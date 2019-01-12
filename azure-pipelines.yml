@@ -46,12 +46,12 @@ jobs:
   container: vscode-ia32
   variables:
     BUILD_ARCH: ia32
-    BINTRAY_ARCH: i386
+    BINTRAY_ARCH: x86
   steps:
   - script: |
       cd $(Build.SourcesDirectory)
       ./ci-build-linux.sh
-    displayName: CI-Build
+    displayName: CI-Build F18 32-bit
 
   - script: |
       cd $(Build.SourcesDirectory)
@@ -59,8 +59,6 @@ jobs:
     displayName: upload F18-linux-$(BINTRAY_ARCH) version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_API_KEY)
-
-
 
 - job: Linux_x64
   pool:
@@ -72,11 +70,10 @@ jobs:
   - script: |
       cd $(Build.SourcesDirectory)
       ./ci-build-linux.sh
-    displayName: CI-Build
+    displayName: CI-Build F18 64-bit
   - script: |
       cd $(Build.SourcesDirectory)
       ./upload_bintray_linux.sh
     displayName: upload F18-linux-$(BINTRAY_ARCH) version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_API_KEY)
-

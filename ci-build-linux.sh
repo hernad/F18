@@ -1,8 +1,13 @@
 #!/bin/bash
 
-echo "hello world"
+HARBOUR_VERSION=20190112.4
+
+
+echo "F18 linux CI build with $HARBOUR_VERSION"
 
 echo "artifakt: $BUILD_ARTIFACT tag: $APPVEYOR_REPO_TAG_NAME pwd: $(pwd)"
+
+
 
 gcc --version
 
@@ -26,17 +31,19 @@ if [ "$BUILD_ARCH" == "ia32" ] ; then
    dpkg -L libpq5:i386
    # /usr/lib/libpq.so.5
 
-   curl -L https://dl.bintray.com/hernad/harbour/hb-linux-i386.tar.gz > hb.tar.gz
-   tar xvf hb.tar.gz
+   curl -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-linux-x86_${HARBOUR_VERSION}.zip > hb.zip
+   
+   #tar xvf hb.tar.gz
+   unzip hb.zip -d harbour
 
    export HB_USER_CFLAGS=-m32
    export HB_USER_DFLAGS='-m32 -L/usr/lib32'
    export HB_USER_LDFLAGS='-m32 -L/usr/lib32'
     
-   export HB_ROOT=$(pwd)/hb-linux-i386
+   export HB_ROOT=$(pwd)/harbour
 
-   cp -av /usr/lib/i386-linux-gnu/libpq.so .
-   cp -av /usr/lib/i386-linux-gnu/libpq.so linux_32/
+   #cp -av /usr/lib/i386-linux-gnu/libpq.so .
+   #cp -av /usr/lib/i386-linux-gnu/libpq.so linux_32/
    
    export LD_LIBRARY_PATH=.
 
@@ -45,6 +52,12 @@ else
     sudo apt-get install -y g++ gcc libc6 \
       libx11-dev libpcre3-dev libssl-dev \
       libncurses5 libstdc++6  libpq-dev lib32z1
+
+    curl -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-linux-x64_${HARBOUR_VERSION}.zip > hb.zip
+    unzip hb.zip -d harbour
+
+    export HB_ROOT=$(pwd)/harbour
+
 
    exit 1
 fi
