@@ -28,6 +28,9 @@ if [ "$BUILD_ARCH" == "ia32" ] ; then
    #  libx11-dev:i386 libpcre3-dev:i386 libssl-dev:i386 \
    #  libncurses5:i386 libstdc++6:i386 lib32stdc++6  libpq-dev:i386 lib32z1
 
+   sudo apt-get update -y
+   sudo apt-get install -y zip unzip
+
    dpkg -L libpq5:i386
    # /usr/lib/libpq.so.5
 
