@@ -62,9 +62,6 @@ else
     unzip hb.zip -d harbour
 
     export HB_ROOT=$(pwd)/harbour
-
-
-   exit 1
 fi
 
 set
