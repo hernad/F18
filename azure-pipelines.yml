@@ -55,7 +55,7 @@ jobs:
 
   - script: |
       cd $(Build.SourcesDirectory)
-      ./upload_bintray.sh
+      ./upload_bintray_linux.sh
     displayName: upload F18-linux-$(BINTRAY_ARCH) version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_API_KEY)
@@ -73,6 +73,10 @@ jobs:
       cd $(Build.SourcesDirectory)
       ./ci-build-linux.sh
     displayName: CI-Build
+  - script: |
+      cd $(Build.SourcesDirectory)
+      ./upload_bintray_linux.sh
+    displayName: upload F18-linux-$(BINTRAY_ARCH) version $(BUILD.BUILDNUMBER)
     env:
-      CHERE_INVOKING: yes
+      BINTRAY_API_KEY: $(BINTRAY_API_KEY)
 
