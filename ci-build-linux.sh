@@ -5,12 +5,9 @@ HARBOUR_VERSION=`./bintray_get_latest_version.sh F18 harbour-linux-${BINTRAY_ARC
 
 [ -z "$HARBOUR_VERSION" ] && exit 1
 
-
 echo "F18 linux CI build with $HARBOUR_VERSION"
 
 echo "artifakt: $BUILD_ARTIFACT tag: $APPVEYOR_REPO_TAG_NAME pwd: $(pwd)"
-
-
 
 gcc --version
 
@@ -52,7 +49,7 @@ if [ "$BUILD_ARCH" == "ia32" ] ; then
 
 else
     sudo apt-get update -y
-    sudo apt-get install -y g++ gcc libc6 \
+    sudo apt-get install -y unzip zip g++ gcc libc6 \
       libx11-dev libpcre3-dev libssl-dev \
       libncurses5 libstdc++6  libpq-dev lib32z1
 
