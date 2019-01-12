@@ -5,9 +5,8 @@
 cd "$(dirname "$0")"
 
 if [[ ! `which curl` ]] ; then
-      apt-get install -y curl
+    sudo apt-get install -y curl
 fi
-
 
 BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 BINTRAY_OWNER=hernad
@@ -32,3 +31,4 @@ curl -s -T $FILE \
 
 curl -s -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
    -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$BINTRAY_PACKAGE_VER/publish
+

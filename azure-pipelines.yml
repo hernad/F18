@@ -49,30 +49,30 @@ jobs:
     BINTRAY_ARCH: i386
   steps:
   - script: |
+      cd $(Build.SourcesDirectory)
       ./ci-build-linux.sh
     displayName: CI-Build
-    env:
-      CHERE_INVOKING: yes
 
   - script: |
+      cd $(Build.SourcesDirectory)
       ./upload_bintray.sh
     displayName: upload F18-linux-$(BINTRAY_ARCH) version $(BUILD.BUILDNUMBER)
     env:
-      CHERE_INVOKING: yes
       BINTRAY_API_KEY: $(BINTRAY_API_KEY)
 
 
 
-#- job: Linux_x64
-#  pool:
-#    vmImage: 'Ubuntu-16.04'
-#  container: vscode-ia32
-#  variables:
-#    BUILD_ARCH: x64
-#  steps:
-#  - script: |
-#      ./ci-build-linux.sh
-#    displayName: CI-Build
-#    env:
-#      CHERE_INVOKING: yes
+- job: Linux_x64
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  container: vscode-ia32
+  variables:
+    BUILD_ARCH: x64
+  steps:
+  - script: |
+      cd $(Build.SourcesDirectory)
+      ./ci-build-linux.sh
+    displayName: CI-Build
+    env:
+      CHERE_INVOKING: yes
 

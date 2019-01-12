@@ -14,6 +14,7 @@ uname -a
 if [ "$BUILD_ARCH" == "ia32" ] ; then
 
    # https://github.com/Microsoft/vscode-linux-build-agent
+   # zamijenjeno sa hernad/vscode-linux-build-agent
    #sudo dpkg --add-architecture i386
    #sudo sed  -i -e 's/.*trusty-updates.*/# trusty updates/' /etc/apt/sources.list
 
@@ -23,6 +24,7 @@ if [ "$BUILD_ARCH" == "ia32" ] ; then
    #  libncurses5:i386 libstdc++6:i386 lib32stdc++6  libpq-dev:i386 lib32z1
 
    dpkg -L libpq5:i386
+   # /usr/lib/libpq.so.5
 
    curl -L https://dl.bintray.com/hernad/harbour/hb-linux-i386.tar.gz > hb.tar.gz
    tar xvf hb.tar.gz
@@ -49,7 +51,6 @@ fi
 
 set
 
-
 PATH=$HB_ROOT/bin:$PATH
 
 echo $PATH
@@ -66,6 +67,6 @@ export F18_GT_CONSOLE=1
 
 hbmk2 -workdir=.h F18.hbp
 
-cp -av /usr/lib/i386-linux-gnu/libpq.so .
+#cp -av /usr/lib/i386-linux-gnu/libpq.so .
 
 zip F18_${BUILD_ARTIFACT}_${APPVEYOR_REPO_TAG_NAME}.zip F18
