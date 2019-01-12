@@ -83,5 +83,3 @@ export F18_GT_CONSOLE=1
 hbmk2 -workdir=.h F18.hbp
 
 #cp -av /usr/lib/i386-linux-gnu/libpq.so .
-
-zip F18_${BUILD_ARTIFACT}_${APPVEYOR_REPO_TAG_NAME}.zip F18

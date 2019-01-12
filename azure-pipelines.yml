@@ -12,33 +12,44 @@ resources:
     image: hernad/azure-linux-build-agent:ia32
 
 jobs:
-#- job: Windows_x64
-#  pool:
-#    vmImage: VS2017-Win2016
-#  variables:
-#    VSCODE_ARCH: x64
-#  steps:
-#    - script: |
-#        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-#        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-#        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
-#      displayName: CI-Build
+- job: Windows_x64
+  pool:
+    vmImage: VS2017-Win2016
+  variables:
+    VSCODE_ARCH: x64
+    HB_COMPILER: mingw64
+    BINTRAY_ARCH: x64
+  steps:
+    - script: |
+        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
+      displayName: CI-Build F18 windows 64-bit
 
-#- job: Windows_ia32
-#  pool:
-#    vmImage: VS2017-Win2016
-#  variables:
-#    VSCODE_ARCH: ia32
-#  steps:
-#    - script: |
-#        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-#        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-#        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
-#      displayName: CI-Build
-#      env:
-#        MSYSTEM: $(MINGW_UPPER)
-#        CHERE_INVOKING: yes
-#        MINGW_INSTALLS: $(MINGW_LOWER)
+- job: Windows_ia32
+  pool:
+    vmImage: VS2017-Win2016
+  variables:
+    VSCODE_ARCH: ia32
+    HB_COMPILER: mingw
+    BINTRAY_ARCH: x86
+  steps:
+    - script: |
+        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
+      displayName: CI-Build F18 windows 32-bit
+      env:
+        MSYSTEM: $(MINGW_UPPER)
+        CHERE_INVOKING: yes
+        MINGW_INSTALLS: $(MINGW_LOWER)
+    - script: |
+        cd $(Build.SourcesDirectory)
+        ./upload_bintray_win32.sh
+      displayName: upload F18-windows-x86 version $(BUILD.BUILDNUMBER)
+      env:
+        BINTRAY_API_KEY: $(BINTRAY_API_KEY)
+
 
 - job: Linux_ia32
   pool:
@@ -52,7 +63,6 @@ jobs:
       cd $(Build.SourcesDirectory)
       ./ci-build-linux.sh
     displayName: CI-Build F18 32-bit
-
   - script: |
       cd $(Build.SourcesDirectory)
       ./upload_bintray_linux.sh
