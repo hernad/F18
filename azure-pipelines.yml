@@ -66,6 +66,7 @@ jobs:
   container: vscode-ia32
   variables:
     BUILD_ARCH: x64
+    BINTRAY_ARCH: x64
   steps:
   - script: |
       cd $(Build.SourcesDirectory)
