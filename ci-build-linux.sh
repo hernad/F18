@@ -1,9 +1,11 @@
 #!/bin/bash
 
 #HARBOUR_VERSION=20190112.4
+echo "bintray arch = $BINTRAY_ARCH"
+
 HARBOUR_VERSION=`./bintray_get_latest_version.sh F18 harbour-linux-${BINTRAY_ARCH}`
 
-[ -z "$HARBOUR_VERSION" ] && exit 1
+[ -z "$HARBOUR_VERSION" ] && echo "HARBOUR_VERSION error" && exit 1
 
 echo "F18 linux CI build with $HARBOUR_VERSION"
 
