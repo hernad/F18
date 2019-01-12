@@ -23,6 +23,7 @@ else
    MINGW_BASE='mingw32' 
 fi
 pacman --noconfirm -S --needed mingw-w64-$MINGW_ARCH-curl
+CURL=/${MINGW_BASE}/bin/curl
 
 $CURL -s -T $FILE \
       -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
