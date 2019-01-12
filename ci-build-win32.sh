@@ -17,7 +17,7 @@ pacman --noconfirm -S zip unzip
 pacman --noconfirm -S --needed mingw-w64-$MINGW_ARCH-postgresql mingw-w64-$MINGW_ARCH-icu mingw-w64-$MINGW_ARCH-curl mingw-w64-$MINGW_ARCH-openssl
 
 pacman --noconfirm -S --needed mingw-w64-$MINGW_ARCH-curl
-if [ "$BINTRAY_ARCH" == "x64" ] ; then
+if [ "$HB_COMPILER" == "mingw64" ] ; then
    MINGW_BASE='mingw64'
 else
    MINGW_BASE='mingw32' 

@@ -87,9 +87,6 @@ jobs:
         CHERE_INVOKING: yes
 
 
-
-
-
 - job: Linux_ia32
   pool:
     vmImage: 'Ubuntu-16.04'
