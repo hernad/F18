@@ -13,13 +13,14 @@ uname -a
 
 if [ "$BUILD_ARCH" == "ia32" ] ; then
 
+   # https://github.com/Microsoft/vscode-linux-build-agent
    #sudo dpkg --add-architecture i386
-   sudo sed  -i -e 's/.*trusty-updates.*/# trusty updates/' /etc/apt/sources.list
+   #sudo sed  -i -e 's/.*trusty-updates.*/# trusty updates/' /etc/apt/sources.list
 
-   sudo apt-get -y remove libpq-dev libpq5
-   sudo apt-get -y install g++-multilib gcc-multilib libc6:i386 \
-     libx11-dev:i386 libpcre3-dev:i386 libssl-dev:i386 \
-     libncurses5:i386 libstdc++6:i386 lib32stdc++6  libpq-dev:i386 lib32z1
+   #sudo apt-get -y remove libpq-dev libpq5
+   #sudo apt-get -y install g++-multilib gcc-multilib libc6:i386 \
+   #  libx11-dev:i386 libpcre3-dev:i386 libssl-dev:i386 \
+   #  libncurses5:i386 libstdc++6:i386 lib32stdc++6  libpq-dev:i386 lib32z1
 
    dpkg -L libpq5:i386
 
