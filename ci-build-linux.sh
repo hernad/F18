@@ -14,7 +14,7 @@ uname -a
 if [ "$BUILD_ARCH" == "ia32" ] ; then
 
    #sudo dpkg --add-architecture i386
-   sudo sed  -i -e 's/trusty-updates/trusty/' /etc/apt/sources.list
+   sudo sed  -i -e 's/.*trusty-updates.*/# trusty updates/' /etc/apt/sources.list
 
    sudo apt-get -y remove libpq-dev libpq5
    sudo apt-get -y install g++-multilib gcc-multilib libc6:i386 \
