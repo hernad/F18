@@ -21,10 +21,29 @@ jobs:
     BINTRAY_ARCH: x64
   steps:
     - script: |
+        git clone https://github.com/lazka/msys2-ci-base.git %CD:~0,2%\msys64
+        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
+      displayName: Install MSYS2
+    - script: |
+        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
+      displayName: Update MSYS2
+    - script: |
+        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
+      displayName: Install Toolchain
+    - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
         %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
       displayName: CI-Build F18 windows 64-bit
+    - script: |
+        cd $(Build.SourcesDirectory)
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
+      displayName: upload F18-windows-x64 version $(BUILD.BUILDNUMBER)
+      env:
+        BINTRAY_API_KEY: $(BINTRAY_API_KEY)
 
 - job: Windows_ia32
   pool:
@@ -35,20 +54,32 @@ jobs:
     BINTRAY_ARCH: x86
   steps:
     - script: |
+        git clone https://github.com/lazka/msys2-ci-base.git %CD:~0,2%\msys64
+        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
+      displayName: Install MSYS2
+    - script: |
+        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
+      displayName: Update MSYS2
+    - script: |
+        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain
+        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
+      displayName: Install Toolchain
+    - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
         %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
-      displayName: CI-Build F18 windows 32-bit
-      env:
-        MSYSTEM: $(MINGW_UPPER)
-        CHERE_INVOKING: yes
-        MINGW_INSTALLS: $(MINGW_LOWER)
+      displayName: CI-Build F18 windows 64-bit
     - script: |
         cd $(Build.SourcesDirectory)
-        ./upload_bintray_win32.sh
-      displayName: upload F18-windows-x86 version $(BUILD.BUILDNUMBER)
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
+      displayName: upload F18-windows-x64 version $(BUILD.BUILDNUMBER)
       env:
         BINTRAY_API_KEY: $(BINTRAY_API_KEY)
+
+
+
 
 
 - job: Linux_ia32
