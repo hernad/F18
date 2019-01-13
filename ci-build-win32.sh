@@ -52,6 +52,9 @@ set
 PATH=$HB_ROOT/bin:$PATH
 echo $PATH
 
+export F18_VER=${BUILD_BUILDNUMBER}
+scripts/update_f18_ver_ch.sh $F18_VER
+
 export F18_POS=1
 export F18_RNAL=0
 export F18_GT_CONSOLE=1
