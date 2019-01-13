@@ -67,11 +67,13 @@ jobs:
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
       displayName: Update MSYS2
+    
     - script: |
         set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain
         %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
-      displayName: Install Toolchain
+      displayName: Install gcc build toolchain
+
     - script: |
         set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
         cd $(Build.SourcesDirectory)
