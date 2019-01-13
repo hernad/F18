@@ -18,7 +18,7 @@ else
    
 fi
 
-pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
+pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
 
 #$ cygcheck ./wget.exe
 #C:\msys64\mingw64\bin\wget.exe
@@ -63,10 +63,10 @@ mkdir zip_loc
 mv F18.exe zip_loc/
 cd zip_loc
 for f in $DLLS ; do
-  mv /${MINGW_BASE}/bin/$f .
+  cp /${MINGW_BASE}/bin/$f .
 done
-zip -r -v $FILE *
-unzip -v $FILE
+zip -r -v ../$FILE *
+unzip -v ../$FILE
 cd ..
 
 ls -lh $FILE
