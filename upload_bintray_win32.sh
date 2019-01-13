@@ -18,7 +18,7 @@ else
    
 fi
 
-pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
+pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
 
 #$ cygcheck ./wget.exe
 #C:\msys64\mingw64\bin\wget.exe
