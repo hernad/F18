@@ -15,15 +15,7 @@ export WIN_DRIVE=$1
 
 pacman --noconfirm -S zip unzip
 pacman --noconfirm -S --needed mingw-w64-$MINGW_ARCH-postgresql mingw-w64-$MINGW_ARCH-icu mingw-w64-$MINGW_ARCH-curl mingw-w64-$MINGW_ARCH-openssl
-
 pacman --noconfirm -S --needed mingw-w64-$MINGW_ARCH-curl
-if [ "$HB_COMPILER" == "mingw64" ] ; then
-   MINGW_BASE='mingw64'
-else
-   MINGW_BASE='mingw32' 
-fi
-
-CURL=/${MINGW_BASE}/bin/curl
 
 # export HB_ARCHITECTURE=win 
 
@@ -35,24 +27,25 @@ CURL=/${MINGW_BASE}/bin/curl
 if [ "$HB_COMPILER" == "mingw64" ] ; then
    # PATH=/mingw64/bin:/usr/local/bin:/usr/bin:/bin: ...
    MINGW_BASE='mingw64'
+   CURL=/${MINGW_BASE}/bin/curl
 
-   $CURL -L https://bintray.com/hernad/F18/download_file?file_path=F18-windows-x64_${HARBOUR_VERSION}.zip > hb.zip   
-   unzip hb.zip -d harbour
-   export HB_ROOT=$(pwd)/harbour
-
+   $CURL -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-windows-x64_${HARBOUR_VERSION}.zip > hb.zip   
+   
 else
    # PATH=/mingw32/bin:/usr/local/bin:/usr/bin:/bin:/c/Windows/System32: ...
    MINGW_BASE='mingw32'
+   CURL=/${MINGW_BASE}/bin/curl
 
-   $CURL -L https://bintray.com/hernad/F18/download_file?file_path=F18-windows-x86_${HARBOUR_VERSION}.zip > hb.zip   
-   unzip hb.zip -d harbour
+   $CURL -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-windows-x86_${HARBOUR_VERSION}.zip > hb.zip   
 
    export HB_USER_CFLAGS=-m32
    export HB_USER_DFLAGS='-m32 -L/usr/lib32'
    export HB_USER_LDFLAGS='-m32 -L/usr/lib32'
     
-   export HB_ROOT=$(pwd)/harbour
 fi
+
+unzip hb.zip -d harbour
+export HB_ROOT=$(pwd)/harbour
 
 
 export MINGW_INCLUDE=$WIN_DRIVE:\\\\msys64\\\\${MINGW_BASE}\\\\include
