@@ -67,7 +67,6 @@ fi
 set
 
 PATH=$HB_ROOT/bin:$PATH
-
 echo $PATH
 
 export F18_VER=${BUILD_BUILDNUMBER}
@@ -81,5 +80,3 @@ export F18_RNAL=0
 export F18_GT_CONSOLE=1
 
 hbmk2 -workdir=.h F18.hbp
-
-#cp -av /usr/lib/i386-linux-gnu/libpq.so .

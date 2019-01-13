@@ -47,17 +47,10 @@ fi
 unzip hb.zip -d harbour
 export HB_ROOT=$(pwd)/harbour
 
-
-export MINGW_INCLUDE=$WIN_DRIVE:\\\\msys64\\\\${MINGW_BASE}\\\\include
-
-export HB_WITH_CURL=${MINGW_INCLUDE} HB_WITH_OPENSSL=${MINGW_INCLUDE} HB_WITH_PGSQL=${MINGW_INCLUDE} HB_WITH_ICU=${MINGW_INCLUDE} 
-export HB_INSTALL_PREFIX=$(pwd)/artifacts
-
-echo "install to: $HB_INSTALL_PREFIX"
-# WIN_DRIVE:\\\\harbour 
-# export HB_VER=${APPVEYOR_REPO_TAG_NAME:=0.0.0}
-
 set
+
+PATH=$HB_ROOT/bin:$PATH
+echo $PATH
 
 export F18_POS=1
 export F18_RNAL=0
