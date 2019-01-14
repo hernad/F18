@@ -24,6 +24,7 @@ fi
 
 pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-gettext  mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
 
+
 #$ cygcheck ./wget.exe
 #C:\msys64\mingw64\bin\wget.exe
 #  C:\WINDOWS\system32\KERNEL32.dll
@@ -122,6 +123,14 @@ pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MI
 #mingw-w64-x86_64-openssl /mingw64/lib/libssl.dll.a
 
 
+
+echo "=========== cygcheck /${MINGW_BASE}/bin/wget.exe ==============="
+cygcheck /${MINGW_BASE}/bin/wget.exe
+
+echo "=========== cygcheck /${MINGW_BASE}/bin/psql.exe ==============="
+cygcheck /${MINGW_BASE}/bin/psql.exe
+
+
 echo "========== openssl ===================="
 pacman -Qi mingw-w64-$MINGW_ARCH-openssl
 
@@ -129,13 +138,13 @@ pacman -Ql mingw-w64-$MINGW_ARCH-openssl
 echo "======================================="
 
 DLLS+=" wget.exe"
-DLLS+=" libcares-2.dll libgpgme-11.dll libwinpthread-1.dll"
+DLLS+=" libpsl-5.dll libcares-3.dll libgpgme-11.dll libwinpthread-1.dll"
 DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll libidn2-4.dll"
 DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
-DLLS+=" libpcre-1.dll zlib1.dll"
+DLLS+=" libpcre-2-8-0.dll zlib1.dll"
 
 
-DLLS+=" pg_dump.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll libeay32.dll ssleay32.dll"
+DLLS+=" pg_dump.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll"
 
 
 echo "=================== /${MINGW_BASE}/bin ==============="
