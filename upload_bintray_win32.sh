@@ -9,7 +9,7 @@ FILE=${BINTRAY_PACKAGE}_${BINTRAY_PACKAGE_VER}.zip
 
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
-DLLS="libeay32.dll libiconv-2.dll libintl-8.dll libpq.dll libssl32.dll"
+DLLS="libpq.dll libiconv-2.dll libintl-8.dll"
 
 if [ "$BINTRAY_ARCH" == "x64" ] ; then
    MINGW_BASE='mingw64'
@@ -29,32 +29,7 @@ pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MI
 #C:\msys64\mingw64\bin\wget.exe
 #  C:\WINDOWS\system32\KERNEL32.dll
 #    C:\WINDOWS\system32\ntdll.dll
-#    C:\WINDOWS\system32\KERNELBASE.dll
-#  C:\WINDOWS\system32\msvcrt.dll
-#  C:\WINDOWS\system32\ole32.dll
-#    C:\WINDOWS\system32\RPCRT4.dll
-#    C:\WINDOWS\system32\GDI32.dll
-#    C:\WINDOWS\system32\USER32.dll
-#      C:\WINDOWS\system32\win32u.dll
-#    C:\WINDOWS\system32\combase.dll
-#      C:\WINDOWS\system32\bcryptPrimitives.dll
-#  C:\WINDOWS\system32\WS2_32.dll
-#  C:\msys64\mingw64\bin\libcares-2.dll
-#    C:\WINDOWS\system32\ADVAPI32.dll
-#      C:\WINDOWS\system32\SECHOST.dll
-#  C:\msys64\mingw64\bin\LIBEAY32.dll
-#  C:\msys64\mingw64\bin\libgpgme-11.dll
-#    C:\msys64\mingw64\bin\libwinpthread-1.dll
-#    C:\msys64\mingw64\bin\libassuan-0.dll
-#      C:\msys64\mingw64\bin\libgpg-error-0.dll
-#  C:\msys64\mingw64\bin\libiconv-2.dll
-#  C:\msys64\mingw64\bin\libidn2-0.dll
-#    C:\msys64\mingw64\bin\libintl-8.dll
-#    C:\msys64\mingw64\bin\libunistring-2.dll
-#  C:\msys64\mingw64\bin\libmetalink-3.dll
-#    C:\msys64\mingw64\bin\libexpat-1.dll
-#  C:\msys64\mingw64\bin\libpcre-1.dll
-#  C:\msys64\mingw64\bin\SSLEAY32.dll
+# ...
 #  C:\msys64\mingw64\bin\zlib1.dll
 #
 
@@ -63,25 +38,17 @@ pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MI
 #  C:\msys64\mingw64\bin\LIBPQ.dll
 #    C:\WINDOWS\system32\ADVAPI32.dll
 #      C:\WINDOWS\system32\msvcrt.dll
-#        C:\WINDOWS\system32\ntdll.dll
-#        C:\WINDOWS\system32\KERNELBASE.dll
-#      C:\WINDOWS\system32\SECHOST.dll
-#        C:\WINDOWS\system32\RPCRT4.dll
-#      C:\WINDOWS\system32\KERNEL32.dll
-#    C:\WINDOWS\system32\Secur32.dll
-#    C:\WINDOWS\system32\SHELL32.dll
-#      C:\WINDOWS\system32\USER32.dll
-#        C:\WINDOWS\system32\win32u.dll
-#        C:\WINDOWS\system32\GDI32.dll
-#    C:\WINDOWS\system32\WLDAP32.dll
-#    C:\WINDOWS\system32\WS2_32.dll
-#    C:\msys64\mingw64\bin\LIBEAY32.dll
-#    C:\msys64\mingw64\bin\libintl-8.dll
-#      C:\msys64\mingw64\bin\libiconv-2.dll
+# ...
 #    C:\msys64\mingw64\bin\SSLEAY32.dll
 #    C:\msys64\mingw64\bin\libxml2-2.dll
 #      C:\msys64\mingw64\bin\liblzma-5.dll
 #      C:\msys64\mingw64\bin\zlib1.dll
+
+echo "=========== cygcheck /${MINGW_BASE}/bin/wget.exe ==============="
+cygcheck /${MINGW_BASE}/bin/wget.exe
+
+echo "=========== cygcheck /${MINGW_BASE}/bin/psql.exe ==============="
+cygcheck /${MINGW_BASE}/bin/psql.exe
 
 #$ pacman -Fys psql.exe
 #:: Synchronizing package databases...
@@ -108,34 +75,16 @@ pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MI
 #mingw-w64-x86_64-openssl /mingw64/bin/libeay32.dll
 #mingw-w64-x86_64-openssl /mingw64/bin/ssleay32.dll
 #mingw-w64-x86_64-openssl /mingw64/lib/engines/4758ccaeay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/aepeay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/atallaeay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/capieay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/chileay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/cswifteay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/gmpeay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/gosteay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/nuroneay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/padlockeay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/surewareeay32.dll
-#mingw-w64-x86_64-openssl /mingw64/lib/engines/ubseceay32.dll
+#..
 #mingw-w64-x86_64-openssl /mingw64/lib/libcrypto.dll.a
 #mingw-w64-x86_64-openssl /mingw64/lib/libssl.dll.a
-
-
-
-echo "=========== cygcheck /${MINGW_BASE}/bin/wget.exe ==============="
-cygcheck /${MINGW_BASE}/bin/wget.exe
-
-echo "=========== cygcheck /${MINGW_BASE}/bin/psql.exe ==============="
-cygcheck /${MINGW_BASE}/bin/psql.exe
 
 
 echo "========== openssl ===================="
 pacman -Qi mingw-w64-$MINGW_ARCH-openssl
 
-pacman -Ql mingw-w64-$MINGW_ARCH-openssl
-echo "======================================="
+# pacman -Ql mingw-w64-$MINGW_ARCH-openssl
+#echo "======================================="
 
 DLLS+=" wget.exe"
 DLLS+=" libpsl-5.dll libcares-3.dll libgpgme-11.dll libwinpthread-1.dll"
@@ -185,4 +134,6 @@ $CURL -s -T $FILE \
 
 $CURL -s -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
    -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$BINTRAY_PACKAGE_VER/publish
+
+
 
