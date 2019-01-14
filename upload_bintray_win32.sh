@@ -14,7 +14,7 @@ DLLS="libeay32.dll libiconv-2.dll libintl-8.dll libpq.dll libssl32.dll"
 if [ "$BINTRAY_ARCH" == "x64" ] ; then
    MINGW_BASE='mingw64'
    DLLS+=" libssl-1_1-x64.dll libcrypto-1_1-x64.dll"
-   DLLS+=" libgcc_s_dw2-1.dll"
+   DLLS+=" libgcc_s_seh-1.dll"
    
 else
    MINGW_BASE='mingw32'
@@ -22,8 +22,7 @@ else
    DLLS+=" libgcc_s_dw2-1.dll"
 fi
 
-# --overwrite = reinstall
-pacman --noconfirm --overwrite  -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-gettext  mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
+pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-gettext  mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
 
 #$ cygcheck ./wget.exe
 #C:\msys64\mingw64\bin\wget.exe
@@ -123,8 +122,10 @@ pacman --noconfirm --overwrite  -S --needed mingw-w64-${MINGW_ARCH}-postgresql m
 #mingw-w64-x86_64-openssl /mingw64/lib/libssl.dll.a
 
 
-echo "========== openssl dlls: =============="
-pacman -Ql mingw-w64-$MINGW_ARCH-openssl | grep dll
+echo "========== openssl ===================="
+pacman -Qi mingw-w64-$MINGW_ARCH-openssl
+
+pacman -Ql mingw-w64-$MINGW_ARCH-openssl
 echo "======================================="
 
 DLLS+=" wget.exe"
