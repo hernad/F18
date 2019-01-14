@@ -159,10 +159,12 @@ mv F18.exe zip_loc/
 cd zip_loc
 for f in $DLLS ; do
   cp /${MINGW_BASE}/bin/$f bin/
-  cp -av /${MINGW_BASE}/etc/pki etc/
-  cp -av /${MINGW_BASE}/ssl ssl/
-  cp -av /${MINGW_BASE}/share/ca-* share/
+
 done
+cp -av /${MINGW_BASE}/etc/pki etc/
+cp -av /${MINGW_BASE}/ssl ssl/
+#cp -av /${MINGW_BASE}/share/ca-* share/
+
 zip -r -v ../$FILE *
 unzip -v ../$FILE
 cd ..
