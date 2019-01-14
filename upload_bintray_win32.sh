@@ -9,18 +9,21 @@ FILE=${BINTRAY_PACKAGE}_${BINTRAY_PACKAGE_VER}.zip
 
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
-DLLS="libeay32.dll libiconv-2.dll libiconv2.dll  libintl-2.dll  libintl-8.dll libintl3.dll libpq.dll libssl32.dll ssleay32.dll"
+DLLS="libeay32.dll libiconv-2.dll libintl-8.dll libpq.dll libssl32.dll"
 
 if [ "$BINTRAY_ARCH" == "x64" ] ; then
    MINGW_BASE='mingw64'
    DLLS+=" libssl-1_1-x64.dll libcrypto-1_1-x64.dll"
+   DLLS+=" libgcc_s_dw2-1.dll"
    
 else
    MINGW_BASE='mingw32'
-   DLLS+=" libssl-1_1.dll libcrypto-1_1-x64.dll"
+   DLLS+=" libssl-1_1.dll libcrypto-1_1.dll"
+   DLLS+=" libgcc_s_dw2-1.dll"
 fi
 
-pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-gettext  mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
+# --overwrite = reinstall
+pacman --noconfirm --overwrite  -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-gettext  mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
 
 #$ cygcheck ./wget.exe
 #C:\msys64\mingw64\bin\wget.exe
@@ -99,14 +102,39 @@ pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MI
 #    mingw64/bin/libcrypto-1_1-x64.dll
 
 
+
+#hernad@DESKTOP-0HRJEDF MINGW64 /mingw64
+#$ pacman -Ql mingw-w64-$MINGW_ARCH-openssl | grep dll
+#mingw-w64-x86_64-openssl /mingw64/bin/libeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/bin/ssleay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/4758ccaeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/aepeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/atallaeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/capieay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/chileay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/cswifteay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/gmpeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/gosteay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/nuroneay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/padlockeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/surewareeay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/engines/ubseceay32.dll
+#mingw-w64-x86_64-openssl /mingw64/lib/libcrypto.dll.a
+#mingw-w64-x86_64-openssl /mingw64/lib/libssl.dll.a
+
+
+echo "========== openssl dlls: =============="
+pacman -Ql mingw-w64-$MINGW_ARCH-openssl | grep dll
+echo "======================================="
+
 DLLS+=" wget.exe"
-DLLS+=" libcares-2.dll LIBEAY32.dll libgpgme-11.dll libwinpthread-1.dll"
-DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll"
+DLLS+=" libcares-2.dll libgpgme-11.dll libwinpthread-1.dll"
+DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll libidn2-4.dll"
 DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
 DLLS+=" libpcre-1.dll zlib1.dll"
 
 
-DLLS+=" psql.exe libxml2-2.dll liblzma-5.dll"
+DLLS+=" pg_dump.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll libeay32.dll ssleay32.dll"
 
 
 echo "=================== /${MINGW_BASE}/bin ==============="
