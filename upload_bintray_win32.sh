@@ -13,12 +13,14 @@ DLLS="libeay32.dll libiconv-2.dll libiconv2.dll  libintl-2.dll  libintl-8.dll li
 
 if [ "$BINTRAY_ARCH" == "x64" ] ; then
    MINGW_BASE='mingw64'
+   DLLS+=" libssl-1_1-x64.dll libcrypto-1_1-x64.dll"
+   
 else
    MINGW_BASE='mingw32'
-   
+   DLLS+=" libssl-1_1.dll libcrypto-1_1-x64.dll"
 fi
 
-pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
+pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-gettext  mingw-w64-${MINGW_ARCH}-icu mingw-w64-${MINGW_ARCH}-openssl mingw-w64-${MINGW_ARCH}-curl mingw-w64-${MINGW_ARCH}-wget
 
 #$ cygcheck ./wget.exe
 #C:\msys64\mingw64\bin\wget.exe
@@ -53,11 +55,59 @@ pacman --noconfirm -S --needed mingw-w64-${MINGW_ARCH}-postgresql mingw-w64-${MI
 #  C:\msys64\mingw64\bin\zlib1.dll
 #
 
+
+#C:\msys64\mingw64\bin\psql.exe
+#  C:\msys64\mingw64\bin\LIBPQ.dll
+#    C:\WINDOWS\system32\ADVAPI32.dll
+#      C:\WINDOWS\system32\msvcrt.dll
+#        C:\WINDOWS\system32\ntdll.dll
+#        C:\WINDOWS\system32\KERNELBASE.dll
+#      C:\WINDOWS\system32\SECHOST.dll
+#        C:\WINDOWS\system32\RPCRT4.dll
+#      C:\WINDOWS\system32\KERNEL32.dll
+#    C:\WINDOWS\system32\Secur32.dll
+#    C:\WINDOWS\system32\SHELL32.dll
+#      C:\WINDOWS\system32\USER32.dll
+#        C:\WINDOWS\system32\win32u.dll
+#        C:\WINDOWS\system32\GDI32.dll
+#    C:\WINDOWS\system32\WLDAP32.dll
+#    C:\WINDOWS\system32\WS2_32.dll
+#    C:\msys64\mingw64\bin\LIBEAY32.dll
+#    C:\msys64\mingw64\bin\libintl-8.dll
+#      C:\msys64\mingw64\bin\libiconv-2.dll
+#    C:\msys64\mingw64\bin\SSLEAY32.dll
+#    C:\msys64\mingw64\bin\libxml2-2.dll
+#      C:\msys64\mingw64\bin\liblzma-5.dll
+#      C:\msys64\mingw64\bin\zlib1.dll
+
+#$ pacman -Fys psql.exe
+#:: Synchronizing package databases...
+# mingw32 is up to date
+# mingw64 is up to date
+# msys is up to date
+#mingw32/mingw-w64-i686-postgresql 11.1-1
+#    mingw32/bin/psql.exe
+#mingw64/mingw-w64-x86_64-postgresql 11.1-1
+#    mingw64/bin/psql.exe
+
+#$ pacman -Fys libcrypto-1_1-x64.dll
+#:: Synchronizing package databases...
+# mingw32 is up to date
+# mingw64 is up to date
+# msys is up to date
+#mingw64/mingw-w64-x86_64-openssl 1.1.1.a-1
+#    mingw64/bin/libcrypto-1_1-x64.dll
+
+
 DLLS+=" wget.exe"
 DLLS+=" libcares-2.dll LIBEAY32.dll libgpgme-11.dll libwinpthread-1.dll"
 DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll"
 DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
 DLLS+=" libpcre-1.dll zlib1.dll"
+
+
+DLLS+=" psql.exe libxml2-2.dll liblzma-5.dll"
+
 
 echo "=================== /${MINGW_BASE}/bin ==============="
 find /${MINGW_BASE}/bin
