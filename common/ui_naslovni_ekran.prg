@@ -51,7 +51,7 @@ FUNCTION crtaj_naslovni_ekran()
    @ 0, 2 SAY '<ESC> Izlaz' COLOR f18_color_invert()
    @ 0, Col() + 2 SAY Date() COLOR f18_color_invert()
 
-   @ nMaxRows - 1, nMaxCols - 16  SAY f18_lib_ver()
+   @ nMaxRows - 1, nMaxCols - 16  SAY f18_harbour()
 
    DispBox( 2, 0, 4, nMaxCols - 1, B_DOUBLE + BOX_CHAR_BACKGROUND_HEAD, cColorNormal )
 

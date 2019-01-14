@@ -37,19 +37,19 @@ if [ "$BUILD_ARCH" == "ia32" ] ; then
    # /usr/lib/libpq.so.5
 
    curl -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-linux-x86_${HARBOUR_VERSION}.zip > hb.zip
-   
+
    #tar xvf hb.tar.gz
    unzip hb.zip -d harbour
 
    export HB_USER_CFLAGS=-m32
    export HB_USER_DFLAGS='-m32 -L/usr/lib32'
    export HB_USER_LDFLAGS='-m32 -L/usr/lib32'
-    
+
    export HB_ROOT=$(pwd)/harbour
 
    #cp -av /usr/lib/i386-linux-gnu/libpq.so .
    #cp -av /usr/lib/i386-linux-gnu/libpq.so linux_32/
-   
+
    export LD_LIBRARY_PATH=.
 
 else
@@ -70,7 +70,7 @@ PATH=$HB_ROOT/bin:$PATH
 echo $PATH
 
 export F18_VER=${BUILD_BUILDNUMBER}
-scripts/update_f18_ver_ch.sh $F18_VER
+scripts/update_f18_ver_ch.sh $F18_VER $HARBOUR_VERSION
 
 export LX_UBUNTU=1
 #source scripts/set_envars.sh

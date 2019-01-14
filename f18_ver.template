@@ -16,7 +16,8 @@
 
 #define F18_DEV_PERIOD  "1994-2019"
 
-#define F18_LIB_VER   "__F18_HARBOUR__"
+#define F18_HARBOUR   "__F18_HARBOUR__"
+#define F18_ARCH   "__F18_ARCH__"
 #define F18_TEMPLATE_VER "3.1.0"
 
 #define F18_DBF_VER_MAJOR  2

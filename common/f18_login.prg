@@ -101,10 +101,10 @@ METHOD F18Login:New()
       hDbParamsIni[ "port" ] := get_f18_param("port")
       hDbParamsIni[ "database" ] := get_f18_param("database")
       hDbParamsIni[ "session" ] := right( get_f18_param("database"), 4)
-      
+
       hDbParamsIni[ "user" ] := get_f18_param("user")
       hDbParamsIni[ "password" ] := get_f18_param("password")
-          
+
       hDbParamsIni[ "schema" ] := "fmk"
    ELSE
       hDbParamsIni[ "host" ] := nil
@@ -125,7 +125,7 @@ METHOD F18Login:New()
 
    ENDIF
 
-  
+
    my_server_params( hDbParamsIni )
 
    ::set_data_connection_params( hDbParamsIni )
@@ -984,7 +984,7 @@ METHOD F18Login:show_info_bar( cDatabase, nXPos )
 
    @ nX, nY SAY PadR( "Info: " + _info, _max_len )
    ++nX
-   @ nX, nY SAY "F18 version: " + f18_ver() + " lib: " + f18_lib_ver()
+   @ nX, nY SAY "F18 version: " + f18_ver() + " HB: " + f18_harbour()
 
    RETURN .T.
 

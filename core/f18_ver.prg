@@ -20,9 +20,14 @@ FUNCTION f18_ver_date()
    RETURN F18_VER_DATE
 
 
-FUNCTION f18_lib_ver()
+FUNCTION f18_harbour()
 
-   RETURN F18_LIB_VER
+   RETURN F18_HARBOUR
+
+
+FUNCTION f18_arch()
+
+   RETURN F18_ARCH
 
 
 FUNCTION f18_dev_period()
