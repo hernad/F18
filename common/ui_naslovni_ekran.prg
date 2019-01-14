@@ -19,7 +19,7 @@ FUNCTION pripremi_naslovni_ekran( oApp )
 
    set_global_screen_vars()
 
-   PUBLIC gNaslov  := "F18: " + oApp:cName + " (" + f18_dev_period() + ")  Ver: " + f18_ver() + "-" + f18_varijanta_builtin() + " " + f18_ver_date()
+   PUBLIC gNaslov  := "F18: " + oApp:cName + " (" + f18_dev_period() + ")  Ver: " + f18_ver() + "-" + f18_varijanta_builtin() + " " + f18_ver_date() + " HB:" + f18_harbour() + " " + f18_arch()
 
    AFill( h, "" )
    nOldCursor := iif( ReadInsert(), 2, 1 )
