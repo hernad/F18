@@ -139,9 +139,9 @@ echo "======================================="
 
 DLLS+=" wget.exe"
 DLLS+=" libpsl-5.dll libcares-3.dll libgpgme-11.dll libwinpthread-1.dll"
-DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll libidn2-4.dll"
+DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-4.dll"
 DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
-DLLS+=" libpcre-2-8-0.dll zlib1.dll"
+DLLS+=" libpcre2-8-0.dll zlib1.dll"
 
 
 DLLS+=" pg_dump.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll"
@@ -149,17 +149,20 @@ DLLS+=" pg_dump.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll"
 
 echo "=================== /${MINGW_BASE}/bin ==============="
 find /${MINGW_BASE}/bin
-echo "======================================================"
 
+
+echo "======================== copy - zip files =============================="
 mkdir -p zip_loc/bin
 mkdir -p zip_loc/etc
-mkdir -p zip_loc/share
+#mkdir -p zip_loc/share
 
 mv F18.exe zip_loc/
 cd zip_loc
 for f in $DLLS ; do
-  cp /${MINGW_BASE}/bin/$f bin/
-
+  if ! cp /${MINGW_BASE}/bin/$f bin/ ; then
+    echo "ERROR pri formiranju zip arhive - file not found: /${MINGW_BASE}/bin/$f" 
+    exit 1
+  fi
 done
 cp -av /${MINGW_BASE}/etc/pki etc/
 cp -av /${MINGW_BASE}/ssl ssl/
