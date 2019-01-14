@@ -9,7 +9,7 @@ FILE=${BINTRAY_PACKAGE}_${BINTRAY_PACKAGE_VER}.zip
 
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
-DLLS="iconv.dll libeay32.dll libiconv-2.dll libiconv2.dll  libintl-2.dll  libintl-8.dll libintl3.dll libpq.dll libssl32.dll ssleay32.dll"
+DLLS="libeay32.dll libiconv-2.dll libiconv2.dll  libintl-2.dll  libintl-8.dll libintl3.dll libpq.dll libssl32.dll ssleay32.dll"
 
 if [ "$BINTRAY_ARCH" == "x64" ] ; then
    MINGW_BASE='mingw64'
@@ -57,7 +57,11 @@ DLLS+=" wget.exe"
 DLLS+=" libcares-2.dll LIBEAY32.dll libgpgme-11.dll libwinpthread-1.dll"
 DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll"
 DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
-DLLS+=" libpcre-1.dll SSLEAY32.dll zlib1.dll"
+DLLS+=" libpcre-1.dll zlib1.dll"
+
+echo "=================== /${MINGW_BASE}/bin ==============="
+find /${MINGW_BASE}/bin
+echo "======================================================"
 
 mkdir zip_loc
 mv F18.exe zip_loc/
