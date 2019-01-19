@@ -4,6 +4,7 @@
 
 - merge origin/3-fix
 - azure-pipelines CHANGELOG.md trigger
+- bintray hernad -> bringout
 
 ## 3.1.319-std, 2019-01-10
 

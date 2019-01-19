@@ -29,14 +29,14 @@ if [ "$HB_COMPILER" == "mingw64" ] ; then
    MINGW_BASE='mingw64'
    CURL=/${MINGW_BASE}/bin/curl
 
-   $CURL -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-windows-x64_${HARBOUR_VERSION}.zip > hb.zip
+   $CURL -L https://bintray.com/bringout/harbour/download_file?file_path=harbour-windows-x64_${HARBOUR_VERSION}.zip > hb.zip
 
 else
    # PATH=/mingw32/bin:/usr/local/bin:/usr/bin:/bin:/c/Windows/System32: ...
    MINGW_BASE='mingw32'
    CURL=/${MINGW_BASE}/bin/curl
 
-   $CURL -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-windows-x86_${HARBOUR_VERSION}.zip > hb.zip
+   $CURL -L https://bintray.com/bringout/harbour/download_file?file_path=harbour-windows-x86_${HARBOUR_VERSION}.zip > hb.zip
 
    export HB_USER_CFLAGS=-m32
    export HB_USER_DFLAGS='-m32 -L/usr/lib32'

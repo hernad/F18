@@ -36,7 +36,7 @@ if [ "$BUILD_ARCH" == "ia32" ] ; then
    dpkg -L libpq5:i386
    # /usr/lib/libpq.so.5
 
-   curl -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-linux-x86_${HARBOUR_VERSION}.zip > hb.zip
+   curl -L https://bintray.com/bringout/harbour/download_file?file_path=harbour-linux-x86_${HARBOUR_VERSION}.zip > hb.zip
 
    #tar xvf hb.tar.gz
    unzip hb.zip -d harbour
@@ -58,7 +58,7 @@ else
       libx11-dev libpcre3-dev libssl-dev \
       libncurses5 libstdc++6  libpq-dev lib32z1
 
-    curl -L https://bintray.com/hernad/harbour/download_file?file_path=harbour-linux-x64_${HARBOUR_VERSION}.zip > hb.zip
+    curl -L https://bintray.com/bringout/harbour/download_file?file_path=harbour-linux-x64_${HARBOUR_VERSION}.zip > hb.zip
     unzip hb.zip -d harbour
 
     export HB_ROOT=$(pwd)/harbour
