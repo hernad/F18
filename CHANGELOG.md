@@ -3,6 +3,7 @@
 ## 2019-01-19
 
 - merge origin/3-fix
+- azure-pipelines CHANGELOG.md trigger
 
 ## 3.1.319-std, 2019-01-10
 
