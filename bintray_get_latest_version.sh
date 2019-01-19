@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-BINTRAY_SUBJECT=hernad
+BINTRAY_SUBJECT=bringout
 BINTRAY_REPOS=$1
 BINTRAY_PACKAGE=$2
 
@@ -16,7 +16,7 @@ VERSION=$(echo $VERSION | sed -n 's/.*'"${BINTRAY_PACKAGE}"'\/\(.*\)$/\1/p' | tr
 #Date: Fri, 11 Jan 2019 15:38:41 GMT
 #Content-Length: 0
 #Connection: keep-alive
-#Location: https://bintray.com/hernad/harbour/harbour-windows-x64/20190111.12
+#Location: https://bintray.com/bringout/harbour/harbour-windows-x64/20190111.12
 #X-Frame-Options: SAMEORIGIN
 #Strict-Transport-Security: max-age=31536000; preload
 

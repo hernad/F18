@@ -21,6 +21,7 @@ FUNCTION kalk_generacija_inventura_magacin_im()
    LOCAL cSrSort := "N"
    LOCAL cIdFirma, cIdRoba, cIdKonto, dDatDok, lOsvjezi
    LOCAL nRbr
+   LOCAL GetList := {}
 
    lOsvjezi := .F.
 
@@ -108,10 +109,15 @@ FUNCTION kalk_generacija_inventura_magacin_im()
             LOOP
          ENDIF
 
-         RowVpvRabat( @nVpvU, @nVpvI, @nRabat )
-
+altd()
          IF cCijenaTIP == "2"
             RowNC( @nNVU, @nNVI )
+            // vpc = nc, magacin po nabavnim
+            nVPVU := nNVU
+            nVPVI := nNVI
+            nRabat := 0
+         ELSE
+             RowVpvRabat( @nVpvU, @nVpvI, @nRabat )
          ENDIF
          RowKolicina( @nUlaz, @nIzlaz )
 
@@ -281,10 +287,17 @@ FUNCTION kalk_generisanje_inventure_razlike_postojeca_magacin_im()
             SKIP
             LOOP
          ENDIF
-         RowVpvRabat( @nVpvU, @nVpvI, @nRabat )
+
          IF cCijenaTIP == "2"
             RowNC( @nNVU, @nNVI )
+            // vpc = nc, magacin po nabavnim
+            nVPVU := nNVU
+            nVPVI := nNVI
+            nRabat := 0
+         ELSE
+             RowVpvRabat( @nVpvU, @nVpvI, @nRabat )
          ENDIF
+         
          RowKolicina( @nUlaz, @nIzlaz )
          SKIP
       ENDDO
@@ -447,7 +460,7 @@ FUNCTION RowKolicina( nUlaz, nIzlaz )
    RETURN
 
 
-FUNCTION RowVpvRabat( nVpvU, nVpvI, nRabat )
+STATIC FUNCTION RowVpvRabat( nVpvU, nVpvI, nRabat )
 
    IF mu_i == "1" .AND. !( idvd $ "12#22#94" )
       nVPVU += vpc * ( kolicina - gkolicina - gkolicin2 )
@@ -466,7 +479,7 @@ FUNCTION RowVpvRabat( nVpvU, nVpvI, nRabat )
 
 
 
-FUNCTION RowNC( nNcU, nNcI )
+STATIC FUNCTION RowNC( nNcU, nNcI )
 
    IF mu_i == "1" .AND. !( idvd $ "12#22#94" )
       nNcU += nc * ( kolicina - gkolicina - gkolicin2 )

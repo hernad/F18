@@ -1,5 +1,26 @@
 # F18 klijent, lista promjena
 
+## 2019-01-19
+
+- merge origin/3-fix
+
+## 3.1.319-std, 2019-01-10
+
+- IM cijena (vpc=nc)
+
+
+## 3.1.318-std, 2019-01-08
+
+- FAKT partn.idrefer specifikacija prodaje po količinama
+
+## 3.1.317-std, 2019-01-08
+
+- FAKT lista dokumenata partn.idrefer
+
+## 3.1.316-std, 2018-09-30
+
+- appveyor F18_RNAL out
+
 ## 3.1.216-std, 2018-09-26
 
 - naša slova "prosječna ..."

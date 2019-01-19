@@ -13,9 +13,7 @@
 
 #define PARTNER_LEN 45
 
-
-
-FUNCTION fakt_stampa_liste_dokumenata( dDatOd, dDatDo, qqTipDok, cIdFirma, cIdObjekat, cImeKup, lOpcine, aUslOpc, cValute )
+FUNCTION fakt_stampa_liste_dokumenata( dDatOd, dDatDo, qqTipDok, cIdFirma, cIdObjekat, cImeKup, cFilterOpcinaReferent, cValute )
 
    LOCAL m, cDinDnem, cRezerv, nC, nIznos, nRab, nIznosD, nIznos3, nRabD, nRab3, nOsn_tot, nPDV_tot, nUkPDV_tot
    LOCAL gnLMarg := 0
@@ -26,7 +24,6 @@ FUNCTION fakt_stampa_liste_dokumenata( dDatOd, dDatDo, qqTipDok, cIdFirma, cIdOb
    IF cValute == NIL
       cValute := Space( 3 )
    ENDIF
-
 
    START PRINT CRET
    ?
@@ -131,17 +128,14 @@ FUNCTION fakt_stampa_liste_dokumenata( dDatOd, dDatDo, qqTipDok, cIdFirma, cIdOb
          ENDIF
       ENDIF
 
-      IF lOpcine
-         select_o_partner( fakt_doks_pregled->idpartner )
-         SELECT fakt_doks_pregled
-         IF !( PARTN->( &aUslOpc ) )
-            SKIP
-            LOOP
-         ENDIF
+      select_o_partner( fakt_doks_pregled->idpartner )
+      SELECT fakt_doks_pregled
+      IF !( PARTN->( &cFilterOpcinaReferent ) )
+         SKIP
+         LOOP
       ENDIF
 
       SELECT fakt_doks_pregled
-
       ? Space( gnLMarg )
 
       ?? Str( ++nC, 4 ) + ".", datdok, idfirma, idtipdok, brdok + Rezerv + " "
@@ -153,7 +147,6 @@ FUNCTION fakt_stampa_liste_dokumenata( dDatOd, dDatDo, qqTipDok, cIdFirma, cIdOb
       ENDIF
 
       nCol1 := PCol() + 1
-
       IF cDinDem == Left( ValBazna(), 3 )
 
          @ PRow(), PCol() + 1 SAY Str( iznos + rabat, 12, 2 )
@@ -171,7 +164,6 @@ FUNCTION fakt_stampa_liste_dokumenata( dDatOd, dDatDo, qqTipDok, cIdFirma, cIdOb
          // iznos obje cValute... u KM
          nIznos3    += Round( fakt_doks_pregled->iznos,  gFZaok )
          nRab3      += fakt_doks_pregled->rabat
-
          nOsn_tot   += nOsn_izn
          nPdv_tot   += nPdv_izn
          nUkPDV_tot += nUkPDV_izn

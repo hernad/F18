@@ -1,5 +1,14 @@
 trigger:
-- 4
+  branches:
+    include:
+    - 4
+    - releases/*
+  paths:
+    exclude:
+    - README.md
+    include:
+    - config/global.mk
+
 
 variables:
 - group: API_KEYS
@@ -48,7 +57,7 @@ jobs:
       displayName: upload F18-windows-x64 version $(BUILD.BUILDNUMBER)
       env:
         CHERE_INVOKING: yes
-        BINTRAY_API_KEY: $(BINTRAY_API_KEY)
+        BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
 
 - job: Windows_ia32
   pool:
@@ -87,7 +96,7 @@ jobs:
         %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
       displayName: upload F18-windows-x86 version $(BUILD.BUILDNUMBER)
       env:
-        BINTRAY_API_KEY: $(BINTRAY_API_KEY)
+        BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
         CHERE_INVOKING: yes
 
 
@@ -109,7 +118,7 @@ jobs:
       ./upload_bintray_linux.sh
     displayName: upload F18-linux-x86 version $(BUILD.BUILDNUMBER)
     env:
-      BINTRAY_API_KEY: $(BINTRAY_API_KEY)
+      BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
 
 - job: Linux_x64
   pool:
@@ -129,4 +138,4 @@ jobs:
       ./upload_bintray_linux.sh
     displayName: upload F18-linux-x64 version $(BUILD.BUILDNUMBER)
     env:
-      BINTRAY_API_KEY: $(BINTRAY_API_KEY)
+      BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)

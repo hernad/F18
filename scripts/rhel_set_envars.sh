@@ -14,10 +14,12 @@ done
 export HB_DBG_PATH
 echo "HB_DBG_PATH="  $HB_DBG_PATH
 
-export GT_DEFAULT_XWC=1
+#export GT_DEFAULT_XWC=1
+export F18_GT_CONSOLE=1
 
 export F18_POS=1
 export F18_DEBUG=1
 
 echo "-------------- F18 envars ---------------------"
 set | grep ^F18_
+

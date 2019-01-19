@@ -7,7 +7,7 @@ if [[ ! `which curl` ]] ; then
 fi
 
 BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
-BINTRAY_OWNER=hernad
+BINTRAY_OWNER=bringout
 BINTRAY_REPOS=F18
 BINTRAY_PACKAGE=F18-linux-$BINTRAY_ARCH
 BINTRAY_PACKAGE_VER=${BUILD_BUILDNUMBER}

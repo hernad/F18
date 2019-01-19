@@ -42,5 +42,5 @@ docker/tds_fdw/
 CHANGELOG_MERGE.md
 template/
 docker/
-docker/postgresql_data/
+docker/postgresql_data/**
 docker/data

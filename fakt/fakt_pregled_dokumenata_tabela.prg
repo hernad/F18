@@ -17,7 +17,7 @@ FIELD idfirma, idtipdok, brdok, rezerv, idvrstep, datdok, partner, iznos, rabat
 
 STATIC s_lBrowseInitialized  := .F.
 
-FUNCTION fakt_lista_dokumenata_tabelarni_pregled( lVrsteP, lOpcine )
+FUNCTION fakt_lista_dokumenata_tabelarni_pregled( lVrstePlacanja )
 
    LOCAL i
    LOCAL nWidthMeni := 30
@@ -37,7 +37,7 @@ FUNCTION fakt_lista_dokumenata_tabelarni_pregled( lVrsteP, lOpcine )
    AAdd( ImeKol, { "Rabat",        {|| fakt_doks_pregled->rabat } } )
    AAdd( ImeKol, { "Ukupno-Rab ",  {|| fakt_doks_pregled->iznos } } )
 
-   IF lVrsteP
+   IF lVrstePlacanja
       AAdd( ImeKol, { _u( "Način placanja" ), {|| fakt_doks_pregled->idvrstep } } )
    ENDIF
 
@@ -116,10 +116,8 @@ FUNCTION fakt_lista_dokumenata_tabelarni_pregled( lVrsteP, lOpcine )
       AAdd( adKol, i )
    NEXT
 
-
-   my_browse( "", nX - 3, nY, {| nCh | fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUredjajModel ) }, "", "", .F., ;
+   my_browse( "", nX - 3, nY, {| nCh | fakt_pregled_dokumenata_browse_key_handler( nCh, cFiskalniUredjajModel ) }, "", "", .F., ;
       NIL, NIL, NIL, 2,  NIL, NIL ) // , {| nSkip | fakt_pregled_dokumenata_skip_block( nSkip ) } ) // aOpcije, nFreeze, bPodvuci, nPrazno, nGPrazno, aPoredak, bSkipBlock
-
 
    BoxC()
 
@@ -134,7 +132,7 @@ FUNCTION fakt_lista_dokumenata_tabelarni_pregled( lVrsteP, lOpcine )
 
 
 
-FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUredjajModel )
+FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, cFiskalniUredjajModel )
 
    LOCAL nRet := DE_CONT
    LOCAL hRec
@@ -172,14 +170,13 @@ FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUred
    CASE nCh == K_ENTER
 
       // nRet := print_porezna_faktura( lOpcine )
-
       fakt_stamp_txt_dokumenta( fakt_doks_pregled->IdFirma, fakt_doks_pregled->IdTipdok, fakt_doks_pregled->brdok )
       lRefresh := .T.
       lReload := .T.
 
    CASE nCh == K_ALT_P .OR. Upper( Chr( nCh ) ) == "L"
 
-      nRet := fakt_print_odt( lOpcine )
+      nRet := fakt_print_odt( .T. )
       lRefresh := .T.
       lReload := .T.
 
@@ -188,7 +185,6 @@ FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUred
       // SELECT fakt_doks_pregled
       // USE
       // o_fakt_doks_dbf()
-
       nRet := DE_REFRESH
       lRefresh := .T.
       lReload := .T.

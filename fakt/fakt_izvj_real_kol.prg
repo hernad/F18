@@ -26,6 +26,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
    LOCAL GetList := {}
    LOCAL cFilter
    LOCAL cIdFirma
+   LOCAL cOpcine30, cIdRefer, cFilterOpcinaReferent
 
    PRIVATE cPrikaz
    PRIVATE cSection := "N"
@@ -67,7 +68,8 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
    cPrikaz := "2"
    cIdRoba := Space( 20 )
    cImeKup := Space( 20 )
-   cOpcina := Space( 200 )
+   cOpcine30 := Space( 200 )
+   cIdRefer := SPACE(10)
    qqPartn := Space( 20 )
    RPar( "sk", @qqPartn )
    RPar( "td", @qqTipDok )
@@ -99,13 +101,11 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Uslov po artiklu (prazno svi) "  GET qqIdRoba PICT "@S30"
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Uslov po opcini (prazno sve) "  GET cOpcina PICT "@S30"
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Uslov po općini (prazno sve) "  GET cOpcine30 PICT "@S30"
 
-
-      // IF lRelations == .T.
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Relacija (prazno sve):" GET cRelation
-      // ENDIF
+      @ box_x_koord() + nX, COL() + 2 SAY8 "Referent: "  GET cIdRefer PICT "@!" VALID Empty(cIdRefer) .OR. P_Refer(@cIdRefer)
 
       IF lGroup
          PRIVATE cPGroup := Space( 3 )
@@ -117,16 +117,18 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Svedi na jedinicu mjere ?" GET cSvediJmj VALID cSvediJmj $ "DN" PICT "@!"
 
       nX := nX + 2
-
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Export u XLSX?" GET cExport VALID cExport $ "DN" PICT "@!"
-
 
       READ
 
       ESC_BCR
 
       aUslRB := Parsiraj( qqIdRoba, "IDROBA", "C" )
-      aUslOpc := Parsiraj( cOpcina, "IDOPS", "C" )
+      cFilterOpcinaReferent := Parsiraj( cOpcine30, "IDOPS", "C" )
+      IF !Empty(cIdRefer)
+        cFilterOpcinaReferent += ".and. idrefer==" + sql_quote(cIdRefer)
+      ENDIF
+
       aUslTD := Parsiraj( qqTipdok, "IdTipdok", "C" )
 
       IF ( aUslTD <> NIL )
@@ -165,13 +167,11 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
    // _o_tables()
 
-
    // SELECT fakt
 
    cFilter := ".t."
 
    IF ( !Empty( dDatOd ) .OR. !Empty( dDatDo ) )
-
       IF cDDokOtpr == "D"
          cFilter += ".and.  datdok>=" + dbf_quote( dDatOd ) + " .and. datdok<=" + dbf_quote( dDatDo )
       ENDIF
@@ -230,12 +230,11 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
       cLinija += " ------------"
    ENDIF
 
-   cIdPartner := idPartner
+   cIdPartner := fakt->idPartner
 
-   fakt_zagl_specif_prodaje( cIdFirma )
+   fakt_zagl_specif_prodaje( cIdFirma, cIdRefer, , cOpcine30 )
 
    IF cPrikaz == "1"
-
       seek_fakt( cIdFirma )
       nC := 0
       nCol1 := 10
@@ -290,13 +289,12 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
             select_o_partner( fakt->idPartner )
             SELECT fakt
-            IF !( partn->( &aUslOpc ) )
+            IF !( partn->( &cFilterOpcinaReferent ) )
                SKIP 1
                LOOP
             ENDIF
 
             nKolicina += kolicina
-
 
             SKIP 1
 
@@ -304,7 +302,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
          IF PRow() > 61
             FF
-            fakt_zagl_specif_prodaje( cIdFirma )
+            fakt_zagl_specif_prodaje( cIdFirma, cIdRefer, , cOpcine30 )
          ENDIF
 
          select_o_partner( cIdPartner )
@@ -397,7 +395,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
             select_o_partner( fakt->idPartner )
             SELECT fakt
-            IF !( partn->( &aUslOpc ) )
+            IF !( partn->( &cFilterOpcinaReferent ) )
                SKIP 1
                LOOP
             ENDIF
@@ -458,7 +456,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
          IF PRow() > 61
             FF
-            fakt_zagl_specif_prodaje( cIdFirma )
+            fakt_zagl_specif_prodaje( cIdFirma, cIdRefer, , cOpcine30 )
          ENDIF
 
          select_o_roba( cIdRoba )
@@ -495,7 +493,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
    IF PRow() > 59
       FF
-      fakt_zagl_specif_prodaje( cIdFirma )
+      fakt_zagl_specif_prodaje( cIdFirma, cIdRefer, , cOpcine30 )
    ENDIF
 
    ? Space( gnLMarg )
@@ -511,7 +509,6 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
    ? Space( gnLMarg )
    ?? cLinija
 
-   // ukini filter
    SET FILTER TO
 
    IF lExpRpt
@@ -521,7 +518,6 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
    FF
    ENDPRINT
 
-
    IF lExpRpt
       open_r_export_table()
    ENDIF
@@ -530,7 +526,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
 
 
-STATIC FUNCTION fakt_zagl_specif_prodaje( cIdFirma )
+STATIC FUNCTION fakt_zagl_specif_prodaje( cIdFirma, cIdRefer, cOpcine30 )
 
    ?
    P_12CPI
@@ -539,7 +535,6 @@ STATIC FUNCTION fakt_zagl_specif_prodaje( cIdFirma )
    IspisFirme( cIdFirma )
 
    ?
-
    SET CENTURY ON
 
    P_12CPI
@@ -563,14 +558,19 @@ STATIC FUNCTION fakt_zagl_specif_prodaje( cIdFirma )
       ?? "Relacija : " + cRelation
    ENDIF
 
+   IF !Empty( cIdRefer )
+      ? Space( gnLMarg )
+      ?? "Referent : " + cIdRefer
+   ENDIF
+
    IF cPrikaz == "2" .AND. !Empty( qqPartn )
       ? Space( gnLMarg )
       ?? "Partner: " + qqPartn + " - " + get_partner_naziv( qqPartn )
    ENDIF
 
-   IF !Empty( cOpcina )
+   IF !Empty( cOpcine30 )
       ? Space( gnLMarg )
-      ?? "Opcine: " + Trim( cOpcina )
+      ?? "Opcine: " + Trim( cOpcine30 )
    ENDIF
 
    IF lGroup .AND. !Empty( cPGroup )
@@ -581,7 +581,6 @@ STATIC FUNCTION fakt_zagl_specif_prodaje( cIdFirma )
    SET CENTURY OFF
 
    P_COND
-
    ? Space( gnLMarg )
    ?? cLinija
 

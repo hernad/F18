@@ -175,7 +175,7 @@ STATIC FUNCTION fill_exp_tbl( cRbr, cDistrib, cPmId, cPmNaz, ;
 // ---------------------------------------
 // specifikacija prodaje
 // ---------------------------------------
-FUNCTION spec_kol_partn()
+FUNCTION fakt_kol_pregled_isporuke_robe_partneri()
 
    LOCAL _x := 1
    LOCAL _define := "N"
