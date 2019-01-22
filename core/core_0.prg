@@ -154,6 +154,15 @@ FUNCTION f18_exe_path()
    RETURN hb_FNameDir( hb_ProgName() )
 
 
+FUNCTION f18_util_path()
+    RETURN SLASH + ".." + SLASH + "F18_util" + SLASH
+
+FUNCTION f18_template_path()
+    RETURN SLASH + ".." + SLASH + "F18_template" + SLASH
+
+FUNCTION f18_exe_template_file_name( cTemplate )
+    RETURN f18_exe_path() + f18_template_path() + cTemplate
+
 FUNCTION is_gt_console()
 
 #ifdef GT_DEFAULT_CONSOLE

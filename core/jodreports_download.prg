@@ -46,7 +46,7 @@ FUNCTION check_jodreports_download()
    LOCAL cJodReportsCliCmd
 
    IF s_cDirF18Util == NIL
-      s_cDirF18Util := f18_exe_path() + "F18_util" + SLASH
+      s_cDirF18Util := f18_exe_path() + f18_util_path()
       s_cProg := "jodreports-cli.jar"
    ENDIF
 

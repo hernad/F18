@@ -51,7 +51,7 @@ FUNCTION check_PDF_download()
    LOCAL cPDFCmd
 
    IF s_cDirF18Util == NIL
-      s_cDirF18Util := f18_exe_path() + "F18_util" + SLASH
+      s_cDirF18Util := f18_exe_path() + f18_util_path()
       s_cProg := "pdf" + iif( is_windows(), ".cmd", "" )
    ENDIF
 

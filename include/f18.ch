@@ -592,8 +592,8 @@
 
 
 
-#define F18_VERZIJA "3"
-#define F18_VARIJANTA "std"
+#define F18_VERZIJA "4"
+#define F18_VARIJANTA "4s"
 
 
 #define FIELD_LENGTH_LD_RADKR_NA_OSNOVU 20

@@ -31,11 +31,6 @@ FUNCTION download_template_ld_obr_2001() // v17
    RETURN download_template( "ld_obr_2001.xlsx", "de948c56cc6dfc8d08b6a3671252b29376f9476624de82ace1f20d9da045b1aa" )
 
 
-FUNCTION f18_exe_template_file_name( cTemplate )
-
-   RETURN f18_exe_path() + "template" + SLASH + cTemplate
-
-
 FUNCTION download_template( cTemplateName,  cSHA256sum )
 
    IF s_hTemplates == NIL
@@ -46,7 +41,7 @@ FUNCTION download_template( cTemplateName,  cSHA256sum )
       RETURN .T. // template je vec ucitan
    ENDIF
 
-   s_cDirF18Template := f18_exe_path() + "template" + SLASH
+   s_cDirF18Template := f18_exe_path() + f18_template_path()
    s_cUrl := TEMPLATE_URL_BASE + f18_template_ver() + "/" + cTemplateName
 
    IF DirChange( s_cDirF18Template ) != 0

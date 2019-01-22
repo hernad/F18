@@ -583,7 +583,6 @@ FUNCTION set_f18_home_root()
    LOCAL cHome
 
 #ifdef __PLATFORM__WINDOWS
-
    cHome := hb_DirSepAdd( GetEnv( "USERPROFILE" ) )
 #else
    cHome := hb_DirSepAdd( GetEnv( "HOME" ) )
@@ -592,7 +591,6 @@ FUNCTION set_f18_home_root()
    cHome := hb_DirSepAdd( cHome + ".f18" )
 
    f18_create_dir( cHome )
-
    my_home_root( cHome )
 
    RETURN .T.

@@ -81,7 +81,7 @@ FUNCTION check_java_download()
    LOCAL cJavaCmd
 
    IF s_cDirF18Util == NIL
-      s_cDirF18Util := f18_exe_path() + "F18_util" + SLASH
+      s_cDirF18Util := f18_exe_path() + f18_util_path()
       s_cProg := "java" + iif( is_windows(), ".cmd", "" )
    ENDIF
 

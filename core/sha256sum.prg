@@ -43,7 +43,7 @@ STATIC FUNCTION check_exe_download()
    LOCAL cVersion := F18_UTIL_VER
 
    IF s_cDirF18Util == NIL
-      s_cDirF18Util := f18_exe_path() + "F18_util" + SLASH
+      s_cDirF18Util := f18_exe_path() + f18_util_path()
       s_cProg := "F18_sha256sum" + iif( is_windows(), ".exe", "" )
    ENDIF
 

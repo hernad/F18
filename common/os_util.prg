@@ -444,7 +444,7 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
 FUNCTION windows_run_invisible( cProg, cArgumenti, cStdOut, cStdErr, lAsync )
 
    LOCAL nBytes := 0, cBuf := Space( 4 ), lStaraVerzija := .F.
-   LOCAL cDirF18Util := f18_exe_path() + "F18_util" + SLASH
+   LOCAL cDirF18Util := f18_exe_path() + f18_util_path()
    LOCAL cStart, cCmd
    LOCAL nH, cArg, cArg2
    LOCAL cVer := "'006"

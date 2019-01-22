@@ -42,8 +42,8 @@ FUNCTION f18_template_location( cTemplate )
       ENDIF
    ENDIF
 
-   // 2) F18.exe/template/
-   cLoc := f18_exe_path() + "template" + SLASH
+   // 2) F18.exe/../template/
+   cLoc := f18_exe_path() + f18_template_path()
    aFileList := Directory( cLoc + cTemplate )
    IF Len( aFileList ) > 0
       s_cTemplatesLoc := cLoc
@@ -55,7 +55,7 @@ FUNCTION f18_template_location( cTemplate )
       ENDIF
    ENDIF
 
-   // 2) ~/.f18/template
+   // 3) ~/.f18/template
    cLoc := my_home_root() + "template" +  SLASH
    aFileList := Directory( cLoc + cTemplate )
    IF Len( aFileList ) > 0
@@ -68,10 +68,7 @@ FUNCTION f18_template_location( cTemplate )
       ENDIF
    ENDIF
 
-
-
    RETURN ""
-
 
 
 

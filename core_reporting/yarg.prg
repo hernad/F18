@@ -151,7 +151,6 @@ METHOD YargReport:create_yarg_xml()
    create_xml( ::cReportXml )
    xml_head()
    xml_subnode_start( 'report name="report"' )
-
    xml_subnode_start( "templates" )
 
    cTemplate := "code=" + xml_quote( "DEFAULT" )

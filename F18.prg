@@ -25,7 +25,7 @@ FUNCTION get_f18_param( cKey )
    IF !hb_hHasKey( s_hF18Params, cKey)
      Alert("F18Param ne postoji: " + cKey)
      QUIT_1
-   ENDIF 
+   ENDIF
 
    RETURN s_hF18Params[ cKey ]
 
@@ -42,14 +42,16 @@ STATIC FUNCTION to_run_f18_module()
 
 #ifndef TEST
 
-FUNCTION Main( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
+FUNCTION Main(...)
 
 
    IF s_hF18Params == NIL
-     s_hF18Params := init_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
+     s_hF18Params := init_f18_params(...)
    ENDIF
 
-   set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
+   //set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
+   set_f18_params(...)
+
 
    IF to_run_f18_module()
       run_module()
@@ -72,7 +74,6 @@ FUNCTION Main( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    RETURN .T.
 
 #endif
-
 
 
 
