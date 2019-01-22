@@ -82,12 +82,10 @@ FUNCTION set_f18_params()
          __Quit()
 
       CASE cTok == "--dbf-prefix"   // prefix privatni dbf
-         altd()
          dbf_prefix( hb_PValue( nI++ ) )
 
       CASE cTok == "--run-on-start"
          run_on_start_param( hb_PValue( nI++ ) )
-
 
       CASE cTok == "-h"
          cHostName := hb_PValue( nI++ )
@@ -145,11 +143,13 @@ FUNCTION set_f18_params()
       case cTok == "--os"
           set_f18_param("run", "os")
 
+      case cTok == "--ld"
+          set_f18_param("run", "ld")
+
       case LEFT(cTok, 7) == "--json_"
           set_f18_param("run", SUBSTR(cTok, 3)) // json_konto, json_roba ...
 
       ENDCASE
-
 
    ENDDO
 
@@ -359,7 +359,6 @@ OutStd( field->ver )
 RETURN
 
 
-
 PROCEDURE run_module()
 
    LOCAL cModul := get_f18_param("run")
@@ -424,7 +423,8 @@ PROCEDURE run_module()
       RETURN MainEPdv( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "os"
       RETURN MainOs( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
-
+   ELSEIF cModul == "ld"
+      RETURN MainLd( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ENDIF
 
    RETURN NIL
