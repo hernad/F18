@@ -1,5 +1,11 @@
 # F18 klijent, lista promjena
 
+## 2019-01-22
+
+- EXE/../F18_util, EXE/../F18_template
+- run --dbf-prefix, os, ld, fakt, ePDV
+- PQReceive()
+
 ## 2019-01-19
 
 - merge origin/3-fix
