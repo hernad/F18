@@ -3,6 +3,7 @@
 ## 2019-01-23
 
 - cre_dbfs when --epdv: `IF get_f18_param("run") == "epdv" .OR. f18_use_module( "epdv" )`
+- refaktor f18_use_module(), fix F_FAKT_PRIPR_DUPLO
 
 ## 2019-01-22
 
