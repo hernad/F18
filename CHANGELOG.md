@@ -2,8 +2,9 @@
 
 ## 2019-01-23
 
-- cre_dbfs when --epdv: `IF get_f18_param("run") == "epdv" .OR. f18_use_module( "epdv" )`
+- F18_HOME envar - nova lokacija podataka
 - refaktor f18_use_module(), fix F_FAKT_PRIPR_DUPLO
+- cre_dbfs when --epdv: `IF get_f18_param("run") == "epdv" .OR. f18_use_module( "epdv" )`
 
 ## 2019-01-22
 

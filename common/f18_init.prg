@@ -582,6 +582,7 @@ FUNCTION set_f18_home_root()
 
    LOCAL cHome
 
+/*
 #ifdef __PLATFORM__WINDOWS
    cHome := hb_DirSepAdd( GetEnv( "USERPROFILE" ) )
 #else
@@ -589,6 +590,14 @@ FUNCTION set_f18_home_root()
 #endif
 
    cHome := hb_DirSepAdd( cHome + ".f18" )
+*/
+   cHome:=GetEnv('F18_HOME')
+
+   IF Empty(cHome)
+     Alert('F18_HOME envar - lokacija podataka nije definisana!?')
+     QUIT_1
+   ENDIF
+   cHome := hb_DirSepAdd(cHome)
 
    f18_create_dir( cHome )
    my_home_root( cHome )
