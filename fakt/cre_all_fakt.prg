@@ -50,11 +50,15 @@ FUNCTION cre_all_fakt( ver )
    AAdd( aDBf, { 'N1', 'N',  10,  3 } )
    AAdd( aDBf, { 'N2', 'N',  10,  3 } )
    AAdd( aDBf, { 'idrelac', 'C',   4,  0 } )
+   AAdd( aDBf, { 'FISC_RN', 'N',   10,  0 } ) // dodaj polje fiskalnog racuna ali samo za pripremu
 
+/*
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 020101 // 2.1.1 - rbr numeric
      f18_delete_dbf( "fakt_pripr" )
    ENDIF
+*/
 
+/*
    // 0.8.3
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 00803
 
@@ -72,14 +76,11 @@ FUNCTION cre_all_fakt( ver )
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 00902
       modstru( { "*" + "fakt_pripr", "C FISC_RN I 4 0 FISC_RN N 10 0" } )
    ENDIF
-
+*/
 
    // ----------------------------------------------------------------------------
    // FAKT_PRIPR
    // ----------------------------------------------------------------------------
-
-
-   AAdd( aDBf, { 'FISC_RN', 'N',   10,  0 } ) // dodaj polje fiskalnog racuna ali samo za pripremu
 
    _alias := "FAKT_PRIPR"
    _table_name := "fakt_pripr"

@@ -22,6 +22,11 @@ FUNCTION set_f18_param( cKey, xValue )
     RETURN s_hF18Params[ cKey ]
 
 FUNCTION get_f18_param( cKey )
+
+   IF s_hF18Params == NIL
+      return "<NIL>"
+   ENDIF
+
    IF !hb_hHasKey( s_hF18Params, cKey)
      // Alert("F18Param ne postoji: " + cKey)
      // QUIT_1
@@ -44,7 +49,6 @@ STATIC FUNCTION to_run_f18_module()
 #ifndef TEST
 
 FUNCTION Main(...)
-
 
    IF s_hF18Params == NIL
      s_hF18Params := init_f18_params(...)

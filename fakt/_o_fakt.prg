@@ -20,10 +20,6 @@
 // "fakt_fakt", "FAKT", F_FAKT
 
 
-
-
-
-
 FUNCTION o_fakt_pripr()
 
    SELECT ( F_FAKT_PRIPR )

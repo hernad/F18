@@ -252,23 +252,27 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
    Usage: f18_use_module( 'kalk' ) => .T. ili .F.
 
    Params:
-      module_name - naziv modula 'kalk', 'fin'
+      cModuleName - naziv modula 'kalk', 'fin'
 */
 
-FUNCTION f18_use_module( module_name )
+FUNCTION f18_use_module( cModuleName )
 
    LOCAL _ret := .F.
    LOCAL _default := "N"
 
-   IF module_name == "tops" .OR. module_name == "pos"
-      module_name := "pos"
+   IF get_f18_param("run") == cModuleName
+      RETURN .T.
    ENDIF
 
-   IF module_name $ "fin#kalk#fakt"
+   IF cModuleName == "tops" .OR. cModuleName == "pos"
+      cModuleName := "pos"
+   ENDIF
+
+   IF cModuleName $ "fin#kalk#fakt"
       _default := "D"
    ENDIF
 
-   IF fetch_metric( "main_menu_" + module_name, my_user(), _default ) == "D"
+   IF fetch_metric( "main_menu_" + cModuleName, my_user(), _default ) == "D"
       _ret := .T.
    ENDIF
 
@@ -282,16 +286,16 @@ FUNCTION f18_use_module( module_name )
    Usage: f18_set_use_module( 'kalk', .T. ) => modul KALK za korisnika je aktivan
 
    Params:
-       module_name - naziv modula 'kalk', 'fin'
+       cModuleName - naziv modula 'kalk', 'fin'
        lset - .T. aktivan, .F. neaktivan
 */
-FUNCTION f18_set_use_module( module_name, lset )
+FUNCTION f18_set_use_module( cModuleName, lset )
 
    LOCAL _ret := .F.
    LOCAL _set := "N"
 
-   IF module_name == "tops"
-      module_name := "pos"
+   IF cModuleName == "tops"
+      cModuleName := "pos"
    ENDIF
 
    IF lset == NIL
@@ -302,7 +306,7 @@ FUNCTION f18_set_use_module( module_name, lset )
       _set := "D"
    ENDIF
 
-   set_metric( "main_menu_" + module_name, my_user(), _set )
+   set_metric( "main_menu_" + cModuleName, my_user(), _set )
 
    RETURN _ret
 
