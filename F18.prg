@@ -23,8 +23,9 @@ FUNCTION set_f18_param( cKey, xValue )
 
 FUNCTION get_f18_param( cKey )
    IF !hb_hHasKey( s_hF18Params, cKey)
-     Alert("F18Param ne postoji: " + cKey)
-     QUIT_1
+     // Alert("F18Param ne postoji: " + cKey)
+     // QUIT_1
+     return "<undefined>"
    ENDIF
 
    RETURN s_hF18Params[ cKey ]
@@ -322,7 +323,6 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
 
       AAdd( aMeniOpcije,  " U. F18 upgrade -> " + cVersion  )
       AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
-
       AAdd( aMeniOpcije, "---------------------------------------------" )
       AAdd( aMeniExec, {|| NIL } )
    ENDIF

@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-01-23
+
+- cre_dbfs when --epdv: `IF get_f18_param("run") == "epdv" .OR. f18_use_module( "epdv" )`
+
 ## 2019-01-22
 
 - EXE/../F18_util, EXE/../F18_template

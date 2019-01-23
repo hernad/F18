@@ -52,7 +52,7 @@ FUNCTION cre_all_dbfs( ver )
    // proizvoljni_izvjestaji_db_cre( ver )
    cre_fin_mat( ver )
 
-   IF f18_use_module( "fin" )
+   IF get_f18_param("run") == "fin" .OR. f18_use_module( "fin" )
       IF fetch_metric_error() > 1
          error_bar( "sql", "fetch metric error" )
          RETURN .F.
@@ -65,57 +65,46 @@ FUNCTION cre_all_dbfs( ver )
       RETURN .F.
    ENDIF
 
-   IF f18_use_module( "kalk" )
+   IF get_f18_param("run") == "kalk" .OR. f18_use_module( "kalk" )
       cre_all_kalk( ver )
    ENDIF
 
-   IF f18_use_module( "fakt" )
+   IF get_f18_param("run") == "fakt" .OR. f18_use_module( "fakt" )
       cre_all_fakt( ver )
    ENDIF
 
-   IF f18_use_module( "ld" )
+   IF get_f18_param("run") == "ld" .OR. f18_use_module( "ld" )
       cre_all_ld_sif( ver )
       cre_all_ld( ver )
    ENDIF
 
 
-   IF f18_use_module( "os" )
+   IF get_f18_param("run") == "os" .OR. f18_use_module( "os" )
       cre_all_os( ver )
    ENDIF
 
-   IF f18_use_module( "virm" )
+   IF get_f18_param("run") == "virm" .OR. f18_use_module( "virm" )
       cre_all_virm_sif( ver )
       cre_all_virm( ver )
    ENDIF
 
 
-   IF f18_use_module( "epdv" )
+   IF get_f18_param("run") == "epdv" .OR. f18_use_module( "epdv" )
       cre_all_epdv( ver )
    ENDIF
 
 #ifdef F18_POS
-   IF f18_use_module( "pos" )
+   IF get_f18_param("run") == "pos" .OR. f18_use_module( "pos" )
       cre_all_pos( ver )
    ENDIF
 #endif
 
-#ifdef F18_RNAL
-   IF f18_use_module( "rnal" )
-      cre_all_rnal( ver )
-   ENDIF
-#endif
-
 #ifdef F18_MAT
-   IF f18_use_module( "mat" )
+   IF get_f18_param("run") == "mat" .OR. f18_use_module( "mat" )
       cre_all_mat( ver )
    ENDIF
 #endif
 
-#ifdef F18_KADEV
-   IF f18_use_module( "kadev" )
-      cre_all_kadev( ver )
-   ENDIF
-#endif
 
 /*
    IF _first_start == 0

@@ -412,18 +412,25 @@ PROCEDURE run_module()
 
 
    IF cModul == "pos"
+       set_metric( "main_menu_pos", my_user(), "D")
        RETURN MainPos( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "fin"
+       set_metric( "main_menu_fin", my_user(), "D" )
        RETURN MainFin( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "kalk"
+       set_metric( "main_menu_kalk", my_user(), "D" )
        RETURN MainKalk( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "fakt"
+       set_metric( "main_menu_fakt", my_user(), "D" )
        RETURN MainFakt( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "epdv"
+      set_metric( "main_menu_epdv", my_user(), "D" ) 
       RETURN MainEPdv( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "os"
+      set_metric( "main_menu_os", my_user(), "D" )
       RETURN MainOs( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "ld"
+      set_metric( "main_menu_ld", my_user(), "D" )
       RETURN MainLd( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ENDIF
 
