@@ -24,7 +24,7 @@ FUNCTION set_f18_param( cKey, xValue )
 FUNCTION get_f18_param( cKey )
 
    IF s_hF18Params == NIL
-      return "<NIL>"
+      return "<undefined>"
    ENDIF
 
    IF !hb_hHasKey( s_hF18Params, cKey)

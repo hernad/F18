@@ -743,38 +743,41 @@ METHOD F18Login:organizacije_array()
 
 
 
-
 METHOD F18Login:administratorske_opcije( nXPos, nYPos )
 
    LOCAL nX, nY
    LOCAL aMeni := {}, aMeniExec := {}, nIzbor
+   LOCAL oAdmin
 
    nX := nXPos
    nY := ( f18_max_cols() / 2 ) - 5
 
+   oAdmin := F18Admin():New()
 
+   IF oAdmin == NIL
+      MsgBeep("Nemate Admin prava? STOP !")
+      RETURN .F.
+   ENDIF
    // print_sql_connections()
 
-   AAdd( aMeni, hb_UTF8ToStr( "1. rekonfiguracija servera        " ) )
-   AAdd( aMeniExec, {|| f18_login_loop( .F. ), .T. } )
+   //AAdd( aMeni, hb_UTF8ToStr( "1. rekonfiguracija servera        " ) )
+   //AAdd( aMeniExec, {|| f18_login_loop( .F. ), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "2. update F18" ) )
-   AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
+   //AAdd( aMeni, hb_UTF8ToStr( "2. update F18" ) )
+   //AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
 
-   // AAdd( aMeni, hb_UTF8ToStr( "3. update baze" ) )
-   // AAdd( aMeniExec, {|| F18Admin():New():update_db(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "3. nova baza" ) )
-   AAdd( aMeniExec, {|| F18Admin():New():create_new_pg_db(), .T. } )
+   AAdd( aMeni, hb_UTF8ToStr( "1. nova baza" ) )
+   AAdd( aMeniExec, {|| oAdmin:create_new_pg_db(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "5. brisanje baze" ) )
-   AAdd( aMeniExec, {|| F18Admin():New():drop_pg_db(), .T. } )
+   AAdd( aMeni, hb_UTF8ToStr( "2. brisanje baze" ) )
+   AAdd( aMeniExec, {|| oAdmin:drop_pg_db(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "6. otvaranje nove godine" ) )
-   AAdd( aMeniExec, {|| F18Admin():New():razdvajanje_sezona(), .T. } )
+   AAdd( aMeni, hb_UTF8ToStr( "3. otvaranje nove godine" ) )
+   AAdd( aMeniExec, {|| oAdmin:razdvajanje_sezona(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "7. sql_cleanup_all" ) )
-   AAdd( aMeniExec, {|| F18Admin():sql_cleanup_all(), .T. } )
+   AAdd( aMeni, hb_UTF8ToStr( "4. sql_cleanup_all" ) )
+   AAdd( aMeniExec, {|| oAdmin:sql_cleanup_all(), .T. } )
 
 
    DO WHILE .T.

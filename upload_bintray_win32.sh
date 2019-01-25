@@ -93,7 +93,7 @@ DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
 DLLS+=" libpcre2-8-0.dll zlib1.dll"
 
 
-DLLS+=" pg_dump.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll"
+DLLS+=" pg_dump.exe pg_dumpall.exe pg_restore.exe psql.exe libxml2-2.dll liblzma-5.dll"
 
 
 echo "=================== /${MINGW_BASE}/bin ==============="

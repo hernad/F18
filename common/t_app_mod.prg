@@ -98,7 +98,7 @@ METHOD getParent()
 METHOD setName()
 
    ::cName := "F18"
-   
+
    RETURN .T.
 
 
@@ -206,21 +206,7 @@ METHOD quit( lVratiseURP )
 
    RETURN .T.
 
-   /*
-   ::lTerminate := .T.
-
-   CLEAR SCREEN
-
-   IF !( ::hasParent() )
-      QUIT_1
-   ENDIF
-
-   RETURN .T.
-   */
-
-
-
-
+/*
 METHOD gParams()
 
    LOCAL cFMKINI := "N"
@@ -272,42 +258,20 @@ METHOD gParams()
    @ box_x_koord() + 8, box_y_koord() + 2 SAY "Direktorij pomocne kopije podataka" GET gArhDir PICT "@S20"
    @ box_x_koord() + 9, box_y_koord() + 2 SAY "Default odgovor na pitanje 'Izlaz direktno na printer?' (D/N/V/E)" GET gcDirekt VALID gcDirekt $ "DNVER" PICT "@!"
    @ box_x_koord() + 10, box_y_koord() + 2 SAY "Shema boja za prikaz na ekranu 'V' (B1/B2/.../B7):" GET gShemaVF
-   @ box_x_koord() + 12, Col() + 2 SAY "Zaok 50f (5):" GET g50f    VALID g50f    $ " 5" PICT "9"
+   @ box_x_koord() + 12,  box_y_koord() + 2 SAY "Zaok 50f (5):" GET g50f    VALID g50f    $ " 5" PICT "9"
    // @ box_x_koord() + 14, box_y_koord() + 2 SAY "Omoguciti kolor-prikaz? (D/N)" GET gFKolor VALID gFKolor $ "DN" PICT "@!"
-   @ box_x_koord() + 15, Col() + 2 SAY "SQL log ? (D/N)" GET gSql PICT "@!"
+   @ box_x_koord() + 15, box_y_koord()  + 2 SAY "SQL log ? (D/N)" GET gSql PICT "@!"
 
    //@ box_x_koord() + 18, box_y_koord() + 2 SAY "PDF stampa (N/D/X)?" GET gPDFPrint VALID {|| gPDFPrint $ "DNX" .AND. if( gPDFPrint $ "XD", pdf_box(), .T. ) } PICT "@!"
 
-   @ box_x_koord() + 20, box_y_koord() + 2 SAY "Ispravka FMK.INI (D/S/P/K/M/N)" GET cFMKINI VALID cFMKINI $ "DNSPKM" PICT "@!"
-   @ box_x_koord() + 20, box_y_koord() + 36 SAY "M - FMKMREZ"
+
+   //@ box_x_koord() + 20, box_y_koord() + 2 SAY "Ispravka FMK.INI (D/S/P/K/M/N)" GET cFMKINI VALID cFMKINI $ "DNSPKM" PICT "@!"
+   //@ box_x_koord() + 20, box_y_koord() + 36 SAY "M - FMKMREZ"
 
 
    READ
    BoxC()
 
-   IF cFMKIni $ "DSPKM"
-      PRIVATE cKom := "q "
-      IF cFMKINI == "D"
-         cKom += EXEPATH
-      ELSEIF  cFMKINI == "K"
-         cKom += KUMPATH
-      ELSEIF  cFMKINI == "P"
-         cKom += my_home()
-      ELSEIF  cFMKINI == "S"
-         cKom += SIFPATH
-      ENDIF
-      // -- M je za ispravku FMKMREZ.BAT
-      IF cFMKINI == "M"
-         cKom += EXEPATH + "FMKMREZ.BAT"
-      ELSE
-         cKom += "FMK.INI"
-      ENDIF
-
-      Box(, 25, 80 )
-      f18_run( cKom )
-      BoxC()
-      IniRefresh() // izbrisi iz cache-a
-   ENDIF
 
 
    IF LastKey() <> K_ESC
@@ -334,7 +298,14 @@ METHOD gParams()
    ENDIF
 
    RETURN .T.
+*/
 
+
+METHOD gparams()
+
+altd()
+my_login():administratorske_opcije(10, 10)
+RETURN .T.
 // ------------------------------------------------------------
 // prikaz dodatnog box-a za stimanje parametara PDF stampe
 // ------------------------------------------------------------

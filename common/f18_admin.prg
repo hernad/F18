@@ -23,9 +23,6 @@ CLASS F18Admin
 
    METHOD new()
 
-   // METHOD update_db()
-   // DATA update_db_result
-
    METHOD create_new_pg_db()
    METHOD drop_pg_db()
    METHOD delete_db_data_all()
@@ -64,15 +61,13 @@ CLASS F18Admin
 ENDCLASS
 
 
-
 METHOD F18Admin:New()
 
-   // ::update_db_result := {}
    ::create_db_result := {}
 
    IF ! ::relogin_as_admin( "postgres" )
       MsgBeep( "relogin postgresql as admin neuspjesno " )
-      RETURN .F.
+      RETURN NIL
    ENDIF
 
    RETURN self
@@ -96,7 +91,7 @@ METHOD F18Admin:sql_cleanup()
 #endif
 
    IF ! ::relogin_as_admin( hDbServerParams[ "database" ] )
-      MsgBeep( "relogin as admin user neuspjesno " )
+      // MsgBeep( "relogin as admin user neuspješno " )
       RETURN .F.
    ENDIF
 
@@ -150,8 +145,6 @@ METHOD F18Admin:sql_cleanup_all()
 
    LOCAL cQuery, oQuery, cQueryForDb // ovaj query radi posao na pojedinoj bazi
 
-   // hDbServerParams := my_server_params()
-
    stop_refresh_operations()
 
    IF Pitanje(, "Konekcije svih korisnika na bazu biti prekinute! Nastaviti?", " " ) == "N"
@@ -160,10 +153,9 @@ METHOD F18Admin:sql_cleanup_all()
    ENDIF
 
    IF ! ::relogin_as_admin()
-      MsgBeep( "relogin as admin user neuspjesno " )
+      // MsgBeep( "relogin as admin user neuspješno " )
       RETURN .F.
    ENDIF
-
 
    pg_terminate_all_data_db_connections()
 
@@ -307,32 +299,6 @@ METHOD F18Admin:update_app()
 
    RETURN SELF
 
-
-/*
-METHOD F18Admin:update_app_run_templates_update( hParams )
-
-   LOCAL cUpdateFile := "F18_template_#VER#.tar.bz2"
-   LOCAL _dest := SLASH + "opt" + SLASH + "knowhowERP" + SLASH
-
-#ifdef __PLATFORM__WINDOWS
-
-   _dest := "c:" + SLASH + "knowhowERP" + SLASH
-#endif
-
-   IF ::update_app_templates_version == "#LAST#"
-      ::update_app_templates_version := hParams[ "templates" ]
-   ENDIF
-
-   cUpdateFile := StrTran( cUpdateFile, "#VER#", ::update_app_templates_version )
-
-   IF !::wget_download( hParams[ "url" ], cUpdateFile, _dest + cUpdateFile, .T., .T. )
-      RETURN SELF
-   ENDIF
-
-   ::update_app_unzip_templates( _dest, _dest, cUpdateFile )
-
-   RETURN SELF
-*/
 
 
 METHOD F18Admin:update_app_unzip_templates( destination_path, location_path, cFileName )
@@ -559,45 +525,6 @@ METHOD F18Admin:update_app_form( hF18UpdateParams )
 
 
 
-/*
-METHOD F18Admin:update_app_get_versions()
-
-   LOCAL _urls := hb_Hash()
-   LOCAL _o_file, cTmp, _a_tmp
-   //LOCAL _file := my_home_root() + ::update_app_info_file
-   LOCAL _count := 0
-
-   //_o_file := TFileRead():New( _file )
-   //_o_file:Open()
-
-   //IF _o_file:Error()
-  //    MSGBEEP( _o_file:ErrorMsg( "Problem sa otvaranjem fajla: " ) )
-  //    RETURN SELF
-   //ENDIF
-
-   cTmp := ""
-
-
-   DO WHILE _o_file:MoreToRead() // prodji kroz svaku liniju i procitaj zapise
-      cTmp := hb_StrToUTF8( _o_file:ReadLine() )
-      _a_tmp := TokToNiz( cTmp, "=" )
-      IF Len( _a_tmp ) > 1
-         ++_count
-         _urls[ AllTrim( Lower( _a_tmp[ 1 ] ) ) ] := AllTrim( _a_tmp[ 2 ] )
-      ENDIF
-   ENDDO
-
-   _o_file:Close()
-
-   IF _count == 0
-      MsgBeep( "Nisam uspio nista procitati iz fajla sa verzijama !" )
-      _urls := NIL
-   ENDIF
-
-   RETURN _urls
-
-*/
-
 METHOD F18Admin:f18_upd_download()
 
    LOCAL lOk := .F.
@@ -709,253 +636,6 @@ METHOD F18Admin:wget_download( cUrl, cFileName, cLocalFileName, lEraseFile, sile
 
 
 
-/*
-
-METHOD F18Admin:update_db()
-
-   LOCAL lOk := .F.
-   LOCAL nX := 1
-   LOCAL _version := Space( 50 )
-   LOCAL _db_list := {}
-   LOCAL _server := my_server_params()
-   LOCAL cDatabase := ""
-   LOCAL _upd_empty := "N"
-   PRIVATE GetList := {}
-
-   cDatabase := Space( 50 )
-
-   Box(, 10, 70 )
-
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "**** upgrade db-a / unesite verziju ..."
-   ++nX
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "     verzija db-a (npr. 4.6.1):" GET _version PICT "@S30" VALID !Empty( _version )
-   ++nX
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "naziv baze / prazno update-sve:" GET cDatabase PICT "@S30"
-   ++nX
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Update template [empty] baza (D/N) ?" GET _upd_empty VALID _upd_empty $ "DN" PICT "@!"
-
-   READ
-
-   BoxC()
-
-   IF LastKey() == K_ESC
-      RETURN lOk
-   ENDIF
-
-   // snimi parametre
-   ::_update_params := hb_Hash()
-   ::_update_params[ "version" ] := AllTrim( _version )
-   ::_update_params[ "database" ] := AllTrim( cDatabase )
-   ::_update_params[ "host" ] := _server[ "host" ]
-   ::_update_params[ "port" ] := _server[ "port" ]
-   ::_update_params[ "file" ] := "?"
-   ::_update_params[ "updade_empty" ] := _upd_empty
-
-   IF !Empty( cDatabase )
-      AAdd( _db_list, { AllTrim( cDatabase ) } )
-   ELSE
-      _db_list := my_login():organizacije_array()
-   ENDIF
-
-   IF _upd_empty == "D"   // dodaj i empty template tabele u update shemu
-
-      AAdd( _db_list, { "empty" } )
-      AAdd( _db_list, { "empty_sezona" } )
-   ENDIF
-
-   IF !::update_db_download()    // download fajla sa interneta
-      RETURN lOk
-   ENDIF
-
-   IF ! ::update_db_all( _db_list )
-      RETURN lOk
-   ENDIF
-
-
-   lOk := .T.
-
-   RETURN lOk
-
-
-
-METHOD F18Admin:update_db_download()
-
-   LOCAL lOk := .F.
-   LOCAL _ver := ::_update_params[ "version" ]
-   LOCAL cCmd := ""
-   LOCAL cPath := my_home_root()
-   LOCAL _file := "f18_db_migrate_package_" + AllTrim( _ver ) + ".gz"
-   LOCAL cUrl := "http://download.bring.out.ba/"
-
-   IF File( AllTrim( cPath ) + AllTrim( _file ) )
-
-      IF Pitanje(, "Izbrisati postojeći download fajl ?", "N" ) == "D"
-         FErase( AllTrim( cPath ) + AllTrim( _file ) )
-         Sleep( 1 )
-      ELSE
-         ::_update_params[ "file" ] := AllTrim( cPath ) + AllTrim( _file )
-         RETURN .T.
-      ENDIF
-
-   ENDIF
-
-
-   IF ::wget_download( cUrl, _file, cPath + _file )  // download fajla
-      ::_update_params[ "file" ] := AllTrim( cPath ) + AllTrim( _file )
-      lOk := .T.
-   ENDIF
-
-   RETURN lOk
-
-
-
-METHOD F18Admin:update_db_all( arr )
-
-   LOCAL nI
-   LOCAL lOk := .F.
-
-   FOR nI := 1 TO Len( arr )
-      IF ! ::update_db_company( AllTrim( arr[ nI, 1 ] ) )
-         RETURN lOk
-      ENDIF
-   NEXT
-
-   lOk := .T.
-
-   RETURN lOk
-
-
-METHOD F18Admin:update_db_command( cDatabase )
-
-   LOCAL cCmd := ""
-   LOCAL _file := ::_update_params[ "file" ]
-
-#ifdef __PLATFORM__DARWIN
-
-   cCmd += "open "
-#endif
-
-#ifdef __PLATFORM__WINDOWS
-   cCmd += "c:" + SLASH + "knowhowERP" + SLASH + "util" + SLASH
-#else
-   cCmd += SLASH + "opt" + SLASH + "knowhowERP" + SLASH + "util" + SLASH
-#endif
-
-   cCmd += "knowhowERP_package_updater"
-
-#ifdef __PLATFORM__WINDOWS
-   cCmd += ".exe"
-#endif
-
-#ifdef __PLATFORM__DARWIN
-   cCmd += ".app"
-#endif
-
-#ifndef __PLATFORM__DARWIN
-   IF !File( cCmd )
-      MsgBeep( "Fajl " + cCmd  + " ne postoji !" )
-      RETURN NIL
-   ENDIF
-#endif
-
-   cCmd += " -databaseURL=//" + AllTrim( ::_update_params[ "host" ] )
-
-   cCmd += ":"
-
-   cCmd += AllTrim( Str( ::_update_params[ "port" ] ) )
-
-   cCmd += "/" + AllTrim( cDatabase )
-
-   cCmd += " -username=admin"
-
-   cCmd += " -passwd=boutpgmin"
-
-#ifdef __PLATFORM__WINDOWS
-   cCmd += " -file=" + '"' + ::_update_params[ "file" ] + '"'
-#else
-   cCmd += " -file=" + ::_update_params[ "file" ]
-#endif
-
-   cCmd += " -autorun"
-
-   RETURN cCmd
-
-
-
-
-METHOD F18Admin:update_db_company( cOrganizacija )
-
-   LOCAL aListaSezona := {}
-   LOCAL nI
-   LOCAL cDatabase
-   LOCAL cCmd
-   LOCAL lOk := .F.
-
-   IF AllTrim( cOrganizacija ) $ "#empty#empty_sezona#"
-
-      AAdd( aListaSezona, { "empty" } ) // ovo su template tabele
-   ELSE
-
-      IF Left( cOrganizacija, 1 ) == "!"
-
-         cOrganizacija := Right( AllTrim( cOrganizacija ), Len( AllTrim( cOrganizacija ) ) - 1 )
-
-         AAdd( aListaSezona, { "empty" } ) // rucno zadan naziv baze, ne gledati sezone
-
-      ELSEIF !( "_" $ cOrganizacija )
-
-
-         aListaSezona := my_login():get_database_sessions( cOrganizacija ) // nema sezone, uzeti sa servera
-
-      ELSE
-
-         IF SubStr( cOrganizacija, Len( cOrganizacija ) - 3, 1 ) $ "1#2"
-
-            AAdd( aListaSezona, { Right( AllTrim( cOrganizacija ), 4 ) } ) // vec postoji zadana sezona, samo je dodati u matricu
-            cOrganizacija := PadR( AllTrim( cOrganizacija ), Len( AllTrim( cOrganizacija ) ) - 5  )
-         ELSE
-            aListaSezona := my_login():get_database_sessions( cOrganizacija )
-         ENDIF
-
-      ENDIF
-
-   ENDIF
-
-   FOR nI := 1 TO Len( aListaSezona )
-
-
-      IF aListaSezona[ nI, 1 ] == "empty" // ako je ovaj marker uzmi cisto ono sto je navedeno
-
-         cDatabase := AllTrim( cOrganizacija ) // ovo je za empty template tabele
-      ELSE
-         cDatabase := AllTrim( cOrganizacija ) + "_" + AllTrim( aListaSezona[ nI, 1 ] )
-      ENDIF
-
-      cCmd := ::update_db_command( cDatabase )
-
-      IF cCmd == NIL
-         RETURN lOk
-      ENDIF
-
-      MsgO( "Vršim update baze " + cDatabase )
-
-      lOk := hb_run( cCmd )
-      AAdd( ::update_db_result, { cOrganizacija, cDatabase, cCmd, lOk } ) // ubaci u matricu rezultat
-
-      MsgC()
-
-   NEXT
-
-   lOk := .T.
-
-   RETURN lOk
-
-*/
-
-
 METHOD F18Admin:razdvajanje_sezona()
 
    LOCAL hParams
@@ -972,6 +652,11 @@ METHOD F18Admin:razdvajanje_sezona()
    LOCAL oRow
    LOCAL lConfirmEnter
    LOCAL GetList := {}
+
+    IF f18_user(.T.) == "<undefined>"
+        MsgBeep("Nemate administratorska prava. STOP!")
+        RETURN .T.
+    ENDIF
 
 #ifndef F18_DEBUG
 
@@ -1018,9 +703,8 @@ METHOD F18Admin:razdvajanje_sezona()
    cTekucaPassword := hDbServerParams[ "password" ]
    cTekucaDb := hDbServerParams[ "database" ]
 
-
    IF !::relogin_as_admin()
-      Alert( "login kao admin neuspjesan !?" )
+      // Alert( "login kao admin neuspješan !?" )
       start_refresh_operations()
       RETURN .F.
    ENDIF
@@ -1184,6 +868,10 @@ METHOD F18Admin:relogin_as_admin( cDatabase )
    LOCAL hSqlParams := my_server_params()
    LOCAL nConnType := 1
 
+   IF f18_user(.T.) == "<undefined>"
+      RETURN .F.
+   ENDIF
+
    hb_default( @cDatabase, "postgres" )
 
    IF cDatabase == "postgres"
@@ -1192,8 +880,8 @@ METHOD F18Admin:relogin_as_admin( cDatabase )
 
    my_server_logout( nConnType )
 
-   hSqlParams[ "user" ] := "admin"
-   hSqlParams[ "password" ] := "boutpgmin"
+   hSqlParams[ "user" ] := f18_user(.T.)
+   hSqlParams[ "password" ] := f18_password(.T.)
    hSqlParams[ "database" ] := cDatabase
 
    IF my_server_login( hSqlParams, nConnType )

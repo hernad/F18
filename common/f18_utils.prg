@@ -15,7 +15,6 @@ FUNCTION usex( cTable )
    RETURN my_use( cTable )
 
 
-
 FUNCTION f18_create_dir( cLocation )
 
    LOCAL nLen
@@ -61,6 +60,8 @@ FUNCTION set_f18_params()
    LOCAL cHostName, nPort, cDataBase, cUser, cPassWord
 
    hParams := hb_hash()
+   hParams[ "admin_user" ]  := "<undefined>"
+   hParams[ "admin_password" ]  := "<undefined>"
 
    DO WHILE nI <= PCount()
 
@@ -108,10 +109,22 @@ FUNCTION set_f18_params()
          set_f18_param("user", cUser)
          hParams[ "user" ] := cUser
 
+      CASE cTok == "-ua"
+         cUser := hb_PValue( nI++ )
+         set_f18_param("admin_user", cUser)
+         hParams[ "admin_user" ]  := cUser
+
+      CASE cTok == "-pa"
+         cPassWord := hb_PValue( nI++ )
+         set_f18_param("admin_password", cPassword)
+         hParams[ "admin_password" ]  := cPassword
+
       CASE cTok == "-p"
          cPassWord := hb_PValue( nI++ )
          set_f18_param("password", cPassword)
          hParams[ "password" ]  := cPassword
+
+
 
       //CASE cTok == "-t"
       //   cDBFDataPath := hb_PValue( nI++ )
@@ -424,7 +437,7 @@ PROCEDURE run_module()
        set_metric( "main_menu_fakt", my_user(), "D" )
        RETURN MainFakt( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "epdv"
-      set_metric( "main_menu_epdv", my_user(), "D" ) 
+      set_metric( "main_menu_epdv", my_user(), "D" )
       RETURN MainEPdv( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
    ELSEIF cModul == "os"
       set_metric( "main_menu_os", my_user(), "D" )

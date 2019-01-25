@@ -175,7 +175,7 @@ FUNCTION my_server_params( hSqlParams )
       NEXT
    ENDIF
 
-   RETURN hb_hClone( s_psqlServer_params )
+   RETURN hb_HClone( s_psqlServer_params )
 
 
 FUNCTION f18_baza_server_host()
@@ -300,10 +300,27 @@ FUNCTION my_server_search_path()
    RETURN s_psqlServer_params[ cKey ]
 */
 
-FUNCTION f18_user()
+FUNCTION f18_user( lAdmin )
+
+   IF lAdmin == NIL
+      lAdmin := .F.
+   ENDIF
+   IF lAdmin
+      RETURN  get_f18_param( "admin_user" )
+   ENDIF
+
    RETURN s_psqlServer_params[ "user" ]
 
-FUNCTION f18_password()
+FUNCTION f18_password( lAdmin )
+
+   IF lAdmin == NIL
+      lAdmin := .F.
+   ENDIF
+
+   IF lAdmin
+      RETURN  get_f18_param( "admin_password" )
+   ENDIF
+
    RETURN s_psqlServer_params[ "password" ]
 
 FUNCTION f18_database()

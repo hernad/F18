@@ -12,6 +12,10 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
+FUNCTION pg_dump_cmd()
+
+   RETURN "pg_dump"
+
 
 CLASS F18Backup
 
@@ -73,28 +77,10 @@ PROCEDURE thread_f18_backup( nBackupTipOrgIliSve )
       ?E "ERROR open_thread f18_backup"
    ENDDO
 
-   // MsgBeep( "start     ============" )
-   // Alert("ok")
-   // hb_idleSleep( 0.5 )
-   // info_bar( "b2", "b2 start")
-   // hb_idleSleep( 10 )
-   // MsgBeep( "-------------------------end" )
-   // info_bar( "b2", "   b2 end")
-   // hb_idleSleep( 3 )
-   // IF .T.
-   // close_thread( "f18_backup" )
-   // RETURN
-   // ENDIF
-
-
-   // init_parameters_cache()
-
    set_global_vars_0()
 
    oBackup := F18Backup():New()
    oBackup:nBackupType := nBackupTipOrgIliSve
-
-
 
    oBackup:get_backup_interval()
    oBackup:get_last_backup_date()
@@ -115,7 +101,6 @@ PROCEDURE thread_f18_backup( nBackupTipOrgIliSve )
    ENDIF
 
    // IF oBackup:get_backup_type( nBackupTipOrgIliSve )
-
 
    oBackup:do_backup()
    // ENDIF
@@ -253,25 +238,23 @@ METHOD F18Backup:backup_organizacija()
    ::get_windows_ping_time()
    ::get_removable_drive()
 
+   if f18_user(.T.) == "<undefined>"
+       RETURN .F.
+   ENDIF
    IF is_windows()
-      cCmd += "set pgusername=" + f18_user() + "&set PGPASSWORD=" + f18_password() + "&"
+      cCmd += "set pgusername=" + f18_user(.T.) + "&set PGPASSWORD=" + f18_password(.T.) + "&"
+      IF ::ping_time > 0
+         cCmd += "ping -n " + AllTrim( Str( ::ping_time ) ) + " 8.8.8.8&"
+      ENDIF
    ELSE
-      cCmd += "export pgusername=" + f18_user() + ";export PGPASSWORD=" + f18_password() + ";"
+      cCmd += "export pgusername=" + f18_user(.T.) + ";export PGPASSWORD=" + f18_password(.T.) + ";"
    ENDIF
-
-#ifdef __PLATFORM__WINDOWS
-
-   IF ::ping_time > 0
-      cCmd += "ping -n " + AllTrim( Str( ::ping_time ) ) + " 8.8.8.8&"
-   ENDIF
-
-#endif
 
    cBackupFile := ::cPath + ::cFileName
 
-#ifdef __PLATFORM__WINDOWS
-   cBackupFile := StrTran( cBackupFile, "\", "//" )
-#endif
+   if is_windows()
+       cBackupFile := StrTran( cBackupFile, "\", "//" )
+   endif
 
    cCmd += pg_dump_cmd() + " "
    cCmd += " -h " + AllTrim( cHost )
@@ -285,37 +268,12 @@ METHOD F18Backup:backup_organizacija()
 
    FErase( ::cPath + ::cFileName )
 
-   // IF is_terminal()
    info_bar( "back", "backup u toku .. " + Right( ::cPath + ::cFileName, 60 ) )
 
-/*
-   ELSE
 
-      Sleep( 1 )
-      @ nX, nY SAY8 "Obavještenje: nakon pokretanja procedure backup-a slobodno se prebacite"
-      ++nX
-      @ nX, nY SAY "              na prozor aplikacije i nastavite raditi."
-      ++nX
-      @ nX, nY SAY cLine
-      ++nX
-      @ nX, nY SAY "Backup podataka u toku...."
-      ++nX
-      @ nX, nY SAY cLine
-      ++nX
-      @ nX, nY SAY "   Lokacija backup-a: " + ::cPath
-      ++nX
-      @ nX, nY SAY "Naziv fajla backup-a: " + ::cFileName
-
-      ++nX
-      ++nX
-      @ nX, nY SAY8 "očekujem rezulat operacije... "
-
-   ENDIF
-*/
 
    ::nError := hb_run_in_background_gt( cCmd )
 
-// IF is_terminal()
    IF ::nError == 0
       // IF File( ::cPath + ::cFileName )
       info_bar( "backup", ::cPath + ::cFileName + " OK" )
@@ -331,42 +289,6 @@ METHOD F18Backup:backup_organizacija()
       error_bar( "backup", ::cPath + ::cFileName + " ERROR" )
    ENDIF
 
-/*
-   ELSE // gui - prikaz informacija u prozoru
-
-      IF File( ::cPath + ::cFileName )
-         @ nX, Col() + 1 SAY "OK" COLOR _color_ok
-         lOk := .T.
-      ELSE
-         @ nX, Col() + 1 SAY "ERROR !" COLOR _color_err
-      ENDIF
-
-      IF lOk
-
-         log_write( "backup company kreiran uspjesno: " + ::cPath + ::cFileName, 6 )
-
-         IF !Empty( ::removable_drive )
-            ++nX
-            @ nX, nY SAY "Prebacujem backup na udaljenu lokaciju ... "
-
-            IF ::backup_to_removable()
-               @ nX, Col() SAY "OK" COLOR _color_ok
-            ELSE
-               @ nX, Col() SAY "ERROR" COLOR _color_err
-            ENDIF
-         ENDIF
-
-      ENDIF
-
-      ++nX
-
-      FOR nI := 10 TO 1 STEP -1
-         @ nX, nY SAY "... izlazim za " + PadL( AllTrim( Str( nI ) ), 2 ) + " sekundi"
-         Sleep( 1 )
-      NEXT
-
-   ENDIF
-*/
 
    RETURN lOk
 
@@ -387,6 +309,10 @@ METHOD F18Backup:backup_server()
    LOCAL _color_ok := "W+/B+"
    LOCAL _color_err := "W+/R+"
 
+   if f18_user(.T.) == "<undefined>"
+       RETURN .F.
+   ENDIF
+
    ::get_backup_filename()
    ::get_windows_ping_time()
    ::get_removable_drive()
@@ -398,25 +324,21 @@ METHOD F18Backup:backup_server()
    FErase( ::cPath + ::cFileName )
    Sleep( 1 )
 
-#ifdef __PLATFORM__UNIX
-   cCmd += "export pgusername=admin;export PGPASSWORD=boutpgmin;"
-#endif
-
-#ifdef __PLATFORM__WINDOWS
-   cCmd += "set pgusername=admin&set PGPASSWORD=boutpgmin&"
-
-   IF ::ping_time > 0
-      // dodaj ping na komandu za backup radi ENV varijabli
-      cCmd += "ping -n " + AllTrim( Str( ::ping_time ) ) + " 8.8.8.8&"
+   IF is_windows()
+      cCmd += "set pgusername=" + f18_user(.T.) + "&set PGPASSWORD=" + f18_password(.T.) + "&"
+      IF ::ping_time > 0
+         cCmd += "ping -n " + AllTrim( Str( ::ping_time ) ) + " 8.8.8.8&"
+      ENDIF
+   ELSE
+      cCmd += "export pgusername=" + f18_user(.T.) + ";export PGPASSWORD=" + f18_password(.T.) + ";"
    ENDIF
 
-#endif
 
    cBackupFile := ::cPath + ::cFileName
 
-#ifdef __PLATFORM__WINDOWS
-   cBackupFile := StrTran( cBackupFile, "\", "//" )
-#endif
+   IF is_windows()
+      cBackupFile := StrTran( cBackupFile, "\", "//" )
+   ENDIF
 
    cCmd += "pg_dumpall"
    cCmd += " -h " + AllTrim( cHost )
@@ -425,33 +347,9 @@ METHOD F18Backup:backup_server()
    cCmd += " -w "
    cCmd += ' -f "' + cBackupFile + '"'
 
-/*
-   IF !is_terminal()
-      @ nX, nY SAY8 "Obavještenje: nakon pokretanja procedure backup-a slobodno se prebacite"
-      ++nX
-      @ nX, nY SAY8 "              na prozor aplikacije i nastavite raditi."
-      ++nX
-      @ nX, nY SAY cLine
-      ++nX
-      @ nX, nY SAY8 "Backup podataka u toku...."
-      ++nX
-      @ nX, nY SAY Replicate( "=", 70 )
-      ++nX
-      @ nX, nY SAY "   Lokacija backup-a: " + ::cPath
-      ++nX
-      @ nX, nY SAY "Naziv fajla backup-a: " + ::cFileName
-      ++nX
-      ++nX
-      @ nX, nY SAY8 "očekujem rezulat operacije... "
-   ENDIF
-*/
-
    ::nError := hb_run_in_background_gt( cCmd )
 
 
-// IF is_terminal()
-
-   // IF File( ::cPath + ::cFileName )
    IF ::nError == 0
       info_bar( "backup", ::cPath + ::cFileName + " OK" )
 
@@ -465,41 +363,6 @@ METHOD F18Backup:backup_server()
    ELSE
       error_bar( "backup", ::cPath + ::cFileName + " ERROR" )
    ENDIF
-
-/*
-   ELSE
-      IF File( ::cPath + ::cFileName )
-         @ nX, Col() + 1 SAY "OK" COLOR _color_ok
-         lOk := .T.
-      ELSE
-         @ nX, Col() + 1 SAY "ERROR !" COLOR _color_err
-      ENDIF
-
-      IF lOk
-         log_write( "backup kreiran uspjesno: " + ::cPath + ::cFileName, 6 )
-
-         IF !Empty( ::removable_drive )
-            ++nX
-            @ nX, nY SAY "Prebacujem backup na udaljenu lokaciju ... "
-
-            IF ::backup_to_removable()
-               @ nX, Col() SAY "OK" COLOR _color_ok
-            ELSE
-               @ nX, Col() SAY "ERROR" COLOR _color_err
-            ENDIF
-
-         ENDIF
-      ENDIF
-
-      ++nX
-
-      FOR nI := 10 TO 1 STEP -1
-         @ nX, nY SAY "... izlazim za " + PadL( AllTrim( Str( nI ) ), 2 ) + " sekundi"
-         Sleep( 1 )
-      NEXT
-
-   ENDIF
-*/
 
    RETURN lOk
 
