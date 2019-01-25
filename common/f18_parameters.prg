@@ -38,6 +38,9 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
    LOCAL cF18Verzija := Padr( fetch_metric( "F18_verzija", NIL, F18_VERZIJA ), 4)
    LOCAL cF18VerzijaKanal := Padr( fetch_metric( "F18_verzija_kanal", my_user(), "S" ), 1)
    LOCAL cF18Varijanta := Padr( fetch_metric( "F18_varijanta", NIL, F18_VARIJANTA ), 5 )
+   LOCAL cScreen
+
+   save screen to cScreen
 
    info_bar( "init", "set_parametre_f18_aplikacije - start" )
 
@@ -50,6 +53,7 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
       IF is_in_main_thread()
          MsgBeep( cErrMsg )
       ENDIF
+      RESTORE SCREEN FROM cScreen
       RETURN .F.
    ENDIF
    _fakt := fetch_metric( "main_menu_fakt", my_user(), "D" )
@@ -75,6 +79,7 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
       IF is_in_main_thread()
          MsgBeep( "problem komunikacije sa serverom ?!#fetch_metric_error:" + AllTrim( Str( fetch_metric_error() ) ) )
       ENDIF
+      RESTORE SCREEN FROM cScreen
       RETURN .F.
    ENDIF
 
@@ -193,6 +198,7 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
       READ
 
       IF LastKey() == K_ESC
+         RESTORE SCREEN FROM cScreen
          RETURN .F.
       ENDIF
 
@@ -241,6 +247,8 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
       info_bar( "init", "set_parametre_f18_aplikacije - end" )
 
    ENDIF
+
+   RESTORE SCREEN FROM cScreen
 
    RETURN .T.
 

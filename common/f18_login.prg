@@ -746,8 +746,9 @@ METHOD F18Login:organizacije_array()
 METHOD F18Login:administratorske_opcije( nXPos, nYPos )
 
    LOCAL nX, nY
-   LOCAL aMeni := {}, aMeniExec := {}, nIzbor
+   LOCAL aMeni := {}, aMeniExec := {}
    LOCAL oAdmin
+   LOCAL nIzbor := 1
 
    nX := nXPos
    nY := ( f18_max_cols() / 2 ) - 5
@@ -767,7 +768,7 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    //AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
 
 
-   AAdd( aMeni, hb_UTF8ToStr( "1. nova baza" ) )
+   AAdd( aMeni, hb_UTF8ToStr( "1. nova baza                  " ) )
    AAdd( aMeniExec, {|| oAdmin:create_new_pg_db(), .T. } )
 
    AAdd( aMeni, hb_UTF8ToStr( "2. brisanje baze" ) )
@@ -779,21 +780,25 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    AAdd( aMeni, hb_UTF8ToStr( "4. sql_cleanup_all" ) )
    AAdd( aMeniExec, {|| oAdmin:sql_cleanup_all(), .T. } )
 
+   AAdd( aMeni, "S. promjena sezone" )
+   AAdd( aMeniExec, {|| f18_promjena_sezone() } )
 
-   DO WHILE .T.
+   AAdd( aMeni, "B. backup podataka" )
+   AAdd( aMeniExec, {|| f18_backup_now() } )
 
-      nIzbor := meni_0_inkey( nX, nY + 1, nX + 5, nY + 40, aMeni, 1 )
+   AAdd( aMeni, "P. parametri aplikacije" )
+  AAdd( aMeniExec, {|| set_parametre_f18_aplikacije() } )
 
-      DO CASE
-      CASE nIzbor == 0
-         EXIT
-      CASE nIzbor > 0
-         Eval( aMeniExec[ nIzbor ] )
-      ENDCASE
+    AAdd( aMeni, "W. pregled log-a" )
+    AAdd( aMeniExec, {|| f18_view_log() } )
 
-      LOOP
+   // AAdd( aMeniOpcije, " V. vpn podrška" )
+   // AAdd( aMeniExec, {|| vpn_support() } )
 
-   ENDDO
+    // AAdd( aMeni, " X. diag info" )
+    // AAdd( aMeniExec, {|| diag_info() } )
+   f18_menu( "adm4", .F., nIzbor, aMeni, aMeniExec )
+
 
    RETURN .T.
 

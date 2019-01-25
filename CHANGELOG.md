@@ -1,5 +1,10 @@
 # F18 klijent, lista promjena
 
+## 2019-01-25
+
+- command line parametri: `-ua` - admin user, `-up` - admin password
+- `<shift+F10>` - admin meni
+
 ## 2019-01-23
 
 - F18_HOME envar - nova lokacija podataka
