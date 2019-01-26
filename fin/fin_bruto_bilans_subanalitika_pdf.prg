@@ -305,7 +305,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
             @ PRow(), PCol() + 1 SAY cIdKonto
 
             select_o_konto( cIdKonto )
-
             IF cFormat == "1"
                @ PRow(), PCol() + 1 SAY naz
             ELSE
@@ -313,20 +312,16 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
             ENDIF
 
             SELECT SUBAN
-
             @ PRow(), nCol1   SAY D1PS PICTURE PicD
             @ PRow(), PCol() + 1  SAY P1PS PICTURE PicD
-
             IF cFormat == "1"
                @ PRow(), PCol() + 1  SAY D1TP PICTURE PicD
                @ PRow(), PCol() + 1  SAY P1TP PICTURE PicD
             ENDIF
-
             @ PRow(), PCol() + 1  SAY D1KP PICTURE PicD
             @ PRow(), PCol() + 1  SAY P1KP PICTURE PicD
 
             D1S := D1KP - P1KP
-
             IF D1S >= 0
                P1S := 0
                D2S += D1S
@@ -342,7 +337,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
             @ PRow(), PCol() + 1 SAY D1S PICTURE PicD
             @ PRow(), PCol() + 1 SAY P1S PICTURE PicD
-
             @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
             @ PRow(), PCol() + 4 SAY Replicate( "-", REP1_LEN - 2 )
 
@@ -364,11 +358,9 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
          @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
          @ PRow(), PCol() + 6 SAY Replicate( "=", REP1_LEN - 4 )
-
          @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
          @ PRow(), PCol() + 4 SAY ++B2 PICTURE '999999'; ?? "."
          @ PRow(), PCol() + 1 SAY cSinKonto
-
          select_o_konto( cSinKonto )
          IF cFormat == "1"
             @ PRow(), PCol() + 1 SAY Left( naz, 50 )
@@ -380,12 +372,10 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
          @ PRow(), nCol1    SAY D2PS PICTURE PicD
          @ PRow(), PCol() + 1 SAY P2PS PICTURE PicD
-
          IF cFormat == "1"
             @ PRow(), PCol() + 1 SAY D2TP PICTURE PicD
             @ PRow(), PCol() + 1 SAY P2TP PICTURE PicD
          ENDIF
-
          @ PRow(), PCol() + 1 SAY D2KP PICTURE PicD
          @ PRow(), PCol() + 1 SAY P2KP PICTURE PicD
          @ PRow(), PCol() + 1 SAY D2S PICTURE PicD
@@ -472,7 +462,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    IF lExpRpt
       dodaj_stavku_u_tabelu_eksporta( "UKUPNO", "", "", D4PS, P4PS, D4KP, P4KP, D4S, P4S )
    ENDIF
-
    IF !check_nova_strana( bZagl, s_oPDF, .F., 5 )
       ?
       ?
@@ -519,7 +508,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
    check_nova_strana( bZagl, s_oPDF )
    ?U Space( PRINT_LEFT_SPACE ) + M10
-
    ? Space( PRINT_LEFT_SPACE ) + "UKUPNO:"
    @ PRow(), PCol() + 3 SAY  nPocDug    PICTURE PicD
    @ PRow(), PCol() + 1 SAY  nPocPot    PICTURE PicD
@@ -532,7 +520,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    ?U Space( PRINT_LEFT_SPACE ) + M10
 
    f18_end_print( NIL, xPrintOpt )
-
    my_close_all_dbf()
 
    IF lExpRpt

@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 CLASS FinBrutoBilans
 
    DATA hParams
@@ -54,7 +53,6 @@ CLASS FinBrutoBilans
    METHOD rekapitulacija_klasa()
 
 ENDCLASS
-
 
 
 METHOD FinBrutoBilans:New( _tip_ )

@@ -54,10 +54,7 @@ FUNCTION fin_bb_sintetika_b( params )
    ENDIF
 
    fin_bb_set_m6_do_m10_vars()
-
-   //o_konto()
    o_bruto_bilans_klase()
-
 
    IF gFinRj == "D" .AND. Len( cIdRJ ) <> 0
       otvori_sint_anal_kroz_temp( .T., "IDRJ='" + cIdRJ + "'" )
@@ -67,35 +64,15 @@ FUNCTION fin_bb_sintetika_b( params )
       MsgC()
    ENDIF
 
-
    cFilter := ""
-
    IF !( Empty( qqKonto ) )
       aUsl1 := Parsiraj( qqKonto, "idkonto" )
       cFilter += ( iif( Empty( cFilter ), "", ".and." ) + aUsl1 )
    ENDIF
 
-
-/*
-   IF Len( cIdFirma ) < 2
-      SELECT SINT
-      Box(, 2, 30 )
-      nSlog := 0
-      nUkupno := RECCOUNT2()
-      cFilt := IF( Empty( cFilter ), "IDFIRMA=" + dbf_quote( cIdFirma ), cFilter + ".and.IDFIRMA=" + dbf_quote( cIdFirma ) )
-      cSort1 := "IdKonto+dtos(DatNal)"
-      INDEX ON &cSort1 TO "SINTMP" FOR &cFilt Eval( fin_tek_rec_2() ) EVERY 1
-      GO TOP
-      BoxC()
-   ELSE
-*/
-
-
    IF !Empty( cFilter )
       SET FILTER TO &cFilter
    ENDIF
-
-   // ENDIF
 
    GO TOP
    EOF CRET
