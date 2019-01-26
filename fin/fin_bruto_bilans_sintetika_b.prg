@@ -53,7 +53,7 @@ FUNCTION fin_bb_sintetika_b( params )
       M5 := "---- ------------------------------ --------------- --------------- --------------- --------------- --------------- ---------------"
    ENDIF
 
-   fin_bb_txt_header()
+   fin_bb_set_m6_do_m10_vars()
 
    //o_konto()
    o_bruto_bilans_klase()

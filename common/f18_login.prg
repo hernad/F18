@@ -51,7 +51,6 @@ CLASS F18Login
    METHOD included_databases_for_user()
    METHOD write_to_ini_server_params()
 
-
    DATA lPostgresDbSpojena
    DATA oMainDbServer
    DATA lOrganizacijaSpojena
@@ -92,18 +91,17 @@ METHOD F18Login:New()
    s_cPredhodnaSezona := AllTrim( Str( Year( Date() ) - 1 ) )
    s_lPrvoPokretanje := .T.
 
-
    hDbParamsIni := hb_Hash()
 
    IF is_f18_db_params_set()
 
-      hDbParamsIni[ "host" ] := get_f18_param("host")
-      hDbParamsIni[ "port" ] := get_f18_param("port")
-      hDbParamsIni[ "database" ] := get_f18_param("database")
-      hDbParamsIni[ "session" ] := right( get_f18_param("database"), 4)
+      hDbParamsIni[ "host" ] := get_f18_param( "host" )
+      hDbParamsIni[ "port" ] := get_f18_param( "port" )
+      hDbParamsIni[ "database" ] := get_f18_param( "database" )
+      hDbParamsIni[ "session" ] := Right( get_f18_param( "database" ), 4 )
 
-      hDbParamsIni[ "user" ] := get_f18_param("user")
-      hDbParamsIni[ "password" ] := get_f18_param("password")
+      hDbParamsIni[ "user" ] := get_f18_param( "user" )
+      hDbParamsIni[ "password" ] := get_f18_param( "password" )
 
       hDbParamsIni[ "schema" ] := "fmk"
    ELSE
@@ -125,9 +123,7 @@ METHOD F18Login:New()
 
    ENDIF
 
-
    my_server_params( hDbParamsIni )
-
    ::set_data_connection_params( hDbParamsIni )
 
    hDbParamsIni[ "database" ] := "postgres"
@@ -410,7 +406,6 @@ METHOD F18Login:promjena_sezone( cDatabase, cSezona )
       ENDIF
       CLOSE ALL
 
-
    ENDIF
 
    hParams[ "posljednji_put" ] := cNovaSezona
@@ -420,7 +415,6 @@ METHOD F18Login:promjena_sezone( cDatabase, cSezona )
    f18_ini_config_write( "sezona", @hParams, .T. )
 
    RETURN lOk
-
 
 
 
@@ -488,7 +482,6 @@ METHOD F18Login:server_login_form()
 
    nX += 2
    @ nX, _left SAY PadL( "KORISNIK:", 15 ) GET cUser PICT "@S30"
-
    nX += 2
    @ nX, _left SAY PadL( "LOZINKA:", 15 ) GET cPassword PICT "@S30" COLOR F18_COLOR_PASSWORD
 
@@ -548,7 +541,6 @@ METHOD F18Login:odabir_organizacije()
       RETURN .F.
    ENDIF
 
-
    aOrganizacijeZaBrowse := ::get_database_browse_array( aOrganizacije ) // odaberi organizaciju
    nOrgBrowseReturn := ::browse_odabir_organizacije( aOrganizacijeZaBrowse ) // browsaj listu organizacija
 
@@ -569,7 +561,6 @@ METHOD F18Login:odabir_organizacije()
    hParams[ "posljednji_put" ] := ::hDbDataConnectionParams[ "session" ]
    hParams[ "posljednja_org" ] := StrTran( ::hDbDataConnectionParams[ "database" ], "_" + ::hDbDataConnectionParams[ "session" ], "" )
    f18_ini_config_write( "sezona", @hParams, .T. ) // nakon odabira organizacije upisi izbor
-
 
    ::lOrganizacijaSpojena := .T.
 
@@ -679,10 +670,8 @@ METHOD F18Login:get_database_browse_array( aOrganizacije )
    LOCAL nCount, nRedova, nUkupnoKolona, nRed, nKolona
    LOCAL cLen := 20
 
-   nUkupnoKolona := Round( (f18_max_cols() - 14 ) / ( cLen + 1 ), 0 ) - 1
+   nUkupnoKolona := Round( ( f18_max_cols() - 14 ) / ( cLen + 1 ), 0 ) - 1
    nRedova := Round( Len( aOrganizacije ) / nUkupnoKolona, 0 ) + 1
-
-
 
    nCount := 0
    FOR nRed := 1 TO nRedova
@@ -756,16 +745,16 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    oAdmin := F18Admin():New()
 
    IF oAdmin == NIL
-      MsgBeep("Nemate Admin prava? STOP !")
+      MsgBeep( "Nemate Admin prava? STOP !" )
       RETURN .F.
    ENDIF
    // print_sql_connections()
 
-   //AAdd( aMeni, hb_UTF8ToStr( "1. rekonfiguracija servera        " ) )
-   //AAdd( aMeniExec, {|| f18_login_loop( .F. ), .T. } )
+   // AAdd( aMeni, hb_UTF8ToStr( "1. rekonfiguracija servera        " ) )
+   // AAdd( aMeniExec, {|| f18_login_loop( .F. ), .T. } )
 
-   //AAdd( aMeni, hb_UTF8ToStr( "2. update F18" ) )
-   //AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
+   // AAdd( aMeni, hb_UTF8ToStr( "2. update F18" ) )
+   // AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
 
 
    AAdd( aMeni, hb_UTF8ToStr( "1. nova baza                  " ) )
@@ -787,22 +776,19 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    AAdd( aMeniExec, {|| f18_backup_now() } )
 
    AAdd( aMeni, "P. parametri aplikacije" )
-  AAdd( aMeniExec, {|| set_parametre_f18_aplikacije() } )
+   AAdd( aMeniExec, {|| set_parametre_f18_aplikacije() } )
 
-    AAdd( aMeni, "W. pregled log-a" )
-    AAdd( aMeniExec, {|| f18_view_log() } )
+   AAdd( aMeni, "W. pregled log-a" )
+   AAdd( aMeniExec, {|| f18_view_log() } )
 
    // AAdd( aMeniOpcije, " V. vpn podrška" )
    // AAdd( aMeniExec, {|| vpn_support() } )
 
-    // AAdd( aMeni, " X. diag info" )
-    // AAdd( aMeniExec, {|| diag_info() } )
+   // AAdd( aMeni, " X. diag info" )
+   // AAdd( aMeniExec, {|| diag_info() } )
    f18_menu( "adm4", .F., nIzbor, aMeni, aMeniExec )
 
-
    RETURN .T.
-
-
 
 
 
@@ -837,7 +823,6 @@ METHOD F18Login:manual_enter_company_data( nXPos, nYPos )
    ENDIF
 
    RETURN .T.
-
 
 
 

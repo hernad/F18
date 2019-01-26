@@ -58,7 +58,6 @@ CLASS F18Backup
 ENDCLASS
 
 
-
 FUNCTION f18_backup_now()
 
    LOCAL oBackup := F18Backup():New()

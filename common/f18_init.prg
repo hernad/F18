@@ -170,7 +170,6 @@ FUNCTION thread_dbfs( pThreadID )
 
 
 
-
 // -----------------------------------------------------------
 // vraca informaciju o nivou logiranja aplikcije
 // -----------------------------------------------------------
@@ -527,7 +526,6 @@ FUNCTION log_level( x )
    ENDIF
 
    RETURN __log_level
-
 
 
 

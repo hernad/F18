@@ -268,7 +268,6 @@ FUNCTION my_server_login( hSqlParams, nConnType )
       RETURN .T.
 
    ELSE
-
       error_bar( "login", "error server connection: " + oServer:ErrorMsg() )
       RETURN .F.
    ENDIF
@@ -284,7 +283,6 @@ FUNCTION f18_promjena_sezone()
    oLogin:promjena_sezone()
 
    RETURN .T.
-
 
 
 

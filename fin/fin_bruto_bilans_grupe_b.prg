@@ -47,7 +47,7 @@ FUNCTION fin_bb_grupe_b( hParams )
    M4 := "*BROJ *           *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE  *"
    M5 := "------ ----------- --------------- --------------- --------------- --------------- --------------- --------------- --------------- ---------------"
 
-   fin_bb_txt_header()
+   fin_bb_set_m6_do_m10_vars()
 
    //o_partner()
    //o_konto()

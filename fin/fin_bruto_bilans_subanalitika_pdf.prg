@@ -12,10 +12,19 @@
 #include "f18.ch"
 
 STATIC s_oPDF
-#define PRINT_LEFT_SPACE 4
+#define PRINT_LEFT_SPACE 2
 
 STATIC REP1_LEN
 STATIC PICD
+
+MEMVAR th1, th2, th3, th4, th5
+MEMVAR M6, M7, M8, M9, M10
+
+MEMVAR d4ps, p4ps, d4tp, p4tp, d4kp, p4kp
+MEMVAR d1ps, p1ps, d1tp, p1tp, d1kp, p1kp
+MEMVAR d3ps, p3ps, d3tp, p3tp, d3kp, p3kp
+MEMVAR d2ps, p2ps, d2tp, p2tp, d2kp, p2kp
+MEMVAR gFinRj
 
 FUNCTION fin_bb_subanalitika_pdf( hParams )
 
@@ -34,6 +43,7 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    LOCAL nValuta := hParams[ "valuta" ]
    LOCAL nBBK := 1
    LOCAL bZagl, xPrintOpt
+   LOCAL nSlog, nUkupno, cFilt, cFilt1, cSort1
 
    PRIVATE M6, M7, M8, M9, M10
 
@@ -52,7 +62,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
    xPrintOpt[ "opdf" ] := s_oPDF
    legacy_ptxt( .F. )
-
 
    IF f18_start_print( NIL, xPrintOpt,  "FIN bruto bilans subanalitika za period: " + DToC( dDatOd ) + " - " + DToC( dDatDo )  + "  NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
@@ -82,7 +91,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
       th5 := "------ ------- -------- -------------------------------------- ----------------- --------------- --------------- --------------- --------------- ---------------"
    ENDIF
 
-
    M6 := "--------- --------------- --------------- --------------- --------------- --------------- --------------- --------------- ---------------"
    M7 := "*        *          POČETNO STANJE       *         TEKUĆI PROMET         *        KUMULATIVNI PROMET     *            SALDO             *"
    M8 := "  KLASA   ------------------------------- ------------------------------- ------------------------------- -------------------------------"
@@ -97,10 +105,7 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
       ENDIF
    ENDIF
 
-   // o_konto()
-   // o_partner()
    o_sql_suban_kto_partner( cIdFirma )
-   // o_konto()
    IF !o_bruto_bilans_klase()
       MsgBeep( "ERROR otvaranje pomoćne tabele BBKLAS !?" )
       RETURN .F.
@@ -143,15 +148,12 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
       GO TOP
       BoxC()
    ELSE
-      // HSEEK cIdFirma
       GO TOP
    ENDIF
-
 
    EOF CRET
 
    nStr := 0
-
    B := 0
    B1 := 0
    B2 := 0
@@ -160,16 +162,11 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
    D1S := D2S := D3S := D4S := 0
    P1S := P2S := P3S := P4S := 0
-
    D4PS := P4PS := D4TP := P4TP := D4KP := P4KP := 0
-
    nCol1 := 50
 
    Eval( bZagl )
-
    DO WHILE !Eof() .AND. IdFirma == cIdFirma
-
-      // check_nova_strana( bZagl, s_oPDF )
 
       // PS - pocetno stanje
       // TP - tekuci promet
@@ -248,11 +245,9 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
                ENDDO
 
                check_nova_strana( bZagl, s_oPDF )
-
                IF ( !lNule .AND. Round( D0KP - P0KP, 2 ) == 0 )
 
                ELSE
-
                   @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
                   @ PRow(), PCol() SAY  ++B  PICTURE '999999'
                   @ PRow(), PCol() + 1 SAY cIdKonto
@@ -269,11 +264,9 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
                   ENDIF
 
                   SELECT SUBAN
-
                   nCol1 := PCol() + 1
                   @ PRow(), PCol() + 1 SAY D0PS PICTURE PicD
                   @ PRow(), PCol() + 1 SAY P0PS PICTURE PicD
-
                   IF cFormat == "1" // A3
                      @ PRow(), PCol() + 1 SAY D0TP PICTURE PicD
                      @ PRow(), PCol() + 1 SAY P0TP PICTURE PicD
@@ -429,7 +422,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
          SalPPot WITH P3S
 
       SELECT SUBAN
-
       IF lPodKlas
          ?U Space( PRINT_LEFT_SPACE ) + th5
          ? Space( PRINT_LEFT_SPACE ) + "UKUPNO KLASA " + cKlKonto
@@ -460,7 +452,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    ENDDO
 
    check_nova_strana( bZagl, s_oPDF )
-
    @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
    ??U th5
 
@@ -504,7 +495,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    DO WHILE !Eof()
 
       check_nova_strana( bZagl, s_oPDF )
-
       @ PRow() + 1, 4  SAY Space( PRINT_LEFT_SPACE ) + IdKlasa
       @ PRow(), PCol() + 5 SAY PocDug               PICTURE PicD
       @ PRow(), PCol() + 1 SAY PocPot               PICTURE PicD
@@ -528,7 +518,6 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    ENDDO
 
    check_nova_strana( bZagl, s_oPDF )
-
    ?U Space( PRINT_LEFT_SPACE ) + M10
 
    ? Space( PRINT_LEFT_SPACE ) + "UKUPNO:"
@@ -591,7 +580,6 @@ STATIC FUNCTION struktura_pomocne_tabele_eksporta()
    AAdd( aFields, { "sldpot", "N", 15, 2 } )
 
    RETURN aFields
-
 
 
 STATIC FUNCTION zagl( hParams )

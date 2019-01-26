@@ -418,7 +418,6 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
 // AAdd( aMeniOpcije, " V. vpn podrška" )
 // AAdd( aMeniExec, {|| vpn_support() } )
 
-
    AAdd( aMeniOpcije, " X. diag info" )
    AAdd( aMeniExec, {|| diag_info() } )
 

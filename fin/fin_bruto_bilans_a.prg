@@ -124,23 +124,28 @@ METHOD FinBrutoBilans:print_b_rpt()
 
    DO CASE
    CASE ::tip == 1
-      altd()
-      IF ::hParams[ "pdf" ]
+      //IF ::hParams[ "pdf" ]
         fin_bb_subanalitika_pdf( ::hParams )
-      ELSE
-        fin_bb_subanalitika_b( ::hParams )
-      ENDIF
+      //ELSE
+      //  fin_bb_subanalitika_b( ::hParams )
+      //ENDIF
    CASE ::tip == 2
-      fin_bb_analitika_b( ::hParams )
+      //IF ::hParams[ "pdf" ]
+         fin_bb_analitika_pdf( ::hParams )
+      //ELSE
+      //   fin_bb_analitika_b( ::hParams )
+      //ENDIF
    CASE ::tip == 3
-      fin_bb_sintetika_b( ::hParams )
+      //IF ::hParams[ "pdf" ]
+         fin_bb_sintetika_pdf( ::hParams )
+      //ELSE
+      //   fin_bb_sintetika_b( ::hParams )
+      //ENDIF
    CASE ::tip == 4
       fin_bb_grupe_b( ::hParams )
    ENDCASE
 
    RETURN SELF
-
-
 
 
 METHOD FinBrutoBilans:get_vars()
@@ -174,15 +179,13 @@ METHOD FinBrutoBilans:get_vars()
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "ODABERI VRSTU BILANSA:"
-
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] subanalitički [2] analitički [3] sintetički [4] po grupama :" GET _tip PICT "9"
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "VRSTA ŠTAMPE:"
-
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] TXT [2] ODT-LO [3] PDF:" GET _var_txt PICT "@!" VALID _var_txt $ "123"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] PDF [2] ODT-LO:" GET _var_txt PICT "@!" VALID _var_txt $ "12"
 
    READ
 
@@ -219,7 +222,6 @@ METHOD FinBrutoBilans:get_vars()
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz stavki sa saldom 0 (D/N) ?" GET _saldo_nula VALID _saldo_nula $ "DN" PICT "@!"
-
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz kolone tekući promet (D/N) ?" GET _tek_prom VALID _tek_prom $ "DN" PICT "@!"
 
@@ -232,8 +234,7 @@ METHOD FinBrutoBilans:get_vars()
    ENDIF
 
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Format izvještaja (1 - A3, 2 - A4, 3 - A4L) ?" GET _format PICT "@S1" VALID _format $ "123"
-
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Format izvještaja (1 sa tekućim prometom, 2 - bez) ?" GET _format PICT "@S1" VALID _format $ "12"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Export u XLSX (D/N)?" GET lExportXLSX VALID lExportXLSX $ "DN" PICT "@!"
 

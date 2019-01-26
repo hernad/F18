@@ -54,7 +54,7 @@ FUNCTION fin_bb_subanalitika_b( hParams )
       th5 := "------ ------- -------- -------------------------------------- ----------------- --------------- --------------- --------------- --------------- ---------------"
    ENDIF
 
-   fin_bb_txt_header()
+   fin_bb_set_m6_do_m10_vars()
 
    IF lExpRpt
       aExpFields := struktura_pomocne_tabele_eksporta()
@@ -613,7 +613,7 @@ STATIC FUNCTION struktura_pomocne_tabele_eksporta()
 
 
 
-FUNCTION fin_bb_txt_header()
+FUNCTION fin_bb_set_m6_do_m10_vars()
 
    M6 := "--------- --------------- --------------- --------------- --------------- --------------- --------------- --------------- ---------------"
    M7 := "*        *          POČETNO STANJE       *         TEKUĆI PROMET         *        KUMULATIVNI PROMET     *            SALDO             *"

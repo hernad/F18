@@ -54,11 +54,9 @@ CLASS TAppMod
 ENDCLASS
 
 
-
 METHOD New( oParent, cModul, cVerzija, cPeriod, cKorisn, cSifra, p3, p4, p5, p6, p7 ) CLASS TAppMod
 
    ::lStarted := nil
-
    ::cName := cModul
    ::oParent := oParent
    ::cVerzija := cVerzija
@@ -75,12 +73,9 @@ METHOD New( oParent, cModul, cVerzija, cPeriod, cKorisn, cSifra, p3, p4, p5, p6,
    RETURN .T.
 
 
-
 METHOD hasParent()
 
    RETURN !( ::oParent == NIL )
-
-
 
 
 METHOD setParent( oParent )
@@ -92,7 +87,6 @@ METHOD setParent( oParent )
 
 METHOD getParent()
    RETURN ::oParent
-
 
 
 METHOD setName()
@@ -123,7 +117,6 @@ METHOD run()
    ENDIF
 
    ::MMenu() // osnovni meni programskog modula
-
    remove_global_idle_handlers()
 
    RETURN .T.
@@ -133,8 +126,6 @@ METHOD gProc( nKey, nKeyHandlerRetEvent )
 
    LOCAL lPushWa
    LOCAL nI
-
-
    pq_receive()
 
    DO CASE
@@ -189,7 +180,6 @@ METHOD gProc( nKey, nKeyHandlerRetEvent )
    RETURN nKeyHandlerRetEvent
 
 
-
 /*   izlazak iz aplikacijskog modula
  *  lVratiSeURP - default vrijednost .t.; kada je .t. vrati se u radno podrucje; .f. ne mjenjaj radno podrucje
  */
@@ -199,12 +189,17 @@ METHOD quit( lVratiseURP )
    LOCAL cKontrDbf
 
    my_close_all_dbf()
-
    IF ( lVratiseURP == NIL )
       lVratiseURP := .T.
    ENDIF
 
    RETURN .T.
+
+
+METHOD gparams()
+    my_login():administratorske_opcije(10, 10)
+RETURN .T.
+
 
 /*
 METHOD gParams()
@@ -298,14 +293,7 @@ METHOD gParams()
    ENDIF
 
    RETURN .T.
-*/
 
-
-METHOD gparams()
-
-altd()
-my_login():administratorske_opcije(10, 10)
-RETURN .T.
 // ------------------------------------------------------------
 // prikaz dodatnog box-a za stimanje parametara PDF stampe
 // ------------------------------------------------------------
@@ -413,7 +401,7 @@ STATIC FUNCTION _g_pdf_viewer( cViewer )
    ENDIF
 
    RETURN .T.
-
+*/
 
 /*
  *  Setuje globalne varijable, te setuje incijalne vrijednosti objekata koji pripadaju glavnom app objektu
