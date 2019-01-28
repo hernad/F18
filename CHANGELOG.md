@@ -2,8 +2,8 @@
 
 ## 2019-01-28
 
+- bruto bilansi pdf: rekapitulacija po klasama nova strana
 - bruto bilans pdf: analitika, sintetika
-
 
 ## 2019-01-25
 

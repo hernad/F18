@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 STATIC s_oPDF
-#define PRINT_LEFT_SPACE 2
+STATIC PRINT_LEFT_SPACE := 0
 
 STATIC REP1_LEN
 STATIC PICD
@@ -52,12 +52,13 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
-   IF cFormat == "1"  // landscape
+   IF cFormat == "1"  //sa tekucim prometom
       xPrintOpt[ "layout" ] := "landscape"
       xPrintOpt[ "font_size" ] := 5.5
    ELSE
       xPrintOpt[ "layout" ] := "landscape"
       xPrintOpt[ "font_size" ] := 8
+      PRINT_LEFT_SPACE := 2
    ENDIF
 
    xPrintOpt[ "opdf" ] := s_oPDF
@@ -462,11 +463,11 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    IF lExpRpt
       dodaj_stavku_u_tabelu_eksporta( "UKUPNO", "", "", D4PS, P4PS, D4KP, P4KP, D4S, P4S )
    ENDIF
-   IF !check_nova_strana( bZagl, s_oPDF, .F., 5 )
-      ?
-      ?
-   ENDIF
 
+   check_nova_strana( NIL, s_oPDF, .T.) // nova strana
+
+   ?
+   ?
    @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
    ?? "REKAPITULACIJA PO KLASAMA NA DAN:"
    @ PRow(), PCol() + 2 SAY Date()

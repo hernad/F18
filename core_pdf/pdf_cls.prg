@@ -299,19 +299,23 @@ METHOD MaxRow() CLASS PDFClass
         RETURN 65
       ENDIF
 
+      IF ::nFontSize == 6.5
+        RETURN 62
+      ENDIF
+
       SWITCH Round( ::nFontSize, 0)
       CASE 9
-         RETURN 35
-      CASE 8
          RETURN 40
-      CASE 7
+      CASE 8
          RETURN 45
-      CASE 6
+      CASE 7
          RETURN 50
+      CASE 6
+         RETURN 60
       CASE 5
          RETURN 70
       OTHERWISE
-         RETURN 35
+         RETURN 40
       ENDSWITCH
    ENDIF
 

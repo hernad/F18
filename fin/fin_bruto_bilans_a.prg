@@ -57,7 +57,7 @@ ENDCLASS
 
 METHOD FinBrutoBilans:New( _tip_ )
 
-   ::tip := 1
+   ::tip := 3
    ::klase := {}
    ::DATA := NIL
    ::broj_stranice := 0
@@ -93,7 +93,6 @@ METHOD FinBrutoBilans:init_params()
    ::pict_iznos := AllTrim( gPicBHD )
 
    RETURN SELF
-
 
 
 METHOD FinBrutoBilans:set_bb_params()
@@ -164,7 +163,7 @@ METHOD FinBrutoBilans:get_vars()
    LOCAL _format := fetch_metric( "fin_bb_format", _user, "2" )
    LOCAL _id_rj := Space( 6 )
    LOCAL lExportXLSX := "N"
-   LOCAL _tip := 1
+   LOCAL _tip := 3
    LOCAL GetList := {}
 
    IF ::tip <> NIL
@@ -179,7 +178,6 @@ METHOD FinBrutoBilans:get_vars()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "ODABERI VRSTU BILANSA:"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] subanalitički [2] analitički [3] sintetički [4] po grupama :" GET _tip PICT "9"
-
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "VRSTA ŠTAMPE:"
    ++nX

@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 STATIC s_oPDF
-#define PRINT_LEFT_SPACE 2
+STATIC PRINT_LEFT_SPACE := 0
 
 STATIC PICD
 STATIC REP1_LEN := 158
@@ -40,7 +40,7 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
    LOCAL nBroj, b1, b2
    LOCAL nValuta := hParams[ "valuta" ]
    LOCAL nBBK := 1
-   LOCAL aNaziv, nColNaz
+   LOCAL nColNaz
    LOCAL bZagl, xPrintOpt
    LOCAL nCol1
 
@@ -49,12 +49,13 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
-   IF cFormat == "1"  // sa poc stanjem
+   IF cFormat == "1"  // sa tekucim prometom
       xPrintOpt[ "layout" ] := "landscape"
       xPrintOpt[ "font_size" ] := 6.5
    ELSE
       xPrintOpt[ "layout" ] := "landscape"
       xPrintOpt[ "font_size" ] := 8
+      PRINT_LEFT_SPACE := 2
    ENDIF
    xPrintOpt[ "opdf" ] := s_oPDF
    legacy_ptxt( .F. )
@@ -73,11 +74,11 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
       M4 := "*BROJ *           *                                                         *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE  *"
       M5 := "------ ----------- --------------------------------------------------------- --------------- --------------- --------------- --------------- --------------- --------------- --------------- ---------------"
    ELSE
-      M1 := "---- ------------------------------ ------------------------------- ------------------------------- -------------------------------"
-      M2 := "    *                              *        POČETNO STANJE         *       KUMULATIVNI PROMET      *            SALDO             *"
-      M3 := "    *    SINTETIČKI KONTO           ------------------------------- ------------------------------- -------------------------------"
-      M4 := "    *                              *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE  *"
-      M5 := "---- ------------------------------ --------------- --------------- --------------- --------------- --------------- ---------------"
+      M1 := "---- --------------------------------------------------------- ------------------------------- ------------------------------- -------------------------------"
+      M2 := "    *                                                         *        POČETNO STANJE         *       KUMULATIVNI PROMET      *            SALDO             *"
+      M3 := "    *                   SINTETIČKI KONTO                       ------------------------------- ------------------------------- -------------------------------"
+      M4 := "    *                                                         *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE   *    DUGUJE     *   POTRAŽUJE  *"
+      M5 := "---- --------------------------------------------------------- --------------- --------------- --------------- --------------- --------------- ---------------"
    ENDIF
 
    fin_bb_set_m6_do_m10_vars()
@@ -156,7 +157,7 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
             ?? "."
             @ PRow(), 10 + PRINT_LEFT_SPACE SAY cIdKonto
             select_o_konto( cIdKonto )
-            @ PRow(), 19 + PRINT_LEFT_SPACE SAY naz
+            @ PRow(), 19 + PRINT_LEFT_SPACE SAY KONTO->naz
             nCol1 := PCol() + 1
             @ PRow(), PCol() + 1 SAY D1PS PICTURE PicD
             @ PRow(), PCol() + 1 SAY P1PS PICTURE PicD
@@ -179,12 +180,10 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
             @ PRow(), PCol() + 1 SAY P1S PICTURE PicD
 
          ELSE
-
             @ PRow() + 1, PRINT_LEFT_SPACE + 1 SAY cIdKonto
             select_o_konto( cIdKonto )
-            aNaziv := SjeciStr( naz, 30 )
             nColNaz := PCol() + 1
-            @ PRow(), PCol() + 1 SAY PadR( aNaziv[ 1 ], 30 )
+            @ PRow(), PCol() + 1 SAY KONTO->naz
             nCol1 := PCol() + 1
             @ PRow(), PCol() + 1 SAY D1PS PICTURE PicD
             @ PRow(), PCol() + 1 SAY P1PS PICTURE PicD
@@ -203,9 +202,7 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
             ENDIF
             @ PRow(), PCol() + 1 SAY D1S PICTURE PicD
             @ PRow(), PCol() + 1 SAY P1S PICTURE PicD
-            IF Len( aNaziv ) == 2
-               @ PRow() + 1, PRINT_LEFT_SPACE + nColNaz SAY PadR( aNaziv[ 2 ], 30 )
-            ENDIF
+
 
          ENDIF
 
@@ -299,11 +296,9 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
    @ PRow(), PCol() + 1 SAY iif( nPom < 0, - nPom, 0 ) PICTURE PicD
    ?U Space( PRINT_LEFT_SPACE ) + M5
 
-   IF !check_nova_strana( bZagl, s_oPDF, .F., 5 )
-      ?
-      ?
-   ENDIF
-
+   check_nova_strana( NIL, s_oPDF, .T.) // nova strana
+   ?
+   ?
    @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE )
    ??U "REKAPITULACIJA PO KLASAMA NA DAN: "
    ?? Date()

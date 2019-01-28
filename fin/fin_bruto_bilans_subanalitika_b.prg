@@ -63,10 +63,7 @@ FUNCTION fin_bb_subanalitika_b( hParams )
       ENDIF
    ENDIF
 
-   //o_konto()
-   //o_partner()
    o_sql_suban_kto_partner( cIdFirma )
-   //o_konto()
    IF !o_bruto_bilans_klase()
       MsgBeep( "ERROR otvaranje pomoćne tabele BBKLAS !?")
       RETURN .F.
@@ -113,9 +110,7 @@ FUNCTION fin_bb_subanalitika_b( hParams )
       GO TOP
    ENDIF
 
-
    EOF CRET
-
    nStr := 0
    IF !start_print()
       RETURN .F.
