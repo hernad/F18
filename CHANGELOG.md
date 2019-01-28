@@ -1,5 +1,10 @@
 # F18 klijent, lista promjena
 
+## 2019-01-28
+
+- bruto bilans pdf: analitika, sintetika
+
+
 ## 2019-01-25
 
 - command line parametri: `-ua` - admin user, `-up` - admin password

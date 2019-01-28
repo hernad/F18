@@ -88,11 +88,6 @@ STATIC FUNCTION _get_vars( rpt_vars )
    LOCAL _box_y := 65
    LOCAL nX := 1
 
-  // o_sifk()
-  // o_sifv()
-  // o_konto()
-   // o_partner()
-
    Box( "#" + _box_name, _box_x, _box_y )
 
    SET CURSOR ON
@@ -122,7 +117,6 @@ STATIC FUNCTION _get_vars( rpt_vars )
 
       _konto := PadR( _konto, 200 )
       _partner := PadR( _partner, 200 )
-
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Konto   " GET _konto PICT "@!S50"
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Partner " GET _partner PICT "@!S50"

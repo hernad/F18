@@ -41,7 +41,6 @@ FUNCTION fin_specifikacija_suban()
    LOCAL nC
    LOCAL lExpRpt
 
-
    PRIVATE cSpecifSkracenaVarijantaDN := "N"
    PRIVATE fK1 := fk2 := fk3 := fk4 := "N"
    PRIVATE cRasclaniti := "N"
@@ -180,16 +179,6 @@ FUNCTION fin_specifikacija_suban()
       create_dbf_r_export( aSSFields )
    ENDIF
 
-   //IF gDugiUslovFirmaRJFinSpecif != "D"
-  //    cIdFirma := Left( cIdFirma, 2 )
-  // ENDIF
-
-   IF cRasclaniti == "D"
-      // o_rj()
-   ENDIF
-
-   // o_partner()
-   // o_konto()
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    find_suban_za_period( cIdFirma, dDatOd, dDatDo, "idfirma,idkonto,idpartner,brdok", cSqlWhere )
    Msgc()
@@ -310,7 +299,6 @@ FUNCTION fin_specifikacija_suban()
    ENDIF
 
    nStr := 0
-
    nUd := 0
    nUp := 0      // DIN
    nUd2 := 0
@@ -530,8 +518,6 @@ FUNCTION fin_specifikacija_suban()
    ENDDO
 
    check_nova_strana( bZagl, oPDF )
-
-
    ? m
    ? " UKUPNO:"
    IF cTipDomacaStranaObje == "1"
@@ -562,8 +548,6 @@ FUNCTION fin_specifikacija_suban()
    ENDIF
 
    closeret
-
-
 
 
 
@@ -638,13 +622,6 @@ STATIC FUNCTION FSvaki1()
 
    RETURN .T.
 
-
-
-/*
- *   Zaglavlje specifikacije
- *   koriste fin_specif, fin_specif_suban_proizv_sort
- *
- */
 
 FUNCTION zagl_fin_specif( cSpecifSkracenaVarijantaDN, cOpcine, cUslovPartnerTelefon, cTipDomacaStranaObje )
 
@@ -725,14 +702,11 @@ FUNCTION zagl_fin_specif( cSpecifSkracenaVarijantaDN, cOpcine, cUslovPartnerTele
    RETURN .T.
 
 
-
-
 STATIC FUNCTION fill_ss_tbl( cKonto, cPartner, cNaziv, nFDug, nFPot, nFSaldo, cRj, cRjNaz )
 
    LOCAL nArr
 
    nArr := Select()
-
    o_r_export()
    APPEND BLANK
    REPLACE field->konto WITH cKonto
