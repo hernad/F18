@@ -24,6 +24,11 @@ FUNCTION PDF_open_dokument( cFile )
 
    LOCAL cCmd, nRet
 
+   IF is_in_eshell()
+       @ 0,0 SAY "[vscode#pdf.view]" + cFile + "[vscode#end]"
+       RETURN .T.
+   ENDIF
+
    IF is_windows()
       cCmd := PDF_cmd()
       nRet := windows_run_invisible( cCmd, cFile )

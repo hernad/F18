@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-01-29
+
+- `F18_ESHELL=1`, PDF `[vscode#pdf.view]<file>[vscode#end]`
+
 ## 2019-01-28
 
 - bruto bilansi pdf: fix paginacija, rekapitulacija po klasama na novu stranu

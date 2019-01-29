@@ -18,6 +18,7 @@ STATIC s_psqlServer_log := .F. // logiranje na server
 STATIC s_cF18HomeRoot := NIL // za sve threadove identican cHomeRootDir
 STATIC s_cF18HomeBackup := NIL // svi threadovi ista backup lokacija
 STATIC s_cF18CurrentDirectory := NIL
+STATIC s_lEshell := .F.
 
 THREAD STATIC s_cF18Home := NIL // svaki thread ima svoj my home ovisno o tekucoj bazi
 
@@ -578,7 +579,7 @@ FUNCTION f18_current_directory()
 
 FUNCTION set_f18_home_root()
 
-   LOCAL cHome
+   LOCAL cHome, cF18eShell
 
 /*
 #ifdef __PLATFORM__WINDOWS
@@ -595,12 +596,23 @@ FUNCTION set_f18_home_root()
      Alert('F18_HOME envar - lokacija podataka nije definisana!?')
      QUIT_1
    ENDIF
+
+   cF18eShell := GetEnv('F18_ESHELL')
+   IF cF18eShell == "1"
+      s_lEshell := .T.
+   ENDIF
+
    cHome := hb_DirSepAdd(cHome)
 
    f18_create_dir( cHome )
    my_home_root( cHome )
 
    RETURN .T.
+
+
+FUNCTION is_in_eshell()
+
+    RETURN s_lEshell
 
 
 FUNCTION my_home_backup( cF18HomeBackup )
