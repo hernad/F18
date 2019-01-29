@@ -138,7 +138,6 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    LOCAL cOpt
    LOCAL oPDF
 
-   my_use_refresh_start()
 
    IF xPrintOpt == NIL  // poziv bez parametara
       xPrintOpt := s_xPrintOpt
@@ -167,11 +166,12 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    SET PRINTER TO
    SET CONSOLE ON
 
-
-   f18_tone( 440, 2 )
-   f18_tone( 440, 2 )
-
    MsgC()
+
+   f18_tone( 440, 2 )
+   f18_tone( 440, 2 )
+
+   
 
    DO CASE
 
@@ -215,8 +215,6 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       hb_cdpSelect( "SL852" )
       hb_SetTermCP( "SLISO" )
 
-
-
    CASE cOpt == "R"
 
       Ptxt( cFileName )
@@ -232,6 +230,10 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
          MsgBeep ( "f18_editor (" + cFileName + ") ERROR ?!" )
       ENDIF
    END CASE
+
+
+   my_use_refresh_start()
+
 
    RETURN .T.
 
@@ -534,7 +536,6 @@ FUNCTION gpNR()
 
 FUNCTION gPFF()
 
-altd()
    IF !is_legacy_ptxt()
 
       SetPRC( 0, 0 )
