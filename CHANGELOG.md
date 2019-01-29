@@ -2,6 +2,7 @@
 
 ## 2019-01-29
 
+- OutStd(...vscode...)
 - `F18_ESHELL=1`, PDF `[vscode#pdf.view]<file>[vscode#end]`
 
 ## 2019-01-28
