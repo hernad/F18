@@ -96,7 +96,6 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
       oPDF:PageHeader()
    ENDIF
 
-
    my_use_refresh_stop()
 
    IF lBezParametara
@@ -138,6 +137,8 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    LOCAL cOpt
    LOCAL oPDF
 
+   hb_cdpSelect( "SL852" )
+   hb_SetTermCP( "SLISO" )
 
    IF xPrintOpt == NIL  // poziv bez parametara
       xPrintOpt := s_xPrintOpt
@@ -192,6 +193,7 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
 
    CASE cOpt == "PDF"
 
+      hb_cdpSelect( "SLWIN" )
       oPDF:End()
 
       oPDF := PDFClass():New()
@@ -211,9 +213,10 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       oPDF:PrnToPdf( txt_print_file_name() )
       oPDF:End()
 
-      oPDF:View()
       hb_cdpSelect( "SL852" )
       hb_SetTermCP( "SLISO" )
+
+      oPDF:View()
 
    CASE cOpt == "R"
 

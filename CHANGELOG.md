@@ -2,6 +2,7 @@
 
 ## 2019-01-29
 
+- windows terminal save screen/restore kad je hb_cdpSelect( "SLWIN" ) - brljotina
 - DEBUG `[vscode]` output
 - OutStd(...vscode...)
 - `F18_ESHELL=1`, PDF `[vscode#pdf.view]<file>[vscode#end]`

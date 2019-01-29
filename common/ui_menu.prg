@@ -190,7 +190,6 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
 
    SetColor( cLocalColor )
 
-
    nItemNo := meni_0_inkey(  box_x_koord() + 1, box_y_koord() + 2, box_x_koord() + nN1 + 1, box_y_koord() + nLength + 1, aItems, nItemNo, .T., lFiksneKoordinate )
 
 
