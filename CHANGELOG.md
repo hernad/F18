@@ -2,6 +2,7 @@
 
 ## 2019-01-30
 
+- DEBUG windows setprc(0,0), outstd(""), inkey(0.2)
 - DEBUG windows PDF output
 
 ## 2019-01-29
