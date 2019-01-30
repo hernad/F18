@@ -25,11 +25,13 @@ FUNCTION PDF_open_dokument( cFile )
    LOCAL cCmd, nRet, cScr
 
    IF is_in_eshell()
-       SAVE SCREEN TO cScr
+       //SAVE SCREEN TO cScr
        CLEAR SCREEN
-       @ 0,0 SAY ""
+       // @ 0,0 SAY ""
+       SetPRC( 0, 0 )
        OutStd("[vscode#pdf.view]" + cFile + "[vscode#end]")
-       RESTORE SCREEN FROM cScr
+       //RESTORE SCREEN FROM cScr
+       Alert("View PDF:" + cFile)
        RETURN .T.
    ENDIF
 

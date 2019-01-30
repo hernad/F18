@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-01-30
+
+- DEBUG windows PDF output
+
 ## 2019-01-29
 
 - windows terminal save screen/restore kad je hb_cdpSelect( "SLWIN" ) - brljotina
