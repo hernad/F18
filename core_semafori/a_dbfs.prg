@@ -120,8 +120,8 @@ FUNCTION f18_dbfs_add( cTable, hItem )
    hb_mutexLock( s_mtxMutex )
 
    FOR EACH cItem IN s_hF18Dbfs[ cDatabase ]:Keys
-      // ako vec postoje tabele sa istom workarea izbrisati ih
-      IF s_hF18Dbfs[ cDatabase ][ cItem ][ "wa" ] == hItem[ "wa" ]
+      // ako vec postoje tabele sa istim nazivom tabele izbrisati
+      IF s_hF18Dbfs[ cDatabase ][ cItem ][ "table" ] == hItem[ "table" ]
          hb_HDel( s_hF18Dbfs[ cDatabase ], cItem )
       ENDIF
    NEXT

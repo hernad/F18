@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 
-
 FUNCTION set_a_dbf_fakt()
 
    set_a_dbf_fakt_fakt()
@@ -28,14 +27,11 @@ FUNCTION set_a_dbf_fakt()
 
    set_a_sql_sifarnik( "fakt_ftxt", "FAKT_FTXT", F_FAKT_FTXT   )
 
-   //set_a_dbf_temp( "fakt_relac",   "RELAC", F_RELAC   )
-   //set_a_dbf_temp( "fakt_vozila",   "VOZILA", F_VOZILA  )
    set_a_dbf_temp( "fakt_kalpos",  "KALPOS", F_KALPOS  )
    set_a_dbf_temp( "fakt_pripr",   "FAKT_PRIPR", F_FAKT_PRIPR   )
    set_a_dbf_temp( "fakt_pripr2",  "FAKT_PRIPR2", F_FAKT_PRIPR2  )
    set_a_dbf_temp( "fakt_pripr9",  "FAKT_PRIPR9", F_FAKT_PRIPR9  )
-   set_a_dbf_temp( "fakt_pormp",   "PORMP", F_PORMP   )
-   //set_a_dbf_temp( "_fakt_roba",   "cIdRoba", F__ROBA   )
+   set_a_dbf_temp( "fakt_pormp",   "PORMP", F_PORMP )
    set_a_dbf_temp( "_fakt_partn",   "_PARTN", F__PARTN  )
    set_a_dbf_temp( "fakt_logk",   "LOGK", F_LOGK    )
    set_a_dbf_temp( "fakt_logkd",   "LOGKD", F_LOGKD   )
@@ -70,9 +66,7 @@ FUNCTION set_a_sql_fakt_ugov()
    LOCAL hItem, hAlgoritam, cTable
 
    cTable := "fakt_ugov"
-
    hItem := hb_Hash()
-
    hItem[ "alias" ] := "UGOV"
    hItem[ "table" ] := cTable
    hItem[ "wa" ]    := F_UGOV
@@ -98,7 +92,6 @@ FUNCTION set_a_sql_fakt_ugov()
    RETURN .T.
 
 
-
 FUNCTION set_a_sql_fakt_rugov()
 
    LOCAL hItem, hAlgoritam, cTable
@@ -112,7 +105,6 @@ FUNCTION set_a_sql_fakt_rugov()
    hItem[ "wa" ]    := F_RUGOV
    hItem[ "sql" ] := .T.
    hItem[ "temp" ]  := .F.
-
    hItem[ "algoritam" ] := {}
 
    // algoritam 1 - default

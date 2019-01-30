@@ -2,6 +2,7 @@
 
 ## 2019-01-30
 
+- FAKT azur: bugfix: `IF s_hF18Dbfs[ cDatabase ][ cItem ][ "wa" ] == hItem[ "wa" ]` => `IF s_hF18Dbfs[ cDatabase ][ cItem ][ "table" ] == hItem[ "table" ]`
 - DEBUG windows setprc(0,0), outstd(""), inkey(0.2)
 - DEBUG windows PDF output
 
