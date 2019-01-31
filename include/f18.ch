@@ -570,9 +570,6 @@
 #define VD_PP        "88"       // dokument polog pazara
 #define VD_ROP       "99"       // reklamacije ostali podaci
 
-#define DOK_ULAZA "00#16"
-#define DOK_IZLAZA "42#01#96#98"
-
 // vrste zaduzenja
 #define ZAD_NORMAL   "0"
 #define ZAD_OTPIS    "1"

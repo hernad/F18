@@ -24,7 +24,6 @@ FUNCTION pos_stanje_artikala()
    LOCAL nRobaNazivSirina := 29
    LOCAL cLijevaMargina := ""
 
-   // LOCAL cRSdbf
    LOCAL xPrintOpt, bZagl
 
    PRIVATE cIdPos
@@ -185,8 +184,8 @@ STATIC FUNCTION pos_stanje_artikala_zagl( cIdPos, cLijevaMargina, nRobaNazivSiri
 
    ? cLijevaMargina + "Prodajno mjesto: " + iif ( Empty( cIdPos ), "SVE", cIdPos + " - " + find_pos_kasa_naz( cIdPos ) )
    podvuci( cLijevaMargina, nRobaNazivSirina )
-   ?U cLijevaMargina + "R.br)", PadR ( "Šifra", 10 ), PadR ( "Naziv artikla", nRobaNazivSirina ) + " "
-   ?? "P.stanje ", PadC ( "Ulaz", 10 ), PadC ( "Izlaz", 10 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Total", 10 )
+   ?U cLijevaMargina + "R.br)", PadR ( "Šifra", 10 ), " ", PadR ( "Naziv artikla", nRobaNazivSirina ) + " "
+   ??U "Poč.stanje ", PadC ( "Ulaz", 10 ), PadC ( "Izlaz", 10 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Ukupno", 10 )
    podvuci( cLijevaMargina, nRobaNazivSirina )
    RETURN .T.
 

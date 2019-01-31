@@ -11,36 +11,33 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
+
 MEMVAR m
 
 FUNCTION pos_kartica_artikla()
 
-   LOCAL nStanje
+   LOCAL nPredhodnoStanjeKolicina
    LOCAL nSign := 1
    LOCAL cSt
-   LOCAL nVrijednost
+   LOCAL nPredhodnaVrijednost
    LOCAL nCijena := 0
+   LOCAL dNaDatum
+   LOCAL xPrintOpt
+   LOCAL bZagl
 
-   // LOCAL cRSdbf
-   LOCAL cLM := ""
+   LOCAL cLijevaMargina := ""
    LOCAL nSir := 40
-   LOCAL cSiroki := "D"
-   LOCAL cPPar
+
+   // LOCAL cPPar
    LOCAL GetList := {}
 
-   // PRIVATE cIdDio := Space( 2 )
    PRIVATE cIdOdj := Space( 2 )
    PRIVATE dDatum0 := gDatum
    PRIVATE dDatum1 := gDatum
-   PRIVATE cPocSt := "D"
+   PRIVATE cPredhodnoStanje := "D"
 
-   nMDBrDok := 6
-
-   // o_pos_kase()
-   // o_sifk()
-   // o_sifv()
-   // o_roba()
-   // o_pos_pos()
+   nPosDuzinaBrojaDokumenta := 6
 
    cIdRoba := Space( 10 )
    cIdPos := gIdPos
@@ -48,7 +45,7 @@ FUNCTION pos_kartica_artikla()
    dDatum0 := fetch_metric( "pos_kartica_datum_od", my_user(), dDatum0 )
    dDatum1 := fetch_metric( "pos_kartica_datum_do", my_user(), dDatum1 )
    cIdRoba := fetch_metric( "pos_kartica_artikal", my_user(), cIdRoba )
-   cPPar := fetch_metric( "pos_kartica_prikaz_partnera", my_user(), "N" )
+   // cPPar := fetch_metric( "pos_kartica_prikaz_partnera", my_user(), "N" )
 
    SET CURSOR ON
 
@@ -58,13 +55,11 @@ FUNCTION pos_kartica_artikla()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prod.mjesto (prazno-svi) "  GET  cIdPos  VALID Empty( cIdPos ) .OR. p_pos_kase( cIdPos ) PICT "@!"
    READ
-
    @ box_x_koord() + 5, box_y_koord() + 6 SAY "Sifra artikla (prazno-svi)" GET cIdRoba VALID Empty( cIdRoba ) .OR. P_Roba( @cIdRoba ) PICT "@!"
    @ box_x_koord() + 7, box_y_koord() + 2 SAY "za period " GET dDatum0
    @ box_x_koord() + 7, Col() + 2 SAY "do " GET dDatum1
-   @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "sa početnim stanjem D/N ?" GET cPocSt VALID cpocst $ "DN" PICT "@!"
-   @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Prikaz partnera D/N ?" GET cPPar VALID cPPar $ "DN" PICT "@!"
-   @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Široki papir    D/N ?" GET cSiroki VALID cSiroki $ "DN" PICT "@!"
+   @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "sa predhodnim stanjem D/N ?" GET cPredhodnoStanje VALID cPredhodnoStanje $ "DN" PICT "@!"
+   // @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Prikaz partnera D/N ?" GET cPPar VALID cPPar $ "DN" PICT "@!"
    READ
 
    ESC_BCR
@@ -75,14 +70,8 @@ FUNCTION pos_kartica_artikla()
    set_metric( "pos_kartica_prikaz_partnera", my_user(), "N" )
    BoxC()
 
-
-   cU := R_U
-   cI := R_I
-   // cRSdbf := "ROBA"
-
-
    IF Empty( cIdRoba )
-      seek_pos_pos_2()
+      seek_pos_pos_2( NIL )
    ELSE
       seek_pos_pos_2( cIdRoba )
       IF pos->idroba <> cIdRoba
@@ -93,257 +82,198 @@ FUNCTION pos_kartica_artikla()
 
    EOF CRET
 
-   START PRINT CRET
-
-   // ZagFirma()
-
-   ? PadC( "KARTICE ARTIKALA NA DAN " + FormDat1( gDatum ), nSir )
-   ? PadC( "-----------------------------------", nSir )
-
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "portrait"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 9
+   IF f18_start_print( NIL, xPrintOpt,  "POS [" + cIdPos + "] KARTICE ARTIKALA NA DAN: " + DToC( Date() ) ) == "X"
+      RETURN .F.
+   ENDIF
 
    IF Empty( cIdPos )
-      ? cLM + "PROD.MJESTO: " + cIdpos + "-" + "SVE"
+      ? cLijevaMargina + "PROD.MJESTO: " + cIdpos + "-" + "SVE"
    ELSE
-      ? cLM + "PROD.MJESTO: " + cIdpos + "-" + find_pos_kasa_naz( cIdPos )
+      ? cLijevaMargina + "PROD.MJESTO: " + cIdpos + "-" + find_pos_kasa_naz( cIdPos )
    ENDIF
 
-
-   ? cLM + "ARTIKAL    : " + iif( Empty( cIdRoba ), "SVI", RTrim( cIdRoba ) )
-   ? cLM + "PERIOD     : " + FormDat1( dDatum0 ) + " - " + FormDat1( dDatum1 )
+   ? cLijevaMargina + "ARTIKAL    : " + iif( Empty( cIdRoba ), "SVI", RTrim( cIdRoba ) )
+   ? cLijevaMargina + "PERIOD     : " + FormDat1( dDatum0 ) + " - " + FormDat1( dDatum1 )
    ?
 
-   cLM := ""
-   ?
+   cLijevaMargina := ""
 
-   ?? "Artikal"
+   m := Replicate( "-", 8 ) + " "
+   m += "-------- ---------- ---------- ---------- ---------- ----------"
 
-   IF cSiroki == "D"
-      ? cLM + " Datum   Dokum." + Space( nMDBrDok - 4 ) + "     Ulaz       Izlaz     Stanje"
-   ELSE
-      ? cLM + "Dokum." + Space( nMDBrDok - 4 ) + "     Ulaz       Izlaz     Stanje"
-   ENDIF
+   bZagl := {|| pos_zagl_kartica(cLijevaMargina) }
+   Eval( bZagl )
 
+   DO WHILE !Eof()
 
-   IF cPPar == "D"
-      ?? "   Partner"
-   ENDIF
+      nPredhodnoStanjeKolicina := 0
+      nPredhodnaVrijednost := 0
 
-   m := ""
-   IF cSiroki == "D"
-      m := m + Replicate( "-", 8 ) + " "  // datum
-   ENDIF
-   m := m + "---" + REPL( "-", nMDBrDok ) + " ---------- ---------- ----------"
+      cIdRobaT := POS->IdRoba
+      select_o_roba( cIdRoba )
+      nCijena1 := pos_get_mpc()
 
-   IF cPPar == "D"
-      m += " --------"
-   ENDIF
-
-
-   DO WHILE !Eof() .AND. POS->IdOdj == cIdOdj
-      nStanje := 0
-      nVrijednost := 0
-      fSt := .T.
-      cIdRoba := POS->IdRoba
-      nUlaz := nIzlaz := 0
+      nPredhodnoStanjeKolicina := 0
+      nPredhodnaVrijednost := 0
+      nStanjeKolicina := 0
 
       SELECT POS
 
-      DO WHILE !Eof() .AND. POS->( IdOdj + IdRoba ) == ( cIdOdj + cIdRoba )
-         IF ( pos->idvd == "96" )
+      check_nova_strana( bZagl, s_oPDF )
+      ?
+      ? m
+      ? cLijevaMargina
+      ?? Space( 8 ) + " "
+      select_o_roba( cIdRobaT )
+      SELECT POS
+      ?? cIdRobaT, PadR ( AllTrim ( roba->Naz ) + " (" + AllTrim ( roba->Jmj ) + ")", 32 )
+      ? m
+
+      // izracunati predhodno stanje
+      DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum < dDatum0
+
+         IF  cPredhodnoStanje == "N" .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
             SKIP
             LOOP
          ENDIF
 
-         IF cPocSt == "N"
-            select_o_roba( cIdRoba )
-            nCijena1 := pos_get_mpc()
-            // SELECT POS
-            nStanje := 0
-            nVrijednost := 0
+         IF pos->idvd $ "00#16"
+            nPredhodnoStanjeKolicina += POS->Kolicina
+            nPredhodnaVrijednost += POS->Kolicina * pos->cijena
 
-            seek_pos_pos_2(cIdRoba, dDatum0 )
+         ELSEIF pos->idvd $ "IN"
 
-         ELSE
-            DO WHILE !Eof() .AND. POS->( IdOdj + IdRoba ) == ( cIdOdj + cIdRoba ) .AND. POS->Datum < dDatum0
-               // IF !Empty( cIdDio ) .AND. POS->IdDio <> cIdDio
-               // SKIP
-               // LOOP
-               // ENDIF
-               IF ( !pos_admin() .AND. pos->idpos = "X" ) .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
-                  SKIP
-                  LOOP
-               ENDIF
+            nPredhodnoStanjeKolicina -= ( POS->Kolicina - POS->Kol2 )
+            nPredhodnaVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
 
-               IF ( pos->idvd == "96" )
-                  SKIP
-                  LOOP
-               ENDIF
+         ELSEIF pos->idvd $ "42#01#98"
+            nPredhodnoStanjeKolicina -= POS->Kolicina
+            nPredhodnaVrijednost -= POS->Kolicina * pos->cijena
 
-               IF pos->idvd $ DOK_ULAZA
-                  nStanje += POS->Kolicina
-
-               ELSEIF pos->idvd $ "IN"
-
-                  nStanje -= ( POS->Kolicina - POS->Kol2 )
-                  nVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
-
-               ELSEIF pos->idvd $ DOK_IZLAZA
-                  nStanje -= POS->Kolicina
-
-               ELSEIF pos->IdVd == "NI"
-                  // ne mijenja kolicinu
-               ENDIF
-
-               SKIP
-            ENDDO
-
-            select_o_roba( cIdRoba )
-            nCijena1 := pos_get_mpc()
-
-            IF fSt
-               ? m
-               ? cLM
-               IF cSiroki == "D"
-                  ?? Space( 8 ) + " "
-               ENDIF
-               ?? cIdRoba, PadR ( AllTrim ( Naz ) + " (" + AllTrim ( Jmj ) + ")", 32 )
-               ? m
-               nVrijednost := nStanje * nCijena1
-               ?
-               ?? PadL ( "Stanje do " + FormDat1 ( dDatum0 ), 29 ), ""
-               ?? Str ( nStanje, 10, 3 )
-               fSt := .F.
-            ENDIF
-            SELECT POS
-         ENDIF // cPocSt
-
-         DO WHILE !Eof() .AND. POS->( IdOdj + IdRoba ) == ( cIdOdj + cIdRoba ) .AND. POS->Datum <= dDatum1
-
-            // IF !Empty( cIdDio ) .AND. POS->IdDio <> cIdDio
-            // SKIP
-            // LOOP
-            // ENDIF
-
-            IF ( !pos_admin() .AND. pos->idpos = "X" ) .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
-               // (POS->IdPos="X" .and. AllTrim (cIdPos)<>"X") .or. ;  // ?MS
-               SKIP
-               LOOP
-            ENDIF
-
-            IF ( pos->idvd == "96" )
-               SKIP
-               LOOP
-            ENDIF
-
-            IF fSt
-               // SELECT ( cRSdbf )
-               select_o_roba( cIdRoba )
-               ? m
-               ? cLM + cIdRoba, PadR( AllTrim( Naz ) + " (" + AllTrim( Jmj ) + ")", 32 )
-               ? m
-               SELECT POS
-               fSt := .F.
-            ENDIF
-
-            IF POS->idvd $ DOK_ULAZA
-
-               ? cLM
-
-               IF cSiroki == "D"
-                  ?? DToC( pos->datum ) + " "
-               ENDIF
-
-               ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), nMDBrDok ), ""
-
-               ?? Str ( POS->Kolicina, 10, 3 ), Space ( 10 ), ""
-               nUlaz += POS->Kolicina
-
-               nStanje += POS->Kolicina
-               ?? Str ( nStanje, 10, 3 )
-
-            ELSEIF POS->IdVd == "NI"
-
-               ? cLM
-
-               IF cSiroki == "D"
-                  ?? DToC( pos->datum ) + " "
-               ENDIF
-
-               ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), nMDBrDok ), ""
-               ?? "S:", Str ( POS->Cijena, 7, 2 ), "N:", Str ( POS->Ncijena, 7, 2 ), ;
-                  Str ( nStanje, 10, 3 )
-
-
-               SKIP
-               LOOP
-
-            ELSEIF POS->idvd $ "IN" + DOK_IZLAZA
-
-               IF pos->idvd $ DOK_IZLAZA
-                  nKol := POS->Kolicina
-               ELSEIF POS->IdVd == "IN"
-                  nKol := ( POS->Kolicina - POS->Kol2 )
-               ENDIF
-
-               IF pos->idvd == "IN" .AND. pos->kolicina == 0
-                  nIzlaz += nStanje - nKol
-                  nStanje -= nStanje - Abs( nKol )
-               ELSE
-                  nIzlaz += nKol
-                  nStanje -= nKol
-               ENDIF
-
-               ? cLM
-               IF cSiroki == "D"
-                  ?? DToC( pos->datum ) + " "
-               ENDIF
-
-               ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), nMDBrDok ), ""
-               ?? Space ( 10 ), Str ( nKol, 10, 3 ), Str ( nStanje, 10, 3 )
-
-            ENDIF // izlaz, in
-
-            IF cPPar == "D"
-               ?? " "
-               ?? ocitaj_izbaci( F_POS_DOKS, POS->( IdPos + IdVd + DToS( datum ) + BrDok ), "idgost" )
-            ENDIF
-
-
-            SKIP
-         ENDDO
-
-         ? m
-         ? cLM
-
-         IF cSiroki == "D"
-            ?? Space( 8 ) + " "
+         ELSEIF pos->IdVd == "NI"
+            nPredhodnaVrijednost += POS->Kolicina * ( pos->ncijena - pos->cijena )
          ENDIF
 
-         ?? " UKUPNO", Str( nUlaz, 10, 3 ), Str( nIzlaz, 10, 3 ), Str( nStanje, 10, 3 )
-
-         IF cSiroki == "D"
-            ?  Space( 9 ) + "  Cij:", Str( nCijena1, 8, 2 ), "Ukupno:", Str ( nCijena1 * nStanje, 12, 3 )
-         ELSE
-            ?  "  Cij:", Str( nCijena1, 8, 2 ), "Ukupno:", Str ( nCijena1 * nStanje, 12, 3 )
-         ENDIF
-
-         ? m
-         ?
-         DO WHILE !Eof() .AND. POS->( IdOdj + IdRoba ) == ( cIdOdj + cIdRoba ) .AND. POS->Datum > dDatum1
-            SKIP
-         ENDDO
-
+         SKIP
       ENDDO
 
-      IF !Empty( cIdRoba )
-         EXIT
+      ?
+      ?? PadL ( "Stanje do " + FormDat1 ( dDatum0 ) + " : ", 40 )
+      ?? Str ( nPredhodnoStanjeKolicina, 10, 2 ) + " "
+      IF Round( nPredhodnoStanjeKolicina, 4 ) != 0
+         nCijena := nPredhodnaVrijednost / nPredhodnoStanjeKolicina
+      ELSE
+         nCijena := 0
       ENDIF
+      ?? Str ( nCijena, 10, 2 ) + " "
+      ?? Str ( nPredhodnaVrijednost, 10, 2 )
+
+      nStanjeKolicina := nPredhodnoStanjeKolicina
+      nUlaz := nIzlaz := 0
+      nVrijednost := nPredhodnaVrijednost
+
+      // zadani interval
+      DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum >= dDatum0 .AND. POS->Datum <= dDatum1
+
+         check_nova_strana( bZagl, s_oPDF )
+         IF ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
+            SKIP
+            LOOP
+         ENDIF
+
+         IF POS->idvd $ "00#16"
+
+            ? cLijevaMargina
+            ?? DToC( pos->datum ) + " "
+            ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), nPosDuzinaBrojaDokumenta ), ""
+            ?? Str ( POS->Kolicina, 10, 3 ), Space ( 10 ), ""
+            nUlaz += POS->Kolicina
+            nStanjeKolicina += POS->Kolicina
+            nVrijednost += POS->Kolicina * pos->cijena
+            ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+            ?? Str ( pos->cijena, 10, 2 ) + " "
+            ?? Str ( nVrijednost, 10, 2 )
+
+         ELSEIF POS->IdVd == "NI"
+
+            ? cLijevaMargina
+            ?? DToC( pos->datum ) + " "
+            ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), nPosDuzinaBrojaDokumenta ), ""
+            ?? "S:", Str ( POS->Cijena, 7, 2 ), "N:", Str ( POS->Ncijena, 7, 2 ), Str ( nStanjeKolicina, 10, 3 )
+            nVrijednost += pos->kolicina * ( pos->ncijena - pos->cijena )
+            ?? Str ( pos->ncijena - pos->cijena, 10, 2 ) + " "
+            ?? Str ( nVrijednost, 10, 2 )
+
+            SKIP
+            LOOP
+
+         ELSEIF POS->idvd $ "IN" + "42#01#98"
+
+            IF pos->idvd $ "42#01#98"
+               nKol := POS->Kolicina
+            ELSEIF POS->IdVd == "IN"
+               nKol := POS->Kolicina - POS->Kol2
+            ENDIF
+
+            nIzlaz += nKol
+            nStanjeKolicina -= nKol
+            nVrijednost -= nKol * pos->Cijena
+
+            check_nova_strana( bZagl, s_oPDF )
+            ? cLijevaMargina
+            ?? DToC( pos->datum ) + " "
+            ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), nPosDuzinaBrojaDokumenta ), ""
+            ?? Space ( 10 )
+            ?? Str ( nKol, 10, 2 ) + " "
+            ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+            ?? Str ( pos->cijena, 10, 2 ) + " "
+            ?? Str ( nVrijednost, 10, 2 )
+
+         ENDIF
+
+         SKIP
+      ENDDO
+
+      DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum > dDatum1
+         SKIP
+      ENDDO
+
+      check_nova_strana( bZagl, s_oPDF )
+
+      ? m
+      ? cLijevaMargina
+      ?? PadL( "UKUPNO:", 18 )
+      ?? Str( nUlaz, 10, 2 ) + " "
+      ?? Str( nIzlaz, 10, 2 ) + " "
+      ?? Str( nStanjeKolicina, 10, 2 ) + " "
+      IF Round( nStanjeKolicina, 4 ) != 0
+         nCijena := nVrijednost / nStanjeKolicina
+      ELSE
+         nCijena := 0
+      ENDIF
+      ?? Str( nCijena, 10, 2 ) + " "
+      ?? Str( nVrijednost, 10, 2 ) + " "
+      ? m
+      ?
 
    ENDDO
 
-   PaperFeed()
-   ENDPRINT
+   f18_end_print( NIL, xPrintOpt )
+   my_close_all_dbf()
 
-   CLOSE ALL
+   RETURN .T.
+
+
+FUNCTION pos_zagl_kartica(cLijevaMargina)
+
+   ? m
+   ? cLijevaMargina + " Datum   Dokum." + Space( nPosDuzinaBrojaDokumenta - 4 ) + "     Ulaz       Izlaz     Stanje     Cijena  Vrijednost"
+   ? m
 
    RETURN .T.

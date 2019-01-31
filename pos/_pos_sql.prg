@@ -339,7 +339,6 @@ FUNCTION seek_pos_h( hParams )
       cSql += "idroba=" + sql_quote( cIdRoba )
    ENDIF
 
-
    IF dDatum != NIL .AND. !Empty( dDatum )
       IF lWhere
          cSql += " AND "
