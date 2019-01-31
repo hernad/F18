@@ -51,9 +51,9 @@ FUNCTION fakt_lager_lista()
       lPocStanje := .T.
       o_fakt_pripr()
       nRbrPst := 0
-      cBrPSt := "00001   "
+      cBrDokPocStanje := "00001   "
       Box(, 2, 60 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Generacija poc. stanja  - broj dokumenta 00 -" GET cBrPSt
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Generacija poc. stanja  - broj dokumenta 00 -" GET cBrDokPocStanje
       READ
       BoxC()
    ENDIF
@@ -459,7 +459,7 @@ FUNCTION fakt_lager_lista()
                   APPEND BLANK
                   REPLACE idfirma WITH cidfirma, idroba WITH Left( cIdRoba, 10 ), ;
                      datdok WITH dDatDo + 1, ;
-                     idtipdok WITH "00", brdok WITH cBRPST, ;
+                     idtipdok WITH "00", brdok WITH cBrDokPocStanje, ;
                      cijena WITH _cijena, ;
                      dindem WITH "KM ", ;
                      Rbr WITH Rednibroj( ++nRbrPst ), ;

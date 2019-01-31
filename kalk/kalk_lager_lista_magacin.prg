@@ -88,9 +88,9 @@ FUNCTION kalk_lager_lista_magacin()
    ELSE
       fPocStanje := .T.
       o_kalk_pripr()
-      cBrPSt := "00001   "
+      cBrDokPocStanje := "00001   "
       Box(, 3, 60 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Generacija poč.stanja  - broj dokumenta 16 -" GET cBrPSt
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Generacija poč.stanja  - broj dokumenta 16 -" GET cBrDokPocStanje
       READ
       ESC_BCR
       BoxC()
@@ -611,7 +611,7 @@ FUNCTION kalk_lager_lista_magacin()
                   datfaktp WITH dDatDo + 1, ;
                   kolicina WITH nUlaz - nIzlaz, ;
                   idvd WITH "16", ;
-                  brdok WITH cBRPST
+                  brdok WITH cBrDokPocStanje
 
                REPLACE nc WITH ( nNVU - nNVI ) / ( nUlaz - nIzlaz )
                REPLACE vpc WITH ( nVPVU - nVPVI ) / ( nUlaz - nIzlaz )
@@ -634,7 +634,7 @@ FUNCTION kalk_lager_lista_magacin()
                   REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH -1
                   REPLACE idvd WITH "16"
-                  REPLACE brdok WITH cBRPST
+                  REPLACE brdok WITH cBrDokPocStanje
                   REPLACE brfaktp WITH "#KOREK"
                   REPLACE nc WITH 0
                   REPLACE vpc WITH 0
@@ -652,7 +652,7 @@ FUNCTION kalk_lager_lista_magacin()
                   REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH 1
                   REPLACE idvd WITH "16"
-                  REPLACE brdok WITH cBRPST
+                  REPLACE brdok WITH cBrDokPocStanje
                   REPLACE brfaktp WITH "#KOREK"
                   REPLACE nc WITH ( nNVU - nNVI )
                   REPLACE vpc WITH 0
@@ -866,7 +866,7 @@ FUNCTION kalk_lager_lista_magacin()
          SELECT kalk_pripr
          my_dbf_zap()
       ELSE
-         renumeracija_kalk_pripr( cBrPst, "16" )
+         renumeracija_kalk_pripr( cBrDokPocStanje, "16" )
       ENDIF
    ENDIF
 

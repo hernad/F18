@@ -11,22 +11,19 @@
 
 #include "f18.ch"
 
-
 STATIC cTblKontrola := ""
 STATIC aPorezi := {}
 STATIC s_cM
-//STATIC __txt1
-//STATIC __txt2
-//STATIC __txt3
+STATIC s_oPDF
+STATIC PRINT_LEFT_SPACE := 0
 
+MEMVAR m
 
 FUNCTION kalk_lager_lista_prodavnica()
 
    PARAMETERS lPocStanje
 
-   // indikator gresaka
-   LOCAL lImaGresaka := .F.
-   //LOCAL cKontrolnaTabela
+   LOCAL lImaGresaka := .F. // indikator gresaka
    LOCAL cPicKol := kalk_pic_kolicina_bilo_gpickol()
    LOCAL cPicCDEm := kalk_prosiri_pic_cjena_za_2()
    LOCAL cPicDem := kalk_pic_iznos_bilo_gpicdem()
@@ -35,29 +32,29 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL cMpcIzSif := "N"
    LOCAL cMinK := "N"
    LOCAL _istek_roka := CToD( "" )
-   LOCAL _item_istek_roka, _hAttrId, _sh_item_istek_roka
-   LOCAL _print := "1"
-
+   LOCAL _hAttrId
+   LOCAL cPrintPdfOdt := "1"
+   LOCAL cIdFirma, dDatOd, dDatDo, lPocStanje
+   LOCAL hZaglParams := hb_hash()
+   LOCAL GetList := {}
+   LOCAL cPrikazNabavneVrijednosti := "N"
+   LOCAL cPredhStanje := "N"
+   LOCAL cIdKonto
+   LOCAL cBrDokPocStanje
+   LOCAL xPrintOpt, bZagl
+   LOCAL cIdRoba
 
    cIdFirma := self_organizacija_id()
-   cIdKonto := PadR( "1320", FIELD_LENGTH_IDKONTO )
-
-//   o_sifk()
-//   o_sifv()
-   // o_roba()
-   // o_konto()
-   // o_partner()
-
-   //cKontrolnaTabela := "N"
+   cIdKonto := PadR( "1330", FIELD_LENGTH_IDKONTO )
 
    IF ( lPocStanje == NIL )
       lPocStanje := .F.
    ELSE
       lPocStanje := .T.
       o_kalk_pripr()
-      cBrPSt := "00001   "
+      cBrDokPocStanje := "00001   "
       Box(, 2, 60 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Generacija poc. stanja  - broj dokumenta 80 -" GET cBrPSt
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Generacija poc. stanja  - broj dokumenta 80 -" GET cBrDokPocStanje
       READ
       BoxC()
    ENDIF
@@ -70,27 +67,25 @@ FUNCTION kalk_lager_lista_prodavnica()
    qqTarifa := Space( 60 )
    qqidvd := Space( 60 )
    qqIdPartn := Space( 60 )
-   PRIVATE cPNab := "N"
+
    PRIVATE cNula := "D"
-   PRIVATE cTU := "N"
    PRIVATE cSredCij := "N"
    PRIVATE cPrikazDob := "N"
    PRIVATE cPlVrsta := Space( 1 )
    PRIVATE cPrikK2 := "N"
    PRIVATE aPorezi
 
-   Box(, 18, 68 )
+   Box(, 18, 70)
 
    cGrupacija := Space( 4 )
-   cPredhStanje := "N"
 
    IF !lPocStanje
       cIdKonto := fetch_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cIdKonto )
-      cPNab := fetch_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, cPNab )
+      cPrikazNabavneVrijednosti := fetch_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, "N" )
       cNula := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cNula )
       dDatOd := fetch_metric( "kalk_lager_lista_prod_datum_od", _curr_user, dDatOd )
       dDatDo := fetch_metric( "kalk_lager_lista_prod_datum_do", _curr_user, dDatDo )
-      _print := fetch_metric( "kalk_lager_lista_prod_print", _curr_user, _print )
+      cPrintPdfOdt := fetch_metric( "kalk_lager_lista_prod_print", _curr_user, cPrintPdfOdt )
    ENDIF
 
    DO WHILE .T.
@@ -103,43 +98,39 @@ FUNCTION kalk_lager_lista_prodavnica()
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Tarife  " GET qqTarifa PICT "@!S50"
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "Partneri" GET qqIdPartn PICT "@!S50"
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Vrste dokumenata  " GET qqIDVD PICT "@!S30"
-      @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikaz Nab.vrijednosti D/N" GET cPNab  VALID cpnab $ "DN" PICT "@!"
-      @ box_x_koord() + 7, Col() + 1 SAY "MPC iz sifrarnika D/N" GET cMpcIzSif VALID cMpcIzSif $ "DN" PICT "@!"
+      @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikaz Nab.vrijednosti D/N" GET cPrikazNabavneVrijednosti  VALID cPrikazNabavneVrijednosti $ "DN" PICT "@!"
+      @ box_x_koord() + 7, Col() + 1 SAY8 "MPC iz šifarnika D/N" GET cMpcIzSif VALID cMpcIzSif $ "DN" PICT "@!"
       @ box_x_koord() + 8, box_y_koord() + 2 SAY "Prikaz stavki kojima je MPV 0 D/N" GET cNula  VALID cNula $ "DN" PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY "Datum od " GET dDatOd
       @ box_x_koord() + 9, Col() + 2 SAY "do" GET dDatDo
-
-
-      @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Varijanta štampe TXT/ODT (1/2)" GET _print VALID _print $ "12" PICT "@!"
+      @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Varijanta štampe PDF/ODT (1/2)" GET cPrintPdfOdt VALID cPrintPdfOdt $ "12" PICT "@!"
 
       IF lPocStanje
          @ box_x_koord() + 11, box_y_koord() + 2 SAY "sredi kol=0, nv<>0 (0/1/2)" GET cSrKolNula VALID cSrKolNula $ "012" PICT "@!"
       ENDIF
 
-      @ box_x_koord() + 12, box_y_koord() + 2 SAY "Prikaz robe tipa T/U  (D/N)" GET cTU VALID cTU $ "DN" PICT "@!"
-      //@ box_x_koord() + 12, Col() + 2 SAY " generisati kontrolnu tabelu ? " GET cKontrolnaTabela VALID cKontrolnaTabela $ "DN" PICT "@!"
       @ box_x_koord() + 13, box_y_koord() + 2 SAY "Odabir grupacije (prazno-svi) GET" GET cGrupacija PICT "@!"
       @ box_x_koord() + 14, box_y_koord() + 2 SAY "Prikaz prethodnog stanja" GET cPredhStanje PICT "@!" VALID cPredhStanje $ "DN"
-      @ box_x_koord() + 14, Col() + 2 SAY8 "Prik. samo kritičnih zaliha (D/N/O) ?" GET cMinK PICT "@!" VALID cMink $ "DNO"
+      @ box_x_koord() + 14, Col() + 2 SAY8 "Prikaz samo kritičnih zaliha (D/N/O) ?" GET cMinK PICT "@!" VALID cMink $ "DNO"
 
-/*
-      //IF IsVindija()
-         cGr := Space( 10 )
-         cPSPDN := "N"
-         @ box_x_koord() + 16, box_y_koord() + 2 SAY "Grupa " GET cGr
-         @ box_x_koord() + 17, box_y_koord() + 2 SAY "Pregled samo prodaje (D/N) " GET cPSPDN VALID !Empty( cPSPDN ) .AND. cPSPDN $ "DN"  PICT "@!"
-      //ENDIF
-*/
       READ
       ESC_BCR
+
+      hZaglParams["sint"] := .F.
+      hZaglParams["datod"] := dDatOd
+      hZaglParams["datdo"] := dDatDo
+      hZaglParams["nabavna"] := cPrikazNabavneVrijednosti == "D"
+      hZaglParams["predhodno"] := cPredhStanje == "D"
+      hZaglParams["konto"] := cIdKonto
+
       PRIVATE cUslovRoba := Parsiraj( qqRoba, "IdRoba" )
-      PRIVATE aUsl2 := Parsiraj( qqTarifa, "IdTarifa" )
-      PRIVATE aUsl3 := Parsiraj( qqIDVD, "idvd" )
-      PRIVATE aUsl4 := Parsiraj( qqIdPartn, "IdPartner" )
-      IF cUslovRoba <> NIL .AND. aUsl2 <> NIL .AND. aUsl3 <> NIL
+      PRIVATE cFilterTarifa := Parsiraj( qqTarifa, "IdTarifa" )
+      PRIVATE cFilterIdVD := Parsiraj( qqIDVD, "idvd" )
+      PRIVATE cFilterPartner := Parsiraj( qqIdPartn, "IdPartner" )
+      IF cUslovRoba <> NIL .AND. cFilterTarifa <> NIL .AND. cFilterIdVD <> NIL
          EXIT
       ENDIF
-      IF aUsl4 <> NIL
+      IF cFilterPartner <> NIL
          EXIT
       ENDIF
    ENDDO
@@ -147,18 +138,22 @@ FUNCTION kalk_lager_lista_prodavnica()
 
    IF !lPocStanje
       set_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cIdKonto )
-      set_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, cPNab )
+      set_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, cPrikazNabavneVrijednosti )
       set_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cNula )
       set_metric( "kalk_lager_lista_prod_datum_od", _curr_user, dDatOd )
       set_metric( "kalk_lager_lista_prod_datum_do", _curr_user, dDatDo )
-      set_metric( "kalk_lager_lista_prod_print", _curr_user, _print )
+      set_metric( "kalk_lager_lista_prod_print", _curr_user, cPrintPdfOdt )
    ENDIF
 
    my_close_all_dbf()
 
-   //IF ( cKontrolnaTabela == "D" )
-  //    CreTblKontrola()
-  // ENDIF
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "portrait"
+   xPrintOpt[ "font_size" ] := 7
+   xPrintOpt[ "opdf" ] := s_oPDF
+   legacy_ptxt( .F. )
 
    IF lPocStanje
       o_kalk_pripr()
@@ -167,14 +162,6 @@ FUNCTION kalk_lager_lista_prodavnica()
    IF cPrikK2 == "D"
       lPrikK2 := .T.
    ENDIF
-
-  // o_sifk()
-  // o_sifv()
-   // o_roba()
-   // o_tarifa()
-   // o_konto()
-   // o_partner()
-   // o_koncij()
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    find_kalk_by_pkonto_idroba( self_organizacija_id(), cIdKonto )
@@ -190,22 +177,21 @@ FUNCTION kalk_lager_lista_prodavnica()
    IF cUslovRoba <> ".t."
       cFilter += ".and." + cUslovRoba   // roba
    ENDIF
-   IF aUsl2 <> ".t."
-      cFilter += ".and." + aUsl2   // tarifa
+   IF cFilterTarifa <> ".t."
+      cFilter += ".and." + cFilterTarifa   // tarifa
    ENDIF
-   IF aUsl3 <> ".t."
-      cFilter += ".and." + aUsl3   // idvd
+   IF cFilterIdVD <> ".t."
+      cFilter += ".and." + cFilterIdVD   // idvd
    ENDIF
-   IF aUsl4 <> ".t."
-      cFilter += ".and." + aUsl4   // partner
+   IF cFilterPartner <> ".t."
+      cFilter += ".and." + cFilterPartner   // partner
    ENDIF
 
    SET FILTER TO &cFilter
    GO TOP
    EOF CRET
 
-   IF _print == "2"
-      // odt stampa
+   IF cPrintPdfOdt == "2" // odt stampa
       _params := hb_Hash()
       _params[ "idfirma" ] := self_organizacija_id()
       _params[ "idkonto" ] := cIdKonto
@@ -215,7 +201,6 @@ FUNCTION kalk_lager_lista_prodavnica()
       kalk_prodavnica_llp_odt( _params )
       RETURN .T.
    ENDIF
-
 
    nLen := 1
 
@@ -241,14 +226,10 @@ FUNCTION kalk_lager_lista_prodavnica()
 
    s_cM := m
 
-   start PRINT cret
-   ?
    select_o_konto( cIdKonto )
    SELECT KALK
 
-   PRIVATE nTStrana := 0
-
-   PRIVATE bZagl := {|| kalk_zagl_lager_lista_prodavnica() }
+   bZagl := {|| kalk_zagl_lager_lista_prodavnica( hZaglParams ) }
 
    nTUlaz := 0
    nTIzlaz := 0
@@ -266,6 +247,9 @@ FUNCTION kalk_lager_lista_prodavnica()
    nCol0 := 50
    nRbr := 0
 
+   IF f18_start_print( NIL, xPrintOpt,  "LAGER LISTA PRODAVNICA [" + Alltrim(cIdKonto) + "] " + DToC( dDatOd ) + " - " + DToC( dDatDo )  + "  NA DAN: " + DToC( Date() ) ) == "X"
+      RETURN .F.
+   ENDIF
    Eval( bZagl )
 
    DO WHILE !Eof() .AND. cIdFirma + cIdKonto == field->idfirma + field->pkonto .AND. IspitajPrekid()
@@ -281,26 +265,6 @@ FUNCTION kalk_lager_lista_prodavnica()
 
       nMink := roba->mink
 
-/*
-      //IF IsVindija()
-         IF !Empty( cGr )
-            IF AllTrim( cGr ) <> AllTrim( IzSifKRoba( "GR1", cIdRoba, .F. ) )
-               SELECT kalk
-               SKIP
-               LOOP
-            ENDIF
-         ENDIF
-
-         IF ( cPSPDN == "D" )
-            SELECT kalk
-            IF !( kalk->idvd $ "41#42#43" ) .AND. !( kalk->pu_i == "5" )
-               SKIP
-               LOOP
-            ENDIF
-            SELECT roba
-         ENDIF
-      //ENDIF
-*/
       SELECT KALK
 
       nPKol := 0
@@ -314,7 +278,7 @@ FUNCTION kalk_lager_lista_prodavnica()
       nNVI := 0
       nRabat := 0
 
-      IF cTU == "N" .AND. roba->tip $ "TU"
+      IF roba->tip $ "TU"
          SKIP
          LOOP
       ENDIF
@@ -325,7 +289,6 @@ FUNCTION kalk_lager_lista_prodavnica()
             SKIP
             LOOP
          ENDIF
-
 
          IF cPredhStanje == "D"
             IF field->datdok < dDatOd
@@ -345,8 +308,6 @@ FUNCTION kalk_lager_lista_prodavnica()
 
                   kalk_sumiraj_kolicinu( - ( field->kolicina ), 0, @nPKol, 0, lPocStanje, lPrikK2 )
 
-                  // vrijednost sa popustom
-                  // nPMPV -= ( field->mpc + nPor1 ) * field->kolicina
 
                   nPMPV -= field->mpcsapp * field->kolicina
                   nPNV -= field->nc * field->kolicina
@@ -367,7 +328,7 @@ FUNCTION kalk_lager_lista_prodavnica()
             ENDIF
          ENDIF
 
-         IF cTU == "N" .AND. roba->tip $ "TU"
+         IF roba->tip $ "TU"
             SKIP
             LOOP
          ENDIF
@@ -425,11 +386,7 @@ FUNCTION kalk_lager_lista_prodavnica()
       // ne prikazuj stavke 0
       IF cNula == "D" .OR. Round( nMPVU - nMPVI + nPMPV, 2 ) <> 0
 
-         IF PRow() > page_length()
-            FF
-            Eval( bZagl )
-         ENDIF
-
+         check_nova_strana( bZagl, s_oPDF )
          select_o_roba(  cIdRoba )
 
          SELECT kalk
@@ -468,7 +425,7 @@ FUNCTION kalk_lager_lista_prodavnica()
                REPLACE datfaktp WITH dDatDo + 1
                REPLACE kolicina WITH nulaz - nizlaz
                REPLACE idvd WITH "80"
-               REPLACE brdok WITH cBRPST
+               REPLACE brdok WITH cBrDokPocStanje
                REPLACE nc WITH ( nNVU - nNVI + nPNV ) / ( nulaz - nizlaz + nPKol )
                REPLACE mpcsapp WITH ( nMPVU - nMPVI + nPMPV ) / ( nulaz - nizlaz + nPKol )
                REPLACE TMarza2 WITH "A"
@@ -492,7 +449,7 @@ FUNCTION kalk_lager_lista_prodavnica()
                   REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH -1
                   REPLACE idvd WITH "80"
-                  REPLACE brdok WITH cBRPST
+                  REPLACE brdok WITH cBrDokPocStanje
                   REPLACE brfaktp WITH "#KOREK"
                   REPLACE nc WITH 0
                   REPLACE mpcsapp WITH 0
@@ -513,7 +470,7 @@ FUNCTION kalk_lager_lista_prodavnica()
                   REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH 1
                   REPLACE idvd WITH "80"
-                  REPLACE brdok WITH cBRPST
+                  REPLACE brdok WITH cBrDokPocStanje
                   REPLACE brfaktp WITH "#KOREK"
                   REPLACE nc WITH 0
                   REPLACE mpcsapp WITH ;
@@ -546,22 +503,9 @@ FUNCTION kalk_lager_lista_prodavnica()
          SELECT kalk
 
          IF Round( nUlaz - nIzlaz + nPKOL, 2 ) <> 0
-
-            // if cMpcIzSif == "D"
-            // @ prow(), pcol() + 1 SAY _mpc pict kalk_pic_cijena_bilo_gpiccdem()
-            // nTMpv += ( ( nUlaz - nIzlaz + nPKOL ) * _mpc )
-            // else
-            // mpcsapdv
             @ PRow(), PCol() + 1 SAY ( nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ) PICT kalk_pic_cijena_bilo_gpiccdem()
 
-            // if ROUND(( nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ), 2) <> ROUND( _mpc, 2 )
-            // ?? " ERR MPC =", ALLTRIM( STR( _mpc, 12, 2 )  )
-            // endif
-            // endif
-
-         ELSE
-
-            // stanje artikla je 0
+         ELSE // stanje artikla je 0
             @ PRow(), PCol() + 1 SAY 0 PICT kalk_pic_iznos_bilo_gpicdem()
 
             IF Round( ( nMPVU - nMPVI + nPMPV ), 4 ) <> 0
@@ -575,7 +519,7 @@ FUNCTION kalk_lager_lista_prodavnica()
             @ PRow(), PCol() + 1 SAY ( nNVU - nNVI + nPNV + nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ) / 2 PICT "9999999.99"
          ENDIF
 
-         IF Len( aNaz ) > 1 .OR. cPredhStanje == "D" .OR. cPNab == "D"
+         IF Len( aNaz ) > 1 .OR. cPredhStanje == "D" .OR. cPrikazNabavneVrijednosti == "D"
             @ PRow() + 1, 0 SAY ""
             IF Len( aNaz ) > 1
                @ PRow(), nCR  SAY aNaz[ 2 ]
@@ -583,15 +527,11 @@ FUNCTION kalk_lager_lista_prodavnica()
             @ PRow(), nCol0 - 1 SAY ""
          ENDIF
 
-        // IF ( cKontrolnaTabela == "D" )
-        //    AzurKontrolnaTabela( cIdRoba, nUlaz - nIzlaz + nPkol, nMpvU - nMpvI + nPMpv )
-        // ENDIF
-
          IF cPredhStanje == "D"
             @ PRow(), PCol() + 1 SAY nPMPV PICT kalk_pic_iznos_bilo_gpicdem()
          ENDIF
 
-         IF cPNab == "D"
+         IF cPrikazNabavneVrijednosti == "D"
 
             @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_kolicina_bilo_gpickol() ) )
             @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_kolicina_bilo_gpickol() ) )
@@ -609,7 +549,6 @@ FUNCTION kalk_lager_lista_prodavnica()
             @ PRow(), PCol() + 1 SAY _mpc PICT kalk_pic_cijena_bilo_gpiccdem()
 
          ENDIF
-
 
          nTULaz += nUlaz
          nTIzlaz += nIzlaz
@@ -631,13 +570,11 @@ FUNCTION kalk_lager_lista_prodavnica()
             ? Space( 6 ) + roba->barkod
          ENDIF
 
-
       ENDIF
-
    ENDDO
 
-   ? s_cM
-   ? "UKUPNO:"
+   ?U s_cM
+   ?U "UKUPNO:"
 
    @ PRow(), nCol0 - 1 SAY ""
 
@@ -657,7 +594,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    @ PRow(), PCol() + 1 SAY nTMPVU - nTMPVI + nTPMPV PICT kalk_pic_iznos_bilo_gpicdem()
    @ PRow(), PCol() + 1 SAY nTMpv PICT kalk_pic_iznos_bilo_gpicdem()
 
-   IF cPNab == "D"
+   IF cPrikazNabavneVrijednosti == "D"
       @ PRow() + 1, nCol0 - 1 SAY ""
       IF cPredhStanje == "D"
          @ PRow(), PCol() + 1 SAY nTPNV PICT kalk_pic_kolicina_bilo_gpickol()
@@ -670,13 +607,12 @@ FUNCTION kalk_lager_lista_prodavnica()
       @ PRow(), PCol() + 1 SAY nTNVU - nTNVI + nTPNV PICT kalk_pic_iznos_bilo_gpicdem()
    ENDIF
 
-   ? s_cM
+   ?U s_cM
 
-   FF
-   ENDPRINT
+   f18_end_print( NIL, xPrintOpt )
 
    IF lImaGresaka
-      MsgBeep( "Pogledajte artikle za koje je u izvjestaju stavljena oznaka ERR - GRESKA" )
+      MsgBeep( "Pogledati artikle za koje je u izvještaju stavljena oznaka ERR - GREŠKA" )
    ENDIF
 
    IF lPocStanje
@@ -684,38 +620,35 @@ FUNCTION kalk_lager_lista_prodavnica()
          SELECT kalk_pripr
          ZAP
       ELSE
-         renumeracija_kalk_pripr( cBrPSt, "80" )
+         renumeracija_kalk_pripr( cBrDokPocStanje, "80" )
       ENDIF
    ENDIF
-
 
    my_close_all_dbf()
 
    RETURN .T.
 
 
+STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
-// zaglavlje llp
-FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
+   LOCAL cTmp, nPom, cSc1, cSc2
 
-   IF lSint == NIL
-      lSint := .F.
+   IF hZaglParams["sint"] == NIL
+      hZaglParams["sint"] := .F.
    ENDIF
 
    Preduzece()
-   P_COND
-   ?? "KALK: LAGER LISTA  PRODAVNICA ZA PERIOD", dDatOd, "-", dDatDo, " NA DAN "
-   ?? Date(), Space( 12 ), "Str:", Str( ++nTStrana, 3 )
+   // P_COND
 
-   IF !lSint .AND. !Empty( qqIdPartn )
-      ? "Obuhvaceni sljedeci partneri:", Trim( qqIdPartn )
+   IF !hZaglParams["sint"] .AND. !Empty( qqIdPartn )
+      ?U "Obuhvaćeni sljedeći partneri:", Trim( qqIdPartn )
    ENDIF
 
-   IF lSint
-      ? "Kriterij za prodavnice:", qqKonto
+   IF hZaglParams["sint"]
+      ?U "Kriterij za prodavnice:", qqKonto
    ELSE
-      select_o_konto( cIdkonto )
-      ? "Prodavnica:", cIdKonto, "-", konto->naz
+      select_o_konto( hZaglParams["konto"] )
+      ? "Prodavnica:", hZaglParams["konto"], "-", konto->naz
    ENDIF
 
    cSC1 := ""
@@ -724,8 +657,7 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
    SELECT kalk
    ?U s_cM
 
-   IF cPredhStanje == "D"
-
+   IF hZaglParams["predhodno"]
 
       cTmp := " R.  * Artikal  *   Naziv            *jmj*"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
@@ -742,8 +674,6 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
       ?U cTmp
 
-
-
       cTmp := " br. *          *                    *   *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "Kol/MPV", nPom ) + "*"
@@ -758,8 +688,7 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
       ?U cTmp
 
-      IF cPNab == "D"
-
+      IF hZaglParams["nabavna"]
          cTmp := "     *          *                    *   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
          cTmp += REPL( " ", nPom ) + "*"
@@ -800,7 +729,7 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
       ?U cTmp
 
-      IF cPNab == "D"
+      IF hZaglParams["nabavna"]
 
          cTmp := "     *          *                    *   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
@@ -818,7 +747,7 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
       ENDIF
    ENDIF
 
-   IF cPredhStanje == "D"
+   IF hZaglParams["predhodno"]
 
       cTmp := "     *    1     *        2           * 3 *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
@@ -855,57 +784,12 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
    ?U s_cM
 
-   RETURN
-
-
-// kreiranje kontrolne tabele
-STATIC FUNCTION CreTblKontrola()
-
-   LOCAL aDbf
-   LOCAL cCdx
-
-   aDbf := {}
-   cTblKontrola := my_home() + "kontrola.dbf"
-
-   AAdd( aDbf, { "ID", "C", 10, 0 } )
-   AAdd( aDbf, { "kolicina", "N", 12, 2 } )
-   AAdd( aDbf, { "Mpv", "N", 10, 2 } )
-
-   dbCreate( cTblKontrola, aDbf )
-   my_use_temp( "KONTROLA", cTblKontrola, .F., .T. )
-   INDEX ON id TAG "ID"
-
    RETURN .T.
 
-/*
-// azuriranje kontrolne tabele
-STATIC FUNCTION AzurKontrolnaTabela( cIdRoba, nStanje, nMpv )
 
-   LOCAL nArea
+STATIC FUNCTION kalk_prodavnica_llp_odt( hParams )
 
-   nArea := Select()
-
-   SELECT ( F_TMP_1 )
-
-   IF !Used()
-      USE ( cTblKontrola )
-   ENDIF
-
-   SELECT kontrola
-   APPEND BLANK
-   REPLACE id WITH cIdRoba
-   REPLACE kolicina WITH nStanje
-   REPLACE Mpv WITH nMpv
-
-   Select( nArea )
-
-   RETURN .T.
-*/
-
-
-STATIC FUNCTION kalk_prodavnica_llp_odt( params )
-
-   IF !_gen_xml( params )
+   IF !kalk_gen_xml_lager_lista_prodavnica( hParams )
       MsgBeep( "Problem sa generisanjem podataka ili nema podataka !" )
       RETURN .F.
    ENDIF
@@ -920,13 +804,10 @@ STATIC FUNCTION kalk_prodavnica_llp_odt( params )
 
 
 
-// -----------------------------------------------------
-// generisanje xml fajla
-// -----------------------------------------------------
-STATIC FUNCTION _gen_xml( params )
+STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParams )
 
-   LOCAL _idfirma := params[ "idfirma" ]
-   LOCAL _idkonto := params[ "idkonto" ]
+   LOCAL _idfirma := hParams[ "idfirma" ]
+   LOCAL _idkonto := hParams[ "idkonto" ]
    LOCAL _idroba, _mpc, _mpcs
    LOCAL _ulaz, _izlaz, _nv_u, _nv_i, _mpv_u, _mpv_i, _rabat
    LOCAL _t_ulaz, _t_izlaz, _t_nv_u, _t_nv_i, _t_mpv_u, _t_mpv_i, _t_rabat
@@ -934,7 +815,7 @@ STATIC FUNCTION _gen_xml( params )
 
    PRIVATE aPorezi
 
-   select_o_konto( params[ "idkonto" ] )
+   select_o_konto( hParams[ "idkonto" ] )
 
    _t_ulaz := _t_izlaz := _t_nv_u := _t_nv_i := 0
    _t_mpv_u := _t_mpv_i := _t_rabat := 0
@@ -944,13 +825,13 @@ STATIC FUNCTION _gen_xml( params )
 
    xml_subnode( "ll", .F. )
 
-   xml_node( "dat_od", DToC( params[ "datum_od" ] ) )
-   xml_node( "dat_do", DToC( params[ "datum_do" ] ) )
+   xml_node( "dat_od", DToC( hParams[ "datum_od" ] ) )
+   xml_node( "dat_do", DToC( hParams[ "datum_do" ] ) )
    xml_node( "dat", DToC( Date() ) )
    xml_node( "tip", "PRODAVNICA" )
    xml_node( "fid", to_xml_encoding( self_organizacija_id() ) )
    xml_node( "fnaz", to_xml_encoding( self_organizacija_naziv() ) )
-   xml_node( "kid", to_xml_encoding( params[ "idkonto" ] ) )
+   xml_node( "kid", to_xml_encoding( hParams[ "idkonto" ] ) )
    xml_node( "knaz", to_xml_encoding( AllTrim( konto->naz ) ) )
 
    SELECT kalk
@@ -958,7 +839,6 @@ STATIC FUNCTION _gen_xml( params )
    DO WHILE !Eof() .AND. _idfirma + _idkonto == field->idfirma + field->pkonto .AND. IspitajPrekid()
 
       _idroba := field->Idroba
-
       select_o_roba( _idroba )
 
       SELECT kalk
@@ -973,12 +853,12 @@ STATIC FUNCTION _gen_xml( params )
 
       DO WHILE !Eof() .AND. _idfirma + _idkonto + _idroba == field->idfirma + field->pkonto + field->idroba .AND. IspitajPrekid()
 
-         IF field->datdok < params[ "datum_od" ] .OR. field->datdok > params[ "datum_do" ]
+         IF field->datdok < hParams[ "datum_od" ] .OR. field->datdok > hParams[ "datum_do" ]
             SKIP
             LOOP
          ENDIF
 
-         IF field->datdok >= params[ "datum_od" ]
+         IF field->datdok >= hParams[ "datum_od" ]
             // nisu predhodni podaci
             IF field->pu_i == "1"
                kalk_sumiraj_kolicinu( field->kolicina, 0, @_ulaz, 0, .F., .F. )
@@ -1015,8 +895,7 @@ STATIC FUNCTION _gen_xml( params )
 
       ENDDO
 
-      // ne prikazuj stavke 0
-      IF params[ "nule" ] .OR. Round( _mpv_u - _mpv_i, 2 ) <> 0
+      IF hParams[ "nule" ] .OR. Round( _mpv_u - _mpv_i, 2 ) <> 0 // ne prikazuj stavke 0
 
          select_o_koncij( _idkonto )
          select_o_roba( _idroba )
@@ -1103,7 +982,7 @@ STATIC FUNCTION _gen_xml( params )
    my_close_all_dbf()
 
    IF _rbr > 0
-      _ok := .T.
+      RETURN .T.
    ENDIF
 
-   RETURN _ok
+   RETURN .F.
