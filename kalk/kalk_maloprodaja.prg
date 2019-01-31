@@ -149,7 +149,7 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
    LOCAL nBrowseRobaNazivLen := 40
    LOCAL nI
    LOCAL cPomTag
-   LOCAL cPom, cPom2 // , cPrikazi
+   LOCAL cPom, cPom2
 
    PRIVATE ImeKol
    PRIVATE Kol

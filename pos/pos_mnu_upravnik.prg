@@ -14,7 +14,6 @@
 
 FUNCTION pos_main_menu_upravnik()
 
-
    LOCAL aOpc := {}
    LOCAL aOpcexe := {}
    LOCAL nIzbor := 1
@@ -30,85 +29,38 @@ FUNCTION pos_main_menu_upravnik()
    AAdd( aOpc, "R. robno-materijalno poslovanje" )
    AAdd( aOpcexe, {|| pos_menu_robmat() } )
    AAdd( aOpc, "--------------" )
-   AAdd( aOpcexe, nil )
+   AAdd( aOpcexe, NIL )
    AAdd( aOpc, "S. šifarnici" )
    AAdd( aOpcexe, {|| pos_sifarnici() } )
    AAdd( aOpc, "W. administracija pos-a" )
    AAdd( aOpcexe, {|| pos_admin_menu() } )
-   //AAdd( opc, "P. promjena seta cijena" )
-   //AAdd( opcexe, {|| PromIDCijena() } )
+   // AAdd( opc, "P. promjena seta cijena" )
+   // AAdd( opcexe, {|| PromIDCijena() } )
 
    f18_menu( "posu", .F., nIzbor, aOpc, aOpcExe )
 
    closeret
 
-   //RETURN .F.
-
-
-/*
-FUNCTION MMenuUpK()
-
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
-   PRIVATE Izbor := 1
-
-   // Vrsta kase "K" - radna stanica
-
-   AAdd( opc, "1. izvjestaji             " )
-   AAdd( opcexe, {|| pos_izvjestaji() } )
-   AAdd( opc, "--------------------------" )
-   AAdd( opcexe, nil )
-   AAdd( opc, "S. sifarnici" )
-   AAdd( opcexe, {|| pos_sifarnici() } )
-   AAdd( opc, "A. administracija pos-a" )
-   AAdd( opcexe, {|| pos_admin_menu() } )
-
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "uprk" )
-
-   RETURN .F.
-
-
-
-FUNCTION MMenuUpS()
-
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
-   PRIVATE Izbor := 1
-
-   // Vrsta kase "S" - server kasa
-
-   AAdd( opc, "1. izvještaji             " )
-   AAdd( opcexe, {|| pos_izvjestaji() } )
-   AAdd( opc, "2. unos dokumenata" )
-   AAdd( opcexe, {|| pos_menu_dokumenti() } )
-   AAdd( opc, "S. šifarnici" )
-   AAdd( opcexe, {|| pos_sifarnici() } )
-
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "uprs" )
-   closeret
-
-   RETURN .F.
-*/
-
 FUNCTION pos_menu_dokumenti()
 
-   PRIVATE Izbor
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
+   LOCAL nIzbor
+   LOCAL aOpc := {}
+   LOCAL aOpcexe := {}
 
-   Izbor := 1
+   nIzbor := 1
 
-   AAdd( opc, "Z. zaduzenje                       " )
-   AAdd( opcexe, {|| Zaduzenje() } )
-   AAdd( opc, "I. inventura" )
-   AAdd( opcexe, {|| pos_inventura_nivelacija( .T. ) } )
-   AAdd( opc, "N. nivelacija" )
-   AAdd( opcexe, {|| pos_inventura_nivelacija( .F. ) } )
-   AAdd( opc, "P. predispozicija" )
-   AAdd( opcexe, {|| Zaduzenje( "PD" ) } )
-   AAdd( opc, "R. reklamacija-povrat u magacin" )
-   AAdd( opcexe, {|| Zaduzenje( VD_REK ) } )
+   AAdd( aOpc, "Z. zaduženje                       " )
+   AAdd( aOpcexe, {|| pos_zaduzenje() } )
+   AAdd( aOpc, "I. inventura" )
+   AAdd( aOpcexe, {|| pos_inventura_nivelacija( .T. ) } )
+   AAdd( aOpc, "N. nivelacija" )
+   AAdd( aOpcexe, {|| pos_inventura_nivelacija( .F. ) } )
+   AAdd( aOpc, "P. predispozicija" )
+   AAdd( aOpcexe, {|| pos_zaduzenje( "PD" ) } )
+   AAdd( aOpc, "R. reklamacija-povrat u magacin" )
+   AAdd( aOpcexe, {|| pos_zaduzenje( POS_VD_REKLAMACIJA ) } )
 
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "pzdo" )
+   f18_menu_sa_priv_vars_opc_opcexe_izbor( "pos6" )
+   f18_menu( "pos6", .F., nIzbor, aOpc, aOpcexe )
 
-   RETURN
+   RETURN .T.

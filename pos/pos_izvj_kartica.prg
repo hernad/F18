@@ -82,11 +82,9 @@ FUNCTION pos_kartica_artikla()
 
 
    IF Empty( cIdRoba )
-      // Seek2( cIdOdj )
-      seek_pos_pos_2( cIdOdj )
+      seek_pos_pos_2()
    ELSE
-      seek_pos_pos_2( cIdOdj, cIdRoba )
-      // Seek2( cIdOdj + cIdRoba )
+      seek_pos_pos_2( cIdRoba )
       IF pos->idroba <> cIdRoba
          MsgBeep( "Ne postoje traženi podaci !" )
          RETURN .F.
@@ -163,8 +161,7 @@ FUNCTION pos_kartica_artikla()
             nStanje := 0
             nVrijednost := 0
 
-            // SEEK cIdOdj + cIdRoba + DToS( dDatum0 )
-            seek_pos_pos_2( cIdOdj, cIdRoba, dDatum0 )
+            seek_pos_pos_2(cIdRoba, dDatum0 )
 
          ELSE
             DO WHILE !Eof() .AND. POS->( IdOdj + IdRoba ) == ( cIdOdj + cIdRoba ) .AND. POS->Datum < dDatum0

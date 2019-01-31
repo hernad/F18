@@ -81,7 +81,7 @@ Sifra    Naziv              JMJ Kolicina
    ?? PadL ( "IZNOS DOKUMENTA (" + Trim ( gDomValuta ) + ")",  10  + nRobaSir ), TRANS ( nFin, "9,999,999.99" )
    ? m
 
-   PaperFeed()
+   //PaperFeed()
 
    ENDPRINT
    SELECT pos_doks

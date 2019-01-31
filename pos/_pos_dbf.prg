@@ -304,21 +304,21 @@ FUNCTION pos_iznos_dokumenta( lUI )
 
    IF ( ( lUI == NIL ) .OR. lUI )
 
-      IF pos_doks->IdVd $ POS_VD_ZAD + "#" + POS_VD_POCETNO_STANJE + "#" + VD_REK // ulazi
+      IF pos_doks->IdVd $ POS_VD_ZADUZENJE + "#" + POS_VD_POCETNO_STANJE + "#" + POS_VD_REKLAMACIJA // ulazi
 
          seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
          DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
             nIznos += pos->kolicina * pos->cijena
             SKIP
          ENDDO
-         IF pos_doks->idvd == VD_REK
+         IF pos_doks->idvd == POS_VD_REKLAMACIJA
             nIznos := -nIznos
          ENDIF
       ENDIF
    ENDIF
 
    IF ( ( lUI == NIL ) .OR. !lUI ) // izlazi
-      IF pos_doks->idvd $ POS_VD_RACUN + "#" + VD_OTP + "#" + VD_RZS + "#" + VD_PRR + "#" + "IN" + "#" + POS_VD_NIV
+      IF pos_doks->idvd $ POS_VD_RACUN + "#" + POS_VD_OTPIS + "#" + VD_RZS + "#" + VD_PRR + "#" + "IN" + "#" + POS_VD_NIV
 
          seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
 
@@ -373,11 +373,6 @@ FUNCTION GoTop2()
    RETURN .T.
 
 
-
-/*
-    Opis: da li ažurirani račun sadrži traženi artikal
- */
-
 FUNCTION pos_racun_sadrzi_artikal( cIdPos, cIdVd, dDatum, cBroj, cIdRoba )
 
    LOCAL lRet := .F.
@@ -394,188 +389,3 @@ FUNCTION pos_racun_sadrzi_artikal( cIdPos, cIdVd, dDatum, cBroj, cIdRoba )
    ENDIF
 
    RETURN lRet
-
-
-/*
--- FUNCTION pos_import_fmk_roba()
-
-   LOCAL _location := fetch_metric( "pos_import_fmk_roba_path", my_user(), PadR( "", 300 ) )
-   LOCAL _cnt := 0
-   LOCAL hRec
-   LOCAL lOk := .T.
-   LOCAL hParams
-
-   o_roba()
-
-   _location := PadR( AllTrim( _location ), 300 )
-
-   Box(, 1, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "lokacija:" GET _location PICT "@S50"
-   READ
-   BoxC()
-
-   IF LastKey() == K_ESC
-      RETURN .F.
-   ENDIF
-
-   set_metric( "pos_import_fmk_roba_path", my_user(), _location )
-
-   SELECT ( F_TMP_1 )
-   IF Used()
-      USE
-   ENDIF
-
-   my_use_temp( "TOPS_ROBA", AllTrim( _location ), .F., .T. )
-   INDEX ON ( "id" ) TAG "ID"
-
-   SELECT tops_roba
-   SET ORDER TO TAG "ID"
-   GO TOP
-
-   run_sql_query( "BEGIN" )
-   IF !f18_lock_tables( { "roba" }, .T. )
-      run_sql_query( "ROLLBACK" )
-      RETURN .F.
-   ENDIF
-
-   Box(, 1, 60 )
-
-   DO WHILE !Eof()
-
-      cIdRoba := field->id
-
-      select_o_roba( cIdRoba )
-
-      IF !Found()
-         APPEND BLANK
-      ENDIF
-
-      hRec := dbf_get_rec()
-
-      hRec[ "id" ] := tops_roba->id
-
-      hRec[ "naz" ] := tops_roba->naz
-      hRec[ "jmj" ] := tops_roba->jmj
-      hRec[ "idtarifa" ] := tops_roba->idtarifa
-      hRec[ "barkod" ] := tops_roba->barkod
-      hRec[ "tip" ] := tops_roba->tip
-      hRec[ "mpc" ] := tops_roba->cijena1
-      hRec[ "mpc2" ] := tops_roba->cijena2
-
-      IF tops_roba->( FieldPos( "fisc_plu" ) ) <> 0
-         hRec[ "fisc_plu" ] := tops_roba->fisc_plu
-      ENDIF
-
-      ++_cnt
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "import roba: " + hRec[ "id" ] + ":" + PadR( hRec[ "naz" ], 20 ) + "..."
-      lOk := update_rec_server_and_dbf( "roba", hRec, 1, "CONT" )
-
-      IF !lOk
-         EXIT
-      ENDIF
-
-      SELECT tops_roba
-      SKIP
-
-   ENDDO
-
-   BoxC()
-
-   IF lOk
-      hParams := hb_Hash()
-      hParams[ "unlock" ] := { "roba" }
-      run_sql_query( "COMMIT", hParams )
-   ELSE
-      run_sql_query( "ROLLBACK" )
-   ENDIF
-
-   SELECT ( F_TMP_1 )
-   USE
-
-   IF lOk .AND. _cnt > 0
-      MsgBeep( "Update " + AllTrim( Str( _cnt ) ) + " zapisa !" )
-   ENDIF
-
-   CLOSE ALL
-
-   RETURN .T.
-*/
-
-/*
-
-FUNCTION pos_brisi_nepostojece_dokumente()
-
-   LOCAL cSql, oQry
-   LOCAL cIdPos, cIdVd, cBrDok, dDatum
-   LOCAL nCount := 0
-   LOCAL oRow
-
-   IF !spec_funkcije_sifra( "ADMIN" )
-      MsgBeep( "Opcija nije dostupna !" )
-      RETURN .F.
-   ENDIF
-
-   cSql := "SELECT p.idpos, p.idvd, p.datum, p.brdok "
-   cSql += "FROM " + F18_PSQL_SCHEMA_DOT + "pos_pos p "
-   cSql += "WHERE ( SELECT COUNT(*) FROM " + F18_PSQL_SCHEMA_DOT + "pos_doks d "
-   cSql += "         WHERE d.idpos = p.idpos "
-   cSql += "           AND d.idvd = p.idvd "
-   cSql += "           AND d.datum = p.datum "
-   cSql += "           AND d.brdok = p.brdok ) = 0 "
-   cSql += "GROUP BY p.idpos, p.idvd, p.datum, p.brdok "
-   cSql += "ORDER BY p.idpos, p.idvd, p.datum, p.brdok "
-
-   MsgO( "SQL upit u toku, sačekajte trenutak ... " )
-   oQry := run_sql_query( cSql )
-   MsgC()
-
-   IF !is_var_objekat_tpqquery( oQry )
-      MsgBeep( "Problem sa SQL upitom !" )
-      RETURN .F.
-   ENDIF
-
-   IF oQry:LastRec() > 0
-      IF Pitanje(, "Izbrisati ukupno " + AllTrim( Str( oQry:LastRec() ) ) + " dokumenata (D/N) ?", "N" ) == "N"
-         RETURN .F.
-      ENDIF
-   ENDIF
-
-   //o_pos_doks()
-   //o_pos_pos()
-
-   oQry:GoTo( 1 )
-
-   Box(, 1, 50 )
-
-   DO WHILE !oQry:Eof()
-
-      oRow := oQry:GetRow()
-
-      dDatum := query_row( oRow, "datum" )
-      cIdPos := query_row( oRow, "idpos" )
-      cIdVd := query_row( oRow, "idvd" )
-      cBrDok := query_row( oRow, "brdok" )
-
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Brišem dokument: " + cIdPos + "-" + cIdVd + "-" + cBrDok + " od datuma " + DToC( dDatum )
-
-    --  IF !pos_brisi_dokument( cIdPos, cIdVd, dDatum, cBrDok )
-         BoxC()
-         MsgBeep( "Problem sa brisanjem dokumenta !" )
-         RETURN .F.
-      ENDIF
-
-      ++nCount
-
-      oQry:Skip()
-
-   ENDDO
-
-   BoxC()
-
-   IF nCount > 0
-      MsgBeep( "Izbrisao ukupno " + AllTrim( Str( nCount ) ) + " dokumenta !"  )
-   ENDIF
-
-   RETURN .T.
-
-*/

@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION pos_realizacija_radnik
 
    PARAMETERS lTekuci, fPrik, fZaklj
@@ -170,7 +169,7 @@ FUNCTION pos_realizacija_radnik
    // ispis izvjestaja
    IF fPrik $ "PO"
       nTotal := 0
-      nTotal2 := 0
+    //  nTotal2 := 0
       nTotal3 := 0
       SELECT POM
       SET ORDER TO TAG "1"
@@ -178,7 +177,7 @@ FUNCTION pos_realizacija_radnik
       DO WHILE !Eof()
          _IdRadnik := POM->IdRadnik
          nTotRadn := 0
-         nTotRadn2 := 0
+      //   nTotRadn2 := 0
          nTotRadn3 := 0
          IF ! lTekuci
             ? _IdRadnik + "  " + PadR ( find_pos_osob_naziv( _IdRadnik ), 30 )
@@ -194,11 +193,11 @@ FUNCTION pos_realizacija_radnik
          DO WHILE !Eof() .AND. POM->IdRadnik == _IdRadnik
             _IdVrsteP := POM->IdVrsteP
             nTotVP := 0
-            nTotVP2 := 0
+        //    nTotVP2 := 0
             nTotVP3 := 0
             DO WHILE !Eof() .AND. POM->( IdRadnik + IdVrsteP ) == ( _IdRadnik + _IdVrsteP )
                nTotVP += POM->Iznos
-               nTotVP2 += pom->iznos2
+          //     nTotVP2 += pom->iznos2
                nTotVP3 += pom->iznos3
 
                IF fPrikPrem == "D"
@@ -219,7 +218,7 @@ FUNCTION pos_realizacija_radnik
             ? Space ( 5 ) + PadR ( VRSTEP->Naz, 24 ), Str ( nTotVP, 10, 2 )
 
             nTotRadn += nTotVP
-            nTotRadn2 += nTotVP2
+        //    nTotRadn2 += nTotVP2
             nTotRadn3 += nTotVP3
 
             SELECT POM
@@ -234,9 +233,7 @@ FUNCTION pos_realizacija_radnik
          ENDIF
 
          ? PadL ( "UKUPNO RADNIK (" + _idradnik + "):", 29 ), Str ( nTotRadn, 10, 2 )
-         IF nTotRadn2 <> 0
-            ? PadL ( "PARTICIPACIJA:", 29 ), Str ( nTotRadn2, 10, 2 )
-         ENDIF
+
          IF nTotRadn3 <> 0
             ? PadL ( NenapPop(), 29 ), Str ( nTotRadn3, 10, 2 )
             ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotRadn - nTotRadn3 + nTotRadn2, 10, 2 )
@@ -244,7 +241,7 @@ FUNCTION pos_realizacija_radnik
          ? Replicate ( "-", 40 )
 
          nTotal += nTotRadn
-         nTotal2 += nTotRadn2
+      //   nTotal2 += nTotRadn2
          nTotal3 += nTotRadn3
       ENDDO
 
@@ -277,7 +274,7 @@ FUNCTION pos_realizacija_radnik
       SET ORDER TO TAG "2"
       GO TOP
       nTotal := 0
-      nTotal2 := 0
+    //  nTotal2 := 0
       nTotal3 := 0
       DO WHILE !Eof()
          select_o_roba( POM->IdRoba )
@@ -290,33 +287,33 @@ FUNCTION pos_realizacija_radnik
          ENDIF
          _IdRoba := POM->IdRoba
          nRobaIzn := 0
-         nRobaIzn2 := 0
+        // nRobaIzn2 := 0
          nRobaIzn3 := 0
          DO WHILE !Eof() .AND. POM->IdRoba == _IdRoba
             _IdCijena := POM->IdCijena
             nIzn := 0
-            nIzn2 := 0
+          //  nIzn2 := 0
             nIzn3 := 0
             nKol := 0
             DO WHILE !Eof() .AND. POM->( IdRoba + IdCijena ) == ( _IdRoba + _IdCijena )
                nKol += POM->Kolicina
                nIzn += POM->Iznos
-               nIzn2 += POM->Iznos2
+            //   nIzn2 += POM->Iznos2
                nIzn3 += POM->Iznos3
                SELECT POM
                SKIP
             ENDDO
             ? PadL ( _IdCijena, 11 ), Str ( nKol, 12, 3 ), Str ( nIzn, 15, 2 )
             nTotal += nIzn
-            nTotal2 += nIzn2
+          //  nTotal2 += nIzn2
             nTotal3 += nIzn3
          ENDDO
       ENDDO
       ? REPL ( "=", 40 )
       ? PadL ( "U K U P N O", 24 ), Str ( nTotal, 15, 2 )
-      IF nTotal2 <> 0
-         ? PadL ( "PARTICIPACIJA:", 24 ), Str ( nTotal2, 15, 2 )
-      ENDIF
+      //IF nTotal2 <> 0
+      //   ? PadL ( "PARTICIPACIJA:", 24 ), Str ( nTotal2, 15, 2 )
+      //ENDIF
       IF nTotal3 <> 0
          ? PadL ( NenapPop(), 24 ), Str ( nTotal3, 15, 2 )
          ? PadL ( "UKUPNO NAPLATA:", 24 ), Str ( nTotal - nTotal3 + nTotal2, 15, 2 )
@@ -324,7 +321,7 @@ FUNCTION pos_realizacija_radnik
       ? REPL ( "=", 40 )
    ENDIF
    IF lTekuci
-      PaperFeed()
+      //PaperFeed()
       IF fZaklj
          ENDPRN2
       ELSE

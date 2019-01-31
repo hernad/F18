@@ -79,6 +79,9 @@
 #define F18_PSQL_SCHEMA            "fmk"
 #define F18_PSQL_SCHEMA_DOT        "fmk."
 
+#define F18_PSQL_KNJIGOVODSTVO_SCHEMA   "fmk"
+
+
 
 #xcommand LOG_CALL_STACK <cLogStr>                 ;
   => FOR nI := 1 TO 30                             ;
@@ -551,10 +554,10 @@
 #define SP_N      "N"           // nivelacija
 
 // vrste dokumenata
-#define POS_VD_RACUN        "42"       // racuni
-#define POS_VD_ZAD       "16"       // zaduzenje
-#define VD_OTP       "95"       // otpis
-#define VD_REK       "98"       // reklamacija
+#define POS_VD_RACUN        "42"
+#define POS_VD_ZADUZENJE     "16"
+#define POS_VD_OTPIS         "95"
+#define POS_VD_REKLAMACIJA   "98"
 #define POS_VD_INV       "IN"       // inventura
 #define POS_VD_NIV       "NI"       // nivelacija
 #define VD_RZS       "96"       // razduzenje sirovina-otprema pr. magacina

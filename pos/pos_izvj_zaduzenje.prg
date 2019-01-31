@@ -49,7 +49,7 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
             cPom += "PREDISPOZICIJA "
             fPred := .T.
          ELSE
-            cPom += "ZADUZENJE "
+            cPom += "ZADUŽENJE "
          ENDIF
       ENDIF
 
@@ -240,7 +240,7 @@ FUNCTION PrepisZad( cNazDok )
 
    ? PadL ( AllTrim ( OSOB->Naz ), nSir - 9 )
 
-   PaperFeed()
+   //PaperFeed()
 
    ENDPRINT
 

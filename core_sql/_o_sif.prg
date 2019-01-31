@@ -156,7 +156,7 @@ FUNCTION select_o_tarifa( cId )
 FUNCTION find_tarifa_by_id( cId )
 
    LOCAL cAlias := "TARIFA"
-   LOCAL cSqlQuery := "select * from fmk.tarifa"
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema("tarifa")
    LOCAL cIdSql
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )

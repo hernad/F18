@@ -21,11 +21,7 @@ FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
    LOCAL hParams
 
    run_sql_query( "BEGIN" )
-   //IF !f18_lock_tables( { "pos_pos", "pos_doks", "roba" }, .T. )
-    //  run_sql_query( "ROLLBACK" )
-    //  MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju." )
-    //  RETURN lRet
-   //ENDIF
+
 
    SELECT PRIPRZ
    GO TOP
@@ -46,11 +42,10 @@ FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
    IF lOk
 
       SELECT PRIPRZ
-
       DO WHILE !Eof()
 
          SELECT PRIPRZ
-         lOk := azuriraj_artikal_u_sifrarniku()
+         lOk := pos_azuriraj_artikal_u_sifarniku( cIdVd )
 
          IF !lOk
             EXIT
@@ -234,7 +229,7 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
 
          SELECT PRIPRZ
          IF cTipDok <> "IN"
-            azuriraj_artikal_u_sifrarniku()
+            pos_azuriraj_artikal_u_sifarniku(cIdVd)
          ENDIF
 
          SELECT PRIPRZ
@@ -267,20 +262,18 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
 
 
 
-STATIC FUNCTION azuriraj_artikal_u_sifrarniku()
+STATIC FUNCTION pos_azuriraj_artikal_u_sifarniku(cIdVd)
 
    LOCAL lOk := .T.
    LOCAL hRec
-   LOCAL _field_mpc
    LOCAL _update := .F.
-
+   LOCAL cFieldPOSMPC
 
    IF gSetMPCijena == "1"
-      _field_mpc := "mpc"
+      cFieldPOSMPC := "mpc"
    ELSE
-      _field_mpc := "mpc" + AllTrim( gSetMPCijena )
+      cFieldPOSMPC := "mpc" + AllTrim( gSetMPCijena )
    ENDIF
-
 
    lNovi := .F.
 
@@ -297,9 +290,9 @@ STATIC FUNCTION azuriraj_artikal_u_sifrarniku()
    hRec[ "jmj" ] := priprz->jmj
 
    IF cIdVd == "NI"
-      hRec[ _field_mpc ] := Round( priprz->ncijena, 3 )
+      hRec[ cFieldPOSMPC ] := Round( priprz->ncijena, 3 )
    ELSE
-      hRec[ _field_mpc ] := Round( priprz->cijena, 3 )
+      hRec[ cFieldPOSMPC ] := Round( priprz->cijena, 3 )
    ENDIF
 
    hRec[ "idtarifa" ] := priprz->idtarifa

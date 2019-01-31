@@ -201,16 +201,15 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
          ELSEIF cOdg == "D"
             pos_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T. )
-
          ENDIF
 
       CASE pos_doks->IdVd == "16"
-         PrepisZad( "ZADUZENJE " )
+         PrepisZad( "ZADUŽENJE " )
 
-      CASE pos_doks->IdVd == VD_OTP
+      CASE pos_doks->IdVd == POS_VD_OTPIS
          PrepisZad( "OTPIS " )
 
-      CASE pos_doks->IdVd == VD_REK
+      CASE pos_doks->IdVd == POS_VD_REKLAMACIJA
          PrepisZad( "REKLAMACIJA" )
          // CASE pos_doks->IdVd == VD_RZS
          // PrepisRazd()

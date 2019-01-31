@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-/* Zaduzenje(cIdVd)
+/* pos_zaduzenje(cIdVd)
  *     Dokument zaduzenja
  *
  *  cIdVD -  16 ulaz
@@ -21,11 +21,11 @@
  *           96 razduzenje sirovina - ako se radi o proizvodnji
  *           PD - predispozicija
  *
- *  Zaduzenje odjeljenje/punktova robama/sirovinama
+ *  pos_zaduzenje odjeljenje/punktova robama/sirovinama
  *       lForsSir .T. - radi se o forsiranom zaduzenju odjeljenja
  *                           sirovinama
  */
-FUNCTION Zaduzenje
+FUNCTION pos_zaduzenje
 
    PARAMETERS cIdVd
 
@@ -33,7 +33,7 @@ FUNCTION Zaduzenje
    LOCAL cOdg
    LOCAL nSign
 
-   IF gSamoProdaja == "D" .AND. ( cIdVd <> VD_REK )
+   IF gSamoProdaja == "D" .AND. ( cIdVd <> POS_VD_REKLAMACIJA )
       MsgBeep( "Ne možete vršiti unos zaduženja !" )
       RETURN .F.
    ENDIF
@@ -110,7 +110,7 @@ FUNCTION Zaduzenje
 
    fSadAz := .F.
 
-   IF ( cIdVd <> VD_REK ) .AND. pos_preuzmi_iz_kalk( @cIdVd, @cBrDok )
+   IF ( cIdVd <> POS_VD_REKLAMACIJA ) .AND. pos_preuzmi_iz_kalk( @cIdVd, @cBrDok )
 
       _from_kalk := .T.
 
@@ -185,7 +185,7 @@ FUNCTION Zaduzenje
       _IdCijena := "1"
       _Prebacen := OBR_NIJE
       _MU_I := cUI_U
-      IF cIdVd == VD_OTP
+      IF cIdVd == POS_VD_OTPIS
          _MU_I := cUI_I
       ENDIF
 

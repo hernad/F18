@@ -317,11 +317,10 @@ FUNCTION RacFuter( cIdRadnik, cSmjena )
    IF !Empty( cStr )
       QOut( cStr )
    ENDIF
-   PaperFeed ()
+   //PaperFeed ()
    gOtvorStr()
 
    RETURN .T.
-
 
 
 FUNCTION seek_pos_db( cPosDb, cIdPos, cIdVD, dDatumRn, cBrDok )
@@ -336,7 +335,6 @@ FUNCTION seek_pos_db( cPosDb, cIdPos, cIdVD, dDatumRn, cBrDok )
    // POS
 
    RETURN seek_pos_pos( cIdPos, cIdVD, dDatumRn, cBrDok )
-
 
 
 FUNCTION pos_stampa_priprema( cIdPos, dDatBrDok, fEkran, lViseOdjednom, lOnlyFill )

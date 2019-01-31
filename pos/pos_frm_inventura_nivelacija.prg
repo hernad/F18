@@ -143,10 +143,8 @@ FUNCTION pos_inventura_nivelacija()
          SELECT priprz
          Scatter()
 
-         //SELECT pos
-         //SET ORDER TO TAG "2"
-         //SEEK cIdOdj
-         seek_pos_pos_2( cIdOdj )
+
+         seek_pos_pos_2()
          DO WHILE !Eof() .AND. field->idodj == cIdOdj
 
             IF pos->datum > dDatRada
@@ -692,11 +690,7 @@ STATIC FUNCTION update_ip_razlika()
    GO TOP
    _rec2 := dbf_get_rec()
 
-   //SELECT pos
-   //SET ORDER TO TAG "2"
-   // "2", "IdOdj + idroba + DTOS(Datum)
-   //SEEK cIdOdj
-   seek_pos_pos_2( cIdOdj )
+   seek_pos_pos_2()
 
    DO WHILE !Eof() .AND. field->idodj == cIdOdj
 
@@ -903,7 +897,7 @@ FUNCTION RacKol( cIdOdj, cIdRoba, nKol )
    //SET ORDER TO TAG "2"
    nKol := 0
 
-   seek_pos_pos_2( cIdOdj, cIdRoba )
+   seek_pos_pos_2(cIdRoba )
 
    DO WHILE !Eof() .AND. pos->IdOdj + pos->IdRoba  == ( cIdOdj + cIdRoba ) .AND. pos->Datum <= dDatRada
 

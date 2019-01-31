@@ -131,7 +131,6 @@ FUNCTION fin_stampa_liste_naloga()
 
    DO WHILE !Eof()
 
-
       IF !Empty( cIdVN ) .AND. idvn <> cIDVN
          SKIP
          LOOP

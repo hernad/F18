@@ -30,7 +30,7 @@ FUNCTION pos_stampa_dokumenta()
 
 
    cIdPos := gIdPos
-   cDoks := POS_VD_RACUN + "#" + POS_VD_ZAD + "#" + "IN" + "#" + POS_VD_NIV + "#" + VD_RZS
+   cDoks := POS_VD_RACUN + "#" + POS_VD_ZADUZENJE + "#" + "IN" + "#" + POS_VD_NIV + "#" + VD_RZS
 
    cIdRadnik := Space( FIELD_LEN_POS_OSOB_ID )
    cIdVd := Space( 2 )

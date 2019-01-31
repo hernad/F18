@@ -427,7 +427,6 @@ METHOD set_module_gvars()
 
    // gRobaBlock := {| Ch | pos_roba_block( Ch ) }
 
-   altd()
    radna_prodavnica( gIdPos )
    set_sql_search_path( radna_prodavnica_sql_schema() )
 

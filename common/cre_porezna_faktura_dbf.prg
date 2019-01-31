@@ -368,20 +368,14 @@ FUNCTION porezna_faktura_azur_podataka_o_kupcu( cIdPos )
       RETURN .F.
    ENDIF
 
-
    IF !begin_sql_tran_lock_tables( { cTabela }  )
       RETURN .F.
    ENDIF
 
-
    SELECT drn
    GO TOP
 
-   //SELECT dokspf
-   //SEEK cIdPos + "42" + DToS( drn->datdok ) + drn->brdok
    seek_pos_dokspf( cIdPos, "42", drn->brdok, drn->datdok)
-
-
    IF !Found()
       APPEND BLANK
    ENDIF
@@ -401,7 +395,6 @@ FUNCTION porezna_faktura_azur_podataka_o_kupcu( cIdPos )
    hRec[ "knaz" ] := cKNaziv
    hRec[ "kadr" ] := cKAdres
    hRec[ "kidbr" ] := cKIdBroj
-
    update_rec_server_and_dbf( cTabela, hRec, 1, "CONT" )
 
    hParams := hb_Hash()

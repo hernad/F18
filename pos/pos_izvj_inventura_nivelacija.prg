@@ -199,7 +199,7 @@ FUNCTION pos_stampa_zaduzenja_inventure( lPrikazStavke0Nepromjenjene, lAzurirana
 
    pos_rekapitulacija_tarifa( aTarife )
 
-   PaperFeed ()
+   // PaperFeed ()
 
    ENDPRINT
 
@@ -230,7 +230,7 @@ FUNCTION StampaPLI( cBrDok )
       ? "----------------------------------------"
       SKIP
    ENDDO
-   PaperFeed ()
+  // PaperFeed ()
    ENDPRINT
 
    RETURN .T.

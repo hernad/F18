@@ -205,13 +205,13 @@ CREATE INDEX pos_doks_id6
 
 */
 
-FUNCTION seek_pos_pos_2( cIdOdj, cIdRoba, dDatum )
+FUNCTION seek_pos_pos_2( cIdRoba, dDatum )
 
    LOCAL hParams := hb_Hash()
 
-   IF cIdOdj != NIL
-      hParams[ "idodj" ] := cIdOdj
-   ENDIF
+//   IF cIdOdj != NIL
+//      hParams[ "idodj" ] := cIdOdj
+//   ENDIF
 
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba

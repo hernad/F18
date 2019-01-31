@@ -48,21 +48,14 @@ FUNCTION pos_pdv_po_tarifama
       cIdOdj := Space( 2 )
    ENDIF
 
-   // o_tarifa()
-
-
    // IF gVrstaRS <> "S"
    cIdPos := gIdPos
    // ENDIF
 
    IF fSolo
-      // IF gVrstaRS <> "K"
-      AAdd ( aNiz, { "Prod.mjesto (prazno-svi)    ", "cIdPos", "cIdPos='X' .or. empty(cIdPos).or.p_pos_kase(cIdPos)", "@!", } )
-      // ENDIF
 
-      // IF gVodiOdj == "D"
-      // AAdd ( aNiz, { "Odjeljenje (prazno-sva)", "cIdOdj", ".t.", "@!", } )
-      // ENDIF
+      AAdd ( aNiz, { "Prod.mjesto (prazno-svi)    ", "cIdPos", "cIdPos='X' .or. empty(cIdPos).or.p_pos_kase(cIdPos)", "@!", } )
+
 
       AAdd ( aNiz, { "Tarife (prazno sve)", "cTarife",, "@S10", } )
       AAdd ( aNiz, { "Izvjestaj se pravi od datuma", "dDatum0",,, } )
@@ -94,14 +87,14 @@ FUNCTION pos_pdv_po_tarifama
       aTarife := {}  // inicijalizuj matricu tarifa
 
       IF fSolo
-         ?? gP12cpi
+         // ?? gP12cpi
 
          IF cNaplaceno == "3"
-            ? PadC( "**** OBRACUN ZA NAPLACENI IZNOS ****", LEN_TRAKA )
+            ?U PadC( "**** OBRAČUN ZA NAPLAĆENI IZNOS ****", LEN_TRAKA )
          ENDIF
 
-         ? PadC( "POREZI PO TARIFAMA NA DAN " + FormDat1( gDatum ), LEN_TRAKA )
-         ? PadC( "-------------------------------------", LEN_TRAKA )
+         ?U PadC( "POREZI PO TARIFAMA NA DAN " + FormDat1( gDatum ), LEN_TRAKA )
+         ?U PadC( "-------------------------------------", LEN_TRAKA )
          ?
          ? "PROD.MJESTO: "
 
@@ -125,7 +118,7 @@ FUNCTION pos_pdv_po_tarifama
             ?
          ENDIF
          IF cNaplaceno == "3"
-            ? PadC( "**** OBRACUN ZA NAPLACENI IZNOS ****", LEN_TRAKA )
+            ?U PadC( "**** OBRAČUN ZA NAPLAĆENI IZNOS ****", LEN_TRAKA )
          ENDIF
          ? PadC ( "REKAPITULACIJA POREZA PO TARIFAMA", LEN_TRAKA )
          IF ( grbReduk < 1 )
@@ -209,9 +202,6 @@ FUNCTION pos_pdv_po_tarifama
    SELECT pos
    SET FILTER TO
 
-   // IF gVrstaRS <> "S"
-   PaperFeed ()
-   // ENDIF
 
    IF fSolo
       ENDPRINT

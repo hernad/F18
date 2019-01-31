@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION pos_izvjestaji()
 
    PRIVATE Izbor := 1
@@ -31,12 +30,12 @@ FUNCTION pos_izvjestaji()
    // ELSE
    // server, samostalna kasa TOPS
 
-   AAdd( opc, "2. stanje artikala ukupno" )
+   AAdd( opc, "2. stanje artikala" )
    AAdd( opcexe, {|| pos_stanje_artikala() } )
 
    // IF gVodiOdj == "D"
-   AAdd( opc, "3. stanje artikala po odjeljenjima" )
-   AAdd( opcexe, {|| pos_stanje_artikala_po_odjeljenjima() } )
+  // AAdd( opc, "3. stanje artikala prodajno mjesto" )
+//   AAdd( opcexe, {|| pos_stanje_artikala_po_odjeljenjima() } )
    // ELSE
    // AAdd( opc, "--------------------" )
    // AAdd( opcexe, nil )

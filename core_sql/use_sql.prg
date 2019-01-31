@@ -161,6 +161,10 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
+   IF cTable == "tarifa" .OR. cTable == "partn" //  tarifa, partn se uvijek uzimaju iz knjigovodstva
+      RETURN F18_PSQL_KNJIGOVODSTVO_SCHEMA + "." + cTable
+   ENDIF
+
    RETURN sql_primarna_schema() + "." + cTable
 
 
@@ -177,14 +181,12 @@ FUNCTION use_sql( cTable, cSqlQuery, cAlias )
    ENDIF
 
    pConn := sql_data_conn():pDB
-
    IF HB_ISNIL( pConn )
       error_bar( "SQL", "SQLMIX pDB NIL?!" + cTable )
       RETURN .F.
    ENDIF
 
    rddSetDefault( "SQLMIX" )
-
    IF rddInfo( 1001, { "POSTGRESQL", pConn } ) == 0  // #define RDDI_CONNECT          1001
       LOG_CALL_STACK cLogMsg
       ?E "Unable connect to the PSQLserver", cLogMsg

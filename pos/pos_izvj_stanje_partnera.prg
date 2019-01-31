@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION pos_rpt_stanje_partnera()
 
    LOCAL nPom
@@ -259,7 +258,7 @@ FUNCTION pos_rpt_stanje_partnera()
    ENDIF
 
    // IF gVrstaRS <> "S"
-   PaperFeed()
+   //PaperFeed()
    // ENDIF
 
    ENDPRINT

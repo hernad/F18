@@ -11,343 +11,190 @@
 
 #include "f18.ch"
 
-FUNCTION pos_stanje_artikala
+STATIC s_oPDF
 
-   PARAMETERS cDat, cSmjena
+FUNCTION pos_stanje_artikala()
 
    LOCAL nStanje
    LOCAL nSign := 1
    LOCAL cSt
    LOCAL nVrijednost
    LOCAL nCijena := 0
-   LOCAL cRSdbf
+   LOCAL cIdRoba
+   LOCAL nRobaNazivSirina := 29
+   LOCAL cLijevaMargina := ""
 
-   // PRIVATE cIdDio := Space ( 2 )
-   PRIVATE cIdOdj := Space ( 2 )
+   // LOCAL cRSdbf
+   LOCAL xPrintOpt, bZagl
+
+   PRIVATE cIdPos
+   PRIVATE dDatum
    PRIVATE cRoba := Space( 60 )
-   PRIVATE cLM := ""
-   PRIVATE nSir := 40
-   PRIVATE nRob := 29
    PRIVATE cNule := "N"
 
-   fZaklj := iif ( PCount() == 0, .F., .T. )
-
-   IF !fZaklj
-      PRIVATE cDat := gDatum, cSmjena := " "
-   ENDIF
-
-   // o_pos_kase()
-   // o_pos_odj()
-   // o_sifk()
-   // o_sifv()
-   // o_roba()
-   // o_pos_pos()
-
+   dDatum := gDatum
    cIdPos := gIdPos
 
-   IF fZaklj
-      // kod zakljucenja smjene
-      aUsl1 := ".t."
-   ELSE
-
-      aNiz := {}
-      // IF cVrstaRs <> "K"
-      AAdd ( aNiz, { "Prodajno mjesto (prazno-svi)", "cIdPos", "cIdpos='X'.or.empty(cIdPos).or. p_pos_kase(@cIdPos)", "@!", } )
-      // ENDIF
-
-      // IF gVodiodj == "D"
-      // AAdd( aNiz, { "Odjeljenje (prazno-sva)", "cIdOdj", "Empty (cIdOdj).or.P_Odj(@cIdOdj)", "@!", } )
-      // ENDIF
-
-      AAdd ( aNiz, { "Artikli  (prazno-svi)", "cRoba",, "@!S30", } )
-      AAdd ( aNiz, { "Izvjestaj se pravi za datum", "cDat",,, } )
-
-      //IF gVSmjene == "D"
-      //   AAdd ( aNiz, { "Smjena", "cSmjena",,, } )
-      //ENDIF
-
-      AAdd ( aNiz, { "Stampati artikle sa stanjem 0", "cNule", "cNule$'DN'", "@!", } )
-      DO WHILE .T.
-         IF !VarEdit( aNiz, 10, 5, 21, 74, 'USLOVI ZA IZVJESTAJ "STANJE ODJELJENJA"', "B1" )
-            CLOSERET
-         ENDIF
-         aUsl1 := Parsiraj( cRoba, "IdRoba", "C" )
-         IF aUsl1 <> NIL
-            EXIT
-         ELSE
-            Msg( "Kriterij za artikal nije korektno postavljen!" )
-         ENDIF
-      ENDDO
-
-   ENDIF
-
-   IF !Empty ( cIdOdj )
-      select_o_pos_odj( cIdOdj )
-      IF Zaduzuje == "S"
-         cU := S_U
-         cI := S_I
-         cRSdbf := "SIROV"
-      ELSE
-         cU := R_U
-         cI := R_I
-         cRSdbf := "ROBA"
+   aNiz := {}
+   AAdd ( aNiz, { "Prodajno mjesto (prazno-svi)", "cIdPos", "cIdpos='X'.or.empty(cIdPos).or. p_pos_kase(@cIdPos)", "@!", } )
+   AAdd ( aNiz, { "Artikli  (prazno-svi)", "cRoba",, "@!S30", } )
+   AAdd ( aNiz, { "Izvještaj se pravi za datum", "dDatum",,, } )
+   AAdd ( aNiz, { "Štampati artikle sa stanjem 0", "cNule", "cNule$'DN'", "@!", } )
+   DO WHILE .T.
+      IF !VarEdit( aNiz, 10, 5, 21, 74, 'USLOVI ZA IZVJESTAJ "STANJE ODJELJENJA"', "B1" )
+         CLOSERET
       ENDIF
-   ENDIF
+      cFilterRoba := Parsiraj( cRoba, "IdRoba", "C" )
+      IF cFilterRoba <> NIL
+         EXIT
+      ELSE
+         Msg( "Kriterij za artikal nije korektno postavljen!" )
+      ENDIF
+   ENDDO
 
-   // SELECT POS
-   // SET ORDER TO TAG "2"
-   // ("2", "IdOdj+idroba+DTOS(Datum)", KUMPATH+"POS")
-
-   // SEEK cIdOdj
-   seek_pos_pos_2( cIdOdj )
-
-   IF !( aUsl1 == ".t." )
-      SET FILTER TO &aUsl1
+   seek_pos_pos_2()
+   IF !( cFilterRoba == ".t." )
+      SET FILTER TO &cFilterRoba
    ENDIF
    GO TOP
 
    EOF CRET
 
    xIdOdj := "??"
-   _n_rbr := 0
+   nRbr := 0
 
-
-   // pravljenje izvjestaja
-   IF !fZaklj
-      START PRINT CRET
-      Zagl( cIdOdj, cDat )
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 8
+   IF f18_start_print( NIL, xPrintOpt,  "POS REALIZACIJA PO ARTIKLIMA NA DAN: " + DToC( Date() ) ) == "X"
+      RETURN .F.
    ENDIF
 
+   bZagl := {|| pos_stanje_artikala_zagl( cIdPos, cLijevaMargina, nRobaNazivSirina ) }
 
-   IF !Empty( cIdOdj )
-      Podvuci()
-   ENDIF
+   Eval(bZagl)
+
+   nStanje := 0
+   nVrijednost := 0
 
    DO WHILE !Eof()
 
-      IF !Empty( cIdOdj ) .AND. POS->IdOdj <> cIdOdj
-         EXIT
-      ENDIF
-
       nStanje := 0
       nVrijednost := 0
+      nPstanje := 0
+      nUlaz := nIzlaz := 0
+      cIdRoba := pos->idroba
 
-      _idodj := pos->IdOdj
+      // 1) promet prije zadanog datuma
+      DO WHILE !Eof() .AND. pos->idRoba == cIdRoba .AND. pos->datum < dDatum
 
-      IF Empty( cIdOdj ) .AND. _IdOdj <> xIdOdj
-
-         IF fZaklj
-            Zagl( _IdOdj, NIL )
+         IF !Empty( cIdPos ) .AND. POS->idpos != cIdPos
+            SKIP
+            LOOP
          ENDIF
+         IF POS->idvd $ "16#00"
+            nPstanje += POS->Kolicina
+            nVrijednost += POS->Kolicina * POS->Cijena
+         ELSEIF POS->idvd $ "IN#NI#" + DOK_IZLAZA
+            DO CASE
+            CASE POS->IdVd == "IN"
+               nPstanje -= ( POS->Kolicina - POS->Kol2 )
+               nVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
 
-         Podvuci()
-
-         xIdOdj := _IdOdj
-
-         select_o_pos_odj( _IdOdj )
-
-         ? cLM + Id + "-" + Naz
-
-         Podvuci()
-
-         cU := R_U
-         cI := R_I
-         cRSdbf := "ROBA"
-
-         SELECT POS
-
-      ENDIF
-
-      // 1) pocetno stanje - vrijednost ... sve ispod datuma zadanog izvjestajem
-      DO WHILE !Eof() .AND. pos->idodj == _idodj
-
-         nStanje := 0
-         nVrijednost := 0
-         nPstanje := 0
-         nUlaz := nIzlaz := 0
-         cIdRoba := pos->idroba
-
-         DO WHILE !Eof() .AND. pos->idodj == _idodj .AND. ;
-               pos->idRoba == cIdRoba .AND. ;
-               ( pos->datum < cDat .OR. ( !Empty ( cSmjena ) .AND. pos->datum == cDat .AND. pos->smjena < cSmjena ) )
-
-            // IF !Empty( cIdDio ) .AND. POS->IdDio <> cIdDio
-            // SKIP
-            // LOOP
-            // ENDIF
-
-            IF ( !pos_admin() .AND. pos->idpos = "X" ) .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
-               // (POS->IdPos="X" .and. AllTrim (cIdPos)<>"X") .or. ;   // ?MS
-               SKIP
-               LOOP
-            ENDIF
-
-            IF ( pos->idvd == "96" )
-               SKIP
-               LOOP
-               // preskoci
-            ENDIF
-
-            IF POS->idvd $ "16#00"
-               nPstanje += POS->Kolicina
-               nVrijednost += POS->Kolicina * POS->Cijena
-            ELSEIF POS->idvd $ "IN#NI#" + DOK_IZLAZA
-               DO CASE
-               CASE POS->IdVd == "IN"
-                  // if pos->kolicina <> 0
-                  nPstanje -= ( POS->Kolicina - POS->Kol2 )
-                  nVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
-                  // else
-                  // nPstanje := pos->kol2
-                  // nVrijednost := pos->kol2 * pos->cijena
-                  // endif
-               CASE POS->IdVd == "NI"
-                  // ne mijenja kolicinu
-                  nVrijednost := POS->Kolicina * POS->Cijena
-               OTHERWISE
-                  nPstanje -= POS->Kolicina
-                  nVrijednost -= POS->Kolicina * POS->Cijena
-               ENDCASE
-            ENDIF
-            SKIP
-         ENDDO
-
-         // 2) stanje na tekuci dan
-         DO WHILE !Eof() .AND. pos->idodj == _idodj .AND. ;
-               pos->idroba == cIdRoba .AND. ;
-               ( pos->datum == cDat .OR. ( !Empty( cSmjena ) .AND. POS->Datum == cDat .AND. POS->Smjena < cSmjena ) )
-
-            // IF !Empty( cIdDio ) .AND. POS->IdDio <> cIdDio
-            // SKIP
-            // LOOP
-            // ENDIF
-            IF ( !pos_admin() .AND. pos->idpos = "X" ) .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
-               // (POS->IdPos="X" .and. AllTrim (cIdPos)<>"X") .or. ;  // ?MS
-               SKIP
-               LOOP
-            ENDIF
-            //
-
-            IF pos->idvd == "96"
-               SKIP
-               LOOP   // otpremnice za robu - zdravo
-            ENDIF
-
-            IF POS->idvd $ "16#00"
-               nUlaz += pos->Kolicina
-               nVrijednost += POS->Kolicina * POS->Cijena
-            ELSEIF pos->idvd $  "IN#NI#" + DOK_IZLAZA
-               DO CASE
-               CASE POS->IdVd == "IN"
-                  // if pos->kolicina <> 0
-                  nIzlaz += ( pos->kolicina - pos->kol2 )
-                  nVrijednost += ( pos->kol2 - pos->kolicina ) * POS->Cijena
-                  // else
-                  // nIzlaz := pos->kol2
-                  // nVrijednost := pos->kol2 * pos->cijena
-                  // endif
-               CASE POS->IdVd == "NI"
-                  // ne mijenja kolicinu
-                  nVrijednost := POS->Kolicina * POS->Cijena
-               OTHERWISE
-                  nIzlaz += POS->Kolicina
-                  nVrijednost -= POS->Kolicina * POS->Cijena
-               ENDCASE
-            ENDIF
-            SKIP
-         ENDDO
-
-         nStanje := nPstanje + nUlaz - nIzlaz
-
-         IF Round( nStanje, 4 ) <> 0 .OR. cNule == "D"
-
-            select_o_roba( cIdRoba )
-
-            ? cLM + PadL( AllTrim( Str( ++_n_rbr, 5 ) ), 5 ) + ")"
-            ?? cIdRoba, PadR( roba->naz, nRob ) + " "
-
-            //
-            SELECT POS
-
-            ?
-            ?? Str ( nPstanje, 9, 3 )
-
-            IF Round ( nUlaz, 4 ) <> 0
-               ?? " " + Str( nUlaz, 9, 3 )
-            ELSE
-               ?? Space ( 10 )
-            ENDIF
-
-            IF Round ( nIzlaz, 4 ) <> 0
-               ?? " " + Str( nIzlaz, 9, 3 )
-            ELSE
-               ?? Space ( 10 )
-            ENDIF
-
-            ?? " " + Str ( nStanje, 10, 3 )
-
-            ?? " " + Str( roba->mpc, 10, 3 )
-
-            ?? " " + Str( nStanje * roba->mpc, 10, 3 )
-
+            CASE POS->IdVd == "NI"
+               // ne mijenja kolicinu
+               nVrijednost := POS->Kolicina * POS->Cijena
+            OTHERWISE
+               nPstanje -= POS->Kolicina
+               nVrijednost -= POS->Kolicina * POS->Cijena
+            ENDCASE
          ENDIF
-
-         DO WHILE ( !Eof() .AND. POS->IdOdj == _IdOdj .AND. POS->IdRoba == cIdRoba )
-            SKIP
-         ENDDO
+         SKIP
       ENDDO
 
-      IF fZaklj
-         PaperFeed()
-         ENDPRINT
+      // 2) stanje na tekuci dan
+      DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum == dDatum
+
+         IF !Empty( cIdPos ) .AND. POS->idpos != cIdPos
+            SKIP
+            LOOP
+         ENDIF
+
+         IF POS->idvd $ "16#00"
+            nUlaz += pos->Kolicina
+            nVrijednost += POS->Kolicina * POS->Cijena
+         ELSEIF pos->idvd $  "IN#NI#" + DOK_IZLAZA
+            DO CASE
+            CASE POS->IdVd == "IN"
+               nIzlaz += ( pos->kolicina - pos->kol2 )
+               nVrijednost += ( pos->kol2 - pos->kolicina ) * POS->Cijena
+            CASE POS->IdVd == "NI" // ne mijenja kolicinu, samo vrijednost
+               nVrijednost := POS->Kolicina * POS->Cijena
+            OTHERWISE
+               nIzlaz += POS->Kolicina
+               nVrijednost -= POS->Kolicina * POS->Cijena
+            ENDCASE
+         ENDIF
+         SKIP
+      ENDDO
+
+      nStanje := nPstanje + nUlaz - nIzlaz
+
+      check_nova_strana( bZagl, s_oPDF )
+      IF Round( nStanje, 4 ) <> 0 .OR. cNule == "D"
+
+         select_o_roba( cIdRoba )
+         ? cLijevaMargina + PadL( AllTrim( Str( ++nRbr, 5 ) ), 5 ) + ")"
+         ?? cIdRoba, PadR( roba->naz, nRobaNazivSirina ) + " "
+
+         SELECT POS
+         ?? Str ( nPstanje, 10, 2 ) + " "
+         IF Round ( nUlaz, 4 ) <> 0
+            ?? Str( nUlaz, 10, 2 )
+         ELSE
+            ?? Space ( 10 )
+         ENDIF
+         ?? " "
+         IF Round ( nIzlaz, 4 ) <> 0
+            ?? Str( nIzlaz, 10, 2 )
+         ELSE
+            ?? Space ( 10 )
+         ENDIF
+         ?? " "
+         ?? Str ( nStanje, 10, 2 )
+         ?? " "
+         ?? Str( roba->mpc, 10, 2 )
+         ?? " "
+         ?? Str( nStanje * roba->mpc, 10, 2 )
       ENDIF
+
+
    ENDDO
+   podvuci(cLijevaMargina, nRobaNazivSirina)
 
-   IF !fZaklj
-      PaperFeed ()
-      ENDPRINT
-   ENDIF
-
-   CLOSE ALL
+   f18_end_print( NIL, xPrintOpt )
+   my_close_all_dbf()
 
    RETURN .T.
 
 
+STATIC FUNCTION pos_stanje_artikala_zagl( cIdPos, cLijevaMargina, nRobaNazivSirina )
 
-
-STATIC FUNCTION Podvuci()
-
-   ?
-   ?? REPL( "-", 5 ), REPL ( "-", 9 ), REPL ( "-", 9 ), REPL ( "-", 9 ), REPL ( "-", 10 ), REPL( "-", 10 ), REPL( "-", 10 )
-
+   ? cLijevaMargina + "Prodajno mjesto: " + iif ( Empty( cIdPos ), "SVE", cIdPos + " - " + find_pos_kasa_naz( cIdPos ) )
+   podvuci( cLijevaMargina, nRobaNazivSirina )
+   ?U cLijevaMargina + "R.br)", PadR ( "Šifra", 10 ), PadR ( "Naziv artikla", nRobaNazivSirina ) + " "
+   ?? "P.stanje ", PadC ( "Ulaz", 10 ), PadC ( "Izlaz", 10 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Total", 10 )
+   podvuci( cLijevaMargina, nRobaNazivSirina )
    RETURN .T.
 
+STATIC FUNCTION podvuci( cLijevaMargina, nRobaNazivSirina )
+   LOCAL nI
 
-
-STATIC FUNCTION Zagl( cIdOdj, dDat )
-
-   IF ( dDat == NIL )
-      dDat := gDatum
-   ENDIF
-
-
-   // ZagFirma()
-
-   P_10CPI
-   ? PadC( "STANJE ODJELJENJA NA DAN " + FormDat1( dDat ), nSir )
-   ? PadC( "-----------------------------------", nSir )
-
-   ? cLM + "Prod. mjesto:" + iif ( Empty( cIdPos ), "SVE", find_pos_kasa_naz( cIdPos ) )
-
-   //IF gvodiodj == "D"
-    //  ? cLM + "Odjeljenje : " + cIdOdj + "-" + RTrim( find_pos_odj_naziv( cIdOdj ) )
-   //ENDIF
-
-   ? cLM + "Artikal    : " + IF( Empty( cRoba ), "SVI", RTrim( cRoba ) )
-   ?
-   ? cLM + PadR ( "Sifra", 10 ), PadR ( "Naziv artikla", nRob ) + " "
-   ? cLM
-   ?? "R.broj", "P.stanje ", PadC ( "Ulaz", 9 ), PadC ( "Izlaz", 9 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Total", 10 )
-   ? cLM
-
+   ? cLijevaMargina  + REPL( "-", 5 ), REPL ( "-", 10 ), REPL ( "-", nRobaNazivSirina )
+   FOR nI := 1 TO 6
+      ?? " " + REPL ( "-", 10 )
+   NEXT
    RETURN .T.
