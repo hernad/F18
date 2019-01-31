@@ -17,7 +17,6 @@ STATIC s_cM
 STATIC s_oPDF
 STATIC PRINT_LEFT_SPACE := 0
 
-MEMVAR m
 
 FUNCTION kalk_lager_lista_prodavnica()
 
@@ -35,7 +34,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL _hAttrId
    LOCAL cPrintPdfOdt := "1"
    LOCAL cIdFirma, dDatOd, dDatDo, lPocStanje
-   LOCAL hZaglParams := hb_hash()
+   LOCAL hZaglParams := hb_Hash()
    LOCAL GetList := {}
    LOCAL cPrikazNabavneVrijednosti := "N"
    LOCAL cPredhStanje := "N"
@@ -43,6 +42,8 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL cBrDokPocStanje
    LOCAL xPrintOpt, bZagl
    LOCAL cIdRoba
+   LOCAL aNazRoba
+   LOCAL cLinija
 
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "1330", FIELD_LENGTH_IDKONTO )
@@ -75,7 +76,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    PRIVATE cPrikK2 := "N"
    PRIVATE aPorezi
 
-   Box(, 18, 70)
+   Box(, 18, 70 )
 
    cGrupacija := Space( 4 )
 
@@ -116,12 +117,12 @@ FUNCTION kalk_lager_lista_prodavnica()
       READ
       ESC_BCR
 
-      hZaglParams["sint"] := .F.
-      hZaglParams["datod"] := dDatOd
-      hZaglParams["datdo"] := dDatDo
-      hZaglParams["nabavna"] := cPrikazNabavneVrijednosti == "D"
-      hZaglParams["predhodno"] := cPredhStanje == "D"
-      hZaglParams["konto"] := cIdKonto
+      hZaglParams[ "sint" ] := .F.
+      hZaglParams[ "datod" ] := dDatOd
+      hZaglParams[ "datdo" ] := dDatDo
+      hZaglParams[ "nabavna" ] := cPrikazNabavneVrijednosti == "D"
+      hZaglParams[ "predhodno" ] := cPredhStanje == "D"
+      hZaglParams[ "konto" ] := cIdKonto
 
       PRIVATE cUslovRoba := Parsiraj( qqRoba, "IdRoba" )
       PRIVATE cFilterTarifa := Parsiraj( qqTarifa, "IdTarifa" )
@@ -204,27 +205,27 @@ FUNCTION kalk_lager_lista_prodavnica()
 
    nLen := 1
 
-   m := "----- ---------- -------------------- ---"
+   cLinija := "----- ---------- " + Replicate( "-", 30 ) + " ---"
    nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
    nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
+   cLinija += " " + REPL( "-", nPom )
 
    IF cPredhstanje == "D"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() ) - 2
-      m += " " + REPL( "-", nPom )
+      cLinija += " " + REPL( "-", nPom )
    ENDIF
    IF cSredCij == "D"
       nPom := Len( kalk_pic_cijena_bilo_gpiccdem() )
-      m += " " + REPL( "-", nLen )
+      cLinija += " " + REPL( "-", nLen )
    ENDIF
 
-   s_cM := m
+   s_cM := cLinija
 
    select_o_konto( cIdKonto )
    SELECT KALK
@@ -247,7 +248,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    nCol0 := 50
    nRbr := 0
 
-   IF f18_start_print( NIL, xPrintOpt,  "LAGER LISTA PRODAVNICA [" + Alltrim(cIdKonto) + "] " + DToC( dDatOd ) + " - " + DToC( dDatDo )  + "  NA DAN: " + DToC( Date() ) ) == "X"
+   IF f18_start_print( NIL, xPrintOpt,  "LAGER LISTA PRODAVNICA [" + AllTrim( cIdKonto ) + "] " + DToC( dDatOd ) + " - " + DToC( dDatDo )  + "  NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF
    Eval( bZagl )
@@ -390,13 +391,13 @@ FUNCTION kalk_lager_lista_prodavnica()
          select_o_roba(  cIdRoba )
 
          SELECT kalk
-         aNaz := Sjecistr( roba->naz, 20 )
+         aNazRoba := Sjecistr( roba->naz, 30 )
 
          ? Str( ++nRbr, 4 ) + ".", cIdRoba
 
          nCr := PCol() + 1
 
-         @ PRow(), PCol() + 1 SAY aNaz[ 1 ]
+         @ PRow(), PCol() + 1 SAY aNazRoba[ 1 ]
          @ PRow(), PCol() + 1 SAY roba->jmj
 
          nCol0 := PCol() + 1
@@ -416,7 +417,6 @@ FUNCTION kalk_lager_lista_prodavnica()
             IF Round( nUlaz - nIzlaz, 4 ) <> 0 .AND. cSrKolNula $ "01"
 
                APPEND BLANK
-
                REPLACE idFirma WITH cIdfirma
                REPLACE idroba WITH cIdRoba
                REPLACE idkonto WITH cIdKonto
@@ -519,10 +519,10 @@ FUNCTION kalk_lager_lista_prodavnica()
             @ PRow(), PCol() + 1 SAY ( nNVU - nNVI + nPNV + nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ) / 2 PICT "9999999.99"
          ENDIF
 
-         IF Len( aNaz ) > 1 .OR. cPredhStanje == "D" .OR. cPrikazNabavneVrijednosti == "D"
+         IF Len( aNazRoba ) > 1 .OR. cPredhStanje == "D" .OR. cPrikazNabavneVrijednosti == "D"
             @ PRow() + 1, 0 SAY ""
-            IF Len( aNaz ) > 1
-               @ PRow(), nCR  SAY aNaz[ 2 ]
+            IF Len( aNazRoba ) > 1
+               @ PRow(), nCR  SAY aNazRoba[ 2 ]
             ENDIF
             @ PRow(), nCol0 - 1 SAY ""
          ENDIF
@@ -633,22 +633,21 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
    LOCAL cTmp, nPom, cSc1, cSc2
 
-   IF hZaglParams["sint"] == NIL
-      hZaglParams["sint"] := .F.
+   IF hZaglParams[ "sint" ] == NIL
+      hZaglParams[ "sint" ] := .F.
    ENDIF
 
    Preduzece()
-   // P_COND
 
-   IF !hZaglParams["sint"] .AND. !Empty( qqIdPartn )
+   IF !hZaglParams[ "sint" ] .AND. !Empty( qqIdPartn )
       ?U "Obuhvaćeni sljedeći partneri:", Trim( qqIdPartn )
    ENDIF
 
-   IF hZaglParams["sint"]
+   IF hZaglParams[ "sint" ]
       ?U "Kriterij za prodavnice:", qqKonto
    ELSE
-      select_o_konto( hZaglParams["konto"] )
-      ? "Prodavnica:", hZaglParams["konto"], "-", konto->naz
+      select_o_konto( hZaglParams[ "konto" ] )
+      ? "Prodavnica:", hZaglParams[ "konto" ], "-", konto->naz
    ENDIF
 
    cSC1 := ""
@@ -657,9 +656,8 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
    SELECT kalk
    ?U s_cM
 
-   IF hZaglParams["predhodno"]
-
-      cTmp := " R.  * Artikal  *   Naziv            *jmj*"
+   IF hZaglParams[ "predhodno" ]
+      cTmp := " R.  * Artikal  *" + PadC( "Naziv", 30 ) + "*jmj*"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "Predh.st", nPom ) + "*"
       cTmp += PadC( "ulaz", nPom ) + " " + PadC( "izlaz", nPom ) + "*"
@@ -674,7 +672,7 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
       ?U cTmp
 
-      cTmp := " br. *          *                    *   *"
+      cTmp := " br. *          *" + Space( 30 ) + "*   *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "Kol/MPV", nPom ) + "*"
       cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
@@ -688,8 +686,8 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
       ?U cTmp
 
-      IF hZaglParams["nabavna"]
-         cTmp := "     *          *                    *   *"
+      IF hZaglParams[ "nabavna" ]
+         cTmp := "     *          *" + Space( 30 ) + "*   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
          cTmp += REPL( " ", nPom ) + "*"
          cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
@@ -704,7 +702,7 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
          ?U cTmp
       ENDIF
    ELSE
-      cTmp := " R.  * Artikal  *   Naziv            *jmj*"
+      cTmp := " R.  * Artikal  *" + PadC( "Naziv", 30 ) + "*jmj*"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "ulaz", nPom ) + " " + PadC( "izlaz", nPom ) + "*"
       cTmp += PadC( "STANJE", nPom ) + "*"
@@ -716,7 +714,7 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
       cTmp += cSC1
       ?U cTmp
 
-      cTmp := " br. *          *                    *   *"
+      cTmp := " br. *          *" + Space( 30 ) + "*   *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
       cTmp += REPL( " ", nPom ) + "*"
@@ -729,9 +727,8 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
       ?U cTmp
 
-      IF hZaglParams["nabavna"]
-
-         cTmp := "     *          *                    *   *"
+      IF hZaglParams[ "nabavna" ]
+         cTmp := "     *          *" + Space( 30 ) + "*   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
          cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
          nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
@@ -747,9 +744,9 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
       ENDIF
    ENDIF
 
-   IF hZaglParams["predhodno"]
+   IF hZaglParams[ "predhodno" ]
 
-      cTmp := "     *    1     *        2           * 3 *"
+      cTmp := "     *    1     *" + PadC( "2", 30 ) + "* 3 *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "4", nPom ) + "*"
       cTmp += PadC( "5", nPom ) + "*"
@@ -766,7 +763,7 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
    ELSE
 
-      cTmp := "     *    1     *        2           * 3 *"
+      cTmp := "     *    1     *" + PadC( "2", 30 ) + "* 3 *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "4", nPom ) + "*"
       cTmp += PadC( "5", nPom ) + "*"
