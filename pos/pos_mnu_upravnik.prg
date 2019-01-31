@@ -48,7 +48,6 @@ FUNCTION pos_menu_dokumenti()
    LOCAL aOpcexe := {}
 
    nIzbor := 1
-
    AAdd( aOpc, "Z. zaduženje                       " )
    AAdd( aOpcexe, {|| pos_zaduzenje() } )
    AAdd( aOpc, "I. inventura" )
@@ -60,7 +59,6 @@ FUNCTION pos_menu_dokumenti()
    AAdd( aOpc, "R. reklamacija-povrat u magacin" )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_VD_REKLAMACIJA ) } )
 
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "pos6" )
    f18_menu( "pos6", .F., nIzbor, aOpc, aOpcexe )
 
    RETURN .T.

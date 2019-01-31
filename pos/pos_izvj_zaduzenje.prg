@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
 
    LOCAL nPrevRec
@@ -72,17 +71,8 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
       ? PadL ( FormDat1 ( PRIPRZ->Datum ), 39 )
       ?
 
-      IF gZadCij == "D"
-         ? " Sifra      Naziv            JMJ Kolicina"
-         ? "---------- ----------------- --- --------"
-         ? "           Nabav.vr.*   PPP   *    MPC   "
-         ? "           --------- --------- ----------"
-         ? "           MPV-porez*   PPU   *    MPV   "
-         ? "-----------------------------------------"
-      ELSE
-         ? " Sifra      Naziv            JMJ Kolicina"
-         ? "---------- ----------------- --- --------"
-      ENDIF
+      ? " Sifra      Naziv            JMJ Kolicina"
+      ? "---------- ----------------- --- --------"
 
       nFinZad := 0
       SELECT PRIPRZ
@@ -94,13 +84,11 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
          IF fpred .AND. !Empty( IdDio )
             // ne stampaj nista
          ELSE
-            ? idroba, PadR ( RobaNaz, 17 ), JMJ, ;
-               Transform ( Kolicina, "99999.99" )
-            IF gZadCij == "D"
-               ? Space( 10 ), Transform( ncijena * kolicina, "999999.99" ), Transform ( nPPP, "999999.99" ), Transform ( cijena, "9999999.99" )
-               ? Space( 10 ), Transform( nOsn, "999999.99" ),             Transform ( nPPU, "999999.99" ), Transform ( cijena * kolicina, "9999999.99" )
-               ? "-----------------------------------------"
-            ENDIF
+            ? idroba, PadR ( RobaNaz, 17 ), JMJ, Transform ( Kolicina, "99999.99" )
+
+            //? Space( 10 ), Transform( ncijena * kolicina, "999999.99" ), Transform ( nPPP, "999999.99" ), Transform ( cijena, "9999999.99" )
+            //? Space( 10 ), Transform( nOsn, "999999.99" ),             Transform ( nPPU, "999999.99" ), Transform ( cijena * kolicina, "9999999.99" )
+            ? "-----------------------------------------"
          ENDIF
          nFinZad += PRIPRZ->( Kolicina * Cijena )
 
@@ -240,7 +228,7 @@ FUNCTION PrepisZad( cNazDok )
 
    ? PadL ( AllTrim ( OSOB->Naz ), nSir - 9 )
 
-   //PaperFeed()
+   // PaperFeed()
 
    ENDPRINT
 

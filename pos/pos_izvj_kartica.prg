@@ -152,7 +152,7 @@ FUNCTION pos_kartica_artikla()
             nPredhodnoStanjeKolicina -= ( POS->Kolicina - POS->Kol2 )
             nPredhodnaVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
 
-         ELSEIF pos->idvd $ "42#01#98"
+         ELSEIF pos->idvd $ "42#98"
             nPredhodnoStanjeKolicina -= POS->Kolicina
             nPredhodnaVrijednost -= POS->Kolicina * pos->cijena
 
@@ -213,9 +213,9 @@ FUNCTION pos_kartica_artikla()
             SKIP
             LOOP
 
-         ELSEIF POS->idvd $ "IN" + "42#01#98"
+         ELSEIF POS->idvd $ "IN" + "42#98"
 
-            IF pos->idvd $ "42#01#98"
+            IF pos->idvd $ "42#98"
                nKol := POS->Kolicina
             ELSEIF POS->IdVd == "IN"
                nKol := POS->Kolicina - POS->Kol2

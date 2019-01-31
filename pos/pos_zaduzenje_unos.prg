@@ -18,8 +18,8 @@
  *           95 otpis
  *           IN inventura
  *           NI nivelacija
- *           96 razduzenje sirovina - ako se radi o proizvodnji
- *           PD - predispozicija
+ *          // 96 razduzenje sirovina - ako se radi o proizvodnji
+ *         //  PD - predispozicija
  *
  *  pos_zaduzenje odjeljenje/punktova robama/sirovinama
  *       lForsSir .T. - radi se o forsiranom zaduzenju odjeljenja
@@ -32,6 +32,7 @@ FUNCTION pos_zaduzenje
    LOCAL _from_kalk := .F.
    LOCAL cOdg
    LOCAL nSign
+   LOCAL GetList := {}
 
    IF gSamoProdaja == "D" .AND. ( cIdVd <> POS_VD_REKLAMACIJA )
       MsgBeep( "Ne možete vršiti unos zaduženja !" )
@@ -218,13 +219,13 @@ FUNCTION pos_zaduzenje
          @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _Kolicina PICT "999999.999" ;
             WHEN{|| ShowGets(), .T. } VALID ZadKolOK( _Kolicina )
 
-         IF gZadCij == "D"
-            @ box_x_koord() + 3, box_y_koord() + 35  SAY "N.cijena:" GET _ncijena PICT "99999.9999"
-            @ box_x_koord() + 3, box_y_koord() + 56  SAY "Marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
-            @ box_x_koord() + 3, Col() + 2 GET _Marza2 PICTURE "9999.99"
-            @ box_x_koord() + 3, Col() + 1 GET fMarza PICT "@!" VALID {|| _marza2 := iif( _cijena <> 0 .AND. Empty( fMarza ), 0, _marza2 ), kalk_marza_11( fmarza ), _cijena := iif( _cijena == 0, _cijena := _nCijena * ( tarifa->zpp / 100 + ( 1 + TARIFA->Opp / 100 ) * ( 1 + TARIFA->PPP / 100 ) ), _cijena ), fMarza := " ", .T. }
-            @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA POREZOM:" GET _cijena  PICT "99999.999" VALID {|| _marza2 := 0, kalk_marza_11(), ShowGets(), .T. }
-         ENDIF
+         //IF gZadCij == "D"
+          //  @ box_x_koord() + 3, box_y_koord() + 35  SAY "N.cijena:" GET _ncijena PICT "99999.9999"
+        //    @ box_x_koord() + 3, box_y_koord() + 56  SAY "Marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
+        //    @ box_x_koord() + 3, Col() + 2 GET _Marza2 PICTURE "9999.99"
+        //    @ box_x_koord() + 3, Col() + 1 GET fMarza PICT "@!" VALID {|| _marza2 := iif( _cijena <> 0 .AND. Empty( fMarza ), 0, _marza2 ), kalk_marza_11( fmarza ), _cijena := iif( _cijena == 0, _cijena := _nCijena * ( tarifa->zpp / 100 + ( 1 + TARIFA->Opp / 100 ) * ( 1 + TARIFA->PPP / 100 ) ), _cijena ), fMarza := " ", .T. }
+            @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" VALID {|| .T. }
+         //ENDIF
 
          READ
 
@@ -318,7 +319,8 @@ FUNCTION StUSif()
       _tmp := "mpc" + AllTrim( gSetMPCijena )
    ENDIF
 
-   IF gZadCij == "D"
+/*
+--   IF gZadCij == "D"
 
       IF _cijena <> pos_get_mpc() .AND. Pitanje(, "Staviti u šifarnik novu cijenu? (D/N)", "D" ) == "D"
 
@@ -332,6 +334,7 @@ FUNCTION StUSif()
       ENDIF
 
    ENDIF
+*/
 
    RETURN .T.
 

@@ -171,7 +171,6 @@ FUNCTION pos_principi_rada_kase()
    ENDIF
 
    AAdd ( aNiz, { "Ako je Bar Cod generisi <ENTER> ", "gEntBarCod", "gEntBarCod$'DN'", "@!", } )
-   AAdd ( aNiz, { "Pri unosu zaduženja azurirati i cijene (D/N)? ", "gZadCij", "gZadCij$'DN'", "@!", } )
    AAdd ( aNiz, { "Pri ažuriranju pitati za nacin placanja (D/N)? ", "gUpitNP", "gUpitNP$'DN'", "@!", } )
    AAdd ( aNiz, { "Kod unosa računa uvijek pretraga art.po nazivu (D/N)? ", "gSifUvPoNaz", "gSifUvPoNaz$'DN'", "@!", } )
    AAdd ( aNiz, { "Maksimalna količina pri unosu racuna (0 - bez provjere) ", "_max_qtty", "_max_qtty >= 0", "999999", } )
@@ -184,9 +183,7 @@ FUNCTION pos_principi_rada_kase()
 
       MsgO( "Ažuriranje parametara" )
 
-      set_metric( "AzuriranjeCijena", nil, gZadCij )
     //  set_metric( "VodiOdjeljenja", nil, gVodiOdj )
-
       set_metric( "DirektnoZakljucivanjeRacuna", nil, gDirZaklj )
       set_metric( "RacunSpecifOpcije", nil, gRnSpecOpc )
       set_metric( "RadniRacuni", nil, gRadniRac )

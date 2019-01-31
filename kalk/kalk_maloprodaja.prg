@@ -28,10 +28,8 @@ FUNCTION kalk_maloprodaja()
    AAdd( aOpcExe, {|| kalk_mp_inicijalizacija() } )
    AAdd( aOpc,   "3. cijene" )
    AAdd( aOpcExe, {|| p_roba_prodavnica() } )
-
    f18_menu( "mp", .F.,  nIzbor, aOpc, aOpcExe )
 
-   //f18_sql_schema( "roba" )
    RETURN .T.
 
 
@@ -42,7 +40,6 @@ FUNCTION kalk_mp_set_radna_prodavnica()
 
    Box(, 3, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodajno mjesto" GET cProdajnoMjesto VALID !Empty( cProdajnoMjesto )
-
    READ
    BoxC()
 
@@ -67,11 +64,11 @@ FUNCTION radna_prodavnica( cSet )
 
 FUNCTION radna_prodavnica_sql_schema()
 
-      RETURN "p" + AllTrim( s_cRadnaProdavnica )
+   RETURN "p" + AllTrim( s_cRadnaProdavnica )
 
 FUNCTION radna_prodavnica_roba_sql_tabela()
 
-   RETURN "p" + AllTrim( s_cRadnaProdavnica ) + ".roba"
+   RETURN radna_prodavnica_sql_schema() + ".roba"
 
 
 FUNCTION dbUseArea_run_query( cQuery, nWa, cAlias )
@@ -102,12 +99,12 @@ FUNCTION get_pkonto_by_prodajno_mjesto( cIdProdajnoMjesto )
 FUNCTION kalk_mp_inicijalizacija()
 
    LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( radna_prodavnica() )
-   LOCAL cQuery := "select distinct(idroba), " + f18_sql_schema( "roba" ) + ".mpc2" +;
-         " from " + f18_sql_schema( "kalk_kalk" ) + ;
-         " LEFT JOIN " + f18_sql_schema( "roba" ) + " ON " + f18_sql_schema( "kalk_kalk") + ".idroba = roba.id" +;
-         " WHERE " + f18_sql_schema( "kalk_kalk" ) + ".pkonto=" + sql_quote( cPKonto ) +;
-         " AND roba.mpc2 <> 0" +;
-         " ORDER BY idroba"
+   LOCAL cQuery := "select distinct(idroba), " + f18_sql_schema( "roba" ) + ".mpc2" + ;
+      " from " + f18_sql_schema( "kalk_kalk" ) + ;
+      " LEFT JOIN " + f18_sql_schema( "roba" ) + " ON " + f18_sql_schema( "kalk_kalk" ) + ".idroba = roba.id" + ;
+      " WHERE " + f18_sql_schema( "kalk_kalk" ) + ".pkonto=" + sql_quote( cPKonto ) + ;
+      " AND roba.mpc2 <> 0" + ;
+      " ORDER BY idroba"
 
    /*
    -- select distinct(idroba), fmk.roba.mpc2 from fmk.kalk_kalk
@@ -121,9 +118,7 @@ FUNCTION kalk_mp_inicijalizacija()
    ENDIF
 
    dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
-
    Box( "#" + radna_prodavnica() + " / " + cPKonto, 1, 50 )
-
    cQuery := "delete from " + radna_prodavnica_roba_sql_tabela()
    dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
 
@@ -182,7 +177,6 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
    // AAdd( ImeKol, { PadC( "PLU kod", 8 ),  {|| PadR( fisc_plu, 10 ) }, "fisc_plu", {|| .T. }, {|| .T. } } )
    AAdd( ImeKol, { PadC( "S.dobav.", 13 ), {|| PadR( sifraDob, 13 ) }, "sifradob"   } )
 
-
    // AAdd( ImeKol, { PadC( "VPC", 10 ), {|| Transform( field->VPC, "999999.999" ) }, "vpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
    // AAdd( ImeKol, { PadC( "VPC2", 10 ), {|| Transform( field->VPC2, "999999.999" ) }, "vpc2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()   } )
    // AAdd( ImeKol, { PadC( "Plan.C", 10 ), {|| Transform( field->PLC, "999999.999" ) }, "PLC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()    } )
@@ -222,7 +216,6 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
 
    // AAdd ( ImeKol, { "Id konto", {|| idkonto }, "idkonto", {|| .T. }, {|| Empty( widkonto ) .OR. P_Konto( @widkonto ) }   } )
 
-
    Kol := {}
 
    FOR nI := 1 TO Len( ImeKol )
@@ -236,7 +229,6 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
 
    // bRoba := {| Ch | kalk_roba_key_handler( Ch ) }
    bRoba := NIL
-
    IF is_roba_trazi_po_sifradob() .AND. !Empty( cTagTraziPoSifraDob )
       cPomTag := Trim( cTagTraziPoSifraDob )
       IF find_roba_by_sifradob( cId )
@@ -245,13 +237,10 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
    ELSE
       cPomTag := "ID"
    ENDIF
-
    xRet := p_sifra( F_ROBA_PRODAVNICA, ( cPomTag ), f18_max_rows() - 11, f18_max_cols() - 5, "Artikli prodavnica " + radna_prodavnica(), @cId, dx, dy, bRoba,,,,, { "ID" } )
-
    PopWa()
 
    RETURN xRet
-
 
 
 FUNCTION select_o_roba_prodavnica( cId )

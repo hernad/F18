@@ -53,18 +53,15 @@ FUNCTION get_hash_record_from_global_vars( cPrefixVarijabla, lReleaseVarFromMemo
          // punimo hash matricu sa vrijednostima public varijabli
          // hRet[ "idfirma" ] := wIdFirma, za cPrefixVarijabla = "w"
          bMemvarBlock := MemVarBlock( cPrefixVarijabla + cImePolja )
-
          IF ValType( bMemvarBlock ) != "B"
             error_bar( "memvar", "memver to array error prefix/field " + cPrefixVarijabla + " / " + cImePolja )
             LOOP
          ENDIF
 
          hRet[ Lower( cImePolja ) ] := Eval( bMemvarBlock )
-
          IF ( ValType( hRet[ Lower( cImePolja ) ] ) == "C" ) .AND.  lUtf
             hRet[ Lower( cImePolja ) ] := hb_StrToUTF8 ( hRet[ Lower( cImePolja ) ]  )
          ENDIF
-
          IF lReleaseVarFromMemory // oslobadja public ili private varijablu
             __mvXRelease( cPrefixVarijabla + cImePolja )
          ENDIF

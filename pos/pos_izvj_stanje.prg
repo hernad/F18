@@ -23,7 +23,6 @@ FUNCTION pos_stanje_artikala()
    LOCAL cIdRoba
    LOCAL nRobaNazivSirina := 29
    LOCAL cLijevaMargina := ""
-
    LOCAL xPrintOpt, bZagl
 
    PRIVATE cIdPos
@@ -97,14 +96,12 @@ FUNCTION pos_stanje_artikala()
          IF POS->idvd $ "16#00"
             nPstanje += POS->Kolicina
             nVrijednost += POS->Kolicina * POS->Cijena
-         ELSEIF POS->idvd $ "IN#NI#" + DOK_IZLAZA
+         ELSEIF POS->idvd $ "IN#NI#" + "42#01"
             DO CASE
             CASE POS->IdVd == "IN"
                nPstanje -= ( POS->Kolicina - POS->Kol2 )
                nVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
-
-            CASE POS->IdVd == "NI"
-               // ne mijenja kolicinu
+            CASE POS->IdVd == "NI" // nivelacijom se ne mijenja kolicina
                nVrijednost := POS->Kolicina * POS->Cijena
             OTHERWISE
                nPstanje -= POS->Kolicina
@@ -125,7 +122,7 @@ FUNCTION pos_stanje_artikala()
          IF POS->idvd $ "16#00"
             nUlaz += pos->Kolicina
             nVrijednost += POS->Kolicina * POS->Cijena
-         ELSEIF pos->idvd $  "IN#NI#" + DOK_IZLAZA
+         ELSEIF pos->idvd $  "IN#NI#" + "42#01"
             DO CASE
             CASE POS->IdVd == "IN"
                nIzlaz += ( pos->kolicina - pos->kol2 )
@@ -169,7 +166,6 @@ FUNCTION pos_stanje_artikala()
          ?? " "
          ?? Str( nStanje * roba->mpc, 10, 2 )
       ENDIF
-
 
    ENDDO
    podvuci(cLijevaMargina, nRobaNazivSirina)

@@ -249,9 +249,6 @@ FUNCTION pos_realizacija_radnik
          ?
          ? Replicate ( "=", 40 )
          ? PadC ( "SVI RADNICI UKUPNO:", 25 ), Str ( nTotal, 14, 2 )
-         IF nTotal2 <> 0
-            ? PadL ( "PARTICIPACIJA:", 29 ), Str ( nTotal2, 10, 2 )
-         ENDIF
          IF nTotal3 <> 0
             ? PadL ( NenapPop(), 29 ), Str ( nTotal3, 10, 2 )
             ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotal - nTotal3 + nTotal2, 10, 2 )
@@ -311,12 +308,9 @@ FUNCTION pos_realizacija_radnik
       ENDDO
       ? REPL ( "=", 40 )
       ? PadL ( "U K U P N O", 24 ), Str ( nTotal, 15, 2 )
-      //IF nTotal2 <> 0
-      //   ? PadL ( "PARTICIPACIJA:", 24 ), Str ( nTotal2, 15, 2 )
-      //ENDIF
       IF nTotal3 <> 0
          ? PadL ( NenapPop(), 24 ), Str ( nTotal3, 15, 2 )
-         ? PadL ( "UKUPNO NAPLATA:", 24 ), Str ( nTotal - nTotal3 + nTotal2, 15, 2 )
+         ? PadL ( "UKUPNO NAPLATA:", 24 ), Str ( nTotal - nTotal3, 15, 2 )
       ENDIF
       ? REPL ( "=", 40 )
    ENDIF

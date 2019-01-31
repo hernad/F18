@@ -242,7 +242,6 @@ METHOD set_module_gvars()
 
    // PUBLIC gPopVar := "P"
    PUBLIC gPopZcj := "N"
-   PUBLIC gZadCij := "N"
    PUBLIC gPopProc := "N"
    PUBLIC gIsPopust := .F.
    PUBLIC gKolDec := 2
@@ -322,7 +321,6 @@ METHOD set_module_gvars()
    // principi rada kase
    cPrevPSS := gPocStaSmjene
 
-   gZadCij := fetch_metric( "AzuriranjeCijena", NIL, gZadCij )
    //gVodiOdj := fetch_metric( "VodiOdjeljenja", NIL, gVodiOdj )
    gRadniRac := fetch_metric( "RadniRacuni", NIL, gRadniRac )
    gDirZaklj := fetch_metric( "DirektnoZakljucivanjeRacuna", NIL, gDirZaklj )
