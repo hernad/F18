@@ -30,7 +30,8 @@ FUNCTION kalk_maloprodaja()
    AAdd( aOpcExe, {|| p_roba_prodavnica() } )
 
    f18_menu( "mp", .F.,  nIzbor, aOpc, aOpcExe )
-f18_sql_schema( "roba" )
+
+   //f18_sql_schema( "roba" )
    RETURN .T.
 
 

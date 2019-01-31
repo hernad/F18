@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 THREAD STATIC __KTO_DUG
 THREAD STATIC __KTO_POT
 THREAD STATIC __SH_SLD_VAR
@@ -29,7 +28,7 @@ FUNCTION fakt_stdok_pdv( cIdFirma, cIdTipDok, cBrDok, lJFill )
       lJFill := .F.
    ENDIF
 
-   IF PCount() == 4 .AND. ( cIdtipDok <> NIL )
+   IF PCount() == 4 .AND. ( cIdtipDok <> NIL ) // azurirani dokument fakt_fakt - alias FAKT_PRIPR
       lPrepisDok := .T.
       hParamsFill[ "from_server" ] := .T.
       close_open_fakt_tabele( .T. )

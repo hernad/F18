@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 STATIC LEN_KOLICINA := 12
 STATIC LEN_CIJENA := 10
 STATIC LEN_VRIJEDNOST := 12
@@ -25,7 +24,6 @@ STATIC __default_odt_mp_template := ""
 STATIC __default_odt_kol_template := ""
 STATIC _temporary := .F.
 STATIC __auto_odt := ""
-
 
 
 FUNCTION fakt_stampa_dok_odt( cIdf, cIdVd, cBrDok )
@@ -47,14 +45,11 @@ FUNCTION fakt_stampa_dok_odt( cIdf, cIdVd, cBrDok )
       _file_pdf := "fakt_" + cIdF + "_" + cIdVd + "_" + AllTrim( cBrDok ) + ".pdf"
       __tip_dok := cIdVd
    ELSE
-
       _file_pdf := "fakt_priprema.pdf"
-
       // ali moramo znati koji je dokument u pitanju !
       SELECT fakt_pripr
       SET ORDER TO TAG "1"
       GO TOP
-
       __tip_dok := field->idtipdok
 
    ENDIF
@@ -161,8 +156,6 @@ STATIC FUNCTION fakt_odaberi_template( cTemplate, tip_dok )
    ENDIF
 
    RETURN _ok
-
-
 
 
 

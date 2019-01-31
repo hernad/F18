@@ -540,44 +540,14 @@ FUNCTION close_open_fakt_tabele( lOpenFaktAsPripr )
    ENDIF
 
 
-   // select_o_fakt_objekti()
-
-
-   // IF glDistrib = .T.
-   // SELECT F_RELAC
-   // IF !Used()
-   // o_relac()
-   // O_VOZILA
-   // O_KALPOS
-   // ENDIF
-   // ENDIF
-
-   // o_vrstep()
-   // o_ops()
-   // select_o_konto()
-   // o_sastavnice()
-   // select_o_partner()
-   // select_o_roba()
-// o_fakt_txt()
-   // o_tarifa()
-   // o_valute()
-
-   // o_fakt_doks2_dbf()
-   // o_fakt_doks_dbf()
-
-   // o_rj()
-   // o_sifk()
-   // o_sifv()
-
    IF !lOpenFaktAsPripr
       o_fakt_pripr()
-      // o_fakt_dbf()
       SELECT fakt_pripr
       SET ORDER TO TAG "1"
       GO TOP
    ENDIF
 
-   RETURN
+   RETURN .T.
 
 
 

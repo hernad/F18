@@ -15,10 +15,8 @@
 FUNCTION set_a_dbf_fakt()
 
    set_a_dbf_fakt_fakt()
-
    set_a_fakt_doks_doks2( "fakt_doks", "FAKT_DOKS", F_FAKT_DOKS )
    set_a_fakt_doks_doks2( "fakt_doks2", "FAKT_DOKS2", F_FAKT_DOKS2 )
-
    set_a_sql_fakt_ugov()
    set_a_sql_fakt_rugov()
    set_a_sql_fakt_dest()
@@ -36,7 +34,6 @@ FUNCTION set_a_dbf_fakt()
    set_a_dbf_temp( "fakt_logk",   "LOGK", F_LOGK    )
    set_a_dbf_temp( "fakt_logkd",   "LOGKD", F_LOGKD   )
    set_a_dbf_temp( "fakt_upl",   "UPL", F_UPL     )
-   set_a_dbf_temp( "fakt_s_pripr",   "FAKT_S_PRIPR", F_FAKT    )
    set_a_dbf_temp( "fakt__fakt",   "_FAKT", F__FAKT   )
    set_a_dbf_temp( "fakt_attr", "FAKT_ATTR", F_FAKT_ATTR )
    set_a_dbf_temp( "labelu", "LABELU", F_LABELU )
