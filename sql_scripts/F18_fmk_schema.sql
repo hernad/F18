@@ -216,7 +216,6 @@ CREATE TABLE fmk.adres (
     k9 character(3)
 );
 
-
 ALTER TABLE fmk.adres OWNER TO admin;
 
 --
@@ -231,7 +230,6 @@ CREATE TABLE fmk.banke (
     adresa character(30)
 );
 
-
 ALTER TABLE fmk.banke OWNER TO admin;
 
 --
@@ -244,7 +242,6 @@ CREATE SEQUENCE fmk.brojac_brojac_id_seq
     NO MINVALUE
     MAXVALUE 2147483647
     CACHE 1;
-
 
 ALTER TABLE fmk.brojac_brojac_id_seq OWNER TO admin;
 
@@ -265,7 +262,6 @@ CREATE TABLE fmk.dest (
     fax character(20)
 );
 
-
 ALTER TABLE fmk.dest OWNER TO admin;
 
 --
@@ -283,7 +279,6 @@ CREATE TABLE fmk.dopr (
     dop_tip character(1),
     tiprada character(1)
 );
-
 
 ALTER TABLE fmk.dopr OWNER TO admin;
 
@@ -325,7 +320,6 @@ CREATE TABLE fmk.epdv_kif (
     p_kat_2 character(1)
 );
 
-
 ALTER TABLE fmk.epdv_kif OWNER TO admin;
 
 --
@@ -363,7 +357,6 @@ CREATE TABLE fmk.epdv_kuf (
     p_kat character(1),
     p_kat_2 character(1)
 );
-
 
 ALTER TABLE fmk.epdv_kuf OWNER TO admin;
 
@@ -419,7 +412,6 @@ CREATE TABLE fmk.epdv_pdv (
     u_pdv_43 numeric(18,2)
 );
 
-
 ALTER TABLE fmk.epdv_pdv OWNER TO admin;
 
 --
@@ -452,7 +444,6 @@ CREATE TABLE fmk.epdv_sg_kif (
     id_kto_naz character(10),
     s_br_dok character(12)
 );
-
 
 ALTER TABLE fmk.epdv_sg_kif OWNER TO admin;
 
@@ -487,7 +478,6 @@ CREATE TABLE fmk.epdv_sg_kuf (
     s_br_dok character(12)
 );
 
-
 ALTER TABLE fmk.epdv_sg_kuf OWNER TO admin;
 
 --
@@ -515,7 +505,6 @@ CREATE TABLE fmk.f18_rules (
     rule_d1 date,
     rule_d2 date
 );
-
 
 ALTER TABLE fmk.f18_rules OWNER TO admin;
 
@@ -552,7 +541,6 @@ CREATE TABLE fmk.fakt_doks (
     korisnik text DEFAULT "current_user"()
 );
 
-
 ALTER TABLE fmk.fakt_doks OWNER TO admin;
 
 --
@@ -571,7 +559,6 @@ CREATE TABLE fmk.fakt_doks2 (
     n1 numeric(15,2),
     n2 numeric(15,2)
 );
-
 
 ALTER TABLE fmk.fakt_doks2 OWNER TO admin;
 
@@ -611,7 +598,6 @@ CREATE TABLE fmk.fakt_fakt (
     idrelac character(4)
 );
 
-
 ALTER TABLE fmk.fakt_fakt OWNER TO admin;
 
 --
@@ -627,7 +613,6 @@ CREATE TABLE fmk.fakt_fakt_atributi (
     value character varying
 );
 
-
 ALTER TABLE fmk.fakt_fakt_atributi OWNER TO admin;
 
 --
@@ -639,7 +624,6 @@ CREATE TABLE fmk.fakt_ftxt (
     match_code character(10),
     naz character varying
 );
-
 
 ALTER TABLE fmk.fakt_ftxt OWNER TO admin;
 
@@ -663,7 +647,6 @@ CREATE TABLE fmk.fakt_gen_ug (
     dat_val date
 );
 
-
 ALTER TABLE fmk.fakt_gen_ug OWNER TO admin;
 
 --
@@ -683,7 +666,6 @@ CREATE TABLE fmk.fakt_gen_ug_p (
     f_iznos_pd numeric(15,5)
 );
 
-
 ALTER TABLE fmk.fakt_gen_ug_p OWNER TO admin;
 
 --
@@ -694,7 +676,6 @@ CREATE TABLE fmk.fakt_objekti (
     id character(10),
     naz character varying(100)
 );
-
 
 ALTER TABLE fmk.fakt_objekti OWNER TO admin;
 
@@ -748,7 +729,6 @@ CREATE TABLE fmk.fakt_ugov (
     def_dest character(6)
 );
 
-
 ALTER TABLE fmk.fakt_ugov OWNER TO admin;
 
 --
@@ -761,7 +741,6 @@ CREATE TABLE fmk.fakt_upl (
     opis character(100),
     iznos numeric(12,2)
 );
-
 
 ALTER TABLE fmk.fakt_upl OWNER TO admin;
 
@@ -782,7 +761,6 @@ CREATE TABLE fmk.fin_anal (
     potdem numeric(15,2)
 );
 
-
 ALTER TABLE fmk.fin_anal OWNER TO admin;
 
 --
@@ -798,7 +776,6 @@ CREATE TABLE fmk.fin_budzet (
     rebiznos numeric(20,2)
 );
 
-
 ALTER TABLE fmk.fin_budzet OWNER TO admin;
 
 --
@@ -809,7 +786,6 @@ CREATE TABLE fmk.fin_buiz (
     id character(7),
     naz character(10)
 );
-
 
 ALTER TABLE fmk.fin_buiz OWNER TO admin;
 
@@ -826,7 +802,6 @@ CREATE TABLE fmk.fin_fin_atributi (
     value character varying
 );
 
-
 ALTER TABLE fmk.fin_fin_atributi OWNER TO admin;
 
 --
@@ -837,7 +812,6 @@ CREATE TABLE fmk.fin_fond (
     id character(4),
     naz character varying(35)
 );
-
 
 ALTER TABLE fmk.fin_fond OWNER TO admin;
 
@@ -869,7 +843,6 @@ CREATE TABLE fmk.fin_izvje (
     tiptab character(1)
 );
 
-
 ALTER TABLE fmk.fin_izvje OWNER TO admin;
 
 --
@@ -892,7 +865,6 @@ CREATE TABLE fmk.fin_koliz (
     kuslov character(100),
     sizraz character(100)
 );
-
 
 ALTER TABLE fmk.fin_koliz OWNER TO admin;
 
@@ -917,7 +889,6 @@ CREATE TABLE fmk.fin_koniz (
     u1 character(3)
 );
 
-
 ALTER TABLE fmk.fin_koniz OWNER TO admin;
 
 --
@@ -938,7 +909,6 @@ CREATE TABLE fmk.fin_nalog (
     korisnik text DEFAULT "current_user"()
 );
 
-
 ALTER TABLE fmk.fin_nalog OWNER TO admin;
 
 --
@@ -949,7 +919,6 @@ CREATE TABLE fmk.fin_parek (
     idpartija character(6),
     idkonto character(7)
 );
-
 
 ALTER TABLE fmk.fin_parek OWNER TO admin;
 
@@ -969,7 +938,6 @@ CREATE TABLE fmk.fin_sint (
     dugdem numeric(15,2),
     potdem numeric(15,2)
 );
-
 
 ALTER TABLE fmk.fin_sint OWNER TO admin;
 
@@ -1004,7 +972,6 @@ CREATE TABLE fmk.fin_suban (
     fond character(4)
 );
 
-
 ALTER TABLE fmk.fin_suban OWNER TO admin;
 
 --
@@ -1016,7 +983,6 @@ CREATE TABLE fmk.fin_ulimit (
     idpartner character(6),
     f_limit numeric(15,2)
 );
-
 
 ALTER TABLE fmk.fin_ulimit OWNER TO admin;
 
@@ -1030,7 +996,6 @@ CREATE TABLE fmk.fin_zagli (
     y1 numeric(3,0) NOT NULL,
     izraz character(100) NOT NULL
 );
-
 
 ALTER TABLE fmk.fin_zagli OWNER TO admin;
 
@@ -1047,7 +1012,6 @@ CREATE TABLE fmk.jprih (
     racun character(16),
     budzorg character(7)
 );
-
 
 ALTER TABLE fmk.jprih OWNER TO admin;
 
@@ -1076,7 +1040,6 @@ CREATE TABLE fmk.kalk_doks (
     korisnik text DEFAULT "current_user"()
 );
 
-
 ALTER TABLE fmk.kalk_doks OWNER TO admin;
 
 --
@@ -1093,7 +1056,6 @@ CREATE TABLE fmk.kalk_doks2 (
     k2 character(2),
     k3 character(3)
 );
-
 
 ALTER TABLE fmk.kalk_doks2 OWNER TO admin;
 
@@ -1156,7 +1118,6 @@ CREATE TABLE fmk.kalk_kalk (
     podbr character(2)
 );
 
-
 ALTER TABLE fmk.kalk_kalk OWNER TO admin;
 
 --
@@ -1172,7 +1133,6 @@ CREATE TABLE fmk.kalk_kalk_atributi (
     value character varying
 );
 
-
 ALTER TABLE fmk.kalk_kalk_atributi OWNER TO admin;
 
 --
@@ -1185,7 +1145,6 @@ CREATE TABLE fmk.kalvir (
     formula character varying(200),
     pnabr character(10)
 );
-
 
 ALTER TABLE fmk.kalvir OWNER TO admin;
 
@@ -1252,7 +1211,6 @@ CREATE TABLE fmk.koncij (
     kod character(7)
 );
 
-
 ALTER TABLE fmk.koncij OWNER TO admin;
 
 --
@@ -1266,7 +1224,6 @@ CREATE TABLE fmk.konto (
     pozbilu character(3),
     pozbils character(3)
 );
-
 
 ALTER TABLE fmk.konto OWNER TO admin;
 
@@ -1286,7 +1243,6 @@ CREATE TABLE fmk.kred (
     fil character(30),
     mjesto character(20)
 );
-
 
 ALTER TABLE fmk.kred OWNER TO admin;
 
@@ -1463,7 +1419,6 @@ CREATE TABLE fmk.ld_ld (
     s60 numeric(5,2),
     radsat numeric(10,0)
 );
-
 
 ALTER TABLE fmk.ld_ld OWNER TO admin;
 
@@ -1903,7 +1858,6 @@ CREATE TABLE fmk.metric (
     metric_module text
 );
 
-
 ALTER TABLE fmk.metric OWNER TO admin;
 
 --
@@ -1924,7 +1878,6 @@ CREATE SEQUENCE fmk.metric_metric_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
-
 ALTER TABLE fmk.metric_metric_id_seq OWNER TO admin;
 
 --
@@ -1936,7 +1889,6 @@ CREATE TABLE fmk.objekti (
     naz character(10),
     idobj character(7)
 );
-
 
 ALTER TABLE fmk.objekti OWNER TO admin;
 
@@ -1957,7 +1909,6 @@ CREATE TABLE fmk.ops (
     reg character(1)
 );
 
-
 ALTER TABLE fmk.ops OWNER TO admin;
 
 --
@@ -1971,7 +1922,6 @@ CREATE TABLE fmk.os_amort (
     iznos numeric(7,3)
 );
 
-
 ALTER TABLE fmk.os_amort OWNER TO admin;
 
 --
@@ -1983,7 +1933,6 @@ CREATE TABLE fmk.os_k1 (
     match_code character(10),
     naz character(25)
 );
-
 
 ALTER TABLE fmk.os_k1 OWNER TO admin;
 
@@ -2018,7 +1967,6 @@ CREATE TABLE fmk.os_os (
     idpartner character(6)
 );
 
-
 ALTER TABLE fmk.os_os OWNER TO admin;
 
 
@@ -2039,7 +1987,6 @@ CREATE TABLE fmk.os_promj (
     revd numeric(18,2),
     revp numeric(18,2)
 );
-
 
 ALTER TABLE fmk.os_promj OWNER TO admin;
 
@@ -2064,7 +2011,6 @@ CREATE TABLE fmk.os_reval (
     i11 numeric(7,3),
     i12 numeric(7,3)
 );
-
 
 ALTER TABLE fmk.os_reval OWNER TO admin;
 
@@ -2094,7 +2040,6 @@ CREATE TABLE fmk.partn (
     idrefer character(10)
 );
 
-
 ALTER TABLE fmk.partn OWNER TO admin;
 
 --
@@ -2105,7 +2050,6 @@ CREATE TABLE fmk.pkonto (
     id character(7),
     tip character(1)
 );
-
 
 ALTER TABLE fmk.pkonto OWNER TO admin;
 
@@ -2134,41 +2078,7 @@ CREATE TABLE fmk.por (
     s_izn_5 numeric(12,2)
 );
 
-
 ALTER TABLE fmk.por OWNER TO admin;
-
---
--- Name: pos_doks; Type: TABLE; Schema: fmk; Owner: admin
---
-
-CREATE TABLE fmk.pos_doks (
-    idpos character varying(2) NOT NULL,
-    idvd character varying(2) NOT NULL,
-    brdok character varying(6) NOT NULL,
-    datum date,
-    idgost character varying(8),
-    idradnik character varying(4),
-    idvrstep character(2),
-    m1 character varying(1),
-    placen character(1),
-    prebacen character(1),
-    smjena character varying(1),
-    sto character varying(3),
-    vrijeme character varying(5),
-    c_1 character varying(6),
-    c_2 character varying(10),
-    c_3 character varying(50),
-    fisc_rn numeric(10,0),
-    zak_br numeric(6,0),
-    sto_br numeric(3,0),
-    funk numeric(3,0),
-    -- fisc_st character(10),
-    rabat numeric(15,5),
-    ukupno numeric(15,5)
-);
-
-
-ALTER TABLE fmk.pos_doks OWNER TO admin;
 
 --
 -- Name: pos_dokspf; Type: TABLE; Schema: fmk; Owner: admin
@@ -2184,7 +2094,6 @@ CREATE TABLE fmk.pos_dokspf (
     kidbr character(13),
     datisp date
 );
-
 
 ALTER TABLE fmk.pos_dokspf OWNER TO admin;
 
@@ -2228,38 +2137,6 @@ CREATE TABLE fmk.pos_osob (
 
 
 ALTER TABLE fmk.pos_osob OWNER TO admin;
-
---
--- Name: pos_pos; Type: TABLE; Schema: fmk; Owner: admin
---
-
-CREATE TABLE fmk.pos_pos (
-    idpos character varying(2),
-    idvd character varying(2),
-    brdok character varying(6),
-    datum date,
-    idcijena character varying(1),
-    iddio character varying(2),
-    idodj character(2),
-    idradnik character varying(4),
-    idroba character(10),
-    idtarifa character(6),
-    m1 character varying(1),
-    mu_i character varying(1),
-    prebacen character varying(1),
-    smjena character varying(1),
-    c_1 character varying(6),
-    c_2 character varying(10),
-    c_3 character varying(50),
-    kolicina numeric(18,3),
-    kol2 numeric(18,3),
-    cijena numeric(10,3),
-    ncijena numeric(10,3),
-    rbr character varying(5)
-);
-
-
-ALTER TABLE fmk.pos_pos OWNER TO admin;
 
 --
 -- Name: pos_promvp; Type: TABLE; Schema: fmk; Owner: admin
@@ -2308,7 +2185,6 @@ CREATE TABLE fmk.refer (
     idops character(4),
     naz character(40)
 );
-
 
 ALTER TABLE fmk.refer OWNER TO admin;
 
@@ -2389,7 +2265,6 @@ CREATE TABLE fmk.roba (
     mpc8 numeric(18,8),
     mpc9 numeric(18,8)
 );
-
 
 ALTER TABLE fmk.roba OWNER TO admin;
 
@@ -2479,7 +2354,6 @@ CREATE TABLE fmk.sii_promj (
     revp numeric(18,2)
 );
 
-
 ALTER TABLE fmk.sii_promj OWNER TO admin;
 
 --
@@ -2513,42 +2387,7 @@ CREATE TABLE fmk.sii_sii (
     idpartner character(6)
 );
 
-
 ALTER TABLE fmk.sii_sii OWNER TO admin;
-
---
--- Name: sii_sii_2013_zavrsni; Type: TABLE; Schema: fmk; Owner: hernad
---
-
-CREATE TABLE fmk.sii_sii_2013_zavrsni (
-    id character(10),
-    match_code character(10),
-    naz character(30),
-    idrj character(4),
-    datum date,
-    datotp date,
-    opisotp character(30),
-    idkonto character(7),
-    kolicina numeric(6,1),
-    jmj character(3),
-    idam character(8),
-    idrev character(4),
-    nabvr numeric(18,2),
-    otpvr numeric(18,2),
-    amd numeric(18,2),
-    amp numeric(18,2),
-    revd numeric(18,2),
-    revp numeric(18,2),
-    k1 character(4),
-    k2 character(1),
-    k3 character(2),
-    opis character(25),
-    brsoba character(6),
-    idpartner character(6)
-);
-
-
-ALTER TABLE fmk.sii_sii_2013_zavrsni OWNER TO hernad;
 
 --
 -- Name: strspr; Type: TABLE; Schema: fmk; Owner: admin
@@ -2579,7 +2418,6 @@ CREATE TABLE fmk.tarifa (
     dlruc numeric(6,2)
 );
 
-
 ALTER TABLE fmk.tarifa OWNER TO admin;
 
 --
@@ -2591,7 +2429,6 @@ CREATE TABLE fmk.tdok (
     match_code character(10),
     naz character(30)
 );
-
 
 ALTER TABLE fmk.tdok OWNER TO admin;
 
@@ -2613,7 +2450,6 @@ CREATE TABLE fmk.tippr (
     tpr_tip character(1)
 );
 
-
 ALTER TABLE fmk.tippr OWNER TO admin;
 
 --
@@ -2634,7 +2470,6 @@ CREATE TABLE fmk.tippr2 (
     tpr_tip character(1)
 );
 
-
 ALTER TABLE fmk.tippr2 OWNER TO admin;
 
 --
@@ -2646,7 +2481,6 @@ CREATE TABLE fmk.tnal (
     match_code character(10),
     naz character(30)
 );
-
 
 ALTER TABLE fmk.tnal OWNER TO admin;
 
@@ -2669,7 +2503,6 @@ CREATE TABLE fmk.trfp (
     idtarifa character(6)
 );
 
-
 ALTER TABLE fmk.trfp OWNER TO admin;
 
 --
@@ -2691,7 +2524,6 @@ CREATE TABLE fmk.trfp2 (
     idtarifa character(6)
 );
 
-
 ALTER TABLE fmk.trfp2 OWNER TO admin;
 
 --
@@ -2708,7 +2540,6 @@ CREATE TABLE fmk.trfp3 (
     znak character(1),
     idvn character(2)
 );
-
 
 ALTER TABLE fmk.trfp3 OWNER TO admin;
 
@@ -2728,7 +2559,6 @@ CREATE TABLE fmk.valute (
     tip character(1)
 );
 
-
 ALTER TABLE fmk.valute OWNER TO admin;
 
 --
@@ -2742,7 +2572,6 @@ CREATE TABLE fmk.vposla (
     idkbenef character(1)
 );
 
-
 ALTER TABLE fmk.vposla OWNER TO admin;
 
 --
@@ -2754,7 +2583,6 @@ CREATE TABLE fmk.vprih (
     match_code character(10),
     naz character(20)
 );
-
 
 ALTER TABLE fmk.vprih OWNER TO admin;
 
@@ -2773,7 +2601,6 @@ CREATE TABLE fmk.vrprim (
     dobav character(1)
 );
 
-
 ALTER TABLE fmk.vrprim OWNER TO admin;
 
 --
@@ -2784,7 +2611,6 @@ CREATE TABLE fmk.vrstep (
     id character(2),
     naz character(20)
 );
-
 
 ALTER TABLE fmk.vrstep OWNER TO admin;
 
@@ -3026,13 +2852,6 @@ ALTER TABLE ONLY fmk.metric
 ALTER TABLE ONLY fmk.partn
     ADD CONSTRAINT partn_pkey PRIMARY KEY (id);
 
-
---
--- Name: pos_doks pos_doks_pkey; Type: CONSTRAINT; Schema: fmk; Owner: admin
---
-
-ALTER TABLE ONLY fmk.pos_doks
-    ADD CONSTRAINT pos_doks_pkey PRIMARY KEY (idpos, idvd, brdok);
 
 
 --
@@ -3819,47 +3638,6 @@ CREATE INDEX pkonto_id2 ON fmk.pkonto USING btree (tip);
 CREATE INDEX por_id1 ON fmk.por USING btree (id);
 
 
---
--- Name: pos_doks_id1; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_doks_id1 ON fmk.pos_doks USING btree (idpos, idvd, datum, brdok);
-
-
---
--- Name: pos_doks_id2; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_doks_id2 ON fmk.pos_doks USING btree (idvd, datum, smjena);
-
-
---
--- Name: pos_doks_id3; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idgost, placen, datum);
-
-
---
--- Name: pos_doks_id4; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_doks_id4 ON fmk.pos_doks USING btree (idvd, m1);
-
-
---
--- Name: pos_doks_id5; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_doks_id5 ON fmk.pos_doks USING btree (prebacen);
-
-
---
--- Name: pos_doks_id6; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_doks_id6 ON fmk.pos_doks USING btree (datum);
-
 
 --
 -- Name: pos_dokspf_id1; Type: INDEX; Schema: fmk; Owner: admin
@@ -3895,47 +3673,6 @@ CREATE INDEX pos_osob_id1 ON fmk.pos_osob USING btree (korsif);
 
 CREATE INDEX pos_osob_id2 ON fmk.pos_osob USING btree (id);
 
-
---
--- Name: pos_pos_id1; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_pos_id1 ON fmk.pos_pos USING btree (idpos, idvd, datum, brdok, idroba, idcijena);
-
-
---
--- Name: pos_pos_id2; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_pos_id2 ON fmk.pos_pos USING btree (idodj, idroba, datum);
-
-
---
--- Name: pos_pos_id3; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_pos_id3 ON fmk.pos_pos USING btree (prebacen);
-
-
---
--- Name: pos_pos_id4; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_pos_id4 ON fmk.pos_pos USING btree (datum);
-
-
---
--- Name: pos_pos_id5; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_pos_id5 ON fmk.pos_pos USING btree (idpos, idroba, datum);
-
-
---
--- Name: pos_pos_id6; Type: INDEX; Schema: fmk; Owner: admin
---
-
-CREATE INDEX pos_pos_id6 ON fmk.pos_pos USING btree (idroba);
 
 
 --
@@ -4260,13 +3997,11 @@ ALTER TABLE ONLY fmk.fakt_fakt_atributi
 
 GRANT ALL ON SCHEMA fmk TO xtrole;
 
-
 --
 -- Name: TABLE adres; Type: ACL; Schema: fmk; Owner: admin
 --
 
 GRANT ALL ON TABLE fmk.adres TO xtrole;
-
 
 --
 -- Name: TABLE banke; Type: ACL; Schema: fmk; Owner: admin
@@ -4400,13 +4135,11 @@ GRANT ALL ON TABLE fmk.fakt_objekti TO xtrole;
 
 GRANT ALL ON TABLE fmk.fakt_rugov TO xtrole;
 
-
 --
 -- Name: TABLE fakt_ugov; Type: ACL; Schema: fmk; Owner: admin
 --
 
 GRANT ALL ON TABLE fmk.fakt_ugov TO xtrole;
-
 
 --
 -- Name: TABLE fakt_upl; Type: ACL; Schema: fmk; Owner: admin
@@ -4414,13 +4147,11 @@ GRANT ALL ON TABLE fmk.fakt_ugov TO xtrole;
 
 GRANT ALL ON TABLE fmk.fakt_upl TO xtrole;
 
-
 --
 -- Name: TABLE fin_anal; Type: ACL; Schema: fmk; Owner: admin
 --
 
 GRANT ALL ON TABLE fmk.fin_anal TO xtrole;
-
 
 --
 -- Name: TABLE fin_budzet; Type: ACL; Schema: fmk; Owner: admin
@@ -4540,13 +4271,11 @@ GRANT ALL ON TABLE fmk.kalk_doks TO xtrole;
 
 GRANT ALL ON TABLE fmk.kalk_doks2 TO xtrole;
 
-
 --
 -- Name: TABLE kalk_kalk; Type: ACL; Schema: fmk; Owner: admin
 --
 
 GRANT ALL ON TABLE fmk.kalk_kalk TO xtrole;
-
 
 --
 -- Name: TABLE kalk_kalk_atributi; Type: ACL; Schema: fmk; Owner: admin
@@ -4603,13 +4332,11 @@ GRANT ALL ON TABLE fmk.ks TO xtrole;
 
 GRANT ALL ON TABLE fmk.ld_ld TO xtrole;
 
-
 --
 -- Name: TABLE ld_norsiht; Type: ACL; Schema: fmk; Owner: admin
 --
 
 GRANT ALL ON TABLE fmk.ld_norsiht TO xtrole;
-
 
 --
 -- Name: TABLE ld_obracuni; Type: ACL; Schema: fmk; Owner: admin
@@ -4665,7 +4392,6 @@ GRANT ALL ON TABLE fmk.ld_radsat TO xtrole;
 --
 
 GRANT ALL ON TABLE fmk.ld_radsiht TO xtrole;
-
 
 --
 -- Name: TABLE ld_rj; Type: ACL; Schema: fmk; Owner: admin
@@ -4864,13 +4590,6 @@ GRANT ALL ON TABLE fmk.pos_osob TO xtrole;
 
 
 --
--- Name: TABLE pos_pos; Type: ACL; Schema: fmk; Owner: admin
---
-
-GRANT ALL ON TABLE fmk.pos_pos TO xtrole;
-
-
---
 -- Name: TABLE pos_promvp; Type: ACL; Schema: fmk; Owner: admin
 --
 
@@ -4946,13 +4665,6 @@ GRANT ALL ON TABLE fmk.sii_promj TO xtrole;
 --
 
 GRANT ALL ON TABLE fmk.sii_sii TO xtrole;
-
-
---
--- Name: TABLE sii_sii_2013_zavrsni; Type: ACL; Schema: fmk; Owner: hernad
---
-
-GRANT ALL ON TABLE fmk.sii_sii_2013_zavrsni TO xtrole;
 
 
 --
@@ -5053,6 +4765,114 @@ GRANT ALL ON TABLE fmk.vrprim TO xtrole;
 GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 
 
+-- --
+-- -- Name: pos_pos; Type: TABLE; Schema: fmk; Owner: admin
+-- --
+-- CREATE TABLE fmk.pos_pos (
+--     idpos character varying(2),
+--     idvd character varying(2),
+--     brdok character varying(6),
+--     datum date,
+--     idcijena character varying(1),
+--     iddio character varying(2),
+--     idodj character(2),
+--     idradnik character varying(4),
+--     idroba character(10),
+--     idtarifa character(6),
+--     m1 character varying(1),
+--     mu_i character varying(1),
+--     prebacen character varying(1),
+--     smjena character varying(1),
+--     c_1 character varying(6),
+--     c_2 character varying(10),
+--     c_3 character varying(50),
+--     kolicina numeric(18,3),
+--     kol2 numeric(18,3),
+--     cijena numeric(10,3),
+--     ncijena numeric(10,3),
+--     rbr character varying(5)
+-- );
 --
--- PostgreSQL database dump complete
+-- ALTER TABLE fmk.pos_pos OWNER TO admin;
 --
+-- CREATE INDEX pos_pos_id1 ON fmk.pos_pos USING btree (idpos, idvd, datum, brdok, idroba, idcijena);
+-- CREATE INDEX pos_pos_id2 ON fmk.pos_pos USING btree (idodj, idroba, datum);
+-- CREATE INDEX pos_pos_id3 ON fmk.pos_pos USING btree (prebacen);
+-- CREATE INDEX pos_pos_id4 ON fmk.pos_pos USING btree (datum);
+-- CREATE INDEX pos_pos_id5 ON fmk.pos_pos USING btree (idpos, idroba, datum);
+-- CREATE INDEX pos_pos_id6 ON fmk.pos_pos USING btree (idroba);
+-- GRANT ALL ON TABLE fmk.pos_pos TO xtrole;
+--
+--
+-- --
+-- -- Name: pos_doks; Type: TABLE; Schema: fmk; Owner: admin
+-- --
+--
+-- CREATE TABLE fmk.pos_doks (
+--     idpos character varying(2) NOT NULL,
+--     idvd character varying(2) NOT NULL,
+--     brdok character varying(6) NOT NULL,
+--     datum date,
+--     idgost character varying(8),
+--     idradnik character varying(4),
+--     idvrstep character(2),
+--     m1 character varying(1),
+--     placen character(1),
+--     prebacen character(1),
+--     smjena character varying(1),
+--     sto character varying(3),
+--     vrijeme character varying(5),
+--     c_1 character varying(6),
+--     c_2 character varying(10),
+--     c_3 character varying(50),
+--     fisc_rn numeric(10,0),
+--     zak_br numeric(6,0),
+--     sto_br numeric(3,0),
+--     -- funk numeric(3,0),
+--     -- fisc_st character(10),
+--     rabat numeric(15,5),
+--     ukupno numeric(15,5)
+-- );
+--
+-- ALTER TABLE fmk.pos_doks OWNER TO admin;
+--
+--
+-- --
+-- -- Name: pos_doks; Type: TABLE; Schema: fmk; Owner: admin
+-- --
+--
+-- CREATE TABLE fmk.pos_doks (
+--     idpos character varying(2) NOT NULL,
+--     idvd character varying(2) NOT NULL,
+--     brdok character varying(6) NOT NULL,
+--     datum date,
+--     idgost character varying(8),
+--     idradnik character varying(4),
+--     idvrstep character(2),
+--     m1 character varying(1),
+--     placen character(1),
+--     prebacen character(1),
+--     smjena character varying(1),
+--     sto character varying(3),
+--     vrijeme character varying(5),
+--     c_1 character varying(6),
+--     c_2 character varying(10),
+--     c_3 character varying(50),
+--     fisc_rn numeric(10,0),
+--     zak_br numeric(6,0),
+--     sto_br numeric(3,0),
+--     -- funk numeric(3,0),
+--     -- fisc_st character(10),
+--     rabat numeric(15,5),
+--     ukupno numeric(15,5)
+-- );
+--
+-- ALTER TABLE fmk.pos_doks OWNER TO admin;
+--
+--
+-- CREATE INDEX pos_doks_id1 ON fmk.pos_doks USING btree (idpos, idvd, datum, brdok);
+-- CREATE INDEX pos_doks_id2 ON fmk.pos_doks USING btree (idvd, datum, smjena);
+-- CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idgost, placen, datum);
+-- CREATE INDEX pos_doks_id4 ON fmk.pos_doks USING btree (idvd, m1);
+-- CREATE INDEX pos_doks_id5 ON fmk.pos_doks USING btree (prebacen);
+-- CREATE INDEX pos_doks_id6 ON fmk.pos_doks USING btree (datum);

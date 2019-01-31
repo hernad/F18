@@ -20,26 +20,8 @@ FUNCTION pos_izvjestaji()
    AAdd( opc, "1. realizacija                               " )
    AAdd( opcexe, {|| pos_menu_realizacija() } )
 
-   // IF gVrstaRS == "K"
-   // AAdd( opc, "----------------------------" )
-   // AAdd( opcexe, nil )
-   // AAdd( opc, "3. najprometniji artikli" )
-   // AAdd( opcexe, {|| pos_top_narudzbe() } )
-   // AAdd( opc, "4. štampa azuriranih dokumenata" )
-   // AAdd( opcexe, {|| pos_lista_azuriranih_dokumenata() } )
-   // ELSE
-   // server, samostalna kasa TOPS
-
    AAdd( opc, "2. stanje artikala" )
    AAdd( opcexe, {|| pos_stanje_artikala() } )
-
-   // IF gVodiOdj == "D"
-  // AAdd( opc, "3. stanje artikala prodajno mjesto" )
-//   AAdd( opcexe, {|| pos_stanje_artikala_po_odjeljenjima() } )
-   // ELSE
-   // AAdd( opc, "--------------------" )
-   // AAdd( opcexe, nil )
-   // ENDIF
 
    AAdd( opc, "4. kartice artikala" )
    AAdd( opcexe, {|| pos_kartica_artikla() } )

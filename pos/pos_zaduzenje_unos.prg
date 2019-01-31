@@ -25,14 +25,15 @@
  *       lForsSir .T. - radi se o forsiranom zaduzenju odjeljenja
  *                           sirovinama
  */
-FUNCTION pos_zaduzenje
+FUNCTION pos_zaduzenje( cIdVd )
 
-   PARAMETERS cIdVd
-
-   LOCAL _from_kalk := .F.
+   LOCAL lFromKalk := .F.
    LOCAL cOdg
    LOCAL nSign
    LOCAL GetList := {}
+   LOCAL aPosKalk
+   LOCAL cBrDok
+   LOCAL lAzuriratiBezStampeSilent
 
    IF gSamoProdaja == "D" .AND. ( cIdVd <> POS_VD_REKLAMACIJA )
       MsgBeep( "Ne možete vršiti unos zaduženja !" )
@@ -46,15 +47,12 @@ FUNCTION pos_zaduzenje
    PRIVATE cIdOdj
    PRIVATE cRsDbf
    PRIVATE bRSblok
-   PRIVATE cIdVd
+   // PRIVATE cIdVd
    PRIVATE cRobSir := " "
    PRIVATE dDatRada := Date()
-   PRIVATE cBrDok := nil
 
    IF cIdVd == NIL
       cIdVd := "16"
-   ELSE
-      cIdVd := cIdVd
    ENDIF
 
    ImeKol := { { "Sifra",    {|| idroba },      "idroba" }, ;
@@ -76,13 +74,6 @@ FUNCTION pos_zaduzenje
    cIdPos := gIdPos
 
    SET CURSOR ON
-
-   // IF gVodiOdj == "D"
-   // @ box_x_koord() + 3, box_y_koord() + 3 SAY   " Odjeljenje:" GET cIdOdj VALID P_Odj ( @cIdOdj, 3, 28 )
-   // IF cIdVD == "PD"
-   // @ box_x_koord() + 4, box_y_koord() + 3 SAY " Prenos na :" GET cIdOdj2 VALID P_Odj ( @cIdOdj2, 4, 28 )
-   // ENDIF
-   // ENDIF
 
    @ box_x_koord() + 6, box_y_koord() + 3 SAY " Datum dok:" GET dDatRada PICT "@D" VALID dDatRada <= Date()
    READ
@@ -109,12 +100,15 @@ FUNCTION pos_zaduzenje
       RETURN .F.
    ENDIF
 
-   fSadAz := .F.
+   lAzuriratiBezStampeSilent := .F.
 
-   IF ( cIdVd <> POS_VD_REKLAMACIJA ) .AND. pos_preuzmi_iz_kalk( @cIdVd, @cBrDok )
+   aPosKalk := pos_katops_priprz()
+   cIdVd := aPosKalk[ 1 ]
+   cBrDok := aPosKalk[ 2 ]
 
-      _from_kalk := .T.
+   IF ( cIdVd <> POS_VD_REKLAMACIJA ) .AND. !Empty( cIdVd )
 
+      lFromKalk := .T.
       IF priprz->( RecCount2() ) > 0
 
          IF cBrDok <> NIL .AND. Pitanje(, "Odštampati prenesni dokument na štampac (D/N) ?", "N" ) == "D"
@@ -127,7 +121,7 @@ FUNCTION pos_zaduzenje
 
             // o_pos_tables()
             IF Pitanje(, "Ako je sve u redu, želite li staviti dokument na stanje (D/N) ?", " " ) == "D"
-               fSadAz := .T.
+               lAzuriratiBezStampeSilent := .T.
             ENDIF
 
          ENDIF
@@ -136,15 +130,13 @@ FUNCTION pos_zaduzenje
    ENDIF
 
    IF cIdVD == "NI"
-
       my_close_all_dbf()
-      pos_inventura_nivelacija( .F., .T., fSadaz, dDatRada )
+      pos_inventura_nivelacija( .F., .T., lAzuriratiBezStampeSilent, dDatRada )
       RETURN .T.
 
    ELSEIF cIdVd == "IN"
-
       my_close_all_dbf()
-      pos_inventura_nivelacija( .T., .T., fSadAz, dDatRada )
+      pos_inventura_nivelacija( .T., .T., lAzuriratiBezStampeSilent, dDatRada )
       RETURN .T.
 
    ENDIF
@@ -155,7 +147,7 @@ FUNCTION pos_zaduzenje
       RETURN .F.
    ENDIF
 
-   IF !fSadAz
+   IF !lAzuriratiBezStampeSilent
 
       SELECT PRIPRZ
       SET ORDER TO
@@ -163,7 +155,6 @@ FUNCTION pos_zaduzenje
 
       BOX (, 20, 77,, { "<*> - Ispravka stavke ", "Storno - negativna količina" } )
       @ box_x_koord(), box_y_koord() + 4 SAY8 PadC( "PRIPREMA " + NaslovDok( cIdVd ) ) COLOR f18_color_invert()
-
       oBrowse := pos_form_browse( box_x_koord() + 6, box_y_koord() + 1, box_x_koord() + 19, box_y_koord() + 77, ImeKol, Kol, ;
          { hb_UTF8ToStrBox( BROWSE_PODVUCI_2 ), hb_UTF8ToStrBox( BROWSE_PODVUCI ), hb_UTF8ToStrBox( BROWSE_COL_SEP ) }, 0 )
       oBrowse:autolite := .F.
@@ -215,17 +206,17 @@ FUNCTION pos_zaduzenje
 
          @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + cDSFINI ;
             WHEN {|| _idroba := PadR( _idroba, Val( cDSFINI ) ), .T. } ;
-            VALID Eval ( bRSblok, 2, 25 ) .AND. ( gDupliArt == "D" .OR. ZadProvDuple( _idroba ) )
+            VALID Eval ( bRSblok, 2, 25 ) .AND. ( gDupliArt == "D" .OR. pos_zaduzenje_provjeri_duple_stavke( _idroba ) )
          @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _Kolicina PICT "999999.999" ;
             WHEN{|| ShowGets(), .T. } VALID ZadKolOK( _Kolicina )
 
-         //IF gZadCij == "D"
-          //  @ box_x_koord() + 3, box_y_koord() + 35  SAY "N.cijena:" GET _ncijena PICT "99999.9999"
-        //    @ box_x_koord() + 3, box_y_koord() + 56  SAY "Marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
-        //    @ box_x_koord() + 3, Col() + 2 GET _Marza2 PICTURE "9999.99"
-        //    @ box_x_koord() + 3, Col() + 1 GET fMarza PICT "@!" VALID {|| _marza2 := iif( _cijena <> 0 .AND. Empty( fMarza ), 0, _marza2 ), kalk_marza_11( fmarza ), _cijena := iif( _cijena == 0, _cijena := _nCijena * ( tarifa->zpp / 100 + ( 1 + TARIFA->Opp / 100 ) * ( 1 + TARIFA->PPP / 100 ) ), _cijena ), fMarza := " ", .T. }
-            @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" VALID {|| .T. }
-         //ENDIF
+         // IF gZadCij == "D"
+         // @ box_x_koord() + 3, box_y_koord() + 35  SAY "N.cijena:" GET _ncijena PICT "99999.9999"
+         // @ box_x_koord() + 3, box_y_koord() + 56  SAY "Marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
+         // @ box_x_koord() + 3, Col() + 2 GET _Marza2 PICTURE "9999.99"
+         // @ box_x_koord() + 3, Col() + 1 GET fMarza PICT "@!" VALID {|| _marza2 := iif( _cijena <> 0 .AND. Empty( fMarza ), 0, _marza2 ), kalk_marza_11( fmarza ), _cijena := iif( _cijena == 0, _cijena := _nCijena * ( tarifa->zpp / 100 + ( 1 + TARIFA->Opp / 100 ) * ( 1 + TARIFA->PPP / 100 ) ), _cijena ), fMarza := " ", .T. }
+         @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" VALID {|| .T. }
+         // ENDIF
 
          READ
 
@@ -233,10 +224,9 @@ FUNCTION pos_zaduzenje
             EXIT
          ELSE
 
-            StUSif()
+            // StUSif()
             SELECT PRIPRZ
             APPEND BLANK
-
             select_o_roba( _idRoba )
             _robanaz := roba->naz
             _jmj := roba->jmj
@@ -253,7 +243,6 @@ FUNCTION pos_zaduzenje
             SELECT priprz
 
             Gather()
-
             oBrowse:goBottom()
             oBrowse:refreshAll()
             oBrowse:dehilite()
@@ -263,7 +252,6 @@ FUNCTION pos_zaduzenje
       ENDDO
 
       pos_unset_key_handler_ispravka_zaduzenja()
-
       BoxC()
 
    ENDIF
@@ -274,21 +262,18 @@ FUNCTION pos_zaduzenje
 
       // SELECT pos_doks
       // SET ORDER TO TAG "1"
-
-      IF !_from_kalk
+      IF !lFromKalk
          cBrDok := pos_novi_broj_dokumenta( cIdPos, iif( cIdvd == "PD", "16", cIdVd ) )
       ENDIF
 
       SELECT PRIPRZ
-
       Beep( 4 )
-
-      IF !fSadAz .AND. Pitanje(, "Želite li odštampati dokument (D/N) ?", "N" ) == "D"
+      IF !lAzuriratiBezStampeSilent .AND. Pitanje(, "Želite li odštampati dokument (D/N) ?", "N" ) == "D"
          pos_stampa_zaduzenja( cIdVd, cBrDok )
          o_pos_tables()
       ENDIF
 
-      IF fSadAz .OR. Pitanje(, "Želite li staviti dokument na stanje (D/N) ?", "D" ) == "D"
+      IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li staviti dokument na stanje (D/N) ?", "D" ) == "D"
          pos_azuriraj_zaduzenje( cBrDok, cIdVD )
       ELSE
          SELECT _POS
@@ -304,10 +289,11 @@ FUNCTION pos_zaduzenje
    RETURN .T.
 
 
+/*
 // ----------------------------------------------------------
 // setuje u sifranik mpc
 // ----------------------------------------------------------
-FUNCTION StUSif()
+-- FUNCTION StUSif()
 
    LOCAL nDbfArea := Select()
    LOCAL hRec
@@ -319,33 +305,31 @@ FUNCTION StUSif()
       _tmp := "mpc" + AllTrim( gSetMPCijena )
    ENDIF
 
-/*
---   IF gZadCij == "D"
+// --   IF gZadCij == "D"
+//
+//       IF _cijena <> pos_get_mpc() .AND. Pitanje(, "Staviti u šifarnik novu cijenu? (D/N)", "D" ) == "D"
+//
+//          SELECT ( F_ROBA )
+//          hRec := dbf_get_rec()
+//          hRec[ _tmp ] := _cijena
+//
+//          update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
+//
+//          SELECT ( nDbfArea )
+//       ENDIF
+//
+//    ENDIF
 
-      IF _cijena <> pos_get_mpc() .AND. Pitanje(, "Staviti u šifarnik novu cijenu? (D/N)", "D" ) == "D"
-
-         SELECT ( F_ROBA )
-         hRec := dbf_get_rec()
-         hRec[ _tmp ] := _cijena
-
-         update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
-
-         SELECT ( nDbfArea )
-      ENDIF
-
-   ENDIF
-*/
 
    RETURN .T.
-
+*/
 
 
 FUNCTION pos_set_key_handler_ispravka_zaduzenja()
 
-   SetKey( Asc( "*" ), {|| IspraviZaduzenje() } )
+   SetKey( Asc( "*" ), {|| pos_ispravi_zaduzenje() } )
 
    RETURN .T.
-
 
 
 FUNCTION pos_unset_key_handler_ispravka_zaduzenja()
@@ -353,7 +337,6 @@ FUNCTION pos_unset_key_handler_ispravka_zaduzenja()
    SetKey( Asc( "*" ), NIL )
 
    RETURN .F.
-
 
 
 FUNCTION ZadKolOK( nKol )
@@ -370,12 +353,7 @@ FUNCTION ZadKolOK( nKol )
 
 
 
-/* ZadProvDuple(cSif)
- *     Provjera postojanja sifre u zaduzenju
- *   param: cSif
- *
- */
-FUNCTION ZadProvDuple( cSif )
+FUNCTION pos_zaduzenje_provjeri_duple_stavke( cSif )
 
    LOCAL lFlag := .T.
 
@@ -394,10 +372,7 @@ FUNCTION ZadProvDuple( cSif )
 
 
 
-/* IspraviZaduzenje()
- *     Ispravka zaduzenja od strane korisnika
- */
-FUNCTION IspraviZaduzenje()
+FUNCTION pos_ispravi_zaduzenje()
 
    LOCAL cGetId
    LOCAL nGetKol
@@ -414,7 +389,7 @@ FUNCTION IspraviZaduzenje()
    oBrowse:autolite := .T.
    oBrowse:configure()
    aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) }, {| Ch | Ch == K_ENTER } }
-   aProcs := { {|| BrisStavZaduz () }, {|| EditStavZaduz () } }
+   aProcs := { {|| pos_brisi_stavku_zaduzenja () }, {|| pos_ispravi_stavku_zaduzenja () } }
    ShowBrowse( oBrowse, aConds, aProcs )
    oBrowse:autolite := .F.
    oBrowse:dehilite()
@@ -430,11 +405,7 @@ FUNCTION IspraviZaduzenje()
 
 
 
-/* BrisStavZaduz()
- *     Brise stavku zaduzenja
- */
-
-FUNCTION BrisStavZaduz()
+FUNCTION pos_brisi_stavku_zaduzenja()
 
    SELECT PRIPRZ
    IF RecCount2() == 0
@@ -448,13 +419,12 @@ FUNCTION BrisStavZaduz()
    RETURN ( DE_CONT )
 
 
-
-FUNCTION EditStavZaduz()
+FUNCTION pos_ispravi_stavku_zaduzenja()
 
    LOCAL PrevRoba
    LOCAL nARTKOL := 2
    LOCAL nKOLKOL := 4
-   PRIVATE GetList := {}
+   LOCAL GetList := {}
 
    IF RecCount2() == 0
       MsgBeep( "Zaduženje nema nijednu stavku!#Ispravka nije moguća!", 20 )
@@ -464,7 +434,7 @@ FUNCTION EditStavZaduz()
    PrevRoba := _IdRoba := PRIPRZ->idroba
    _Kolicina := PRIPRZ->Kolicina
    Box(, 3, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 3 SAY "Novi artikal:" GET _idroba PICTURE "@K" VALID Eval ( bRSblok, 1, 27 ) .AND. ( _IdRoba == PrevRoba .OR. ZadProvDuple ( _idroba ) )
+   @ box_x_koord() + 1, box_y_koord() + 3 SAY "Novi artikal:" GET _idroba PICTURE "@K" VALID Eval ( bRSblok, 1, 27 ) .AND. ( _IdRoba == PrevRoba .OR. pos_zaduzenje_provjeri_duple_stavke ( _idroba ) )
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "Nova količina:" GET _Kolicina VALID ZadKolOK ( _Kolicina )
    READ
 

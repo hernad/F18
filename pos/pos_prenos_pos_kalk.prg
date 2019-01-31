@@ -11,8 +11,11 @@
 
 #include "f18.ch"
 
+/*
+   katops => pos.priprz
+*/
 
-FUNCTION pos_preuzmi_iz_kalk( cIdTipDok, cBrDok )
+FUNCTION pos_katops_priprz()
 
    LOCAL _imp_table := ""
    LOCAL _destination := ""
@@ -21,11 +24,11 @@ FUNCTION pos_preuzmi_iz_kalk( cIdTipDok, cBrDok )
    LOCAL _val_zaduzenje
    LOCAL _val_inventura
    LOCAL _val_nivelacija
-   LOCAL cIdPos //, cIdPos
+   LOCAL cIdPos // , cIdPos
    LOCAL lOk := .T.
+   LOCAL cIdTipDok, cBrDok
 
    cIdPos := gIdPos
-   //cIdPos := Space( 2 )
    _val_otpremnica := "95"
    _val_zaduzenje := "11#12#13#80#81"
    _val_inventura := "IP"
@@ -36,36 +39,26 @@ FUNCTION pos_preuzmi_iz_kalk( cIdTipDok, cBrDok )
    SET CURSOR ON
    o_pos_priprz()
 
-   _br_dok := Space( FIELD_LEN_POS_BRDOK )
-
+   cBrDok := Space( FIELD_LEN_POS_BRDOK )
    IF priprz->( RecCount2() ) == 0 .AND. Pitanje( , "Preuzeti dokumente iz KALK-a", "N" ) == "N"
-      RETURN .F.
+      RETURN { "", "" }
    ENDIF
 
-   IF !get_import_file( _br_dok, @_destination, @_imp_table )
-      RETURN .F.
+   IF !get_katops_file( cBrDok, @_destination, @_imp_table )
+      RETURN { "", "" }
    ENDIF
-
    SELECT ( F_TMP_KATOPS )
    my_use_temp( "KATOPS", _imp_table )
 
-   _id_tip_dok := _get_vd( katops->idvd )
-   cIdTipDok := _id_tip_dok
-
-   //SELECT pos_doks
-   //SET ORDER TO TAG "1"
-
-   _br_dok := pos_novi_broj_dokumenta( cIdPos, cIdTipDok )
-   cBrDok := _br_dok
+   cIdTipDok := pos_get_idvd( katops->idvd )
+   cBrDok := pos_novi_broj_dokumenta( cIdPos, cIdTipDok )
 
    SELECT katops
    GO TOP
-
    MsgO( "kalk -> priprema, update roba " )
-
    DO WHILE !Eof()
       IF ( katops->idpos == cIdPos )
-         IF import_row( _id_tip_dok, _br_dok, "" ) == 0
+         IF import_row( cIdTipDok, cBrDok, "" ) == 0
             lOk := .F.
             EXIT
          ENDIF
@@ -76,7 +69,6 @@ FUNCTION pos_preuzmi_iz_kalk( cIdTipDok, cBrDok )
 
    SELECT katops
    USE
-
    MsgC()
 
    IF !lOk
@@ -87,11 +79,10 @@ FUNCTION pos_preuzmi_iz_kalk( cIdTipDok, cBrDok )
       _brisi_fajlove_importa( _imp_table )
    ENDIF
 
-   RETURN .T.
+   RETURN { cIdTipDok, cBrDok }
 
 
-
-STATIC FUNCTION _get_vd( cIdVd )
+STATIC FUNCTION pos_get_idvd( cIdVd )
 
    LOCAL _ret := "16"
 
@@ -178,7 +169,7 @@ STATIC FUNCTION import_row( cIdTipDk, cBrDok, cIdOdj )
 
 
 
-STATIC FUNCTION get_import_file( cBrDok, cDestinacijaDir, cFile )
+STATIC FUNCTION get_katops_file( cBrDok, cDestinacijaDir, cFile )
 
    LOCAL _filter
    LOCAL cIdPos, cPrefixLocal
@@ -192,7 +183,7 @@ STATIC FUNCTION get_import_file( cBrDok, cDestinacijaDir, cFile )
    cIdPos := AllTrim( gIdPos )
 
    IF !Empty( cIdPos )
-      //cIdPos := cIdPos
+      // cIdPos := cIdPos
       cPrefixLocal := ( Trim( cIdPos ) ) + SLASH
    ELSE
       cPrefixLocal := ""
@@ -204,11 +195,9 @@ STATIC FUNCTION get_import_file( cBrDok, cDestinacijaDir, cFile )
 
    _imp_files := Directory( cDestinacijaDir + "kt*.dbf" )
 
-   ASort( _imp_files,,, {| x, y| DToS( x[ 3 ] ) + x[ 4 ] > DToS( y[ 3 ] ) + y[ 4 ] } )
-
-   AEval( _imp_files, {| elem| AAdd( _opc, PadR( elem[ 1 ], 15 ) + UChkPostoji() + " " + DToC( elem[ 3 ] ) + " " + elem[ 4 ] ) }, 1 )
-
-   ASort( _opc,,, {| x, y| Right( x, 17 ) > Right( y, 17 ) } )
+   ASort( _imp_files,,, {| x, y | DToS( x[ 3 ] ) + x[ 4 ] > DToS( y[ 3 ] ) + y[ 4 ] } )
+   AEval( _imp_files, {| elem | AAdd( _opc, PadR( elem[ 1 ], 15 ) + UChkPostoji() + " " + DToC( elem[ 3 ] ) + " " + elem[ 4 ] ) }, 1 )
+   ASort( _opc,,, {| x, y | Right( x, 17 ) > Right( y, 17 ) } )
 
    _h := Array( Len( _opc ) )
    FOR nI := 1 TO Len( _h )
@@ -220,7 +209,6 @@ STATIC FUNCTION get_import_file( cBrDok, cDestinacijaDir, cFile )
       CLOSE ALL
       RETURN .F.
    ENDIF
-
 
    nIzbor := 1
    lPrenijeti := .F.
@@ -244,21 +232,21 @@ STATIC FUNCTION get_import_file( cBrDok, cDestinacijaDir, cFile )
    RETURN .T.
 
 
-//STATIC FUNCTION GetPm( cIdPos )
-//   LOCAL _pm
-//   _pm := AllTrim( cIdPos )
-//   RETURN _pm
+// STATIC FUNCTION GetPm( cIdPos )
+// LOCAL _pm
+// _pm := AllTrim( cIdPos )
+// RETURN _pm
 
 
 
-//STATIC FUNCTION _o_real_table()
+// STATIC FUNCTION _o_real_table()
 
-//   o_roba()
-//   o_pos_kase()
-//   o_pos_pos()
-//   o_pos_doks()
+// o_roba()
+// o_pos_kase()
+// o_pos_pos()
+// o_pos_doks()
 
-//   RETURN .T.
+// RETURN .T.
 
 
 
@@ -277,7 +265,7 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
 
    cre_pom_topska_dbf()
 
-   //_o_real_table()
+   // _o_real_table()
 
    IF !pos_dokument_postoji( cIdPos, cIdTipDk, dDatDok, cBrDok )
       MsgBeep( "Dokument: " + cIdPos + "-" + cIdTipDk + "-" + PadL( cBrDok, 6 ) + " ne postoji !" )
@@ -288,13 +276,13 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
    nKolicina := 0
    nIznos := 0
 
-   //SELECT pos
-   //SET ORDER TO TAG "1"
-   //GO TOP
-   //SEEK cIdPos + cIdTipDk + DToS( dDatDok ) + cBrDok
+   // SELECT pos
+   // SET ORDER TO TAG "1"
+   // GO TOP
+   // SEEK cIdPos + cIdTipDk + DToS( dDatDok ) + cBrDok
 
    IF !seek_pos_pos( cIdPos, cIdTipDk, dDatDok, cBrDok )
-   //IF !Found()
+      // IF !Found()
       MsgBeep( "POS tabela nema stavki !" )
       SELECT ( nDbfArea )
       RETURN .F.
@@ -358,7 +346,7 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
 
 
 
-FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) //, cIdVd )
+FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
 
    LOCAL cUslovRoba := Space( 150 )
    LOCAL cUslovArtikleUkljuciIskljuci := "U"
@@ -369,8 +357,8 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) //, cIdVd )
    LOCAL nIznos
    LOCAL cIdVd := "42"
 
-   //LOCAL cIdPos
-   //LOCAL dDatOd, dDatDo,
+   // LOCAL cIdPos
+   // LOCAL dDatOd, dDatDo,
    LOCAL cTopskaFile
    LOCAL _tmp
    LOCAL lAutoPrenos := .F.
@@ -381,12 +369,12 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) //, cIdVd )
       lAutoPrenos := .T.
    ELSE
       cIdPos := gIdPos
-      //cIdVd := "42"
+      // cIdVd := "42"
       dDatumOd := Date()
       dDatumDo := Date()
    ENDIF
 
-   //_o_real_table()
+   // _o_real_table()
 
 
    IF !lAutoPrenos
@@ -409,11 +397,11 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) //, cIdVd )
    gIdPos := cIdPos
 
    cre_pom_topska_dbf()
-   //_o_real_table()
+   // _o_real_table()
    seek_pos_doks_2_za_period( cIdVd, dDatumOd, dDatumDo )
-   //SET ORDER TO TAG "2"
-   //GO TOP
-   //SEEK cIdVd + DToS( dDatOd )
+   // SET ORDER TO TAG "2"
+   // GO TOP
+   // SEEK cIdVd + DToS( dDatOd )
 
    EOF CRET
 
@@ -437,7 +425,7 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) //, cIdVd )
 
          IF !Empty( cUslovRoba )
             _tmp := Parsiraj( cUslovRoba, "idroba" )
-            if &_tmp
+            IF &_tmp
 
                IF cUslovArtikleUkljuciIskljuci == "I"
                   SKIP
@@ -519,7 +507,7 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) //, cIdVd )
 
 STATIC FUNCTION pos_kalk_prenos_report( dDatOd, dDatDo, nKolicina, nIznos, nBrojStavki )
 
-   //START PRINT CRET
+   // START PRINT CRET
    start_print_editor()
 
    ?
@@ -532,7 +520,7 @@ STATIC FUNCTION pos_kalk_prenos_report( dDatOd, dDatDo, nKolicina, nIznos, nBroj
    ?U "   Ukupan iznos:", AllTrim( Str( nIznos, 12, 2 ) )
 
    FF
-   //ENDPRINT
+   // ENDPRINT
    end_print_editor()
 
    RETURN .T.
@@ -561,7 +549,7 @@ STATIC FUNCTION cre_pom_topska_dbf()
    AAdd( aDBF, { "BARKOD",   "C",  13, 0 } )
    AAdd( aDBF, { "JMJ",      "C",   3, 0 } )
 
-   //seek_pos_doks( "XX", "XX" )
+   // seek_pos_doks( "XX", "XX" )
    pos_cre_pom_dbf( aDbf )
 
    SELECT ( F_POM )
@@ -571,7 +559,7 @@ STATIC FUNCTION cre_pom_topska_dbf()
 
    my_use_temp( "POM", my_home() + "pom", .F., .T. )
 
-   INDEX on ( idpos + idroba + Str( mpc, 13, 4 ) + Str( stmpc, 13, 4 ) ) TAG "1"
+   INDEX ON ( idpos + idroba + Str( mpc, 13, 4 ) + Str( stmpc, 13, 4 ) ) TAG "1"
 
    SET ORDER TO TAG "1"
 
@@ -592,7 +580,8 @@ STATIC FUNCTION pos_kalk_create_topska_dbf( cIdPos, dDatOd, dDatDo, cIdTipDok, c
    LOCAL _table_path
    LOCAL cFajlDestinacija := ""
    LOCAL _bytes := 0
-   //LOCAL cIdPos
+
+   // LOCAL cIdPos
 
    IF cPrefix != NIL
       cPrefixLocal := cPrefix
@@ -604,8 +593,8 @@ STATIC FUNCTION pos_kalk_create_topska_dbf( cIdPos, dDatOd, dDatDo, cIdTipDok, c
 
    direktorij_kreiraj_ako_ne_postoji( AllTrim( gKalkDest ) )
 
-   //cIdPos := GetPm( cIdPos )
-   cIdPos := Alltrim( cIdPos )
+   // cIdPos := GetPm( cIdPos )
+   cIdPos := AllTrim( cIdPos )
 
    cExportDirektorij := AllTrim( gKalkDest ) + cIdPos + SLASH
 

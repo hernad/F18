@@ -116,10 +116,6 @@ $body$
 LANGUAGE plpgsql;
 
 
-
-
-
-
 -------
 
 CREATE OR REPLACE FUNCTION cleanup_konto_roba_stanje()
