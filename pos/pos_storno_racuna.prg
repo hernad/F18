@@ -261,7 +261,7 @@ STATIC FUNCTION napravi_u_pripremi_storno_dokument( dDatDok, cBrDok, cBrojFiskal
       SELECT _pos_pripr
       APPEND BLANK
 
-      hRec[ "brdok" ] :=  "PRIPRE"
+      hRec[ "brdok" ] :=  POS_BRDOK_PRIPREMA
       hRec[ "kolicina" ] := ( hRec[ "kolicina" ] * -1 )
       hRec[ "robanaz" ] := roba->naz
       hRec[ "datum" ] := danasnji_datum()

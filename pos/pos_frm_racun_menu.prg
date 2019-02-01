@@ -23,7 +23,7 @@ FUNCTION pos_unos_ispravka_racuna()
 
    SELECT _pos_pripr
 
-   IF reccount2() <> 0 .AND. AllTrim( field->brdok ) == "PRIPRE"
+   IF reccount2() <> 0 .AND. AllTrim( field->brdok ) == POS_BRDOK_PRIPREMA
       lNoviRacun := .F.
    ENDIF
 
@@ -45,12 +45,12 @@ STATIC FUNCTION unos_stavki_racuna( lNovi )
    GO TOP
 
    IF lNovi
-      cBrojRacuna := PadR( "PRIPRE", FIELD_LEN_POS_BRDOK )
+      cBrojRacuna := PadR( POS_BRDOK_PRIPREMA, FIELD_LEN_POS_BRDOK )
    ELSE
       cBrojRacuna := _pos_pripr->brdok
-
    ENDIF
 
+altd()
    pos_unos_racuna( cBrojRacuna )
 
    RETURN .T.
@@ -199,7 +199,7 @@ STATIC FUNCTION koliko_treba_povrata_kupcu( hParams )
 
    SELECT _pos_pripr
    GO TOP
-   DO WHILE !Eof() .AND. AllTrim( field->brdok ) == "PRIPRE"
+   DO WHILE !Eof() .AND. AllTrim( field->brdok ) == POS_BRDOK_PRIPREMA
       _iznos += field->kolicina * field->cijena
       _popust += field->kolicina * field->ncijena
       SKIP

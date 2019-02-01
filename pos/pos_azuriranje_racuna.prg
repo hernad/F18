@@ -18,11 +18,11 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
    LOCAL nCount := 0
    LOCAL lOk := .T.
    LOCAL lRet := .F.
-   LOCAL hParams := hb_hash()
+   LOCAL hParams := hb_Hash()
 
    hParams[ "tran_name" ] := "pos_rn_azur"
 
-  o_pos_tables()
+   o_pos_tables()
    IF !racun_se_moze_azurirati( cIdPos, POS_VD_RACUN, danasnji_datum(), cBrojRacuna )
       RETURN lRet
    ENDIF
@@ -39,15 +39,15 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
 
    MsgO( "Ažuriranje stavki računa u toku ..." )
 
-   IF SELECT( "pos_doks" ) == 0
-     o_pos_doks()
+   IF Select( "pos_doks" ) == 0
+      o_pos_doks()
    ELSE
-     SELECT POS_DOKS
+      SELECT POS_DOKS
    ENDIF
 
    APPEND BLANK
 
-   cDokument := ALLTRIM( cIdPos ) + "-" + POS_VD_RACUN + "-" + ALLTRIM( cBrojRacuna ) + " " + DTOC( danasnji_datum() )
+   cDokument := AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrojRacuna ) + " " + DToC( danasnji_datum() )
 
    hRec := dbf_get_rec()
    hRec[ "idpos" ] := cIdPos
@@ -55,8 +55,8 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
    hRec[ "datum" ] := danasnji_datum()
    hRec[ "brdok" ] := cBrojRacuna
    hRec[ "vrijeme" ] := cVrijeme
-   hRec[ "idvrstep" ] := IIF( cNacPlac == NIL, gGotPlac, cNacPlac )
-   hRec[ "idgost" ] := IIF( cIdGost == NIL, "", cIdGost )
+   hRec[ "idvrstep" ] := iif( cNacPlac == NIL, gGotPlac, cNacPlac )
+   hRec[ "idgost" ] := iif( cIdGost == NIL, "", cIdGost )
    hRec[ "idradnik" ] := _pos_pripr->idradnik
    hRec[ "m1" ] := OBR_NIJE
    hRec[ "prebacen" ] := OBR_JEST
@@ -68,7 +68,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
 
       SELECT _pos_pripr
 
-      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == ( cIdPos + "42" + DTOS( danasnji_datum() ) + "PRIPRE" )
+      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == ( cIdPos + "42" + DToS( danasnji_datum() ) + POS_BRDOK_PRIPREMA )
 
          SELECT pos
          APPEND BLANK
@@ -78,7 +78,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
          hRec[ "idvd" ] := POS_VD_RACUN
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrojRacuna
-         hRec[ "rbr" ] := PadL( AllTrim( Str( ++ nCount ) ), 5 )
+         hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
          hRec[ "m1" ] := OBR_JEST
          hRec[ "prebacen" ] := OBR_NIJE
          hRec[ "idodj" ] := _pos_pripr->idodj

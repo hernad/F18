@@ -40,7 +40,6 @@ FUNCTION pos_unos_racuna( cBrDok )
    o_pos_tables()
    SELECT _pos_pripr
 
-
    aRabat := {}
 
    IF ( cBrDok == NIL )
@@ -145,7 +144,6 @@ FUNCTION pos_unos_racuna( cBrDok )
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _kolicina PICT "999999.999" WHEN when_pos_kolicina( @_kolicina ) VALID valid_pos_kolicina( @_kolicina, _cijena )
 
       nRowPos := 5
-
       READ
 
       @ box_x_koord() + 4, box_y_koord() + 25 SAY Space ( 11 )
