@@ -204,15 +204,14 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          ENDIF
 
       CASE pos_doks->IdVd == "16"
-         PrepisZad( "ZADUŽENJE " )
+         pos_stampa_azuriranog_zaduzenja( "ZADUŽENJE" )
 
       CASE pos_doks->IdVd == POS_VD_OTPIS
-         PrepisZad( "OTPIS " )
+         pos_stampa_azuriranog_zaduzenja( "OTPIS" )
 
       CASE pos_doks->IdVd == POS_VD_REKLAMACIJA
-         PrepisZad( "REKLAMACIJA" )
-         // CASE pos_doks->IdVd == VD_RZS
-         // PrepisRazd()
+         pos_stampa_azuriranog_zaduzenja( "REKLAMACIJA" )
+
 
       CASE pos_doks->IdVd == "IN"
          pos_prepis_inventura_nivelacija( .T. )

@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR gIdPos
+
 FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumRacuna )
 
    LOCAL cQuery, _qry_ret, oTable
@@ -18,7 +20,7 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumR
    LOCAL cIdPos := gIdPos
    LOCAL aPosStavke
    LOCAL _rn_broj := ""
-   LOCAL _ok := .F.
+   LOCAL lOk := .F.
 
    cQuery := " SELECT pd.datum, pd.brdok, pd.fisc_rn, " + ;
       " SUM( pp.kolicina * pp.cijena ) as iznos, " + ;
@@ -46,83 +48,76 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumR
 
       izaberi_racun_iz_liste( aPosStavke, @cBrojRacuna, @dDatumRacuna )
 
-      _ok := .T.
+      lOk := .T.
 
    ELSE
 
       IF oTable:LastRec() == 0
-         RETURN _ok
+         RETURN lOk
       ENDIF
 
-      _ok := .T.
+      lOk := .T.
       oRow := oTable:GetRow()
       cBrojRacuna := oRow:FieldGet( oRow:FieldPos( "brdok" ) )
       dDatumRacuna := oRow:FieldGet( oRow:FieldPos( "datum" ) )
 
    ENDIF
 
-   RETURN _ok
+   RETURN lOk
 
 
 
 
 STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrojRacuna, dDatumRacuna )
 
-   LOCAL _ret := 0
+   LOCAL nRet := 0
    LOCAL nI, _n
-   LOCAL _tmp
-   LOCAL _izbor := 1
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL cTmp
+   LOCAL nIzbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
    LOCAL _m_x := box_x_koord()
    LOCAL _m_y := box_y_koord()
 
    FOR nI := 1 TO Len( arr )
 
-      _tmp := ""
-      _tmp += DToC( arr[ nI, 1 ] )
-      _tmp += " cBrRacuna: "
-      _tmp += PadR( PadL( AllTrim( gIdPos ), 2 ) + "-" + AllTrim( arr[ nI, 2 ]  ), 10 )
-      _tmp += PadL( AllTrim( Str( arr[ nI, 4 ] - arr[ nI, 5 ], 12, 2 ) ), 10 )
-
-      AAdd( _opc, _tmp )
-      AAdd( _opcexe, {|| "" } )
+      cTmp := ""
+      cTmp += DToC( arr[ nI, 1 ] )
+      cTmp += " cBrRacuna: "
+      cTmp += PadR( PadL( AllTrim( gIdPos ), 2 ) + "-" + AllTrim( arr[ nI, 2 ]  ), 10 )
+      cTmp += PadL( AllTrim( Str( arr[ nI, 4 ] - arr[ nI, 5 ], 12, 2 ) ), 10 )
+      AAdd( aOpc, cTmp )
+      AAdd( aOpcExe, {|| "" } )
 
    NEXT
 
    DO WHILE .T. .AND. LastKey() != K_ESC
-      _izbor := meni_0( "choice", _opc, _izbor, .F. )
-      IF _izbor == 0
+      nIzbor := meni_0( "choice", aOpc, nIzbor, .F. )
+      IF nIzbor == 0
          EXIT
       ELSE
-         cBrojRacuna := arr[ _izbor, 2 ]
-         dDatumRacuna := arr[ _izbor, 1 ]
-         _izbor := 0
+         cBrojRacuna := arr[ nIzbor, 2 ]
+         dDatumRacuna := arr[ nIzbor, 1 ]
+         nIzbor := 0
       ENDIF
    ENDDO
 
    box_x_koord( _m_x )
    box_y_koord( _m_y )
 
-   RETURN _ret
+   RETURN nRet
 
 
 
-// ---------------------------------------------------------------
-// koriguje broj racuna
-// ---------------------------------------------------------------
-STATIC FUNCTION pos_fix_rn_no( cBrRacuna )
+STATIC FUNCTION pos_fix_broj_racuna( cBrRacuna )
 
    LOCAL _a_rn := {}
 
    IF !Empty( cBrRacuna ) .AND. ( "-" $ cBrRacuna )
-
       _a_rn := TokToNiz( cBrRacuna, "-" )
-
       IF !Empty( _a_rn[ 2 ] )
          cBrRacuna := PadR( AllTrim( _a_rn[ 2 ] ), 6 )
       ENDIF
-
    ENDIF
 
    RETURN .T.
@@ -167,14 +162,14 @@ FUNCTION pos_storno_fisc_no()
    RETURN .T.
 
 
-FUNCTION pos_storno_rn( lSilent, cSt_rn, dSt_date, cSt_fisc )
+FUNCTION pos_storno_rn( lSilent, cBrDokStornirati, dSt_date, cSt_fisc )
 
    LOCAL nTArea := Select()
    LOCAL hRec
    LOCAL GetList := {}
 
    LOCAL _datum := gDatum
-   LOCAL _danasnji := "D"
+   LOCAL cDanasnjiDN := "D"
 
    // PRIVATE GetList := {}
    PRIVATE aVezani := {}
@@ -183,8 +178,8 @@ FUNCTION pos_storno_rn( lSilent, cSt_rn, dSt_date, cSt_fisc )
       lSilent := .F.
    ENDIF
 
-   IF cSt_rn == nil
-      cSt_rn := Space( 6 )
+   IF cBrDokStornirati == nil
+      cBrDokStornirati := Space( FIELD_LEN_POS_BRDOK )
    ENDIF
 
    IF dSt_date == nil
@@ -195,42 +190,27 @@ FUNCTION pos_storno_rn( lSilent, cSt_rn, dSt_date, cSt_fisc )
       cSt_fisc := Space( 10 )
    ENDIF
 
-   // SELECT ( F_POS )
-   // IF !Used()
-   // o_pos_pos()
-   // ENDIF
-
-// SELECT ( F_POS_DOKS )
-// IF !Used()
-   // o_pos_doks()
-   // ENDIF
 
    Box(, 4, 55 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Račun je današnji (D/N) ?" GET _danasnji VALID _danasnji $ "DN" PICT "@!"
-
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Račun je današnji (D/N) ?" GET cDanasnjiDN VALID cDanasnjiDN $ "DN" PICT "@!"
    READ
 
-   IF _danasnji == "N"
+   IF cDanasnjiDN == "N"
       _datum := NIL
    ENDIF
 
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "stornirati pos račun broj:" GET cSt_rn VALID {|| pos_lista_racuna( @_datum, @cSt_rn, .T. ), pos_fix_rn_no( @cSt_rn ), dSt_date := _datum,  .T. }
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "stornirati pos račun broj:" GET cBrDokStornirati VALID {|| pos_lista_racuna( @_datum, @cBrDokStornirati, .T. ), pos_fix_broj_racuna( @cBrDokStornirati ), dSt_date := _datum,  .T. }
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "od datuma:" GET dSt_date
-
    READ
 
-   cSt_rn := PadL( AllTrim( cSt_rn ), 6 )
-
+   cBrDokStornirati := PadL( AllTrim( cBrDokStornirati ), FIELD_LEN_POS_BRDOK )
    IF Empty( cSt_fisc )
-      // SELECT pos_doks
-      // SEEK gIdPos + "42" + DToS( dSt_date ) + cSt_rn
-      seek_pos_doks( gIdPos, "42", dSt_date, cSt_rn )
+      seek_pos_doks( gIdPos, "42", dSt_date, cBrDokStornirati )
       cSt_fisc := PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 )
    ENDIF
 
    @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "broj fiskalnog isječka:" GET cSt_fisc
-
    READ
 
    BoxC()
@@ -240,28 +220,20 @@ FUNCTION pos_storno_rn( lSilent, cSt_rn, dSt_date, cSt_fisc )
       RETURN .F.
    ENDIF
 
-   IF Empty( cSt_rn )
+   IF Empty( cBrDokStornirati )
       SELECT ( nTArea )
       RETURN .F.
    ENDIF
 
    SELECT ( nTArea )
 
-   napravi_u_pripremi_storno_dokument( dSt_date, cSt_rn, cSt_fisc )
-
-   // SELECT ( F_POS )
-   // USE
-   // SELECT ( F_POS_DOKS )
-   // USE
-
+   napravi_u_pripremi_storno_dokument( dSt_date, cBrDokStornirati, cSt_fisc )
    SELECT ( nTArea )
 
    IF lSilent == .F.
-
       oBrowse:goBottom()
       oBrowse:refreshAll()
       oBrowse:dehilite()
-
       DO WHILE !oBrowse:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
       ENDDO
 
@@ -275,20 +247,12 @@ STATIC FUNCTION napravi_u_pripremi_storno_dokument( dDatDok, cBrDok, cBrojFiskal
    LOCAL nDbfArea := Select()
    LOCAL _t_roba, hRec
 
-   //SELECT ( F_POS )
-   //IF !Used()
-    //  o_pos_pos()
-   //ENDIF
-   //SELECT pos
-   //SEEK gIdPos + "42" + DToS( dDatDok ) + cBrDok
    seek_pos_pos( gIdPos, "42", dDatDok, cBrDok )
-
    DO WHILE !Eof() .AND. field->idpos == gIdPos .AND. field->brdok == cBrDok  .AND. field->idvd == "42"
 
       _t_roba := field->idroba
 
       select_o_roba( _t_roba )
-
       SELECT pos
 
       hRec := dbf_get_rec()
@@ -310,7 +274,6 @@ STATIC FUNCTION napravi_u_pripremi_storno_dokument( dDatDok, cBrDok, cBrojFiskal
       ENDIF
 
       dbf_update_rec( hRec )
-
       SELECT pos
       SKIP
 

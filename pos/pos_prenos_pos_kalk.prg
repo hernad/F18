@@ -232,23 +232,6 @@ STATIC FUNCTION get_katops_file( cBrDok, cDestinacijaDir, cFile )
    RETURN .T.
 
 
-// STATIC FUNCTION GetPm( cIdPos )
-// LOCAL _pm
-// _pm := AllTrim( cIdPos )
-// RETURN _pm
-
-
-
-// STATIC FUNCTION _o_real_table()
-
-// o_roba()
-// o_pos_kase()
-// o_pos_pos()
-// o_pos_doks()
-
-// RETURN .T.
-
-
 
 FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
 
@@ -265,8 +248,6 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
 
    cre_pom_topska_dbf()
 
-   // _o_real_table()
-
    IF !pos_dokument_postoji( cIdPos, cIdTipDk, dDatDok, cBrDok )
       MsgBeep( "Dokument: " + cIdPos + "-" + cIdTipDk + "-" + PadL( cBrDok, 6 ) + " ne postoji !" )
       RETURN .F.
@@ -275,11 +256,6 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
    nRbr := 0
    nKolicina := 0
    nIznos := 0
-
-   // SELECT pos
-   // SET ORDER TO TAG "1"
-   // GO TOP
-   // SEEK cIdPos + cIdTipDk + DToS( dDatDok ) + cBrDok
 
    IF !seek_pos_pos( cIdPos, cIdTipDk, dDatDok, cBrDok )
       // IF !Found()
@@ -294,7 +270,6 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
          field->datum == dDatDok .AND. field->brdok == cBrDok
 
       cIdRoba := field->idroba
-
       select_o_roba( cIdRoba )
 
       SELECT pom
@@ -339,7 +314,6 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
    cTopskaFile := pos_kalk_create_topska_dbf( cIdPos, dDatDok, dDatDok, cIdTipDk, "tk_p" )
    MsgBeep( "Kreiran fajl " + cTopskaFile + "#broj stavki: " + AllTrim( Str( nRbr ) ) )
 
-
    SELECT ( nDbfArea )
 
    RETURN .T.
@@ -374,9 +348,6 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
       dDatumDo := Date()
    ENDIF
 
-   // _o_real_table()
-
-
    IF !lAutoPrenos
       SET CURSOR ON
 
@@ -397,11 +368,7 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
    gIdPos := cIdPos
 
    cre_pom_topska_dbf()
-   // _o_real_table()
    seek_pos_doks_2_za_period( cIdVd, dDatumOd, dDatumDo )
-   // SET ORDER TO TAG "2"
-   // GO TOP
-   // SEEK cIdVd + DToS( dDatOd )
 
    EOF CRET
 
@@ -507,9 +474,7 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
 
 STATIC FUNCTION pos_kalk_prenos_report( dDatOd, dDatDo, nKolicina, nIznos, nBrojStavki )
 
-   // START PRINT CRET
    start_print_editor()
-
    ?
    ? "PRENOS PODATAKA TOPS->KALK za ", DToC( Date() )
    ?
@@ -520,7 +485,6 @@ STATIC FUNCTION pos_kalk_prenos_report( dDatOd, dDatDo, nKolicina, nIznos, nBroj
    ?U "   Ukupan iznos:", AllTrim( Str( nIznos, 12, 2 ) )
 
    FF
-   // ENDPRINT
    end_print_editor()
 
    RETURN .T.

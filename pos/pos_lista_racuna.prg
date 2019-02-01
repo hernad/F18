@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR Kol, ImeKol, gIdPos, gIdRadnik
+
 FUNCTION pos_pregled_racuna( lAdmin )
 
    LOCAL dDatum := NIL
@@ -22,8 +24,6 @@ FUNCTION pos_pregled_racuna( lAdmin )
       lAdmin := .F.
    ENDIF
 
-   // o_pos_tables()
-
    Box(, 1, 50 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Samo današnji ? (D/N)" GET cDanasnjiRacuni VALID cDanasnjiRacuni $ "DN" PICT "!@"
    READ
@@ -34,18 +34,16 @@ FUNCTION pos_pregled_racuna( lAdmin )
    ENDIF
 
    pos_lista_racuna( dDatum )
-
    my_close_all_dbf()
 
    RETURN .T.
 
 
-
-FUNCTION pos_lista_racuna( dDatum, cBroj, fPrep, cPrefixFilter, qIdRoba )
+FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
 
    LOCAL i
    LOCAL cFilter
-   LOCAL cIdPos, cRacun
+   LOCAL cIdPos
 
    PRIVATE fMark := .F.
 
@@ -57,31 +55,28 @@ FUNCTION pos_lista_racuna( dDatum, cBroj, fPrep, cPrefixFilter, qIdRoba )
    ENDIF
 
    cFilter := cPrefixFilter
-
    IF fPrep == NIL
       fPrep := .F.
-   ELSE
-      fPrep := fPrep
    ENDIF
 
-   IF cBroj == NIL
-      cRacun := Space( FIELD_LEN_POS_BRDOK )
+   IF cBrdok == NIL
+      cBrDok := Space( FIELD_LEN_POS_BRDOK )
    ELSE
-      cRacun := AllTrim( cBroj )
+      cBrDok := AllTrim( cBrDok )
    ENDIF
 
-   cIdPos := Left( cRacun, At( "-", cRacun ) - 1 )
+   cIdPos := Left( cBrDok, At( "-", cBrDok ) - 1 )
    cIdPos := PadR( cIdPOS, Len( gIdPos ) )
 
-   seek_pos_doks( cIdPos, "42", dDatum, cRacun )
+   seek_pos_doks( cIdPos, "42", dDatum, cBrDok )
 
    IF !Empty( cIdPos ) .AND. cIdPOS <> gIdPos
       MsgBeep( "Račun nije napravljen na ovoj kasi!#" + "Ne možete napraviti promjenu!", 20 )
       RETURN ( .F. )
    ENDIF
 
-   cBroj := Right( cRacun, Len( cRacun ) - At( "-", cRacun ) )
-   cBroj := PadL( cBroj, 6 )
+   cBrDok := Right( cBrDok, Len( cBrDok ) - At( "-", cBrDok ) )
+   cBrDok := PadL( cBrDok, FIELD_LEN_POS_BRDOK )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Fisk.rn", {|| field->fisc_rn } } )
@@ -99,25 +94,7 @@ FUNCTION pos_lista_racuna( dDatum, cBroj, fPrep, cPrefixFilter, qIdRoba )
 
    SELECT pos_doks
 
-   // IF fScope = nil
-   // fScope := .T.
-   // ENDIF
-
-   // IF fScope
-   // SET SCOPEBOTTOM TO "W"
-   // ENDIF
-
-   //IF gVrstaRS == "S" .OR. pos_admin()
-    //  AAdd( ImeKol, { "Radnik", {|| IdRadnik } } )
-    //  AAdd( Kol, Len( ImeKol ) )
-      //cFilter += ".and. (Idpos=" + dbf_quote( gIdPos ) + " .or. IdPos='X ')"
-   //ELSE
-      cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( gIdPos )
-   //ENDIF
-
-   // IF dDatum <> NIL
-   // cFilter += '.and. Datum=' + dbf_quote( dDatum )
-   // ENDIF
+   cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( gIdPos )
 
    IF qIdRoba <> NIL .AND. !Empty( qIdRoba )
       cFilter += ".and. pos_racun_sadrzi_artikal(IdPos, IdVd, datum, BrDok, " + dbf_quote( qIdRoba ) + ")"
@@ -126,22 +103,18 @@ FUNCTION pos_lista_racuna( dDatum, cBroj, fPrep, cPrefixFilter, qIdRoba )
    SET FILTER TO &cFilter
    GO TOP
 
-   IF !Empty( cBroj )
-      // SEEK2( cIdPos + "42" + DToS( dDat ) + cBroj )
-
+   IF !Empty( cBrDok )
       IF !Eof()
-         cBroj := AllTrim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok )
+         cBrDok := AllTrim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok )
          dDat := pos_doks->datum
          RETURN( .T. )
       ENDIF
-      // ELSE
-      // GO BOTTOM
    ENDIF
 
    IF fPrep
       cFnc := "<Enter>-Odabir   <+>-Markiraj/Demarkiraj   <P>-Pregled"
       fMark := .T.
-      bMarkF := {|| RacObilj () }
+      bMarkF := {|| pos_racun_obiljezen () }
    ELSE
       cFnc := "<Enter>-Odabir          <P>-Pregled"
       bMarkF := NIL
@@ -152,14 +125,12 @@ FUNCTION pos_lista_racuna( dDatum, cBroj, fPrep, cPrefixFilter, qIdRoba )
 
    SET FILTER TO
 
-   cBroj := AllTrim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok )
-
-   IF cBroj = '-'
-      cBroj := Space( 9 )
+   cBrDok := AllTrim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok )
+   IF cBrDok = '-'
+      cBrDok := Space( 3 + FIELD_LEN_POS_BRDOK )
    ENDIF
 
    dDat := pos_doks->datum
-
    IF LastKey() == K_ESC
       RETURN( .F. )
    ENDIF
@@ -167,28 +138,15 @@ FUNCTION pos_lista_racuna( dDatum, cBroj, fPrep, cPrefixFilter, qIdRoba )
    RETURN( .T. )
 
 
-
 STATIC FUNCTION lista_racuna_key_handler( nCh )
 
-   // LOCAL cLevel
-   // LOCAL ii
    LOCAL nTrec
    LOCAL nTrec2
    LOCAL hRec
+   LOCAL nFiscNo
+   LOCAL GetList := {}
 
-   // IF nCh == 0
-   // RETURN ( DE_CONT )
-   // ENDIF
-
-
-   // o_pos_odj()
-   // o_pos_strad()
-
-   // select_o_pos_strad( gStrad )
-   // cLevel := field->prioritet
-   // USE
-
-   // SELECT pos_doks
+   SELECT pos_doks
 
    IF Chr( nCh ) == '\'
       DO WHILE !( Tb:hitTop .OR. TB:hitBottom )
@@ -203,19 +161,16 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "F"
-      pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T., NIL, .T. )
+      pos_racun_stampa_priprema( pos_doks->IdPos, DToS( pos_doks->datum ) + pos_doks->BrDok, .T., NIL, .T. )
       SELECT pos_doks
       f7_pf_traka( .T. )
       SELECT pos_doks
-
       RETURN DE_REFRESH
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "S"
-
       pos_storno_rn( .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
       MsgBeep( "Storno račun se nalazi u pripremi !" )
-
       SELECT pos_doks
       RETURN DE_REFRESH
 
@@ -226,31 +181,20 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
       IF pos_doks->idvd <> "42"
          RETURN DE_CONT
       ENDIF
-
-      nFisc_no := pos_doks->fisc_rn
-
+      nFiscNo := pos_doks->fisc_rn
       Box(, 1, 40 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFisc_no
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFiscNo
       READ
       BoxC()
 
       IF LastKey() <> K_ESC
-
          hRec := dbf_get_rec()
-         hRec[ "fisc_rn" ] := nFisc_no
-
+         hRec[ "fisc_rn" ] := nFiscNo
          update_rec_server_and_dbf( "pos_doks", hRec, 1, "FULL" )
-
          RETURN DE_REFRESH
-
       ENDIF
 
    ENDIF
 
-/*
-   IF ( LastKey() == K_ESC ) .OR. ( LastKey() == K_ENTER )
-      RETURN ( DE_ABORT )
-   ENDIF
-*/
 
    RETURN ( DE_CONT )

@@ -290,7 +290,7 @@ STATIC FUNCTION form_zakljuci_racun( hParams )
 
 
 
-FUNCTION RacObilj()
+FUNCTION pos_racun_obiljezen()
 
    IF AScan ( aVezani, {| x | x[ 1 ] + DToS( x[ 4 ] ) + x[ 2 ] == pos_doks->( IdPos + DToS( datum ) + BrDok ) } ) > 0
       RETURN .T.
@@ -298,57 +298,6 @@ FUNCTION RacObilj()
 
    RETURN .F.
 
-
-/*
-FUNCTION PreglNezakljRN()
-
-   o_pos_tables()
-
-   dDatOd := Date()
-   dDatDo := Date()
-
-   Box (, 1, 60 )
-   SET CURSOR ON
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Od datuma:" GET dDatOd
-   @ box_x_koord() + 1, box_y_koord() + 22 SAY "Do datuma:" GET dDatDo
-   READ
-   ESC_BCR
-   BoxC()
-
-   IF Pitanje(, "Pregledati nezaključene račune (D/N) ?", "D" ) == "D"
-      StampaNezakljRN( gIdRadnik, dDatOd, dDatDo )
-   ENDIF
-
-   RETURN .T.
-*/
-
-
-/*
-FUNCTION RekapViseRacuna()
-
-   cBrojStola := Space( 3 )
-
-   o_pos_tables()
-
-   dDatOd := Date()
-   dDatDo := Date()
-
-   Box (, 2, 60 )
-   SET CURSOR ON
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Od datuma:" GET dDatOd
-   @ box_x_koord() + 1, box_y_koord() + 22 SAY "Do datuma:" GET dDatDo
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj stola:" GET cBrojStola VALID !Empty( cBrojStola )
-   READ
-   ESC_BCR
-   BoxC()
-
-   IF Pitanje(, "Štampati zbirni račun (D/N) ?", "D" ) == "D"
-  --    StampaRekap( gIdRadnik, cBrojStola, dDatOd, dDatDo, .T. )
-   ENDIF
-
-   RETURN .T.
-
-*/
 
 
 FUNCTION StrValuta( cNaz2, dDat )

@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION pos_racun_stampa_priprema( cIdPos, dDatBrDok, fEkran, lViseOdjednom, lOnlyFill )
 
    LOCAL cDbf
@@ -24,7 +23,6 @@ FUNCTION pos_racun_stampa_priprema( cIdPos, dDatBrDok, fEkran, lViseOdjednom, lO
    //
    // 1            2               3              4
    // aVezani : {pos_doks->IdPos, pos_doks->(BrDok), pos_doks->IdVrsteP, pos_doks->Datum})
-   //
    // Napomena: dDatBrDok sadrzi DTOS(DATUM)+BRDOK  !!
 
    PRIVATE nIznos := 0

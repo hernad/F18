@@ -66,7 +66,6 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
 
    MsgO( "Priprema " + iif( cOpt == "PDF", "PDF", "tekst" ) + " izvještaja ..." )
 
-
    LOG_CALL_STACK cLogMsg
    SetPRC( 0, 0 )
    SET CONSOLE OFF
@@ -83,7 +82,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
       hb_cdpSelect( "SLWIN" )
       oPDF := xPrintOpt[ "opdf" ]
       oPDF:cFileName := txt_print_file_name()
-      oPDF:cHeader := cDocumentName
+      oPDF:cHeader := hb_UTF8ToStr( cDocumentName )
       IF xPrintOpt[ "layout" ] == "portrait"
          oPDF:SetType( PDF_TXT_PORTRAIT )
       ELSE
@@ -172,7 +171,7 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    f18_tone( 440, 2 )
    f18_tone( 440, 2 )
 
-   
+
 
    DO CASE
 
@@ -237,7 +236,6 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
 
    my_use_refresh_start()
 
-
    RETURN .T.
 
 
@@ -275,7 +273,7 @@ FUNCTION end_print_editor()
 
    lRet := f18_end_print( NIL, "0" )
    SetColor( s_cColor )
-   info_bar( "edit", "")
+   info_bar( "edit", "" )
 
    RETURN lRet
 
