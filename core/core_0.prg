@@ -198,12 +198,12 @@ FUNCTION my_rddName()
 // FUNCTION danasnji_datum()
 // RETURN date()
 
-    /*
-       Opis: vraća tekući datum sa servera
+/*
+   Opis: vraća tekući datum sa servera
 
-       Usage:
-          danasnji_datum() => vraća vrijednost statičke varijable _datum
+   danasnji_datum() => vraća vrijednost statičke varijable _datum
 
-    */
+*/
 FUNCTION danasnji_datum()
+
    RETURN datum_server()

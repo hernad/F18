@@ -11,31 +11,32 @@
 
 #include "f18.ch"
 
-STATIC __tezinski_barkod := NIL
+STATIC s_cTezinkiBarkodDN := NIL
+STATIC s_cPredhodniIdRoba := ""
 
+MEMVAR ImeKol, Kol
+MEMVAR _kolicina, _cijena
 
 FUNCTION param_tezinski_barkod( read_par )
 
    IF read_par != NIL
-      __tezinski_barkod := fetch_metric( "barkod_tezinski_barkod", NIL, "N" )
+      s_cTezinkiBarkodDN := fetch_metric( "barkod_tezinski_barkod", NIL, "N" )
    ENDIF
 
-   RETURN __tezinski_barkod
+   RETURN s_cTezinkiBarkodDN
 
 
-FUNCTION pos_postoji_roba( cId, dx, dy, barkod )
+FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
 
-   LOCAL _zabrane
+   LOCAL aZabrane
    LOCAL nI
    LOCAL cBarkod := ""
    LOCAL lSveJeOk := .F.
-   LOCAL _tezina := 0
+   LOCAL nTezina := 0
    LOCAL _order
 
-   // LOCAL _area := Select()
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
-
 
    PushWA()
 
@@ -45,12 +46,11 @@ FUNCTION pos_postoji_roba( cId, dx, dy, barkod )
       select_o_roba()
    ENDIF
 
-   sif_uv_naziv( @cId )
-
+   cId := pos_sifra_ako_je_pretraga_uvijek_po_nazivu( cId )
    pos_unset_key_handler_ispravka_racuna()
 
-   IF ValType( GetList ) == "A" .AND. Len( GetList ) > 1
-      PrevId := GetList[ 1 ]:original
+   IF ValType( aGetList ) == "A" .AND. Len( aGetList ) > 1 // zapamtiti zadnji artikal iz GetListe, ako sa <ESC> izadjemo iz browse-a robe
+      s_cPredhodniIdRoba := aGetList[ 1 ]:original
    ENDIF
 
    AAdd( ImeKol, { _u( "Šifra" ), {|| id }, "" } )
@@ -58,39 +58,34 @@ FUNCTION pos_postoji_roba( cId, dx, dy, barkod )
    AAdd( ImeKol, { PadC( "JMJ", 5 ), {|| PadC( jmj, 5 ) }, "" } )
    AAdd( ImeKol, { "Cijena set: " + gSetMPCijena, {|| PadL( AllTrim( Str( pos_get_mpc(), 12, 3 ) ), 12 ) }, "" } )
    AAdd( ImeKol, { "BARKOD", {|| roba->barkod }, "" } )
-   //AAdd( ImeKol, { "K7", {|| roba->k7 }, "" } )
 
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
    NEXT
 
    IF pos_prodavac()
-      _zabrane := { K_CTRL_T, K_CTRL_N, K_F4, K_F2, k_ctrl_f9() }
+      aZabrane := { K_CTRL_T, K_CTRL_N, K_F4, K_F2, k_ctrl_f9() }
    ELSE
-      _zabrane := {}
+      aZabrane := {}
    ENDIF
 
-   IF !tezinski_barkod( @cId, @_tezina )
+   IF !tezinski_barkod( @cId, @nTezina )
       cBarkod := barkod_or_roba_id( @cId )
    ELSE
       cBarkod := PadR( "T", 13 )
    ENDIF
 
-   // SELECT ( _area )
-
-   lSveJeOk := p_sifra( F_ROBA, "ID", f18_max_rows() - 15, f18_max_cols() - 7, "Roba ( artikli ) ", @cId, NIL, NIL, NIL, NIL, NIL, _zabrane )
+   lSveJeOk := p_sifra( F_ROBA, "ID", f18_max_rows() - 15, f18_max_cols() - 7, "Roba ( artikli ) ", @cId, NIL, NIL, NIL, NIL, NIL, aZabrane )
 
    IF LastKey() == K_ESC
-      cId := PrevID
+      cId := s_cPredhodniIdRoba
       lSveJeOk := .F.
    ELSE
 
       @ box_x_koord() + dx, box_y_koord() + dy SAY PadR( AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 50 )
-
-      IF _tezina <> 0
-         _kolicina := _tezina
+      IF nTezina <> 0
+         _kolicina := nTezina
       ENDIF
-
       IF roba->tip <> "T"
          _cijena := pos_get_mpc()
       ENDIF
@@ -105,36 +100,32 @@ FUNCTION pos_postoji_roba( cId, dx, dy, barkod )
    ENDIF
 
    pos_set_key_handler_ispravka_racuna()
-
-   barkod := cBarkod
+   cBarkodVratiti := cBarkod
 
    PopWA()
 
-   // SELECT roba
-   // SET ORDER TO TAG "ID"
-   // SELECT ( _area )
 
    RETURN lSveJeOk
 
 
 
 
-FUNCTION sif_uv_naziv( cId )
+STATIC FUNCTION pos_sifra_ako_je_pretraga_uvijek_po_nazivu( cId )
 
    LOCAL nIdLen
 
-   IF gSifUvPoNaz == "N"
-      RETURN
+   IF gPosPretragaRobaUvijekPoNazivu == "N"
+      RETURN cId
    ENDIF
    IF Empty( cId )
-      RETURN
+      RETURN cId
    ENDIF
    IF Len( AllTrim( cID ) ) == 10
-      RETURN
+      RETURN cId
    ENDIF
    IF Right( AllTrim( cID ), 1 ) == "."
-      RETURN
+      RETURN cId
    ENDIF
    cId := PadR( AllTrim( cId ) + ".", 10 )
 
-   RETURN .T.
+   RETURN cId

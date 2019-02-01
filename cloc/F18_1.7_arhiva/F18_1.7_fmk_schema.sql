@@ -45,7 +45,7 @@ BEGIN
   SELECT metric_value::TEXT INTO _returnVal
     FROM metric
    WHERE metric_name = _pMetricName;
-  
+
   IF (FOUND) THEN
      RETURN _returnVal;
   ELSE
@@ -105,7 +105,7 @@ BEGIN
      WHERE (metric_name=pMetricName);
      RETURN TRUE;
   END IF;
-  
+
   SELECT metric_id INTO _metricid
   FROM metric
   WHERE (metric_name=pMetricName);
@@ -12827,4 +12827,3 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --
 -- PostgreSQL database dump complete
 --
-

@@ -192,7 +192,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "brdok" ] := priprz->brdok
          hRec[ "m1" ] := priprz->m1
          hRec[ "prebacen" ] := priprz->prebacen
-         hRec[ "iddio" ] := priprz->iddio
          hRec[ "idodj" ] := priprz->idodj
          hRec[ "idcijena" ] := priprz->idcijena
          hRec[ "idradnik" ] := priprz->idradnik

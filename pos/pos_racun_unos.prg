@@ -40,6 +40,7 @@ FUNCTION pos_unos_racuna( cBrDok )
    o_pos_tables()
    SELECT _pos_pripr
 
+
    aRabat := {}
 
    IF ( cBrDok == NIL )
@@ -137,12 +138,10 @@ FUNCTION pos_unos_racuna( cBrDok )
          cRobaPosDuzinaSifre := "10"
       ENDIF
 
-      @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba ;
-         PICT PICT_POS_ARTIKAL ;
-         WHEN {|| _idroba := PadR( _idroba, Val( cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( @_kolicina )
+      @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
+         WHEN {|| _idroba := PadR( _idroba, Val( cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( @_kolicina, GetList )
 
       @ box_x_koord() + 3, box_y_koord() + 5 SAY "  Cijena:" GET _Cijena PICT "99999.999"  WHEN ( roba->tip == "T" .OR. gPopZcj == "D" )
-
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _kolicina PICT "999999.999" WHEN when_pos_kolicina( @_kolicina ) VALID valid_pos_kolicina( @_kolicina, _cijena )
 
       nRowPos := 5
@@ -231,11 +230,11 @@ STATIC FUNCTION Popust( nx, ny )
    RETURN .T.
 
 
-STATIC FUNCTION valid_pos_racun_artikal( nKolicina )
+STATIC FUNCTION valid_pos_racun_artikal( nKolicina, aGetList )
 
-   LOCAL lOk, _read_barkod
+   LOCAL lOk, cBarkodProcitati
 
-   lOk := pos_postoji_roba( @_idroba, 2, 27, @_read_barkod ) .AND. NarProvDuple( _idroba )
+   lOk := pos_postoji_roba( @_idroba, 2, 27, @cBarkodProcitati, aGetList ) .AND. NarProvDuple( _idroba )
 
    IF gOcitBarCod
       hb_keyPut( K_ENTER )

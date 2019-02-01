@@ -133,45 +133,6 @@ FUNCTION P_Osob( cId, dx, dy )
 
    RETURN xRet
 
-/*
-
--- FUNCTION P_Uredj( cId, dx, dy )
-
-   PRIVATE ImeKol
-   PRIVATE Kol := {}
-
-   ImeKol := { { "ID ",  {|| id },       "id", {|| .T. }, {|| validacija_postoji_sifra( wId ) }      }, ;
-      { PadC( "Naziv", 30 ), {|| naz },      "naz"       }, ;
-      { "Port", {|| port },      "port"       };
-      }
-
-   FOR i := 1 TO Len( ImeKol )
-      AAdd( Kol, i )
-   NEXT
-
-   RETURN p_sifra( F_UREDJ, 1, 10, 55, "Sifrarnik uredjaja", @cid, dx, dy )
-
-*/
-
-
-/*
--- FUNCTION P_MJTRUR( cId, dx, dy )
-
-   PRIVATE ImeKol
-   PRIVATE Kol := {}
-
-   ImeKol := { { "Uredjaj",     {|| iduredjaj }, "IdUredjaj", {|| .T. }, {|| P_Uredj( wIdUredjaj ) } }, ;
-      { "Odjeljenje",  {|| IdOdj },     "IdOdj", {|| .T. }, {|| P_Odj( wIdOdj ) } }, ;
-      { "Dio objekta", {|| IdDio },     "IdDio", {|| .T. }, {|| P_Dio( wIdDio ) } } ;
-      }
-
-   FOR i := 1 TO Len( ImeKol )
-      AAdd( Kol, i )
-   NEXT
-
-   RETURN p_sifra( F_MJTRUR, 1, 10, 55, "Sifrarnik parova uredjaj-odjeljenje", @cid, dx, dy )
-*/
-
 
 FUNCTION pos_osob_key_handler( Ch )
 

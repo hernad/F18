@@ -71,7 +71,7 @@ Sifra    Naziv              JMJ Kolicina
       SELECT POS
       ?? TRANS ( POS->Kolicina, cPicKol )
       ? cLM + Space ( Len ( POS->IdRoba ) )
-      ?? " " + POS->IdOdj, " " + POS->IdDio
+      ?? " " + POS->IdOdj
       nFin += POS->( Kolicina * Cijena )
       SKIP
    ENDDO

@@ -12,8 +12,7 @@
 #include "f18.ch"
 
 
-
-FUNCTION kalk_get1_80( atrib )
+FUNCTION kalk_get1_80()
 
    LOCAL nX := 5
    LOCAL _kord_x := 0
@@ -35,18 +34,10 @@ FUNCTION kalk_get1_80( atrib )
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje/razdužuje:" GET _IdKonto VALID {|| P_Konto( @_IdKonto ), ispisi_naziv_konto( _kord_x - 1, 40, 20 ) } PICT "@!"
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, box_y_koord() + 50  SAY "Partner zaduzuje:" GET _IdZaduz PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz )
-      // ENDIF
-
-      ++nX
+       ++nX
       _kord_x := box_x_koord() + nX
 
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Prenos na konto:" GET _IdKonto2 VALID {|| Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2 ), ispisi_naziv_konto( _kord_x, 30, 20 )  } PICT "@!"
-
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, box_y_koord() + 50 SAY "Partner zaduzuje:" GET _IdZaduz2 PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz2 )
-      // ENDIF
 
       READ
 
@@ -63,18 +54,12 @@ FUNCTION kalk_get1_80( atrib )
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Konto zaduzuje/razduzuje: "
       ?? _IdKonto
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, Col() + 2  SAY "Partner zaduzuje: "
-      // ?? _IdZaduz
-      // ENDIF
+
 
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Prenos na konto: "
       ?? _IdKonto2
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, Col() + 2 SAY "Partner zaduzuje: "
-      // ?? _IdZaduz2
-      // ENDIF
+
 
       READ
       ESC_RETURN K_ESC
@@ -109,9 +94,6 @@ FUNCTION kalk_get1_80( atrib )
 
    _pkonto := _idkonto
 
-   // kalk_dat_poslj_promjene_prod()
-   // DuplRoba()
-
    IF kalk_is_novi_dokument()
 
       select_o_koncij( _idkonto )
@@ -141,15 +123,12 @@ FUNCTION kalk_get1_80( atrib )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MALOPROD. CIJENA (MPC):"
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc ;
-      PICT PicDEM;
-      WHEN W_MPC_( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
-      VALID V_Mpc_( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
+      PICT PicDEM  WHEN W_MPC_( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) VALID V_Mpc_( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
 
    ++nX
    SayPorezi_lv( nX, aPorezi )
 
    ++nX
-
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _MPCSaPP PICT PicDEM VALID kalk_valid_mpcsapdv( "80", .F., @aPorezi, .T. )
 
@@ -205,8 +184,6 @@ FUNCTION kalk_get_1_80_protustavka()
 
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + nX, box_y_koord() + 2, @aPorezi )
 
-
-
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() -20 ) SAY "Tarifa:" GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
 
    READ
@@ -239,9 +216,7 @@ FUNCTION kalk_get_1_80_protustavka()
 
    // NC
    ++nX
-
    _kord_x := box_x_koord() + nX
-
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "NABAVNA CIJENA:"
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _NC PICT PicDEM WHEN VKol( _kord_x )
 
@@ -252,25 +227,16 @@ FUNCTION kalk_get_1_80_protustavka()
    @ box_x_koord() + nX, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"
 
    ++nX
-
    @ box_x_koord() + nX, box_y_koord() + 2  SAY "PROD.CIJENA BEZ PDV:"
-
-
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc PICT PicDEM ;
-      WHEN WMpc_lv( nil, nil, aPorezi ) ;
-      VALID VMpc_lv( nil, nil, aPorezi )
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc PICT PicDEM WHEN WMpc_lv( nil, nil, aPorezi ) VALID VMpc_lv( nil, nil, aPorezi )
 
    ++nX
 
    SayPorezi_lv( nX, aPorezi )
 
    ++nX
-
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "P.CIJENA SA PDV:"
-
-
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpcsapp PICT PicDEM ;
-      valid {|| Svedi( cSvedi ), VMpcSapp_lv( nil, nil, aPorezi ) }
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpcsapp PICT PicDEM valid {|| Svedi( cSvedi ), VMpcSapp_lv( nil, nil, aPorezi ) }
 
    READ
 

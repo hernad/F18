@@ -56,12 +56,7 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
    pos_naslov_dok_zaduzenja( cIdVd )
 
    IF cIdVD == "16"
-      IF !Empty( IdDio )
-         cPom += "PREDISPOZICIJA "
-         lPredispozicija := .T.
-      ELSE
-         cPom += "ZADUŽENJE "
-      ENDIF
+     cPom += "ZADUŽENJE "
    ENDIF
 
    IF cIdvd == "PD"
@@ -185,8 +180,6 @@ FUNCTION pos_stampa_azuriranog_zaduzenja( cNazDok )
    SELECT POS
    IF lPredispozicija
       ?U  "PRENOS IZ ODJ: " + pos->idodj + "  U ODJ:" + pos_doks->idvrstep
-   ELSE
-      ?U iif ( !Empty ( POS->IdDio ), "-" + AllTrim ( DIO->Naz ), "" )
 
    ENDIF
 
@@ -202,12 +195,6 @@ FUNCTION pos_stampa_azuriranog_zaduzenja( cNazDok )
    Eval( bZagl )
    DO WHILE ! Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
 
-      IF lPredispozicija  // predispozicija
-         IF !Empty( IdDio )
-            SKIP
-            LOOP
-         ENDIF
-      ENDIF
       check_nova_strana( bZagl, s_oPDF )
       select_o_roba( POS->IdRoba )
       SELECT POS

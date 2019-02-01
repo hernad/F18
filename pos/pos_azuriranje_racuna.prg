@@ -81,7 +81,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++ nCount ) ), 5 )
          hRec[ "m1" ] := OBR_JEST
          hRec[ "prebacen" ] := OBR_NIJE
-         hRec[ "iddio" ] := _pos_pripr->iddio
          hRec[ "idodj" ] := _pos_pripr->idodj
          hRec[ "idcijena" ] := _pos_pripr->idcijena
          hRec[ "idradnik" ] := _pos_pripr->idradnik

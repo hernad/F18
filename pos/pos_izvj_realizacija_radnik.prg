@@ -360,7 +360,7 @@ FUNCTION pos_close_dbfs_real_radnici()
 
 FUNCTION pos_radnik_izvuci( cIdVd )
 
-   //SEEK cIdVd + DToS ( dDatOd )
+
    seek_pos_doks_2( cIdVd, dDatOd )
    DO WHILE ! Eof() .AND. IdVd == cIdVd .AND. pos_doks->Datum <= dDatDo
 
@@ -376,10 +376,6 @@ FUNCTION pos_radnik_izvuci( cIdVd )
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
       DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
 
-         // IF ( !Empty( cIdDio ) .AND. POS->IdDio <> cIdDio )
-         // SKIP
-         // LOOP
-         // ENDIF
 
          select_o_roba( pos->idroba )
 

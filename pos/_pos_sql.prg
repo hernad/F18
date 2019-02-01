@@ -24,7 +24,6 @@ CREATE TABLE fmk.pos_pos
   brdok character varying(6),
   datum date,
   idcijena character varying(1),
-  iddio character varying(2),
   idodj character(2),
   idradnik character varying(4),
   idroba character(10),
@@ -401,7 +400,7 @@ FUNCTION h_pos_pos_indexes()
    hIndexes[ "4" ] := "dtos(datum)"
    hIndexes[ "5" ] := "IdPos+idroba+DTOS(Datum)"
    hIndexes[ "6" ] := "IdRoba"
-   hIndexes[ "7" ] := "IdPos+IdVd+BrDok+DTOS(Datum)+IdDio+IdOdj"
+   hIndexes[ "7" ] := "IdPos+IdVd+BrDok+DTOS(Datum)+IdOdj"
 
    RETURN hIndexes
 

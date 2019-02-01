@@ -61,14 +61,14 @@ CREATE TABLE IF NOT EXISTS  p15.pos_doks (
     placen character(1),
     prebacen character(1),
     smjena character varying(1),
-    sto character varying(3),
+    -- sto character varying(3),
     vrijeme character varying(5),
     c_1 character varying(6),
     c_2 character varying(10),
     c_3 character varying(50),
     fisc_rn numeric(10,0),
-    zak_br numeric(6,0),
-    sto_br numeric(3,0),
+    -- zak_br numeric(6,0),
+    -- sto_br numeric(3,0),
     -- funk numeric(3,0),
     -- fisc_st character(10),
     rabat numeric(15,5),
@@ -130,7 +130,6 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos (
     brdok character varying(6),
     datum date,
     idcijena character varying(1),
-    iddio character varying(2),
     idodj character(2),
     idradnik character varying(4),
     idroba character(10),
@@ -231,9 +230,6 @@ GRANT ALL ON FUNCTION fmk.fetchmetrictext TO xtrole;
 ALTER FUNCTION fmk.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 
--- ALTER TABLE p15.pos_doks
--- DROP COLUMN IF EXISTS FUNK;
-
 
 CREATE TABLE IF NOT EXISTS  p15.pos_doks (
     idpos character varying(2) NOT NULL,
@@ -272,7 +268,6 @@ CREATE TABLE p15.pos_pos_knjig (
    brdok character varying(6),
    datum date,
    idcijena character varying(1),
-   iddio character varying(2),
    idodj character(2),
    idradnik character varying(4),
    idroba character(10),
@@ -311,14 +306,11 @@ CREATE TABLE p15.pos_doks_knjig (
    placen character(1),
    prebacen character(1),
    smjena character varying(1),
-   sto character varying(3),
    vrijeme character varying(5),
    c_1 character varying(6),
    c_2 character varying(10),
    c_3 character varying(50),
    fisc_rn numeric(10,0),
-   zak_br numeric(6,0),
-   sto_br numeric(3,0),
    rabat numeric(15,5),
    ukupno numeric(15,5)
 );
@@ -329,3 +321,22 @@ CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idgost, place
 CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
 CREATE INDEX pos_doks_id5_knjig ON p15.pos_doks_knjig USING btree (prebacen);
 CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
+
+
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS funk;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS sto;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS sto_br;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS zak_br;
+ALTER TABLE p15.pos_doks ALTER COLUMN brdok TYPE varchar(8);
+
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto_br;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS zak_br;
+ALTER TABLE p15.pos_doks_knjig ALTER COLUMN brdok TYPE varchar(8);
+
+ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;
+ALTER TABLE p15.pos_pos ALTER COLUMN brdok TYPE varchar(8);
+
+ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS iddio;
+ALTER TABLE p15.pos_pos_knjig ALTER COLUMN brdok TYPE varchar(8);

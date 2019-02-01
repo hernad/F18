@@ -15,25 +15,20 @@
 STATIC aPorezi := {}
 
 
-
 FUNCTION kalk_unos_dok_81( hParams )
 
    LOCAL nX := 5
    LOCAL _kord_x := 0
    LOCAL _unos_left := 40
    LOCAL _use_opis := .F.
-   LOCAL _use_rok := .F.
    LOCAL _opis := Space( 300 )
-   LOCAL _rok := CToD( "" )
+   
    LOCAL _krabat := NIL
 
    IF hb_HHasKey( hParams, "opis" )
       _use_opis := .T.
    ENDIF
 
-   IF hb_HHasKey( hParams, "rok" )
-      _use_rok := .T.
-   ENDIF
 
    IF _use_opis
       IF !kalk_is_novi_dokument()
@@ -41,11 +36,6 @@ FUNCTION kalk_unos_dok_81( hParams )
       ENDIF
    ENDIF
 
-   IF _use_rok
-      IF !kalk_is_novi_dokument()
-         _rok := CToD( AllTrim( hParams[ "rok" ] ) )
-      ENDIF
-   ENDIF
 
    __k_val := "N"
 
@@ -68,10 +58,6 @@ FUNCTION kalk_unos_dok_81( hParams )
 
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje:" GET _idkonto VALID {|| P_Konto( @_IdKonto ), ispisi_naziv_konto( _kord_x, 40, 30 ) } PICT "@!"
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, box_y_koord() + 42 SAY8 "Zadužuje: " GET _idzaduz PICT "@!" VALID Empty( _idzaduz ) .OR. p_partner( @_idzaduz )
-      // ENDIF
-
       READ
 
       ESC_RETURN K_ESC
@@ -91,10 +77,6 @@ FUNCTION kalk_unos_dok_81( hParams )
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Konto zaduzuje: "
       ?? _idkonto
 
-      // IF gNW <> "X"
-      // @  box_x_koord() + nX, box_y_koord() + 42 SAY "Zaduzuje: "
-      // ?? _idzaduz
-      // ENDIF
       READ
       ESC_RETURN K_ESC
 
@@ -124,10 +106,6 @@ FUNCTION kalk_unos_dok_81( hParams )
    // kalk_dat_poslj_promjene_prod()
 
    ++nX
-   // IF _use_rok
-   // @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Datum isteka roka:" GET _rok
-   // ENDIF
-
    IF _use_opis
       @ box_x_koord() + nX, box_y_koord() + 30 SAY8 "Opis:" GET _opis PICT "@S40"
    ENDIF
@@ -153,30 +131,15 @@ FUNCTION kalk_unos_dok_81( hParams )
       @ box_x_koord() + nX, Col() + 1 SAY "EUR->" GET __k_val VALID kalk_ulaz_preracun_fakturne_cijene( __k_val ) PICT "@!"
    ENDIF
 
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _fcj ;
-      PICT PicDEM ;
-      VALID {|| SetKey( K_ALT_T, {|| NIL } ), _fcj > 0 } ;
-      WHEN VKol()
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _fcj PICT PicDEM ;
+      VALID {|| SetKey( K_ALT_T, {|| NIL } ), _fcj > 0 } WHEN valid_kolicina()
    @ box_x_koord() + nX, Col() + 1 SAY "*** <ALT+T> unos ukupne FV"
-
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2   SAY "Rabat (%):"
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _rabat PICT PicDEM ;
-      WHEN {|| SetKey( K_ALT_T, {|| _kaskadni_rabat( @_krabat ) } ), .T. } ;
-      VALID {|| SetKey( K_ALT_T, {|| NIL } ), .T. }
-   @ box_x_koord() + nX, Col() + 1 SAY "*** <ALT+T> unos kaskadnog rabata"
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _rabat PICT PicDEM 
 
-/*
-   IF gNW <> "X"
-      ++ nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Transport. kalo:"
-      @ box_x_koord() + nX, box_y_koord() + _unos_left GET _gkolicina PICT PicKol
-      ++ nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "    Ostalo kalo:"
-      @ box_x_koord() + nX, box_y_koord() + _unos_left GET _gkolicin2 PICT PicKol
-   ENDIF
-*/
+
    READ
 
    ESC_RETURN K_ESC
@@ -188,48 +151,10 @@ FUNCTION kalk_unos_dok_81( hParams )
       hParams[ "opis" ] := _opis
    ENDIF
 
-   IF _use_rok
-      hParams[ "rok" ] := DToC( _rok )
-   ENDIF
 
    obracun_kalkulacija_tip_81_pdv( nX )
 
    RETURN LastKey()
-
-
-
-// ---------------------------------------------
-// unos kaskadnog rabata
-// ---------------------------------------------
-STATIC FUNCTION _kaskadni_rabat( krabat )
-
-   LOCAL _r_1 := 0
-   LOCAL _r_2 := 0
-   LOCAL _r_3 := 0
-   LOCAL _r_4 := 0
-   LOCAL _ok := .T.
-   PRIVATE GetList := {}
-
-   Box(, 8, 50 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Unos kaskadnog rabata:"
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY "Rabat 1 (%):" GET _r_1 PICT PicDem
-   @ box_x_koord() + 4, box_y_koord() + 2 SAY "Rabat 2 (%):" GET _r_2 PICT PicDem
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY "Rabat 3 (%):" GET _r_3 PICT PicDem
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY "Rabat 4 (%):" GET _r_4 PICT PicDem
-   READ
-   BoxC()
-
-   IF LastKey() == K_ESC
-      RETURN _ok
-   ENDIF
-
-   _rabat := ( 100 - 100 * ( 1 - _r_1 / 100 ) * ;
-      IF( _r_2 > 0, ( 1 - _r_2 / 100 ), 1 ) * ;
-      IF( _r_3 > 0, ( 1 - _r_3 / 100 ), 1 ) * ;
-      IF( _r_4 > 0, ( 1 - _r_4 / 100 ), 1 ) ;
-      )
-
-   RETURN _ok
 
 
 
@@ -256,7 +181,7 @@ STATIC FUNCTION _fv_ukupno()
    RETURN _ok
 
 
-STATIC FUNCTION VKol()
+STATIC FUNCTION valid_kolicina()
 
    SetKey( K_ALT_T, {|| _fv_ukupno() } )
 
@@ -315,7 +240,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( x_kord )
    IF lSaTroskovima == .T.
 
       // TROSKOVNIK
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Raspored troskova kalkulacije ->"
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Raspored troškova kalkulacije ->"
       @ box_x_koord() + nX, box_y_koord() + _unos_left SAY c10T1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _Prevoz PICT PicDEM
 

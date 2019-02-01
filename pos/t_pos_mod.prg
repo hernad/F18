@@ -38,13 +38,11 @@ METHOD mMenu()
    Fx := 4
    Fy := 8
 
+   pos_check_brdok()
    pos_init()
    CLOSE ALL
 
-
-
    DO WHILE ( .T. )
-
       box_x_koord( Fx )
       box_y_koord( Fy )
       g_cUserLevel := pos_prijava( Fx, Fy )
@@ -52,7 +50,6 @@ METHOD mMenu()
       IF g_cUserLevel == "X"
          RETURN .F.
       ENDIF
-
 
       pos_status_traka()
       SetPos( Fx, Fy )
@@ -97,12 +94,12 @@ METHOD setScreen()
 
 METHOD set_module_gvars()
 
-
    PUBLIC gPrevIdPos := "  "
    PUBLIC gOcitBarcod := .F.
    PUBLIC gSmijemRaditi := 'D'
    PUBLIC gSamoProdaja := 'N'
    PUBLIC gZauzetSam := 'N'
+
    // sifra radnika
    PUBLIC gIdRadnik
    // prezime i ime korisnika (iz OSOB)
@@ -125,7 +122,7 @@ METHOD set_module_gvars()
    PUBLIC gSmjena := " "   // identifikator smjene
    // PUBLIC danasnji_datum()           // datum
 
-   //PUBLIC gVodiOdj
+   // PUBLIC gVodiOdj
    PUBLIC gRadniRac        // da li se koristi princip radnih racuna ili se
    // racuni furaju kao u trgovini
    PUBLIC gDupliArt        // da li dopusta unos duplih artikala na racunu
@@ -134,7 +131,7 @@ METHOD set_module_gvars()
    PUBLIC gDirZaklj        // ako se ne koristi princip radnih racuna, da li se
    // racuni zakljucuju odmah po unosu stavki
 
-  // PUBLIC gPoreziRaster    // da li se porezi stampaju pojedinacno ili zbirno
+   // PUBLIC gPoreziRaster    // da li se porezi stampaju pojedinacno ili zbirno
    PUBLIC gPocStaSmjene    // da li se uvodi pocetno stanje smjene
    // (da li se radnicima dodjeljuju pocetna sredstva)
    PUBLIC gIdPos           // id prodajnog mjesta
@@ -164,11 +161,11 @@ METHOD set_module_gvars()
    PUBLIC gRnSpecOpc  // HOPS - rn specificne opcije
    PUBLIC gSjeciStr := ""
    PUBLIC gOtvorStr := ""
-   //PUBLIC gVSmjene := "N"
+   // PUBLIC gVSmjene := "N"
    PUBLIC gSezonaTip := "M"
    PUBLIC gSifUpravn := "D"
    PUBLIC gEntBarCod := "D"
-   PUBLIC gSifUvPoNaz := "N" // sifra uvijek po nazivu
+   PUBLIC gPosPretragaRobaUvijekPoNazivu := "N" // sifra uvijek po nazivu
 
    PUBLIC gPosNaz
    PUBLIC gRnHeder := "RacHeder.TXT"
@@ -214,7 +211,7 @@ METHOD set_module_gvars()
    PUBLIC gKolDec := 2
    PUBLIC gCijDec := 2
    PUBLIC gStariObrPor := .F.
-  // PUBLIC gPoreziRaster := "D"
+   // PUBLIC gPoreziRaster := "D"
    PUBLIC gPratiStanje := "N"
    PUBLIC gIdPos := "1 "
    PUBLIC gPostDO := "N"
@@ -288,7 +285,7 @@ METHOD set_module_gvars()
    // principi rada kase
    cPrevPSS := gPocStaSmjene
 
-   //gVodiOdj := fetch_metric( "VodiOdjeljenja", NIL, gVodiOdj )
+   // gVodiOdj := fetch_metric( "VodiOdjeljenja", NIL, gVodiOdj )
    gRadniRac := fetch_metric( "RadniRacuni", NIL, gRadniRac )
    gDirZaklj := fetch_metric( "DirektnoZakljucivanjeRacuna", NIL, gDirZaklj )
    gRnSpecOpc := fetch_metric( "RacunSpecifOpcije", NIL, gRnSpecOpc )
@@ -298,20 +295,20 @@ METHOD set_module_gvars()
    gPocStaSmjene := fetch_metric( "PratiPocetnoStanjeSmjene", NIL, gPocStaSmjene )
    gStamPazSmj := fetch_metric( "StampanjePazara", NIL, gStamPazSmj )
    gStamStaPun := fetch_metric( "StampanjePunktova", NIL, gStamStaPun )
-   //gVSmjene := fetch_metric( "VoditiPoSmjenama", NIL, gVsmjene )
+   // gVSmjene := fetch_metric( "VoditiPoSmjenama", NIL, gVsmjene )
    gSezonaTip := fetch_metric( "TipSezone", NIL, gSezonaTip )
    gSifUpravn := fetch_metric( "UpravnikIspravljaCijene", NIL, gSifUpravn )
    gDisplay := fetch_metric( "DisplejOpcije", NIL, gDisplay )
    gEntBarCod := fetch_metric( "BarkodEnter", my_user(), gEntBarCod )
    gEvidPl := fetch_metric( "EvidentiranjeVrstaPlacanja", NIL, gEvidPl )
-   gSifUvPoNaz := fetch_metric( "PretragaArtiklaPoNazivu", NIL, gSifUvPoNaz )
+   gPosPretragaRobaUvijekPoNazivu := fetch_metric( "PretragaArtiklaPoNazivu", NIL, gPosPretragaRobaUvijekPoNazivu )
    gDiskFree := fetch_metric( "SlobodniProstorDiska", NIL, gDiskFree )
 
    // izgled racuna
    gSjecistr := PadR( GETPStr( gSjeciStr ), 20 )
    gOtvorstr := PadR( GETPStr( gOtvorStr ), 20 )
 
-  // gPoreziRaster := fetch_metric( "PorezniRaster", NIL, gPoreziRaster )
+   // gPoreziRaster := fetch_metric( "PorezniRaster", NIL, gPoreziRaster )
    nFeedLines := fetch_metric( "BrojLinijaZaKrajRacuna", NIL, nFeedLines )
    gSjeciStr := fetch_metric( "SekvencaSjeciTraku", NIL, gSjeciStr )
    gOtvorStr := fetch_metric( "SekvencaOtvoriLadicu", NIL, gOtvorStr )
@@ -395,5 +392,31 @@ METHOD set_module_gvars()
    radna_prodavnica( gIdPos )
    set_sql_search_path( radna_prodavnica_sql_schema() )
 
+   RETURN .T.
+
+
+FUNCTION pos_check_brdok()
+
+   LOCAL aTabele, nI, cFile
+
+   o_pos_tables()
+   SELECT _pos_pripr
+
+   IF Len( _pos_pripr->brdok ) <> FIELD_LEN_POS_BRDOK
+
+
+      Alert( "Serviser F18 brdok[" + AllTrim( Str( Len( _pos_pripr->brdok ) ) ) + "] - pobrisati pos tabele pripreme!" )
+      my_close_all_dbf()
+      aTabele := { "pos_priprz", "pos_priprg", "_pos_pripr" }
+      FOR nI := 1 TO Len( aTabele )
+         cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".dbf"
+         info_bar( "pos_brdok", cFile )
+         FErase( cFile )
+         cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".cdx"
+         info_bar( "pos_brdok", cFile )
+         FErase( cFile )
+      NEXT
+
+   ENDIF
 
    RETURN .T.

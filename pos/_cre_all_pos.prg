@@ -150,50 +150,12 @@ FUNCTION cre_all_pos( ver )
    AAdd ( aDbf, { "C_3",       "C", 50, 0 } )
 
    AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
-   AAdd ( aDbf, { "ZAK_BR",    "N",  6, 0 } )
-   AAdd ( aDbf, { "STO_BR",    "N",  3, 0 } )
+   // AAdd ( aDbf, { "ZAK_BR",    "N",  6, 0 } )
+   // AAdd ( aDbf, { "STO_BR",    "N",  3, 0 } )
 
    _alias := "POS_DOKS"
    _table_name := "pos_doks"
 
-/*
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok", _alias )
-   CREATE_INDEX ( "2", "IdVd+DTOS(Datum)+Smjena", _alias )
-   CREATE_INDEX ( "3", "IdGost+Placen+DTOS(Datum)", _alias )
-   CREATE_INDEX ( "4", "IdVd+M1", _alias )
-   CREATE_INDEX ( "5", "Prebacen", _alias )
-   CREATE_INDEX ( "6", "dtos(datum)", _alias )
-   CREATE_INDEX ( "7", "IdPos+IdVD+BrDok", _alias )
-   CREATE_INDEX ( "TK", "IdPos+DTOS(Datum)+IdVd", _alias )
-   CREATE_INDEX ( "GOSTDAT", "IdPos+IdGost+DTOS(Datum)+IdVd+Brdok", _alias )
-   CREATE_INDEX ( "STO", "IdPos+idvd+STR(STO_BR)+STR(ZAK_BR)+DTOS(datum)+brdok", _alias )
-   CREATE_INDEX ( "ZAK", "IdPos+idvd+STR(ZAK_BR)+STR(STO_BR)+DTOS(datum)+brdok", _alias )
-   CREATE_INDEX ( "FISC", "STR(fisc_rn,10)+idpos+idvd", _alias )
-   AFTER_CREATE_INDEX
-*/
-
-/*
-   // ------- pos dokspf ------
-   aDbf := {}
-   AAdd( aDbf, { "DATUM", "D", 8, 0 } )
-   AAdd( aDbf, { "IDPOS", "C", 2, 0 } )
-   AAdd( aDbf, { "IDVD",  "C", 2, 0 } )
-   AAdd( aDbf, { "BRDOK", "C", 6, 0 } )
-
-   AAdd( aDbf, { "KNAZ",  "C", 35, 0 } )
-   AAdd( aDbf, { "KADR",  "C", 35, 0 } )
-   AAdd( aDbf, { "KIDBR", "C", 13, 0 } )
-   AAdd( aDbf, { "DATISP", "D", 8, 0 } )
-
-   _alias := "DOKSPF"
-   _table_name := "pos_dokspf"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX( "1", "idpos+idvd+DToS(datum)+brdok", _alias )
-   CREATE_INDEX( "2", "knaz", _alias )
-   AFTER_CREATE_INDEX
-*/
 
 
    // ----------------- pos items ---------------
@@ -207,7 +169,7 @@ FUNCTION cre_all_pos( ver )
    AAdd ( aDbf, { "RBR",       "C",  FIELD_LEN_POS_RBR, 0 } )
    AAdd ( aDbf, { "IDCIJENA",  "C",  1, 0 } )
    AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )
-   AAdd ( aDbf, { "IDDIO",     "C",  2, 0 } )
+   // AAdd ( aDbf, { "IDDIO",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDODJ",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
    AAdd ( aDbf, { "IDROBA",    "C", 10, 0 } )
@@ -223,26 +185,7 @@ FUNCTION cre_all_pos( ver )
    AAdd ( aDbf, { "C_2",        "C", 10, 0 } )
    AAdd ( aDbf, { "C_3",        "C", 50, 0 } )
 
-/*
-   _alias := "POS"
-   _table_name := "pos_pos"
-   IF_NOT_FILE_DBF_CREATE
 
-   // 0.4.5
-   IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 00405
-      modstru( { "*" + _table_name, "A RBR C 5 0" } )
-   ENDIF
-
-   CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+Rbr", _alias )
-   CREATE_INDEX ( "2", "IdOdj+idroba+DTOS(Datum)", _alias )
-   CREATE_INDEX ( "3", "Prebacen", _alias )
-   CREATE_INDEX ( "4", "dtos(datum)", _alias )
-   CREATE_INDEX ( "5", "IdPos+idroba+DTOS(Datum)", _alias )
-   CREATE_INDEX ( "6", "IdRoba", _alias )
-   CREATE_INDEX ( "7", "IdPos+IdVd+BrDok+DTOS(Datum)+IdDio+IdOdj", _alias )
-   CREATE_INDEX ( "IDS_SEM", "IdPos+IdVd+dtos(datum)+BrDok+rbr", _alias )
-   AFTER_CREATE_INDEX
-*/
 
    // --- promvp - promet po vrstama placanja --
    aDbf := {}
@@ -284,8 +227,8 @@ FUNCTION cre_all_pos( ver )
    IF_NOT_FILE_DBF_CREATE
 
    CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+STR(Cijena,10,3)", _alias )
-   CREATE_INDEX ( "2", "IdVd+IdOdj+IdDio", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdRadnik+GT+IdDio+IdOdj+IdRoba", _alias )
+   CREATE_INDEX ( "2", "IdVd+IdOdj", _alias )
+   CREATE_INDEX ( "3", "IdVd+IdRadnik+GT+IdOdj+IdRoba", _alias )
 
    _alias := "_POSP"
    _table_name := "_posp"
@@ -310,52 +253,15 @@ FUNCTION cre_all_pos( ver )
    _table_name := "priprg"
 
    IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdPos+IdOdj+IdDio+IdRoba+DTOS(Datum)+Smjena", _alias )
+   CREATE_INDEX ( "1", "IdPos+IdOdj+IdRoba+DTOS(Datum)+Smjena", _alias )
    CREATE_INDEX ( "2", "IdPos+DTOS (Datum)+Smjena", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdPos+IdVrsteP+IdGost+Placen+IdDio+IdOdj+IdRoba", _alias )
+   CREATE_INDEX ( "3", "IdVd+IdPos+IdVrsteP+IdGost+Placen+IdOdj+IdRoba", _alias )
    CREATE_INDEX ( "4", "IdVd+IdPos+IdVrsteP+IdGost+DToS(datum)", _alias )
 
 
    aDbf := {}
    AAdd ( aDbf, { "KEYCODE", "N",  4, 0 } )
    AAdd ( aDbf, { "IDROBA",  "C", 10, 0 } )
-
-/*
-   _alias := "K2C"
-   _table_name := "k2c"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "STR (KeyCode, 4)", _alias )
-   CREATE_INDEX ( "2", "IdRoba", _alias )
-*/
-
-/*
-   aDbf := {}
-   AAdd ( aDbf, { "IDDIO",      "C",  2, 0 } )
-   AAdd ( aDbf, { "IDODJ",      "C",  2, 0 } )
-   AAdd ( aDbf, { "IDUREDJAJ", "C",  2, 0 } )
-
-   _alias := "MJTRUR"
-   _table_name := "mjtrur"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdDio+IdOdj", _alias )
-*/
-
-/*
-   aDbf := {}
-   AAdd ( aDbf, { "IDROBA",     "C", 10, 0 } )
-   AAdd ( aDbf, { "IDDIO",      "C",  2, 0 } )
-
-  -- _alias := "ROBAIZ"
-   _table_name := "robaiz"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdRoba", _alias )
-*/
-
-   // kreiraj tabele dok_src : DOK_SRC
-   // cre_doksrc( ver )
 
    create_porezna_faktura_temp_dbfs()
 
@@ -368,12 +274,11 @@ FUNCTION g_pos_pripr_fields()
 
    // _POS, _PRIPR, PRIPRZ, PRIPRG, _POSP
    aDbf := {}
-   AAdd ( aDbf, { "BRDOK",     "C",  6, 0 } )
+   AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
    AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )
    AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
    AAdd ( aDbf, { "GT",        "C",  1, 0 } )
    AAdd ( aDbf, { "IDCIJENA",  "C",  1, 0 } )
-   AAdd ( aDbf, { "IDDIO",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDGOST",    "C",  8, 0 } )
    AAdd ( aDbf, { "IDODJ",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
@@ -395,9 +300,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "PREBACEN",  "C",  1, 0 } )
    AAdd ( aDbf, { "ROBANAZ",   "C", 40, 0 } )
    AAdd ( aDbf, { "SMJENA",    "C",  1, 0 } )
-   AAdd ( aDbf, { "STO",       "C",  3, 0 } )
-   AAdd ( aDbf, { "STO_BR",    "N",  3, 0 } )
-   AAdd ( aDbf, { "ZAK_BR",    "N",  4, 0 } )
    AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
 
    AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
@@ -416,10 +318,7 @@ FUNCTION g_pos_pripr_fields()
 
    AAdd( aDBf, { 'N1', 'N',  12,  2 } )
    AAdd( aDBf, { 'N2', 'N',  12,  2 } )
-
    AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
-//   AAdd( aDBf, { 'KATBR', 'C',  14,  0 } )
-
    AAdd( aDBf, { 'C_1', 'C',   6,  0 } )
    AAdd( aDBf, { 'C_2', 'C',  10,  0 } )
    AAdd( aDBf, { 'C_3', 'C',  50,  0 } )

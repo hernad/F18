@@ -72,15 +72,6 @@ FUNCTION pos_stampa_zaduzenja_inventure( lPrikazStavke0Nepromjenjene, lAzurirana
 
    SELECT PRIPRZ
 
-/*
-   IF gPostDO == "D" .AND. ! Empty ( field->IdDio )
-      SELECT DIO
-      HSEEK PRIPRZ->IdDio
-      ? PadC ( "Dio objekta: " + AllTrim ( DIO->Naz ), nSir )
-      SELECT PRIPRZ
-   ENDIF
-*/
-
    ?
 
    ?    " ------------- ---------------------- ---"
