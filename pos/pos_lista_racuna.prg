@@ -203,7 +203,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "F"
-      pos_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T., NIL, .T. )
+      pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T., NIL, .T. )
       SELECT pos_doks
       f7_pf_traka( .T. )
       SELECT pos_doks

@@ -113,13 +113,12 @@ FUNCTION pos_zaduzenje( cIdVd )
 
          IF cBrDok <> NIL .AND. Pitanje(, "Odštampati prenesni dokument na štampac (D/N) ?", "N" ) == "D"
 
-            IF cIdVd $ "16#96#95#98"
+            IF cIdVd $ "16#95#98"
                pos_stampa_zaduzenja( cIdVd, cBrDok )
             ELSEIF cIdVd $ "IN#NI"
                pos_stampa_zaduzenja_inventure()
             ENDIF
 
-            // o_pos_tables()
             IF Pitanje(, "Ako je sve u redu, želite li staviti dokument na stanje (D/N) ?", " " ) == "D"
                lAzuriratiBezStampeSilent := .T.
             ENDIF
@@ -152,7 +151,6 @@ FUNCTION pos_zaduzenje( cIdVd )
       SELECT PRIPRZ
       SET ORDER TO
       GO  TOP
-
       BOX (, 20, 77,, { "<*> - Ispravka stavke ", "Storno - negativna količina" } )
       @ box_x_koord(), box_y_koord() + 4 SAY8 PadC( "PRIPREMA " + NaslovDok( cIdVd ) ) COLOR f18_color_invert()
       oBrowse := pos_form_browse( box_x_koord() + 6, box_y_koord() + 1, box_x_koord() + 19, box_y_koord() + 77, ImeKol, Kol, ;
@@ -168,7 +166,6 @@ FUNCTION pos_zaduzenje( cIdVd )
       _IdPos := cIdPos
       _IdVrsteP := cIdOdj2
       _IdOdj := cIdOdj
-      // _IdDio := cIdDio
       _IdVd := cIdVd
       _BrDok := Space( FIELD_LEN_POS_BRDOK )
       _Datum := dDatRada
@@ -198,11 +195,11 @@ FUNCTION pos_zaduzenje( cIdVd )
 
          @ box_x_koord() + 2, box_y_koord() + 25 SAY Space( 40 )
 
-         IF gDuzSifre <> NIL .AND. gDuzSifre > 0
-            cDSFINI := AllTrim( Str( gDuzSifre ) )
-         ELSE
-            cDSFINI := my_get_from_ini( 'SifRoba', 'DuzSifra', '10' )
-         ENDIF
+         // IF gRobaPosDuzinaSifre <> NIL .AND. gRobaPosDuzinaSifre > 0
+         cDSFINI := AllTrim( Str( gRobaPosDuzinaSifre ) )
+         // ELSE
+         // cDSFINI := my_get_from_ini( 'SifRoba', 'DuzSifra', '10' )
+         // ENDIF
 
          @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + cDSFINI ;
             WHEN {|| _idroba := PadR( _idroba, Val( cDSFINI ) ), .T. } ;
@@ -273,7 +270,7 @@ FUNCTION pos_zaduzenje( cIdVd )
          o_pos_tables()
       ENDIF
 
-      IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li staviti dokument na stanje (D/N) ?", "D" ) == "D"
+      IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + cIdPos + "-" + cIdVd + "-" + cBrDok + " ažurirati (D/N) ?", "D" ) == "D"
          pos_azuriraj_zaduzenje( cBrDok, cIdVD )
       ELSE
          SELECT _POS

@@ -63,7 +63,7 @@ FUNCTION pos_param_podaci_kase()
    AAdd( aNiz, { "Oznaka/ID gotovinskog placanja", "gGotPlac",, "@!", } )
    AAdd( aNiz, { "Oznaka/ID placanja duga       ", "gDugPlac",, "@!", } )
    AAdd( aNiz, { "Oznaka strane valute", "gStrValuta",, "@!", } )
-   AAdd( aNiz, { "Duzina sifre artikla u unosu", "gDuzSifre",, "99", } )
+   AAdd( aNiz, { "Duzina sifre artikla u unosu", "gRobaPosDuzinaSifre",, "99", } )
 
    VarEdit( aNiz, 2, 2, 24, 78, "PARAMETRI RADA PROGRAMA - PODACI KASE", "B1" )
 
@@ -77,7 +77,7 @@ FUNCTION pos_param_podaci_kase()
       set_metric( "OznakaGotovinskogPlacanja", nil, gGotPlac )
       set_metric( "OznakaDugPlacanja", nil, gDugPlac )
       set_metric( "StranaValuta", nil, gStrValuta )
-      set_metric( "DuzinaSifre", _user, gDuzSifre )
+      set_metric( "DuzinaSifre", _user, gRobaPosDuzinaSifre )
 
    ENDIF
 

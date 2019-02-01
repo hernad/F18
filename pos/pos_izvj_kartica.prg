@@ -37,7 +37,7 @@ FUNCTION pos_kartica_artikla()
    PRIVATE dDatum1 := gDatum
    PRIVATE cPredhodnoStanje := "D"
 
-   nPosDuzinaBrojaDokumenta := 6
+   nPosDuzinaBrojaDokumenta :=  FIELD_LEN_POS_BRDOK
 
    cIdRoba := Space( 10 )
    cIdPos := gIdPos

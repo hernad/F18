@@ -131,9 +131,8 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
       RETURN lRet
    ENDIF
 
-   // IF gRnInfo == "D"
    pos_racun_info( cBrojRacuna )
-   // ENDIF
+
 
    IF fiscal_opt_active()
       pos_stampa_fiskalni_racun( _id_pos, gDatum, cBrojRacuna, _uplaceno )
@@ -144,6 +143,11 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
    RETURN lOk
 
 
+STATIC FUNCTION pos_racun_info( cBrRn )
+
+      info_bar( "pos", "POS račun broj: " + cBrRN )
+
+      RETURN .T.
 
 
 STATIC FUNCTION pos_stampa_fiskalni_racun( cIdPos, dDatum, cBrRn, nUplaceno )

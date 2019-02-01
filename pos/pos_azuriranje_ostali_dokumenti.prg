@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR _idpos, _rbr, _brdok, _idvd, _datum
+
 FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
 
    LOCAL lOk := .T.
@@ -21,7 +23,6 @@ FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
    LOCAL hParams
 
    run_sql_query( "BEGIN" )
-
 
    SELECT PRIPRZ
    GO TOP
@@ -46,13 +47,11 @@ FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
 
          SELECT PRIPRZ
          lOk := pos_azuriraj_artikal_u_sifarniku( cIdVd )
-
          IF !lOk
             EXIT
          ENDIF
 
          SELECT PRIPRZ
-
          set_global_memvars_from_dbf()
 
          SELECT pos
@@ -63,11 +62,9 @@ FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
 
          hRec := get_hash_record_from_global_vars()
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
-
          IF !lOk
             EXIT
          ENDIF
-
          SELECT priprz
          SKIP
 
@@ -77,7 +74,6 @@ FUNCTION pos_azuriraj_zaduzenje( cBrDok, cIdVd )
 
    IF lOk
       lRet := .T.
-
       hParams := hb_Hash()
       //hParams[ "unlock" ] :=  { "pos_pos", "pos_doks", "roba" }
       run_sql_query( "COMMIT", hParams )
@@ -153,12 +149,8 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
 
    nTotalCount := priprz->( RecCount() )
 
-   //SELECT ROBA
-   //SET ORDER TO TAG "ID"
-
    SELECT PRIPRZ
    GO TOP
-
    seek_pos_doks( "XX", "XX" )
    APPEND BLANK
 
@@ -179,15 +171,13 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    cDokument := AllTrim( hRec[ "idpos" ] ) + "-" + hRec[ "idvd" ] + "-" + AllTrim( hRec[ "brdok" ] ) + " " + DToC( hRec[ "datum" ] )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "    AŽURIRANJE DOKUMENTA U TOKU ..."
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Formiran dokument: " + cDokument +  " / zap: " + AllTrim( Str( nTotalCount ) )
-
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Formiran dokument: " + cDokument +  " / zap: " + AllTrim( Str( nTotalCount ) )
    lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
 
 
    IF lOk
 
       seek_pos_pos( "XX", "XX" )
-
       SELECT PRIPRZ
 
       DO WHILE !Eof()
@@ -222,7 +212,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Stavka " + AllTrim( Str( nCount ) ) + " roba: " + hRec[ "idroba" ]
 
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
-
          IF !lOk
             EXIT
          ENDIF
@@ -258,8 +247,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    ENDIF
 
    RETURN lRet
-
-
 
 
 STATIC FUNCTION pos_azuriraj_artikal_u_sifarniku(cIdVd)
@@ -304,7 +291,6 @@ STATIC FUNCTION pos_azuriraj_artikal_u_sifarniku(cIdVd)
    hRec[ "n1" ] := priprz->n1
    hRec[ "n2" ] := priprz->n2
    hRec[ "barkod" ] := priprz->barkod
-
    lOk := update_rec_server_and_dbf( "roba", hRec, 1, "CONT" )
 
    RETURN lOk

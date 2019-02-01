@@ -38,7 +38,7 @@ FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
    nBrojDokumenta := Max( nBrojDokumenta, 0 )
 
    ++nBrojDokumenta
-   _ret := PadL( AllTrim( Str( nBrojDokumenta ) ), 6  )
+   _ret := PadL( AllTrim( Str( nBrojDokumenta ) ),  FIELD_LEN_POS_BRDOK)
 
    set_metric( cPosBrojacParam, nil, nBrojDokumenta )
 

@@ -34,14 +34,13 @@ FUNCTION set_a_dbf_pos()
    set_a_dbf_temp( "_pos_pripr",   "_POS_PRIPR", F__PRIPR  )
    set_a_dbf_temp( "pos_priprg",   "PRIPRG", F_PRIPRG  )
    set_a_dbf_temp( "pos_priprz",   "PRIPRZ", F_PRIPRZ  )
-   //set_a_dbf_temp( "pos_k2c",   "K2C", F_K2C  )
-   //set_a_dbf_temp( "pos_mjtrur",   "MJTRUR", F_MJTRUR  )
-   //set_a_dbf_temp( "pos_robaiz",   "ROBAIZ", F_ROBAIZ  )
-   //set_a_dbf_temp( "pos_razdr",   "RAZDR", F_RAZDR  )
+   // set_a_dbf_temp( "pos_k2c",   "K2C", F_K2C  )
+   // set_a_dbf_temp( "pos_mjtrur",   "MJTRUR", F_MJTRUR  )
+   // set_a_dbf_temp( "pos_robaiz",   "ROBAIZ", F_ROBAIZ  )
+   // set_a_dbf_temp( "pos_razdr",   "RAZDR", F_RAZDR  )
    set_a_dbf_temp( "pos_uredj",   "UREDJ", F_UREDJ  )
-   //set_a_dbf_temp( "pos_dio",   "DIO", F_DIO  )
+   // set_a_dbf_temp( "pos_dio",   "DIO", F_DIO  )
    set_a_dbf_temp( "pos_mars",   "MARS", F_MARS  )
-
 
    RETURN .T.
 
@@ -70,10 +69,10 @@ FUNCTION set_a_dbf_pos_pos()
    // -------------------------------------------------------------------------------
    hAlgoritam := hb_Hash()
    hAlgoritam[ "dbf_key_block" ]  := {|| field->idpos + field->idvd + DToS( field->datum ) + field->brdok + field->rbr }
-   hAlgoritam[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + DToS( CTOD("") ) + SPACE( FIELD_LEN_POS_BRDOK ) + SPACE( FIELD_LEN_POS_RBR )
+   hAlgoritam[ "dbf_key_empty_rec" ] := Space( 2 ) + Space( 2 ) + DToS( CToD( "" ) ) + Space( FIELD_LEN_POS_BRDOK ) + Space( FIELD_LEN_POS_RBR )
 
    hAlgoritam[ "dbf_key_fields" ] := { "idpos", "idvd", "datum", "brdok", "rbr" }
-   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok,6) || lpad(rbr,5)"
+   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok," + AllTrim( Str( FIELD_LEN_POS_BRDOK ) ) + ") || lpad(rbr,5)"
    hAlgoritam[ "dbf_tag" ]        := "IDS_SEM"
    AAdd( hItem[ "algoritam" ], hAlgoritam )
 
@@ -83,7 +82,7 @@ FUNCTION set_a_dbf_pos_pos()
    hAlgoritam := hb_Hash()
    hAlgoritam[ "dbf_key_block" ]  := {|| field->idpos + field->idvd + DToS( field->datum ) + field->brdok }
    hAlgoritam[ "dbf_key_fields" ] := { "idpos", "idvd", "datum", "brdok" }
-   hAlgoritam[ "sql_in" ]    := "rpad(idpos,2) || rpad(idvd, 2) || to_char(datum, 'YYYYMMDD') || rpad(brdok, 6)"
+   hAlgoritam[ "sql_in" ]    := "rpad(idpos,2) || rpad(idvd, 2) || to_char(datum, 'YYYYMMDD') || rpad(brdok, " + AllTrim( Str( FIELD_LEN_POS_BRDOK ) ) + ")"
    hAlgoritam[ "dbf_tag" ]    := "1"
    AAdd( hItem[ "algoritam" ], hAlgoritam )
 
@@ -118,10 +117,10 @@ FUNCTION set_a_dbf_pos_doks()
    // -------------------------------------------------------------------------------
    hAlgoritam := hb_Hash()
    hAlgoritam[ "dbf_key_block" ]  := {|| field->idpos + field->idvd + DToS( field->datum ) + field->brdok }
-   hAlgoritam[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + DToS( CTOD("") ) + SPACE( FIELD_LEN_POS_BRDOK )
+   hAlgoritam[ "dbf_key_empty_rec" ] := Space( 2 ) + Space( 2 ) + DToS( CToD( "" ) ) + Space( FIELD_LEN_POS_BRDOK )
 
    hAlgoritam[ "dbf_key_fields" ] := { "idpos", "idvd", "datum", "brdok" }
-   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok,6)"
+   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok," + AllTrim( Str( FIELD_LEN_POS_BRDOK ) ) + ")"
    hAlgoritam[ "dbf_tag" ]        := "1"
    AAdd( hItem[ "algoritam" ], hAlgoritam )
 
@@ -191,7 +190,7 @@ FUNCTION set_a_dbf_pos_dokspf()
    hAlgoritam := hb_Hash()
    hAlgoritam[ "dbf_key_block" ]  := {|| field->idpos + field->idvd + DToS( field->datum ) + field->brdok }
    hAlgoritam[ "dbf_key_fields" ] := { "idpos", "idvd", "datum", "brdok" }
-   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok,6)"
+   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok," + AllTrim( Str( FIELD_LEN_POS_BRDOK ) ) + ")"
    hAlgoritam[ "dbf_tag" ]        := "1"
    AAdd( hItem[ "algoritam" ], hAlgoritam )
 

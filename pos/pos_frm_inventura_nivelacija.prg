@@ -156,20 +156,10 @@ FUNCTION pos_inventura_nivelacija()
             _idroba := pos->idroba
             DO WHILE !Eof() .AND. pos->( idodj + idroba ) == ( cIdOdj + _idroba ) .AND. pos->datum <= dDatRada
 
-               //IF !Empty( cIdDio ) .AND. pos->iddio <> cIdDio
-                //  SKIP
-                  //LOOP
-               //ENDIF
-
-               IF pos->idvd == "96"
-                  SKIP
-                  LOOP
-               ENDIF
-
                IF pos->idvd $ "16#00"
                   nKolicina += pos->kolicina
 
-               ELSEIF pos->idvd $ "42#96#01#IN#NI"
+               ELSEIF pos->idvd $ "42#01#IN#NI"
                   DO CASE
                   CASE pos->idvd == POS_VD_INV
                      nKolicina -= pos->kolicina - pos->kol2
@@ -505,8 +495,8 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
    LOCAL _pict := "9999999.99"
    LOCAL _last_read_var
 
-   IF gDuzSifre <> NIL .AND. gDuzSifre > 0
-      _duz_sif := AllTrim( Str( gDuzSifre ) )
+   IF gRobaPosDuzinaSifre <> NIL .AND. gRobaPosDuzinaSifre > 0
+      _duz_sif := AllTrim( Str( gRobaPosDuzinaSifre ) )
    ENDIF
 
    SET CURSOR ON
@@ -717,15 +707,11 @@ STATIC FUNCTION update_ip_razlika()
 
       DO WHILE !Eof() .AND. pos->( idodj + idroba ) == ( cIdOdj + ip_roba ) .AND. pos->datum <= dDatRada
 
-         //IF !Empty( cIdDio ) .AND. pos->iddio <> cIdDio
-          //  SKIP
-        //    LOOP
-         //ENDIF
 
          IF pos->idvd $ "16#00"
             nKolicinaZaInventuru += pos->kolicina
 
-         ELSEIF pos->idvd $ "42#96#01#IN#NI"
+         ELSEIF pos->idvd $ "42#01#IN#NI"
             DO CASE
             CASE pos->idvd == POS_VD_INV
                nKolicinaZaInventuru -= pos->kolicina - pos->kol2

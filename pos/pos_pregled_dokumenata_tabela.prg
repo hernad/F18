@@ -191,7 +191,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
             DO WHILE !Eof() .AND. IdPos + IdVd == ctIdPos + POS_VD_RACUN
                IF ( datum <= dDatum1 )
-                  pos_stampa_priprema( IdPos, DToS( datum ) + BrDok, .F., glRetroakt )
+                  pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .F., glRetroakt )
                ENDIF
                SELECT pos_doks
                SKIP 1
@@ -200,7 +200,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
             ENDPRINT
 
          ELSEIF cOdg == "D"
-            pos_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T. )
+            pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T. )
          ENDIF
 
       CASE pos_doks->IdVd == "16"
@@ -232,7 +232,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
    CASE Ch == Asc( "F" ) .OR. Ch == Asc( "f" )
 
 
-      pos_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T., NIL, .T. )
+      pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T., NIL, .T. )
 
       SELECT pos_doks
 

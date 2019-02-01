@@ -135,8 +135,8 @@ FUNCTION pos_unos_racuna()
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space ( 40 )
       SET CURSOR ON
 
-      IF gDuzSifre > 0
-         cDSFINI := AllTrim( Str( gDuzSifre ) )
+      IF gRobaPosDuzinaSifre > 0
+         cDSFINI := AllTrim( Str( gRobaPosDuzinaSifre ) )
       ELSE
          cDSFINI := "10"
       ENDIF
