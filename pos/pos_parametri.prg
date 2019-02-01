@@ -205,7 +205,7 @@ FUNCTION pos_principi_rada_kase()
       pos_kalk_konto_magacin( cKalkKontoMagacin )
 
       set_metric( "pos_maksimalna_kolicina_na_unosu", my_user(), _max_qtty )
-      max_kolicina_kod_unosa( .T. )
+      pos_max_kolicina_kod_unosa( .T. )
 
       set_metric( "pos_konstantni_unos_racuna", my_user(), _konstantni_unos )
       MsgC()

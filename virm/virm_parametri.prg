@@ -22,7 +22,7 @@ FUNCTION virm_parametri()
    LOCAL _sys_datum := fetch_metric( "virm_sys_datum_uplate", nil, "D" )
    LOCAL _org_jed := fetch_metric( "virm_org_jedinica", nil, gOrgJed )
    LOCAL _mjesto := fetch_metric( "virm_mjesto_uplate", nil, gMjesto )
-   LOCAL _datum := fetch_metric( "virm_init_datum_uplate", nil, gDatum )
+   LOCAL _datum := fetch_metric( "virm_init_datum_uplate", nil, danasnji_datum() )
    LOCAL _konverzija := fetch_metric( "virm_konverzija_delphirb", nil, "5" )
 
    Box(, 10, 70 )

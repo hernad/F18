@@ -20,7 +20,7 @@ FUNCTION pos_pregled_prometa_po_vrstama_placanja()
    //o_pos_kase()
 
    cIdPos := gIdPos
-   dDatOd := dDatDo := gDatum
+   dDatOd := dDatDo := danasnji_datum()
 
    SET CURSOR ON
    Box(, 3, 60 )
@@ -58,7 +58,7 @@ FUNCTION pos_pregled_prometa_po_vrstama_placanja()
 
    // ZagFirma()
 
-   ? "PREGLED PROMETA PO VRSTI PLACANJA NA DAN " + DToC( gDatum )
+   ? "PREGLED PROMETA PO VRSTI PLACANJA NA DAN " + DToC( danasnji_datum() )
    ? "-------------------------------------------------"
    ?
    IF Empty( cIdPos )

@@ -39,19 +39,19 @@ FUNCTION pos_unos_ispravka_racuna()
 
 STATIC FUNCTION unos_stavki_racuna( lNovi )
 
-   LOCAL cSto := Space( 3 )
+   LOCAL cBrojRacuna
 
    SELECT _pos_pripr
    GO TOP
 
    IF lNovi
-      cBrojRacuna := "PRIPRE"
+      cBrojRacuna := PadR( "PRIPRE", FIELD_LEN_POS_BRDOK )
    ELSE
       cBrojRacuna := _pos_pripr->brdok
-      cSto := _pos_pripr->sto
+
    ENDIF
 
-   pos_unos_racuna( cBrojRacuna, cSto )
+   pos_unos_racuna( cBrojRacuna )
 
    RETURN .T.
 
@@ -122,7 +122,6 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
    cBrojRacuna := pos_novi_broj_dokumenta( _id_pos, POS_VD_RACUN )
 
    cVrijemeRacuna := PadR( Time(), 5 )
-   gDatum := Date()
 
    lOk := pos_azuriraj_racun( _id_pos, cBrojRacuna, cVrijemeRacuna, _id_vrsta_p, _id_partner )
 
@@ -135,7 +134,7 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
 
    IF fiscal_opt_active()
-      pos_stampa_fiskalni_racun( _id_pos, gDatum, cBrojRacuna, _uplaceno )
+      pos_stampa_fiskalni_racun( _id_pos, danasnji_datum(), cBrojRacuna, _uplaceno )
    ENDIF
 
    my_close_all_dbf()
@@ -145,9 +144,9 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
 STATIC FUNCTION pos_racun_info( cBrRn )
 
-      info_bar( "pos", "POS račun broj: " + cBrRN )
+   info_bar( "pos", "POS račun broj: " + cBrRN )
 
-      RETURN .T.
+   RETURN .T.
 
 
 STATIC FUNCTION pos_stampa_fiskalni_racun( cIdPos, dDatum, cBrRn, nUplaceno )
@@ -176,7 +175,7 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( cIdPos, dDatum, cBrRn, nUplaceno )
    ENDIF
 
    IF nError > 0
-      MsgBeep( "Greška pri štampi fiskalog računa " + cBrRn + " !?##Račun se iz tog razloga BRIŠE")
+      MsgBeep( "Greška pri štampi fiskalog računa " + cBrRn + " !?##Račun se iz tog razloga BRIŠE" )
       pos_povrat_rn( cBrRn, dDatum )
    ENDIF
 

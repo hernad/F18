@@ -38,6 +38,6 @@ FUNCTION o_pos_pos()
 
 FUNCTION o_pos_promvp()
 
-   seek_pos_promvp( gDatum )
+   seek_pos_promvp( danasnji_datum() )
 
    RETURN .T.

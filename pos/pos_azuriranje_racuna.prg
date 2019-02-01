@@ -23,7 +23,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
    hParams[ "tran_name" ] := "pos_rn_azur"
 
   o_pos_tables()
-   IF !racun_se_moze_azurirati( cIdPos, POS_VD_RACUN, gDatum, cBrojRacuna )
+   IF !racun_se_moze_azurirati( cIdPos, POS_VD_RACUN, danasnji_datum(), cBrojRacuna )
       RETURN lRet
    ENDIF
 
@@ -47,12 +47,12 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
 
    APPEND BLANK
 
-   cDokument := ALLTRIM( cIdPos ) + "-" + POS_VD_RACUN + "-" + ALLTRIM( cBrojRacuna ) + " " + DTOC( gDatum )
+   cDokument := ALLTRIM( cIdPos ) + "-" + POS_VD_RACUN + "-" + ALLTRIM( cBrojRacuna ) + " " + DTOC( danasnji_datum() )
 
    hRec := dbf_get_rec()
    hRec[ "idpos" ] := cIdPos
    hRec[ "idvd" ] := POS_VD_RACUN
-   hRec[ "datum" ] := gDatum
+   hRec[ "datum" ] := danasnji_datum()
    hRec[ "brdok" ] := cBrojRacuna
    hRec[ "vrijeme" ] := cVrijeme
    hRec[ "idvrstep" ] := IIF( cNacPlac == NIL, gGotPlac, cNacPlac )
@@ -68,7 +68,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
 
       SELECT _pos_pripr
 
-      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == ( cIdPos + "42" + DTOS( gDatum ) + "PRIPRE" )
+      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == ( cIdPos + "42" + DTOS( danasnji_datum() ) + "PRIPRE" )
 
          SELECT pos
          APPEND BLANK
@@ -76,7 +76,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdGost )
 
          hRec[ "idpos" ] := cIdPos
          hRec[ "idvd" ] := POS_VD_RACUN
-         hRec[ "datum" ] := gDatum
+         hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrojRacuna
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++ nCount ) ), 5 )
          hRec[ "m1" ] := OBR_JEST

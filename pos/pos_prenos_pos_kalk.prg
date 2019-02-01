@@ -161,7 +161,7 @@ STATIC FUNCTION import_row( cIdTipDk, cBrDok, cIdOdj )
    REPLACE IdVd WITH cIdTipDk
    REPLACE Smjena WITH gSmjena
    REPLACE BrDok WITH cBrDok
-   REPLACE DATUM WITH gDatum
+   REPLACE DATUM WITH danasnji_datum()
 
    SELECT ( nDbfArea )
 
@@ -249,7 +249,7 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
    cre_pom_topska_dbf()
 
    IF !pos_dokument_postoji( cIdPos, cIdTipDk, dDatDok, cBrDok )
-      MsgBeep( "Dokument: " + cIdPos + "-" + cIdTipDk + "-" + PadL( cBrDok, 6 ) + " ne postoji !" )
+      MsgBeep( "Dokument: " + cIdPos + "-" + cIdTipDk + "-" + PadL( cBrDok, FIELD_LEN_POS_BRDOK ) + " ne postoji !" )
       RETURN .F.
    ENDIF
 

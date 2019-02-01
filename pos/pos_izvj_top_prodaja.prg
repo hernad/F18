@@ -77,7 +77,7 @@ FUNCTION pos_top_narudzbe()
 
    ? PadC ( "NAJPROMETNIJI ARTIKLI", 40 )
    ? PadC ( "-----------------------", 40 )
-   ? PadC ( "NA DAN: " + FormDat1 ( gDatum ), 40 )
+   ? PadC ( "NA DAN: " + FormDat1 ( danasnji_datum() ), 40 )
    ?
    ? PadC ( "Za period od " + FormDat1 ( dDatum0 ) + " do " + FormDat1 ( dDatum1 ), 40 )
    ?

@@ -72,14 +72,14 @@ STATIC FUNCTION virm_edit_pripr( fNovi )
    ESC_RETURN 0
 
    IF fNovi
-      IF Empty( gDatum )
+      IF Empty( danasnji_datum() )
          IF gIDU == "D"
-            _dat_upl := Date()  // gdatum
+            _dat_upl := Date()  // danasnji_datum()
          ELSE
-            _dat_upl := gdatum
+            _dat_upl := danasnji_datum()
          ENDIF
       ELSE
-         _dat_upl := gdatum
+         _dat_upl := danasnji_datum()
       ENDIF
       _mjesto := gmjesto
       _svrha_doz := PadR( vrprim->pom_txt, Len( _svrha_doz ) )

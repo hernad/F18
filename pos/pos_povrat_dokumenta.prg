@@ -112,7 +112,7 @@ FUNCTION pos_povrat_rn( cPosBrDok, dDatumPosRacun )
       RETURN .F.
    ENDIF
 
-   cPosBrDok := PadL( AllTrim( cPosBrDok ), 6 )
+   cPosBrDok := PadL( AllTrim( cPosBrDok ), FIELD_LEN_POS_BRDOK )
 
    seek_pos_pos( gIdPos, "42",  dDatumPosRacun,  cPosBrDok )
 

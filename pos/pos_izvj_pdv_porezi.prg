@@ -38,8 +38,8 @@ FUNCTION pos_pdv_po_tarifama
    ENDIF
 
    IF fSolo
-      PRIVATE dDatum0 := gDatum
-      PRIVATE dDatum1 := gDatum
+      PRIVATE dDatum0 := danasnji_datum()
+      PRIVATE dDatum1 := danasnji_datum()
       PRIVATE cIdPos := Space( 2 )
       PRIVATE cNaplaceno := "1"
    ENDIF
@@ -93,7 +93,7 @@ FUNCTION pos_pdv_po_tarifama
             ?U PadC( "**** OBRAČUN ZA NAPLAĆENI IZNOS ****", LEN_TRAKA )
          ENDIF
 
-         ?U PadC( "POREZI PO TARIFAMA NA DAN " + FormDat1( gDatum ), LEN_TRAKA )
+         ?U PadC( "POREZI PO TARIFAMA NA DAN " + FormDat1( danasnji_datum() ), LEN_TRAKA )
          ?U PadC( "-------------------------------------", LEN_TRAKA )
          ?
          ? "PROD.MJESTO: "

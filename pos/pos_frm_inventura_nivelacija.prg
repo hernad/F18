@@ -37,7 +37,7 @@ FUNCTION pos_inventura_nivelacija()
    ENDIF
 
    IF dDatRada == nil
-      dDatRada := gDatum
+      dDatRada := danasnji_datum()
    ENDIF
 
    IF stanje_dn == nil

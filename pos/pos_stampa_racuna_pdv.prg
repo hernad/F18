@@ -28,7 +28,7 @@ FUNCTION pos_stampa_racuna_pdv( cIdPos, cBrDok, lPrepis, cIdVrsteP, dDatumRn, aR
    ENDIF
 
    IF ( dDatumRn == NIL )
-      dDatumRn := gDatum
+      dDatumRn := danasnji_datum()
    ENDIF
 
    // napuni tabele podacima

@@ -18,8 +18,8 @@ FUNCTION pos_rpt_stanje_partnera()
    LOCAL nPotrazuje
    PRIVATE cGost := Space( 8 )
    PRIVATE cNula := "D"
-   PRIVATE dDat := gDatum
-   PRIVATE dDatOd := gDatum - 30
+   PRIVATE dDat := danasnji_datum()
+   PRIVATE dDatOd := danasnji_datum() - 30
    PRIVATE cSpec := "D"
    PRIVATE cVrstP := Space( 2 )
    PRIVATE cGotZir := Space( 1 )

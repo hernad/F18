@@ -50,9 +50,9 @@ FUNCTION harbour_init()
 
    SetColor( f18_color_normal() )
 
-   if !is_electron_host()
-       hb_idleAdd( {|| on_idle_dbf_refresh() } )  // BUG_CPU100
-   endif
+   IF !is_electron_host()
+      hb_idleAdd( {|| on_idle_dbf_refresh() } )  // BUG_CPU100
+   ENDIF
 
    RETURN .T.
 
@@ -155,29 +155,31 @@ FUNCTION f18_exe_path()
 
 
 FUNCTION f18_util_path()
-    RETURN SLASH + ".." + SLASH + "F18_util" + SLASH
+   RETURN SLASH + ".." + SLASH + "F18_util" + SLASH
 
 FUNCTION f18_template_path()
-    RETURN SLASH + ".." + SLASH + "F18_template" + SLASH
+   RETURN SLASH + ".." + SLASH + "F18_template" + SLASH
 
 FUNCTION f18_exe_template_file_name( cTemplate )
-    RETURN f18_exe_path() + f18_template_path() + cTemplate
+   RETURN f18_exe_path() + f18_template_path() + cTemplate
 
 FUNCTION is_gt_console()
 
 #ifdef GT_DEFAULT_CONSOLE
-    return .T.
+   RETURN .T.
 #else
-    return .F.
+
+   RETURN .F.
 #endif
 
 
 FUNCTION is_electron_host()
 
 #ifdef ELECTRON_HOST
-   return .T.
+   RETURN .T.
 #else
-   return .F.
+
+   RETURN .F.
 #endif
 
 /*
@@ -191,3 +193,17 @@ FUNCTION my_rddName()
    ENDIF
 
    RETURN "unused"
+
+
+// FUNCTION danasnji_datum()
+// RETURN date()
+
+    /*
+       Opis: vraća tekući datum sa servera
+
+       Usage:
+          danasnji_datum() => vraća vrijednost statičke varijable _datum
+
+    */
+FUNCTION danasnji_datum()
+   RETURN datum_server()

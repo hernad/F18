@@ -116,7 +116,7 @@ STATIC FUNCTION pos_fix_broj_racuna( cBrRacuna )
    IF !Empty( cBrRacuna ) .AND. ( "-" $ cBrRacuna )
       _a_rn := TokToNiz( cBrRacuna, "-" )
       IF !Empty( _a_rn[ 2 ] )
-         cBrRacuna := PadR( AllTrim( _a_rn[ 2 ] ), 6 )
+         cBrRacuna := PadR( AllTrim( _a_rn[ 2 ] ), FIELD_LEN_POS_BRDOK )
       ENDIF
    ENDIF
 
@@ -168,7 +168,7 @@ FUNCTION pos_storno_rn( lSilent, cBrDokStornirati, dSt_date, cSt_fisc )
    LOCAL hRec
    LOCAL GetList := {}
 
-   LOCAL _datum := gDatum
+   LOCAL _datum := danasnji_datum()
    LOCAL cDanasnjiDN := "D"
 
    // PRIVATE GetList := {}
@@ -264,7 +264,7 @@ STATIC FUNCTION napravi_u_pripremi_storno_dokument( dDatDok, cBrDok, cBrojFiskal
       hRec[ "brdok" ] :=  "PRIPRE"
       hRec[ "kolicina" ] := ( hRec[ "kolicina" ] * -1 )
       hRec[ "robanaz" ] := roba->naz
-      hRec[ "datum" ] := gDatum
+      hRec[ "datum" ] := danasnji_datum()
       hRec[ "idvrstep" ] := "01"
 
       IF Empty( cBrojFiskalnogRacuna )

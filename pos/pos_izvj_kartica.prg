@@ -33,8 +33,8 @@ FUNCTION pos_kartica_artikla()
    LOCAL GetList := {}
 
    PRIVATE cIdOdj := Space( 2 )
-   PRIVATE dDatum0 := gDatum
-   PRIVATE dDatum1 := gDatum
+   PRIVATE dDatum0 := danasnji_datum()
+   PRIVATE dDatum1 := danasnji_datum()
    PRIVATE cPredhodnoStanje := "D"
 
    nPosDuzinaBrojaDokumenta :=  FIELD_LEN_POS_BRDOK

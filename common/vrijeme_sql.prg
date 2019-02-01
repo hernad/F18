@@ -11,28 +11,14 @@
 
 #include "f18.ch"
 
-
-STATIC _datum
-
+STATIC s_dDatumNaServeru
 
 /*
-   Opis: vraća tekući datum sa servera
+   Opis: vraća/setuje statičku varijablu s_dDatumNaServeru
 
    Usage:
-      danasnji_datum() => vraća vrijednost statičke varijable _datum
-
-*/
-FUNCTION danasnji_datum()
-   RETURN datum_server()
-
-
-
-/*
-   Opis: vraća/setuje statičku varijablu _datum
-
-   Usage:
-      datum_server() => vraća vrijednost statičke varijable _datum
-      datum_server(.T.) => iščitava vrijednost sa sql servera i setuje statičku varijablu _datum
+      datum_server() => vraća vrijednost statičke varijable s_dDatumNaServeru
+      datum_server(.T.) => iščitava vrijednost sa sql servera i setuje statičku varijablu s_dDatumNaServeru
 
 */
 FUNCTION datum_server( lSet )
@@ -41,11 +27,11 @@ FUNCTION datum_server( lSet )
       lSet := .F.
    ENDIF
 
-   IF lSet .OR. _datum == NIL
-      _datum := datum_server_sql()
+   IF lSet .OR. s_dDatumNaServeru == NIL
+      s_dDatumNaServeru := datum_server_sql()
    ENDIF
 
-   RETURN _datum
+   RETURN s_dDatumNaServeru
 
 
 

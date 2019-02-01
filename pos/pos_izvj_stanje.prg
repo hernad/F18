@@ -30,7 +30,7 @@ FUNCTION pos_stanje_artikala()
    PRIVATE cRoba := Space( 60 )
    PRIVATE cNule := "N"
 
-   dDatum := gDatum
+   dDatum := danasnji_datum()
    cIdPos := gIdPos
 
    aNiz := {}

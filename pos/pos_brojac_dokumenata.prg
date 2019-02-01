@@ -11,17 +11,18 @@
 
 #include "f18.ch"
 
+MEMVAR gIdPos
+
 FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
 
    LOCAL nBrojDokumenta
-   //LOCAL _broj_doks := 0
    LOCAL cPosBrojacParam
    LOCAL _tmp, _rest
-   LOCAL _ret := ""
+   LOCAL cRet := ""
    LOCAL nDbfArea := Select()
 
    IF dDatDok == NIL
-      dDatDok := gDatum
+      dDatDok := danasnji_datum()
    ENDIF
 
    cPosBrojacParam := "pos" + "/" + cIdPos + "/" + cIdTipDokumenta
@@ -36,15 +37,12 @@ FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
    ENDIF
 
    nBrojDokumenta := Max( nBrojDokumenta, 0 )
-
    ++nBrojDokumenta
-   _ret := PadL( AllTrim( Str( nBrojDokumenta ) ),  FIELD_LEN_POS_BRDOK)
-
+   cRet := PadL( AllTrim( Str( nBrojDokumenta ) ),  FIELD_LEN_POS_BRDOK)
    set_metric( cPosBrojacParam, nil, nBrojDokumenta )
-
    SELECT ( nDbfArea )
 
-   RETURN _ret
+   RETURN cRet
 
 
 FUNCTION pos_set_param_broj_dokumenta()
@@ -72,7 +70,6 @@ FUNCTION pos_set_param_broj_dokumenta()
    nBrojDokumentaOld := nBrojDokumenta
 
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Zadnji broj dokumenta:" GET nBrojDokumenta PICT "999999"
-
    READ
 
    BoxC()

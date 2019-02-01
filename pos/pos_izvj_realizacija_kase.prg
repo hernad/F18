@@ -51,8 +51,8 @@ FUNCTION realizacija_kase
    ENDIF
 
    IF ( dDatum0 == NIL )
-      dDatum0 := gDatum
-      dDatum1 := gDatum
+      dDatum0 := danasnji_datum()
+      dDatum1 := danasnji_datum()
    ENDIF
 
    IF ( cVarijanta == NIL )
@@ -75,7 +75,7 @@ FUNCTION realizacija_kase
    // IF fZaklj
    // cK1 := "N"
    // cIdPos := gIdPos
-   // dDatum0 := dDatum1 := gDatum
+   // dDatum0 := dDatum1 := danasnji_datum()
    // cSmjena := gSmjena
    // cRD := "R"
    // cVrijOd := "00:00"
@@ -230,7 +230,7 @@ STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cSmjena, cRadnic
    // IF glRetroakt
    // ? PadC( "REALIZACIJA NA DAN " + FormDat1( dDatum1 ), LEN_TRAKA )
    // ELSE
-   // ? PadC( "REALIZACIJA NA DAN " + FormDat1( gDatum ), LEN_TRAKA )
+   // ? PadC( "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() ), LEN_TRAKA )
    // ENDIF
 
    // ? PadC( "-------------------------------------", LEN_TRAKA )
@@ -325,9 +325,9 @@ STATIC FUNCTION pos_zagl_realizacijaZ( dDatum0, dDatum1, cIdPos, cSmjena, cRadni
 
 
    // IF gVSmjene == "D"
-   // ? PadC( FormDat1( gDatum ) + " Smjena: " + gSmjena, LEN_TRAKA )
+   // ? PadC( FormDat1( danasnji_datum() ) + " Smjena: " + gSmjena, LEN_TRAKA )
    // ELSE
-   ? PadC( FormDat1( gDatum ), LEN_TRAKA )
+   ? PadC( FormDat1( danasnji_datum() ), LEN_TRAKA )
    // ENDIF
    ?
 

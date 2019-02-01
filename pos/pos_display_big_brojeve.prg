@@ -485,7 +485,7 @@ FUNCTION pos_status_traka()
    LOCAL _x := f18_max_rows() - 3
    LOCAL _y := 0
 
-   @ 1, _y + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " CIJENE:" + gIdCijena + " DATUM:" + DToC( gDatum ) + " KASA-PM:" + gIdPos
+   @ 1, _y + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " CIJENE:" + gIdCijena + " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
 
    IF gIdPos == "X "
       @ _x, _y + 1 SAY8 PadC( "$$$ --- PRODAJNO MJESTO X ! --- $$$", f18_max_cols() - 2, "█" )

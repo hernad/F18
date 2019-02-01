@@ -22,8 +22,8 @@ FUNCTION pos_realizacija_radnik
    PRIVATE cIdPos := pos_prodajno_mjesto()
 
    // PRIVATE cIdDio := gIdDio
-   PRIVATE dDatOd := gDatum
-   PRIVATE dDatDo := gDatum
+   PRIVATE dDatOd := danasnji_datum()
+   PRIVATE dDatDo := danasnji_datum()
    PRIVATE aNiz
    PRIVATE cGotZir := " "
 
@@ -45,7 +45,7 @@ FUNCTION pos_realizacija_radnik
       ELSE
          cSmjena := gSmjena
       ENDIF
-      dDatOd := dDatDo := gDatum
+      dDatOd := dDatDo := danasnji_datum()
    ELSE
       aNiz := {}
       cIdPos := gIdPos
@@ -122,7 +122,7 @@ FUNCTION pos_realizacija_radnik
       ?
 
       ? gIdRadnik, "-", PadC ( AllTrim ( find_pos_osob_naziv( gIdRadnik ) ), 40 )
-      cTxt := "Na dan: " + FormDat1 ( gDatum )
+      cTxt := "Na dan: " + FormDat1 ( danasnji_datum() )
       IF gRadniRac == "N"
          cTxt += " u smjeni " + gSmjena
       ENDIF
@@ -136,7 +136,7 @@ FUNCTION pos_realizacija_radnik
       IF glRetroakt
          ? PadC( "REALIZACIJA NA DAN " + FormDat1( dDatDo ), 40 )
       ELSE
-         ? PadC( "REALIZACIJA NA DAN " + FormDat1( gDatum ), 40 )
+         ? PadC( "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() ), 40 )
       ENDIF
       ? PadC( "-------------------------------------", 40 )
       ? "PROD.MJESTO: " + cidpos + "-" + IF( Empty( cIdPos ), "SVA", find_pos_kasa_naz( cIdPos ) )

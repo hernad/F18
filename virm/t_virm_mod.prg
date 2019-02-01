@@ -81,7 +81,6 @@ METHOD set_module_gvars()
 
 FUNCTION virm_set_global_vars()
 
-   PUBLIC gDatum := Date()
    PUBLIC gMjesto := Space( 16 )
    PUBLIC gOrgJed := Space( 17 )
    PUBLIC gINulu := "N"
@@ -94,7 +93,7 @@ FUNCTION virm_set_global_vars()
    gPici := fetch_metric( "virm_iznos_pict", nil, gPici )
    gINulu := fetch_metric( "virm_stampati_nule", nil, gINulu )
    gIDU := fetch_metric( "virm_sys_datum_uplate", nil, gIDU )
-   gDatum := fetch_metric( "virm_init_datum_uplate", nil, gDatum )
+   //danasnji_datum() := fetch_metric( "virm_init_datum_uplate", nil, danasnji_datum() )
    gVirmFirma := PadR( fetch_metric( "virm_org_id", nil, "" ), 6 )
 
    RETURN .T.

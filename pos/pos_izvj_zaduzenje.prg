@@ -53,7 +53,7 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
    ENDIF
 
    cPom := ""
-   NaslovDok( cIdVd )
+   pos_naslov_dok_zaduzenja( cIdVd )
 
    IF cIdVD == "16"
       IF !Empty( IdDio )

@@ -14,18 +14,18 @@
 FUNCTION pos_odredi_smjenu( lOdredi )
 
    LOCAL cOK := " "
-   PRIVATE dDatum := gDatum
+   PRIVATE dDatum := danasnji_datum()
    PRIVATE cSmjena := Str( Val( gSmjena ) + 1, Len( gSmjena ) )
    PRIVATE d_Pos := d_Doks := CToD( "" )
    PRIVATE s_Pos := s_Doks := " "
 
-   // IF gVSmjene == "N"
+
    cSmjena := "1"
    gSmjena := cSmjena
-   gDatum := dDatum
+
    pos_status_traka()
    CLOSERET
-   // ENDIF
+
 
    IF lOdredi == nil
       lOdredi := .T.
@@ -93,7 +93,7 @@ FUNCTION pos_odredi_smjenu( lOdredi )
    BoxC()
 
    gSmjena := cSmjena
-   gDatum := dDatum
+   
 
    pos_status_traka()
    CLOSE ALL
@@ -286,9 +286,9 @@ FUNCTION ProvKonzBaze( dDatum, cSmjena )
    ENDDO
 
    // podesim datum i smjenu
-   SavegDatum := gDatum
+   SavegDatum := danasnji_datum()
    SavegSmjena := gSmjena
-   gDatum := dPrevDat
+   danasnji_datum() := dPrevDat
    gSmjena := cPrevSmj
    SavegIdRadnik := gIdRadnik
 
@@ -301,7 +301,7 @@ FUNCTION ProvKonzBaze( dDatum, cSmjena )
    realizacija_kase( .T. )
 
    // vrati datum i smjenu
-   gDatum  := SavegDatum
+   danasnji_datum()  := SavegDatum
    gSmjena := SavegSmjena
 
    my_close_all_dbf()

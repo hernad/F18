@@ -142,17 +142,6 @@ STATIC FUNCTION pos_definisi_inicijalne_podatke()
 
    LOCAL lOk := .T., hParams
 
-   // select_o_pos_strad()
-   // IF table_count( F18_PSQL_SCHEMA_DOT + "pos_strad" ) == 0
-   // IF ( RECCOUNT2() == 0 )
-
-   // MsgO( "Definišem šifre prioriteta ..." )
-
-   // run_sql_query( "BEGIN" )
-   // IF !f18_lock_tables( { "pos_strad" }, .T. )
-   // run_sql_query( "ROLLBACK" )
-   // RETURN .F.
-   // ENDIF
 
    lOk := pos_dodaj_u_sifarnik_prioriteta( "0", "0", "Nivo adm." )
 
@@ -164,30 +153,6 @@ STATIC FUNCTION pos_definisi_inicijalne_podatke()
    lOk := pos_dodaj_u_sifarnik_prioriteta( "3", "3", "Nivo prod." )
    // ENDIF
 
-   // MsgC()
-
-   // IF lOk
-   // hParams := hb_Hash()
-   // hParams[ "unlock" ] := { "pos_strad" }
-   // run_sql_query( "COMMIT", hParams )
-
-   // ELSE
-   // run_sql_query( "ROLLBACK" )
-   // ENDIF
-
-   // ENDIF
-
-   // o_pos_osob()
-   // IF ( RECCOUNT2() == 0 )
-   // IF table_count( F18_PSQL_SCHEMA_DOT + "pos_osob" ) == 0
-
-   // MsgO( "Definišem šifranik radnika ..." )
-
-   // run_sql_query( "BEGIN" )
-   // IF !f18_lock_tables( { "pos_osob" }, .T. )
-   // run_sql_query( "COMMIT" )
-   // RETURN .F.
-   // ENDIF
 
    lOk := pos_dodaj_u_sifarnik_radnika( "0001", "PARSON", "Admin", "0" )
 
@@ -199,16 +164,7 @@ STATIC FUNCTION pos_definisi_inicijalne_podatke()
    lOk := pos_dodaj_u_sifarnik_radnika( "0011", "P2", "Prodavac 2", "3" )
    // ENDIF
 
-   // MsgC()
 
-   // IF lOk
-   // f18_unlock_tables( { "pos_osob" } )
-   // run_sql_query( "COMMIT" )
-   // ELSE
-   // run_sql_query( "ROLLBACK" )
-   // ENDIF
-
-   // ENDIF
 
    my_close_all_dbf()
 
@@ -227,20 +183,7 @@ FUNCTION o_pos_tables( lOtvoriKumulativ )
       o_pos_kumulativne_tabele()
    ENDIF
 
-   // o_pos_odj()
-   // o_pos_osob()
-   // SET ORDER TO TAG "NAZ"
 
-   // o_vrstep()
-// o_partner()
-   // O_K2C
-// O_MJTRUR
-// o_pos_kase()
-// o_sastavnice()
-// o_roba()
-   // o_tarifa()
-   // o_sifk()
-   // o_sifv()
    o_pos_priprz()
    o_pos_priprg()
    o_pos__pos()

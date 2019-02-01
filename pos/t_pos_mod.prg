@@ -41,31 +41,7 @@ METHOD mMenu()
    pos_init()
    CLOSE ALL
 
-/*
-   DO WHILE ( .T. )
 
-      box_x_koord( Fx )
-      box_y_koord( Fy )
-      g_cUserLevel := pos_prijava( Fx, Fy )
-
-      IF g_cUserLevel == "X"
-         RETURN .F.
-      ENDIF
-
-      SetPos ( Fx, Fy )
-      //IF gVsmjene == "N"
-      gSmjena := "1"
-      pos_odredi_smjenu( .F. )
-      //ELSE
-      //   pos_odredi_smjenu( .T. )
-      //ENDIF
-      EXIT
-
-   ENDDO
-*/
-
-   //SetPos( Fx, Fy )
-   //fPrviPut := .T.
 
    DO WHILE ( .T. )
 
@@ -77,13 +53,6 @@ METHOD mMenu()
          RETURN .F.
       ENDIF
 
-      // unesi prijavu korisnika
-    //  IF fPRviPut //.AND. gVSmjene == "N"
-      //   fPrviPut := .F.
-      //ELSE
-      //   g_cUserLevel := pos_prijava( Fx, Fy )
-      //   pos_status_traka()
-      //ENDIF
 
       pos_status_traka()
       SetPos( Fx, Fy )
@@ -128,7 +97,7 @@ METHOD setScreen()
 
 METHOD set_module_gvars()
 
-   // gPrevIdPos - predhodna vrijednost gIdPos
+
    PUBLIC gPrevIdPos := "  "
    PUBLIC gOcitBarcod := .F.
    PUBLIC gSmijemRaditi := 'D'
@@ -154,7 +123,7 @@ METHOD set_module_gvars()
    PUBLIC gPopIznP := 0
    PUBLIC SC_Opisi[ 5 ]      // nazivi (opisi) setova cijena
    PUBLIC gSmjena := " "   // identifikator smjene
-   PUBLIC gDatum           // datum
+   // PUBLIC danasnji_datum()           // datum
 
    //PUBLIC gVodiOdj
    PUBLIC gRadniRac        // da li se koristi princip radnih racuna ili se
@@ -238,8 +207,6 @@ METHOD set_module_gvars()
    SC_Opisi[ 4 ] := "4"
    SC_Opisi[ 5 ] := "5"
 
-   gDatum := Date()
-
    // PUBLIC gPopVar := "P"
    PUBLIC gPopZcj := "N"
    PUBLIC gPopProc := "N"
@@ -281,7 +248,7 @@ METHOD set_module_gvars()
    PUBLIC gFirTel := Space( 20 )
 
    // fiskalni parametri
-   //gVodiOdj := "N"
+
    gRnSpecOpc := "N"
    gRadniRac := "N"
    gDirZaklj := "D"
@@ -419,7 +386,7 @@ METHOD set_module_gvars()
 
    SetNazDVal() // set valuta
    param_tezinski_barkod( .T. ) // setuj parametar tezinski_barkod
-   max_kolicina_kod_unosa( .T. ) // maksimalna kolicina kod unosa racuna
+   pos_max_kolicina_kod_unosa( .T. ) // maksimalna kolicina kod unosa racuna
    // kalk_konto_za_stanje_pos( .T. ) // kalk konto za stanje pos artikla
    fiscal_opt_active() // koristenje fiskalnih opcija
 
