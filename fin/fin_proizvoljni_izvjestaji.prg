@@ -90,8 +90,8 @@ FUNCTION fin_pregled_promjena_na_racunu()
    nDug := 0
    nPot := 0
 
-   m := "------ -------- " + REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " " + REPL( "-", 40 ) + " " + REPL( "-", 16 )
-   z := "R.BR. * DATUM  *" + PadC( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + "*" + PadC( "NAZIV PARTNERA ILI OPIS PROMJENE", 40 ) + "*" + PadC( "UPLATA KM", 16 )
+   m := "------ -------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " " + REPL( "-", 40 ) + " " + REPL( "-", 16 )
+   z := "R.BR. * DATUM  *" + PadC( "PARTN.", FIELD_LEN_PARTNER_ID ) + "*" + PadC( "NAZIV PARTNERA ILI OPIS PROMJENE", 40 ) + "*" + PadC( "UPLATA KM", 16 )
 
    IF !start_print()
       RETURN .F.

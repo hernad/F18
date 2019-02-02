@@ -55,13 +55,13 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
    M := iif( cInd == "3", "------ -------------- --- ", "" )
    IF hParams[ "fin_tip_dokumenta" ]
 
-      M +=  + "---- ------- " + REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------"
+      M +=  + "---- ------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------"
       M +=  " -- ------------- ----------- -------- -------- --------------- ---------------"
 
    ELSE
 
       M +=  "---- ------- "
-      M += REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------"
+      M += REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------"
       M += " ----------- -------- -------- --------------- ---------------"
 
    ENDIF
@@ -405,19 +405,19 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
    IF !hParams[ "fin_tip_dokumenta" ]
       P_NRED
 
-      cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R.   * KONTO *" + PadC( "PART", FIELD_PARTNER_ID_LENGTH )
+      cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R.   * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID )
       cTmp +=  "*" + "    NAZIV PARTNERA ILI      "  + "*   D  O  K  U  M  E  N  T    *         IZNOS U  " + valuta_domaca_skraceni_naziv() + "         *"
       cTmp += iif( fin_jednovalutno(), "", "    IZNOS U " + ValPomocna() + "    *" )
       ??U cTmp
       P_NRED
 
-      cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "             " + PadC( "NER", FIELD_PARTNER_ID_LENGTH ) + " "
+      cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "             " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + " "
       cTmp += "                            " + " ----------------------------- ------------------------------- "
       cTmp += iif( fin_jednovalutno(), "", "---------------------" )
       ??U cTmp
       P_NRED
 
-      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR *       *" + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "*"
+      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR *       *" + REPL( " ", FIELD_LEN_PARTNER_ID ) + "*"
       cTmp += "    NAZIV KONTA             "  + "* BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
       cTmp += iif( fin_jednovalutno(), "", " DUG. " + ValPomocna() + "* POT." + ValPomocna() + "*" )
       ??U cTmp
@@ -425,20 +425,20 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
    ELSE
       P_NRED
 
-      cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R.   * KONTO *" + PadC( "PART", FIELD_PARTNER_ID_LENGTH ) + "*"
+      cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R.   * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID ) + "*"
       cTmp += "    NAZIV PARTNERA ILI      "  + "*           D  O  K  U  M  E  N  T             *         IZNOS U  " + valuta_domaca_skraceni_naziv() + "         *"
       cTmp += iif( fin_jednovalutno(), "", "    IZNOS U " + ValPomocna() + "    *" )
       ??U cTmp
       P_NRED
 
-      cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "               " + PadC( "NER", FIELD_PARTNER_ID_LENGTH ) + " "
+      cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "               " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + " "
       cTmp += "                            " + " ---------------------------------------------- ------------------------------- "
       cTmp += iif( fin_jednovalutno(), "", "---------------------" )
       ??U cTmp
       P_NRED
 
 
-      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR   *       *" + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "*"
+      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR   *       *" + REPL( " ", FIELD_LEN_PARTNER_ID ) + "*"
       cTmp += "    NAZIV KONTA             " + "*  TIP I NAZIV   * BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
       cTmp +=  iif( fin_jednovalutno(), "", " DUG. " + ValPomocna() + "* POT." + ValPomocna() + "*" )
       ??U cTmp

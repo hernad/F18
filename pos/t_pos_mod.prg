@@ -189,7 +189,7 @@ METHOD set_module_gvars()
    PUBLIC grbStId := "D"
    PUBLIC grbReduk := 0
    // PUBLIC gRnInfo := "N"
-   PUBLIC aRabat
+   //PUBLIC aRabat
 
    self:cName := "POS"
    gModul := self:cName
@@ -391,32 +391,5 @@ METHOD set_module_gvars()
 
    radna_prodavnica( gIdPos )
    set_sql_search_path( radna_prodavnica_sql_schema() )
-
-   RETURN .T.
-
-
-FUNCTION pos_check_brdok()
-
-   LOCAL aTabele, nI, cFile
-
-   o_pos_tables()
-   SELECT _pos_pripr
-
-   IF Len( _pos_pripr->brdok ) <> FIELD_LEN_POS_BRDOK
-
-
-      Alert( "Serviser F18 brdok[" + AllTrim( Str( Len( _pos_pripr->brdok ) ) ) + "] - pobrisati pos tabele pripreme!" )
-      my_close_all_dbf()
-      aTabele := { "pos_priprz", "pos_priprg", "_pos_pripr" }
-      FOR nI := 1 TO Len( aTabele )
-         cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".dbf"
-         info_bar( "pos_brdok", cFile )
-         FErase( cFile )
-         cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".cdx"
-         info_bar( "pos_brdok", cFile )
-         FErase( cFile )
-      NEXT
-
-   ENDIF
 
    RETURN .T.

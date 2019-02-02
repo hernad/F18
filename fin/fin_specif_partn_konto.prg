@@ -69,11 +69,11 @@ FUNCTION fin_spec_partnera_na_kontu()
    cIdFirma := Left( cIdFirma, 2 )
 
    IF cF == "1"
-      M := "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------------------ ----------------------- ------------------ ----------------- ----------------- ----------------- ----------------- ----------------- ----------------- -----------------"
+      M := "----- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------------------ ----------------------- ------------------ ----------------- ----------------- ----------------- ----------------- ----------------- ----------------- -----------------"
    ELSEIF cPG == "D"
-      M := "---- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------- ---------------- ----------------- ----------------- ----------------- -----------------"
+      M := "---- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------- ---------------- ----------------- ----------------- ----------------- -----------------"
    ELSE
-      M := "---- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------- ----------------- ----------------- ----------------- -----------------"
+      M := "---- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------- ----------------- ----------------- ----------------- -----------------"
    ENDIF
    o_suban()
    SELECT SUBAN
@@ -289,22 +289,22 @@ FUNCTION ZaglDPK()
 
    @ PRow(), PCol() + 2 SAY "KONTO:"; @ PRow(), PCol() + 2 SAY cIdKonto
    IF cF == "1"
-      ? "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------------------ ----- ----------------- ----------------------------------------------------------------------- -----------------------------------------------------------------------"
-      ? "*RED.*" + PadC( "�IFRA", FIELD_PARTNER_ID_LENGTH ) + "*     NAZIV POSLOVNOG PARTNERA      * PTT *      MJESTO     *       K  U  M  U  L  A  T  I  V  N  I       P  R  O  M  E  T           *                 S      A      L      D       O                       *"
-      ? "      " + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "                                                              ----------------------------------------------------------------------- -----------------------------------------------------------------------"
-      ? "*BROJ*" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*                                   * BROJ*                 *   DUGUJE   " + valuta_domaca_skraceni_naziv() + "  *  POTRA�UJE " + valuta_domaca_skraceni_naziv() + " *   DUGUJE  " + ValPomocna() + "  *   POTRA�. " + ValPomocna() + "  *    DUGUJE " + valuta_domaca_skraceni_naziv() + "  *  POTRA�UJE " + valuta_domaca_skraceni_naziv() + " *   DUGUJE  " + ValPomocna() + "  *   POTRA�." + ValPomocna() + "  *"
+      ? "----- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------------------ ----- ----------------- ----------------------------------------------------------------------- -----------------------------------------------------------------------"
+      ? "*RED.*" + PadC( "�IFRA", FIELD_LEN_PARTNER_ID ) + "*     NAZIV POSLOVNOG PARTNERA      * PTT *      MJESTO     *       K  U  M  U  L  A  T  I  V  N  I       P  R  O  M  E  T           *                 S      A      L      D       O                       *"
+      ? "      " + REPL( " ", FIELD_LEN_PARTNER_ID ) + "                                                              ----------------------------------------------------------------------- -----------------------------------------------------------------------"
+      ? "*BROJ*" + Replicate( " ", FIELD_LEN_PARTNER_ID ) + "*                                   * BROJ*                 *   DUGUJE   " + valuta_domaca_skraceni_naziv() + "  *  POTRA�UJE " + valuta_domaca_skraceni_naziv() + " *   DUGUJE  " + ValPomocna() + "  *   POTRA�. " + ValPomocna() + "  *    DUGUJE " + valuta_domaca_skraceni_naziv() + "  *  POTRA�UJE " + valuta_domaca_skraceni_naziv() + " *   DUGUJE  " + ValPomocna() + "  *   POTRA�." + ValPomocna() + "  *"
       ? m
    ELSEIF cPG == "D"
-      ? "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------ ---------------- ----------------------------------- -----------------------------------"
-      ? "*RED.*" + PadC( "�IFRA", FIELD_PARTNER_ID_LENGTH ) + "*     NAZIV POSLOVNOG    *     MJESTO     *         KUMULATIVNI  PROMET       *               SALDO              *"
+      ? "----- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------ ---------------- ----------------------------------- -----------------------------------"
+      ? "*RED.*" + PadC( "�IFRA", FIELD_LEN_PARTNER_ID ) + "*     NAZIV POSLOVNOG    *     MJESTO     *         KUMULATIVNI  PROMET       *               SALDO              *"
       ? "                                                       ----------------------------------- -----------------------------------"
-      ? "*BROJ*" + Replicate( " ", FIELD_PARTNER_ID_LENGTH )  + "*     PARTNERA           *                *    DUGUJE       *   POTRA�UJE     *    DUGUJE       *   POTRA�UJE    *"
+      ? "*BROJ*" + Replicate( " ", FIELD_LEN_PARTNER_ID )  + "*     PARTNERA           *                *    DUGUJE       *   POTRA�UJE     *    DUGUJE       *   POTRA�UJE    *"
       ? m
    ELSE
-      ? "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------ ----------------------------------- -----------------------------------"
-      ? "*RED.*" + PadC( "SIFRA", FIELD_PARTNER_ID_LENGTH ) + "*      NAZIV POSLOVNOG    *         KUMULATIVNI  PROMET       *               SALDO              *"
-      ? "      " + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "                        ----------------------------------- -----------------------------------"
-      ? "*BROJ*" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*      PARTNERA           *    DUGUJE       *   POTRA�UJE     *    DUGUJE       *   POTRA�UJE    *"
+      ? "----- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------ ----------------------------------- -----------------------------------"
+      ? "*RED.*" + PadC( "SIFRA", FIELD_LEN_PARTNER_ID ) + "*      NAZIV POSLOVNOG    *         KUMULATIVNI  PROMET       *               SALDO              *"
+      ? "      " + REPL( " ", FIELD_LEN_PARTNER_ID ) + "                        ----------------------------------- -----------------------------------"
+      ? "*BROJ*" + Replicate( " ", FIELD_LEN_PARTNER_ID ) + "*      PARTNERA           *    DUGUJE       *   POTRA�UJE     *    DUGUJE       *   POTRA�UJE    *"
       ? m
    ENDIF
 

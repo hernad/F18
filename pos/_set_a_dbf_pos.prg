@@ -18,7 +18,7 @@ FUNCTION set_a_dbf_pos()
    set_a_dbf_pos_pos()
    set_a_dbf_pos_doks()
    set_a_dbf_pos_promvp()
-   set_a_dbf_pos_dokspf()
+   // set_a_dbf_pos_dokspf()
 
    // tabele sa strukturom sifarnika (id je primarni ključ)
    set_a_sql_sifarnik( "pos_strad", "STRAD", F_STRAD   )
@@ -166,7 +166,7 @@ FUNCTION set_a_dbf_pos_promvp()
    RETURN .T.
 
 
-
+/*
 FUNCTION set_a_dbf_pos_dokspf()
 
    LOCAL hItem, hAlgoritam, cTabela
@@ -209,3 +209,4 @@ FUNCTION set_a_dbf_pos_dokspf()
    f18_dbfs_add( cTabela, @hItem )
 
    RETURN .T.
+*/

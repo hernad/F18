@@ -31,7 +31,7 @@ CREATE TABLE fmk.pos_pos
   mu_i character varying(1),
   prebacen character varying(1),
   smjena character varying(1),
-  c_1 character varying(6),
+  brdokStorn character varying(8),
   c_2 character varying(10),
   c_3 character varying(50),
   kolicina numeric(18,3),
@@ -182,18 +182,10 @@ STATIC FUNCTION pos_dok_is_storno( cIdPos, cIdTipDok, dDatDok, cBrojRacuna )
 
    LOCAL lStorno := .F.
 
-
-   seek_pos_pos( cIdPos, cIdTipDok, dDatDok, cBrojRacuna )
-
-   DO WHILE !Eof() .AND. pos->idpos == cIdPos  .AND. pos->idvd == cIdTipDok .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrojRacuna
-
-      IF !Empty( AllTrim( field->c_1 ) )
-         lStorno := .T.
-         EXIT
-      ENDIF
-      SKIP
-
-   ENDDO
+   seek_pos_doks( cIdPos, cIdTipDok, dDatDok, cBrojRacuna )
+   IF !Empty( AllTrim( pos_doks->brdokStorn ) )
+      lStorno := .T.
+   ENDIF
 
    RETURN lStorno
 
@@ -243,7 +235,7 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrojRacun
       _cijena := 0
       _art_barkod := ""
 
-      cReklamiraniRacun := field->c_1
+      cReklamiraniRacun := field->brdokStorn
 
       _art_id := field->idroba
 
@@ -434,12 +426,12 @@ STATIC FUNCTION pos_doks_update_fisc_rn( cIdPos, cIdTipDok, dDatDok, cBrojRacuna
 
    LOCAL hRec
 
-   //SELECT pos_doks
-   //SET ORDER TO TAG "1"
-   //GO TOP
+   // SELECT pos_doks
+   // SET ORDER TO TAG "1"
+   // GO TOP
 
-   //SEEK cIdPos + cIdTipDok + DToS( dDatDok ) + cBrojRacuna
-   //IF !Found()
+   // SEEK cIdPos + cIdTipDok + DToS( dDatDok ) + cBrojRacuna
+   // IF !Found()
    IF !seek_pos_doks( cIdPos, cIdTipDok, dDatDok, cBrojRacuna )
       RETURN .F.
    ENDIF

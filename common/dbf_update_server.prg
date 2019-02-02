@@ -403,7 +403,6 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
    IF hRecord == NIL
       cAlias := Alias()
       hRecord := dbf_get_rec()
-
       IF ( hDbfRec[ "alias" ] != cAlias )
          RaiseError( "hRecord matrica razlicita od tabele ALIAS():" + cAlias + " cTabela=" + cTabela )
       ENDIF

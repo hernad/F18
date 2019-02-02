@@ -41,7 +41,7 @@ FUNCTION pos_kumulativ_prometa()
    cPom := Left( VRSTEP->Naz, 23 )
 
    ? cLM + "Vrsta placanja:", cPom
-   select_o_partner( pos_doks->IdGost )
+   select_o_partner( pos_doks->idPartner )
 
    cPom := Left( partn->Naz, 23 )
    ? cLM + "Gost / partner:", cPom

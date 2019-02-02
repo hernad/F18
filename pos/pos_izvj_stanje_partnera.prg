@@ -78,7 +78,7 @@ FUNCTION pos_rpt_stanje_partnera()
 
    SELECT pos_doks
 
-   // "IdGost+Placen+DTOS (Datum)"
+   // "idPartner+Placen+DTOS (Datum)"
    SET ORDER TO 3
    SEEK cGost
 
@@ -89,7 +89,7 @@ FUNCTION pos_rpt_stanje_partnera()
          LOOP
       ENDIF
 
-      IF Empty( pos_doks->IdGost )
+      IF Empty( pos_doks->idPartner )
          SKIP
          LOOP
       ENDIF
@@ -114,9 +114,9 @@ FUNCTION pos_rpt_stanje_partnera()
       fPisi := .F.
       nPlacJest := 0
       nPlacNije := 0
-      cIdGost := pos_doks->IdGost
+      cIdPartner := pos_doks->idPartner
 
-      DO WHILE !Eof() .AND. pos_doks->IdGost == cIdGost
+      DO WHILE !Eof() .AND. pos_doks->idPartner == cIdPartner
 
          IF ( pos_doks->datum < dDatOd .OR. pos_doks->datum > dDat )
             SKIP
@@ -172,9 +172,9 @@ FUNCTION pos_rpt_stanje_partnera()
 
       IF Round( nStanje, 4 ) <> 0 .OR. cNula == "D"
 
-         select_o_partner( cIdGost )
+         select_o_partner( cIdPartner )
          ? REPL( "-", 80 )
-         ? AllTrim( Str( nBrojacPartnera ) ) + ") " + PadR( AllTrim( cIdGost ) + " " + partn->Naz, 35 ) + " "
+         ? AllTrim( Str( nBrojacPartnera ) ) + ") " + PadR( AllTrim( cIdPartner ) + " " + partn->Naz, 35 ) + " "
          // IF gVrstaRS == "K"
          // ? Space( 4 )
          // ENDIF
@@ -191,7 +191,7 @@ FUNCTION pos_rpt_stanje_partnera()
       IF cSpec == "D" .AND. fPisi
          GO nPrviRec
          nBrojacStavki := 1
-         DO WHILE !Eof() .AND. pos_doks->IdGost == cIdGost
+         DO WHILE !Eof() .AND. pos_doks->idPartner == cIdPartner
 
             IF ( pos_doks->datum < dDatOd .OR. pos_doks->datum > dDat )
                SKIP

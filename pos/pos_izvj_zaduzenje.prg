@@ -56,7 +56,7 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
    pos_naslov_dok_zaduzenja( cIdVd )
 
    IF cIdVD == "16"
-     cPom += "ZADUŽENJE "
+      cPom += "ZADUŽENJE "
    ENDIF
 
    IF cIdvd == "PD"
@@ -176,12 +176,14 @@ FUNCTION pos_stampa_azuriranog_zaduzenja( cNazDok )
       RETURN .F.
    ENDIF
 
-   select_o_pos_odj( POS->IdOdj )
-   SELECT POS
-   IF lPredispozicija
-      ?U  "PRENOS IZ ODJ: " + pos->idodj + "  U ODJ:" + pos_doks->idvrstep
+   // select_o_pos_odj( POS->IdOdj )
+   // SELECT POS
+   // IF lPredispozicija
+   // ?U  "PRENOS IZ ODJ: " + pos->idodj + "  U ODJ:" + pos_doks->idvrstep
 
-   ENDIF
+   // ENDIF
+   select_o_partner( pos_doks->idPartner )
+   ? "Partner:", pos_doks->idPartner, partn->naz
 
    aLines := get_pos_linija_podvuci( nRobaSir, cPicKol, cPicIzn )
    cLine := aLines[ 1 ]
@@ -204,7 +206,7 @@ FUNCTION pos_stampa_azuriranog_zaduzenja( cNazDok )
       ??U roba->Jmj + " "
       ??U TRANS( POS->Kolicina, cPicKol ) + " "
       ??U TRANS( POS->Cijena, cPicIzn ) + " "
-      nCol := PCol()-1
+      nCol := PCol() - 1
       ??U TRANS( POS->Kolicina * POS->cijena, cPicIzn )
 
       nFinZad += POS->Kolicina * POS->Cijena

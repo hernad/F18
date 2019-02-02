@@ -23,7 +23,7 @@ FUNCTION kalk_magacin_pregled_robe_za_dobavljaca()
    // SET RELATION TO idroba INTO ROBA
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL cIdRoba    := Space( FIELD_ROBA_ID_LENGTH )
-   LOCAL cIdPartner := Space( FIELD_PARTNER_ID_LENGTH )
+   LOCAL cIdPartner := Space( FIELD_LEN_PARTNER_ID )
    LOCAL dOd := CToD( "" )
    LOCAL dDo := Date()
    LOCAL cFilt

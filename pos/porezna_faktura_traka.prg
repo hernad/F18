@@ -28,8 +28,10 @@ FUNCTION pf_traka_print()
    RETURN .T.
 
 
-FUNCTION f7_pf_traka( lSilent )
+FUNCTION pos_porezna_faktura_traka( lSilent )
 
+   Alert( "POS porezna faktura ne radi" )
+/*
    LOCAL lPfTraka
 
    IF lSilent == nil
@@ -38,7 +40,7 @@ FUNCTION f7_pf_traka( lSilent )
 
    isPfTraka( @lPfTraka )
 
-   IF !lSilent .AND. Pitanje(, "Štampati poresku fakturu za zadnji račun (D/N)?", "D" ) == "N"
+   IF !lSilent .AND. Pitanje(, "Štampati poreznu fakturu za zadnji račun (D/N)?", "D" ) == "N"
       RETURN .F.
    ENDIF
 
@@ -55,6 +57,7 @@ FUNCTION f7_pf_traka( lSilent )
    IF !lPfTraka
       porezna_faktura_azur_podataka_o_kupcu( gIdPos )
    ENDIF
+*/
 
    RETURN .T.
 
@@ -70,6 +73,8 @@ FUNCTION read_kup_data()
 
    RETURN .T.
 
+/*
+pos
 
 FUNCTION get_kup_data()
 
@@ -125,6 +130,7 @@ FUNCTION get_kup_data()
    add_drn_datum_isporuke( dDatIsp )
 
    RETURN .T.
+*/
 
 FUNCTION pf_traka_line( nRazmak )
 
@@ -269,7 +275,7 @@ FUNCTION st_pf_traka()
 
    ENDPRN2 13
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -309,6 +315,7 @@ FUNCTION kup_rb_traka()
    RETURN .T.
 
 
+/*
 
 // vraca matricu sa dostupnim kupcima koji pocinju sa cKupac
 FUNCTION get_arr_kup_data( cKupac, cKAdr, cKIdBroj )
@@ -363,3 +370,5 @@ FUNCTION list_kup_data( aKupci )
    f18_menu_sa_priv_vars_opc_opcexe_izbor( "kup" )
 
    RETURN nIzbor
+
+*/

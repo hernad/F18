@@ -36,7 +36,6 @@ FUNCTION pos_unos_ispravka_racuna()
    RETURN lRet
 
 
-
 STATIC FUNCTION unos_stavki_racuna( lNovi )
 
    LOCAL cBrojRacuna
@@ -50,7 +49,6 @@ STATIC FUNCTION unos_stavki_racuna( lNovi )
       cBrojRacuna := _pos_pripr->brdok
    ENDIF
 
-altd()
    pos_unos_racuna( cBrojRacuna )
 
    RETURN .T.
@@ -65,14 +63,12 @@ FUNCTION zakljuci_pos_racun()
 
    O__POS_PRIPR
    my_dbf_pack()
-
    IF _pos_pripr->( RecCount2() ) == 0
       my_close_all_dbf()
       RETURN lRet
    ENDIF
 
    GO TOP
-
    hParam[ "idpos" ] := _pos_pripr->idpos
    hParam[ "idvd" ] := _pos_pripr->idvd
    hParam[ "datum" ] := _pos_pripr->datum
@@ -81,6 +77,7 @@ FUNCTION zakljuci_pos_racun()
    hParam[ "idvrstap" ] := "01"
    hParam[ "zakljuci" ] := "D"
    hParam[ "uplaceno" ] := 0
+   hParam[ "idpartner" ] := _pos_pripr->idpartner
 
    form_zakljuci_racun( @hParam )
 
@@ -89,7 +86,6 @@ FUNCTION zakljuci_pos_racun()
    ENDIF
 
    my_close_all_dbf()
-
    IF lOtvoriUnos .AND. lRet
       pos_unos_ispravka_racuna()
       lRet := zakljuci_pos_racun()
@@ -98,32 +94,28 @@ FUNCTION zakljuci_pos_racun()
    RETURN lRet
 
 
-
 STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
-   LOCAL _br_dok := hParams[ "brdok" ]
-   LOCAL _id_pos := hParams[ "idpos" ]
-   LOCAL _id_vrsta_p := hParams[ "idvrstap" ]
-   LOCAL _id_partner := hParams[ "idpartner" ]
-   LOCAL _uplaceno := hParams[ "uplaceno" ]
+  // LOCAL _br_dok := hParams[ "brdok" ]
+  // LOCAL _id_pos := hParams[ "idpos" ]
+  // LOCAL _id_vrsta_p := hParams[ "idvrstap" ]
+  // LOCAL _id_partner := hParams[ "idpartner" ]
+  // LOCAL _uplaceno := hParams[ "uplaceno" ]
    LOCAL lOk := .T.
    LOCAL lRet := .F.
    LOCAL cVrijemeRacuna
    LOCAL cBrojRacuna
 
    o_pos_tables()
-
-   IF ( Len( aRabat ) > 0 )
-      ReCalcRabat( _id_vrsta_p )
-   ENDIF
+   //IF ( Len( aRabat ) > 0 )
+  //    ReCalcRabat( hParams[ "idvrstap"] )
+  // ENDIF
 
    SELECT pos_doks
 
-   cBrojRacuna := pos_novi_broj_dokumenta( _id_pos, POS_VD_RACUN )
-
+   cBrojRacuna := pos_novi_broj_dokumenta( hPArams["idpos"], POS_VD_RACUN )
    cVrijemeRacuna := PadR( Time(), 5 )
-
-   lOk := pos_azuriraj_racun( _id_pos, cBrojRacuna, cVrijemeRacuna, _id_vrsta_p, _id_partner )
+   lOk := pos_azuriraj_racun( hParams["idpos"], cBrojRacuna, cVrijemeRacuna, hParams["idvrstap"], hParams["idpartner"] )
 
    IF !lOk
       MsgBeep( "Greška sa ažuriranjem računa u kumulativ !" )
@@ -132,11 +124,10 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
    pos_racun_info( cBrojRacuna )
 
-
    IF fiscal_opt_active()
-      pos_stampa_fiskalni_racun( _id_pos, danasnji_datum(), cBrojRacuna, _uplaceno )
+      //pos_stampa_fiskalni_racun( _id_pos, danasnji_datum(), cBrojRacuna, _uplaceno )
+      pos_stampa_fiskalni_racun( hParams )
    ENDIF
-
    my_close_all_dbf()
 
    RETURN lOk
@@ -149,7 +140,15 @@ STATIC FUNCTION pos_racun_info( cBrRn )
    RETURN .T.
 
 
-STATIC FUNCTION pos_stampa_fiskalni_racun( cIdPos, dDatum, cBrRn, nUplaceno )
+STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
+
+//cIdPos, dDatum, cBrRn, nUplaceno )
+
+   //LOCAL _br_dok := hParams[ "brdok" ]
+   //LOCAL _id_pos := hParams[ "idpos" ]
+   //LOCAL _id_vrsta_p := hParams[ "idvrstap" ]
+   //LOCAL _id_partner := hParams[ "idpartner" ]
+   //LOCAL _uplaceno := hParams[ "uplaceno" ]
 
    LOCAL nDeviceId
    LOCAL hDeviceParams
@@ -166,7 +165,7 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( cIdPos, dDatum, cBrRn, nUplaceno )
       RETURN lRet
    ENDIF
 
-   nError := pos_fiskalni_racun( cIdPos, dDatum, cBrRn, hDeviceParams, nUplaceno )
+   nError := pos_fiskalni_racun( hParams["idpos"], hParams["datum"], hParams["brdok"], hDeviceParams, hParams["uplaceno"] )
 
    IF nError = -20
       IF Pitanje(, "Da li je nestalo trake u fiskalnom uređaju (D/N)?", "N" ) == "N"
@@ -175,8 +174,8 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( cIdPos, dDatum, cBrRn, nUplaceno )
    ENDIF
 
    IF nError > 0
-      MsgBeep( "Greška pri štampi fiskalog računa " + cBrRn + " !?##Račun se iz tog razloga BRIŠE" )
-      pos_povrat_rn( cBrRn, dDatum )
+      MsgBeep( "Greška pri štampi fiskalog računa " + hParams["brdok"] + " !?##Račun se iz tog razloga BRIŠE" )
+      pos_povrat_rn( hParams["brdok"], hParams["datum"] )
    ENDIF
 
    lRet := .T.

@@ -48,13 +48,12 @@ CREATE TABLE IF NOT EXISTS  p15.roba (
 );
 ALTER TABLE p15.roba OWNER TO admin;
 
-
-CREATE TABLE IF NOT EXISTS  p15.pos_doks (
+CREATE TABLE IF NOT EXISTS p15.pos_doks (
     idpos character varying(2) NOT NULL,
     idvd character varying(2) NOT NULL,
     brdok character varying(6) NOT NULL,
     datum date,
-    idgost character varying(8),
+    idPartner character varying(6),
     idradnik character varying(4),
     idvrstep character(2),
     m1 character varying(1),
@@ -63,7 +62,7 @@ CREATE TABLE IF NOT EXISTS  p15.pos_doks (
     smjena character varying(1),
     -- sto character varying(3),
     vrijeme character varying(5),
-    c_1 character varying(6),
+    brdokStorn character varying(8),
     c_2 character varying(10),
     c_3 character varying(50),
     fisc_rn numeric(10,0),
@@ -99,7 +98,6 @@ CREATE TABLE IF NOT EXISTS p15.pos_dokspf (
     datisp date
 );
 ALTER TABLE p15.pos_dokspf OWNER TO admin;
-
 
 CREATE TABLE IF NOT EXISTS  p15.pos_kase (
     id character varying(2),
@@ -138,7 +136,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos (
     mu_i character varying(1),
     prebacen character varying(1),
     smjena character varying(1),
-    c_1 character varying(6),
+    -- brdokStorn character varying(8),
     c_2 character varying(10),
     c_3 character varying(50),
     kolicina numeric(18,3),
@@ -230,34 +228,6 @@ GRANT ALL ON FUNCTION fmk.fetchmetrictext TO xtrole;
 ALTER FUNCTION fmk.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 
-
-CREATE TABLE IF NOT EXISTS  p15.pos_doks (
-    idpos character varying(2) NOT NULL,
-    idvd character varying(2) NOT NULL,
-    brdok character varying(6) NOT NULL,
-    datum date,
-    idgost character varying(8),
-    idradnik character varying(4),
-    idvrstep character(2),
-    m1 character varying(1),
-    placen character(1),
-    prebacen character(1),
-    smjena character varying(1),
-    sto character varying(3),
-    vrijeme character varying(5),
-    c_1 character varying(6),
-    c_2 character varying(10),
-    c_3 character varying(50),
-    fisc_rn numeric(10,0),
-    zak_br numeric(6,0),
-    sto_br numeric(3,0),
-    -- funk numeric(3,0),
-    -- fisc_st character(10),
-    rabat numeric(15,5),
-    ukupno numeric(15,5)
-);
-ALTER TABLE p15.pos_doks OWNER TO admin;
-
 -----------------------------------------------------
 -- pos_pos_knjig, pos_doks_knjig
 ----------------------------------------------------
@@ -276,7 +246,7 @@ CREATE TABLE p15.pos_pos_knjig (
    mu_i character varying(1),
    prebacen character varying(1),
    smjena character varying(1),
-   c_1 character varying(6),
+   -- brdokStorn character varying(8),
    c_2 character varying(10),
    c_3 character varying(50),
    kolicina numeric(18,3),
@@ -299,7 +269,7 @@ CREATE TABLE p15.pos_doks_knjig (
    idvd character varying(2) NOT NULL,
    brdok character varying(6) NOT NULL,
    datum date,
-   idgost character varying(8),
+   idPartner character varying(6),
    idradnik character varying(4),
    idvrstep character(2),
    m1 character varying(1),
@@ -307,7 +277,7 @@ CREATE TABLE p15.pos_doks_knjig (
    prebacen character(1),
    smjena character varying(1),
    vrijeme character varying(5),
-   c_1 character varying(6),
+   brdokStorn character varying(8),
    c_2 character varying(10),
    c_3 character varying(50),
    fisc_rn numeric(10,0),
@@ -317,7 +287,7 @@ CREATE TABLE p15.pos_doks_knjig (
 ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
 CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
 CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum, smjena);
-CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idgost, placen, datum);
+CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, placen, datum);
 CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
 CREATE INDEX pos_doks_id5_knjig ON p15.pos_doks_knjig USING btree (prebacen);
 CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
@@ -327,16 +297,26 @@ ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS sto;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS sto_br;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS zak_br;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS idgost;
 ALTER TABLE p15.pos_doks ALTER COLUMN brdok TYPE varchar(8);
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS idpartner varchar(6);
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS brdokStorn varchar(8);
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_1;
 
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto_br;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS zak_br;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS idgost;
 ALTER TABLE p15.pos_doks_knjig ALTER COLUMN brdok TYPE varchar(8);
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS idpartner varchar(6);
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS brdokStorn varchar(8);
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS c_1;
 
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos ALTER COLUMN brdok TYPE varchar(8);
+ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS c_1;
 
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN brdok TYPE varchar(8);
+ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS c_1;

@@ -175,7 +175,7 @@ FUNCTION fin_specifikacija_suban()
    lExpRpt := ( cExpRptDN == "D" )
 
    IF lExpRpt
-      aSSFields := get_ss_fields( gFinRj, FIELD_PARTNER_ID_LENGTH )
+      aSSFields := get_ss_fields( gFinRj, FIELD_LEN_PARTNER_ID )
       create_dbf_r_export( aSSFields )
    ENDIF
 
@@ -293,9 +293,9 @@ FUNCTION fin_specifikacija_suban()
    ENDIF
 
    IF cTipDomacaStranaObje == "3"
-      m := "------- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " " + REPL( "-", nDOpis ) + " " + REPL( "-", nDIznos ) + " " + REPL( "-", nDIznos )
+      m := "------- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " " + REPL( "-", nDOpis ) + " " + REPL( "-", nDIznos ) + " " + REPL( "-", nDIznos )
    ELSE
-      m := "------- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " " + REPL( "-", nDOpis ) + " " + REPL( "-", nDIznos ) + " " + REPL( "-", nDIznos ) + " " + REPL( "-", nDIznos )
+      m := "------- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " " + REPL( "-", nDOpis ) + " " + REPL( "-", nDIznos ) + " " + REPL( "-", nDIznos ) + " " + REPL( "-", nDIznos )
    ENDIF
 
    nStr := 0
@@ -686,15 +686,15 @@ FUNCTION zagl_fin_specif( cSpecifSkracenaVarijantaDN, cOpcine, cUslovPartnerTele
 
    IF cTipDomacaStranaObje $ "12"
       IF cSpecifSkracenaVarijantaDN != "D"
-         ? "KONTO  " + PadC( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + "  NAZIV KONTA / PARTNERA                                          duguje            potrazuje                saldo"
+         ? "KONTO  " + PadC( "PARTN.", FIELD_LEN_PARTNER_ID ) + "  NAZIV KONTA / PARTNERA                                          duguje            potrazuje                saldo"
       ELSE
-         ? "KONTO  " + PadC( "PARTN", FIELD_PARTNER_ID_LENGTH ) + "  " +  PadR( "NAZIV KONTA / PARTNERA", nDOpis ) + " " + PadC( "duguje", nDIznos ) + " " + PadC( "potrazuje", nDIznos ) + " " + PadC( "saldo", nDIznos )
+         ? "KONTO  " + PadC( "PARTN", FIELD_LEN_PARTNER_ID ) + "  " +  PadR( "NAZIV KONTA / PARTNERA", nDOpis ) + " " + PadC( "duguje", nDIznos ) + " " + PadC( "potrazuje", nDIznos ) + " " + PadC( "saldo", nDIznos )
       ENDIF
    ELSE
       IF cSpecifSkracenaVarijantaDN != "D"
-         ? "KONTO  " + PadC( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + "  NAZIV KONTA / PARTNERA                                       saldo " + valuta_domaca_skraceni_naziv() + "           saldo " + AllTrim( ValPomocna() )
+         ? "KONTO  " + PadC( "PARTN.", FIELD_LEN_PARTNER_ID ) + "  NAZIV KONTA / PARTNERA                                       saldo " + valuta_domaca_skraceni_naziv() + "           saldo " + AllTrim( ValPomocna() )
       ELSE
-         ? "KONTO  " + PadC( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + "  " + PadR( "NAZIV KONTA / PARTNERA", nDOpis ) + " " + PadC( "saldo " + valuta_domaca_skraceni_naziv(), nDIznos ) + " " + PadC( "saldo " + AllTrim( ValPomocna() ), nDIznos )
+         ? "KONTO  " + PadC( "PARTN.", FIELD_LEN_PARTNER_ID ) + "  " + PadR( "NAZIV KONTA / PARTNERA", nDOpis ) + " " + PadC( "saldo " + valuta_domaca_skraceni_naziv(), nDIznos ) + " " + PadC( "saldo " + AllTrim( ValPomocna() ), nDIznos )
       ENDIF
    ENDIF
    ? m

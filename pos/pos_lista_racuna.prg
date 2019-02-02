@@ -84,7 +84,7 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    AAdd( ImeKol, { "Smj", {||  field->smjena } } )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
-   AAdd( ImeKol, { "Partner", {|| field->idgost } } )
+   AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
    AAdd( ImeKol, { "Vrijeme", {|| field->vrijeme } } )
    AAdd( ImeKol, { "Placen",     {|| iif ( field->Placen == PLAC_NIJE, "  NE", "  DA" ) } } )
 
@@ -145,6 +145,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    LOCAL hRec
    LOCAL nFiscNo
    LOCAL GetList := {}
+   LOCAL hParams := hb_hash()
 
    SELECT pos_doks
 
@@ -161,15 +162,20 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "F"
-      pos_racun_stampa_priprema( pos_doks->IdPos, DToS( pos_doks->datum ) + pos_doks->BrDok, .T., NIL, .T. )
+      hParams["idpos"] := pos_doks->idpos
+      hParams["datum"] := pos_doks->datum
+      hParams["brdok"] := pos_doks->brdok
+      hParams["napuni_dbf"] := .T.
+      hParams["priprema"] := .F.
+      pos_racun_stampa_priprema(hParams)
       SELECT pos_doks
-      f7_pf_traka( .T. )
+      pos_porezna_faktura_traka( .T. )
       SELECT pos_doks
       RETURN DE_REFRESH
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "S"
-      pos_storno_rn( .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
+      pos_storno_racuna( .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
       MsgBeep( "Storno račun se nalazi u pripremi !" )
       SELECT pos_doks
       RETURN DE_REFRESH

@@ -21,6 +21,8 @@ FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
    LOCAL cRet := ""
    LOCAL nDbfArea := Select()
 
+altd()
+
    IF dDatDok == NIL
       dDatDok := danasnji_datum()
    ENDIF

@@ -434,8 +434,8 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
                barkod WITH roba->barkod, ;
                robanaz WITH roba->naz
 
-            IF !Empty( pos_doks->idgost )
-               REPLACE idpartner WITH pos_doks->idgost
+            IF !Empty( pos_doks->idPartner )
+               REPLACE idpartner WITH pos_doks->idPartner
             ENDIF
 
             ++nRbr

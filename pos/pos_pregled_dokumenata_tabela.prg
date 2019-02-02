@@ -11,12 +11,19 @@
 
 #include "f18.ch"
 
+STATIC cIdPos
+STATIC cIdVd
+STATIC cBrDok
+STATIC dDatum
+STATIC cIdRadnik
+
 
 FUNCTION pos_lista_azuriranih_dokumenata()
 
    LOCAL aOpc
    LOCAL GetList := {}
-   //LOCAL _prikaz_partnera := .F.
+
+   // LOCAL _prikaz_partnera := .F.
    PRIVATE cFilter := ".t."
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
@@ -36,17 +43,17 @@ FUNCTION pos_lista_azuriranih_dokumenata()
       RETURN .F.
    ENDIF
 
-   //_o_pos_prepis_tbl()
+   // _o_pos_prepis_tbl()
 
    AAdd( ImeKol, { "Vrsta", {|| IdVd } } )
    AAdd( ImeKol, { "Broj ", {|| PadR( IF( !Empty( IdPos ), Trim( IdPos ) + "-", "" ) + AllTrim( BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Fisk.rn", {|| fisc_rn } } )
 
-   //IF _prikaz_partnera
-  //    SELECT pos_doks
-  //    SET RELATION TO idgost INTO partn
-  //    AAdd( ImeKol, { PadR( "Partner", 25 ), {|| PadR( Trim( idgost ) + "-" + Trim( partn->naz ), 25 ) } } )
-  // ENDIF
+   // IF _prikaz_partnera
+   // SELECT pos_doks
+   // SET RELATION TO idPartner INTO partn
+   // AAdd( ImeKol, { PadR( "Partner", 25 ), {|| PadR( Trim( idPartner ) + "-" + Trim( partn->naz ), 25 ) } } )
+   // ENDIF
 
    AAdd( ImeKol, { "VP", {|| IdVrsteP } } )
    AAdd( ImeKol, { "Datum", {|| datum } } )
@@ -65,17 +72,17 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    seek_pos_doks_za_period( NIL, cIdVd, dDatOd, dDatDo )
    SET CURSOR ON
 
-  // IF !Empty( dDatOd ) .OR. !Empty( dDatDo )
-  //    cFilter += ".and. Datum>=" + dbf_quote( dDatOD ) + ".and. Datum<=" + dbf_quote( dDatDo )
-  // ENDIF
-   //IF !Empty( cIdVd )
-  //    cFilter += ".and. IdVd=" + dbf_quote( cIdVd )
-  // ENDIF
-//   IF !( cFilter == ".t." )
-//      SET FILTER TO &cFilter
-//   ENDIF
+   // IF !Empty( dDatOd ) .OR. !Empty( dDatDo )
+   // cFilter += ".and. Datum>=" + dbf_quote( dDatOD ) + ".and. Datum<=" + dbf_quote( dDatDo )
+   // ENDIF
+   // IF !Empty( cIdVd )
+   // cFilter += ".and. IdVd=" + dbf_quote( cIdVd )
+   // ENDIF
+// IF !( cFilter == ".t." )
+// SET FILTER TO &cFilter
+// ENDIF
 
-//   GO TOP
+// GO TOP
 
    aOpc := { "<ENTER> Odabir", "<E> eksport" }
 
@@ -107,11 +114,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
    LOCAL _rec_no, _ok
    LOCAL _tbl_pos := "pos_pos"
    LOCAL _tbl_doks := "pos_doks"
-   STATIC cIdPos
-   STATIC cIdVd
-   STATIC cBrDok
-   STATIC dDatum
-   STATIC cIdRadnik
+   LOCAL hParams := hb_Hash()
 
    IF Ch == 0
       RETURN ( DE_CONT )
@@ -176,8 +179,9 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
       CASE pos_doks->IdVd == POS_VD_RACUN
 
-         cOdg := "D"
 
+/*
+         cOdg := "D"
          IF glRetroakt
             cOdg := Pitanje(, "Štampati tekući račun? (D-da,N-ne,S-sve račune u izabranom periodu)", "D", "DNS" )
          ENDIF
@@ -198,10 +202,15 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
             ENDDO
 
             ENDPRINT
+*/
+         // ELSEIF cOdg == "D"
 
-         ELSEIF cOdg == "D"
-            pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T. )
-         ENDIF
+         hParams[ "idpos" ] := pos_doks->idpos
+         hParams[ "datum" ] := pos_doks->datum
+         hParams[ "brdok" ] := pos_doks->brdok
+         hParams[ "napuni_dbf" ] := .F.
+         pos_racun_stampa_priprema( hParams )
+         // ENDIF
 
       CASE pos_doks->IdVd == "16"
          pos_stampa_azuriranog_zaduzenja( "ZADUŽENJE" )
@@ -230,12 +239,14 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
    CASE Ch == Asc( "F" ) .OR. Ch == Asc( "f" )
 
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+      hParams[ "napuni_dbf" ] := .T.
+      pos_racun_stampa_priprema( hParams )
 
-      pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .T., NIL, .T. )
-
-      SELECT pos_doks
-
-      f7_pf_traka( .T. )
+      //SELECT pos_doks
+      pos_porezna_faktura_traka( .T. )
 
       SELECT pos_doks
 
@@ -387,7 +398,7 @@ STATIC FUNCTION pos_racun_browse_kolone( aImeKol, aKol )
    AAdd( aImeKol, { _u( "Količina" ), {|| Str( field->kolicina, 7, 3 ) } } )
    AAdd( aImeKol, { "Cijena", {|| Str( field->cijena, 7, 2 ) } } )
    AAdd( aImeKol, { "Popust", {|| Str( field->ncijena, 7, 2 ) } } )
-   AAdd( aImeKol, { "Ukupno", {|| Str( (field->kolicina * field->cijena) - (field->kolicina * field->ncijena) , 11, 2 ) } } )
+   AAdd( aImeKol, { "Ukupno", {|| Str( ( field->kolicina * field->cijena ) - ( field->kolicina * field->ncijena ), 11, 2 ) } } )
    AAdd( aImeKol, { "Tarifa", {|| idtarifa } } )
 
    FOR i := 1 TO Len( aImeKol )
@@ -405,37 +416,37 @@ STATIC FUNCTION _o_pos_prepis_tbl()
 // o_partner()
 // ENDIF
 
-  // SELECT ( F_VRSTEP )
-  // IF !Used()
-  //    o_vrstep()
-  // ENDIF
+   // SELECT ( F_VRSTEP )
+   // IF !Used()
+   // o_vrstep()
+   // ENDIF
 
 
-  // SELECT ( F_ODJ )
-  // IF !Used()
-  //    o_pos_odj()
-  // ENDIF
+   // SELECT ( F_ODJ )
+   // IF !Used()
+   // o_pos_odj()
+   // ENDIF
 
-  // SELECT ( F_KASE )
-  // IF !Used()
-  //    o_pos_kase()
-  // ENDIF
+   // SELECT ( F_KASE )
+   // IF !Used()
+   // o_pos_kase()
+   // ENDIF
 
-//   SELECT ( F_OSOB )
-//   IF !Used()
-  //    o_pos_osob()
-    //  SET ORDER TO TAG "NAZ"
-   //ENDIF
+// SELECT ( F_OSOB )
+// IF !Used()
+   // o_pos_osob()
+   // SET ORDER TO TAG "NAZ"
+   // ENDIF
 
 // SELECT ( F_TARIFA )
 // IF !Used()
 // o_tarifa()
 // ENDIF
 
-  // SELECT ( F_VALUTE )
-//   IF !Used()
-    //  o_valute()
-   //ENDIF
+   // SELECT ( F_VALUTE )
+// IF !Used()
+   // o_valute()
+   // ENDIF
 
 // SELECT ( F_SIFK )
    // IF !Used()
@@ -452,14 +463,14 @@ STATIC FUNCTION _o_pos_prepis_tbl()
    // o_roba()
 // ENDIF
 
-//   SELECT ( F_POS_DOKS )
-//   IF !Used()
-//      o_pos_doks()
-//   ENDIF
+// SELECT ( F_POS_DOKS )
+// IF !Used()
+// o_pos_doks()
+// ENDIF
 
-//   SELECT ( F_POS )
-//   IF !Used()
-//      o_pos_pos()
-//   ENDIF
+// SELECT ( F_POS )
+// IF !Used()
+// o_pos_pos()
+// ENDIF
 
    RETURN .T.

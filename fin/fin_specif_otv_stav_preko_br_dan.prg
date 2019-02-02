@@ -30,7 +30,7 @@ FUNCTION fin_spec_otv_stavke_preko_dana()
    cD_P := "1"
    qqBrDok := Space( 40 )
 
-   M := "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------------- ------ ---------------- -------- -------- --------- -----------------"
+   M := "----- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------------- ------ ---------------- -------- -------- --------- -----------------"
    IF fin_dvovalutno()
       M += " ----------------"
    ENDIF
@@ -307,26 +307,26 @@ FUNCTION ZaglSpBrDana()
 
    SELECT SUBAN
 
-   ? "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------------- ------ ---------------- -------- -------- -------- "
+   ? "----- " + Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------------- ------ ---------------- -------- -------- -------- "
    ?? Replicate( "-", 17 )
    IF fin_dvovalutno() // dvovalutno
       ?? " " + Replicate( "-", 17 )
    ENDIF
-   ? "*RED *" + PadC( "PART-", FIELD_PARTNER_ID_LENGTH ) + "*      NAZIV POSLOVNOG PARTNERA      PTT     MJESTO         *  BROJ  * DATUM  * K1-K4  *"
+   ? "*RED *" + PadC( "PART-", FIELD_LEN_PARTNER_ID ) + "*      NAZIV POSLOVNOG PARTNERA      PTT     MJESTO         *  BROJ  * DATUM  * K1-K4  *"
    IF fin_dvovalutno()
       ?? PadC( "NEPLA�ENO", 35 )
    ELSE
       ?? PadC( "NEPLA�ENO", 17 )
    ENDIF
 
-   ? " BR. " + PadC( "NER", FIELD_PARTNER_ID_LENGTH ) + "                                                                                         "
+   ? " BR. " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + "                                                                                         "
 
    ?? Replicate( "-", 17 )
    IF fin_dvovalutno() // dvovalutno
       ?? " " + Replicate( "-", 17 )
    ENDIF
 
-   ? "*    *" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*                                                           * RA�UNA *" + iif( cObzirDatVal == "D", " VALUTE ", " RA�UNA " ) + "*        *"
+   ? "*    *" + Replicate( " ", FIELD_LEN_PARTNER_ID ) + "*                                                           * RA�UNA *" + iif( cObzirDatVal == "D", " VALUTE ", " RA�UNA " ) + "*        *"
 
    cPom := ""
    IF cD_P = "1"

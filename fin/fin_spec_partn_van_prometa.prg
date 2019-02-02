@@ -69,9 +69,9 @@ FUNCTION PartVanProm()
    ? Space ( 5 ) + "Za period:", IIF ( Empty ( dDatOd ), "", DToC ( dDatOd ) + " " ) + ;
       "do", DToC ( dDatDo )
    ?
-   ? Space ( 5 ) + PadR( "Sifra", FIELD_PARTNER_ID_LENGTH ), PadR( "NAZIV", 25 ), ;
+   ? Space ( 5 ) + PadR( "Sifra", FIELD_LEN_PARTNER_ID ), PadR( "NAZIV", 25 ), ;
       PadR ( "MJESTO", Len ( PARTN->Mjesto ) ), PadR ( "ADRESA", Len ( PARTN->Adresa ) )
-   ? Space ( 5 ) + REPL( "-", FIELD_PARTNER_ID_LENGTH ), REPL ( "-", 25 ), ;
+   ? Space ( 5 ) + REPL( "-", FIELD_LEN_PARTNER_ID ), REPL ( "-", 25 ), ;
       REPL ( "-", Len ( PARTN->Mjesto ) ), REPL ( "-", Len ( PARTN->Adresa ) )
 
    nBrPartn := 0
@@ -102,7 +102,7 @@ FUNCTION PartVanProm()
       SELECT PARTN // while
       SKIP
    END
-   ? Space ( 5 ) + REPL( "-", FIELD_PARTNER_ID_LENGTH ), REPL ( "-", 25 ), ;
+   ? Space ( 5 ) + REPL( "-", FIELD_LEN_PARTNER_ID ), REPL ( "-", 25 ), ;
       REPL ( "-", Len ( PARTN->Mjesto ) ), REPL ( "-", Len ( PARTN->Adresa ) )
    ?
    ? Space ( 5 ) + "Ukupno izlistano", AllTrim ( Str ( nBrPartn ) ), ;

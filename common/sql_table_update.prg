@@ -42,9 +42,6 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
          cTable := Alias()
       ENDIF
 
-      // IF USED() .AND. ( my_rddName() == "SQLMIX" )
-      // lSqlDbf := .T.  // u sql tabeli su utf enkodirani stringovi
-      // ENDIF
 
       hDbfRec := get_a_dbf_rec( cTable )
 
@@ -60,9 +57,10 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
       IF "." $ cTable
          cSqlTable := cTable
       ELSE
-         cSqlTable   := f18_sql_schema( cTable )
+         cSqlTable := f18_sql_schema( cTable )
       ENDIF
 
+altd()
       // uvijek je algoritam 1 nivo recorda
       _alg := hDbfRec[ "algoritam" ][ 1 ]
 

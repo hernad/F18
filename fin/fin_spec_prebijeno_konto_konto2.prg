@@ -89,9 +89,9 @@ FUNCTION fin_spec_prebijeno_konto_konto2( lOtvSt )
    BoxC()
 
    IF cPG == "N"
-      PRIVATE m := Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------- ---------------- ---------------- ----------------"
+      PRIVATE m := Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------- ---------------- ---------------- ----------------"
    ELSE
-      PRIVATE m := Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------- ---------------- ---------------- ---------------- ----------------"
+      PRIVATE m := Replicate( "-", FIELD_LEN_PARTNER_ID ) + " ------------------------- ---------------- ---------------- ---------------- ----------------"
    ENDIF
 
    cUslovKonta := PadR( cIdKonto + ";" + cIdKonto2 + ";", 100 )
@@ -290,9 +290,9 @@ STATIC FUNCTION zagl_prebijeno_konto_konto2( cIdKonto, cIdKonto2 )
 
    ? m
    IF cPG = "D"
-      ? PadR( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + " PARTNER                       MJESTO           saldo1         saldo2           saldo"
+      ? PadR( "PARTN.", FIELD_LEN_PARTNER_ID ) + " PARTNER                       MJESTO           saldo1         saldo2           saldo"
    ELSE
-      ? PadR( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + "  PARTNER                       saldo1           saldo2           saldo"
+      ? PadR( "PARTN.", FIELD_LEN_PARTNER_ID ) + "  PARTNER                       saldo1           saldo2           saldo"
    ENDIF
    ? m
 

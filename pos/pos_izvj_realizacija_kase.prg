@@ -307,7 +307,7 @@ STATIC FUNCTION pos_set_filter_pos_doks( cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo
    ENDIF
 
    IF !Empty( cPartId )
-      cFilter += ".and. idgost==" + dbf_quote( cPartId )
+      cFilter += ".and. idPartner==" + dbf_quote( cPartId )
    ENDIF
 
    IF !( cFilter == ".t." )

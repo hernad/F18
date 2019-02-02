@@ -4783,7 +4783,7 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --     mu_i character varying(1),
 --     prebacen character varying(1),
 --     smjena character varying(1),
---     c_1 character varying(6),
+--     brdokStorn character varying(6),
 --     c_2 character varying(10),
 --     c_3 character varying(50),
 --     kolicina numeric(18,3),
@@ -4813,7 +4813,7 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --     idvd character varying(2) NOT NULL,
 --     brdok character varying(6) NOT NULL,
 --     datum date,
---     idgost character varying(8),
+--     idPartner character varying(8),
 --     idradnik character varying(4),
 --     idvrstep character(2),
 --     m1 character varying(1),
@@ -4822,7 +4822,7 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --     smjena character varying(1),
 --     sto character varying(3),
 --     vrijeme character varying(5),
---     c_1 character varying(6),
+--     brdokStorn character varying(6),
 --     c_2 character varying(10),
 --     c_3 character varying(50),
 --     fisc_rn numeric(10,0),
@@ -4846,7 +4846,7 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --     idvd character varying(2) NOT NULL,
 --     brdok character varying(6) NOT NULL,
 --     datum date,
---     idgost character varying(8),
+--     idPartner character varying(8),
 --     idradnik character varying(4),
 --     idvrstep character(2),
 --     m1 character varying(1),
@@ -4855,7 +4855,7 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --     smjena character varying(1),
 --     sto character varying(3),
 --     vrijeme character varying(5),
---     c_1 character varying(6),
+--     brdokStorn character varying(6),
 --     c_2 character varying(10),
 --     c_3 character varying(50),
 --     fisc_rn numeric(10,0),
@@ -4872,7 +4872,7 @@ GRANT ALL ON TABLE fmk.vrstep TO xtrole;
 --
 -- CREATE INDEX pos_doks_id1 ON fmk.pos_doks USING btree (idpos, idvd, datum, brdok);
 -- CREATE INDEX pos_doks_id2 ON fmk.pos_doks USING btree (idvd, datum, smjena);
--- CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idgost, placen, datum);
+-- CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idPartner, placen, datum);
 -- CREATE INDEX pos_doks_id4 ON fmk.pos_doks USING btree (idvd, m1);
 -- CREATE INDEX pos_doks_id5 ON fmk.pos_doks USING btree (prebacen);
 -- CREATE INDEX pos_doks_id6 ON fmk.pos_doks USING btree (datum);

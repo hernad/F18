@@ -2479,7 +2479,7 @@ CREATE TABLE fmk.pos_doks (
     idvd character varying(2) NOT NULL,
     brdok character varying(6) NOT NULL,
     datum date NOT NULL,
-    idgost character varying(8),
+    idPartner character varying(8),
     idradnik character varying(4),
     idvrstep character(2),
     m1 character varying(1),
@@ -8822,7 +8822,7 @@ CREATE INDEX pos_doks_id2 ON fmk.pos_doks USING btree (idvd, datum, smjena);
 -- Name: pos_doks_id3; Type: INDEX; Schema: fmk; Owner: admin
 --
 
-CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idgost, placen, datum);
+CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idPartner, placen, datum);
 
 
 --

@@ -21,7 +21,7 @@ STATIC LEN_UKUPNO := 10
 STATIC PIC_UKUPNO := "9999999.99"
 
 // glavna funkcija za stampu PDV blag.racuna na traci
-// lStartPrint - .t. - pozivaju se funkcije za stampu START PRINT itd...
+// lStartPrint - .t. - pozivaju se funkcije za stampu START PRINT
 FUNCTION pos_racun_print( lStartPrint )
 
    LOCAL nIznUkupno
@@ -37,7 +37,6 @@ FUNCTION pos_racun_print( lStartPrint )
    lJedanRacun := lStartPrint
 
    close_open_racun_tbl()
-
    IF !racun_tbl_checksum()
       MsgBeep( "Stampanje onemoguceno! checksum error!!!" )
       RETURN .F.
@@ -65,16 +64,17 @@ FUNCTION pos_racun_print( lStartPrint )
       ENDIF
    ENDIF
 
+/*
    IF lJedanRacun .AND. ( lGetKupData .AND. !lAzurDok )
-      // daj nam podatke o kupcu
       get_kup_data()
    ENDIF
+*/
 
-   IF lJedanRacun
-      // Ispisi iznos racuna velikim slovima
-      ShowIznRac( nIznUkupno )
-   ENDIF
+  // IF lJedanRacun
+  //    pos_show_iznos_racuna_velikim_slovima( nIznUkupno )
+  // ENDIF
 
+/*
    // vidjeti sta sa ovim
    IF gDisplay == "D"
       Send2ComPort( Chr( 10 ) + Chr( 13 ) )
@@ -84,6 +84,7 @@ FUNCTION pos_racun_print( lStartPrint )
       Send2ComPort( Chr( 13 ) )
       Send2ComPort( AllTrim( Str( nIznUkupno, 10, 2 ) ) )
    ENDIF
+*/
 
    // stampaj racun
    st_rb_traka( lStartPrint, lAzurDok )
@@ -467,11 +468,8 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
    RETURN
 // }
 
-// -----------------------------------
-// -----------------------------------
 FUNCTION hd_rb_traka( nRedukcija )
 
-   // {
    LOCAL cDuplaLin
    LOCAL cINaziv
    LOCAL cIAdresa
@@ -525,40 +523,35 @@ FUNCTION hd_rb_traka( nRedukcija )
 
    ?
 
-   RETURN
-// }
+   RETURN .T.
 
 
 FUNCTION g_br_stola( cBrStola )
 
-   // {
    cBrStola := get_dtxt_opis( "R11" )
    IF cBrStola == "-"
       cBrStola := ""
    ENDIF
 
-   RETURN
-// }
+   RETURN .T.
+
 
 
 FUNCTION g_vez_racuni( aRacuni )
 
-   // {
    LOCAL cRead
    cRead := get_dtxt_opis( "R12" )
    IF cRead == "-"
       aRacuni := {}
-      RETURN
+      RETURN .T.
    ENDIF
    aRacuni := SjeciStr( cRead, 20 )
 
-   RETURN
-// }
+   RETURN .T.
 
 
 FUNCTION ft_rb_traka( cIdRadnik )
 
-   // {
    LOCAL cRadnik
    LOCAL cSmjena
    LOCAL cVrstaP
@@ -580,21 +573,8 @@ FUNCTION ft_rb_traka( cIdRadnik )
    g_vez_racuni( @aVezRacuni )
 
    ? Space( LEN_RAZMAK ) + " " + PadR( cRadnik, 27 ), PadL( "Smjena: " + cSmjena, 10 )
-   IF !Empty( cBrStola )
-      ? Space( LEN_RAZMAK ) + " Sto.br:" + Space( 1 ) + cBrStola
-      IF Len( aVezRacuni ) > 0
-         ?? " RN: "
-         FOR i := 1 TO Len( aVezRacuni )
-            IF i == 1
-               ?? aVezRacuni[ i ]
-            ELSE
-               ? Space( LEN_RAZMAK ) + " " + aVezRacuni[ i ]
-            ENDIF
-         NEXT
-      ENDIF
-   ELSE
-      ?
-   ENDIF
+   ?
+
    ? Space( LEN_RAZMAK ) + " Placanje izvrseno: " + cVrstaP
 
    // pomocni text na racunu

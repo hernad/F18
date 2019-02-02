@@ -994,9 +994,9 @@ METHOD F18Admin:delete_db_data_all( cDatabaseName, nDataType )
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "kalk_doks;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "kalk_doks2;"
 
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "pos_doks;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "pos_pos;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "pos_dokspf;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "pos_doks;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "pos_pos;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "pos_dokspf;"
 
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt_atributi;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks;"
@@ -1013,12 +1013,12 @@ METHOD F18Admin:delete_db_data_all( cDatabaseName, nDataType )
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "mat_sint;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "mat_nalog;"
 
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_docs;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_it;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_it2;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_ops;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_log;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_lit;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_docs;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_it;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_it2;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_ops;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_log;"
+   // cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_lit;"
 
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "epdv_kuf;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "epdv_kif;"

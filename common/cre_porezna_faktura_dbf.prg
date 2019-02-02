@@ -343,8 +343,8 @@ FUNCTION get_dtxt_opis( cTip )
 
    RETURN cRet
 
-
-FUNCTION porezna_faktura_azur_podataka_o_kupcu( cIdPos )
+/*
+FUNCTION pos_porezna_faktura_azur_podataka_o_kupcu( cIdPos )
 
    LOCAL cKNaziv
    LOCAL cKAdres
@@ -402,9 +402,9 @@ FUNCTION porezna_faktura_azur_podataka_o_kupcu( cIdPos )
    run_sql_query( "COMMIT", hParams )
 
    RETURN .T.
+*/
 
-
-
+/*
 FUNCTION pos_find_kupac_podaci( cKupac ) // pretrazi tabelu kupaca i napuni matricu
 
    LOCAL aRet := {}
@@ -449,3 +449,4 @@ FUNCTION pos_find_kupac_podaci( cKupac ) // pretrazi tabelu kupaca i napuni matr
    SELECT ( nArr )
 
    RETURN aRet
+*/

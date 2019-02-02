@@ -97,12 +97,12 @@ FUNCTION PregNDP()
    EOF CRET
 
    IF cPG == "D"
-      m := Replicate( "-", FIELD_PARTNER_ID_LENGTH )
+      m := Replicate( "-", FIELD_LEN_PARTNER_ID )
       m += " "
       m += Replicate( "-", 25 )
       m += " --------------- ------------------ ----------------- ----------------- ----------------- ---------------"
    ELSE
-      m := Replicate( "-", FIELD_PARTNER_ID_LENGTH )
+      m := Replicate( "-", FIELD_LEN_PARTNER_ID )
       m += " "
       m += Replicate( "-", 25 )
       m += " ------------------ ----------------- ----------------- ----------------- -------------------"
@@ -301,18 +301,18 @@ FUNCTION Zagl9()
 
       IF cPoRP == "1"
 
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "  Naziv                                 Prethodno           Novo             Napla�eno         Sada�nje          Napomena"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "                                          stanje          potra�ivanje                           stanje"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "  Naziv                                 Prethodno           Novo             Napla�eno         Sada�nje          Napomena"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "                                          stanje          potra�ivanje                           stanje"
 
       ELSEIF cPG == "N"
 
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "    Naziv                     Prethodno           Novo             Napla�eno         Sadasnje          Napomena"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "                               stanje          potra�ivanje                           stanje"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "    Naziv                     Prethodno           Novo             Napla�eno         Sadasnje          Napomena"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "                               stanje          potra�ivanje                           stanje"
 
       ELSE
 
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "  Naziv                  Mjesto         Prethodno           Novo             Napla�eno         Sada�nje          Napomena"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "                                          stanje          potra�ivanje                           stanje"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "  Naziv                  Mjesto         Prethodno           Novo             Napla�eno         Sada�nje          Napomena"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "                                          stanje          potra�ivanje                           stanje"
 
       ENDIF
 
@@ -320,14 +320,14 @@ FUNCTION Zagl9()
    ELSE
       ? m
       IF cPoRP == "1"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "  Naziv                                 Prethodno           Prispjelo         Placeno          Sada�nje          Napomena"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "                                          stanje                                                 stanje"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "  Naziv                                 Prethodno           Prispjelo         Placeno          Sada�nje          Napomena"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "                                          stanje                                                 stanje"
       ELSEIF cPG == "N"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "  Naziv                       Prethodno         Prispjelo          Placeno          Sada�nje          Napomena"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "                                stanje                                               stanje"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "  Naziv                       Prethodno         Prispjelo          Placeno          Sada�nje          Napomena"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "                                stanje                                               stanje"
       ELSE
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "  Naziv                  Mjesto         Prethodno           Prispjelo         Placeno          Sada�nje          Napomena"
-         ? Space( FIELD_PARTNER_ID_LENGTH ) + "                                          stanje                                                 stanje"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "  Naziv                  Mjesto         Prethodno           Prispjelo         Placeno          Sada�nje          Napomena"
+         ? Space( FIELD_LEN_PARTNER_ID ) + "                                          stanje                                                 stanje"
       ENDIF
       ? m
    ENDIF

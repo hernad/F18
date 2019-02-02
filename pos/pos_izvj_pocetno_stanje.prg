@@ -31,9 +31,9 @@ FUNCTION pos_prepis_pocetno_stanje()
       iif ( !Empty ( DOKS->Smjena ), " Smjena: " + DOKS->Smjena, "" ), nSir )
    ?
 
-   IF !Empty( doks->idgost )
+   IF !Empty( doks->idPartner )
       ?
-      ? "Partner: ", doks->idgost
+      ? "Partner: ", doks->idPartner
       ?
    ENDIF
 

@@ -11,58 +11,35 @@
 
 #include "f18.ch"
 
-FUNCTION pos_racun_stampa_priprema( cIdPos, dDatBrDok, fEkran, lViseOdjednom, lOnlyFill )
+FUNCTION pos_racun_stampa_priprema( hParams )
+
+// cIdPos, dDatBrDok, fEkran, lViseOdjednom, lOnlyFill )
 
    LOCAL cDbf
    LOCAL cIdRadnik
    LOCAL nCnt
    LOCAL aPom := {}
-   LOCAL cPomaVezani
-   LOCAL aVezani := { { pos_doks->IdPos, pos_doks->BrDok, pos_doks->IdVd, pos_doks->datum } }
+   LOCAL nIznos, nNePlaca
 
-   //
-   // 1            2               3              4
-   // aVezani : {pos_doks->IdPos, pos_doks->(BrDok), pos_doks->IdVrsteP, pos_doks->Datum})
-   // Napomena: dDatBrDok sadrzi DTOS(DATUM)+BRDOK  !!
-
-   PRIVATE nIznos := 0
-   PRIVATE nSumaPor := 0
+   //PRIVATE nSumaPor := 0
    PRIVATE aPorezi := {}
 
-   IF fEkran == NIL
-      fEkran := .F.
-   ELSE
-      fEkran := .T.
-   ENDIF
-
-   IF lOnlyFill == nil
-      lOnlyFill := .F.
-   ENDIF
-
-   IF lViseOdjednom == nil
-      lViseOdjednom := .F.
-   ENDIF
-
-   cSto := pos_doks->Sto
    cIdRadnik := pos_doks->IdRadnik
-   cSmjena := pos_doks->Smjena
+   //cSmjena := pos_doks->Smjena
 
    nIznos := 0
    nNeplaca := 0
+   seek_pos_pos( hParams[ "idpos" ], POS_VD_RACUN, hParams[ "datum" ], hParams[ "brdok" ] )
+   DO WHILE !Eof() .AND. ( pos->IdPos + pos->IdVd + DToS( pos->datum ) + pos->BrDok ) == ( hParams[ "idpos" ] + POS_VD_RACUN + DToS( hParams[ "datum" ] ) + hParams[ "brdok" ] )
+      nIznos += pos->kolicina * pos->cijena
+      //select_o_pos_odj( pos->idodj )
+      //SELECT POS
+      nNeplaca += pos->kolicina * pos->ncijena
+      SKIP
+   ENDDO
 
-   FOR nCnt := 1 TO Len( aVezani )
-      seek_pos_pos( aVezani[ nCnt ][ 1 ], POS_VD_RACUN, aVezani[ nCnt ][ 4 ],  aVezani[ nCnt ][ 2 ] )
-      DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == ( aVezani[ nCnt ][ 1 ] + POS_VD_RACUN + DToS( aVezani[ nCnt ][ 4 ] ) + aVezani[ nCnt ][ 2 ] )
-
-         nIznos += pos->( kolicina * cijena )
-         select_o_pos_odj( pos->idodj )
-         SELECT POS
-         nNeplaca += pos->( kolicina * ncijena )
-         SKIP
-      ENDDO
-   NEXT
-
-   SELECT pos
-   pos_stampa_racuna_pdv( cIdPos, pos_doks->brdok, .T., pos_doks->idvrstep, pos_doks->datum, aVezani, lViseOdjednom, lOnlyFill )
+   //SELECT pos
+   pos_stampa_racuna_pdv( hParams )
+   // hParams["idpos"], hParams["brdok"], .T., pos_doks->idvrstep, pos_doks->datum, aVezani, lViseOdjednom, lOnlyFill )
 
    RETURN .T.

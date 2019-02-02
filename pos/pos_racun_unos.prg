@@ -40,7 +40,7 @@ FUNCTION pos_unos_racuna( cBrDok )
    o_pos_tables()
    SELECT _pos_pripr
 
-   aRabat := {}
+   //aRabat := {}
 
    IF ( cBrDok == NIL )
       cBrDok := ""
@@ -74,10 +74,9 @@ FUNCTION pos_unos_racuna( cBrDok )
 
    oBrowse:autolite := .F.
 
-   SetKey( K_F6, {|| f7_pf_traka() } )
-
-   SetKey( K_F7, {|| pos_storno_fisc_no(), _refresh_total() } )
-   SetKey( K_F8, {|| pos_storno_rn(), _refresh_total() } )
+   // SetKey( K_F6, {|| pos_porezna_faktura_traka() } )
+   // SetKey( K_F7, {|| pos_storno_fiskalnog_racuna(oBrowse), _refresh_total() } )
+   SetKey( K_F8, {|| pos_storno_racuna( oBrowse ), _refresh_total() } )
    SetKey( K_F9, {|| fiskalni_izvjestaji_komande( .T., .T.  ) } )
 
    pos_set_key_handler_ispravka_racuna( oBrowse )
@@ -222,8 +221,8 @@ STATIC FUNCTION Popust( nx, ny )
    LOCAL nC1 := 0
    LOCAL nC2 := 0
 
-   pos_get_popust_sve_varijante( aRabat, _cijena )
-   ShowRabatOnForm( nx, ny )
+   //pos_get_popust_sve_varijante( aRabat, _cijena )
+   //ShowRabatOnForm( nx, ny )
 
    RETURN .T.
 
@@ -243,7 +242,7 @@ STATIC FUNCTION valid_pos_racun_artikal( nKolicina, aGetList )
 
 STATIC FUNCTION when_pos_kolicina( kolicina )
 
-   Popust( box_x_koord() + 4, box_y_koord() + 28 )
+   // Popust( box_x_koord() + 4, box_y_koord() + 28 )
 
    IF gOcitBarCod
       IF param_tezinski_barkod() == "D" .AND. kolicina <> 0
@@ -516,7 +515,6 @@ FUNCTION pos_brisi_stavku_racuna( oBrowse )
    my_delete()
 
    oBrowse:refreshAll()
-
    DO WHILE !oBrowse:stable
       oBrowse:Stabilize()
    ENDDO

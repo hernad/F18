@@ -61,7 +61,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
    cIdFirma := self_organizacija_id()
    cIdkonto := Space( 7 )
-   cIdPartner := PadR( "", FIELD_PARTNER_ID_LENGTH )
+   cIdPartner := PadR( "", FIELD_LEN_PARTNER_ID )
    dNaDan := Date()
    cOpcine := Space( 20 )
    cValuta := "1"
@@ -130,7 +130,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
    cSvi := cIdpartner
 
    IF lExpRpt == .T.
-      aExpFld := get_ost_fields( cSaRokom, FIELD_PARTNER_ID_LENGTH )
+      aExpFld := get_ost_fields( cSaRokom, FIELD_LEN_PARTNER_ID )
       create_dbf_r_export( aExpFld )
    ENDIF
 
@@ -154,7 +154,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
       Boxc()
    ENDIF
 
-   fin_create_pom_table( nil, FIELD_PARTNER_ID_LENGTH )
+   fin_create_pom_table( nil, FIELD_LEN_PARTNER_ID )
    // kreiraj pomocnu bazu
 
    o_trfp2()
@@ -838,7 +838,7 @@ STATIC FUNCTION _get_line1( cTmpL, cSaRokom, cPicForm )
    ENDIF
 
    cTmpL := cStart
-   cTmpL += Replicate( cFill, FIELD_PARTNER_ID_LENGTH )
+   cTmpL += Replicate( cFill, FIELD_LEN_PARTNER_ID )
    cTmpL += cMidd
    cTmpL += Replicate( cFill, 25 )
 
@@ -867,7 +867,7 @@ STATIC FUNCTION _get_line2( cTmpL, cSaRokom, cPicForm )
    ENDIF
 
    cTmpL := cStart
-   cTmpL += Replicate( cFill, FIELD_PARTNER_ID_LENGTH )
+   cTmpL += Replicate( cFill, FIELD_LEN_PARTNER_ID )
    cTmpL += cLine
    cTmpL += Replicate( cFill, 25 )
 
@@ -1003,7 +1003,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          // prvi red
          cTmp := "+"
-         cTmp += Replicate( "+", FIELD_PARTNER_ID_LENGTH )
+         cTmp += Replicate( "+", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += Replicate( "+", 25 )
          cTmp += "+"
@@ -1022,7 +1022,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          // drugi red
          cTmp := "+"
-         cTmp += Replicate( " ", FIELD_PARTNER_ID_LENGTH )
+         cTmp += Replicate( " ", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += Replicate( " ", 25 )
          cTmp += "+"
@@ -1044,7 +1044,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          // treci red
          cTmp := "+"
-         cTmp += PadC( "SIFRA", FIELD_PARTNER_ID_LENGTH )
+         cTmp += PadC( "SIFRA", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += _f_text( "NAZIV  PARTNERA", 25 )
          cTmp += "+"
@@ -1081,7 +1081,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          ? cTmp
 
          cTmp := "+"
-         cTmp += PadC( "PARTN.", FIELD_PARTNER_ID_LENGTH )
+         cTmp += PadC( "PARTN.", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += _f_text( " ", 25 )
 
@@ -1116,7 +1116,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          ? cTmp
 
          cTmp := "+"
-         cTmp += Replicate( "+", FIELD_PARTNER_ID_LENGTH )
+         cTmp += Replicate( "+", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += Replicate( "+", 25 )
 
@@ -1133,7 +1133,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          // 1 red
          cTmp := "+"
-         cTmp += Replicate( "+", FIELD_PARTNER_ID_LENGTH )
+         cTmp += Replicate( "+", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += Replicate( "+", 25 )
 
@@ -1150,7 +1150,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          // 2 red
 
          cTmp := "+"
-         cTmp += PadC( "SIFRA", FIELD_PARTNER_ID_LENGTH )
+         cTmp += PadC( "SIFRA", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += _f_text( " ", 25 )
          cTmp += "+"
@@ -1166,7 +1166,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          // 3 red
 
          cTmp := "+"
-         cTmp += PadC( "PARTN.", FIELD_PARTNER_ID_LENGTH )
+         cTmp += PadC( "PARTN.", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += _f_text( "NAZIV PARTNERA", 25 )
          cTmp += "+"
@@ -1181,7 +1181,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          // 4 red
          cTmp := "+"
-         cTmp += REPL( "+", FIELD_PARTNER_ID_LENGTH )
+         cTmp += REPL( "+", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
          cTmp += Replicate( "+", 25 )
 

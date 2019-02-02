@@ -17,7 +17,7 @@
  *   param: aRabat - matrica rabata: type array
   {idroba, nPopVar1, nPopVar2, nPopVar3, nPopVar4, nPopVar5, nPopVar6}
  *   param: nCijena - cijena artikla
- */
+
 FUNCTION pos_get_popust_sve_varijante( aRabat, nCijena )
 
    // prodji kroz svaku varijantu popusta i napuni matricu aRabat{}
@@ -44,13 +44,14 @@ FUNCTION pos_get_popust_sve_varijante( aRabat, nCijena )
    pos_popust_varijanta_procenat( aRabat, nCijena )
 
    RETURN .T.
+*/
 
 
 /* GetPopZadavanjemNoveCijene(aRabat, nCijena)
  *     Popust zadavanjem nove cijene
  *   param: aRabat
  *   param: nCijena
- */
+
 FUNCTION GetPopZadavanjemNoveCijene( aRabat, nCijena )
 
 
@@ -64,13 +65,13 @@ FUNCTION GetPopZadavanjemNoveCijene( aRabat, nCijena )
    ENDIF
 
    RETURN .T.
-
+*/
 
 /* GetPopGeneral(aRabat, nCijena)
  *     Generalni popust za sve artikle
  *   param: aRabat
  *   param: nCijena
- */
+
 FUNCTION GetPopGeneral( aRabat, nCijena )
 
    LOCAL nNovaCijena := 0
@@ -83,14 +84,14 @@ FUNCTION GetPopGeneral( aRabat, nCijena )
    ENDIF
 
    RETURN
-
+*/
 
 
 /* GetPopFromN2(aRabat, nCijena)
  *     Popust na osnovu polja "roba->N2", gPopust=99 - gledaj sifrarnik
  *   param: aRabat
  *   param: nCijena
- */
+
 FUNCTION GetPopFromN2( aRabat, nCijena )
 
 
@@ -104,14 +105,14 @@ FUNCTION GetPopFromN2( aRabat, nCijena )
    ENDIF
 
    RETURN
-
+*/
 
 
 /* GetPopPrekoOdrIznosa(aRabat, nCijena)
  *     Varijanta popusta preko odredjenog iznosa
  *   param: aRabat
  *   param: nCijena
- */
+
 FUNCTION GetPopPrekoOdrIznosa( aRabat, nCijena )
 
    LOCAL nNovaCijena := 0
@@ -122,10 +123,10 @@ FUNCTION GetPopPrekoOdrIznosa( aRabat, nCijena )
    ENDIF
 
    RETURN
+*/
 
 
-
-
+/*
 FUNCTION pos_popust_varijanta_procenat( aRabat, nCijena )
 
    LOCAL nNovaCijena := 0
@@ -137,7 +138,7 @@ FUNCTION pos_popust_varijanta_procenat( aRabat, nCijena )
    ENDIF
 
    RETURN .T.
-
+*/
 
 
 /* AddToArrRabat(aRabat, cIdRoba, nPopVar1, nPopVar2, nPopVar3, nPopVar4, nPopVar5, nPopVar6)
@@ -150,7 +151,7 @@ FUNCTION pos_popust_varijanta_procenat( aRabat, nCijena )
  *   param: nPopVar4 - iznos popusta preko odredjenog iznosa
  *   param: nPopVar5 - iznos popusta za clanove
  *   param: nPopVar6 - iznos popusta zadavanjem procenta
- */
+
 FUNCTION AddToArrRabat( aRabat, cIdRoba, nPopVar1, nPopVar2, nPopVar3, nPopVar4, nPopVar5, nPopVar6 )
 
 
@@ -204,13 +205,13 @@ FUNCTION AddToArrRabat( aRabat, cIdRoba, nPopVar1, nPopVar2, nPopVar3, nPopVar4,
    ENDIF
 
    RETURN
-
+*/
 
 
 /* RptArrRabat(aRabat)
  *     Stampa matricu aRabat, sluzi samo za testiranje!!!
  *   param: aRabat
- */
+
 FUNCTION RptArrRabat( aRabat )
 
    START PRINT CRET
@@ -230,6 +231,7 @@ FUNCTION RptArrRabat( aRabat )
 
    RETURN
 
+*/
 
 
 /* CalcArrRabat(aRabat, lPopVar1, lPopVar2, lPopVar3, lPopVar4, lPopVar5, lPopVar6)
@@ -241,7 +243,7 @@ FUNCTION RptArrRabat( aRabat )
  *   param: lPopVar4 - .t. racunaj 4 varijantu
  *   param: lPopVar5 - .t. racunaj 5 varijantu
  *   param: lPopVar6 - .t. racunaj 6 varijantu
- */
+
 FUNCTION CalcArrRabat( aRabat, lPopVar1, lPopVar2, lPopVar3, lPopVar4, lPopVar5, lPopVar6 )
 
 
@@ -270,7 +272,7 @@ FUNCTION CalcArrRabat( aRabat, lPopVar1, lPopVar2, lPopVar3, lPopVar4, lPopVar5,
    NEXT
 
    RETURN nIznos
-
+*/
 
 
 /* CalcRabatForArticle(aRabat, cIdRoba, lPopVar1, lPopVar2, lPopVar3, lPopVar4, lPopVar5, lPopVar6)
@@ -283,7 +285,7 @@ FUNCTION CalcArrRabat( aRabat, lPopVar1, lPopVar2, lPopVar3, lPopVar4, lPopVar5,
  *   param: lPopVar4
  *   param: lPopVar5
  *   param: lPopVar6
- */
+
 FUNCTION CalcRabatForArticle( aRabat, cIdRoba, lPopVar1, lPopVar2, lPopVar3, lPopVar4, lPopVar5, lPopVar6 )
 
 
@@ -314,11 +316,13 @@ FUNCTION CalcRabatForArticle( aRabat, cIdRoba, lPopVar1, lPopVar2, lPopVar3, lPo
    ENDIF
 
    RETURN nIznos
-
+*/
 
 //
 // Provjerava da li je tacnan uslov za popust preko odredjenog iznosa
 //
+
+/*
 FUNCTION IsPopPrekoOdrIzn( nTotal )
 
    LOCAL lReslut := .F.
@@ -332,9 +336,9 @@ FUNCTION IsPopPrekoOdrIzn( nTotal )
 
    RETURN lResult
 
+*/
 
-
-
+/*
 // Provjerava da li se uzima u obzir varijanta popusta preko odredjenog iznosa
 FUNCTION VarPopPrekoOdrIzn()
 
@@ -348,9 +352,10 @@ FUNCTION VarPopPrekoOdrIzn()
 
    RETURN _ok
 
+*/
 
 
-
+/*
 FUNCTION pos_get_popust_procenat()
 
 
@@ -363,17 +368,16 @@ FUNCTION pos_get_popust_procenat()
    BoxC()
 
    RETURN nPopProc
-
+*/
 
 
 /* ShowRabatOnForm(nx, ny)
  *     Prikazuje iznos rabata na formi unosa
  *   param: nx
  *   param: ny
- */
+
 FUNCTION ShowRabatOnForm( nx, ny )
 
-   // {
    LOCAL nCijena := 0
    LOCAL nPopust := 0
 
@@ -392,14 +396,15 @@ FUNCTION ShowRabatOnForm( nx, ny )
    ENDIF
 
    RETURN
-// }
+
+*/
 
 
 
-
-/* RecalcRabat()
+/* RecalcRabat
  *     Rekalkulise vrijednost rabata prije azuriranja i stampanja racuna. Ovo je neophodno radi varijante popusta preko odredjenog iznosa.
- */
+
+
 FUNCTION RecalcRabat( cIdVrsteP )
 
    LOCAL nNIznos := 0
@@ -442,16 +447,16 @@ FUNCTION RecalcRabat( cIdVrsteP )
    ENDDO
 
    RETURN
-
+*/
 
 
 /* Scan_PriprForRabat(aRabat)
  *     Ako ima nezakljucenih racuna u _PRIPR napuni matricu aRabat
  *   param: aRabat - matrica rabata
- */
+
 FUNCTION Scan_PriprForRabat( aRabat )
 
-   // {
+
    SELECT _pos_pripr
    IF ( RecCount() > 0 )
       DO WHILE !Eof()
@@ -502,3 +507,4 @@ FUNCTION get_vrpl_popust( cIdVrPlac, nPopust )
    SELECT ( nTArea )
 
    RETURN
+*/
