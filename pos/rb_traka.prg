@@ -20,21 +20,13 @@ STATIC LEN_UKUPNO := 10
 
 STATIC PIC_UKUPNO := "9999999.99"
 
-// glavna funkcija za stampu PDV blag.racuna na traci
-// lStartPrint - .t. - pozivaju se funkcije za stampu START PRINT
-FUNCTION pos_racun_print( lStartPrint )
+
+FUNCTION pos_racun_print()
 
    LOCAL nIznUkupno
    LOCAL lPrintPfTraka := .F.
    LOCAL lGetKupData := .F.
    LOCAL lAzurDok := .F.
-   LOCAL lJedanRacun
-
-   IF lStartPrint == nil
-      lStartPrint := .T.
-   ENDIF
-
-   lJedanRacun := lStartPrint
 
    close_open_racun_tbl()
    IF !racun_tbl_checksum()
@@ -44,10 +36,12 @@ FUNCTION pos_racun_print( lStartPrint )
 
    nIznUkupno := get_rb_ukupno()
    // da li uopste stampati fakture - parametri
-   isPfTraka( @lPrintPfTraka )
-   // da li je ovo prepis dokumenta
-   isAzurDok( @lAzurDok )
+   // isPfTraka( @lPrintPfTraka )
 
+   // da li je ovo prepis dokumenta
+   //isAzurDok( @lAzurDok )
+
+   /*
    // podaci o kupcu
    IF ( lJedanRacun .AND. nIznUkupno <= 100 )
       IF lPrintPfTraka
@@ -56,13 +50,16 @@ FUNCTION pos_racun_print( lStartPrint )
          ENDIF
       ENDIF
    ENDIF
+   */
 
+   /*
    // ako je racun veci od 100 - nudi po defaultu poresku fakturu
    IF ( lJedanRacun .AND. nIznUkupno > 100 )
       IF lPrintPfTraka
          lGetKupData := .T.
       ENDIF
    ENDIF
+   */
 
 /*
    IF lJedanRacun .AND. ( lGetKupData .AND. !lAzurDok )
@@ -101,10 +98,6 @@ FUNCTION pos_racun_print( lStartPrint )
    RETURN .T.
 
 
-
-// ----------------------------------------------
-// varijable za stampu racuna
-// ----------------------------------------------
 FUNCTION pos_get_racun_broj_varijable( nFeedLines, cOLadSkv, cSTrakSkv, nPdvCijene, lStampId, nVrRedukcije, lPrKupac )
 
    LOCAL cTmp
@@ -124,13 +117,15 @@ FUNCTION pos_get_racun_broj_varijable( nFeedLines, cOLadSkv, cSTrakSkv, nPdvCije
 
    nVrRedukcije := Val( get_dtxt_opis( "P22" ) ) // redukcija trake
 
+   /*
    // ispis kupca na racunu
    cTmp := get_dtxt_opis( "P23" )
    IF cTmp == "D"
       lPrKupac := .T.
    ENDIF
+   */
 
-   RETURN
+   RETURN .T.
 
 
 FUNCTION isAzurDok( lRet )
@@ -152,7 +147,6 @@ FUNCTION isAzurDok( lRet )
 
 FUNCTION isPfTraka( lRet )
 
-   // {
    // inace iscitati parametar
    IF gPorFakt == "D"
       lRet := .T.
@@ -161,7 +155,7 @@ FUNCTION isPfTraka( lRet )
    ENDIF
 
    RETURN
-// }
+
 
 
 // ---------------------------------------
@@ -196,7 +190,7 @@ FUNCTION rb_traka_line( cLine )
 
    cLine := Replicate( "-", LEN_RBR ) + " " + Replicate( "-", LEN_NAZIV ) + " " + Replicate( "-", LEN_UKUPNO )
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -204,7 +198,7 @@ FUNCTION rb_traka_line( cLine )
 // lStartPrint - ako je .t. pozivaju se funkcije stampe
 FUNCTION st_rb_traka( lStartPrint, lAzurDok )
 
-   // {
+
    LOCAL cBrDok
    LOCAL dDatDok
    LOCAL aRNaz
@@ -236,9 +230,11 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
    LOCAL nLen
    LOCAL cNum
 
+/*
    IF lStartPrint
       STARTPRINTPORT CRET gLocPort, Space( 5 )
    ENDIF
+*/
 
    rb_traka_line( @cLine )
 
@@ -247,17 +243,21 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
 
    hd_rb_traka( nRedukcija )
 
+/*
    IF lKupac == .T.
       // ispis kupca ako je potreban
       kup_rb_traka()
    ENDIF
+*/
 
+/*
    SELECT drn
    GO TOP
    // ako postoji vise zapisa onda ima vise racuna
    IF RecCount2() > 1
       lViseRacuna := .T.
    ENDIF
+*/
 
    SELECT rn
    SET ORDER TO TAG "1"
@@ -269,7 +269,7 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
    ? cLine
 
    // broj racuna
-   cPom :=  "BLAGAJNA RACUN br. " + AllTrim( drn->brdok )
+   cPom :=  "POS RACUN br. " + AllTrim( drn->brdok )
 
    IF lAzurDok
       IF lStartPrint
@@ -278,7 +278,6 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
    ENDIF
 
    ? PadC( cPom, LEN_TRAKA )
-
 
    ? cLine
 
@@ -298,7 +297,6 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
    ENDIF
 
    ? cPom
-
    ? cLine
 
    SELECT rn
@@ -357,7 +355,6 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
 
       ENDIF
 
-
       cNum := AllTrim( show_number( nRnUkupno, PIC_UKUPNO ) )
 
       // sve spoji pa presjeci
@@ -386,7 +383,7 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
          aRb_row := aRb_row_2
       ENDIF
 
-      // prikazi sve do predzanjeg reda
+      // prikazi sve do predzadnjeg reda
       FOR i := 1 to ( Len( aRb_row ) -1 )
          ? Space( LEN_RAZMAK )
          IF i > 1
@@ -401,7 +398,6 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
       cPom := Trim( aRb_row[ Len( aRb_row ) ] )
       nLen := Len( cPom )
 
-
       // ako se ne moze nastiklati iznos ukupno na zadnji red
       // onda ga i neces dodavati sad
       IF LEN_RAZMAK + LEN_RBR + 1 + nLen + 1 + Len( cNum )  > LEN_TRAKA
@@ -412,10 +408,8 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
          nLen := 0
       ENDIF
 
-
       // ispis zadnjeg reda
       ? Space( LEN_RAZMAK )
-
 
       // nije prvi red napravi indent za redni broj
       IF Len( aRb_row ) > 1
@@ -450,6 +444,8 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
 
    ft_rb_traka()
 
+
+  /*
    FOR i := 1 TO nPFeed
       ?
    NEXT
@@ -464,9 +460,10 @@ FUNCTION st_rb_traka( lStartPrint, lAzurDok )
    IF lStartPrint
       ENDPRN2 13
    ENDIF
+*/
 
-   RETURN
-// }
+   RETURN .T.
+
 
 FUNCTION hd_rb_traka( nRedukcija )
 
@@ -526,30 +523,6 @@ FUNCTION hd_rb_traka( nRedukcija )
    RETURN .T.
 
 
-FUNCTION g_br_stola( cBrStola )
-
-   cBrStola := get_dtxt_opis( "R11" )
-   IF cBrStola == "-"
-      cBrStola := ""
-   ENDIF
-
-   RETURN .T.
-
-
-
-FUNCTION g_vez_racuni( aRacuni )
-
-   LOCAL cRead
-   cRead := get_dtxt_opis( "R12" )
-   IF cRead == "-"
-      aRacuni := {}
-      RETURN .T.
-   ENDIF
-   aRacuni := SjeciStr( cRead, 20 )
-
-   RETURN .T.
-
-
 FUNCTION ft_rb_traka( cIdRadnik )
 
    LOCAL cRadnik
@@ -558,9 +531,9 @@ FUNCTION ft_rb_traka( cIdRadnik )
    LOCAL cPomTxt1
    LOCAL cPomTxt2
    LOCAL cPomTxt3
-   LOCAL cBrStola
-   LOCAL cVezRacuni := ""
-   LOCAL aVezRacuni := {}
+   //LOCAL cBrStola
+   //LOCAL cVezRacuni := ""
+   //LOCAL aVezRacuni := {}
 
    cRadnik := get_dtxt_opis( "R02" )
    cSmjena := get_dtxt_opis( "R03" )
@@ -569,8 +542,8 @@ FUNCTION ft_rb_traka( cIdRadnik )
    cPomTxt2 := get_dtxt_opis( "R07" )
    cPomTxt3 := get_dtxt_opis( "R08" )
 
-   g_br_stola( @cBrStola )
-   g_vez_racuni( @aVezRacuni )
+   //g_br_stola( @cBrStola )
+   //g_vez_racuni( @aVezRacuni )
 
    ? Space( LEN_RAZMAK ) + " " + PadR( cRadnik, 27 ), PadL( "Smjena: " + cSmjena, 10 )
    ?

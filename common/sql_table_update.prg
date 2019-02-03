@@ -60,7 +60,6 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
          cSqlTable := f18_sql_schema( cTable )
       ENDIF
 
-altd()
       // uvijek je algoritam 1 nivo recorda
       _alg := hDbfRec[ "algoritam" ][ 1 ]
 

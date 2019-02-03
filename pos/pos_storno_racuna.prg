@@ -13,7 +13,7 @@
 
 MEMVAR gIdPos
 
-FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumRacuna )
+FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna )
 
    LOCAL cQuery, _qry_ret, oTable
    LOCAL nI, oRow
@@ -46,7 +46,7 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumR
          oTable:Skip()
       ENDDO
 
-      izaberi_racun_iz_liste( aPosStavke, @cBrojRacuna, @dDatumRacuna )
+      izaberi_racun_iz_liste( aPosStavke, @cBrDok, @dDatumRacuna )
 
       lOk := .T.
 
@@ -58,7 +58,7 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumR
 
       lOk := .T.
       oRow := oTable:GetRow()
-      cBrojRacuna := oRow:FieldGet( oRow:FieldPos( "brdok" ) )
+      cBrDok := oRow:FieldGet( oRow:FieldPos( "brdok" ) )
       dDatumRacuna := oRow:FieldGet( oRow:FieldPos( "datum" ) )
 
    ENDIF
@@ -68,7 +68,7 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrojRacuna, dDatumR
 
 
 
-STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrojRacuna, dDatumRacuna )
+STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
 
    LOCAL nRet := 0
    LOCAL nI, _n
@@ -96,7 +96,7 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrojRacuna, dDatumRacuna )
       IF nIzbor == 0
          EXIT
       ELSE
-         cBrojRacuna := arr[ nIzbor, 2 ]
+         cBrDok := arr[ nIzbor, 2 ]
          dDatumRacuna := arr[ nIzbor, 1 ]
          nIzbor := 0
       ENDIF
@@ -123,39 +123,6 @@ STATIC FUNCTION pos_fix_broj_racuna( cBrRacuna )
    RETURN .T.
 
 
-/*
---- FUNCTION pos_storno_fiskalnog_racuna(oBrowse)
-
-   LOCAL nTArea := Select()
-   LOCAL hRec
-   LOCAL dDatum, _broj_rn
-   LOCAL nBrojFiskalnogRacuna := 0
-   LOCAL GetList := {}
-   PRIVATE aVezani := {}
-
-   Box(, 1, 55 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "broj fiskalnog isječka:" GET nBrojFiskalnogRacuna ;
-      VALID pos_vrati_broj_racuna_iz_fiskalnog( nBrojFiskalnogRacuna, @_broj_rn, @dDatum ) PICT "9999999999"
-   READ
-   BoxC()
-
-   IF LastKey() == K_ESC
-      SELECT ( nTArea )
-      RETURN .F.
-   ENDIF
-
-   pos_napravi_u_pripremi_storno_dokument( dDatum, _broj_rn, Str( nBrojFiskalnogRacuna, 10 ) )
-   SELECT ( nTArea )
-
-   oBrowse:goBottom()
-   oBrowse:refreshAll()
-   oBrowse:dehilite()
-
-   DO WHILE !oBrowse:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
-   ENDDO
-
-   RETURN .T.
-*/
 
 FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFiskalnogRacuna )
 
@@ -163,8 +130,6 @@ FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFis
    LOCAL hRec
    LOCAL GetList := {}
    LOCAL cDanasnjiDN := "D"
-
-   PRIVATE aVezani := {}
 
    IF lSilent == nil
       lSilent := .F.

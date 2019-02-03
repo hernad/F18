@@ -18,7 +18,7 @@ FUNCTION pos_main_menu_prodavac()
    LOCAL nIzbor := 1
 
    AAdd( aOpc, "1. priprema računa                        " )
-   AAdd( aOpcExe, {|| _pos_prodavac_racun() } )
+   AAdd( aOpcExe, {|| pos_unos_ispravka_racuna() } )
 
    AAdd( aOpc, "2. pregled ažuriranih računa  " )
    AAdd( aOpcExe, {|| pos_pregled_racuna( .F. ) } )
@@ -39,32 +39,3 @@ FUNCTION pos_main_menu_prodavac()
    CLOSE ALL
 
    RETURN .T.
-
-
-
-STATIC FUNCTION _pos_prodavac_racun()
-
-   pos_unos_ispravka_racuna()
-   zakljuci_pos_racun()
-
-   RETURN .T.
-
-
-/*
-FUNCTION MnuZakljRacuna()
-
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
-   PRIVATE Izbor := 1
-
-   AAdd( opc, "1. napravi zbirni racun            " )
-   AAdd( opcexe, {|| RekapViseRacuna() } )
-   AAdd( opc, "2. pregled nezakljucenih racuna    " )
-   AAdd( opcexe, {|| PreglNezakljRN() } )
-   AAdd( opc, "3. setuj sve RN na zakljuceno      " )
-   AAdd( opcexe, {|| SetujZakljuceno() } )
-
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "zrn" )
-
-   RETURN .T.
-*/

@@ -43,83 +43,6 @@ FUNCTION cre_all_pos( ver )
    CREATE_INDEX ( "ID", "ID", _alias )
    CREATE_INDEX ( "2", "ID+ID2", _alias )
 
-  // aDbf := {}
-  // AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
-  // AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
-  // AAdd ( aDbf, { "IDVD",      "C",  2, 0 } )
-  // AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
-  // AAdd ( aDbf, { "idPartner",    "C",  FIELD_LEN_PARTNER_ID, 0 } )
-  // AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
-  // AAdd ( aDbf, { "IDVRSTEP",  "C",  2, 0 } )
-  // AAdd ( aDbf, { "M1",        "C",  1, 0 } )
-  // AAdd ( aDbf, { "PLACEN",    "C",  1, 0 } )
-  // AAdd ( aDbf, { "PREBACEN",  "C",  1, 0 } )
-  // AAdd ( aDbf, { "SMJENA",    "C",  1, 0 } )
-  // AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
-  // AAdd ( aDbf, { "brdokStorn",   "C",  FIELD_LEN_POS_BRDOK, 0 } )
-  // AAdd ( aDbf, { "C_2",       "C", 10, 0 } )
-  // AAdd ( aDbf, { "C_3",       "C", 50, 0 } )
-
-  // AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
-
-  // _alias := "POS_DOKS"
-  // _table_name := "pos_doks"
-
-
-
-   // ----------------- pos items ---------------
-
-  // aDbf := {}
-
-  // AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
-  // AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
-  // AAdd ( aDbf, { "IDVD",      "C",  2, 0 } )
-  // AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
-  // AAdd ( aDbf, { "RBR",       "C",  FIELD_LEN_POS_RBR, 0 } )
-  // AAdd ( aDbf, { "IDCIJENA",  "C",  1, 0 } )
-  // AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )
-  // // AAdd ( aDbf, { "IDDIO",     "C",  2, 0 } )
-  // AAdd ( aDbf, { "IDODJ",     "C",  2, 0 } )
-  // AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
-  // AAdd ( aDbf, { "IDROBA",    "C", 10, 0 } )
-  // AAdd ( aDbf, { "IDTARIFA",  "C",  6, 0 } )
-  // AAdd ( aDbf, { "KOL2",      "N", 18, 3 } )  // za dokument IN - inventuru
-  // AAdd ( aDbf, { "KOLICINA",  "N", 18, 3 } )
-  // AAdd ( aDbf, { "M1",        "C",  1, 0 } )
-  // AAdd ( aDbf, { "MU_I",      "C",  1, 0 } )
-  // AAdd ( aDbf, { "NCIJENA",   "N", 10, 3 } )
-  // AAdd ( aDbf, { "PREBACEN",  "C",  1, 0 } )
-  // AAdd ( aDbf, { "SMJENA",    "C",  1, 0 } )
-  // AAdd ( aDbf, { "brdokStorn",  "C",  FIELD_LEN_POS_BRDOK, 0 } )
-  // AAdd ( aDbf, { "C_2",        "C", 10, 0 } )
-  // AAdd ( aDbf, { "C_3",        "C", 50, 0 } )
-
-
-
-   // --- promvp - promet po vrstama placanja --
-//   aDbf := {}
-//   AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
-//   AAdd ( aDbf, { "POLOG01",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG02",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG03",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG04",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG05",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG06",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG07",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG08",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG09",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG10",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG11",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "POLOG12",   "N", 10, 2 } )
-//   AAdd ( aDbf, { "UKUPNO",    "N", 10, 3 } )
-/*
-   _alias := "PROMVP"
-   _table_name := "pos_promvp"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "DATUM", _alias )
-   AFTER_CREATE_INDEX
-*/
 
 
    // ----------------------------------------------------------
@@ -251,7 +174,5 @@ FUNCTION g_pos_pripr_fields()
    AAdd( aDBf, { 'N2', 'N',  12,  2 } )
    AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
    AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
-   AAdd( aDBf, { 'C_2', 'C',  10,  0 } )
-   AAdd( aDBf, { 'C_3', 'C',  50,  0 } )
-
+  
    RETURN aDbf

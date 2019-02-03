@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     -- sto character varying(3),
     vrijeme character varying(5),
     brdokStorn character varying(8),
-    c_2 character varying(10),
-    c_3 character varying(50),
+    --c_2 character varying(10),
+    --c_3 character varying(50),
     fisc_rn numeric(10,0),
     -- zak_br numeric(6,0),
     -- sto_br numeric(3,0),
@@ -137,8 +137,8 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos (
     prebacen character varying(1),
     smjena character varying(1),
     -- brdokStorn character varying(8),
-    c_2 character varying(10),
-    c_3 character varying(50),
+    --c_2 character varying(10),
+    --c_3 character varying(50),
     kolicina numeric(18,3),
     kol2 numeric(18,3),
     cijena numeric(10,3),
@@ -247,8 +247,8 @@ CREATE TABLE p15.pos_pos_knjig (
    prebacen character varying(1),
    smjena character varying(1),
    -- brdokStorn character varying(8),
-   c_2 character varying(10),
-   c_3 character varying(50),
+   --c_2 character varying(10),
+   --c_3 character varying(50),
    kolicina numeric(18,3),
    kol2 numeric(18,3),
    cijena numeric(10,3),
@@ -278,8 +278,8 @@ CREATE TABLE p15.pos_doks_knjig (
    smjena character varying(1),
    vrijeme character varying(5),
    brdokStorn character varying(8),
-   c_2 character varying(10),
-   c_3 character varying(50),
+   --c_2 character varying(10),
+   --c_3 character varying(50),
    fisc_rn numeric(10,0),
    rabat numeric(15,5),
    ukupno numeric(15,5)
@@ -302,6 +302,8 @@ ALTER TABLE p15.pos_doks ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS idpartner varchar(6);
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS brdokStorn varchar(8);
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_1;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
 
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto;
@@ -312,11 +314,17 @@ ALTER TABLE p15.pos_doks_knjig ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS idpartner varchar(6);
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS brdokStorn varchar(8);
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS c_1;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
 
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS c_1;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
 
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS c_1;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;

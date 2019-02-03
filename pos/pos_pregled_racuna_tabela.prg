@@ -17,16 +17,11 @@ FUNCTION pos_pregled_racuna_tabela()
    LOCAL GetList := {}
    LOCAL cFilterDatumOdDo
    LOCAL cTekIdPos := gIdPos
-   PRIVATE aVezani := {}
+   LOCAL dDatOd, dDatDo
+
    PRIVATE dMinDatProm := CToD( "" )
 
-  // o_sifk()
-  // o_sifv()
-  // o_pos_kase()
-//   o_roba()
    O__POS_PRIPR
-   //o_pos_doks()
-   //o_pos_pos()
 
    dDatOd := Date()
    dDatDo := Date()
@@ -36,9 +31,9 @@ FUNCTION pos_pregled_racuna_tabela()
    SET CURSOR ON
 
    Box(, 2, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Datumski period:" GET dDatOd
-   @ box_x_koord() + 1, Col() + 2 SAY "-" GET dDatDo
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Prodajno mjesto:" GET gIdPos VALID p_pos_kase( @gIdPos )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodajno mjesto:" GET gIdPos VALID p_pos_kase( @gIdPos )
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datumski period:" GET dDatOd
+   @ box_x_koord() + 2, Col() + 2 SAY "-" GET dDatDo
    READ
    BoxC()
 

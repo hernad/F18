@@ -204,8 +204,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "cijena" ] := priprz->cijena
          hRec[ "smjena" ] := priprz->smjena
          hRec[ "brdokstorn" ] := priprz->brdokStorn
-         hRec[ "c_2" ] := priprz->c_2
-         hRec[ "c_3" ] := priprz->c_3
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
 
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Stavka " + AllTrim( Str( nCount ) ) + " roba: " + hRec[ "idroba" ]

@@ -13,55 +13,22 @@
 
 FUNCTION pos_stampa_racuna_pdv( hParams )
 
-   // cIdPos, cBrDok, lPrepis, cIdVrsteP, dDatumRn, aRacuni, lViseOdjednom, lOnlyFill )
-
    LOCAL cTime
 
-/*
-   IF ( lOnlyFill == NIL )
-      lOnlyFill := .F.
-   ENDIF
-   IF ( lPrepis == NIL )
-      lPrepis := .F.
-   ENDIF
-   IF ( cIdVrsteP == NIL )
-      cIdVrsteP := ""
-   ENDIF
-   IF ( dDatumRn == NIL )
-      dDatumRn := danasnji_datum()
-   ENDIF
-*/
-
-   // napuni tabele podacima
-   // pos_napuni_pos_doks( cIdPos, cBrDok, dDatumRn, lPrepis, aRacuni, @cTime )
-   pos_napuni_pos_doks( hParams )
-
-   lStartPrint := .T.
-   IF lViseOdjednom == .T.
-      lStartPrint := .F.
-   ENDIF
-
-/*
-   IF lOnlyFill  // ako je samo punjenje tabela - ovdje se zaustavi
-      RETURN .T.
-   ENDIF
-*/
+   pos_napuni_drn_rn_dbf( hParams )
 
    IF !fiscal_opt_active() // fiskalni racun - ne stampati !
-      pos_racun_print( lStartPrint )
+      pos_racun_print()
    ENDIF
 
    RETURN cTime
 
 
 
-FUNCTION pos_napuni_pos_doks( hParams )
-
-   // , cIdPos, cBrDok, dDatRn, lPrepis, aRacuni, cTime )
+FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    LOCAL cPosDB
-   LOCAL dDatumRn
-   LOCAL cIdRadnik
+
    LOCAL cSmjena
    LOCAL cIdRoba
    LOCAL cIdTarifa
@@ -77,6 +44,9 @@ FUNCTION pos_napuni_pos_doks( hParams )
    LOCAL nCjen2PDV
    LOCAL nVPDV
    LOCAL nPPDV
+   LOCAL nPDV, nIznPop
+
+   LOCAL nUkStavka
    LOCAL nUkupno
    LOCAL cJmj
 
@@ -91,16 +61,20 @@ FUNCTION pos_napuni_pos_doks( hParams )
    LOCAL nZakBr := 0
    LOCAL nFZaokr := 0
    LOCAL i
+   LOCAL cIdPos := hParams[ "idpos" ]
+   LOCAL dDatum := hParams[ "datum" ]
+   LOCAL cBrDok := hParams[ "brdok" ]
+   LOCAL cIdRadnik := hParams[ "idradnik" ]
 
    close_open_racun_tbl()
    zap_racun_tbl()
    firma_params_fill()
    gvars_fill()
 
-   IF lPrepis == .T.
-      SELECT pos
-   ELSE
+   IF hParams[ "priprema" ]
       SELECT _pos_pripr
+   ELSE
+      SELECT pos
    ENDIF
 
    // checksum
@@ -113,16 +87,10 @@ FUNCTION pos_napuni_pos_doks( hParams )
    nUBPDVPopust := 0
    nUTotal := 0
 
-   dDatRn := hParams[ "datum" ]
-   cBrDok := hParams[ "brdok" ]
-
    IF !hParams[ "priprema" ]
-      cStalRac := cBrDok
-      seek_pos_pos( cIdPos, POS_VD_RACUN, dDatRn, cBrDok )
+      seek_pos_pos( cIdPos, POS_VD_RACUN, dDatum, cBrDok )
 
       SELECT pos_doks
-      cIdRadnik := pos_doks->idRadnik
-      // cSmjena := pos_doks->smjena
       cTime := pos_doks->vrijeme
       cVrstaP := pos_doks->idvrstep
 
@@ -130,8 +98,7 @@ FUNCTION pos_napuni_pos_doks( hParams )
       SELECT _pos_pripr
       SET ORDER TO TAG "1"
       GO TOP
-      SEEK cIdPos + POS_VD_RACUN + DToS( dDatRn ) + cBrDok
-      cIdRadnik := _pos->idradnik
+      SEEK cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok
       // cSmjena := _pos->smjena
       cTime := Left( Time(), 5 )
       cVrstaP := _pos->idvrstep
@@ -156,8 +123,8 @@ FUNCTION pos_napuni_pos_doks( hParams )
 
    AltD()
    DO WHILE !Eof() .AND. iif( !hParams[ "priprema" ], ;
-         pos->( idpos + idvd + DToS( datum ) + brdok ) == ( cIdPos + POS_VD_RACUN + DToS( dDatRn ) + cBrDok ), ;
-         _pos_pripr->( idpos + idvd + DToS( datum ) + brdok ) == ( cIdPos + POS_VD_RACUN + DToS( dDatRn ) + cBrDok ) )
+         ( pos->idpos + pos->idvd + DToS( pos->datum ) + pos->brdok ) == ( cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok ), ;
+         ( _pos_pripr->idpos + _pos_pripr->idvd + DToS( _pos_pripr->datum ) + _pos_pripr->brdok ) == ( cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok ) )
 
       nCjenBPDV := 0
       nCjenPDV := 0
@@ -232,21 +199,19 @@ FUNCTION pos_napuni_pos_doks( hParams )
       ++nCSum
 
       // cre_porezna_faktura_dbf.prg
-      dodaj_stavku_racuna( cStalRac, Str( nCSum, 3 ), "", cIdRoba, cRobaNaz, cJmj, nKolicina, Round( nCjenPDV, 3 ), Round( nCjenBPDV, 3 ), Round( nCjen2PDV, 3 ), Round( nCjen2BPDV, 3 ), Round( nPopust, 2 ), Round( nPPDV, 2 ), Round( nVPDV, 3 ), Round( nUkStavka, 3 ), 0, 0 )
+      dodaj_stavku_racuna( cBrDok, Str( nCSum, 3 ), "", cIdRoba, cRobaNaz, cJmj, nKolicina, Round( nCjenPDV, 3 ), Round( nCjenBPDV, 3 ), Round( nCjen2PDV, 3 ), Round( nCjen2BPDV, 3 ), Round( nPopust, 2 ), Round( nPPDV, 2 ), Round( nVPDV, 3 ), Round( nUkStavka, 3 ), 0, 0 )
 
-      IF lPrepis == .T.
-         SELECT pos
-      ELSE
+      IF hParams[ "priprema" ]
          SELECT _pos_pripr
+      ELSE
+         SELECT pos
       ENDIF
-
       SKIP
 
    ENDDO
 
-
    // dodaj zapis u drn.dbf
-   add_drn( cStalRac, dDatRn, NIL, NIL, cTime, Round( nUBPDV, 2 ), Round( nUPopust, 2 ), Round( nUBPDVPopust, 2 ), Round( nUPDV, 2 ), Round( nUTotal - nFZaokr, 2 ), nCSum, 0, nFZaokr, 0 )
+   add_drn( cBrDok, dDatum, NIL, NIL, cTime, Round( nUBPDV, 2 ), Round( nUPopust, 2 ), Round( nUBPDVPopust, 2 ), Round( nUPDV, 2 ), Round( nUTotal - nFZaokr, 2 ), nCSum, 0, nFZaokr, 0 )
    // mjesto nastanka racuna
    add_drntext( "R01", gRnMjesto )
    // dodaj naziv radnika

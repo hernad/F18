@@ -229,7 +229,7 @@ METHOD set_module_gvars()
    PUBLIC gServerPath := PadR( "i:" + SLASH + "sigma", 40 )
    PUBLIC gKalkDEST := PadR( "a:" + SLASH, 300 )
    PUBLIC gUseChkDir := "N"
-   PUBLIC gStrValuta := Space( 4 )
+  // PUBLIC gStrValuta := Space( 4 )
    // upit o nacinu placanja
    PUBLIC gUpitNp := "N"
    // podaci kase - zaglavlje
@@ -270,7 +270,7 @@ METHOD set_module_gvars()
    gServerPath := fetch_metric( "PutanjaServera", NIL, gServerPath )
    gKalkDest := fetch_metric( "KalkDestinacija", my_user(), gKalkDest )
    gUseChkDir := fetch_metric( "KoristitiDirektorijProvjere", my_user(), gUseChkDir )
-   gStrValuta := fetch_metric( "StranaValuta", NIL, gStrValuta )
+   //gStrValuta := fetch_metric( "StranaValuta", NIL, gStrValuta )
    gLocPort := fetch_metric( "OznakaLokalnogPorta", my_user(), gLocPort )
    gGotPlac := fetch_metric( "OznakaGotovinskogPlacanja", NIL, gGotPlac )
    gDugPlac := fetch_metric( "OznakaDugPlacanja", NIL, gDugPlac )

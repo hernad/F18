@@ -17,6 +17,7 @@ STATIC cBrDok
 STATIC dDatum
 STATIC cIdRadnik
 
+MEMVAR Kol, ImeKol
 
 FUNCTION pos_lista_azuriranih_dokumenata()
 
@@ -208,8 +209,10 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          hParams[ "idpos" ] := pos_doks->idpos
          hParams[ "datum" ] := pos_doks->datum
          hParams[ "brdok" ] := pos_doks->brdok
-         hParams[ "napuni_dbf" ] := .F.
-         pos_racun_stampa_priprema( hParams )
+         hParams[ "idradnik" ] := pos_doks->idradnik
+         hParams[ "samo_napuni_rn_dbf" ] := .F.
+         hParams[ "priprema" ] := .F.
+         pos_stampa_racuna_pdv( hParams )
          // ENDIF
 
       CASE pos_doks->IdVd == "16"
@@ -220,7 +223,6 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
       CASE pos_doks->IdVd == POS_VD_REKLAMACIJA
          pos_stampa_azuriranog_zaduzenja( "REKLAMACIJA" )
-
 
       CASE pos_doks->IdVd == "IN"
          pos_prepis_inventura_nivelacija( .T. )
@@ -242,10 +244,14 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       hParams[ "idpos" ] := pos_doks->idpos
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "brdok" ] := pos_doks->brdok
-      hParams[ "napuni_dbf" ] := .T.
-      pos_racun_stampa_priprema( hParams )
+      hParams[ "idradnik" ] := pos_doks->idradnik
+      hParams[ "idvrstep" ] := pos_doks->idvrstep
+      hParams[ "vrijeme" ] := pos_doks->vrijeme
+      hParams[ "samo_napuni_rn_dbf" ] := .T.
+      hParams[ "priprema" ] := .F.
+      pos_napuni_drn_rn_dbf( hParams )
 
-      //SELECT pos_doks
+      // SELECT pos_doks
       pos_porezna_faktura_traka( .T. )
 
       SELECT pos_doks

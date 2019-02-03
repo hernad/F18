@@ -73,7 +73,6 @@ FUNCTION pos_brisi_dokument( cIdPos, cIdTipDok, dDatDok, cBrDok )
 
 
 
-
 FUNCTION pos_dokument_postoji( cIdPos, cIdvd, dDatum, cBroj )
 
    LOCAL lRet := .F.
@@ -97,59 +96,50 @@ FUNCTION pos_dokument_postoji( cIdPos, cIdvd, dDatum, cBroj )
    RETURN lRet
 
 
-
-
-FUNCTION pos_povrat_rn( cPosBrDok, dDatumPosRacun )
+FUNCTION pos_povrat_racuna( cIdPos, cBrDok, dDatumPosRacun )
 
    LOCAL nTArea := Select()
    LOCAL hRec
    LOCAL nCount := 0
+   LOCAL cIdRoba
 
-   // LOCAL GetList := {}
-
-   IF Empty( cPosBrDok )
+   IF Empty( cBrDok )
       SELECT ( nTArea )
       RETURN .F.
    ENDIF
 
-   cPosBrDok := PadL( AllTrim( cPosBrDok ), FIELD_LEN_POS_BRDOK )
+   cBrDok := PadL( AllTrim( cBrDok ), FIELD_LEN_POS_BRDOK )
 
-   seek_pos_pos( gIdPos, "42",  dDatumPosRacun,  cPosBrDok )
+   MsgO( "Povrat POS računa " + cBrDok + " u pripremu ... " )
 
-   MsgO( "Povrat dokumenta " + cPosBrDok + " u pripremu ... " )
+   seek_pos_pos( cIdPos, "42",  dDatumPosRacun,  cBrDok )
+   DO WHILE !Eof() .AND. field->idpos == cIdPos .AND. field->brdok == cBrDok .AND. field->idvd == "42"
 
-   DO WHILE !Eof() .AND. field->idpos == gIdPos .AND. field->brdok == cPosBrDok .AND. field->idvd == "42"
-
-      cT_roba := field->idroba
-      select_o_roba( cT_roba )
+      cIdRoba := field->idroba
+      select_o_roba( cIdRoba )
 
       SELECT pos
 
       hRec := dbf_get_rec()
       hb_HDel( hRec, "rbr" )
-
       SELECT _pos_pripr
       APPEND BLANK
-
       hRec[ "robanaz" ] := roba->naz
-
       dbf_update_rec( hRec )
-
       ++nCount
 
       SELECT pos
       SKIP
 
    ENDDO
-
-   msgC()
+   MsgC()
 
    IF nCount > 0
       log_write( "F18_DOK_OPER, povrat dokumenta u pripremu: " + ;
-         AllTrim( gIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cPosBrDok ) + " " + DToC( dDatumPosRacun ), 2 )
+         AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( dDatumPosRacun ), 2 )
    ENDIF
 
-   pos_brisi_dokument( gIdPos, POS_VD_RACUN, dDatumPosRacun, cPosBrDok )
+   pos_brisi_dokument( cIdPos, POS_VD_RACUN, dDatumPosRacun, cBrDok )
 
    SELECT ( nTArea )
 

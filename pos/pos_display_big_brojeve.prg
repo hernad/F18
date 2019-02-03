@@ -78,7 +78,6 @@ FUNCTION SetNazDVal()
    // LOCAL lOpened
 
    select_o_valute()
-
    PushWA()
 
    // lOpened := .T.
@@ -96,8 +95,8 @@ FUNCTION SetNazDVal()
 
    GO TOP
 
-   Seek2( "P" )
-   gStrValuta := AllTrim( naz2 )
+   //Seek2( "P" )
+   //gStrValuta := AllTrim( naz2 )
 
    // IF !lOpened
    // USE

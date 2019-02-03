@@ -18,7 +18,6 @@ FUNCTION pos_pregled_racuna( lAdmin )
    LOCAL dDatum := NIL
    LOCAL cDanasnjiRacuni := "D"
    LOCAL GetList := {}
-   PRIVATE aVezani := {}
 
    IF lAdmin == NIL
       lAdmin := .F.
@@ -44,8 +43,10 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    LOCAL i
    LOCAL cFilter
    LOCAL cIdPos
+   LOCAL bRacunMarkiran := NIL
+   LOCAL cFnc
 
-   PRIVATE fMark := .F.
+   // PRIVATE  := .F.
 
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
@@ -112,16 +113,16 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    ENDIF
 
    IF fPrep
-      cFnc := "<Enter>-Odabir   <+>-Markiraj/Demarkiraj   <P>-Pregled"
-      fMark := .T.
-      bMarkF := {|| pos_racun_obiljezen () }
+      cFnc := "<Enter>-Odabir   <P>-Pregled"
+      // fMark := .T.
+      // bRacunMarkiran := {|| pos_racun_obiljezen () }
    ELSE
       cFnc := "<Enter>-Odabir          <P>-Pregled"
-      bMarkF := NIL
+      // bRacunMarkiran := NIL
    ENDIF
 
    KEYBOARD '\'
-   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh ) }, _u( " POS RAČUNI " ), "", NIL, cFnc,, bMarkF )
+   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh ) }, _u( " POS RAČUNI " ), "", NIL, cFnc,, bRacunMarkiran )
 
    SET FILTER TO
 
@@ -145,7 +146,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    LOCAL hRec
    LOCAL nFiscNo
    LOCAL GetList := {}
-   LOCAL hParams := hb_hash()
+   LOCAL hParams := hb_Hash()
 
    SELECT pos_doks
 
@@ -162,13 +163,17 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "F"
-      hParams["idpos"] := pos_doks->idpos
-      hParams["datum"] := pos_doks->datum
-      hParams["brdok"] := pos_doks->brdok
-      hParams["napuni_dbf"] := .T.
-      hParams["priprema"] := .F.
-      pos_racun_stampa_priprema(hParams)
-      SELECT pos_doks
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+      hParams[ "idradnik" ] := pos_doks->idradnik
+      hParams[ "idvrstep" ] := pos_doks->idvrstep
+      hParams[ "vrijeme" ] := pos_doks->vrijeme
+      hParams[ "samo_napuni_rn_dbf" ] := .T.
+      hParams[ "priprema" ] := .F.
+      pos_napuni_drn_rn_dbf( hParams )
+
+      // SELECT pos_doks
       pos_porezna_faktura_traka( .T. )
       SELECT pos_doks
       RETURN DE_REFRESH
@@ -201,6 +206,5 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
       ENDIF
 
    ENDIF
-
 
    RETURN ( DE_CONT )

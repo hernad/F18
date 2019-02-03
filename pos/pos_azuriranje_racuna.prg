@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdPartner )
+FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    LOCAL cDokument := ""
    LOCAL hRec
@@ -23,7 +23,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdPartner
    hParams[ "tran_name" ] := "pos_rn_azur"
 
    o_pos_tables()
-   IF !racun_se_moze_azurirati( cIdPos, POS_VD_RACUN, danasnji_datum(), cBrojRacuna )
+   IF !racun_se_moze_azurirati( cIdPos, POS_VD_RACUN, danasnji_datum(), cBrDok )
       RETURN lRet
    ENDIF
 
@@ -47,12 +47,12 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdPartner
 
    APPEND BLANK
 
-   cDokument := AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrojRacuna ) + " " + DToC( danasnji_datum() )
+   cDokument := AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( danasnji_datum() )
    hRec := dbf_get_rec()
    hRec[ "idpos" ] := cIdPos
    hRec[ "idvd" ] := POS_VD_RACUN
    hRec[ "datum" ] := danasnji_datum()
-   hRec[ "brdok" ] := cBrojRacuna
+   hRec[ "brdok" ] := cBrDok
    hRec[ "vrijeme" ] := cVrijeme
    hRec[ "idvrstep" ] := iif( cNacPlac == NIL, gGotPlac, cNacPlac )
    hRec[ "idPartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
@@ -74,7 +74,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdPartner
          hRec[ "idpos" ] := cIdPos
          hRec[ "idvd" ] := POS_VD_RACUN
          hRec[ "datum" ] := danasnji_datum()
-         hRec[ "brdok" ] := cBrojRacuna
+         hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
          hRec[ "m1" ] := OBR_JEST
          hRec[ "prebacen" ] := OBR_NIJE
@@ -88,9 +88,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrojRacuna, cVrijeme, cNacPlac, cIdPartner
          hRec[ "ncijena" ] := _pos_pripr->ncijena
          hRec[ "cijena" ] := _pos_pripr->cijena
          hRec[ "smjena" ] := _pos_pripr->smjena
-
-         hRec[ "c_2" ] := _pos_pripr->c_2
-         hRec[ "c_3" ] := _pos_pripr->c_3
 
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
          IF !lOk

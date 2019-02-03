@@ -14,51 +14,42 @@
 
 FUNCTION pos_unos_ispravka_racuna()
 
-   LOCAL lRet
-   LOCAL lNoviRacun := .T.
+   LOCAL lStalnoUnos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" ) == "D"
 
-   SetKXLat( "'", "-" )
+   DO WHILE .T.
 
-   o_pos_tables()
+      //SetKXLat( "'", "-" )
+      o_pos_tables()
+      SELECT _pos_pripr
+      IF reccount2() <> 0
+         IF AllTrim( field->brdok ) != POS_BRDOK_PRIPREMA
+            GO TOP // ako je racun vracen u pripremu, inicijaliziraj brdok
+            DO WHILE !Eof()
+               RREPLACE brdok WITH POS_BRDOK_PRIPREMA
+            ENDDO
+            GO TOP
+         ENDIF
+      ENDIF
 
-   SELECT _pos_pripr
+      //SET KEY "'" to
+      my_close_all_dbf()
 
-   IF reccount2() <> 0 .AND. AllTrim( field->brdok ) == POS_BRDOK_PRIPREMA
-      lNoviRacun := .F.
-   ENDIF
-
-   unos_stavki_racuna( lNoviRacun )
-
-   SET KEY "'" to
-
-   my_close_all_dbf()
-
-   RETURN lRet
+      IF pos_racun_unos_browse( POS_BRDOK_PRIPREMA )
+         pos_zakljuci_racun()
+      ELSE
+         EXIT
+      ENDIF
 
 
-STATIC FUNCTION unos_stavki_racuna( lNovi )
-
-   LOCAL cBrojRacuna
-
-   SELECT _pos_pripr
-   GO TOP
-
-   IF lNovi
-      cBrojRacuna := PadR( POS_BRDOK_PRIPREMA, FIELD_LEN_POS_BRDOK )
-   ELSE
-      cBrojRacuna := _pos_pripr->brdok
-   ENDIF
-
-   pos_unos_racuna( cBrojRacuna )
+   ENDDO
 
    RETURN .T.
 
 
-
-FUNCTION zakljuci_pos_racun()
+FUNCTION pos_zakljuci_racun()
 
    LOCAL lRet := .F.
-   LOCAL lOtvoriUnos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" ) == "D"
+
    LOCAL hParam := hb_Hash()
 
    O__POS_PRIPR
@@ -74,63 +65,48 @@ FUNCTION zakljuci_pos_racun()
    hParam[ "datum" ] := _pos_pripr->datum
    hParam[ "brdok" ] := _pos_pripr->brdok
    hParam[ "idpartner" ] := Space( 6 )
-   hParam[ "idvrstap" ] := "01"
+   hParam[ "idvrstep" ] := "01"
    hParam[ "zakljuci" ] := "D"
    hParam[ "uplaceno" ] := 0
    hParam[ "idpartner" ] := _pos_pripr->idpartner
 
-   form_zakljuci_racun( @hParam )
-
-   IF hParam[ "zakljuci" ] == "D"
+   IF pos_form_zakljucenje_racuna( @hParam )
       lRet := azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParam )
    ENDIF
 
    my_close_all_dbf()
-   IF lOtvoriUnos .AND. lRet
-      pos_unos_ispravka_racuna()
-      lRet := zakljuci_pos_racun()
-   ENDIF
 
    RETURN lRet
 
 
 STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
-  // LOCAL _br_dok := hParams[ "brdok" ]
-  // LOCAL _id_pos := hParams[ "idpos" ]
-  // LOCAL _id_vrsta_p := hParams[ "idvrstap" ]
-  // LOCAL _id_partner := hParams[ "idpartner" ]
-  // LOCAL _uplaceno := hParams[ "uplaceno" ]
    LOCAL lOk := .T.
-   LOCAL lRet := .F.
-   LOCAL cVrijemeRacuna
-   LOCAL cBrojRacuna
+   LOCAL cVrijeme
+   LOCAL cBrDok
 
    o_pos_tables()
-   //IF ( Len( aRabat ) > 0 )
-  //    ReCalcRabat( hParams[ "idvrstap"] )
-  // ENDIF
 
    SELECT pos_doks
 
-   cBrojRacuna := pos_novi_broj_dokumenta( hPArams["idpos"], POS_VD_RACUN )
-   cVrijemeRacuna := PadR( Time(), 5 )
-   lOk := pos_azuriraj_racun( hParams["idpos"], cBrojRacuna, cVrijemeRacuna, hParams["idvrstap"], hParams["idpartner"] )
+   cBrDok := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_VD_RACUN )
+   cVrijeme := PadR( Time(), 5 )
+
+   lOk := pos_azuriraj_racun( hParams[ "idpos" ], cBrDok, cVrijeme, hParams[ "idvrstep" ], hParams[ "idpartner" ] )
 
    IF !lOk
       MsgBeep( "Greška sa ažuriranjem računa u kumulativ !" )
-      RETURN lRet
+      RETURN .F.
    ENDIF
 
-   pos_racun_info( cBrojRacuna )
+   pos_racun_info( cBrDok )
 
    IF fiscal_opt_active()
-      //pos_stampa_fiskalni_racun( _id_pos, danasnji_datum(), cBrojRacuna, _uplaceno )
       pos_stampa_fiskalni_racun( hParams )
    ENDIF
    my_close_all_dbf()
 
-   RETURN lOk
+   RETURN .T.
 
 
 STATIC FUNCTION pos_racun_info( cBrRn )
@@ -141,14 +117,6 @@ STATIC FUNCTION pos_racun_info( cBrRn )
 
 
 STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
-
-//cIdPos, dDatum, cBrRn, nUplaceno )
-
-   //LOCAL _br_dok := hParams[ "brdok" ]
-   //LOCAL _id_pos := hParams[ "idpos" ]
-   //LOCAL _id_vrsta_p := hParams[ "idvrstap" ]
-   //LOCAL _id_partner := hParams[ "idpartner" ]
-   //LOCAL _uplaceno := hParams[ "uplaceno" ]
 
    LOCAL nDeviceId
    LOCAL hDeviceParams
@@ -165,17 +133,15 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
       RETURN lRet
    ENDIF
 
-   nError := pos_fiskalni_racun( hParams["idpos"], hParams["datum"], hParams["brdok"], hDeviceParams, hParams["uplaceno"] )
-
-   IF nError = -20
+   nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "uplaceno" ] )
+   IF nError == -20
       IF Pitanje(, "Da li je nestalo trake u fiskalnom uređaju (D/N)?", "N" ) == "N"
          nError := 20
       ENDIF
    ENDIF
-
    IF nError > 0
-      MsgBeep( "Greška pri štampi fiskalog računa " + hParams["brdok"] + " !?##Račun se iz tog razloga BRIŠE" )
-      pos_povrat_rn( hParams["brdok"], hParams["datum"] )
+      MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun se iz tog razloga BRIŠE" )
+      pos_povrat_racuna( hParams[ "idpos" ], hParams[ "brdok" ], hParams[ "datum" ] )
    ENDIF
 
    lRet := .T.
@@ -226,21 +192,18 @@ STATIC FUNCTION ispisi_iznos_i_kusur_za_kupca( uplaceno, iznos_rn, pos_x, pos_y 
 
 
 
-STATIC FUNCTION form_zakljuci_racun( hParams )
+STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
 
-   LOCAL _def_partner := .F.
+   LOCAL lUnesiKupca := .F.
    LOCAL _id_vd := hParams[ "idvd" ]
    LOCAL _id_pos := hParams[ "idpos" ]
    LOCAL _br_dok := hParams[ "brdok" ]
    LOCAL _dat_dok := hParams[ "datum" ]
-   LOCAL _ok := hParams[ "zakljuci" ]
-   LOCAL _id_vrsta_p := hParams[ "idvrstap" ]
-   LOCAL _id_partner := hParams[ "idpartner" ]
-   LOCAL _uplaceno := hParams[ "uplaceno" ]
+   LOCAL cIdVrsteP := hParams[ "idvrstep" ]
+   LOCAL cIdPartner := hParams[ "idpartner" ]
+   LOCAL nUplaceno := hParams[ "uplaceno" ]
+   LOCAL cAzuriratiDN := "D"
    LOCAL GetList := {}
-
-   _id_vrsta_p := gGotPlac
-
 
    Box(, 8, 67 )
 
@@ -250,69 +213,36 @@ STATIC FUNCTION form_zakljuci_racun( hParams )
    // KT - kartica
    // VR - virman
    // CK - cek
-
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "FORMA ZAKLJUČENJA RAČUNA" COLOR "BG+/B"
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Način plaćanja (01/KT/VR...):" GET _id_vrsta_p PICT "@!" VALID p_vrstep( @_id_vrsta_p )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "ZAKLJUČENJE RAČUNA" COLOR "BG+/B"
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Način plaćanja (01/KT/VR...):" GET cIdVrsteP PICT "@!" VALID p_vrstep( @cIdVrsteP )
 
    READ
 
-   IF _id_vrsta_p <> gGotPlac
-      _def_partner := .T.
+   IF cIdVrsteP <> gGotPlac
+      lUnesiKupca := .T.
    ENDIF
 
-   IF _def_partner
-      @ box_x_koord() + 4, box_y_koord() + 2 SAY "Kupac:" GET _id_partner PICT "@!" VALID p_partner( @_id_partner )
+   IF lUnesiKupca
+      @ box_x_koord() + 4, box_y_koord() + 2 SAY "Kupac:" GET cIdPartner PICT "@!" VALID p_partner( @cIdPartner )
    ELSE
-      _id_partner := Space( 6 )
+      cIdPartner := Space( FIELD_LEN_PARTNER_ID )
    ENDIF
 
-   @ _x_pos := box_x_koord() + 5, _y_pos := box_y_koord() + 2 SAY8 "Kupac uplatio:" GET _uplaceno PICT "9999999.99" ;
-      VALID {|| IF ( _uplaceno <> 0, ispisi_iznos_i_kusur_za_kupca( _uplaceno, koliko_treba_povrata_kupcu( hParams ), _x_pos, _y_pos ), .T. ), .T. }
+   @ nX := box_x_koord() + 5, nY := box_y_koord() + 2 SAY8 "Kupac uplatio:" GET nUplaceno PICT "9999999.99" ;
+      VALID {|| IF ( nUplaceno <> 0, ispisi_iznos_i_kusur_za_kupca( nUplaceno, koliko_treba_povrata_kupcu( hParams ), nX, nY ), .T. ), .T. }
 
-   @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Ažurirati POS račun (D/N) ?" GET _ok PICT "@!" VALID _ok $ "DN"
-
+   @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Ažurirati POS račun (D/N) ?" GET cAzuriratiDN PICT "@!" VALID cAzuriratiDN $ "DN"
    READ
 
    BoxC()
 
-   IF LastKey() == K_ESC
-      _ok := "D"
+   IF LastKey() == K_ESC .OR. cAzuriratiDN == "N"
+      RETURN .F.
    ENDIF
 
-   hParams[ "zakljuci" ] := _ok
-   hParams[ "idpartner" ] := _id_partner
-   hParams[ "idvrstap" ] := _id_vrsta_p
-   hParams[ "uplaceno" ] := _uplaceno
+   hParams[ "zakljuci" ] := "D"
+   hParams[ "idpartner" ] := cIdPartner
+   hParams[ "idvrstep" ] := cIdVrsteP
+   hParams[ "uplaceno" ] := nUplaceno
 
    RETURN .T.
-
-
-
-FUNCTION pos_racun_obiljezen()
-
-   IF AScan ( aVezani, {| x | x[ 1 ] + DToS( x[ 4 ] ) + x[ 2 ] == pos_doks->( IdPos + DToS( datum ) + BrDok ) } ) > 0
-      RETURN .T.
-   ENDIF
-
-   RETURN .F.
-
-
-
-FUNCTION StrValuta( cNaz2, dDat )
-
-   LOCAL nTekSel
-
-   nTekSel := Select()
-   SELECT valute
-   SET ORDER TO TAG "NAZ2"
-   cNaz2 := PadR( cNaz2, 4 )
-   SEEK PadR( cNaz2, 4 ) + DToS( dDat ) // valute
-   IF valute->naz2 <> cnaz2
-      SKIP -1
-   ENDIF
-   SELECT ( nTekSel )
-   IF valute->naz2 <> cnaz2
-      RETURN 0
-   ELSE
-      RETURN valute->kurs1
-   ENDIF
