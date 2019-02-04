@@ -187,7 +187,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "idvd" ] := priprz->idvd
          hRec[ "datum" ] := priprz->datum
          hRec[ "brdok" ] := priprz->brdok
-         hRec[ "idcijena" ] := priprz->idcijena
          hRec[ "idradnik" ] := priprz->idradnik
          hRec[ "idroba" ] := priprz->idroba
          hRec[ "idtarifa" ] := priprz->idtarifa
@@ -271,14 +270,14 @@ STATIC FUNCTION pos_azuriraj_artikal_u_sifarniku(cIdVd)
    ENDIF
 
    hRec[ "idtarifa" ] := priprz->idtarifa
-   hRec[ "k1" ] := priprz->k1
-   hRec[ "k2" ] := priprz->k2
-   hRec[ "k7" ] := priprz->k7
-   hRec[ "k8" ] := priprz->k8
-   hRec[ "k9" ] := priprz->k9
-   hRec[ "n1" ] := priprz->n1
-   hRec[ "n2" ] := priprz->n2
-   hRec[ "barkod" ] := priprz->barkod
+  -- hRec[ "k1" ] := priprz->k1
+--   hRec[ "k2" ] := priprz->k2
+--   hRec[ "k7" ] := priprz->k7
+--   hRec[ "k8" ] := priprz->k8
+--   hRec[ "k9" ] := priprz->k9
+--   hRec[ "n1" ] := priprz->n1
+--   hRec[ "n2" ] := priprz->n2
+    hRec[ "barkod" ] := priprz->barkod
    lOk := update_rec_server_and_dbf( "roba", hRec, 1, "CONT" )
 
    RETURN lOk

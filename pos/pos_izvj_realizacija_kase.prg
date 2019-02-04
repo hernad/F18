@@ -18,7 +18,7 @@ STATIC s_oPDF
 
 FUNCTION realizacija_kase
 
-   PARAMETERS fZaklj, dDatum0, dDatum1, cVarijanta
+   PARAMETERS fZaklj, dDatum0, dDatum1
    LOCAL xPrintOpt
    LOCAL bZagl
 
@@ -42,8 +42,6 @@ FUNCTION realizacija_kase
 
    SET CURSOR ON
 
-   cK1 := "N"
-
    IF fZaklj
       cPVrstePl := "D"
    ENDIF
@@ -57,7 +55,7 @@ FUNCTION realizacija_kase
       cVarijanta := "0"
    ELSEIF ( cVarijanta == "2" )
       cVarijanta := "0"
-      cK1 := "D"
+
    ENDIF
 
    pos_realizacija_tbl_cre_pom()
@@ -71,7 +69,7 @@ FUNCTION realizacija_kase
    cGotZir := " "
 
 
-   IF pos_get_vars_izvjestaj_realizacija( @cK1, @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @aUsl1, @aUsl2, @cVrsteP, @cAPrometa, @cGotZir, @cSifraDob, @cPartId ) == 0
+   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @aUsl1, @aUsl2, @cVrsteP, @cAPrometa, @cGotZir, @cSifraDob, @cPartId ) == 0
       RETURN 0
    ENDIF
 
@@ -141,7 +139,7 @@ FUNCTION realizacija_kase
    RETURN .T.
 
 
-STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cK1, cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, aUsl1, aUsl2, cVrsteP, cAPrometa, cGotZir, cSifraDob, cPartId )
+STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, aUsl1, aUsl2, cVrsteP, cAPrometa, cGotZir, cSifraDob, cPartId )
 
    LOCAL aNiz
 
@@ -160,11 +158,9 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cK1, cIdPos, dDatum0, dDatum
    AAdd( aNiz, { "Prikazati Pazar/Robe/Oboje (P/R/O)?", "fPrik", "fPrik$'PRO'", "@!", } )
    cRD := "R"
 
-   IF cK1 == "D"
-      cRd := "O"
-   ELSE
-      AAdd( aNiz, { "Po Radnicima/Odjeljenjima/oBoje (R/O/B)?", "cRD", "cRD$'ROB'", "@!", } )
-   ENDIF
+
+   AAdd( aNiz, { "Po Radnicima/Odjeljenjima/oBoje (R/O/B)?", "cRD", "cRD$'ROB'", "@!", } )
+
 
    AAdd( aNiz, { "Prikazati pregled po vrstama placanja ?", "cPVrstePl", "cPVrstePl$'DN'", "@!", } )
    AAdd( aNiz, { "Vrijeme od", "cVrijOd",, "99:99", } )
@@ -494,30 +490,23 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
             _IdRoba := POM->idRoba
             nRobaIzn := 0
             nRobaKol := 0
-            nSetova := 0
-            nRobaIzn2 := 0
+
+
             nRobaIzn3 := 0
-            DO WHILE !Eof() .AND. POM->( IdPos + IdRoba ) == ( _IdPos + _IdRoba )
-               nKol := 0
-               nIzn := 0
-               nIzn2 := 0
-               nIzn3 := 0
-               _IdCijena := POM->IdCijena
-               DO WHILE !Eof() .AND. POM->( IdPos + IdRoba + IdCijena ) == ( _IdPos + _IdRoba + _IdCijena )
-                  nKol += POM->Kolicina
-                  nIzn += POM->Iznos
-                  nIzn2 += POM->Iznos2
-                  nIzn3 += POM->Iznos3
+            DO WHILE !Eof() .AND. POM->IdPos + POM->IdRoba == _IdPos + _IdRoba
+
+                  nRobaKol += POM->Kolicina
+                  nRobaIzn += POM->Iznos
+                  nRobaIzn3 += POM->Iznos3
 
                   SKIP
+             ENDDO
 
-               ENDDO
+             cStr2 := ""
+             cStr2 += show_number( nRobaKol, NIL, - 8 )
+             nLen2 := Len( cStr2 )
 
-               cStr2 := ""
-               cStr2 += show_number( nKol, NIL, - 8 )
-               nLen2 := Len( cStr2 )
-
-               cStr3 := show_number( nIzn, PIC_UKUPNO )
+               cStr3 := show_number( nRobaIzn, PIC_UKUPNO )
                nLen3 := Len( cStr3 )
 
                aReal := SjeciStr( cStr1, LEN_TRAKA )
@@ -533,21 +522,8 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
                   ?? PadL( cStr2 + Space( LEN_RAZMAK ) + cStr3, LEN_TRAKA - nLenRow )
                ENDIF
 
-               IF glPorNaSvStRKas
-                  pos_prikazi_porez( nIzn, roba->idTarifa )
-               ENDIF
-
-               nRobaIzn += nIzn
-               nRobaIzn2 += nIzn2
-               nRobaIzn3 += nIzn3
-               nRobaKol += nKol
-               nSetova++
                SELECT POM
-            ENDDO
-            IF nSetova > 1
-               ? PadL( "Ukupno roba ", 16 ), Str( nRobaKol, 10, 3 )
-               ?? Transform( nRobaIzn, "999,999,999.99" )
-            ENDIF
+
             nTotPos += nRobaIzn
             nTotPos3 += nRobaIzn3
          ENDDO
@@ -612,11 +588,6 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
    IF ( fPrik $ "PO" )
       // daj mi pazar
       ?
-      IF cK1 == "D"
-         ? PadC( "PROMET PO GRUPAMA", LEN_TRAKA )
-      ELSE
-         ? PadC( "PROMET PO ODJELJENJIMA", LEN_TRAKA )
-      ENDIF
       ? PadC( "------------------------------------", LEN_TRAKA )
       ?
       ? "Sifra Naziv odjeljenja          IZNOS"
@@ -664,15 +635,12 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
       ENDIF
    ENDIF
 
-   IF ( fPrik $ "RO" ) .OR. cK1 == "D"
+   IF fPrik $ "RO"
       // realizacija kase, po odjeljenjima, ROBNO
       nTotal := 0
       SELECT POM
-      IF cK1 == "D"
-         SET ORDER TO TAG "K1"   // IdPos+IdRoba+IdCijena
-      ELSE
-         SET ORDER TO TAG "2"   // IdPos+IdRoba+IdCijena
-      ENDIF
+      SET ORDER TO TAG "2"   // IdPos+IdRoba
+
       GO TOP
       DO WHILE !Eof()
          _IdPos := POM->IdPos
@@ -708,17 +676,17 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
                nRobaKol := 0
                nSetova := 0
                DO WHILE !Eof() .AND. pom->idPos + pom->IdRoba == _IdPos + _IdRoba
-                  _IdCijena := POM->IdCijena
+
                   nKol := 0
                   nIzn := 0
                   nIzn3 := 0
-                  DO WHILE !Eof() .AND. pom->IdPos + pom->IdRoba + pom->IdCijena ==  _IdPos + _+ _IdRoba + _IdCijena
+                  DO WHILE !Eof() .AND. pom->IdPos + pom->IdRoba ==  _IdPos + _+ _IdRoba
                      nKol += POM->Kolicina
                      nIzn += POM->Iznos
                      nIzn3 += POM->Iznos3
                      SKIP
                   ENDDO
-                  ? Space( 10 ) + PadC( _IdCijena, 6 ) + Str( nKol, 10, 3 ) + Transform( nIzn, "999,999,999.99" )
+                  ? Space( 10 ) + Str( nKol, 10, 3 ) + Transform( nIzn, "999,999,999.99" )
                   nRobaIzn += nIzn
                   nRobaKol += nKol
                   nRobaIzn3 += nIzn3
@@ -745,7 +713,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
             nTotPosK += nTotOdjk
          ENDDO
 
-         pos_total_kasa( _IdPos, nTotPos, nTotPos3, nTotPosk, cK1, "=" )
+         pos_total_kasa( _IdPos, nTotPos, nTotPos3, nTotPosk, "=" )
          nTotal += nTotPos
          nTotal3 += nTotPos3
       ENDDO
@@ -760,15 +728,10 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
 
 
 
-STATIC FUNCTION pos_total_kasa( cIdPos, nTotPos, nTotPos3, nTotPosk, cK1, cPodvuci )
+STATIC FUNCTION pos_total_kasa( cIdPos, nTotPos, nTotPos3, nTotPosk, cPodvuci )
 
    ? REPL( cPodvuci, LEN_TRAKA )
-   IF cK1 == "D"
-      ? PadC( "UKUPNO KASA " + _idpos, 16 ), Str( nTotPosK, 10, 2 )
-      ?? Transform( nTotPos, "999,999,999.99" )
-   ELSE
-      ? PadC( "UKUPNO KASA " + _idpos, 25 ), Transform( nTotPos, "999,999,999.99" )
-   ENDIF
+   ? PadC( "UKUPNO KASA " + _idpos, 25 ), Transform( nTotPos, "999,999,999.99" )
 
    IF nTotPos3 <> 0
       ? PadL( NenapPop(), 25 ) + Str( nTotPos3, 15, 2 )
@@ -821,8 +784,7 @@ STATIC FUNCTION pos_realizacija_tbl_cre_pom()
    AAdd( aDbf, { "Iznos", "N", 20, 5 } )
    AAdd( aDbf, { "Iznos2", "N", 20, 5 } )
    AAdd( aDbf, { "Iznos3", "N", 20, 5 } )
-   AAdd( aDbf, { "K1", "C",  4, 0 } )
-   AAdd( aDbf, { "K2", "C",  4, 0 } )
+
 
    pos_cre_pom_dbf( aDbf )
 
@@ -843,6 +805,5 @@ STATIC FUNCTION o_pom_table()
    INDEX ON ( IdPos + IdRoba + IdCijena ) TAG "2"
    INDEX ON ( IdPos + IdRoba + IdCijena ) TAG "3"
    INDEX ON ( IdPos + IdVrsteP ) TAG "4"
-   INDEX ON ( IdPos + K1 + idroba ) TAG "K1"
 
    RETURN .T.

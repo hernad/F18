@@ -44,7 +44,6 @@ FUNCTION cre_all_pos( ver )
    CREATE_INDEX ( "2", "ID+ID2", _alias )
 
 
-
    // ----------------------------------------------------------
    // _POS, _PRIPR, PRIPRZ, PRIPRG, _POSP
    // ----------------------------------------------------------
@@ -55,8 +54,8 @@ FUNCTION cre_all_pos( ver )
 
    IF_NOT_FILE_DBF_CREATE
 
-   CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+STR(Cijena,10,3)", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdRadnik+GT+IdRoba", _alias )
+   CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+STR(Cijena,10,3)", _alias )
+   CREATE_INDEX ( "3", "IdVd+IdRadnik+IdRoba", _alias )
 
    _alias := "_POSP"
    _table_name := "_posp"
@@ -131,8 +130,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
    AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )
    AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
-   AAdd ( aDbf, { "GT",        "C",  1, 0 } )
-   AAdd ( aDbf, { "IDCIJENA",  "C",  1, 0 } )
    AAdd ( aDbf, { "idPartner",    "C",  FIELD_LEN_PARTNER_ID, 0 } )
    AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
@@ -152,20 +149,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
    AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
 
-   AAdd( aDBf, { 'K1', 'C',   4,  0 } )
-   // planika: dobavljac   - grupe artikala
-   AAdd( aDBf, { 'K2', 'C',   4,  0 } )
-   // planika: stavljaju se oznake za velicinu obuce
-   // X - ne broji se parovno
-
-   AAdd( aDBf, { 'K7', 'C',   1,  0 } )
-   AAdd( aDBf, { 'K8', 'C',   2,  0 } )
-   AAdd( aDBf, { 'K9', 'C',   3,  0 } )
-   // planika: stavljaju se oznake za velicinu obuce
-   // X - ne broji se parovno
-
-   AAdd( aDBf, { 'N1', 'N',  12,  2 } )
-   AAdd( aDBf, { 'N2', 'N',  12,  2 } )
    AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
    AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
 

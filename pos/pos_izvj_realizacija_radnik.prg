@@ -232,18 +232,18 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
          nRobaIzn := 0
          nRobaIzn3 := 0
          DO WHILE !Eof() .AND. POM->IdRoba == _IdRoba
-            _IdCijena := POM->IdCijena
+
             nIzn := 0
             nIzn3 := 0
             nKol := 0
-            DO WHILE !Eof() .AND. POM->( IdRoba + IdCijena ) == ( _IdRoba + _IdCijena )
+            DO WHILE !Eof() .AND. POM->IdRoba == _IdRoba
                nKol += POM->Kolicina
                nIzn += POM->Iznos
                nIzn3 += POM->Iznos3
                SELECT POM
                SKIP
             ENDDO
-            ? PadL ( _IdCijena, 11 ), Str ( nKol, 12, 3 ), Str ( nIzn, 15, 2 )
+            ? Str ( nKol, 12, 3 ), Str ( nIzn, 15, 2 )
             nTotal += nIzn
             nTotal3 += nIzn3
          ENDDO
@@ -275,12 +275,12 @@ STATIC FUNCTION zagl_radnik()
 
 STATIC FUNCTION zagl_roba()
 
-   LOCAL cLinija := REPL ( "-", 11 ) + " " + REPL ( "-", 12 ) + " " + REPL ( "-", 15 )
+   LOCAL cLinija := REPL ( "-", 12 ) + " " + REPL ( "-", 15 )
 
    ?U
    ?U cLinija
    ?U PadR ( "Šifra", 10 ), PadR ( "Naziv robe", 21 )
-   ?U PadL ( "Set c.", 11 ), PadC ( "Količina", 12 ), PadC ( "Iznos", 15 )
+   ?U PadC ( "Količina", 12 ), PadC ( "Iznos", 15 )
    ?U cLinija
 
    RETURN .T.

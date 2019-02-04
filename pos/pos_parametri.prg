@@ -300,7 +300,6 @@ FUNCTION pos_param_cijene()
    AAdd ( aNiz, { "Popust zadavanjem procenta             ", "gPopProc", "gPopProc$'DN'", , } )
    AAdd ( aNiz, { "Popust preko određenog iznosa (iznos):", "gPopIzn",, "999999.99", } )
    AAdd ( aNiz, { "                  procenat popusta (%):", "gPopIznP",, "999.99", } )
-   AAdd ( aNiz, { "Koristiti set cijena                  :", "gSetMPCijena",, "9", } )
    VarEdit( aNiz, 9, 2, 20, 78, "PARAMETRI RADA PROGRAMA - CIJENE", "B1" )
 
    o_params()
@@ -313,7 +312,6 @@ FUNCTION pos_param_cijene()
       set_metric( "PopustProcenat", nil, gPopProc )
       set_metric( "PopustIznos", nil, gPopIzn )
       set_metric( "PopustVrijednostProcenta", nil, gPopIznP )
-      set_metric( "pos_set_cijena", nil, gSetMPCijena )
    ENDIF
 
    RETURN .T.

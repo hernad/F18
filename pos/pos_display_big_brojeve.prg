@@ -397,33 +397,6 @@ FUNCTION SkloniIznRac()
 
 
 
-/*
- *     Promjena seta cijena
- *  todo Ovu funkciju treba ugasiti, zajedno sa konceptom vise setova cijena, to treba generalno revidirati jer prakticno niko i ne koristi, a knjigovodstveno je sporno
-
-
--- FUNCTION PromIdCijena()
-
-   LOCAL i := 0, j := Len( SC_Opisi )
-   LOCAL cbsstara := ShemaBoja( "B1" )
-
-   box_crno_na_zuto( 5, 1, 6 + j + 2, 78, "SETOVI CIJENA", cbnaslova,, cbokvira, cbteksta, 0 )
-   FOR i := 1 TO j
-      @ 6 + i, 2 SAY IF( Val( gIdCijena ) == i, "->", "  " ) + ;
-         Str( i, 3 ) + ". " + PadR( SC_Opisi[ i ], 40 ) + ;
-         IF( Val( gIdCijena ) == i, " <- tekuci set", "" )
-   NEXT
-   VarEdit( { { "Oznaka seta cijena", "gIdCijena", "VAL(gIdCijena)>0.and.VAL(gIdCijena)<=LEN(SC_Opisi)",, } }, ;
-      6 + j + 3, 1, 6 + j + 7, 78, "IZBOR SETA CIJENA", "B1" )
-   box_crno_na_zuto_end()
-   ShemaBoja( cBsstara )
-   pos_status_traka()
-
-   RETURN .T.
-
-*/
-
-
 
 FUNCTION NazivRobe( cIdRoba )
 
@@ -487,7 +460,7 @@ FUNCTION pos_status_traka()
    LOCAL _x := f18_max_rows() - 3
    LOCAL _y := 0
 
-   @ 1, _y + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " CIJENE:" + gIdCijena + " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
+   @ 1, _y + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
 
    IF gIdPos == "X "
       @ _x, _y + 1 SAY8 PadC( "$$$ --- PRODAJNO MJESTO X ! --- $$$", f18_max_cols() - 2, "█" )

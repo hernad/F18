@@ -56,7 +56,6 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
    AAdd( ImeKol, { _u( "Šifra" ), {|| id }, "" } )
    AAdd( ImeKol, { PadC( "Naziv", 40 ), {|| PadR( naz, 40 ) }, "" } )
    AAdd( ImeKol, { PadC( "JMJ", 5 ), {|| PadC( jmj, 5 ) }, "" } )
-   AAdd( ImeKol, { "Cijena set: " + gSetMPCijena, {|| PadL( AllTrim( Str( pos_get_mpc(), 12, 3 ) ), 12 ) }, "" } )
    AAdd( ImeKol, { "BARKOD", {|| roba->barkod }, "" } )
 
    FOR nI := 1 TO Len( ImeKol )

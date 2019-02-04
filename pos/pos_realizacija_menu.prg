@@ -33,8 +33,7 @@ FUNCTION pos_menu_realizacija()
    AAdd( opcexe, NIL )
 // #endif
 
-   AAdd( opc, "5. realizacija po K1" )
-   AAdd( opcexe, {|| realizacija_kase( .F.,,, "2" ) } )
+
 
    f18_menu_sa_priv_vars_opc_opcexe_izbor( "real" )
 

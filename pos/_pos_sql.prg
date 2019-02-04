@@ -23,7 +23,7 @@ CREATE TABLE fmk.pos_pos
   idvd character varying(2),
   brdok character varying(6),
   datum date,
-  idcijena character varying(1),
+  -- idcijena character varying(1),
   -- idodj character(2),
   idradnik character varying(4),
   idroba character(10),
@@ -376,7 +376,7 @@ FUNCTION h_pos_pos_indexes()
 
    LOCAL hIndexes := hb_Hash()
 
-   hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+Rbr"
+   hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+Rbr"
    hIndexes[ "2" ] := "idroba+DTOS(Datum)"
    hIndexes[ "4" ] := "dtos(datum)"
    hIndexes[ "5" ] := "IdPos+idroba+DTOS(Datum)"
@@ -570,10 +570,6 @@ FUNCTION pos_get_mpc()
    LOCAL cField
    LOCAL oData, cQry
 
-   IF !pos_get_mpc_valid()
-      MsgBeep( "Set cijena nije podešen ispravno !" )
-      RETURN 0
-   ENDIF
 
    cField := pos_get_mpc_field()
 
@@ -596,11 +592,14 @@ FUNCTION pos_get_mpc()
 STATIC FUNCTION pos_get_mpc_field()
 
    LOCAL cField := "mpc"
+
+   /*
    LOCAL cSet := AllTrim( gSetMPCijena )
 
    IF cSet <> "1"
       cField := cField + cSet
    ENDIF
+   */
 
    RETURN cField
 

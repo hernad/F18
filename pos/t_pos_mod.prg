@@ -108,9 +108,7 @@ METHOD set_module_gvars()
    // status radnika
    PUBLIC gSTRAD
 
-   // identifikator seta cijena koji se
-   PUBLIC gSetMPCijena := "1"
-   PUBLIC gIdCijena := "1"
+
    PUBLIC gPopust := 0
    PUBLIC gPopDec := 2
    PUBLIC gPopZcj := "N"
@@ -183,7 +181,6 @@ METHOD set_module_gvars()
 
    // postavljanje globalnih varijabli
    PUBLIC gLocPort := "LPT1"
-   PUBLIC gIdCijena := "1"
    PUBLIC gDiskFree := "N"
    PUBLIC grbCjen := 2
    PUBLIC grbStId := "D"
@@ -326,8 +323,7 @@ METHOD set_module_gvars()
    grbReduk := fetch_metric( "RacunRedukcijaTrake", NIL, grbReduk )
 
    // cijene
-   gSetMPCijena := fetch_metric( "pos_set_cijena", NIL, gSetMPCijena )
-   gIdCijena := fetch_metric( "SetCijena", NIL, gIdCijena )
+
    gPopust := fetch_metric( "Popust", NIL, gPopust )
    gPopDec := fetch_metric( "PopustDecimale", NIL, gPopDec )
    // gPopVar := fetch_metric( "PopustVarijanta", NIL, gPopVar )
@@ -372,7 +368,6 @@ METHOD set_module_gvars()
    gPosModem := "D"
 
    PUBLIC glPorezNaSvakuStavku := .F.
-   PUBLIC glPorNaSvStRKas := .F.
 
    IF select_o_pos_kase( gIdPos )
       gPosNaz := AllTrim( KASE->Naz )

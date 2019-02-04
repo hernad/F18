@@ -4,47 +4,47 @@ ALTER SCHEMA p15 OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS  p15.roba (
     id character(10) NOT NULL,
-    match_code character(10),
+    -- match_code character(10),
     sifradob character(20),
     naz character varying(250),
     jmj character(3),
     idtarifa character(6),
-    nc numeric(18,8),
-    vpc numeric(18,8),
+    -- nc numeric(18,8),
+    -- vpc numeric(18,8),
     mpc numeric(18,8),
     tip character(1),
-    carina numeric(5,2),
+    -- carina numeric(5,2),
     opis text,
-    vpc2 numeric(18,8),
-    mpc2 numeric(18,8),
-    mpc3 numeric(18,8),
-    k1 character(4),
-    k2 character(4),
-    n1 numeric(12,2),
-    n2 numeric(12,2),
-    plc numeric(18,8),
+    -- vpc2 numeric(18,8),
+    -- mpc2 numeric(18,8),
+    -- mpc3 numeric(18,8),
+    --k1 character(4),
+    --k2 character(4),
+    --n1 numeric(12,2),
+    --n2 numeric(12,2),
+    -- plc numeric(18,8),
     mink numeric(12,2),
-    _m1_ character(1),
+    -- _m1_ character(1),
     barkod character(13),
-    zanivel numeric(18,8),
-    zaniv2 numeric(18,8),
-    trosk1 numeric(15,5),
-    trosk2 numeric(15,5),
-    trosk3 numeric(15,5),
-    trosk4 numeric(15,5),
-    trosk5 numeric(15,5),
+    -- zanivel numeric(18,8),
+    -- zaniv2 numeric(18,8),
+    -- trosk1 numeric(15,5),
+    -- trosk2 numeric(15,5),
+    -- trosk3 numeric(15,5),
+    -- trosk4 numeric(15,5),
+    -- trosk5 numeric(15,5),
     fisc_plu numeric(10,0),
-    k7 character(4),
-    k8 character(4),
-    k9 character(4),
-    strings numeric(10,0),
-    idkonto character(7),
-    mpc4 numeric(18,8),
-    mpc5 numeric(18,8),
-    mpc6 numeric(18,8),
-    mpc7 numeric(18,8),
-    mpc8 numeric(18,8),
-    mpc9 numeric(18,8)
+    --k7 character(4),
+    --k8 character(4),
+    --k9 character(4),
+    -- strings numeric(10,0),
+    -- idkonto character(7),
+    -- mpc4 numeric(18,8),
+    -- mpc5 numeric(18,8),
+    -- mpc6 numeric(18,8),
+    -- mpc7 numeric(18,8),
+    -- mpc8 numeric(18,8),
+    -- mpc9 numeric(18,8)
 );
 ALTER TABLE p15.roba OWNER TO admin;
 
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos (
     idvd character varying(2),
     brdok character varying(6),
     datum date,
-    idcijena character varying(1),
+    -- idcijena character varying(1),
     --idodj character(2),
     idradnik character varying(4),
     idroba character(10),
@@ -223,7 +223,7 @@ CREATE TABLE p15.pos_pos_knjig (
    idvd character varying(2),
    brdok character varying(6),
    datum date,
-   idcijena character varying(1),
+   -- idcijena character varying(1),
    --idodj character(2),
    idradnik character varying(4),
    idroba character(10),
@@ -242,7 +242,7 @@ CREATE TABLE p15.pos_pos_knjig (
    rbr character varying(5)
 );
 ALTER TABLE p15.pos_pos_knjig OWNER TO admin;
-CREATE INDEX pos_pos_id1_knjig ON p15.pos_pos_knjig USING btree (idpos, idvd, datum, brdok, idroba, idcijena);
+CREATE INDEX pos_pos_id1_knjig ON p15.pos_pos_knjig USING btree (idpos, idvd, datum, brdok, idroba);
 CREATE INDEX pos_pos_id2_knjig ON p15.pos_pos_knjig USING btree (idroba, datum);
 -- CREATE INDEX pos_pos_id3_knjig ON p15.pos_pos_knjig USING btree (prebacen);
 CREATE INDEX pos_pos_id4_knjig ON p15.pos_pos_knjig USING btree (datum);
@@ -322,6 +322,7 @@ ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS idodj;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS mu_i;
+ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS idcijena;
 
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN brdok TYPE varchar(8);
@@ -333,5 +334,42 @@ ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS idodj;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS mu_i;
+ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS idcijena;
+
+
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS k1;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS k2;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS k7;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS k8;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS k9;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS n1;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS n2;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS match_code;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS nc;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS vpc;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS carina;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS vpc2;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc2;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc3;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc4;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc5;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc6;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc7;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc8;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc9;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS _m1_;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS plc;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS zanivel;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS zaniv2;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk1;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk2;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk3;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk4;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk5;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS strings;
+ALTER TABLE p15.roba DROP COLUMN IF EXISTS idkonto;
+
+
+
 
 DROP TABLE IF EXISTS p15.pos_dokspf;

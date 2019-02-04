@@ -77,7 +77,6 @@ FUNCTION pos_zaduzenje( cIdVd )
    _BrDok := Space( FIELD_LEN_POS_BRDOK )
    _Datum := dDatRada
    _IdRadnik := gIdRadnik
-   _IdCijena := "1"
 
    Box(, 6, f18_max_cols() - 15 )
 
@@ -137,12 +136,6 @@ FUNCTION pos_zaduzenje( cIdVd )
       _idtarifa := roba->idtarifa
       _cijena := iif( Empty( _cijena ), pos_get_mpc(), _cijena )
       _barkod := roba->barkod
-      _n1 := roba->n1
-      _n2 := roba->n2
-      _k1 := roba->k1
-      _k2 := roba->k2
-      _k7 := roba->k7
-      _k9 := roba->k9
 
       SELECT priprz
       Gather()
@@ -195,42 +188,6 @@ STATIC FUNCTION pos_valid_roba_zaduzenje( cIdRoba, nX, nY )
 
    RETURN lOk .AND. ( gDupliArt == "D" .OR.  pos_zaduzenje_provjeri_duple_stavke( cIdroba ) )
 
-
-
-/*
-// ----------------------------------------------------------
-// setuje u sifranik mpc
-// ----------------------------------------------------------
--- FUNCTION StUSif()
-
-   LOCAL nDbfArea := Select()
-   LOCAL hRec
-   LOCAL _tmp
-
-   IF gSetMPCijena == "1"
-      _tmp := "mpc"
-   ELSE
-      _tmp := "mpc" + AllTrim( gSetMPCijena )
-   ENDIF
-
-// --   IF gZadCij == "D"
-//
-//       IF _cijena <> pos_get_mpc() .AND. Pitanje(, "Staviti u šifarnik novu cijenu? (D/N)", "D" ) == "D"
-//
-//          SELECT ( F_ROBA )
-//          hRec := dbf_get_rec()
-//          hRec[ _tmp ] := _cijena
-//
-//          update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
-//
-//          SELECT ( nDbfArea )
-//       ENDIF
-//
-//    ENDIF
-
-
-   RETURN .T.
-*/
 
 
 STATIC FUNCTION pos_set_key_handler_ispravka_zaduzenja()
@@ -287,7 +244,6 @@ FUNCTION pos_ispravi_zaduzenje()
    LOCAL aConds
    LOCAL aProcs
 
-altd()
    pos_unset_key_handler_ispravka_zaduzenja()
 
    cGetId := _idroba
@@ -311,7 +267,6 @@ altd()
    pos_set_key_handler_ispravka_zaduzenja()
 
    RETURN .T.
-
 
 
 FUNCTION pos_brisi_stavku_zaduzenja()

@@ -63,13 +63,8 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
             REPLACE Kolicina WITH pos->Kolicina
             REPLACE Iznos WITH pos->Kolicina * POS->Cijena
             REPLACE Iznos3 WITH nNeplaca
-
-            // IF gPopVar == "A"
             REPLACE Iznos2 WITH pos->nCijena
-            // ENDIF
-            IF roba->( FieldPos( "K1" ) ) <> 0
-               REPLACE K2 WITH roba->K2, K1 WITH roba->K1
-            ENDIF
+
 
          ELSE
             REPLACE Kolicina WITH Kolicina + POS->Kolicina

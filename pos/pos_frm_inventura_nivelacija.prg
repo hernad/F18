@@ -163,7 +163,6 @@ FUNCTION pos_inventura_nivelacija()
 
                _BrDok := cBrDok
                _IdVd := cIdVd
-               _IdCijena := "1"
                _IdRadnik := gIdRadnik
                _IdPos := gIdPos
                _datum := dDatRada
@@ -510,7 +509,6 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
          _kol2 := 0
          _brdok := cBrDok
          _idvd := cIdVd
-         _idcijena := "1"
          _idradnik := gIdRadnik
          _idpos := gIdPos
          _cijena := 0
@@ -718,7 +716,6 @@ STATIC FUNCTION update_ip_razlika()
          hRec[ "kolicina" ] := nKolicinaZaInventuru
          hRec[ "brdok" ] := _rec2[ "brdok" ]
          hRec[ "datum" ] := _rec2[ "datum" ]
-         hRec[ "idcijena" ] := _rec2[ "idcijena" ]
          hRec[ "idpos" ] := _rec2[ "idpos" ]
          hRec[ "idradnik" ] := _rec2[ "idradnik" ]
          hRec[ "idvd" ] := _rec2[ "idvd" ]
