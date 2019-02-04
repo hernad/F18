@@ -140,7 +140,7 @@ FUNCTION Stanje2Fakt()
          ELSEIF POS->idvd $ "42#01#IN#NI#96"
             DO CASE
             CASE POS->IdVd == "IN"
-               nIzlaz += ( POS->Kolicina - POS->Kol2 )
+               nIzlaz += POS->Kolicina - POS->Kol2
                nVrijednost -= ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
             CASE POS->IdVd == POS_VD_NIV
                // ne mijenja kolicinu
@@ -196,4 +196,4 @@ FUNCTION Stanje2Fakt()
 
    CLOSERET
 
-   RETURN
+   RETURN .T.
