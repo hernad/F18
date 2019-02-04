@@ -167,8 +167,6 @@ STATIC FUNCTION dodaj_taksu_za_gorivo_na_pos_racun( nKolicina )
    hRec["brdok"] := hPrviRec["brdok"]
    hRec["datum"] := hPrviRec["datum"]
    hRec["sto"] := hPrviRec["sto"]
-   hRec["smjena"] := hPrviRec["smjena"]
-   hRec["idodj"] := hPrviRec["idodj"]
    hRec["idradnik"] := hPrviRec["idradnik"]
    hRec["idcijena"] := hPrviRec["idcijena"]
    hRec["prebacen"] := hPrviRec["prebacen"]

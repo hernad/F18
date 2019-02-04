@@ -56,7 +56,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    hRec[ "idpartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
    hRec[ "idradnik" ] := _pos_pripr->idradnik
    hRec[ "prebacen" ] := OBR_JEST
-   hRec[ "smjena" ] := _pos_pripr->smjena
    hRec[ "brdokstorn" ] := _pos_pripr->brdokStorn
 
    lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
@@ -74,7 +73,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
          hRec[ "prebacen" ] := OBR_NIJE
-         hRec[ "idodj" ] := _pos_pripr->idodj
          hRec[ "idcijena" ] := _pos_pripr->idcijena
          hRec[ "idradnik" ] := _pos_pripr->idradnik
          hRec[ "idroba" ] := _pos_pripr->idroba
@@ -83,7 +81,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "mu_i" ] := _pos_pripr->mu_i
          hRec[ "ncijena" ] := _pos_pripr->ncijena
          hRec[ "cijena" ] := _pos_pripr->cijena
-         hRec[ "smjena" ] := _pos_pripr->smjena
 
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
          IF !lOk

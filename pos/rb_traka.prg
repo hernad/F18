@@ -526,17 +526,12 @@ FUNCTION hd_rb_traka( nRedukcija )
 FUNCTION ft_rb_traka( cIdRadnik )
 
    LOCAL cRadnik
-   LOCAL cSmjena
    LOCAL cVrstaP
    LOCAL cPomTxt1
    LOCAL cPomTxt2
    LOCAL cPomTxt3
-   //LOCAL cBrStola
-   //LOCAL cVezRacuni := ""
-   //LOCAL aVezRacuni := {}
 
    cRadnik := get_dtxt_opis( "R02" )
-   cSmjena := get_dtxt_opis( "R03" )
    cVrstaP := get_dtxt_opis( "R05" )
    cPomTxt1 := get_dtxt_opis( "R06" )
    cPomTxt2 := get_dtxt_opis( "R07" )
@@ -545,7 +540,7 @@ FUNCTION ft_rb_traka( cIdRadnik )
    //g_br_stola( @cBrStola )
    //g_vez_racuni( @aVezRacuni )
 
-   ? Space( LEN_RAZMAK ) + " " + PadR( cRadnik, 27 ), PadL( "Smjena: " + cSmjena, 10 )
+   ? Space( LEN_RAZMAK ) + " " + PadR( cRadnik, 27 )
    ?
 
    ? Space( LEN_RAZMAK ) + " Placanje izvrseno: " + cVrstaP

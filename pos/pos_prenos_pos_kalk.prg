@@ -58,7 +58,7 @@ FUNCTION pos_katops_priprz()
    MsgO( "kalk -> priprema, update roba " )
    DO WHILE !Eof()
       IF ( katops->idpos == cIdPos )
-         IF import_row( cIdTipDok, cBrDok, "" ) == 0
+         IF import_row( cIdTipDok, cBrDok ) == 0
             lOk := .F.
             EXIT
          ENDIF
@@ -118,7 +118,7 @@ STATIC FUNCTION uslovi_za_insert_ispunjeni()
    RETURN lOk
 
 
-STATIC FUNCTION import_row( cIdTipDk, cBrDok, cIdOdj )
+STATIC FUNCTION import_row( cIdTipDk, cBrDok )
 
    LOCAL nDbfArea := Select()
 
@@ -157,9 +157,7 @@ STATIC FUNCTION import_row( cIdTipDk, cBrDok, cIdOdj )
    REPLACE PREBACEN WITH OBR_NIJE
    REPLACE IDRADNIK WITH gIdRadnik
    REPLACE IdPos WITH KATOPS->IdPos
-   REPLACE IdOdj WITH cIdOdj
    REPLACE IdVd WITH cIdTipDk
-   REPLACE Smjena WITH gSmjena
    REPLACE BrDok WITH cBrDok
    REPLACE DATUM WITH danasnji_datum()
 

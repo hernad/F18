@@ -22,7 +22,6 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
    PRIVATE cIdRadnik := Space( 4 )
    PRIVATE cVrsteP := Space( 60 )
    PRIVATE cFilterVrstePlacanja := ".t."
-   PRIVATE cSmjena := Space( 1 )
    PRIVATE cIdPos := pos_prodajno_mjesto()
 
    PRIVATE dDatOd := danasnji_datum()
@@ -134,11 +133,10 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
    pos_radnik_izvuci ( POS_VD_RACUN )
 
    SELECT pos_doks
-   SET ORDER TO TAG "2"       // "DOKSi2", "IdVd+DTOS (Datum)+Smjena"
+   SET ORDER TO TAG "2"       // "DOKSi2", "IdVd+DTOS (Datum)"
    IF !( cFilterVrstePlacanja == ".t." )
       SET FILTER TO &cFilterVrstePlacanja
    ENDIF
-
 
    IF cPrikazPazarRoba $ "PO"
       nTotal := 0
@@ -307,7 +305,7 @@ FUNCTION pos_radnik_izvuci( cIdVd )
    seek_pos_doks_2( cIdVd, dDatOd )
    DO WHILE ! Eof() .AND. IdVd == cIdVd .AND. pos_doks->Datum <= dDatDo
 
-      IF ( !pos_admin() .AND. pos_doks->idpos = "X" ) .OR. ( pos_doks->IdPos = "X" .AND. AllTrim ( cIdPos ) <> "X" ) .OR. ( !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos ) .OR. ( !Empty( cSmjena ) .AND. pos_doks->Smjena <> cSmjena ) .OR. ( !Empty( cIdRadnik ) .AND. pos_doks->IdRadnik <> cIdRadnik )
+      IF ( !pos_admin() .AND. pos_doks->idpos = "X" ) .OR. ( pos_doks->IdPos = "X" .AND. AllTrim ( cIdPos ) <> "X" ) .OR. ( !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos ) .OR. ( !Empty( cIdRadnik ) .AND. pos_doks->IdRadnik <> cIdRadnik )
          SKIP
          LOOP
       ENDIF
@@ -321,11 +319,6 @@ FUNCTION pos_radnik_izvuci( cIdVd )
 
 
          select_o_roba( pos->idroba )
-
-         IF roba->( FieldPos( "idodj" ) ) <> 0
-            // SELECT odj
-            select_o_pos_odj( roba->idodj )
-         ENDIF
 
          nNeplaca := 0
          nNeplaca += pos->( NCijena * kolicina )

@@ -32,7 +32,6 @@ FUNCTION pos_kartica_artikla()
    // LOCAL cPPar
    LOCAL GetList := {}
 
-   PRIVATE cIdOdj := Space( 2 )
    PRIVATE dDatum0 := danasnji_datum()
    PRIVATE dDatum1 := danasnji_datum()
    PRIVATE cPredhodnoStanje := "D"

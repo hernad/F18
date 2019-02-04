@@ -114,31 +114,22 @@ FUNCTION Stanje2Fakt()
 
    SELECT POS
 
-   // ("2", "IdOdj+idroba+DTOS(Datum)", KUMPATH+"POS")
+   // ("2", "idroba+DTOS(Datum)", KUMPATH+"POS")
    SET ORDER TO TAG "2"
 
    GO TOP
 
-   cIdOdj := Space( 2 )
    nRBr := 0
-   SEEK cIdOdj
-   // do while !eof()
-   // cIdOdj:=IdOdj
-   DO WHILE !Eof() .AND. POS->IdOdj == cIdOdj
+
+   DO WHILE !Eof()
       nStanje := 0
       nVrijednost := 0
       nUlaz := nIzlaz := 0
       cIdRoba := POS->IdRoba
       nUlaz := nIzlaz := nVrijednost := 0
       SELECT pos
-      DO WHILE !Eof() .AND. POS->IdOdj == cIdOdj .AND. POS->IdRoba == cIdRoba
+      DO WHILE !Eof() .AND. POS->IdRoba == cIdRoba
          IF ( !pos_admin() .AND. pos->idpos = "X" ) .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
-            SKIP
-            LOOP
-         ENDIF
-
-         IF pos->idvd == "96"
-            // otpremnice za robu - zdravo
             SKIP
             LOOP
          ENDIF
@@ -163,7 +154,6 @@ FUNCTION Stanje2Fakt()
          SKIP
       ENDDO
 
-
       select_o_roba( cIdRoba )
       SELECT topsfakt
       nKolicina := nUlaz - nIzlaz
@@ -187,8 +177,6 @@ FUNCTION Stanje2Fakt()
 
    ENDDO
 
-   // ------------------------------------------------------------------
-
    CLOSE ALL
 
    cLokacija := PadR( "A:\", 40 )
@@ -209,4 +197,3 @@ FUNCTION Stanje2Fakt()
    CLOSERET
 
    RETURN
-// }

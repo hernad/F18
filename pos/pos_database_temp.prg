@@ -77,7 +77,7 @@ FUNCTION pos2_pripr()
    RETURN .T.
 
 
-FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik, cIdOdj )
+FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik )
 
    LOCAL cSta
    LOCAL cBrDok
@@ -98,14 +98,14 @@ FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik, cIdOdj )
    SELECT _pos
    SET ORDER TO TAG "2"
 
-   SEEK cIdVd + cIdOdj
+   SEEK cIdVd
    IF Found()
       IF _pos->idradnik <> cIdRadnik
          MsgBeep ( "Drugi radnik je počeo raditi pripremu " + cSta + "#" + "AKO NASTAVITE, PRIPREMA SE BRIŠE !", 30 )
          IF Pitanje(, "Želite li nastaviti (D/N) ?", " " ) == "N"
             RETURN .F.
          ENDIF
-         DO WHILE !Eof() .AND. _POS->( IdVd + IdOdj ) == ( cIdVd + cIdOdj )
+         DO WHILE !Eof() .AND. _POS->IdVd == cIdVd
             Del_Skip()
          ENDDO
 
@@ -115,13 +115,13 @@ FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik, cIdOdj )
          Beep ( 3 )
 
          IF Pitanje(, "Počeli ste pripremu! Želite li nastaviti? (D/N)", "D" ) == "N"
-            DO WHILE !Eof() .AND. _POS->( IdVd + IdOdj ) == ( cIdVd + cIdOdj )
+            DO WHILE !Eof() .AND. _POS->IdVd == cIdVd
                Del_Skip()
             ENDDO
             MsgBeep ( "Priprema je izbrisana ... " )
          ELSE
             SELECT _POS
-            DO WHILE !Eof() .AND. _POS->( IdVd + IdOdj ) == ( cIdVd + cIdOdj )
+            DO WHILE !Eof() .AND. _POS->IdVd == cIdVd
                Scatter()
                SELECT PRIPRZ
                APPEND BLANK

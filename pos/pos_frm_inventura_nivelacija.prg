@@ -68,12 +68,6 @@ FUNCTION pos_inventura_nivelacija()
       fSadAz := .F.
    ENDIF
 
-   IF fIzZad
-   ELSE
-      PRIVATE cIdOdj := Space( 2 )
-      //PRIVATE cIdDio := Space( 2 )
-   ENDIF
-
    o_pos_tables()
 
    SET CURSOR ON
@@ -82,13 +76,6 @@ FUNCTION pos_inventura_nivelacija()
 
       aNiz := {}
 
-      //IF gVodiOdj == "D"
-      //   AAdd( aNiz, { "Sifra odjeljenja", "cIdOdj", "P_Odj(@cIdOdj)",, } )
-      //ENDIF
-
-      //IF gPostDO == "D" .AND. fInvent
-      //   AAdd( aNiz, { "Sifra dijela objekta", "cIdDio", "P_Dio(@cIdDio)",, } )
-      //ENDIF
 
       AAdd( aNiz, { "Datum rada", "dDatRada", "dDatRada <= DATE()",, } )
 
@@ -109,7 +96,7 @@ FUNCTION pos_inventura_nivelacija()
    cUI_U := R_U
    cUI_I := R_I
 
-   IF !pos_vrati_dokument_iz_pripr( cIdVd, gIdRadnik, cIdOdj )
+   IF !pos_vrati_dokument_iz_pripr( cIdVd, gIdRadnik )
       my_close_all_dbf()
       RETURN .F.
    ENDIF
@@ -145,7 +132,7 @@ FUNCTION pos_inventura_nivelacija()
 
 
          seek_pos_pos_2()
-         DO WHILE !Eof() .AND. field->idodj == cIdOdj
+         DO WHILE !Eof()
 
             IF pos->datum > dDatRada
                SKIP
@@ -154,7 +141,7 @@ FUNCTION pos_inventura_nivelacija()
 
             nKolicina := 0
             _idroba := pos->idroba
-            DO WHILE !Eof() .AND. pos->( idodj + idroba ) == ( cIdOdj + _idroba ) .AND. pos->datum <= dDatRada
+            DO WHILE !Eof() .AND. pos->idroba == _idroba .AND. pos->datum <= dDatRada
 
                IF pos->idvd $ "16#00"
                   nKolicina += pos->kolicina
@@ -182,7 +169,7 @@ FUNCTION pos_inventura_nivelacija()
 
                SELECT priprz
 
-               _IdOdj := cIdOdj
+
                //_IdDio := cIdDio
                _BrDok := cBrDok
                _IdVd := cIdVd
@@ -528,7 +515,6 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
 
       IF nInd == 0
 
-         _idodj := cIdOdj
         // _iddio := cIdDio
          _idroba := Space( 10 )
          nKolicina := 0
@@ -666,8 +652,8 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
 
 STATIC FUNCTION update_ip_razlika()
 
-   LOCAL cIdOdj := Space( 2 )
-   LOCAL nKolicinaZaInventuru, ip_roba
+
+   LOCAL nKolicinaZaInventuru, cIdRoba
    LOCAL _rec2, hRec
 
    IF Pitanje(, "Generisati razliku artikala sa stanja ?", "N" ) == "N"
@@ -682,7 +668,7 @@ STATIC FUNCTION update_ip_razlika()
 
    seek_pos_pos_2()
 
-   DO WHILE !Eof() .AND. field->idodj == cIdOdj
+   DO WHILE !Eof()
 
       IF pos->datum > dDatRada
          SKIP
@@ -690,14 +676,14 @@ STATIC FUNCTION update_ip_razlika()
       ENDIF
 
       nKolicinaZaInventuru := 0
-      ip_roba := pos->idroba
+      cIdRoba := pos->idroba
 
       SELECT priprz
       SET ORDER TO TAG "1"
       GO TOP
-      SEEK PadR( ip_roba, 10 ) // PRIPRZ
+      SEEK PadR( cIdRoba, 10 ) // PRIPRZ
 
-      IF Found() .AND. field->idroba == PadR( ip_roba, 10 )
+      IF Found() .AND. field->idroba == PadR( cIdRoba, 10 )
          SELECT pos
          SKIP
          LOOP
@@ -705,7 +691,7 @@ STATIC FUNCTION update_ip_razlika()
 
       SELECT pos
 
-      DO WHILE !Eof() .AND. pos->( idodj + idroba ) == ( cIdOdj + ip_roba ) .AND. pos->datum <= dDatRada
+      DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum <= dDatRada
 
 
          IF pos->idvd $ "16#00"
@@ -727,7 +713,7 @@ STATIC FUNCTION update_ip_razlika()
 
       IF Round( nKolicinaZaInventuru, 3 ) <> 0
 
-         select_o_roba( ip_roba )
+         select_o_roba( cIdRoba )
 
          SELECT priprz
          APPEND BLANK
@@ -735,7 +721,7 @@ STATIC FUNCTION update_ip_razlika()
          hRec := dbf_get_rec()
          hRec[ "cijena" ] := pos_get_mpc()
          hRec[ "ncijena" ] := 0
-         hRec[ "idroba" ] := ip_roba
+         hRec[ "idroba" ] := cIdRoba
          hRec[ "barkod" ] := roba->barkod
          hRec[ "robanaz" ] := roba->naz
          hRec[ "jmj" ] := roba->jmj
@@ -750,7 +736,6 @@ STATIC FUNCTION update_ip_razlika()
          hRec[ "idvd" ] := _rec2[ "idvd" ]
          hRec[ "mu_i" ] := _rec2[ "mu_i" ]
          hRec[ "prebacen" ] := _rec2[ "prebacen" ]
-         hRec[ "smjena" ] := _rec2[ "smjena" ]
 
          dbf_update_rec( hRec )
 
@@ -875,17 +860,16 @@ FUNCTION _postoji_artikal_u_pripremi( cIdRoba )
 
 
 
-FUNCTION RacKol( cIdOdj, cIdRoba, nKol )
+FUNCTION RacKol( cIdRoba, nKol )
 
    MsgO( "Računam količinu artikla ..." )
 
-   //SELECT pos
-   //SET ORDER TO TAG "2"
+
    nKol := 0
 
    seek_pos_pos_2(cIdRoba )
 
-   DO WHILE !Eof() .AND. pos->IdOdj + pos->IdRoba  == ( cIdOdj + cIdRoba ) .AND. pos->Datum <= dDatRada
+   DO WHILE !Eof() .AND. pos->IdRoba  == cIdRoba .AND. pos->Datum <= dDatRada
 
       IF AllTrim( POS->IdPos ) == "X"
          SKIP

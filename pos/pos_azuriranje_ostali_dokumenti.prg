@@ -164,8 +164,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    hRec[ "idpartner" ] := priprz->idPartner
    hRec[ "idradnik" ] := priprz->idradnik
    hRec[ "prebacen" ] := priprz->prebacen
-   hRec[ "smjena" ] := priprz->smjena
-
    hRec[ "brdokstorn" ] := priprz->brdokStorn
 
    cTipDok := hRec[ "idvd" ]
@@ -192,7 +190,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "datum" ] := priprz->datum
          hRec[ "brdok" ] := priprz->brdok
          hRec[ "prebacen" ] := priprz->prebacen
-         hRec[ "idodj" ] := priprz->idodj
          hRec[ "idcijena" ] := priprz->idcijena
          hRec[ "idradnik" ] := priprz->idradnik
          hRec[ "idroba" ] := priprz->idroba
@@ -202,7 +199,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "mu_i" ] := priprz->mu_i
          hRec[ "ncijena" ] := priprz->ncijena
          hRec[ "cijena" ] := priprz->cijena
-         hRec[ "smjena" ] := priprz->smjena
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
 
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Stavka " + AllTrim( Str( nCount ) ) + " roba: " + hRec[ "idroba" ]

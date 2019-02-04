@@ -172,9 +172,7 @@ FUNCTION pos_top_n_izvuci( cIdVd, dDatum0, cFilterRoba )
       DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
 
          select_o_roba( pos->idroba )
-         IF roba->( FieldPos( "idodj" ) ) <> 0
-            select_o_pos_odj( roba->idodj )
-         ENDIF
+
          nNeplaca := 0
          // IF Right( odj->naz, 5 ) == "#1#0#"  // proba!!!
          // nNeplaca := pos->( Kolicina * Cijena )

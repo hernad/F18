@@ -219,7 +219,6 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
          hRec[ "idradnik" ] := "XXXX"
          hRec[ "idtarifa" ] := roba->idtarifa
          hRec[ "prebacen" ] := "1"
-         hRec[ "smjena" ] := "1"
          hRec[ "mu_i" ] := "1"
 
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
@@ -247,7 +246,6 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
       hRec[ "datum" ] := dDatDok
       hRec[ "idradnik" ] := "XXXX"
       hRec[ "prebacen" ] := "1"
-      hRec[ "smjena" ] := "1"
 
       lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
 

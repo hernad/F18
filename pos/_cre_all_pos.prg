@@ -56,8 +56,7 @@ FUNCTION cre_all_pos( ver )
    IF_NOT_FILE_DBF_CREATE
 
    CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+STR(Cijena,10,3)", _alias )
-   CREATE_INDEX ( "2", "IdVd+IdOdj", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdRadnik+GT+IdOdj+IdRoba", _alias )
+   CREATE_INDEX ( "3", "IdVd+IdRadnik+GT+IdRoba", _alias )
 
    _alias := "_POSP"
    _table_name := "_posp"
@@ -82,9 +81,9 @@ FUNCTION cre_all_pos( ver )
    _table_name := "priprg"
 
    IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdPos+IdOdj+IdRoba+DTOS(Datum)+Smjena", _alias )
-   CREATE_INDEX ( "2", "IdPos+DTOS (Datum)+Smjena", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdPos+IdVrsteP+idPartner+Placen+IdOdj+IdRoba", _alias )
+   CREATE_INDEX ( "1", "IdPos+IdRoba+DTOS(Datum)", _alias )
+   CREATE_INDEX ( "2", "IdPos+DTOS (Datum)", _alias )
+   CREATE_INDEX ( "3", "IdVd+IdPos+IdVrsteP+idPartner+Placen+IdRoba", _alias )
    CREATE_INDEX ( "4", "IdVd+IdPos+IdVrsteP+idPartner+DToS(datum)", _alias )
 
    aDbf := {}
@@ -135,7 +134,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "GT",        "C",  1, 0 } )
    AAdd ( aDbf, { "IDCIJENA",  "C",  1, 0 } )
    AAdd ( aDbf, { "idPartner",    "C",  FIELD_LEN_PARTNER_ID, 0 } )
-   AAdd ( aDbf, { "IDODJ",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
    AAdd ( aDbf, { "IDROBA",    "C", 10, 0 } )
@@ -153,7 +151,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "PLACEN",    "C",  1, 0 } )
    AAdd ( aDbf, { "PREBACEN",  "C",  1, 0 } )
    AAdd ( aDbf, { "ROBANAZ",   "C", 40, 0 } )
-   AAdd ( aDbf, { "SMJENA",    "C",  1, 0 } )
    AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
    AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
 

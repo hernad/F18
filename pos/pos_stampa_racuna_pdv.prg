@@ -28,13 +28,11 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    LOCAL cPosDB
 
-   //LOCAL cSmjena
    LOCAL cIdRoba
    LOCAL cIdTarifa
    LOCAL cRobaNaz
    LOCAL nRbr
 
-   // rn vars
    LOCAL nCjenBPDV
    LOCAL nCjenPDV
    LOCAL nKolicina

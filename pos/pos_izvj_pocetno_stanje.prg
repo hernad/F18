@@ -27,8 +27,7 @@ FUNCTION pos_prepis_pocetno_stanje()
       AllTrim ( DOKS->BrDok ), nSir )
 
    seek_pos_pos( pos_doks->IdPos,  pos_doks->IdVd, pos_doks->datum,  pos_doks->BrDok )
-   ? PadC ( FormDat1 ( DOKS->Datum ) + ;
-      iif ( !Empty ( DOKS->Smjena ), " Smjena: " + DOKS->Smjena, "" ), nSir )
+   ? PadC ( FormDat1 ( DOKS->Datum ), nSir )
    ?
 
    IF !Empty( doks->idPartner )
@@ -71,7 +70,6 @@ Sifra    Naziv              JMJ Kolicina
       SELECT POS
       ?? TRANS ( POS->Kolicina, cPicKol )
       ? cLM + Space ( Len ( POS->IdRoba ) )
-      ?? " " + POS->IdOdj
       nFin += POS->( Kolicina * Cijena )
       SKIP
    ENDDO

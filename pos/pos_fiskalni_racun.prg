@@ -23,14 +23,14 @@ CREATE TABLE fmk.pos_pos
   brdok character varying(6),
   datum date,
   idcijena character varying(1),
-  idodj character(2),
+  --idodj character(2),
   idradnik character varying(4),
   idroba character(10),
   idtarifa character(6),
   -- m1 character varying(1),
   mu_i character varying(1),
   prebacen character varying(1),
-  smjena character varying(1),
+  -- smjena character varying(1),
   brdokStorn character varying(8),
   -- c_2 character varying(10),
   -- c_3 character varying(50),
@@ -59,10 +59,10 @@ CREATE INDEX pos_pos_id1
 
 -- DROP INDEX fmk.pos_pos_id2;
 
-CREATE INDEX pos_pos_id2
-  ON fmk.pos_pos
-  USING btree
-  (idodj COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", datum);
+--CREATE INDEX pos_pos_id2
+--  ON fmk.pos_pos
+--  USING btree
+--  (idodj COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", datum);
 
 -- Index: fmk.pos_pos_id3
 

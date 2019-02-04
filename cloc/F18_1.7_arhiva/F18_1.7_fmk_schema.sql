@@ -2570,7 +2570,7 @@ CREATE TABLE fmk.pos_pos (
     datum date,
     idcijena character varying(1),
     iddio character varying(2),
-    idodj character(2),
+    -- idodj character(2),
     idradnik character varying(4),
     idroba character(10),
     idtarifa character(6),

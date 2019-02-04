@@ -59,8 +59,6 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    AAdd( ImeKol, { "VP", {|| IdVrsteP } } )
    AAdd( ImeKol, { "Datum", {|| datum } } )
 
-   AAdd( ImeKol, { "Smj", {|| smjena } } )
-
    AAdd( ImeKol, { PadC( "Iznos", 10 ), {|| pos_iznos_dokumenta( NIL ) } } )
    AAdd( ImeKol, { "Radnik", {|| IdRadnik } } )
 

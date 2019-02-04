@@ -70,10 +70,6 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
 
    cPom += AllTrim( PRIPRZ->IdPos ) + "-" + AllTrim ( cBrDok )
 
-   IF lPredispozicija
-      ? PadC( "PRENOS IZ ODJ: " + idodj + "  U ODJ:" + idvrstep, 38 )
-   ENDIF
-
    ?U PadC( cPom, 40 )
    ?? " " + PadL ( FormDat1 ( PRIPRZ->Datum ), 39 )
    ?
@@ -176,12 +172,6 @@ FUNCTION pos_stampa_azuriranog_zaduzenja( cNazDok )
       RETURN .F.
    ENDIF
 
-   // select_o_pos_odj( POS->IdOdj )
-   // SELECT POS
-   // IF lPredispozicija
-   // ?U  "PRENOS IZ ODJ: " + pos->idodj + "  U ODJ:" + pos_doks->idvrstep
-
-   // ENDIF
    select_o_partner( pos_doks->idPartner )
    ? "Partner:", pos_doks->idPartner, partn->naz
 

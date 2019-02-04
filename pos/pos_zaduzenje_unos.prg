@@ -30,6 +30,7 @@ MEMVAR Kol, ImeKol
  *       lForsSir .T. - radi se o forsiranom zaduzenju odjeljenja
  *                           sirovinama
  */
+
 FUNCTION pos_zaduzenje( cIdVd )
 
    LOCAL lFromKalk := .F.
@@ -48,7 +49,6 @@ FUNCTION pos_zaduzenje( cIdVd )
    PRIVATE Kol := {}
 
    PRIVATE cBrojZad
-   PRIVATE cIdOdj
    PRIVATE cRsDbf
 
    PRIVATE dDatRada := Date()
@@ -73,69 +73,6 @@ FUNCTION pos_zaduzenje( cIdVd )
    cUI_I := R_I
    cUI_U := R_U
 
-/*
-   SELECT PRIPRZ
-   IF RecCount2() > 0
-      SELECT _POS
-      AppFrom( "PRIPRZ", .F. )
-   ENDIF
-
-   SELECT priprz
-   my_dbf_zap()
-
-   IF !pos_vrati_dokument_iz_pripr( cIdVd, gIdRadnik, cIdOdj ) // , cIdDio )
-      my_close_all_dbf()
-      RETURN .F.
-   ENDIF
-*/
-
-// lAzuriratiBezStampeSilent := .F.
-
-/*
-   aPosKalk := pos_katops_priprz()
-   cIdVd := aPosKalk[ 1 ]
-   cBrDok := aPosKalk[ 2 ]
-
-   IF ( cIdVd <> POS_VD_REKLAMACIJA ) .AND. !Empty( cIdVd )
-      lFromKalk := .T.
-      IF priprz->( RecCount2() ) > 0
-
-         IF cBrDok <> NIL .AND. Pitanje(, "Odštampati prenesni dokument na štampač (D/N) ?", "N" ) == "D"
-
-            IF cIdVd $ "16#95#98"
-               pos_stampa_zaduzenja( cIdVd, cBrDok )
-            ELSEIF cIdVd $ "IN#NI"
-               pos_stampa_zaduzenja_inventure()
-            ENDIF
-            IF Pitanje(, "Ako je sve u redu, želite li staviti dokument na stanje (D/N) ?", " " ) == "D"
-               lAzuriratiBezStampeSilent := .T.
-            ENDIF
-
-         ENDIF
-      ENDIF
-
-   ENDIF
-
-   IF cIdVD == "NI"
-      my_close_all_dbf()
-      pos_inventura_nivelacija( .F., .T., lAzuriratiBezStampeSilent, dDatRada )
-      RETURN .T.
-
-   ELSEIF cIdVd == "IN"
-      my_close_all_dbf()
-      pos_inventura_nivelacija( .T., .T., lAzuriratiBezStampeSilent, dDatRada )
-      RETURN .T.
-
-   ENDIF
-
-   SELECT ( F_PRIPRZ )
-   IF !Used()
-      RETURN .F.
-   ENDIF
-   */
-
-// IF !lAzuriratiBezStampeSilent
-
 
    SELECT PRIPRZ
    Scatter()
@@ -152,7 +89,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    ENDIF
 
    Box(, 6, f18_max_cols() - 15 )
-   // cIdOdj := Space( 2 )
+
    cRazlog := Space( 40 )
    // cIdOdj2 := Space( 2 )
    // cIdPos := gIdPos

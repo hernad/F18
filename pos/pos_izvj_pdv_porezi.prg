@@ -18,7 +18,7 @@ STATIC LEN_TRAKA := 40
 
 FUNCTION pos_pdv_po_tarifama
 
-   PARAMETERS dDatum0, dDatum1, cIdPos, cNaplaceno, cIdOdj
+   PARAMETERS dDatum0, dDatum1, cIdPos, cNaplaceno
 
    LOCAL aNiz := {}
    LOCAL fSolo
@@ -44,13 +44,8 @@ FUNCTION pos_pdv_po_tarifama
       PRIVATE cNaplaceno := "1"
    ENDIF
 
-   IF ( cIdOdj == NIL )
-      cIdOdj := Space( 2 )
-   ENDIF
-
-   // IF gVrstaRS <> "S"
    cIdPos := gIdPos
-   // ENDIF
+
 
    IF fSolo
 
@@ -105,9 +100,6 @@ FUNCTION pos_pdv_po_tarifama
             ?? cIdPos + "-" + AllTrim ( find_pos_kasa_naz( cIdPos ) )
          ENDIF
 
-         IF !Empty( cIdOdj )
-            ? "  Odjeljenje:", cIdOdj
-         ENDIF
 
          ? "     Tarife:", iif ( Empty ( cTarife ), "SVE", cTarife )
          ? "PERIOD: " + FormDat1( dDatum0 ) + " - " + FormDat1( dDatum1 )
@@ -136,16 +128,10 @@ FUNCTION pos_pdv_po_tarifama
          cFilter += ".and." + cFilterTarifa
       ENDIF
 
-      IF !Empty( cIdOdj )
-         cFilter += ".and. IdOdj=" + dbf_quote( cIdOdj )
-      ENDIF
-
-      IF !( cFilter == ".t." )
+        IF !( cFilter == ".t." )
          SET FILTER TO &cFilter
       ENDIF
 
-      // SELECT pos_doks
-      // SET ORDER TO TAG "2"
 
       m := Replicate( "-", 12 ) + " " + Replicate( "-", 12 ) + " " + Replicate( "-", 12 )
 

@@ -67,8 +67,7 @@ FUNCTION pos_stampa_zaduzenja_inventure( lPrikazStavke0Nepromjenjene, lAzurirana
    cPom += AllTrim ( field->IdPos ) + "-"
 
    ? PadC ( cPom + AllTrim ( field->BrDok ), nSir )
-   ?
-   select_o_pos_odj( field->IdOdj )
+
 
    SELECT PRIPRZ
 
@@ -208,9 +207,7 @@ FUNCTION StampaPLI( cBrDok )
    cPom += AllTrim ( PRIPRZ->IdPos ) + "-"
    ? PadC ( cPom + AllTrim ( cBrDok ), 40 )
    ?
-   // IF gvodiodj == "D"
-   // ? "Odjeljenje: " + PRIPRZ->IdOdj + "-" + find_pos_odj_naziv( IdOdj )
-   // ENDIF
+
    ?
    ? "Sifra    Naziv robe"
    ? "            Stanje    Popisana kolicina"
@@ -221,7 +218,7 @@ FUNCTION StampaPLI( cBrDok )
       ? "----------------------------------------"
       SKIP
    ENDDO
-  // PaperFeed ()
+
    ENDPRINT
 
    RETURN .T.
@@ -232,7 +229,7 @@ FUNCTION pos_prepis_inventura_nivelacija( lInventura )
 
    // prepisace azuriranu fakturu
 
-   PRIVATE cIdOdj, cRsDBF, cRsBlok
+   PRIVATE cRsDBF, cRsBlok
    IF lInventura
       PRIVATE cIdVd := "IN"
    ELSE
@@ -246,16 +243,7 @@ FUNCTION pos_prepis_inventura_nivelacija( lInventura )
 
    SELECT pos_doks
 
-   // otvori pos sa aliasom PRIPRZ, te je pozicioniraj na pravo mjesto
-   // SELECT ( F_POS )
-   // my_use( "priprz", "POS" )
-
-   // SET ORDER TO TAG "1"
    seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
-   // ovdje treba parametar alias
-   cIdOdj := pos->idodj
-
-   //select_o_pos_odj( cIdodj )
 
    cRSdbf := "ROBA"
    cRSblok := "P_Roba(@_IdRoba)"
@@ -273,4 +261,3 @@ FUNCTION pos_prepis_inventura_nivelacija( lInventura )
    SELECT pos_doks
 
    RETURN .T.
-// /

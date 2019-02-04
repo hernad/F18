@@ -55,10 +55,6 @@ FUNCTION Porezi( cIdVd, dDatum0, aTarife, cNaplaceno )
 
             select_o_roba( pos->idroba )
 
-            IF roba->( FieldPos( "idodj" ) ) <> 0
-               select_o_pos_odj( roba->idodj )
-            ENDIF
-
             nNeplaca := 0
 
             // IF gPopVar = "P"

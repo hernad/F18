@@ -24,14 +24,14 @@ CREATE TABLE fmk.pos_pos
   brdok character varying(6),
   datum date,
   idcijena character varying(1),
-  idodj character(2),
+  -- idodj character(2),
   idradnik character varying(4),
   idroba character(10),
   idtarifa character(6),
   -- m1 character varying(1),
   mu_i character varying(1),
   prebacen character varying(1),
-  smjena character varying(1),
+  --smjena character varying(1),
   -- brdokStorn character varying(6),
   -- c_2 character varying(10),
   -- c_3 character varying(50),
@@ -62,10 +62,10 @@ CREATE INDEX pos_pos_id1
 
 -- DROP INDEX fmk.pos_pos_id2;
 
-CREATE INDEX pos_pos_id2
-  ON fmk.pos_pos
-  USING btree
-  (idodj COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", datum);
+-- CREATE INDEX pos_pos_id2
+--  ON fmk.pos_pos
+--  USING btree
+--  (idodj COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", datum);
 
 -- Index: fmk.pos_pos_id3
 
@@ -126,7 +126,7 @@ kljuc:
   -- m1 character varying(1),
   placen character(1),
   prebacen character(1),
-  smjena character varying(1),
+--  smjena character varying(1),
   sto character varying(3),
   vrijeme character varying(5),
   brdokStorn character varying(6),
@@ -161,10 +161,10 @@ CREATE INDEX pos_doks_id1
 
 -- DROP INDEX fmk.pos_doks_id2;
 
-CREATE INDEX pos_doks_id2
-  ON fmk.pos_doks
-  USING btree
-  (idvd COLLATE pg_catalog."default", datum, smjena COLLATE pg_catalog."default");
+-- CREATE INDEX pos_doks_id2
+--  ON fmk.pos_doks
+--  USING btree
+--  (idvd COLLATE pg_catalog."default", datum, smjena COLLATE pg_catalog."default");
 
 -- Index: fmk.pos_doks_id3
 
@@ -208,10 +208,6 @@ FUNCTION seek_pos_pos_2( cIdRoba, dDatum )
 
    LOCAL hParams := hb_Hash()
 
-//   IF cIdOdj != NIL
-//      hParams[ "idodj" ] := cIdOdj
-//   ENDIF
-
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba
    ENDIF
@@ -225,7 +221,7 @@ FUNCTION seek_pos_pos_2( cIdRoba, dDatum )
    RETURN seek_pos_h( hParams )
 
 
-FUNCTION seek_pos_pos_5( cIdPos, cIdOdj, cIdRoba, dDatum )
+FUNCTION seek_pos_pos_5( cIdPos, cIdRoba, dDatum )
 
    LOCAL hParams := hb_Hash()
 
@@ -233,9 +229,6 @@ FUNCTION seek_pos_pos_5( cIdPos, cIdOdj, cIdRoba, dDatum )
       hParams[ "idpos" ] := cIdPos
    ENDIF
 
-   IF cIdOdj != NIL
-      hParams[ "idodj" ] := cIdOdj
-   ENDIF
 
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba
@@ -266,7 +259,7 @@ FUNCTION seek_pos_h( hParams )
 
    LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag
    LOCAL dDatOd
-   LOCAL cIdOdj, cIdRoba
+   LOCAL cIdRoba
    LOCAL cSql
    LOCAL cTable := "pos_pos", cAlias := "POS"
    LOCAL hIndexes, cKey
@@ -285,9 +278,7 @@ FUNCTION seek_pos_h( hParams )
    IF hb_HHasKey( hParams, "brdok" )
       cBrDok := hParams[ "brdok" ]
    ENDIF
-   IF hb_HHasKey( hParams, "idodj" )
-      cIdOdj := hParams[ "idodj" ]
-   ENDIF
+
    IF hb_HHasKey( hParams, "idroba" )
       cIdRoba := hParams[ "idroba" ]
    ENDIF
@@ -318,15 +309,6 @@ FUNCTION seek_pos_h( hParams )
       cSql += "idvd=" + sql_quote( cIdVd )
    ENDIF
 
-   IF cIdOdj != NIL .AND. !Empty( cIdOdj )
-      IF lWhere
-         cSql += " AND "
-      ELSE
-         cSql += " WHERE "
-         lWhere := .T.
-      ENDIF
-      cSql += "idodj=" + sql_quote( cIdOdj )
-   ENDIF
 
    IF cIdRoba != NIL .AND. !Empty( cIdRoba )
       IF lWhere
@@ -395,12 +377,12 @@ FUNCTION h_pos_pos_indexes()
    LOCAL hIndexes := hb_Hash()
 
    hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+Rbr"
-   hIndexes[ "2" ] := "IdOdj+idroba+DTOS(Datum)"
+   hIndexes[ "2" ] := "idroba+DTOS(Datum)"
    hIndexes[ "3" ] := "Prebacen"
    hIndexes[ "4" ] := "dtos(datum)"
    hIndexes[ "5" ] := "IdPos+idroba+DTOS(Datum)"
    hIndexes[ "6" ] := "IdRoba"
-   hIndexes[ "7" ] := "IdPos+IdVd+BrDok+DTOS(Datum)+IdOdj"
+   hIndexes[ "7" ] := "IdPos+IdVd+BrDok+DTOS(Datum)"
 
    RETURN hIndexes
 
@@ -499,7 +481,7 @@ FUNCTION h_pos_doks_indexes()
    LOCAL hIndexes := hb_Hash()
 
    hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok"
-   hIndexes[ "2" ] := "IdVd+DTOS(Datum)+Smjena"
+   hIndexes[ "2" ] := "IdVd+DTOS(Datum)"
    hIndexes[ "3" ] := "idPartner+Placen+DTOS(Datum)"
    // hIndexes[ "4" ] := "IdVd+M1"
    hIndexes[ "5" ] := "Prebacen"
@@ -886,22 +868,6 @@ FUNCTION use_sql_pos_odj( cId )
    ENDIF
 
    RETURN !Eof()
-
-/*
-       set_a_sql_sifarnik( "pos_odj", "ODJ", F_ODJ  )
-*/
-FUNCTION find_pos_odj_naziv( cIdOdj )
-
-   LOCAL cRet, nSelect := Select()
-
-   SELECT F_ODJ
-   cRet := find_field_by_id( "pos_odj", cIdOdj, "naz" )
-   SELECT ( nSelect )
-
-   RETURN cRet
-
-
-
 
 
 FUNCTION find_pos_osob_naziv( cId )

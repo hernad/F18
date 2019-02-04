@@ -27,17 +27,12 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
 
    DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatum1
 
-      IF ( !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos ) .OR. ( !Empty( cSmjena ) .AND. pos_doks->Smjena <> cSmjena )
+      IF ( !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos )
          SKIP
          LOOP
       ENDIF
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
       DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
-
-         IF ( !Empty( cIdOdj ) .AND. pos->IdOdj <> cIdOdj )
-            SKIP
-            LOOP
-         ENDIF
 
          select_o_roba( pos->IdRoba )
          IF roba->( FieldPos( "sifdob" ) ) <> 0
@@ -50,32 +45,19 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
             ENDIF
          ENDIF
 
-         IF roba->( FieldPos( "idodj" ) ) <> 0
-            select_o_pos_odj( roba->IdOdj )
-         ENDIF
-
          nNeplaca := 0
-
-         // IF Right( odj->naz, 5 ) == "#1#0#"  // proba!!!
-         // nNeplaca := pos->( Kolicina * Cijena )
-         // ELSEIF Right( odj->naz, 6 ) == "#1#50#"
-         // nNeplaca := pos->( Kolicina * Cijena ) / 2
-         // ENDIF
-
-         // IF gPopVar = "P"
          nNeplaca += pos->( kolicina * nCijena )
-         // ENDIF
+
 
          SELECT pom
          GO TOP
-         SEEK pos_doks->IdPos + pos_doks->IdRadnik + pos_doks->IdVrsteP + pos->IdOdj + pos->IdRoba + pos->IdCijena // POM
+         SEEK pos_doks->IdPos + pos_doks->IdRadnik + pos_doks->IdVrsteP + pos->IdRoba + pos->IdCijena // POM
 
          IF !Found()
             APPEND BLANK
             REPLACE IdPos WITH pos_doks->IdPos
             REPLACE IdRadnik WITH pos_doks->IdRadnik
             REPLACE IdVrsteP WITH pos_doks->IdVrsteP
-            REPLACE IdOdj WITH pos->IdOdj
             REPLACE IdRoba WITH pos->IdRoba
             REPLACE IdCijena WITH pos->IdCijena
             REPLACE Kolicina WITH pos->Kolicina
