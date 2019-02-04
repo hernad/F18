@@ -55,7 +55,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    hRec[ "idvrstep" ] := iif( cNacPlac == NIL, gGotPlac, cNacPlac )
    hRec[ "idpartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
    hRec[ "idradnik" ] := _pos_pripr->idradnik
-   hRec[ "prebacen" ] := OBR_JEST
    hRec[ "brdokstorn" ] := _pos_pripr->brdokStorn
 
    lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
@@ -72,13 +71,11 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
-         hRec[ "prebacen" ] := OBR_NIJE
          hRec[ "idcijena" ] := _pos_pripr->idcijena
          hRec[ "idradnik" ] := _pos_pripr->idradnik
          hRec[ "idroba" ] := _pos_pripr->idroba
          hRec[ "idtarifa" ] := _pos_pripr->idtarifa
          hRec[ "kolicina" ] := _pos_pripr->kolicina
-         hRec[ "mu_i" ] := _pos_pripr->mu_i
          hRec[ "ncijena" ] := _pos_pripr->ncijena
          hRec[ "cijena" ] := _pos_pripr->cijena
 

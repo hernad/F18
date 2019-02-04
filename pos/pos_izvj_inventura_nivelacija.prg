@@ -229,7 +229,6 @@ FUNCTION pos_prepis_inventura_nivelacija( lInventura )
 
    // prepisace azuriranu fakturu
 
-   PRIVATE cRsDBF, cRsBlok
    IF lInventura
       PRIVATE cIdVd := "IN"
    ELSE
@@ -245,16 +244,7 @@ FUNCTION pos_prepis_inventura_nivelacija( lInventura )
 
    seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
 
-   cRSdbf := "ROBA"
-   cRSblok := "P_Roba(@_IdRoba)"
-   cUI_U   := R_U
-   cUI_I   := R_I
-
-
    pos_stampa_zaduzenja_inventure( .F., .T. )  // drugi parametar kaze da se radi o azuriranom dok
-
-   // o_pos_doks()
-   // o_pos_pos()
 
    PopWa()
 

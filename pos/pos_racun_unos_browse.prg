@@ -15,8 +15,8 @@ STATIC s_nMaxKolicinaPosRacun := NIL
 STATIC s_oBrowse, s_nIznosRacuna, s_nPopust, s_cRobaPosDuzinaSifre
 
 MEMVAR Kol, ImeKol, gIdPos, gOcitBarKod
-MEMVAR _idpos, _idroba, _cijena, _ncijena, _kolicina, _iznos, _popust, _idvd, _brdok, _datum, _idradnik, _idcijena, _prebacen, _mu_ui
-MEMVAR _robanaz, _jmj, _idtarifa  // , _idodj
+MEMVAR _idpos, _idroba, _cijena, _ncijena, _kolicina, _iznos, _popust, _idvd, _brdok, _datum, _idradnik, _idcijena
+MEMVAR _robanaz, _jmj, _idtarifa
 
 FUNCTION pos_racun_unos_browse( cBrDok )
 
@@ -92,12 +92,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    _idvd  := POS_VD_RACUN
    _brdok := cBrDok
    _datum := danasnji_datum()
-   _sto   := ""
-   // _smjena := gSmjena
    _idradnik := gIdRadnik
    _idcijena := gIdCijena
-   _prebacen := OBR_NIJE
-   _mu_i := R_I
 
 
    DO WHILE .T.

@@ -574,9 +574,6 @@
 #define ZAD_NORMAL   "0"
 #define ZAD_OTPIS    "1"
 
-// flagovi da li je slog sa kase prebacen na server
-#define OBR_NIJE     "1"
-#define OBR_JEST     "0"
 
 // flagovi da li je racun placen
 #define PLAC_NIJE    "1"
@@ -589,7 +586,6 @@
 
 //#define PICT_POS_ARTIKAL "@K"
 #define PICT_POS_ARTIKAL "@!S10"
-
 
 
 #define F18_VERZIJA "4"

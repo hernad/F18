@@ -28,8 +28,8 @@ CREATE TABLE fmk.pos_pos
   idroba character(10),
   idtarifa character(6),
   -- m1 character varying(1),
-  mu_i character varying(1),
-  prebacen character varying(1),
+  -- mu_i character varying(1),
+  -- prebacen character varying(1),
   -- smjena character varying(1),
   brdokStorn character varying(8),
   -- c_2 character varying(10),
@@ -68,10 +68,10 @@ CREATE INDEX pos_pos_id1
 
 -- DROP INDEX fmk.pos_pos_id3;
 
-CREATE INDEX pos_pos_id3
-  ON fmk.pos_pos
-  USING btree
-  (prebacen COLLATE pg_catalog."default");
+-- CREATE INDEX pos_pos_id3
+--  ON fmk.pos_pos
+--  USING btree
+--  (prebacen COLLATE pg_catalog."default");
 
 -- Index: fmk.pos_pos_id4
 

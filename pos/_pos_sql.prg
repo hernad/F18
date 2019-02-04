@@ -29,7 +29,7 @@ CREATE TABLE fmk.pos_pos
   idroba character(10),
   idtarifa character(6),
   -- m1 character varying(1),
-  mu_i character varying(1),
+  -- mu_i character varying(1),
   prebacen character varying(1),
   --smjena character varying(1),
   -- brdokStorn character varying(6),
@@ -136,7 +136,7 @@ kljuc:
   zak_br numeric(6,0),
   sto_br numeric(3,0),
   -- fisc_st character(10),
-  rabat numeric(15,5),
+  -- rabat numeric(15,5),
   ukupno numeric(15,5),
   CONSTRAINT pos_doks_pkey PRIMARY KEY (idpos, idvd, brdok)
 )
@@ -378,7 +378,6 @@ FUNCTION h_pos_pos_indexes()
 
    hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+IdCijena+Rbr"
    hIndexes[ "2" ] := "idroba+DTOS(Datum)"
-   hIndexes[ "3" ] := "Prebacen"
    hIndexes[ "4" ] := "dtos(datum)"
    hIndexes[ "5" ] := "IdPos+idroba+DTOS(Datum)"
    hIndexes[ "6" ] := "IdRoba"
@@ -484,7 +483,7 @@ FUNCTION h_pos_doks_indexes()
    hIndexes[ "2" ] := "IdVd+DTOS(Datum)"
    hIndexes[ "3" ] := "idPartner+Placen+DTOS(Datum)"
    // hIndexes[ "4" ] := "IdVd+M1"
-   hIndexes[ "5" ] := "Prebacen"
+   // hIndexes[ "5" ] := "Prebacen"
    hIndexes[ "6" ] := "dtos(datum)"
    hIndexes[ "7" ] := "IdPos+IdVD+BrDok"
    hIndexes[ "TK" ] := "IdPos+DTOS(Datum)+IdVd"

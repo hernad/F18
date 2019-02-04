@@ -70,10 +70,6 @@ FUNCTION pos_zaduzenje( cIdVd )
 
    o_pos_tables()
 
-   cUI_I := R_I
-   cUI_U := R_U
-
-
    SELECT PRIPRZ
    Scatter()
    _IdPos := gIdPos
@@ -82,11 +78,6 @@ FUNCTION pos_zaduzenje( cIdVd )
    _Datum := dDatRada
    _IdRadnik := gIdRadnik
    _IdCijena := "1"
-   _Prebacen := OBR_NIJE
-   _MU_I := cUI_U
-   IF cIdVd == POS_VD_OTPIS
-      _MU_I := cUI_I
-   ENDIF
 
    Box(, 6, f18_max_cols() - 15 )
 

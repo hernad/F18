@@ -37,7 +37,6 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok )
    cDokument := AllTrim( _idpos ) + "-" + _idvd + "-" + AllTrim( _brdok ) + " " + DToC( _datum )
 
    hRec := get_hash_record_from_global_vars()
-   hRec[ "rabat" ] := 0
    hRec[ "ukupno" ] := 0
    lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
 
@@ -163,7 +162,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    hRec[ "idvrstep" ] := priprz->idvrstep
    hRec[ "idpartner" ] := priprz->idPartner
    hRec[ "idradnik" ] := priprz->idradnik
-   hRec[ "prebacen" ] := priprz->prebacen
    hRec[ "brdokstorn" ] := priprz->brdokStorn
 
    cTipDok := hRec[ "idvd" ]
@@ -189,14 +187,12 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "idvd" ] := priprz->idvd
          hRec[ "datum" ] := priprz->datum
          hRec[ "brdok" ] := priprz->brdok
-         hRec[ "prebacen" ] := priprz->prebacen
          hRec[ "idcijena" ] := priprz->idcijena
          hRec[ "idradnik" ] := priprz->idradnik
          hRec[ "idroba" ] := priprz->idroba
          hRec[ "idtarifa" ] := priprz->idtarifa
          hRec[ "kolicina" ] := priprz->kolicina
          hRec[ "kol2" ] := priprz->kol2
-         hRec[ "mu_i" ] := priprz->mu_i
          hRec[ "ncijena" ] := priprz->ncijena
          hRec[ "cijena" ] := priprz->cijena
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )

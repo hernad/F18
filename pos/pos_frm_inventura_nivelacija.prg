@@ -25,10 +25,7 @@ FUNCTION pos_inventura_nivelacija()
    LOCAL cNazDok
    LOCAL nCnt
 
-   PRIVATE cRSdbf
-   PRIVATE cRSblok
-   PRIVATE cUI_U
-   PRIVATE cUI_I
+
    PRIVATE cIdVd
 
    IF gSamoProdaja == "D"
@@ -90,11 +87,6 @@ FUNCTION pos_inventura_nivelacija()
 
    ENDIF
 
-   //SELECT ODJ
-
-   cRSdbf := "ROBA"
-   cUI_U := R_U
-   cUI_I := R_I
 
    IF !pos_vrati_dokument_iz_pripr( cIdVd, gIdRadnik )
       my_close_all_dbf()
@@ -169,18 +161,15 @@ FUNCTION pos_inventura_nivelacija()
 
                SELECT priprz
 
-
-               //_IdDio := cIdDio
                _BrDok := cBrDok
                _IdVd := cIdVd
-               _Prebacen := OBR_NIJE
                _IdCijena := "1"
                _IdRadnik := gIdRadnik
                _IdPos := gIdPos
                _datum := dDatRada
                _Smjena := gSmjena
                _Kol2 := nKolicina
-               _MU_I := cUI_I
+
 
                APPEND BLANK
                Gather()
@@ -521,7 +510,6 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
          _kol2 := 0
          _brdok := cBrDok
          _idvd := cIdVd
-         _prebacen := OBR_NIJE
          _idcijena := "1"
          _idradnik := gIdRadnik
          _idpos := gIdPos
@@ -529,7 +517,7 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
          _ncijena := 0
          _datum := datum
          _smjena := gSmjena
-         _mu_i := cUI_I
+
 
       ENDIF
 
@@ -734,8 +722,6 @@ STATIC FUNCTION update_ip_razlika()
          hRec[ "idpos" ] := _rec2[ "idpos" ]
          hRec[ "idradnik" ] := _rec2[ "idradnik" ]
          hRec[ "idvd" ] := _rec2[ "idvd" ]
-         hRec[ "mu_i" ] := _rec2[ "mu_i" ]
-         hRec[ "prebacen" ] := _rec2[ "prebacen" ]
 
          dbf_update_rec( hRec )
 
