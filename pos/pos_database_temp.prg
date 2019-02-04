@@ -77,24 +77,6 @@ FUNCTION pos2_pripr()
    RETURN .T.
 
 
-FUNCTION pos_ukloni_radne_racune( cIdRadnik )
-
-   SELECT _POS
-   SET ORDER TO TAG "1"
-   SEEK gIdPos + POS_VD_RACUN  // _POS
-   DO WHILE !Eof() .AND. _POS->( IdPos + IdVd ) == ( gIdPos + POS_VD_RACUN )
-      IF _POS->IdRadnik == cIdRadnik .AND. _POS->M1 == "Z"
-         Del_Skip ()
-      ELSE
-         SKIP
-      ENDIF
-   END
-   SELECT ZAKSM
-
-   RETURN .T.
-
-
-
 FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik, cIdOdj )
 
    LOCAL cSta

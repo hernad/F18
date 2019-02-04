@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     idPartner character varying(6),
     idradnik character varying(4),
     idvrstep character(2),
-    m1 character varying(1),
+    -- m1 character varying(1),
     placen character(1),
     prebacen character(1),
     smjena character varying(1),
@@ -87,17 +87,6 @@ CREATE TABLE IF NOT EXISTS p15.pos_dokspf (
 );
 ALTER TABLE p15.pos_dokspf OWNER TO admin;
 
-CREATE TABLE IF NOT EXISTS p15.pos_dokspf (
-    idpos character(2),
-    idvd character(2),
-    datum date,
-    brdok character(6),
-    knaz character varying(35),
-    kadr character varying(35),
-    kidbr character(13),
-    datisp date
-);
-ALTER TABLE p15.pos_dokspf OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS  p15.pos_kase (
     id character varying(2),
@@ -132,13 +121,10 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos (
     idradnik character varying(4),
     idroba character(10),
     idtarifa character(6),
-    m1 character varying(1),
+    -- m1 character varying(1),
     mu_i character varying(1),
     prebacen character varying(1),
     smjena character varying(1),
-    -- brdokStorn character varying(8),
-    --c_2 character varying(10),
-    --c_3 character varying(50),
     kolicina numeric(18,3),
     kol2 numeric(18,3),
     cijena numeric(10,3),
@@ -242,7 +228,7 @@ CREATE TABLE p15.pos_pos_knjig (
    idradnik character varying(4),
    idroba character(10),
    idtarifa character(6),
-   m1 character varying(1),
+   -- m1 character varying(1),
    mu_i character varying(1),
    prebacen character varying(1),
    smjena character varying(1),
@@ -272,7 +258,7 @@ CREATE TABLE p15.pos_doks_knjig (
    idPartner character varying(6),
    idradnik character varying(4),
    idvrstep character(2),
-   m1 character varying(1),
+   -- m1 character varying(1),
    placen character(1),
    prebacen character(1),
    smjena character varying(1),
@@ -288,7 +274,7 @@ ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
 CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
 CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum, smjena);
 CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, placen, datum);
-CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
+-- CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
 CREATE INDEX pos_doks_id5_knjig ON p15.pos_doks_knjig USING btree (prebacen);
 CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
 
@@ -304,6 +290,7 @@ ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS brdokStorn varchar(8);
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_1;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS m1;
 
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto;
@@ -314,17 +301,21 @@ ALTER TABLE p15.pos_doks_knjig ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS idpartner varchar(6);
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS brdokStorn varchar(8);
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS c_1;
-ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
-ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS m1;
 
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS c_1;
-ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
-ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS m1;
 
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN brdok TYPE varchar(8);
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS c_1;
-ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_2;
-ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS c_2;
+ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS c_3;
+ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS m1;
+DROP TABLE IF EXISTS p15.pos_dokspf;

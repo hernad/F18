@@ -46,8 +46,6 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    LOCAL bRacunMarkiran := NIL
    LOCAL cFnc
 
-   // PRIVATE  := .F.
-
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
 
@@ -80,14 +78,14 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    cBrDok := PadL( cBrDok, FIELD_LEN_POS_BRDOK )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
+   AAdd( ImeKol, { "Datum", {|| field->datum } } )
    AAdd( ImeKol, { "Fisk.rn", {|| field->fisc_rn } } )
    AAdd( ImeKol, { "Iznos", {|| Str ( pos_iznos_racuna( field->idpos, field->idvd, field->datum, field->brdok ), 13, 2 ) } } )
-   AAdd( ImeKol, { "Smj", {||  field->smjena } } )
-   AAdd( ImeKol, { "Datum", {|| field->datum } } )
+
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
    AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
    AAdd( ImeKol, { "Vrijeme", {|| field->vrijeme } } )
-   AAdd( ImeKol, { _u("Plaćen"),     {|| iif ( field->Placen == PLAC_NIJE, "  NE", "  DA" ) } } )
+   AAdd( ImeKol, { _u("Plaćen"),   {|| iif ( field->Placen == PLAC_NIJE, "  NE", "  DA" ) } } )
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( kol, i )

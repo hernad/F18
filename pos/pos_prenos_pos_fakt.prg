@@ -42,7 +42,7 @@ STATIC cIdPos
 
 FUNCTION PripTOPSFAKT( cIdPartnG )
 
-   aDbf := {}
+   LOCAL aDbf := {}
    AAdd( aDBF, { "IdPos", "C", 2, 0 } )
    AAdd( aDBF, { "IDROBA", "C", 10, 0 } )
    AAdd( aDBF, { "IDPARTNER", "C", Len( cIdPartnG ), 0 } )
@@ -53,7 +53,7 @@ FUNCTION PripTOPSFAKT( cIdPartnG )
    AAdd( aDBF, { "IDTARIFA", "C", 6, 0 } )
    AAdd( aDBF, { "DATUM", "D", 8, 0 } )
    AAdd( aDBF, { "IdVd", "C", 2, 0 } )
-   AAdd( aDBF, { "M1", "C", 1, 0 } )
+
 
    pos_cre_pom_dbf( aDbf, "TOPSFAKT" )
 

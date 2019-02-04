@@ -27,7 +27,7 @@ CREATE TABLE fmk.pos_pos
   idradnik character varying(4),
   idroba character(10),
   idtarifa character(6),
-  m1 character varying(1),
+  -- m1 character varying(1),
   mu_i character varying(1),
   prebacen character varying(1),
   smjena character varying(1),

@@ -111,12 +111,14 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
 
 STATIC FUNCTION pos_fix_broj_racuna( cBrRacuna )
 
-   LOCAL _a_rn := {}
+   LOCAL aRacunTok := {}
+
 
    IF !Empty( cBrRacuna ) .AND. ( "-" $ cBrRacuna )
-      _a_rn := TokToNiz( cBrRacuna, "-" )
-      IF !Empty( _a_rn[ 2 ] )
-         cBrRacuna := PadR( AllTrim( _a_rn[ 2 ] ), FIELD_LEN_POS_BRDOK )
+      // 42-155
+      aRacunTok := TokToNiz( cBrRacuna, "-" )
+      IF !Empty( aRacunTok[ 2 ] ) // 155
+         cBrRacuna := PadR( AllTrim( aRacunTok[ 2 ] ), FIELD_LEN_POS_BRDOK )
       ENDIF
    ENDIF
 
@@ -182,7 +184,7 @@ FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFis
    ENDIF
 
    SELECT ( nTArea )
-   pos_napravi_u_pripremi_storno_dokument( dDatum, cBrDokStornirati, cBrojFiskalnogRacuna )
+   pos_napravi_u_pripremi_storno_dokument( gIdPos, dDatum, cBrDokStornirati, cBrojFiskalnogRacuna )
    SELECT ( nTArea )
 
    IF lSilent == .F.
@@ -197,13 +199,13 @@ FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFis
    RETURN .T.
 
 
-STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( dDatDok, cBrDok, cBrojFiskalnogRacuna )
+STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( cIdPos, dDatDok, cBrDok, cBrojFiskalnogRacuna )
 
    LOCAL nDbfArea := Select()
    LOCAL cIdRoba, hRec
 
-   seek_pos_pos( gIdPos, "42", dDatDok, cBrDok )
-   DO WHILE !Eof() .AND. field->idpos == gIdPos .AND. field->brdok == cBrDok  .AND. field->idvd == "42"
+   seek_pos_pos( cIdPos, "42", dDatDok, cBrDok )
+   DO WHILE !Eof() .AND. field->idpos == cIdPos .AND. field->brdok == cBrDok  .AND. field->idvd == "42"
 
       cIdRoba := field->idroba
       select_o_roba( cIdRoba )
@@ -222,6 +224,8 @@ STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( dDatDok, cBrDok, cBrojFi
       hRec[ "idvrstep" ] := "01"
 
       IF Empty( cBrojFiskalnogRacuna )
+          // !!! ovo nije potpuna informacija bez datuma, ali u principu, račun mora biti fiskalizovan
+          // tako da ova se varijanta može/treba izbaciti
          hRec[ "brdokstorn" ] := AllTrim( cBrDok )
       ELSE
          hRec[ "brdokstorn" ] := AllTrim( cBrojFiskalnogRacuna )

@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR gGotPlac
+
 FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    LOCAL cDokument := ""
@@ -31,13 +33,10 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    GO TOP
 
    run_sql_query( "BEGIN", hParams )
-   //IF !f18_lock_tables( { "pos_pos", "pos_doks" }, .T. )
-  //    run_sql_query( "COMMIT", hParams )
-  //    MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju." )
-  //    RETURN lRet
-   //ENDIF
 
-   MsgO( "Ažuriranje stavki računa u toku ..." )
+   cDokument := AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( danasnji_datum() )
+
+   MsgO( "POS Ažuriranje " + cDokument + " u toku ..." )
 
    IF Select( "pos_doks" ) == 0
       o_pos_doks()
@@ -47,7 +46,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    APPEND BLANK
 
-   cDokument := AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( danasnji_datum() )
    hRec := dbf_get_rec()
    hRec[ "idpos" ] := cIdPos
    hRec[ "idvd" ] := POS_VD_RACUN
@@ -55,9 +53,8 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    hRec[ "brdok" ] := cBrDok
    hRec[ "vrijeme" ] := cVrijeme
    hRec[ "idvrstep" ] := iif( cNacPlac == NIL, gGotPlac, cNacPlac )
-   hRec[ "idPartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
+   hRec[ "idpartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
    hRec[ "idradnik" ] := _pos_pripr->idradnik
-   hRec[ "m1" ] := OBR_NIJE
    hRec[ "prebacen" ] := OBR_JEST
    hRec[ "smjena" ] := _pos_pripr->smjena
    hRec[ "brdokstorn" ] := _pos_pripr->brdokStorn
@@ -76,7 +73,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
-         hRec[ "m1" ] := OBR_JEST
          hRec[ "prebacen" ] := OBR_NIJE
          hRec[ "idodj" ] := _pos_pripr->idodj
          hRec[ "idcijena" ] := _pos_pripr->idcijena
@@ -105,7 +101,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    IF lOk
       lRet := .T.
-      // hParams[ "unlock" ] := { "pos_pos", "pos_doks" }
       run_sql_query( "COMMIT", hParams )
       log_write( "F18_DOK_OPER, ažuriran računa " + cDokument, 2 )
    ELSE

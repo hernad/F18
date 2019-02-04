@@ -509,7 +509,6 @@ STATIC FUNCTION cre_pom_topska_dbf()
    AAdd( aDBF, { "DATPOS",   "D",   8, 0 } )
    AAdd( aDBF, { "IdVd",     "C",   2, 0 } )
    AAdd( aDBF, { "BRDOK",    "C",  10, 0 } )
-   AAdd( aDBF, { "M1",       "C",   1, 0 } )
    AAdd( aDBF, { "BARKOD",   "C",  13, 0 } )
    AAdd( aDBF, { "JMJ",      "C",   3, 0 } )
 

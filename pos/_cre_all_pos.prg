@@ -148,7 +148,6 @@ FUNCTION g_pos_pripr_fields()
    // za inventuru, nivelaciju
    AAdd ( aDbf, { "KOL2",      "N", 18, 3 } )
    AAdd ( aDbf, { "KOLICINA",  "N", 18, 3 } )
-   AAdd ( aDbf, { "M1",        "C",  1, 0 } )
    AAdd ( aDbf, { "MU_I",      "C",  1, 0 } )
    AAdd ( aDbf, { "NCIJENA",   "N", 10, 3 } )
    AAdd ( aDbf, { "PLACEN",    "C",  1, 0 } )
@@ -174,5 +173,5 @@ FUNCTION g_pos_pripr_fields()
    AAdd( aDBf, { 'N2', 'N',  12,  2 } )
    AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
    AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
-  
+
    RETURN aDbf
