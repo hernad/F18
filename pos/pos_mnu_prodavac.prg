@@ -24,10 +24,10 @@ FUNCTION pos_main_menu_prodavac()
    AAdd( aOpcExe, {|| pos_pregled_racuna( .F. ) } )
 
    AAdd( aOpc, "R. trenutna realizacija radnika" )
-   AAdd( aOpcExe, {|| pos_realizacija_radnik( .T., "P", .F. ) } )
+   AAdd( aOpcExe, {|| pos_realizacija_radnik( .T., "P" ) } )
 
    AAdd( aOpc, "A. trenutna realizacija po artiklima" )
-   AAdd( aOpcExe, {|| pos_realizacija_radnik( .T., "R", .F. ) } )
+   AAdd( aOpcExe, {|| pos_realizacija_radnik( .T., "R" ) } )
 
    IF fiscal_opt_active()
       AAdd( aOpc, "F. fiskalne funkcije - prodavac" )

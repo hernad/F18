@@ -11,9 +11,13 @@
 
 #include "f18.ch"
 
-FUNCTION pos_realizacija_radnik
+STATIC s_oPDF
 
-   PARAMETERS lTekuci, fPrik, fZaklj
+FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
+
+   LOCAL xPrintOpt, bZagl
+   LOCAL aDbf
+   LOCAL cNaslov
 
    PRIVATE cIdRadnik := Space( 4 )
    PRIVATE cVrsteP := Space( 60 )
@@ -21,48 +25,30 @@ FUNCTION pos_realizacija_radnik
    PRIVATE cSmjena := Space( 1 )
    PRIVATE cIdPos := pos_prodajno_mjesto()
 
-   // PRIVATE cIdDio := gIdDio
    PRIVATE dDatOd := danasnji_datum()
    PRIVATE dDatDo := danasnji_datum()
    PRIVATE aNiz
    PRIVATE cGotZir := " "
 
-   //o_tables()
-
-   fPrik := iif ( fPrik == NIL, "P", fPrik )
-   fZaklj := iif ( fZaklj == NIL, .F., fZaklj )
-
-   PRIVATE fPrikPrem := "N"
-
-   fPrikPrem := "D"
+   cPrikazPazarRoba := iif ( cPrikazPazarRoba == NIL, "P", cPrikazPazarRoba )
 
 
    IF lTekuci
       cIdRadnik := gIdRadnik
-      IF gRadniRac == "D"
-         cSmjena   := ""
-         // ako radnik prelazi u narednu smjenu
-      ELSE
-         cSmjena := gSmjena
-      ENDIF
       dDatOd := dDatDo := danasnji_datum()
    ELSE
       aNiz := {}
       cIdPos := gIdPos
 
       AAdd( aNiz, { "Prodajno mjesto (prazno-sve)", "cIdPos", "cIdPos='X' .or. empty(cIdPos) .or. p_pos_kase(@cIdPos)", "@!", } )
-      AAdd( aNiz, { "Sifra radnika  (prazno-svi)", "cIdRadnik", "IF(!EMPTY(cIdRadnik),P_OSOB(@cIdRadnik),.t.)",, } )
+      AAdd( aNiz, { "Šifra radnika  (prazno-svi)", "cIdRadnik", "IF(!EMPTY(cIdRadnik),P_OSOB(@cIdRadnik),.t.)",, } )
       AAdd( aNiz, { "Vrsta placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
-      AAdd( aNiz, { "Smjena (prazno-sve)", "cSmjena",,, } )
-      AAdd( aNiz, { "Izvjestaj se pravi od datuma", "dDatOd",,, } )
+      AAdd( aNiz, { "Izvještaj se pravi od datuma", "dDatOd",,, } )
       AAdd( aNiz, { "                   do datuma", "dDatDo",,, } )
-      IF fPrikPrem == "D"
-         AAdd( aNiz, { "Prikaz kolicina za premirane artikle ", "fPrikPrem", "fprikPrem$'DN'", "@!", } )
-      ENDIF
 
 
-      fPrik := "O"
-      AAdd( aNiz, { "Prikazi Pazar/Robe/Oboje (P/R/O)", "fPrik", "fPrik$'PRO'", "@!", } )
+      cPrikazPazarRoba := "O"
+      AAdd( aNiz, { "Prikazi Pazar/Robe/Oboje (P/R/O)", "cPrikazPazarRoba", "cPrikazPazarRoba$'PRO'", "@!", } )
       DO WHILE .T.
          IF !VarEdit( aNiz, 10, 5, 13 + Len( aNiz ), 74, 'USLOVI ZA IZVJESTAJ "REALIZACIJA"', "B1" )
             CLOSERET
@@ -101,64 +87,51 @@ FUNCTION pos_realizacija_radnik
 
    SET ORDER TO TAG "1"
 
-   o_tables()
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "portrait"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 10
+
+   cNaslov := "POS "
+   IF lTekuci
+      IF cPrikazPazarRoba $ "PO"
+         cNaslov += "PAZAR RADNIKA"
+      ELSE
+         cNaslov += "REALIZACIJA RADNIKA PO ROBAMA"
+      ENDIF
+   ELSE
+      IF glRetroakt
+         cNaslov += "REALIZACIJA NA DAN " + FormDat1( dDatDo )
+      ELSE
+         cNasslov += "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() )
+      ENDIF
+   ENDIF
+
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
 
    IF lTekuci
-      IF fZaklj
-         STARTPRINTPORT CRET gLocPort, .F.
-      ELSE
-         STARTPRINT CRET
-      ENDIF
-
-      //ZagFirma()
-
-      ?
-      IF fPrik $ "PO"
-         ?? PadC ( iif ( fZaklj, "ZAKLJUCENJE", "PAZAR" ) + " RADNIKA", 40 )
-      ELSE
-         ?? PadC ( "REALIZACIJA RADNIKA PO ROBAMA", 40 )
-      ENDIF
       ? PadC ( gPosNaz )
-      ?
-
-      ? gIdRadnik, "-", PadC ( AllTrim ( find_pos_osob_naziv( gIdRadnik ) ), 40 )
-      cTxt := "Na dan: " + FormDat1 ( danasnji_datum() )
-      IF gRadniRac == "N"
-         cTxt += " u smjeni " + gSmjena
-      ENDIF
-      ? PadC ( cTxt, 40 )
+      ? gIdRadnik, "-", AllTrim ( find_pos_osob_naziv( gIdRadnik ) ),  "   NA DAN: " + FormDat1 ( danasnji_datum() )
       ?
    ELSE
-      START PRINT CRET
-      //ZagFirma()
-      ?? gP12cpi
+      ?U "PROD.MJESTO: " + cidpos + "-" + IF( Empty( cIdPos ), "SVA", find_pos_kasa_naz( cIdPos ) )
+      ?U "RADNIK     : " + IF( Empty( cIdRadnik ), "svi", cIdRadnik + "-" + RTrim( find_pos_osob_naziv( cIdRadnik ) ) )
+      ?U "VR.PLAĆANJA: " + IF( Empty( cVrsteP ), "sve", RTrim( cVrsteP ) )
+
+      ?U "PERIOD     : " + FormDat1( dDatOd ) + " - " + FormDat1( dDatDo )
       ?
-      IF glRetroakt
-         ? PadC( "REALIZACIJA NA DAN " + FormDat1( dDatDo ), 40 )
-      ELSE
-         ? PadC( "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() ), 40 )
-      ENDIF
-      ? PadC( "-------------------------------------", 40 )
-      ? "PROD.MJESTO: " + cidpos + "-" + IF( Empty( cIdPos ), "SVA", find_pos_kasa_naz( cIdPos ) )
-      ? "RADNIK     : " + IF( Empty( cIdRadnik ), "svi", cIdRadnik + "-" + RTrim( find_pos_osob_naziv( cIdRadnik ) ) )
-      ? "VR.PLACANJA: " + IF( Empty( cVrsteP ), "sve", RTrim( cVrsteP ) )
-      IF ! Empty ( cSmjena )
-         ? "SMJENA     : " + RTrim( cSmjena )
-      ENDIF
+      ?U "ŠIFRA PREZIME I IME RADNIKA"
+      ?U "-----", Replicate ( "-", 30 )
+   ENDIF
 
-
-      ? "PERIOD     : " + FormDat1( dDatOd ) + " - " + FormDat1( dDatDo )
-      ?
-      ? "SIFRA PREZIME I IME RADNIKA"
-      ? "-----", Replicate ( "-", 30 )
-   ENDIF // lTekuci
-
-   // formiram pomocnu datoteku sa podacima o realizaciji
    IF !lTekuci
       pos_radnik_izvuci ( VD_PRR )
    ENDIF
    pos_radnik_izvuci ( POS_VD_RACUN )
-
 
    SELECT pos_doks
    SET ORDER TO TAG "2"       // "DOKSi2", "IdVd+DTOS (Datum)+Smjena"
@@ -166,26 +139,26 @@ FUNCTION pos_realizacija_radnik
       SET FILTER TO &cFilterVrstePlacanja
    ENDIF
 
-   // ispis izvjestaja
-   IF fPrik $ "PO"
+
+   IF cPrikazPazarRoba $ "PO"
       nTotal := 0
-    //  nTotal2 := 0
       nTotal3 := 0
       SELECT POM
       SET ORDER TO TAG "1"
       GO TOP
+      bZagl := {|| zagl_radnik() }
+      Eval( bZagl )
       DO WHILE !Eof()
+
+         check_nova_strana( bZagl, s_oPDF )
          _IdRadnik := POM->IdRadnik
          nTotRadn := 0
-      //   nTotRadn2 := 0
          nTotRadn3 := 0
          IF ! lTekuci
             ? _IdRadnik + "  " + PadR ( find_pos_osob_naziv( _IdRadnik ), 30 )
             ? Replicate ( "-", 40 )
             SELECT POM
-         ELSE
-            ? Space ( 5 ) + PadR ( "Vrsta placanja", 24 ), PadC( "Iznos", 10 )
-            ? Space ( 5 ) + REPL ( "-", 24 ), REPL ( "-", 10 )
+
          ENDIF
 
          nKolicO := 0    // kolicina za ostale
@@ -193,24 +166,10 @@ FUNCTION pos_realizacija_radnik
          DO WHILE !Eof() .AND. POM->IdRadnik == _IdRadnik
             _IdVrsteP := POM->IdVrsteP
             nTotVP := 0
-        //    nTotVP2 := 0
             nTotVP3 := 0
             DO WHILE !Eof() .AND. POM->( IdRadnik + IdVrsteP ) == ( _IdRadnik + _IdVrsteP )
                nTotVP += POM->Iznos
-          //     nTotVP2 += pom->iznos2
                nTotVP3 += pom->iznos3
-
-               IF fPrikPrem == "D"
-                  select_o_roba( pom->idroba )
-                  SELECT pom
-                  IF !( roba->k2 = 'X' )
-                     IF roba->k7 = '*'
-                        nKolicPr += pom->kolicina
-                     ELSE
-                        nKolicO += pom->kolicina
-                     ENDIF
-                  ENDIF
-               ENDIF // fPrikPrem=="D"
                SKIP
             ENDDO
 
@@ -218,20 +177,12 @@ FUNCTION pos_realizacija_radnik
             ? Space ( 5 ) + PadR ( VRSTEP->Naz, 24 ), Str ( nTotVP, 10, 2 )
 
             nTotRadn += nTotVP
-        //    nTotRadn2 += nTotVP2
             nTotRadn3 += nTotVP3
 
             SELECT POM
          ENDDO
 
          ? Replicate ( "-", 40 )
-         IF fPrikPrem == "D"
-            ?
-            ?  PadL( "Kolicina - k7='*' ", 29, "." ), Str( nKolicPr, 10, 2 )
-            ?  PadL( "Kolicina - ostali artikli", 29, ), Str( nKolicO, 10, 2 )
-            ?
-         ENDIF
-
          ? PadL ( "UKUPNO RADNIK (" + _idradnik + "):", 29 ), Str ( nTotRadn, 10, 2 )
 
          IF nTotRadn3 <> 0
@@ -241,7 +192,6 @@ FUNCTION pos_realizacija_radnik
          ? Replicate ( "-", 40 )
 
          nTotal += nTotRadn
-      //   nTotal2 += nTotRadn2
          nTotal3 += nTotRadn3
       ENDDO
 
@@ -257,52 +207,46 @@ FUNCTION pos_realizacija_radnik
       ENDIF
    ENDIF
 
-   IF fPrik $ "RO"
+   IF cPrikazPazarRoba $ "RO"
       IF ! lTekuci
          ?
          ?
          ? PadC ( "REALIZACIJA PO ROBAMA", 40 )
       ENDIF
-      ?
-      ? PadR ( "Sifra", 10 ), PadR ( "Naziv robe", 21 )
-      ? PadL ( "Set c.", 11 ), PadC ( "Kolicina", 12 ), PadC ( "Iznos", 15 )
-      ? REPL ( "-", 11 ), REPL ( "-", 12 ), REPL ( "-", 15 )
+
+      bZagl := {|| zagl_roba() }
+      Eval( bZagl )
+
       SELECT POM
       SET ORDER TO TAG "2"
       GO TOP
       nTotal := 0
-    //  nTotal2 := 0
       nTotal3 := 0
       DO WHILE !Eof()
+
+         check_nova_strana( bZagl, s_oPDF )
          select_o_roba( POM->IdRoba )
          SELECT POM
-         ? POM->IdRoba + " "
-         IF roba->( FieldPos( "K7" ) ) <> 0
-            ?? PadR ( roba->Naz, 23 ) + roba->k7
-         ELSE
-            ?? PadR ( roba->Naz, 21 )
-         ENDIF
+         ?U POM->IdRoba + " "
+         ??U PadR ( roba->Naz, 21 )
+
          _IdRoba := POM->IdRoba
          nRobaIzn := 0
-        // nRobaIzn2 := 0
          nRobaIzn3 := 0
          DO WHILE !Eof() .AND. POM->IdRoba == _IdRoba
             _IdCijena := POM->IdCijena
             nIzn := 0
-          //  nIzn2 := 0
             nIzn3 := 0
             nKol := 0
             DO WHILE !Eof() .AND. POM->( IdRoba + IdCijena ) == ( _IdRoba + _IdCijena )
                nKol += POM->Kolicina
                nIzn += POM->Iznos
-            //   nIzn2 += POM->Iznos2
                nIzn3 += POM->Iznos3
                SELECT POM
                SKIP
             ENDDO
             ? PadL ( _IdCijena, 11 ), Str ( nKol, 12, 3 ), Str ( nIzn, 15, 2 )
             nTotal += nIzn
-          //  nTotal2 += nIzn2
             nTotal3 += nIzn3
          ENDDO
       ENDDO
@@ -314,34 +258,38 @@ FUNCTION pos_realizacija_radnik
       ENDIF
       ? REPL ( "=", 40 )
    ENDIF
-   IF lTekuci
-      //PaperFeed()
-      IF fZaklj
-         ENDPRN2
-      ELSE
-         ENDPRINT
-      ENDIF
-   ELSE
-      ENDPRINT
-   ENDIF
 
-   IF fZaklj
-      pos_close_dbfs_real_radnici()
-   ELSE
-      CLOSE ALL
-   ENDIF
+   f18_end_print( NIL, xPrintOpt )
+   my_close_all_dbf()
+
+   RETURN .T.
+
+
+STATIC FUNCTION zagl_radnik()
+
+   LOCAL cLinija :=  REPL ( "-", 24 ) + " " + REPL ( "-", 10 )
+
+   ?U Space( 5 ) + cLinija
+   ?U Space( 5 ) + PadR ( "Vrsta plaćanja", 24 ), PadC( "Iznos", 10 )
+   ?U Space( 5 ) + cLinija
+
+   RETURN .T.
+
+STATIC FUNCTION zagl_roba()
+
+   LOCAL cLinija := REPL ( "-", 11 ) + " " + REPL ( "-", 12 ) + " " + REPL ( "-", 15 )
+
+   ?U
+   ?U cLinija
+   ?U PadR ( "Šifra", 10 ), PadR ( "Naziv robe", 21 )
+   ?U PadL ( "Set c.", 11 ), PadC ( "Količina", 12 ), PadC ( "Iznos", 15 )
+   ?U cLinija
 
    RETURN .T.
 
 
 FUNCTION pos_close_dbfs_real_radnici()
 
-   SELECT DIO
-   USE
-   // SELECT KASE
-   // USE
-   // SELECT roba
-   // USE
    SELECT VRSTEP
    USE
    SELECT pos_doks
@@ -354,12 +302,7 @@ FUNCTION pos_close_dbfs_real_radnici()
    RETURN .T.
 
 
-/* pos_radnik_izvuci(cIdVd)
- *     Punjenje pomocne baze realizacijom po radnicima
- */
-
 FUNCTION pos_radnik_izvuci( cIdVd )
-
 
    seek_pos_doks_2( cIdVd, dDatOd )
    DO WHILE ! Eof() .AND. IdVd == cIdVd .AND. pos_doks->Datum <= dDatDo
@@ -380,20 +323,12 @@ FUNCTION pos_radnik_izvuci( cIdVd )
          select_o_roba( pos->idroba )
 
          IF roba->( FieldPos( "idodj" ) ) <> 0
-            //SELECT odj
+            // SELECT odj
             select_o_pos_odj( roba->idodj )
          ENDIF
 
          nNeplaca := 0
-
-        // IF Right( odj->naz, 5 ) == "#1#0#"  // proba!!!
-        //    nNeplaca := pos->( Kolicina * Cijena )
-        // ELSEIF Right( odj->naz, 6 ) == "#1#50#"
-        //    nNeplaca := pos->( Kolicina * Cijena ) / 2
-        // ENDIF
-         //IF gPopVar = "P"
-            nNeplaca += pos->( NCijena * kolicina )
-         //ENDIF
+         nNeplaca += pos->( NCijena * kolicina )
 
          SELECT POM
          GO TOP
@@ -402,14 +337,14 @@ FUNCTION pos_radnik_izvuci( cIdVd )
          IF !Found()
             APPEND BLANK
             REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, IdCijena WITH POS->IdCijena, Kolicina WITH POS->KOlicina, Iznos WITH POS->Kolicina * POS->Cijena, iznos3 WITH nNeplaca
-            //IF gPopVar = "A"
-            //   REPLACE Iznos2   WITH pos->( ncijena )
-            //ENDIF
+            // IF gPopVar = "A"
+            // REPLACE Iznos2   WITH pos->( ncijena )
+            // ENDIF
          ELSE
             REPLACE Kolicina WITH Kolicina + POS->Kolicina, Iznos WITH Iznos + POS->Kolicina * POS->Cijena, iznos3 WITH iznos3 + nNeplaca
-            //IF gPopVar = "A"
-            //   REPLACE Iznos2   WITH Iznos2 + pos->( ncijena )
-            //ENDIF
+            // IF gPopVar = "A"
+            // REPLACE Iznos2   WITH Iznos2 + pos->( ncijena )
+            // ENDIF
          ENDIF
          SELECT POS
          SKIP
@@ -417,22 +352,5 @@ FUNCTION pos_radnik_izvuci( cIdVd )
       SELECT pos_doks
       SKIP
    ENDDO
-
-   RETURN .T.
-
-
-
-STATIC FUNCTION o_tables()
-
-   // o_sifk()
-   // o_sifv()
-   // o_pos_kase()
-   //o_pos_odj()
-   // o_roba()
-   // o_pos_osob()
-   //SET ORDER TO TAG "NAZ"
-   //o_vrstep()
-   //o_pos_pos()
-   //o_pos_doks()
 
    RETURN .T.

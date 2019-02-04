@@ -331,6 +331,8 @@ METHOD MaxCol() CLASS PDFClass
 
    IF ::nType == PDF_TXT_PORTRAIT
       SWITCH ROUND(::nFontSize, 0)
+      CASE 10
+         RETURN 92
       CASE 9
          RETURN 102
       CASE 8
