@@ -244,7 +244,6 @@ STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrste
 
    ? "PERIOD     : " + FormDat1( dDatum0 ) + " - " + FormDat1( dDatum1 )
 
-
    RETURN .T.
 
 
@@ -358,7 +357,7 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
          nTotPos3 += nTotVP3
       ENDDO
 
-      pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "N", "-" )
+      pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
 
       nTotal += nTotPos
       nTotal3 += nTotPos3
@@ -495,40 +494,40 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
             nRobaIzn3 := 0
             DO WHILE !Eof() .AND. POM->IdPos + POM->IdRoba == _IdPos + _IdRoba
 
-                  nRobaKol += POM->Kolicina
-                  nRobaIzn += POM->Iznos
-                  nRobaIzn3 += POM->Iznos3
+               nRobaKol += POM->Kolicina
+               nRobaIzn += POM->Iznos
+               nRobaIzn3 += POM->Iznos3
 
-                  SKIP
-             ENDDO
+               SKIP
+            ENDDO
 
-             cStr2 := ""
-             cStr2 += show_number( nRobaKol, NIL, - 8 )
-             nLen2 := Len( cStr2 )
+            cStr2 := ""
+            cStr2 += show_number( nRobaKol, NIL, - 8 )
+            nLen2 := Len( cStr2 )
 
-               cStr3 := show_number( nRobaIzn, PIC_UKUPNO )
-               nLen3 := Len( cStr3 )
+            cStr3 := show_number( nRobaIzn, PIC_UKUPNO )
+            nLen3 := Len( cStr3 )
 
-               aReal := SjeciStr( cStr1, LEN_TRAKA )
+            aReal := SjeciStr( cStr1, LEN_TRAKA )
 
-               FOR i := 1 TO Len( aReal )
-                  ? RTrim( aReal[ i ] )
-                  nLenRow := Len( RTrim( aReal[ i ] ) )
-               NEXT
+            FOR i := 1 TO Len( aReal )
+               ? RTrim( aReal[ i ] )
+               nLenRow := Len( RTrim( aReal[ i ] ) )
+            NEXT
 
-               IF  nLen2 + 1 + nLen3 > LEN_TRAKA - nLenRow
-                  ? PadL( cStr2 + Space( LEN_RAZMAK ) + cStr3, LEN_TRAKA )
-               ELSE
-                  ?? PadL( cStr2 + Space( LEN_RAZMAK ) + cStr3, LEN_TRAKA - nLenRow )
-               ENDIF
+            IF  nLen2 + 1 + nLen3 > LEN_TRAKA - nLenRow
+               ? PadL( cStr2 + Space( LEN_RAZMAK ) + cStr3, LEN_TRAKA )
+            ELSE
+               ?? PadL( cStr2 + Space( LEN_RAZMAK ) + cStr3, LEN_TRAKA - nLenRow )
+            ENDIF
 
-               SELECT POM
+            SELECT POM
 
             nTotPos += nRobaIzn
             nTotPos3 += nRobaIzn3
          ENDDO
 
-         pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "N", "-" )
+         pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
          nTotal += nTotPos
          nTotal3 += nTotPos3
       ENDDO
@@ -613,7 +612,6 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
             nTotOdj := 0
             nTotOdj3 := 0
 
-
             SELECT POM
             DO WHILE !Eof() .AND. pom->IdPos == _IdPos
                nTotOdj += pom->Iznos
@@ -624,7 +622,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
             nTotPos += nTotOdj
             nTotPos3 += nTotOdj3
          ENDDO
-         pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "N", "-" )
+         pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
          nTotal += nTotPos
          nTotal3 += nTotPos3
       ENDDO
@@ -635,8 +633,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
       ENDIF
    ENDIF
 
-   IF fPrik $ "RO"
-      // realizacija kase, po odjeljenjima, ROBNO
+   IF fPrik $ "RO" // realizacija kase, po odjeljenjima, ROBNO
       nTotal := 0
       SELECT POM
       SET ORDER TO TAG "2"   // IdPos+IdRoba
@@ -680,7 +677,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
                   nKol := 0
                   nIzn := 0
                   nIzn3 := 0
-                  DO WHILE !Eof() .AND. pom->IdPos + pom->IdRoba ==  _IdPos + _+ _IdRoba
+                  DO WHILE !Eof() .AND. pom->IdPos + pom->IdRoba ==  _IdPos + _ + _IdRoba
                      nKol += POM->Kolicina
                      nIzn += POM->Iznos
                      nIzn3 += POM->Iznos3
@@ -783,7 +780,6 @@ STATIC FUNCTION pos_realizacija_tbl_cre_pom()
    AAdd( aDbf, { "Iznos", "N", 20, 5 } )
    AAdd( aDbf, { "Iznos2", "N", 20, 5 } )
    AAdd( aDbf, { "Iznos3", "N", 20, 5 } )
-
 
    pos_cre_pom_dbf( aDbf )
 
