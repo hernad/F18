@@ -51,7 +51,7 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
 
          SELECT pom
          GO TOP
-         SEEK pos_doks->IdPos + pos_doks->IdRadnik + pos_doks->IdVrsteP + pos->IdRoba + pos->IdCijena // POM
+         SEEK pos_doks->IdPos + pos_doks->IdRadnik + pos_doks->IdVrsteP + pos->IdRoba
 
          IF !Found()
             APPEND BLANK
@@ -59,7 +59,7 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
             REPLACE IdRadnik WITH pos_doks->IdRadnik
             REPLACE IdVrsteP WITH pos_doks->IdVrsteP
             REPLACE IdRoba WITH pos->IdRoba
-            REPLACE IdCijena WITH pos->IdCijena
+
             REPLACE Kolicina WITH pos->Kolicina
             REPLACE Iznos WITH pos->Kolicina * POS->Cijena
             REPLACE Iznos3 WITH nNeplaca

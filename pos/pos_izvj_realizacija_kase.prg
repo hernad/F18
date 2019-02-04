@@ -779,7 +779,6 @@ STATIC FUNCTION pos_realizacija_tbl_cre_pom()
    AAdd( aDbf, { "IdRadnik", "C",  4, 0 } )
    AAdd( aDbf, { "IdVrsteP", "C",  2, 0 } )
    AAdd( aDbf, { "IdRoba", "C", 10, 0 } )
-   AAdd( aDbf, { "IdCijena", "C",  1, 0 } )
    AAdd( aDbf, { "Kolicina", "N", 12, 3 } )
    AAdd( aDbf, { "Iznos", "N", 20, 5 } )
    AAdd( aDbf, { "Iznos2", "N", 20, 5 } )
@@ -801,9 +800,8 @@ STATIC FUNCTION o_pom_table()
    my_use_temp( "POM", my_home() + "pom", .F., .T. )
    SET ORDER TO TAG "1"
 
-   INDEX ON ( IdPos + IdRadnik + IdVrsteP + IdRoba + IdCijena ) TAG "1"
-   INDEX ON ( IdPos + IdRoba + IdCijena ) TAG "2"
-   INDEX ON ( IdPos + IdRoba + IdCijena ) TAG "3"
+   INDEX ON ( IdPos + IdRadnik + IdVrsteP + IdRoba ) TAG "1"
+   INDEX ON ( IdPos + IdRoba ) TAG "2"
    INDEX ON ( IdPos + IdVrsteP ) TAG "4"
 
    RETURN .T.

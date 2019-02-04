@@ -416,7 +416,6 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
                Kolicina WITH POS->Kolicina, ;
                IdTarifa WITH POS->IdTarifa, ;
                mpc WITH POS->Cijena, ;
-               IdCijena WITH POS->IdCijena, ;
                Datum WITH dDatumDo, ;
                DatPos WITH pos->datum, ;
                brdok WITH pos->brdok, ;
@@ -494,7 +493,6 @@ STATIC FUNCTION cre_pom_topska_dbf()
    AAdd( aDBF, { "MPC",      "N",  13, 4 } )
    AAdd( aDBF, { "STMPC",    "N",  13, 4 } )
    AAdd( aDBF, { "IDTARIFA", "C",   6, 0 } )
-   AAdd( aDBF, { "IDCIJENA", "C",   1, 0 } )
    AAdd( aDBF, { "IDPARTNER", "C",  10, 0 } )
    AAdd( aDBF, { "DATUM",    "D",   8, 0 } )
    AAdd( aDBF, { "DATPOS",   "D",   8, 0 } )

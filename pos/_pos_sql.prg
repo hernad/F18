@@ -605,17 +605,6 @@ STATIC FUNCTION pos_get_mpc_field()
 
 
 
-STATIC FUNCTION pos_get_mpc_valid()
-
-   LOCAL lOk := .T.
-   LOCAL cSet := AllTrim( gSetMPCijena )
-
-   IF Empty( cSet ) .OR. cSet == "0"
-      lOk := .F.
-   ENDIF
-
-   RETURN lOk
-
 
 FUNCTION o_vrstep( cId )
 

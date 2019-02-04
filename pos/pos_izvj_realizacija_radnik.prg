@@ -67,7 +67,6 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
    AAdd ( aDbf, { "IdRadnik", "C",  4, 0 } )
    AAdd ( aDbf, { "IdVrsteP", "C",  2, 0 } )
    AAdd ( aDbf, { "IdRoba", "C", 10, 0 } )
-   AAdd ( aDbf, { "IdCijena", "C",  1, 0 } )
    AAdd ( aDbf, { "Kolicina", "N", 15, 3 } )
    AAdd ( aDbf, { "Iznos",    "N", 20, 5 } )
    AAdd ( aDbf, { "Iznos2",   "N", 20, 5 } )
@@ -81,8 +80,8 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
    ENDIF
 
    my_use_temp( "POM", my_home() + "pom", .F., .T. )
-   INDEX ON ( idradnik + idvrstep + idroba + idcijena ) TAG "1"
-   INDEX ON ( idroba + idcijena ) TAG "2"
+   INDEX ON ( idradnik + idvrstep + idroba ) TAG "1"
+   INDEX ON ( idroba ) TAG "2"
 
    SET ORDER TO TAG "1"
 
@@ -325,14 +324,12 @@ FUNCTION pos_radnik_izvuci( cIdVd )
 
          SELECT POM
          GO TOP
-         HSEEK _IdRadnik + _IdVrsteP + POS->IdRoba + POS->IdCijena // POM
+         HSEEK _IdRadnik + _IdVrsteP + POS->IdRoba
 
          IF !Found()
             APPEND BLANK
-            REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, IdCijena WITH POS->IdCijena, Kolicina WITH POS->KOlicina, Iznos WITH POS->Kolicina * POS->Cijena, iznos3 WITH nNeplaca
-            // IF gPopVar = "A"
-            // REPLACE Iznos2   WITH pos->( ncijena )
-            // ENDIF
+            REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, Kolicina WITH POS->KOlicina, Iznos WITH POS->Kolicina * POS->Cijena, iznos3 WITH nNeplaca
+
          ELSE
             REPLACE Kolicina WITH Kolicina + POS->Kolicina, Iznos WITH Iznos + POS->Kolicina * POS->Cijena, iznos3 WITH iznos3 + nNeplaca
             // IF gPopVar = "A"
