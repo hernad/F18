@@ -90,7 +90,7 @@ FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
 
    nIzb := meni_0_inkey( nX1 + 1, nY1 + 1, nX1 + xM, nY1 + nYm, aNiz, nIzb )
 
-   Prozor0()
+   box_crno_na_zuto_end()
 
    RETURN nIzb
 

@@ -159,7 +159,7 @@ FUNCTION barkod_or_roba_id( cId )
    LOCAL cIdRoba := ""
    LOCAL cBarkod := ""
 
-   gOcitBarCod := .F.
+   gOcitBarKod := .F.
 
    // SELECT roba
 
@@ -171,7 +171,7 @@ FUNCTION barkod_or_roba_id( cId )
       IF find_roba_by_barkod( cID )
          IF PadR( cId, 13 ) == field->barkod
             cId := field->id
-            gOcitBarCod := .T.
+            gOcitBarKod := .T.
             cBarkod := AllTrim( field->barkod )
          ENDIF
       ENDIF
@@ -250,7 +250,7 @@ FUNCTION tezinski_barkod( id, tezina, pop_push )
       pop_push := .T.
    ENDIF
 
-   gOcitBarCod := _ocitao
+   gOcitBarKod := _ocitao
 
    IF _tb == "N"
       RETURN _ocitao
@@ -289,7 +289,7 @@ FUNCTION tezinski_barkod( id, tezina, pop_push )
       id := roba->id
       _ocitao := .T.
 
-      gOcitBarCod := _ocitao
+      gOcitBarKod := _ocitao
 
 
       IF !Empty( _tb_tezina )

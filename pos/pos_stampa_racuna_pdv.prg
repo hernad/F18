@@ -13,7 +13,7 @@
 
 FUNCTION pos_stampa_racuna_pdv( hParams )
 
-   LOCAL cTime
+   LOCAL cVrijeme
 
    pos_napuni_drn_rn_dbf( hParams )
 
@@ -21,15 +21,14 @@ FUNCTION pos_stampa_racuna_pdv( hParams )
       pos_racun_print()
    ENDIF
 
-   RETURN cTime
-
+   RETURN cVrijeme
 
 
 FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    LOCAL cPosDB
 
-   LOCAL cSmjena
+   //LOCAL cSmjena
    LOCAL cIdRoba
    LOCAL cIdTarifa
    LOCAL cRobaNaz
@@ -65,6 +64,8 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
    LOCAL dDatum := hParams[ "datum" ]
    LOCAL cBrDok := hParams[ "brdok" ]
    LOCAL cIdRadnik := hParams[ "idradnik" ]
+   LOCAL cIdVrsteP := hParams[ "idvrstep" ]
+   LOCAL cVrijeme := hParams[ "vrijeme" ]
 
    close_open_racun_tbl()
    zap_racun_tbl()
@@ -89,27 +90,23 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    IF !hParams[ "priprema" ]
       seek_pos_pos( cIdPos, POS_VD_RACUN, dDatum, cBrDok )
-
       SELECT pos_doks
-      cTime := pos_doks->vrijeme
-      cVrstaP := pos_doks->idvrstep
-
+      //cVrijeme := pos_doks->vrijeme
+      //cIdVrsteP := pos_doks->idvrstep
    ELSE
       SELECT _pos_pripr
       SET ORDER TO TAG "1"
       GO TOP
       SEEK cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok
-      // cSmjena := _pos->smjena
-      cTime := Left( Time(), 5 )
-      cVrstaP := _pos->idvrstep
-
+      //cVrijeme := Left( Time(), 5 )
+      //cIdVrsteP := _pos->idvrstep
    ENDIF
 
 
    find_pos_osob_by_naz( cIdRadnik )
    cRdnkNaz := osob->naz
 
-   IF !select_o_vrstep( cVrstaP )
+   IF !select_o_vrstep( cIdVrsteP )
       cNazVrstaP := "GOTOVINA"
    ELSE
       cNazVrstaP := AllTrim( vrstep->naz )
@@ -211,7 +208,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
    ENDDO
 
    // dodaj zapis u drn.dbf
-   add_drn( cBrDok, dDatum, NIL, NIL, cTime, Round( nUBPDV, 2 ), Round( nUPopust, 2 ), Round( nUBPDVPopust, 2 ), Round( nUPDV, 2 ), Round( nUTotal - nFZaokr, 2 ), nCSum, 0, nFZaokr, 0 )
+   add_drn( cBrDok, dDatum, NIL, NIL, cVrijeme, Round( nUBPDV, 2 ), Round( nUPopust, 2 ), Round( nUBPDVPopust, 2 ), Round( nUPDV, 2 ), Round( nUTotal - nFZaokr, 2 ), nCSum, 0, nFZaokr, 0 )
    // mjesto nastanka racuna
    add_drntext( "R01", gRnMjesto )
    // dodaj naziv radnika

@@ -329,14 +329,10 @@ FUNCTION pos_pregled_stavki_racuna()
    LOCAL nMaxRow := f18_max_rows() - 15
    LOCAL nMaxCol := f18_max_cols() - 35
 
-
    PRIVATE ImeKol
    PRIVATE Kol
 
-   cPrevCol := SetColor( f18_color_invert()  )
-
    SELECT F__PRIPR
-
    IF !Used()
       O__POS_PRIPR
    ENDIF
@@ -384,8 +380,7 @@ FUNCTION pos_pregled_stavki_racuna()
 
    BoxC()
 
-   SetColor ( cPrevCol )
-
+   //SetColor ( cPrevCol )
    SELECT pos_doks
 
    RETURN .T.

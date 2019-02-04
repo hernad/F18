@@ -365,7 +365,7 @@ altd()
    cGetId := _idroba
    nGetKol := _Kolicina
 
-   prikaz_dostupnih_opcija( { "<Enter>-Ispravi stavku", "<B>-Brisi stavku", "<Esc>-Zavrsi" } )
+   prikaz_dostupnih_opcija_crno_na_zuto( { "<Enter>-Ispravi stavku", "<B>-Brisi stavku", "<Esc>-Zavrsi" } )
 
    s_oBrowse:autolite := .T.
    s_oBrowse:configure()
@@ -376,7 +376,7 @@ altd()
    s_oBrowse:dehilite()
    s_oBrowse:stabilize()
 
-   Prozor0()
+   //box_crno_na_zuto_end()
    _idroba := cGetId
    _Kolicina := nGetKol
 

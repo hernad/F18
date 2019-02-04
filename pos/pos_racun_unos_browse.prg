@@ -12,38 +12,30 @@
 #include "f18.ch"
 
 STATIC s_nMaxKolicinaPosRacun := NIL
+STATIC s_oBrowse, s_nIznosRacuna, s_nPopust, s_cRobaPosDuzinaSifre
 
-MEMVAR Kol, ImeKol, gIdPos
-MEMVAR _idpos, _idroba, _cijena, _ncijena, _kolicina, _iznos, _popust, _idvd, _brdok, _datum, _sto, _idradnik, _idcijena, _prebacen, _mu_ui
+MEMVAR Kol, ImeKol, gIdPos, gOcitBarKod
+MEMVAR _idpos, _idroba, _cijena, _ncijena, _kolicina, _iznos, _popust, _idvd, _brdok, _datum, _idradnik, _idcijena, _prebacen, _mu_ui
 MEMVAR _robanaz, _jmj, _idtarifa  // , _idodj
 
 FUNCTION pos_racun_unos_browse( cBrDok )
 
    LOCAL nMaxCols := f18_max_cols()
    LOCAL nMaxRows := f18_max_rows()
-   LOCAL _read_barkod
+
    LOCAL nStanjeRobe := 0
    LOCAL cIdRobaStanje, cJmjStanje
    LOCAL i
    LOCAL aUnosMsg := {}
-   LOCAL oBrowse
-   LOCAL cRobaPosDuzinaSifre
    LOCAL GetList := {}
-   LOCAL nIznosRacuna
-   LOCAL nPopust
    LOCAL cTmp
 
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
    PRIVATE nRowPos
 
-   // PRIVATE nPopust := 0
-   // PRIVATE nIznosRacuna := 0
-
    o_pos_tables()
    SELECT _pos_pripr
-
-   // aRabat := {}
 
    IF ( cBrDok == NIL )
       cBrDok := ""
@@ -67,31 +59,29 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    Box(, nMaxRows - 3, nMaxCols - 3, , aUnosMsg )
    @ box_x_koord(), box_y_koord() + 23 SAY8 PadC ( "RAČUN BR: " + AllTrim( cBrDok ), 40 ) COLOR f18_color_invert()
-   oBrowse := pos_form_browse( box_x_koord() + 7, box_y_koord() + 1, box_x_koord() + nMaxRows - 12, box_y_koord() + nMaxCols - 2, ;
+   s_oBrowse := pos_form_browse( box_x_koord() + 7, box_y_koord() + 1, box_x_koord() + nMaxRows - 12, box_y_koord() + nMaxCols - 2, ;
       ImeKol, Kol, ;
       { hb_UTF8ToStrBox( BROWSE_PODVUCI_2 ), ;
       hb_UTF8ToStrBox( BROWSE_PODVUCI ), ;
       hb_UTF8ToStrBox( BROWSE_COL_SEP ) }, 0 )
 
-   oBrowse:autolite := .F.
+   s_oBrowse:autolite := .F.
 
-   // SetKey( K_F6, {|| pos_porezna_faktura_traka() } )
-   // SetKey( K_F7, {|| pos_storno_fiskalnog_racuna(oBrowse), _refresh_total() } )
-   SetKey( K_F8, {|| pos_storno_racuna( oBrowse ), _refresh_total() } )
+
+   SetKey( K_F8, {|| pos_storno_racuna( s_oBrowse ), pos_osvjezi_ukupno( .T. ) } )
    SetKey( K_F9, {|| fiskalni_izvjestaji_komande( .T., .T.  ) } )
 
-   pos_set_key_handler_ispravka_racuna( oBrowse )
+   pos_set_key_handler_ispravka_racuna()
 
    @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY "UKUPNO:"
    @ box_x_koord() + 4, box_y_koord() + ( nMaxCols - 30 ) SAY "POPUST:"
    @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY " TOTAL:"
 
-   ispisi_iznos_veliki_brojevi( 0, box_x_koord() + ( nMaxRows - 12 ), nMaxCols - 2 )
-
-   nIznosRacuna := 0
-   nPopust := 0
-
-   pos_tekuci_saldo_racuna( @nIznosRacuna, @nPopust )
+   // aRet := pos_tekuci_saldo_racuna()
+   // s_nIznosRacuna := aRet[ 1 ]
+   // s_nPopust := aRet[ 2 ]
+   // ispisi_iznos_veliki_brojevi( s_nIznosRacuna - s_nPopust, box_x_koord() + ( nMaxRows - 13 ), nMaxCols - 2 )
+   pos_osvjezi_ukupno( .T. )
 
    SELECT _pos_pripr
    SET ORDER TO
@@ -113,16 +103,14 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    DO WHILE .T.
 
       SET CONFIRM ON
-      pos_unos_show_total( nIznosRacuna, nPopust, box_x_koord() + 2 )
 
-      @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
-      ispisi_iznos_veliki_brojevi( ( nIznosRacuna - nPopust ), box_x_koord() + ( nMaxRows - 12 ), nMaxCols - 2 )
+      pos_osvjezi_ukupno( .F. )
 
-      DO WHILE !oBrowse:stable
-         oBrowse:Stabilize()
+      DO WHILE !s_oBrowse:stable
+         s_oBrowse:Stabilize()
       ENDDO
 
-      DO WHILE !oBrowse:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
+      DO WHILE !s_oBrowse:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
       ENDDO
 
       _idroba := Space( Len( _idroba ) )
@@ -132,13 +120,13 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       SET CURSOR ON
 
       IF gRobaPosDuzinaSifre > 0
-         cRobaPosDuzinaSifre := AllTrim( Str( gRobaPosDuzinaSifre ) )
+         s_cRobaPosDuzinaSifre := AllTrim( Str( gRobaPosDuzinaSifre ) )
       ELSE
-         cRobaPosDuzinaSifre := "10"
+         s_cRobaPosDuzinaSifre := "10"
       ENDIF
 
       @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
-         WHEN {|| _idroba := PadR( _idroba, Val( cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( @_kolicina, GetList )
+         WHEN {|| _idroba := PadR( _idroba, Val( s_cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( GetList, 2, 27 )
 
       @ box_x_koord() + 3, box_y_koord() + 5 SAY "  Cijena:" GET _Cijena PICT "99999.999"  WHEN ( roba->tip == "T" .OR. gPopZcj == "D" )
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _kolicina PICT "999999.999" WHEN when_pos_kolicina( @_kolicina ) VALID valid_pos_kolicina( @_kolicina, _cijena )
@@ -153,10 +141,10 @@ FUNCTION pos_racun_unos_browse( cBrDok )
          IF valid_dodaj_taksu_za_gorivo()
             EXIT
          ELSE
-            pos_tekuci_saldo_racuna( @nIznosRacuna, @nPopust )
-            oBrowse:goBottom()
-            oBrowse:refreshAll()
-            oBrowse:dehilite()
+            pos_tekuci_saldo_racuna()
+            s_oBrowse:goBottom()
+            s_oBrowse:refreshAll()
+            s_oBrowse:dehilite()
             LOOP
 
          ENDIF
@@ -169,7 +157,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-      // _idodj := Space( 2 )
+
 
       IF !( roba->tip == "T" )
          _cijena := pos_get_mpc()
@@ -181,11 +169,11 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       cIdRobaStanje := field->idroba
       cJmjStanje := field->jmj
 
-      nIznosRacuna += field->cijena * field->kolicina
-      nPopust += field->ncijena * field->kolicina
-      oBrowse:goBottom()
-      oBrowse:refreshAll()
-      oBrowse:dehilite()
+      s_nIznosRacuna += field->cijena * field->kolicina
+      s_nPopust += field->ncijena * field->kolicina
+      s_oBrowse:goBottom()
+      s_oBrowse:refreshAll()
+      s_oBrowse:dehilite()
 
       cTmp := "STANJE ARTIKLA " + AllTrim( cIdRobaStanje ) + ": " + AllTrim( Str( nStanjeRobe, 12, 2 ) ) + " " + cJmjStanje
       ispisi_donji_dio_forme_unosa( cTmp, 1 )
@@ -222,24 +210,14 @@ FUNCTION pos_max_kolicina_kod_unosa( nMaxKolicina )
    RETURN s_nMaxKolicinaPosRacun
 
 
-STATIC FUNCTION Popust( nx, ny )
 
-   LOCAL nC1 := 0
-   LOCAL nC2 := 0
-
-   // pos_get_popust_sve_varijante( aRabat, _cijena )
-   // ShowRabatOnForm( nx, ny )
-
-   RETURN .T.
-
-
-STATIC FUNCTION valid_pos_racun_artikal( nKolicina, aGetList )
+STATIC FUNCTION valid_pos_racun_artikal( aGetList, nRow, nCol )
 
    LOCAL lOk, cBarkodProcitati
 
-   lOk := pos_postoji_roba( @_idroba, 2, 27, @cBarkodProcitati, aGetList ) .AND. NarProvDuple( _idroba )
+   lOk := pos_postoji_roba( @_idroba, nRow, nCol, @cBarkodProcitati, aGetList ) .AND. pos_racun_provjera_dupli_artikli( _idroba )
 
-   IF gOcitBarCod
+   IF gOcitBarKod
       hb_keyPut( K_ENTER )
    ENDIF
 
@@ -248,9 +226,7 @@ STATIC FUNCTION valid_pos_racun_artikal( nKolicina, aGetList )
 
 STATIC FUNCTION when_pos_kolicina( kolicina )
 
-   // Popust( box_x_koord() + 4, box_y_koord() + 28 )
-
-   IF gOcitBarCod
+   IF gOcitBarKod
       IF param_tezinski_barkod() == "D" .AND. kolicina <> 0
       ELSE
          kolicina := 1
@@ -261,23 +237,27 @@ STATIC FUNCTION when_pos_kolicina( kolicina )
 
 
 
-STATIC FUNCTION valid_pos_kolicina( kolicina, cijena )
-   RETURN KolicinaOK( kolicina ) .AND. pos_check_qtty( @kolicina ) .AND. cijena_ok( cijena )
+STATIC FUNCTION valid_pos_kolicina( nKolicina, nCijena )
+   RETURN pos_valid_kolicina( nKolicina ) .AND. pos_provjera_max_kolicine( @nKolicina ) .AND. pos_cijena_nije_nula( nCijena )
 
 
+STATIC FUNCTION pos_osvjezi_ukupno( lRekalkulisati )
 
-STATIC FUNCTION _refresh_total()
+   LOCAL aRet
 
-   LOCAL _iznos := 0
-   LOCAL _popust := 0
+   IF lRekalkulisati == NIL
+      lRekalkulisati := .F.
+   ENDIF
 
-   pos_tekuci_saldo_racuna( @_iznos, @_popust )
+   IF lRekalkulisati
+      aRet := pos_tekuci_saldo_racuna()
+      s_nIznosRacuna := aRet[ 1 ]
+      s_nPopust := aRet[ 2 ]
+   ENDIF
 
-   nIznosRacuna := _iznos
-   nPopust := _popust
-
-   ispisi_iznos_veliki_brojevi( ( _iznos - _popust ), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
-   pos_unos_show_total( _iznos, _popust, box_x_koord() + 2 )
+   @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
+   pos_unos_show_total( box_x_koord() + 2 )
+   ispisi_iznos_veliki_brojevi( s_nIznosRacuna - s_nPopust, box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
 
    SELECT _pos_pripr
    GO TOP
@@ -285,32 +265,26 @@ STATIC FUNCTION _refresh_total()
    RETURN .T.
 
 
-STATIC FUNCTION pos_tekuci_saldo_racuna( iznos, nPopust )
+STATIC FUNCTION pos_tekuci_saldo_racuna()
 
-   LOCAL nDbfArea := Select()
-   LOCAL _iznos := 0
-   LOCAL _popust := 0
+   LOCAL nIznos := 0
+   LOCAL nPopust := 0
 
+   PushWa()
    SELECT _pos_pripr
    GO TOP
 
    DO WHILE !Eof()
-      _iznos += _pos_pripr->( kolicina * cijena )
-      _popust += _pos_pripr->( kolicina * nCijena )
+      nIznos += _pos_pripr->kolicina *  _pos_pripr->cijena
+      nPopust += _pos_pripr->kolicina * _pos_pripr->ncijena
       SKIP
    ENDDO
+   PopWa()
 
-   GO TOP
-
-   iznos := _iznos
-   nPopust := _popust
-
-   SELECT ( nDbfArea )
-
-   RETURN .T.
+   RETURN { nIznos, nPopust }
 
 
-FUNCTION pos_check_qtty( nKolicina )
+FUNCTION pos_provjera_max_kolicine( nKolicina )
 
    LOCAL nPosUnosMaxKolicina
 
@@ -335,9 +309,12 @@ FUNCTION pos_check_qtty( nKolicina )
       RETURN .T.
    ENDIF
 
-FUNCTION pos_set_key_handler_ispravka_racuna( oBrowse )
+   RETURN .T.
 
-   SetKey( Asc( "*" ), {|| pos_ispravi_racun( oBrowse ) } )
+
+FUNCTION pos_set_key_handler_ispravka_racuna()
+
+   SetKey( Asc( "*" ), {|| pos_ispravi_racun() } )
 
    RETURN .T.
 
@@ -349,26 +326,24 @@ FUNCTION pos_unset_key_handler_ispravka_racuna()
    RETURN .F.
 
 
-STATIC FUNCTION cijena_ok( cijena )
-
-   LOCAL _ret := .T.
+STATIC FUNCTION pos_cijena_nije_nula( nCijena )
 
    IF LastKey() == K_UP
-      RETURN _ret
+      RETURN .T.
    ENDIF
 
-   IF cijena == 0
+   IF nCijena == 0
       MsgBeep( "Nepravilan unos cijene, cijena mora biti <> 0 !?" )
-      _ret := .F.
+      RETURN .F.
    ENDIF
 
-   RETURN _ret
+   RETURN .T.
 
 
-STATIC FUNCTION KolicinaOK( nKolicina )
+STATIC FUNCTION pos_valid_kolicina( nKolicina )
 
    LOCAL lOk := .F.
-   LOCAL _msg
+   LOCAL cMsg
    LOCAL nStanjeRobe
 
    IF LastKey() == K_UP
@@ -392,22 +367,20 @@ STATIC FUNCTION KolicinaOK( nKolicina )
 
    IF ( nKolicina > nStanjeRobe )
 
-      _msg := "Artikal: " + _idroba + " Trenutno na stanju: " + Str( nStanjeRobe, 12, 2 )
-
+      cMsg := "Artikal: " + _idroba + " Trenutno na stanju: " + Str( nStanjeRobe, 12, 2 )
       IF gPratiStanje = "!"
-         _msg += "#Unos artikla onemogućen !?"
+         cMsg += "#Unos artikla onemogućen !?"
          lOk := .F.
       ENDIF
 
-      MsgBeep( _msg )
+      MsgBeep( cMsg )
 
    ENDIF
 
    RETURN lOk
 
 
-
-STATIC FUNCTION NarProvDuple()
+STATIC FUNCTION pos_racun_provjera_dupli_artikli()
 
    LOCAL nPrevRec
    LOCAL lFlag := .T.
@@ -453,54 +426,57 @@ STATIC FUNCTION NarProvDuple()
    RETURN ( lFlag )
 
 
+FUNCTION pos_ispravi_racun()
 
-FUNCTION pos_ispravi_racun( oBrowse )
-
-   LOCAL cGetId
-   LOCAL nGetKol
    LOCAL aConds
    LOCAL aProcs
+   LOCAL cColor
 
    pos_unset_key_handler_ispravka_racuna()
 
-   prikaz_dostupnih_opcija( { "<Enter>-Ispravi stavku", hb_UTF8ToStr( "<B>-Briši stavku" ), hb_UTF8ToStr( "<Esc>-Završi" ) } )
+   cColor := SetColor()
+   prikaz_dostupnih_opcija_crno_na_zuto( { ;
+      " <Enter>-Ispravi stavku", ;
+      _u( " <B>-Briši stavku" ), ;
+      _u( " <Esc>-Završi" ) } )
 
-   oBrowse:autolite := .T.
-   oBrowse:configure()
+   SetColor( cColor )
 
-   cGetId := _idroba
-   nGetKol := _Kolicina
+   s_oBrowse:autolite := .T.
+   s_oBrowse:configure()
 
-   aConds := { {| Ch | Upper( Chr( Ch ) ) == "B" }, {| Ch | Ch == K_ENTER } }
-   aProcs := { {|| pos_brisi_stavku_racuna( oBrowse ) }, {|| pos_ispravi_stavku_racuna( oBrowse ) } }
+   // cGetId := _idroba
+   // nGetKol := _Kolicina
 
-   ShowBrowse( oBrowse, aConds, aProcs )
+   aConds := { {| nCh | Upper( Chr( nCh ) ) == "B" }, {| nCh | nCh == K_ENTER } }
+   aProcs := { {|| pos_brisi_stavku_racuna() }, {|| pos_ispravi_stavku_racuna() } }
 
-   oBrowse:autolite := .F.
-   oBrowse:dehilite()
-   oBrowse:stabilize()
+   ShowBrowse( s_oBrowse, aConds, aProcs )
 
-   Prozor0()
+   s_oBrowse:autolite := .F.
+   s_oBrowse:dehilite()
+   s_oBrowse:stabilize()
 
-   _idroba := cGetId
-   _kolicina := nGetKol
+   // box_crno_na_zuto_end()
 
-   pos_set_key_handler_ispravka_racuna( oBrowse )
+   // _idroba := cGetId
+   // _kolicina := nGetKol
 
-   RETURN .T.
-
-
-STATIC FUNCTION pos_unos_show_total( iznos, popust, row )
-
-   @ box_x_koord() + row + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY iznos PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + row + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY popust PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + row + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY iznos - popust PICT "99999.99" COLOR f18_color_invert()
+   pos_set_key_handler_ispravka_racuna()
 
    RETURN .T.
 
 
+STATIC FUNCTION pos_unos_show_total( nRow )
 
-FUNCTION pos_brisi_stavku_racuna( oBrowse )
+   @ box_x_koord() + nRow + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY s_nIznosRacuna PICT "99999.99" COLOR f18_color_invert()
+   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY s_nPopust PICT "99999.99" COLOR f18_color_invert()
+   @ box_x_koord() + nRow + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY s_nIznosRacuna - s_nPopust PICT "99999.99" COLOR f18_color_invert()
+
+   RETURN .T.
+
+
+FUNCTION pos_brisi_stavku_racuna()
 
    SELECT _pos_pripr
 
@@ -511,24 +487,23 @@ FUNCTION pos_brisi_stavku_racuna( oBrowse )
 
    Beep ( 2 )
 
-   nIznosRacuna -= _pos_pripr->kolicina * _pos_pripr->cijena
-   nPopust -= _pos_pripr->kolicina * _pos_pripr->ncijena
-
-   pos_unos_show_total( nIznosRacuna, nPopust, box_x_koord() + 2 )
-   ispisi_iznos_veliki_brojevi( ( nIznosRacuna - nPopust ), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
-
+   s_nIznosRacuna -= _pos_pripr->kolicina * _pos_pripr->cijena
+   s_nPopust -= _pos_pripr->kolicina * _pos_pripr->ncijena
    my_delete()
 
-   oBrowse:refreshAll()
-   DO WHILE !oBrowse:stable
-      oBrowse:Stabilize()
+   pos_osvjezi_ukupno( .F. )
+
+
+   s_oBrowse:refreshAll()
+   DO WHILE !s_oBrowse:stable
+      s_oBrowse:Stabilize()
    ENDDO
 
    RETURN ( DE_REFRESH )
 
 
 
-FUNCTION pos_ispravi_stavku_racuna( oBrowse )
+FUNCTION pos_ispravi_stavku_racuna()
 
    LOCAL GetList := {}
 
@@ -543,11 +518,13 @@ FUNCTION pos_ispravi_stavku_racuna( oBrowse )
 
    SET CURSOR ON
 
-   BOX (, 3, 75 )
+   BOX (, 3, 80 )
 
-   @ box_x_koord() + 1, box_y_koord() + 4 SAY8 "    Artikal:" GET _idroba PICTURE PICT_POS_ARTIKAL VALID pos_postoji_roba( @_idroba, 1, 27 ) .AND. ( _IdRoba == _pos_pripr->IdRoba .OR. NarProvDuple () )
+   @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "    Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
+      WHEN {|| _idroba := PadR( _idroba, Val( s_cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( GetList, 1, 28 )
+
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "     Cijena:" GET _Cijena  PICTURE "99999.999" WHEN roba->tip == "T"
-   @ box_x_koord() + 3, box_y_koord() + 3 SAY8 "   količina:" GET _Kolicina VALID KolicinaOK ( _Kolicina )
+   @ box_x_koord() + 3, box_y_koord() + 3 SAY8 "   količina:" GET _Kolicina VALID pos_valid_kolicina ( _Kolicina )
 
    READ
 
@@ -568,8 +545,8 @@ FUNCTION pos_ispravi_stavku_racuna( oBrowse )
          _idtarifa := roba->idtarifa
          // _idodj := Space( 2 )
 
-         nIznosRacuna += ( _cijena * _kolicina ) - cijena * kolicina
-         nPopust += ( _ncijena * _kolicina )  - ncijena * kolicina
+         s_nIznosRacuna += ( _cijena * _kolicina ) - _pos_pripr->cijena * _pos_pripr->kolicina
+         s_nPopust += ( _ncijena * _kolicina )  - _pos_pripr->ncijena * _pos_pripr->kolicina
 
          my_rlock()
          Gather()
@@ -578,8 +555,8 @@ FUNCTION pos_ispravi_stavku_racuna( oBrowse )
       ENDIF
 
       IF ( _pos_pripr->Kolicina <> _Kolicina )
-         nIznosRacuna += ( _cijena * _kolicina ) - cijena * kolicina
-         nPopust += ( _ncijena * _kolicina ) - ncijena * kolicina
+         s_nIznosRacuna += ( _cijena * _kolicina ) - _pos_pripr->cijena * _pos_pripr->kolicina
+         s_nPopust += ( _ncijena * _kolicina ) - _pos_pripr->ncijena * _pos_pripr->kolicina
          RREPLACE Kolicina WITH _Kolicina
       ENDIF
 
@@ -587,13 +564,12 @@ FUNCTION pos_ispravi_stavku_racuna( oBrowse )
 
    BoxC()
 
-   pos_unos_show_total( nIznosRacuna, nPopust, box_x_koord() + 2 )
-   ispisi_iznos_veliki_brojevi( ( nIznosRacuna - nPopust ), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
+   pos_osvjezi_ukupno( .F. )
 
-   oBrowse:refreshCurrent()
+   s_oBrowse:refreshCurrent()
 
-   DO WHILE !oBrowse:stable
-      oBrowse:Stabilize()
+   DO WHILE !s_oBrowse:stable
+      s_oBrowse:Stabilize()
    ENDDO
 
    RETURN ( DE_CONT )
@@ -609,7 +585,7 @@ FUNCTION GetReader2( oGet, GetList, oMenu, aMsg )
    IF ( GetPreValSC( oGet, aMsg ) )
       oGet:setFocus()
       DO WHILE ( oGet:exitState == GE_NOEXIT )
-         IF ( gOcitBarcod .AND. gEntBarCod == "D" )
+         IF ( gOcitBarKod .AND. gEntBarCod == "D" )
             oGet:exitState := GE_ENTER
             EXIT
          ENDIF
@@ -631,5 +607,85 @@ FUNCTION GetReader2( oGet, GetList, oMenu, aMsg )
       ENDDO
       oGet:killFocus()
    ENDIF
+
+   RETURN .T.
+
+
+FUNCTION ShowBrowse( oBrowse, aConds, aProcs )
+
+   LOCAL nCnt
+   LOCAL lFlag
+   LOCAL nArrLen
+   LOCAL nRez := DE_CONT
+   LOCAL nCh
+
+   nArrLen := Len ( aConds )
+   DO WHILE nRez <> DE_ABORT
+
+      IF nRez == DE_REFRESH     // obnovi
+         oBrowse:Refreshall()
+      ENDIF
+
+      IF oBrowse:colPos <= oBrowse:freeze
+         oBrowse:colPos := oBrowse:freeze + 1
+      ENDIF
+
+      nCh := 0
+      DO WHILE ! oBrowse:stable .AND. ( nCh = 0 )
+         oBrowse:Stabilize()
+         nCh := Inkey ()
+      ENDDO
+
+      IF oBrowse:stable
+         IF oBrowse:hitTop .OR. oBrowse:hitBottom
+            Beep ( 1 )
+         ENDIF
+         nCh := Inkey ( 0 )
+      ENDIF
+
+      lFlag := .T.
+      FOR nCnt := 1 TO nArrLen
+         IF Eval ( aConds[ nCnt ], nCh )
+            nRez := Eval ( aProcs[ nCnt ] )
+            lFlag := .F.
+            EXIT
+         ENDIF
+      NEXT
+
+      IF ! lFlag;  LOOP; ENDIF
+
+      DO CASE
+      CASE nCh = K_ESC
+         EXIT
+      CASE nCh == K_DOWN
+         oBrowse:down()
+      CASE nCh == K_PGDN
+         oBrowse:pageDown()
+      CASE nCh == K_CTRL_PGDN
+         oBrowse:goBottom()
+      CASE nCh == K_UP
+         oBrowse:up()
+      CASE nCh == K_PGUP
+         oBrowse:pageUp()
+      CASE nCh == K_CTRL_PGUP
+         oBrowse:goTop()
+      CASE nCh == K_RIGHT
+         oBrowse:Right()
+      CASE nCh == K_LEFT
+         oBrowse:Left()
+      CASE nCh == K_HOME
+         oBrowse:home()
+      CASE nCh == K_END
+         oBrowse:end()
+      CASE nCh == K_CTRL_LEFT
+         oBrowse:panLeft()
+      CASE nCh == K_CTRL_RIGHT
+         oBrowse:panRight()
+      CASE nCh == K_CTRL_HOME
+         oBrowse:panHome()
+      CASE nCh == K_CTRL_END
+         oBrowse:panEnd()
+      ENDCASE
+   ENDDO
 
    RETURN .T.

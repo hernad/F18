@@ -87,7 +87,7 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
    AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
    AAdd( ImeKol, { "Vrijeme", {|| field->vrijeme } } )
-   AAdd( ImeKol, { "Placen",     {|| iif ( field->Placen == PLAC_NIJE, "  NE", "  DA" ) } } )
+   AAdd( ImeKol, { _u("Plaćen"),     {|| iif ( field->Placen == PLAC_NIJE, "  NE", "  DA" ) } } )
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( kol, i )
@@ -180,7 +180,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "S"
-      pos_storno_racuna( .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
+      pos_storno_racuna( TB, .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
       MsgBeep( "Storno račun se nalazi u pripremi !" )
       SELECT pos_doks
       RETURN DE_REFRESH

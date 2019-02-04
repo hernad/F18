@@ -50,7 +50,7 @@ FUNCTION p_fakt_ftxt( cId, dx, dy )
 
    xRet := p_sifra( F_FAKT_FTXT, 1, nBoxHeight, nBoxWidth, "Faktura - tekst na kraju fakture", @cId, , , {|| fakt_ftxt_keyboard_handler( nTop, nLeft, 8, nRight ) } )
 
-   Prozor0()
+   box_crno_na_zuto_end()
 
    SELECT ( nDbfArea )
    PopWa()

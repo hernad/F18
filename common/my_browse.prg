@@ -931,7 +931,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
       NEXT
       @ 18, 27 SAY "UREDITI TABELU PO BROJU:" GET nRez VALID nRez > 0 .AND. nRez < nPored + 1 PICT "9"
       READ
-      Prozor0()
+      box_crno_na_zuto_end()
 
       IF LastKey() != K_ESC
          dbSetOrder( nRez + 1 )

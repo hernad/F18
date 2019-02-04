@@ -15,7 +15,7 @@
 MEMVAR m_x, m_y
 
 THREAD STATIC aBoxStack := {}
-THREAD STATIC aPrStek := {}
+THREAD STATIC s_aProzorFunkcijeStek := {}
 THREAD STATIC aMsgStack := {}
 
 
@@ -220,7 +220,7 @@ FUNCTION MsgC( msg_x1, msg_y1, msg_x2, msg_y2 )
  *         (Inv=.T. ili ne)
  *
  *   param: aOpcijeIliCPoruka - tip C -> prikaz poruke
- *   param: A -> ispisuje opcije pomocu fje prikaz_dostupnih_opcija
+ *   param: A -> ispisuje opcije pomocu fje prikaz_dostupnih_opcija_crno_na_zuto
  *   param: cBoxId se ne koristi
  */
 
@@ -239,8 +239,8 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
 
    SET DEVICE TO SCREEN
 
-   //_m_x := box_x_koord()
-   //_m_y := box_y_koord()
+   // _m_x := box_x_koord()
+   // _m_y := box_y_koord()
    _nA1 := nVisina
 
    Calc_xy( @_nA1, nSirina )
@@ -248,7 +248,7 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
    // stvori prostor za prikaz
    IF ValType( aOpcijeIliCPoruka ) == "A"
 
-      cBoxId := prikaz_dostupnih_opcija( aOpcijeIliCPoruka )
+      cBoxId := prikaz_dostupnih_opcija_crno_na_zuto( aOpcijeIliCPoruka )
 
       IF box_x_koord() + _NA1 > f18_max_rows() - 3 - cBoxId
 
@@ -267,8 +267,8 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
       aOpcijeIliCPoruka := ""
    ENDIF
 
-   //m_x := _m_x
-   //m_y := _m_y
+   // m_x := _m_x
+   // m_y := _m_y
 
    nVisina := _nA1
 
@@ -331,7 +331,7 @@ FUNCTION BoxC()
    SetCursor( iif( aBoxPar[ 9 ] == 0, 0, iif( ReadInsert(), 2, 1 ) ) )
    SetColor( aBoxPar[ 10 ] )
 
-   IF ValType( aBoxPar[ 6 ] ) == "N"; Prozor0(); ENDIF
+   IF ValType( aBoxPar[ 6 ] ) == "N"; box_crno_na_zuto_end(); ENDIF
 
    IF !StackIsEmpty( aBoxStack )
       aBoxPar := StackTop( aBoxStack )
@@ -346,16 +346,16 @@ FUNCTION BoxC()
    RETURN .T.
 
 
-/*  prikaz_dostupnih_opcija(aNiz)
+/*  prikaz_dostupnih_opcija_crno_na_zuto(aNiz)
  *  prikaz opcija u Browse-u
  *
  *  aNiz:={"<c-N> Novi","<a-A> Ispravka"}
  *
  */
 
-FUNCTION prikaz_dostupnih_opcija( aNiz )
+FUNCTION prikaz_dostupnih_opcija_crno_na_zuto( aNiz )
 
-   LOCAL i := 0, j := 0, k := 0, nOmax := 0
+   LOCAL nI := 0, j := 0, nCol := 0, nOmax := 0
    LOCAL nBrKol, nOduz, nBrRed, xVrati := ""
 
    IF ValType( aNiz ) == "A"
@@ -368,19 +368,25 @@ FUNCTION prikaz_dostupnih_opcija( aNiz )
 
       box_crno_na_zuto( f18_max_rows() - 3 - nBrRed, 0,  f18_max_rows() - 2, f18_max_cols(),,, Space( 9 ), , F18_COLOR_TEKST )
 
-      FOR i := 1 TO nBrRed * nBrKol
+      FOR nI := 1 TO nBrRed * nBrKol
+         IF Mod( nI - 1, nBrKol ) == 0
+            Eval( {||++j, nCol := 0 } )
+         ELSE
+            nCol += nOduz
+         ENDIF
 
-         iif( Mod( i - 1, nBrKol ) == 0, Eval( {||++j, k := 0 } ), k += nOduz )
-
-         IF i > Len( aNiz )
+         IF nI > Len( aNiz )
             AAdd( aNiz, "" )
          ENDIF
 
-         IF aNiz[ i ] == NIL
-            aNiz[ i ] := ""
+         IF aNiz[ nI ] == NIL
+            aNiz[ nI ] := ""
          ENDIF
-         @ f18_max_rows() - 3 - nBrRed + j, k SAY PadR( aNiz[ i ], nOduz - 1 ) + iif( Mod( i - 1, nBrKol ) == nBrKol - 1, "", hb_UTF8ToStrBox( BROWSE_COL_SEP ) )
+         @ f18_max_rows() - 3 - nBrRed + j, nCol + 1 SAY " " + PadR( aNiz[ nI ], nOduz - 2 )
 
+         IF Mod( nI - 1, nBrKol ) != nBrKol - 1
+            @ Row(), Col() SAY  hb_UTF8ToStrBox( BROWSE_COL_SEP )
+         ENDIF
       NEXT
 
       // FOR i := 1 TO nBrKol
@@ -467,7 +473,7 @@ FUNCTION box_crno_na_zuto( v1, h1, v2, h2, cNaslov, cBojaN, cOkvir, cBojaO, cBoj
       nKursor := SetCursor()
    ENDIF
 
-   StackPush( aPrStek, { Row(), Col(), v1, h1, v2, h2, SaveScreen( v1, h1, v2, h2 ), SetColor( cBojaT ), SetCursor( nKursor ) } )
+   StackPush( s_aProzorFunkcijeStek, { Row(), Col(), v1, h1, v2, h2, SaveScreen( v1, h1, v2, h2 ), SetColor( cBojaT ), SetCursor( nKursor ) } )
 
    DispBox( v1, h1, v2, h2, cOkvir, cBojaO )
 
@@ -483,16 +489,16 @@ FUNCTION box_crno_na_zuto( v1, h1, v2, h2, cNaslov, cBojaN, cOkvir, cBojaO, cBoj
 
 
 
-FUNCTION Prozor0()
+FUNCTION box_crno_na_zuto_end()
 
-   LOCAL _a_st := StackPop( aPrStek )
+   LOCAL aStack := StackPop( s_aProzorFunkcijeStek )
    LOCAL _device := Set( _SET_DEVICE )
 
    SET DEVICE TO SCREEN
-   RestScreen( _a_st[ 3 ], _a_st[ 4 ], _a_st[ 5 ], _a_st[ 6 ], _a_st[ 7 ] )
-   SetColor( _a_st[ 8 ] )
-   SetCursor( _a_st[ 9 ] )
-   @ _a_st[ 1 ], _a_st[ 2 ] SAY ""
+   RestScreen( aStack[ 3 ], aStack[ 4 ], aStack[ 5 ], aStack[ 6 ], aStack[ 7 ] )
+   SetColor( aStack[ 8 ] )
+   SetCursor( aStack[ 9 ] )
+   @ aStack[ 1 ], aStack[ 2 ] SAY ""
    Set( _SET_DEVICE, _device )
 
    RETURN .T.
@@ -562,7 +568,7 @@ FUNCTION Postotak( nIndik, nUkupno, cTekst, cBNasl, cBOkv, lZvuk )
          @ 14, 28 SAY "<pritisnite neku tipku>" COLOR iif( Int( Seconds() * 1.5 ) % 2 == 0, "W/", "W+/" ) + Right( cOkv, 1 )
          Inkey( 0 )
       ENDIF
-      Prozor0()
+      box_crno_na_zuto_end()
       nCilj := 0; cKraj := ""
    ENDCASE
    Set( _SET_DEVICE, cPom )
@@ -675,7 +681,7 @@ FUNCTION KudaDalje( cTekst, aOpc, cPom )
          EXIT
       ENDCASE
    ENDDO
-   Prozor0()
+   box_crno_na_zuto_end()
 
    RETURN nVrati
 
@@ -882,7 +888,7 @@ FUNCTION VarEdit( aNiz, nX1, nY1, nX2, nY2, cNaslov, cBoje )
    NEXT
    PRIVATE MGetList := GetList
    READ
-   Prozor0()
+   box_crno_na_zuto_end()
    ShemaBoja( cBsstara )
    Set( _SET_DEVICE, cPomUI )
 
@@ -1124,92 +1130,3 @@ FUNCTION pos_form_browse( nT, nL, nB, nR, aImeKol, aKol, aHFCS, nFreeze, bIstakn
    ENDIF
 
    RETURN ( oBrowse )
-
-// ---------------------------------------------------------
-// prikaz forme
-// ---------------------------------------------------------
-FUNCTION ShowBrowse( oBrowse, aConds, aProcs )
-
-   LOCAL nCnt
-   LOCAL lFlag
-   LOCAL nArrLen
-   LOCAL nRez := DE_CONT
-   PRIVATE cCH
-
-   nArrLen := Len ( aConds )
-   DO WHILE nRez <> DE_ABORT
-
-      IF nRez == DE_REFRESH     // obnovi
-         oBrowse:Refreshall()
-      ENDIF
-
-      IF oBrowse:colPos <= oBrowse:freeze
-         oBrowse:colPos := oBrowse:freeze + 1
-      ENDIF
-
-      cCH := 0
-      DO WHILE ! oBrowse:stable .AND. ( cCH = 0 )
-         oBrowse:Stabilize()
-         cCH := Inkey ()
-      ENDDO
-
-      IF oBrowse:stable
-         IF oBrowse:hitTop .OR. oBrowse:hitBottom
-            Beep ( 1 )
-         ENDIF
-         cCH := Inkey ( 0 )
-      ENDIF
-
-      lFlag := .T.
-      FOR nCnt := 1 TO nArrLen
-         IF Eval ( aConds[ nCnt ], cCH )
-            nRez := Eval ( aProcs[ nCnt ] )
-            lFlag := .F.
-            EXIT
-         ENDIF
-      NEXT
-
-      IF ! lFlag;  LOOP; ENDIF
-
-      DO CASE
-      CASE cCH = K_ESC
-         EXIT
-      CASE cCH == K_DOWN
-         oBrowse:down()
-      CASE cCH == K_PGDN
-         oBrowse:pageDown()
-      CASE cCH == K_CTRL_PGDN
-         oBrowse:goBottom()
-      CASE cCH == K_UP
-         oBrowse:up()
-      CASE cCH == K_PGUP
-         oBrowse:pageUp()
-      CASE cCH == K_CTRL_PGUP
-         oBrowse:goTop()
-      CASE cCH == K_RIGHT
-         oBrowse:Right()
-      CASE cCH == K_LEFT
-         oBrowse:Left()
-      CASE cCH == K_HOME
-         oBrowse:home()
-      CASE cCH == K_END
-         oBrowse:end()
-      CASE cCH == K_CTRL_LEFT
-         oBrowse:panLeft()
-      CASE cCH == K_CTRL_RIGHT
-         oBrowse:panRight()
-      CASE cCH == K_CTRL_HOME
-         oBrowse:panHome()
-      CASE cCH == K_CTRL_END
-         oBrowse:panEnd()
-      ENDCASE
-   ENDDO
-
-   RETURN
-
-
-// -----------------------------------
-// dummy funkcija
-// -----------------------------------
-FUNCTION dummy_func()
-   RETURN

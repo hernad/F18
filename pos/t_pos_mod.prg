@@ -95,7 +95,7 @@ METHOD setScreen()
 METHOD set_module_gvars()
 
    PUBLIC gPrevIdPos := "  "
-   PUBLIC gOcitBarcod := .F.
+   PUBLIC gOcitBarKod := .F.
    PUBLIC gSmijemRaditi := 'D'
    PUBLIC gSamoProdaja := 'N'
    PUBLIC gZauzetSam := 'N'
