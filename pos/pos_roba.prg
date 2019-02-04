@@ -53,10 +53,11 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
       s_cPredhodniIdRoba := aGetList[ 1 ]:original
    ENDIF
 
-   AAdd( ImeKol, { _u( "Šifra" ), {|| id }, "" } )
-   AAdd( ImeKol, { PadC( "Naziv", 40 ), {|| PadR( naz, 40 ) }, "" } )
-   AAdd( ImeKol, { PadC( "JMJ", 5 ), {|| PadC( jmj, 5 ) }, "" } )
+   AAdd( ImeKol, { _u( "Šifra" ), {|| roba->id }, "" } )
+   AAdd( ImeKol, { PadC( "Naziv", 40 ), {|| PadR( roba->naz, 40 ) }, "" } )
+   AAdd( ImeKol, { PadC( "JMJ", 5 ), {|| PadC( roba->jmj, 5 ) }, "" } )
    AAdd( ImeKol, { "BARKOD", {|| roba->barkod }, "" } )
+   AAdd( ImeKol, { "Cijena", {|| transform(roba->mpc, "99999.99") }, "" } )
 
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
@@ -74,7 +75,7 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
       cBarkod := PadR( "T", 13 )
    ENDIF
 
-   lSveJeOk := p_sifra( F_ROBA, "ID", f18_max_rows() - 15, f18_max_cols() - 7, "Roba ( artikli ) ", @cId, NIL, NIL, NIL, NIL, NIL, aZabrane )
+   lSveJeOk := p_sifra( F_ROBA, "ID", f18_max_rows() - 15, f18_max_cols() - 7, "POS artikli", @cId, NIL, NIL, NIL, NIL, NIL, aZabrane )
 
    IF LastKey() == K_ESC
       cId := s_cPredhodniIdRoba
@@ -91,12 +92,14 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
 
    ENDIF
 
+/*
    IF fetch_metric( "pos_kontrola_cijene_pri_unosu_stavke", NIL, "N" ) == "D"
       IF Round( _cijena, 5 ) == 0
          MsgBeep( "Cijena 0.00, ne mogu napraviti račun !##STOP!" )
          lSveJeOk := .F.
       ENDIF
    ENDIF
+*/
 
    pos_set_key_handler_ispravka_racuna()
    cBarkodVratiti := cBarkod

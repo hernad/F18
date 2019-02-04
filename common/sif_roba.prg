@@ -18,10 +18,10 @@ FUNCTION P_Roba_select( cId )
 
    LOCAL xRet
 
-   //lExit := browse_exit_on_enter()
-   //browse_exit_on_enter( .T. )
+   // lExit := browse_exit_on_enter()
+   // browse_exit_on_enter( .T. )
    xRet := p_roba( @cId )
-   //browse_exit_on_enter( lExit )
+   // browse_exit_on_enter( lExit )
 
    RETURN xRet
 
@@ -64,38 +64,40 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    AAdd( ImeKol, { PadC( "S.dobav.", 13 ), {|| PadR( sifraDob, 13 ) }, "sifradob"   } )
 
 
-   AAdd( ImeKol, { PadC( "VPC", 10 ), {|| Transform( field->VPC, "999999.999" ) }, "vpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
-   AAdd( ImeKol, { PadC( "VPC2", 10 ), {|| Transform( field->VPC2, "999999.999" ) }, "vpc2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()   } )
-   AAdd( ImeKol, { PadC( "Plan.C", 10 ), {|| Transform( field->PLC, "999999.999" ) }, "PLC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()    } )
-   AAdd( ImeKol, { PadC( "MPC1", 10 ), {|| Transform( field->MPC, "999999.999" ) }, "mpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+   IF programski_modul() != "POS"
+      AAdd( ImeKol, { PadC( "VPC", 10 ), {|| Transform( field->VPC, "999999.999" ) }, "vpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+      AAdd( ImeKol, { PadC( "VPC2", 10 ), {|| Transform( field->VPC2, "999999.999" ) }, "vpc2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()   } )
+      AAdd( ImeKol, { PadC( "Plan.C", 10 ), {|| Transform( field->PLC, "999999.999" ) }, "PLC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()    } )
+      AAdd( ImeKol, { PadC( "MPC1", 10 ), {|| Transform( field->MPC, "999999.999" ) }, "mpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
 
-   FOR nI := 2 TO 4
+      FOR nI := 2 TO 4
 
-      cPom := "mpc" + AllTrim( Str( nI ) )
-      cPom2 := '{|| transform(' + cPom + ',"999999.999")}'
+         cPom := "mpc" + AllTrim( Str( nI ) )
+         cPom2 := '{|| transform(' + cPom + ',"999999.999")}'
 
-      // IF roba->( FieldPos( cPom ) )  <>  0
-      cPrikazi := fetch_metric( "roba_prikaz_" + cPom, NIL, "D" )
+         cPrikazi := fetch_metric( "roba_prikaz_" + cPom, NIL, "D" )
 
-      IF cPrikazi == "D"
-         AAdd( ImeKol, { PadC( Upper( cPom ), 10 ), &( cPom2 ), cPom, NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem() } )
-      ENDIF
+         IF cPrikazi == "D"
+            AAdd( ImeKol, { PadC( Upper( cPom ), 10 ), &( cPom2 ), cPom, NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem() } )
+         ENDIF
 
-      // ENDIF
-   NEXT
+      NEXT
 
-   AAdd( ImeKol, { PadC( "NC", 10 ), {|| Transform( field->NC, kalk_pic_cijena_bilo_gpiccdem() ) }, "NC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+      AAdd( ImeKol, { PadC( "NC", 10 ), {|| Transform( field->NC, kalk_pic_cijena_bilo_gpiccdem() ) }, "NC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+   ENDIF
+
    AAdd( ImeKol, { "Tarifa", {|| field->IdTarifa }, "IdTarifa", {|| .T. }, {|| P_Tarifa( @wIdTarifa ), roba_opis_edit()  }   } )
    AAdd( ImeKol, { "Tip", {|| " " + field->Tip + " " }, "Tip", {|| .T. }, {|| wTip $ " TUCKVPSXY" }, NIL, NIL, NIL, NIL, 27 } )
    AAdd ( ImeKol, { PadC( "BARKOD", 14 ), {|| field->BARKOD }, "BarKod", {|| .T. }, {|| roba_valid_barkod( Ch, @wId, @wBarkod ) }  } )
 
    AAdd ( ImeKol, { PadC( "MINK", 10 ), {|| Transform( field->MINK, "999999.99" ) }, "MINK"   } )
 
-   AAdd ( ImeKol, { PadC( "K1", 4 ), {|| field->k1 }, "k1"   } )
-   AAdd ( ImeKol, { PadC( "K2", 4 ), {|| field->k2 }, "k2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 35   } )
-   AAdd ( ImeKol, { PadC( "N1", 12 ), {|| field->N1 }, "N1"   } )
-   AAdd ( ImeKol, { PadC( "N2", 12 ), {|| field->N2 }, "N2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 35   } )
-
+   IF programski_modul() != "POS"
+      AAdd ( ImeKol, { PadC( "K1", 4 ), {|| field->k1 }, "k1"   } )
+      AAdd ( ImeKol, { PadC( "K2", 4 ), {|| field->k2 }, "k2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 35   } )
+      AAdd ( ImeKol, { PadC( "N1", 12 ), {|| field->N1 }, "N1"   } )
+      AAdd ( ImeKol, { PadC( "N2", 12 ), {|| field->N2 }, "N2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 35   } )
+   ENDIF
 
    // AUTOMATSKI TROSKOVI ROBE, samo za KALK
    IF programski_modul() == "KALK"   // .AND. roba->( FieldPos( "TROSK1" ) ) <> 0
@@ -107,22 +109,12 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    ENDIF
 
    IF programski_modul() == "KALK"
-      IF roba->( FieldPos( "ZANIVEL" ) ) <> 0
-         AAdd ( ImeKol, { PadC( "Nova cijena", 20 ), {|| Transform( zanivel, "999999.999" ) }, "zanivel", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
-      ENDIF
-      IF roba->( FieldPos( "ZANIV2" ) ) <> 0
-         AAdd ( ImeKol, { PadC( "Nova cijena/2", 20 ), {|| Transform( zaniv2, "999999.999" ) }, "zaniv2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
-      ENDIF
-   ENDIF
-
-   IF roba->( FieldPos( "IDKONTO" ) ) <> 0
+      AAdd ( ImeKol, { PadC( "Nova cijena", 20 ), {|| Transform( zanivel, "999999.999" ) }, "zanivel", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+      AAdd ( ImeKol, { PadC( "Nova cijena/2", 20 ), {|| Transform( zaniv2, "999999.999" ) }, "zaniv2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
       AAdd ( ImeKol, { "Id konto", {|| idkonto }, "idkonto", {|| .T. }, {|| Empty( widkonto ) .OR. P_Konto( @widkonto ) }   } )
    ENDIF
 
-   // IF roba->( FieldPos( "IDTARIFA2" ) ) <> 0
-   // AAdd ( ImeKol, { "Tarifa R2", {|| IdTarifa2 }, "IdTarifa2", {|| .T. }, {|| set_tar_rs( @wIdTarifa2, wIdTarifa ) .OR. P_Tarifa( @wIdTarifa2 ) }   } )
-   // AAdd ( ImeKol, { "Tarifa R3", {|| IdTarifa3 }, "IdTarifa3", {|| .T. }, {|| set_tar_rs( @wIdTarifa3, wIdTarifa ) .OR. P_Tarifa( @wIdTarifa3 ) }   } )
-   // ENDIF
+
 
    Kol := {}
 
@@ -131,19 +123,20 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    NEXT
 
    SELECT ROBA
-   sifk_fill_ImeKol( "ROBA", @ImeKol, @Kol )
+   if programski_modul() != "POS"
+      sifk_fill_ImeKol( "ROBA", @ImeKol, @Kol )
+   ENDIF
 
-   //bRoba := gRobaBlock
 
    DO CASE
-   CASE gModul == "KALK"
-       bRoba := {| Ch| kalk_roba_key_handler( Ch ) }
+   CASE programski_modul() == "KALK"
+      bRoba := {| Ch | kalk_roba_key_handler( Ch ) }
 
-   CASE gModul == "FAKT"
-       bRoba := {| Ch| fakt_roba_key_handler( Ch ) }
+   CASE programski_modul() == "FAKT"
+      bRoba := {| Ch | fakt_roba_key_handler( Ch ) }
 
    OTHERWISE
-       bRoba := {| Ch | pos_roba_block( Ch ) }
+      bRoba := {| Ch | pos_roba_block( Ch ) }
    ENDCASE
 
 
@@ -323,7 +316,7 @@ FUNCTION OFmkRoba()
    o_trfp()
    // o_tarifa()
    // o_roba()
-   //o_sastavnice()
+   // o_sastavnice()
 
    RETURN .T.
 
