@@ -115,11 +115,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space ( 40 )
       SET CURSOR ON
 
-      IF gRobaPosDuzinaSifre > 0
-         s_cRobaPosDuzinaSifre := AllTrim( Str( gRobaPosDuzinaSifre ) )
-      ELSE
-         s_cRobaPosDuzinaSifre := "10"
-      ENDIF
+      s_cRobaPosDuzinaSifre := "13"
+
 
       @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
          WHEN {|| _idroba := PadR( _idroba, Val( s_cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( GetList, 2, 27 )

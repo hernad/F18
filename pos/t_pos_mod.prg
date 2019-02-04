@@ -177,8 +177,6 @@ METHOD set_module_gvars()
    PUBLIC gRNALSif := ""
    PUBLIC gRNALKum := ""
 
-   PUBLIC gRobaPosDuzinaSifre := 13
-
    // postavljanje globalnih varijabli
    PUBLIC gLocPort := "LPT1"
    PUBLIC gDiskFree := "N"
@@ -339,8 +337,6 @@ METHOD set_module_gvars()
    gFMKSif := fetch_metric( "FMKSifrarnik", NIL, gFmkSif )
    gRNALSif := fetch_metric( "RNALSifrarnik", NIL, gRNALSif )
    gRNALKum := fetch_metric( "RNALKumulativ", NIL, gRNALKum )
-
-   gRobaPosDuzinaSifre := fetch_metric( "DuzinaSifre", my_user(), gRobaPosDuzinaSifre )
 
    gUpitNp := fetch_metric( "UpitZaNacinPlacanja", NIL, gUpitNp )
 

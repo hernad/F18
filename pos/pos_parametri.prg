@@ -41,7 +41,6 @@ FUNCTION pos_parametri()
    RETURN .F.
 
 
-
 FUNCTION pos_param_podaci_kase()
 
    LOCAL aNiz := {}
@@ -62,12 +61,10 @@ FUNCTION pos_param_podaci_kase()
    AAdd( aNiz, { "Lokalni port za stampu racuna", "gLocPort", , , } )
    AAdd( aNiz, { "Oznaka/ID gotovinskog placanja", "gGotPlac",, "@!", } )
    AAdd( aNiz, { "Oznaka/ID placanja duga       ", "gDugPlac",, "@!", } )
-  // AAdd( aNiz, { "Oznaka strane valute", "gStrValuta",, "@!", } )
-   AAdd( aNiz, { "Duzina sifre artikla u unosu", "gRobaPosDuzinaSifre",, "99", } )
 
    VarEdit( aNiz, 2, 2, 24, 78, "PARAMETRI RADA PROGRAMA - PODACI KASE", "B1" )
 
-   // Upisujem nove parametre
+
    IF LastKey() <> K_ESC
 
       set_metric( "IDPos", _user, gIdPos )
@@ -76,8 +73,6 @@ FUNCTION pos_param_podaci_kase()
       set_metric( "OznakaLokalnogPorta", _user, gLocPort )
       set_metric( "OznakaGotovinskogPlacanja", nil, gGotPlac )
       set_metric( "OznakaDugPlacanja", nil, gDugPlac )
-    //  set_metric( "StranaValuta", nil, gStrValuta )
-      set_metric( "DuzinaSifre", _user, gRobaPosDuzinaSifre )
 
    ENDIF
 

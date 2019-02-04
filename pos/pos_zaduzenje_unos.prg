@@ -14,7 +14,7 @@
 STATIC s_oBrowse
 STATIC s_cRobaDuzinaSifre
 
-MEMVAR Kol, ImeKol
+MEMVAR Kol, ImeKol, gSamoProdaja
 
 /* pos_zaduzenje(cIdVd)
  *     Dokument zaduzenja
@@ -40,6 +40,8 @@ FUNCTION pos_zaduzenje( cIdVd )
    LOCAL aPosKalk
    LOCAL cBrDok
    LOCAL lAzuriratiBezStampeSilent := .F.
+   LOCAL dDatum := danasnji_datum()
+
 
    IF gSamoProdaja == "D" .AND. ( cIdVd <> POS_VD_REKLAMACIJA )
       MsgBeep( "Ne možete vršiti unos zaduženja !" )
@@ -51,7 +53,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    PRIVATE cBrojZad
    PRIVATE cRsDbf
 
-   PRIVATE dDatRada := Date()
+
 
    IF cIdVd == NIL
       cIdVd := "16"
@@ -66,7 +68,7 @@ FUNCTION pos_zaduzenje( cIdVd )
       }
    Kol := { 1, 2, 3, 4, 5, 6 }
 
-   s_cRobaDuzinaSifre := AllTrim( Str( gRobaPosDuzinaSifre ) )
+   s_cRobaDuzinaSifre := "13"
 
    o_pos_tables()
 
@@ -75,7 +77,6 @@ FUNCTION pos_zaduzenje( cIdVd )
    _IdPos := gIdPos
    _IdVd := cIdVd
    _BrDok := Space( FIELD_LEN_POS_BRDOK )
-   _Datum := dDatRada
    _IdRadnik := gIdRadnik
 
    Box(, 6, f18_max_cols() - 15 )
@@ -86,7 +87,7 @@ FUNCTION pos_zaduzenje( cIdVd )
 
    SET CURSOR ON
    @ box_x_koord() + 1, box_y_koord() + 3 SAY " Partner:" GET _idPartner PICT "@!" VALID p_partner( @_idPArtner )
-   @ box_x_koord() + 2, box_y_koord() + 3 SAY " Datum dok:" GET dDatRada PICT "@D" VALID dDatRada <= Date()
+   @ box_x_koord() + 2, box_y_koord() + 3 SAY " Datum dok:" GET dDatum PICT "@D" VALID dDatum <= Date()
    READ
    ESC_BCR
    BoxC()
@@ -163,7 +164,7 @@ FUNCTION pos_zaduzenje( cIdVd )
       ENDIF
 
       IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + gIdPos + "-" + cIdVd + "-" + AllTrim(cBrDok) + " ažurirati (D/N) ?", "D" ) == "D"
-         pos_azuriraj_zaduzenje( gIdPos, cIdVd, cBrDok )
+         pos_azuriraj_zaduzenje( gIdPos, cIdVd, cBrDok, dDatum )
       ELSE
          SELECT _POS
          AppFrom( "PRIPRZ", .F. )

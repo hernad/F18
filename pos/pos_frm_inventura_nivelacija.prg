@@ -466,13 +466,11 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
    LOCAL aNiz := {}
    LOCAL nRec := RecNo()
    LOCAL _r_tar, _r_barkod, _r_jmj, _r_naz
-   LOCAL _duz_sif := "10"
+   LOCAL cIdRobaDuzinaSifre := "10"
    LOCAL _pict := "9999999.99"
    LOCAL _last_read_var
 
-   IF gRobaPosDuzinaSifre <> NIL .AND. gRobaPosDuzinaSifre > 0
-      _duz_sif := AllTrim( Str( gRobaPosDuzinaSifre ) )
-   ENDIF
+   cIdRobaDuzinaSifre := "13"
 
    SET CURSOR ON
 
@@ -523,7 +521,7 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
 
       @ nLX, box_y_koord() + 3 SAY "      Artikal:" GET _idroba ;
          PICT PICT_POS_ARTIKAL ;
-         WHEN {|| _idroba := PadR( _idroba, Val( _duz_sif ) ), .T. } ;
+         WHEN {|| _idroba := PadR( _idroba, Val( cIdRobaDuzinaSifre ) ), .T. } ;
          VALID valid_pos_inv_niv( cIdVd, nInd )
 
       nLX++

@@ -11,15 +11,16 @@
 
 #include "f18.ch"
 
-MEMVAR _idpos, _rbr, _brdok, _idvd, _datum
+MEMVAR _idpos, _rbr, _brdok, _idvd, _datum, _cijena, _kolicina
 
-FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok )
+FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
 
    LOCAL lOk := .T.
    LOCAL lRet := .F.
    LOCAL hRec
    LOCAL nCount := 0
    LOCAL cDokument := ""
+   LOCAL nUkupno
    LOCAL hParams
 
    run_sql_query( "BEGIN" )
@@ -28,53 +29,47 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok )
    GO TOP
    set_global_memvars_from_dbf()
 
-   SELECT pos_doks
-   APPEND BLANK
-   _idpos := cIdPos
-   _brdok := cBrDok
-   _idvd := cIdVd
 
    cDokument := AllTrim( _idpos ) + "-" + _idvd + "-" + AllTrim( _brdok ) + " " + DToC( _datum )
 
    hRec := get_hash_record_from_global_vars()
-   hRec[ "ukupno" ] := 0
-   lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
+   hRec[ "idpos" ] := cIdPos
+   hRec[ "brdok" ] := cBrDok
+   hRec[ "idvd" ] := cIdVd
+   hRec[ "datum" ] := dDatum
+   hRec[ "ukupno" ] := nUkupno
+
+   SELECT PRIPRZ
+   nUkupno := 0
+   DO WHILE !Eof()
+
+      SELECT pos
+      APPEND BLANK
+
+      hRec["rbr"] := PadL( AllTrim( Str( ++nCount ) ), 5 )
+      hRec["cijena"] := priprz->cijena
+      hRec["kolicina"] := priprz->kolicina
+      nUkupno += priprz->cijena * priprz->kolicina
+
+      lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
+      IF !lOk
+         EXIT
+      ENDIF
+      SELECT priprz
+      SKIP
+
+   ENDDO
 
    IF lOk
-
-      SELECT PRIPRZ
-      DO WHILE !Eof()
-
-         SELECT PRIPRZ
-         // lOk := pos_azuriraj_artikal_u_sifarniku( cIdVd )
-         // IF !lOk
-        //     EXIT
-         // ENDIF
-
-         SELECT PRIPRZ
-         set_global_memvars_from_dbf()
-
-         SELECT pos
-         APPEND BLANK
-         _brdok := cBrDok
-         _idvd := cIdVd
-         _rbr := PadL( AllTrim( Str( ++nCount ) ), 5 )
-         hRec := get_hash_record_from_global_vars()
-         lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
-         IF !lOk
-            EXIT
-         ENDIF
-         SELECT priprz
-         SKIP
-
-      ENDDO
-
+      SELECT pos_doks
+      APPEND BLANK
+      lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
    ENDIF
 
    IF lOk
       lRet := .T.
       hParams := hb_Hash()
-      //hParams[ "unlock" ] :=  { "pos_pos", "pos_doks", "roba" }
+      // hParams[ "unlock" ] :=  { "pos_pos", "pos_doks", "roba" }
       run_sql_query( "COMMIT", hParams )
       log_write( "F18_DOK_OPER, ažuriran pos dokument " + cDokument, 2 )
    ELSE
@@ -205,7 +200,7 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
 
          SELECT PRIPRZ
          // IF cTipDok <> "IN"
-        //     pos_azuriraj_artikal_u_sifarniku(cIdVd)
+         // pos_azuriraj_artikal_u_sifarniku(cIdVd)
          // ENDIF
 
          SELECT PRIPRZ
