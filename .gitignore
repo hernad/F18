@@ -44,3 +44,4 @@ template/
 docker/
 docker/postgresql_data/**
 docker/data
+data/
