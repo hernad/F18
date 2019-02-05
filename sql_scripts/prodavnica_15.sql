@@ -268,6 +268,7 @@ ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS mu_i;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS idcijena;
+update p15.pos_pos set rbr = lpad(ltrim(rbr),3);
 ALTER TABLE p15.pos_pos ALTER COLUMN rbr TYPE character(3);
 ALTER TABLE p15.pos_pos ALTER COLUMN rbr SET NOT NULL;
 
@@ -282,6 +283,7 @@ ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS mu_i;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS idcijena;
+update p15.pos_pos_knjig set rbr = lpad(ltrim(rbr),3);
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr TYPE character(3);
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr SET NOT NULL;
 
