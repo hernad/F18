@@ -19,7 +19,7 @@ FUNCTION pos_menu_realizacija()
    PRIVATE Izbor := 1
 
    AAdd( opc, "1. kase             " )
-   AAdd( opcexe, {|| realizacija_kase( .F. ) } )
+   AAdd( opcexe, {|| realizacija_kase() } )
    //AAdd( opc, "2. odjeljenja" )
    //AAdd( opcexe, {|| realizacija_odjeljenja() } )
    AAdd( opc, "3. radnici" )

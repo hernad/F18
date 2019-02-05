@@ -214,22 +214,11 @@
 
 // modul POS
 
-#xcommand O__POS_PRIPR  => SELECT (F__PRIPR); my_use("_pos_pripr"); set order to tag "1"
 
-
-#xcommand O__POSP     => select(F__POSP)  ; my_use("_posp")
 #xcommand O__POS_DOKSP  => select(F__DOKSP) ; my_use("_pos_doksp")
-//#xcommand O_K2C       => SELECT (F_K2C)   ; my_use("k2c")   ; set order to tag "1"
-//#xcommand O_MJTRUR    => SELECT (F_MJTRUR); my_use("mjtrur"); set order to tag "1"
-//#xcommand O_ROBAIZ    => SELECT (F_ROBAIZ); my_use("robaiz"); set order to tag "1"
-//#xcommand O_RAZDR     => SELECT (F_RAZDR) ; my_use("razdr")
+
 #xcommand O_STRAD     => o_pos_strad()
 
-
-//#xcommand O_ODJ       => SELECT (F_ODJ); my_use("odj"); set order to tag "ID"
-//#xcommand O_DIO       => SELECT (F_DIO); my_use("dio"); set order to tag "ID"
-//#xcommand o_pos_uredj()     => SELECT (F_UREDJ); my_use("uredj"); set order to tag "ID"
-//#xcommand O_MARS      => SELECT (F_MARS); my_use("mars"); set order to tag "ID"
 
 // modul MAT
 #xcommand O_MAT_PRIPR    =>  select(F_MAT_PRIPR); my_use("mat_pripr") ; set order to tag "1"

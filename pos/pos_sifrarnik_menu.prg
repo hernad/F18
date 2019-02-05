@@ -13,39 +13,34 @@
 
 FUNCTION pos_sifarnici()
 
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
-   PRIVATE Izbor := {}
+   LOCAL aOpc := {}
+   LOCAL aOpcexe := {}
+   LOCAL nIzbor := 1
 
-   AAdd( opc, "1. robe/artikli                " )
-   AAdd( opcexe, {|| P_Roba() } )
-   AAdd( opc, "2. tarife" )
-   AAdd( opcexe, {|| P_Tarifa() } )
-   AAdd( opc, "3. vrste placanja" )
-   AAdd( opcexe, {|| P_VrsteP() } )
-   AAdd( opc, "4. valute" )
-   AAdd( opcexe, {|| P_Valuta(), SetNazDVal() } )
-   AAdd( opc, "5. partneri" )
-   AAdd( opcexe, {|| p_partner() } )
-   AAdd( opc, "6. odjeljenja" )
-   AAdd( opcexe, {|| P_Odj() } )
-   AAdd( opc, "7. kase (prodajna mjesta)" )
-   AAdd( opcexe, {|| p_pos_kase() } )
-   AAdd( opc, "8. sifk" )
-   AAdd( opcexe, {|| P_SifK() } )
-   //AAdd( opc, "9. uređi za štampu" )
-   //AAdd( opcexe, {|| P_Uredj() } )
+   AAdd( aOpc, "1. robe/artikli                " )
+   AAdd( aOpcexe, {|| P_Roba() } )
+   AAdd( aOpc, "2. tarife" )
+   AAdd( aOpcexe, {|| P_Tarifa() } )
+   AAdd( aOpc, "3. vrste placanja" )
+   AAdd( aOpcexe, {|| P_VrsteP() } )
+   //AAdd( aOpc, "4. valute" )
+   //AAdd( aOpcexe, {|| P_Valuta(), SetNazDVal() } )
+   AAdd( aOpc, "5. partneri" )
+   AAdd( aOpcexe, {|| p_partner() } )
+   AAdd( aOpc, "6. odjeljenja" )
+   AAdd( aOpcexe, {|| P_Odj() } )
+   AAdd( aOpc, "7. kase (prodajna mjesta)" )
+   AAdd( aOpcexe, {|| p_pos_kase() } )
+   AAdd( aOpc, "8. sifk" )
+   AAdd( aOpcexe, {|| P_SifK() } )
 
    IF pos_admin()
-      AAdd( opc, "A. statusi radnika" )
-      AAdd( opcexe, {|| p_pos_strad() } )
-      AAdd( opc, "B. osoblje" )
-      AAdd( opcexe, {|| P_Osob() } )
+      AAdd( aOpc, "A. statusi radnika" )
+      AAdd( aOpcexe, {|| p_pos_strad() } )
+      AAdd( aOpc, "B. osoblje" )
+      AAdd( aOpcexe, {|| P_Osob() } )
    ENDIF
 
-   o_pos_sifre()
-
-   Izbor := 1
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "sift" )
+   f18_menu( "sift", .F., nIzbor, aOpc, aOpcExe )
 
    RETURN .T.

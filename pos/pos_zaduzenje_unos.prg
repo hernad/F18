@@ -16,22 +16,8 @@ STATIC s_cRobaDuzinaSifre
 
 MEMVAR Kol, ImeKol, gSamoProdaja
 
-/* pos_zaduzenje(cIdVd)
- *     Dokument zaduzenja
- *
- *  cIdVD -  16 ulaz
- *           95 otpis
- *           IN inventura
- *           NI nivelacija
- *          // 96 razduzenje sirovina - ako se radi o proizvodnji
- *         //  PD - predispozicija
- *
- *  pos_zaduzenje odjeljenje/punktova robama/sirovinama
- *       lForsSir .T. - radi se o forsiranom zaduzenju odjeljenja
- *                           sirovinama
- */
 
-FUNCTION pos_zaduzenje( cIdVd )
+FUNCTION pos_zaduzenje()
 
    LOCAL lFromKalk := .F.
    LOCAL cOdg
@@ -41,23 +27,16 @@ FUNCTION pos_zaduzenje( cIdVd )
    LOCAL cBrDok
    LOCAL lAzuriratiBezStampeSilent := .F.
    LOCAL dDatum := danasnji_datum()
+   LOCAL cIdVd := "81"
 
 
-   IF gSamoProdaja == "D" .AND. ( cIdVd <> POS_VD_REKLAMACIJA )
+   IF gSamoProdaja == "D"
       MsgBeep( "Ne možete vršiti unos zaduženja !" )
       RETURN .F.
    ENDIF
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
 
-   PRIVATE cBrojZad
-   PRIVATE cRsDbf
-
-
-
-   IF cIdVd == NIL
-      cIdVd := "16"
-   ENDIF
 
    ImeKol := { { _u( "Šifra" ),    {|| idroba },      "idroba" }, ;
       { "Partner", {|| idPartner }, "idPartner" }, ;
@@ -81,12 +60,9 @@ FUNCTION pos_zaduzenje( cIdVd )
 
    Box(, 6, f18_max_cols() - 15 )
 
-   cRazlog := Space( 40 )
-   // cIdOdj2 := Space( 2 )
-   // cIdPos := gIdPos
 
    SET CURSOR ON
-   @ box_x_koord() + 1, box_y_koord() + 3 SAY " Partner:" GET _idPartner PICT "@!" VALID p_partner( @_idPArtner )
+   @ box_x_koord() + 1, box_y_koord() + 3 SAY " Partner:" GET _idPartner PICT "@!" VALID p_partner( @_idPartner )
    @ box_x_koord() + 2, box_y_koord() + 3 SAY " Datum dok:" GET dDatum PICT "@D" VALID dDatum <= Date()
    READ
    ESC_BCR
@@ -165,13 +141,8 @@ FUNCTION pos_zaduzenje( cIdVd )
 
       IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + gIdPos + "-" + cIdVd + "-" + AllTrim(cBrDok) + " ažurirati (D/N) ?", "D" ) == "D"
          pos_azuriraj_zaduzenje( gIdPos, cIdVd, cBrDok, dDatum )
-      ELSE
-         SELECT _POS
-         AppFrom( "PRIPRZ", .F. )
-         SELECT PRIPRZ
-         my_dbf_zap()
-         MsgBeep( "Dokument nije stavljen na stanje!#" + "Ostavljen je za doradu!", 20 )
       ENDIF
+
    ENDIF
 
    my_close_all_dbf()

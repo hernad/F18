@@ -176,7 +176,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
       DO CASE
 
-      CASE pos_doks->IdVd == POS_VD_RACUN
+      CASE pos_doks->IdVd == POS_IDVD_RACUN
 
 
 /*
@@ -188,11 +188,11 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          IF cOdg == "S"
 
             ctIdPos := gIdPos
-            SEEK ctIdPos + POS_VD_RACUN
+            SEEK ctIdPos + POS_IDVD_RACUN
 
             START PRINT CRET
 
-            DO WHILE !Eof() .AND. IdPos + IdVd == ctIdPos + POS_VD_RACUN
+            DO WHILE !Eof() .AND. IdPos + IdVd == ctIdPos + POS_IDVD_RACUN
                IF ( datum <= dDatum1 )
                   pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .F., glRetroakt )
                ENDIF
@@ -332,7 +332,7 @@ FUNCTION pos_pregled_stavki_racuna()
 
    SELECT F__PRIPR
    IF !Used()
-      O__POS_PRIPR
+      o_pos__pripr()
    ENDIF
 
    SELECT _pos_pripr

@@ -142,7 +142,7 @@ FUNCTION pos_kartica_artikla()
             LOOP
          ENDIF
 
-         IF pos->idvd $ "00#16"
+         IF pos->idvd $ POS_IDVD_ULAZI
             nPredhodnoStanjeKolicina += POS->Kolicina
             nPredhodnaVrijednost += POS->Kolicina * pos->cijena
 
@@ -151,7 +151,7 @@ FUNCTION pos_kartica_artikla()
             nPredhodnoStanjeKolicina -= ( POS->Kolicina - POS->Kol2 )
             nPredhodnaVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
 
-         ELSEIF pos->idvd $ "42#98"
+         ELSEIF pos->idvd $ "42"
             nPredhodnoStanjeKolicina -= POS->Kolicina
             nPredhodnaVrijednost -= POS->Kolicina * pos->cijena
 

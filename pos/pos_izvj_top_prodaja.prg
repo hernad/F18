@@ -82,7 +82,7 @@ FUNCTION pos_top_narudzbe()
    ? PadC ( "Za period od " + FormDat1 ( dDatum0 ) + " do " + FormDat1 ( dDatum1 ), 40 )
    ?
 
-   pos_top_n_izvuci ( POS_VD_RACUN, dDatum0, cFilterRoba )
+   pos_top_n_izvuci ( POS_IDVD_RACUN, dDatum0, cFilterRoba )
    pos_top_n_izvuci ( VD_PRR, dDatum0, cFilterRoba )
 
    // stampa izvjestaja

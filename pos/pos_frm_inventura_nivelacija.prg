@@ -73,7 +73,6 @@ FUNCTION pos_inventura_nivelacija()
 
       aNiz := {}
 
-
       AAdd( aNiz, { "Datum rada", "dDatRada", "dDatRada <= DATE()",, } )
 
       IF fInvent
@@ -223,7 +222,6 @@ FUNCTION pos_inventura_nivelacija()
       SELECT priprz
       SET ORDER TO TAG "1"
 
-      DO WHILE .T.
 
          SELECT priprz
          GO TOP
@@ -243,53 +241,7 @@ FUNCTION pos_inventura_nivelacija()
             RETURN .F.
          ENDIF
 
-         i := KudaDalje( "ZAVRSAVATE SA PRIPREMOM " + cNazDok + "E. STA RADITI S NJOM?", { ;
-            "NASTAVICU S NJOM KASNIJE", ;
-            "AZURIRATI (ZAVRSENA JE)", ;
-            "TREBA JE IZBRISATI", ;
-            "VRATI PRIPREMU " + cNazDok + "E" } )
 
-         IF i == 1
-
-            SELECT _POS
-            AppFrom( "PRIPRZ", .F. )
-            SELECT PRIPRZ
-            my_dbf_zap()
-            my_close_all_dbf()
-            RETURN .T.
-
-         ELSEIF i == 3
-
-            IF Pitanje(, D_ZELITE_LI_IZBRISATI_PRIPREMU, "N" ) == "D"
-               SELECT PRIPRZ
-               my_dbf_zap()
-               pos_reset_broj_dokumenta( gIdPos, cIdVd, cBrDok )
-               my_close_all_dbf()
-               RETURN .T.
-
-            ELSE
-               SELECT _POS
-               AppFrom( "PRIPRZ", .F. )
-               SELECT PRIPRZ
-               my_dbf_zap()
-               my_close_all_dbf()
-               RETURN .T.
-
-            ENDIF
-
-         ELSEIF i == 4
-
-            SELECT PRIPRZ
-            GO TOP
-            LOOP
-
-         ENDIF
-
-         IF i == 2
-            EXIT
-         ENDIF
-
-      ENDDO
 
    ENDIF
 

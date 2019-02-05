@@ -21,68 +21,18 @@ FUNCTION o_pos_priprz()
 
 
 
-FUNCTION o_pos_priprg()
+FUNCTION o_pos__pripr()
 
-   SELECT ( F_PRIPRG )
-   my_use( "priprg" )
+   SELECT ( F__PRIPR )
+   my_use( "_pos_pripr" )
    SET ORDER TO TAG "1"
 
    RETURN .T.
-
-
-FUNCTION o_pos__pos()
-
-   SELECT ( F__POS )
-   my_use( "_pos" )
-   SET ORDER TO TAG "1"
-
-   RETURN .T.
-
-/*
--- FUNCTION o_pos_uredj()
-
-   SELECT ( F_UREDJ )
-   my_use( "uredj" )
-   SET ORDER TO TAG "ID"
-
-   RETURN .T.
-*/
 
 FUNCTION pos_init()
 
    my_close_all_dbf()
    pos_definisi_inicijalne_podatke()
-   cre_priprz()
-
-   RETURN .T.
-
-
-STATIC FUNCTION cre_priprz()
-
-   LOCAL cFileName := my_home() + "PRIPRZ"
-   LOCAL lCreate := .F.
-   LOCAL aDbf
-
-   IF !File( f18_ime_dbf( "priprz" ) )
-      lCreate := .T.
-   ELSE
-      CLOSE ALL
-      o_pos_priprz()
-      IF reccount2() > 0
-         RETURN .F.
-      ENDIF
-
-      IF FieldPos( "k7" ) == 0
-         lCreate := .T.
-      ENDIF
-   ENDIF
-
-   CLOSE ALL
-   IF lCreate
-      aDbf := g_pos_pripr_fields()
-      DBcreate2 ( cFileName, aDbf )
-      CREATE_INDEX ( "1", "IdRoba", cFileName )
-   ENDIF
 
    RETURN .T.
 
@@ -116,14 +66,9 @@ STATIC FUNCTION pos_dodaj_u_sifarnik_radnika( cId, cLozinka, cOpis, cStatus )
    LOCAL lOk := .T.
    LOCAL hRec
 
-   // IF Select( "OSOB" ) == 0
    IF select_o_pos_osob( cId )
       RETURN .F.
    ENDIF
-   // ELSE
-   // SELECT OSOB
-   // ENDIF
-
 
    hRec := dbf_get_rec()
    hRec[ "id" ] := PadR( cId, Len( hRec[ "id" ] ) )
@@ -141,7 +86,6 @@ STATIC FUNCTION pos_dodaj_u_sifarnik_radnika( cId, cLozinka, cOpis, cStatus )
 STATIC FUNCTION pos_definisi_inicijalne_podatke()
 
    LOCAL lOk := .T., hParams
-
 
    lOk := pos_dodaj_u_sifarnik_prioriteta( "0", "0", "Nivo adm." )
 
@@ -183,11 +127,8 @@ FUNCTION o_pos_tables( lOtvoriKumulativ )
       o_pos_kumulativne_tabele()
    ENDIF
 
-
    o_pos_priprz()
-   o_pos_priprg()
-   o_pos__pos()
-   O__POS_PRIPR
+   o_pos__pripr()
 
    IF lOtvoriKumulativ
       SELECT pos_doks
@@ -202,30 +143,8 @@ FUNCTION o_pos_kumulativne_tabele()
 
    o_pos_pos()
    o_pos_doks()
-   // o_pos_dokspf()
 
    RETURN .T.
-
-
-
-FUNCTION o_pos_sifre()
-
-   // o_pos_kase()
-   // o_pos_uredj()
-   // o_pos_odj()
-   // o_roba()
-   // o_tarifa()
-   // o_vrstep()
-   // o_valute()
-   // o_partner()
-   // o_pos_osob()
-   // o_pos_strad()
-   // o_sifk()
-   // o_sifv()
-
-   RETURN .T.
-
-
 
 
 
@@ -261,7 +180,7 @@ FUNCTION pos_iznos_dokumenta( lUI )
    ENDIF
 
    IF ( ( lUI == NIL ) .OR. !lUI ) // izlazi
-      IF pos_doks->idvd $ POS_VD_RACUN + "#" + POS_VD_OTPIS + "#" + VD_RZS + "#" + VD_PRR + "#" + "IN" + "#" + POS_VD_NIV
+      IF pos_doks->idvd $ POS_IDVD_RACUN + "#" + POS_VD_OTPIS + "#" + VD_RZS + "#" + VD_PRR + "#" + "IN" + "#" + POS_VD_NIV
 
          seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
 

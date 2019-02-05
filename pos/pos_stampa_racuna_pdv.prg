@@ -87,7 +87,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
    nUTotal := 0
 
    IF !hParams[ "priprema" ]
-      seek_pos_pos( cIdPos, POS_VD_RACUN, dDatum, cBrDok )
+      seek_pos_pos( cIdPos, POS_IDVD_RACUN, dDatum, cBrDok )
       SELECT pos_doks
       //cVrijeme := pos_doks->vrijeme
       //cIdVrsteP := pos_doks->idvrstep
@@ -95,7 +95,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       SELECT _pos_pripr
       SET ORDER TO TAG "1"
       GO TOP
-      SEEK cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok
+      SEEK cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok
       //cVrijeme := Left( Time(), 5 )
       //cIdVrsteP := _pos->idvrstep
    ENDIF
@@ -118,8 +118,8 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    AltD()
    DO WHILE !Eof() .AND. iif( !hParams[ "priprema" ], ;
-         ( pos->idpos + pos->idvd + DToS( pos->datum ) + pos->brdok ) == ( cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok ), ;
-         ( _pos_pripr->idpos + _pos_pripr->idvd + DToS( _pos_pripr->datum ) + _pos_pripr->brdok ) == ( cIdPos + POS_VD_RACUN + DToS( dDatum ) + cBrDok ) )
+         ( pos->idpos + pos->idvd + DToS( pos->datum ) + pos->brdok ) == ( cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok ), ;
+         ( _pos_pripr->idpos + _pos_pripr->idvd + DToS( _pos_pripr->datum ) + _pos_pripr->brdok ) == ( cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok ) )
 
       nCjenBPDV := 0
       nCjenPDV := 0

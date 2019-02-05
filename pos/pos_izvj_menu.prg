@@ -13,39 +13,37 @@
 
 FUNCTION pos_izvjestaji()
 
-   PRIVATE Izbor := 1
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
+   LOCAL nIzbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcexe := {}
 
-   AAdd( opc, "1. realizacija                               " )
-   AAdd( opcexe, {|| pos_menu_realizacija() } )
+   AAdd( aOpc, "1. realizacija                               " )
+   AAdd( aOpcexe, {|| pos_menu_realizacija() } )
+   AAdd( aOpc, "2. stanje artikala" )
+   AAdd( aOpcexe, {|| pos_stanje_artikala() } )
 
-   AAdd( opc, "2. stanje artikala" )
-   AAdd( opcexe, {|| pos_stanje_artikala() } )
+   AAdd( aOpc, "4. kartice artikala" )
+   AAdd( aOpcexe, {|| pos_kartica_artikla() } )
+   AAdd( aOpc, "5. porezi po tarifama" )
+   AAdd( aOpcexe, {||  pos_pdv_po_tarifama() } )
+   AAdd( aOpc, "6. najprometniji artikli" )
+   AAdd( aOpcexe, {|| pos_top_narudzbe() } )
+   AAdd( aOpc, "7. stanje partnera" )
+   AAdd( aOpcexe, {|| pos_rpt_stanje_partnera() } )
+   AAdd( aOpc, "A. štampa azuriranih dokumenata" )
+   AAdd( aOpcexe, {|| pos_lista_azuriranih_dokumenata() } )
 
-   AAdd( opc, "4. kartice artikala" )
-   AAdd( opcexe, {|| pos_kartica_artikla() } )
-   AAdd( opc, "5. porezi po tarifama" )
-   AAdd( opcexe, {||  pos_pdv_po_tarifama() } )
-   AAdd( opc, "6. najprometniji artikli" )
-   AAdd( opcexe, {|| pos_top_narudzbe() } )
-   AAdd( opc, "7. stanje partnera" )
-   AAdd( opcexe, {|| pos_rpt_stanje_partnera() } )
-   AAdd( opc, "A. štampa azuriranih dokumenata" )
-   AAdd( opcexe, {|| pos_lista_azuriranih_dokumenata() } )
-   // ENDIF
+   AAdd( aOpc, "-------------------" )
+   AAdd( aOpcexe, NIL )
 
-   AAdd( opc, "-------------------" )
-   AAdd( opcexe, NIL )
-
-   AAdd( opc, "N. pregled prometa po vrstama plaćanja" )
-   AAdd( opcexe, {|| pos_pregled_prometa_po_vrstama_placanja() } )
+   AAdd( aOpc, "N. pregled prometa po vrstama plaćanja" )
+   AAdd( aOpcexe, {|| pos_pregled_prometa_po_vrstama_placanja() } )
 
    IF fiscal_opt_active()
-      AAdd( opc, "F. fiskalni izvještaji i komande" )
-      AAdd( opcexe, {|| fiskalni_izvjestaji_komande( NIL, .T. ) } )
+      AAdd( aOpc, "F. fiskalni izvještaji i komande" )
+      AAdd( aOpcexe, {|| fiskalni_izvjestaji_komande( NIL, .T. ) } )
    ENDIF
 
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "izvt" )
+   f18_menu( "izvt", .F., nIzbor, aOpc, aOpcExe )
 
    RETURN .T.

@@ -45,22 +45,12 @@ FUNCTION cre_all_pos( ver )
 
 
    // ----------------------------------------------------------
-   // _POS, _PRIPR, PRIPRZ, PRIPRG, _POSP
+   // _PRIPR, PRIPRZ
    // ----------------------------------------------------------
 
    aDbf := g_pos_pripr_fields()
-   _alias := "_POS"
-   _table_name := "_pos"
 
-   IF_NOT_FILE_DBF_CREATE
 
-   CREATE_INDEX ( "1", "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+STR(Cijena,10,3)", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdRadnik+IdRoba", _alias )
-
-   _alias := "_POSP"
-   _table_name := "_posp"
-
-   IF_NOT_FILE_DBF_CREATE
 
    _alias := "_POS_PRIPR"
    _table_name := "_pos_pripr"
@@ -76,14 +66,6 @@ FUNCTION cre_all_pos( ver )
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX ( "1", "IdRoba", _alias )
 
-   _alias := "PRIPRG"
-   _table_name := "priprg"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdPos+IdRoba+DTOS(Datum)", _alias )
-   CREATE_INDEX ( "2", "IdPos+DTOS (Datum)", _alias )
-   CREATE_INDEX ( "3", "IdVd+IdPos+IdVrsteP+idPartner+Placen+IdRoba", _alias )
-   CREATE_INDEX ( "4", "IdVd+IdPos+IdVrsteP+idPartner+DToS(datum)", _alias )
 
    aDbf := {}
    AAdd ( aDbf, { "KEYCODE", "N",  4, 0 } )
@@ -92,6 +74,7 @@ FUNCTION cre_all_pos( ver )
    create_porezna_faktura_temp_dbfs()
 
    RETURN .T.
+
 
 
 FUNCTION pos_check_brdok()

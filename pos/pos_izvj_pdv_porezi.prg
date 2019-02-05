@@ -136,7 +136,7 @@ FUNCTION pos_pdv_po_tarifama
 
       // matrica je lok var : aTarife:={}
       // filuj za poreze, VD_PRR - realizacija iz predhodnih sezona
-      aTarife := Porezi( POS_VD_RACUN, dDatum0, aTarife, cNaplaceno )
+      aTarife := Porezi( POS_IDVD_RACUN, dDatum0, aTarife, cNaplaceno )
       aTarife := Porezi( VD_PRR, dDatum0, aTarife, cNaplaceno )
 
       ASort ( aTarife,,, {| x, y | x[ 1 ] < y[ 1 ] } )

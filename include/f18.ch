@@ -554,7 +554,9 @@
 #define SP_N      "N"           // nivelacija
 
 // vrste dokumenata
-#define POS_VD_RACUN        "42"
+#define POS_IDVD_ULAZI "00#11#80#81"
+
+#define POS_IDVD_RACUN        "42"
 #define POS_VD_ZADUZENJE     "16"
 #define POS_VD_OTPIS         "95"
 #define POS_VD_REKLAMACIJA   "98"

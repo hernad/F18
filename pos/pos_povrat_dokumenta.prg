@@ -136,10 +136,10 @@ FUNCTION pos_povrat_racuna( cIdPos, cBrDok, dDatumPosRacun )
 
    IF nCount > 0
       log_write( "F18_DOK_OPER, povrat dokumenta u pripremu: " + ;
-         AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( dDatumPosRacun ), 2 )
+         AllTrim( cIdPos ) + "-" + POS_IDVD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( dDatumPosRacun ), 2 )
    ENDIF
 
-   pos_brisi_dokument( cIdPos, POS_VD_RACUN, dDatumPosRacun, cBrDok )
+   pos_brisi_dokument( cIdPos, POS_IDVD_RACUN, dDatumPosRacun, cBrDok )
 
    SELECT ( nTArea )
 

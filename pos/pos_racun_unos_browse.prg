@@ -89,7 +89,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    scatter()
    _idpos := gIdPos
-   _idvd  := POS_VD_RACUN
+   _idvd  := POS_IDVD_RACUN
    _brdok := cBrDok
    _datum := danasnji_datum()
    _idradnik := gIdRadnik

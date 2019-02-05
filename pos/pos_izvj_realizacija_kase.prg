@@ -16,11 +16,15 @@ STATIC LEN_RAZMAK := 1
 STATIC PIC_UKUPNO := "9999999.99"
 STATIC s_oPDF
 
+MEMVAR dDatum0, dDatum1
+
 FUNCTION realizacija_kase
 
-   PARAMETERS fZaklj, dDatum0, dDatum1
+   PARAMETERS dDatum0, dDatum1 // funkcije VarEdit zahtjevaju privatne varijable
+
    LOCAL xPrintOpt
    LOCAL bZagl
+   LOCAL cVarijanta := "0"
 
    PRIVATE cRadnici := Space( 60 )
    PRIVATE cVrsteP := Space( 60 )
@@ -36,27 +40,13 @@ FUNCTION realizacija_kase
    PRIVATE cSifraDob := Space( 8 )
    PRIVATE cPartId := Space( 8 )
 
-   IF fZaklj == nil
-      fZaklj := .F.
-   ENDIF
-
    SET CURSOR ON
-
-   IF fZaklj
-      cPVrstePl := "D"
-   ENDIF
 
    IF ( dDatum0 == NIL )
       dDatum0 := danasnji_datum()
       dDatum1 := danasnji_datum()
    ENDIF
 
-   IF ( cVarijanta == NIL )
-      cVarijanta := "0"
-   ELSEIF ( cVarijanta == "2" )
-      cVarijanta := "0"
-
-   ENDIF
 
    pos_realizacija_tbl_cre_pom()
    o_pos_tables()
@@ -68,11 +58,9 @@ FUNCTION realizacija_kase
    cVrijDo := "23:59"
    cGotZir := " "
 
-
    IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @aUsl1, @aUsl2, @cVrsteP, @cAPrometa, @cGotZir, @cSifraDob, @cPartId ) == 0
       RETURN 0
    ENDIF
-
 
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
@@ -84,14 +72,10 @@ FUNCTION realizacija_kase
       RETURN .F.
    ENDIF
 
-   // IF fZaklj
-   // STARTPRINTPORT CRET gLocPort, .F.
-
 
    bZagl := {|| pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP, cGotZir ) }
 
    Eval( bZagl )
-   // ENDIF // fZaklj
 
    o_pos_tables()
    o_pom_table()
@@ -100,11 +84,8 @@ FUNCTION realizacija_kase
 
    pos_set_filter_pos_doks( @cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cGotZir, cPartId )
 
-   // fZaklj - zakljucenje smjene
-   // IF !fZaklj
-   pos_kasa_pripremi_pom_za_izvjestaj( "01", cSifraDob )
-   // ENDIF
 
+   pos_kasa_pripremi_pom_za_izvjestaj( "01", cSifraDob )
    pos_kasa_pripremi_pom_za_izvjestaj( "42", cSifraDob )
 
    PRIVATE nTotal := 0
@@ -146,7 +127,6 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
    aNiz := {}
    cIdPos := gIdPos
 
-
    AAdd( aNiz, { "Prod. mjesto (prazno-sve)", "cIdPos", "cidpos='X'.or.EMPTY(cIdPos) .or. p_pos_kase(@cIdPos)", "@!", } )
    AAdd( aNiz, { "Radnici (prazno-svi)", "cRadnici",, "@!S30", } )
    AAdd( aNiz, { "Vrste placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
@@ -170,12 +150,12 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
    AAdd( aNiz, { "Partner (prazno-svi)", "cPartId", ".t.",, } )
 
    DO WHILE .T.
-      IF cVarijanta <> "1"  // onda nema read-a
-         IF !VarEdit( aNiz, 6, 5, 24, 74, "USLOVI ZA IZVJESTAJ: REALIZACIJA KASE-PRODAJNOG MJESTA", "B1" )
-            CLOSE ALL
-            RETURN 0
-         ENDIF
+
+      IF !VarEdit( aNiz, 6, 5, 24, 74, "USLOVI ZA IZVJEŠTAJ: REALIZACIJA KASE-PRODAJNOG MJESTA", "B1" )
+         CLOSE ALL
+         RETURN 0
       ENDIF
+
       aUsl1 := Parsiraj( cRadnici, "IdRadnik" )
       aUsl2 := Parsiraj( cVrsteP, "IdVrsteP" )
       IF aUsl1 <> NIL .AND. aUsl2 <> NIL .AND. dDatum0 <= dDatum1
@@ -195,40 +175,27 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
 
 STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP, cGotZir )
 
-   // ?? gP12CPI
-
-   // IF glRetroakt
-   // ? PadC( "REALIZACIJA NA DAN " + FormDat1( dDatum1 ), LEN_TRAKA )
-   // ELSE
-   // ? PadC( "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() ), LEN_TRAKA )
-   // ENDIF
-
-   // ? PadC( "-------------------------------------", LEN_TRAKA )
-
    IF Empty( cIdPos )
-
-         ? "PRODAJNO MJESTO: SVA"
-
+      ? "PRODAJNO MJESTO: SVA"
    ELSE
       ? "PRODAJNO MJESTO: " + cIdPos + "-" + find_pos_kasa_naz( cIdPos )
    ENDIF
 
    IF Empty( cRadnici )
-
-         ? "RADNIK     :  SVI"
+      ? "RADNIK     :  SVI"
    ELSE
       ? "RADNIK     : " + cRadnici + "-" + RTrim( find_pos_osob_naziv( cRadnici ) )
    ENDIF
 
    IF Empty( cVrsteP )
 
-         ?U "VR.PLAĆANJA: SVE"
+      ?U "VR.PLAĆANJA: SVE"
    ELSE
       ?U "VR.PLAĆANJA: " + RTrim( cVrsteP )
    ENDIF
 
    IF Empty( cGotZir )
-         ? "PLACANJE: gotovinsko i ziralno"
+      ? "PLACANJE: gotovinsko i ziralno"
    ELSE
       ?U "PLAĆANJE: " + IF( cGotZir <> "Z", "gotovinsko", "ziralno" )
    ENDIF
@@ -271,19 +238,6 @@ STATIC FUNCTION pos_set_filter_pos_doks( cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo
    IF !( cFilter == ".t." )
       SET FILTER TO &cFilter
    ENDIF
-
-   RETURN .T.
-
-
-STATIC FUNCTION pos_zagl_realizacijaZ( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP )
-
-   ?
-   ?? PadC( "ZAKLJUCENJE KASE", LEN_TRAKA )
-   ? PadC( gPosNaz )
-
-   ? PadC( FormDat1( danasnji_datum() ), LEN_TRAKA )
-
-   ?
 
    RETURN .T.
 
@@ -442,7 +396,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
       pos_realizacija_po_vrstama_placanja()
    ENDIF
 
-   IF !fZaklj .AND. fPrik $ "RO"
+   IF fPrik $ "RO"
       // ako je zakljucenje NE realizacija po robama
 
       set_pos_zagl_realizacija()
@@ -540,14 +494,9 @@ STATIC FUNCTION set_pos_zagl_realizacija()
    cLinija := Replicate( "-", LEN_TRAKA )
 
    ?
-
    ? cLinija
-
-
    ? PadC( "REALIZACIJA PO ROBAMA", LEN_TRAKA )
-
    ? cLinija
-
    ?
 
    cStr1 := ""
@@ -564,7 +513,7 @@ STATIC FUNCTION set_pos_zagl_realizacija()
 
    ? cLinija
 
-   RETURN
+   RETURN .T.
 
 
 /* pos_realizacija_po_odjeljenjima(fPrik, nTotal3)

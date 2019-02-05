@@ -21,7 +21,7 @@ FUNCTION pos_pregled_racuna_tabela()
 
    PRIVATE dMinDatProm := CToD( "" )
 
-   O__POS_PRIPR
+   o_pos__pripr()
 
    dDatOd := Date()
    dDatDo := Date()

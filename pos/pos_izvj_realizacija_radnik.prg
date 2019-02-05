@@ -13,11 +13,15 @@
 
 STATIC s_oPDF
 
-FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
+MEMVAR lTekuci, cPrikazPazarRoba, cIdRadnik, cVrsteP, cFilterVrstePlacanja, cIdPos, dDatOd, dDatDo
+
+FUNCTION pos_realizacija_radnik
+   PARAMETERS lTekuci, cPrikazPazarRoba
 
    LOCAL xPrintOpt, bZagl
    LOCAL aDbf
    LOCAL cNaslov
+   LOCAL aNiz
 
    PRIVATE cIdRadnik := Space( 4 )
    PRIVATE cVrsteP := Space( 60 )
@@ -26,7 +30,6 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
 
    PRIVATE dDatOd := danasnji_datum()
    PRIVATE dDatDo := danasnji_datum()
-   PRIVATE aNiz
    PRIVATE cGotZir := " "
 
    cPrikazPazarRoba := iif ( cPrikazPazarRoba == NIL, "P", cPrikazPazarRoba )
@@ -103,7 +106,7 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
       IF glRetroakt
          cNaslov += "REALIZACIJA NA DAN " + FormDat1( dDatDo )
       ELSE
-         cNasslov += "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() )
+         cNaslov += "REALIZACIJA NA DAN " + FormDat1( danasnji_datum() )
       ENDIF
    ENDIF
 
@@ -129,7 +132,7 @@ FUNCTION pos_realizacija_radnik( lTekuci, cPrikazPazarRoba )
    IF !lTekuci
       pos_radnik_izvuci ( VD_PRR )
    ENDIF
-   pos_radnik_izvuci ( POS_VD_RACUN )
+   pos_radnik_izvuci ( POS_IDVD_RACUN )
 
    SELECT pos_doks
    SET ORDER TO TAG "2"       // "DOKSi2", "IdVd+DTOS (Datum)"

@@ -95,47 +95,5 @@ FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik )
       cSta := "ostalo"
    ENDCASE
 
-   SELECT _pos
-   SET ORDER TO TAG "2"
-
-   SEEK cIdVd
-   IF Found()
-      IF _pos->idradnik <> cIdRadnik
-         MsgBeep ( "Drugi radnik je počeo raditi pripremu " + cSta + "#" + "AKO NASTAVITE, PRIPREMA SE BRIŠE !", 30 )
-         IF Pitanje(, "Želite li nastaviti (D/N) ?", " " ) == "N"
-            RETURN .F.
-         ENDIF
-         DO WHILE !Eof() .AND. _POS->IdVd == cIdVd
-            Del_Skip()
-         ENDDO
-
-         MsgBeep( "Izbrisana je priprema " + cSta )
-      ELSE
-
-         Beep ( 3 )
-
-         IF Pitanje(, "Počeli ste pripremu! Želite li nastaviti? (D/N)", "D" ) == "N"
-            DO WHILE !Eof() .AND. _POS->IdVd == cIdVd
-               Del_Skip()
-            ENDDO
-            MsgBeep ( "Priprema je izbrisana ... " )
-         ELSE
-            SELECT _POS
-            DO WHILE !Eof() .AND. _POS->IdVd == cIdVd
-               Scatter()
-               SELECT PRIPRZ
-               APPEND BLANK
-               Gather()
-               SELECT _POS
-               Del_Skip()
-            ENDDO
-            SELECT PRIPRZ
-            GO TOP
-         ENDIF
-      ENDIF
-   ENDIF
-
-   SELECT _POS
-   SET ORDER TO TAG "1"
 
    RETURN .T.

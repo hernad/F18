@@ -25,7 +25,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    hParams[ "tran_name" ] := "pos_rn_azur"
 
    o_pos_tables()
-   IF !racun_se_moze_azurirati( cIdPos, POS_VD_RACUN, danasnji_datum(), cBrDok )
+   IF !racun_se_moze_azurirati( cIdPos, POS_IDVD_RACUN, danasnji_datum(), cBrDok )
       RETURN lRet
    ENDIF
 
@@ -34,7 +34,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    run_sql_query( "BEGIN", hParams )
 
-   cDokument := AllTrim( cIdPos ) + "-" + POS_VD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( danasnji_datum() )
+   cDokument := AllTrim( cIdPos ) + "-" + POS_IDVD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( danasnji_datum() )
 
    MsgO( "POS Ažuriranje " + cDokument + " u toku ..." )
 
@@ -48,7 +48,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    hRec := dbf_get_rec()
    hRec[ "idpos" ] := cIdPos
-   hRec[ "idvd" ] := POS_VD_RACUN
+   hRec[ "idvd" ] := POS_IDVD_RACUN
    hRec[ "datum" ] := danasnji_datum()
    hRec[ "brdok" ] := cBrDok
    hRec[ "vrijeme" ] := cVrijeme
@@ -67,7 +67,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          APPEND BLANK
          hRec := dbf_get_rec()
          hRec[ "idpos" ] := cIdPos
-         hRec[ "idvd" ] := POS_VD_RACUN
+         hRec[ "idvd" ] := POS_IDVD_RACUN
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )

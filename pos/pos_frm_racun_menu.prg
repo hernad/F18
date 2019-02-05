@@ -54,7 +54,7 @@ FUNCTION pos_zakljuci_racun()
 
    LOCAL hParam := hb_Hash()
 
-   O__POS_PRIPR
+   o_pos__pripr()
    my_dbf_pack()
    IF _pos_pripr->( RecCount2() ) == 0
       my_close_all_dbf()
@@ -93,7 +93,7 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
    SELECT pos_doks
 
-   cBrDok := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_VD_RACUN )
+   cBrDok := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_IDVD_RACUN )
    cVrijeme := PadR( Time(), 5 )
 
    lOk := pos_azuriraj_racun( hParams[ "idpos" ], cBrDok, cVrijeme, hParams[ "idvrstep" ], hParams[ "idpartner" ] )

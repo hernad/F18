@@ -92,7 +92,6 @@ ALTER TABLE p15.vrstep OWNER TO admin;
 GRANT ALL ON SCHEMA p15 TO xtrole;
 GRANT ALL ON TABLE p15.roba TO xtrole;
 GRANT ALL ON TABLE p15.pos_doks TO xtrole;
-GRANT ALL ON TABLE p15.pos_dokspf TO xtrole;
 GRANT ALL ON TABLE p15.pos_pos TO xtrole;
 GRANT ALL ON TABLE p15.pos_strad TO xtrole;
 GRANT ALL ON TABLE p15.pos_osob TO xtrole;
@@ -179,28 +178,18 @@ ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
 CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
 CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum);
 CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, placen, datum);
--- CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
--- CREATE INDEX pos_doks_id5_knjig ON p15.pos_doks_knjig USING btree (prebacen);
 CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
 
+GRANT ALL ON TABLE p15.pos_doks_knjig TO xtrole;
 
 CREATE TABLE p15.pos_pos_knjig (
    idpos character varying(2),
    idvd character varying(2),
    brdok character varying(6),
    datum date,
-   -- idcijena character varying(1),
-   --idodj character(2),
    idradnik character varying(4),
    idroba character(10),
    idtarifa character(6),
-   -- m1 character varying(1),
-   -- mu_i character varying(1),
-   -- prebacen character varying(1),
-   -- smjena character varying(1),
-   -- brdokStorn character varying(8),
-   --c_2 character varying(10),
-   --c_3 character varying(50),
    kolicina numeric(18,3),
    kol2 numeric(18,3),
    cijena numeric(10,3),
@@ -210,7 +199,6 @@ CREATE TABLE p15.pos_pos_knjig (
 ALTER TABLE p15.pos_pos_knjig OWNER TO admin;
 CREATE INDEX pos_pos_id1_knjig ON p15.pos_pos_knjig USING btree (idpos, idvd, datum, brdok, idroba);
 CREATE INDEX pos_pos_id2_knjig ON p15.pos_pos_knjig USING btree (idroba, datum);
--- CREATE INDEX pos_pos_id3_knjig ON p15.pos_pos_knjig USING btree (prebacen);
 CREATE INDEX pos_pos_id4_knjig ON p15.pos_pos_knjig USING btree (datum);
 CREATE INDEX pos_pos_id5_knjig ON p15.pos_pos_knjig USING btree (idpos, idroba, datum);
 CREATE INDEX pos_pos_id6_knjig ON p15.pos_pos_knjig USING btree (idroba);
@@ -343,18 +331,19 @@ ELSE
           from fmk.koncij where id=OLD.PKonto;
 END IF;
 
-
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete prodavnica %', idPos;
+      EXECUTE 'DELETE FROM p' || idPos || '.pos_pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+         USING idpos, OLD.idvd, OLD.brdok, OLD.datdok, OLD.rbr;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-      RAISE INFO 'update prodavnica %', idPos;
+      RAISE INFO 'update prodavnica!? %', idPos;
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
 
       RAISE INFO 'insert prodavnica %', idPos;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,brFaktP,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5,$6,$7)'
-              USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.idroba, NEW.kolicina, NEW.mpcsapp;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, NEW.mpcsapp;
       RAISE INFO 'sql: %', sql;
 
       RETURN NEW;
@@ -380,25 +369,26 @@ BEGIN
 
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   SELECT idprodmjes INTO idPos
-          from fmk.koncij where id=NEW.PKonto;
+      SELECT idprodmjes INTO idPos
+            from fmk.koncij where id=NEW.PKonto;
 ELSE
-   SELECT idprodmjes INTO idPos
-          from fmk.koncij where id=OLD.PKonto;
+      SELECT idprodmjes INTO idPos
+            from fmk.koncij where id=OLD.PKonto;
 END IF;
 
-
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete prodavnica %', idPos;
+      RAISE INFO 'delete doks prodavnica %', idPos;
+      RAISE INFO
+      EXECUTE 'DELETE FROM p' || idPos || '.pos_doks_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+             USING idpos, OLD.idvd, OLD.brdok, OLD.datdok;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-      RAISE INFO 'update prodavnica %', idPos;
-      RETURN NEW;
+      RAISE INFO 'update doks prodavnica!? %', idPos;
+          RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
-
-      RAISE INFO 'insert prodavnica %', idPos;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_doks_knjig(idpos,idvd,brdok,datum,brFaktP,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5)'
-              USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP;
+      RAISE INFO 'insert doks prodavnica %', idPos;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_doks_knjig(idpos,idvd,brdok,datum,brFaktP) VALUES($1,$2,$3,$4,$5)'
+            USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP;
       RAISE INFO 'sql: %', sql;
 
       RETURN NEW;
@@ -409,18 +399,42 @@ RETURN NULL; -- result is ignored since this is an AFTER trigger
 END;
 $$;
 
+
 -- fmk.kalk_kalk -> p15.pos_pos
-CREATE TRIGGER pos_insert_upate_delete
+DROP TRIGGER IF EXISTS pos_insert_update_delete on fmk.kalk_kalk;
+CREATE TRIGGER pos_insert_update_delete
    AFTER INSERT OR DELETE OR UPDATE
    ON fmk.kalk_kalk
    FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_kalk_insert_update_delete();
 
+-- fmk.kalk_doks -> p15.pos_doks
+DROP TRIGGER IF EXISTS pos_doks_insert_update_delete on fmk.kalk_doks;
+CREATE TRIGGER pos_doks_insert_update_delete
+      AFTER INSERT OR DELETE OR UPDATE
+      ON fmk.kalk_doks
+      FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_doks_insert_update_delete();
+
 
 -- test
--- insert into fmk.kalk_doks(idfirma, idvd, brdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'XX', 1, '13322', 'R01', 10,  2)
--- insert into fmk.kalk_kalk(idfirma, idvd, brdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'XX', 1, '13322', 'R01', 10,  2)
---- delete from fmk.kalk_kalk where brdok='XX';
 
+-- step 1
+-- insert into fmk.kalk_doks(idfirma, idvd, brdok, datdok, brfaktP, pkonto) values('10', '11', 'BRDOK01', current_date, 'FAKTP01', '13322');
+-- insert into fmk.kalk_kalk(idfirma, idvd, brdok, datdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'BRDOK01', current_date, 1, '13322', 'R01', 10,  2);
+-- insert into fmk.kalk_kalk(idfirma, idvd, brdok, datdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'BRDOK01', current_date, 2, '13322', 'R02', 20,  3);
+
+-- step 2
+-- select * from p15.pos_doks_knjig;
+-- step 3
+-- select * from p15.pos_pos_knjig;
+
+-- step 4
+-- delete from fmk.kalk_kalk where brdok='BRDOK01';
+-- delete from fmk.kalk_doks where brdok='BRDOK01';
+
+-- step 5
+-- select * from p15.pos_doks_knjig;
+-- step 6
+-- select * from p15.pos_pos_knjig;
 
 
 -- DO $$

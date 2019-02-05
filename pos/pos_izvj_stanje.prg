@@ -39,7 +39,7 @@ FUNCTION pos_stanje_artikala()
    AAdd ( aNiz, { "Izvještaj se pravi za datum", "dDatum",,, } )
    AAdd ( aNiz, { "Štampati artikle sa stanjem 0", "cNule", "cNule$'DN'", "@!", } )
    DO WHILE .T.
-      IF !VarEdit( aNiz, 10, 5, 21, 74, 'USLOVI ZA IZVJESTAJ "STANJE ODJELJENJA"', "B1" )
+      IF !VarEdit( aNiz, 10, 5, 21, 74, 'USLOVI ZA IZVJESTAJ STANJE ARTIKALA', "B1" )
          CLOSERET
       ENDIF
       cFilterRoba := Parsiraj( cRoba, "IdRoba", "C" )
@@ -58,7 +58,6 @@ FUNCTION pos_stanje_artikala()
 
    EOF CRET
 
-   xIdOdj := "??"
    nRbr := 0
 
    s_oPDF := PDFClass():New()
@@ -93,7 +92,7 @@ FUNCTION pos_stanje_artikala()
             SKIP
             LOOP
          ENDIF
-         IF POS->idvd $ "16#00"
+         IF POS->idvd $ POS_IDVD_ULAZI
             nPstanje += POS->Kolicina
             nVrijednost += POS->Kolicina * POS->Cijena
          ELSEIF POS->idvd $ "IN#NI#" + "42#01"
@@ -119,7 +118,7 @@ FUNCTION pos_stanje_artikala()
             LOOP
          ENDIF
 
-         IF POS->idvd $ "16#00"
+         IF POS->idvd $ POS_IDVD_ULAZI
             nUlaz += pos->Kolicina
             nVrijednost += POS->Kolicina * POS->Cijena
          ELSEIF pos->idvd $  "IN#NI#" + "42#01"

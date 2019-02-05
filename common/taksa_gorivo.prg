@@ -64,7 +64,6 @@ STATIC FUNCTION artikal_je_gorivo( cIdRoba )
    LOCAL lRet := .F.
    LOCAL cSql, oQuery
 
-altd()
    cSql := "SELECT tip FROM " + f18_sql_schema( "roba" ) + " WHERE id = " + sql_quote( cIdRoba )
    oQuery := run_sql_query( cSql )
 
