@@ -161,7 +161,7 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
-   IF cTable == "tarifa" .OR. cTable == "partn" //  tarifa, partn se uvijek uzimaju iz knjigovodstva
+   IF cTable == "tarifa" .OR. cTable == "partn" .OR. cTable == "valute" //  tarifa, partn se uvijek uzimaju iz knjigovodstva
       RETURN F18_PSQL_KNJIGOVODSTVO_SCHEMA + "." + cTable
    ENDIF
 

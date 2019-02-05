@@ -28,8 +28,6 @@ FUNCTION get_f18_param( cKey )
    ENDIF
 
    IF !hb_hHasKey( s_hF18Params, cKey)
-     // Alert("F18Param ne postoji: " + cKey)
-     // QUIT_1
      return "<undefined>"
    ENDIF
 

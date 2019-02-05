@@ -13,21 +13,12 @@
 
 FUNCTION o_pos_priprz()
 
-   SELECT ( F_PRIPRZ )
-   my_use( "priprz" )
-   SET ORDER TO TAG "1"
-
-   RETURN .T.
-
-
+   RETURN o_dbf_table( F_PRIPRZ, { "PRIPRZ", "pos_priprz" }, "1" )
 
 FUNCTION o_pos__pripr()
 
-   SELECT ( F__PRIPR )
-   my_use( "_pos_pripr" )
-   SET ORDER TO TAG "1"
+   RETURN o_dbf_table( F__PRIPR, { "_POS_PRIPR", "_pos_pripr" }, "1" )
 
-   RETURN .T.
 
 FUNCTION pos_init()
 
@@ -35,8 +26,6 @@ FUNCTION pos_init()
    pos_definisi_inicijalne_podatke()
 
    RETURN .T.
-
-
 
 
 STATIC FUNCTION pos_dodaj_u_sifarnik_prioriteta( cId, cPrioritet, cOpis )

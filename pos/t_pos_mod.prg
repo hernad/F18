@@ -35,8 +35,7 @@ METHOD mMenu()
 
    Fx := 4
    Fy := 8
-
-   pos_check_brdok()
+   
    pos_init()
    CLOSE ALL
 

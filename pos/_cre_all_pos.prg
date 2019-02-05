@@ -51,7 +51,6 @@ FUNCTION cre_all_pos( ver )
    aDbf := g_pos_pripr_fields()
 
 
-
    _alias := "_POS_PRIPR"
    _table_name := "_pos_pripr"
 
@@ -61,7 +60,7 @@ FUNCTION cre_all_pos( ver )
    CREATE_INDEX ( "2", "IdPos+IdVd+dtos(datum)+BrDok", _alias )
 
    _alias := "PRIPRZ"
-   _table_name := "priprz"
+   _table_name := "pos_priprz"
 
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX ( "1", "IdRoba", _alias )
@@ -89,7 +88,7 @@ FUNCTION pos_check_brdok()
 
       Alert( "Serviser F18 brdok[" + AllTrim( Str( Len( _pos_pripr->brdok ) ) ) + "] - pobrisati pos tabele pripreme!" )
       my_close_all_dbf()
-      aTabele := { "_pos_pos", "_pos_posp", "pos_priprz", "pos_priprg", "_pos_pripr" }
+      aTabele := { "pos_priprz", "_pos_pripr" }
       FOR nI := 1 TO Len( aTabele )
          cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".dbf"
          info_bar( "pos_brdok", cFile )

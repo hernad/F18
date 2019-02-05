@@ -1,10 +1,7 @@
 #include "f18.ch"
 
-//#ifdef __PLATFORM__UNIX
 #define INI_FNAME "f18_config.ini"
-//#else
-//#define INI_FNAME ".f18_config.ini"
-//#endif
+
 
 FUNCTION f18_ini_config_read( cSection, hIniParams, lGlobalno )
 
@@ -12,6 +9,10 @@ FUNCTION f18_ini_config_read( cSection, hIniParams, lGlobalno )
    LOCAL cTmpKey
    LOCAL cIniFile
    LOCAL cIniRead
+
+   IF get_f18_param("run") != "<undefined>" // command line parametri, ignorisati ini
+      RETURN .T.
+   ENDIF
 
    IF ( lGlobalno == NIL ) .OR. ( lGlobalno == .F. )
       cIniFile := my_home() + INI_FNAME

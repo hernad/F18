@@ -43,13 +43,8 @@ FUNCTION cre_all_dbfs( ver )
    cre_sif_konto( ver )
 
    fill_tbl_valute() // upisi default valute ako ne postoje
-   //db_cre_ugov( ver ) // kreiranje tabela ugovora
-
+    
    cre_barkod( ver )
-   //cre_sif_partn( ver )
-   //cre_sif_adrese( ver )
-
-   // proizvoljni_izvjestaji_db_cre( ver )
    cre_fin_mat( ver )
 
    ?E "cre_all_dbfs param run:", get_f18_param("run")
@@ -99,6 +94,7 @@ FUNCTION cre_all_dbfs( ver )
 #ifdef F18_POS
    IF f18_use_module( "pos" )
       cre_all_pos( ver )
+      pos_check_brdok()
    ENDIF
 #endif
 
