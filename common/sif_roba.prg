@@ -74,20 +74,19 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
 
          cPom := "mpc" + AllTrim( Str( nI ) )
          cPom2 := '{|| transform(' + cPom + ',"999999.999")}'
-
          cPrikazi := fetch_metric( "roba_prikaz_" + cPom, NIL, "D" )
-
          IF cPrikazi == "D"
             AAdd( ImeKol, { PadC( Upper( cPom ), 10 ), &( cPom2 ), cPom, NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem() } )
          ENDIF
 
       NEXT
-
       AAdd( ImeKol, { PadC( "NC", 10 ), {|| Transform( field->NC, kalk_pic_cijena_bilo_gpiccdem() ) }, "NC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
    ENDIF
 
    AAdd( ImeKol, { "Tarifa", {|| field->IdTarifa }, "IdTarifa", {|| .T. }, {|| P_Tarifa( @wIdTarifa ), roba_opis_edit()  }   } )
-   AAdd( ImeKol, { "Tip", {|| " " + field->Tip + " " }, "Tip", {|| .T. }, {|| wTip $ " TUCKVPSXY" }, NIL, NIL, NIL, NIL, 27 } )
+
+   // " " - roba, "G" - roba gorivo, "U" - usluge, "P" - proizvod, "S" - sirovina
+   AAdd( ImeKol, { "Tip", {|| " " + field->Tip + " " }, "Tip", {|| .T. }, {|| wTip $ " UPSG" }, NIL, NIL, NIL, NIL, 27 } )
    AAdd ( ImeKol, { PadC( "BARKOD", 14 ), {|| field->BARKOD }, "BarKod", {|| .T. }, {|| roba_valid_barkod( Ch, @wId, @wBarkod ) }  } )
 
    AAdd ( ImeKol, { PadC( "MINK", 10 ), {|| Transform( field->MINK, "999999.99" ) }, "MINK"   } )
@@ -115,7 +114,6 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    ENDIF
 
 
-
    Kol := {}
 
    FOR nI := 1 TO Len( ImeKol )
@@ -126,7 +124,6 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    if programski_modul() != "POS"
       sifk_fill_ImeKol( "ROBA", @ImeKol, @Kol )
    ENDIF
-
 
    DO CASE
    CASE programski_modul() == "KALK"
@@ -171,7 +168,7 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
 FUNCTION roba_opis_edit( view )
 
    LOCAL _op := "N"
-   PRIVATE getList := {}
+   LOCAL GetList := {}
 
    IF view == NIL
       view := .F.

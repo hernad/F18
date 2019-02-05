@@ -64,10 +64,12 @@ STATIC FUNCTION artikal_je_gorivo( cIdRoba )
    LOCAL lRet := .F.
    LOCAL cSql, oQuery
 
-   cSql := "SELECT k1 FROM " + f18_sql_schema( "roba" ) + " WHERE id = " + sql_quote( cIdRoba )
+altd()
+   cSql := "SELECT tip FROM " + f18_sql_schema( "roba" ) + " WHERE id = " + sql_quote( cIdRoba )
    oQuery := run_sql_query( cSql )
 
-   IF query_row( oQuery, "k1" ) == "GORI"
+   IF query_row( oQuery, "tip" ) == "G"
+   //IF query_row( oQuery, "k1" ) == "GORI"
       lRet := .T.
    ENDIF
 
