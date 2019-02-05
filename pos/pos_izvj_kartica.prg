@@ -14,23 +14,20 @@
 STATIC s_oPDF
 
 MEMVAR m
+MEMVAR dDatum0, dDatum1, cIdRoba, cIdPos, gIdPos, cPredhodnoStanje
 
 FUNCTION pos_kartica_artikla()
 
-   LOCAL nPredhodnoStanjeKolicina
-   LOCAL nSign := 1
-   LOCAL cSt
-   LOCAL nPredhodnaVrijednost
-   LOCAL nCijena := 0
-   LOCAL dNaDatum
+   LOCAL nUlaz, nIzlaz
+   LOCAL nVrijednost, nPredhodnaVrijednost
+   LOCAL nKol, nCijena
    LOCAL xPrintOpt
    LOCAL bZagl
-
    LOCAL cLijevaMargina := ""
-   LOCAL nSir := 40
-
-   // LOCAL cPPar
    LOCAL GetList := {}
+   LOCAL cIdRobaT
+   LOCAL nPosDuzinaBrojaDokumenta
+   LOCAL nPredhodnoStanjeKolicina, nStanjeKolicina
 
    PRIVATE dDatum0 := danasnji_datum()
    PRIVATE dDatum1 := danasnji_datum()
@@ -50,11 +47,9 @@ FUNCTION pos_kartica_artikla()
 
    Box(, 11, 60 )
 
-   aNiz := {}
-
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prod.mjesto (prazno-svi) "  GET  cIdPos  VALID Empty( cIdPos ) .OR. p_pos_kase( cIdPos ) PICT "@!"
    READ
-   @ box_x_koord() + 5, box_y_koord() + 6 SAY "Sifra artikla (prazno-svi)" GET cIdRoba VALID Empty( cIdRoba ) .OR. P_Roba( @cIdRoba ) PICT "@!"
+   @ box_x_koord() + 5, box_y_koord() + 6 SAY8 "Šifra artikla (prazno-svi)" GET cIdRoba VALID Empty( cIdRoba ) .OR. P_Roba( @cIdRoba ) PICT "@!"
    @ box_x_koord() + 7, box_y_koord() + 2 SAY "za period " GET dDatum0
    @ box_x_koord() + 7, Col() + 2 SAY "do " GET dDatum1
    @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "sa predhodnim stanjem D/N ?" GET cPredhodnoStanje VALID cPredhodnoStanje $ "DN" PICT "@!"
@@ -103,10 +98,9 @@ FUNCTION pos_kartica_artikla()
 
    cLijevaMargina := ""
 
-   m := Replicate( "-", 8 ) + " "
-   m += "-------- ---------- ---------- ---------- ---------- ----------"
+   m := Replicate( "-", 8 ) + " " + "----------- ---------- ---------- ---------- ---------- ----------"
 
-   bZagl := {|| pos_zagl_kartica(cLijevaMargina) }
+   bZagl := {|| pos_zagl_kartica( cLijevaMargina ) }
    Eval( bZagl )
 
    DO WHILE !Eof()
@@ -116,7 +110,6 @@ FUNCTION pos_kartica_artikla()
 
       cIdRobaT := POS->IdRoba
       select_o_roba( cIdRoba )
-      nCijena1 := pos_get_mpc()
 
       nPredhodnoStanjeKolicina := 0
       nPredhodnaVrijednost := 0
@@ -124,7 +117,7 @@ FUNCTION pos_kartica_artikla()
 
       SELECT POS
 
-      check_nova_strana( bZagl, s_oPDF )
+      check_nova_strana( bZagl, s_oPDF, .F., 8 )
       ?
       ? m
       ? cLijevaMargina
@@ -134,10 +127,10 @@ FUNCTION pos_kartica_artikla()
       ?? cIdRobaT, PadR ( AllTrim ( roba->Naz ) + " (" + AllTrim ( roba->Jmj ) + ")", 32 )
       ? m
 
-      // izracunati predhodno stanje
+      // izračunati predhodno stanje
       DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum < dDatum0
 
-         IF  cPredhodnoStanje == "N" .OR. ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
+         IF cPredhodnoStanje == "N" .OR. ( !Empty( cIdPos ) .AND. pos->IdPos <> cIdPos )
             SKIP
             LOOP
          ENDIF
@@ -162,8 +155,9 @@ FUNCTION pos_kartica_artikla()
          SKIP
       ENDDO
 
+      check_nova_strana( bZagl, s_oPDF, .F., 3 )
       ?
-      ?? PadL ( "Stanje do " + FormDat1 ( dDatum0 ) + " : ", 40 )
+      ?? PadL ( "Stanje do " + FormDat1 ( dDatum0 ) + " : ", 43 )
       ?? Str ( nPredhodnoStanjeKolicina, 10, 2 ) + " "
       IF Round( nPredhodnoStanjeKolicina, 4 ) != 0
          nCijena := nPredhodnaVrijednost / nPredhodnoStanjeKolicina
@@ -181,12 +175,12 @@ FUNCTION pos_kartica_artikla()
       DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum >= dDatum0 .AND. POS->Datum <= dDatum1
 
          check_nova_strana( bZagl, s_oPDF )
-         IF ( !Empty( cIdPos ) .AND. IdPos <> cIdPos )
+         IF ( !Empty( cIdPos ) .AND. pos->IdPos <> cIdPos )
             SKIP
             LOOP
          ENDIF
 
-         IF POS->idvd $ "00#16"
+         IF POS->idvd $ POS_IDVD_ULAZI
 
             ? cLijevaMargina
             ?? DToC( pos->datum ) + " "
@@ -212,9 +206,9 @@ FUNCTION pos_kartica_artikla()
             SKIP
             LOOP
 
-         ELSEIF POS->idvd $ "IN" + "42#98"
+         ELSEIF POS->idvd $ "IN#42"
 
-            IF pos->idvd $ "42#98"
+            IF pos->idvd $ "42"
                nKol := POS->Kolicina
             ELSEIF POS->IdVd == "IN"
                nKol := POS->Kolicina - POS->Kol2
@@ -243,14 +237,14 @@ FUNCTION pos_kartica_artikla()
          SKIP
       ENDDO
 
-      check_nova_strana( bZagl, s_oPDF )
-
+      check_nova_strana( bZagl, s_oPDF, .F., 3 )
       ? m
       ? cLijevaMargina
-      ?? PadL( "UKUPNO:", 18 )
+      ?? PadL( "UKUPNO:", 21 )
       ?? Str( nUlaz, 10, 2 ) + " "
       ?? Str( nIzlaz, 10, 2 ) + " "
       ?? Str( nStanjeKolicina, 10, 2 ) + " "
+
       IF Round( nStanjeKolicina, 4 ) != 0
          nCijena := nVrijednost / nStanjeKolicina
       ELSE
@@ -269,10 +263,10 @@ FUNCTION pos_kartica_artikla()
    RETURN .T.
 
 
-FUNCTION pos_zagl_kartica(cLijevaMargina)
+FUNCTION pos_zagl_kartica( cLijevaMargina )
 
    ? m
-   ? cLijevaMargina + " Datum   Dokum." + Space( nPosDuzinaBrojaDokumenta - 4 ) + "     Ulaz       Izlaz     Stanje     Cijena  Vrijednost"
+   ? cLijevaMargina + " Datum    Dokument       Ulaz       Izlaz     Stanje    Cijena   Vrijednost"
    ? m
 
    RETURN .T.
