@@ -206,33 +206,29 @@ STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrste
    // ? PadC( "-------------------------------------", LEN_TRAKA )
 
    IF Empty( cIdPos )
-      IF ( grbReduk < 2 )
+
          ? "PRODAJNO MJESTO: SVA"
-      ENDIF
+
    ELSE
       ? "PRODAJNO MJESTO: " + cIdPos + "-" + find_pos_kasa_naz( cIdPos )
    ENDIF
 
    IF Empty( cRadnici )
-      IF ( grbReduk < 2 )
+
          ? "RADNIK     :  SVI"
-      ENDIF
    ELSE
       ? "RADNIK     : " + cRadnici + "-" + RTrim( find_pos_osob_naziv( cRadnici ) )
    ENDIF
 
    IF Empty( cVrsteP )
-      IF ( grbReduk < 2 )
+
          ?U "VR.PLAĆANJA: SVE"
-      ENDIF
    ELSE
       ?U "VR.PLAĆANJA: " + RTrim( cVrsteP )
    ENDIF
 
    IF Empty( cGotZir )
-      IF ( grbReduk < 2 )
          ? "PLACANJE: gotovinsko i ziralno"
-      ENDIF
    ELSE
       ?U "PLAĆANJE: " + IF( cGotZir <> "Z", "gotovinsko", "ziralno" )
    ENDIF
@@ -545,15 +541,12 @@ STATIC FUNCTION set_pos_zagl_realizacija()
 
    ?
 
-   IF ( grbReduk < 2 )
-      ? cLinija
-   ENDIF
+   ? cLinija
+
 
    ? PadC( "REALIZACIJA PO ROBAMA", LEN_TRAKA )
 
-   IF ( grbReduk < 2 )
-      ? cLinija
-   ENDIF
+   ? cLinija
 
    ?
 

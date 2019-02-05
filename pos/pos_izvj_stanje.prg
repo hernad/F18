@@ -143,7 +143,7 @@ FUNCTION pos_stanje_artikala()
       IF Round( nStanje, 4 ) <> 0 .OR. cNule == "D"
 
          select_o_roba( cIdRoba )
-         ? cLijevaMargina + PadL( AllTrim( Str( ++nRbr, 5 ) ), 5 ) + ")"
+         ? cLijevaMargina + PadL( AllTrim( Str( ++nRbr, FIELD_LEN_POS_RBR ) ), FIELD_LEN_POS_RBR ) + ")"
          ?? cIdRoba, PadR( roba->naz, nRobaNazivSirina ) + " "
 
          SELECT POS

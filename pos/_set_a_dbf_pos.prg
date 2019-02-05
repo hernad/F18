@@ -72,7 +72,7 @@ FUNCTION set_a_dbf_pos_pos()
    hAlgoritam[ "dbf_key_empty_rec" ] := Space( 2 ) + Space( 2 ) + DToS( CToD( "" ) ) + Space( FIELD_LEN_POS_BRDOK ) + Space( FIELD_LEN_POS_RBR )
 
    hAlgoritam[ "dbf_key_fields" ] := { "idpos", "idvd", "datum", "brdok", "rbr" }
-   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok," + AllTrim( Str( FIELD_LEN_POS_BRDOK ) ) + ") || lpad(rbr,5)"
+   hAlgoritam[ "sql_in" ]         := "rpad( idpos,2) || rpad( idvd,2)  || to_char(datum, 'YYYYMMDD') || rpad(brdok," + AllTrim( Str( FIELD_LEN_POS_BRDOK ) ) + ") || lpad(rbr,"+ AllTrim( Str( FIELD_LEN_POS_RBR ) ) +")"
    hAlgoritam[ "dbf_tag" ]        := "IDS_SEM"
    AAdd( hItem[ "algoritam" ], hAlgoritam )
 

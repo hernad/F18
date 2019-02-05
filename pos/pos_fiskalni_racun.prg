@@ -38,7 +38,7 @@ CREATE TABLE fmk.pos_pos
   kol2 numeric(18,3),
   cijena numeric(10,3),
   ncijena numeric(10,3),
-  rbr character varying(5)
+  rbr character varying(3)
 )
 WITH (
   OIDS=FALSE

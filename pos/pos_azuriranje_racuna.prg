@@ -70,7 +70,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "idvd" ] := POS_VD_RACUN
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
-         hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), 5 )
+         hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
          hRec[ "idradnik" ] := _pos_pripr->idradnik
          hRec[ "idroba" ] := _pos_pripr->idroba
          hRec[ "idtarifa" ] := _pos_pripr->idtarifa

@@ -13,7 +13,6 @@
 
 FUNCTION pos_main_menu_admin()
 
-   LOCAL nSetPosPM
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
@@ -41,16 +40,16 @@ RETURN .T.
 
 FUNCTION pos_admin_menu()
 
-   PRIVATE opc := {}
-   PRIVATE opcexe := {}
-   PRIVATE Izbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
+   LOCAL nIzbor := 1
 
-   AAdd( opc, "1. parametri rada programa                        " )
-   AAdd( opcexe, {|| pos_parametri() } )
+   AAdd( aOpc, "1. parametri rada programa                        " )
+   AAdd( aOpcexe, {|| pos_parametri() } )
 
-   AAdd( opc, "R. setovanje brojača dokumenata" )
-   AAdd( opcexe, {|| pos_set_param_broj_dokumenta() } )
+   AAdd( aOpc, "R. setovanje brojača dokumenata" )
+   AAdd( aOpcexe, {|| pos_set_param_broj_dokumenta() } )
 
-   f18_menu_sa_priv_vars_opc_opcexe_izbor( "aadm" )
+   f18_menu( "padm", .F., nIzbor, aOpc, aOpcExe )
 
    RETURN .F.

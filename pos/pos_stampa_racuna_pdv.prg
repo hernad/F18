@@ -241,7 +241,6 @@ STATIC FUNCTION gvars_fill()
 
    add_drntext( "P20", AllTrim( Str( grbCjen ) ) ) // prikaz cijene sa pdv, bez pdv
    add_drntext( "P21", grbStId ) // stampa id robe na racunu
-   add_drntext( "P22", AllTrim( Str( grbReduk ) ) ) // redukcija trake
 
    RETURN .T.
 

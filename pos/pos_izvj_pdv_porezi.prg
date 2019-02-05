@@ -106,16 +106,12 @@ FUNCTION pos_pdv_po_tarifama
          ?
 
       ELSE // fsolo
-         IF ( grbReduk < 1 )
-            ?
-         ENDIF
+         ?
          IF cNaplaceno == "3"
             ?U PadC( "**** OBRAČUN ZA NAPLAĆENI IZNOS ****", LEN_TRAKA )
          ENDIF
          ? PadC ( "REKAPITULACIJA POREZA PO TARIFAMA", LEN_TRAKA )
-         IF ( grbReduk < 1 )
-            ? PadC ( "---------------------------------", LEN_TRAKA )
-         ENDIF
+
       ENDIF // fsolo
 
       // SELECT POS

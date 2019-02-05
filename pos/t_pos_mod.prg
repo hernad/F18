@@ -157,7 +157,6 @@ METHOD set_module_gvars()
    PUBLIC gDiskFree := "N"
    PUBLIC grbCjen := 2
    PUBLIC grbStId := "D"
-   PUBLIC grbReduk := 0
 
    self:cName := "POS"
    gModul := self:cName
@@ -258,7 +257,6 @@ METHOD set_module_gvars()
    // izgled racuna
    grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
    grbStId := fetch_metric( "RacunStampaIDArtikla", NIL, grbStId )
-   grbReduk := fetch_metric( "RacunRedukcijaTrake", NIL, grbReduk )
 
    // cijene
 

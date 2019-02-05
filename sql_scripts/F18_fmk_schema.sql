@@ -562,10 +562,6 @@ CREATE TABLE fmk.fakt_doks2 (
 
 ALTER TABLE fmk.fakt_doks2 OWNER TO admin;
 
---
--- Name: fakt_fakt; Type: TABLE; Schema: fmk; Owner: admin
---
-
 CREATE TABLE fmk.fakt_fakt (
     idfirma character(2) NOT NULL,
     idtipdok character(2) NOT NULL,
@@ -599,10 +595,6 @@ CREATE TABLE fmk.fakt_fakt (
 );
 
 ALTER TABLE fmk.fakt_fakt OWNER TO admin;
-
---
--- Name: fakt_fakt_atributi; Type: TABLE; Schema: fmk; Owner: admin
---
 
 CREATE TABLE fmk.fakt_fakt_atributi (
     idfirma character(2) NOT NULL,
@@ -1058,10 +1050,6 @@ CREATE TABLE fmk.kalk_doks2 (
 );
 
 ALTER TABLE fmk.kalk_doks2 OWNER TO admin;
-
---
--- Name: kalk_kalk; Type: TABLE; Schema: fmk; Owner: admin
---
 
 CREATE TABLE fmk.kalk_kalk (
     idfirma character(2) NOT NULL,
@@ -4763,116 +4751,3 @@ GRANT ALL ON TABLE fmk.vrprim TO xtrole;
 --
 
 GRANT ALL ON TABLE fmk.vrstep TO xtrole;
-
-
--- --
--- -- Name: pos_pos; Type: TABLE; Schema: fmk; Owner: admin
--- --
--- CREATE TABLE fmk.pos_pos (
---     idpos character varying(2),
---     idvd character varying(2),
---     brdok character varying(6),
---     datum date,
---     idcijena character varying(1),
---     iddio character varying(2),
---     idodj character(2),
---     idradnik character varying(4),
---     idroba character(10),
---     idtarifa character(6),
---     m1 character varying(1),
---     mu_i character varying(1),
---     prebacen character varying(1),
---     smjena character varying(1),
---     brdokStorn character varying(6),
---     c_2 character varying(10),
---     c_3 character varying(50),
---     kolicina numeric(18,3),
---     kol2 numeric(18,3),
---     cijena numeric(10,3),
---     ncijena numeric(10,3),
---     rbr character varying(5)
--- );
---
--- ALTER TABLE fmk.pos_pos OWNER TO admin;
---
--- CREATE INDEX pos_pos_id1 ON fmk.pos_pos USING btree (idpos, idvd, datum, brdok, idroba, idcijena);
--- CREATE INDEX pos_pos_id2 ON fmk.pos_pos USING btree (idodj, idroba, datum);
--- CREATE INDEX pos_pos_id3 ON fmk.pos_pos USING btree (prebacen);
--- CREATE INDEX pos_pos_id4 ON fmk.pos_pos USING btree (datum);
--- CREATE INDEX pos_pos_id5 ON fmk.pos_pos USING btree (idpos, idroba, datum);
--- CREATE INDEX pos_pos_id6 ON fmk.pos_pos USING btree (idroba);
--- GRANT ALL ON TABLE fmk.pos_pos TO xtrole;
---
---
--- --
--- -- Name: pos_doks; Type: TABLE; Schema: fmk; Owner: admin
--- --
---
--- CREATE TABLE fmk.pos_doks (
---     idpos character varying(2) NOT NULL,
---     idvd character varying(2) NOT NULL,
---     brdok character varying(6) NOT NULL,
---     datum date,
---     idPartner character varying(8),
---     idradnik character varying(4),
---     idvrstep character(2),
---     m1 character varying(1),
---     placen character(1),
---     prebacen character(1),
---     smjena character varying(1),
---     sto character varying(3),
---     vrijeme character varying(5),
---     brdokStorn character varying(6),
---     c_2 character varying(10),
---     c_3 character varying(50),
---     fisc_rn numeric(10,0),
---     zak_br numeric(6,0),
---     sto_br numeric(3,0),
---     -- funk numeric(3,0),
---     -- fisc_st character(10),
---     rabat numeric(15,5),
---     ukupno numeric(15,5)
--- );
---
--- ALTER TABLE fmk.pos_doks OWNER TO admin;
---
---
--- --
--- -- Name: pos_doks; Type: TABLE; Schema: fmk; Owner: admin
--- --
---
--- CREATE TABLE fmk.pos_doks (
---     idpos character varying(2) NOT NULL,
---     idvd character varying(2) NOT NULL,
---     brdok character varying(6) NOT NULL,
---     datum date,
---     idPartner character varying(8),
---     idradnik character varying(4),
---     idvrstep character(2),
---     m1 character varying(1),
---     placen character(1),
---     prebacen character(1),
---     smjena character varying(1),
---     sto character varying(3),
---     vrijeme character varying(5),
---     brdokStorn character varying(6),
---     c_2 character varying(10),
---     c_3 character varying(50),
---     fisc_rn numeric(10,0),
---     zak_br numeric(6,0),
---     sto_br numeric(3,0),
---     -- funk numeric(3,0),
---     -- fisc_st character(10),
---     rabat numeric(15,5),
---     ukupno numeric(15,5)
--- );
---
--- ALTER TABLE fmk.pos_doks OWNER TO admin;
---
---
--- CREATE INDEX pos_doks_id1 ON fmk.pos_doks USING btree (idpos, idvd, datum, brdok);
--- CREATE INDEX pos_doks_id2 ON fmk.pos_doks USING btree (idvd, datum, smjena);
--- CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idPartner, placen, datum);
--- CREATE INDEX pos_doks_id4 ON fmk.pos_doks USING btree (idvd, m1);
--- CREATE INDEX pos_doks_id5 ON fmk.pos_doks USING btree (prebacen);
--- CREATE INDEX pos_doks_id6 ON fmk.pos_doks USING btree (datum);

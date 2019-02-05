@@ -4,47 +4,16 @@ ALTER SCHEMA p15 OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS  p15.roba (
     id character(10) NOT NULL,
-    -- match_code character(10),
     sifradob character(20),
     naz character varying(250),
     jmj character(3),
     idtarifa character(6),
-    -- nc numeric(18,8),
-    -- vpc numeric(18,8),
     mpc numeric(18,8),
     tip character(1),
-    -- carina numeric(5,2),
     opis text,
-    -- vpc2 numeric(18,8),
-    -- mpc2 numeric(18,8),
-    -- mpc3 numeric(18,8),
-    --k1 character(4),
-    --k2 character(4),
-    --n1 numeric(12,2),
-    --n2 numeric(12,2),
-    -- plc numeric(18,8),
     mink numeric(12,2),
-    -- _m1_ character(1),
     barkod character(13),
-    -- zanivel numeric(18,8),
-    -- zaniv2 numeric(18,8),
-    -- trosk1 numeric(15,5),
-    -- trosk2 numeric(15,5),
-    -- trosk3 numeric(15,5),
-    -- trosk4 numeric(15,5),
-    -- trosk5 numeric(15,5),
     fisc_plu numeric(10,0),
-    --k7 character(4),
-    --k8 character(4),
-    --k9 character(4),
-    -- strings numeric(10,0),
-    -- idkonto character(7),
-    -- mpc4 numeric(18,8),
-    -- mpc5 numeric(18,8),
-    -- mpc6 numeric(18,8),
-    -- mpc7 numeric(18,8),
-    -- mpc8 numeric(18,8),
-    -- mpc9 numeric(18,8)
 );
 ALTER TABLE p15.roba OWNER TO admin;
 
@@ -56,39 +25,31 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     idPartner character varying(6),
     idradnik character varying(4),
     idvrstep character(2),
-    -- m1 character varying(1),
     placen character(1),
-    -- prebacen character(1),
-    -- smjena character varying(1),
-    -- sto character varying(3),
     vrijeme character varying(5),
     brdokStorn character varying(8),
-    --c_2 character varying(10),
-    --c_3 character varying(50),
     fisc_rn numeric(10,0),
-    -- zak_br numeric(6,0),
-    -- sto_br numeric(3,0),
-    -- funk numeric(3,0),
-    -- fisc_st character(10),
-    -- pos numeric(15,5),
     ukupno numeric(15,5),
     brFaktP varchar(10),
     opis varchar(100)
 );
 ALTER TABLE p15.pos_doks OWNER TO admin;
 
-CREATE TABLE IF NOT EXISTS p15.pos_dokspf (
-    idpos character(2),
-    idvd character(2),
+CREATE TABLE IF NOT EXISTS p15.pos_pos (
+    idpos character varying(2),
+    idvd character varying(2),
+    brdok character varying(6),
     datum date,
-    brdok character(6),
-    knaz character varying(35),
-    kadr character varying(35),
-    kidbr character(13),
-    datisp date
+    idradnik character varying(4),
+    idroba character(10),
+    idtarifa character(6),
+    kolicina numeric(18,3),
+    kol2 numeric(18,3),
+    cijena numeric(10,3),
+    ncijena numeric(10,3),
+    rbr character(3) NOT NULL
 );
-ALTER TABLE p15.pos_dokspf OWNER TO admin;
-
+ALTER TABLE p15.pos_pos OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS  p15.pos_kase (
     id character varying(2),
@@ -112,28 +73,6 @@ CREATE TABLE IF NOT EXISTS p15.pos_osob (
     status character(2)
 );
 ALTER TABLE p15.pos_osob OWNER TO admin;
-
-CREATE TABLE IF NOT EXISTS p15.pos_pos (
-    idpos character varying(2),
-    idvd character varying(2),
-    brdok character varying(6),
-    datum date,
-    -- idcijena character varying(1),
-    --idodj character(2),
-    idradnik character varying(4),
-    idroba character(10),
-    idtarifa character(6),
-    -- m1 character varying(1),
-    -- mu_i character varying(1),
-    -- prebacen character varying(1),
-    -- smjena character varying(1),
-    kolicina numeric(18,3),
-    kol2 numeric(18,3),
-    cijena numeric(10,3),
-    ncijena numeric(10,3),
-    rbr character varying(5)
-);
-ALTER TABLE p15.pos_pos OWNER TO admin;
 
 
 CREATE TABLE IF NOT EXISTS p15.pos_strad (
@@ -329,6 +268,8 @@ ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS mu_i;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS idcijena;
+ALTER TABLE p15.pos_pos ALTER COLUMN rbr TYPE character(3);
+ALTER TABLE p15.pos_pos ALTER COLUMN rbr SET NOT NULL;
 
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN brdok TYPE varchar(8);
@@ -341,7 +282,8 @@ ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS mu_i;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS idcijena;
-
+ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr TYPE character(3);
+ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr SET NOT NULL;
 
 ALTER TABLE p15.roba DROP COLUMN IF EXISTS k1;
 ALTER TABLE p15.roba DROP COLUMN IF EXISTS k2;
@@ -378,8 +320,9 @@ ALTER TABLE p15.roba DROP COLUMN IF EXISTS idkonto;
 
 DROP TABLE IF EXISTS p15.pos_dokspf;
 
-
-
+---------------------------------------------------------------------------------------
+-- on kalk_kalk update p15.pos_pos_knjig
+---------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.on_kalk_kalk_insert_update_delete() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -390,36 +333,79 @@ DECLARE
 BEGIN
 
 
-        IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-           SELECT idprodmjes INTO idPos
-              from fmk.koncij where id=NEW.PKonto;
-        ELSE
-           SELECT idprodmjes INTO idPos
-              from fmk.koncij where id=OLD.PKonto;
-        END IF;
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
+   SELECT idprodmjes INTO idPos
+          from fmk.koncij where id=NEW.PKonto;
+ELSE
+   SELECT idprodmjes INTO idPos
+          from fmk.koncij where id=OLD.PKonto;
+END IF;
 
 
-        IF (TG_OP = 'DELETE') THEN
-            RAISE INFO 'delete prodavnica %', idPos;
-            RETURN OLD;
-        ELSIF (TG_OP = 'UPDATE') THEN
-            RAISE INFO 'update prodavnica %', idPos;
-            RETURN NEW;
-        ELSIF (TG_OP = 'INSERT') THEN
+IF (TG_OP = 'DELETE') THEN
+      RAISE INFO 'delete prodavnica %', idPos;
+      RETURN OLD;
+ELSIF (TG_OP = 'UPDATE') THEN
+      RAISE INFO 'update prodavnica %', idPos;
+      RETURN NEW;
+ELSIF (TG_OP = 'INSERT') THEN
 
-            RAISE INFO 'insert prodavnica %', idPos;
-            EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,idroba) VALUES($1,$2,$3)'
-              USING idpos, NEW.idvd, NEW.idroba;
+      RAISE INFO 'insert prodavnica %', idPos;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,brFaktP,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5,$6,$7)'
+              USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.idroba, NEW.kolicina, NEW.mpcsapp;
+      RAISE INFO 'sql: %', sql;
 
-            RAISE INFO 'sql: %', sql;
+      RETURN NEW;
+END IF;
 
+RETURN NULL; -- result is ignored since this is an AFTER trigger
 
-            RETURN NEW;
-        END IF;
-        RETURN NULL; -- result is ignored since this is an AFTER trigger
-    END;
+END;
 $$;
 
+
+---------------------------------------------------------------------------------------
+-- on kalk_doks update p15.pos_doks_knjig
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.on_kalk_doks_insert_update_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+    idPos varchar;
+    sql varchar;
+BEGIN
+
+
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
+   SELECT idprodmjes INTO idPos
+          from fmk.koncij where id=NEW.PKonto;
+ELSE
+   SELECT idprodmjes INTO idPos
+          from fmk.koncij where id=OLD.PKonto;
+END IF;
+
+
+IF (TG_OP = 'DELETE') THEN
+      RAISE INFO 'delete prodavnica %', idPos;
+      RETURN OLD;
+ELSIF (TG_OP = 'UPDATE') THEN
+      RAISE INFO 'update prodavnica %', idPos;
+      RETURN NEW;
+ELSIF (TG_OP = 'INSERT') THEN
+
+      RAISE INFO 'insert prodavnica %', idPos;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_doks_knjig(idpos,idvd,brdok,datum,brFaktP,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5)'
+              USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP;
+      RAISE INFO 'sql: %', sql;
+
+      RETURN NEW;
+END IF;
+
+RETURN NULL; -- result is ignored since this is an AFTER trigger
+
+END;
+$$;
 
 -- fmk.kalk_kalk -> p15.pos_pos
 CREATE TRIGGER pos_insert_upate_delete
@@ -429,5 +415,19 @@ CREATE TRIGGER pos_insert_upate_delete
 
 
 -- test
+-- insert into fmk.kalk_doks(idfirma, idvd, brdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'XX', 1, '13322', 'R01', 10,  2)
 -- insert into fmk.kalk_kalk(idfirma, idvd, brdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'XX', 1, '13322', 'R01', 10,  2)
 --- delete from fmk.kalk_kalk where brdok='XX';
+
+
+
+-- DO $$
+-- BEGIN
+--
+--   BEGIN
+--     ALTER TABLE p15.pos_pos_knjig ADD CONSTRAINT rbr NOT NULL;
+--   EXCEPTION
+--     WHEN duplicate_object THEN RAISE NOTICE 'Table constraint foo.bar already exists';
+--   END;
+--
+-- END $$;
