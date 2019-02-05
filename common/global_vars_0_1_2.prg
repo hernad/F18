@@ -22,8 +22,7 @@ PROCEDURE set_global_vars_0()
    PUBLIC GW_STATUS := "-"
    PUBLIC GW_HANDLE := 0
    PUBLIC gModul := ""
-   PUBLIC gSQL := "N"
-   PUBLIC gSQLLogBase := ""
+
    PUBLIC ZGwPoruka := ""
    PUBLIC GW_STATUS := "-"
    PUBLIC GW_HANDLE := 0
@@ -63,8 +62,6 @@ PROCEDURE set_global_vars_0()
    PUBLIC gKodnaS := "8"
    PUBLIC g50f := " "
    PUBLIC System := .F.
-   PUBLIC gSqlLogBase
-
 
    PUBLIC cBteksta
    PUBLIC cBokvira
@@ -230,10 +227,6 @@ FUNCTION set_global_vars_2()
    PUBLIC gSecurity := "D"
    PUBLIC gnDebug := 0
    PUBLIC gOpSist := "-"
-
-
-   gSql := "N"
-   gSqlLogBase := ""
 
    info_bar( "init", "set global_vars_2 - end" )
 

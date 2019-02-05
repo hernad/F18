@@ -161,13 +161,8 @@ FUNCTION barkod_or_roba_id( cId )
 
    gOcitBarKod := .F.
 
-   // SELECT roba
-
    IF !Empty( cId )
 
-      // SET ORDER TO TAG "BARKOD"
-      // GO TOP
-      // SEEK cId
       IF find_roba_by_barkod( cID )
          IF PadR( cId, 13 ) == field->barkod
             cId := field->id

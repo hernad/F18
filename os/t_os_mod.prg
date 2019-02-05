@@ -41,7 +41,6 @@ METHOD mMenu()
       SET EPOCH TO ( _tmp )
    ENDIF
 
-   PUBLIC gSQL := "N"
    PUBLIC gCentOn := fetch_metric( "os_set_century_on", NIL, "N" )
    // my_get_from_ini( "SET", "CenturyOn", "N", KUMPATH )
 

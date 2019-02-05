@@ -39,24 +39,6 @@ FUNCTION pos_main_menu_admin()
 RETURN .T.
 
 
-FUNCTION SetPM( nPosSetPM )
-
-   LOCAL nLen
-
-   IF gIdPos == "X "
-      gIdPos := gPrevIdPos
-   ELSE
-      gPrevIdPos := gIdPos
-      gIdPos := "X "
-   ENDIF
-   nLen := Len( opc[ nPosSetPM ] )
-   opc[ nPosSetPM ] := Left( opc[ nPosSetPM ], nLen - 2 ) + gIdPos
-   pos_status_traka()
-
-   RETURN .T.
-
-
-
 FUNCTION pos_admin_menu()
 
    PRIVATE opc := {}
@@ -68,20 +50,6 @@ FUNCTION pos_admin_menu()
 
    AAdd( opc, "R. setovanje brojača dokumenata" )
    AAdd( opcexe, {|| pos_set_param_broj_dokumenta() } )
-
-  // AAdd( opc, "X. briši nepostojeće dokumente" )
-  // AAdd( opcexe, {|| pos_brisi_nepostojece_dokumente() } )
-
-   IF ( g_cUserLevel < L_UPRAVN )
-
-      AAdd( opc, "---------------------------" )
-      AAdd( opcexe, nil )
-
-      AAdd( opc, "P. prodajno mjesto: " + gIdPos )
-      nPosSetPM := Len( opc )
-      AAdd( opcexe, {|| SetPm ( nPosSetPM ) } )
-
-   ENDIF
 
    f18_menu_sa_priv_vars_opc_opcexe_izbor( "aadm" )
 

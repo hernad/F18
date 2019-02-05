@@ -385,27 +385,10 @@ STATIC FUNCTION pos_racun_provjera_dupli_artikli()
    SELECT _pos_pripr
    nPrevRec := RecNo()
 
-   IF _idroba = PadR( "PLDUG", 7 ) .AND. reccount2() <> 0
-      RETURN .F.
-   ENDIF
-
    SET ORDER TO TAG "1"
-   SEEK PadR( "PLDUG", 7 )
+   HSEEK _IdRoba
 
    IF Found()
-      MsgBeep( 'PLDUG mora biti jedina stavka !' )
-      SET ORDER TO
-      GO ( nPrevRec )
-      RETURN .F.
-   ELSE
-      SET ORDER TO TAG "1"
-      HSEEK _IdRoba
-   ENDIF
-
-   IF Found()
-      IF _IdRoba = 'PLDUG'
-         MsgBeep( 'Pri plaćanju duga ne možete navoditi artikal' )
-      ENDIF
       IF gDupliArt == "N"
          MsgBeep ( "Na računu se već nalazi ista roba!#" + "U slucaju potrebe ispravite stavku računa!", 20 )
          lFlag := .F.
@@ -438,9 +421,6 @@ FUNCTION pos_ispravi_racun()
    s_oBrowse:autolite := .T.
    s_oBrowse:configure()
 
-   // cGetId := _idroba
-   // nGetKol := _Kolicina
-
    aConds := { {| nCh | Upper( Chr( nCh ) ) == "B" }, {| nCh | nCh == K_ENTER } }
    aProcs := { {|| pos_brisi_stavku_racuna() }, {|| pos_ispravi_stavku_racuna() } }
 
@@ -449,11 +429,6 @@ FUNCTION pos_ispravi_racun()
    s_oBrowse:autolite := .F.
    s_oBrowse:dehilite()
    s_oBrowse:stabilize()
-
-   // box_crno_na_zuto_end()
-
-   // _idroba := cGetId
-   // _kolicina := nGetKol
 
    pos_set_key_handler_ispravka_racuna()
 
@@ -486,14 +461,12 @@ FUNCTION pos_brisi_stavku_racuna()
 
    pos_osvjezi_ukupno( .F. )
 
-
    s_oBrowse:refreshAll()
    DO WHILE !s_oBrowse:stable
       s_oBrowse:Stabilize()
    ENDDO
 
    RETURN ( DE_REFRESH )
-
 
 
 FUNCTION pos_ispravi_stavku_racuna()
@@ -515,7 +488,6 @@ FUNCTION pos_ispravi_stavku_racuna()
 
    @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "    Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
       WHEN {|| _idroba := PadR( _idroba, Val( s_cRobaPosDuzinaSifre ) ), .T. } VALID valid_pos_racun_artikal( GetList, 1, 28 )
-
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "     Cijena:" GET _Cijena  PICTURE "99999.999" WHEN roba->tip == "T"
    @ box_x_koord() + 3, box_y_koord() + 3 SAY8 "   količina:" GET _Kolicina VALID pos_valid_kolicina ( _Kolicina )
 
@@ -536,7 +508,6 @@ FUNCTION pos_ispravi_stavku_racuna()
          ENDIF
 
          _idtarifa := roba->idtarifa
-         // _idodj := Space( 2 )
 
          s_nIznosRacuna += ( _cijena * _kolicina ) - _pos_pripr->cijena * _pos_pripr->kolicina
          s_nPopust += ( _ncijena * _kolicina )  - _pos_pripr->ncijena * _pos_pripr->kolicina
@@ -558,7 +529,6 @@ FUNCTION pos_ispravi_stavku_racuna()
    BoxC()
 
    pos_osvjezi_ukupno( .F. )
-
    s_oBrowse:refreshCurrent()
 
    DO WHILE !s_oBrowse:stable
@@ -578,7 +548,7 @@ FUNCTION GetReader2( oGet, GetList, oMenu, aMsg )
    IF ( GetPreValSC( oGet, aMsg ) )
       oGet:setFocus()
       DO WHILE ( oGet:exitState == GE_NOEXIT )
-         IF ( gOcitBarKod .AND. gEntBarCod == "D" )
+         IF gOcitBarKod  // ocitan barkod - send enter
             oGet:exitState := GE_ENTER
             EXIT
          ENDIF

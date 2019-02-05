@@ -35,8 +35,6 @@ CLASS TAppMod
    DATA cP5
    DATA cP6
    DATA cP7
-   DATA cSqlLogBase
-   DATA lSqlDirektno
    DATA lStarted
    DATA lTerminate
 
@@ -255,7 +253,6 @@ METHOD gParams()
    @ box_x_koord() + 10, box_y_koord() + 2 SAY "Shema boja za prikaz na ekranu 'V' (B1/B2/.../B7):" GET gShemaVF
    @ box_x_koord() + 12,  box_y_koord() + 2 SAY "Zaok 50f (5):" GET g50f    VALID g50f    $ " 5" PICT "9"
    // @ box_x_koord() + 14, box_y_koord() + 2 SAY "Omoguciti kolor-prikaz? (D/N)" GET gFKolor VALID gFKolor $ "DN" PICT "@!"
-   @ box_x_koord() + 15, box_y_koord()  + 2 SAY "SQL log ? (D/N)" GET gSql PICT "@!"
 
    //@ box_x_koord() + 18, box_y_koord() + 2 SAY "PDF stampa (N/D/X)?" GET gPDFPrint VALID {|| gPDFPrint $ "DNX" .AND. if( gPDFPrint $ "XD", pdf_box(), .T. ) } PICT "@!"
 
@@ -274,7 +271,6 @@ METHOD gParams()
       Wpar( "SK", gSKSif )
       Wpar( "DO", gcDirekt )
       // Wpar( "FK", gFKolor )
-      Wpar( "S9", gSQL )
       Wpar( "SB", gShemaVF )
       Wpar( "Ad", Trim( gArhDir ) )
       Wpar( "FO", Trim( gPFont ) )
@@ -410,14 +406,7 @@ STATIC FUNCTION _g_pdf_viewer( cViewer )
 METHOD setTGVars()
 
    info_bar( ::cName, ::cName + " set_tg_vars start " )
-   ::cSqlLogBase := my_get_from_ini( "Sql", "SqlLogBase", "c:" + SLASH + "sigma" )
-   gSqlLogBase := ::cSqlLogBase
 
-   IF my_get_from_ini( "Sql", "SqlDirektno", "D" ) == "D"
-      ::lSqlDirektno := .T.
-   ELSE
-      ::lSqlDirektno := .F.
-   ENDIF
 
    IF ( ::oDesktop != NIL )
       ::oDesktop := nil

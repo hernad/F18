@@ -27,8 +27,8 @@ docker run \
   -v $PWD/scripts:/scripts \
   -v $PWD/postgresql_data:/var/lib/postgresql \
   -p 5432:5432 \
-  sameersbn/postgresql:10
-
+  sameersbn/postgresql:10 \
+  -c logging_collector=on
 
 docker logs $PG_DOCKER_NAME
 

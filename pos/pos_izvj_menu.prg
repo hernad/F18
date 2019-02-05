@@ -38,10 +38,8 @@ FUNCTION pos_izvjestaji()
    AAdd( opc, "-------------------" )
    AAdd( opcexe, NIL )
 
-   IF gPVrsteP
-      AAdd( opc, "N. pregled prometa po vrstama plaćanja" )
-      AAdd( opcexe, {|| pos_pregled_prometa_po_vrstama_placanja() } )
-   ENDIF
+   AAdd( opc, "N. pregled prometa po vrstama plaćanja" )
+   AAdd( opcexe, {|| pos_pregled_prometa_po_vrstama_placanja() } )
 
    IF fiscal_opt_active()
       AAdd( opc, "F. fiskalni izvještaji i komande" )

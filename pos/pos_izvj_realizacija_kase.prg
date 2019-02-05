@@ -166,10 +166,6 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
    AAdd( aNiz, { "Vrijeme od", "cVrijOd",, "99:99", } )
    AAdd( aNiz, { "Vrijeme do", "cVrijDo", "cVrijDo>=cVrijOd", "99:99", } )
 
-   IF gPVrsteP
-      AAdd( aNiz, { "Izvrsiti azuriranje tabele prometa prodavnice (D/N)", "cAPrometa", "cAPrometa$'DN'", "@!", } )
-   ENDIF
-
    AAdd( aNiz, { "Dobavljac (prazno-svi)", "cSifraDob", ".t.",, } )
    AAdd( aNiz, { "Partner (prazno-svi)", "cPartId", ".t.",, } )
 

@@ -34,7 +34,7 @@ FUNCTION pos_katops_priprz()
    _val_inventura := "IP"
    _val_nivelacija := "19"
 
-   _destination := AllTrim( gKalkDest )
+   _destination :=  pos_kalk_prenos_dir()
 
    SET CURSOR ON
    o_pos_priprz()
@@ -81,6 +81,10 @@ FUNCTION pos_katops_priprz()
 
    RETURN { cIdTipDok, cBrDok }
 
+
+STATIC FUNCTION pos_kalk_prenos_dir()
+
+   RETURN my_home_root() + "pos_kalk"
 
 STATIC FUNCTION pos_get_idvd( cIdVd )
 
@@ -180,7 +184,7 @@ STATIC FUNCTION get_katops_file( cBrDok, cDestinacijaDir, cFile )
       cPrefixLocal := ""
    ENDIF
 
-   cDestinacijaDir := AllTrim( gKalkDest ) + cPrefixLocal
+   cDestinacijaDir := pos_kalk_prenos_dir() + cPrefixLocal
 
    brisi_stare_fajlove( cDestinacijaDir )
 
@@ -533,22 +537,16 @@ STATIC FUNCTION pos_kalk_create_topska_dbf( cIdPos, dDatOd, dDatDo, cIdTipDok, c
    LOCAL cFajlDestinacija := ""
    LOCAL _bytes := 0
 
-   // LOCAL cIdPos
 
    IF cPrefix != NIL
       cPrefixLocal := cPrefix
    ENDIF
 
-   IF Right( AllTrim( gKalkDest ), 1 ) <> SLASH
-      gKalkDest := AllTrim( gKalkDest ) + SLASH
-   ENDIF
+   direktorij_kreiraj_ako_ne_postoji( pos_kalk_prenos_dir() )
 
-   direktorij_kreiraj_ako_ne_postoji( AllTrim( gKalkDest ) )
-
-   // cIdPos := GetPm( cIdPos )
    cIdPos := AllTrim( cIdPos )
 
-   cExportDirektorij := AllTrim( gKalkDest ) + cIdPos + SLASH
+   cExportDirektorij := pos_kalk_prenos_dir() + SLASH + cIdPos + SLASH
 
    direktorij_kreiraj_ako_ne_postoji( AllTrim( cExportDirektorij ) )
 

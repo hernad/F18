@@ -486,7 +486,6 @@ FUNCTION font_width( nWidth )
 
 
 
-
 FUNCTION font_weight_bold()
 
    IF is_terminal()

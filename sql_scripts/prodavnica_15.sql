@@ -71,7 +71,9 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     -- funk numeric(3,0),
     -- fisc_st character(10),
     -- pos numeric(15,5),
-    ukupno numeric(15,5)
+    ukupno numeric(15,5),
+    brFaktP varchar(10),
+    opis varchar(100)
 );
 ALTER TABLE p15.pos_doks OWNER TO admin;
 
@@ -218,6 +220,31 @@ GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 -- pos_pos_knjig, pos_doks_knjig
 ----------------------------------------------------
 
+CREATE TABLE p15.pos_doks_knjig (
+   idpos character varying(2) NOT NULL,
+   idvd character varying(2) NOT NULL,
+   brdok character varying(6) NOT NULL,
+   datum date,
+   idPartner character varying(6),
+   idradnik character varying(4),
+   idvrstep character(2),
+   placen character(1),
+   vrijeme character varying(5),
+   brdokStorn character varying(8),
+   fisc_rn numeric(10,0),
+   ukupno numeric(15,5),
+   brFaktP varchar(10),
+   opis varchar(100)
+);
+ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
+CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
+CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum);
+CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, placen, datum);
+-- CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
+-- CREATE INDEX pos_doks_id5_knjig ON p15.pos_doks_knjig USING btree (prebacen);
+CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
+
+
 CREATE TABLE p15.pos_pos_knjig (
    idpos character varying(2),
    idvd character varying(2),
@@ -250,33 +277,6 @@ CREATE INDEX pos_pos_id5_knjig ON p15.pos_pos_knjig USING btree (idpos, idroba, 
 CREATE INDEX pos_pos_id6_knjig ON p15.pos_pos_knjig USING btree (idroba);
 GRANT ALL ON TABLE p15.pos_pos_knjig TO xtrole;
 
-CREATE TABLE p15.pos_doks_knjig (
-   idpos character varying(2) NOT NULL,
-   idvd character varying(2) NOT NULL,
-   brdok character varying(6) NOT NULL,
-   datum date,
-   idPartner character varying(6),
-   idradnik character varying(4),
-   idvrstep character(2),
-   -- m1 character varying(1),
-   placen character(1),
-   -- prebacen character(1),
-   -- smjena character varying(1),
-   vrijeme character varying(5),
-   brdokStorn character varying(8),
-   --c_2 character varying(10),
-   --c_3 character varying(50),
-   fisc_rn numeric(10,0),
-   -- rabat numeric(15,5),
-   ukupno numeric(15,5)
-);
-ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
-CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
-CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum);
-CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, placen, datum);
--- CREATE INDEX pos_doks_id4_knjig ON p15.pos_doks_knjig USING btree (idvd, m1);
--- CREATE INDEX pos_doks_id5_knjig ON p15.pos_doks_knjig USING btree (prebacen);
-CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
 
 
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS funk;
@@ -295,6 +295,8 @@ ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS idodj;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS rabat;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS prebacen;
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS brFaktP varchar(10);
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS opis varchar(100);
 
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto;
@@ -312,6 +314,9 @@ ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS idodj;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS smjena;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS rabat;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS prebacen;
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS brFaktP varchar(10);
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS opis varchar(100);
+
 
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos ALTER COLUMN brdok TYPE varchar(8);
@@ -371,6 +376,58 @@ ALTER TABLE p15.roba DROP COLUMN IF EXISTS strings;
 ALTER TABLE p15.roba DROP COLUMN IF EXISTS idkonto;
 
 
-
-
 DROP TABLE IF EXISTS p15.pos_dokspf;
+
+
+
+CREATE OR REPLACE FUNCTION public.on_kalk_kalk_insert_update_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+    idPos varchar;
+    sql varchar;
+BEGIN
+
+
+        IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
+           SELECT idprodmjes INTO idPos
+              from fmk.koncij where id=NEW.PKonto;
+        ELSE
+           SELECT idprodmjes INTO idPos
+              from fmk.koncij where id=OLD.PKonto;
+        END IF;
+
+
+        IF (TG_OP = 'DELETE') THEN
+            RAISE INFO 'delete prodavnica %', idPos;
+            RETURN OLD;
+        ELSIF (TG_OP = 'UPDATE') THEN
+            RAISE INFO 'update prodavnica %', idPos;
+            RETURN NEW;
+        ELSIF (TG_OP = 'INSERT') THEN
+
+            RAISE INFO 'insert prodavnica %', idPos;
+            EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,idroba) VALUES($1,$2,$3)'
+              USING idpos, NEW.idvd, NEW.idroba;
+
+            RAISE INFO 'sql: %', sql;
+
+
+            RETURN NEW;
+        END IF;
+        RETURN NULL; -- result is ignored since this is an AFTER trigger
+    END;
+$$;
+
+
+-- fmk.kalk_kalk -> p15.pos_pos
+CREATE TRIGGER pos_insert_upate_delete
+   AFTER INSERT OR DELETE OR UPDATE
+   ON fmk.kalk_kalk
+   FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_kalk_insert_update_delete();
+
+
+-- test
+-- insert into fmk.kalk_kalk(idfirma, idvd, brdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'XX', 1, '13322', 'R01', 10,  2)
+--- delete from fmk.kalk_kalk where brdok='XX';

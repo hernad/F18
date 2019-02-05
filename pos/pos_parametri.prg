@@ -51,12 +51,9 @@ FUNCTION pos_param_podaci_kase()
    PRIVATE aHistory := {}
    PRIVATE cSection := "1"
 
-   gKalkDest := PadR( gKalkDest, 500 )
-
    SET CURSOR ON
 
    AAdd( aNiz, { "Oznaka/ID prodajnog mjesta", "gIdPos",, "@!", } )
-   AAdd( aNiz, { "Destinacija datoteke TOPSKA", "gKALKDEST", , "@S40", } )
    AAdd( aNiz, { "Razmjena podataka, koristiti 'chk' direktorij D/N", "gUseChkDir", "gUseChkDir$'DN'", "@!", } )
    AAdd( aNiz, { "Lokalni port za stampu racuna", "gLocPort", , , } )
    AAdd( aNiz, { "Oznaka/ID gotovinskog placanja", "gGotPlac",, "@!", } )
@@ -68,7 +65,6 @@ FUNCTION pos_param_podaci_kase()
    IF LastKey() <> K_ESC
 
       set_metric( "IDPos", _user, gIdPos )
-      set_metric( "KalkDestinacija", _user, gKalkDest )
       set_metric( "KoristitiDirektorijProvjere", _user, gUseChkDir )
       set_metric( "OznakaLokalnogPorta", _user, gLocPort )
       set_metric( "OznakaGotovinskogPlacanja", nil, gGotPlac )
@@ -140,7 +136,6 @@ FUNCTION pos_param_principi_rada()
 FUNCTION pos_principi_rada_kase()
 
    LOCAL aNiz := {}
-   LOCAL cPrevPSS
    LOCAL cPom := ""
 
    PRIVATE _konstantni_unos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" )
@@ -150,13 +145,10 @@ FUNCTION pos_principi_rada_kase()
    PRIVATE _max_qtty := fetch_metric( "pos_maksimalna_kolicina_na_unosu", NIL, 0 )
    PRIVATE cIdPosOld := gIdPos
 
-   cPrevPSS := gPocStaSmjene
-
    SET CURSOR ON
 
    aNiz := {}
 
-   AAdd ( aNiz, { "Račun se zaključuje dikretno bez upita (D/N)", "gDirZaklj", "gDirZaklj$'DN'", "@!", } )
    AAdd ( aNiz, { "Dopustiti dupli unos artikala na računu (D/N)", "gDupliArt", "gDupliArt$'DN'", "@!", } )
    AAdd ( aNiz, { "Ako se dopusta dupli unos, da li se radnik upozorava(D/N)", "gDupliUpoz", "gDupliUpoz$'DN'", "@!", } )
    AAdd ( aNiz, { "Da li se prati stanje artikla na unosu (D/N/!)", "gPratiStanje", "gPratiStanje$'DN!'", "@!", } )
@@ -165,8 +157,6 @@ FUNCTION pos_principi_rada_kase()
       AAdd ( aNiz, { "Upravnik može ispravljati cijene", "gSifUpravn", "gSifUpravn$'DN'", "@!", } )
    ENDIF
 
-   AAdd ( aNiz, { "Ako je Bar Cod generisi <ENTER> ", "gEntBarCod", "gEntBarCod$'DN'", "@!", } )
-   AAdd ( aNiz, { "Pri ažuriranju pitati za nacin placanja (D/N)? ", "gUpitNP", "gUpitNP$'DN'", "@!", } )
    AAdd ( aNiz, { "Kod unosa računa uvijek pretraga art.po nazivu (D/N)? ", "gPosPretragaRobaUvijekPoNazivu", "gPosPretragaRobaUvijekPoNazivu$'DN'", "@!", } )
    AAdd ( aNiz, { "Maksimalna količina pri unosu racuna (0 - bez provjere) ", "_max_qtty", "_max_qtty >= 0", "999999", } )
    AAdd ( aNiz, { "Unos računa bez izlaska iz pripreme (D/N) ", "_konstantni_unos", "_konstantni_unos$'DN'", "@!", } )
@@ -177,26 +167,16 @@ FUNCTION pos_principi_rada_kase()
    IF LastKey() <> K_ESC
 
       MsgO( "Ažuriranje parametara" )
-
-    //  set_metric( "VodiOdjeljenja", nil, gVodiOdj )
-      set_metric( "DirektnoZakljucivanjeRacuna", nil, gDirZaklj )
       set_metric( "RacunSpecifOpcije", nil, gRnSpecOpc )
-      set_metric( "RadniRacuni", nil, gRadniRac )
       set_metric( "DupliArtikli", nil, gDupliArt )
       set_metric( "DupliUnosUpozorenje", nil, gDupliUpoz )
       set_metric( "PratiStanjeRobe", nil, gPratiStanje )
-      set_metric( "PratiPocetnoStanjeSmjene", nil, gPocStaSmjene )
       set_metric( "StampanjePazara", nil, gStamPazSmj )
       set_metric( "StampanjePunktova", nil, gStamStaPun )
-      //set_metric( "VoditiPoSmjenama", nil, gVsmjene )
       set_metric( "UpravnikIspravljaCijene", nil, gSifUpravn )
-      set_metric( "BarkodEnter", my_user(), gEntBarCod )
-      set_metric( "UpitZaNacinPlacanja", nil, gUpitNP )
       set_metric( "EvidentiranjeVrstaPlacanja", nil, gEvidPl )
       set_metric( "PretragaArtiklaPoNazivu", nil, gPosPretragaRobaUvijekPoNazivu )
 
-      //set_metric( "pos_stanje_sa_kalk_konta", my_user(), _kalk_konto )
-      //kalk_konto_za_stanje_pos( .T. )
       pos_kalk_konto_magacin( cKalkKontoMagacin )
 
       set_metric( "pos_maksimalna_kolicina_na_unosu", my_user(), _max_qtty )
@@ -209,15 +189,6 @@ FUNCTION pos_principi_rada_kase()
 
    RETURN .T.
 
-
-
-   // FUNCTION kalk_konto_za_stanje_pos( read_par )
-
-   // IF read_par != NIL
-   // __kalk_konto :=
-   // ENDIF
-
-   // RETURN __kalk_konto
 
    FUNCTION pos_kalk_konto_magacin( cSet )
 
@@ -249,7 +220,6 @@ FUNCTION pos_param_izgled_racuna()
    gOtvorStr := PadR( gOtvorStr, 30 )
    gZagIz := PadR( gZagIz, 20 )
 
-  // AAdd( aNiz, { "Stampa poreza pojedinacno (D-pojedinacno,N-zbirno)", "gPoreziRaster", "gPoreziRaster$'DN'", "@!", } )
    AAdd( aNiz, { "Broj redova potrebnih da se racun otcijepi", "nFeedLines", "nFeedLines>=0", "99", } )
    AAdd( aNiz, { "Sekvenca za cijepanje trake", "gSjeciStr", , "@S20", } )
    AAdd( aNiz, { "Sekvenca za otvaranje kase ", "gOtvorStr", , "@S20", } )
@@ -261,7 +231,6 @@ FUNCTION pos_param_izgled_racuna()
 
    IF LastKey() <> K_ESC
       MsgO( "Ažuriranje parametara" )
-      //set_metric( "PorezniRaster", nil, gPoreziRaster )
       set_metric( "BrojLinijaZaKrajRacuna", nil, nFeedLines )
       set_metric( "SekvencaSjeciTraku", nil, gSjeciStr )
       set_metric( "SekvencaOtvoriLadicu", nil, gOtvorStr )
@@ -290,7 +259,6 @@ FUNCTION pos_param_cijene()
 
    AAdd ( aNiz, { "Generalni popust % (99-gledaj sifranik)", "gPopust", , "99", } )
    AAdd ( aNiz, { "Zakružiti cijenu na (broj decimala)    ", "gPopDec", ,  "9", } )
-  // AAdd ( aNiz, { "Varijanta Planika/Apoteka decimala)    ", "gPopVar", "gPopVar$' PA'", , } )
    AAdd ( aNiz, { "Popust zadavanjem nove cijene          ", "gPopZCj", "gPopZCj$'DN'", , } )
    AAdd ( aNiz, { "Popust zadavanjem procenta             ", "gPopProc", "gPopProc$'DN'", , } )
    AAdd ( aNiz, { "Popust preko određenog iznosa (iznos):", "gPopIzn",, "999999.99", } )
@@ -303,7 +271,6 @@ FUNCTION pos_param_cijene()
       set_metric( "Popust", nil, gPopust )
       set_metric( "PopustZadavanjemCijene", nil, gPopZCj )
       set_metric( "PopustDecimale", nil, gPopDec )
-    //  set_metric( "PopustVarijanta", nil, gPopVar )
       set_metric( "PopustProcenat", nil, gPopProc )
       set_metric( "PopustIznos", nil, gPopIzn )
       set_metric( "PopustVrijednostProcenta", nil, gPopIznP )

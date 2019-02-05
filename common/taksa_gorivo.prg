@@ -13,15 +13,6 @@
 
 STATIC s_cId_taksa := "TAKGORI-M "
 
-
-STATIC FUNCTION is_modul_pos()
-   IF programski_modul() == "POS"
-      RETURN .T.
-   ELSE
-      RETURN .F.
-   ENDIF
-
-
 FUNCTION valid_taksa_gorivo( cError, nGorivoKolicina, nTaksaKolicina )
 
    LOCAL lRet := .T.
@@ -51,7 +42,6 @@ FUNCTION valid_taksa_gorivo( cError, nGorivoKolicina, nTaksaKolicina )
       IF field->idroba == s_cId_taksa
          nTaksaKolicina += field->kolicina
       ENDIF
-
       SKIP
 
    ENDDO
@@ -63,11 +53,10 @@ FUNCTION valid_taksa_gorivo( cError, nGorivoKolicina, nTaksaKolicina )
    IF nGorivoKolicina <> nTaksaKolicina
       lRet := .F.
       cError := "Količina goriva na računu je " + AllTrim( Str( nGorivoKolicina ) ) + "#Dok je unesena taksa TAKGORI-M " + ;
-               AllTrim( Str( nTaksaKolicina ) )
+         AllTrim( Str( nTaksaKolicina ) )
    ENDIF
 
    RETURN lRet
-
 
 
 STATIC FUNCTION artikal_je_gorivo( cIdRoba )
@@ -75,7 +64,7 @@ STATIC FUNCTION artikal_je_gorivo( cIdRoba )
    LOCAL lRet := .F.
    LOCAL cSql, oQuery
 
-   cSql := "SELECT k1 FROM " + F18_PSQL_SCHEMA_DOT + "roba WHERE id = " + sql_quote( cIdRoba )
+   cSql := "SELECT k1 FROM " + f18_sql_schema( "roba" ) + " WHERE id = " + sql_quote( cIdRoba )
    oQuery := run_sql_query( cSql )
 
    IF query_row( oQuery, "k1" ) == "GORI"
@@ -83,8 +72,6 @@ STATIC FUNCTION artikal_je_gorivo( cIdRoba )
    ENDIF
 
    RETURN lRet
-
-
 
 
 FUNCTION valid_dodaj_taksu_za_gorivo()
@@ -97,21 +84,21 @@ FUNCTION valid_dodaj_taksu_za_gorivo()
 
    IF !valid_taksa_gorivo( @cError, @nGorivoKolicina, @nTaksaKolicina )
 
-       MsgBeep( cError )
+      MsgBeep( cError )
 
-       nDodajTakse := nGorivoKolicina - nTaksaKolicina
+      nDodajTakse := nGorivoKolicina - nTaksaKolicina
 
-       IF nDodajTakse > 0
+      IF nDodajTakse > 0
 
-          IF Pitanje(, "Unijeti stavku TAKGORI-M " + AllTrim( Str( nDodajTakse ), 12, 2 ) + " na gorivo (D/N) ?", "D" ) == "D"
-             dodaj_taksu_za_gorivo( nDodajTakse )
-          ENDIF
+         IF Pitanje(, "Unijeti stavku TAKGORI-M " + AllTrim( Str( nDodajTakse ), 12, 2 ) + " na gorivo (D/N) ?", "D" ) == "D"
+            dodaj_taksu_za_gorivo( nDodajTakse )
+         ENDIF
 
-       ELSE
-          error_dodaj_stavku_takse_goriva()
-       ENDIF
+      ELSE
+         error_dodaj_stavku_takse_goriva()
+      ENDIF
 
-       lRet := .F.
+      lRet := .F.
 
    ENDIF
 
@@ -120,21 +107,22 @@ FUNCTION valid_dodaj_taksu_za_gorivo()
 
 
 STATIC FUNCTION error_dodaj_stavku_takse_goriva()
-   MsgBeep( "Pobrisati stavku TAKGORI-M iz pripreme pa ponoviti operciju ažuriranja !" )
-   RETURN .T.
 
+   MsgBeep( "Pobrisati stavku TAKGORI-M iz pripreme pa ponoviti operciju ažuriranja !" )
+
+   RETURN .T.
 
 
 FUNCTION dodaj_taksu_za_gorivo( nKolicina )
 
-   LOCAL nSelect := SELECT()
+   LOCAL nSelect := Select()
    LOCAL hRec, hPrviRec
    LOCAL lRet := .T.
 
    o_roba()
    HSEEK s_cId_taksa
 
-   IF !FOUND()
+   IF !Found()
       dodaj_sifru_takse_u_sifarnik_robe()
    ENDIF
 
@@ -162,27 +150,26 @@ STATIC FUNCTION dodaj_taksu_za_gorivo_na_pos_racun( nKolicina )
    APPEND BLANK
    hRec := dbf_get_rec()
 
-   hRec["idpos"] := hPrviRec["idpos"]
-   hRec["idvd"] := hPrviRec["idvd"]
-   hRec["brdok"] := hPrviRec["brdok"]
-   hRec["datum"] := hPrviRec["datum"]
-   hRec["sto"] := hPrviRec["sto"]
-   hRec["idradnik"] := hPrviRec["idradnik"]
-   hRec["idcijena"] := hPrviRec["idcijena"]
-   hRec["prebacen"] := hPrviRec["prebacen"]
-   hRec["mu_i"] := hPrviRec["mu_i"]
+   hRec[ "idpos" ] := hPrviRec[ "idpos" ]
+   hRec[ "idvd" ] := hPrviRec[ "idvd" ]
+   hRec[ "brdok" ] := hPrviRec[ "brdok" ]
+   hRec[ "datum" ] := hPrviRec[ "datum" ]
+   hRec[ "sto" ] := hPrviRec[ "sto" ]
+   hRec[ "idradnik" ] := hPrviRec[ "idradnik" ]
+   hRec[ "idcijena" ] := hPrviRec[ "idcijena" ]
+   hRec[ "prebacen" ] := hPrviRec[ "prebacen" ]
+   hRec[ "mu_i" ] := hPrviRec[ "mu_i" ]
 
-   hRec["idroba"] := s_cId_taksa
-   hRec["kolicina"] := nKolicina
-   hRec["cijena"] := roba->mpc
-   hRec["idtarifa"] := roba->idtarifa
-   hRec["robanaz"] := roba->naz
-   hRec["jmj"] := roba->jmj
+   hRec[ "idroba" ] := s_cId_taksa
+   hRec[ "kolicina" ] := nKolicina
+   hRec[ "cijena" ] := roba->mpc
+   hRec[ "idtarifa" ] := roba->idtarifa
+   hRec[ "robanaz" ] := roba->naz
+   hRec[ "jmj" ] := roba->jmj
 
    dbf_update_rec( hRec )
 
    RETURN .T.
-
 
 
 STATIC FUNCTION dodaj_taksu_za_gorivo_na_fakt_racun( nKolicina )
@@ -190,7 +177,6 @@ STATIC FUNCTION dodaj_taksu_za_gorivo_na_fakt_racun( nKolicina )
    MsgBeep( "Prema zakonu o naftnim derivatima potrebno je na svaki izdati litar goriva#dodati na račun i posebnu stavku TAKGORI-M za istu količinu !" )
 
    RETURN .T.
-
 
 
 STATIC FUNCTION dodaj_sifru_takse_u_sifarnik_robe()
@@ -206,12 +192,12 @@ STATIC FUNCTION dodaj_sifru_takse_u_sifarnik_robe()
 
    hRec := dbf_get_rec()
 
-   hRec["id"] := s_cId_taksa
-   hRec["fisc_plu"] := roba_max_fiskalni_plu() + 1
-   hRec["naz"] := "TAKSA M NAFTNI DERIVATI"
-   hRec["jmj"] := "KOM"
-   hRec["idtarifa"] := PadR( "PDVM0", 6 )
-   hRec["mpc"] := 0.01
+   hRec[ "id" ] := s_cId_taksa
+   hRec[ "fisc_plu" ] := roba_max_fiskalni_plu() + 1
+   hRec[ "naz" ] := "TAKSA M NAFTNI DERIVATI"
+   hRec[ "jmj" ] := "KOM"
+   hRec[ "idtarifa" ] := PadR( "PDVM0", 6 )
+   hRec[ "mpc" ] := 0.01
 
    lOk := update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
 
@@ -229,7 +215,7 @@ STATIC FUNCTION dodaj_sifru_takse_u_tarife()
 
    LOCAL lOk := .T.
    LOCAL hRec
-   LOCAL cTarifa := PADR( "PDVM0", 6 )
+   LOCAL cTarifa := PadR( "PDVM0", 6 )
 
    IF table_count( F18_PSQL_SCHEMA_DOT + "tarifa", "id = " + sql_quote( cTarifa ) ) > 0
       RETURN lOk
@@ -239,14 +225,14 @@ STATIC FUNCTION dodaj_sifru_takse_u_tarife()
 
    APPEND BLANK
    hRec := dbf_get_rec()
-   hRec["id"] := cTarifa
-   hRec["naz"] := "PDV 0 %"
-   hRec["opp"] := 0
-   hRec["ppp"] := 0
-   hRec["zpp"] := 0
-   hRec["vpp"] := 0
-   hRec["mpp"] := 0
-   hRec["dlruc"] := 0
+   hRec[ "id" ] := cTarifa
+   hRec[ "naz" ] := "PDV 0 %"
+   hRec[ "opp" ] := 0
+   hRec[ "ppp" ] := 0
+   hRec[ "zpp" ] := 0
+   hRec[ "vpp" ] := 0
+   hRec[ "mpp" ] := 0
+   hRec[ "dlruc" ] := 0
 
    lOk := update_rec_server_and_dbf( "tarifa", hRec, 1, "FULL" )
 
@@ -255,3 +241,12 @@ STATIC FUNCTION dodaj_sifru_takse_u_tarife()
    ENDIF
 
    RETURN lOk
+
+
+STATIC FUNCTION is_modul_pos()
+
+   IF programski_modul() == "POS"
+      RETURN .T.
+   ELSE
+      RETURN .F.
+   ENDIF

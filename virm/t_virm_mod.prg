@@ -33,10 +33,7 @@ METHOD mMenu()
    PRIVATE Izbor
    PRIVATE lPodBugom
 
-   PUBLIC gSQL := "N"
-
    Izbor := 1
-
 
    ::programski_modul_osnovni_meni()
 
