@@ -8822,7 +8822,7 @@ CREATE INDEX pos_doks_id2 ON fmk.pos_doks USING btree (idvd, datum, smjena);
 -- Name: pos_doks_id3; Type: INDEX; Schema: fmk; Owner: admin
 --
 
-CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idPartner, placen, datum);
+CREATE INDEX pos_doks_id3 ON fmk.pos_doks USING btree (idPartner, datum);
 
 
 --

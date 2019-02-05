@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     idPartner character varying(6),
     idradnik character varying(4),
     idvrstep character(2),
-    placen character(1),
     vrijeme character varying(5),
     brdokStorn character varying(8),
     fisc_rn numeric(10,0),
@@ -166,7 +165,6 @@ CREATE TABLE p15.pos_doks_knjig (
    idPartner character varying(6),
    idradnik character varying(4),
    idvrstep character(2),
-   placen character(1),
    vrijeme character varying(5),
    brdokStorn character varying(8),
    fisc_rn numeric(10,0),
@@ -177,7 +175,7 @@ CREATE TABLE p15.pos_doks_knjig (
 ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
 CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
 CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum);
-CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, placen, datum);
+CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, datum);
 CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
 
 GRANT ALL ON TABLE p15.pos_doks_knjig TO xtrole;
@@ -224,6 +222,7 @@ ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS rabat;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS brFaktP varchar(10);
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS opis varchar(100);
+ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS placen;
 
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS sto;
@@ -243,6 +242,7 @@ ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS rabat;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS brFaktP varchar(10);
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS opis varchar(100);
+ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS placen;
 
 
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;

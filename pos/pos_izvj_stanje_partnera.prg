@@ -22,7 +22,6 @@ FUNCTION pos_rpt_stanje_partnera()
    PRIVATE dDatOd := danasnji_datum() - 30
    PRIVATE cSpec := "D"
    PRIVATE cVrstP := Space( 2 )
-   PRIVATE cGotZir := Space( 1 )
    PRIVATE cSifraDob := Space( 8 )
 
    DO WHILE .T.
@@ -31,7 +30,6 @@ FUNCTION pos_rpt_stanje_partnera()
             { "Prikaz partnera sa stanjem 0 (D/N)", "cNula", "cNula$'DN'", "@!", }, ;
             { "Prikazati stanje od dana ", "dDatOd", ".t.",, }, ;
             { "Prikazati stanje do dana ", "dDat", ".t.",, }, ;
-            { "Prikaz G/Z/sve ", "cGotZir", "cGotZir$'GZ '", "@!", }, ;
             { "Vrsta plaćanja (prazno-sve) ", "cVrstP", ".t.",, }, ;
             { "Dobavljač ", "cSifraDob", ".t.",, }, ;
             { "Prikazati specifikaciju", "cSpec", "cSpec$'DN'", "@!", } }, 8, 5, 19, 74, 'USLOVI ZA IZVJESTAJ "STANJE PARTNERA"', "B1" )
@@ -81,22 +79,6 @@ FUNCTION pos_rpt_stanje_partnera()
       IF Empty( pos_doks->idPartner )
          SKIP
          LOOP
-      ENDIF
-
-      // G-gotovina Z-ziral
-      IF !Empty( cGotZir )
-         DO CASE
-         CASE cGotZir == "G"
-            IF pos_doks->placen <> " "
-               SKIP
-               LOOP
-            ENDIF
-         CASE cGotZir == "Z"
-            IF pos_doks->placen <> cGotZir
-               SKIP
-               LOOP
-            ENDIF
-         ENDCASE
       ENDIF
 
       nPrviRec := RecNo()

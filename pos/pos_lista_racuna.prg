@@ -85,7 +85,6 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
    AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
    AAdd( ImeKol, { "Vrijeme", {|| field->vrijeme } } )
-   AAdd( ImeKol, { _u("Plaćen"),   {|| iif ( field->Placen == PLAC_NIJE, "  NE", "  DA" ) } } )
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( kol, i )

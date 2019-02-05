@@ -124,7 +124,7 @@ kljuc:
   idradnik character varying(4),
   idvrstep character(2),
   -- m1 character varying(1),
-  placen character(1),
+--  placen character(1),
   prebacen character(1),
 --  smjena character varying(1),
   sto character varying(3),
@@ -173,7 +173,7 @@ CREATE INDEX pos_doks_id1
 CREATE INDEX pos_doks_id3
   ON fmk.pos_doks
   USING btree
-  (idPartner COLLATE pg_catalog."default", placen COLLATE pg_catalog."default", datum);
+--  (idPartner COLLATE pg_catalog."default", placen COLLATE pg_catalog."default", datum);
 
 -- Index: fmk.pos_doks_id4
 
@@ -481,9 +481,7 @@ FUNCTION h_pos_doks_indexes()
 
    hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok"
    hIndexes[ "2" ] := "IdVd+DTOS(Datum)"
-   hIndexes[ "3" ] := "idPartner+Placen+DTOS(Datum)"
-   // hIndexes[ "4" ] := "IdVd+M1"
-   // hIndexes[ "5" ] := "Prebacen"
+   hIndexes[ "3" ] := "idPartner+DTOS(Datum)"
    hIndexes[ "6" ] := "dtos(datum)"
    hIndexes[ "7" ] := "IdPos+IdVD+BrDok"
    hIndexes[ "TK" ] := "IdPos+DTOS(Datum)+IdVd"

@@ -125,8 +125,6 @@ METHOD set_module_gvars()
    PUBLIC gGotPlac         // sifra za gotovinsko (default) placanje
    PUBLIC gDugPlac
 
-   // ( K-kasa S-server A-samostalna kasa)
-   PUBLIC gEvidPl          // evidentiranje podataka za vrste placanja CEK, SIND.KRED. i GARANTNO PISMO
 
    PUBLIC gDisplay  // koristiti ispis na COM DISPLAY
 
@@ -144,7 +142,6 @@ METHOD set_module_gvars()
    PUBLIC gSifUpravn := "D"
    PUBLIC gPosPretragaRobaUvijekPoNazivu := "N" // sifra uvijek po nazivu
 
-   PUBLIC gPosNaz
    PUBLIC gRnHeder := "RacHeder.TXT"
    PUBLIC gRnFuter := "RacPodn.TXT "
    PUBLIC gZagIz := "1;2;"
@@ -184,7 +181,6 @@ METHOD set_module_gvars()
    PUBLIC gStamPazSmj := "D"
    PUBLIC gStamStaPun := "D"
    PUBLIC CRinitDone := .T.
-   PUBLIC gEvidPl := "N"
    PUBLIC gGotPlac := "01"
    PUBLIC gDugPlac := "DP"
    PUBLIC gSifPath := my_home()
@@ -235,7 +231,6 @@ METHOD set_module_gvars()
    gSezonaTip := fetch_metric( "TipSezone", NIL, gSezonaTip )
    gSifUpravn := fetch_metric( "UpravnikIspravljaCijene", NIL, gSifUpravn )
    gDisplay := fetch_metric( "DisplejOpcije", NIL, gDisplay )
-   gEvidPl := fetch_metric( "EvidentiranjeVrstaPlacanja", NIL, gEvidPl )
    gPosPretragaRobaUvijekPoNazivu := fetch_metric( "PretragaArtiklaPoNazivu", NIL, gPosPretragaRobaUvijekPoNazivu )
    gDiskFree := fetch_metric( "SlobodniProstorDiska", NIL, gDiskFree )
 
@@ -273,26 +268,11 @@ METHOD set_module_gvars()
 
    gSamoProdaja := fetch_metric( "SamoProdaja", NIL, gSamoProdaja )
 
-   PUBLIC gPosSirovine
-   PUBLIC gPosKalk
-
-   PUBLIC gSQLSynchro
-   PUBLIC gPosModem
 
    PUBLIC glRetroakt := .F.
 
-   gPosSirovine := "D"
-   gPosKalk := "D"
-   gSQLSynchro := "D"
-   gPosModem := "D"
-
    PUBLIC glPorezNaSvakuStavku := .F.
 
-   IF select_o_pos_kase( gIdPos )
-      gPosNaz := AllTrim( KASE->Naz )
-   ELSE
-      gPosNaz := "SERVER"
-   ENDIF
    CLOSE ALL
 
    SetNazDVal() // set valuta

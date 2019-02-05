@@ -13,7 +13,7 @@
 
 STATIC s_oPDF
 
-MEMVAR lTekuci, cPrikazPazarRoba, cIdRadnik, cVrsteP, cFilterVrstePlacanja, cIdPos, dDatOd, dDatDo
+MEMVAR gIdRadnik, lTekuci, cPrikazPazarRoba, cIdRadnik, cVrsteP, cFilterVrstePlacanja, cIdPos, dDatOd, dDatDo
 
 FUNCTION pos_realizacija_radnik
    PARAMETERS lTekuci, cPrikazPazarRoba
@@ -30,7 +30,6 @@ FUNCTION pos_realizacija_radnik
 
    PRIVATE dDatOd := danasnji_datum()
    PRIVATE dDatDo := danasnji_datum()
-   PRIVATE cGotZir := " "
 
    cPrikazPazarRoba := iif ( cPrikazPazarRoba == NIL, "P", cPrikazPazarRoba )
 
@@ -115,7 +114,6 @@ FUNCTION pos_realizacija_radnik
    ENDIF
 
    IF lTekuci
-      ? PadC ( gPosNaz )
       ? gIdRadnik, "-", AllTrim ( find_pos_osob_naziv( gIdRadnik ) ),  "   NA DAN: " + FormDat1 ( danasnji_datum() )
       ?
    ELSE

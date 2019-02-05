@@ -16,7 +16,7 @@ STATIC LEN_RAZMAK := 1
 STATIC PIC_UKUPNO := "9999999.99"
 STATIC s_oPDF
 
-MEMVAR dDatum0, dDatum1
+MEMVAR gIdPos, dDatum0, dDatum1
 
 FUNCTION realizacija_kase
 
@@ -31,7 +31,6 @@ FUNCTION realizacija_kase
    PRIVATE cIdPos := gIdPos
    PRIVATE cRD
 
-   // PRIVATE cIdDio := gIdDio
    PRIVATE aNiz
    PRIVATE aUsl1 := {}
    PRIVATE aUsl2 := {}
@@ -56,9 +55,9 @@ FUNCTION realizacija_kase
    cAPrometa := "N"
    cVrijOd := "00:00"
    cVrijDo := "23:59"
-   cGotZir := " "
 
-   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @aUsl1, @aUsl2, @cVrsteP, @cAPrometa, @cGotZir, @cSifraDob, @cPartId ) == 0
+
+   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @aUsl1, @aUsl2, @cVrsteP, @cAPrometa, @cSifraDob, @cPartId ) == 0
       RETURN 0
    ENDIF
 
@@ -73,7 +72,7 @@ FUNCTION realizacija_kase
    ENDIF
 
 
-   bZagl := {|| pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP, cGotZir ) }
+   bZagl := {|| pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP ) }
 
    Eval( bZagl )
 
@@ -82,7 +81,7 @@ FUNCTION realizacija_kase
 
    SELECT pos_doks
 
-   pos_set_filter_pos_doks( @cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cGotZir, cPartId )
+   pos_set_filter_pos_doks( @cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cPartId )
 
 
    pos_kasa_pripremi_pom_za_izvjestaj( "01", cSifraDob )
@@ -120,7 +119,7 @@ FUNCTION realizacija_kase
    RETURN .T.
 
 
-STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, aUsl1, aUsl2, cVrsteP, cAPrometa, cGotZir, cSifraDob, cPartId )
+STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, aUsl1, aUsl2, cVrsteP, cAPrometa, cSifraDob, cPartId )
 
    LOCAL aNiz
 
@@ -129,24 +128,21 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
 
    AAdd( aNiz, { "Prod. mjesto (prazno-sve)", "cIdPos", "cidpos='X'.or.EMPTY(cIdPos) .or. p_pos_kase(@cIdPos)", "@!", } )
    AAdd( aNiz, { "Radnici (prazno-svi)", "cRadnici",, "@!S30", } )
-   AAdd( aNiz, { "Vrste placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
+   AAdd( aNiz, { "Vrste plaćanja (prazno-sve)", "cVrsteP",, "@!S30", } )
 
-   AAdd( aNiz, { "Izvjestaj se pravi od datuma", "dDatum0",,, } )
+   AAdd( aNiz, { "Izvještaj se pravi od datuma", "dDatum0",,, } )
    AAdd( aNiz, { "                   do datuma", "dDatum1",,, } )
 
    fPrik := "O"
    AAdd( aNiz, { "Prikazati Pazar/Robe/Oboje (P/R/O)?", "fPrik", "fPrik$'PRO'", "@!", } )
    cRD := "R"
 
-
    AAdd( aNiz, { "Po Radnicima/Odjeljenjima/oBoje (R/O/B)?", "cRD", "cRD$'ROB'", "@!", } )
-
-
-   AAdd( aNiz, { "Prikazati pregled po vrstama placanja ?", "cPVrstePl", "cPVrstePl$'DN'", "@!", } )
+   AAdd( aNiz, { "Prikazati pregled po vrstama plaćanja ?", "cPVrstePl", "cPVrstePl$'DN'", "@!", } )
    AAdd( aNiz, { "Vrijeme od", "cVrijOd",, "99:99", } )
    AAdd( aNiz, { "Vrijeme do", "cVrijDo", "cVrijDo>=cVrijOd", "99:99", } )
 
-   AAdd( aNiz, { "Dobavljac (prazno-svi)", "cSifraDob", ".t.",, } )
+   AAdd( aNiz, { "Dobavljač (prazno-svi)", "cSifraDob", ".t.",, } )
    AAdd( aNiz, { "Partner (prazno-svi)", "cPartId", ".t.",, } )
 
    DO WHILE .T.
@@ -173,7 +169,7 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
    RETURN 1
 
 
-STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP, cGotZir )
+STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP )
 
    IF Empty( cIdPos )
       ? "PRODAJNO MJESTO: SVA"
@@ -194,19 +190,12 @@ STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrste
       ?U "VR.PLAĆANJA: " + RTrim( cVrsteP )
    ENDIF
 
-   IF Empty( cGotZir )
-      ? "PLACANJE: gotovinsko i ziralno"
-   ELSE
-      ?U "PLAĆANJE: " + IF( cGotZir <> "Z", "gotovinsko", "ziralno" )
-   ENDIF
-
-
    ? "PERIOD     : " + FormDat1( dDatum0 ) + " - " + FormDat1( dDatum1 )
 
    RETURN .T.
 
 
-STATIC FUNCTION pos_set_filter_pos_doks( cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cGotZir, cPartId )
+STATIC FUNCTION pos_set_filter_pos_doks( cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cPartId )
 
    SELECT pos_doks
    SET ORDER TO TAG "2"  // "2" - "IdVd+DTOS (Datum)"
@@ -223,13 +212,6 @@ STATIC FUNCTION pos_set_filter_pos_doks( cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo
       cFilter += ".and. Vrijeme>='" + cVrijOd + "'.and. Vrijeme<='" + cVrijDo + "'"
    ENDIF
 
-   IF !Empty( cGotZir )
-      IF cGotZir == "Z"
-         cFilter += ".and. placen=='Z'"
-      ELSE
-         cFilter += ".and. placen<>'Z'"
-      ENDIF
-   ENDIF
 
    IF !Empty( cPartId )
       cFilter += ".and. idPartner==" + dbf_quote( cPartId )

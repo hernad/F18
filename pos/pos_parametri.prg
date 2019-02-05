@@ -174,7 +174,6 @@ FUNCTION pos_principi_rada_kase()
       set_metric( "StampanjePazara", nil, gStamPazSmj )
       set_metric( "StampanjePunktova", nil, gStamStaPun )
       set_metric( "UpravnikIspravljaCijene", nil, gSifUpravn )
-      set_metric( "EvidentiranjeVrstaPlacanja", nil, gEvidPl )
       set_metric( "PretragaArtiklaPoNazivu", nil, gPosPretragaRobaUvijekPoNazivu )
 
       pos_kalk_konto_magacin( cKalkKontoMagacin )

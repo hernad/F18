@@ -577,10 +577,6 @@
 #define ZAD_OTPIS    "1"
 
 
-// flagovi da li je racun placen
-#define PLAC_NIJE    "1"
-#define PLAC_JEST    "0"
-
 // ako ima potrebe, brojeve zaokruzujemo na
 #define N_ROUNDTO    2
 //#define I_ID         1

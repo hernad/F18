@@ -40,17 +40,12 @@ FUNCTION pos_kumulativ_prometa()
 
    cPom := Left( VRSTEP->Naz, 23 )
 
-   ? cLM + "Vrsta placanja:", cPom
+   ?U cLM + "Vrsta plaćanja:", cPom
    select_o_partner( pos_doks->idPartner )
 
    cPom := Left( partn->Naz, 23 )
-   ? cLM + "Gost / partner:", cPom
+   ? cLM + "Partner:", cPom
 
-   IF pos_doks->Placen == PLAC_JEST .OR. pos_doks->IdVrsteP == gGotPlac
-      ? cLM + "       Placeno:", "DA"
-   ELSE
-      ? cLM + "       Placeno:", "NE"
-   ENDIF
 
    seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
 
