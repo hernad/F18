@@ -35,9 +35,10 @@ METHOD mMenu()
 
    Fx := 4
    Fy := 8
-   
+
    pos_init()
    CLOSE ALL
+   pos_check_brdok()
 
    DO WHILE ( .T. )
       box_x_koord( Fx )

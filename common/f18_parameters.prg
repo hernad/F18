@@ -268,8 +268,14 @@ FUNCTION f18_use_module( cModuleName )
    LOCAL _ret := .F.
    LOCAL _default := "N"
 
-   IF get_f18_param("run") == cModuleName
-      RETURN .T.
+   LOCAL cModulRun := get_f18_param("run")
+
+   IF cModulRun != "<undefined>"
+      IF cModuleName == cModulRun
+          RETURN .T.
+      ELSE
+          RETURN .F.
+      ENDIF
    ENDIF
 
    IF cModuleName == "tops" .OR. cModuleName == "pos"

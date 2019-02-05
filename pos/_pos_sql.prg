@@ -501,15 +501,11 @@ FUNCTION pos_stanje_artikla( cIdPos, cIdRoba )
 
    IF !Empty( pos_kalk_konto_magacin() )
 
-      // IF !Empty( AllTrim( __kalk_konto ) )
-      // IF PadR( __kalk_konto, 3 ) == "132"
       RETURN kalk_kol_stanje_artikla_magacin( cKalkKontoMagacin, cIdRoba, Date() )
-      // ELSE
-      // nStanjeRobe := kalk_kol_stanje_artikla_prodavnica( PadR( __kalk_konto, 7 ), field->idroba, Date() )
-      // ENDIF
+
    ENDIF
 
-   cQuery := "SELECT SUM( CASE WHEN idvd IN ('16') THEN kolicina WHEN idvd IN ('42') THEN -kolicina WHEN idvd IN ('IN') THEN -(kolicina - kol2) ELSE 0 END ) AS stanje FROM " + F18_PSQL_SCHEMA_DOT + "pos_pos " + ;
+   cQuery := "SELECT SUM( CASE WHEN idvd IN ('00','11','80','81') THEN kolicina WHEN idvd IN ('42') THEN -kolicina WHEN idvd IN ('IN') THEN -(kolicina - kol2) ELSE 0 END ) AS stanje FROM " + f18_sql_schema("pos_pos") + " " + ;
       " WHERE idpos = " + sql_quote( cIdPos ) + ;
       " AND idroba = " + sql_quote( cIdRoba )
 
@@ -692,7 +688,7 @@ FUNCTION use_sql_pos_strad( cId )
 FUNCTION find_pos_osob_by_naz( cNaz )
 
    LOCAL cTable := "pos_osob", cAlias := "OSOB"
-   LOCAL cSqlQuery := "select * from fmk." + cTable
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
 
    cSqlQuery += " WHERE naz=" + sql_quote( cNaz )
    SELECT ( F_OSOB )
@@ -705,7 +701,7 @@ FUNCTION find_pos_osob_by_naz( cNaz )
 FUNCTION find_pos_osob_by_korsif( cKorSif )
 
    LOCAL cTable := "pos_osob", cAlias := "OSOB"
-   LOCAL cSqlQuery := "select * from fmk." + cTable
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
 
    cSqlQuery += " WHERE korsif=" + sql_quote( cKorSif )
    SELECT ( F_OSOB )
@@ -888,7 +884,7 @@ FUNCTION seek_pos_promvp( dDatDok )
    LOCAL lWhere := .F.
    LOCAL cTag := "1"
 
-   cSql := "SELECT * from " + F18_PSQL_SCHEMA_DOT + cTable
+   cSql := "SELECT * from " + f18_sql_schema( cTable )
 
    IF dDatDok != NIL .AND. !Empty( dDatDok )
       IF lWhere
@@ -925,104 +921,3 @@ FUNCTION h_pos_promvp_indexes()
    hIndexes[ "1" ] := "DATUM"
 
    RETURN hIndexes
-
-/*
-FUNCTION seek_pos_dokspf_by_naz( cKupac )
-
-   // cFilter := Parsiraj( Lower( cKupac ), "lower(knaz)" )
-   // SET FILTER TO &cFilter
-   // SET ORDER TO TAG "2"
-   // GO TOP
-
-   RETURN seek_pos_dokspf( NIL, NIL, NIL, NIL, cKupac )
-
-
-FUNCTION seek_pos_dokspf( cIdPos, cIdVd, cBrDok, dDatum, cKupac )
-
-   LOCAL cSql
-   LOCAL cTable := "pos_dokspf", cAlias := "DOKSPF"
-   LOCAL hIndexes, cKey
-   LOCAL lWhere := .F.
-   LOCAL cTag := "1"
-
-   cSql := "SELECT * from " + F18_PSQL_SCHEMA_DOT + cTable
-
-   IF cKupac != NIL
-      cTag := "2"
-   ENDIF
-
-   IF cIdPos != NIL .AND. !Empty( cIdPos )
-      IF lWhere
-         cSql += " AND "
-      ELSE
-         cSql += " WHERE "
-         lWhere := .T.
-      ENDIF
-      cSql += "idpos=" + sql_quote( cIdPos )
-   ENDIF
-
-   IF cIdVD != NIL .AND. !Empty( cIdVD )
-      IF lWhere
-         cSql += " AND "
-      ELSE
-         cSql += " WHERE "
-         lWhere := .T.
-      ENDIF
-      cSql += "idvd=" + sql_quote( cIdVd )
-   ENDIF
-
-   IF cBrDok != NIL .AND. !Empty( cBrDok )
-      IF lWhere
-         cSql += " AND "
-      ELSE
-         cSql += " WHERE "
-         lWhere := .T.
-      ENDIF
-      cSql += "brdok=" + sql_quote( cBrDok )
-   ENDIF
-
-   IF dDatum != NIL .AND. !Empty( dDatum )
-      IF lWhere
-         cSql += " AND "
-      ELSE
-         cSql += " WHERE "
-         lWhere := .T.
-      ENDIF
-      cSql += "datum=" + sql_quote( dDatum )
-   ENDIF
-
-   IF cKupac != NIL .AND. !Empty( cKupac )
-      IF lWhere
-         cSql += " AND "
-      ELSE
-         cSql += " WHERE "
-         lWhere := .T.
-      ENDIF
-      cSql += "knaz like " + sql_quote( Lower( Trim( cKupac ) ) + "%" )
-   ENDIF
-
-   SELECT F_DOKSPF
-   use_sql( cTable, cSql, cAlias )
-
-   hIndexes := h_pos_dokspf_indexes()
-
-   FOR EACH cKey IN hIndexes:Keys
-      INDEX ON  &( hIndexes[ cKey ] )  TAG ( cKey ) TO ( cAlias )
-   NEXT
-
-
-   SET ORDER TO TAG ( cTag )
-   GO TOP
-
-   RETURN !Eof()
-
-
-FUNCTION h_pos_dokspf_indexes()
-
-   LOCAL hIndexes := hb_Hash()
-
-   hIndexes[ "1" ] := "idpos+idvd+DToS(datum)+brdok"
-   hIndexes[ "2" ] := "knaz"
-
-   RETURN hIndexes
-*/

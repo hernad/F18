@@ -437,6 +437,91 @@ CREATE TRIGGER pos_doks_insert_update_delete
 -- select * from p15.pos_pos_knjig;
 
 
+----------- TRIGERI na strani prodavnice ! -----------------------------------------------------
+
+-- on p15.pos_doks_knjig -> p15.pos_doks
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION p15.on_pos_doks_knjig_insert_update_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+    idPos varchar := '15';
+    sql varchar;
+BEGIN
+
+IF (TG_OP = 'DELETE') THEN
+      RAISE INFO 'delete pos_doks_knjig prodavnica %', idPos;
+      EXECUTE 'DELETE FROM p' || idPos || '.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+         USING idpos, OLD.idvd, OLD.brdok, OLD.datum;
+      RETURN OLD;
+ELSIF (TG_OP = 'UPDATE') THEN
+      RAISE INFO 'update pos_doks_knjig prodavnica!? %', idPos;
+      RETURN NEW;
+ELSIF (TG_OP = 'INSERT') THEN
+      RAISE INFO 'insert pos_doks_knjig prodavnica %', idPos;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_doks(idpos,idvd,brdok,datum,brFaktP) VALUES($1,$2,$3,$4,$5)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP;
+      RAISE INFO 'sql: %', sql;
+      RETURN NEW;
+END IF;
+
+RETURN NULL; -- result is ignored since this is an AFTER trigger
+
+END;
+$$;
+
+---------------------------------------------------------------------------------------
+-- TRIGER na strani prodavnice !
+-- on p15.pos_pos_knjig -> p15.pos_pos
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_insert_update_delete() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+    idPos varchar := '15';
+    sql varchar;
+BEGIN
+
+IF (TG_OP = 'DELETE') THEN
+      RAISE INFO 'delete pos_pos_knjig prodavnica %', idPos;
+      EXECUTE 'DELETE FROM p' || idPos || '.pos_pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+         USING idpos, OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
+      RETURN OLD;
+ELSIF (TG_OP = 'UPDATE') THEN
+      RAISE INFO 'update pos_pos_knjig prodavnica!? %', idPos;
+      RETURN NEW;
+ELSIF (TG_OP = 'INSERT') THEN
+      RAISE INFO 'insert pos_pos_knjig prodavnica %', idPos;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.kolicina, NEW.cijena;
+      RAISE INFO 'sql: %', sql;
+      RETURN NEW;
+END IF;
+
+RETURN NULL; -- result is ignored since this is an AFTER trigger
+
+END;
+$$;
+
+
+-- p15.pos_doks_knjig -> p15.pos_doks
+DROP TRIGGER IF EXISTS pos_doks_knjig_insert_update_delete on p15.pos_doks_knjig;
+CREATE TRIGGER pos_doks_knjig_insert_update_delete
+      AFTER INSERT OR DELETE OR UPDATE
+      ON p15.pos_doks_knjig
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_doks_knjig_insert_update_delete();
+
+-- p15.pos_pos_knjig -> p15.pos_pos
+DROP TRIGGER IF EXISTS pos_pos_knjig_insert_update_delete on p15.pos_pos_knjig;
+CREATE TRIGGER pos_pos_knjig_insert_update_delete
+   AFTER INSERT OR DELETE OR UPDATE
+   ON p15.pos_pos_knjig
+   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_insert_update_delete();
+
+
+
 -- DO $$
 -- BEGIN
 --

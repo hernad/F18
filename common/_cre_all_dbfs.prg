@@ -43,7 +43,7 @@ FUNCTION cre_all_dbfs( ver )
    cre_sif_konto( ver )
 
    fill_tbl_valute() // upisi default valute ako ne postoje
-    
+
    cre_barkod( ver )
    cre_fin_mat( ver )
 
@@ -94,7 +94,6 @@ FUNCTION cre_all_dbfs( ver )
 #ifdef F18_POS
    IF f18_use_module( "pos" )
       cre_all_pos( ver )
-      pos_check_brdok()
    ENDIF
 #endif
 
