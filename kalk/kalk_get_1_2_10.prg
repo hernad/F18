@@ -344,7 +344,7 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
    _MKonto := _Idkonto
    _MU_I := "1"
 
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()
 

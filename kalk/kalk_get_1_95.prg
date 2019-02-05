@@ -157,7 +157,7 @@ FUNCTION kalk_get_1_95()
    READ
    _Marza := 0; _TMarza := "A"; _VPC := _NC
 
-   nStrana := 2
+   nKalkStrana := 2
    _marza := _vpc - _nc
    _MKonto := _Idkonto2;_MU_I := "5"     // izlaz iz magacina
    _PKonto := ""; _PU_I := ""

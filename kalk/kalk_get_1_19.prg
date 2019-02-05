@@ -115,7 +115,7 @@ FUNCTION kalk_get_1_19()
       SELECT kalk_pripr
    ENDIF
 
-   nStrana := 3
+   nKalkStrana := 3
    _VPC := 0
    _GKolicina := _GKolicin2 := 0
    _Marza2 := 0

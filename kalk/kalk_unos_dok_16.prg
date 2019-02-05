@@ -105,7 +105,7 @@ FUNCTION kalk_get_1_16()
    _VPC := _nc
    marza := 0
 
-   nStrana := 2
+   nKalkStrana := 2
 
    _marza := _vpc - _nc
    _MKonto := _Idkonto
@@ -189,14 +189,14 @@ FUNCTION kalk_get_16_1()
    READ
 
 
-   nStrana := 2
+   nKalkStrana := 2
    _marza := _vpc - _nc
    _MKonto := _Idkonto
    _MU_I := "1"
    _PKonto := ""
    _PU_I := ""
    _ERROR := "0"
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()
 

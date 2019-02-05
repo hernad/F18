@@ -24,7 +24,7 @@ FUNCTION Get1_RN()
       beep( 2 )
       Msg( "Razduzenja materijala se ne mogu ispravljati" )
       KEYBOARD K_ESC
-      nStrana := 3
+      nKalkStrana := 3
       RETURN  LastKey()
    ENDIF
 
@@ -64,7 +64,7 @@ FUNCTION Get1_RN()
          Msg( "Vec postoji dokument RN broj " + kalk_doks->brdok + " za radni nalog:"  + _IdZaduz2 )
          SELECT kalk_pripr
          KEYBOARD K_ESC
-         nStrana := 3
+         nKalkStrana := 3
          RETURN  LastKey()
       ENDIF
 
@@ -289,6 +289,6 @@ FUNCTION Get2_RN()
    ENDIF
 
    _MKonto := _Idkonto; _MU_I := "1"
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()

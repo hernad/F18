@@ -121,7 +121,7 @@ FUNCTION Get1_82()
    read
    ESC_RETURN K_ESC
 
-   nStrana := 2
+   nKalkStrana := 2
    _marza := _vpc - _nc
 
    _MKonto := _Idkonto;_MU_I := "5"     // izlaz iz magacina

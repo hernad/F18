@@ -200,7 +200,7 @@ FUNCTION kalk_get_1_11()
    _PKonto := _Idkonto  // ulaz u prodavnicu
    _PU_I := "1"
 
-   nStrana := 2
+   nKalkStrana := 2
 
    kalk_puni_polja_za_izgenerisane_stavke( pIzgSt )
 

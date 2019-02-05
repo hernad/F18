@@ -116,7 +116,7 @@ FUNCTION kalk_get_1_94()
 
 
    _mpcsapp := 0
-   nStrana := 2
+   nKalkStrana := 2
 
    _marza := _vpc - _nc
    _MKonto := _Idkonto;_MU_I := "1"

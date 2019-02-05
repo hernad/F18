@@ -90,7 +90,7 @@ FUNCTION kalk_get_1_ip()
    _mu_i := ""
    _pu_i := "I" // inventura
 
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()
 

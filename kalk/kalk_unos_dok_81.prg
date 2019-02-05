@@ -307,6 +307,6 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( x_kord )
    _pu_i := "1"
    _mu_i := ""
 
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()

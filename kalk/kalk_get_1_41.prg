@@ -178,7 +178,7 @@ FUNCTION kalk_get_1_41()
 
    _PKonto := _Idkonto
    _PU_I := "5" // izlaz iz prodavnice
-   nStrana := 2
+   nKalkStrana := 2
 
    kalk_puni_polja_za_izgenerisane_stavke( pIzgSt )
 

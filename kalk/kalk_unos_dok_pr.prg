@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR nRbr, cProracunMarzeUnaprijed, nStrana
+MEMVAR nRbr, cProracunMarzeUnaprijed, nKalkStrana
 MEMVAR _IdFirma, _IdVd, _BrDok, _TBankTr, _TPrevoz, _TSpedTr, _TZavTr, _TCarDaz, _SpedTr, _ZavTr, _BankTr, _CarDaz, _MArza, _Prevoz
 MEMVAR _TMarza, _IdKonto, _IdKonto2, _IdTarifa, _IDRoba, _Kolicina, _DatFaktP, _datDok, _brFaktP, _VPC, _NC, _FCJ, _FCJ2, _Rabat
 MEMVAR _MKonto, _MU_I, _Error
@@ -220,7 +220,7 @@ FUNCTION Get2_PR()
       _MKonto := _Idkonto
       _MU_I := "1"
    ENDIF
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()
 

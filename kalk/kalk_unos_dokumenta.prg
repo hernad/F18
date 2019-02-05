@@ -12,7 +12,6 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
-
 #define BOX_HEIGHT (f18_max_rows() - 8)
 #define BOX_WIDTH  (f18_max_cols() - 6)
 
@@ -22,7 +21,7 @@ THREAD STATIC s_lAsistentPause := .F. // asistent u stanju pauze
 THREAD STATIC s_nAsistentPauseSeconds := 0
 THREAD STATIC s_nKalkEditLastKey := 0
 
-MEMVAR PicDEM, PicProc, PicCDem, PicKol, gPICPROC
+MEMVAR PicDEM, PicProc, PicCDem, PicKol, gPICPROC, nKalkStrana
 MEMVAR ImeKol, Kol
 MEMVAR picv
 // MEMVAR lKalkAsistentUToku, lAutoObr, lAsist, lAAzur, lAAsist
@@ -33,12 +32,49 @@ MEMVAR cSection, cHistory, aHistory
 
 STATIC cENTER := Chr( K_ENTER ) + Chr( K_ENTER ) + Chr( K_ENTER )
 
+FUNCTION kalk_header_get1( lNoviDokument )
+
+   LOCAL GetList := {}
+   //LOCAL cOpisDokumenta := SPACE(100)
+
+   IF lNoviDokument
+      _idfirma := self_organizacija_id()
+   ENDIF
+
+   IF lNoviDokument .AND. _TBankTr == "X"
+      _TBankTr := "%"
+   ENDIF
+
+   @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma: "
+   ?? self_organizacija_id(), "-", self_organizacija_naziv()
+   @  box_x_koord() + 2, box_y_koord() + 2 SAY "KALKULACIJA: "
+   @  box_x_koord() + 2, Col() SAY "Vrsta:" GET _idvd VALID P_TipDok( @_idvd, 2, 25 ) PICT "@!"
+
+   READ
+
+   ESC_RETURN 0
+
+   IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> idfirma .OR. _idvd <> idvd )
+      _brDok := get_kalk_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
+      SELECT kalk_pripr
+   ENDIF
+
+   @ box_x_koord() + 2, box_y_koord() + 40  SAY "Broj:" GET _brdok VALID {|| !kalk_dokument_postoji( _idfirma, _idvd, _brdok ) }
+   @ box_x_koord() + 2, Col() + 2 SAY "Datum:" GET _datdok VALID {||  datum_not_empty_upozori_godina( _datDok, "Datum KALK" ) }
+   @ box_x_koord() + 3, box_y_koord() + 2  SAY "Rbr:" GET nRBr PICT '9999' VALID {|| valid_kalk_rbr_stavke( _idvd ) }
+   //IF nRbr == 1 .AND. !is_kalk_asistent_started()
+   //    @ Row(), Col() + 2 SAY8 "Opis:" GET cOpisDokumenta PICT "@S52"
+   //ENDIF
+
+   READ
+   ESC_RETURN 0
+
+   RETURN 1
 
 
 FUNCTION kalk_pripr_obrada_stavki_sa_asistentom()
 
    RETURN kalk_pripr_obrada( .T. ) // kalk unos sa pozovi asistenta
-
 
 
 FUNCTION kalk_pripr_obrada( lAsistentObrada )
@@ -59,7 +95,6 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    PRIVATE PicProc := gPicProc
    PRIVATE PicDEM := kalk_pic_iznos_bilo_gpicdem()
    PRIVATE Pickol := kalk_pic_kolicina_bilo_gpickol()
-   //PRIVATE gVarijanta := "2"
    PRIVATE PicV := "99999999.9"
 
    PRIVATE ImeKol := {}
@@ -77,21 +112,15 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    IF roba_barkod_pri_unosu()
       AAdd( ImeKol, { "Barkod", {|| roba_ocitaj_barkod( field->idroba ) }, "IdRoba" } )
    ENDIF
-
    AAdd( ImeKol, { _u( "Količina" ), {|| say_kolicina( field->Kolicina, "99999.999" ) }, "kolicina"    } )
    AAdd( ImeKol, { "IdTarifa", {|| field->idtarifa }, "idtarifa"    } )
    AAdd( ImeKol, { "F.Cj.", {|| say_cijena( field->FCJ, "99999.999" ) }, "fcj"         } )
-   //AAdd( ImeKol, { "F.Cj2.", {|| say_cijena( field->FCJ2, "99999.999" ) }, "fcj2"        } )
    AAdd( ImeKol, { "Nab.Cj.", {|| say_cijena( field->NC, "99999.999" ) }, "nc"          } )
    AAdd( ImeKol, { "VPC", {|| say_cijena( field->VPC, "99999.999" ) }, "vpc"         } )
-   // AAdd( ImeKol, { "VPCj.sa P.", {|| say_cijena( field->VPCsaP )   }, "vpcsap"      } )
    AAdd( ImeKol, { "MPC", {|| say_cijena( field->MPC, "99999.999" )  }, "mpc"         } )
    AAdd( ImeKol, { "MPCsaPDV", {|| say_cijena( field->MPCSaPP, "99999.999" )  }, "mpcsapp"     } )
-   //AAdd( ImeKol, { "RN", {|| field->idzaduz2 }, "idzaduz2"    } )
    AAdd( ImeKol, { "Br.Fakt", {|| field->brfaktp }, "brfaktp"     } )
    AAdd( ImeKol, { "Partner", {|| field->idpartner }, "idpartner"   } )
-   //AAdd( ImeKol, { "Marza", {|| field->tmarza }, "tmarza"   } )
-   //AAdd( ImeKol, { "Marza 2", {|| field->tmarza2 }, "tmarza2"   } )
    AAdd( ImeKol, { "E", {|| field->error },  "error"       } )
 
    FOR nI := 1 TO Len( ImeKol )
@@ -125,13 +154,6 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
 
    @ box_x_koord() + nMaxRow, box_y_koord() + 2 SAY8 cOpcijaRed
 
-/*
-   IF gCijene == "1" .AND. kalk_metoda_nc() == " "
-      Soboslikar( { { nMaxRow - 3, box_y_koord() + 1, nMaxRow, box_y_koord() + 77 } }, 23, 14 )
-   ENDIF
-*/
-   // PRIVATE lKalkAsistentAuto := .F.
-
    pIdlePause  := hb_idleAdd( {|| kalk_asistent_pause_handler( lAsistentObrada ) } )
 
    IF lAsistentObrada
@@ -148,7 +170,6 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
       kalk_asistent_stop()
    ENDIF
 
-   // my_close_all_dbf()
    RETURN .T.
 
 
@@ -159,11 +180,9 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
    LOCAL _log_info
    LOCAL hRec
 
-   // hb_default( @lPrviPoziv, .F. )
    hb_default( @lAsistentObrada, .F. )
 
    IF lAsistentObrada .AND. !kalk_asistent_pause()
-      // ( lPrviPoziv .OR. is_kalk_asistent_started() ) .AND. ;
       kalk_asistent_start()
       IF !kalk_asistent_pause()
          kalk_asistent_send_esc() // prekid browse funkcije
@@ -206,7 +225,6 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
    CASE Upper( Chr( Ch ) ) == "Q"
 
       IF Pitanje(, "Štampa naljepnica za robu (D/N) ?", "D" ) == "D"
-
          kalk_roba_naljepnice_stampa()
          o_kalk_edit()
          GO TOP
@@ -495,8 +513,6 @@ FUNCTION kalk_unos_nova_stavka()
    LOCAL _rok, _opis
    LOCAL _rbr_uvecaj := 0
 
-   // aNC_ctrl := {} // isprazni kontrolnu matricu
-
    _rok := fetch_metric( "kalk_definisanje_roka_trajanja", NIL, "N" ) == "D"
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
@@ -657,10 +673,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
    PushWA()
 
-   //select_o_tarifa()
-   // select_o_roba()
-   //select_o_koncij()
-
    select_o_kalk_pripr()
    IF lStartPocetak
       GO TOP
@@ -669,7 +681,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
    _rok := fetch_metric( "kalk_definisanje_roka_trajanja", NIL, "N" ) == "D"
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
-
 
    Box( "anal", BOX_HEIGHT, BOX_WIDTH, .F., "Ispravka naloga" )
 
@@ -848,6 +859,7 @@ PROCEDURE kalk_asistent_pause_handler( lAsistentObrada )
 
    RETURN
 
+
 FUNCTION kalk_asistent_pause( lSet )
 
    IF lSet != NIL
@@ -864,6 +876,7 @@ FUNCTION kalk_asistent_start()
    kalk_edit_sve_stavke( .T., .T. )
 
    RETURN DE_REFRESH
+
 
 
 FUNCTION kalk_asistent_send_esc()
@@ -883,7 +896,7 @@ FUNCTION kalk_asistent_send_entere()
       cSekv += cEnter
    NEXT
    KEYBOARD cSekv
-   // ENDIF
+
 
    RETURN .T.
 
@@ -910,7 +923,7 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
    PRIVATE PicDEM := "9999999.99999999"
    PRIVATE PicKol := kalk_pic_kolicina_bilo_gpickol()
 
-   nStrana := 1
+   nKalkStrana := 1
 
    DO WHILE .T.
 
@@ -920,9 +933,9 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
       SetKey( K_PGUP, {|| NIL } )
       SetKey( K_CTRL_K, {|| a_val_convert() } )
 
-      IF nStrana == 1
+      IF nKalkStrana == 1
          nR := kalk_unos_1( lNoviDokument, @hParams )
-      ELSEIF nStrana == 2
+      ELSEIF nKalkStrana == 2
          nR := kalk_unos_2( lNoviDokument )
       ENDIF
 
@@ -935,14 +948,14 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
       IF nR == K_ESC
          EXIT
       ELSEIF nR == K_PGUP
-         --nStrana
+         --nKalkStrana
       ELSEIF nR == K_PGDN .OR. nR == K_ENTER
-         ++nStrana
+         ++nKalkStrana
       ENDIF
 
-      IF nStrana == 0
-         nStrana++
-      ELSEIF nStrana >= 3
+      IF nKalkStrana == 0
+         nKalkStrana++
+      ELSEIF nKalkStrana >= 3
          EXIT
       ENDIF
 
@@ -1048,8 +1061,6 @@ FUNCTION ispisi_naziv_konto( x, y, len )
 
    LOCAL cNaz := ""
 
-   // LOCAL nDbfArea := Select()
-
    PushWa()
    SELECT F_KONTO
 
@@ -1070,8 +1081,6 @@ FUNCTION ispisi_naziv_konto( x, y, len )
 FUNCTION ispisi_naziv_partner( x, y, len )
 
    LOCAL cNaz := ""
-
-   // LOCAL nDbfArea := Select()
 
    PushWa()
    SELECT F_PARTN
@@ -1094,8 +1103,6 @@ FUNCTION ispisi_naziv_roba( x, y, len )
 
    LOCAL cNaz := ""
 
-   // LOCAL nDbfArea := Select()
-
    PushWa()
    SELECT F_ROBA
 
@@ -1103,8 +1110,6 @@ FUNCTION ispisi_naziv_roba( x, y, len )
       PopWa()
       RETURN .F.
    ENDIF
-
-
    cNaz := AllTrim( field->naz )
 
    IF Len( cNaz ) >= len
@@ -1120,43 +1125,6 @@ FUNCTION ispisi_naziv_roba( x, y, len )
 
 
 
-
-/*
-FUNCTION ispisi_naziv_sifre( area, id, x, y, len )
-
-   LOCAL _naz := ""
-   LOCAL nDbfArea := Select()
-
-   IF Empty( id )
-      RETURN .T.
-   ENDIF
-
-   SELECT ( area )
-   GO TOP
-   SEEK id
-
-   IF ( area )->( FieldPos( "naz" ) ) <> 0
-
-      _naz := AllTrim( field->naz )
-
-      IF ( area )->( FieldPos( "jmj" ) ) <> 0
-         IF Len( _naz ) >= len
-            _naz := PadR( _naz, len - 6 )
-         ENDIF
-         _naz += " (" + AllTrim( field->jmj ) + ")"
-      ENDIF
-
-   ENDIF
-
-   @ x, y SAY PadR( _naz, len )
-
-   SELECT ( nDbfArea )
-
-   RETURN .T.
-
-*/
-
-
 FUNCTION kalk_unos_2()
 
    IF _idvd == "RN"
@@ -1169,47 +1137,6 @@ FUNCTION kalk_unos_2()
 
 
 
-FUNCTION kalk_header_get1( lNoviDokument )
-
-   IF lNoviDokument
-      _idfirma := self_organizacija_id()
-   ENDIF
-
-   IF lNoviDokument .AND. _TBankTr == "X"
-      _TBankTr := "%"
-   ENDIF
-
-   //IF gNW $ "DX"
-      @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma: "
-      ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   //ELSE
-    //   @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma:" GET _IdFirma VALID p_partner( @_IdFirma, 1, 25 ) .AND. Len( Trim( _idFirma ) ) <= 2
-   //ENDIF
-
-   @  box_x_koord() + 2, box_y_koord() + 2 SAY "KALKULACIJA: "
-   @  box_x_koord() + 2, Col() SAY "Vrsta:" GET _idvd VALID P_TipDok( @_idvd, 2, 25 ) PICT "@!"
-
-   READ
-
-   ESC_RETURN 0
-
-
-   IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> idfirma .OR. _idvd <> idvd )
-
-      _brDok := get_kalk_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
-      SELECT kalk_pripr
-
-   ENDIF
-
-   @ box_x_koord() + 2, box_y_koord() + 40  SAY "Broj:" GET _brdok VALID {|| !kalk_dokument_postoji( _idfirma, _idvd, _brdok ) }
-   @ box_x_koord() + 2, Col() + 2 SAY "Datum:" GET _datdok VALID {||  datum_not_empty_upozori_godina( _datDok, "Datum KALK" ) }
-   @ box_x_koord() + 3, box_y_koord() + 2  SAY "Redni broj stavke:" GET nRBr PICT '9999' VALID {|| valid_kalk_rbr_stavke( _idvd ) }
-
-   READ
-
-   ESC_RETURN 0
-
-   RETURN 1
 
 
 FUNCTION valid_kalk_rbr_stavke( cIdVd )
@@ -1303,25 +1230,6 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
 
    SELECT kalk_pripr
    GO TOP
-
-   RETURN .T.
-
-
-/*
- *  Vrsi se preracunavanje veleprodajnih cijena ako je _VPC=0
- */
-
-FUNCTION VpcSaPpp()
-
-   IF _VPC == 0
-      _RabatV := 0
-      _VPC := ( _VPCSAPPP + _NC * tarifa->vpp / 100 ) / ( 1 + tarifa->vpp / 100 + _mpc / 100 )
-      nMarza := _VPC - _NC
-      _VPCSAP := _VPC + nMarza * TARIFA->VPP / 100
-      _PNAP := _VPC * _mpc / 100
-      _VPCSAPP := _VPC + _PNAP
-   ENDIF
-   ShowGets()
 
    RETURN .T.
 
@@ -1430,9 +1338,6 @@ FUNCTION kalk_set_diskont_mpc()
 
    my_unlock()
 
-   // Msg( "Automatski pokrećem asistenta (opcija A)!", 1 )
-   // lKalkAsistentAuto := .T.
-   // KEYBOARD Chr( K_ESC )
    kalk_asistent_start() // kalk_set_diskont_mpc
 
    my_close_all_dbf()
@@ -1468,46 +1373,6 @@ FUNCTION MPCSAPPuSif()
 
 
 /*
- *     Maloprodajne cijene svih artikala iz izabranog azuriranog dokumenta tipa 80 kopira u sifrarnik robe
- */
-
-FUNCTION MPCSAPPiz80uSif()
-
-   o_kalk_edit()
-
-   cIdFirma := self_organizacija_id()
-   cIdVdU   := "80"
-   cBrDokU  := Space( Len( kalk_pripr->brdok ) )
-
-   Box(, 4, 75 )
-   @ box_x_koord() + 0, box_y_koord() + 5 SAY8 "FORMIRANJE MPC U šifarnikU OD MPCSAPP DOKUMENTA TIPA 80"
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Dokument: " + cIdFirma + "-" + cIdVdU + "-"
-   @ Row(), Col() GET cBrDokU VALID is_kalk_postoji_dokument( cIdFirma + cIdVdU + cBrDokU )
-   READ
-   ESC_BCR
-   BoxC()
-
-   SELECT KALK
-   SEEK cIdFirma + cIdVDU + cBrDokU
-   cIdKonto := KALK->pkonto
-   select_o_koncij( cIdKonto )
-
-   SELECT KALK
-   DO WHILE !Eof() .AND. cIdFirma + cIdVDU + cBrDokU == IDFIRMA + IDVD + BRDOK
-      select_o_roba( KALK->idroba )
-      IF Found()
-         roba_set_mcsapp_na_osnovu_koncij_pozicije( KALK->mpcsapp, .F. )
-      ENDIF
-      SELECT KALK
-      SKIP 1
-   ENDDO
-
-   my_close_all_dbf()
-
-   RETURN .T.
-
-
-/*
  *  brief Filuje VPC u svim stavkama u kalk_pripremi odgovarajucom VPC iz sifrarnika robe
  */
 FUNCTION VPCSifUDok()
@@ -1529,9 +1394,7 @@ FUNCTION VPCSifUDok()
    ENDDO
    my_unlock()
 
-   // Msg( "Automatski pokrećem asistenta (opcija A) !", 1 )
-   // lKalkAsistentAuto := .T.
-   // KEYBOARD Chr( K_ESC )
+
    kalk_asistent_start() // VPCSifUDok
 
    my_close_all_dbf()
@@ -1542,12 +1405,12 @@ FUNCTION VPCSifUDok()
 
 FUNCTION kalk_open_tables_unos( lAzuriraniDok, cIdFirma, cIdVD, cBrDok )
 
-//   o_koncij()
+// o_koncij()
 // select_o_roba()
-//   o_tarifa()
-//   select_o_partner()
-//   select_o_konto()
-//   o_tdok()
+// o_tarifa()
+// select_o_partner()
+// select_o_konto()
+// o_tdok()
 
    IF lAzuriraniDok
       open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok ) // .T. => SQL table
@@ -1595,17 +1458,6 @@ FUNCTION kalkulacija_ima_sve_cijene( firma, tip_dok, br_dok )
 
 FUNCTION o_kalk_edit()
 
-   // select_o_partner()
-   // o_kalk_doks()
-   // select_o_roba()
-   // o_kalk()
-   // select_o_konto()
-//   o_tdok()
-//   o_valute()
-   // o_tarifa()
-//   o_koncij()
-   // o_sifk()
-   // o_sifv()
    o_kalk_pripr()
 
    SELECT kalk_pripr
@@ -1613,46 +1465,3 @@ FUNCTION o_kalk_edit()
    GO TOP
 
    RETURN .T.
-
-/*
- *  Umjesto iskazanog popusta odradjuje smanjenje MPC
-
-
-FUNCTION PopustKaoNivelacijaMP()
-
-   LOCAL lImaPromjena := .F.
-
-   o_kalk_edit()
-   SELECT kalk_pripr
-   GO TOP
-
-   DO WHILE !Eof()
-      IF ( !idvd = "4" .OR. rabatv == 0 )
-         SKIP 1
-         LOOP
-      ENDIF
-      lImaPromjena := .T.
-      Scatter()
-      _mpcsapp := Round( _mpcsapp - _rabatv, 2 )
-      _rabatv := 0
-      PRIVATE aPorezi := {}
-      ---PRIVATE fNovi := .F.
-      VRoba( .F. )
-      WMpc( .T. )
-      _error := " "
-      SELECT kalk_pripr
-      my_rlock()
-      Gather()
-      my_unlock()
-      SKIP 1
-   ENDDO
-   IF lImaPromjena
-      Msg( "Izvršio promjene!", 1 )
-      KEYBOARD Chr( K_ESC )
-   ELSE
-      MsgBeep( "Nisam našao niti jednu stavku sa maloprodajnim popustom !" )
-   ENDIF
-   CLOSERET
-
-   RETURN .T.
-*/

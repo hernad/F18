@@ -145,7 +145,7 @@ FUNCTION kalk_get1_80()
    _MKonto := ""
    _MU_I := ""
 
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()
 
@@ -253,7 +253,7 @@ FUNCTION kalk_get_1_80_protustavka()
    _MKonto := ""
    _MU_I := ""
 
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()
 

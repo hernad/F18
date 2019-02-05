@@ -156,7 +156,7 @@ FUNCTION kalk_get_1_14()
 
    READ
 
-   nStrana := 2
+   nKalkStrana := 2
    IF roba->tip == "X"
       _marza := _vpc - _mpcsapp / ( 1 + _PORVT ) * _PORVT - _nc
    ELSE

@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 STATIC s_hLastDokInfo
 
 FUNCTION kalk_meni_f10()
@@ -88,10 +87,7 @@ FUNCTION kalk_meni_f10()
    AAdd( aOpcExe, {|| ProtStErase() } )
 
    AAdd( aOpc, "R. renumeracija kalk priprema" )
-   AAdd( aOpcexe, {|| renumeracija_kalk_pripr( nil, nil, .F. ) } )
-
-   // AAdd( aOpc, "P. duple stavke u pripremi - provjeri" )
-   // AAdd( aOpcExe, {|| kalk_printaj_duple_stavke_iz_pripreme() } )
+   AAdd( aOpcexe, {|| renumeracija_kalk_pripr( NIL, NIL, .F. ) } )
 
    AAdd( aOpc, "S. spoji duple stavke u pripremi" )
    AAdd( aOpcExe, {||  kalk_pripr_spoji_duple_artikle() } )
@@ -160,7 +156,7 @@ STATIC FUNCTION kalk_dokument_prenos_cijena()
    LOCAL _update := .F.
    LOCAL _konto := Space( 7 )
    LOCAL nDbfArea := Select()
-   PRIVATE getList := {}
+   LOCAL getList := {}
 
    Box(, 7, 65 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Prenos cijena dokument/šifarnik ****"
@@ -186,9 +182,9 @@ STATIC FUNCTION kalk_dokument_prenos_cijena()
    IF _opt == 2
 
       o_kalk_pripr()
-    //  o_roba()
+      // o_roba()
       o_koncij()
-      o_konto()
+      // o_konto()
 
       Box(, 1, 50 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Prodavnički konto:" GET _konto VALID p_konto( @_konto )
@@ -240,15 +236,51 @@ STATIC FUNCTION kalk_dokument_prenos_cijena()
       MsgBeep( "Ubačene cijene iz šifarnika !#Odradite asistenta sa opcijom A" )
    ENDIF
 
-   RETURN
+   RETURN .T.
+
+
+   /*
+    *     Maloprodajne cijene svih artikala iz izabranog azuriranog dokumenta tipa 80 kopira u sifrarnik robe
+    */
+
+STATIC FUNCTION MPCSAPPiz80uSif()
+
+   o_kalk_edit()
+
+   cIdFirma := self_organizacija_id()
+   cIdVdU   := "80"
+   cBrDokU  := Space( Len( kalk_pripr->brdok ) )
+
+   Box(, 4, 75 )
+   @ box_x_koord() + 0, box_y_koord() + 5 SAY8 "FORMIRANJE MPC U šifarnikU OD MPCSAPP DOKUMENTA TIPA 80"
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Dokument: " + cIdFirma + "-" + cIdVdU + "-"
+   @ Row(), Col() GET cBrDokU VALID is_kalk_postoji_dokument( cIdFirma + cIdVdU + cBrDokU )
+   READ
+   ESC_BCR
+   BoxC()
+
+   SELECT KALK
+   SEEK cIdFirma + cIdVDU + cBrDokU
+   cIdKonto := KALK->pkonto
+   select_o_koncij( cIdKonto )
+
+   SELECT KALK
+   DO WHILE !Eof() .AND. cIdFirma + cIdVDU + cBrDokU == IDFIRMA + IDVD + BRDOK
+      select_o_roba( KALK->idroba )
+      IF Found()
+         roba_set_mcsapp_na_osnovu_koncij_pozicije( KALK->mpcsapp, .F. )
+      ENDIF
+      SELECT KALK
+      SKIP 1
+   ENDDO
+
+   my_close_all_dbf()
+
+   RETURN .T.
 
 
 
-
-
-
-
-FUNCTION ProtStErase()
+STATIC FUNCTION ProtStErase()
 
    IF Pitanje(, "Pobrisati protustavke dokumenta (D/N)?", "N" ) == "N"
       RETURN

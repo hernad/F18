@@ -44,28 +44,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDBf, { 'PODBR', 'C',   2,  0 } )
    AAdd( aDBf, { 'SIFRA', 'C',   6,  0 } )
 
-/*
-   _alias := "KALK_DOKS"
-   _table_name := "kalk_doks"
-
-   IF_NOT_FILE_DBF_CREATE
-
-   // 0.4.0
-   IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 0400
-      modstru( { "*" + _table_name, "A SIFRA C 6 0" } )
-   ENDIF
-
-
-   CREATE_INDEX( "1", "IdFirma+idvd+brdok", _alias )
-   CREATE_INDEX( "2", "IdFirma+MKONTO+idzaduz2+idvd+brdok", _alias )
-   CREATE_INDEX( "3", "IdFirma+dtos(datdok)+podbr+idvd+brdok", _alias )
-   CREATE_INDEX( "DAT", "datdok", _alias )
-   CREATE_INDEX( "1S", "IdFirma+idvd+SUBSTR(brdok,6)+LEFT(brdok,5)", _alias )
-   CREATE_INDEX( "V_BRF", "brfaktp+idvd", _alias )
-   CREATE_INDEX( "V_BRF2", "idvd+brfaktp", _alias )
-   AFTER_CREATE_INDEX
-*/
-
 
    aDbf := {} // kalk_doks2
    AAdd( aDBf, { 'IDFIRMA', 'C',   2,  0 } )
@@ -77,15 +55,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDBf, { 'K2', 'C',  2,  0 } )
    AAdd( aDBf, { 'K3', 'C',  3,  0 } )
 
-/*
-   _alias := "KALK_DOKS2"
-   _table_name := "kalk_doks2"
-
-   IF_NOT_FILE_DBF_CREATE
-
-   CREATE_INDEX( "1", "IdFirma+idvd+brdok", _alias )
-   AFTER_CREATE_INDEX
-*/
 
    // objekti
    _alias := "OBJEKTI"
@@ -124,7 +93,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
 
    _alias := "KALK_KARTICA"
    _table_name := "kalk_kartica"
-
    aDbf := {}
    AAdd( aDbf, { "ID", "C", 15, 0 } )
    AAdd( aDbf, { "stanje", "N", 15, 3 } )
@@ -142,9 +110,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    RETURN .T.
 
 
-
-
-
 STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
 
    LOCAL aDbf
@@ -154,12 +119,9 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
 
    aDbf := definicija_kalk_tabele()
 
-
    // KALK_PRIPR
-
    _alias := "KALK_PRIPR"
    _table_name := "kalk_pripr"
-
 
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 020106 // 2.1.5
       f18_delete_dbf( _table_name )

@@ -134,7 +134,7 @@ FUNCTION kalk_get_1_12()
 
    ESC_RETURN K_ESC
 
-   nStrana := 2
+   nKalkStrana := 2
 
    _MKonto := _Idkonto2
    _MU_I := "1"

@@ -131,6 +131,6 @@ FUNCTION kalk_get_1_18()
    _PKonto := ""
    _PU_I := ""
 
-   nStrana := 3
+   nKalkStrana := 3
 
    RETURN LastKey()

@@ -11,9 +11,11 @@
 
 #include "f18.ch"
 
+STATIC s_nStrana := 0
 
 FUNCTION kalk_real_partnera()
 
+   LOCAL GetList := {}
    LOCAL nT0 := nT1 := nT2 := nT3 := nT4 := 0
    LOCAL nCol1 := 0
    LOCAL nPom
@@ -22,21 +24,10 @@ FUNCTION kalk_real_partnera()
    LOCAL PicDEM := kalk_pic_iznos_bilo_gpicdem()         // "9999999.99"
    LOCAL Pickol := kalk_pic_kolicina_bilo_gpickol()         // "999999.999"
 
-   // o_sifk()
-   // o_sifv()
-   // o_roba()
-   // o_konto()
-   // o_tarifa()
-   // o_partner()
-
    PRIVATE dDat1 := dDat2 := CToD( "" )
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "1320", 7 )
-
-
-   //IF IsVindija()
-      cOpcine := Space( 50 )
-   //ENDIF
+   cOpcine := Space( 50 )
 
    qqPartn := Space( 60 )
 
@@ -46,17 +37,12 @@ FUNCTION kalk_real_partnera()
       SET CURSOR ON
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Magacinski konto:" GET cIdKonto PICT "@!" VALID P_Konto( @cIdKonto )
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Period:" GET dDat1
       @ box_x_koord() + 4, Col() + 1 SAY "do" GET dDat2
 
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Partneri:" GET qqPartn PICT "@!S40"
-
-      //IF IsVindija()
-         @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Općine:" GET cOpcine PICT "@!S40"
-      //ENDIF
-
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Općine:" GET cOpcine PICT "@!S40"
       READ
 
       ESC_BCR
@@ -68,11 +54,8 @@ FUNCTION kalk_real_partnera()
    ENDDO
    BoxC()
 
-
-   //o_tarifa()
    find_kalk_by_mkonto_idroba( cIdFirma, cIdKonto, NIL , "idfirma,mkonto,idpartner", .F., NIL )
 
-   //SET ORDER TO TAG PMAG
 
    PRIVATE cFilt1 := ""
 
@@ -86,7 +69,7 @@ FUNCTION kalk_real_partnera()
       SET FILTER TO &cFilt1
    ENDIF
 
-   //HSEEK cIdFirma
+
    GO TOP
    EOF CRET
 
@@ -97,7 +80,7 @@ FUNCTION kalk_real_partnera()
 
    B := 0
 
-   PRIVATE nStrana := 0
+   PRIVATE s_nStrana := 0
    kalk_zagl_real_partnera()
 
    nVPV := nNV := nVPVBP := nPRUC := nPP := nZarada := nRabat := 0
@@ -372,7 +355,7 @@ FUNCTION kalk_zagl_real_partnera( fTabela )
 
    SET CENTURY ON
    ? "  KALK: REALIZACIJA VELEPRODAJE PO PARTNERIMA    na dan:", Date()
-   ?? Space( 6 ), "Strana:", Str( ++nStrana, 3 )
+   ?? Space( 6 ), "Strana:", Str( ++s_nStrana, 3 )
    ? "        Magacin:", cIdkonto, "   period:", dDat1, "DO", dDat2
    SET CENTURY OFF
 
@@ -381,13 +364,9 @@ FUNCTION kalk_zagl_real_partnera( fTabela )
    IF ftabela
       ?
       ? m
-
       ? "   *           Partner            *    NV     *  ZARADA  *   RUC    * Prod.vr  *  Rabat   *   PDV    *  Ukupno *"
-
-
       ? "   *                              *           *(RUC-RAB.)* (PV - NV) *         *          *          *          *" +  ""
-
       ? m
    ENDIF
 
-   RETURN .Y.
+   RETURN .T.
