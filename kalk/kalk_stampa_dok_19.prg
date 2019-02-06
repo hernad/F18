@@ -141,7 +141,7 @@ FUNCTION head_19()
    ? "*BR*          *          *MPC SA PDV*   MPC    *          *          *          *MPC SA PDV*MPC SA PDV*"
    ? "*  *          *          *   sum    *   sum    *          *   sum    *   sum    *   sum    *   sum   *"
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -151,10 +151,10 @@ FUNCTION head_19()
 
 FUNCTION Obraz19()
 
-
    LOCAL nCol1 := nCol2 := 0, npom := 0
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    nStr := 0
@@ -209,7 +209,6 @@ FUNCTION Obraz19()
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
-
       print_nova_strana( 110, @nStr, iif( cProred == "D", 2, 1 ) )
 
       ?
@@ -248,21 +247,41 @@ FUNCTION Obraz19()
 
    ENDPRINT
 
-   RETURN
+   RETURN .T.
 
 
 /*
   legacy global vars
 */
 
-FUNCTION picdem()
+FUNCTION picdem( cPic )
+
+   IF cPic != NIL
+      picdem := cPic
+   ENDIF
+
    RETURN picdem
 
-FUNCTION pickol()
+FUNCTION pickol( cPic )
+
+   IF cPic != NIL
+      pickol := cPic
+   ENDIF
+
    RETURN pickol
 
-FUNCTION piccdem()
+FUNCTION piccdem( cPic )
+
+   IF cPic != NIL
+      piccdem := cPic
+   ENDIF
+
    RETURN piccdem
 
-FUNCTION picproc()
+FUNCTION picproc( cPic )
+
+   IF cPic != NIL
+      picproc := cPic
+   ENDIF
+
    RETURN picproc

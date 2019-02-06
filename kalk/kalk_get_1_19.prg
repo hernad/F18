@@ -13,9 +13,10 @@
 
 MEMVAR GetList
 MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena
-MEMVAR _DatFaktP, _IdKonto, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
+MEMVAR _IdFirma, _DatFaktP, _IdKonto, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
-MEMVAR _TBankTr, _GKolicina, _GKolicin2
+MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
+
 MEMVAR aPorezi
 
 FUNCTION kalk_get_1_19()
@@ -52,7 +53,7 @@ FUNCTION kalk_get_1_19()
       MsgC()
    ENDIF
 
-   @ box_x_koord() + 12, box_y_koord() + 2   SAY "Količina " GET _Kolicina PICTURE PicKol VALID _kolicina >= 0
+   @ box_x_koord() + 12, box_y_koord() + 2   SAY "Količina " GET _Kolicina PICTURE pickol() VALID _kolicina >= 0
 
    _idpartner := ""
    READ

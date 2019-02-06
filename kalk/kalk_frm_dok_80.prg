@@ -75,7 +75,7 @@ FUNCTION kalk_get1_80()
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() -20 ) SAY "Tarifa:" GET _IdTarifa  VALID P_Tarifa( @_IdTarifa )
 
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Kolicina " GET _Kolicina PICT PicKol VALID _Kolicina <> 0
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Kolicina " GET _Kolicina PICT pickol() VALID _Kolicina <> 0
 
    READ
    ESC_RETURN K_ESC
@@ -123,7 +123,7 @@ FUNCTION kalk_get1_80()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MALOPROD. CIJENA (MPC):"
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc ;
-      PICT PicDEM  WHEN W_MPC_( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) VALID V_Mpc_( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
+      PICT PicDEM  WHEN kalk_when_valid_mpc_80_81_41_42( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) VALID kalk_valid_mpc_80_81_41_42( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
 
    ++nX
    SayPorezi_lv( nX, aPorezi )
@@ -167,7 +167,7 @@ FUNCTION kalk_get_1_80_protustavka()
    kalk_is_novi_dokument( .T. )
 
 
-   PicKol := "999999.999"
+   pickol( "999999.999" )
 
    Beep( 1 )
 
@@ -175,7 +175,6 @@ FUNCTION kalk_get_1_80_protustavka()
    @ box_x_koord() + nX, Col() + 2 GET cSvedi VALID cSvedi $ " SM" PICT "@!"
 
    READ
-
 
    set_metric( "kalk_dok_80_predispozicija_set_cijena", my_user(), cSvedi ) // zapamti zadnji unos
 
@@ -201,7 +200,7 @@ FUNCTION kalk_get_1_80_protustavka()
    PRIVATE cProracunMarzeUnaprijed := " "
 
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Kolicina " GET _Kolicina PICT PicKol VALID _Kolicina <> 0
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Kolicina " GET _Kolicina PICT pickol() VALID _Kolicina <> 0
 
    select_o_koncij( _idkonto )
    select_o_roba( _idroba )
@@ -306,7 +305,7 @@ STATIC FUNCTION VKol( x_kord )
       kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nC1, @nC2 )
 
       @ x_kord, box_y_koord() + 30 SAY "Ukupno na stanju "
-      @ x_kord, Col() + 2 SAY nKols PICT pickol
+      @ x_kord, Col() + 2 SAY nKols PICT pickol()
 
       IF _nc == 0
          _nc := nc2

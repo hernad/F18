@@ -271,8 +271,8 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( x_kord )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC BEZ PDV:"
 
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc PICT PicDEM WHEN W_MPC_( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
-      VALID V_Mpc_( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc PICT PicDEM WHEN kalk_when_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
+      VALID kalk_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV (%):"

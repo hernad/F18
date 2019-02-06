@@ -154,7 +154,7 @@ FUNCTION kalk_get_1_41()
    ENDIF
 
    @ box_x_koord() + 17, box_y_koord() + 2 SAY "PRODAJNA CJENA  (PC):"
-   @ box_x_koord() + 17, box_y_koord() + 50 GET _mpc PICT PicDEM WHEN W_MPC_( IdVd, .F., @aPorezi ) VALID V_Mpc_( _IdVd, .F., @aPorezi )
+   @ box_x_koord() + 17, box_y_koord() + 50 GET _mpc PICT PicDEM WHEN kalk_when_valid_mpc_80_81_41_42( IdVd, .F., @aPorezi ) VALID kalk_valid_mpc_80_81_41_42( _IdVd, .F., @aPorezi )
 
    PRIVATE cRCRP := gRCRP
 

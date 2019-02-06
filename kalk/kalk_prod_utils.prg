@@ -12,73 +12,6 @@
 #include "f18.ch"
 
 
-FUNCTION MarzaMP( cIdVd, lNaprijed, aPorezi )
-
-   LOCAL nPrevMP
-
-   // za svaki slucaj setujemo ovo ako slucajno u dokumentu nije ispranvo
-   IF cIdVD $ "11#12#13"
-      // inace je _fcj kod ovih dokumenata  = nabavnoj cijeni
-      // _nc u ovim dokumentima moze biti uvecana za troskove prevoza
-      _VPC := _FCJ
-   ENDIF
-
-   IF cIdVD $ "80"
-      _vpc := _nc
-      _fcj := _nc
-   ENDIF
-
-
-   // ako je prevoz u MP rasporedjen uzmi ga u obzir
-   IF  ( cIdVd $ "11#12#13" ) .AND. ( _TPrevoz == "A" )
-      nPrevMP := _Prevoz
-   ELSE
-      nPrevMP := 0
-   ENDIF
-
-
-   IF  ( _Marza2 == 0 ) .AND. !lNaprijed
-
-      nMarza2 := _MPC - _VPC - nPrevMP
-
-      IF _TMarza2 == "%"
-         IF Round( _VPC, 5 ) <> 0
-            _Marza2 := 100 * ( _MPC / ( _VPC + nPrevMP ) - 1 )
-         ELSE
-            _Marza2 := 0
-         ENDIF
-
-      ELSEIF _TMarza2 == "A"
-         _Marza2 := nMarza2
-
-      ELSEIF _TMarza2 == "U"
-         _Marza2 := nMarza2 * ( _Kolicina )
-      ENDIF
-
-   ELSEIF ( _MPC == 0 ) .OR. lNaprijed
-
-      IF _TMarza2 == "%"
-         nMarza2 := _Marza2 / 100 * ( _VPC + nPrevMP )
-      ELSEIF _TMarza2 == "A"
-         nMarza2 := _Marza2
-      ELSEIF _TMarza2 == "U"
-         nMarza2 := _Marza2 / ( _Kolicina )
-      ENDIF
-
-      _MPC := Round( nMarza2 + _VPC, 2 )
-
-      _MpcSaPP := Round( MpcSaPor( _mpc, aPorezi ), 2 )
-
-   ELSE
-      nMarza2 := _MPC - _VPC - nPrevMP
-   ENDIF
-
-   AEval( GetList, {| o | o:display() } )
-
-   RETURN
-
-
-
 /*
  *     Postavi _Marza2, _mpc, _mpcsapp
  */
@@ -88,13 +21,6 @@ FUNCTION kalk_Marza_11( cProracunMarzeUnaprijed, lSvediVPCNaNC )
    LOCAL nPrevMP, nPPP
 
    hb_default( @lSvediVPCNaNC, .T. )
-
-   // za svaki slucaj setujemo ovo ako slucajno u dokumentu nije ispranvo
-//   IF _IdVD $ "11#12#13" .and. lSvediVPCNaNC
-      // inace je _fcj kod ovih dokumenata  = nabavnoj cijeni
-      // _nc u ovim dokumentima moze biti uvecana za troskove prevoza
-//      _VPC := _FCJ
-//   ENDIF
 
 
    IF cProracunMarzeUnaprijed == nil
@@ -208,13 +134,7 @@ FUNCTION Marza2O( cProracunMarzeUnaprijed )
       ENDIF
       _MPC := Round( nMarza2 + _VPC, 2 )
       IF !Empty( cProracunMarzeUnaprijed )
-         IF roba->tip == "V"
-            _mpcsapp := Round( _mpc * ( 1 + TARIFA->PPP / 100 ), 2 )
-         ELSEIF roba->tip = "X"
-            // ne diraj _mpcsapp
-         ELSE
-            _mpcsapp := Round( MpcSaPor( _mpc, aPorezi ), 2 )
-         ENDIF
+        _mpcsapp := Round( MpcSaPor( _mpc, aPorezi ), 2 )
       ENDIF
 
    ELSE
@@ -224,8 +144,6 @@ FUNCTION Marza2O( cProracunMarzeUnaprijed )
    AEval( GetList, {| o | o:display() } )
 
    RETURN .T.
-
-
 
 
 /*
@@ -270,8 +188,6 @@ FUNCTION Marza2R()
    AEval( GetList, {| o | o:display() } )
 
    RETURN .T.
-
-
 
 
 
@@ -327,8 +243,6 @@ FUNCTION kalk_marza_realizacija_prodavnica()
 
 
 
-
-
 FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 
    LOCAL nOrder
@@ -367,6 +281,7 @@ FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 /*
    mora biti pozicioniran na zapis u roba
 */
+
 FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
 
    LOCAL nCV := 0, cRule
@@ -386,10 +301,7 @@ FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
       nCV := roba->mpc3
    ELSEIF cRule == "M4" .AND. roba->( FieldPos( "mpc4" ) ) <> 0
       nCV := roba->mpc4
-      // ELSEIF koncij->naz == "M5" .AND. roba->( FieldPos( "mpc5" ) ) <> 0
-      // nCV := roba->mpc5
-      // ELSEIF koncij->naz == "M6" .AND. roba->( FieldPos( "mpc6" ) ) <> 0
-      // nCV := roba->mpc6
+
    ELSEIF roba->( FieldPos( "mpc" ) ) <> 0
       nCV := roba->mpc
    ENDIF
@@ -397,11 +309,6 @@ FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
    RETURN nCV
 
 
-
-
-// ------------------------------------
-// roba_set_mcsapp_na_osnovu_koncij_pozicije(nCijena, lUpit)
-// ------------------------------------
 FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
 
    LOCAL lAzuriraj
@@ -422,18 +329,13 @@ FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
       cMpc := "mpc3"
    CASE koncij->naz == "M4"
       cMpc := "mpc4"
-      // CASE koncij->naz == "M5"
-      // cMpc := "mpc5"
-      // CASE koncij->naz == "M6"
-      // cMpc := "mpc6"
+
    OTHERWISE
       cMpc := "mpc"
    ENDCASE
 
    lIsteCijene := ( Round( roba->( &cMpc ), 4 ) == Round( nCijena, 4 ) )
-
    IF lIsteCijene
-      // iste cijene nemam sta mijenjati
       RETURN .F.
    ENDIF
 
@@ -455,16 +357,12 @@ FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
       SELECT ROBA
       hRec := dbf_get_rec()
       hRec[ cMpc ] := nCijena
-
       update_rec_server_and_dbf( Alias(), hRec, 1, "FULL" )
-
       PopWa()
       lRet := .T.
    ENDIF
 
    RETURN lRet
-
-
 
 
 
