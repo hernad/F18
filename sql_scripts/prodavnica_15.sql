@@ -320,6 +320,8 @@ CREATE OR REPLACE FUNCTION public.on_kalk_kalk_insert_update_delete() RETURNS tr
 DECLARE
     idPos varchar;
     sql varchar;
+    cijena decimal;
+    ncijena decimal;
 BEGIN
 
 
@@ -342,9 +344,16 @@ ELSIF (TG_OP = 'UPDATE') THEN
 ELSIF (TG_OP = 'INSERT') THEN
 
       RAISE INFO 'insert prodavnica %', idPos;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, NEW.mpcsapp;
-      RAISE INFO 'sql: %', sql;
+      IF ( NEW.idvd = '19' ) THEN
+        cijena := NEW.fcj;  -- stara cijena
+        ncijena := NEW.mpcsapp + NEW.fcj; -- nova cijena
+      ELSE
+        cijena := NEW.mpcsapp;
+        ncijena := 0;
+      END IF;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena;
+      -- RAISE INFO 'sql: %', sql;
 
       RETURN NEW;
 END IF;
@@ -494,8 +503,8 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert pos_pos_knjig prodavnica %', idPos;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.kolicina, NEW.cijena;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena;
       RAISE INFO 'sql: %', sql;
       RETURN NEW;
 END IF;

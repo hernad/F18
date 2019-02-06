@@ -53,21 +53,8 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
    ENDIF
 
    cPom := ""
-   pos_naslov_dok_zaduzenja( cIdVd )
-
-   IF cIdVD == "16"
-      cPom += "ZADUŽENJE "
-   ENDIF
-
-   IF cIdvd == "PD"
-      cPom += "PREDISPOZICIJA "
-      lPredispozicija := .T.
-   ENDIF
-
-   IF cIdVd == "98"
-      cPom += "REKLAMACIJA "
-   ENDIF
-
+   cPom += pos_naslov_dok_zaduzenja( cIdVd )
+   cPom += pos_dokument_naziv( cIdVd )
    cPom += AllTrim( PRIPRZ->IdPos ) + "-" + AllTrim ( cBrDok )
 
    ?U PadC( cPom, 40 )

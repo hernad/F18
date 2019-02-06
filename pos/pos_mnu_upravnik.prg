@@ -55,12 +55,6 @@ FUNCTION pos_menu_dokumenti()
    AAdd( aOpc, "N. nivelacija" )
    AAdd( aOpcexe, {|| pos_inventura_nivelacija( .F. ) } )
 
-   // AAdd( aOpc, "P. predispozicija" )
-   // AAdd( aOpcexe, {|| pos_zaduzenje( "PD" ) } )
-
-   // AAdd( aOpc, "R. reklamacija-povrat u magacin" )
-   // AAdd( aOpcexe, {|| pos_zaduzenje( POS_VD_REKLAMACIJA ) } )
-
    f18_menu( "pos6", .F., nIzbor, aOpc, aOpcexe )
 
    RETURN .T.

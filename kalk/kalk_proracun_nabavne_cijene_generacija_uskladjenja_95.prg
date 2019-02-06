@@ -16,7 +16,7 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
    LOCAL cIdFirma := self_organizacija_id(), cIdRoba
    LOCAL cBrDok
    LOCAL hRec
-   LOCAL nKolicina, nKolZn, nNcZadnjaNabavka, nSrednjaNabavnaCijena, dDatNab
+   LOCAL nKolicina, nKolZn, nNcZadnjaNabavka, nSrednjaNabavnaCijena
    LOCAL nNabavnaVrijednost, nSrednjaNcPoUlazima
    LOCAL nRbr, dDatDo, nOdstupanje
    LOCAL nCnt, cInfo
@@ -84,7 +84,7 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
       kalk_get_nabavna_mag( dDatDo, cIdFirma, cIdRoba, hParams[ "idkonto" ], ;
-         @nKolicina, @nKolZN, @nNcZadnjaNabavka, @nSrednjaNabavnaCijena, @dDatNab, ;
+         @nKolicina, @nKolZN, @nNcZadnjaNabavka, @nSrednjaNabavnaCijena, ;
          @nNabavnaVrijednost, @nSrednjaNcPoUlazima, .T. )
 
       SELECT kalk_pripr

@@ -237,7 +237,7 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
    LOCAL _count
    LOCAL cIdRoba
 
-   IF cIdTipDk <> POS_VD_INV
+   IF cIdTipDk <> POS_IDVD_INVENTURA
       RETURN .F.
    ENDIF
 

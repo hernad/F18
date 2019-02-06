@@ -83,7 +83,7 @@ FUNCTION pos_top_narudzbe()
    ?
 
    pos_top_n_izvuci ( POS_IDVD_RACUN, dDatum0, cFilterRoba )
-   pos_top_n_izvuci ( VD_PRR, dDatum0, cFilterRoba )
+
 
    // stampa izvjestaja
    SELECT POM

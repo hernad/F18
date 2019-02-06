@@ -120,16 +120,12 @@ FUNCTION kalk_get_1_11()
    IF _TBankTr <> "X"
       IF !Empty( kalk_metoda_nc() )
          nc1 := nc2 := 0
-         dDatNab := CToD( "" )
          IF _kolicina > 0
-            kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nc1, @nc2, @dDatNab )
+            kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nc1, @nc2 )
          ELSE
-            kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2, dDatNab )
+            kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
          ENDIF
-         IF dDatNab > _DatDok
-            Beep( 1 )
-            Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-         ENDIF
+
          IF kalk_metoda_nc() $ "13"
             _fcj := nc1
          ELSEIF kalk_metoda_nc() == "2"

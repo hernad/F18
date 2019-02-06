@@ -429,7 +429,6 @@ FUNCTION kalk_when_valid_nc_ulaz()
    LOCAL nKolZN := 0
    LOCAL nNabCjZadnjaNabavka
    LOCAL nNabCj2 := 0
-   LOCAL dDatNab := CToD( "" )
 
    IF gKalo == "1"
       nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
@@ -497,7 +496,7 @@ FUNCTION kalk_when_valid_nc_ulaz()
 
    nNabCjZadnjaNabavka := _nc // proslijediti nabavnu cijenu
    // proracun nabavne cijene radi utvrdjivanja odstupanja ove nabavne cijene od posljednje
-   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2, @dDatNab )
+   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2 )
 
    RETURN .T.
 

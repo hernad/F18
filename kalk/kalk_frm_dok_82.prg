@@ -82,16 +82,13 @@ FUNCTION Get1_82()
    nKolS := 0
    nKolZN := 0
    nc1 := nc2 := 0
-   dDatNab := CToD( "" )
+
 
    lGenStavke := .F.
    IF _TBankTr <> "X"
 
-      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2, @dDatNab )
-      IF dDatNab > _DatDok
-         Beep( 1 )
-         Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-      ENDIF
+      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
+
       IF kalk_metoda_nc() $ "13"
          _nc := nc1
       ELSEIF kalk_metoda_nc() == "2"

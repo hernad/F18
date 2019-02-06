@@ -155,33 +155,31 @@ FUNCTION pos_iznos_dokumenta( lUI )
 
    IF ( ( lUI == NIL ) .OR. lUI )
 
-      IF pos_doks->IdVd $ POS_VD_ZADUZENJE + "#" + POS_VD_POCETNO_STANJE + "#" + POS_VD_REKLAMACIJA // ulazi
+      IF pos_doks->IdVd $ POS_IDVD_ULAZI
 
          seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
          DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
             nIznos += pos->kolicina * pos->cijena
             SKIP
          ENDDO
-         IF pos_doks->idvd == POS_VD_REKLAMACIJA
-            nIznos := -nIznos
-         ENDIF
+
       ENDIF
    ENDIF
 
    IF ( ( lUI == NIL ) .OR. !lUI ) // izlazi
-      IF pos_doks->idvd $ POS_IDVD_RACUN + "#" + POS_VD_OTPIS + "#" + VD_RZS + "#" + VD_PRR + "#" + "IN" + "#" + POS_VD_NIV
+      IF pos_doks->idvd $ POS_IDVD_RACUN + "#" + "IN" + "#" + POS_IDVD_NIVELACIJA
 
          seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
 
          DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
             DO CASE
-            CASE pos_doks->idvd == "IN"
+            CASE pos_doks->idvd = POS_IDVD_INVENTURA
                // samo ako je razlicit iznos od 0
                // ako je 0 onda ne treba mnoziti sa cijenom
                IF pos->kol2 <> 0
                   nIznos += pos->kol2 * pos->cijena
                ENDIF
-            CASE pos_doks->IdVd == POS_VD_NIV
+            CASE pos_doks->IdVd == POS_IDVD_NIVELACIJA
                nIznos += pos->kolicina * ( pos->ncijena - pos->cijena )
             OTHERWISE
                nIznos += pos->kolicina * pos->cijena

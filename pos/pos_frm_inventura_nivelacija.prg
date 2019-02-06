@@ -46,9 +46,9 @@ FUNCTION pos_inventura_nivelacija()
    ENDIF
 
    IF fInvent
-      cIdVd := POS_VD_INV
+      cIdVd := POS_IDVD_INVENTURA
    ELSE
-      cIdVd := POS_VD_NIV
+      cIdVd := POS_IDVD_NIVELACIJA
    ENDIF
 
    IF fInvent
@@ -110,11 +110,11 @@ FUNCTION pos_inventura_nivelacija()
          o_pos_tables()
       ENDIF
 
-      IF stanje_dn == "N" .AND. cIdVd == POS_VD_INV
+      IF stanje_dn == "N" .AND. cIdVd == POS_IDVD_INVENTURA
          fPocInv := .F.
       ENDIF
 
-      IF fPocInv .AND. !fPreuzeo .AND. cIdVd == POS_VD_INV
+      IF fPocInv .AND. !fPreuzeo .AND. cIdVd == POS_IDVD_INVENTURA
 
          MsgO( "GENERIŠEM DATOTEKU " + cNazDok + "E" )
 
@@ -134,14 +134,14 @@ FUNCTION pos_inventura_nivelacija()
             _idroba := pos->idroba
             DO WHILE !Eof() .AND. pos->idroba == _idroba .AND. pos->datum <= dDatRada
 
-               IF pos->idvd $ "16#00"
+               IF pos->idvd $  POS_IDVD_ULAZI
                   nKolicina += pos->kolicina
 
-               ELSEIF pos->idvd $ "42#01#IN#NI"
+               ELSEIF pos->idvd $ POS_IDVD_IZLAZI_NIVELACIJE_INVENTURE
                   DO CASE
-                  CASE pos->idvd == POS_VD_INV
+                  CASE pos->idvd == POS_IDVD_INVENTURA
                      nKolicina -= pos->kolicina - pos->kol2
-                  CASE pos->idvd == POS_VD_NIV
+                  CASE pos->idvd == POS_IDVD_NIVELACIJA
                   OTHERWISE
                      nKolicina -= pos->kolicina
                   ENDCASE
@@ -198,7 +198,7 @@ FUNCTION pos_inventura_nivelacija()
 
       AAdd( ImeKol, { "Sifra i naziv", {|| idroba + "-" + Left( robanaz, 25 ) } } )
       AAdd( ImeKol, { "BARKOD", {|| barkod } } )
-      IF cIdVd == POS_VD_INV
+      IF cIdVd == POS_IDVD_INVENTURA
          AAdd( ImeKol, { "Knj.kol.", {|| Str( kolicina, 9, 3 ) } } )
          AAdd( ImeKol, { "Pop.kol.", {|| Str( kol2, 9, 3 ) }, "kol2" } )
       ELSE
@@ -206,7 +206,7 @@ FUNCTION pos_inventura_nivelacija()
       ENDIF
       AAdd( ImeKol, { "Cijena ", {|| Str( cijena, 7, 2 ) } } )
 
-      IF cIdVd == POS_VD_NIV
+      IF cIdVd == POS_IDVD_NIVELACIJA
          AAdd( ImeKol, { "Nova C.",     {|| Str( ncijena, 7, 2 ) } } )
       ENDIF
 
@@ -320,7 +320,7 @@ FUNCTION EditInvNiv( dat_inv_niv )
 
    CASE Ch == K_ALT_P
 
-      IF cIdVd == POS_VD_INV
+      IF cIdVd == POS_IDVD_INVENTURA
          pos_stampa_zaduzenja_inventure( .T. )
          o_pos_tables()
          SELECT priprz
@@ -394,7 +394,7 @@ STATIC FUNCTION _calc_priprz()
 
    DO WHILE !Eof()
 
-      IF field->idvd == "IN"
+      IF field->idvd == POS_IDVD_INVENTURA
          _saldo_kol += field->kol2
          _saldo_izn += ( field->kol2 * field->cijena )
       ELSE
@@ -478,7 +478,7 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
 
       nLX++
 
-      IF cIdVd == POS_VD_INV
+      IF cIdVd == POS_IDVD_INVENTURA
          @ nLX, box_y_koord() + 3 SAY8 "Knj. količina:" GET nKolicina PICT _pict ;
             WHEN {|| .F. }
       ELSE
@@ -488,7 +488,7 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
 
       nLX++
 
-      IF cIdVd == POS_VD_INV
+      IF cIdVd == POS_IDVD_INVENTURA
 
          @ nLX, box_y_koord() + 3 SAY8 "Pop. količina:" GET _kol2 PICT _pict ;
             VALID _pop_kol( _kol2 ) ;
@@ -502,7 +502,7 @@ FUNCTION pos_ed_priprema_inventura( nInd, datum )
          WHEN {|| .T. } ;
          VALID {|| _cijena < 999999.99 }
 
-      IF cIdVd == POS_VD_NIV
+      IF cIdVd == POS_IDVD_NIVELACIJA
 
          nLX++
 
@@ -630,14 +630,14 @@ STATIC FUNCTION update_ip_razlika()
       DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum <= dDatRada
 
 
-         IF pos->idvd $ "16#00"
+         IF pos->idvd $ POS_IDVD_ULAZI
             nKolicinaZaInventuru += pos->kolicina
 
-         ELSEIF pos->idvd $ "42#01#IN#NI"
+         ELSEIF pos->idvd $ POS_IDVD_IZLAZI_NIVELACIJE_INVENTURE
             DO CASE
-            CASE pos->idvd == POS_VD_INV
+            CASE pos->idvd == POS_IDVD_INVENTURA
                nKolicinaZaInventuru -= pos->kolicina - pos->kol2
-            CASE pos->idvd == POS_VD_NIV
+            CASE pos->idvd == POS_IDVD_NIVELACIJA
             OTHERWISE
                nKolicinaZaInventuru -= pos->kolicina
             ENDCASE
@@ -730,7 +730,7 @@ STATIC FUNCTION valid_pos_inv_niv( cIdVd, ind )
       SELECT ( _area )
    ENDIF
 
-   IF cIdVD == POS_VD_INV
+   IF cIdVD == POS_IDVD_INVENTURA
       get_field_set_focus( "_kol2" )
    ELSE
       get_field_set_focus( "_cijena" )
@@ -759,7 +759,7 @@ FUNCTION _set_cijena_artikla( id_vd, cIdRoba )
 
    PushWa()
 
-   IF id_vd == POS_VD_INV
+   IF id_vd == POS_IDVD_INVENTURA
 
       select_o_roba( cIdRoba )
       _cijena := pos_get_mpc()
@@ -809,13 +809,13 @@ FUNCTION RacKol( cIdRoba, nKol )
          LOOP
       ENDIF
 
-      IF pos->idvd $ "16#00"
+      IF pos->idvd $ POS_IDVD_ULAZI
          nKol += pos->Kolicina
-      ELSEIF POS->idvd $ "42#01#IN#NI"
+      ELSEIF POS->idvd $ POS_IDVD_IZLAZI_NIVELACIJE_INVENTURE
          DO CASE
-         CASE POS->IdVd == POS_VD_INV
+         CASE POS->IdVd == POS_IDVD_INVENTURA
             nKol := pos->kol2
-         CASE POS->idvd == POS_VD_NIV
+         CASE POS->idvd == POS_IDVD_NIVELACIJA
          OTHERWISE
             nKol -= pos->kolicina
          ENDCASE

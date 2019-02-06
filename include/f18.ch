@@ -553,28 +553,16 @@
 #define SP_I      "I"           // inventura - stanje
 #define SP_N      "N"           // nivelacija
 
-// vrste dokumenata
-#define POS_IDVD_ULAZI "00#11#80#81"
+#define POS_IDVD_ULAZI "P0#11#80#81"
+#define POS_IDVD_POCETNO_STANJE_PRODAVNICA  "P0"
+#define POS_IDVD_PRIJEM_PRODAVNICA          "80"
+#define POS_IDVD_DOBAVLJAC_PRODAVNICA       "81"
+#define POS_IDVD_OTPREMNICA_MAGACIN         "11"
 
-#define POS_IDVD_RACUN        "42"
-#define POS_VD_ZADUZENJE     "16"
-#define POS_VD_OTPIS         "95"
-#define POS_VD_REKLAMACIJA   "98"
-#define POS_VD_INV       "IN"       // inventura
-#define POS_VD_NIV       "NI"       // nivelacija
-#define VD_RZS       "96"       // razduzenje sirovina-otprema pr. magacina
-#define POS_VD_POCETNO_STANJE       "00"       // pocetno stanje
-
-#define VD_PRR       "01"       // prenos realizacije iz prethodnih sezona
-#define VD_CK        "90"       // dokument cek
-#define VD_SK        "91"       // dokument sindikalni kredit
-#define VD_GP        "92"       // dokument garatno pismo
-#define VD_PP        "88"       // dokument polog pazara
-#define VD_ROP       "99"       // reklamacije ostali podaci
-
-// vrste zaduzenja
-#define ZAD_NORMAL   "0"
-#define ZAD_OTPIS    "1"
+#define POS_IDVD_IZLAZI_NIVELACIJE_INVENTURE "42#19#IP"
+#define POS_IDVD_RACUN               "42"
+#define POS_IDVD_NIVELACIJA          "19"
+#define POS_IDVD_INVENTURA           "IP"       // inventura
 
 
 // ako ima potrebe, brojeve zaokruzujemo na
@@ -582,9 +570,7 @@
 //#define I_ID         1
 #define I_ID2        2
 
-//#define PICT_POS_ARTIKAL "@K"
 #define PICT_POS_ARTIKAL "@!S10"
-
 
 #define F18_VERZIJA "4"
 #define F18_VARIJANTA "4s"

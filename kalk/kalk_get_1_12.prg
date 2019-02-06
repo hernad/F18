@@ -98,16 +98,12 @@ FUNCTION kalk_get_1_12()
    nKolS := 0
    nKolZN := 0
    nc1 := nc2 := 0
-   dDatNab := CToD( "" )
    lGenStavke := .F.
 
    IF _TBankTr <> "X"
       IF !Empty( kalk_metoda_nc() )
-         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2, dDatNab )
-         IF dDatNab > _DatDok
-            Beep( 1 )
-            Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-         ENDIF
+         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
+
          IF kalk_metoda_nc() $ "13"; _fcj := nc1; ELSEIF kalk_metoda_nc() == "2"; _fcj := nc2; ENDIF
       ENDIF
    ENDIF

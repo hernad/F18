@@ -284,3 +284,23 @@ METHOD set_module_gvars()
    set_sql_search_path( radna_prodavnica_sql_schema() )
 
    RETURN .T.
+
+
+FUNCTION pos_dokument_naziv( cIdVd )
+
+   DO CASE
+   CASE cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
+      RETURN "Ulaz od dobavljača"
+
+   CASE cIdVd == POS_IDVD_OTPREMNICA_MAGACIN
+      RETURN "Otpremnica magacin"
+
+   CASE cIdVd == POS_IDVD_PRIJEM_PRODAVNICA
+      RETURN "Prijem prodavnica"
+
+   CASE cIdVD == POS_IDVD_POCETNO_STANJE_PRODAVNICA
+      RETURN "Početno stanje"
+
+   ENDCASE
+
+   RETURN "<undefined>"

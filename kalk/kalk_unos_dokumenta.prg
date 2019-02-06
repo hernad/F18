@@ -21,6 +21,7 @@ THREAD STATIC s_lAsistentPause := .F. // asistent u stanju pauze
 THREAD STATIC s_nAsistentPauseSeconds := 0
 THREAD STATIC s_nKalkEditLastKey := 0
 
+MEMVAR GetList
 MEMVAR PicDEM, PicProc, PicCDem, PicKol, gPICPROC, nKalkStrana
 MEMVAR ImeKol, Kol
 MEMVAR picv

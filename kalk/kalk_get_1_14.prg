@@ -96,21 +96,15 @@ FUNCTION kalk_get_1_14()
    nKolZN := 0
    nNabCj1 := 0
    nNabCj2 := 0
-   dDatNab := CToD( "" )
    lGenStavke := .F.
 
    IF _TBankTr <> "X"   // ako je X onda su stavke vec izgenerisane
 
       IF !Empty( kalk_metoda_nc() )
 
-         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nNabCj1, @nNabCj2, @dDatNab )
+         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nNabCj1, @nNabCj2 )
          @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "
          @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
-      ENDIF
-
-      IF dDatNab > _DatDok
-         Beep( 1 )
-         Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
       ENDIF
 
       // Vindija trazi da se uvijek nudi srednja nabavna cijena

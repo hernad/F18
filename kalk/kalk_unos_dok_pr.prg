@@ -256,7 +256,7 @@ FUNCTION kalk_pripr_pobrisi_sirovine( cIdFirma, cIdVd, cBrDok, nRbr, bDokument )
 FUNCTION kalk_pripr_napuni_sirovine_za( nRbr, _idroba, _kolicina )
 
    LOCAL nRbr100
-   LOCAL nKolS, nKolZN, nC1, nC2, dDatNab
+   LOCAL nKolS, nKolZN, nC1, nC2
    LOCAL hRec
 
    select_o_roba( _idroba )
@@ -297,20 +297,14 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nRbr, _idroba, _kolicina )
          field->error WITH "0", ;
          field->mkonto WITH _idkonto2
 
-
       nKolS := 0
       nKolZN := 0
       nC1 := 0
       nC2 := 0
-      dDatNab := CToD( "" )
 
       info_bar( _idkonto2 + "/" + sast->id2, "sirovina: " + _idkonto2 + "/" + sast->id2 )
-      kalk_get_nabavna_mag( _datdok, _idfirma, sast->id2, _idkonto2, @nKolS, @nKolZN, @nc1, @nc2, @dDatNab )
+      kalk_get_nabavna_mag( _datdok, _idfirma, sast->id2, _idkonto2, @nKolS, @nKolZN, @nc1, @nc2 )
       info_bar( _idkonto2 + "/" + sast->id2, NIL )
-
-      IF dDatNab > _DatDok
-         error_bar( _idFirma + "-" + _idvd + "-" + _brdok, "Datum nabavke je " + DToC( dDatNab ) + " sirovina " + sast->id2 )
-      ENDIF
 
       IF _kolicina >= 0 .OR. Round( _NC, 3 ) == 0 .AND. !( roba->tip $ "UT" )
 

@@ -18,20 +18,17 @@ FUNCTION pos_stampa_dokumenta()
    LOCAL dDatOd := CToD( "" )
    LOCAL dDatDo := danasnji_datum()
    LOCAL cIdRadnik
-   LOCAL cDoks
    LOCAL nBH := 8
    LOCAL nR := 5
    LOCAL cIdPos := gIdPos
    LOCAL cLM := ""
    LOCAL nRW := 13
    LOCAL nSir
+   LOCAL GetList := {}
 
    SET CURSOR ON
 
-
    cIdPos := gIdPos
-   cDoks := POS_IDVD_RACUN + "#" + POS_VD_ZADUZENJE + "#" + "IN" + "#" + POS_VD_NIV + "#" + VD_RZS
-
    cIdRadnik := Space( FIELD_LEN_POS_OSOB_ID )
    cIdVd := Space( 2 )
 
@@ -40,7 +37,7 @@ FUNCTION pos_stampa_dokumenta()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY " Prodajno mjesto (prazno-sva)" GET cIdPos PICT "@!" VALID Empty( cIdPos ) .OR. p_pos_kase( @cIdPos, 1, 37 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "          Radnik (prazno-svi)" GET cIdRadnik PICT "@!" VALID Empty( cIdRadnik ) .OR. P_Osob( @cIdRadnik, 2, 37 )
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY "Vrste dokumenata (prazno-svi)" GET cIdVd PICT "@!" VALID Empty( cIdVd ) .OR. cIdVd $ cDoks
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY "Vrste dokumenata (prazno-svi)" GET cIdVd PICT "@!"
    @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "            Počevši od datuma" GET dDatOd PICT "@D" VALID dDatOd <= danasnji_datum() .AND. dDatOd <= dDatDo
    @ box_x_koord() + 5, box_y_koord() + 2 SAY8 "                 zaključno sa" GET dDatDo PICT "@D" VALID dDatDo <= danasnji_datum() .AND. dDatOd <= dDatDo
    READ
@@ -57,7 +54,6 @@ FUNCTION pos_stampa_dokumenta()
 
    START PRINT CRET
 
-   // ZagFirma()
    ?
    ? PadC( "KASA " + gIdPos, 40 )
    ?U PadC( "ŠTAMPA LISTE DOKUMENATA", nSir )
@@ -90,8 +86,7 @@ FUNCTION pos_stampa_dokumenta()
       ?? " " + Left( OSOB->Naz, nRW )
       nBrStav := 0
       nIznos := 0
-      // SELECT POS
-      // SEEK pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
+
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
 
       DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )

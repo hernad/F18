@@ -40,10 +40,7 @@ FUNCTION kalk_get_1_18()
    SELECT kalk_pripr  // napuni tarifu
 
    _MKonto := _Idkonto
-   //check_datum_posljednje_kalkulacije()
-   //DuplRoba()
 
-   dDatNab := CToD( "" )
    IF kalk_is_novi_dokument()
       _Kolicina := 0
    ENDIF
@@ -53,24 +50,22 @@ FUNCTION kalk_get_1_18()
       IF gKolicFakt == "D"
          KalkNaF( _idroba, @_kolicina )
       ELSE
-         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @_kolicina, NIL, NIL, NIL, @dDatNab )
+         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @_kolicina, NIL, NIL, NIL )
       ENDIF
 
    ENDIF
-   IF dDatNab > _DatDok; Beep( 1 );Msg( "Datum nabavke je " + DToC( dDatNab ), 4 );ENDIF
-
-   @ box_x_koord() + 12, box_y_koord() + 2   SAY "Kolicina " GET _Kolicina PICTURE PicKol VALID _kolicina > 0
+   @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _kolicina > 0
 
    IF kalk_is_novi_dokument() .AND. gMagacin == "2" .AND. _TBankTr <> "X"
-      nStCj := KoncijVPC()
+      nKalkStaraCijena := KoncijVPC()
    ELSE
-      nStCj := _MPCSAPP
+      nKalkStaraCijena := _MPCSAPP
    ENDIF
 
    IF kalk_is_novi_dokument()
-      nNCj := 0
+      nKalkNovaCijena := 0
    ELSE
-      nNCJ := _VPC + nStCj
+      nKalkNovaCijena := _VPC + nKalkStaraCijena
    ENDIF
 
    IF roba->tip = "X"
@@ -83,13 +78,13 @@ FUNCTION kalk_get_1_18()
    IF gmagacin == "1"
       cNaziv := "NC"
    ENDIF
-   @ box_x_koord() + 17, box_y_koord() + 2    SAY "STARA CIJENA  (" + cNaziv + ") :"  GET nStCj  PICTURE PicDEM
-   @ box_x_koord() + 18, box_y_koord() + 2    SAY "NOVA CIJENA   (" + cNaziv + ") :"  GET nNCj   PICTURE PicDEM
+   @ box_x_koord() + 17, box_y_koord() + 2    SAY "STARA CIJENA  (" + cNaziv + ") :"  GET nKalkStaraCijena  PICTURE PicDEM
+   @ box_x_koord() + 18, box_y_koord() + 2    SAY "NOVA CIJENA   (" + cNaziv + ") :"  GET nKalkNovaCijena   PICTURE PicDEM
 
    IF gcMpcKalk10 == "D"
       PRIVATE _MPCPom := 0
       @ box_x_koord() + 18, box_y_koord() + 42    SAY "NOVA CIJENA  MPC :"  GET _mpcpom   PICTURE PicDEM ;
-         valid {|| nNcj := iif( nNcj = 0, Round( _mpcpom / ( 1 + TARIFA->opp / 100 ) / ( 1 + TARIFA->PPP / 100 ), 2 ), nNcj ), .T. }
+         valid {|| nKalkNovaCijena := iif( nKalkNovaCijena = 0, Round( _mpcpom / ( 1 + TARIFA->opp / 100 ) / ( 1 + TARIFA->PPP / 100 ), 2 ), nKalkNovaCijena ), .T. }
    ENDIF
 
    READ
@@ -98,7 +93,7 @@ FUNCTION kalk_get_1_18()
    IF _TBankTr <> "X"
 
       //SELECT roba
-      kalk_set_vpc_sifarnik( nNCJ )
+      kalk_set_vpc_sifarnik( nKalkNovaCijena )
 
       SELECT kalk_pripr
    ENDIF
@@ -115,11 +110,11 @@ FUNCTION kalk_get_1_18()
    ENDIF
 
    IF roba->tip $ "VK"
-      _VPC := ( nNCJ - nStCj )
-      _MPCSAPP := nStCj
+      _VPC := ( nKalkNovaCijena - nKalkStaraCijena )
+      _MPCSAPP := nKalkStaraCijena
    ELSE
-      _VPC := nNCJ - nStCj
-      _MPCSAPP := nStCj
+      _VPC := nKalkNovaCijena - nKalkStaraCijena
+      _MPCSAPP := nKalkStaraCijena
    ENDIF
 
    _idpartner := ""

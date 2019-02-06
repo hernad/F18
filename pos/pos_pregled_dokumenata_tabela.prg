@@ -21,10 +21,10 @@ MEMVAR Kol, ImeKol
 
 FUNCTION pos_lista_azuriranih_dokumenata()
 
+   LOCAL i
    LOCAL aOpc
    LOCAL GetList := {}
 
-   // LOCAL _prikaz_partnera := .F.
    PRIVATE cFilter := ".t."
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
@@ -44,23 +44,15 @@ FUNCTION pos_lista_azuriranih_dokumenata()
       RETURN .F.
    ENDIF
 
-   // _o_pos_prepis_tbl()
+   AAdd( ImeKol, { "Vrsta", {|| pos_doks->IdVd } } )
+   AAdd( ImeKol, { "Broj ", {|| pos_doks->brdok } } )
+   AAdd( ImeKol, { "Fisk.rn", {|| pos_doks->fisc_rn } } )
+   AAdd( ImeKol, { "Datum", {|| pos_doks->datum } } )
 
-   AAdd( ImeKol, { "Vrsta", {|| IdVd } } )
-   AAdd( ImeKol, { "Broj ", {|| PadR( IF( !Empty( IdPos ), Trim( IdPos ) + "-", "" ) + AllTrim( BrDok ), 9 ) } } )
-   AAdd( ImeKol, { "Fisk.rn", {|| fisc_rn } } )
-
-   // IF _prikaz_partnera
-   // SELECT pos_doks
-   // SET RELATION TO idPartner INTO partn
-   // AAdd( ImeKol, { PadR( "Partner", 25 ), {|| PadR( Trim( idPartner ) + "-" + Trim( partn->naz ), 25 ) } } )
-   // ENDIF
-
-   AAdd( ImeKol, { "VP", {|| IdVrsteP } } )
-   AAdd( ImeKol, { "Datum", {|| datum } } )
+   AAdd( ImeKol, { "VP", {|| pos_doks->IdVrsteP } } )
 
    AAdd( ImeKol, { PadC( "Iznos", 10 ), {|| pos_iznos_dokumenta( NIL ) } } )
-   AAdd( ImeKol, { "Radnik", {|| IdRadnik } } )
+   AAdd( ImeKol, { "Radnik", {|| pos_doks->IdRadnik } } )
 
 
    FOR i := 1 TO Len( ImeKol )
@@ -71,24 +63,11 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    seek_pos_doks_za_period( NIL, cIdVd, dDatOd, dDatDo )
    SET CURSOR ON
 
-   // IF !Empty( dDatOd ) .OR. !Empty( dDatDo )
-   // cFilter += ".and. Datum>=" + dbf_quote( dDatOD ) + ".and. Datum<=" + dbf_quote( dDatDo )
-   // ENDIF
-   // IF !Empty( cIdVd )
-   // cFilter += ".and. IdVd=" + dbf_quote( cIdVd )
-   // ENDIF
-// IF !( cFilter == ".t." )
-// SET FILTER TO &cFilter
-// ENDIF
-
-// GO TOP
-
    aOpc := { "<ENTER> Odabir", "<E> eksport" }
 
    IF pos_upravnik() .OR. pos_admin()
       AAdd( aOpc, "<F2> - promjena vrste placanja" )
    ENDIF
-
 
    my_browse( "pos_doks", f18_max_rows() - 10, f18_max_cols() - 15, ;  // params cImeBoxa, xw, yw
       {|| pos_stampa_dokumenta_key_handler( dDatOd, dDatDo ) }, _u( "  ŠTAMPA AŽURIRANOG DOKUMENTA  " ), "POS", ; // bUserF, cMessTop, cMessBot
@@ -132,11 +111,9 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       IF Pitanje(, "Želite li promijeniti vrstu plaćanja (D/N) ?", "N" ) == "D"
 
          cVrPl := field->idvrstep
-
          IF !VarEdit( { { "Nova vrsta placanja", "cVrPl", "Empty (cVrPl).or.P_VrsteP(@cVrPl)", "@!", } }, 10, 5, 14, 74, 'PROMJENA VRSTE PLACANJA, DOKUMENT:' + idvd + "/" + idpos + "-" + brdok + " OD " + DToC( datum ), "B1" )
             RETURN DE_CONT
          ENDIF
-
          hRec := dbf_get_rec()
          hRec[ "idvrstep" ] := cVrPl
 
@@ -155,17 +132,14 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       _id_vd := field->idvd
       _br_dok := field->brdok
       _dat_dok := field->datum
-
       _rec_no := RecNo()
 
       IF Pitanje(, "Želite li zaista izbrisati dokument (D/N) ?", "N" ) == "D"
 
          pos_brisi_dokument( _id_pos, _id_vd, _dat_dok, _br_dok )
-         _o_pos_prepis_tbl()
          SELECT ( nDbfArea )
          SET FILTER TO &_tbl_filter
          GO ( _rec_no )
-
          RETURN DE_REFRESH
 
       ENDIF
@@ -178,32 +152,6 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
       CASE pos_doks->IdVd == POS_IDVD_RACUN
 
-
-/*
-         cOdg := "D"
-         IF glRetroakt
-            cOdg := Pitanje(, "Štampati tekući račun? (D-da,N-ne,S-sve račune u izabranom periodu)", "D", "DNS" )
-         ENDIF
-
-         IF cOdg == "S"
-
-            ctIdPos := gIdPos
-            SEEK ctIdPos + POS_IDVD_RACUN
-
-            START PRINT CRET
-
-            DO WHILE !Eof() .AND. IdPos + IdVd == ctIdPos + POS_IDVD_RACUN
-               IF ( datum <= dDatum1 )
-                  pos_racun_stampa_priprema( IdPos, DToS( datum ) + BrDok, .F., glRetroakt )
-               ENDIF
-               SELECT pos_doks
-               SKIP 1
-            ENDDO
-
-            ENDPRINT
-*/
-         // ELSEIF cOdg == "D"
-
          hParams[ "idpos" ] := pos_doks->idpos
          hParams[ "datum" ] := pos_doks->datum
          hParams[ "brdok" ] := pos_doks->brdok
@@ -211,29 +159,22 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          hParams[ "samo_napuni_rn_dbf" ] := .F.
          hParams[ "priprema" ] := .F.
          pos_stampa_racuna_pdv( hParams )
-         // ENDIF
 
-      CASE pos_doks->IdVd == "16"
-         pos_stampa_azuriranog_zaduzenja( "ZADUŽENJE" )
 
-      CASE pos_doks->IdVd == POS_VD_OTPIS
-         pos_stampa_azuriranog_zaduzenja( "OTPIS" )
+      CASE pos_doks->IdVd $ POS_IDVD_ULAZI
+         pos_stampa_azuriranog_zaduzenja( pos_dokument_naziv( pos_doks->idvd ) )
 
-      CASE pos_doks->IdVd == POS_VD_REKLAMACIJA
-         pos_stampa_azuriranog_zaduzenja( "REKLAMACIJA" )
-
-      CASE pos_doks->IdVd == "IN"
+      CASE pos_doks->IdVd == POS_IDVD_INVENTURA
          pos_prepis_inventura_nivelacija( .T. )
 
-      CASE pos_doks->IdVd == POS_VD_NIV
-         pos_prepis_inventura_nivelacija( .F. )
+      CASE pos_doks->IdVd == POS_IDVD_NIVELACIJA
+
+         hParams[ "idpos" ] := pos_doks->idpos
+         hParams[ "idvd" ] := pos_doks->idvd
+         hParams[ "datum" ] := pos_doks->datum
+         hParams[ "brdok" ] := pos_doks->brdok
+         pos_stampa_nivelacija( hParams )
          RETURN ( DE_REFRESH )
-
-      CASE pos_doks->IdVd == VD_PRR
-         pos_kumulativ_prometa()
-
-      CASE pos_doks->IdVd == POS_VD_POCETNO_STANJE
-         pos_prepis_pocetno_stanje()
 
       ENDCASE
 
@@ -249,7 +190,6 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       hParams[ "priprema" ] := .F.
       pos_napuni_drn_rn_dbf( hParams )
 
-      // SELECT pos_doks
       pos_porezna_faktura_traka( .T. )
 
       SELECT pos_doks
@@ -280,7 +220,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       _br_dok := field->brdok
       _dat_dok := field->datum
 
-      IF field->idvd <> POS_VD_INV
+      IF field->idvd <> POS_IDVD_INVENTURA
          MsgBeep( "Ne postoji metoda povrata za ovu vrstu dokumenta !" )
          RETURN ( DE_CONT )
       ENDIF
@@ -289,12 +229,11 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          RETURN ( DE_CONT )
       ENDIF
 
-      IF field->idvd == POS_VD_INV
+      IF field->idvd == POS_IDVD_INVENTURA
 
          pos_povrat_dokumenta_u_pripremu()
          pos_brisi_dokument( _id_pos, _id_vd, _dat_dok, _br_dok )
 
-         _o_pos_prepis_tbl()
          SELECT pos_doks
          SET FILTER TO &_tbl_filter
          GO TOP
@@ -310,7 +249,6 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
    ENDCASE
 
-   _o_pos_prepis_tbl()
    SELECT pos_doks
    SET FILTER TO &( _tbl_filter )
    GO ( _rec_no )
@@ -367,7 +305,6 @@ FUNCTION pos_pregled_stavki_racuna()
    Box(, nMaxRow, nMaxCol )
 
    @ box_x_koord() + 1, box_y_koord() + 19 SAY8 PadC ( "Pregled računa " + Trim( pos_doks->IdPos ) + "-" + LTrim ( pos_doks->BrDok ), 30 ) COLOR f18_color_invert()
-
    oBrowse := pos_form_browse( box_x_koord() + 2, box_y_koord() + 1, box_x_koord() + nMaxRow, box_y_koord() + nMaxCol, ImeKol, Kol, ;
       { hb_UTF8ToStrBox( BROWSE_PODVUCI_2 ), ;
       hb_UTF8ToStrBox( BROWSE_PODVUCI ), ;
@@ -378,7 +315,6 @@ FUNCTION pos_pregled_stavki_racuna()
 
    BoxC()
 
-   //SetColor ( cPrevCol )
    SELECT pos_doks
 
    RETURN .T.
@@ -403,73 +339,5 @@ STATIC FUNCTION pos_racun_browse_kolone( aImeKol, aKol )
    FOR i := 1 TO Len( aImeKol )
       AAdd( aKol, i )
    NEXT
-
-   RETURN .T.
-
-
-
-STATIC FUNCTION _o_pos_prepis_tbl()
-
-// SELECT ( F_PARTN )
-// IF !Used()
-// o_partner()
-// ENDIF
-
-   // SELECT ( F_VRSTEP )
-   // IF !Used()
-   // o_vrstep()
-   // ENDIF
-
-
-   // SELECT ( F_ODJ )
-   // IF !Used()
-   // o_pos_odj()
-   // ENDIF
-
-   // SELECT ( F_KASE )
-   // IF !Used()
-   // o_pos_kase()
-   // ENDIF
-
-// SELECT ( F_OSOB )
-// IF !Used()
-   // o_pos_osob()
-   // SET ORDER TO TAG "NAZ"
-   // ENDIF
-
-// SELECT ( F_TARIFA )
-// IF !Used()
-// o_tarifa()
-// ENDIF
-
-   // SELECT ( F_VALUTE )
-// IF !Used()
-   // o_valute()
-   // ENDIF
-
-// SELECT ( F_SIFK )
-   // IF !Used()
-// o_sifk()
-// ENDIF
-
-// SELECT ( F_SIFV )
-// IF !Used()
-// o_sifv()
-// ENDIF
-
-// SELECT ( F_ROBA )
-   // IF !Used()
-   // o_roba()
-// ENDIF
-
-// SELECT ( F_POS_DOKS )
-// IF !Used()
-// o_pos_doks()
-// ENDIF
-
-// SELECT ( F_POS )
-// IF !Used()
-// o_pos_pos()
-// ENDIF
 
    RETURN .T.

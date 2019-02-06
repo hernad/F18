@@ -17,14 +17,8 @@ FUNCTION kalk_nivelacija_11()
 
    LOCAL _sufix, hRec
 
-  // o_tarifa()
-   //o_koncij()
    o_kalk_pripr2()
    o_kalk_pripr()
-
-  // o_sifk()
-  // o_sifv()
-  // o_roba()
 
    SELECT kalk_pripr
    GO TOP
@@ -57,7 +51,6 @@ FUNCTION kalk_nivelacija_11()
       select_o_koncij( hRec[ "idkonto" ] )
       select_o_roba( hRec[ "idroba" ] )
       select_o_tarifa( roba->idtarifa )
-
       SELECT roba
 
       PRIVATE nMPC := 0
@@ -77,18 +70,11 @@ FUNCTION kalk_nivelacija_11()
          fNivelacija := .T.
 
          PRIVATE nKolZn := nKols := nc1 := nc2 := 0
-         PRIVATE dDatNab := CToD( "" )
 
-         kalk_get_nabavna_prod( hRec[ "idfirma" ], hRec[ "idroba" ], hRec[ "idkonto" ], @nKolS, @nKolZN, @nc1, @nc2, @dDatNab )
+         kalk_get_nabavna_prod( hRec[ "idfirma" ], hRec[ "idroba" ], hRec[ "idkonto" ], @nKolS, @nKolZN, @nc1, @nc2 )
 
-         IF dDatNab > hRec[ "datdok" ]
-            Beep( 1 )
-            Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-            hRec[ "error" ] := "1"
-         ENDIF
 
          SELECT kalk_pripr2
-         // append blank
 
          hRec[ "idpartner" ] := ""
          hRec[ "vpc" ] := 0
@@ -97,15 +83,14 @@ FUNCTION kalk_nivelacija_11()
          hRec[ "marza2" ] := 0
          hRec[ "tmarza2" ] := "A"
 
-         PRIVATE cOsn := "2", nStCj := nNCJ := 0
+         PRIVATE cOsn := "2", nKalkStaraCijena := nKalkNovaCijena := 0
 
-         nStCj := nMPC
+         nKalkStaraCijena := nMPC
+         nKalkNovaCijena := kalk_pripr->MPCSaPP
 
-         nNCJ := kalk_pripr->MPCSaPP
-
-         hRec[ "mpcsapp" ] := nNCj - nStCj
+         hRec[ "mpcsapp" ] := nKalkNovaCijena - nKalkStaraCijena
          hRec[ "mpc" ] := 0
-         hRec[ "fcj" ] := nStCj
+         hRec[ "fcj" ] := nKalkStaraCijena
 
          IF hRec[ "mpc" ] <> 0
             hRec[ "mpcsapp" ] := ( 1 + tarifa->opp / 100 ) * hRec[ "mpc" ] * ( 1 + tarifa->ppp / 100 )

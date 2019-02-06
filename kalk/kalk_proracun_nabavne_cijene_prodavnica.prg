@@ -14,7 +14,7 @@
 MEMVAR _datdok
 
 FUNCTION kalk_get_nabavna_prod( cIdFirma, cIdroba, cIdkonto, nKolicina, nKolZN, ;
-      nNcZadnjaNabavka, nSrednjaNabavnaCijena, dDatNab, ;
+      nNcZadnjaNabavka, nSrednjaNabavnaCijena, ;
       nSrednjaNcPoUlazima, nNabavnaVrijednost, lSilent )
 
    LOCAL nPom

@@ -21,12 +21,11 @@ MEMVAR _idroba
   6) nKolZN - kolicina koja je na stanju od zadnje nabavke
   7) nNcZadnjaNabavka - zadnja nabavna cijena
   8) nSrednjaNabavnaCijena - srednja nabavna cijena
-  9- dDatNab - datum nabavke
 
 */
 
 FUNCTION kalk_get_nabavna_mag( dDatDo, cIdFirma, cIdRoba, cIdKonto, ;
-      nKolicina, nKolZN, nNcZadnjaNabavka, nSrednjaNabavnaCijena, dDatNab, ;
+      nKolicina, nKolZN, nNcZadnjaNabavka, nSrednjaNabavnaCijena, ;
       nNabavnaVrijednost, nSrednjaNcPoUlazima, lSilent )
 
    LOCAL nPom

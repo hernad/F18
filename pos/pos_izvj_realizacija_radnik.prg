@@ -127,9 +127,6 @@ FUNCTION pos_realizacija_radnik
       ?U "-----", Replicate ( "-", 30 )
    ENDIF
 
-   IF !lTekuci
-      pos_radnik_izvuci ( VD_PRR )
-   ENDIF
    pos_radnik_izvuci ( POS_IDVD_RACUN )
 
    SELECT pos_doks

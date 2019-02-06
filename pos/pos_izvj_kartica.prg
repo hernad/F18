@@ -139,16 +139,16 @@ FUNCTION pos_kartica_artikla()
             nPredhodnoStanjeKolicina += POS->Kolicina
             nPredhodnaVrijednost += POS->Kolicina * pos->cijena
 
-         ELSEIF pos->idvd $ "IN"
+         ELSEIF pos->idvd $ POS_IDVD_INVENTURA
 
             nPredhodnoStanjeKolicina -= ( POS->Kolicina - POS->Kol2 )
             nPredhodnaVrijednost += ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
 
-         ELSEIF pos->idvd $ "42"
+         ELSEIF pos->idvd $ POS_IDVD_RACUN
             nPredhodnoStanjeKolicina -= POS->Kolicina
             nPredhodnaVrijednost -= POS->Kolicina * pos->cijena
 
-         ELSEIF pos->IdVd == "NI"
+         ELSEIF pos->IdVd == POS_IDVD_NIVELACIJA
             nPredhodnaVrijednost += POS->Kolicina * ( pos->ncijena - pos->cijena )
          ENDIF
 

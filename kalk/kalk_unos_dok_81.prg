@@ -22,7 +22,7 @@ FUNCTION kalk_unos_dok_81( hParams )
    LOCAL _unos_left := 40
    LOCAL _use_opis := .F.
    LOCAL _opis := Space( 300 )
-   
+
    LOCAL _krabat := NIL
 
    IF hb_HHasKey( hParams, "opis" )
@@ -137,7 +137,7 @@ FUNCTION kalk_unos_dok_81( hParams )
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2   SAY "Rabat (%):"
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _rabat PICT PicDEM 
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _rabat PICT PicDEM
 
 
    READ
@@ -187,22 +187,14 @@ STATIC FUNCTION valid_kolicina()
 
    IF _kolicina < 0
 
-      // storno
-
       nKolS := 0
       nKolZN := 0
       nc1 := nc2 := 0
-      dDatNab := CToD( "" )
 
       IF !Empty( kalk_metoda_nc() )
-         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2, @dDatNab )
+         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
          @ box_x_koord() + 12, box_y_koord() + 30 SAY "Ukupno na stanju "
          @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
-      ENDIF
-
-      IF dDatNab > _DatDok
-         Beep( 1 )
-         Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
       ENDIF
 
       IF nKols < Abs( _kolicina )

@@ -303,19 +303,10 @@ STATIC FUNCTION VKol( x_kord )
 
       nc1 := nc2 := 0
 
-      dDatNab := CToD( "" )
-
-
-      kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nC1, @nC2, @dDatNab )
+      kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nC1, @nC2 )
 
       @ x_kord, box_y_koord() + 30 SAY "Ukupno na stanju "
       @ x_kord, Col() + 2 SAY nKols PICT pickol
-
-
-      IF dDatNab > _DatDok
-         Beep( 1 )
-         Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-      ENDIF
 
       IF _nc == 0
          _nc := nc2

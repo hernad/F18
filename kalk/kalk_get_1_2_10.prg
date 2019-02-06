@@ -448,19 +448,14 @@ FUNCTION V_kol10()
       nKolS := 0
       nKolZN := 0
       nc1 := nc2 := 0
-      dDatNab := CToD( "" )
 
       IF !Empty( kalk_metoda_nc() )
 
-         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, @nC1, @nC2, @dDatNab )
+         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, @nC1, @nC2 )
 
          @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
       ENDIF
 
-      IF dDatNab > _DatDok
-         Beep( 1 )
-         Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-      ENDIF
       IF _idvd == "16"  // storno prijema
          IF kalk_metoda_nc() $ "13"
             _nc := nC1

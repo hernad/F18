@@ -114,20 +114,14 @@ FUNCTION kalk_get_1_95()
    nKolS := 0
    nKolZN := 0
    nc1 := nc2 := 0
-   dDatNab := CToD( "" )
    lGenStavke := .F.
 
    IF _TBankTr <> "X"
 
-      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nC1, @nC2, @dDatNab )
+      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nC1, @nC2 )
 
       @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
       @ box_x_koord() + 13, box_y_koord() + 30   SAY "Srednja nc "; @ box_x_koord() + 13, Col() + 2 SAY nc2 PICT pickol
-
-      IF dDatNab > _DatDok
-         Beep( 1 )
-         Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-      ENDIF
 
       IF !( roba->tip $ "UT" )
 

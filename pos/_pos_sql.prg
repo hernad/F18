@@ -250,7 +250,7 @@ FUNCTION seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok, cTag )
    hParams[ "idvd" ] := cIdVd
    hParams[ "datum" ] := dDatum
    hParams[ "brdok" ] := cBrDok
-   hParams[  "tag" ] := cTag
+   hParams[ "tag" ] := cTag
 
    RETURN seek_pos_h( hParams )
 
@@ -376,7 +376,7 @@ FUNCTION h_pos_pos_indexes()
 
    LOCAL hIndexes := hb_Hash()
 
-   hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+IdRoba+Rbr"
+   hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+Rbr"
    hIndexes[ "2" ] := "idroba+DTOS(Datum)"
    hIndexes[ "4" ] := "dtos(datum)"
    hIndexes[ "5" ] := "IdPos+idroba+DTOS(Datum)"

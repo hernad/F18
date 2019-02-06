@@ -142,7 +142,7 @@ FUNCTION Stanje2Fakt()
             CASE POS->IdVd == "IN"
                nIzlaz += POS->Kolicina - POS->Kol2
                nVrijednost -= ( POS->Kol2 - POS->Kolicina ) * POS->Cijena
-            CASE POS->IdVd == POS_VD_NIV
+            CASE POS->IdVd == POS_IDVD_NIVELACIJA
                // ne mijenja kolicinu
                nVrijednost := POS->Kolicina * POS->Cijena
             OTHERWISE

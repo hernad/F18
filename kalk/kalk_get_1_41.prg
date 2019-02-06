@@ -125,7 +125,6 @@ FUNCTION kalk_get_1_41()
       nKolZN := 0
       nc1 := 0
       nc2 := 0
-      dDatNab := CToD( "" )
       lGenStavke := .F.
 
       // ako je X onda su stavke vec izgenerisane
@@ -136,10 +135,6 @@ FUNCTION kalk_get_1_41()
 
             kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
 
-            IF dDatNab > _DatDok
-               Beep( 1 )
-               Msg( "Datum nabavke je " + DToC( dDatNab ), 4 )
-            ENDIF
             IF kalk_metoda_nc() $ "13"
                _fcj := nc1
             ELSEIF kalk_metoda_nc() == "2"

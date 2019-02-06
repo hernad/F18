@@ -81,11 +81,6 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
       brisi_tabelu_pripreme()
    ENDIF
 
-/*
-   IF lOk .AND. fiscal_opt_active()
-      setuj_plu_kodove_artikala_nakon_azuriranja()
-   ENDIF
-*/
    SELECT PRIPRZ
 
    RETURN lRet
@@ -103,23 +98,6 @@ STATIC FUNCTION brisi_tabelu_pripreme()
 
    RETURN .T.
 
-/*
-STATIC FUNCTION setuj_plu_kodove_artikala_nakon_azuriranja()
-
-   LOCAL nDeviceId
-   LOCAL hDeviceParams
-
-   nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
-
-   IF nDeviceId > 0
-      hDeviceParams := get_fiscal_device_params( nDeviceId, my_user() )
-      IF hDeviceParams[ "plu_type" ] == "P"
-         gen_all_plu( .T. )
-      ENDIF
-   ENDIF
-
-   RETURN .T.
-*/
 
 
 FUNCTION pos_azuriraj_inventura_nivelacija()
@@ -171,7 +149,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
 
       seek_pos_pos( "XX", "XX" )
       SELECT PRIPRZ
-
       DO WHILE !Eof()
 
          nTrec := RecNo()
@@ -199,9 +176,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          ENDIF
 
          SELECT PRIPRZ
-         // IF cTipDok <> "IN"
-         // pos_azuriraj_artikal_u_sifarniku(cIdVd)
-         // ENDIF
 
          SELECT PRIPRZ
          GO ( nTrec )
@@ -229,51 +203,3 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    ENDIF
 
    RETURN lRet
-
-/*
-STATIC FUNCTION pos_azuriraj_artikal_u_sifarniku(cIdVd)
-
-   LOCAL lOk := .T.
-   LOCAL hRec
-   LOCAL _update := .F.
-   LOCAL cFieldPOSMPC
-
-   IF gSetMPCijena == "1"
-      cFieldPOSMPC := "mpc"
-   ELSE
-      cFieldPOSMPC := "mpc" + AllTrim( gSetMPCijena )
-   ENDIF
-
-   lNovi := .F.
-
-   IF !select_o_roba( priprz->idroba )
-      APPEND BLANK
-      hRec := dbf_get_rec()
-      hRec[ "id" ] := priprz->idroba
-      _update := .T.
-   ELSE
-      hRec := dbf_get_rec()
-   ENDIF
-
-   hRec[ "naz" ] := priprz->robanaz
-   hRec[ "jmj" ] := priprz->jmj
-
-   IF cIdVd == "NI"
-      hRec[ cFieldPOSMPC ] := Round( priprz->ncijena, 3 )
-   ELSE
-      hRec[ cFieldPOSMPC ] := Round( priprz->cijena, 3 )
-   ENDIF
-
-   hRec[ "idtarifa" ] := priprz->idtarifa
-  -- hRec[ "k1" ] := priprz->k1
---   hRec[ "k2" ] := priprz->k2
---   hRec[ "k7" ] := priprz->k7
---   hRec[ "k8" ] := priprz->k8
---   hRec[ "k9" ] := priprz->k9
---   hRec[ "n1" ] := priprz->n1
---   hRec[ "n2" ] := priprz->n2
-    hRec[ "barkod" ] := priprz->barkod
-   lOk := update_rec_server_and_dbf( "roba", hRec, 1, "CONT" )
-
-   RETURN lOk
-*/
