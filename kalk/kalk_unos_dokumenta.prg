@@ -537,9 +537,6 @@ FUNCTION kalk_unos_nova_stavka()
       Scatter()
       hParams := hb_Hash()
 
-      IF _rok
-         hParams[ "rok" ] := Space( 10 )
-      ENDIF
       IF _opis
          hParams[ "opis" ] := Space( 300 )
       ENDIF
@@ -669,7 +666,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
    LOCAL hParams := hb_Hash()
    LOCAL hDok
    LOCAL oAttr, hKalkAtributi, _old_dok, _new_dok
-   LOCAL _rok, _opis
+   LOCAL _opis
    LOCAL nTr2
    LOCAL nDug, nPot, nTrec
    LOCAL cIdKont, cIdKont2
@@ -682,7 +679,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
    ENDIF
    hb_default( @lStartPocetak, .F. )
 
-   _rok := fetch_metric( "kalk_definisanje_roka_trajanja", NIL, "N" ) == "D"
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
    Box( "anal", BOX_HEIGHT, BOX_WIDTH, .F., "Ispravka naloga" )
@@ -729,10 +725,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
       IF _opis
          hParams[ "opis" ] := get_kalk_attr_opis( hDok, .F. )
       ENDIF
-      IF _rok
-         hParams[ "rok" ] := get_kalk_attr_rok( hDok, .F. )
-      ENDIF
-
+  
       IF kalk_edit_stavka( .F., @hParams ) == K_ESC
          IF lAsistentObrada
             automatska_obrada_error( .T. ) // iz stavke se izaslo sa ESC tokom automatske obrade
