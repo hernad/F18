@@ -16,13 +16,9 @@ FUNCTION PregNDP()
 
    Box( "#PREGLED NOVIH DUGOVANJA/POTRAZIVANJA", 15, 72 )
 
-   IF gNW == "D"
-      cIdFirma := self_organizacija_id()
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      cidfirma := "10"
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma: " GET cIdFirma valid {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-   ENDIF
+    cIdFirma := self_organizacija_id()
+    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Dugovanja/Potrazivanja (1/2):" GET cDP VALID cDP $ "12"
    READ
    ESC_BCR

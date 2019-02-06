@@ -335,15 +335,13 @@ STATIC FUNCTION zagl_bb_grupe( hParams, nStr )
 
    @ PRow(), REP1_LEN - 15 SAY "Str:" + Str( ++nStr, 3 )
 
-   IF gNW == "D"
-      ? "Firma:", self_organizacija_id(), self_organizacija_naziv()
-   ELSE
+
       ? "Firma:"
       @ PRow(), PCol() + 2 SAY hParams[ "idfirma" ]
       select_o_partner( hParams[ "idfirma" ] )
       @ PRow(), PCol() + 2 SAY Naz
       @ PRow(), PCol() + 2 SAY Naz2
-   ENDIF
+
 
    IF !Empty( hParams[ "konto" ] )
       ? "Odabrana konta: " + AllTrim( hParams[ "konto" ] )

@@ -45,9 +45,7 @@ FUNCTION kalk_get_1_14()
       _IdZaduz := ""
       _Idkonto := "2110"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto razdužuje "; ?? _IdKonto2
-      // IF gNW <> "X"
-      // @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Razdužuje: "; ?? _IdZaduz2
-      // ENDIF
+
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br "
@@ -96,7 +94,6 @@ FUNCTION kalk_get_1_14()
    nKolZN := 0
    nNabCj1 := 0
    nNabCj2 := 0
-   lGenStavke := .F.
 
    IF _TBankTr <> "X"   // ako je X onda su stavke vec izgenerisane
 

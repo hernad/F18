@@ -56,11 +56,9 @@ FUNCTION KSintKont()
    Box( "KSK", 4, 60, .F. )
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "SINTETICKA KARTICA"
-      IF gNW $ "DR"
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 4, box_y_koord() + 2 SAY KonSeks( "KONTO" ) + ":  " GET qqKonto PICTURE "@S50"
       READ;  ESC_BCR
       aUsl1 := Parsiraj( qqKonto, "IdKonto", "C" )
@@ -221,8 +219,7 @@ FUNCTION KAnalK()
 
 
 
-// -----------------------------------------
-// -----------------------------------------
+
 FUNCTION KAnKPoj()
 
    cIdFirma := "  "
@@ -234,12 +231,10 @@ FUNCTION KAnKPoj()
 
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 6 SAY "ANALITICKA KARTICA"
-      IF gNW $ "DR"
+
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
          cIdFirma := self_organizacija_id()
-      ELSE
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
       @ box_x_koord() + 3, box_y_koord() + 2 SAY KonSeks( "KONTO  " ) + "  : " GET qqKonto  PICTURE "@S50"
       READ;  ESC_BCR
 
@@ -371,22 +366,14 @@ FUNCTION KAnKKonto()
 
    Box( "kankko", 2, 60, .F. )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "ANALITICKA KARTICA - PO " + KonSeks( "KONT" ) + "IMA"
-   IF gNW $ "DR"
+
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
       cIdFirma := self_organizacija_id()
-   ELSE
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-   ENDIF
+
    READ;  ESC_BCR
    BoxC()
 
-   // cIdFirma:=left(cIdFirma,2)
-
    O_MAT_SUBAN
-   // o_konto()
-   // o_roba()
-   // o_sifk()
-   // o_sifv()
 
    SELECT mat_anal
    SET ORDER TO TAG "2"
@@ -534,9 +521,8 @@ FUNCTION KSuban()
    RPar( "d1", @_dat_od )
    RPar( "d2", @_dat_do )
 
-   IF gNW $ "DR"
-      _id_firma := self_organizacija_id()
-   ENDIF
+
+    _id_firma := self_organizacija_id()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "SUBANALITICKA KARTICA"
 
@@ -546,13 +532,10 @@ FUNCTION KSuban()
 
    DO WHILE .T.
 
-      IF gNW $ "DR"
+
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "
          ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma: " GET _id_firma ;
-            VALID {|| p_partner( @_id_firma ), _id_firma := Left( _id_firma, 2 ), .T. }
-      ENDIF
+
 
       IF _brza_k == "D"
          _konto := PadR( _konto, 7 )

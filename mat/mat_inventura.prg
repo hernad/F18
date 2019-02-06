@@ -408,13 +408,10 @@ STATIC FUNCTION _get_inv_vars( vars )
 
    @ box_x_koord() + 1, box_y_koord() + 6 SAY  "PREGLED UNESENIH KOLICINA"
 
-   IF gNW $ "DR"
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
-      ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET _id_firma ;
-         VALID {|| p_partner( @_id_firma ), _id_firma := Left( _id_firma, 2 ), .T. }
-   ENDIF
+
+    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
+    ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
 
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "  Konto " GET _konto ;
       VALID P_Konto( @_konto )
@@ -578,11 +575,9 @@ FUNCTION mat_obracun_inv()
    o_partner(); o_konto()
    Box( "", 4, 60 )
    @ box_x_koord() + 1, box_y_koord() + 6 SAY "OBRACUN INVENTURE"
-   IF gNW $ "DR"
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdF VALID {|| p_partner( @cIdF ), cidf := Left( cidf, 2 ), .T. }
-   ENDIF
+
+  @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto  " GET cIdK VALID P_Konto( @cIdK )
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Datum  " GET cIdD
    READ; ESC_BCR

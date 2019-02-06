@@ -218,7 +218,6 @@ FUNCTION set_global_vars_2()
    PUBLIC gPDV := "D"
    PUBLIC gMjStr := PadR( "Sarajevo", 30 )
    PUBLIC gModemVeza := "N"
-   PUBLIC gNW := "D"
 
 
    PUBLIC gPartnBlock

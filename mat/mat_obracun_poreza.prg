@@ -18,13 +18,9 @@ FUNCTION pornar()
 
    // obracun poreza na realizaciju
 
-   o_partner()
-   o_tarifa()
+
    O_MAT_SUBAN
-   //o_konto()
-   //o_sifk()
-   //o_sifv()
-   //o_roba()
+
 
    dDatOd := CToD( "" )
    dDatDo := Date()
@@ -35,11 +31,9 @@ FUNCTION pornar()
    Box( "pnar", 8, 60, .F. )
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "OBRACUN POREZA NA REALIZACIJU"
-      IF gNW $ "DR"
+
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma: " GET cIdFirma valid {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Konto:  " GET qqKonto PICTURE "@S50"
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Za period od" GET dDatOd
       @ box_x_koord() + 6, Col() + 2 SAY "do" GET dDatDo

@@ -44,9 +44,8 @@ FUNCTION kalk_get_1_18()
    IF kalk_is_novi_dokument()
       _Kolicina := 0
    ENDIF
-   lGenStavke := .F.
-   IF !Empty( kalk_metoda_nc() ) .AND. _TBankTr <> "X"
 
+   IF !Empty( kalk_metoda_nc() ) .AND. _TBankTr <> "X"
       IF gKolicFakt == "D"
          KalkNaF( _idroba, @_kolicina )
       ELSE

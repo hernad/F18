@@ -114,7 +114,6 @@ FUNCTION kalk_get_1_95()
    nKolS := 0
    nKolZN := 0
    nc1 := nc2 := 0
-   lGenStavke := .F.
 
    IF _TBankTr <> "X"
 

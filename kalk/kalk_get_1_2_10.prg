@@ -139,16 +139,7 @@ FUNCTION kalk_get_1_10()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Rabat (%):"
    @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _Rabat PICT PicDEM
 
-   /*
-   IF gNW <> "X" .OR. gVodiKalo == "D"
-      ++ nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Normalni . kalo:"
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _GKolicina PICTURE PicKol
-      ++ nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Preko  kalo:    "
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _GKolicin2 PICTURE PicKol
-   ENDIF
-   */
+
 
    READ
 

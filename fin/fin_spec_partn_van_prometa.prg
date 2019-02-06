@@ -22,18 +22,14 @@ FUNCTION PartVanProm()
    PRIVATE cIdKonto := Space ( 7 ), cIdFirma := Space ( Len ( self_organizacija_id() ) ), ;
       cKrit := Space ( 60 ), aUsl
 
-   o_konto()
-   //o_partner()
    o_suban()
 
    Box (, 11, 60 )
    @ box_x_koord(), box_y_koord() + 15 SAY "PREGLED PARTNERA BEZ PROMETA"
-   IF gNW == "D"
-      cIdFirma := self_organizacija_id()
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma valid {|| p_partner( @cIdFirma ), cIdfirma := Left( cidfirma, 2 ), .T. }
-   ENDIF
+
+    cIdFirma := self_organizacija_id()
+    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
    @ box_x_koord() + 4, box_y_koord() + 2 SAY " Konto (prazno-svi)" GET cIdKonto ;
       VALID Empty ( cIdKonto ) .OR. p_konto ( @cIdKonto )
    @ box_x_koord() + 6, box_y_koord() + 2 SAY "Kriterij za telefon" GET cKrit PICT "@S30@!";
@@ -64,7 +60,7 @@ FUNCTION PartVanProm()
    ? Space ( 5 ) + "    Konto:", ;
       iif ( Empty ( cIdKonto ), "SVI", cIdKonto + konto->Naz )
    PopWa()
-   
+
    ? Space ( 5 ) + " Kriterij:", cKrit
    ? Space ( 5 ) + "Za period:", IIF ( Empty ( dDatOd ), "", DToC ( dDatOd ) + " " ) + ;
       "do", DToC ( dDatDo )

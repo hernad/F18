@@ -62,14 +62,12 @@ FUNCTION mat_unos_naloga()
       { "Kolicina",      {|| Transform( Kolicina, "999999.99" ) } } ;
       }
 
-   IF gNW == "R"
-      AAdd( ImeKol, { "Datum",               {|| DatDok                       }, "datdok" } )
-   ELSE
+
       AAdd( ImeKol, { "Cijena ",             {|| Transform( Cijena, "99999.999" ) }           } )
       AAdd( ImeKol, { "Iznos " + valuta_domaca_skraceni_naziv(), {|| Transform( Iznos, "9999999.9" ) }           } )
       AAdd( ImeKol, { "Iznos " + ValPomocna(),  {|| Transform( Iznos2, "9999999.9" ) }           } )
       AAdd( ImeKol, { "Datum",               {|| DatDok                       }, "datdok" } )
-   ENDIF
+
 
    Kol := {}
    FOR i := 1 TO Len( ImeKol )
@@ -127,12 +125,10 @@ STATIC FUNCTION mat_edit_priprema( fNovi )
       _idfirma := self_organizacija_id()
    ENDIF
 
-   IF gNW $ "DR"
+
       @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma: "
       ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma:" GET _IdFirma VALID {|| p_partner( @_IdFirma, 1, 20 ), _idfirma := Left( _idfirma, 2 ), .T. }
-   ENDIF
+
 
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "NALOG:   Vrsta:"  GET _IdVN    VALID P_VN( @_IdVN, 3, 23 )
    READ
@@ -162,12 +158,9 @@ STATIC FUNCTION mat_edit_priprema( fNovi )
 
    @  box_x_koord() + 9, box_y_koord() + 2  SAY "DOKUMENT:"
 
-   IF gNW == "N"
-      @ box_x_koord() + 9, box_y_koord() + 12 SAY "Tip :" GET _IdTipDok VALID P_TipDok( @_IdTipDok )
-      @ box_x_koord() + 9, box_y_koord() + 24 SAY "Broj:"   GET _BrDok
-   ELSE
+
       @ box_x_koord() + 9, box_y_koord() + 13 SAY "Broj:"   GET _BrDok
-   ENDIF
+
 
    IF fk1 == "D"; @  box_x_koord() + 9, Col() + 2 SAY "K1" GET _k1 PICT "@!" ; ENDIF
    IF fk2 == "D"; @  box_x_koord() + 9, Col() + 2 SAY "K2" GET _k2 PICT "@!" ; ENDIF
@@ -175,10 +168,7 @@ STATIC FUNCTION mat_edit_priprema( fNovi )
    IF fk4 == "D"; @  box_x_koord() + 9, Col() + 2 SAY "K4" GET _k4 PICT "@!" ; ENDIF
 
    @  box_x_koord() + 11, box_y_koord() + 2  SAY "Datum dok.:"   GET  _DatDok valid {|| _datkurs := _DatDok, .T. }
-   IF gNW == "N"
-      @  box_x_koord() + 11, box_y_koord() + 24 SAY "Datum kursa:" GET _DatKurs ;
-         VALID {|| nKurs := Kurs( _DatKurs ), QQOut( " " + valuta_domaca_skraceni_naziv() + "/" + ValPomocna(), Transform( nKurs, PicUn ) ), .T. }
-   ENDIF
+
 
    IF gkonto <> "D"
       @  box_x_koord() + 13, box_y_koord() + 2  SAY IF( gSeks == "D", "Predmet ", "Konto   " ) GET _IdKonto ;
@@ -192,7 +182,7 @@ STATIC FUNCTION mat_edit_priprema( fNovi )
 
    @ box_x_koord() + 16, box_y_koord() + 32 GET _Kolicina PICTURE PicKol VALID V_Kol( fnovi )
 
-   IF gNW != "R"
+   //IF gNW != "R"
       @ box_x_koord() + 16, box_y_koord() + 50 SAY "CIJENA   :" GET _Cijena PICTURE PicUn + "9" ;
          when {|| IF( _cijena <> 0, .T., Cijena() ) } ;
          valid {|| _Iznos := iif( _Cijena <> 0, Round( _Cijena * _Kolicina, 2 ), _Iznos ), .T. }
@@ -201,7 +191,7 @@ STATIC FUNCTION mat_edit_priprema( fNovi )
       @ box_x_koord() + 18, box_y_koord() + 50 SAY "IZNOS " + ValPomocna() + ":" GET _Iznos2 PICTURE PicUn ;
          when {|| _iznos2 := iif( gkonto == "D", _iznos, _iznos2 ), .T. }
 
-   ENDIF
+   //ENDIF
 
    READ
 
@@ -669,9 +659,9 @@ FUNCTION mat_st_anal_nalog( fnovi )
    ENDIF
 
    IF gkonto == "N"  .AND. g2Valute == "D"
-      M := "---- ------- ---------- ------------------ --- -------- ------- ---------- ----------" + IF( gNW == "R", "", " ---------- ---------- ------------ ------------" )
+      M := "---- ------- ---------- ------------------ --- -------- ------- ---------- ----------" + " ---------- ---------- ------------ ------------"
    ELSE
-      M := "---- ------- ------ ---------- ---------------------------------------- -- --------" + IF( gNW == "R", "", " ----------" ) + " ---------- ----------" + IF( gNW == "R", "", " ------------ ------------" )
+      M := "---- ------- ------ ---------- ---------------------------------------- -- --------"   + " ----------"  + " ---------- ----------" +  " ------------ ------------"
    ENDIF
 
    DO WHILE !Eof()
@@ -733,7 +723,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
                @ PRow(), PCol() + 1 SAY BrDok
             ENDIF
             @ PRow(), PCol() + 1 SAY DatDok
-            IF ( gkonto == "D" .OR. g2Valute == "N" ) .AND. gNW != "R"
+            IF ( gkonto == "D" .OR. g2Valute == "N" )
                IF Round( kolicina, 4 ) <> 0
                   @ PRow(), PCol() + 1 SAY iznos / kolicina PICTURE Right( kalk_pic_iznos_bilo_gpicdem() + "9", Len( kalk_pic_iznos_bilo_gpicdem() ) )
                ELSE
@@ -750,7 +740,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
             ENDIF
 
             nCI := PCol() + 1
-            IF gNW != "R"
+            //IF gNW != "R"
                IF D_P = "1"
                   @ PRow(), PCol() + 1 SAY Iznos PICTURE "@Z " + g_picdem_mat()
                   @ PRow(), PCol() + 1 SAY 0 PICTURE "@Z " + g_picdem_mat()
@@ -760,9 +750,9 @@ FUNCTION mat_st_anal_nalog( fnovi )
                   @ PRow(), PCol() + 1 SAY Iznos PICTURE "@Z " + g_picdem_mat()
                   nPot += Iznos
                ENDIF
-            ENDIF
+            // ENDIF
 
-            IF gkonto == "N" .AND. g2Valute == "D" .AND. gNW != "R"
+            IF gkonto == "N" .AND. g2Valute == "D" //.AND. gNW != "R"
                IF D_P = "1"
                   @ PRow(), PCol() + 1 SAY Iznos2  PICTURE "@Z " + gPicDIN
                   @ PRow(), PCol() + 1 SAY 0  PICTURE "@Z " + gPicDIN
@@ -781,7 +771,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
                @ PRow() + 1, nCP SAY IdPartner
                @ PRow(), nCR SAY IdZaduz
                @ PRow(), nCK14 SAY k1 + "-" + k2 + "-" + k3 + "-" + k4
-               IF Kolicina <> 0 .AND. gNW != "R"
+               IF Kolicina <> 0 //.AND. gNW != "R"
                   @ PRow(), nCK SAY "Cijena:"
                   @ PRow(), PCol() + 1 SAY  Iznos / Kolicina PICTURE "*****.***"
                   @ PRow(), PCol() + 1 SAY valuta_domaca_skraceni_naziv()
@@ -802,7 +792,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
 
          IF PRow() > 59; FF; Zagl11();  ENDIF
          ? M
-         IF gNW != "R"
+         //IF gNW != "R"
             ? "UKUPNO ZA DOKUMENT:"
             @ PRow(), PCol() + 1 SAY cBrDok
             @ PRow(), nCI - 1 SAY ""
@@ -814,7 +804,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
                @ PRow(), PCol() + 1 SAY nPot2 PICTURE "@Z " + gPicDIN
             ENDIF
             ? M
-         ENDIF
+         //ENDIF
 
          nUkDug += nDug; nUkPot += nPot
          nUkDug2 += nDug2; nUkPot2 += nPot2
@@ -822,7 +812,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
       ENDDO // mat_nalog
 
       IF PRow() > 59; FF; Zagl11();  ENDIF
-      IF gNW != "R"
+      //IF gNW != "R"
          ? M
          ? "ZBIR NALOGA:"
          @ PRow(), nCI - 1 SAY ""
@@ -833,7 +823,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
             @ PRow(), PCol() + 1 SAY nUkPot2 PICTURE "@Z " + gPicDIN
          ENDIF
          ? M
-      ENDIF
+      //ENDIF
       cIdFirma := IdFirma
       cIdVN := IdVN
       cBrNal := BrNal
@@ -854,7 +844,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
 
    my_close_all_dbf()
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -878,13 +868,13 @@ STATIC FUNCTION Zagl11()
    @ PRow(), 120 SAY "Str " + Str( ++nStr, 3 )
    ? M
    IF gkonto == "N" .AND. g2Valute == "D"
-      ? "*R. *" + KonSeks( "KONTO  " ) + "*  ROBA    *  NAZIV ROBE      *  D O K U M E N T   *      KOLICINA       *" + IF( gNW == "R", "", "  I Z N O S   " + valuta_domaca_skraceni_naziv() + "   *   I Z N O S   " + ValPomocna() + "     *" )
-      ? "             ----------  ---------------  --------------------- --------------------- " + IF( gNW == "R", "", "--------------------- -------------------------" )
-      ? "*BR.*       * PARTNER  *  ZADUZUJE        *TIP* BROJ  * DATUM  *  ULAZ    *  IZLAZ   *" + IF( gNW == "R", "", "   DUG    *   POT    *    DUG     *    POT    *" )
+      ? "*R. *" + KonSeks( "KONTO  " ) + "*  ROBA    *  NAZIV ROBE      *  D O K U M E N T   *      KOLICINA       *" + "  I Z N O S   " + valuta_domaca_skraceni_naziv() + "   *   I Z N O S   " + ValPomocna() + "     *"
+      ? "             ----------  ---------------  --------------------- --------------------- " + "--------------------- -------------------------"
+      ? "*BR.*       * PARTNER  *  ZADUZUJE        *TIP* BROJ  * DATUM  *  ULAZ    *  IZLAZ   *" + "   DUG    *   POT    *    DUG     *    POT    *"
    ELSE
-      ? "*R. *" + KonSeks( "KONTO  " ) + "*Partn.*  SIFRA   *            NAZIV                       * DOKUMENT   *" + IF( gNW == "R", "", "  Cijena *" ) + "      KOLICINA       *" + IF( gNW == "R", "", "   I Z N O S   " + valuta_domaca_skraceni_naziv() + "     *" )
-      ? "            *      *                                                   --------------" + IF( gNW == "R", "", "         *" ) + "--------------------- " + IF( gNW == "R", "", "-------------------------" )
-      ? "*BR.*       *      *          *                                        *TIP* DATUM  *" + IF( gNW == "R", "", "         *" ) + "  ULAZ    *  IZLAZ   *" + IF( gNW == "R", "", "    DUG     *    POT    *" )
+      ? "*R. *" + KonSeks( "KONTO  " ) + "*Partn.*  SIFRA   *            NAZIV                       * DOKUMENT   *" +  "  Cijena *"  + "      KOLICINA       *" + "   I Z N O S   " + valuta_domaca_skraceni_naziv() + "     *"
+      ? "            *      *                                                   --------------" + "         *"  + "--------------------- " + "-------------------------"
+      ? "*BR.*       *      *          *                                        *TIP* DATUM  *" + "         *"  + "  ULAZ    *  IZLAZ   *" + "    DUG     *    POT    *"
    ENDIF
    ? M
 

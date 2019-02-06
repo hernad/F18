@@ -60,11 +60,9 @@ FUNCTION mat_st_sint_nalog( fnovi )
    IF !fnovi
       Box( "", 1, 35 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nalog:"
-      IF gNW $ "DR"
+
          @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
-      ELSE
-         @ box_x_koord() + 1, Col() + 1 GET cIdFirma
-      ENDIF
+
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVN
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrNal
       read; ESC_BCR

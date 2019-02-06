@@ -36,11 +36,9 @@ FUNCTION fin_sinteticki_nalog_stampa( lAzuriraniDokument )
 
       Box( "", 1, 35 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nalog:"
-      IF gNW == "D"
-         @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
-      ELSE
-         @ box_x_koord() + 1, Col() + 1 GET cIdFirma
-      ENDIF
+
+      @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
+
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVN PICT "@!"
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrNal VALID fin_fix_broj_naloga( @cBrNal )
       READ

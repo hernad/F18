@@ -40,17 +40,15 @@ FUNCTION fin_sint_kartica()
    RPar( "c3", @cBrza )
    RPar( "c4", @cPredh )
 
-   IF gNW == "D"; cIdFirma := self_organizacija_id(); ENDIF
+   cIdFirma := self_organizacija_id()
 
    Box( "", 9, 75 )
    DO WHILE .T.
       SET CURSOR ON
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "KARTICA (SINTETICKI KONTO)"
-      IF gNW == "D"
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
+       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Brza kartica (D/N)               " GET cBrza PICT "@!" VALID cBrza $ "DN"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "BEZ/SA prethodnim prometom (1/2):" GET cPredh VALID cPredh $ "12"
       read; ESC_BCR
@@ -263,12 +261,8 @@ FUNCTION SinKZagl()
    ENDIF
    @ PRow(), 125 SAY "Str." + Str( ++nStr, 3 )
 
-   IF gNW == "D"
-      ? "Firma:", self_organizacija_id(), self_organizacija_naziv()
-   ELSE
-      select_o_partner( cIdFirma )
-      ? "Firma:", cidfirma, AllTrim( partn->naz ), AllTrim( partn->naz2 )
-   ENDIF
+
+   ? "Firma:", self_organizacija_id(), self_organizacija_naziv()
 
    IF gFinRj == "D" .AND. gSAKrIz == "D" .AND. Len( cIdRJ ) <> 0
       ? "Radna jedinica ='" + cIdRj + "'"

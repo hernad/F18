@@ -51,12 +51,10 @@ FUNCTION fin_spec_otv_stavke_preko_dana()
 
    Box( "skpoi", 14, 70, .F. )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "OTVORENE STAVKE PREKO/DO ODREDJENOG BROJA DANA"
-   IF gNW == "D"
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "
-      ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma: " GET cIdFirma valid {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-   ENDIF
+
+    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "
+    ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
    PRIVATE cViseManje := ">"
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "KONTO  " GET cIdKonto VALID p_konto( @cIdKonto )
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "Broj dana ?" GET cViseManje VALID cViseManje $ "><"

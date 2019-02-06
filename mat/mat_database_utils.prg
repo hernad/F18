@@ -56,11 +56,9 @@ FUNCTION mat_povrat_naloga( lStorno )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nalog:"
 
-   IF gNW == "D"
-      @ box_x_koord() + 1, Col() + 1 SAY cIdFirma PICT "@!"
-   ELSE
-      @ box_x_koord() + 1, Col() + 1 GET cIdFirma PICT "@!"
-   ENDIF
+
+    @ box_x_koord() + 1, Col() + 1 SAY cIdFirma PICT "@!"
+
 
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVN PICT "@!"
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrNal VALID !Empty( cBrNal )
@@ -69,11 +67,8 @@ FUNCTION mat_povrat_naloga( lStorno )
 
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Broj novog naloga (naloga storna):"
 
-      IF gNW == "D"
-         @ box_x_koord() + 3, Col() + 1 SAY cIdFirma2
-      ELSE
-         @ box_x_koord() + 3, Col() + 1 GET cIdFirma2
-      ENDIF
+      @ box_x_koord() + 3, Col() + 1 SAY cIdFirma2
+
 
       @ box_x_koord() + 3, Col() + 1 SAY "-" GET cIdVN2 PICT "@!"
       @ box_x_koord() + 3, Col() + 1 SAY "-" GET cBrNal2

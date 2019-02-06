@@ -31,7 +31,7 @@ FUNCTION fin_sint_kart_po_mjesecima()
    PRIVATE cSection := "2", cHistory := " ", aHistory := {}
    Params1()
    RPar( "c1", @cIdFirma ); RPar( "c2", @qqKonto ); RPar( "d1", @dDatOd ); RPar( "d2", @dDatDo )
-   IF gNW == "D";cIdFirma := self_organizacija_id(); ENDIF
+   cIdFirma := self_organizacija_id()
    qqKonto := PadR( qqKonto, 100 )
 
    Box( "", 5, 75 )
@@ -39,11 +39,9 @@ FUNCTION fin_sint_kart_po_mjesecima()
       SET CURSOR ON
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "KARTICA (SINTETIČKI KONTO) PO MJESECIMA"
 
-      IF gNW == "D"
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto: " GET qqKonto PICTURE "@S50"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Datum od:" GET dDatOd
       @ box_x_koord() + 4, Col() + 2 SAY "do:" GET dDatDo

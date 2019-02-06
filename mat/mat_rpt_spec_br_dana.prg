@@ -577,13 +577,9 @@ STATIC FUNCTION _get_vars( params )
 
    Box(, 10, 70 )
 
-   IF gNW == "D"
+
       @ box_x_koord() + _cnt, box_y_koord() + 2 SAY "Firma "
       ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + _cnt, box_y_koord() + 2 SAY "Firma: " GET _firma ;
-         VALID {|| p_partner( @_firma ), _firma := Left( _firma, 2 ), .T. }
-   ENDIF
 
    ++ _cnt
    ++ _cnt

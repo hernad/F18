@@ -34,11 +34,9 @@ FUNCTION specifikacija_po_analitickim_kontima()
 
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 6 SAY "SPECIFIKACIJA ANALITICKIH KONTA"
-      IF gNW == "D"
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Konto " GET qqKonto  PICT "@!S50"
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum od" GET dDatOd
       @ box_x_koord() + 5, Col() + 2 SAY "do" GET dDatDo

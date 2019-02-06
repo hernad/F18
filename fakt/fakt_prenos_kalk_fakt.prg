@@ -366,12 +366,8 @@ FUNCTION kalk_2_fakt_period()
    DO WHILE .T.
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma/RJ:"
+      @ box_x_koord() + 1, Col() + 1 SAY cIdFirma PICT "@!"
 
-      IF gNW == "N"
-         @ box_x_koord() + 1, Col() + 1 GET cIdFirma PICT "@!"
-      ELSE
-         @ box_x_koord() + 1, Col() + 1 SAY cIdFirma PICT "@!"
-      ENDIF
 
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Kalk partner" GET cIdPartner  VALID p_partner( @cIdPartner )
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Vrste KALK dokumenata" GET qqIdVd PICT "@!S30"

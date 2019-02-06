@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR gCijene, gDefNiv, gNw
+MEMVAR gCijene, gDefNiv
 
 STATIC s_cKalkFinIstiBroj := NIL
 STATIC s_cKalkPreuzimanjeTroskovaIzSifRoba := NIL
@@ -54,8 +54,6 @@ FUNCTION kalk_params()
    AAdd( aOpcExe, {|| kalk_par_razno( 'D' ) } )
 
    f18_menu( "pars", .F., nIzbor, aOpc, aOpcExe )
-
-   gNW := "X"
 
    my_close_all_dbf()
 
@@ -258,8 +256,6 @@ FUNCTION kalk_par_razno()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Koristiti BARKOD pri unosu kalkulacija (D/N)" GET cUnosBarKodDN VALID cUnosBarKodDN $ "DN" PICT "@!"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Potpis na kraju naloga D/N     " GET gPotpis VALID gPotpis $ "DN"
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Novi korisnički interfejs D/N/X" GET gNW VALID gNW $ "DNX" PICT "@!"
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Tip tabele (0/1/2)             " GET gTabela VALID gTabela < 3 PICT "9"
@@ -315,7 +311,7 @@ FUNCTION kalk_par_razno()
       set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glBrojacPoKontima )
       set_metric( "kalk_potpis_na_kraju_naloga", NIL, gPotpis )
       set_metric( "kalk_tip_tabele", NIL, gTabela )
-      set_metric( "kalk_novi_korisnicki_interfejs", NIL, gNW )
+
       //set_metric( "kalk_zabrana_promjene_tarifa", NIL, gPromTar )
       set_metric( "kalk_djoker_f1_kod_kontiranja", NIL, gFunKon1 )
       set_metric( "kalk_djoker_f2_kod_kontiranja", NIL, gFunKon2 )

@@ -12,8 +12,10 @@
 #include "f18.ch"
 
 MEMVAR GetList
-MEMVAR nKalkStaraCijena, nKalkNovaCijena
+MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena
 MEMVAR _DatFaktP, _IdKonto, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
+MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
+MEMVAR _TBankTr, _GKolicina, _GKolicin2
 MEMVAR aPorezi
 
 FUNCTION kalk_get_1_19()
@@ -44,7 +46,6 @@ FUNCTION kalk_get_1_19()
       _Kolicina := 0
    ENDIF
 
-   lGenStavke := .F.
    IF !Empty( kalk_metoda_nc() ) .AND. _TBankTr <> "X"
       MsgO( "Računam količinu u prodavnici" )
       kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @_kolicina, NIL, NIL, @_nc )
@@ -88,10 +89,9 @@ FUNCTION kalk_get_1_19()
    _MPCSaPP := nKalkNovaCijena - nKalkStaraCijena
    _MPC := 0
    _fcj := nKalkStaraCijena
-
    _mpc := MpcBezPor( nKalkNovaCijena, aPorezi, , _nc ) - MpcBezPor( nKalkStaraCijena, aPorezi, , _nc )
 
-   IF Pitanje(, "Staviti u šifrarnik novu cijenu", gDefNiv ) == "D"
+   IF Pitanje(, "Staviti u šifarnik novu cijenu", gDefNiv ) == "D"
       select_o_koncij( _idkonto )
       roba_set_mcsapp_na_osnovu_koncij_pozicije( _fcj + _mpcsapp )
       SELECT kalk_pripr

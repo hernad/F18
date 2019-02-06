@@ -52,11 +52,8 @@ FUNCTION mat_specifikacija()
       ENDIF
    ENDIF
 
-   IF gNW $ "DR"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + 4, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-   ENDIF
+
 
    @ box_x_koord() + 5, box_y_koord() + 2 SAY KonSeks( "Konta  " ) + " : " GET qqKonto  PICTURE "@S50"
    @ box_x_koord() + 6, box_y_koord() + 2 SAY "Partner : " GET qqPartn  PICTURE "@S50"

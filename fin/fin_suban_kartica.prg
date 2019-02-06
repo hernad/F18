@@ -225,16 +225,16 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          lSpojiUplate := .T.
       ENDIF
 
-      IF !( cK14 $ "123" ) // .AND. ( cSazeta == "D" .OR. gNW == "D" )
+      IF !( cK14 $ "123" )
          cK14 := "3"
       ENDIF
-      // IF cSazeta == "N"
+
       IF cDinDem == "3"
          nC1 := 59 + iif( _fin_params[ "fin_tip_dokumenta" ], 17, 0 )
       ELSE
          nC1 := 63 + iif( _fin_params[ "fin_tip_dokumenta" ], 17, 0 )
       ENDIF
-      // ENDIF
+
 
       IF cDinDem == "3"
          cKumul := "1"

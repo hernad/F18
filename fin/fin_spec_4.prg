@@ -22,11 +22,9 @@ FUNCTION SpecOstPop()
 
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 6 SAY "SPECIFIKACIJA KONTA ZA ODREDJENE PARTNERE"
-      IF gNW == "D"
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma: " GET cIdFirma valid {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
+       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "Partner:" GET qqPartner PICT "@!S50"
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Konta  :" GET  qqKonto PICT "@!S50"
       READ; ESC_BCR

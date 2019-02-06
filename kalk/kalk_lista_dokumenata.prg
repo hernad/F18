@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION kalk_stampa_liste_dokumenata()
 
    LOCAL nCol1 := 0, cImeKup
@@ -19,7 +18,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    LOCAL m
    LOCAL nC
 
-   // LOCAL lImaUkSt := .F.
    LOCAL cIdVd
    LOCAL _head
    LOCAL _n_col := 20
@@ -32,8 +30,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    PRIVATE cIdfirma := self_organizacija_id() // fn preduzece trazi privatnu varijablu
 
    my_close_all_dbf()
-
-   //o_partner()
 
    dDatOd := CToD( "" )
    dDatDo := Date()
@@ -66,11 +62,10 @@ FUNCTION kalk_stampa_liste_dokumenata()
 
    DO WHILE .T.
 
-      IF gNW == "X"
          cIdFirma := PadR( cidfirma, 2 )
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma - prazno svi" GET cIdFirma valid {|| .T. }
          READ
-      ENDIF
+
 
       IF !Empty( cidfirma )
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Tip dokumenta (prazno svi tipovi)" GET cIdVd PICT "@!"
@@ -127,9 +122,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    ENDIF
    find_kalk_doks_by_tip_datum( cIdFirma, cIdVd, dDatOd, dDatDo )
 
-   // IF FieldPos( "ukstavki" ) <> 0
-   // lImaUkSt := .T.
-   // ENDIF
 
    PRIVATE cFilt := ".t."
 
@@ -169,11 +161,8 @@ FUNCTION kalk_stampa_liste_dokumenata()
 
    Preduzece()
 
-   //IF FIELD_LENGTH_IDKONTO > 7
-  //    P_COND2
-   //ELSE
+
       P_COND
-   //ENDIF
 
    ??U "KALK: Štampa dokumenata na dan:", Date(), Space( 10 ), "za period", dDatOd, "-", dDatDo
 
@@ -261,33 +250,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
       nRabat += Rabat
       nMPV += MPV
 
-/*
-      IF lImaUkSt
-         IF field->ukStavki == 0
 
-            nStavki := 0
-
-            SELECT kalk
-            SET ORDER TO TAG "1"
-            SEEK kalk_doks->( idFirma + idVd + brDok )
-
-            DO WHILE !Eof() .AND. idFirma + idVd + brDok == kalk_doks->( idFirma + idVd + brDok )
-               nStavki := nStavki + 1
-               SKIP 1
-            ENDDO
-
-            SELECT kalk_doks
-            hRec := dbf_get_rec()
-            hRec[ "ukstavki" ] := nStavki
-            update_rec_server_and_dbf( "kalk_doks", hRec, 1, "FULL" )
-
-         ENDIF
-
-         nUkStavki += field->ukStavki
-         @ PRow(), PCol() + 1 SAY Str( field->ukStavki, 6 )
-
-      ENDIF
-*/
       SKIP
 
    ENDDO
@@ -304,9 +267,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
       ?? "       "
    ENDIF
 
-   // IF lImaUkSt
-   // @ PRow(), PCol() + 1 SAY Str( nUkStavki, 6 )
-   // ENDIF
    ? m
 
    FF

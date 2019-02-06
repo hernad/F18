@@ -84,7 +84,6 @@ FUNCTION Get1_82()
    nc1 := nc2 := 0
 
 
-   lGenStavke := .F.
    IF _TBankTr <> "X"
 
       kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )

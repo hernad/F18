@@ -39,12 +39,10 @@ FUNCTION sint_lager_lista_prodavnice()
    Box(, 12, 66 )
    cGrupacija := Space( 4 )
    DO WHILE .T.
-      IF gNW $ "DX"
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
-         ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma  " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-      ENDIF
+
+     @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
+     ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Prodavnice" GET qqKonto  PICT "@!S50"
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Artikli   " GET qqRoba PICT "@!S50"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Tarife    " GET qqTarifa PICT "@!S50"

@@ -116,7 +116,7 @@ FUNCTION kalk_get_1_11()
    nKolZN := 0
    nc1 := 0
    nc2 := 0
-   lGenStavke := .F.
+
    IF _TBankTr <> "X"
       IF !Empty( kalk_metoda_nc() )
          nc1 := nc2 := 0

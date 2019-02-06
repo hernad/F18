@@ -101,11 +101,8 @@ FUNCTION fin_dnevnik_naloga()
 
    lJerry := .F.
 
-   IF gNW == "N"
-      M := "------ -------------- --- " + "---- ------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + REPL( "-", 20 ), "" ) + " -- ------------- ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
-   ELSE
-      M := "------ -------------- --- " + "---- ------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + REPL( "-", 20 ), "" ) + " ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
-   ENDIF
+    M := "------ -------------- --- " + "---- ------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + REPL( "-", 20 ), "" ) + " ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
+
 
    cMjGod := Str( Month( dDatNal ), 2 ) + Str( Year( dDatNal ), 4 )
 

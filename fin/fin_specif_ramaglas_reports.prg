@@ -29,16 +29,13 @@ FUNCTION SpecTrosRN()
    dOd := CToD( "" )
    dDo := Date()
 
-   //o_partner()
 
    Box( "#SPECIFIKACIJA TROSKOVA PO RADNIM NALOZIMA", 10, 75 )
 
-   IF gNW == "D"
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
-      ?? self_organizacija_id(), "-", self_organizacija_naziv()
-   ELSE
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma VALID {|| p_partner( @cIdFirma ), cidfirma := Left( cidfirma, 2 ), .T. }
-   ENDIF
+
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
+   ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
 
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Radni nalozi (uslov):" GET qqRN
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "Period: od datuma" GET dOd

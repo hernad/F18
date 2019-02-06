@@ -74,12 +74,10 @@ FUNCTION fin_preknjizenje_konta()
 
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 6 SAY "PREKNJIZENJE SUBANALITICKIH KONTA"
-      IF gNW == "D"
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
-         ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      ELSE
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma: " GET cIdFirma valid {|| p_partner( @cIdFirma ), cIdFirma := Left( cIdFirma, 2 ), .T. }
-      ENDIF
+
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
+      ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto   " GET qqKonto  PICT "@!S50"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Partner " GET qqPartner PICT "@!S50"
       IF gFinRj == "D"

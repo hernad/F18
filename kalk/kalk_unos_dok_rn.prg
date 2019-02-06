@@ -195,17 +195,9 @@ FUNCTION Get1_RN()
    @ box_x_koord() + 15, box_y_koord() + 2   SAY "N.CJ.(DEM/JM):"
    @ box_x_koord() + 15, box_y_koord() + 50  GET _FCJ PICTURE PicDEM VALID _fcj > 0 when {|| _fcj := iif( nRbr > 1 .AND. kalk_is_novi_dokument(), _vpc, _fcj ), V_kol10() }
 
-/*
-   --IF gNW <> "X"
-      @ box_x_koord() + 18, box_y_koord() + 2   SAY "Transport. kalo:"
-      @ box_x_koord() + 18, box_y_koord() + 40  GET _GKolicina PICTURE PicKol
 
-      @ box_x_koord() + 19, box_y_koord() + 2   SAY "Ostalo kalo:    "
-      @ box_x_koord() + 19, box_y_koord() + 40  GET _GKolicin2 PICTURE PicKol
-   ENDIF
-*/
-
-   read; ESC_RETURN K_ESC
+   read
+   ESC_RETURN K_ESC
 
    _FCJ2 := _FCJ * ( 1 -_Rabat / 100 )
 
@@ -221,7 +213,7 @@ FUNCTION Get1_RN()
 
 FUNCTION Get2_RN()
 
-   // {
+
    LOCAL cSPom := " (%,A,U,R) "
    PRIVATE getlist := {}
 

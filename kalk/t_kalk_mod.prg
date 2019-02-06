@@ -290,23 +290,13 @@ METHOD TKalkMod:set_module_gvars()
    gCache := fetch_metric( "kalk_cache_tabela", f18_user(), gCache )
    gnLOst := fetch_metric( "kalk_limit_za_otvorene_stavke", f18_user(), gnLOst )
 
-
    gAImpPrint := fetch_metric( "kalk_auto_import_podataka_printanje", f18_user(), gAImpPrint )
-
-   //IF roba_barkod_pri_unosu()
-  //   -- gDuzSifIni := "13" // ako se koristi barkod onda je duzina robe 13
-   //ENDIF
 
    lPrikPRUC := fetch_metric( "kalk_prikazi_kolone_pruc", nil, lPrikPRUC )
 
    glZabraniVisakIP := fetch_metric( "kalk_zabrani_visak_kod_ip", nil, glZabraniVisakIP )
    glBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glBrojacPoKontima )
 
-   //gcSlObracun := fetch_metric( "kalk_sl_obrazac", nil, gcSLObrazac )
-
-   //gRobaBlock := {| Ch| kalk_roba_key_handler( Ch ) }
-
-   gNW := "D"
 
    info_bar( ::cName, ::cName + " - kalk set gvars end" )
    info_bar( "KALK", "params in cache: " + AllTrim( Str( params_in_cache() ) ) )

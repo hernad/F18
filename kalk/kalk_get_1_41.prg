@@ -125,7 +125,6 @@ FUNCTION kalk_get_1_41()
       nKolZN := 0
       nc1 := 0
       nc2 := 0
-      lGenStavke := .F.
 
       // ako je X onda su stavke vec izgenerisane
       IF _TBankTr <> "X"

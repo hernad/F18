@@ -94,11 +94,9 @@ FUNCTION kalk_kontiranje_gen_finmat()
          Box( "", 1, 50 )
          SET CURSOR ON
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument broj:"
-         IF gNW $ "DX"
-            @ box_x_koord() + 1, Col() + 2  SAY cIdFirma
-         ELSE
-            @ box_x_koord() + 1, Col() + 2 GET cIdFirma
-         ENDIF
+
+         @ box_x_koord() + 1, Col() + 2  SAY cIdFirma
+
          @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVD
          @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrDok
          READ

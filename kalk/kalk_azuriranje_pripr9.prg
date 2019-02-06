@@ -49,7 +49,7 @@ FUNCTION kalk_azuriranje_tabele_pripr9()
 
    DO WHILE !Eof()
 
-      _scan := AScan( _a_pripr, {|var| VAR[ 1 ] == field->idfirma .AND. ;
+      _scan := AScan( _a_pripr, {| var | VAR[ 1 ] == field->idfirma .AND. ;
          VAR[ 2 ] == field->idvd .AND. ;
          VAR[ 3 ] == field->brdok } )
 
@@ -101,7 +101,7 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
    SELECT kalk_pripr9
    SET ORDER TO TAG "1"
 
-   IF ( ( cIdFirma == nil ) .AND. ( cIdVd == nil ) .AND. ( cBrDok == nil ) )
+   IF ( ( cIdFirma == NIL ) .AND. ( cIdVd == NIL ) .AND. ( cBrDok == NIL ) )
       lSilent := .F.
    ENDIF
 
@@ -114,11 +114,9 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
    IF !lSilent
       Box( "", 1, 35 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:"
-      IF gNW $ "DX"
-         @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
-      ELSE
-         @ box_x_koord() + 1, Col() + 1 GET cIdFirma
-      ENDIF
+
+      @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
+
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVD
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrDok
       READ
