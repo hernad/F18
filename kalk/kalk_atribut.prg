@@ -24,7 +24,6 @@ FUNCTION get_kalk_attr_opis( dok, from_server )
    RETURN oAttr:get_attr()
 
 
-
 // --------------------------------------------------
 // get atribut rok
 // --------------------------------------------------

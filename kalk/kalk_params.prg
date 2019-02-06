@@ -86,20 +86,11 @@ FUNCTION kalk_par_varijante_prikaza()
 
    Box(, 23, 76, .F., "Varijante obrade i prikaza pojedinih dokumenata" )
 
-   //@ box_x_koord() + nX, box_y_koord() + 2 SAY8 "14 -Varijanta poreza na RUC u VP 1/2 (1-naprijed,2-nazad)"  GET gVarVP  VALID gVarVP $ "12"
-
-   nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "14 - Nivelaciju izvršiti na ukupno stanje/na prodanu kolicinu  1/2 ?" GET gNiv14  VALID gNiv14 $ "12"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "10 - prikaz ukalkulisanog poreza (D/N)" GET  g10Porez  PICT "@!" VALID g10Porez $ "DN"
-
-  // nX += 1
-  // @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "10 - ** količina = (1) kol-kalo ; (2) kol" GET gKalo VALID gKalo $ "12"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "10 - automatsko preuzimanje troškova iz sifrarnika robe ? (0/D/N)" GET cRobaTrosk VALID cRobaTrosk $ "0DN" PICT "@!"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "   default tip za pojedini trošak:"
 
@@ -117,21 +108,15 @@ FUNCTION kalk_par_varijante_prikaza()
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Mogućnost konverzije valute pri unosu dokumenta (D/N)" GET cKonverzijaValuteDn VALID cKonverzijaValuteDn $ "DN" PICT "@!"
 
-   nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Voditi kalo pri ulazu " GET gVodiKalo VALID gVodiKalo $ "DN" PICT "@!"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Program se koristi isključivo za vođenje magacina po NC  Da-1 / Ne-2 " GET gMagacin VALID gMagacin $ "12"
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta FAKT13->KALK11 ( 1-mpc iz šifarnika, 2-mpc iz FAKT13)" GET  gVar13u11  PICT "@!" VALID gVar13u11 $ "12"
-
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta KALK 11 bez prikaza NC i storna RUC-a (D/N)" GET  g11bezNC  PICT "@!" VALID g11bezNC $ "DN"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Pri ulaznoj kalkulaciji pomoć sa C.sa PDV (D/N)" GET  gcMpcKalk10 PICT "@!" VALID gcMpcKalk10 $ "DN"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta popusta na dokumentima, default P-%, C-cijena" GET gRCRP
 
@@ -142,18 +127,14 @@ FUNCTION kalk_par_varijante_prikaza()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina za nivelaciju iz FAKT-a " GET  gKolicFakt VALID gKolicFakt $ "DN"  PICT "@!"
 
    @ box_x_koord() + nX, Col() + 1 SAY8 "Auto ravnoteža naloga (FIN):" GET cFinAutoAzurDN VALID cFinAutoAzurDN $ "DN" PICT "@!"
-
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Automatsko ažuriranje cijena u šifarnik (D/N)" GET gAutoCjen VALID gAutoCjen $ "DN" PICT "@!"
-
    READ
 
    BoxC()
 
    IF LastKey() <> K_ESC
       set_metric( "kalk_magacin_po_nc", NIL, gMagacin )
-      set_metric( "kalk_kolicina_kalo", NIL, gKalo )
-      set_metric( "kalk_voditi_kalo", NIL, gVodiKalo )
       set_metric( "kalk_dokument_10_prikaz_ukalk_poreza", NIL, g10Porez )
       set_metric( "kalk_dokument_14_varijanta_poreza", NIL, gVarVP )
       set_metric( "kalk_dokument_11_bez_nc", NIL, g11bezNC )
@@ -162,10 +143,8 @@ FUNCTION kalk_par_varijante_prikaza()
       set_metric( "kalk_varijanta_fakt_13_kalk_11_cijena", NIL, gVar13u11 )
       set_metric( "kalk_pomoc_sa_mpc", NIL, gcMpcKalk10 )
       set_metric( "kalk_kolicina_kod_nivelacije_fakt", NIL, gKolicFakt )
-
       kalk_preuzimanje_troskova_iz_sif_roba( cRobaTrosk )
       set_metric( "kalk_varijanta_popusta_na_dokumentima", NIL, gRCRP )
-
       set_metric( "kalk_automatsko_azuriranje_cijena", NIL, gAutoCjen )
       set_metric( "kalk_trosak_1_tip", NIL, gRobaTr1Tip )
       set_metric( "kalk_trosak_2_tip", NIL, gRobaTr2Tip )
@@ -255,8 +234,6 @@ FUNCTION kalk_par_razno()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Potpis na kraju naloga D/N     " GET gPotpis VALID gPotpis $ "DN"
 
    nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Tip tabele (0/1/2)             " GET gTabela VALID gTabela < 3 PICT "9"
-
    @ box_x_koord() + nX, Col() + 2 SAY "Vise konta na dokumentu (D/N) ?" GET _vise_konta VALID _vise_konta $ "DN" PICT "@!"
    ++nX
 
@@ -305,7 +282,6 @@ FUNCTION kalk_par_razno()
       set_metric( "kalk_brojac_kalkulacija", NIL, gBrojacKalkulacija )
       set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glKalkBrojacPoKontima )
       set_metric( "kalk_potpis_na_kraju_naloga", NIL, gPotpis )
-      set_metric( "kalk_tip_tabele", NIL, gTabela )
 
       //set_metric( "kalk_zabrana_promjene_tarifa", NIL, gPromTar )
       set_metric( "kalk_djoker_f1_kod_kontiranja", NIL, gFunKon1 )

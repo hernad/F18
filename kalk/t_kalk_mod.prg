@@ -120,7 +120,6 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC gAFin := "D"
    PUBLIC gAMat := "0"
    PUBLIC gAFakt := "D"
-   PUBLIC gVodiKalo := "N"
    PUBLIC gAutoCjen := "D"
    PUBLIC gVarEv := "1"  // 1-sa cijenama   2-bez cijena
    PUBLIC c24T1 := PadR( "Tr 1", 15 )
@@ -153,7 +152,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC gGen16 := "1"
    PUBLIC gNiv14 := "1"
 
-   PUBLIC gTabela := 0
+   // PUBLIC gTabela := 0
    PUBLIC gPicNC := "999999.99999999"
    PUBLIC gKomFakt := "20"
    PUBLIC gKomKonto := "5611   "     // zakomision definisemo
@@ -238,19 +237,15 @@ METHOD TKalkMod:set_module_gvars()
    gBrojacKalkulacija := fetch_metric( "kalk_brojac_kalkulacija", nil, gBrojacKalkulacija )
    gMagacin := fetch_metric( "kalk_magacin_po_nc", nil, gMagacin )
    gCijene := fetch_metric( "kalk_azuriranje_sumnjivih_dokumenata", nil, gCijene )
-   gTabela := fetch_metric( "kalk_tip_tabele", nil, gTabela )
    gSetForm := fetch_metric( "kalk_set_formula", nil, gSetForm )
    gGen16 := fetch_metric( "kalk_generisi_16_nakon_96", f18_user(), gGen16 )
    gKomFakt := fetch_metric( "kalk_oznaka_rj_u_fakt", nil, gKomFakt )
    gKomKonto := fetch_metric( "kalk_komision_konto", nil, gKomKonto )
-   // gKalo := fetch_metric( "kalk_kolicina_kalo", nil, gKalo )
-   gVodiKalo := fetch_metric( "kalk_voditi_kalo", nil, gVodiKalo )
    gNiv14 := fetch_metric( "kalk_tip_nivelacije_14", nil, gNiv14 )
 
    gDecKol := fetch_metric( "kalk_broj_decimala_za_kolicinu", nil, gDeckol )
    gDefNiv := fetch_metric( "kalk_promjena_cijena_odgovor", nil, gDefNiv )
    gVarEv := fetch_metric( "kalk_varijanta_evidencije", nil, gVarEv )
-
 
    gPicProc := fetch_metric( "kalk_format_prikaza_procenta", nil, gPicProc )
 

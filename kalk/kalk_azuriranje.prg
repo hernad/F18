@@ -66,11 +66,6 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
 
    o_kalk_za_azuriranje( .T. )
 
-   // SELECT kalk_doks
-   // IF FieldPos( "ukstavki" ) <> 0
-   // lBrStDoks := .T.
-   // ENDIF
-
    IF nije_dozvoljeno_azuriranje_sumnjivih_stavki() .AND. !kalk_provjera_integriteta( @aOstaju, lViseDok )
       RETURN .F.
    ENDIF
@@ -208,22 +203,18 @@ STATIC FUNCTION kalk_gen_zavisni_fin_fakt_nakon_azuriranja( lGenerisi, lAuto, lS
    LOCAL lgAMat := gAMat
 
    o_kalk_za_azuriranje()
-
    IF kalk_generisati_11()
       lForm11 := .T.
       cNext11 := kalk_get_next_broj_v5( self_organizacija_id(), "11", NIL )
       kalk_gen_11_iz_10( cNext11 )
    ENDIF
 
-
    IF lGenerisi
       kalk_kontiranje_gen_finmat()
       kalk_generisi_finansijski_nalog( lAuto, lStampa )
-
       gAFin := lgAFin
       gAMat := lgAMat
       kalk_generisi_fakt_dokument()
-
    ENDIF
 
    IF lForm11
@@ -239,7 +230,6 @@ STATIC FUNCTION kalk_generisi_fakt_dokument()
    LOCAL cOdg := "D"
 
    o_kalk_pripr()
-
    IF !f18_use_module( "fakt" )
       RETURN .F.
    ENDIF
@@ -361,11 +351,9 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
    GO TOP
 
    nBrDoks := 0
-
    DO WHILE !Eof()
 
       ++nBrDoks
-
       cIdFirma := field->idfirma
       cIdVd := field->idvd
       cBrDok := field->brdok
@@ -512,9 +500,6 @@ FUNCTION o_kalk_za_azuriranje( lRasporedTr )
 
    my_close_all_dbf()
    o_kalk_pripr()
-   // o_kalk()
-   // o_kalk_doks2()
-   // o_kalk_doks()
 
    IF lRasporedTr
       kalk_raspored_troskova_azuriranje()
@@ -530,12 +515,6 @@ STATIC FUNCTION kalk_raspored_troskova_azuriranje()
    IF ( ( field->tprevoz == "R" .OR. field->TCarDaz == "R" .OR. field->TBankTr == "R" .OR. ;
          field->TSpedTr == "R" .OR. field->TZavTr == "R" ) .AND. field->idvd $ "10#81" )  .OR. ;
          field->idvd $ "RN"
-
-      // o_sifk()
-      // o_sifv()
-      // select_o_roba()
-      // o_tarifa()
-      // o_koncij()
 
       SELECT kalk_pripr
       kalk_raspored_troskova( .T. )
@@ -580,20 +559,11 @@ STATIC FUNCTION kalk_azur_sql()
 
    run_sql_query( "BEGIN" )
 
-/*
-   IF !f18_lock_tables( { _tbl_kalk, _tbl_doks }, .T. )
-      run_sql_query( "ROLLBACK" )
-      MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju." )
-      RETURN lRet
-   ENDIF
-*/
-
    o_kalk()  // otvoriti samo radi strukture tabele
    o_kalk_doks() // otvoriti samo radi strukture tabele
 
    SELECT kalk_pripr
    GO TOP
-
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "kalk_kalk -> server: " + _tmp_id
 
@@ -646,7 +616,6 @@ STATIC FUNCTION kalk_azur_sql()
 
 
       IF lOk
-
          hRecKalkDok[ "nv" ] := _doks_nv
          hRecKalkDok[ "vpv" ] := _doks_vpv
          hRecKalkDok[ "rabat" ] := _doks_rabat
@@ -675,7 +644,6 @@ STATIC FUNCTION kalk_azur_sql()
 
 
    IF !lOk
-
       run_sql_query( "ROLLBACK" )
       _msg := "kalk ažuriranje, trasakcija " + _tmp_id + " neuspješna ?!"
       log_write( _msg, 2 )
@@ -702,7 +670,6 @@ STATIC FUNCTION kalk_azur_sql()
 
 
 
-
 FUNCTION kalk_dokumenti_iz_pripreme_u_matricu()
 
    LOCAL aKalkDokumenti := {}
@@ -714,7 +681,6 @@ FUNCTION kalk_dokumenti_iz_pripreme_u_matricu()
    DO WHILE !Eof()
 
       nScan := AScan( aKalkDokumenti, {| aVar | aVar[ 1 ] == field->idfirma .AND. aVar[ 2 ] == field->idvd .AND. aVar[ 3 ] == field->brdok  } )
-
       IF nScan == 0
          AAdd( aKalkDokumenti, { field->idfirma, field->idvd, field->brdok, 0 } )
       ENDIF
