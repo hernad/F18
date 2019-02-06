@@ -163,7 +163,7 @@ FUNCTION kalk_generisi_niv_prodavnica_na_osnovu_druge_niv()
       _idfirma := cidfirma; _idkonto := cidkonto; _pkonto := cidkonto; _pu_i := "3"
       _idroba := cidroba; _idtarifa := kalk->idtarifa
       _idvd := "19"; _brdok := cbrdok
-      _rbr := RedniBroj( ++nrbr )
+      _rbr := rbr_u_char( ++nrbr )
       _kolicina := nUlaz - nIzlaz
       _datdok := _DatFaktP := ddatdok
       _fcj := kalk->fcj
@@ -322,7 +322,7 @@ FUNCTION NivPoProc()
          _idtarifa := roba->idtarifa
          _idvd := "19"
          _brdok := cBrDok
-         _rbr := RedniBroj( ++nRbr )
+         _rbr := rbr_u_char( ++nRbr )
          _kolicina := nUlaz - nIzlaz
          _datdok := _DatFaktP := dDatDok
          _error := "0"
@@ -430,7 +430,7 @@ FUNCTION VratiZadNiv()
       _idkonto := cidkonto; _pkonto := cidkonto; _pu_i := _mu_i := ""
       _idtarifa := roba->idtarifa
       _idvd := "19"; _brdok := cbrdok
-      _rbr := RedniBroj( ++nrbr )
+      _rbr := rbr_u_char( ++nrbr )
       _kolicina := nPom
       _datdok := _DatFaktP := ddatdok
       _ERROR := ""

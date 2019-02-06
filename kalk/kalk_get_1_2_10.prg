@@ -9,8 +9,9 @@
  * By using this software, you agree to be bound by its terms.
  */
 
-
 #include "f18.ch"
+
+MEMVAR nKalkRBr
 
 STATIC s_cKonverzijaValuteDN // konverzija valute
 STATIC aPorezi := {}
@@ -33,20 +34,18 @@ FUNCTION kalk_get_1_10()
    LOCAL nSayDeltaY := 40
    LOCAL GetList := {}
 
-   //gVarijanta := "2"
    s_cKonverzijaValuteDN := "N"
 
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
-   IF nRbr == 1  .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
+   IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
 
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "DOBAVLJAČ:" GET _IdPartner PICT "@!"  VALID {|| kalk_valid_dobavljac( @_IdPartner, box_x_koord() + nX ) }
 
       @ box_x_koord() + nX, 50 SAY "Broj fakture:" GET _BrFaktP VALID !Empty ( _brFaktP )
       @ box_x_koord() + nX, Col() + 1 SAY "Datum:" GET _DatFaktP VALID {||  datum_not_empty_upozori_godina( _datFaktP, "Datum fakture" ) }
-
 
       ++nX
       nBoxKoordX := box_x_koord() + nX

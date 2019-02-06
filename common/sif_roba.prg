@@ -304,24 +304,6 @@ FUNCTION RobaZastCijena( cIdTarifa )
    RETURN lZasticena
 
 
-FUNCTION OFmkRoba()
-
-   // o_sifk()
-   // o_sifv()
-   // o_konto()
-   // o_koncij()
-   o_trfp()
-   // o_tarifa()
-   // o_roba()
-   // o_sastavnice()
-
-   RETURN .T.
-
-
-
-// ----------------------------------------------------
-// provjera cijena u sifrarniku artikala
-// ----------------------------------------------------
 FUNCTION sifre_artikli_provjera_mp_cijena()
 
    LOCAL _check := {}
@@ -342,7 +324,6 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
       FOR _n := 1 TO 9
 
          // MPC, MPC2, MPC3...
-
          _tmp := "mpc"
 
          IF _n > 1
@@ -409,11 +390,7 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
       PadC( "MPC2", 15 ), ;
       PadC( "MPC3", 15 ), ;
       PadC( "MPC4", 15 )
-   // PadC( "MPC5", 15 ), ;
-   // PadC( "MPC6", 15 ), ;
-   // PadC( "MPC7", 15 ), ;
-   // PadC( "MPC8", 15 ), ;
-   // PadC( "MPC9", 15 )
+
 
    ? _line
 
@@ -502,9 +479,9 @@ FUNCTION rpt_dupli_barkod()
    _data := __dupli_bk_sql()
    MsgC()
 
-   __dupli_bk_rpt( _data )
+   dupli_barkodovi_report( _data )
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -533,7 +510,7 @@ STATIC FUNCTION __dupli_bk_sql()
 // -----------------------------------------------
 // prikaz duplih barkodova iz sifrarnika
 // -----------------------------------------------
-STATIC FUNCTION __dupli_bk_rpt( DATA )
+STATIC FUNCTION dupli_barkodovi_report( DATA )
 
    LOCAL nI
 

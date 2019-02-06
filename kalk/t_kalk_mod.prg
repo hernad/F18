@@ -199,7 +199,7 @@ METHOD TKalkMod:set_module_gvars()
 
 
    PUBLIC glZabraniVisakIP
-   PUBLIC glBrojacPoKontima := .F.
+   PUBLIC glKalkBrojacPoKontima := .F.
    //PUBLIC gcSLObrazac
    //PUBLIC ZAOKRUZENJE := 2
 
@@ -291,7 +291,7 @@ METHOD TKalkMod:set_module_gvars()
    lPrikPRUC := fetch_metric( "kalk_prikazi_kolone_pruc", nil, lPrikPRUC )
 
    glZabraniVisakIP := fetch_metric( "kalk_zabrani_visak_kod_ip", nil, glZabraniVisakIP )
-   glBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glBrojacPoKontima )
+   glKalkBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glKalkBrojacPoKontima )
 
 
    info_bar( ::cName, ::cName + " - kalk set gvars end" )

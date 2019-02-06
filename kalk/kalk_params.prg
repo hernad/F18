@@ -86,7 +86,7 @@ FUNCTION kalk_par_varijante_prikaza()
 
    Box(, 23, 76, .F., "Varijante obrade i prikaza pojedinih dokumenata" )
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "14 -Varijanta poreza na RUC u VP 1/2 (1-naprijed,2-nazad)"  GET gVarVP  VALID gVarVP $ "12"
+   //@ box_x_koord() + nX, box_y_koord() + 2 SAY8 "14 -Varijanta poreza na RUC u VP 1/2 (1-naprijed,2-nazad)"  GET gVarVP  VALID gVarVP $ "12"
 
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "14 - Nivelaciju izvršiti na ukupno stanje/na prodanu kolicinu  1/2 ?" GET gNiv14  VALID gNiv14 $ "12"
@@ -226,7 +226,7 @@ FUNCTION kalk_par_razno()
    LOCAL _reset_roba := fetch_metric( "kalk_reset_artikla_kod_unosa", my_user(), "N" )
    LOCAL _rabat := fetch_metric( "pregled_rabata_kod_ulaza", my_user(), "N" )
    LOCAL _vise_konta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" )
-   LOCAL _rok := fetch_metric( "kalk_definisanje_roka_trajanja", NIL, "N" )
+
    LOCAL _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" )
    LOCAL nLenBrKalk :=  kalk_duzina_brojaca_dokumenta()
    LOCAL cRobaTrazi := PadR( roba_trazi_po_sifradob(), 20 )
@@ -234,7 +234,7 @@ FUNCTION kalk_par_razno()
    LOCAL nStandardnaStopaMarza  := standardna_stopa_marze()
    LOCAL GetList := {}
 
-   IF glBrojacPoKontima
+   IF glKalkBrojacPoKontima
       _brojac := "D"
    ENDIF
 
@@ -244,8 +244,7 @@ FUNCTION kalk_par_razno()
 
    Box(, 20, 75, .F., "RAZNO" )
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Brojac kalkulacija D/N     " GET gBrojacKalkulacija PICT "@!" VALID gBrojacKalkulacija $ "DN"
-
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Brojač kalkulacija D/N     " GET gBrojacKalkulacija PICT "@!" VALID gBrojacKalkulacija $ "DN"
    @ box_x_koord() + nX, Col() + 2 SAY8 "dužina brojača:" GET nLenBrKalk PICT "9" VALID ( nLenBrKalk > 0 .AND. nLenBrKalk < 10 )
    ++nX
 
@@ -288,7 +287,7 @@ FUNCTION kalk_par_razno()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Pregled rabata za dobavljaca kod unosa ulaza (D/N)" GET _rabat PICT "@!" VALID _rabat $ "DN"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Def.opisa kod unosa (D/N)" GET _opis VALID _opis $ "DN" PICT "@!"
-   @ box_x_koord() + nX, Col() + 1 SAY "Def.datuma isteka roka (D/N)" GET _rok VALID _rok $ "DN" PICT "@!"
+
 
    READ
 
@@ -297,14 +296,14 @@ FUNCTION kalk_par_razno()
    IF LastKey() <> K_ESC
 
       IF _brojac == "D"
-         glBrojacPoKontima := .T.
+         glKalkBrojacPoKontima := .T.
       ELSE
-         glBrojacPoKontima := .F.
+         glKalkBrojacPoKontima := .F.
       ENDIF
 
       roba_barkod_pri_unosu( cUnosBarKodDN == "D" )
       set_metric( "kalk_brojac_kalkulacija", NIL, gBrojacKalkulacija )
-      set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glBrojacPoKontima )
+      set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glKalkBrojacPoKontima )
       set_metric( "kalk_potpis_na_kraju_naloga", NIL, gPotpis )
       set_metric( "kalk_tip_tabele", NIL, gTabela )
 
@@ -320,7 +319,6 @@ FUNCTION kalk_par_razno()
       standardna_stopa_marze( nStandardnaStopaMarza )
       set_metric( "kalk_reset_artikla_kod_unosa", my_user(), _reset_roba )
       set_metric( "pregled_rabata_kod_ulaza", my_user(), _rabat )
-      set_metric( "kalk_definisanje_roka_trajanja", NIL, _rok )
       set_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, _opis )
       set_metric( "kalk_dokument_vise_konta", NIL, _vise_konta )
 

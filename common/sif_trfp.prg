@@ -14,7 +14,7 @@
 
 MEMVAR ImeKol, Kol, wIdKonto
 
-FUNCTION P_TRFP( cId, dx, dy )
+FUNCTION p_trfp_kalk_fin( cId, dx, dy )
 
    LOCAL xRet
    LOCAL cShema := Space( 1 )
@@ -283,7 +283,7 @@ FUNCTION v_setform()
       RESTORE SCREEN FROM cscr
       SELECT F_TRFP
       IF !Used(); o_trfp(); ENDIF
-      P_Trfp()
+      p_trfp_kalk_fin()
       SELECT F_TRMP
       IF !Used(); O_TRMP; ENDIF
       SELECT trfp; USE

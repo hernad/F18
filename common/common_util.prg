@@ -222,7 +222,7 @@ FUNCTION preduzece()
 
 
 
-FUNCTION RbrUNum( cRBr )
+FUNCTION rbr_u_num( cRBr )
 
    IF Left( cRbr, 1 ) > "9"
       RETURN  ( Asc( Left( cRbr, 1 ) ) - 65 + 10 ) * 100  + Val( SubStr( cRbr, 2, 2 ) )
@@ -231,7 +231,7 @@ FUNCTION RbrUNum( cRBr )
    ENDIF
 
 
-FUNCTION RedniBroj( nRbr )
+FUNCTION rbr_u_char( nRbr )
 
    LOCAL nOst
 

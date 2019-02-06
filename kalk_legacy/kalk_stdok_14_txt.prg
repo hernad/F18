@@ -82,15 +82,6 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
    PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-/*
-    if idpartner+brfaktp+idkonto+idkonto2<>cidd
-     set device to screen
-      Beep(2)
-      Msg("Unutar kalkulacije se pojavilo vise dokumenata !",6)
-      set device to printer
-    endif
-*/
-
 
       SELECT kalk_pripr
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
@@ -113,46 +104,20 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
          nVPCIzbij := ( MPCSAPP / ( 1 + tarifa->opp / 100 ) * tarifa->opp / 100 )
       ENDIF
 
-      nTot4 +=  ( nU4 := Round( NC * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr )     )  // nv
+      nTot4 +=  ( nU4 := Round( NC * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr )     )  // nv
 
-      IF gVarVP == "1"
-         IF ( roba->tip $ "UTY" )
-            nU5 := 0
-         ELSE
-            nTot5 +=  ( Round( nU5 := nMarza * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr )  ) // ruc
-         ENDIF
-         nTot6 +=  ( nU6 := Round( TARIFA->VPP / 100 * iif( nMarza < 0, 0, nMarza ) * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr ) )  // pruc
-         nTot7 +=  ( nU7 := nU5 - nU6  )    // ruc-pruc
+
+      IF ( roba->tip $ "UTY" )
+         nU5 := 0
       ELSE
-         // obracun poreza unazad - preracunata stopa
-         IF ( roba->tip $ "UTY" )
-            nU5 := 0
-         ELSE
-            IF nMarza > 0
-               ( nU5 := Round( nMarza * Kolicina * iif( idvd = "15", -1, 1 ) / ( 1 + tarifa->vpp / 100 ), gZaokr ) ) // ruc
-            ELSE
-               ( nU5 := Round( nMarza * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr ) ) // ruc
-            ENDIF
-         ENDIF
-
-         nU6 := Round( TARIFA->VPP / 100 / ( 1 + tarifa->vpp / 100 ) * iif( nMarza < 0, 0, nMarza ) * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr )
-         // nU6 = pruc
-
-         // franex 20.11.200 nasteliti ruc + pruc = bruto marza !!
-         IF Round( nMarza * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr ) > 0 // pozitivna marza
-            nU5 :=  Round( nMarza * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr )  - nU6
-            // bruto marza               - porez na ruc
-         ENDIF
-         nU7 := nU5 + nU6      // ruc+pruc
-
-         nTot5 += nU5
-         nTot6 += nU6
-         nTot7 += nU7
-
+         nTot5 +=  ( Round( nU5 := nMarza * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr )  ) // ruc
       ENDIF
+      nTot6 +=  ( nU6 := Round( TARIFA->VPP / 100 * iif( nMarza < 0, 0, nMarza ) * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )  // pruc
+      nTot7 +=  ( nU7 := nU5 - nU6  )    // ruc-pruc
 
-      nTot8 +=  ( nU8 := Round( ( VPC - nVPCIzbij ) * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr ) )
-      nTot9 +=  ( nU9 := Round( RABATV / 100 * VPC * Kolicina * iif( idvd = "15", -1, 1 ), gZaokr ) )
+
+      nTot8 +=  ( nU8 := Round( ( VPC - nVPCIzbij ) * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )
+      nTot9 +=  ( nU9 := Round( RABATV / 100 * VPC * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )
 
       IF roba->tip == "X"
          // kod nafte prikazi bez poreza
@@ -163,7 +128,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
       ENDIF
       IF roba->tip == "X"
          nTotb := nUb := 0
-         nTotc +=  ( nUc := Round( VPC * kolicina * iif( idvd = "15", -1, 1 ), gzaokr ) )   // vpv+ppp
+         nTotc +=  ( nUc := Round( VPC * kolicina * iif( idvd = "15", - 1, 1 ), gzaokr ) )   // vpv+ppp
       ELSE
          IF idvd == "15" // kod 15-ke nema poreza na promet
             nUb := 0
@@ -175,7 +140,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
       ENDIF
 
       IF koncij->naz = "P"
-         nTotd +=  ( nUd := Round( fcj * kolicina * iif( idvd = "15", -1, 1 ), gZaokr ) )  // trpa se planska cijena
+         nTotd +=  ( nUd := Round( fcj * kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )  // trpa se planska cijena
       ELSE
          nTotd +=  ( nUd := nua + nub + nu6 )   // vpc+pornapr+pornaruc
       ENDIF
@@ -188,7 +153,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
          ?? ", BK: " + roba->barkod
       ENDIF
       @ PRow() + 1, 4 SAY IdRoba
-      @ PRow(), PCol() + 1 SAY Kolicina * iif( idvd = "15", -1, 1 )  PICTURE PicKol
+      @ PRow(), PCol() + 1 SAY Kolicina * iif( idvd = "15", - 1, 1 )  PICTURE PicKol
       nC1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY NC                          PICTURE PicCDEM
       PRIVATE nNc := 0
@@ -202,7 +167,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
 
       @ PRow(), PCol() + 1 SAY VPC - nVPCIzbij       PICTURE PiccDEM
       @ PRow(), PCol() + 1 SAY RABATV              PICTURE PicProc
-      @ PRow(), PCol() + 1 SAY VPC * ( 1 -RABATV / 100 ) -nVPCIzbij  PICTURE PiccDEM
+      @ PRow(), PCol() + 1 SAY VPC * ( 1 - RABATV / 100 ) - nVPCIzbij  PICTURE PiccDEM
 
       IF roba->tip $ "VKX"
          @ PRow(), PCol() + 1 SAY PadL( "VT-" + Str( tarifa->opp, 5, 2 ) + "%", Len( picproc ) )
@@ -217,7 +182,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
       IF roba->tip = "X"  // nafta , kolona VPC SA PP
          @ PRow(), PCol() + 1 SAY VPC PICTURE PicCDEM
       ELSE
-         @ PRow(), PCol() + 1 SAY VPC * ( 1 -RabatV / 100 ) * ( 1 + mpc / 100 ) PICTURE PicCDEM
+         @ PRow(), PCol() + 1 SAY VPC * ( 1 - RabatV / 100 ) * ( 1 + mpc / 100 ) PICTURE PicCDEM
       ENDIF
 
       // 2. DRUGI RED

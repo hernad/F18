@@ -11,16 +11,18 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkRBr
+
 FUNCTION kalk_get_1_12()
 
    LOCAL lRet
 
-   pIzgSt := .F.   // izgenerisane stavke jos ne postoje
+   lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
    PRIVATE aPorezi := {}
 
    _GKolicina := _GKolicin2 := 0
    _IdPartner := ""
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
       @ box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj:" GET _BrFaktP
       @ box_x_koord() + 6, Col() + 2 SAY "Datum:" GET _DatFaktP
       _DatFaktP := _datdok
@@ -136,6 +138,6 @@ FUNCTION kalk_get_1_12()
    _PKonto := _Idkonto
    _PU_I := "5"
 
-   kalk_puni_polja_za_izgenerisane_stavke( pIzgSt )
+   kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()

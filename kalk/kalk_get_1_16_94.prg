@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkRBr
+
 STATIC aPorezi := {}
 
 // prijem robe 16
@@ -21,15 +23,15 @@ FUNCTION kalk_get_1_94()
 
    LOCAL nRVPC
 
-   pIzgSt := .F.   // izgenerisane stavke jos ne postoje
+   lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
 
    SET KEY K_ALT_K TO KM94()
 
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
       IF _idvd $ "94#97"
          @  box_x_koord() + 6, box_y_koord() + 2   SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 6, 18 )
       ENDIF
@@ -37,19 +39,13 @@ FUNCTION kalk_get_1_94()
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP   valid {|| .T. }
 
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje"  GET _IdKonto VALID Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 9, box_y_koord() + 40 SAY "Zaduzuje:" GET _IdZaduz   PICT "@!"  VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz, 21, 5 )
-      // ELSE
+
       IF !Empty( cRNT1 )
          @ box_x_koord() + 9, box_y_koord() + 40 SAY "Rad.nalog:"   GET _IdZaduz2  PICT "@!"
       ENDIF
-      // ENDIF
 
       IF _idvd == "16"
          @ box_x_koord() + 10, box_y_koord() + 2   SAY "Prenos na konto          " GET _IdKonto2   VALID Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2, 21, 5 ) PICT "@!"
-         // IF gNW <> "X"
-         // @ box_x_koord() + 10, box_y_koord() + 35  SAY "Zaduzuje: "   GET _IdZaduz2  PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz2, 21, 5 )
-         // ENDIF
       ENDIF
 
    ELSE
@@ -57,9 +53,6 @@ FUNCTION kalk_get_1_94()
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura Broj: "; ?? _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje "; ?? _IdKonto
-      // IF gNW <> "X"
-      // @ box_x_koord() + 9, box_y_koord() + 40 SAY "Zaduzuje: "; ?? _IdZaduz
-      // ENDIF
 
    ENDIF
 
@@ -83,10 +76,6 @@ FUNCTION kalk_get_1_94()
    _MKonto := _Idkonto
    _MU_I := "1"
 
-
-
-   //check_datum_posljednje_kalkulacije()
-   //DuplRoba()
 
    _GKolicina := 0
    IF kalk_is_novi_dokument()
@@ -112,7 +101,6 @@ FUNCTION kalk_get_1_94()
    READ
    _VPC := _nc
    _marza := 0  // vodi se po nc
-
 
 
    _mpcsapp := 0
@@ -142,8 +130,7 @@ FUNCTION KM94()
    nR1 := RecNo()
    SELECT kalk_pripr
    nR2 := RecNo()
-   //SELECT tarifa
-   //nR3 := RecNo()
+
    my_close_all_dbf()
    kalk_kartica_magacin( _IdFirma, _idroba, _IdKonto )
    o_kalk_edit()
@@ -151,8 +138,7 @@ FUNCTION KM94()
    GO nR1
    SELECT kalk_pripr
    GO nR2
-   //SELECT tarifa
-   //GO nR3
+
    SELECT kalk_pripr
 
    RETURN .T.

@@ -210,7 +210,7 @@ METHOD loadFromTbl()
    ::cIdRj := field->idFirma
    ::cIdVd := field->idTipDok
    ::cBrDok := field->brDok
-   ::nRbr := RbrUNum( field->rBr )
+   ::nRbr := rbr_u_num( field->rBr )
    ::nPKolicina := field->kolicina
    ::cIdRoba := field->idRoba
    ::cValuta := field->dinDem
@@ -251,7 +251,7 @@ METHOD saveToTbl()
 
    REPLACE idFirma WITH ::cIdRj
    REPLACE idTipDok WITH ::cIdVd
-   REPLACE rBr WITH RedniBroj( ::nRbr, 3 )
+   REPLACE rBr WITH rbr_u_char( ::nRbr, 3 )
    REPLACE kolicina WITH ::nPKolicina
    REPLACE idRoba WITH ::cIdRoba
    REPLACE brDok WITH ::cBrDok

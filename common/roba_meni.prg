@@ -32,21 +32,16 @@ FUNCTION sif_roba_tarife_koncij_sast()
    AAdd( aOpc, "3. konta - tipovi cijena" )
    AAdd( aOpcExe, {|| P_Koncij() } )
 
-   AAdd( aOpc, "4. konta - atributi / 2 " )
-   AAdd( aOpcExe, {|| MsgBeep( F18_SECUR_WARRNING ) } )
-
    AAdd( aOpc, "5. trfp - sheme kontiranja u fin" )
-   AAdd( aOpcExe, {|| P_TrFP() } )
+   AAdd( aOpcExe, {|| p_trfp_kalk_fin() } )
 
    AAdd( aOpc, "6. sastavnice" )
    AAdd( aOpcExe, {|| p_roba_sastavnice() } )
-
 
    AAdd( aOpc, "8. sifk - karakteristike" )
    AAdd( aOpcExe, {|| P_SifK() } )
 
    my_close_all_dbf()
-   OFmkRoba()
 
    f18_menu( "srob", .F., _izbor, aOpc, aOpcExe )
 

@@ -11,17 +11,20 @@
 
 #include "f18.ch"
 
+MEMVAR nVPV16, nNVPredhodna
+MEMVAR nKalkRbr
+
 STATIC aPorezi := {}
 
 FUNCTION kalk_get_1_16()
 
    LOCAL nRVPC
 
-   pIzgSt := .F.   // izgenerisane stavke jos ne postoje
+   lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
 
    SET KEY K_ALT_K TO KM94()
 
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
@@ -29,7 +32,7 @@ FUNCTION kalk_get_1_16()
       _TMarza := "%"
    ENDIF
 
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
       IF _idvd $ "94#97"
          @  box_x_koord() + 6, box_y_koord() + 2   SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 6, 18 )
@@ -54,7 +57,6 @@ FUNCTION kalk_get_1_16()
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura Broj: "; ?? _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       @  box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje "; ?? _IdKonto
-
 
    ENDIF
 
@@ -81,8 +83,7 @@ FUNCTION kalk_get_1_16()
    _MKonto := _Idkonto
    _MU_I := "1"
 
-   // check_datum_posljednje_kalkulacije()
-   // DuplRoba()
+
    _GKolicina := 0
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
@@ -116,7 +117,6 @@ FUNCTION kalk_get_1_16()
    SET KEY K_ALT_K TO
 
    RETURN LastKey()
-
 
 
 
@@ -202,7 +202,6 @@ FUNCTION kalk_get_16_1()
 
 
 
-
 /*
   *   Svodjenje kolicine u protustavci da bi se dobila ista vrijednost (kada su cijene u stavci i protustavci razlicite)
 */
@@ -214,12 +213,12 @@ STATIC FUNCTION SvediM( cSvedi )
    ENDIF
    IF csvedi == "S"
       IF _vpc <> 0
-         _kolicina := -Round( _oldval / _vpc, 4 )
+         _kolicina := -Round( nVPV16 / _vpc, 4 )
       ELSE
          _kolicina := 99999999
       ENDIF
       IF _kolicina <> 0
-         _nc := Abs( _oldvaln / _kolicina )
+         _nc := Abs( nNVPredhodna / _kolicina )
       ELSE
          _nc := 0
       ENDIF

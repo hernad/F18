@@ -41,12 +41,12 @@ FUNCTION kalk_stampa_dok_10_txt()
    select_o_koncij( cIdPartner )
    select_o_partner( cIdPartner )
 
-   ?  _u( "DOBAVLJAČ:"), cIdPartner, "-", PadR( partn->naz, 25 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
+   ?  _u( "DOBAVLJAČ:" ), cIdPartner, "-", PadR( partn->naz, 25 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
 
    SELECT kalk_pripr
    select_o_konto( cIdKonto )
 
-   ? _u( "MAGACINSKI KONTO zadužuje :"), cIdKonto, "-", konto->naz
+   ? _u( "MAGACINSKI KONTO zadužuje :" ), cIdKonto, "-", konto->naz
 
    m := "--- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
 
@@ -89,11 +89,11 @@ FUNCTION kalk_stampa_dok_10_txt()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       print_nova_strana( 125, @nStr, 2 )
 
-    //  IF gKalo == "1"
-      //   SKol := hRec[ "kolicina" ] - field->GKolicina - field->GKolicin2
-    //  ELSE
-         SKol := hRec[ "kolicina" ]
-    //  ENDIF
+      // IF gKalo == "1"
+      // SKol := hRec[ "kolicina" ] - field->GKolicina - field->GKolicin2
+      // ELSE
+      SKol := hRec[ "kolicina" ]
+      // ENDIF
 
       nPDVStopa := tarifa->opp
       nPDV := hRec[ "mpcsapp" ] / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )
@@ -111,12 +111,12 @@ FUNCTION kalk_stampa_dok_10_txt()
       nTot9 += ( nU9 := Round( nMarza * ( hRec[ "kolicina" ] - Gkolicina - GKolicin2 ), gZaokr ) )
       nTotA += ( nUA := Round( VPC   * ( hRec[ "kolicina" ] - Gkolicina - GKolicin2 ), gZaokr ) )
 
-      IF gVarVP == "1"
-         nTotB += Round( nU9 * tarifa->vpp / 100, gZaokr ) // porez na razliku u cijeni
-      ELSE
-         PRIVATE cistaMar := Round( nU9 / ( 1 + tarifa->vpp / 100 ), gZaokr )
-         nTotB += Round( cistaMar * tarifa->vpp / 100, gZaokr )  // porez na razliku u cijeni
-      ENDIF
+      // IF gVarVP == "1"
+      // nTotB += Round( nU9 * tarifa->vpp / 100, gZaokr ) // porez na razliku u cijeni
+      // ELSE
+      PRIVATE cistaMar := Round( nU9 / ( 1 + tarifa->vpp / 100 ), gZaokr )
+      nTotB += Round( cistaMar * tarifa->vpp / 100, gZaokr )  // porez na razliku u cijeni
+      // ENDIF
       // total porez
       nTotP += ( nUP := nPDV * hRec[ "kolicina" ] )
       // total mpcsapp
@@ -127,12 +127,6 @@ FUNCTION kalk_stampa_dok_10_txt()
       @ PRow(), 4 SAY ""
 
       ?? Trim( Left( ROBA->naz, 40 ) ), "(", ROBA->jmj, ")"
-
-/*
-      IF roba->( FieldPos( "KATBR" ) ) <> 0
-  --       ?? " KATBR:", roba->katbr
-      ENDIF
-*/
 
       IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
          ?? ", BK: " + roba->barkod

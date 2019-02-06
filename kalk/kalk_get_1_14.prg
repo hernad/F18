@@ -11,21 +11,23 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkRBr
+
 STATIC aPorezi := {}
 
 FUNCTION kalk_get_1_14()
 
    LOCAL dDatVal := CToD( "" ), nNabCj1, nNabCj2
 
-   pIzgSt := .F.
+   lKalkIzgenerisaneStavke := .F.
 
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
 
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
       @ box_x_koord() + 6, box_y_koord() + 2   SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 6, 18 )
       @ box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura Broj:" GET _BrFaktP
       @ box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP   valid {|| .T. }
@@ -71,11 +73,7 @@ FUNCTION kalk_get_1_14()
       _FCJ := roba->PlC
    ENDIF
 
-   //check_datum_posljednje_kalkulacije()
-   //DuplRoba()
-
    IF kalk_is_novi_dokument()
-    //  SELECT roba
       _VPC := kalk_vpc_za_koncij()
       select roba
       _NC := NC
@@ -98,7 +96,6 @@ FUNCTION kalk_get_1_14()
    IF _TBankTr <> "X"   // ako je X onda su stavke vec izgenerisane
 
       IF !Empty( kalk_metoda_nc() )
-
          kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nNabCj1, @nNabCj2 )
          @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "
          @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
@@ -165,7 +162,7 @@ FUNCTION kalk_get_1_14()
       _MU_I := "4" // ne utice na stanje
    ENDIF
 
-   IF pIzgSt .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
+   IF lKalkIzgenerisaneStavke .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
       PRIVATE nRRec := RecNo()
       GO TOP
       my_flock()
@@ -178,20 +175,22 @@ FUNCTION kalk_get_1_14()
             GO nRRec2
             LOOP
          ENDIF
-         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nRbr
+         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nKalkRbr
 
-            nMarza := _VPC / ( 1 + _PORVT ) * ( 1 -_RabatV / 100 ) -_NC
+            //nMarza := _VPC / ( 1 + _PORVT ) * ( 1 -_RabatV / 100 ) -_NC
             REPLACE vpc WITH _vpc, ;
                rabatv WITH _rabatv, ;
                mkonto WITH _mkonto, ;
                tmarza  WITH _tmarza, ;
                mpc     WITH  _MPC, ;
                marza  WITH _vpc / ( 1 + _PORVT ) -kalk_pripr->nc, ;   // mora se uzeti nc iz ove stavke
-            vpcsap WITH _VPC / ( 1 + _PORVT ) * ( 1 -_RABATV / 100 ) + iif( nMarza < 0, 0, nMarza ) * TARIFA->VPP / 100, ;
                mu_i WITH  _mu_i, ;
                pkonto WITH "", ;
                pu_i WITH  "", ;
                error WITH "0"
+
+               //vpcsap WITH _VPC / ( 1 + _PORVT ) * ( 1 -_RABATV / 100 ) + iif( nMarza < 0, 0, nMarza ) * TARIFA->VPP / 100, ;
+
          ENDIF
          SKIP
       ENDDO
@@ -218,6 +217,6 @@ FUNCTION pPDV14( lRet )
       QQOut( "   PDV:", Transform( _PNAP := _VPC * ( 1 -_RabatV / 100 ) * _MPC / 100, picdem ) )
    ENDIF
 
-   _VPCSaP := iif( _VPC <> 0, _VPC * ( 1 -_RABATV / 100 ) + iif( nMarza < 0, 0, nMarza ) * TARIFA->VPP / 100, 0 )
+   //_VPCSaP := iif( _VPC <> 0, _VPC * ( 1 -_RABATV / 100 ) + iif(  < 0, 0, nMarza ) * TARIFA->VPP / 100, 0 )
 
    RETURN lRet

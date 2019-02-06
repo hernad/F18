@@ -133,7 +133,7 @@ FUNCTION kalk_say_pdv_a_porezi_var( nRow )
 
 FUNCTION kalk_puni_polja_za_izgenerisane_stavke( pIzgStavke )
 
-   IF pIzgSt .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
+   IF lKalkIzgenerisaneStavke .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
       PRIVATE nRRec := RecNo()
       GO TOP
       my_flock()
@@ -146,7 +146,7 @@ FUNCTION kalk_puni_polja_za_izgenerisane_stavke( pIzgStavke )
             GO nRRec2
             LOOP
          ENDIF
-         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nRbr
+         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nKalkRbr
             REPLACE nc WITH kalk_pripr->fcj, ;
                vpc WITH _vpc, ;
                tprevoz WITH _tprevoz, ;

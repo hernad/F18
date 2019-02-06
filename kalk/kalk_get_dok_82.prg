@@ -14,14 +14,14 @@
 
 FUNCTION Get1_82()
 
-   pIzgSt := .F.
+   lKalkIzgenerisaneStavke := .F.
 
    // izgenerisane stavke jos ne postoje
    // private cisMarza:=0
 
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
 
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura Broj:" GET _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP VALID {|| .T. }
       _IdZaduz := ""
@@ -123,7 +123,7 @@ FUNCTION Get1_82()
    _MKonto := _Idkonto;_MU_I := "5"     // izlaz iz magacina
    _PKonto := ""; _PU_I := ""
 
-   IF pIzgSt   .AND. _kolicina > 0 .AND. LastKey() <> K_ESC
+   IF lKalkIzgenerisaneStavke   .AND. _kolicina > 0 .AND. LastKey() <> K_ESC
       // izgenerisane stavke postoje
       PRIVATE nRRec := RecNo()
       GO TOP
@@ -137,8 +137,8 @@ FUNCTION Get1_82()
             GO nRRec2
             LOOP
          ENDIF
-         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nRbr
-            nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC
+         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nKalkRbr
+            //nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC
             REPLACE vpc WITH _vpc, ;
                rabatv WITH _rabatv, ;
                mkonto WITH _mkonto, ;

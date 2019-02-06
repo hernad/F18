@@ -35,7 +35,7 @@ FUNCTION kalk_pregled_smece_pripr9()
 
    ka_pripr9_set_filter( aUslFirma, aUslDok, dDat1, dDat2 )
 
-   //PRIVATE gVarijanta := "2"
+   // PRIVATE gVarijanta := "2"
 
    PRIVATE PicV := "99999999.9"
    ImeKol := { ;
@@ -65,7 +65,7 @@ FUNCTION kalk_pregled_smece_pripr9()
       Soboslikar( { { box_x_koord() + 17, box_y_koord() + 1, box_x_koord() + 20, box_y_koord() + 77 } }, 23, 14 )
    ENDIF
 
-   //PRIVATE lKalkAsistentAuto := .F.
+   // PRIVATE lKalkAsistentAuto := .F.
 
    my_browse( "KALK_PRIPR9", 20, 77, {|| ka_pripr9_key_handler() }, "<P>-povrat dokumenta u pripremu", "Pregled smeca...", , , , , 4 )
    BoxC()
@@ -116,7 +116,6 @@ FUNCTION ka_pripr9_key_handler()
  */
 STATIC FUNCTION ka_pripr9_set_filter( aUslFirma, aUslDok, dDat1, dDat2 )
 
-
    o_kalk_pripr9()
    SET ORDER TO TAG "1"
 
@@ -140,7 +139,7 @@ STATIC FUNCTION ka_pripr9_set_filter( aUslFirma, aUslDok, dDat1, dDat2 )
       cFilter += " .and. datdok <= " + dbf_quote( dDat2 )
    ENDIF
 
-   SET FILTER to &cFilter
+   SET FILTER TO &cFilter
 
    GO TOP
 
@@ -179,5 +178,18 @@ FUNCTION ErP9All()
    SELECT kalk_pripr9
    GO TOP
    my_dbf_zap()
+
+   RETURN .T.
+
+
+STATIC FUNCTION Soboslikar( aNiz, nIzKodaBoja, nUKodBoja )
+
+   LOCAL i, cEkran
+
+   FOR i := 1 TO Len( aNiz )
+      cEkran := SaveScreen( aNiz[ i, 1 ], aNiz[ i, 2 ], aNiz[ i, 3 ], aNiz[ i, 4 ] )
+      cEkran := StrTran( cEkran, Chr( nIzKodaBoja ), Chr( nUKodBoja ) )
+      RestScreen( aNiz[ i, 1 ], aNiz[ i, 2 ], aNiz[ i, 3 ], aNiz[ i, 4 ], cEkran )
+   NEXT
 
    RETURN .T.

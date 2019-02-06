@@ -462,7 +462,7 @@ FUNCTION fakt_lager_lista()
                      idtipdok WITH "00", brdok WITH cBrDokPocStanje, ;
                      cijena WITH _cijena, ;
                      dindem WITH "KM ", ;
-                     Rbr WITH Rednibroj( ++nRbrPst ), ;
+                     Rbr WITH rbr_u_char( ++nRbrPst ), ;
                      kolicina WITH nPrenesi
 
                   // IF fId_J

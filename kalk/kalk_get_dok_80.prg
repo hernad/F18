@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR nMPV80, nNVPredhodna
+MEMVAR nKalkRBr
 
 FUNCTION kalk_get1_80()
 
@@ -20,11 +22,11 @@ FUNCTION kalk_get1_80()
    PRIVATE aPorezi := {}
    PRIVATE cProracunMarzeUnaprijed := " "
 
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
       _kord_x := box_x_koord() + nX
 
@@ -230,12 +232,10 @@ FUNCTION kalk_get_1_80_protustavka()
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc PICT PicDEM WHEN WMpc_lv( nil, nil, aPorezi ) VALID VMpc_lv( nil, nil, aPorezi )
 
    ++nX
-
    SayPorezi_lv( nX, aPorezi )
-
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "P.CIJENA SA PDV:"
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpcsapp PICT PicDEM valid {|| Svedi( cSvedi ), VMpcSapp_lv( nil, nil, aPorezi ) }
+   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpcsapp PICT PicDEM valid {|| kalk_80_svedi( cSvedi ), VMpcSapp_lv( nil, nil, aPorezi ) }
 
    READ
 
@@ -258,9 +258,7 @@ FUNCTION kalk_get_1_80_protustavka()
 
 
 
-
-
-FUNCTION Svedi( cSvedi )
+FUNCTION kalk_80_svedi( cSvedi )
 
    IF cSvedi == "M"
 
@@ -269,15 +267,14 @@ FUNCTION Svedi( cSvedi )
       _mpcsapp := kalk_get_mpc_by_koncij_pravilo()
 
    ELSEIF cSvedi == "S"
-
       IF _mpcsapp <> 0
-         _kolicina := -Round( _oldval / _mpcsapp, 4 )
+         _kolicina := -Round( nMPV80 / _mpcsapp, 4 )
       ELSE
          _kolicina := 99999999
       ENDIF
 
       IF _kolicina <> 0
-         _nc := Abs( _oldvaln / _kolicina )
+         _nc := Abs( nNVPredhodna / _kolicina )
       ELSE
          _nc := 0
       ENDIF

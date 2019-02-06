@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR glBrojacPoKontima, gBrojacKalkulacija
+MEMVAR glKalkBrojacPoKontima, gBrojacKalkulacija
 
 STATIC s_nLenKalkBrojac
 
@@ -29,7 +29,7 @@ FUNCTION kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKonto )
 
 FUNCTION is_brojac_po_kontima()
 
-   RETURN glBrojacPoKontima
+   RETURN glKalkBrojacPoKontima
 
 
 FUNCTION kalk_duzina_brojaca_dokumenta( nLen )
@@ -317,9 +317,9 @@ FUNCTION kalk_novi_broj_dokumenta( firma, tip_dokumenta, konto )
    GO BOTTOM
 
    IF field->idfirma == firma .AND. field->idvd == tip_dokumenta .AND. ;
-         iif( glBrojacPoKontima, Right( AllTrim( field->brdok ), Len( _sufix ) ) == _sufix, .T. )
+         iif( glKalkBrojacPoKontima, Right( AllTrim( field->brdok ), Len( _sufix ) ) == _sufix, .T. )
 
-      IF glBrojacPoKontima .AND. ( _sufix $ field->brdok )
+      IF glKalkBrojacPoKontima .AND. ( _sufix $ field->brdok )
          _len_brdok := Len( AllTrim( field->brdok ) )
          _len_sufix := Len( _sufix )
          // odrezi sufiks ako postoji
@@ -440,7 +440,7 @@ FUNCTION kalk_set_param_broj_dokumenta()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:" GET _firma
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET _tip_dok
 
-   IF glBrojacPoKontima
+   IF glKalkBrojacPoKontima
       @ box_x_koord() + 1, Col() + 1 SAY " konto:" GET _konto
    ENDIF
 
@@ -451,7 +451,7 @@ FUNCTION kalk_set_param_broj_dokumenta()
       RETURN .F.
    ENDIF
 
-   IF glBrojacPoKontima
+   IF glKalkBrojacPoKontima
       _sufix := kalk_sufiks_brdok( _konto )
    ENDIF
 

@@ -76,7 +76,7 @@ FUNCTION fakt_kalk_prenos_10_14()
    cIdZaduz2 := Space( 6 )
 
 
-   IF glBrojacPoKontima
+   IF glKalkBrojacPoKontima
       Box( "#FAKT->KALK", 3, 70 )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto razduzuje" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
       READ
@@ -92,7 +92,7 @@ FUNCTION fakt_kalk_prenos_10_14()
       nRBr := 0
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 14 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
-      @ box_x_koord() + 4, box_y_koord() + 2   SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" WHEN !glBrojacPoKontima VALID P_Konto( @cIdKonto2 )
+      @ box_x_koord() + 4, box_y_koord() + 2   SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto2 )
 
       // IF gNW <> "X"
       // @ box_x_koord() + 4, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )
@@ -313,7 +313,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
    cIdKonto2 := fetch_metric( "kalk_fakt_prenos_otpr_konto_2", my_user(), cIdKonto2 )
    cIdZaduz2 := Space( 6 )
 
-   IF glBrojacPoKontima
+   IF glKalkBrojacPoKontima
 
       Box( "#FAKT->KALK", 3, 70 )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto zaduzuje" GET cIdKonto PICT "@!" VALID P_Konto( @cIdKonto )
@@ -332,7 +332,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Broj kalkulacije " + cTipKalk + " -" GET cBrKalk PICT "@!"
 
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto zaduzuje :" GET cIdKonto  PICT "@!" WHEN !glBrojacPoKontima VALID P_Konto( @cIdKonto )
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto zaduzuje :" GET cIdKonto  PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto )
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" VALID Empty( cidkonto2 ) .OR. P_Konto( @cIdKonto2 )
       // IF gNW <> "X"
       // @ box_x_koord() + 4, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )

@@ -230,7 +230,7 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             _idkonto := _idkonto
             _Idkonto2 := ""
             _VPC := nFaktVPC
-            _rbr := RedniBroj( ++nrbr2 )
+            _rbr := rbr_u_char( ++nrbr2 )
 
             _brdok := cBrDop
             _MKonto := _Idkonto;_MU_I := "1"     // ulaz
@@ -250,7 +250,7 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             _idkonto2 := _idkonto
             _Idkonto := ""
             _VPC := nFaktVPC
-            _rbr := RedniBroj( ++nrbr )
+            _rbr := rbr_u_char( ++nrbr )
 
             _brdok := cBrOtp
             _MKonto := _Idkonto;_MU_I := "5"     // izlaz

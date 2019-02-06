@@ -11,20 +11,29 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkRBr
+MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena
+MEMVAR _IdFirma, _DatFaktP, _IdKonto, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
+MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
+MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
+MEMVAR _BrFaktP
+MEMVAR aPorezi
+
 FUNCTION kalk_get_1_11()
 
    LOCAL lRet
    LOCAL GetList := {}
+   LOCAL lKalkIzgenerisaneStavke
 
-   pIzgSt := .F.   // izgenerisane stavke jos ne postoje
+   lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
 
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
    PRIVATE aPorezi := {}
 
-   IF nRbr == 1  .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
       _GKolicina := _GKolicin2 := 0
       IF _IdVD $ "11#12#13#22"
          _IdPartner := ""
@@ -33,14 +42,8 @@ FUNCTION kalk_get_1_11()
       ENDIF
 
       @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Prodavnički Konto zadužuje" GET _IdKonto VALID  P_Konto( @_IdKonto, 8, 40 ) PICT "@!"
-      // IF gNW <> "X"
-      // @ box_x_koord() + 8, box_y_koord() + 42  SAY "Zaduzuje: "   GET _IdZaduz  PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz, 24 )
-      // ENDIF
-
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto razdužuje"  GET _IdKonto2 VALID Empty( _IdKonto2 ) .OR. P_Konto( @_IdKonto2, 9, 40 )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 9, box_y_koord() + 42 SAY "Razduzuje:" GET _IdZaduz2   PICT "@!"  VALID Empty( _idZaduz2 ) .OR. p_partner( @_IdZaduz2, 24 )
-      // ENDIF
+
       READ
       ESC_RETURN K_ESC
 
@@ -50,25 +53,15 @@ FUNCTION kalk_get_1_11()
          @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       ENDIF
       @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Prodavnički Konto zadužuje "; ?? _IdKonto
-      // IF gNW <> "X"
-      // @ box_x_koord() + 8, box_y_koord() + 42  SAY "Zaduzuje: "; ?? _IdZaduz
-      // ENDIF
+
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto razdužuje "; ?? _IdKonto2
-      // IF gNW <> "X"
-      // @ box_x_koord() + 9, box_y_koord() + 42  SAY "Razduzuje: "; ?? _IdZaduz2
-      // ENDIF
+
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarifa ->"
 
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
-   /*
-   IF roba_barkod_pri_unosu()
-    --  @ box_x_koord() + 11, box_y_koord() + 2   SAY "Artikal  " GET _IdRoba PICT "@!S10" when {|| _IdRoba := PadR( _idroba, Val(-- gDuzSifIni ) ), .T. } VALID VRoba()
-   ELSE
-    --  @ box_x_koord() + 11, box_y_koord() + 2   SAY "Artikal  " GET _IdRoba PICT "@!" VALID VRoba()
-   ENDIF
-*/
+
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
@@ -83,20 +76,14 @@ FUNCTION kalk_get_1_11()
    _PKonto := _Idkonto
    select_o_koncij( _pkonto )
 
-   SELECT kalk_pripr  // napuni tarifu
-
-   // check_datum_posljednje_kalkulacije()
-   // kalk_dat_poslj_promjene_prod()
-   // DuplRoba()
+   SELECT kalk_pripr
 
    _GKolicina := _GKolicin2 := 0
    IF kalk_is_novi_dokument()
-      // SELECT roba
       _MPCSaPP := kalk_get_mpc_by_koncij_pravilo( _pkonto )
 
-      SELECT roba
-      _FCJ := NC
-      _VPC := NC
+      _FCJ := roba->NC
+      _VPC := roba->NC
 
       SELECT kalk_pripr
       _Marza2 := 0
@@ -162,14 +149,6 @@ FUNCTION kalk_get_1_11()
       _TPrevoz := "R"
    ENDIF
 
-/*
-   IF nRBr == 1 .OR. !kalk_is_novi_dokument() // prva stavka
-      @ box_x_koord() + 15, box_y_koord() + 2 SAY "MP trosak (A,R):" GET _TPrevoz VALID _tPrevoz $ "AR"
-      @ box_x_koord() + 15, Col() + 2 GET _prevoz PICT PICDEM
-   ELSE
-      @ box_x_koord() + 15, box_y_koord() + 2 SAY "MP trosak:"; ?? "(" + _tPrevoz + ") "; ?? _prevoz
-   ENDIF
-*/
 
    PRIVATE cProracunMarzeUnaprijed := " "
    @ box_x_koord() + 16, box_y_koord() + 2 SAY8 "MP marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
@@ -198,6 +177,6 @@ FUNCTION kalk_get_1_11()
 
    nKalkStrana := 2
 
-   kalk_puni_polja_za_izgenerisane_stavke( pIzgSt )
+   kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()

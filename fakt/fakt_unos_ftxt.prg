@@ -21,7 +21,7 @@ FUNCTION fakt_ispravka_ftxt()
 
    hFaktTxt := fakt_ftxt_decode_string( hRec[ "txt" ] )
 
-   fakt_unos_set_fakt_txt_opis( @hFaktTxt[ "txt2" ], RbrUnum( hRec[ "rbr" ] ), hRec[ "idtipdok" ], hRec[ "idpartner" ] )
+   fakt_unos_set_fakt_txt_opis( @hFaktTxt[ "txt2" ], rbr_u_num( hRec[ "rbr" ] ), hRec[ "idtipdok" ], hRec[ "idpartner" ] )
 
    hRec[ "txt" ] := fakt_ftxt_encode_5( hFaktTxt )
 

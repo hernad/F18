@@ -551,7 +551,7 @@ STATIC FUNCTION edit_fakt_priprema( lFaktNoviRec, hFaktItemsAttributi )
       _txt := ""
    ENDIF
 
-   _rbr := RedniBroj( s_nFaktUnosRedniBroj )
+   _rbr := rbr_u_char( s_nFaktUnosRedniBroj )
 
    IF hFaktParams[ "fakt_opis_stavke" ]
       hFaktItemsAttributi[ "opis" ] := cOpis
@@ -980,7 +980,7 @@ STATIC FUNCTION fakt_prodji_kroz_stavke( hFaktParams )
       ENDIF
 
       _podbr := Space( 2 )
-      s_nFaktUnosRedniBroj := RbrUnum( _rbr )
+      s_nFaktUnosRedniBroj := rbr_u_num( _rbr )
 
       BoxCLS()
 
@@ -1073,7 +1073,7 @@ STATIC FUNCTION fakt_ispravi_dokument( hFaktParams )
    hPostojeciFaktRec[ "brdok" ] := _brdok
    hPostojeciFaktRec[ "rbr" ] := _rbr
 
-   s_nFaktUnosRedniBroj := RbrUnum( _rbr )
+   s_nFaktUnosRedniBroj := rbr_u_num( _rbr )
    IF hFaktParams[ "fakt_opis_stavke" ]
       _items_atrib[ "opis" ] := get_fakt_attr_opis( hPostojeciFaktRec, .F. )
    ENDIF
@@ -1123,15 +1123,15 @@ STATIC FUNCTION fakt_unos_nove_stavke()
       _podbr := Space( 2 )
 
       IF AllTrim( _podbr ) == "." .AND. Empty( _idroba )
-         s_nFaktUnosRedniBroj := RbrUnum( _rbr )
+         s_nFaktUnosRedniBroj := rbr_u_num( _rbr )
          _podbr := " 1"
 
       ELSEIF _podbr >= " 1"
-         s_nFaktUnosRedniBroj := RbrUnum( _rbr )
+         s_nFaktUnosRedniBroj := rbr_u_num( _rbr )
          _podbr := Str( Val( _podbr ) + 1, 2, 0 )
 
       ELSE
-         s_nFaktUnosRedniBroj := RbrUnum( _rbr ) + 1
+         s_nFaktUnosRedniBroj := rbr_u_num( _rbr ) + 1
          _podbr := "  "
       ENDIF
 
@@ -1500,7 +1500,7 @@ STATIC FUNCTION popup_fakt_unos_dokumenta()
 
          _idroba := Space( 10 )
          _kolicina := 1
-         _rbr := Str( RbrUnum( _Rbr ) + 1, 3, 0 )
+         _rbr := Str( rbr_u_num( _Rbr ) + 1, 3, 0 )
          _rabat := 0
 
          cDN := "D"
@@ -1605,7 +1605,7 @@ STATIC FUNCTION fakt_svedi_prostavkom_vrijednost_dokumenta_na_0()
 
    _idroba := Space( 10 )
    _kolicina := 1
-   _rbr := Str( RbrUnum( _Rbr ) + 1, 3, 0 )
+   _rbr := Str( rbr_u_num( _Rbr ) + 1, 3, 0 )
    _rabat := 0
 
    cDN := "D"

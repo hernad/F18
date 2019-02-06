@@ -259,7 +259,7 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
 //   o_roba()
 //   o_tarifa()
 
-   IF glBrojacPoKontima
+   IF glKalkBrojacPoKontima
       // _sufix := kalk_sufiks_brdok( _p_konto )
       cKalkBrDok := kalk_get_next_broj_v5( self_organizacija_id(), _kalk_tip, _p_konto )
    ELSE

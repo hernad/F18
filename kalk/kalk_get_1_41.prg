@@ -16,7 +16,7 @@ FUNCTION kalk_get_1_41()
 
    LOCAL lRet
 
-   pIzgSt := .F. // izgenerisane stavke jos ne postoje
+   lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
    PRIVATE aPorezi := {}
 
    IF kalk_is_novi_dokument()
@@ -174,7 +174,7 @@ FUNCTION kalk_get_1_41()
    _PU_I := "5" // izlaz iz prodavnice
    nKalkStrana := 2
 
-   kalk_puni_polja_za_izgenerisane_stavke( pIzgSt )
+   kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()
 

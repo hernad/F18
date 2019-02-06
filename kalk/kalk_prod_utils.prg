@@ -285,7 +285,7 @@ FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 
 FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
 
-   LOCAL nCV := 0, cRule
+   LOCAL nMPCSifarnik := 0, cRule
 
    IF cIdKonto != NIL
       PushWa()
@@ -297,17 +297,17 @@ FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
    ENDIF
 
    IF cRule == "M2"
-      nCV := roba->mpc2
+      nMPCSifarnik := roba->mpc2
    ELSEIF cRule == "M3"
-      nCV := roba->mpc3
+      nMPCSifarnik := roba->mpc3
    ELSEIF cRule == "M4" .AND. roba->( FieldPos( "mpc4" ) ) <> 0
-      nCV := roba->mpc4
+      nMPCSifarnik := roba->mpc4
 
    ELSEIF roba->( FieldPos( "mpc" ) ) <> 0
-      nCV := roba->mpc
+      nMPCSifarnik := roba->mpc
    ENDIF
 
-   RETURN nCV
+   RETURN nMPCSifarnik
 
 
 FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )

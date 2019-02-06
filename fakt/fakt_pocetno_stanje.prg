@@ -80,7 +80,7 @@ FUNCTION fakt_pocetno_stanje()
       _rec[ "idfirma" ] := _param[ "id_firma" ]
       _rec[ "idtipdok" ] := "00"
       _rec[ "brdok" ] := _n_br_dok
-      _rec[ "rbr" ] := RedniBroj( ++_count )
+      _rec[ "rbr" ] := rbr_u_char( ++_count )
       _rec[ "datdok" ] := _param[ "datum_ps" ]
       _rec[ "dindem" ] := "KM "
       _rec[ "idpartner" ] := cIdPartner

@@ -216,7 +216,7 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
 
    my_flock()
    DO WHILE !Eof()
-      REPLACE field->rbr WITH RedniBroj( ++_rbr )
+      REPLACE field->rbr WITH rbr_u_char( ++_rbr )
       SKIP
    ENDDO
    my_unlock()

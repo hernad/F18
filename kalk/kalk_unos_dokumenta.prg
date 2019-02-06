@@ -22,21 +22,30 @@ THREAD STATIC s_nAsistentPauseSeconds := 0
 THREAD STATIC s_nKalkEditLastKey := 0
 
 MEMVAR GetList
+MEMVAR _TBankTr
 MEMVAR PicDEM, PicProc, PicCDem, PicKol, gPICPROC, nKalkStrana
 MEMVAR ImeKol, Kol
 MEMVAR picv
-// MEMVAR lKalkAsistentUToku, lAutoObr, lAsist, lAAzur, lAAsist
+MEMVAR gBrojacKalkulacija
 MEMVAR Ch
 MEMVAR opc, Izbor, h
-MEMVAR _idfirma, _idvd, _brdok
+
+MEMVAR aPorezi
+MEMVAR _idfirma, _idvd, _brdok, _datdok, _idkonto, _idkonto2, _vpc, _nc, _mpcsapp, _kolicina
+MEMVAR _TMarza
 MEMVAR cSection, cHistory, aHistory
+MEMVAR nKalkRBr, _rbr
+MEMVAR nVPV16, nMPV80, nNVPredhodna
+MEMVAR _ERROR
+
 
 STATIC cENTER := Chr( K_ENTER ) + Chr( K_ENTER ) + Chr( K_ENTER )
 
 FUNCTION kalk_header_get1( lNoviDokument )
 
    LOCAL GetList := {}
-   //LOCAL cOpisDokumenta := SPACE(100)
+
+   // LOCAL cOpisDokumenta := SPACE(100)
 
    IF lNoviDokument
       _idfirma := self_organizacija_id()
@@ -55,17 +64,18 @@ FUNCTION kalk_header_get1( lNoviDokument )
 
    ESC_RETURN 0
 
-   IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> idfirma .OR. _idvd <> idvd )
+   IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> kalk_pripr->idfirma .OR. _idvd <> kalk_pripr->idvd )
       _brDok := get_kalk_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
       SELECT kalk_pripr
    ENDIF
 
    @ box_x_koord() + 2, box_y_koord() + 40  SAY "Broj:" GET _brdok VALID {|| !kalk_dokument_postoji( _idfirma, _idvd, _brdok ) }
    @ box_x_koord() + 2, Col() + 2 SAY "Datum:" GET _datdok VALID {||  datum_not_empty_upozori_godina( _datDok, "Datum KALK" ) }
-   @ box_x_koord() + 3, box_y_koord() + 2  SAY "Rbr:" GET nRBr PICT '9999' VALID {|| valid_kalk_rbr_stavke( _idvd ) }
-   //IF nRbr == 1 .AND. !is_kalk_asistent_started()
-   //    @ Row(), Col() + 2 SAY8 "Opis:" GET cOpisDokumenta PICT "@S52"
-   //ENDIF
+   @ box_x_koord() + 3, box_y_koord() + 2  SAY "Rbr:" GET nKalkRBr PICT '9999' VALID {|| valid_kalk_rbr_stavke( _idvd ) }
+
+   // IF nKalkRbr == 1 .AND. !is_kalk_asistent_started()
+   // @ Row(), Col() + 2 SAY8 "Opis:" GET cOpisDokumenta PICT "@S52"
+   // ENDIF
 
    READ
    ESC_RETURN 0
@@ -176,10 +186,9 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
 
 FUNCTION kalk_pripr_key_handler( lAsistentObrada )
 
-   LOCAL nTr2
-   LOCAL iSekv
-   LOCAL _log_info
+   LOCAL cLogInfo
    LOCAL hRec
+   LOCAL cStavka
 
    hb_default( @lAsistentObrada, .F. )
 
@@ -255,14 +264,14 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
 
    CASE Ch == K_CTRL_T
       IF Pitanje(, "Želite izbrisati ovu stavku (D/N) ?", "D" ) == "D"
-         _log_info := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
+         cLogInfo := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
          cStavka := kalk_pripr->rbr
-         cArtikal := kalk_pripr->idroba
-         nKolicina := kalk_pripr->kolicina
-         nNc := kalk_pripr->nc
-         nVpc := kalk_pripr->vpc
+         //cArtikal := kalk_pripr->idroba
+         //nKolicina := kalk_pripr->kolicina
+         //nNc := kalk_pripr->nc
+         //nVpc := kalk_pripr->vpc
          my_delete()
-         log_write( "F18_DOK_OPER: kalk, brisanje stavke u pripremi: " + _log_info + " stavka br: " + cStavka, 2 )
+         log_write( "F18_DOK_OPER: kalk, brisanje stavke u pripremi: " + cLogInfo + " stavka br: " + cStavka, 2 )
          RETURN DE_REFRESH
       ENDIF
 
@@ -286,9 +295,9 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
 
    CASE Ch == k_ctrl_f9()
       IF Pitanje(, "Želite izbrisati kompletnu tabelu pripreme (D/N) ?", "N" ) == "D"
-         cOpis := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
+         cStavka := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
          my_dbf_zap()
-         log_write( "F18_DOK_OPER: kalk, brisanje pripreme: " + cOpis, 2 )
+         log_write( "F18_DOK_OPER: kalk, brisanje pripreme: " + cStavka, 2 )
          RETURN DE_REFRESH
       ENDIF
       RETURN DE_CONT
@@ -339,15 +348,14 @@ FUNCTION kalk_edit_last_key( nSet )
 
 FUNCTION kalk_ispravka_postojeca_stavka()
 
+   LOCAL cIdkont, cIdkont2
    LOCAL hParams := hb_Hash()
-   LOCAL _dok
-   LOCAL _rok, _opis, _hAttrId
+   LOCAL hDok
+   LOCAL _opis, hKalkAtributi
    LOCAL _old_dok, _new_dok
    LOCAL oAttr, nTrec
 
    _old_dok := hb_Hash()
-
-   _rok := fetch_metric( "kalk_definisanje_roka_trajanja", NIL, "N" ) == "D"
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
    IF RecCount() == 0
@@ -363,7 +371,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       RETURN DE_CONT
    ENDIF
 
-   nRbr := RbrUNum( _Rbr )
+   nKalkRbr := rbr_u_num( _Rbr )
    _ERROR := ""
 
    Box( "ist", BOX_HEIGHT, BOX_WIDTH, .F. )
@@ -372,17 +380,14 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    _old_dok[ "idvd" ] := _idvd
    _old_dok[ "brdok" ] := _brdok
 
-   _dok := hb_Hash()
-   _dok[ "idfirma" ] := _idfirma
-   _dok[ "idtipdok" ] := _idvd
-   _dok[ "brdok" ] := _brdok
-   _dok[ "rbr" ] := _rbr
+   hDok := hb_Hash()
+   hDok[ "idfirma" ] := _idfirma
+   hDok[ "idtipdok" ] := _idvd
+   hDok[ "brdok" ] := _brdok
+   hDok[ "rbr" ] := _rbr
 
-   IF _rok
-      hParams[ "rok" ] := get_kalk_attr_rok( _dok, .F. )
-   ENDIF
    IF _opis
-      hParams[ "opis" ] := get_kalk_attr_opis( _dok, .F. )
+      hParams[ "opis" ] := get_kalk_attr_opis( hDok, .F. )
    ENDIF
 
    IF kalk_edit_stavka( .F., @hParams ) == K_ESC
@@ -397,30 +402,29 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       ENDIF
 
       IF _idvd == "16"
-         _oldval := _vpc * _kolicina
+         nVPV16 := _vpc * _kolicina
       ELSE
-         _oldval := _mpcsapp * _kolicina
+          nMPV80 := _mpcsapp * _kolicina
       ENDIF
-
-      _oldvaln := _nc * _kolicina
+      nNVPredhodna := _nc * _kolicina
 
       my_rlock()
       Gather()
       my_unlock()
 
-      _hAttrId := hb_Hash()
-      _hAttrId[ "idfirma" ] := field->idfirma
-      _hAttrId[ "idtipdok" ] := field->idvd
-      _hAttrId[ "brdok" ] := field->brdok
-      _hAttrId[ "rbr" ] := field->rbr
+      hKalkAtributi := hb_Hash()
+      hKalkAtributi[ "idfirma" ] := field->idfirma
+      hKalkAtributi[ "idtipdok" ] := field->idvd
+      hKalkAtributi[ "brdok" ] := field->brdok
+      hKalkAtributi[ "rbr" ] := field->rbr
 
       oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-      oAttr:hAttrId := _hAttrId
+      oAttr:hAttrId := hKalkAtributi
       oAttr:push_attr_from_mem_to_dbf( hParams )
 
       SELECT kalk_pripr
 
-      IF nRbr == 1
+      IF nKalkRbr == 1
          nTrec := RecNo()
          _new_dok := dbf_get_rec()
          kalk_izmjeni_sve_stavke_dokumenta( _old_dok, _new_dok )
@@ -434,17 +438,15 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          cIdkont2 := _idkonto2
          _idkonto := cIdkont2
          _idkonto2 := "XXX"
-         _kolicina := -kolicina
+         _kolicina := - kalk_pripr->kolicina
 
-         nRbr := RbrUNum( _rbr ) + 1
-         _rbr := RedniBroj( nRbr )
+         nKalkRbr := rbr_u_num( _rbr ) + 1
+         _rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
 
          SEEK _idfirma + _idvd + _brdok + _rbr
-
          _tbanktr := "X"
-
          DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + field->rbr
             IF Left( field->idkonto2, 3 ) == "XXX"
                Scatter()
@@ -507,14 +509,14 @@ STATIC FUNCTION kalk_kontiraj_alt_k()
 FUNCTION kalk_unos_nova_stavka()
 
    LOCAL hParams := hb_Hash()
-   LOCAL _dok, _hAttrId
+   LOCAL hDok, hKalkAtributi
    LOCAL _old_dok := hb_Hash()
    LOCAL _new_dok
    LOCAL oAttr
-   LOCAL _rok, _opis
+   LOCAL _opis
    LOCAL _rbr_uvecaj := 0
+   LOCAL cIdKont, cIdKont2
 
-   _rok := fetch_metric( "kalk_definisanje_roka_trajanja", NIL, "N" ) == "D"
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
    Box( "knjn", BOX_HEIGHT, BOX_WIDTH, .F., "Unos novih stavki" )
@@ -574,7 +576,7 @@ FUNCTION kalk_unos_nova_stavka()
 
       _NC := _VPC := _VPCSaP := _MPC := _MPCSaPP := 0
 
-      nRbr := RbrUNum( _rbr ) + 1 + _rbr_uvecaj
+      nKalkRbr := rbr_u_num( _rbr ) + 1 + _rbr_uvecaj
 
       _old_dok[ "idfirma" ] := _idfirma
       _old_dok[ "idvd" ] := _idvd
@@ -591,26 +593,25 @@ FUNCTION kalk_unos_nova_stavka()
       ENDIF
 
       IF _idvd == "16"
-         _oldval := _vpc * _kolicina
+         nVPV16 := _vpc * _kolicina
       ELSE
-         _oldval := _mpcsapp * _kolicina
+         nMPV80 := _mpcsapp * _kolicina
       ENDIF
-
-      _oldvaln := _nc * _kolicina
+      nNVPredhodna := _nc * _kolicina
 
       Gather()
 
-      _hAttrId := hb_Hash()
-      _hAttrId[ "idfirma" ] := field->idfirma
-      _hAttrId[ "idtipdok" ] := field->idvd
-      _hAttrId[ "brdok" ] := field->brdok
-      _hAttrId[ "rbr" ] := field->rbr
+      hKalkAtributi := hb_Hash()
+      hKalkAtributi[ "idfirma" ] := field->idfirma
+      hKalkAtributi[ "idtipdok" ] := field->idvd
+      hKalkAtributi[ "brdok" ] := field->brdok
+      hKalkAtributi[ "rbr" ] := field->rbr
 
       oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-      oAttr:hAttrId := _hAttrId
+      oAttr:hAttrId := hKalkAtributi
       oAttr:push_attr_from_mem_to_dbf( hParams )
 
-      IF nRbr == 1
+      IF nKalkRbr == 1
          SELECT kalk_pripr
          nTrec := RecNo()
          _new_dok := dbf_get_rec()
@@ -628,8 +629,8 @@ FUNCTION kalk_unos_nova_stavka()
          _idkonto2 := "XXX"
          _kolicina := -kolicina
 
-         nRbr := RbrUNum( _rbr ) + 1
-         _Rbr := RedniBroj( nRbr )
+         nKalkRbr := rbr_u_num( _rbr ) + 1
+         _Rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
 
@@ -666,11 +667,12 @@ FUNCTION kalk_unos_nova_stavka()
 FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
    LOCAL hParams := hb_Hash()
-   LOCAL _dok
-   LOCAL oAttr, _hAttrId, _old_dok, _new_dok
+   LOCAL hDok
+   LOCAL oAttr, hKalkAtributi, _old_dok, _new_dok
    LOCAL _rok, _opis
    LOCAL nTr2
    LOCAL nDug, nPot, nTrec
+   LOCAL cIdKont, cIdKont2
 
    PushWA()
 
@@ -711,24 +713,24 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          ENDIF
       ENDIF
 
-      nRbr := RbrUNum( _rbr )
+      nKalkRbr := rbr_u_num( _rbr )
 
       IF lAsistentObrada .AND. !kalk_asistent_pause()
          kalk_asistent_send_entere()
          hb_idleSleep( 0.1 )
       ENDIF
 
-      _dok := hb_Hash()
-      _dok[ "idfirma" ] := _idfirma
-      _dok[ "idtipdok" ] := _idvd
-      _dok[ "brdok" ] := _brdok
-      _dok[ "rbr" ] := _rbr
+      hDok := hb_Hash()
+      hDok[ "idfirma" ] := _idfirma
+      hDok[ "idtipdok" ] := _idvd
+      hDok[ "brdok" ] := _brdok
+      hDok[ "rbr" ] := _rbr
 
       IF _opis
-         hParams[ "opis" ] := get_kalk_attr_opis( _dok, .F. )
+         hParams[ "opis" ] := get_kalk_attr_opis( hDok, .F. )
       ENDIF
       IF _rok
-         hParams[ "rok" ] := get_kalk_attr_rok( _dok, .F. )
+         hParams[ "rok" ] := get_kalk_attr_rok( hDok, .F. )
       ENDIF
 
       IF kalk_edit_stavka( .F., @hParams ) == K_ESC
@@ -744,20 +746,20 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          _error := "0"
       ENDIF
 
-      _oldval := _mpcsapp * _kolicina  // vrijednost prosle stavke
-      _oldvaln := _nc * _kolicina
+      nMPV80 := _mpcsapp * _kolicina  // vrijednost prosle stavke
+      nNVPredhodna := _nc * _kolicina
 
       my_rlock()
       Gather()
       my_unlock()
 
       oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-      oAttr:hAttrId := _dok
+      oAttr:hAttrId := hDok
       oAttr:push_attr_from_mem_to_dbf( hParams )
 
       SELECT kalk_pripr
 
-      IF nRbr == 1
+      IF nKalkRbr == 1
          nTrec := RecNo()
          _new_dok := dbf_get_rec()
          kalk_izmjeni_sve_stavke_dokumenta( _old_dok, _new_dok )
@@ -773,8 +775,8 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          _idkonto2 := "XXX"
          _kolicina := -kolicina
 
-         nRbr := RbrUNum( _rbr ) + 1
-         _Rbr := RedniBroj( nRbr )
+         nKalkRbr := rbr_u_num( _rbr ) + 1
+         _Rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
 
@@ -879,7 +881,6 @@ FUNCTION kalk_asistent_start()
    RETURN DE_REFRESH
 
 
-
 FUNCTION kalk_asistent_send_esc()
 
    KEYBOARD Chr( K_ESC )
@@ -897,7 +898,6 @@ FUNCTION kalk_asistent_send_entere()
       cSekv += cEnter
    NEXT
    KEYBOARD cSekv
-
 
    RETURN .T.
 
@@ -918,8 +918,8 @@ FUNCTION is_kalk_asistent_started()
 FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
    LOCAL nRet, nR
-   PRIVATE nMarza := 0
-   PRIVATE nMarza2 := 0
+   //PRIVATE nMarza := 0
+   //PRIVATE nMarza2 := 0
 
    PRIVATE PicDEM := "9999999.99999999"
    PRIVATE PicKol := kalk_pic_kolicina_bilo_gpickol()
@@ -963,15 +963,13 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
    ENDDO
 
    nRet := LastKey()
-
    IF ( nRet ) <> K_ESC
-      _Rbr := RedniBroj( nRbr )
-      _Dokument := P_TipDok( _IdVD, - 2 )
+      _Rbr := rbr_u_char( nKalkRbr )
+      // _Dokument := P_TipDok( _IdVD, - 2 )
       RETURN nRet
    ENDIF
 
    RETURN nRet
-
 
 
 /*
@@ -980,7 +978,7 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
 FUNCTION kalk_unos_1( lNoviDokument, hParams )
 
-   PRIVATE pIzgSt := .F.
+   PRIVATE lKalkIzgenerisaneStavke := .F.
    PRIVATE Getlist := {}
 
    IF kalk_header_get1( lNoviDokument ) == 0
@@ -1057,7 +1055,6 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    RETURN .T.
 
 
-
 FUNCTION ispisi_naziv_konto( x, y, len )
 
    LOCAL cNaz := ""
@@ -1076,7 +1073,6 @@ FUNCTION ispisi_naziv_konto( x, y, len )
    PopWa()
 
    RETURN .T.
-
 
 
 FUNCTION ispisi_naziv_partner( x, y, len )
@@ -1125,7 +1121,6 @@ FUNCTION ispisi_naziv_roba( x, y, len )
    RETURN .T.
 
 
-
 FUNCTION kalk_unos_2()
 
    IF _idvd == "RN"
@@ -1135,9 +1130,6 @@ FUNCTION kalk_unos_2()
    ENDIF
 
    RETURN K_ESC
-
-
-
 
 
 FUNCTION valid_kalk_rbr_stavke( cIdVd )
@@ -1197,9 +1189,7 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
          hRec[ "pkonto" ] := _tek_dok[ "pkonto" ]
          hRec[ "mkonto" ] := _tek_dok[ "mkonto" ]
       ENDIF
-
       dbf_update_rec( hRec )
-
       GO ( nTrec )
 
    ENDDO
@@ -1217,7 +1207,6 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
       SKIP -1
 
       hRec := dbf_get_rec()
-
       hRec[ "idfirma" ] := _tek_dok[ "idfirma" ]
       hRec[ "idtipdok" ] := _tek_dok[ "idvd" ]
       hRec[ "brdok" ] := _tek_dok[ "brdok" ]
@@ -1228,23 +1217,8 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
    ENDDO
 
    USE
-
    SELECT kalk_pripr
    GO TOP
-
-   RETURN .T.
-
-
-
-FUNCTION Soboslikar( aNiz, nIzKodaBoja, nUKodBoja )
-
-   LOCAL i, cEkran
-
-   FOR i := 1 TO Len( aNiz )
-      cEkran := SaveScreen( aNiz[ i, 1 ], aNiz[ i, 2 ], aNiz[ i, 3 ], aNiz[ i, 4 ] )
-      cEkran := StrTran( cEkran, Chr( nIzKodaBoja ), Chr( nUKodBoja ) )
-      RestScreen( aNiz[ i, 1 ], aNiz[ i, 2 ], aNiz[ i, 3 ], aNiz[ i, 4 ], cEkran )
-   NEXT
 
    RETURN .T.
 
@@ -1266,7 +1240,7 @@ FUNCTION kalk_zagl_firma()
    ? "(poslovnica-poslovna jedinica)"
    ? "Datum:"
    U_ON
-   ?? PadC( SrediDat( DATDOK ), 18 )
+   ?? PadC( SrediDat( kalk_pripr->DATDOK ), 18 )
    U_OFF
    ?
    ?
@@ -1274,13 +1248,12 @@ FUNCTION kalk_zagl_firma()
    RETURN .T.
 
 
-
 STATIC FUNCTION NazProdObj()
 
    LOCAL cVrati := ""
 
    select_o_konto( kalk_pripr->pkonto )
-   cVrati := naz
+   cVrati := konto->naz
    SELECT kalk_pripr
 
    RETURN cVrati
@@ -1303,10 +1276,7 @@ FUNCTION kalk_plus_minus_kol()
       SKIP 1
    ENDDO
    my_unlock()
-
-
    kalk_asistent_start()  // kalk_plus_minus_kol
-
    my_close_all_dbf()
 
    RETURN .T.
@@ -1351,6 +1321,8 @@ FUNCTION kalk_set_diskont_mpc()
  */
 FUNCTION MPCSAPPuSif()
 
+   LOCAL cIdKonto
+
    o_kalk_edit()
    SELECT kalk_pripr
    GO TOP
@@ -1358,7 +1330,7 @@ FUNCTION MPCSAPPuSif()
       cIdKonto := kalk_pripr->pkonto
       select_o_koncij( cIdKonto )
       SELECT kalk_pripr
-      DO WHILE !Eof() .AND. pkonto == cIdKonto
+      DO WHILE !Eof() .AND. kalk_pripr->pkonto == cIdKonto
          select_o_roba(  kalk_pripr->idroba )
          IF Found()
             roba_set_mcsapp_na_osnovu_koncij_pozicije( kalk_pripr->mpcsapp, .F. )
@@ -1370,7 +1342,6 @@ FUNCTION MPCSAPPuSif()
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 /*
@@ -1395,23 +1366,13 @@ FUNCTION kalk_iz_vpc_sif_u_vpc_dokumenta()
    ENDDO
    my_unlock()
 
-
    kalk_asistent_start() // kalk_iz_vpc_sif_u_vpc_dokumenta
-
    my_close_all_dbf()
 
    RETURN .T.
 
 
-
 FUNCTION kalk_open_tables_unos( lAzuriraniDok, cIdFirma, cIdVD, cBrDok )
-
-// o_koncij()
-// select_o_roba()
-// o_tarifa()
-// select_o_partner()
-// select_o_konto()
-// o_tdok()
 
    IF lAzuriraniDok
       open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok ) // .T. => SQL table
@@ -1420,8 +1381,6 @@ FUNCTION kalk_open_tables_unos( lAzuriraniDok, cIdFirma, cIdVD, cBrDok )
    ENDIF
 
    RETURN .T.
-
-
 
 
 FUNCTION kalkulacija_ima_sve_cijene( firma, tip_dok, br_dok )
@@ -1445,7 +1404,6 @@ FUNCTION kalkulacija_ima_sve_cijene( firma, tip_dok, br_dok )
             // EXIT
          ENDIF
       ENDIF
-
       SKIP
 
    ENDDO
@@ -1456,11 +1414,9 @@ FUNCTION kalkulacija_ima_sve_cijene( firma, tip_dok, br_dok )
    RETURN cOk
 
 
-
 FUNCTION o_kalk_edit()
 
    o_kalk_pripr()
-
    SELECT kalk_pripr
    SET ORDER TO TAG "1"
    GO TOP

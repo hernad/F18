@@ -170,7 +170,7 @@ altd()
 
       DO WHILE !Eof()
          scatter()
-         _rbr := RedniBroj( ++nRbr )
+         _rbr := rbr_u_char( ++nRbr )
          my_rlock()
          gather()
          my_unlock()
@@ -361,7 +361,7 @@ FUNCTION kalk_azuriraj_im_stavku( cIdFirma, cIdKonto, cBrDok, dDatDok, nRbr, cId
       _idtarifa := roba->idTarifa
       _idvd := "IM"
       _brdok := cBrdok
-      _rbr := RedniBroj( ++nRbr )
+      _rbr := rbr_u_char( ++nRbr )
       _kolicina := nUlaz - nIzlaz
       _gkolicina := nUlaz - nIzlaz
       _DatDok := dDatDok
@@ -406,7 +406,7 @@ STATIC FUNCTION kalk_dodaj_im_stavku( cIdFirma, cIdKonto, cBrDok, dDatDok, nRbr,
    _IdTarifa := roba->idtarifa
    _IdVd := "IM"
    _Brdok := cBrdok
-   _RBr := RedniBroj( ++nRbr )
+   _RBr := rbr_u_char( ++nRbr )
    _kolicina := _gkolicina := nUlaz - nIzlaz
 
    IF lKolNula // ako je lKolNula setuj na 0 popisanu kolicinu

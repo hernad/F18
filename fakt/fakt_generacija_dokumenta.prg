@@ -80,7 +80,7 @@ FUNCTION fakt_generisi_inventuru( cIdRj )
             SELECT fakt_pripr
             nRbr++
             ShowKorner( nRbr, 10 )
-            cRbr := RedniBroj( nRbr )
+            cRbr := rbr_u_char( nRbr )
             fakt_dodaj_stavku_inventura( cIdRj, cIdRoba, cBrDok, nUl - nIzl - nRevers, cRbr )
          ENDIF
       ENDIF
@@ -159,7 +159,7 @@ FUNCTION fakt_inventura_manjak( cIdRj, cBrDok )
          select_o_roba( fakt->idRoba )
          SELECT fakt_pripr
          nRBr++
-         cRBr := RedniBroj( nRBr )
+         cRBr := rbr_u_char( nRBr )
          dodaj_stavku_inventure_manjka( cIdRj, fakt->idRoba, cNoviBrDok, nRazlikaKol, cRBr )
       ENDIF
       SELECT fakt
@@ -228,7 +228,7 @@ FUNCTION fakt_inventura_visak( cIdRj, cBrDok )
          select_o_roba( fakt->idRoba )
          SELECT fakt_pripr
          nRBr++
-         cRBr := RedniBroj( nRBr )
+         cRBr := rbr_u_char( nRBr )
          dodaj_stavku_inventure_viska( cIdRj, fakt->idRoba, cNoviBrDok, -nRazlikaKol, cRBr )
       ENDIF
       SELECT fakt

@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkRBr
 
 FUNCTION kalk_get_1_ip()
 
@@ -23,11 +24,6 @@ FUNCTION kalk_get_1_ip()
    _datfaktp := _datdok
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto koji zadužuje" GET _IdKonto  VALID P_Konto( @_IdKonto, nX, 35 ) PICT "@!"
-
-   // IF gNW <> "X"
-   // @ box_x_koord() + nX, box_y_koord() + 35 SAY "Zaduzuje: " GET _idzaduz PICT "@!" ;
-   // VALID Empty( _idzaduz ) .OR. p_partner( @_idzaduz, nX, 35 )
-   // ENDIF
 
    READ
    ESC_RETURN K_ESC
@@ -46,13 +42,7 @@ FUNCTION kalk_get_1_ip()
       _idroba := Left( _idroba, 10 )
    ENDIF
 
-/*
-   // proracunava knjizno stanje robe na prodavnici
-   // kada je dokument prenesen iz tops-a onda ovo ne bi trebalo da radi
-   IF !Empty( kalk_metoda_nc() ) .AND. _nc == 0 .AND. _mpcsapp == 0
-      knjizno_stanje_prodavnica()
-   ENDIF
-*/
+
 
    select_o_tarifa( _idtarifa )
    select_o_roba( _idroba )
@@ -60,8 +50,6 @@ FUNCTION kalk_get_1_ip()
    _mpcsapp := kalk_get_mpc_by_koncij_pravilo( _IdKonto )
 
    SELECT kalk_pripr
-
-   // DuplRoba()
 
    nX += 2
 
@@ -95,17 +83,12 @@ FUNCTION kalk_get_1_ip()
    RETURN LastKey()
 
 
-
 FUNCTION kalk_generisi_ip()
 
    LOCAL cIdFirma, cIdKonto, cIdRoba, dDatDok, cNulirati
    LOCAL nRbr
+   LOCAL GetList := {}
 
-   // o_konto()
-// o_tarifa()
-// o_sifk()
-// o_sifv()
-// o_roba()
 
    Box(, 4, 50 )
 
@@ -123,9 +106,7 @@ FUNCTION kalk_generisi_ip()
 
    BoxC()
 
-   o_koncij()
    o_kalk_pripr()
-   // o_kalk()
 
    PRIVATE cBrDok := kalk_get_next_broj_v5( cIdFirma, "IP", NIL )
 
@@ -165,7 +146,7 @@ FUNCTION kalk_ip_when_knjizna_kolicina()
 
    IF  Round( _nc, 2 ) == 0 .AND. Round( _gkolicina, 2 ) == 0 // jos nisu setovane mpc niti knjizna kolicina
       find_kalk_by_pkonto_idroba( cIdFirma, cIdKonto, cIdRoba )
-      kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, cNulirati, .T., @nRbr )
+      kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, cNulirati, .T., @nKalkRbr )
       SELECT kalk_pripr
    ENDIF
 
@@ -261,7 +242,7 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, 
       _idvd := "IP"
       _brdok := cBrdok
 
-      _rbr := RedniBroj( nRbr++ )
+      _rbr := rbr_u_char( nRbr++ )
       _kolicina := _gkolicina := nUlaz - nIzlaz
       IF cNulirati == "D"
          _kolicina := 0
@@ -302,8 +283,8 @@ FUNCTION gen_ip_razlika()
    LOCAL nNVI
    LOCAL nRabat
    LOCAL _cnt := 0
-
-   // o_konto()
+   LOCAL GetList := {}
+   LOCAL nRbr
 
    Box(, 4, 50 )
 
@@ -337,15 +318,8 @@ FUNCTION gen_ip_razlika()
 
    MsgC()
 
-   // otvori potrebne tabele
-// o_tarifa()
-// o_sifk()
-// o_sifv()
-// o_roba()
-// o_koncij()
    o_kalk_pripr()
    o_kalk_pript()
-   // o_kalk()
 
    // sljedeci broj kalkulacije IP
    PRIVATE cBrDok := kalk_get_next_broj_v5( cIdFirma, "IP", NIL )
@@ -360,9 +334,6 @@ FUNCTION gen_ip_razlika()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "generacija IP-" + AllTrim( cBrDok ) + " u toku..."
 
    select_o_koncij( cIdKonto )
-
-   // SELECT kalk
-   // HSEEK cIdFirma + cIdKonto
    find_kalk_by_pkonto_idroba( cIdFirma, cIdKonto )
    GO TOP
 
@@ -397,7 +368,6 @@ FUNCTION gen_ip_razlika()
       DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == idFirma + pkonto + idroba
 
          IF dDatdok < field->datdok
-            // preskoci
             SKIP
             LOOP
          ENDIF
@@ -452,20 +422,15 @@ FUNCTION gen_ip_razlika()
          hRec[ "idtarifa" ] := roba->idtarifa
          hRec[ "idvd" ] := "IP"
          hRec[ "brdok" ] := cBrdok
-         hRec[ "rbr" ] := RedniBroj( ++nRbr )
-
+         hRec[ "rbr" ] := rbr_u_char( ++nRbr )
          // kolicinu odmah setuj na 0
          hRec[ "kolicina" ] := 0
-
          // popisana kolicina je trenutno stanje
          hRec[ "gkolicina" ] := nUlaz - nIzlaz
-
          hRec[ "datdok" ] := dDatDok
          hRec[ "datfaktp" ] := dDatdok
-
          hRec[ "error" ] := ""
          hRec[ "fcj" ] := nMpvu - nMpvi
-
 
          IF Round( nUlaz - nIzlaz, 4 ) <> 0 // stanje mpvsapp
             // treba li ovo zaokruzivati ????

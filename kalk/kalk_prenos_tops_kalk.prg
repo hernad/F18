@@ -320,8 +320,8 @@ FUNCTION pos_kalk_napuni_kalk_pripr( cTopskaImeDbf, cIdVdKalk ) // , lAutoRazduz
    DO WHILE !Eof()
 
       cIdKontoProdavnica := koncij->id
-      nRedniBroj := RbrUNum( cRedniBroj ) + 1
-      cRedniBroj := RedniBroj( nRedniBroj )
+      nRedniBroj := rbr_u_num( cRedniBroj ) + 1
+      cRedniBroj := rbr_u_char( nRedniBroj )
 
 /*
       // provjeri da li roba postoji u sifarniku, ako ne postoji dodaj, dodati u kontrolnu matricu ove informacije
