@@ -39,6 +39,10 @@ FUNCTION say_pict( nVar, cPicture, lZero )
 
    hb_default( @lZero, .F. )
 
+   IF ValType( nVar ) == "C" // npr. "[NIV]"
+      RETURN PadC( nVar, Len( cPicture ) )
+   ENDIF
+
    cPic1 := StrTran( cPicture, "@Z ", "" )
    cPic1 := StrTran( cPic1, " ", "" )
    nLen := Len( cPic1 )
@@ -63,7 +67,6 @@ FUNCTION say_pict( nVar, cPicture, lZero )
    NEXT
 
    RETURN Transform( nVar, cPicture ) // ako nista ne odgovara
-
 
 
 /*
