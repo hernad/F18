@@ -626,11 +626,11 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    LOCAL nStvarnaKolicina := 0
 
-   IF gKalo == "1"
-      nStvarnaKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
-   ELSE
+   //IF gKalo == "1"
+    //  nStvarnaKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
+   //ELSE
       nStvarnaKolicina := field->Kolicina
-   ENDIF
+   //ENDIF
 
 
    IF field->TPrevoz == "%"

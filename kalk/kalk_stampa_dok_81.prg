@@ -94,18 +94,18 @@ FUNCTION kalk_stampa_dok_81()
          @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
-      IF gKalo == "1"
-         SKol := Kolicina - GKolicina - GKolicin2
-      ELSE
+      //IF gKalo == "1"
+      //   SKol := Kolicina - GKolicina - GKolicin2
+      //ELSE
          SKol := Kolicina
-      ENDIF
+      //ENDIF
 
       nTot +=  ( nU := FCj * Kolicina )
-      IF gKalo == "1"
-         nTot1 += ( nU1 := FCj2 * ( GKolicina + GKolicin2 ) )
-      ELSE
+    //  IF gKalo == "1"
+    //     nTot1 += ( nU1 := FCj2 * ( GKolicina + GKolicin2 ) )
+      //ELSE
          nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
-      ENDIF
+      //ENDIF
       nTot2 += ( nU2 := -Rabat / 100 * FCJ * Kolicina )
       nTot3 += ( nU3 := nPrevoz * SKol )
       nTot4 += ( nU4 := nBankTr * SKol )
@@ -346,18 +346,18 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
-      IF gKalo == "1"
-         SKol := Kolicina - GKolicina - GKolicin2
-      ELSE
+    //  IF gKalo == "1"
+      //   SKol := Kolicina - GKolicina - GKolicin2
+      //ELSE
          SKol := Kolicina
-      ENDIF
+      //ENDIF
 
       nTot +=  ( nU := FCj * Kolicina )
-      IF gKalo == "1"
-         nTot1 += ( nU1 := FCj2 * ( GKolicina + GKolicin2 ) )
-      ELSE
+      //IF gKalo == "1"
+      //   nTot1 += ( nU1 := FCj2 * ( GKolicina + GKolicin2 ) )
+      //ELSE
          nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
-      ENDIF
+      //ENDIF
       nTot2 += ( nU2 := -Rabat / 100 * FCJ * Kolicina )
       nTot3 += ( nU3 := nPrevoz * SKol )
       nTot4 += ( nU4 := nBankTr * SKol )
@@ -509,5 +509,3 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
    dok_potpis( 90, "L", NIL, NIL )
 
    RETURN .T.
-
-

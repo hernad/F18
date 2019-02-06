@@ -49,27 +49,27 @@ FUNCTION kalk_meni_f10()
 
    IF kalk_pripr->idvd == "19"
       AAdd( aOpc, "X. obrazac promjene cijena" )
-      AAdd( aOpcExe, {||  Obraz19() } )
+      AAdd( aOpcExe, {||  kalk_obrazac_promjene_cijena_19() } )
    ENDIF
 
    AAdd( aOpc, "B. pretvori 11 -> 41  ili  11 -> 42"        )
    AAdd( aOpcExe, {||  kalk_iz_11_u_41_42() } )
 
    AAdd( aOpc, "C. promijeni predznak za količine"          )
-   AAdd( aOpcExe, {||  kalk_plus_minus_kol() } )
+   AAdd( aOpcExe, {|| kalk_plus_minus_kol() } )
 
 
    AAdd( aOpc, "E. storno dokumenta"                        )
-   AAdd( aOpcExe, {||  storno_kalk_dokument() } )
+   AAdd( aOpcExe, {|| storno_kalk_dokument() } )
 
    AAdd( aOpc, "F. prenesi VPC(sifr)+POREZ -> MPCSAPP(dok)" )
    AAdd( aOpcExe, {|| kalk_set_diskont_mpc() } )
 
    AAdd( aOpc, "G. prenesi mpc sa por(dok)->sifarnik"  )
-   AAdd( aOpcExe, {||  kalk_dokument_prenos_cijena() } )
+   AAdd( aOpcExe, {|| kalk_dokument_prenos_cijena() } )
 
-   AAdd( aOpc, "H. prenesi vpc(sif)-> vpc(dok)"     )
-   AAdd( aOpcExe, {|| VPCSifUDok() } )
+   AAdd( aOpc, "H. prenesi vpc sifarnik -> vpc dokumenta"     )
+   AAdd( aOpcExe, {|| kalk_iz_vpc_sif_u_vpc_dokumenta() } )
 
    AAdd( aOpc, "I. povrat (12,11) -> u drugo skl.(96,97)" )
    AAdd( aOpcExe, {|| Iz12u97()  } )  // 11,12 -> 96,97
@@ -84,7 +84,7 @@ FUNCTION kalk_meni_f10()
    AAdd( aOpcExe, {|| kalk_pregled_smece_pripr9() } )
 
    AAdd( aOpc, "O. briši sve protu-stavke" )
-   AAdd( aOpcExe, {|| ProtStErase() } )
+   AAdd( aOpcExe, {|| kalk_pripr_brisi_protustavke() } )
 
    AAdd( aOpc, "R. renumeracija kalk priprema" )
    AAdd( aOpcexe, {|| renumeracija_kalk_pripr( NIL, NIL, .F. ) } )
@@ -280,10 +280,10 @@ STATIC FUNCTION MPCSAPPiz80uSif()
 
 
 
-STATIC FUNCTION ProtStErase()
+STATIC FUNCTION kalk_pripr_brisi_protustavke()
 
    IF Pitanje(, "Pobrisati protustavke dokumenta (D/N)?", "N" ) == "N"
-      RETURN
+      RETURN .F.
    ENDIF
 
    o_kalk_pripr()
@@ -303,87 +303,6 @@ STATIC FUNCTION ProtStErase()
 
    RETURN .T.
 
-
-/*
-FUNCTION ()
-
-   IF Pitanje(, "Setovati NC na 0 (D/N)?", "N" ) == "N"
-      RETURN .F.
-   ENDIF
-
-   o_kalk_pripr()
-   SELECT kalk_pripr
-   GO TOP
-   my_flock()
-   DO WHILE !Eof()
-      Scatter()
-      _nc := 0
-      Gather()
-      SKIP
-   ENDDO
-   my_unlock()
-   GO TOP
-
-   RETURN .T.
-*/
-
-/*
-STATIC FUNCTION kalk_printaj_duple_stavke_iz_pripreme()
-
-   LOCAL aRobaDupli := {}
-   LOCAL nScan, nI
-
-//   o_roba()
-   o_kalk_pripr()
-
-   SELECT kalk_pripr
-   GO TOP
-
-   DO WHILE !Eof()
-
-      SELECT roba
-      HSEEK kalk_pripr->idroba
-
-      SELECT kalk_pripr
-
-      nScan := AScan( aRobaDupli, {| var| VAR[ 1 ] == kalk_pripr->idroba } )
-
-      IF nScan == 0
-         AAdd( aRobaDupli, { kalk_pripr->idroba } )
-      ELSE
-         AAdd( aRobaDupli, { kalk_pripr->idroba, roba->naz, roba->barkod, kalk_pripr->rbr } )
-      ENDIF
-
-      SKIP
-
-   ENDDO
-
-   GO TOP
-
-   IF Len( aRobaDupli ) > 0
-
-      START PRINT CRET .F.
-
-      ?U "Sljedeći artikli u pripremi su dupli:"
-      ? Replicate( "-", 80 )
-      ? PadR( "R.br", 5 ) + " " + PadR( "Rb.st", 5 ) + " " + PadR( "ID", 10 ) + " " + PadR( "NAZIV", 40 ) + " " + PadR( "BARKOD", 13 )
-      ? Replicate( "-", 80 )
-
-      FOR nI := 1 TO Len( aRobaDupli )
-         ? PadL( AllTrim( Str( nI, 5 ) ) + ".", 5 )
-         @ PRow(), PCol() + 1 SAY PadR( aRobaDupli[ nI, 4 ], 5 )
-         @ PRow(), PCol() + 1 SAY aRobaDupli[ nI, 1 ]
-         @ PRow(), PCol() + 1 SAY PadR( aRobaDupli[ nI, 2 ], 40 )
-         @ PRow(), PCol() + 1 SAY aRobaDupli[ nI, 3 ]
-      NEXT
-
-      ENDPRINT
-
-   ENDIF
-
-   RETURN .T.
-
-*/
 
 FUNCTION kalk_pripr_spoji_duple_artikle()
 

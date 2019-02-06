@@ -103,7 +103,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC KursLis := "1"
    PUBLIC gDefNiv := "D"
    PUBLIC gDecKol := 5
-   PUBLIC gKalo := "2"
+   // PUBLIC gKalo := "2"
    PUBLIC gMagacin := "2"
    PUBLIC gRCRP := "C"
    PUBLIC gPotpis := "N"
@@ -243,7 +243,7 @@ METHOD TKalkMod:set_module_gvars()
    gGen16 := fetch_metric( "kalk_generisi_16_nakon_96", f18_user(), gGen16 )
    gKomFakt := fetch_metric( "kalk_oznaka_rj_u_fakt", nil, gKomFakt )
    gKomKonto := fetch_metric( "kalk_komision_konto", nil, gKomKonto )
-   gKalo := fetch_metric( "kalk_kolicina_kalo", nil, gKalo )
+   // gKalo := fetch_metric( "kalk_kolicina_kalo", nil, gKalo )
    gVodiKalo := fetch_metric( "kalk_voditi_kalo", nil, gVodiKalo )
    gNiv14 := fetch_metric( "kalk_tip_nivelacije_14", nil, gNiv14 )
 
@@ -255,10 +255,6 @@ METHOD TKalkMod:set_module_gvars()
    gPicProc := fetch_metric( "kalk_format_prikaza_procenta", nil, gPicProc )
 
    gPicNc := fetch_metric( "kalk_format_prikaza_nabavne_cijene", nil, gPicNC )
-
-   //gFPicCDem := fetch_metric( "kalk_format_prikaza_cijene_prosirenje", nil, gFPicCDem )
-   //gFPicDem := fetch_metric( "kalk_format_prikaza_iznosa_prosirenje", nil, gFPicDem )
-   //gFPicKol := fetch_metric( "kalk_format_prikaza_kolicine_prosirenje", nil, gFPicKol )
 
    gPotpis := fetch_metric( "kalk_potpis_na_kraju_naloga", nil, gPotpis )
    gRCRP := fetch_metric( "kalk_varijanta_popusta_na_dokumentima", nil, gRCRP )

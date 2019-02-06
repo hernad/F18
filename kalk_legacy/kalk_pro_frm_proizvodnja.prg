@@ -214,7 +214,7 @@ FUNCTION legacy_get_1_pr()
    IF kalk_is_novi_dokument()
       SELECT ROBA
       HSEEK _IdRoba
-      _VPC := KoncijVPC()
+      _VPC := kalk_vpc_za_koncij()
       _TCarDaz := "%"
       _CarDaz := 0
    ENDIF

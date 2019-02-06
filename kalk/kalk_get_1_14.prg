@@ -76,7 +76,7 @@ FUNCTION kalk_get_1_14()
 
    IF kalk_is_novi_dokument()
     //  SELECT roba
-      _VPC := KoncijVPC()
+      _VPC := kalk_vpc_za_koncij()
       select roba
       _NC := NC
       SELECT kalk_pripr

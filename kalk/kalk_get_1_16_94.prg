@@ -95,7 +95,7 @@ FUNCTION kalk_get_1_94()
          _nc := plc
          _vpc := plc
       ELSE
-         _VPC := KoncijVPC()
+         _VPC := kalk_vpc_za_koncij()
          _NC := NC
       ENDIF
    ENDIF

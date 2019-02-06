@@ -90,7 +90,7 @@ FUNCTION kalk_get_1_16()
          _nc := plc
          _vpc := plc
       ELSE
-         _VPC := KoncijVPC()
+         _VPC := kalk_vpc_za_koncij()
          _NC := NC
       ENDIF
    ENDIF
@@ -159,7 +159,7 @@ FUNCTION kalk_get_16_1()
    select_o_koncij( _idkonto )
    select_o_roba(  _IdRoba )
 
-   _VPC := KoncijVPC()
+   _VPC := kalk_vpc_za_koncij()
    _TMarza2 := "%"
    _TCarDaz := "%"
    _CarDaz := 0

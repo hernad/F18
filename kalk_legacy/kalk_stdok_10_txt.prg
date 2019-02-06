@@ -89,11 +89,11 @@ FUNCTION kalk_stampa_dok_10_txt()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       print_nova_strana( 125, @nStr, 2 )
 
-      IF gKalo == "1"
-         SKol := hRec[ "kolicina" ] - field->GKolicina - field->GKolicin2
-      ELSE
+    //  IF gKalo == "1"
+      //   SKol := hRec[ "kolicina" ] - field->GKolicina - field->GKolicin2
+    //  ELSE
          SKol := hRec[ "kolicina" ]
-      ENDIF
+    //  ENDIF
 
       nPDVStopa := tarifa->opp
       nPDV := hRec[ "mpcsapp" ] / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )

@@ -61,7 +61,6 @@ FUNCTION kalk_params()
 
 
 
-
 FUNCTION kalk_preuzimanje_troskova_iz_sif_roba( cSet )
 
    IF s_cKalkPreuzimanjeTroskovaIzSifRoba == NIL
@@ -83,7 +82,6 @@ FUNCTION kalk_par_varijante_prikaza()
    LOCAL cRobaTrosk :=  kalk_preuzimanje_troskova_iz_sif_roba()
    LOCAL cKonverzijaValuteDn := kalk_konverzija_valute_na_unosu()
    LOCAL cFinAutoAzurDN := param_fin_automatska_ravnoteza_kod_azuriranja()
-
    LOCAL GetList := {}
 
    Box(, 23, 76, .F., "Varijante obrade i prikaza pojedinih dokumenata" )
@@ -96,8 +94,8 @@ FUNCTION kalk_par_varijante_prikaza()
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "10 - prikaz ukalkulisanog poreza (D/N)" GET  g10Porez  PICT "@!" VALID g10Porez $ "DN"
 
-   nX += 1
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "10 - ** količina = (1) kol-kalo ; (2) kol" GET gKalo VALID gKalo $ "12"
+  // nX += 1
+  // @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "10 - ** količina = (1) kol-kalo ; (2) kol" GET gKalo VALID gKalo $ "12"
 
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "10 - automatsko preuzimanje troškova iz sifrarnika robe ? (0/D/N)" GET cRobaTrosk VALID cRobaTrosk $ "0DN" PICT "@!"
@@ -262,8 +260,7 @@ FUNCTION kalk_par_razno()
 
    @ box_x_koord() + nX, Col() + 2 SAY "Vise konta na dokumentu (D/N) ?" GET _vise_konta VALID _vise_konta $ "DN" PICT "@!"
    ++nX
-   //@ box_x_koord() + nX, box_y_koord() + 2 SAY "Zabraniti promjenu tarife u dokumentima? (D/N)" GET gPromTar VALID gPromTar $ "DN" PICT "@!"
-   //++nX
+
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "F-ja za odredjivanje dzokera F1 u kontiranju" GET gFunKon1 PICT "@S28"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "F-ja za odredjivanje dzokera F2 u kontiranju" GET gFunKon2 PICT "@S28"
@@ -305,7 +302,6 @@ FUNCTION kalk_par_razno()
          glBrojacPoKontima := .F.
       ENDIF
 
-
       roba_barkod_pri_unosu( cUnosBarKodDN == "D" )
       set_metric( "kalk_brojac_kalkulacija", NIL, gBrojacKalkulacija )
       set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glBrojacPoKontima )
@@ -340,8 +336,7 @@ FUNCTION kalk_par_razno()
 FUNCTION kalk_par_metoda_nc()
 
    LOCAL cMetodaNc := kalk_metoda_nc()
-
-   PRIVATE  GetList := {}
+   LOCAL GetList := {}
 
    Box(, 4, 75, .F., "METODA NC, ISPRAVKA DOKUMENATA" )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Metoda nabavne cijene: bez kalk./zadnja/prosječna/prva ( /1/2/3)" GET cMetodaNc VALID cMetodaNC $ " 123" .AND. metodanc_info()

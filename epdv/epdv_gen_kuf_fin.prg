@@ -435,15 +435,15 @@ STATIC FUNCTION zav_tr( nZ1, nZ2, nZ3, nZ4, nZ5 )
 
    LOCAL Skol := 0
    LOCAL nPPP := 0
-   LOCAL gKalo := "0"
+   //LOCAL gKalo := "0"
 
    SELECT SUBAN
 
-   IF gKalo == "1"
-      Skol := Kolicina - GKolicina - GKolicin2
-   ELSE
+   //IF gKalo == "1"
+    //  Skol := Kolicina - GKolicina - GKolicin2
+   //ELSE
       Skol := Kolicina
-   ENDIF
+   //ENDIF
 
    nPPP := 1
 
@@ -534,7 +534,7 @@ STATIC FUNCTION kuf_fin_trazi_dob( nRecNo, cIdFirma, cIdVn, cBrNal, cBrDok, nRbr
    PushWa()
    SELECT SUBAN
    PushWA()
-   // SELECT suban_2
+
    SELECT suban
    SET FILTER TO
 
@@ -542,7 +542,6 @@ STATIC FUNCTION kuf_fin_trazi_dob( nRecNo, cIdFirma, cIdVn, cBrNal, cBrDok, nRbr
 
       GO ( nRecNo )
       SKIP i
-
       cKto := Left( idkonto, 3 )
 
       IF ( cKto $ AllTrim( gL_kto_dob ) ) .AND. ( IdFirma ==  cIdFirma ) .AND. ( IdVn == cIdVn ) .AND. ( BrNal == cBrNal ) .AND. ( BrDok == cBrDok )

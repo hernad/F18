@@ -117,11 +117,11 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
          print_nova_strana( 125, @nStr, 2 )
 
-         IF gKalo == "1"
-            SKol := Kolicina - GKolicina - GKolicin2
-         ELSE
+        // IF gKalo == "1"
+        //    SKol := Kolicina - GKolicina - GKolicin2
+        // ELSE
             SKol := Kolicina
-         ENDIF
+         //ENDIF
 
          nTot8 += ( nU8 := NC *    ( Kolicina - Gkolicina - GKolicin2 ) )
          nTot9 += ( nU9 := nMarza2 * ( Kolicina - Gkolicina - GKolicin2 ) )

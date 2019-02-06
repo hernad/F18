@@ -496,15 +496,15 @@ STATIC FUNCTION zav_tr( nZ1, nZ2, nZ3, nZ4, nZ5 )
 
    LOCAL Skol := 0
    LOCAL nPPP := 0
-   LOCAL gKalo := "0"
+   //LOCAL gKalo := "0"
 
    SELECT SUBAN
 
-   IF gKalo == "1"
-      Skol := Kolicina - GKolicina - GKolicin2
-   ELSE
+   //IF gKalo == "1"
+    //  Skol := Kolicina - GKolicina - GKolicin2
+   //ELSE
       Skol := Kolicina
-   ENDIF
+   //ENDIF
 
    nPPP := 1
 
@@ -585,6 +585,7 @@ STATIC FUNCTION zav_tr( nZ1, nZ2, nZ3, nZ4, nZ5 )
    nZ5 := nSpedTr
 
    RETURN .T.
+
 
 // -----------------------------------------------------------
 // trazi dobavljaca za trosak - mora biti u blizini - iznad ili

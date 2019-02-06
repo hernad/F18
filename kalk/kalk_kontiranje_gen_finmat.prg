@@ -201,11 +201,11 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
          nFV := FCj * Kolicina
 
-         IF gKalo == "1"
-            nKolicina := kalk_pripr->( Kolicina - GKolicina - GKolicin2 )
-         ELSE
+         //IF gKalo == "1"
+        //    nKolicina := kalk_pripr->( Kolicina - GKolicina - GKolicin2 )
+        // ELSE
             nKolicina := kalk_pripr->Kolicina
-         ENDIF
+        // ENDIF
 
          select_o_roba( KALK_PRIPR->IdRoba )
 
@@ -300,13 +300,13 @@ FUNCTION kalk_kontiranje_gen_finmat()
          ENDIF
 
 
-         IF gKalo == "2" .AND.  kalk_pripr->idvd $ "10#81"  // kalo ima vrijednost po NC
-            REPLACE GKV   WITH Round( kalk_pripr->( GKolicina * NC ), nZaokruzenje ), ;   // vrijednost transp.kala
-            GKV2  WITH Round( kalk_pripr->( GKolicin2 * NC ), nZaokruzenje ), ;   // vrijednost ostalog kala
-            GKol  WITH Round( kalk_pripr->GKolicina, nZaokruzenje ), ;
-               GKol2 WITH Round( kalk_pripr->GKolicin2, nZaokruzenje ), ;
-               POREZV WITH Round( nMarza * kalk_pripr->( GKolicina + Gkolicin2 ), nZaokruzenje ) // negativna marza za kalo
-         ENDIF
+         //IF gKalo == "2" .AND.  kalk_pripr->idvd $ "10#81"  // kalo ima vrijednost po NC
+        //    REPLACE GKV   WITH Round( kalk_pripr->( GKolicina * NC ), nZaokruzenje ), ;   // vrijednost transp.kala
+        //    GKV2  WITH Round( kalk_pripr->( GKolicin2 * NC ), nZaokruzenje ), ;   // vrijednost ostalog kala
+        //    GKol  WITH Round( kalk_pripr->GKolicina, nZaokruzenje ), ;
+        //       GKol2 WITH Round( kalk_pripr->GKolicin2, nZaokruzenje ), ;
+        //       POREZV WITH Round( nMarza * kalk_pripr->( GKolicina + Gkolicin2 ), nZaokruzenje ) // negativna marza za kalo
+         //ENDIF
 
          IF kalk_pripr->IDVD $ "18#19"
             REPLACE Kolicina WITH 0

@@ -75,18 +75,18 @@ FUNCTION kalk_stampa_dok_rn()
             @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
          ENDIF
 
-         IF gKalo == "1"
-            SKol := Kolicina - GKolicina - GKolicin2
-         ELSE
+         //IF gKalo == "1"
+        //    SKol := Kolicina - GKolicina - GKolicin2
+         //ELSE
             SKol := Kolicina
-         ENDIF
+         //ENDIF
 
          nU := FCj * Kolicina
-         IF gKalo == "1"
-            nU1 := FCj2 * ( GKolicina + GKolicin2 )
-         ELSE
+         //IF gKalo == "1"
+          //  nU1 := FCj2 * ( GKolicina + GKolicin2 )
+         //ELSE
             nU1 := NC * ( GKolicina + GKolicin2 )
-         ENDIF
+         //ENDIF
 
          nU3 := nPrevoz * SKol
          nU4 := nBankTr * SKol

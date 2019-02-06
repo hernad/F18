@@ -69,7 +69,7 @@ FUNCTION Get1_82()
 
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
-      _VPC := KoncijVPC()
+      _VPC := kalk_vpc_za_koncij()
       _NC := NC
    ENDIF
 

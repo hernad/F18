@@ -56,7 +56,7 @@ FUNCTION kalk_get_1_18()
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _kolicina > 0
 
    IF kalk_is_novi_dokument() .AND. gMagacin == "2" .AND. _TBankTr <> "X"
-      nKalkStaraCijena := KoncijVPC()
+      nKalkStaraCijena := kalk_vpc_za_koncij()
    ELSE
       nKalkStaraCijena := _MPCSAPP
    ENDIF

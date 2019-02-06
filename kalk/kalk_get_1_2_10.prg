@@ -115,7 +115,7 @@ FUNCTION kalk_get_1_10()
 
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
-      _VPC := KoncijVPC()
+      _VPC := kalk_vpc_za_koncij()
       _TCarDaz := "%"
       _CarDaz := 0
    ENDIF

@@ -145,11 +145,11 @@ FUNCTION head_19()
 
 
 
-/* Obraz19()
+/* kalk_obrazac_promjene_cijena_19()
  *     Stampa dokumenta tipa 19 - obrazac nivelacije
  */
 
-FUNCTION Obraz19()
+FUNCTION kalk_obrazac_promjene_cijena_19()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0
 

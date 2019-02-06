@@ -457,21 +457,20 @@ STATIC FUNCTION gen_kalk_kuf_item( cSezona )
    RETURN
 
 
-// ----------------------------------------------
-// ----------------------------------------------
+
 STATIC FUNCTION zav_tr( nZ1, nZ2, nZ3, nZ4, nZ5 )
 
    LOCAL Skol := 0
    LOCAL nPPP := 0
-   LOCAL gKalo := "0"
+   //LOCAL gKalo := "0"
 
    SELECT KALK
 
-   IF gKalo == "1"
-      Skol := Kolicina - GKolicina - GKolicin2
-   ELSE
+   //IF gKalo == "1"
+    //  Skol := Kolicina - GKolicina - GKolicin2
+   //ELSE
       Skol := Kolicina
-   ENDIF
+   //ENDIF
 
    nPPP := 1
 

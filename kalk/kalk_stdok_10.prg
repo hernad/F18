@@ -74,11 +74,11 @@ FUNCTION kalk_stampa_dok_10()
 
       check_nova_strana( bZagl, s_oPDF )
 
-      IF gKalo == "1"
-         nKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
-      ELSE
+      //IF gKalo == "1"
+      //   nKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
+      //ELSE
          nKolicina := field->Kolicina
-      ENDIF
+      //ENDIF
 
       nPDVStopa := tarifa->opp
       nPDV := MPCsaPP / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )

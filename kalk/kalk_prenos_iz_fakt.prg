@@ -460,7 +460,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
             IF cTipKalk $ "10#16"
                // kod ulaza puni sa cijenama iz sifanika
                // replace vpc with roba->vpc
-               hRec[ "vpc" ] := KoncijVPC()
+               hRec[ "vpc" ] := kalk_vpc_za_koncij()
             ENDIF
 
             IF cTipKalk $ "96"  // veza radni nalog !

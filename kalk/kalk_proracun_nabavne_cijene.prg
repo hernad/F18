@@ -145,11 +145,11 @@ FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
       _nc := 9999
    ENDIF
 
-   IF gKalo == "1" .AND. cIdvd == "10"
-      nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   ELSE
+   //IF gKalo == "1" .AND. cIdvd == "10"
+  //    nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
+   //ELSE
       nStvarnaKolicina := _Kolicina
-   ENDIF
+   //ENDIF
 
    IF _Marza == 0 .OR. _VPC <> 0 .AND. !lNaprijed
 
@@ -202,11 +202,11 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
    ENDIF
 
 
-   IF gKalo == "1" .AND. _idvd == "10"
-      nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   ELSE
+   //IF gKalo == "1" .AND. _idvd == "10"
+    //  nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
+   //ELSE
       nStvarnaKolicina := _Kolicina
-   ENDIF
+   //ENDIF
 
 
    IF !Empty( cProracunMarzeUnaprijed ) // proračun unaprijed od nc -> vpc
@@ -406,12 +406,9 @@ FUNCTION UzmiVPCSif( cMKonto, lKoncij )
 
    LOCAL nCV := 0, nArr := Select()
 
-   // IF lKoncij = NIL; lKoncij := .F. ; ENDIF
    select_o_koncij( cMKonto )
-   nCV := KoncijVPC()
-   // IF !lKoncij
-   // GO ( nRec )
-   // ENDIF
+   nCV := kalk_vpc_za_koncij()
+
    SELECT ( nArr )
 
    RETURN nCV
@@ -430,11 +427,11 @@ FUNCTION kalk_when_valid_nc_ulaz()
    LOCAL nNabCjZadnjaNabavka
    LOCAL nNabCj2 := 0
 
-   IF gKalo == "1"
-      nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   ELSE
+   //IF gKalo == "1"
+  //    nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
+  // ELSE
       nStvarnaKolicina := _Kolicina
-   ENDIF
+   //ENDIF
 
    IF _TPrevoz == "%"
       nPrevoz := _Prevoz / 100 * _FCj2
@@ -536,7 +533,7 @@ FUNCTION NabCj2( n1, n2 )
 FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
 
    LOCAL nVal
-   LOCAL _vars
+   LOCAL hVars
 
    IF lUvijek == nil
       lUvijek := .F.
@@ -562,13 +559,11 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
    IF nVal == 0  .OR. Abs( Round( nVal - nNovaVrijednost, 2 ) ) > 0 .OR. lUvijek
 
       IF gAutoCjen == "D" .AND. Pitanje( , "Staviti cijenu (" + cPom + ")" + " u šifarnik ?", "D" ) == "D"
+
          SELECT roba
-
-         _vars := dbf_get_rec()
-         _vars[ cPom ] := nNovaVrijednost
-
-         update_rec_server_and_dbf( "roba", _vars, 1, "FULL" )
-
+         hVars := dbf_get_rec()
+         hVars[ cPom ] := nNovaVrijednost
+         update_rec_server_and_dbf( "roba", hVars, 1, "FULL" )
          SELECT kalk_pripr
       ENDIF
    ENDIF
@@ -577,14 +572,15 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
 
 
 
-/* KoncijVPC
+/* kalk_vpc_za_koncij()
  *     Daje odgovarajucu VPC iz sifrarnika robe
  */
 
-FUNCTION KoncijVPC()
+FUNCTION kalk_vpc_za_koncij()
 
    // podrazumjeva da je nastimana tabela koncij
    // ------------------------------------------
+
    IF koncij->naz == "P2"
       RETURN roba->plc
    ELSEIF koncij->naz == "V2"
@@ -716,7 +712,7 @@ FUNCTION V_RabatV()
       RETURN .T.
    ENDIF
 
-   nRVPC := KoncijVPC()
+   nRVPC := kalk_vpc_za_koncij()
    IF Round( nRVPC - _vpc, 4 ) <> 0  .AND. gMagacin == "2"
       IF nRVPC == 0
          Beep( 1 )

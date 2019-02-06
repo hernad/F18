@@ -75,22 +75,22 @@ FUNCTION kalk_stampa_dok_pr()
             @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
          ENDIF
 
-         IF gKalo == "1"
-            SKol := field->Kolicina - field->GKolicina - field->GKolicin2
-         ELSE
+         //IF gKalo == "1"
+          //  SKol := field->Kolicina - field->GKolicina - field->GKolicin2
+        // ELSE
             SKol := field->Kolicina
-         ENDIF
+        // ENDIF
 
          nUnabavna := field->FCj * field->Kolicina
          IF Val( field->rbr ) > 99
             nUnabavna := field->NC * field->Kolicina
          ENDIF
 
-         IF gKalo == "1"
-            nU1 := field->FCj2 * ( field->GKolicina + field->GKolicin2 )
-         ELSE
+         //IF gKalo == "1"
+        //    nU1 := field->FCj2 * ( field->GKolicina + field->GKolicin2 )
+         //ELSE
             nU1 := field->NC * ( field->GKolicina + field->GKolicin2 )
-         ENDIF
+         //ENDIF
 
          nU3 := nPrevoz * SKol
          nU4 := nBankTr * SKol

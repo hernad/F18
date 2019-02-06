@@ -101,7 +101,7 @@ FUNCTION kalk_get_1_95()
       IF koncij->naz == "P2"
          _VPC := PLC
       ELSE
-         _VPC := KoncijVPC()
+         _VPC := kalk_vpc_za_koncij()
       ENDIF
       _NC := NC
    ENDIF

@@ -177,7 +177,7 @@ FUNCTION Get1_RN()
       IF koncij->naz == "P2"
          _VPC := PlC
       ELSE
-         _VPC := KoncijVPC()
+         _VPC := kalk_vpc_za_koncij()
       ENDIF
       _TCarDaz := "%"
       _CarDaz := 0
@@ -266,12 +266,12 @@ FUNCTION Get2_RN()
             ENDIF
          ENDIF
       ELSE
-         IF KoncijVPC() == 0 .OR. Round( KoncijVPC(), 4 ) <> Round( _vpc, 4 )
-            kalk_set_vpc_sifarnik( _vpc, Round( KoncijVPC(), 4 ) <> Round( _vpc, 4 ) )
+         IF kalk_vpc_za_koncij() == 0 .OR. Round( kalk_vpc_za_koncij(), 4 ) <> Round( _vpc, 4 )
+            kalk_set_vpc_sifarnik( _vpc, Round( kalk_vpc_za_koncij(), 4 ) <> Round( _vpc, 4 ) )
          ELSE
-            IF ( _vpc <> KoncijVPC() )
+            IF ( _vpc <> kalk_vpc_za_koncij() )
                Beep( 1 )
-               Msg( "Cijena u sifrarniku je " + Str( KoncijVPC(), 11, 3 ), 6 )
+               Msg( "Cijena u sifrarniku je " + Str( kalk_vpc_za_koncij(), 11, 3 ), 6 )
             ENDIF
          ENDIF
       ENDIF

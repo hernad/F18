@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+MEMVAR cMpcFieldName
 
 /*
  *     Postavi _Marza2, _mpc, _mpcsapp
@@ -311,7 +312,7 @@ FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
 
 FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
 
-   LOCAL lAzuriraj
+   LOCAL lAzurirajCijenu
    LOCAL lRet := .F.
    LOCAL lIsteCijene
    LOCAL hRec
@@ -320,43 +321,43 @@ FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
       lUpit := .F.
    ENDIF
 
-   PRIVATE cMpc := ""
+   PRIVATE cMpcFieldName := ""
 
    DO CASE
    CASE koncij->naz == "M2"
-      cMpc := "mpc2"
+      cMpcFieldName := "mpc2"
    CASE koncij->naz == "M3"
-      cMpc := "mpc3"
+      cMpcFieldName := "mpc3"
    CASE koncij->naz == "M4"
-      cMpc := "mpc4"
+      cMpcFieldName := "mpc4"
 
    OTHERWISE
-      cMpc := "mpc"
+      cMpcFieldName := "mpc"
    ENDCASE
 
-   lIsteCijene := ( Round( roba->( &cMpc ), 4 ) == Round( nCijena, 4 ) )
+   lIsteCijene := ( Round( roba->( &cMpcFieldName ), 4 ) == Round( nCijena, 4 ) )
    IF lIsteCijene
       RETURN .F.
    ENDIF
 
    IF lUpit
-      IF gAutoCjen == "D" .AND. Pitanje(, "Staviti " + cMpc + " u sifrarnik ?", gDefNiv ) == "D"
-         lAzuriraj := .T.
+      IF gAutoCjen == "D" .AND. Pitanje(, "Staviti " + cMpcFieldName + " u šifarnik ?", gDefNiv ) == "D"
+         lAzurirajCijenu := .T.
       ELSE
-         lAzuriraj := .F.
+         lAzurirajCijenu := .F.
       ENDIF
    ELSE
-      lAzuriraj := .T.
+      lAzurirajCijenu := .T.
       IF gAutoCjen == "N"
-         lAzuriraj := .F.
+         lAzurirajCijenu := .F.
       ENDIF
    ENDIF
 
-   IF lAzuriraj
+   IF lAzurirajCijenu
       PushWA()
       SELECT ROBA
       hRec := dbf_get_rec()
-      hRec[ cMpc ] := nCijena
+      hRec[ cMpcFieldName ] := nCijena
       update_rec_server_and_dbf( Alias(), hRec, 1, "FULL" )
       PopWa()
       lRet := .T.
@@ -393,14 +394,12 @@ FUNCTION kalk_valid_kolicina_prod()
 
       sumnjive_stavke_error()
 
-      // Msg( "U prodavnici je samo" + Str( nKolS, 10, 3 ) + " robe !", 6 )
       error_bar( "KA_" + _pkonto + "/" + _idroba, ;
          _pkonto + " / " + _idroba + "na stanju: " + AllTrim( Str( nKolS, 10, 4 ) ) + " treba " +  AllTrim( Str( _kolicina, 10, 4 ) ) )
 
    ENDIF
 
    RETURN .T.
-
 
 
 
@@ -417,11 +416,12 @@ FUNCTION StanjeProd( cKljuc, dDatdok )
    GO TOP
    SEEK cKljuc
    DO WHILE !Eof() .AND. cKljuc == idfirma + pkonto + idroba
-      IF ddatdok < datdok  // preskoci
+      IF ddatdok < datdok
          skip; LOOP
       ENDIF
       IF roba->tip $ "UT"
-         skip; LOOP
+         skip
+         LOOP
       ENDIF
 
       IF pu_i == "1"

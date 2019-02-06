@@ -392,7 +392,7 @@ FUNCTION fakt_13_kalk_11()
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
-               vpc WITH IF( gVar13u11 == "1", fakt->cijena, KoncijVPC() ), ;
+               vpc WITH IIF( gVar13u11 == "1", fakt->cijena, kalk_vpc_za_koncij() ), ;
                rabatv WITH fakt->rabat, ;
                mpc WITH fakt->porez, ;
                tmarza2 WITH "A", ;
@@ -1138,7 +1138,7 @@ FUNCTION fakt_15_kalk_15()
                kolicina  WITH -fakt->kolicina, ;
                idroba    WITH fakt->idroba, ;
                nc        WITH ROBA->nc, ;
-               vpc       WITH KoncijVPC(), ;
+               vpc       WITH kalk_vpc_za_koncij(), ;
                rabatv    WITH fakt->rabat, ;
                mpc       WITH fakt->porez, ;
                tmarza2   WITH "A", ;

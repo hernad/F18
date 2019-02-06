@@ -1376,7 +1376,7 @@ FUNCTION MPCSAPPuSif()
 /*
  *  brief Filuje VPC u svim stavkama u kalk_pripremi odgovarajucom VPC iz sifrarnika robe
  */
-FUNCTION VPCSifUDok()
+FUNCTION kalk_iz_vpc_sif_u_vpc_dokumenta()
 
    o_kalk_edit()
    SELECT kalk_pripr
@@ -1385,10 +1385,10 @@ FUNCTION VPCSifUDok()
    DO WHILE !Eof()
       select_o_roba(  kalk_pripr->idroba )
       select_o_koncij( kalk_pripr->mkonto )
-      // SELECT TARIFA; HSEEK ROBA->idtarifa
+
       SELECT kalk_pripr
       Scatter()
-      _vpc := KoncijVPC()
+      _vpc := kalk_vpc_za_koncij()
       _ERROR := " "
       Gather()
       SKIP 1
@@ -1396,7 +1396,7 @@ FUNCTION VPCSifUDok()
    my_unlock()
 
 
-   kalk_asistent_start() // VPCSifUDok
+   kalk_asistent_start() // kalk_iz_vpc_sif_u_vpc_dokumenta
 
    my_close_all_dbf()
 
