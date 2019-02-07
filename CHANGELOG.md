@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-02-07
+
+- POS grand cleanup/1
+
 ## 2019-01-30
 
 - FAKT azur: bugfix: `IF s_hF18Dbfs[ cDatabase ][ cItem ][ "wa" ] == hItem[ "wa" ]` => `IF s_hF18Dbfs[ cDatabase ][ cItem ][ "table" ] == hItem[ "table" ]`
