@@ -40,7 +40,6 @@ FUNCTION kalk_stampa_dok_19()
    dDatFaktP := DatFaktP
    cPKonto := kalk_pripr->pkonto
 
-
    cNaslov := "NIVELACIJA PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
 
    s_oPDF := PDFClass():New()

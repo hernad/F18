@@ -54,13 +54,11 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
    ENDIF
 
    my_close_all_dbf()
-
    kalk_open_tables_unos( lAzuriraniDokument )
 
    SELECT kalk_pripr
    SET ORDER TO TAG "1"
    GO TOP
-
 
    fTopsD := .F.
    fFaktD := .F.
@@ -339,4 +337,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
   //    RETURN .F.
    //ENDIF
 
-   RETURN cIdVd $ "10#14#19"  // implementirano za kalk 10, 14
+   RETURN cIdVd $ "10#14#19#80"  // implementirano za kalk 10, 14

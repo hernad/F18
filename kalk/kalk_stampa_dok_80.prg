@@ -11,11 +11,20 @@
 
 #include "f18.ch"
 
-MEMVAR cPKonto, cPKonto2
+MEMVAR cIdFirma, cIdPartner, cBrFaktP, dDatFaktP, cIdVd, cBrDok, cPKonto, cPKonto2
+
+STATIC s_oPDF
+STATIC s_cLinija
+STATIC s_nRobaNazivSirina := 39
+
 
 FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
-   LOCAL nCol1 := nCol2 := 0, nPom := 0
+   LOCAL nCol1 := 0
+   LOCAL nCol2 := 0
+   LOCAL nPom := 0
+   LOCAL cNaslov
+   LOCAL bZagl, xPrintOpt
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
 
@@ -23,52 +32,44 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
       lStampatiBezNabavneCijene := .F.
    ENDIF
 
-   nStr := 0
-   cIdPartner := IdPartner
-   cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
+   cIdFirma := kalk_pripr->IdFirma
+   cIdVd := kalk_pripr->Idvd
+   cBrDok := kalk_pripr->brdok
+
+   cIdPartner := kalk_pripr->IdPartner
+   cBrFaktP := kalk_pripr->BrFaktP
+   dDatFaktP := kalk_pripr->DatFaktP
 
    cPKonto := kalk_pripr->pkonto
    cPKonto2 := kalk_pripr->IdKonto2
 
-   P_10CPI
-   ?
-   ? "PRIJEM U PRODAVNICU (INTERNI DOKUMENT)"
-   ?
-   P_COND
-   ? "KALK. DOKUMENT BR:",  cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), P_TipDok( cIdVD, - 2 ), Space( 2 ), "Datum:", DatDok
-   @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
+   cNaslov := "PRIJEM PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
+
    select_o_partner( cIdPartner )
-
    ?  "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
-
    select_o_konto( cPKonto )
+   ?  _u("KONTO zadužuje :"), cPKonto, "-", AllTrim( konto->naz )
 
-   ?U  "KONTO zadužuje :", cPKonto, "-", AllTrim( naz )
 
-
-   m := "--- -------------------------------------------- ----------" + ;
+   s_cLinija := "--- " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
+   s_cLinija += " " + Replicate( "-", s_nRobaNazivSirina + 5 ) + " ----------" + ;
       iif( lStampatiBezNabavneCijene, "", " ---------- ----------" ) + ;
       " ---------- ----------"
 
+   bZagl := {|| zagl( lStampatiBezNabavneCijene ) }
 
-   ? m
-
-   // 1. red
-   ? "*R.* Roba                                       * kolicina *" + ;
-      iif( lStampatiBezNabavneCijene, "", "  Nab.cj  * marza    *" ) + ;
-      "   MPC    *  MPC    *"
-   // 2.red
-   ? "*br* Tarifa                                     *          *" + ;
-      iif( lStampatiBezNabavneCijene, "", "          *          *" ) + ;
-      "  bez PDV * sa PDV  *"
-
-
-   ? m
 
    SELECT kalk_pripr
    nRec := RecNo()
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   PRIVATE cIdd := kalk_pripr->idpartner + kalk_pripr->brfaktp + kalk_pripr->idkonto + kalk_pripr->idkonto2
    IF !Empty( cPKonto2 ) // postoje stavka i protustavka
       nProlaza := 2
    ELSE
@@ -81,65 +82,58 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    PRIVATE aPorezi
    aPorezi := {}
 
+   Eval( bZagl )
+
    FOR nProlaz := 1 TO nProlaza
       nTot := nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTotA := nTotb := 0
       nTot9a := 0
       GO nRec
+
+      check_nova_strana( bZagl, s_oPDF )
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
          IF ( nProlaza == 2 .AND. nProlaz == 1 .AND. Left( kalk_pripr->idkonto2, 3 ) == "XXX" )
             // prvi prolaz ignorisati idkonto==XXX
             SKIP
             LOOP
          ENDIF
-
          IF ( nProlaza == 2 .AND. nProlaz == 2 .AND. Left( kalk_pripr->idkonto2, 3 ) != "XXX" )
             // drugi prolaz ignorisati ako idkonto2 NIJE XXX
             SKIP
             LOOP
          ENDIF
-
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
 
          aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcSaPP, field->nc )
-
-         print_nova_strana( 125, @nStr, 2 )
-
          SKol := kalk_pripr->Kolicina
-
          nTot8 += ( nU8 := NC *    ( Kolicina ) )
          nTot9 += ( nU9 := nMarza2 * ( Kolicina ) )
          nTotA += ( nUA := MPC   * ( Kolicina ) )
          nTotB += ( nUB := MPCSAPP * ( Kolicina  ) )
 
-         @ PRow() + 1, 0 SAY rbr PICT "999"
-         @ PRow(), 4 SAY ""
-         ?? Trim( Left( ROBA->naz, 40 ) ), "(", ROBA->jmj, ")"
+         check_nova_strana( bZagl, s_oPDF )
+         @ PRow() + 1, 0 SAY kalk_pripr->rbr PICT "999"
+         @ PRow(), PCol() + 1 SAY IdRoba
+         @ PRow(), PCol() + 1 SAY ROBA->barkod
+         @ PRow(), PCol() + 1 SAY PadR( ROBA->naz, s_nRobaNazivSirina ) + "(" + ROBA->jmj + ")"
+         @ PRow(), PCol() + 1  SAY kalk_pripr->Kolicina             PICTURE PicCDEM
 
-         IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
-            ?? ", BK: " + ROBA->barkod
-         ENDIF
-
-         @ PRow() + 1, 4 SAY IdRoba
-         @ PRow(), PCol() + 35  SAY Kolicina             PICTURE PicCDEM
          nCol1 := PCol() + 1
          IF !lStampatiBezNabavneCijene  // bez nc
-            @ PRow(), nCol1    SAY NC                    PICTURE PicCDEM
+            @ PRow(), nCol1    SAY kalk_pripr->NC                    PICTURE PicCDEM
             IF Round( nc, 5 ) <> 0
-               @ PRow(), PCol() + 1 SAY nMarza2 / NC * 100        PICTURE PicProc
+               @ PRow(), PCol() + 1 SAY nMarza2 / kalk_pripr->NC * 100        PICTURE PicProc
             ELSE
                @ PRow(), PCol() + 1 SAY 0        PICTURE PicProc
             ENDIF
          ENDIF
-         @ PRow(), PCol() + 1 SAY MPC                   PICTURE PicCDEM
-         @ PRow(), PCol() + 1 SAY MPCSaPP               PICTURE PicCDEM
+         @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                   PICTURE PicCDEM
+         @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSaPP               PICTURE PicCDEM
 
-         @ PRow() + 1, 4 SAY IdTarifa
+         // @ PRow() + 1, 4 SAY kalk_pripr->IdTarifa
          IF !lStampatiBezNabavneCijene
             @ PRow(), nCol1     SAY nU8         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nU9         PICTURE         PICDEM
@@ -154,7 +148,9 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
       ENDDO
 
       IF nProlaza == 2
-         ? m
+
+         check_nova_strana( bZagl, s_oPDF, .F., 3 )
+         ? s_cLinija
          ? "Konto "
          IF nProlaz == 1
             ?? cPKonto
@@ -170,7 +166,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
             @ PRow(), nCol1     SAY nTotA         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nTotB         PICTURE         PICDEM
          ENDIF
-         ? m
+         ? s_cLinija
       ENDIF
       unTot8  += nTot8
       unTot9  += nTot9
@@ -179,8 +175,8 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
       unTotB  += nTotB
    NEXT
 
-   print_nova_strana( 125, @nStr, 3 )
-   ? m
+   check_nova_strana( bZagl, s_oPDF, .F., 3 )
+   ? s_cLinija
    @ PRow() + 1, 0        SAY "Ukupno:"
    IF !lStampatiBezNabavneCijene
       @ PRow(), nCol1     SAY unTot8         PICTURE         PICDEM
@@ -191,13 +187,28 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
       @ PRow(), nCol1     SAY unTotA         PICTURE         PICDEM
       @ PRow(), PCol() + 1  SAY unTotB         PICTURE         PICDEM
    ENDIF
-   ? m
+   ? s_cLinija
 
-   print_nova_strana( 125, @nStr, 8 )
    nRec := RecNo()
-   kalk_pripr_rekap_tarife()
+   kalk_pripr_rekap_tarife( {|| check_nova_strana( bZagl, s_oPDF, .F., 5 ) }  )
 
+   dok_potpis( 90, "L", NIL, NIL )
 
-   dok_potpis( 90, "L", NIL, NIL ) // potpis na dokumentu
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .F.
+
+
+
+STATIC FUNCTION zagl( lStampatiBezNabavneCijene )
+
+   ? s_cLinija
+   ?U "*R.*  Roba        Barkod                  Naziv                          * količina *" + ;
+      iif( lStampatiBezNabavneCijene, "", "  Nab.cj  * marža    *" ) + ;
+      "   MPC    *  MPC    *"
+   ?U "*br*                                                                     *          *" + ;
+      iif( lStampatiBezNabavneCijene, "", "          *          *" ) + ;
+      "  bez PDV * sa PDV  *"
+   ? s_cLinija
+
+   RETURN .T.
