@@ -163,7 +163,6 @@ FUNCTION pos_zaduzenje()
       IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + hParams[ "idpos" ] + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] ) + " ažurirati (D/N) ?", "D" ) == "D"
          hParams[ "brdok" ] := pos_novi_broj_dokumenta( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ] )
          hParams[ "opis" ] := hb_UTF8ToStr( hParams[ "opis" ] )
-         AltD()
          pos_azuriraj_zaduzenje( hParams )
       ENDIF
 

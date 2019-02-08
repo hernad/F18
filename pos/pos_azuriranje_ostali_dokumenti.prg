@@ -23,6 +23,14 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
    LOCAL nUkupno
    LOCAL hAzur
 
+   cDokument := AllTrim( hParams["idpos"] ) + "-" + hParams["idvd"] + "-" + AllTrim( hParams["brdok"] ) + " " + DToC( hParams["datum"] )
+
+   IF seek_pos_doks( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] ) ;
+      .OR.  seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] )
+      MsgBeep( "Dokument: " + cDokument + " već postoji?!" )
+      RETURN .F.
+   ENDIF
+
    run_sql_query( "BEGIN" )
 
    SELECT PRIPRZ
@@ -37,7 +45,6 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
    hRec[ "brfaktp" ] := hParams["brfaktp"]
    hRec[ "opis" ] := hParams["opis"]
    hRec[ "ukupno" ] := nUkupno
-   cDokument := AllTrim( hRec["idpos"] ) + "-" + hRec["idvd"] + "-" + AllTrim( hRec["brdok"] ) + " " + DToC( hRec["datum"] )
 
    SELECT PRIPRZ
    nUkupno := 0

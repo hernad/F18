@@ -76,13 +76,13 @@ FUNCTION pos_stampa_zaduzenja( hParams )
       select_o_roba( PRIPRZ->IdRoba )
       SELECT PRIPRZ
 
-      ?U  cLM + PRIPRZ->IdRoba + " "
-      ??U PadR( AllTrim( roba->Naz ), nRobaNazivSirina - 1 ) + "  "
-      ??U roba->Jmj + " "
-      ??U TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
-      ??U TRANS( PRIPRZ->Cijena, cPicIzn ) + " "
+      ?  cLM + PRIPRZ->IdRoba + " "
+      ?? PadR( AllTrim( roba->Naz ), nRobaNazivSirina - 1 ) + "  "
+      ?? roba->Jmj + " "
+      ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
+      ?? TRANS( PRIPRZ->Cijena, cPicIzn ) + " "
       nCol := PCol() - 1
-      ??U TRANS( PRIPRZ->Kolicina * PRIPRZ->cijena, cPicIzn )
+      ?? TRANS( PRIPRZ->Kolicina * PRIPRZ->cijena, cPicIzn )
 
       nFinZad += PRIPRZ->Kolicina * PRIPRZ->Cijena
       pos_setuj_tarife( PRIPRZ->IdRoba, PRIPRZ->Kolicina * PRIPRZ->Cijena, @aTarife )
