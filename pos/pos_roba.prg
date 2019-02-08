@@ -99,9 +99,8 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
          lSveJeOk := .F.
       ENDIF
    ENDIF
-*/
-
    pos_set_key_handler_ispravka_racuna()
+*/
    cBarkodVratiti := cBarkod
 
    PopWA()

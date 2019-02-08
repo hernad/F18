@@ -349,7 +349,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
          ? Space( 6 ) + PadL( "UKUPNO", 20 ) + Str( nTotRadn, 14, 2 )
 
          IF nTotRadn3 <> 0
-            ? Space( 6 ) + PadL( NenapPop(), 20 ) + Str( nTotRadn3, 14, 2 )
+            ? Space( 6 ) + PadL( pos_popust_prikaz(), 20 ) + Str( nTotRadn3, 14, 2 )
             ? Space( 6 ) + PadL( "UKUPNO NAPLATA:", 20 ) + Str( nTotRadn - nTotRadn3, 14, 2 )
          ENDIF
          ? Space( 6 ) + Replicate( "-", 34 )
@@ -360,7 +360,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
       ? PadC( "UKUPNO KASA " + _IdPos, 20 ) + Str( nTotPos, 20, 2 )
 
       IF nTotPos3 <> 0
-         ? PadL( NenapPop(), 20 ) + Str( nTotPos3, 20, 2 )
+         ? PadL( pos_popust_prikaz(), 20 ) + Str( nTotPos3, 20, 2 )
          ? PadL( "UKUPNO NAPLATA:", 20 ) + Str( nTotPos - nTotPos3 + nTotPos2, 20, 2 )
       ENDIF
       ? Replicate( "-", 40 )
@@ -651,7 +651,7 @@ STATIC FUNCTION pos_total_kasa( cIdPos, nTotPos, nTotPos3, nTotPosk, cPodvuci )
    ? PadC( "UKUPNO KASA " + _idpos, 25 ), Transform( nTotPos, "999,999,999.99" )
 
    IF nTotPos3 <> 0
-      ? PadL( NenapPop(), 25 ) + Str( nTotPos3, 15, 2 )
+      ? PadL( pos_popust_prikaz(), 25 ) + Str( nTotPos3, 15, 2 )
       ? PadL( "UKUPNO NAPLATA:", 25 ) + Str( nTotPos - nTotPos3 + nTotPos2, 15, 2 )
    ENDIF
    ? REPL( cPodvuci, LEN_TRAKA )

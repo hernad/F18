@@ -288,7 +288,7 @@ FUNCTION pos_dokument_naziv( cIdVd )
 
    DO CASE
    CASE cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
-      RETURN "Ulaz od dobavljača"
+      RETURN "Ulaz"
 
    CASE cIdVd == POS_IDVD_OTPREMNICA_MAGACIN
       RETURN "Otpremnica magacin"

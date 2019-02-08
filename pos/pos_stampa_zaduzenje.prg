@@ -13,6 +13,106 @@
 
 STATIC s_oPDF
 
+FUNCTION pos_stampa_zaduzenja( hParams )
+
+   LOCAL lPredispozicija := .F.
+   LOCAL nRobaNazivSirina := 40
+   LOCAL cLm := Space ( 5 )
+   LOCAL cPicKol := "9999999.999"
+   LOCAL cPicIzn := "99999999.99"
+   LOCAL aTarife := {}
+   LOCAL cRobaNaStanju := "N"
+   LOCAL cLine
+   LOCAL cLine2
+   LOCAL nDbfArea := Select()
+   LOCAL xPrintOpt, bZagl
+   LOCAL aLines
+   LOCAL nFinZad
+   LOCAL nCol := 50
+   LOCAL cNazDok
+
+   nRobaNazivSirina := 40
+   cLM := ""
+
+   IF !hParams[ "priprema" ]
+      IF !seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok, "1", "PRIPRZ" )
+         RETURN .F.
+      ENDIF
+   ENDIF
+
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "portrait"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 9
+
+   cNazDok := pos_dokument_naziv( hParams[ "idvd" ] ) + " " + AllTrim( hParams[ "idpos" ] ) + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] )
+   cNazDok += " od: " + FormDat1 ( hParams[ "datum" ] )
+
+   IF f18_start_print( NIL, xPrintOpt,  cNazDok + " Štampa na dan: " + DToC( Date() ) ) == "X"
+      RETURN .F.
+   ENDIF
+
+   select_o_partner( hParams[ "idpartner" ] )
+   ? "Partner:", hParams[ "idpartner" ], AllTrim( partn->naz )
+   ?? "  Broj fakture:", hParams[ "brfaktp" ]
+   ?  "Opis:", _u( hParams[ "opis" ] )
+
+   aLines := get_pos_linija_podvuci( nRobaNazivSirina, cPicKol, cPicIzn )
+   cLine := aLines[ 1 ]
+   cLine2 := aLines[ 2 ]
+
+   bZagl := {|| QOutU( cLM + cLine2 ), QOutU( cLM + cLine ), QOutU( cLM + cLine2 ) }
+
+   nFinZad := 0
+   SELECT PRIPRZ
+   GO TOP
+
+   Eval( bZagl )
+   DO WHILE ! Eof() .AND. PRIPRZ->IdPos + PRIPRZ->IdVd + DToS( PRIPRZ->datum ) + PRIPRZ->BrDok  == hParams[ "idpos" ] + hParams[ "idvd" ] + DToS( hParams[ "datum" ] ) + hParams[ "brdok" ]
+
+      check_nova_strana( bZagl, s_oPDF )
+      select_o_roba( PRIPRZ->IdRoba )
+      SELECT PRIPRZ
+
+      ?U  cLM + PRIPRZ->IdRoba + " "
+      ??U PadR( AllTrim( roba->Naz ), nRobaNazivSirina - 1 ) + "  "
+      ??U roba->Jmj + " "
+      ??U TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
+      ??U TRANS( PRIPRZ->Cijena, cPicIzn ) + " "
+      nCol := PCol() - 1
+      ??U TRANS( PRIPRZ->Kolicina * PRIPRZ->cijena, cPicIzn )
+
+      nFinZad += PRIPRZ->Kolicina * PRIPRZ->Cijena
+      pos_setuj_tarife( PRIPRZ->IdRoba, PRIPRZ->Kolicina * PRIPRZ->Cijena, @aTarife )
+      SKIP
+   ENDDO
+
+   ?U cLine2
+
+   ?U cLM
+   ?? "    UKUPNO:"
+   @ PRow() + 1, nCol SAY TRANS( nFinZad, cPicIzn )
+   ?U cLine2
+   ?
+
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
+   pos_rekapitulacija_tarifa( aTarife )
+
+   check_nova_strana( bZagl, s_oPDF, .F., 3 )
+   ?
+   ??U "        Primio:                               Predao:"
+   select_o_pos_osob( hParams[ "idradnik" ] )
+   ?U  "                                        " + AllTrim ( OSOB->Naz )
+
+   f18_end_print( NIL, xPrintOpt )
+
+   SELECT ( nDbfArea )
+
+   RETURN .T.
+
+/*
 FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
 
    LOCAL nPrevRec
@@ -80,7 +180,7 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
          ?? Transform ( priprz->cijena * priprz->Kolicina, "99999.99" )
          ? cLinija
       ENDIF
-      nFinZad += PRIPRZ->( Kolicina * Cijena )
+      nFinZad += PRIPRZ->Kolicina * priprz->Cijena
 
       SKIP 1
 
@@ -106,8 +206,9 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
    GO nPrevRec
 
    RETURN .T.
+*/
 
-
+/*
 STATIC FUNCTION zagl( cLinija )
 
    ?U cLinija
@@ -115,115 +216,18 @@ STATIC FUNCTION zagl( cLinija )
    ?U cLinija
 
    RETURN .T.
+*/
 
 
-FUNCTION pos_stampa_azuriranog_zaduzenja( cNazDok )
-
-   LOCAL lPredispozicija := .F.
-   LOCAL nRobaSir := 40
-   LOCAL cLm := Space ( 5 )
-   LOCAL cPicKol := "9999999.999"
-   LOCAL cPicIzn := "99999999.99"
-   LOCAL aTarife := {}
-   LOCAL cRobaNaStanju := "N"
-   LOCAL cLine
-   LOCAL cLine2
-   LOCAL nDbfArea := Select()
-   LOCAL xPrintOpt, bZagl
-   LOCAL aLines
-   LOCAL nFinZad
-   LOCAL nCol := 50
-
-   nRobaSir := 40
-   cLM := ""
-   IF !seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
-      RETURN .F.
-   ENDIF
-
-   IF !Empty( pos_doks->idvrstep )
-      lPredispozicija := .T.
-      cNazDok := "PREDISPOZICIJA "
-   ENDIF
-
-   s_oPDF := PDFClass():New()
-   xPrintOpt := hb_Hash()
-   xPrintOpt[ "tip" ] := "PDF"
-   xPrintOpt[ "layout" ] := "portrait"
-   xPrintOpt[ "opdf" ] := s_oPDF
-   xPrintOpt[ "font_size" ] := 9
-
-   cNazDok := cNazDok + " " + iif( Empty( pos_doks->IdPos ), "", AllTrim( pos_doks->IdPos ) + "-" ) + AllTrim( pos_doks->BrDok )
-   cNazDok += " od: " + FormDat1 ( pos_doks->Datum )
-
-   IF f18_start_print( NIL, xPrintOpt,  cNazDok + " Štampa na dan: " + DToC( Date() ) ) == "X"
-      RETURN .F.
-   ENDIF
-
-   select_o_partner( pos_doks->idPartner )
-   ? "Partner:", pos_doks->idPartner, partn->naz
-
-   aLines := get_pos_linija_podvuci( nRobaSir, cPicKol, cPicIzn )
-   cLine := aLines[ 1 ]
-   cLine2 := aLines[ 2 ]
-
-   bZagl := {|| QOutU( cLM + cLine2 ), QOutU( cLM + cLine ), QOutU( cLM + cLine2 ) }
-
-   nFinZad := 0
-   SELECT POS
-
-   Eval( bZagl )
-   DO WHILE ! Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
-
-      check_nova_strana( bZagl, s_oPDF )
-      select_o_roba( POS->IdRoba )
-      SELECT POS
-
-      ?U  cLM + pos->IdRoba + " "
-      ??U PadR( AllTrim( roba->Naz ), nRobaSir ) + "  "
-      ??U roba->Jmj + " "
-      ??U TRANS( POS->Kolicina, cPicKol ) + " "
-      ??U TRANS( POS->Cijena, cPicIzn ) + " "
-      nCol := PCol() - 1
-      ??U TRANS( POS->Kolicina * POS->cijena, cPicIzn )
-
-      nFinZad += POS->Kolicina * POS->Cijena
-      pos_setuj_tarife( pos->IdRoba, POS->( Kolicina * Cijena ), @aTarife )
-      SKIP
-   ENDDO
-
-   ?U cLine2
-
-   ?U cLM
-   ?? "    UKUPNO:"
-   @ PRow(), nCol SAY TRANS( nFinZad, cPicIzn )
-   ?U cLine2
-   ?
-
-   check_nova_strana( bZagl, s_oPDF, .F., 5 )
-   pos_rekapitulacija_tarifa( aTarife )
-
-   check_nova_strana( bZagl, s_oPDF, .F., 3 )
-   ?
-   ??U "        Primio:                               Predao:"
-   select_o_pos_osob( pos_doks->IdRadnik )
-   ?U  "                                        " + AllTrim ( OSOB->Naz )
-
-   f18_end_print( NIL, xPrintOpt )
-
-   SELECT ( nDbfArea )
-
-   RETURN .T.
-
-
-STATIC FUNCTION get_pos_linija_podvuci( nRobaSir, cPicKol, cPicIzn )
+STATIC FUNCTION get_pos_linija_podvuci( nRobaNazivSirina, cPicKol, cPicIzn )
 
    LOCAL cLine, cLine2
 
    cLine := PadC( "Šifra", 10 )
    cLine2 := Replicate( "-", 10 )
 
-   cLine  += "  " + PadC( "Naziv", nRobaSir )
-   cLine2 += " " + Replicate( "-", nRobaSir )
+   cLine  += "  " + PadC( "Naziv", nRobaNazivSirina )
+   cLine2 += " " + Replicate( "-", nRobaNazivSirina )
 
    cLine  += " " + PadR( "JMJ", 3 )
    cLine2 += " " + Replicate( "-", 3 )

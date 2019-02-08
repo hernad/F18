@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 
-FUNCTION pos_prijava( Fx, Fy )
+FUNCTION pos_prijava( nX, nY )
 
    LOCAL nChar
    LOCAL cKorSif
@@ -23,12 +23,11 @@ FUNCTION pos_prijava( Fx, Fy )
    LOCAL nPrevKorRec
 
    CLOSE ALL
-
    nSifLen := 6
 
    DO WHILE .T.
 
-      SetPos ( Fx + 4, Fy + 15 )
+      SetPos ( nX + 4, nY + 15 )
 
       cKorSif := Upper( pos_get_lozinka( nSifLen ) )
 #ifdef F18_DEBUG
@@ -46,7 +45,6 @@ FUNCTION pos_prijava( Fx, Fy )
          cLevel := L_SYSTEM
          EXIT
       ENDIF
-
 
       pos_spec_sifre( cKorSif ) // obradi specijalne sifre
 
@@ -83,3 +81,48 @@ FUNCTION pos_spec_sifre( cSifra )
    ENDIF
 
    RETURN .T.
+
+
+
+FUNCTION pos_status_traka()
+
+   LOCAL nX := f18_max_rows() - 1
+   LOCAL nY := 0
+
+   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
+
+   @ nX - 1, nY + 1 SAY PadC ( Razrijedi ( gKorIme ), f18_max_cols() - 2 ) COLOR f18_color_invert()
+
+   RETURN .T.
+
+
+FUNCTION pos_set_user( cKorSif, nSifLen, cLevel )
+
+   cKorSif := CryptSC( PadR( Upper( Trim( cKorSif ) ), nSifLen ) )
+
+   IF find_pos_osob_by_korsif( cKorSif )
+      gIdRadnik := field->ID
+      gKorIme   := field->Naz
+      gSTRAD  := AllTrim ( field->STATUS )
+      IF select_o_pos_strad( OSOB->STATUS )
+         cLevel := field->prioritet
+      ELSE
+         cLevel := L_PRODAVAC
+         gSTRAD := "K"
+      ENDIF
+      RETURN 1
+   ELSE
+      MsgBeep ( "Unijeta je nepostojeća lozinka !" )
+
+      RETURN 0
+   ENDIF
+
+   RETURN 0
+
+
+
+   FUNCTION pos_popust_prikaz()
+
+      // RETURN iif( gPopVar = "A", "NENAPLACENO:", "     POPUST:" )
+
+      RETURN  "     POPUST:"

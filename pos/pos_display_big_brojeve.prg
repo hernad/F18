@@ -253,7 +253,6 @@ FUNCTION ispisi_iznos_veliki_brojevi( nIznos, nRow, nCol )
    RETURN .T.
 
 
-
 FUNCTION ispisi_iznos_racuna_box( nIznos )
 
    LOCAL cIzn
@@ -389,15 +388,6 @@ FUNCTION ispisi_iznos_racuna_box( nIznos )
 
 
 
-FUNCTION SkloniIznRac()
-
-   BoxC()
-
-   RETURN .T.
-
-
-
-
 FUNCTION NazivRobe( cIdRoba )
 
    LOCAL nCurr := Select()
@@ -415,59 +405,3 @@ FUNCTION Godina_2( dDatum )
    // 01.01.00 -> "00"
 
    RETURN PadL( AllTrim( Str( Year( dDatum ) % 100, 2, 0 ) ), 2, "0" )
-
-
-
-FUNCTION NenapPop()
-
-   // RETURN iif( gPopVar = "A", "NENAPLACENO:", "     POPUST:" )
-
-   RETURN  "     POPUST:"
-
-
-
-FUNCTION pos_set_user( cKorSif, nSifLen, cLevel )
-
-   // o_pos_strad()
-   // o_pos_osob()
-
-   cKorSif := CryptSC( PadR( Upper( Trim( cKorSif ) ), nSifLen ) )
-
-   IF find_pos_osob_by_korsif( cKorSif )
-      gIdRadnik := field->ID
-      gKorIme   := field->Naz
-      gSTRAD  := AllTrim ( field->STATUS )
-      // SELECT STRAD
-      IF select_o_pos_strad( OSOB->STATUS )
-         cLevel := field->prioritet
-      ELSE
-         cLevel := L_PRODAVAC
-         gSTRAD := "K"
-      ENDIF
-      // SELECT OSOB
-      RETURN 1
-   ELSE
-      MsgBeep ( "Unijeta je nepostojeća lozinka !" )
-      // SELECT OSOB
-      RETURN 0
-   ENDIF
-
-   RETURN 0
-
-
-FUNCTION pos_status_traka()
-
-   LOCAL nX := f18_max_rows() - 1
-   LOCAL nY := 0
-
-   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
-
-   IF gIdPos == "X "
-      @ nX, nY + 1 SAY8 PadC( "$$$ --- PRODAJNO MJESTO X ! --- $$$", f18_max_cols() - 2, "█" )
-    //ELSE
-    //  @ nX, nY + 1 SAY8 Replicate( "█", f18_max_cols() - 2 )
-   ENDIF
-
-   @ nX - 1, nY + 1 SAY PadC ( Razrijedi ( gKorIme ), f18_max_cols() - 2 ) COLOR f18_color_invert()
-
-   RETURN .T.

@@ -181,7 +181,7 @@ FUNCTION pos_realizacija_radnik
          ? PadL ( "UKUPNO RADNIK (" + _idradnik + "):", 29 ), Str ( nTotRadn, 10, 2 )
 
          IF nTotRadn3 <> 0
-            ? PadL ( NenapPop(), 29 ), Str ( nTotRadn3, 10, 2 )
+            ? PadL ( pos_popust_prikaz(), 29 ), Str ( nTotRadn3, 10, 2 )
             ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotRadn - nTotRadn3 + nTotRadn2, 10, 2 )
          ENDIF
          ? Replicate ( "-", 40 )
@@ -195,7 +195,7 @@ FUNCTION pos_realizacija_radnik
          ? Replicate ( "=", 40 )
          ? PadC ( "SVI RADNICI UKUPNO:", 25 ), Str ( nTotal, 14, 2 )
          IF nTotal3 <> 0
-            ? PadL ( NenapPop(), 29 ), Str ( nTotal3, 10, 2 )
+            ? PadL ( pos_popust_prikaz(), 29 ), Str ( nTotal3, 10, 2 )
             ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotal - nTotal3 + nTotal2, 10, 2 )
          ENDIF
          ? Replicate ( "=", 40 )
@@ -248,7 +248,7 @@ FUNCTION pos_realizacija_radnik
       ? REPL ( "=", 40 )
       ? PadL ( "U K U P N O", 24 ), Str ( nTotal, 15, 2 )
       IF nTotal3 <> 0
-         ? PadL ( NenapPop(), 24 ), Str ( nTotal3, 15, 2 )
+         ? PadL ( pos_popust_prikaz(), 24 ), Str ( nTotal3, 15, 2 )
          ? PadL ( "UKUPNO NAPLATA:", 24 ), Str ( nTotal - nTotal3, 15, 2 )
       ENDIF
       ? REPL ( "=", 40 )

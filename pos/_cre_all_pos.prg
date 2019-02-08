@@ -131,6 +131,8 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
 
    AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
+   AAdd( aDBf, { 'BRFAKTP', 'C',  10,  0 } )
    AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
+   AAdd( aDBf, { 'OPIS', 'C',  100,  0 } )
 
    RETURN aDbf

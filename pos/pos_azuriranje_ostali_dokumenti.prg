@@ -13,7 +13,7 @@
 
 MEMVAR _idpos, _rbr, _brdok, _idvd, _datum, _cijena, _kolicina
 
-FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
+FUNCTION pos_azuriraj_zaduzenje( hParams )
 
    LOCAL lOk := .T.
    LOCAL lRet := .F.
@@ -21,7 +21,7 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
    LOCAL nCount := 0
    LOCAL cDokument := ""
    LOCAL nUkupno
-   LOCAL hParams
+   LOCAL hAzur
 
    run_sql_query( "BEGIN" )
 
@@ -29,15 +29,15 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
    GO TOP
    set_global_memvars_from_dbf()
 
-
-   cDokument := AllTrim( _idpos ) + "-" + _idvd + "-" + AllTrim( _brdok ) + " " + DToC( _datum )
-
    hRec := get_hash_record_from_global_vars()
-   hRec[ "idpos" ] := cIdPos
-   hRec[ "brdok" ] := cBrDok
-   hRec[ "idvd" ] := cIdVd
-   hRec[ "datum" ] := dDatum
+   hRec[ "idpos" ] := hParams["idpos"]
+   hRec[ "brdok" ] := hParams["brdok"]
+   hRec[ "idvd" ] := hParams["idvd"]
+   hRec[ "datum" ] := hParams["datum"]
+   hRec[ "brfaktp" ] := hParams["brfaktp"]
+   hRec[ "opis" ] := hParams["opis"]
    hRec[ "ukupno" ] := nUkupno
+   cDokument := AllTrim( hRec["idpos"] ) + "-" + hRec["idvd"] + "-" + AllTrim( hRec["brdok"] ) + " " + DToC( hRec["datum"] )
 
    SELECT PRIPRZ
    nUkupno := 0
@@ -47,6 +47,7 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
       APPEND BLANK
 
       hRec["rbr"] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
+      hRec["idroba"] := priprz->idroba
       hRec["cijena"] := priprz->cijena
       hRec["kolicina"] := priprz->kolicina
       nUkupno += priprz->cijena * priprz->kolicina
@@ -63,14 +64,15 @@ FUNCTION pos_azuriraj_zaduzenje( cIdPos, cIdVd, cBrDok, dDatum )
    IF lOk
       SELECT pos_doks
       APPEND BLANK
+      hRec["ukupno"] := nUkupno
       lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
    ENDIF
 
    IF lOk
       lRet := .T.
-      hParams := hb_Hash()
+      hAzur := hb_Hash()
       // hParams[ "unlock" ] :=  { "pos_pos", "pos_doks", "roba" }
-      run_sql_query( "COMMIT", hParams )
+      run_sql_query( "COMMIT", hAzur )
       log_write( "F18_DOK_OPER, ažuriran pos dokument " + cDokument, 2 )
    ELSE
       run_sql_query( "ROLLBACK" )

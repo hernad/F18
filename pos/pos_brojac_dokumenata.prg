@@ -26,20 +26,26 @@ FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
    ENDIF
 
    cPosBrojacParam := "pos" + "/" + cIdPos + "/" + cIdTipDokumenta
-   nBrojDokumenta := fetch_metric( cPosBrojacParam, nil, nBrojDokumenta )
+   nBrojDokumenta := fetch_metric( cPosBrojacParam, NIL, nBrojDokumenta )
 
    seek_pos_doks( cIdPos, cIdTipDokumenta, dDatDok )
    GO BOTTOM
-   IF field->idpos == cIdPos .AND. field->idvd == cIdTipDokumenta .AND. DToS( field->datum ) == DToS( dDatDok )
-      nBrojDokumenta := Val( field->brdok )
-   ELSE
-      nBrojDokumenta := 0
-   ENDIF
+   DO WHILE !Bof()
+      IF hb_regexHas( "\s*\d+", pos_doks->brdok )
+         IF field->idpos == cIdPos .AND. field->idvd == cIdTipDokumenta .AND. DToS( field->datum ) == DToS( dDatDok )
+            nBrojDokumenta := Val( pos_doks->brdok )
+         ELSE
+            nBrojDokumenta := 0
+         ENDIF
+         EXIT
+      ENDIF
+      SKIP -1
+   ENDDO
 
    nBrojDokumenta := Max( nBrojDokumenta, 0 )
    ++nBrojDokumenta
-   cRet := PadL( AllTrim( Str( nBrojDokumenta ) ),  FIELD_LEN_POS_BRDOK)
-   set_metric( cPosBrojacParam, nil, nBrojDokumenta )
+   cRet := PadL( AllTrim( Str( nBrojDokumenta ) ),  FIELD_LEN_POS_BRDOK )
+   set_metric( cPosBrojacParam, NIL, nBrojDokumenta )
    SELECT ( nDbfArea )
 
    RETURN cRet
@@ -66,7 +72,7 @@ FUNCTION pos_set_param_broj_dokumenta()
    ENDIF
 
    cPosBrojacParam := "pos" + "/" + _id_pos + "/" + _tip_dok
-   nBrojDokumenta := fetch_metric( cPosBrojacParam, nil, nBrojDokumenta )
+   nBrojDokumenta := fetch_metric( cPosBrojacParam, NIL, nBrojDokumenta )
    nBrojDokumentaOld := nBrojDokumenta
 
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Zadnji broj dokumenta:" GET nBrojDokumenta PICT "999999"
@@ -76,7 +82,7 @@ FUNCTION pos_set_param_broj_dokumenta()
 
    IF LastKey() != K_ESC
       IF nBrojDokumenta <> nBrojDokumentaOld
-         set_metric( cPosBrojacParam, nil, nBrojDokumenta )
+         set_metric( cPosBrojacParam, NIL, nBrojDokumenta )
       ENDIF
    ENDIF
 
@@ -89,11 +95,11 @@ FUNCTION pos_reset_broj_dokumenta( cIdPos, tip_dok, broj_dok )
    LOCAL nBrojDokumenta := 0
 
    cPosBrojacParam := "pos" + "/" + cIdPos + "/" + tip_dok
-   nBrojDokumenta := fetch_metric( cPosBrojacParam, nil, nBrojDokumenta )
+   nBrojDokumenta := fetch_metric( cPosBrojacParam, NIL, nBrojDokumenta )
 
    IF Val( AllTrim( broj_dok ) ) == nBrojDokumenta
       --nBrojDokumenta
-      set_metric( cPosBrojacParam, nil, nBrojDokumenta )
+      set_metric( cPosBrojacParam, NIL, nBrojDokumenta )
    ENDIF
 
    RETURN .T.

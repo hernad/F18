@@ -67,7 +67,6 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    s_oBrowse:autolite := .F.
 
-
    SetKey( K_F8, {|| pos_storno_racuna( s_oBrowse ), pos_osvjezi_ukupno( .T. ) } )
    SetKey( K_F9, {|| fiskalni_izvjestaji_komande( .T., .T.  ) } )
 
@@ -307,6 +306,7 @@ FUNCTION pos_provjera_max_kolicine( nKolicina )
 
 FUNCTION pos_set_key_handler_ispravka_racuna()
 
+   SetKey( Asc ( "*" ), NIL )
    SetKey( Asc( "*" ), {|| pos_ispravi_racun() } )
 
    RETURN .T.

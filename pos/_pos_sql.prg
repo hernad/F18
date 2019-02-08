@@ -242,7 +242,7 @@ FUNCTION seek_pos_pos_5( cIdPos, cIdRoba, dDatum )
    RETURN seek_pos_h( hParams )
 
 
-FUNCTION seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok, cTag )
+FUNCTION seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok, cTag, cAlias )
 
    LOCAL hParams := hb_Hash()
 
@@ -251,6 +251,9 @@ FUNCTION seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok, cTag )
    hParams[ "datum" ] := dDatum
    hParams[ "brdok" ] := cBrDok
    hParams[ "tag" ] := cTag
+   IF cAlias != NIL
+      hParams[ "alias" ] := cAlias
+   ENDIF
 
    RETURN seek_pos_h( hParams )
 
@@ -264,6 +267,10 @@ FUNCTION seek_pos_h( hParams )
    LOCAL cTable := "pos_pos", cAlias := "POS"
    LOCAL hIndexes, cKey
    LOCAL lWhere := .F.
+
+   IF hb_HHasKey( hParams, "alias" )
+      cAlias := hParams[ "alias" ]
+   ENDIF
 
    IF hb_HHasKey( hParams, "idpos" )
       cIdPos := hParams[ "idpos" ]
@@ -285,7 +292,6 @@ FUNCTION seek_pos_h( hParams )
    IF hb_HHasKey( hParams, "tag" )
       cTag := hParams[ "tag" ]
    ENDIF
-
 
    cSql := "SELECT * from " + f18_sql_schema( cTable )
 
@@ -505,7 +511,7 @@ FUNCTION pos_stanje_artikla( cIdPos, cIdRoba )
 
    ENDIF
 
-   cQuery := "SELECT SUM( CASE WHEN idvd IN ('00','11','80','81') THEN kolicina WHEN idvd IN ('42') THEN -kolicina WHEN idvd IN ('IN') THEN -(kolicina - kol2) ELSE 0 END ) AS stanje FROM " + f18_sql_schema("pos_pos") + " " + ;
+   cQuery := "SELECT SUM( CASE WHEN idvd IN ('00','11','80','81') THEN kolicina WHEN idvd IN ('42') THEN -kolicina WHEN idvd IN ('IN') THEN -(kolicina - kol2) ELSE 0 END ) AS stanje FROM " + f18_sql_schema( "pos_pos" ) + " " + ;
       " WHERE idpos = " + sql_quote( cIdPos ) + ;
       " AND idroba = " + sql_quote( cIdRoba )
 
@@ -563,7 +569,6 @@ FUNCTION pos_get_mpc()
    LOCAL nCijena := 0
    LOCAL cField
    LOCAL oData, cQry
-
 
    cField := pos_get_mpc_field()
 

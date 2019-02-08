@@ -153,6 +153,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       CASE pos_doks->IdVd == POS_IDVD_RACUN
 
          hParams[ "idpos" ] := pos_doks->idpos
+         hParams[ "idvd" ] := pos_doks->idvd
          hParams[ "datum" ] := pos_doks->datum
          hParams[ "brdok" ] := pos_doks->brdok
          hParams[ "idradnik" ] := pos_doks->idradnik
@@ -162,7 +163,17 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
 
       CASE pos_doks->IdVd $ POS_IDVD_ULAZI
-         pos_stampa_azuriranog_zaduzenja( pos_dokument_naziv( pos_doks->idvd ) )
+         hParams := hb_hash()
+         hParams[ "idpos" ] := pos_doks->idpos
+         hParams[ "datum" ] := pos_doks->datum
+         hParams[ "idvd" ] := pos_doks->idvd
+         hParams[ "brdok" ] := pos_doks->brdok
+         hParams[ "idradnik" ] := pos_doks->idradnik
+         hParams[ "idpartner"] := pos_doks->idpartner
+         hParams[ "opis" ] := hb_StrToUtf8( pos_doks->opis )
+         hParams[ "brfaktp" ] := pos_doks->brfaktp
+         hParams[ "priprema" ] := .F.
+         pos_stampa_zaduzenja( hParams )
 
       CASE pos_doks->IdVd == POS_IDVD_INVENTURA
          pos_prepis_inventura_nivelacija( .T. )
