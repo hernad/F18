@@ -13,51 +13,55 @@
 #include "f18.ch"
 
 STATIC aPorezi := {}
+STATIC s_cKonverzijaValuteDN := "N"
 
+MEMVAR nKalkRBr
+MEMVAR GetList
+MEMVAR _idroba, _kolicina, _pkonto, _idkonto2, _brfaktp, _datfaktp
 
 FUNCTION kalk_unos_dok_81( hParams )
 
    LOCAL nX := 5
-   LOCAL _kord_x := 0
+   LOCAL nKoordX := 0
    LOCAL _unos_left := 40
-   LOCAL _use_opis := .F.
-   LOCAL _opis := Space( 300 )
-
+   //LOCAL _use_opis := .F.
+   //LOCAL _opis := Space( 300 )
    LOCAL _krabat := NIL
 
    IF hb_HHasKey( hParams, "opis" )
       _use_opis := .T.
    ENDIF
 
+   //IF _use_opis
+  //    IF !kalk_is_novi_dokument()
+  //       _opis := PadR( hParams[ "opis" ], 300 )
+  //    ENDIF
+   //ENDIF
 
-   IF _use_opis
-      IF !kalk_is_novi_dokument()
-         _opis := PadR( hParams[ "opis" ], 300 )
-      ENDIF
+   IF Empty(_pkonto)
+      _pkonto := _idkonto2
+      _idkonto2 := ""
    ENDIF
 
+   s_cKonverzijaValuteDN := "N"
 
-   __k_val := "N"
-
-   IF nRbr == 1 .AND. kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _datfaktp := _datdok
    ENDIF
 
-   IF nRbr == 1 .OR. !kalk_is_novi_dokument()
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
       ++nX
-      _kord_x := box_x_koord() + nX
-
+      nKoordX := box_x_koord() + nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "DOBAVLJAČ:" GET _IdPartner PICT "@!" ;
-         VALID {|| Empty( _IdPartner ) .OR. p_partner( @_IdPartner ), ispisi_naziv_partner( _kord_x - 1, 22, 20 ) }
+         VALID {|| Empty( _IdPartner ) .OR. p_partner( @_IdPartner ), ispisi_naziv_partner( nKoordX - 1, 22, 20 ) }
       @ box_x_koord() + nX, 50 SAY "Broj fakture:" GET _brfaktp
       @ box_x_koord() + nX, Col() + 1 SAY "Datum:" GET _datfaktp
 
       ++nX
-      _kord_x := box_x_koord() + nX
+      nKoordX := box_x_koord() + nX
 
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje:" GET _idkonto VALID {|| P_Konto( @_IdKonto ), ispisi_naziv_konto( _kord_x, 40, 30 ) } PICT "@!"
-
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje:" GET _pkonto VALID {|| P_Konto( @_pkonto ), ispisi_naziv_konto( nKoordX, 40, 30 ) } PICT "@!"
       READ
 
       ESC_RETURN K_ESC
@@ -74,8 +78,8 @@ FUNCTION kalk_unos_dok_81( hParams )
 
       ++nX
 
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Konto zaduzuje: "
-      ?? _idkonto
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje: "
+      ?? _pkonto
 
       READ
       ESC_RETURN K_ESC
@@ -83,9 +87,9 @@ FUNCTION kalk_unos_dok_81( hParams )
    ENDIF
 
    nX += 2
-   _kord_x := box_x_koord() + nX
+   nKoordX := box_x_koord() + nX
 
-   kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), _kord_x, box_y_koord() + 2, @aPorezi, _idPartner )
+   kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), nKoordX, box_y_koord() + 2, @aPorezi, _idPartner )
 
 
 
@@ -99,22 +103,19 @@ FUNCTION kalk_unos_dok_81( hParams )
    ENDIF
 
    select_o_tarifa( roba->idtarifa )
-   select_o_koncij( _idkonto )
+   select_o_koncij( _pkonto )
    SELECT kalk_pripr
 
-   _pkonto := _idkonto
-   // kalk_dat_poslj_promjene_prod()
-
-   ++nX
-   IF _use_opis
-      @ box_x_koord() + nX, box_y_koord() + 30 SAY8 "Opis:" GET _opis PICT "@S40"
-   ENDIF
+   //++nX
+   //IF _use_opis
+  //    @ box_x_koord() + nX, box_y_koord() + 30 SAY8 "Opis:" GET _opis PICT "@S40"
+   //ENDIF
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _kolicina PICT PicKol VALID _kolicina <> 0
 
    IF kalk_is_novi_dokument()
-      select_o_koncij( _idkonto )
+      select_o_koncij( _pkonto )
       select_o_roba(  _idroba )
       _mpcsapp := kalk_get_mpc_by_koncij_pravilo()
       _TMarza2 := "%"
@@ -128,7 +129,7 @@ FUNCTION kalk_unos_dok_81( hParams )
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Fakturna cijena:"
 
    IF is_kalk_konverzija_valute_na_unosu()
-      @ box_x_koord() + nX, Col() + 1 SAY "EUR->" GET __k_val VALID kalk_ulaz_preracun_fakturne_cijene( __k_val ) PICT "@!"
+      @ box_x_koord() + nX, Col() + 1 SAY "EUR->" GET s_cKonverzijaValuteDN VALID kalk_ulaz_preracun_fakturne_cijene( s_cKonverzijaValuteDN ) PICT "@!"
    ENDIF
 
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _fcj PICT PicDEM ;
@@ -146,11 +147,10 @@ FUNCTION kalk_unos_dok_81( hParams )
 
    _fcj2 := _fcj * ( 1 - _rabat / 100 )
 
-   // setuj hParamsute
-   IF _use_opis
-      hParams[ "opis" ] := _opis
-   ENDIF
 
+  //IF _use_opis
+  //    hParams[ "opis" ] := _opis
+  // ENDIF
 
    obracun_kalkulacija_tip_81_pdv( nX )
 
@@ -192,14 +192,14 @@ STATIC FUNCTION valid_kolicina()
       nc1 := nc2 := 0
 
       IF !Empty( kalk_metoda_nc() )
-         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
+         kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolS, @nKolZN, @nc1, @nc2 )
          @ box_x_koord() + 12, box_y_koord() + 30 SAY "Ukupno na stanju "
          @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
       ENDIF
 
       IF nKols < Abs( _kolicina )
          sumnjive_stavke_error()
-         error_bar( "KA_" + _idroba + "/" + _idkonto, _idroba + "/" + _idkonto + " kolicina nedovoljna:" + AllTrim( Str( nKols, 12, 3 ) ) )
+         error_bar( "KA_" + _idroba + "/" + _pkonto, _idroba + "/" + _pkonto + " kolicina nedovoljna:" + AllTrim( Str( nKols, 12, 3 ) ) )
       ENDIF
       SELECT kalk_pripr
    ENDIF
@@ -210,15 +210,16 @@ STATIC FUNCTION valid_kolicina()
 // --------------------------------------------------------
 // 81 - dokument, obracun kalkulacije
 // --------------------------------------------------------
-STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( x_kord )
+STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
 
    LOCAL cSPom := " (%,A,U,R) "
-   LOCAL nX := x_kord + 2
    LOCAL _unos_left := 40
-   LOCAL _kord_x
+   LOCAL nKoordX
    LOCAL lSaTroskovima := .T.
    PRIVATE getlist := {}
    PRIVATE cProracunMarzeUnaprijed := " "
+
+   nX += 2
 
    IF Empty( _TPrevoz )
       _TPrevoz := "%"
@@ -288,14 +289,13 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( x_kord )
 
    ESC_RETURN K_ESC
 
-   select_o_koncij( _idkonto )
-
+   select_o_koncij( _pkonto )
    roba_set_mcsapp_na_osnovu_koncij_pozicije( _mpcsapp, .T. )
 
    SELECT kalk_pripr
 
-   _pkonto := _idkonto
    _mkonto := ""
+   _idkonto := ""
    _pu_i := "1"
    _mu_i := ""
 

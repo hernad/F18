@@ -27,8 +27,8 @@ FUNCTION kalk_stampa_dok_81()
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
    dDatFaktP := DatFaktP
-   cIdKonto := IdKonto
-   cIdKonto2 := IdKonto2
+   cPKonto := kalk_pripr->pkonto
+   //cIdKonto2 := IdKonto2
 
    P_10CPI
    ??U "ULAZ U PRODAVNICU DIREKTNO OD DOBAVLJAČA"
@@ -39,10 +39,9 @@ FUNCTION kalk_stampa_dok_81()
    select_o_partner( cIdPartner )
 
    ?U  "DOBAVLJAČ:", cIdPartner, "-", PadR( naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
+   select_o_konto( cPKonto )
 
-   select_o_konto( cIdKonto )
-
-   ?U  "KONTO zadužuje :", cIdKonto, "-", AllTrim( naz )
+   ?U  "KONTO zadužuje :", cPKonto, "-", AllTrim( naz )
 
    m := "---- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- -----------"
    m += " ----------"
@@ -61,7 +60,7 @@ FUNCTION kalk_stampa_dok_81()
    SELECT kalk_pripr
 
    aPorezi := {}
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   //PRIVATE cIdd := idpartner + brfaktp + pkonto //+ idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
 
@@ -73,31 +72,16 @@ FUNCTION kalk_stampa_dok_81()
       SELECT kalk_pripr
 
       aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcSaPP, field->nc )
-
       nPDV := aIPor[ 1 ]
-
-      // IF lPrikPRUC
-      // nPRUC := aIPor[ 2 ]
-      // nMarza2 := nMarza2 - nPRUC
-      // ENDIF
-
       IF PRow() > page_length()
          FF
          @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
-      // IF gKalo == "1"
-      // SKol := Kolicina - GKolicina - GKolicin2
-      // ELSE
       SKol := Kolicina
-      // ENDIF
 
       nTot +=  ( nU := FCj * Kolicina )
-      // IF gKalo == "1"
-      // nTot1 += ( nU1 := FCj2 * ( GKolicina + GKolicin2 ) )
-      // ELSE
       nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
-      // ENDIF
       nTot2 += ( nU2 := -Rabat / 100 * FCJ * Kolicina )
       nTot3 += ( nU3 := nPrevoz * SKol )
       nTot4 += ( nU4 := nBankTr * SKol )
@@ -106,9 +90,7 @@ FUNCTION kalk_stampa_dok_81()
       nTot7 += ( nU7 := nZavTr * SKol )
       nTot8 += ( nU8 := NC *    ( Kolicina - Gkolicina - GKolicin2 ) )
       nTot9 += ( nU9 := nMarza2 * ( Kolicina - Gkolicina - GKolicin2 ) )
-      // IF lPrikPRUC
-      // nTot9a += ( nU9a := nPRUC * ( Kolicina - Gkolicina - GKolicin2 ) )
-      // ENDIF
+
       nTotA += ( nUA := MPC   * ( Kolicina - Gkolicina - GKolicin2 ) )
       nTotB += ( nUB := MPCSAPP * ( Kolicina - Gkolicina - GKolicin2 ) )
       nTotC += ( nUC := nPDV * ( Kolicina - Gkolicina - GKolicin2 ) )
@@ -120,7 +102,6 @@ FUNCTION kalk_stampa_dok_81()
       IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
          ?? ", BK: " + roba->barkod
       ENDIF
-
 
       @ PRow() + 1, 4 SAY IdRoba
       nCol1 := PCol() + 1
@@ -159,13 +140,8 @@ FUNCTION kalk_stampa_dok_81()
       @ PRow(), PCol() + 1  SAY nu3 + nu4 + nu5 + nu6 + nU7         PICTURE  PICDEM
       @ PRow(), PCol() + 1  SAY nU8         PICTURE         PICDEM
       @ PRow(), PCol() + 1  SAY nU9         PICTURE         PICDEM
-      // IF lPrikPRUC
-      // @ PRow(), PCol() + 1  SAY nU9a         PICTURE         PICDEM
-      // ENDIF
       @ PRow(), PCol() + 1  SAY nUA         PICTURE         PICDEM
-
       @ PRow(), PCol() + 1 SAY nUC  PICTURE  PICDEM
-
       @ PRow(), PCol() + 1  SAY nUB         PICTURE         PICDEM
 
       SKIP
@@ -183,15 +159,8 @@ FUNCTION kalk_stampa_dok_81()
    @ PRow(), PCol() + 1  SAY ntot3 + ntot4 + ntot5 + ntot6 + nTot7         PICTURE         PICDEM
    @ PRow(), PCol() + 1  SAY nTot8         PICTURE         PICDEM
    @ PRow(), PCol() + 1  SAY nTot9         PICTURE         PICDEM
-   // IF lPrikPRUC
-   // @ PRow(), PCol() + 1  SAY nTot9a        PICTURE         PICDEM
-   // ENDIF
    @ PRow(), PCol() + 1  SAY nTotA         PICTURE         PICDEM
-
-
    @ PRow(), PCol() + 1  SAY nTotC  PICTURE         PICDEM
-
-
    @ PRow(), PCol() + 1  SAY nTotB         PICTURE         PICDEM
 
    ? m
@@ -244,7 +213,8 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
    nStr := 0
    cIdPartner := IdPartner; cBrFaktP := BrFaktP; dDatFaktP := DatFaktP
 
-   cIdKonto := IdKonto; cIdKonto2 := IdKonto2
+   cPKonto := kalk_pripr->Konto
+   cIdKonto2 := IdKonto2
 
    IF lZaTops == NIL
       lZaTops := .F.
@@ -260,9 +230,9 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
 
    ?U "DOBAVLJAČ:", cIdPartner, "-", PadR( naz, 20 ), Space( 5 ), "DOKUMENT Broj:", AllTrim( cBrFaktP ), "Datum:", dDatFaktP
 
-   select_o_konto( cIdKonto )
+   select_o_konto( cPKonto )
 
-   ?U  "KONTO zadužuje :", cIdKonto, "-", AllTrim( naz )
+   ?U  "KONTO zadužuje :", cPKonto, "-", AllTrim( naz )
 
    IF !lZaTops
 
@@ -293,7 +263,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
 
    SELECT kalk_pripr
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   //PRIVATE cIdd := idpartner + brfaktp + kalk_pripr->pkonto //+ idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
@@ -312,18 +282,10 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
-      // IF gKalo == "1"
-      // SKol := Kolicina - GKolicina - GKolicin2
-      // ELSE
       SKol := Kolicina
-      // ENDIF
 
       nTot +=  ( nU := FCj * Kolicina )
-      // IF gKalo == "1"
-      // nTot1 += ( nU1 := FCj2 * ( GKolicina + GKolicin2 ) )
-      // ELSE
       nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
-      // ENDIF
       nTot2 += ( nU2 := -Rabat / 100 * FCJ * Kolicina )
       nTot3 += ( nU3 := nPrevoz * SKol )
       nTot4 += ( nU4 := nBankTr * SKol )
@@ -345,7 +307,6 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
       IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
          ?? ", BK: " + ROBA->barkod
       ENDIF
-
 
       @ PRow() + 1, 4 SAY IdRoba
       nCol1 := PCol() + 1
@@ -408,9 +369,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow() + 1, nCol1 - 1   SAY Space( Len( picdem ) )
       ENDIF
       @ PRow(), PCol() + 1  SAY nUA         PICTURE         PICDEM
-
       @ PRow(), PCol() + 1  SAY nUC  PICTURE PICDEM
-
       @ PRow(), PCol() + 1  SAY nUB         PICTURE         PICDEM
       SKIP
    ENDDO
@@ -435,9 +394,6 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
       @ PRow(), PCol() + 1  SAY nTot7         PICTURE         PICDEM
       @ PRow(), PCol() + 1  SAY nTot8         PICTURE         PICDEM
       @ PRow(), PCol() + 1  SAY nTot9         PICTURE         PICDEM
-      // IF lPrikPRUC
-      // @ PRow(), PCol() + 1  SAY nTot9a        PICTURE         PICDEM
-      // ENDIF
    ELSE
       @ PRow() + 1, nCol1 - 1   SAY Space( Len( picdem ) )
    ENDIF

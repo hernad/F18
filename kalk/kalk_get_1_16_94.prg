@@ -25,7 +25,7 @@ FUNCTION kalk_get_1_94()
 
    lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
 
-   SET KEY K_ALT_K TO KM94()
+   SET KEY K_ALT_K TO kalk_alt_k_kartica_magacin()
 
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
@@ -113,32 +113,18 @@ FUNCTION kalk_get_1_94()
 
    RETURN LastKey()
 
+FUNCTION kalk_alt_k_kartica_magacin()
 
-
-/*
- *     Magacinska kartica kao pomoc pri unosu 94-ke
- */
-
-// koristi se stkalk14   za stampu kalkulacije
-// stkalk 95 za stampu 16-ke
-FUNCTION KM94()
-
-   LOCAL nR1, nR2, nR3
+   LOCAL nR3
    PRIVATE GetList := {}
 
-   SELECT  roba
-   nR1 := RecNo()
+   PushWa()
    SELECT kalk_pripr
-   nR2 := RecNo()
 
    my_close_all_dbf()
    kalk_kartica_magacin( _IdFirma, _idroba, _IdKonto )
    o_kalk_edit()
-   SELECT roba
-   GO nR1
-   SELECT kalk_pripr
-   GO nR2
 
-   SELECT kalk_pripr
+   PopWa()
 
    RETURN .T.

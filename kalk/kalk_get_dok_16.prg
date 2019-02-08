@@ -13,6 +13,8 @@
 
 MEMVAR nVPV16, nNVPredhodna
 MEMVAR nKalkRbr
+MEMVAR GetList
+MEMVAR _idkonto, _idkonto2, _kolicina, _IdTarifa
 
 STATIC aPorezi := {}
 
@@ -21,8 +23,7 @@ FUNCTION kalk_get_1_16()
    LOCAL nRVPC
 
    lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
-
-   SET KEY K_ALT_K TO KM94()
+   SET KEY K_ALT_K TO kalk_alt_k_kartica_magacin()
 
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
@@ -34,12 +35,11 @@ FUNCTION kalk_get_1_16()
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
-      IF _idvd $ "94#97"
-         @  box_x_koord() + 6, box_y_koord() + 2   SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 6, 18 )
-      ENDIF
+      //IF _idvd $ "94#97"
+      //   @  box_x_koord() + 6, box_y_koord() + 2   SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 6, 18 )
+      //ENDIF
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura/Otpremnica Broj:" GET _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP  VALID {|| .T. }
-
 
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje"  GET _IdKonto VALID Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 )
 
@@ -64,9 +64,7 @@ FUNCTION kalk_get_1_16()
 
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
 
-
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
-
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
    READ
@@ -120,8 +118,6 @@ FUNCTION kalk_get_1_16()
 
 
 
-// _odlval nalazi se u knjiz, filuje staru vrijednost
-// _odlvalb nalazi se u knjiz, filuje staru vrijednost nabavke
 FUNCTION kalk_get_16_1()
 
    LOCAL cSvedi := " "
@@ -149,12 +145,9 @@ FUNCTION kalk_get_16_1()
 
    _PKonto := _Idkonto
 
-   // kalk_dat_poslj_promjene_prod()
-   // DuplRoba()
 
    PRIVATE cProracunMarzeUnaprijed := " "
-
-   @ box_x_koord() + 13, box_y_koord() + 2   SAY "Kolicina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
+   @ box_x_koord() + 13, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
    select_o_koncij( _idkonto )
    select_o_roba(  _IdRoba )
@@ -180,11 +173,8 @@ FUNCTION kalk_get_16_1()
    _vpc := _nc
    marza := 0
 
-
    cBeze := " "
    @ box_x_koord() + 17, box_y_koord() + 2 GET cBeze VALID SvediM( cSvedi )
-
-
 
    READ
 

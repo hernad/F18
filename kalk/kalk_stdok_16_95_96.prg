@@ -13,7 +13,7 @@
 
 MEMVAR picdem, piccdem, pickol, m
 
-FUNCTION kalk_stampa_dok_95() // stampa kalkulacije tip-a 95, 96, 97
+FUNCTION kalk_stampa_dok_16_95_96()
 
    LOCAL cKto1
    LOCAL cKto2
@@ -72,7 +72,6 @@ FUNCTION kalk_stampa_dok_95() // stampa kalkulacije tip-a 95, 96, 97
       ENDIF
 
       select_o_konto( cKto2 )
-
       ? PadL( cPom, 14 ), AllTrim( cKto2 ) + " - " + PadR( konto->naz, 60 )
 
    ENDIF
@@ -231,8 +230,8 @@ STATIC FUNCTION _get_naslov_dokumenta( id_vd )
       _ret := "PRIJEM U MAGACIN (INTERNI DOKUMENT):"
    ELSEIF id_vd == "96"
       _ret := "OTPREMA IZ MAGACINA (INTERNI DOKUMENT):"
-   ELSEIF id_vd == "97"
-      _ret := "PREBACIVANJE IZ MAGACINA U MAGACIN (INTERNI DOKUMENT):"
+   //ELSEIF id_vd == "97"
+   //    _ret := "PREBACIVANJE IZ MAGACINA U MAGACIN (INTERNI DOKUMENT):"
    ELSEIF id_vd == "95"
       _ret := "OTPIS MAGACIN:"
    ENDIF

@@ -164,7 +164,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
 
          ELSEIF ( cIdvd $ "16#95#96#97" )
 
-            kalk_stampa_dok_95()
+            kalk_stampa_dok_16_95_96()
 
          ELSEIF ( cidvd $ "41#42#43#47#49" )
             kalk_stampa_dok_41()

@@ -28,15 +28,6 @@ FUNCTION kalk_get_nabavna_prod( cIdFirma, cIdroba, cIdkonto, nKolicina, nKolZN, 
 
    nKolicina := 0
    hb_default( @lSilent, .F. )
-/*
-  -- IF lAutoObr == .T.
-
-      IF knab_cache( cIdKonto, cIdroba, @nUlKol, @nIzlKol, @nKolicina,  @nUlNv, @nIzlNv, @nNc ) == 1 // uzmi stanje iz cache tabele
-         SELECT kalk_pripr
-         RETURN .F.
-      ENDIF
-   ENDIF
-*/
 
    IF Empty( kalk_metoda_nc() )
       RETURN .F.
