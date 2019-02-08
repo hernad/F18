@@ -457,17 +457,17 @@ FUNCTION pos_set_user( cKorSif, nSifLen, cLevel )
 
 FUNCTION pos_status_traka()
 
-   LOCAL _x := f18_max_rows() - 3
-   LOCAL _y := 0
+   LOCAL nX := f18_max_rows() - 1
+   LOCAL nY := 0
 
-   @ 1, _y + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
+   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
 
    IF gIdPos == "X "
-      @ _x, _y + 1 SAY8 PadC( "$$$ --- PRODAJNO MJESTO X ! --- $$$", f18_max_cols() - 2, "█" )
-   ELSE
-      @ _x, _y + 1 SAY8 Replicate( "█", f18_max_cols() - 2 )
+      @ nX, nY + 1 SAY8 PadC( "$$$ --- PRODAJNO MJESTO X ! --- $$$", f18_max_cols() - 2, "█" )
+    //ELSE
+    //  @ nX, nY + 1 SAY8 Replicate( "█", f18_max_cols() - 2 )
    ENDIF
 
-   @ _x - 1, _y + 1 SAY PadC ( Razrijedi ( gKorIme ), f18_max_cols() - 2 ) COLOR f18_color_invert()
+   @ nX - 1, nY + 1 SAY PadC ( Razrijedi ( gKorIme ), f18_max_cols() - 2 ) COLOR f18_color_invert()
 
    RETURN .T.
