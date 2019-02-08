@@ -17,7 +17,6 @@ MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pko
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
 MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
 MEMVAR gStavitiUSifarnikNovuCijenuDefault
-
 MEMVAR aPorezi
 
 FUNCTION kalk_get_1_19()

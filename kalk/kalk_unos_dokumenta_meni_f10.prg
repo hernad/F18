@@ -83,7 +83,7 @@ FUNCTION kalk_meni_f10()
    AAdd( aOpc, "N. pregled smeća" )
    AAdd( aOpcExe, {|| kalk_pregled_smece_pripr9() } )
 
-   AAdd( aOpc, "O. briši sve protu-stavke" )
+   AAdd( aOpc, "O. briši sve protustavke" )
    AAdd( aOpcExe, {|| kalk_pripr_brisi_protustavke() } )
 
    AAdd( aOpc, "R. renumeracija kalk priprema" )

@@ -335,8 +335,8 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
 
 STATIC FUNCTION pdf_kalk_dokument( cIdVd )
 
-   IF is_legacy_ptxt()
-      RETURN .F.
-   ENDIF
+   //IF is_legacy_ptxt()
+  //    RETURN .F.
+   //ENDIF
 
-   RETURN cIdVd $ "10#14"  // implementirano za kalk 10, 14
+   RETURN cIdVd $ "10#14#19"  // implementirano za kalk 10, 14

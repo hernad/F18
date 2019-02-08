@@ -13,7 +13,7 @@
 
 
 // PDV obracun
-FUNCTION kalk_pripr_rekap_tarife()
+FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
 
    LOCAL _pict := "99999999999.99"
    LOCAL nKolona
@@ -21,16 +21,20 @@ FUNCTION kalk_pripr_rekap_tarife()
    LOCAL nIznPRuc
    PRIVATE aPorezi
 
-   IF PRow() > ( RPT_PAGE_LEN  + dodatni_redovi_po_stranici() )
-      FF
-      @ PRow(), 123 SAY "Str:" + Str( ++nStr, 3 )
+   IF bCheckPDFNovaStrana != NIL
+      Eval( bCheckPDFNovaStrana )
+   ELSE
+      IF PRow() > ( RPT_PAGE_LEN  + dodatni_redovi_po_stranici() )
+         FF
+         @ PRow(), 123 SAY "Str:" + Str( ++nStr, 3 )
+      ENDIF
    ENDIF
 
    nRec := RecNo()
    SELECT kalk_pripr
 
    IF my_rddName() == "SQLMIX" // hernad hack, azurirani dokument
-       go top
+      GO TOP
    ELSE
       SET ORDER TO TAG "2"
       SEEK cIdFirma + cIdVd + cBrDok
@@ -46,12 +50,8 @@ FUNCTION kalk_pripr_rekap_tarife()
    NEXT
 
    ? m
-
-
    ?  "* Tar.*  PDV%    *      MPV     *      PDV     *     MPV     *"
    ?  "*     *          *    bez PDV   *     iznos    *    sa PDV   *"
-
-
    ? m
 
    aPKonta := PKontoCnt( cIdFirma + cIdvd + cBrDok )
@@ -62,7 +62,6 @@ FUNCTION kalk_pripr_rekap_tarife()
    FOR i := 1 TO nCntKonto
 
       SEEK cIdFirma + cIdVd + cBrdok
-
       nTot1 := 0
       nTot2 := 0
       nTot2b := 0
@@ -85,8 +84,6 @@ FUNCTION kalk_pripr_rekap_tarife()
          nU1 := 0
          // pdv
          nU2 := 0
-
-
          // mpv sa porezom
          nU3 := 0
 
@@ -103,7 +100,6 @@ FUNCTION kalk_pripr_rekap_tarife()
             ENDIF
 
             select_o_roba(  kalk_pripr->idroba )
-
             set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi, cIdTarifa )
             SELECT kalk_pripr
 
@@ -132,11 +128,6 @@ FUNCTION kalk_pripr_rekap_tarife()
             nKolicina := DokKolicina( field->idvd )
             nU1 += nMpc * nKolicina
             nU2 += aIPor[ 1 ] * nKolicina
-
-            IF glUgost
-               nU2b += aIPor[ 3 ] * nKolicina
-            ENDIF
-
             nU3 += field->mpcsapp * nKolicina
 
             // ukupna bruto marza
@@ -172,16 +163,9 @@ FUNCTION kalk_pripr_rekap_tarife()
 
       ? m
       ? "UKUPNO " + aPKonta[ i ]
-
       @ PRow(), nCol1 SAY nTot1 PICT _pict
       @ PRow(), PCol() + 1 SAY nTot2 PICT _pict
-
-      IF glUgost
-         @ PRow(), PCol() + 1 SAY nTot2b PICT _pict
-      ENDIF
-
       @ PRow(), PCol() + 1 SAY nTot3 PICT _pict
-
       ? m
 
    NEXT
@@ -200,8 +184,8 @@ FUNCTION kalk_pripr_rekap_tarife()
 
 FUNCTION PKontoCnt( cSeek )
 
-   // {
    LOCAL nPos, aPKonta
+
    aPKonta := {}
    // baza: kalk_pripr, order: 2
    SEEK cSeek

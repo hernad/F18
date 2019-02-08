@@ -11,58 +11,68 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
+STATIC s_cLinija
+
+MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
+MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
+MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
+MEMVAR cIdPar
+MEMVAR aPorezi
+MEMVAR cIdFirma, cIdVd, cBrDok, cPKonto
 
 FUNCTION kalk_stampa_dok_19()
 
-   LOCAL nCol1 := nCol2 := 0, npom := 0
+   LOCAL nCol1 := 0
+   LOCAL nCol2 := 0
+   LOCAL nPom := 0
+   LOCAL cNaslov
+   LOCAL bZagl, xPrintOpt
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, aPorezi
 
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
    aPorezi := {}
-   nStr := 0
-   cIdPartner := IdPartner
-   cBrFaktP := BrFaktP
+
+   cIdFirma := kalk_pripr->IdFirma
+   cIdVd := kalk_pripr->Idvd
+   cBrDok := kalk_pripr->brdok
+
    dDatFaktP := DatFaktP
-   cIdKonto := IdKonto
-   cIdKonto2 := IdKonto2
+   cPKonto := kalk_pripr->pkonto
 
-   P_10CPI
-   B_ON
-   ?? "PROMJENA CIJENA U PRODAVNICI"
-   ?
-   B_OFF
-   P_COND
-   ? "KALK BR:",  cIdFirma + "-" + cIdVD + "-" + cBrDok, ", Datum:", DatDok
+
+   cNaslov := "NIVELACIJA PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
+
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
+
    @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-   select_o_partner( cIdPartner )
-   select_o_konto( cIdkonto )
-
-   ?  "KONTO zaduzuje :", cIdKonto, "-", naz
+   select_o_konto( cPKonto )
+   ?  _u("KONTO zadužuje :"), cPKonto, "-", konto->naz
 
    SELECT kalk_pripr
 
-   IF ( cIdVD == "19" )
-      m := "--- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
-      ? m
-      head_19()
-      ? m
-      nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
-   ENDIF
+   s_cLinija := "--- ---------- " + Replicate( "-", 40 ) + " ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   bZagl := {|| zagl() }
+   nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
 
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVd == IdVd
+   Eval( bZagl )
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVd == kalk_pripr->IdVd
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       set_pdv_public_vars()
-
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi )
 
       // nova cijena
-      nMpcSaPP1 := field->mpcSaPP + field->fcj
+      nMpcSaPP1 := kalk_pripr->mpcSaPP + kalk_pripr->fcj
       nMpc1 := MpcBezPor( nMpcSaPP1, aPorezi,, field->nc )
       aIPor1 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc1, nMpcSaPP1, field->nc )
 
@@ -72,37 +82,35 @@ FUNCTION kalk_stampa_dok_19()
       aIPor2 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc2, nMpcSaPP2, field->nc )
 
       print_nova_strana( 125, @nStr, 2 )
-
       nTot3 +=  ( nU3 := MPC * Kolicina )
-
       nPor1 := aIPor1[ 1 ] - aIPor2[ 1 ]
       nPor2 := aIPor1[ 2 ] - aIPor2[ 2 ]
 
       nTot4 +=  ( nU4 := ( nPor1 + nPor2 ) * Kolicina )
       nTot5 +=  ( nU5 := MPcSaPP * Kolicina )
 
-      // 1. red
+      check_nova_strana( bZagl, s_oPDF )
 
-      @ PRow() + 1, 0 SAY  Rbr PICTURE "999"
-      @ PRow(), 4 SAY  ""
-      ?? Trim( Left( ROBA->naz, 40 ) ), "(", ROBA->jmj, ")"
-      @ PRow() + 1, 4 SAY IdRoba
-      @ PRow(), PCol() + 1 SAY Kolicina             PICTURE pickol()
-      @ PRow(), PCol() + 1 SAY FCJ                  PICTURE piccdem()
+      // 1. red
+      @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "999"
+      @ PRow(), PCol() + 1 SAY  kalk_pripr->idRoba
+      @ PRow(), PCol() + 1 SAY  Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")"
+
+      @ PRow(), PCol() + 1 SAY kalk_pripr->Kolicina             PICTURE pickol()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                  PICTURE piccdem()
       nC0 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY MPC                  PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
       nC1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ]            PICTURE picproc()
       @ PRow(), PCol() + 1 SAY nPor1                         PICTURE picdem()
-      @ PRow(), PCol() + 1 SAY nPor1 * Kolicina                PICTURE picdem()
-      @ PRow(), PCol() + 1 SAY MPCSAPP                       PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY MPCSAPP + FCJ                   PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY nPor1 * kalk_pripr->Kolicina                PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP                       PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ                   PICTURE piccdem()
 
       // 2. red
-
-      @ PRow() + 1, nC1 SAY 0                       PICTURE picproc()
-      @ PRow(), PCol() + 1 SAY nPor2                PICTURE picdem()
-      @ PRow(), PCol() + 1 SAY nPor2 * Kolicina     PICTURE picdem()
+      @ PRow() + 1, nC1 SAY 0   PICTURE picproc()
+      @ PRow(), PCol() + 1 SAY nPor2   PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY nPor2 * kalk_pripr->Kolicina  PICTURE picdem()
 
       IF Round( field->FCJ, 4 ) == 0
          @ PRow(), PCol() + 1 SAY 9999999  PICTURE picproc() // error fcj=0
@@ -110,35 +118,37 @@ FUNCTION kalk_stampa_dok_19()
          @ PRow(), PCol() + 1 SAY (  field->MPCSAPP / field->FCJ ) * 100  PICTURE picproc()
       ENDIF
       @ PRow(), PCol() + 1 SAY Space( Len( piccdem() ) )
-
       SKIP
 
    ENDDO
 
-   print_nova_strana( 125, @nStr, 3 )
+   check_nova_strana( bZagl, s_oPDF, .F., 10 )
 
-   ? m
+   ? s_cLinija
    @ PRow() + 1, 0        SAY "Ukupno:"
    @ PRow(), nC0        SAY  nTot3         PICTURE        picdem()
    @ PRow(), PCol() + 1   SAY  Space( Len( picdem() ) )
    @ PRow(), PCol() + 1   SAY  Space( Len( picdem() ) )
    @ PRow(), PCol() + 1   SAY  nTot4         PICTURE        picdem()
    @ PRow(), PCol() + 1   SAY  nTot5         PICTURE        picdem()
-   ? m
-
+   ? s_cLinija
    ?
-   kalk_pripr_rekap_tarife()
+   kalk_pripr_rekap_tarife( {|| check_nova_strana( bZagl, s_oPDF, .F., 5 ) } )
 
-   PrnClanoviKomisije()
+   kalk_clanovi_komisije()
+
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
 
-FUNCTION head_19()
+STATIC FUNCTION zagl()
 
-   ? "*R * ROBA     * Kolicina *  STARA   * RAZLIKA  * PDV   %  *IZN. PDV  * UK. PDV  * RAZLIKA  *  NOVA   *"
-   ? "*BR*          *          *MPC SA PDV*   MPC    *          *          *          *MPC SA PDV*MPC SA PDV*"
-   ? "*  *          *          *   sum    *   sum    *          *   sum    *   sum    *   sum    *   sum   *"
+   ? s_cLinija
+   ?U "*R * ROBA                                            * Količina *  STARA   * RAZLIKA  * PDV   %  *IZN. PDV  * UK. PDV  * RAZLIKA  *  NOVA    *"
+   ?U "*BR*                                                 *          * MPCsaPDV *   MPC    *          *          *          * MPCsaPDV * MPCsaPDV *"
+   ?U "*  *                                                 *          *   sum    *   sum    *          *   sum    *   sum    *   sum    *   sum    *"
+   ? s_cLinija
 
    RETURN .T.
 
@@ -150,102 +160,109 @@ FUNCTION head_19()
 
 FUNCTION kalk_obrazac_promjene_cijena_19()
 
-   LOCAL nCol1 := nCol2 := 0, npom := 0
+   LOCAL nCol1 := nCol2 := 0, nPom := 0
+   LOCAL xPrintOpt, bZagl
+   LOCAL GetList := {}
+   LOCAL cNaslov
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
 
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
-   nStr := 0
-   cIdPartner := IdPartner
-   cBrFaktP := BrFaktP
    dDatFaktP := DatFaktP
-   cIdKonto := IdKonto
-   cIdKonto2 := IdKonto2
+   cPKonto := kalk_pripr->pkonto
 
-   cProred := "N"
+   cProred := "D"
    cPodvuceno := "N"
    Box(, 2, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prikazati sa proredom:" GET cProred VALID cprored $ "DN" PICT "@!"
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Prikazati podvuceno  :" GET cPodvuceno VALID cpodvuceno $ "DN" PICT "@!"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Prikazati sa proredom:" GET cProred VALID cprored $ "DN" PICT "@!"
+
    READ
    ESC_BCR
    BoxC()
 
-   START PRINT CRET
+   cNaslov := "OBRAZAC PROMJENE CIJENA"
+
+   // START PRINT CRET
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
+
    ?
    Preduzece()
 
-   P_10CPI
-   B_ON
    ? PadL( "Prodavnica __________________________", 74 )
    ?
    ?
    ? PadC( "PROMJENA CIJENA U PRODAVNICI ___________________, Datum _________", 80 )
    ?
-   B_OFF
+
 
    SELECT kalk_pripr
 
-   P_COND
-   ?
-   @ PRow(), 110 SAY "Str:" + Str( ++nStr, 3 )
+   cIdFirma := kalk_pripr->IdFirma
+   cIdVd := kalk_pripr->Idvd
+   cBrDok := kalk_pripr->brdok
 
-   IF cIdVD == "19"
-      m := "--- --------------------------------------------------- ---------- ---------- ---------- ------------- ------------- -------------"
-      ? m
-      ? "*R *  Sifra   *        Naziv                           *  STARA   *   NOVA   * promjena *  zaliha     *   iznos     *  ukupno    *"
-      ? "*BR*          *                                        *  cijena  *  cijena  *  cijene  * (kolicina)  *   poreza    * promjena   *"
-      ? m
-      nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
-   ENDIF
+   nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
+   // ENDIF
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+   s_cLinija := "--- --------------------------------------------------- ---------- ---------- ---------- ------------- -------------"
+
+   bZagl := {|| zagl_obrazac() }
+
+   Eval( bZagl )
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND. cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
-      print_nova_strana( 110, @nStr, iif( cProred == "D", 2, 1 ) )
 
-      ?
-      IF cPodvuceno == "D"
-         U_ON
-      ENDIF
-      ?? rbr + " " + idroba + " " + PadR( Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 )
-      @ PRow(), PCol() + 1 SAY FCJ                  PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY MPCSAPP + FCJ          PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY MPCSAPP              PICTURE piccdem()
-      IF cPodvuceno == "D"
-         U_OFF
-      ENDIF
-      @ PRow(), PCol() + 1 SAY "_____________"
-      @ PRow(), PCol() + 1 SAY "_____________"
-      @ PRow(), PCol() + 1 SAY "_____________"
+      check_nova_strana( bZagl, s_oPDF, .F., 2 )
       IF cProred == "D"
          ?
       ENDIF
+      ?
+      ?? kalk_pripr->rbr + " " + kalk_pripr->idroba + " " + PadR( Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 )
+      @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                  PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ          PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP              PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY "_____________"
+      @ PRow(), PCol() + 1 SAY "_____________"
+
       SKIP
 
    ENDDO
 
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
 
-   print_nova_strana( 110, @nStr, 12 )
-
-   ? m
+   ? s_cLinija
    ? " UKUPNO "
-   ? m
+   ? s_cLinija
    ?
    ?
    ?
-   P_10CPI
 
-   PrnClanoviKomisije()
+   kalk_clanovi_komisije()
 
-   ENDPRINT
+
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
+
+
+STATIC FUNCTION zagl_obrazac()
+
+   ?U s_cLinija
+   ?U "*R *  Sifra   *        Naziv                           *  STARA   *   NOVA   * promjena *  zaliha     *  ukupno    *"
+   ?U "*BR*          *                                        *  cijena  *  cijena  *  cijene  * (količina)  * promjena   *"
+   ?U s_cLinija
+
+   RETURN .T.
 
 /*
   legacy global vars

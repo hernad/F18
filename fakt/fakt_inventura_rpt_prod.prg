@@ -54,7 +54,7 @@ FUNCTION RptInvObrPopisa()
 
    ? cLin
 
-   PrnClanoviKomisije()
+   kalk_clanovi_komisije()
 
    ENDPRINT
 

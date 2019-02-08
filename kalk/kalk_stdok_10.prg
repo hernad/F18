@@ -13,6 +13,8 @@
 
 STATIC s_oPDF
 
+MEMVAR gZaokr, gcMpcKalk10
+
 #define PRINT_LEFT_SPACE 4
 
 MEMVAR m
@@ -29,15 +31,15 @@ FUNCTION kalk_stampa_dok_10()
    LOCAL bZagl, xPrintOpt
    LOCAL nTot, nTot1, nTot2, nTot3, nTot4, nTot5, nTot6, nTot7, nTot8, nTot9, nTotA, nTotB, nTotP, nTotM
    LOCAL nU, nU1, nU2, nU3, nU4, nU5, nU6, nU7, nU8, nU9, nUA, nUP, nUM
-   LOCAL cIdd
+   //LOCAL cIdd
    LOCAL nKolicina
+   LOCAL nPDV, nPDVStopa
 
-   IF is_legacy_ptxt()
-      RETURN kalk_stampa_dok_10_txt()
-   ENDIF
+   //IF is_legacy_ptxt()
+   //    RETURN kalk_stampa_dok_10_txt()
+   //ENDIF
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
-
 
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
@@ -59,30 +61,29 @@ FUNCTION kalk_stampa_dok_10()
    bZagl := {|| zagl() }
 
    Eval( bZagl )
-
    nTot := nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTotA := 0
    nTotB := nTotP := nTotM := 0
 
    SELECT kalk_pripr
 
-   cIdd := idpartner + brfaktp + idkonto + idkonto2
+   //cIdd := kalk_pripr->idpartner + kalk_pripr->brfaktp + kalk_pripr->idkonto + idkonto2
 
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
       check_nova_strana( bZagl, s_oPDF )
 
-      nKolicina := field->Kolicina
+      nKolicina := kalk_pripr->Kolicina
 
       nPDVStopa := tarifa->opp
-      nPDV := MPCsaPP / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )
+      nPDV := kalk_pripr->MPCsaPP / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )
 
-      nTot +=  ( nU := Round( FCj * Kolicina, gZaokr ) )
-      nTot1 += ( nU1 := Round( FCj2 * ( GKolicina + GKolicin2 ), gZaokr ) )
+      nTot +=  ( nU := Round( kalk_pripr->FCj * kalk_pripr->Kolicina, gZaokr ) )
+      nTot1 += ( nU1 := Round( kalk_pripr->FCj2 * ( kalk_pripr->GKolicina + kalk_pripr->GKolicin2 ), gZaokr ) )
 
-      nTot2 += ( nU2 := Round( - Rabat / 100 * FCJ * Kolicina, gZaokr ) )
+      nTot2 += ( nU2 := Round( - kalk_pripr->Rabat / 100 * kalk_pripr->FCJ * kalk_pripr->Kolicina, gZaokr ) )
       nTot3 += ( nU3 := Round( nPrevoz * nKolicina, gZaokr ) )
       nTot4 += ( nU4 := Round( nBankTr * nKolicina, gZaokr ) )
       nTot5 += ( nU5 := Round( nSpedTr * nKolicina, gZaokr ) )
@@ -106,11 +107,6 @@ FUNCTION kalk_stampa_dok_10()
       @ PRow() + 1, 0 SAY Space( PRINT_LEFT_SPACE ) // PRVI RED podaci o artiklu
       @ PRow(), PCol() SAY field->rBr PICTURE "999"
       ?? " " + Trim( Left( ROBA->naz, 60 ) ), "(", ROBA->jmj, ")"
-/*
-      IF roba->( FieldPos( "KATBR" ) ) <> 0
-  --       ?? " KATBR:", roba->katbr
-      ENDIF
-*/
 
       IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
          ?? ", BK: " + roba->barkod
@@ -153,7 +149,6 @@ FUNCTION kalk_stampa_dok_10()
          @ PRow(), PCol() + 1 SAY nPDV           PICTURE PicCDEM
       ENDIF
 
-
       @ PRow() + 1, nCol1   SAY nU          PICTURE         PICDEM  // cetvrti red
       @ PRow(), PCol() + 1  SAY nU1         PICTURE         PICDEM
       @ PRow(), PCol() + 1  SAY nU2         PICTURE         PICDEM
@@ -191,7 +186,6 @@ FUNCTION kalk_stampa_dok_10()
    @ PRow(), PCol() + 1  SAY nTot8         PICTURE         PICDEM
    @ PRow(), PCol() + 1  SAY nTot9         PICTURE         PICDEM
    @ PRow(), PCol() + 1  SAY nTotA         PICTURE         PICDEM
-
    IF ( gcMpcKalk10 == "D" )
       @ PRow(), PCol() + 1  SAY nTotP         PICTURE         PICDEM
       @ PRow(), PCol() + 1  SAY nTotM         PICTURE         PICDEM

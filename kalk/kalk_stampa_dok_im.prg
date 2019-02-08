@@ -175,7 +175,7 @@ FUNCTION kalk_stampa_dok_im()
    print_nova_strana( 125, @nStr, 5 )
 
    IF cSamoObrazac == "D"
-      PrnClanoviKomisije()
+      kalk_clanovi_komisije()
       RETURN .F.
    ENDIF
 

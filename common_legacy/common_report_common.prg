@@ -59,13 +59,18 @@ FUNCTION NovaStrana( bZagl, nOdstampatiStrana )
 
 
 
-FUNCTION PrnClanoviKomisije()
+FUNCTION kalk_clanovi_komisije()
+
+   LOCAL nSirina := 10
 
    ?
-   P_10CPI
-   ? PadL( "Clanovi komisije: 1. ___________________", 75 )
-   ? PadL( "2. ___________________", 75 )
-   ? PadL( "3. ___________________", 75 )
+   ?U Space( nSirina ), "Članovi komisije:"
+   ?
+   ? Space( nSirina ),  "1. ___________________"
+   ?
+   ?U Space( nSirina ), "2. ___________________"
+   ?
+   ?U Space( nSirina ), "3. ___________________"
    ?
 
    RETURN .T.
