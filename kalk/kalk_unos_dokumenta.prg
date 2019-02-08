@@ -66,6 +66,7 @@ FUNCTION kalk_header_get1( lNoviDokument )
 
    IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> kalk_pripr->idfirma .OR. _idvd <> kalk_pripr->idvd )
       _brDok := get_kalk_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
+      AltD()
       SELECT kalk_pripr
    ENDIF
 
@@ -112,13 +113,13 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    PRIVATE Kol := {}
 
    AAdd( ImeKol, { "F.", {|| my_dbSelectArea( F_KALK_PRIPR ), field->idfirma   }, "idfirma"   } )
-   AAdd( ImeKol, { "VD", {|| field->IdVD                     }, "IdVD"        } )
-   AAdd( ImeKol, { "BrDok", {|| field->BrDok                 }, "BrDok"       } )
-   AAdd( ImeKol, { "R.Br", {|| field->Rbr                    }, "Rbr"         } )
-   AAdd( ImeKol, { "Dat.Kalk", {|| field->DatDok             }, "DatDok"      } )
-   AAdd( ImeKol, { "Dat.Fakt", {|| field->DatFaktP           }, "DatFaktP"    } )
-   AAdd( ImeKol, { "K.zad. ", {|| field->IdKonto             }, "IdKonto"     } )
-   AAdd( ImeKol, { "K.razd.", {|| field->IdKonto2            }, "IdKonto2"    } )
+   AAdd( ImeKol, { "VD", {|| field->IdVD                      }, "IdVD"        } )
+   AAdd( ImeKol, { "BrDok", {|| field->BrDok                  }, "BrDok"       } )
+   AAdd( ImeKol, { "R.Br", {|| field->Rbr                     }, "Rbr"         } )
+   AAdd( ImeKol, { "Dat.Kalk", {|| field->DatDok              }, "DatDok"      } )
+   AAdd( ImeKol, { "Dat.Fakt", {|| field->DatFaktP            }, "DatFaktP"    } )
+   AAdd( ImeKol, { "K.mag. ", {|| field->mkonto               }, "mKonto"     } )
+   AAdd( ImeKol, { "K.prod.", {|| field->pkonto               }, "pKonto"    } )
    AAdd( ImeKol, { "IdRoba", {|| field->IdRoba                }, "IdRoba"      } )
    IF roba_barkod_pri_unosu()
       AAdd( ImeKol, { "Barkod", {|| roba_ocitaj_barkod( field->idroba ) }, "IdRoba" } )
@@ -266,10 +267,10 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
       IF Pitanje(, "Želite izbrisati ovu stavku (D/N) ?", "D" ) == "D"
          cLogInfo := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
          cStavka := kalk_pripr->rbr
-         //cArtikal := kalk_pripr->idroba
-         //nKolicina := kalk_pripr->kolicina
-         //nNc := kalk_pripr->nc
-         //nVpc := kalk_pripr->vpc
+         // cArtikal := kalk_pripr->idroba
+         // nKolicina := kalk_pripr->kolicina
+         // nNc := kalk_pripr->nc
+         // nVpc := kalk_pripr->vpc
          my_delete()
          log_write( "F18_DOK_OPER: kalk, brisanje stavke u pripremi: " + cLogInfo + " stavka br: " + cStavka, 2 )
          RETURN DE_REFRESH
@@ -404,7 +405,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       IF _idvd == "16"
          nVPV16 := _vpc * _kolicina
       ELSE
-          nMPV80 := _mpcsapp * _kolicina
+         nMPV80 := _mpcsapp * _kolicina
       ENDIF
       nNVPredhodna := _nc * _kolicina
 
@@ -432,11 +433,22 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          GO ( nTrec )
       ENDIF
 
-      IF _idvd $ "16#80" .AND. !Empty( _idkonto2 )
+      IF _idvd $ "16#80" .AND. !Empty( _idkonto2 ) // protustavka
 
-         cIdkont := _idkonto
+         IF _idvd == "80"
+            cIdkont := _pkonto
+         ELSE
+            cIdKont := _mkonto
+         ENDIF
+
          cIdkont2 := _idkonto2
-         _idkonto := cIdkont2
+
+
+         IF _idvd == "80"
+            _pkonto := cIdKont2
+         ELSE
+            _mkonto := cIdKont2
+         ENDIF
          _idkonto2 := "XXX"
          _kolicina := - kalk_pripr->kolicina
 
@@ -456,7 +468,11 @@ FUNCTION kalk_ispravka_postojeca_stavka()
             SKIP
          ENDDO
 
-         _idkonto := cIdKont2
+         IF _idvd == "80"
+            _pkonto := cIdKont2
+         ELSE
+            _mkonto := cIdKont2
+         ENDIF
          _idkonto2 := "XXX"
 
          IF _idvd == "16"
@@ -725,7 +741,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
       IF _opis
          hParams[ "opis" ] := get_kalk_attr_opis( hDok, .F. )
       ENDIF
-  
+
       IF kalk_edit_stavka( .F., @hParams ) == K_ESC
          IF lAsistentObrada
             automatska_obrada_error( .T. ) // iz stavke se izaslo sa ESC tokom automatske obrade
@@ -911,8 +927,9 @@ FUNCTION is_kalk_asistent_started()
 FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
    LOCAL nRet, nR
-   //PRIVATE nMarza := 0
-   //PRIVATE nMarza2 := 0
+
+   // PRIVATE nMarza := 0
+   // PRIVATE nMarza2 := 0
 
    PRIVATE PicDEM := "9999999.99999999"
    PRIVATE PicKol := kalk_pic_kolicina_bilo_gpickol()
@@ -1119,7 +1136,7 @@ FUNCTION kalk_unos_2()
    IF _idvd == "RN"
       RETURN Get2_RN()
    ELSEIF _idvd == "PR"
-      RETURN Get2_PR()
+      RETURN kalk_get_pr_2()
    ENDIF
 
    RETURN K_ESC

@@ -65,7 +65,7 @@ FUNCTION pos_stanje_artikala()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "opdf" ] := s_oPDF
-   xPrintOpt[ "font_size" ] := 8
+   xPrintOpt[ "font_size" ] := 10
    IF f18_start_print( NIL, xPrintOpt,  "POS REALIZACIJA PO ARTIKLIMA NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF

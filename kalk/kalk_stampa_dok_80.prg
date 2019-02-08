@@ -11,38 +11,40 @@
 
 #include "f18.ch"
 
+MEMVAR cPKonto, cPKonto2
 
 FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
-   LOCAL nCol1 := nCol2 := 0, npom := 0
+   LOCAL nCol1 := nCol2 := 0, nPom := 0
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
-
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    IF lStampatiBezNabavneCijene == NIL
       lStampatiBezNabavneCijene := .F.
    ENDIF
 
    nStr := 0
-   cIdPartner := IdPartner; cBrFaktP := BrFaktP; dDatFaktP := DatFaktP
+   cIdPartner := IdPartner
+   cBrFaktP := BrFaktP
+   dDatFaktP := DatFaktP
 
-   cIdKonto := IdKonto; cIdKonto2 := IdKonto2
+   cPKonto := kalk_pripr->pkonto
+   cPKonto2 := kalk_pripr->IdKonto2
 
    P_10CPI
    ?
    ? "PRIJEM U PRODAVNICU (INTERNI DOKUMENT)"
    ?
    P_COND
-   ? "KALK. DOKUMENT BR:",  cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), P_TipDok( cIdVD, -2 ), Space( 2 ), "Datum:", DatDok
+   ? "KALK. DOKUMENT BR:",  cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), P_TipDok( cIdVD, - 2 ), Space( 2 ), "Datum:", DatDok
    @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
    select_o_partner( cIdPartner )
 
    ?  "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
 
-   select_o_konto( cIdKonto )
+   select_o_konto( cPKonto )
 
-   ?  "KONTO zaduzuje :", cIdKonto, "-", AllTrim( naz )
+   ?U  "KONTO zadužuje :", cPKonto, "-", AllTrim( naz )
 
 
    m := "--- -------------------------------------------- ----------" + ;
@@ -51,7 +53,6 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
 
    ? m
-
 
    // 1. red
    ? "*R.* Roba                                       * kolicina *" + ;
@@ -68,12 +69,9 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    SELECT kalk_pripr
    nRec := RecNo()
    PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
-   IF !Empty( idkonto2 )
-      cIdkont := idkonto
-      cIdkont2 := idkonto2
+   IF !Empty( cPKonto2 ) // postoje stavka i protustavka
       nProlaza := 2
    ELSE
-      cidkont := idkonto
       nProlaza := 1
    ENDIF
 
@@ -83,50 +81,41 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    PRIVATE aPorezi
    aPorezi := {}
 
-   FOR i := 1 TO nProlaza
+   FOR nProlaz := 1 TO nProlaza
       nTot := nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTotA := nTotb := 0
       nTot9a := 0
       GO nRec
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-         IF idkonto2 = "XXX"
-            cIdkont2 := Idkonto
-         ELSE
-            cIdkont := Idkonto
-         ENDIF
 
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
-         IF Empty( idkonto2 )
-            vise_kalk_dok_u_pripremi( cIdd )
-         ELSE
-            IF ( i == 1 .AND. Left( idkonto2, 3 ) <> "XXX" ) .OR. ( i == 2 .AND. Left( idkonto2, 3 ) == "XXX" )
-               // nastavi
-            ELSE
-               SKIP
-               LOOP
-            ENDIF
+         IF ( nProlaza == 2 .AND. nProlaz == 1 .AND. Left( kalk_pripr->idkonto2, 3 ) == "XXX" )
+            // prvi prolaz ignorisati idkonto==XXX
+            SKIP
+            LOOP
+         ENDIF
+
+         IF ( nProlaza == 2 .AND. nProlaz == 2 .AND. Left( kalk_pripr->idkonto2, 3 ) != "XXX" )
+            // drugi prolaz ignorisati ako idkonto2 NIJE XXX
+            SKIP
+            LOOP
          ENDIF
 
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
 
          aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcSaPP, field->nc )
 
          print_nova_strana( 125, @nStr, 2 )
 
-        // IF gKalo == "1"
-        //    SKol := Kolicina - GKolicina - GKolicin2
-        // ELSE
-            SKol := Kolicina
-         //ENDIF
+         SKol := kalk_pripr->Kolicina
 
-         nTot8 += ( nU8 := NC *    ( Kolicina - Gkolicina - GKolicin2 ) )
-         nTot9 += ( nU9 := nMarza2 * ( Kolicina - Gkolicina - GKolicin2 ) )
-         nTotA += ( nUA := MPC   * ( Kolicina - Gkolicina - GKolicin2 ) )
-         nTotB += ( nUB := MPCSAPP * ( Kolicina - Gkolicina - GKolicin2 ) )
+         nTot8 += ( nU8 := NC *    ( Kolicina ) )
+         nTot9 += ( nU9 := nMarza2 * ( Kolicina ) )
+         nTotA += ( nUA := MPC   * ( Kolicina ) )
+         nTotB += ( nUB := MPCSAPP * ( Kolicina  ) )
 
          @ PRow() + 1, 0 SAY rbr PICT "999"
          @ PRow(), 4 SAY ""
@@ -167,13 +156,13 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
       IF nProlaza == 2
          ? m
          ? "Konto "
-         IF i == 1
-            ?? cidkont
+         IF nProlaz == 1
+            ?? cPKonto
          ELSE
-            ?? cidkont2
+            ?? cPKonto2
          ENDIF
          IF !lStampatiBezNabavneCijene
-            @ PRow(), nCol1     SAY nTot8         PICTURE         PICDEM
+            @ PRow(), nCol1     SAY   nTot8         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nTot9         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nTotA         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nTotB         PICTURE         PICDEM
@@ -209,6 +198,6 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    kalk_pripr_rekap_tarife()
 
 
-   dok_potpis( 90, "L", nil, nil ) // potpis na dokumentu
+   dok_potpis( 90, "L", NIL, NIL ) // potpis na dokumentu
 
    RETURN .F.

@@ -22,7 +22,6 @@ FUNCTION kalk_kartica_prodavnica()
    LOCAL cTxt1
    LOCAL cTxt2
    LOCAL cTxt3
-   LOCAL lRokTrajanja, hAttriId, _item_istek_roka
    LOCAL nNc, nSredNc, nOdstupanje, cTransakcija
    LOCAL cPrikSredNc := "N"
    LOCAL cIdvd := Space( 100 )

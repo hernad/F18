@@ -68,17 +68,13 @@ FUNCTION kalk_stampa_dok_10()
    cIdd := idpartner + brfaktp + idkonto + idkonto2
 
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
-      vise_kalk_dok_u_pripremi( cIdd )
+
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
       check_nova_strana( bZagl, s_oPDF )
 
-      //IF gKalo == "1"
-      //   nKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
-      //ELSE
-         nKolicina := field->Kolicina
-      //ENDIF
+      nKolicina := field->Kolicina
 
       nPDVStopa := tarifa->opp
       nPDV := MPCsaPP / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )
@@ -86,7 +82,7 @@ FUNCTION kalk_stampa_dok_10()
       nTot +=  ( nU := Round( FCj * Kolicina, gZaokr ) )
       nTot1 += ( nU1 := Round( FCj2 * ( GKolicina + GKolicin2 ), gZaokr ) )
 
-      nTot2 += ( nU2 := Round( -Rabat / 100 * FCJ * Kolicina, gZaokr ) )
+      nTot2 += ( nU2 := Round( - Rabat / 100 * FCJ * Kolicina, gZaokr ) )
       nTot3 += ( nU3 := Round( nPrevoz * nKolicina, gZaokr ) )
       nTot4 += ( nU4 := Round( nBankTr * nKolicina, gZaokr ) )
       nTot5 += ( nU5 := Round( nSpedTr * nKolicina, gZaokr ) )

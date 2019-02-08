@@ -298,9 +298,10 @@ FUNCTION fin_suban_kartica2( lOtvSt )
             fprosao := .T.
             IF !fzaglavlje
                IF PRow() > 55 + dodatni_redovi_po_stranici()
-                  FF; ZaglSif2( .T. )
+                  FF
+                  fin_zagl_sif_dva_konta( .T. )
                ELSE
-                  ZaglSif2( iif( nstr = 0, .T., .F. ) )
+                  fin_zagl_sif_dva_konta( iif( nstr = 0, .T., .F. ) )
                ENDIF
                fzaglavlje := .T.
             ENDIF
@@ -415,12 +416,12 @@ FUNCTION fin_suban_kartica2( lOtvSt )
                @ PRow(), PCol() + 1 SAY nDugDEM - nPotDEM PICT picbhd
             ENDIF
 
-            fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), ZaglSif2() } ), ) }, nSirOp )
+            fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), fin_zagl_sif_dva_konta() } ), ) }, nSirOp )
             IF ck14 == "3"
                @ PRow() + 1, nc7 SAY k1 + "-" + k2 + "-" + K3Iz256( k3 ) + k4
             ENDIF
          ENDIF
-         fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), ZaglSif2() } ), ) }, nSirOp )
+         fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), fin_zagl_sif_dva_konta() } ), ) }, nSirOp )
          IF cPoVezi <> "D"
             SKIP
          ENDIF
@@ -436,9 +437,10 @@ FUNCTION fin_suban_kartica2( lOtvSt )
 
          IF !fzaglavlje
             IF PRow() > 55 + dodatni_redovi_po_stranici()
-               FF; ZaglSif2( .T. )
+               FF
+               fin_zagl_sif_dva_konta( .T. )
             ELSE
-               ZaglSif2( iif( nstr = 0, .T., .F. ) )
+               fin_zagl_sif_dva_konta( iif( nstr = 0, .T., .F. ) )
             ENDIF
             fzaglavlje := .T.
          ENDIF
@@ -553,12 +555,12 @@ FUNCTION fin_suban_kartica2( lOtvSt )
 
 
 /*
-    ZaglSif2(fStrana)
+    fin_zagl_sif_dva_konta(fStrana)
     Zaglavlje subanaliticke kartice 2
     fStrana
  */
 
-FUNCTION ZaglSif2( fStrana )
+FUNCTION fin_zagl_sif_dva_konta( fStrana )
 
    ?
    IF cDinDem == "3"  .OR. cKumul == "2"

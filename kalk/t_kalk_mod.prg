@@ -101,7 +101,7 @@ METHOD TKalkMod:set_module_gvars()
    info_bar( ::cName, ::cName + " kalk set gvars start " )
 
    PUBLIC KursLis := "1"
-   PUBLIC gDefNiv := "D"
+   PUBLIC gStavitiUSifarnikNovuCijenuDefault := "D"
    PUBLIC gDecKol := 5
    // PUBLIC gKalo := "2"
    PUBLIC gMagacin := "2"
@@ -244,7 +244,7 @@ METHOD TKalkMod:set_module_gvars()
    gNiv14 := fetch_metric( "kalk_tip_nivelacije_14", nil, gNiv14 )
 
    gDecKol := fetch_metric( "kalk_broj_decimala_za_kolicinu", nil, gDeckol )
-   gDefNiv := fetch_metric( "kalk_promjena_cijena_odgovor", nil, gDefNiv )
+   gStavitiUSifarnikNovuCijenuDefault := fetch_metric( "kalk_promjena_cijena_odgovor", nil, gStavitiUSifarnikNovuCijenuDefault )
    gVarEv := fetch_metric( "kalk_varijanta_evidencije", nil, gVarEv )
 
    gPicProc := fetch_metric( "kalk_format_prikaza_procenta", nil, gPicProc )

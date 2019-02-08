@@ -15,7 +15,7 @@
 STATIC s_nLastNC := 0
 STATIC s_cIdArtikal := "XX"
 
-FUNCTION get_nabavna_cijena( cIdKonto, cIdArtikal, dDatum )
+FUNCTION get_nabavna_cijena_from_konto_roba_stanje( cIdKonto, cIdArtikal, dDatum )
 
    LOCAL cQuery, oRet, nRet
    LOCAL nNv_u, nNV_i, nUlaz, nIzlaz
@@ -75,7 +75,7 @@ FUNCTION get_realizovana_marza( cIdKonto, cIdArtikal, dDatum, nCijena )
    IF s_cIdArtikal == cIdArtikal
       nNC := s_nLastNC
    ELSE
-      nNC := get_nabavna_cijena( cIdKonto, cIdArtikal, dDatum )
+      nNC := get_nabavna_cijena_from_konto_roba_stanje( cIdKonto, cIdArtikal, dDatum )
    ENDIF
 
    IF Round( nNC, 0 ) == -9999

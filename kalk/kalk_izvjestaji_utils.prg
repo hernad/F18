@@ -14,18 +14,6 @@
 
 
 
-FUNCTION vise_kalk_dok_u_pripremi( cIdd )
-
-/* TODO: ne trebamo ovo vise ?!
-   IF field->idPartner + field->brFaktP + field->idKonto + field->idKonto2 <> cIdd
-      SET DEVICE TO SCREEN
-      Beep( 2 )
-      Msg( "Unutar kalkulacije se pojavilo vise dokumenata !", 6 )
-      SET DEVICE TO PRINTER
-   ENDIF
-*/
-
-   RETURN
 
 FUNCTION show_more_info( cPartner, dDatum, cFaktura, cMU_I )
 

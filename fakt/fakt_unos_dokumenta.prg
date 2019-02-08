@@ -584,7 +584,7 @@ STATIC FUNCTION fakt_unos_prikaz_marza()
 STATIC FUNCTION fakt_unos_prikaz_nab_cj()
 
    IF field->IdTipDok == "10" .OR. field->IdTipDok == "20"
-      RETURN Transform( get_nabavna_cijena( NIL, field->idRoba, field->DatDok ), "99999.999" )
+      RETURN Transform( get_nabavna_cijena_from_konto_roba_stanje( NIL, field->idRoba, field->DatDok ), "99999.999" )
    ENDIF
 
    RETURN "00000.000"

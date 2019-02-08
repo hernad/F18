@@ -206,14 +206,13 @@ FUNCTION preduzece()
 
    LOCAL _t_arr := Select()
 
-   P_10CPI
-   B_ON
+   //P_10CPI
+   //B_ON
 
    ? AllTrim( tip_organizacije() ) + ": "
-
    ?? self_organizacija_id(), "-", AllTrim( self_organizacija_naziv() )
 
-   B_OFF
+   //B_OFF
    ?
 
    SELECT ( _t_arr )

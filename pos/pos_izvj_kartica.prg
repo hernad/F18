@@ -20,7 +20,7 @@ FUNCTION pos_kartica_artikla()
 
    LOCAL nUlaz, nIzlaz
    LOCAL nVrijednost, nPredhodnaVrijednost
-   LOCAL nKol, nCijena
+   LOCAL nKol, nKol2, nCijena
    LOCAL xPrintOpt
    LOCAL bZagl
    LOCAL cLijevaMargina := ""
@@ -193,12 +193,17 @@ FUNCTION pos_kartica_artikla()
             ?? Str ( pos->cijena, 10, 2 ) + " "
             ?? Str ( nVrijednost, 10, 2 )
 
-         ELSEIF POS->IdVd == "NI"
+         ELSEIF POS->IdVd == POS_IDVD_NIVELACIJA
+
 
             ? cLijevaMargina
             ?? DToC( pos->datum ) + " "
-            ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), nPosDuzinaBrojaDokumenta ), ""
-            ?? "S:", Str ( POS->Cijena, 7, 2 ), "N:", Str ( POS->Ncijena, 7, 2 ), Str ( nStanjeKolicina, 10, 3 )
+            ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), nPosDuzinaBrojaDokumenta )
+            nKol2 := PCol()
+            ?? " S:", Str ( POS->Cijena, 7, 2 ), "N:", Str( POS->Ncijena, 7, 2 )
+            @ PRow() + 1, nKol2 + 1 SAY Padr( "Niv.Kol:", 10) + " "
+            ?? Str( pos->kolicina, 10, 3 ) + " "
+            ?? Str ( nStanjeKolicina, 10, 3 ) + " "
             nVrijednost += pos->kolicina * ( pos->ncijena - pos->cijena )
             ?? Str ( pos->ncijena - pos->cijena, 10, 2 ) + " "
             ?? Str ( nVrijednost, 10, 2 )
@@ -206,11 +211,11 @@ FUNCTION pos_kartica_artikla()
             SKIP
             LOOP
 
-         ELSEIF POS->idvd $ "IN#42"
+         ELSEIF POS->idvd == POS_IDVD_RACUN .OR. pos->idvd == POS_IDVD_INVENTURA
 
-            IF pos->idvd $ "42"
+            IF pos->idvd == POS_IDVD_RACUN
                nKol := POS->Kolicina
-            ELSEIF POS->IdVd == "IN"
+            ELSEIF POS->IdVd ==  POS_IDVD_INVENTURA
                nKol := POS->Kolicina - POS->Kol2
             ENDIF
 

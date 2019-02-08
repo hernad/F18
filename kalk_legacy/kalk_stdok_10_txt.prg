@@ -84,7 +84,7 @@ FUNCTION kalk_stampa_dok_10_txt()
 
       hRec := dbf_get_rec()
 
-      vise_kalk_dok_u_pripremi( cIdd )
+
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       print_nova_strana( 125, @nStr, 2 )

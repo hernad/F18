@@ -44,11 +44,9 @@ METHOD mMenu()
       box_x_koord( Fx )
       box_y_koord( Fy )
       g_cUserLevel := pos_prijava( Fx, Fy )
-
       IF g_cUserLevel == "X"
          RETURN .F.
       ENDIF
-
       pos_status_traka()
       SetPos( Fx, Fy )
       pos_main_menu_level( Fx, Fy )

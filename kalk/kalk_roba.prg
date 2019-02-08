@@ -50,14 +50,14 @@ FUNCTION kalk_pripr_form_get_roba( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDoku
    ENDIF
 
    bValid := {|| kalk_valid_roba( @cIdRoba, @cIdTarifa, lNoviDokument, @aPorezi ), ;
-      ispisi_naziv_roba( nKoordX, 25, 40 ), ;
+      ispisi_naziv_roba( nKoordX, 25, 41 ), ;
       kalk_zadnji_ulazi_info( cIdpartner, cIdroba, cProdMag ), !Empty( cIdRoba) }
 
    // _ocitani_barkod := _idroba, ;
    // P_Roba( @_IdRoba ), ;
    // if ( !tezinski_barkod_get_tezina( @_ocitani_barkod, @_kolicina ), .T., .T. ), ;
 
-   @ nKoordX, nKoordY SAY "Artikal  " GET cIdRoba PICT "@!S10" WHEN  Eval( bWhen ) VALID Eval( bValid )
+   @ nKoordX, nKoordY SAY "Artikal: " GET cIdRoba PICT "@!S10" WHEN  Eval( bWhen ) VALID Eval( bValid )
 
    RETURN .T.
 

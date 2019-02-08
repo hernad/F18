@@ -55,7 +55,6 @@ FUNCTION kalk_stampa_dok_19()
 
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVd == IdVd
 
-      vise_kalk_dok_u_pripremi( cIdd )
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       set_pdv_public_vars()
@@ -203,8 +202,6 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
 
    PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
-
-      vise_kalk_dok_u_pripremi( cIdd )
 
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )

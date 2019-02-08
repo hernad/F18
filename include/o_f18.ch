@@ -20,10 +20,6 @@
 #xcommand O_KS       => select (F_KS);     use_sql_ks() ; set order to tag "ID"
 
 
-//#xcommand O__ROBA    => select (F__ROBA)   ;  my_usex("cIdRoba")
-//#xcommand O__PARTN   => select (F__PARTN)  ;  my_use  ("_partn")
-
-
 #xcommand O_VOZILA   => SELECT (F_VOZILA)  ;  my_use  ("vozila")    ; set order to tag "ID"
 
 #xcommand O_RELATION => SELECT (F_RELATION);  my_use ("relation")  ; set order to tag "1"
@@ -69,29 +65,6 @@
 #xcommand O_KOMP_POT    => select (F_FIN_KOMP_POT);  my_use ("komp_pot")
 
 
-//#xcommand O_RSUBAN    => select (F_SUBAN);    my_usex("suban")    ; set order to tag "1"
-//#xcommand O_RANAL     => select (F_ANAL);     my_usex("anal")     ; set order to tag "1"
-
-//#xcommand o_sint()SUB   => select (F_SUBAN);    my_use("suban")     ; set order to tag "1"
-//#xcommand O_BUDZET    => select (F_BUDZET);   my_use("budzet")    ; set order to tag "1"
-//#xcommand O_PAREK     => select (F_PAREK);    my_use("parek")     ; set order to tag "1"
-
-
-//#xcommand OX_KONTO    => select (F_KONTO);  my_usex ("konto")  ;  set order to tag "ID"
-//#xcommand O_RKONTO    => select (F_KONTO);  my_usex ("konto") ; set order to tag "ID"
-
-//#xcommand OX_PARTN    => select (F_PARTN);  my_usex ("partn") ; set order to tag "ID"
-//#xcommand O_RPARTN    => select (F_PARTN);  my_usex ("partn") ; set order to tag "ID"
-//#xcommand OX_TNAL    => select (F_TNAL);  my_usex ("tnal")      ; set order to tag "ID"
-//#xcommand OX_TDOK    => select (F_TDOK);  my_usex ("tdok")      ; set order to tag "ID"
-//#xcommand OX_PKONTO   => select (F_PKONTO); my_use  ("pkonto")  ; set order to tag "ID"
-//#xcommand OX_VALUTE   => select(F_VALUTE);  my_usex  ("valute")  ; set order to tag "ID"
-
-//#xcommand O__KONTO => select(F__KONTO); MY_USE  ("_konto")
-//#xcommand O__PARTN => select(F__PARTN); MY_USE  ("_partn")
-//#xcommand O_PRENHH   => select(F_PRENHH); my_usex ("prenhh"); set order to tag "1"
-
-//#xcommand O_OSTAV   => o_ostav()
 
 
 // modul KALK

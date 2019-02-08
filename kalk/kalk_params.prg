@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR gCijene, gDefNiv
+MEMVAR gCijene, gStavitiUSifarnikNovuCijenuDefault
 
 STATIC s_cKalkFinIstiBroj := NIL
 STATIC s_cKalkPreuzimanjeTroskovaIzSifRoba := NIL
@@ -315,13 +315,13 @@ FUNCTION kalk_par_metoda_nc()
    Box(, 4, 75, .F., "METODA NC, ISPRAVKA DOKUMENATA" )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Metoda nabavne cijene: bez kalk./zadnja/prosječna/prva ( /1/2/3)" GET cMetodaNc VALID cMetodaNC $ " 123" .AND. metodanc_info()
    @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Program omogućava /ne omogućava ažuriranje sumnjivih dokumenata (1/2)" GET gCijene VALID  gCijene $ "12"
-   @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "Tekući odgovor na pitanje o promjeni cijena ?" GET gDefNiv VALID  gDefNiv $ "DN" PICT "@!"
+   @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "Tekući odgovor na pitanje o promjeni cijena ?" GET gStavitiUSifarnikNovuCijenuDefault VALID  gStavitiUSifarnikNovuCijenuDefault $ "DN" PICT "@!"
    READ
    BoxC()
 
    IF LastKey() <> K_ESC
       kalk_metoda_nc ( cMetodaNC )
-      set_metric( "kalk_promjena_cijena_odgovor", NIL, gDefNiv )
+      set_metric( "kalk_promjena_cijena_odgovor", NIL, gStavitiUSifarnikNovuCijenuDefault )
       set_metric( "kalk_azuriranje_sumnjivih_dokumenata", NIL, gCijene )
       set_metric( "kalk_broj_decimala_za_kolicinu", NIL, gDecKol )
    ENDIF

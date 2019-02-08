@@ -75,7 +75,6 @@ METHOD END() CLASS PDFClass
       SET PRINTER TO
 
    ELSE
-
       IF File( ::cFileName )
          FErase( ::cFileName )
       ENDIF
@@ -279,6 +278,8 @@ METHOD MaxRow() CLASS PDFClass
 
    IF ::nType == PDF_TXT_PORTRAIT
       SWITCH Round(::nFontSize, 0)
+      CASE 10
+         RETURN 60
       CASE 9
          RETURN 63
       CASE 8
@@ -304,6 +305,8 @@ METHOD MaxRow() CLASS PDFClass
       ENDIF
 
       SWITCH Round( ::nFontSize, 0)
+      CASE 10
+         RETURN 35
       CASE 9
          RETURN 40
       CASE 8
@@ -357,8 +360,10 @@ METHOD MaxCol() CLASS PDFClass
       ENDIF
 
       SWITCH Round(::nFontSize, 0)
+      CASE 10
+         RETURN 135
       CASE 9
-         RETURN 155
+         RETURN 150
       CASE 8
          RETURN 170
       CASE 7

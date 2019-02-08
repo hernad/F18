@@ -341,7 +341,7 @@ FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
    ENDIF
 
    IF lUpit
-      IF gAutoCjen == "D" .AND. Pitanje(, "Staviti " + cMpcFieldName + " u šifarnik ?", gDefNiv ) == "D"
+      IF gAutoCjen == "D" .AND. Pitanje(, "Staviti " + cMpcFieldName + " u šifarnik ?", gStavitiUSifarnikNovuCijenuDefault ) == "D"
          lAzurirajCijenu := .T.
       ELSE
          lAzurirajCijenu := .F.

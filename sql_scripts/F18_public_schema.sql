@@ -1,14 +1,7 @@
 --
--- PostgreSQL database dump
---
-
--- Dumped from database version 10.5
--- Dumped by pg_dump version 10.5
-
-
---
 -- Name: ulaz_izlaz; Type: TYPE; Schema: public; Owner: admin
 --
+
 
 CREATE TYPE public.ulaz_izlaz AS (
 	ulaz double precision,
@@ -17,15 +10,53 @@ CREATE TYPE public.ulaz_izlaz AS (
 	nv_i double precision
 );
 
-
 ALTER TYPE public.ulaz_izlaz OWNER TO admin;
 
 
+CREATE TYPE public.t_dugovanje AS (
+	konto_id character varying,
+	partner_naz character varying,
+	referent_naz character varying,
+	partner_id character varying,
+	i_pocstanje numeric(16,2),
+	i_dospjelo numeric(16,2),
+	i_nedospjelo numeric(16,2),
+	i_ukupno numeric(16,2),
+	valuta date,
+	rok_pl integer
+);
+
+ALTER TYPE public.t_dugovanje OWNER TO admin;
+
+
+--
+-- Name: konto_roba_stanje; Type: TABLE; Schema: public; Owner: xtrole
+--
+
+--   idkonto     idroba   datum       tip     ulaz     izlaz   nv_u    nv_i   vpc   mpc_sa_pdv
+--    13322       R01      01.02.19    p       10         3      9      2.7    1.5      2
+--
+--
+CREATE TABLE public.konto_roba_stanje (
+    idkonto character varying(7) NOT NULL,
+    idroba character varying(10) NOT NULL,
+    datum date NOT NULL,
+    tip character(1),
+    ulaz double precision,
+    izlaz double precision,
+    nv_u double precision,
+    nv_i double precision,
+    vpc double precision,
+    mpc_sa_pdv double precision,
+    CONSTRAINT mag_ili_prod CHECK (((tip = 'm'::bpchar) OR (tip = 'p'::bpchar)))
+);
+
+
+ALTER TABLE public.konto_roba_stanje OWNER TO xtrole;
 
 --
 -- Name: cleanup_konto_roba_stanje(); Type: FUNCTION; Schema: public; Owner: admin
 --
-
 CREATE FUNCTION public.cleanup_konto_roba_stanje() RETURNS trigger
     LANGUAGE plpgsql
     AS $_$
@@ -45,7 +76,7 @@ BEGIN
 IF TG_OP = 'INSERT' THEN
   -- sve stavke u konto_roba_stanje koje imaju datum >= od ovoga
   -- vise nisu validne
-  RAISE NOTICE 'NEW: %', NEW;
+  -- RAISE NOTICE 'NEW: %', NEW;
   datum_limit := NEW.datdok;
   pkonto := NEW.pkonto;
   mkonto := NEW.mkonto;
@@ -102,6 +133,108 @@ $_$;
 
 ALTER FUNCTION public.cleanup_konto_roba_stanje() OWNER TO admin;
 
+
+-- CREATE TRIGGER trig_cleanup_konto_roba_stanje BEFORE INSERT OR DELETE OR UPDATE ON fmk.kalk_kalk
+--   FOR EACH ROW EXECUTE PROCEDURE public.cleanup_konto_roba_stanje();
+
+
+--
+-- Name: sp_konto_stanje(character varying, character varying, character varying, date); Type: FUNCTION; Schema: public; Owner: admin
+--
+CREATE FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) RETURNS SETOF public.ulaz_izlaz
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+  row RECORD;
+  tek_godina integer;
+  tek_mjesec integer;
+  predhodni_datum date;
+  predhodni_mjesec integer;
+  predhodna_godina integer;
+  table_name text := 'fmk.kalk_kalk';
+  table_stanje_name text := 'konto_roba_stanje';
+  nUlaz double precision := 0;
+  nIzlaz double precision := 0;
+  nNV_u  double precision := 0;
+  nNV_i double precision := 0;
+  row_ui ulaz_izlaz;
+  datum_posljednje_stanje date := '1900-01-01';
+BEGIN
+
+FOR row IN
+  EXECUTE 'SELECT * FROM '  || table_stanje_name || ' WHERE idkonto = '''  || param_konto ||
+   ''' AND idroba = ''' || param_idroba  ||
+   ''' AND datum=(SELECT max(datum) FROM ' || table_stanje_name ||
+   ' WHERE idkonto = '''  || param_konto ||
+   ''' AND idroba = ''' || param_idroba  || ''' AND datum<=''' || param_datum || ''')'
+LOOP
+
+datum_posljednje_stanje := row.datum;
+-- RAISE NOTICE 'nasao stanje na datum: %', datum_posljednje_stanje;
+
+nUlaz := coalesce(row.ulaz,0);
+nIzlaz := coalesce(row.izlaz,0);
+nNV_u := coalesce(row.nv_u,0);
+nNV_i := coalesce(row.nv_i,0);
+
+END LOOP;
+
+predhodna_godina := 0;
+predhodni_mjesec := 0;
+
+FOR row IN
+  EXECUTE 'SELECT datdok, pu_i, mu_i, nc, kolicina FROM '  || table_name || ' WHERE ' || mag_prod || 'konto = '''  || param_konto ||
+  ''' AND idroba = ''' || param_idroba  || ''' AND datdok<=''' || param_datum || ''''
+  ' AND datdok>''' || datum_posljednje_stanje || ''' order by datdok'
+LOOP
+
+tek_godina := date_part( 'year', row.datdok );
+tek_mjesec := date_part( 'month', row.datdok );
+
+-- kraj mjeseca
+IF predhodna_godina > 0 AND ( (predhodna_godina < tek_godina) OR (predhodni_mjesec < tek_mjesec) ) THEN
+
+
+--RAISE NOTICE 'konto: %, roba: %, predh dat: % datum: % predh kolicina: %, %', param_mkonto, param_idroba, predhodni_datum, row.datdok, nUlaz, nIzlaz;
+INSERT INTO konto_roba_stanje(idkonto, idroba, datum, tip, ulaz, izlaz, nv_u, nv_i)
+VALUES( param_konto,  param_idroba, predhodni_datum, mag_prod, nUlaz, nIzlaz, nNV_u, nNV_i );
+
+END IF;
+
+IF (( mag_prod = 'm' AND row.mu_i = '1') OR ( mag_prod = 'p' AND row.pu_i = '1') ) THEN
+  nUlaz := nUlaz + coalesce(row.kolicina, 0);
+  nNV_u := nNV_u + coalesce(row.kolicina, 0) * coalesce(row.nc, 0) ;
+ELSIF (( mag_prod = 'm' AND row.mu_i = '5') OR ( mag_prod = 'p' AND row.pu_i = '5') ) THEN
+  nIzlaz := nIzlaz + coalesce(row.kolicina, 0);
+  nNV_i := nNV_i + coalesce(row.kolicina, 0) * coalesce(row.nc, 0) ;
+END IF;
+
+predhodna_godina := tek_godina;
+predhodni_mjesec := tek_mjesec;
+predhodni_datum := row.datdok;
+
+-- RAISE NOTICE 'datum: % kolicina: %, %', row.datdok, nUlaz, nIzlaz;
+END LOOP;
+
+row_ui.ulaz := nUlaz;
+row_ui.izlaz := nIzlaz;
+row_ui.nv_u := nNV_u;
+row_ui.nv_i := nNV_i;
+
+RETURN next row_ui;
+RETURN;
+
+END
+$$;
+
+
+ALTER FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) OWNER TO admin;
+
+
+
+
+-- ==================== FAKT ========================================================== --
 
 CREATE FUNCTION public.fakt_dokument_promijeni_datum(param_firma character varying, param_tip character varying, param_brdok character varying, param_datum_stari date, param_datum_novi date, param_datum_otpremnica_novi date, param_datum_valuta_novi date) RETURNS integer[]
     LANGUAGE plpgsql
@@ -164,14 +297,14 @@ LOOP
 
      IF NOT ( cElement ~ '^<memo>' ) THEN
        -- cXml := concat( cXml, '<item>', cElement, '</item>' );
-       cElement := concat( chr(16), cElement, chr(17) ); 
+       cElement := concat( chr(16), cElement, chr(17) );
        cTxt := concat( cTxt, cElement );
      END IF;
 
    END LOOP;
 
    -- cXml := concat( '<memo>', cXml, '</memo>');
-   -- cTxt := concat( cTxt, chr(16), cXml, chr(17) ); 
+   -- cTxt := concat( cTxt, chr(16), cXml, chr(17) );
    --RAISE NOTICE 'cTxt = %',  cTxt;
 
 END LOOP;
@@ -190,7 +323,7 @@ EXECUTE 'UPDATE ' || fakt_table_name || ' set datdok = $1'  || cWhere
 EXECUTE 'UPDATE ' || fakt_table_name || ' set  txt = $1'  || cWhere || ' AND rbr=lpad(''1'', 3)'
  USING cTxt;
 
-EXECUTE 'UPDATE ' || fakt_doks_table_name || ' set datdok = $1' || cWhere 
+EXECUTE 'UPDATE ' || fakt_doks_table_name || ' set datdok = $1' || cWhere
 USING param_datum_novi;
 
 --PERFORM pg_sleep(4);
@@ -210,12 +343,12 @@ ALTER FUNCTION public.fakt_dokument_promijeni_datum(param_firma character varyin
 
 CREATE FUNCTION public.fakt_faktura_stavke(param_idfirma text, param_brdok text) RETURNS TABLE(datum date, idpartner character varying, partner character varying, kolicina real, porez real, rabat real, cijena real)
     LANGUAGE plpgsql
-    AS $$ 
+    AS $$
     BEGIN
     RETURN QUERY SELECT
-       fmk.fakt_doks.datdok::date, fmk.fakt_doks.idpartner::varchar, fmk.fakt_doks.partner::varchar, 
-       fmk.fakt_fakt.kolicina::real, fmk.fakt_fakt.porez::real, fmk.fakt_fakt.rabat::real, fmk.fakt_fakt.cijena::real 
-    FROM fmk.fakt_fakt inner join fmk.fakt_doks on 
+       fmk.fakt_doks.datdok::date, fmk.fakt_doks.idpartner::varchar, fmk.fakt_doks.partner::varchar,
+       fmk.fakt_fakt.kolicina::real, fmk.fakt_fakt.porez::real, fmk.fakt_fakt.rabat::real, fmk.fakt_fakt.cijena::real
+    FROM fmk.fakt_fakt inner join fmk.fakt_doks on
 ( fmk.fakt_fakt.idfirma=fmk.fakt_doks.idfirma and fmk.fakt_fakt.idtipdok=fmk.fakt_doks.idtipdok and fmk.fakt_fakt.brdok=fmk.fakt_doks.brdok)
     where fmk.fakt_doks.idfirma = param_idfirma and fmk.fakt_doks.brdok = rpad(param_brdok, 12) and fmk.fakt_doks.idtipdok='10';
     END;
@@ -227,7 +360,6 @@ ALTER FUNCTION public.fakt_faktura_stavke(param_idfirma text, param_brdok text) 
 --
 -- Name: fakt_get_datumi(character varying, character varying); Type: FUNCTION; Schema: public; Owner: hernad
 --
-
 CREATE FUNCTION public.fakt_get_datumi(param_tip character varying, param_brdok character varying) RETURNS date[]
     LANGUAGE plpgsql
     AS $$
@@ -326,12 +458,12 @@ $$;
 ALTER FUNCTION public.get_sifk(param_id character varying, param_oznaka character varying, param_sif character varying, OUT vrijednost text) OWNER TO admin;
 
 
+-- ========================= FIN  otvorene stavke, stanje kupaca  =================================================
 CREATE FUNCTION public.on_suban_insert_update_delete() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
 BEGIN
-
         IF (TG_OP = 'DELETE') THEN
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
@@ -344,31 +476,7 @@ BEGIN
     END;
 $$;
 
-
 ALTER FUNCTION public.on_suban_insert_update_delete() OWNER TO admin;
-
-
-
---
--- Name: t_dugovanje; Type: TYPE; Schema: public; Owner: admin
---
-
-CREATE TYPE public.t_dugovanje AS (
-	konto_id character varying,
-	partner_naz character varying,
-	referent_naz character varying,
-	partner_id character varying,
-	i_pocstanje numeric(16,2),
-	i_dospjelo numeric(16,2),
-	i_nedospjelo numeric(16,2),
-	i_ukupno numeric(16,2),
-	valuta date,
-	rok_pl integer
-);
-
-
-ALTER TYPE public.t_dugovanje OWNER TO admin;
-
 
 
 --
@@ -601,102 +709,6 @@ $$;
 
 ALTER FUNCTION public.sp_duguje_stanje_2(param_konto character varying, param_partner character varying, param_dat_od date, param_dat_do date, OUT pocstanje double precision, OUT dospjelo double precision, OUT nedospjelo double precision, OUT valuta date) OWNER TO admin;
 
---
--- Name: sp_konto_stanje(character varying, character varying, character varying, date); Type: FUNCTION; Schema: public; Owner: admin
---
-
-CREATE FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) RETURNS SETOF public.ulaz_izlaz
-    LANGUAGE plpgsql
-    AS $$
-
-DECLARE
-  row RECORD;
-  tek_godina integer;
-  tek_mjesec integer;
-  predhodni_datum date;
-  predhodni_mjesec integer;
-  predhodna_godina integer;
-  table_name text := 'fmk.kalk_kalk';
-  table_stanje_name text := 'konto_roba_stanje';
-  nUlaz double precision := 0;
-  nIzlaz double precision := 0;
-  nNV_u  double precision := 0;
-  nNV_i double precision := 0;
-  row_ui ulaz_izlaz;
-  datum_posljednje_stanje date := '1900-01-01';
-BEGIN
-
-FOR row IN
-  EXECUTE 'SELECT * FROM '  || table_stanje_name || ' WHERE idkonto = '''  || param_konto ||
-   ''' AND idroba = ''' || param_idroba  ||
-   ''' AND datum=(SELECT max(datum) FROM ' || table_stanje_name ||
-   ' WHERE idkonto = '''  || param_konto ||
-   ''' AND idroba = ''' || param_idroba  || ''' AND datum<=''' || param_datum || ''')'
-LOOP
-
-datum_posljednje_stanje := row.datum;
--- RAISE NOTICE 'nasao stanje na datum: %', datum_posljednje_stanje;
-
-nUlaz := coalesce(row.ulaz,0);
-nIzlaz := coalesce(row.izlaz,0);
-nNV_u := coalesce(row.nv_u,0);
-nNV_i := coalesce(row.nv_i,0);
-
-
-END LOOP;
-
-predhodna_godina := 0;
-predhodni_mjesec := 0;
-
-FOR row IN
-  EXECUTE 'SELECT datdok, pu_i, mu_i, nc, kolicina FROM '  || table_name || ' WHERE ' || mag_prod || 'konto = '''  || param_konto ||
-  ''' AND idroba = ''' || param_idroba  || ''' AND datdok<=''' || param_datum || ''''
-  ' AND datdok>''' || datum_posljednje_stanje || ''' order by datdok'
-LOOP
-
-tek_godina := date_part( 'year', row.datdok );
-tek_mjesec := date_part( 'month', row.datdok );
-
--- kraj mjeseca
-IF predhodna_godina > 0 AND ( (predhodna_godina < tek_godina) OR (predhodni_mjesec < tek_mjesec) ) THEN
-
-
---RAISE NOTICE 'konto: %, roba: %, predh dat: % datum: % predh kolicina: %, %', param_mkonto, param_idroba, predhodni_datum, row.datdok, nUlaz, nIzlaz;
-INSERT INTO konto_roba_stanje(idkonto, idroba, datum, tip, ulaz, izlaz, nv_u, nv_i)
-VALUES( param_konto,  param_idroba, predhodni_datum, mag_prod, nUlaz, nIzlaz, nNV_u, nNV_i );
-
-END IF;
-
-
-IF (( mag_prod = 'm' AND row.mu_i = '1') OR ( mag_prod = 'p' AND row.pu_i = '1') ) THEN
-  nUlaz := nUlaz + coalesce(row.kolicina, 0);
-  nNV_u := nNV_u + coalesce(row.kolicina, 0) * coalesce(row.nc, 0) ;
-ELSIF (( mag_prod = 'm' AND row.mu_i = '5') OR ( mag_prod = 'p' AND row.pu_i = '5') ) THEN
-  nIzlaz := nIzlaz + coalesce(row.kolicina, 0);
-  nNV_i := nNV_i + coalesce(row.kolicina, 0) * coalesce(row.nc, 0) ;
-END IF;
-
-predhodna_godina := tek_godina;
-predhodni_mjesec := tek_mjesec;
-predhodni_datum := row.datdok;
-
--- RAISE NOTICE 'datum: % kolicina: %, %', row.datdok, nUlaz, nIzlaz;
-END LOOP;
-
-row_ui.ulaz := nUlaz;
-row_ui.izlaz := nIzlaz;
-row_ui.nv_u := nNV_u;
-row_ui.nv_i := nNV_i;
-
-RETURN next row_ui;
-RETURN;
-
-END
-$$;
-
-
-ALTER FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) OWNER TO admin;
-
 
 --
 -- Name: zatvori_otvst(text, text, text); Type: FUNCTION; Schema: public; Owner: admin
@@ -754,26 +766,6 @@ ALTER FUNCTION public.zatvori_otvst(cidkonto text, cidpartner text, cbrdok text)
 -- Name: accnt_accnt_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
 --
 
---
--- Name: konto_roba_stanje; Type: TABLE; Schema: public; Owner: xtrole
---
-
-CREATE TABLE public.konto_roba_stanje (
-    idkonto character varying(7) NOT NULL,
-    idroba character varying(10) NOT NULL,
-    datum date NOT NULL,
-    tip character(1),
-    ulaz double precision,
-    izlaz double precision,
-    nv_u double precision,
-    nv_i double precision,
-    vpc double precision,
-    mpc_sa_pdv double precision,
-    CONSTRAINT mag_ili_prod CHECK (((tip = 'm'::bpchar) OR (tip = 'p'::bpchar)))
-);
-
-
-ALTER TABLE public.konto_roba_stanje OWNER TO xtrole;
 
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: admin

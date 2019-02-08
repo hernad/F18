@@ -13,18 +13,26 @@
 
 MEMVAR GetList
 MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena
-MEMVAR _IdFirma, _DatFaktP, _IdKonto, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
+MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
 MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
+MEMVAR gStavitiUSifarnikNovuCijenuDefault
 
 MEMVAR aPorezi
 
 FUNCTION kalk_get_1_19()
 
+   LOCAL nKolicinaNaStanju
+
    _DatFaktP := _datdok
+   _MKonto := ""
+   _IdKonto := ""
+   _PKonto := _Idkonto2
+   _PU_I := "3"
+
    PRIVATE aPorezi := {}
 
-   @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Konto koji zadužuje" GET _IdKonto VALID  P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
+   @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Konto koji zadužuje" GET _PKonto VALID  P_Konto( @_PKonto, 8, 30 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
 
@@ -34,13 +42,12 @@ FUNCTION kalk_get_1_19()
 
    READ
    ESC_RETURN K_ESC
+
    IF roba_barkod_pri_unosu()
       _idRoba := Left( _idRoba, 10 )
    ENDIF
 
-   _MKonto := _Idkonto
-
-   select_o_koncij( _idkonto )
+   select_o_koncij( _pkonto )
    SELECT kalk_pripr
 
    IF kalk_is_novi_dokument()
@@ -49,25 +56,25 @@ FUNCTION kalk_get_1_19()
 
    IF !Empty( kalk_metoda_nc() ) .AND. _TBankTr <> "X"
       MsgO( "Računam količinu u prodavnici" )
-      kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @_kolicina, NIL, NIL, @_nc )
+      kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolicinaNaStanju, NIL, NIL, @_nc )
+      IF ROUND(_gkolicin2, 4) == 0 // ako je ispravka djelimične nivelacije, ne dirati količinu
+         _kolicina := nKolicinaNaStanju
+      ENDIF
       MsgC()
    ENDIF
 
-   @ box_x_koord() + 12, box_y_koord() + 2   SAY "Količina " GET _Kolicina PICTURE pickol() VALID _kolicina >= 0
-
+   @ box_x_koord() + 12, box_y_koord() + 23  SAY8 "stanje: " + Transform( nKolicinaNaStanju, pickol() )
+   @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE pickol() // VALID _kolicina >= 0
    _idpartner := ""
    READ
 
    nKalkStaraCijena := nKalkNovaCijena := 0
    IF kalk_is_novi_dokument()
-      select_o_koncij( _idkonto )
+      select_o_koncij( _pkonto )
       nKalkStaraCijena := Round( kalk_get_mpc_by_koncij_pravilo(), 3 )
    ELSE
       nKalkStaraCijena := _fcj
    ENDIF
-
-   _PKonto := _Idkonto
-   _PU_I := "3"
 
    IF kalk_is_novi_dokument() .AND.  dozvoljeno_azuriranje_sumnjivih_stavki()
       kalk_fakticka_mpc( @nKalkStaraCijena, _idfirma, _pkonto, _idroba )
@@ -77,9 +84,9 @@ FUNCTION kalk_get_1_19()
    SELECT kalk_pripr
 
    nKalkNovaCijena := nKalkStaraCijena + _MPCSaPP
-   @ box_x_koord() + 16, box_y_koord() + 2  SAY "STARA CIJENA " + "(MPCSAPDV):"
+   @ box_x_koord() + 16, box_y_koord() + 2  SAY "STARA CIJENA (MPCSAPDV):"
    @ box_x_koord() + 16, box_y_koord() + 50 GET nKalkStaraCijena    PICT "999999.9999"
-   @ box_x_koord() + 17, box_y_koord() + 2  SAY "NOVA CIJENA  " +  "(MPCSAPDV):"
+   @ box_x_koord() + 17, box_y_koord() + 2  SAY "NOVA CIJENA  (MPCSAPDV):"
    @ box_x_koord() + 17, box_y_koord() + 50 GET nKalkNovaCijena     PICT "999999.9999"
 
    kalk_say_pdv_a_porezi_var( 19 )
@@ -92,15 +99,22 @@ FUNCTION kalk_get_1_19()
    _fcj := nKalkStaraCijena
    _mpc := MpcBezPor( nKalkNovaCijena, aPorezi, , _nc ) - MpcBezPor( nKalkStaraCijena, aPorezi, , _nc )
 
-   IF Pitanje(, "Staviti u šifarnik novu cijenu", gDefNiv ) == "D"
-      select_o_koncij( _idkonto )
-      roba_set_mcsapp_na_osnovu_koncij_pozicije( _fcj + _mpcsapp )
-      SELECT kalk_pripr
+   IF Round( nKolicinaNaStanju - _kolicina, 4 ) == 0
+      IF Pitanje(, "Staviti u šifarnik novu cijenu", gStavitiUSifarnikNovuCijenuDefault ) == "D"
+         select_o_koncij( _pkonto )
+         roba_set_mcsapp_na_osnovu_koncij_pozicije( _fcj + _mpcsapp )
+         SELECT kalk_pripr
+      ENDIF
+      _gkolicin2 := 0
+   ELSE
+      // zapamtiti količinu na stanju u slučaju djelimične nivelacije
+      _gkolicin2 := nKolicinaNaStanju
+      info_bar( "kalk_19", _idroba + " djelimična nivelacija" )
    ENDIF
 
    nKalkStrana := 3
    _VPC := 0
-   _GKolicina := _GKolicin2 := 0
+   _GKolicina := 0
    _Marza2 := 0
    _TMarza2 := "A"
    _MKonto := ""

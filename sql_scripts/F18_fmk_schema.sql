@@ -1,9 +1,3 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 10.5
--- Dumped by pg_dump version 10.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -20,8 +14,6 @@ SET row_security = off;
 --
 
 CREATE SCHEMA fmk;
-
-
 ALTER SCHEMA fmk OWNER TO admin;
 
 --
@@ -3968,7 +3960,8 @@ CREATE TRIGGER suban_insert_upate_delete AFTER INSERT OR DELETE OR UPDATE ON fmk
 -- Name: kalk_kalk trig_cleanup_konto_roba_stanje; Type: TRIGGER; Schema: fmk; Owner: admin
 --
 
-CREATE TRIGGER trig_cleanup_konto_roba_stanje BEFORE INSERT OR DELETE OR UPDATE ON fmk.kalk_kalk FOR EACH ROW EXECUTE PROCEDURE public.cleanup_konto_roba_stanje();
+CREATE TRIGGER trig_cleanup_konto_roba_stanje BEFORE INSERT OR DELETE OR UPDATE ON fmk.kalk_kalk
+   FOR EACH ROW EXECUTE PROCEDURE public.cleanup_konto_roba_stanje();
 
 
 --

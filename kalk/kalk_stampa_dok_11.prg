@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR cPKonto, cMKonto, cIdPartner, cBrFakt, dDatFaktP
+
 FUNCTION kalk_stampa_dok_11( fZaTops )
 
    LOCAL nCol0 := 0
@@ -25,11 +27,12 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
    PRIVATE nMarza, nMarza2
 
    nStr := 0
-   cIdPartner := IdPartner
-   cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
-   cIdKonto := IdKonto
-   cIdKonto2 := IdKonto2
+   altd()
+   cIdPartner := kalk_pripr->IdPartner
+   cBrFaktP := kalk_pripr->BrFaktP
+   dDatFaktP := kalk_pripr->DatFaktP
+   cPKonto := kalk_pripr->pkonto
+   cMKonto := kalk_pripr->mkonto
 
    IF fzaTops == NIL
       fzaTops := .F.
@@ -62,15 +65,15 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
    ? "OTPREMNICA Broj:", cBrFaktP, "Datum:", dDatFaktP
 
    IF cIdvd == "11"
-      select_o_konto( cIdKonto )
-      ?U  "Prodavnica zadužuje :", cIdKonto, "-", AllTrim( naz )
-      select_o_konto( cIdKonto2 )
-      ?U  "Magacin razdužuje   :", cIdKonto2, "-", AllTrim( naz )
+      select_o_konto( cPKonto )
+      ?U  "Prodavnica zadužuje :", cPKonto, "-", AllTrim( naz )
+      select_o_konto( cMKonto )
+      ?U  "Magacin razdužuje   :", cMKonto, "-", AllTrim( naz )
    ELSE
-      select_o_konto( cIdKonto )
-      ?  "Storno Prodavnica zadužuje :", cIdKonto, "-", AllTrim( naz )
-      select_o_konto( cIdKonto2 )
-      ?  "Storno Magacin razdužuje   :", cIdKonto2, "-", AllTrim( naz )
+      select_o_konto( cPKonto )
+      ?  "Storno Prodavnica zadužuje :", cPKonto, "-", AllTrim( naz )
+      select_o_konto( cMKonto )
+      ?  "Storno Magacin razdužuje   :", cMKonto, "-", AllTrim( naz )
    ENDIF
 
    SELECT kalk_pripr
@@ -98,8 +101,6 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
 
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-      vise_kalk_dok_u_pripremi( cIdd )
-
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
       Scatter()
@@ -108,12 +109,11 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
          nVPC := vpc_magacin_rs( .T. )
          SELECT kalk_pripr
          _VPC := nVPC
-      endif
+      ENDIF
 
       kalk_Marza_11( NIL, .F. ) // ne diraj _VPC
 
       nMarza := _marza
-      // izracunaj nMarza,nMarza2
 
       set_pdv_public_vars()
 
@@ -172,10 +172,10 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
          @ PRow(), PCol() + 1 SAY Prevoz               PICTURE PicCDEM
       ENDIF
 
-      //IF g11bezNC != "D"
-         @ PRow(), PCol() + 1 SAY _VPC                   PICTURE PicCDEM // _VPC
-         @ PRow(), PCol() + 1 SAY nMarza               PICTURE PicCDEM  // marza vp
-      //ENDIF
+
+      @ PRow(), PCol() + 1 SAY _VPC                   PICTURE PicCDEM // _VPC
+      @ PRow(), PCol() + 1 SAY nMarza               PICTURE PicCDEM  // marza vp
+
 
       @ PRow(), PCol() + 1 SAY nMarza2              PICTURE PicCDEM
 
@@ -197,21 +197,14 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
       ENDIF
       @ PRow(),  PCol() + 1 SAY  nc * kolicina      PICTURE picdem
 
-      //IF lVPC
-        // nVPC := vpc_magacin_rs( .T. )
-        // SELECT kalk_pripr
-         //nTotVPV += ( nUVPV := nVPC * field->kolicina )
-         //@ PRow(), PCol() + 1 SAY nVPC PICT piccdem
-         //@ PRow(), PCol() + 1 SAY nUVPV PICT picdem
-      //ENDIF
 
       IF !lPrikPRUC
          @ PRow(),  PCol() + 1 SAY  prevoz * kolicina      PICTURE picdem
       ENDIF
-      //IF g11bezNC != "D"
-         @ PRow(),  PCol() + 1 SAY  _VPC * kolicina      PICTURE picdem
-         @ PRow(),  PCol() + 1 SAY  nMarza * kolicina      PICTURE picdem
-      //ENDIF
+
+      @ PRow(),  PCol() + 1 SAY  _VPC * kolicina      PICTURE picdem
+      @ PRow(),  PCol() + 1 SAY  nMarza * kolicina      PICTURE picdem
+
       @ PRow(), nMPos := PCol() + 1 SAY  nMarza2 * kolicina      PICTURE picdem
       IF lPrikPRUC
          @ PRow(), PCol() + 1 SAY nU4c                PICTURE PicCDEM
@@ -254,10 +247,10 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
    ENDIF
 
    nMarzaVP := nTotMarzaVP
-   //IF g11bezNC != "D"
-      @ PRow(), PCol() + 1   SAY  nTotVPV        PICTURE       PicDEM
-      @ PRow(), PCol() + 1   SAY  nTotMarzaVP        PICTURE       PicDEM
-   //ENDIF
+   // IF g11bezNC != "D"
+   @ PRow(), PCol() + 1   SAY  nTotVPV        PICTURE       PicDEM
+   @ PRow(), PCol() + 1   SAY  nTotMarzaVP        PICTURE       PicDEM
+   // ENDIF
 
    @ PRow(), PCol() + 1   SAY  nTotMarzaMP        PICTURE       PicDEM
    IF lPrikPRUC
@@ -271,7 +264,6 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
 
    nTot5 := nTot6 := nTot7 := 0
    kalk_pripr_rekap_tarife()
-
 
    IF fZaTops
       g11BezNC := nBezNC11

@@ -480,22 +480,32 @@ FUNCTION kalk_set_param_broj_dokumenta()
 
 FUNCTION get_kalk_brdok( _idfirma, _idvd, _idkonto, _idkonto2 )
 
-   LOCAL _brdok, cIdKonto
+   LOCAL _brdok, cIdKonto, cSay
+   LOCAL GetList := {}
 
    IF is_brojac_po_kontima()
 
       Box( "#Glavni konto za brojač", 3, 70 )
-      IF _idvd $ "10#16#18#IM#"
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Magacinski konto: " GET _idKonto VALID P_Konto( @_idKonto ) PICT "@!"
-         READ
-
+      IF _idvd $ KALK_IDVD_MAGACIN
+         cSay := "Magacinski konto: "
          cIdKonto := _idKonto
       ELSE
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Prodavnički konto: " GET _idKonto2 VALID P_Konto( @_idKonto2 ) PICT "@!"
-         READ
-         cIdKonto := _idKonto2
+         cSay := "Prodavnički konto: "
+         cIdKonto := _IdKonto2
       ENDIF
+      cIdKonto := Padr( cIdKonto, FIELD_LENGTH_IDKONTO)
+
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 cSay GET cIdKonto VALID P_Konto( @cIdKonto ) PICT "@!"
+      READ
+
       BoxC()
+
+      IF _idvd $ KALK_IDVD_MAGACIN
+
+         _idKonto := cIdKonto
+      ELSE
+         _IdKonto2 := cIdKonto
+      ENDIF
 
    ENDIF
 
