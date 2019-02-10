@@ -11,14 +11,15 @@
 
 #include "f18.ch"
 
-
+/*
 // ------------------------------------
 // dodaj match_code u browse
 // ------------------------------------
-FUNCTION add_mcode( aKolona )
+-- FUNCTION add_mcode( aKolona )
 
    IF FieldPos( "MATCH_CODE" ) <> 0
       AAdd( aKolona, { PadC( "MATCH CODE", 10 ), {|| match_code }, "match_code" } )
    ENDIF
 
    RETURN .T.
+*/

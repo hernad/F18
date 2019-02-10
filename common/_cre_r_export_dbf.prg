@@ -100,7 +100,6 @@ FUNCTION open_r_export_table( cExportDbf )
    RETURN .T.
 
 
-
 FUNCTION o_r_export()
 
    SELECT ( F_R_EXP )

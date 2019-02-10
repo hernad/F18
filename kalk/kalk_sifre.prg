@@ -142,7 +142,7 @@ FUNCTION P_Objekti()
    kalk_o_objekti()
 
    AAdd( ImeKol, { "ID", {|| id }, "id" } )
-   add_mcode( @ImeKol )
+   // add_mcode( @ImeKol )
    AAdd( ImeKol, { "Naziv", {|| PadR( ToStrU( naz ), 20 ) }, "naz" } )
    AAdd( ImeKol, { "IdObj", {|| idobj }, "idobj" } )
 

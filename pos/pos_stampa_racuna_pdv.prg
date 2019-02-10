@@ -116,7 +116,6 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       SELECT pos
    ENDIF
 
-   AltD()
    DO WHILE !Eof() .AND. iif( !hParams[ "priprema" ], ;
          ( pos->idpos + pos->idvd + DToS( pos->datum ) + pos->brdok ) == ( cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok ), ;
          ( _pos_pripr->idpos + _pos_pripr->idvd + DToS( _pos_pripr->datum ) + _pos_pripr->brdok ) == ( cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok ) )

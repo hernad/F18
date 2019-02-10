@@ -16,14 +16,14 @@
   set version to -1
   -------------------------------------------
 */
-FUNCTION server_log_write( msg, silent )
+FUNCTION server_log_write( cMessage, silent )
 
    LOCAL _ret
    LOCAL _result
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _tbl
    LOCAL _user := f18_user()
-   LOCAL hParams := hb_hash()
+   LOCAL hParams := hb_Hash()
 
    IF silent == NIL
       silent := .F.
@@ -32,8 +32,8 @@ FUNCTION server_log_write( msg, silent )
    _tbl := F18_PSQL_SCHEMA + ".log"
 
    hParams[ "log" ] := .F.
-   msg  := ProcName( 2 ) + "(" + AllTrim( Str( ProcLine( 2 ) ) ) + ") : " + msg
-   _qry := "INSERT INTO " + _tbl + "(user_code, msg) VALUES(" +  sql_quote( _user ) + "," +  sql_quote( msg ) + ")"
-   _ret := run_sql_query( _qry, hParams )
+   cMessage  := ProcName( 2 ) + "(" + AllTrim( Str( ProcLine( 2 ) ) ) + ") : " + cMessage
+   cQuery := "INSERT INTO " + _tbl + "(user_code, msg) VALUES(" +  sql_quote( _user ) + "," +  sql_quote( _u( cMessage ) ) + ")"
+   _ret := run_sql_query( cQuery, hParams )
 
    RETURN .T.

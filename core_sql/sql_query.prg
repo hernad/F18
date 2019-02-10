@@ -84,7 +84,7 @@ FUNCTION postgres_sql_query( cQuery )
 FUNCTION run_sql_query( cQry, hParams )
 
    LOCAL nI, oQuery, cLogMsg, cMsg
-   LOCAL _msg
+   LOCAL cMessage
    LOCAL cTip
    LOCAL nPos
    LOCAL nRetry := 2
@@ -163,7 +163,6 @@ FUNCTION run_sql_query( cQry, hParams )
    ENDIF
 
 
-
    IF Left( cQry, 6 ) == "COMMIT" .OR. Left( cQry, 8 ) == "ROLLBACK"
       IF hb_mutexLock( s_mtxMutex )
          nPos := AScan( s_aTransactions, {| aTran | ValType( aTran ) == "A" .AND. ;
@@ -186,27 +185,29 @@ FUNCTION run_sql_query( cQry, hParams )
    ENDIF
 
    IF ValType( cQry ) != "C"
-      _msg := "qry ne valja VALTYPE(qry) =" + ValType( cQry )
+      cMessage := "qry ne valja VALTYPE(qry) =" + ValType( cQry )
       IF lLog
-         log_write( _msg, 2 )
+         log_write( cMessage, 2 )
       ENDIF
-      MsgBeep( _msg )
+      MsgBeep( cMessage )
       quit_1
    ENDIF
 
+   IF log_level() == 9
+      ?E "QUERY:"
+      ?E cQry
+   ENDIF
+   
    FOR nI := 1 TO nRetry
-
 
       IF nI > 1
          error_bar( "sql",  cQry + " pokušaj: " + AllTrim( Str( nI ) ) )
       ENDIF
 
       BEGIN SEQUENCE WITH {| err | Break( err ) }
-
          oQuery := oServer:Query( cQry + ";" )
 
       RECOVER
-
          ?E "SQL ERRRRROR:", cQry
          hb_idleSleep( 1 )
 

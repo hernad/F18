@@ -18,7 +18,7 @@ FUNCTION pos_unos_ispravka_racuna()
 
    DO WHILE .T.
 
-      //SetKXLat( "'", "-" )
+      // SetKXLat( "'", "-" )
       o_pos_tables()
       SELECT _pos_pripr
       IF reccount2() <> 0
@@ -31,7 +31,7 @@ FUNCTION pos_unos_ispravka_racuna()
          ENDIF
       ENDIF
 
-      //SET KEY "'" to
+      // SET KEY "'" to
       my_close_all_dbf()
 
       IF pos_racun_unos_browse( POS_BRDOK_PRIPREMA )
@@ -88,16 +88,22 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
    LOCAL lOk := .T.
    LOCAL cVrijeme
    LOCAL cBrDok
+   LOCAL cDokumentNaziv
 
    o_pos_tables()
 
-   SELECT pos_doks
-
-   cBrDok := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_IDVD_RACUN )
+altd()
+   cBrDok := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_IDVD_RACUN, hParams[ "datum" ] )
    cVrijeme := PadR( Time(), 5 )
 
-   lOk := pos_azuriraj_racun( hParams[ "idpos" ], cBrDok, cVrijeme, hParams[ "idvrstep" ], hParams[ "idpartner" ] )
+   cDokumentNaziv := AllTrim( hParams["idpos"] ) + "-" + hParams["idvd"] + "-" + AllTrim( cBrDok ) + " " + DToC( hParams["datum"] )
+   IF seek_pos_doks( hParams["idpos"], hParams["idvd"], hParams["datum"], cBrDok ) ;
+      .OR. seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], cBrDok )
+      MsgBeep( "Dokument: " + cDokumentNaziv + " već postoji?!" )
+      RETURN .F.
+   ENDIF
 
+   lOk := pos_azuriraj_racun( hParams[ "idpos" ], cBrDok, cVrijeme, hParams[ "idvrstep" ], hParams[ "idpartner" ] )
    IF !lOk
       MsgBeep( "Greška sa ažuriranjem računa u kumulativ !" )
       RETURN .F.

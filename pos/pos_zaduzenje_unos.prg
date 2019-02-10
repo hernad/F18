@@ -15,7 +15,7 @@ STATIC s_oBrowse
 STATIC s_cRobaDuzinaSifre
 
 MEMVAR Kol, ImeKol, gSamoProdaja
-MEMVAR _BrFaktP, _Opis
+MEMVAR _BrFaktP, _Opis, _Datum
 
 FUNCTION pos_zaduzenje()
 
@@ -78,7 +78,7 @@ FUNCTION pos_zaduzenje()
    SET ORDER TO
    GO  TOP
    BOX (, f18_max_rows() - 12, f18_max_cols() - 10 - 1,, { _u( "<*> - Ispravka stavke " ), _u( "Storno - negativna količina" ) } )
-   @ box_x_koord(), box_y_koord() + 4 SAY8 PadC( "PRIPREMA " + pos_naslov_dok_zaduzenja( cIdVd ) ) COLOR f18_color_invert()
+   @ box_x_koord(), box_y_koord() + 4 SAY8 PadC( "PRIPREMA " + pos_dokument_naziv( cIdVd ) ) COLOR f18_color_invert()
 
 
    s_oBrowse := pos_form_browse( box_x_koord() + 6, box_y_koord() + 1, box_x_koord() + f18_max_rows() - 12, box_y_koord() + f18_max_cols() - 10, ImeKol, Kol, ;
@@ -137,9 +137,6 @@ FUNCTION pos_zaduzenje()
    SELECT PRIPRZ
 
    IF RecCount2() > 0
-      // IF !lFromKalk
-      // cBrDok := pos_novi_broj_dokumenta( gIdPos, iif( cIdvd == "PD", "16", cIdVd ) )
-      // ENDIF
 
       SELECT PRIPRZ
       GO TOP
@@ -259,7 +256,6 @@ FUNCTION pos_ispravi_zaduzenje()
    s_oBrowse:dehilite()
    s_oBrowse:stabilize()
 
-   // box_crno_na_zuto_end()
    _idroba := cGetId
    _Kolicina := nGetKol
 
@@ -297,9 +293,7 @@ FUNCTION pos_ispravi_stavku_zaduzenja()
    PrevRoba := _IdRoba := PRIPRZ->idroba
    _Kolicina := PRIPRZ->Kolicina
    Box(, 3, 80 )
-   @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "Artikal:" GET _idroba PICTURE "@K" ;
-      VALID pos_valid_roba_zaduzenje( @_IdRoba, 1, 30 )
-   // VALID Eval ( bRobaPosValid, 1, 27 ) .AND. ( _IdRoba == PrevRoba .OR. pos_zaduzenje_provjeri_duple_stavke ( _idroba ) )
+   @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "Artikal:" GET _idroba PICTURE "@K" VALID pos_valid_roba_zaduzenje( @_IdRoba, 1, 30 )
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "Količina:" GET _Kolicina VALID pos_zaduzenje_valid_kolicina ( _Kolicina )
    READ
 
@@ -316,21 +310,3 @@ FUNCTION pos_ispravi_stavku_zaduzenja()
    s_oBrowse:refreshCurrent()
 
    RETURN ( DE_CONT )
-
-
-FUNCTION pos_naslov_dok_zaduzenja( cIdVd )
-
-   DO CASE
-   CASE cIdVd == "16"
-      RETURN "ZADUŽENJE"
-   CASE cIdVd == "PD"
-      RETURN "PREDISPOZICIJA"
-   CASE cIdVd == "95"
-      RETURN "OTPIS"
-   CASE cIdVd == "98"
-      RETURN "REKLAMACIJA"
-   OTHERWISE
-      RETURN "????"
-   ENDCASE
-
-   RETURN .T.

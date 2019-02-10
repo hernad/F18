@@ -41,9 +41,9 @@ STATIC s_nDesktopRows := NIL
 STATIC s_nDesktopCols := NIL
 
 #ifdef F18_DEBUG
-STATIC __log_level := F18_DEFAULT_LOG_LEVEL_DEBUG
+STATIC s_nLogLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
 #else
-STATIC __log_level := F18_DEFAULT_LOG_LEVEL
+STATIC s_nLogLevel := F18_DEFAULT_LOG_LEVEL
 #endif
 
 FUNCTION f18_error_block()
@@ -170,10 +170,6 @@ FUNCTION thread_dbfs( pThreadID )
    RETURN .T.
 
 
-
-// -----------------------------------------------------------
-// vraca informaciju o nivou logiranja aplikcije
-// -----------------------------------------------------------
 STATIC FUNCTION get_log_level_from_params()
 
 #ifdef F18_DEBUG
@@ -229,14 +225,14 @@ FUNCTION set_screen_dimensions()
 
    CASE nPixWidth >= 3000 .AND. nPixHeight >= 1800
 
-       IF is_linux()
-         font_name("Liberation Mono")
+      IF is_linux()
+         font_name( "Liberation Mono" )
          font_weight_bold()
-         font_size(40)
-         font_width(24)
+         font_size( 40 )
+         font_width( 24 )
          // linux zavrsi 45x24, 37 rows x 132 cols
          ?E cMsg + "HiDPI"
-       ENDIF
+      ENDIF
 
    CASE nPixWidth >= 1440 .AND. nPixHeight >= 900
 
@@ -519,13 +515,13 @@ FUNCTION desktop_cols()
    RETURN s_nDesktopCols
 
 
-FUNCTION log_level( x )
+FUNCTION log_level( nLevel )
 
-   IF ValType( x ) == "N"
-      __log_level := x
+   IF ValType( nLevel ) == "N"
+      s_nLogLevel := nLevel
    ENDIF
 
-   RETURN __log_level
+   RETURN s_nLogLevel
 
 
 
@@ -589,19 +585,20 @@ FUNCTION set_f18_home_root()
 
    cHome := hb_DirSepAdd( cHome + ".f18" )
 */
-   cHome:=GetEnv('F18_HOME')
 
-   IF Empty(cHome)
-     Alert('F18_HOME envar - lokacija podataka nije definisana!?')
-     QUIT_1
+   cHome := GetEnv( 'F18_HOME' )
+
+   IF Empty( cHome )
+      Alert( 'F18_HOME envar - lokacija podataka nije definisana!?' )
+      QUIT_1
    ENDIF
 
-   cF18eShell := GetEnv('F18_ESHELL')
+   cF18eShell := GetEnv( 'F18_ESHELL' )
    IF cF18eShell == "1"
       s_lEshell := .T.
    ENDIF
 
-   cHome := hb_DirSepAdd(cHome)
+   cHome := hb_DirSepAdd( cHome )
 
    f18_create_dir( cHome )
    my_home_root( cHome )
@@ -611,7 +608,7 @@ FUNCTION set_f18_home_root()
 
 FUNCTION is_in_eshell()
 
-    RETURN s_lEshell
+   RETURN s_lEshell
 
 
 FUNCTION my_home_backup( cF18HomeBackup )
@@ -693,15 +690,17 @@ FUNCTION log_write( cMsg, nLevel, lSilent )
    LOCAL _msg_time
 
    IF nLevel == NIL
-      // uzmi defaultni
-      nLevel := log_level()
+#ifdef F18_DEBUG
+      nLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
+#else
+      nLevel := F18_DEFAULT_LOG_LEVEL
+#endif
    ENDIF
 
    IF lSilent == NIL
       lSilent := .F.
    ENDIF
 
-   // treba li logirati ?
    IF nLevel > log_level()
       RETURN .T.
    ENDIF
@@ -715,6 +714,7 @@ FUNCTION log_write( cMsg, nLevel, lSilent )
    // ovdje ima neki problem #30139 iskljucujem dok ne skontamo
    // baca mi ove poruke u outf.txt
    // FWRITE( s_nF18FileHandle, _msg_time + cMsg + hb_eol() )
+   ?E _msg_time + cMsg
 
    IF server_log()
       server_log_write( cMsg, lSilent )
@@ -781,9 +781,9 @@ FUNCTION set_hot_keys()
    hb_SetKey( hb_keyNew( "C", HB_KF_CTRL ), {|| set_clipboard() } )
    hb_SetKey( hb_keyNew( "V", HB_KF_CTRL ), {|| get_clipboard() } )
 
-   //nKey := inkey(0, hb_bitOr( HB_INKEY_ALL, HB_INKEY_EXT ))
-   //MsgBeep( AllTrim( Str( nKey ) ) )
-   //hb_keyNew( "C", HB_KF_CTRL )
+   // nKey := inkey(0, hb_bitOr( HB_INKEY_ALL, HB_INKEY_EXT ))
+   // MsgBeep( AllTrim( Str( nKey ) ) )
+   // hb_keyNew( "C", HB_KF_CTRL )
 
    info_bar( "init", "setting up hot keys - end" )
 
@@ -867,7 +867,7 @@ FUNCTION run_on_start()
 
 
    CASE "pos_run"
-       goModul:run()
+      goModul:run()
 
    CASE "fakt_pretvori_otpremnice_u_racun"
       _fakt_doks := FaktDokumenti():New()

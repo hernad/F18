@@ -141,7 +141,6 @@ FUNCTION fakt_pregled_liste_dokumenata()
       IF !Empty(cIdRefer)
         cFilterOpcinaReferent += ".and. flt_fakt_partner('idrefer')==" + sql_quote(cIdRefer)
       ENDIF
-      altd()
 
       IF cFilterBrFaktDok <> NIL .AND. cFilterSifraKupca <> NIL .AND. ( !lVrstePlacanja .OR. aUslVrsteP <> NIL )
          EXIT // nema greske u filter uslovima

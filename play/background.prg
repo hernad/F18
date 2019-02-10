@@ -105,4 +105,4 @@ FUNCTION log_write_db( cMsg )
 
    FWrite( _log_db_handle, cMsg + hb_eol() )
 
-   RETURN
+   RETURN .T.

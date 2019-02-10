@@ -30,8 +30,9 @@ FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
 
    seek_pos_doks( cIdPos, cIdTipDokumenta, dDatDok )
    GO BOTTOM
+   nBrojDokumenta := 0
    DO WHILE !Bof()
-      IF hb_regexHas( "\s*\d+", pos_doks->brdok )
+      IF hb_regexHas( "^\s*\d+", pos_doks->brdok )
          IF field->idpos == cIdPos .AND. field->idvd == cIdTipDokumenta .AND. DToS( field->datum ) == DToS( dDatDok )
             nBrojDokumenta := Val( pos_doks->brdok )
          ELSE
