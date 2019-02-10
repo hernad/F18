@@ -262,8 +262,6 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi )
 
-         set_pdv_public_vars()
-
          IF field->pu_i == "1"
 
             _mp_ulaz += field->mpc * field->kolicina

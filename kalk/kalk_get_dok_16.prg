@@ -93,7 +93,6 @@ FUNCTION kalk_get_1_16()
          _NC := NC
       ENDIF
    ENDIF
-   set_pdv_public_vars()
    SELECT kalk_pripr
 
    @ box_x_koord() + 14, box_y_koord() + 2   SAY "NAB.CJ   "  GET _NC  PICTURE gPicNC  WHEN V_kol10()
@@ -158,10 +157,6 @@ FUNCTION kalk_get_16_1()
    _CarDaz := 0
 
    SELECT kalk_pripr
-
-   set_pdv_public_vars()
-   SELECT kalk_pripr
-
 
 
    @ box_x_koord() + 14, box_y_koord() + 2    SAY "NAB.CJ   "  GET _NC  PICTURE  gPicNC  WHEN V_kol10()

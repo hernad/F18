@@ -53,11 +53,6 @@ FUNCTION set_pdv_array( aPorezi )
    ENDIF
    aPorezi[ POR_PPP ] := tarifa->opp
 
-
-   // aPorezi[ POR_PP ] := tarifa->zpp
-   // aPorezi[ POR_PPU ] := tarifa->ppp
-   // aPorezi[ POR_PRUC ]  := tarifa->vpp
-
    IF tarifa->( FieldPos( "mpp" ) ) <> 0
       aPorezi[ POR_PRUCMP ] := tarifa->mpp
    ELSE
@@ -65,17 +60,3 @@ FUNCTION set_pdv_array( aPorezi )
    ENDIF
 
    RETURN NIL
-
-
-FUNCTION set_pdv_public_vars()
-
-   PUBLIC _PDV := tarifa->opp / 100
-   PUBLIC _PP := 0
-   PUBLIC _ZPP := 0
-   PUBLIC _PPP := 0
-   PUBLIC _ZPP := 0
-   PUBLIC _PORVT := 0
-   PUBLIC _MPP   := 0
-   PUBLIC _DLRUC := 0
-
-   RETURN .T.

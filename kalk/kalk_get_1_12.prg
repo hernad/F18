@@ -29,10 +29,6 @@ FUNCTION kalk_get_1_12()
 
       @ box_x_koord() + 8, box_y_koord() + 2   SAY "Prodavnicki konto razduzuje " GET _IdKonto VALID P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + 8, box_y_koord() + 40  SAY "Razduzuje "   GET _IdZaduz  PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz, 21, 5 )
-      // ENDIF
-
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto zadužuje   "  GET _IdKonto2 VALID Empty( _IdKonto2 ) .OR. P_Konto( @_IdKonto2, 24 )
       // IF gNW <> "X"
       // @ box_x_koord() + 9, box_y_koord() + 40  SAY "Zaduzuje  " GET _IdZaduz2   PICT "@!"  VALID Empty( _idZaduz2 ) .OR. p_partner( @_IdZaduz2, 21, 5 )
@@ -71,9 +67,6 @@ FUNCTION kalk_get_1_12()
 
    _PKonto := _Idkonto
    _MKonto := _Idkonto2
-   // kalk_dat_poslj_promjene_prod()
-   // check_datum_posljednje_kalkulacije()
-   // DuplRoba()
 
    _GKolicina := 0
 
@@ -96,7 +89,6 @@ FUNCTION kalk_get_1_12()
       kalk_vpc_po_kartici( @_VPC, _idfirma, _mkonto, _idroba )
    ENDIF
 
-   set_pdv_public_vars()
    nKolS := 0
    nKolZN := 0
    nc1 := nc2 := 0
@@ -118,7 +110,7 @@ FUNCTION kalk_get_1_12()
 
    @ box_x_koord() + 16, box_y_koord() + 2  SAY8 "MP marža:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
    @ box_x_koord() + 16, Col() + 1  GET _Marza2 PICTURE  PicDEM ;
-      VALID {|| _nc := _fcj + iif( _TPrevoz == "A", _Prevoz, 0 ), _Tmarza := "A", _marza := _vpc / ( 1 + _PORVT ) - _fcj, .T. }
+      VALID {|| _nc := _fcj + iif( _TPrevoz == "A", _Prevoz, 0 ), _Tmarza := "A", _marza := _vpc - _fcj, .T. }
    @ box_x_koord() + 17, box_y_koord() + 2  SAY "MALOPROD. CJENA (MPC):"
    @ box_x_koord() + 17, box_y_koord() + 50 GET _MPC PICT PicDEM WHEN WMpc() VALID VMpc()
 

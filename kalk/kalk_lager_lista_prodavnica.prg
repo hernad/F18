@@ -305,8 +305,6 @@ FUNCTION kalk_lager_lista_prodavnica()
                   set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi, field->idtarifa )
                   aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
                   nPor1 := aIPor[ 1 ]
-                  set_pdv_public_vars()
-
                   kalk_sumiraj_kolicinu( - ( field->kolicina ), 0, @nPKol, 0, lPocStanje, lPrikK2 )
 
 
@@ -354,7 +352,6 @@ FUNCTION kalk_lager_lista_prodavnica()
                set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi, field->idtarifa )
                aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
                nPor1 := aIPor[ 1 ]
-               set_pdv_public_vars()
 
                IF idvd $ "12#13"
                   kalk_sumiraj_kolicinu( - ( field->kolicina ), 0, @nUlaz, 0, lPocStanje, lPrikK2 )
@@ -866,7 +863,6 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParams )
                set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi, field->idtarifa )
                aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
                nPor1 := aIPor[ 1 ]
-               set_pdv_public_vars()
                IF field->idvd $ "12#13"
                   kalk_sumiraj_kolicinu( - ( field->kolicina ), 0, @_ulaz, 0, .F., .F. )
                   _mpv_u -= field->mpcsapp * field->kolicina

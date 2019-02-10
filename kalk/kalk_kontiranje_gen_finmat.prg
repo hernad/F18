@@ -208,14 +208,12 @@ FUNCTION kalk_kontiranje_gen_finmat()
         // ENDIF
 
          select_o_roba( KALK_PRIPR->IdRoba )
-
          select_o_tarifa( KALK_PRIPR->idtarifa )
 
          SELECT KALK_PRIPR
 
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( pkonto, idroba, @aPorezi )
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-         set_pdv_public_vars()
 
          SELECT finmat
          APPEND BLANK

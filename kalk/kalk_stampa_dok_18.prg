@@ -76,11 +76,8 @@ FUNCTION kalk_stampa_dok_18()
          @ PRow(), 122 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
-      set_pdv_public_vars()
-
       nTotA += VPC * Kolicina
-      nTotB += vpc / ( 1 + _PORVT ) * _PORVT * kolicina
-
+      nTotB += 0
       @ PRow() + 1, 0 SAY  Rbr PICTURE "999"
       @ PRow(), PCol() + 1 SAY IdRoba
       aNaz := SjeciStr( Trim( ROBA->naz ) + " ( " + ROBA->jmj + " )", 37 )
@@ -91,8 +88,8 @@ FUNCTION kalk_stampa_dok_18()
       @ PRow(), PCol() + 1 SAY MPCSAPP + VPC  PICTURE PicCDEM
       nC1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY VPC * Kolicina  PICTURE PicDEM
-      @ PRow(), PCol() + 1 SAY _porvt * 100    PICTURE Picproc
-      @ PRow(), PCol() + 1 SAY vpc / ( 1 + _PORVT ) * _PORVT * kolicina   PICTURE Picdem
+      @ PRow(), PCol() + 1 SAY 0    PICTURE Picproc
+      @ PRow(), PCol() + 1 SAY 0   PICTURE Picdem
 
       // novi red
       IF Len( aNaz ) > 1

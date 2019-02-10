@@ -17,6 +17,7 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
 
    LOCAL nKolUlaz
    LOCAL nKolIzlaz
+   LOCAL nPDVProc
 
    PRIVATE aPorezi
 
@@ -32,7 +33,7 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
 //   o_sifv()
   // o_roba()
   // o_tarifa()
-   o_koncij()
+  // o_koncij()
   // o_konto()
   // o_partner()
 
@@ -169,10 +170,10 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
 
          select_o_roba( kalk->idroba )
          select_o_tarifa( kalk->idtarifa )
+         nPDVProc := tarifa->opp / 100
          SELECT kalk
 
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( pkonto, idroba, @aPorezi, idtarifa )
-         set_pdv_public_vars()
 
          nBezP := 0
          nSaP := 0
@@ -228,7 +229,7 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
             aRTar[ nElem, 9 ] += nP1 + nP2 + nP3
             aRTar[ nElem, 10 ] += nSaP
          ELSE
-            AAdd( aRTar, { TARIFA->ID, nBezP, _PDV * 100, 0, _ZPP * 100, nP1, nP2, nP3, nP1 + nP2 + nP3, nSaP } )
+            AAdd( aRTar, { TARIFA->ID, nBezP, nPDVProc * 100, 0, 0, nP1, nP2, nP3, nP1 + nP2 + nP3, nSaP } )
          ENDIF
          SKIP
       ENDDO

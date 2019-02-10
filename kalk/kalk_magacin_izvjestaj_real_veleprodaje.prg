@@ -99,7 +99,7 @@ FUNCTION kalk_real_partnera()
 
    DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. cIdkonto = mkonto .AND. IspitajPrekid()
 
-      nPaNV := nPaVPV := nPaPruc := nPaRuc := nPaPP := nPaZarada := nPaRabat := 0
+      nPaNV := nPaVPV := nPaRuc := nPaPP := nPaZarada := nPaRabat := 0
       cIdPartner := idpartner
 
 
@@ -119,16 +119,12 @@ FUNCTION kalk_real_partnera()
          select_o_tarifa( kalk->idtarifa )
          SELECT kalk
 
-         IF idvd = "14"
-
+         IF idvd == "14"
             IF cUslovPartner <> ".t." .AND. ! &cUslovPartner
                SKIP
                LOOP
             ENDIF
-
-            set_pdv_public_vars()
-
-            nVPVBP := nVPV / ( 1 + _PORVT )
+            nVPVBP := nVPV
             nPaNV += Round( NC * kolicina, gZaokr )
             nPaVPV += Round( VPC * ( Kolicina ), gZaokr )
             nPaPP += Round( MPC / 100 * VPC * ( 1 - RabatV / 100 ) * Kolicina, gZaokr )
@@ -137,16 +133,6 @@ FUNCTION kalk_real_partnera()
             nPom := VPC * ( 1 - RabatV / 100 ) - NC
             nPaRuc += Round( nPom * Kolicina, gZaokr )
 
-            IF nPom > 0
-               // porez na ruc se obracunava
-               // samo ako je pozit. razlika
-               IF gVarVP == "1"
-                  nPaPRUC += Round( nPom * Kolicina * tarifa->VPP / 100, gZaokr )
-               ELSE
-                  nPaPRUC += Round( nPom * Kolicina * tarifa->VPP / 100 / ( 1 + tarifa->VPP / 100 ), gZaokr )
-                  // Preracunata stopa
-               ENDIF
-            ENDIF
 
          ELSEIF idvd == "18"
             // nivelacija
@@ -215,7 +201,7 @@ FUNCTION kalk_real_partnera()
 
       nNV += nPaNV
       nVPV += nPaVPV
-      nPRuc += nPaPruc
+      nPRuc += 0
       nZarada += nPaZarada
       nRuc += nPaRuc
       nPP += nPaPP

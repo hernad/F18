@@ -79,7 +79,6 @@ FUNCTION kalk_get_1_19()
       kalk_fakticka_mpc( @nKalkStaraCijena, _idfirma, _pkonto, _idroba )
    ENDIF
 
-   set_pdv_public_vars()
    SELECT kalk_pripr
 
    nKalkNovaCijena := nKalkStaraCijena + _MPCSaPP

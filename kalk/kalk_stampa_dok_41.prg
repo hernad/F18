@@ -71,10 +71,7 @@ FUNCTION kalk_stampa_dok_41_42()
       // uracunaj i popust
       aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, kalk_pripr->mpc, kalk_pripr->mpcsapp, kalk_pripr->nc )
       nPor1 := aIPor[ 1 ]
-
-      set_pdv_public_vars()
       print_nova_strana( 125, @nStr, 2 )
-
       // nabavna vrijednost
       nTot3 += ( nU3 := IIF( roba->tip = "U", 0, kalk_pripr->nc ) * kalk_pripr->kolicina )
       // marza
@@ -286,7 +283,6 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
 
          select_o_roba( kalk_pripr->idroba )
          SELECT kalk_pripr
-         set_pdv_public_vars()
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idRoba, @aPorezi, kalk_pripr->idtarifa )
          // mpc bez poreza sa uracunatim popustom
          nU1 += kalk_pripr->mpc * kalk_pripr->kolicina

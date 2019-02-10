@@ -89,8 +89,6 @@ FUNCTION kalk_get_1_94()
       ENDIF
    ENDIF
 
-   set_pdv_public_vars()
-
    SELECT kalk_pripr
 
    @ box_x_koord() + 13, box_y_koord() + 2    SAY "NAB.CJ   "  GET _NC  PICTURE gPicNC  WHEN V_kol10()

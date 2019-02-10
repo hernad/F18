@@ -15,6 +15,7 @@
 FUNCTION kalk_stampa_dok_82()
 
    LOCAL nCol0 := nCol1 := nCol2 := 0, npom := 0
+   LOCAL nPdvProc
 
    PRIVATE nMarza, nMarza2
 
@@ -44,14 +45,6 @@ FUNCTION kalk_stampa_dok_82()
    PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-/*
-    if idpartner+brfaktp+idkonto+idkonto2<>cidd
-     set device to screen
-     Beep(2)
-     Msg("Unutar kalkulacije se pojavilo vise dokumenata !",6)
-     set device to printer
-    endif
-*/
 
       scatter()  // formiraj varijable _....
       Marza2R()   // izracunaj nMarza2
@@ -60,7 +53,7 @@ FUNCTION kalk_stampa_dok_82()
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
-      set_pdv_public_vars()
+      nPDVProc := tarifa->opp / 100
 
       IF PRow() > page_length()
          FF
@@ -70,7 +63,7 @@ FUNCTION kalk_stampa_dok_82()
       nTot3 +=  ( nU3 := NC * kolicina )
       nTot4 +=  ( nU4 := vpc * ( 1 - rabatv / 100 ) * Kolicina )
       nTot5 +=  ( nU5 := MPC * Kolicina )
-      nPor1 :=  MPC * _PDV
+      nPor1 :=  MPC * nPdvProc
       nPor2 := 0
       nTot6 +=  ( nU6 := ( nPor1 + nPor2 ) * Kolicina )
       nTot7 +=  ( nU7 := MPcSaPP * Kolicina )
@@ -98,7 +91,7 @@ FUNCTION kalk_stampa_dok_82()
       @ PRow(),   PCol() + 1  SAY  vpc * ( 1 - rabatv / 100 ) * kolicina  PICTURE picdem
       @ PRow(),   PCol() + 1  SAY  mpc * kolicina      PICTURE picdem
 
-      @ PRow(), nCol1    SAY    _PPP       PICTURE picproc
+      @ PRow(), nCol1    SAY    0       PICTURE picproc
       @ PRow(),  PCol() + 1 SAY  nPor2             PICTURE piccdem
 
       SKIP
@@ -139,12 +132,11 @@ FUNCTION kalk_stampa_dok_82()
       nU1 := nU2 := nU3 := nU4 := 0
       select_o_tarifa( cIdtarifa )
       SELECT kalk_pripr
-      DO WHILE !Eof() .AND. cidfirma + cidvd + cbrdok == idfirma + idvd + brdok .AND. idtarifa == cidtarifa
+      DO WHILE !Eof() .AND. cIdfirma + cIdvd + cBrdok == idfirma + idvd + brdok .AND. idtarifa == cidtarifa
          select_o_roba( kalk_pripr->idroba )
          SELECT kalk_pripr
-         set_pdv_public_vars()
          nU1 += mpc * kolicina
-         nU2 += mpc * _PDV * kolicina
+         nU2 += mpc * nPDVProc * kolicina
          nU3 += 0
          nU4 += mpcsapp * kolicina
          nTot5 += ( mpc - nc ) * kolicina
@@ -153,7 +145,7 @@ FUNCTION kalk_stampa_dok_82()
       nTot1 += nu1; nTot2 += nU2; nTot3 += nU3
       nTot4 += nU4
       ? cidtarifa
-      @ PRow(), PCol() + 1   SAY _PDV * 100 PICT picproc
+      @ PRow(), PCol() + 1   SAY nPdvProc * 100 PICT picproc
       @ PRow(), PCol() + 1   SAY 0 PICT picproc
       nCol1 := PCol() + 1
       @ PRow(), PCol() + 1   SAY nu1 PICT picdem

@@ -113,11 +113,8 @@ FUNCTION kalk_get_1_41()
 
 
    IF roba->( FieldPos( "PLC" ) ) <> 0
-
       _vpc := roba->plc // stavi plansku cijenu
    ENDIF
-
-   set_pdv_public_vars()
 
    IF ( ( _idvd <> "47" ) .AND. roba->tip != "T" )
 

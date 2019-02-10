@@ -114,9 +114,6 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
       kalk_Marza_11( NIL, .F. ) // ne diraj _VPC
 
       nMarza := _marza
-
-      set_pdv_public_vars()
-
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi, field->idtarifa )
       aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcSaPP, field->nc )
 

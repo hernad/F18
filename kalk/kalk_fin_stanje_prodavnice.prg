@@ -215,7 +215,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
          select_o_roba( KALK->idroba )
          select_o_tarifa( KALK->idtarifa )
          SELECT KALK
-         set_pdv_public_vars()
+
          IF field->pu_i == "1"
             nMPVBU += kalk->mpc * kalk->kolicina
             nMPVU += kalk->mpcsapp * kalk->kolicina

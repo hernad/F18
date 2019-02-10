@@ -60,15 +60,12 @@ FUNCTION kalk_get_1_11()
          @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       ENDIF
       @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Prodavnički Konto zadužuje "; ?? _pkonto
-
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto razdužuje "; ?? _mkonto
 
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarifa ->"
-
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
-
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
@@ -103,7 +100,6 @@ FUNCTION kalk_get_1_11()
       SELECT kalk_pripr  // magacin
    ENDIF
 
-   set_pdv_public_vars()
    nKolS := 0
    nKolZN := 0
    nc1 := 0
@@ -145,7 +141,6 @@ FUNCTION kalk_get_1_11()
       @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE PicDEM VALID {|| lRet := kalk_valid_kolicina_prod(), _vpc := _fcj, lRet }
    ENDIF
 
-
    select_o_koncij( _pkonto )
    SELECT kalk_pripr
 
@@ -153,11 +148,10 @@ FUNCTION kalk_get_1_11()
       _TPrevoz := "R"
    ENDIF
 
-
    PRIVATE cProracunMarzeUnaprijed := " "
    @ box_x_koord() + 16, box_y_koord() + 2 SAY8 "MP marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
    @ box_x_koord() + 16, Col() + 1  GET _Marza2 PICTURE  PicDEM ;
-      VALID {|| _nc := _fcj + iif( _TPrevoz == "A", _Prevoz, 0 ), _Tmarza := "A", _marza := _vpc / ( 1 + _PORVT ) - _fcj, .T. }
+      VALID {|| _nc := _fcj + iif( _TPrevoz == "A", _Prevoz, 0 ), _Tmarza := "A", _marza := _vpc - _fcj, .T. }
    @ box_x_koord() + 16, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"   VALID {|| kalk_Marza_11( cProracunMarzeUnaprijed ), cProracunMarzeUnaprijed := " ", .T. }
 
    @ box_x_koord() + 18, box_y_koord() + 2 SAY8 "                MP BEZ PDV:"

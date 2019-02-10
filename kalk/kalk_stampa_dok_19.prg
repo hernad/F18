@@ -66,7 +66,6 @@ FUNCTION kalk_stampa_dok_19()
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-      set_pdv_public_vars()
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi )
 
       // nova cijena

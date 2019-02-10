@@ -145,11 +145,11 @@ FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
       _nc := 9999
    ENDIF
 
-   //IF gKalo == "1" .AND. cIdvd == "10"
-  //    nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   //ELSE
-      nStvarnaKolicina := _Kolicina
-   //ENDIF
+   // IF gKalo == "1" .AND. cIdvd == "10"
+   // nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
+   // ELSE
+   nStvarnaKolicina := _Kolicina
+   // ENDIF
 
    IF _Marza == 0 .OR. _VPC <> 0 .AND. !lNaprijed
 
@@ -202,11 +202,11 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
    ENDIF
 
 
-   //IF gKalo == "1" .AND. _idvd == "10"
-    //  nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   //ELSE
-      nStvarnaKolicina := _Kolicina
-   //ENDIF
+   // IF gKalo == "1" .AND. _idvd == "10"
+   // nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
+   // ELSE
+   nStvarnaKolicina := _Kolicina
+   // ENDIF
 
 
    IF !Empty( cProracunMarzeUnaprijed ) // proračun unaprijed od nc -> vpc
@@ -427,11 +427,11 @@ FUNCTION kalk_when_valid_nc_ulaz()
    LOCAL nNabCjZadnjaNabavka
    LOCAL nNabCj2 := 0
 
-   //IF gKalo == "1"
-  //    nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-  // ELSE
-      nStvarnaKolicina := _Kolicina
-   //ENDIF
+   // IF gKalo == "1"
+   // nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
+   // ELSE
+   nStvarnaKolicina := _Kolicina
+   // ENDIF
 
    IF _TPrevoz == "%"
       nPrevoz := _Prevoz / 100 * _FCj2
@@ -524,7 +524,6 @@ FUNCTION NabCj2( n1, n2 )
    RETURN .T.
 
 
-
 /* kalk_set_vpc_sifarnik(nNovaVrijednost,fUvijek)
  *   param: fUvijek -.f. samo ako je vrijednost u sifrarniku 0, .t. uvijek setuj
  *     Utvrdi varijablu VPC. U sifrarnik staviti novu vrijednost
@@ -543,7 +542,7 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
 
    IF koncij->naz == "N1"  // magacin se vodi po nabavnim cijenama
       RETURN .T.
-   endif
+   ENDIF
 
    IF koncij->naz == "P2"
       cPom := "plc"
@@ -595,7 +594,6 @@ FUNCTION kalk_vpc_za_koncij()
 
 
 
-
 FUNCTION kalk_marza_veleprodaja()
 
    LOCAL nStvarnaKolicina := 0, nMarza
@@ -610,7 +608,6 @@ FUNCTION kalk_marza_veleprodaja()
    ENDIF
 
    RETURN nMarza
-
 
 
 
@@ -734,30 +731,14 @@ FUNCTION V_RabatV()
       ENDIF
    ENDIF
 
-   IF roba->tip == "V"  // roba tarife
-      nMarza := _VPC / ( 1 + _PORVT ) - _VPC * _RabatV / 100 - _NC
-   ELSEIF roba->tip = "X"
-      nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC - _MPCSAPP / ( 1 + _PORVT ) * _porvt
-   ELSE
-      nMarza := _VPC / ( 1 + _PORVT ) * ( 1 - _RabatV / 100 ) - _NC
-   ENDIF
-
+   nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC
 
    @ box_x_koord() + 15, box_y_koord() + 41  SAY "PC b.pdv.-RAB:"
-
-
-   IF roba->tip == "V"
-      @ box_x_koord() + 15, Col() + 1 SAY _Vpc / ( 1 + _PORVT ) - _VPC * _RabatV / 100 PICT picdem
-   ELSEIF roba->tip == "X"
-      @ box_x_koord() + 15, Col() + 1 SAY _Vpc * ( 1 - _RabatV / 100 ) - _MPCSAPP / ( 1 + _PORVT ) * _PORVT PICT picdem
-   ELSE
-      @ box_x_koord() + 15, Col() + 1 SAY _Vpc / ( 1 + _PORVT ) * ( 1 - _RabatV / 100 ) PICT picdem
-   ENDIF
+   @ box_x_koord() + 15, Col() + 1 SAY _Vpc * ( 1 - _RabatV / 100 ) PICT picdem
 
    ShowGets()
 
    RETURN .T.
-
 
 
 

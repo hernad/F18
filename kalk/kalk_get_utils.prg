@@ -154,7 +154,7 @@ FUNCTION kalk_puni_polja_za_izgenerisane_stavke( pIzgStavke )
                mpc    WITH _mpc, ;
                mpcsapp WITH _mpcsapp, ;
                tmarza  WITH _tmarza, ;
-               marza  WITH _vpc / ( 1 + _PORVT ) - kalk_pripr->fcj, ;      // konkretna vp marza
+               marza  WITH _vpc - kalk_pripr->fcj, ;      // konkretna vp marza
                tmarza2  WITH _tmarza2, ;
                marza2  WITH _marza2, ;
                mkonto WITH _mkonto, ;

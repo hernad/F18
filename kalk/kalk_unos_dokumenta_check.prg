@@ -402,77 +402,13 @@ FUNCTION kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
    RETURN .T.
 
 
-/*
- *     Uzmi iz parametara
- *   param: cSta - "KOL", "NV", "MPV", MPVBP"...
- */
-FUNCTION UzmiIzP( cSta )
-
-   // {
-   LOCAL nVrati := 0, nArr := 0
-   IF cSta == "KOL"
-      IF pu_i == "1"
-         nVrati := kolicina - GKolicina - GKolicin2
-      ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
-         nVrati := -kolicina
-      ELSEIF pu_i == "I"
-         nVrati := -gkolicin2
-      ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )    // povrat
-         nVrati := -kolicina
-      ELSEIF pu_i == "3"    // nivelacija
-      ENDIF
-   ELSEIF cSta == "NV"
-      IF pu_i == "1"
-         nVrati := + nc * kolicina
-      ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
-         nVrati := -nc * kolicina
-      ELSEIF pu_i == "I"
-         nVrati := -nc * gkolicin2
-      ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )    // povrat
-         nVrati := -nc * kolicina
-      ELSEIF pu_i == "3"    // nivelacija
-      ENDIF
-   ELSEIF cSta == "MPV"
-      IF pu_i == "1"
-         nVrati := + mpcsapp * kolicina
-      ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
-         nVrati := -mpcsapp * kolicina
-      ELSEIF pu_i == "I"
-         nVrati := -mpcsapp * gkolicin2
-      ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )    // povrat
-         nVrati := -mpcsapp * kolicina
-      ELSEIF pu_i == "3"    // nivelacija
-         nVrati := + mpcsapp * kolicina
-      ENDIF
-   ELSEIF cSta == "MPVBP"
-      IF pu_i == "1"
-         nVrati := + mpc * kolicina
-      ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
-         nVrati := -mpc * kolicina
-      ELSEIF pu_i == "I"
-         nArr := Select()
-         select_o_tarifa( ( nArr )->IDTARIFA )
-         set_pdv_public_vars()
-         SELECT ( nArr )
-         nVrati := -mpcsapp / ( 1 + _PDV ) * gkolicin2
-      ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )    // povrat
-         nVrati := -mpc * kolicina
-      ELSEIF pu_i == "3"    // nivelacija
-         nVrati := + mpc * kolicina
-      ENDIF
-   ENDIF
-
-   RETURN nVrati
-
-
-
 FUNCTION kalk_gen_11_iz_10( cBrDok )
 
    LOCAL nArr
 
    nArr := Select()
-   o_tarifa()
-   o_koncij()
+   //o_tarifa()
+   //o_koncij()
    // o_roba()
    o_kalk_pripr9()
    cOtpremnica := Space( 10 )
@@ -496,7 +432,6 @@ FUNCTION kalk_gen_11_iz_10( cBrDok )
       select_o_roba( cRoba )
       select_o_tarifa( cTarifa )
       set_pdv_array( @aPorezi )
-      set_pdv_public_vars()
       SELECT kalk_pripr
       Scatter()
       SELECT kalk_pripr9
@@ -508,7 +443,7 @@ FUNCTION kalk_gen_11_iz_10( cBrDok )
       _brFaktP := cOtpremnica
       _tPrevoz := "R"
       _tMarza := "A"
-      _marza := _vpc / ( 1 + _PORVT ) - _fcj
+      _marza := _vpc - _fcj
       _tMarza2 := "A"
       _mpcsapp := kalk_get_mpc_by_koncij_pravilo()
       VMPC( .F., cProracunMarzeUnaprijed )

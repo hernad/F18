@@ -83,12 +83,9 @@ FUNCTION kalk_get1_80()
    READ
    ESC_RETURN K_ESC
 
-   set_pdv_public_vars()
-
    IF roba_barkod_pri_unosu()
       _idRoba := Left( _idRoba, 10 )
    ENDIF
-
    select_o_roba( _idroba )
    select_o_tarifa( roba->idtarifa )
    select_o_koncij( _pkonto )

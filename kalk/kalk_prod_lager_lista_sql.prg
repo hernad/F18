@@ -238,7 +238,6 @@ FUNCTION kalk_prod_pocetno_stanje()
 
 
 
-
 STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
 
    LOCAL nCount := 0
@@ -314,11 +313,7 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
       hRec[ "idroba" ] := cIdRoba
       hRec[ "idkonto" ] := _p_konto
       hRec[ "pkonto" ] := _p_konto
-
       hRec[ "idtarifa" ] := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( _p_konto, cIdRoba, @aPorezi )
-
-      set_pdv_public_vars()
-
       hRec[ "tcardaz" ] := "%"
       hRec[ "pu_i" ] := "1"
       hRec[ "brfaktp" ] := PadR( "lPocetnoStanje", Len( hRec[ "brfaktp" ] ) )
