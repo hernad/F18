@@ -59,7 +59,6 @@ FUNCTION _db_thread_fn()
       QUIT_1
    ENDIF
 
-
    log_write_db( my_home() )
 
    DO WHILE .T.

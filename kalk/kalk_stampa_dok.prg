@@ -12,12 +12,23 @@
 #include "f18.ch"
 
 MEMVAR cIdfirma, cIdvd, cBrdok
-
+MEMVAR gTops
+MEMVAR __print_opt
+MEMVAR  PicCDEM, PicProc, PicDEM, PicKol, gPicPROC
 
 FUNCTION kalk_stampa_svih_dokumenata_u_pripremi()
-   RETURN kalk_stampa_dokumenta( .F., NIL, .T. )
+   RETURN kalk_stampa_dokumenta( .F., .T. )
 
-FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
+FUNCTION kalk_stampa_dokumenta_priprema( lBezPitanjaDok )
+   RETURN kalk_stampa_dokumenta( .F., lBezPitanjaDok )
+
+FUNCTION kalk_stampa_azuriranog_dokumenta_na_osnovu_doks()
+   RETURN kalk_stampa_dokumenta( .T., .T. )
+
+FUNCTION kalk_stampa_azuriranog_dokumenta()
+   RETURN kalk_stampa_dokumenta( .T., .F. )
+
+FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
 
    LOCAL nCol1
    LOCAL nCol2
@@ -25,6 +36,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
    LOCAL cOk
    LOCAL cNaljepniceDN := "N"
    LOCAL GetList := {}
+   LOCAL lDokumentZaPOS, lDokumentZaFakt
    PRIVATE cIdfirma, cIdvd, cBrdok
 
    nCol1 := 0
@@ -40,34 +52,39 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
    IF ( PCount() == 0 )
       lAzuriraniDokument := .F.
    ENDIF
-
    IF ( lAzuriraniDokument == NIL )
       lAzuriraniDokument := .F.
    ENDIF
-
-   IF ( lAuto == NIL )
-      lAuto := .F.
+   IF ( lBezPitanjaBrDok == NIL )
+      lBezPitanjaBrDok := .F.
    ENDIF
 
-   IF ( cSeek == NIL )
-      cSeek := ""
+   IF lAzuriraniDokument .AND. lBezPitanjaBrDok
+      cIdFirma := kalk_doks->IdFirma
+      cIdVd := kalk_doks->IdVd
+      cBrDok := kalk_doks->BrDok
+      open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok )
+   ELSE
+      my_close_all_dbf()
+      kalk_open_tables_unos( lAzuriraniDokument )
    ENDIF
 
-   my_close_all_dbf()
-   kalk_open_tables_unos( lAzuriraniDokument )
+   // IF ( cSeek == NIL )
+   // cSeek := ""
+   // ENDIF
 
    SELECT kalk_pripr
    SET ORDER TO TAG "1"
    GO TOP
 
-   fTopsD := .F.
-   fFaktD := .F.
+   lDokumentZaPOS := .F.
+   lDokumentZaFakt := .F.
 
    DO WHILE .T.
 
-      cIdFirma := field->IdFirma
-      cBrDok := field->BrDok
-      cIdVD := field->IdVD
+      cIdFirma := kalk_pripr->IdFirma
+      cBrDok := kalk_pripr->BrDok
+      cIdVD := kalk_pripr->IdVD
 
       IF Eof()
          EXIT
@@ -78,42 +95,41 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
          LOOP
       ENDIF
 
-      IF !lAuto
+      IF !lBezPitanjaBrDok
 
-         IF ( cSeek == "" )
-            Box( "", 6, 65 )
-            SET CURSOR ON
-            @ box_x_koord() + 1, box_y_koord() + 2 SAY "KALK Dok broj:"
+         // IF ( cSeek == "" )
+         Box( "", 6, 65 )
+         SET CURSOR ON
+         @ box_x_koord() + 1, box_y_koord() + 2 SAY "KALK Dok broj:"
 
-            @ box_x_koord() + 1, Col() + 2  SAY cIdFirma
-            @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVD  PICT "@!"
-            @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrDok VALID {|| cBrdok := kalk_fix_brdok( cBrDok ), .T. }
+         @ box_x_koord() + 1, Col() + 2  SAY cIdFirma
+         @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVD  PICT "@!"
+         @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrDok VALID {|| cBrdok := kalk_fix_brdok( cBrDok ), .T. }
 
-            @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "(Brdok: '00000022', '22' -> '00000022', '00005/TZ'"
-            @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "        '22#  ' -> '22   ', '0022' -> '00000022' ) "
+         @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "(Brdok: '00000022', '22' -> '00000022', "
+         @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "        '22#  ' -> '22   ', '0022' -> '00000022' ) "
 
-            @ box_x_koord() + 6, box_y_koord() + 2 SAY8 "Štampa naljepnica D/N ?" GET cNaljepniceDN  PICT "@!" VALID cNaljepniceDN $ "DN"
-            READ
+         @ box_x_koord() + 6, box_y_koord() + 2 SAY8 "Štampa naljepnica D/N ?" GET cNaljepniceDN  PICT "@!" VALID cNaljepniceDN $ "DN"
+         READ
 
-            ESC_BCR
-            BoxC()
+         ESC_BCR
+         BoxC()
 
-            IF lAzuriraniDokument // stampa azuriranog KALK dokumenta
-               open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok )
-            ENDIF
+         // ENDIF
+         IF lAzuriraniDokument // stampa azuriranog KALK dokumenta
+            open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok )
          ENDIF
 
       ENDIF
 
-      IF ( !Empty( cSeek ) .AND. cSeek != 'IZDOKS' )
-         HSEEK cSeek
-         cIdfirma := SubStr( cSeek, 1, 2 )
-         cIdvd := SubStr( cSeek, 3, 2 )
-         cBrDok := PadR( SubStr( cSeek, 5, 8 ), 8 )
-      ELSE
-         HSEEK cIdFirma + cIdVD + cBrDok
-      ENDIF
-
+      // IF ( !Empty( cSeek ) .AND. cSeek != 'IZDOKS' )
+      // HSEEK cSeek
+      // cIdfirma := SubStr( cSeek, 1, 2 )
+      // cIdvd := SubStr( cSeek, 3, 2 )
+      // cBrDok := PadR( SubStr( cSeek, 5, 8 ), 8 )
+      // ELSE
+      HSEEK cIdFirma + cIdVD + cBrDok
+      // ENDIF
 
       IF !Empty( cOk := kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok ) ) // provjeri da li kalkulacija ima sve cijene ?
          MsgBeep( "Unutar kalkulacije nedostaju pojedine cijene bitne za obračun!##Stavke: " + cOk )
@@ -121,97 +137,94 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
          // RETURN .F.
       ENDIF
 
-      IF ( cSeek != 'IZDOKS' )
-         EOF CRET
-      ELSE
-         PRIVATE nStr := 1
-      ENDIF
+      // IF ( cSeek != 'IZDOKS' )
+      EOF CRET
+      // ELSE
+      // PRIVATE nStr := 1
+      // ENDIF
 
       IF !pdf_kalk_dokument( cIdVd )
          START PRINT CRET
          ?
       ENDIF
 
-      DO WHILE .T.
+      // DO WHILE .T.
 
-         IF ( cSeek == 'IZDOKS' )
-            IF ( PRow() > 42 ) // stampati sve odjednom
-               ++nStr
-               FF
-            ENDIF
-            SELECT kalk_pripr
-            cIdfirma := kalk_pripr->idfirma
-            cIdvd := kalk_pripr->idvd
-            cBrdok := kalk_pripr->brdok
-            HSEEK cIdFirma + cIdVD + cBrDok
+      // IF ( cSeek == 'IZDOKS' )
+      // IF ( PRow() > 42 ) // stampati sve odjednom
+      // ++nStr
+      // FF
+      // ENDIF
+      // SELECT kalk_pripr
+      // cIdfirma := kalk_pripr->idfirma
+      // cIdvd := kalk_pripr->idvd
+      // cBrdok := kalk_pripr->brdok
+      // HSEEK cIdFirma + cIdVD + cBrDok
+      // ENDIF
+
+      IF !pdf_kalk_dokument( cIdVd )
+         Preduzece()
+      ENDIF
+
+      IF cIdVD == "10"
+         kalk_stampa_dok_10()
+
+      ELSEIF ( cIdvd $ "11#12#13" )
+         kalk_stampa_dok_11()
+
+      ELSEIF ( cIdvd $ "14#94#74#KO" )
+         kalk_stampa_dok_14()
+
+      ELSEIF ( cIdvd $ "16#95#96#97" )
+
+         kalk_stampa_dok_16_95_96()
+
+      ELSEIF ( cIdvd $ "41#42#43#47#49" )
+         kalk_stampa_dok_41_42()
+
+      ELSEIF ( cIdvd == "18" )
+         kalk_stampa_dok_18()
+
+      ELSEIF ( cIdvd == "19" )
+         kalk_stampa_dok_19()
+
+      ELSEIF ( cIdvd == "80" )
+         kalk_stampa_dok_80()
+
+      ELSEIF ( cIdvd == "81" )
+
+         kalk_stampa_dok_81()
+
+      ELSEIF ( cIdvd == "82" )
+         kalk_stampa_dok_82()
+
+      ELSEIF ( cIdvd == "IM" )
+         kalk_stampa_dok_im()
+
+      ELSEIF ( cIdvd == "IP" )
+         kalk_stampa_dok_ip()
+
+      ELSEIF ( cIdvd == "RN" )
+         IF !lAzuriraniDokument
+            kalk_raspored_troskova( .T. )
          ENDIF
+         kalk_stampa_dok_rn()
+      ELSEIF ( cidvd == "PR" )
+         kalk_stampa_dok_pr()
+      ENDIF
 
-         IF !pdf_kalk_dokument( cIdVd )
-            Preduzece()
-         ENDIF
-
-         IF cIdVD == "10"
-            kalk_stampa_dok_10()
-
-         ELSEIF ( cIdvd $ "11#12#13" )
-
-            kalk_stampa_dok_11()
-
-         ELSEIF ( cIdvd $ "14#94#74#KO" )
-            kalk_stampa_dok_14()
-
-         ELSEIF ( cIdvd $ "16#95#96#97" )
-
-            kalk_stampa_dok_16_95_96()
-
-         ELSEIF ( cidvd $ "41#42#43#47#49" )
-            kalk_stampa_dok_41()
-
-         ELSEIF ( cIdvd == "18" )
-            kalk_stampa_dok_18()
-
-         ELSEIF ( cIdvd == "19" )
-            kalk_stampa_dok_19()
-
-         ELSEIF ( cIdvd == "80" )
-            kalk_stampa_dok_80()
-
-         ELSEIF ( cIdvd == "81" )
-
-            kalk_stampa_dok_81()
-
-         ELSEIF ( cIdvd == "82" )
-            kalk_stampa_dok_82()
-
-         ELSEIF ( cIdvd == "IM" )
-            kalk_stampa_dok_im()
-
-         ELSEIF ( cIdvd == "IP" )
-            kalk_stampa_dok_ip()
-
-         ELSEIF ( cIdvd == "RN" )
-            IF !lAzuriraniDokument
-               kalk_raspored_troskova( .T. )
-            ENDIF
-            kalk_stampa_dok_rn()
-         ELSEIF ( cidvd == "PR" )
-            kalk_stampa_dok_pr()
-         ENDIF
-
-         IF ( cSeek != 'IZDOKS' )
-            EXIT
-         ELSE
-            SELECT kalk_pripr
-            SKIP
-            IF Eof()
-               EXIT
-            ENDIF
-            ?
-            ?
-         ENDIF
-
-
-      ENDDO // cSEEK
+      // IF ( cSeek != 'IZDOKS' )
+      // EXIT
+      // ELSE
+      // SELECT kalk_pripr
+      // SKIP
+      // IF Eof()
+      // EXIT
+      // ENDIF
+      // ?
+      // ?
+      // ENDIF
+      // ENDDO // cSEEK
 
       IF !pdf_kalk_dokument( cIdVd )
          IF ( gPotpis == "D" )
@@ -226,10 +239,8 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
             @ PRow() + 1, 47 SAY "Komercijala "; ?? Replicate( "_", 20 )
             @ PRow() + 1, 47 SAY "Likvidatura "; ?? Replicate( "_", 20 )
          ENDIF
-
          ?
          ?
-
          FF
       ENDIF
 
@@ -241,22 +252,20 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
       ENDIF
 
       // ------------------- kraj stampe jedne kalkulacije
-
-
       kalk_open_tables_unos( lAzuriraniDokument )
       PopWa()
 
-      IF ( cIdvd $ "80#11#81#12#13#IP#19" )
-         fTopsD := .T.
+      IF ( cIdvd $ "80#11#81#IP#19" )
+         lDokumentZaPOS := .T.
       ENDIF
 
       IF ( cIdvd $ "10#11#81" )
-         fFaktD := .T.
+         lDokumentZaFakt := .T.
       ENDIF
 
-      IF ( !Empty( cSeek ) )
-         EXIT
-      ENDIF
+      // IF ( !Empty( cSeek ) )
+      // EXIT
+      // ENDIF
 
       IF lAzuriraniDokument // stampa azuriranog KALK dokumenta
          IF cNaljepniceDN == "D"
@@ -276,14 +285,16 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
 
    ENDDO  // vrti kroz kalkulacije
 
-   IF ( fTopsD .AND. !lAzuriraniDokument .AND. gTops != "0 " )
-      start PRINT cret
+   IF ( lDokumentZaPOS .AND. !lAzuriraniDokument .AND. gTops != "0 " )
+      IF !pdf_kalk_dokument( cIdVd )
+         START PRINT CRET
+      ENDIF
       SELECT kalk_pripr
       SET ORDER TO TAG "1"
       GO TOP
-      cIdFirma := IdFirma
-      cBrDok := BrDok
-      cIdVD := IdVD
+      cIdFirma := kalk_pripr->IdFirma
+      cBrDok := kalk_pripr->BrDok
+      cIdVD := kalk_pripr->IdVD
       IF ( cIdVd $ "11#12" )
          kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
       ELSEIF ( cIdVd == "80" )
@@ -296,23 +307,25 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
          kalk_stampa_dok_19()
       ENDIF
       my_close_all_dbf()
-      FF
-      ENDPRINT
+      IF !pdf_kalk_dokument( cIdVd )
+         FF
+         ENDPRINT
+      ENDIF
 
       kalk_generisi_tops_dokumente()
 
    ENDIF
 
-   IF ( fFaktD .AND. !lAzuriraniDokument .AND. gFakt != "0 " )
+   IF ( lDokumentZaFakt .AND. !lAzuriraniDokument .AND. gFakt != "0 " )
 
       start PRINT cret
       o_kalk_edit()
       SELECT kalk_pripr
       SET ORDER TO TAG "1"
       GO TOP
-      cIdFirma := IdFirma
-      cBrDok := BrDok
-      cIdVD := IdVD
+      cIdFirma := kalk_pripr->IdFirma
+      cBrDok := kalk_pripr->BrDok
+      cIdVD := kalk_pripr->IdVD
       IF ( cIdVd $ "11#12" )
          kalk_stampa_dok_11( .T. )
       ELSEIF ( cIdVd == "10" )
@@ -331,10 +344,48 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, cSeek, lAuto )
    RETURN NIL
 
 
+
+
+   /*
+     legacy global vars
+   */
+
+FUNCTION picdem( cPic )
+
+   IF cPic != NIL
+      picdem := cPic
+   ENDIF
+
+   RETURN picdem
+
+FUNCTION pickol( cPic )
+
+   IF cPic != NIL
+      pickol := cPic
+   ENDIF
+
+   RETURN pickol
+
+FUNCTION piccdem( cPic )
+
+   IF cPic != NIL
+      piccdem := cPic
+   ENDIF
+
+   RETURN piccdem
+
+FUNCTION picproc( cPic )
+
+   IF cPic != NIL
+      picproc := cPic
+   ENDIF
+
+   RETURN picproc
+
 STATIC FUNCTION pdf_kalk_dokument( cIdVd )
 
-   //IF is_legacy_ptxt()
-  //    RETURN .F.
-   //ENDIF
+   // IF is_legacy_ptxt()
+   // RETURN .F.
+   // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80"  // implementirano za kalk 10, 14
+   RETURN cIdVd $ "10#14#19#80"  // implementirano za ove dokumente

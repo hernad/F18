@@ -103,17 +103,16 @@ FUNCTION Get1_82()
 
    @ box_x_koord() + 14, box_y_koord() + 2   SAY "VPC      " GET _VPC    PICTURE PicDEM ;
       VALID {|| iif( gVarVP == "2" .AND. ( _vpc - _nc ) > 0, cisMarza := ( _vpc - _nc ) / ( 1 + tarifa->vpp ), _vpc - _nc ), ;
-      _mpcsapp := _MPCSaPP := ( 1 + _OPP ) * _VPC * ( 1 - _Rabatv / 100 ) * ( 1 + _PPP ), ;
+      _mpcsapp := _MPCSaPP := ( 1 + _PDV ) * _VPC * ( 1 - _Rabatv / 100 ), ;
       _mpcsapp := Round( _mpcsapp, 2 ), .T. }
 
    _RabatV := 0
-   @ box_x_koord() + 19, box_y_koord() + 2  SAY "PPP (%):"; @ Row(), Col() + 2 SAY  _OPP * 100 PICTURE "99.99"
-   @ box_x_koord() + 19, Col() + 8  SAY "PPU (%):"; @ Row(), Col() + 2  SAY _PPP * 100 PICTURE "99.99"
+   @ box_x_koord() + 19, box_y_koord() + 2  SAY "PDV (%):"; @ Row(), Col() + 2 SAY  _PDV * 100 PICTURE "99.99"
+   //@ box_x_koord() + 19, Col() + 8  SAY "PPU (%):"; @ Row(), Col() + 2  SAY _PPP * 100 PICTURE "99.99"
 
    @ box_x_koord() + 20, box_y_koord() + 2 SAY "MPC SA POREZOM:"
    @ box_x_koord() + 20, box_y_koord() + 50 GET _MPCSaPP  PICTURE PicDEM ;
-      VALID {|| _mpc := iif( _mpcsapp <> 0, _mpcsapp / ( 1 + _opp ) / ( 1 + _PPP ), _mpc ), ;
-      _marza2 := 0,  Marza2R(), ShowGets(), .T. }
+      VALID {|| _mpc := iif( _mpcsapp <> 0, _mpcsapp / ( 1 + _PDV ), _mpc ), _marza2 := 0,  Marza2R(), ShowGets(), .T. }
    read
    ESC_RETURN K_ESC
 

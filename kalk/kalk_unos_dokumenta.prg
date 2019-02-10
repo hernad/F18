@@ -257,7 +257,7 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
 
    CASE Ch == K_CTRL_P
       my_close_all_dbf()
-      kalk_stampa_dokumenta()
+      kalk_stampa_dokumenta_priprema()
       my_close_all_dbf()
       o_kalk_edit()
 

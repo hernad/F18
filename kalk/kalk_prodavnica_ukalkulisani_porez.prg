@@ -40,6 +40,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL aPorezi
    LOCAL cLine, cText1, cText2
+   LOCAL GetList := {}
 
    dDat1 := dDat2 := CToD( "" )
    cVDok := "99"
@@ -83,7 +84,6 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
 
    GO TOP   // samo  zaduz prod. i povrat iz prod.
    EOF CRET
-
 
    aRUP := {}
    AAdd( aRUP, { 10, "PROD", " KTO" } )
@@ -159,9 +159,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
          select_o_tarifa( cIdtarifa )
 
          SELECT kalk
-
          // cIdTarifa := Tarifa( pkonto, idRoba, @aPorezi, cIdTarifa )
-
          nMPV := 0
          nMPVSaPP := 0
          nNV := 0
@@ -190,11 +188,8 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
             FF
          ENDIF
 
-         // porez na promet
-         // nPorez := Izn_P_PPP( nMpv, aPorezi, , nMpvSaPP )
-
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-         nPDV := kalk_porezi_maloprodaja( nMPV, aPorezi, nMPVSaPP )
+         nPDV := kalk_porezi_maloprodaja( aPorezi, nMPV, nMPVSaPP )
 
          @ PRow() + 1, 0 SAY Space( 3 ) + cIdKonto
          @ PRow(), PCol() + 1 SAY Space( 6 ) + cIdTarifa
@@ -223,23 +218,6 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
       @ PRow(), PCol() + 1  SAY  nT4     PICT cPicIznos
       @ PRow(), PCol() + 1  SAY  nT7     PICT cPicIznos
       ? cLine
-
-/*
-      IF cStope == "D"
-         ?
-         ? "Prikaz ucesca pojedinih tarifa:"
-         ? cLine
-         FOR ii := 1 TO Len( aTarife )
-            ? aTarife[ ii, 1 ]
-            @ PRow(), PCol() + 1 SAY aTarife[ ii, 2 ] / nT7 * 100 PICT "99.999%"
-            ?? " * "
-            @ PRow(), PCol() + 1 SAY nReal PICT  cPicIznos
-            ?? " = "
-            @ PRow(), PCol() + 1 SAY nReal * aTarife[ ii, 2 ] / nT7 PICT cPicIznos
-         NEXT
-         ? cLine
-      ENDIF
-*/
 
    ENDDO
 

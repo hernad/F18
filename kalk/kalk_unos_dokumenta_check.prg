@@ -451,9 +451,10 @@ FUNCTION UzmiIzP( cSta )
          nVrati := -mpc * kolicina
       ELSEIF pu_i == "I"
          nArr := Select()
-         select_o_tarifa( ( nArr )->IDTARIFA ); set_pdv_public_vars()
+         select_o_tarifa( ( nArr )->IDTARIFA )
+         set_pdv_public_vars()
          SELECT ( nArr )
-         nVrati := -mpcsapp / ( ( 1 + _OPP ) * ( 1 + _PPP ) ) * gkolicin2
+         nVrati := -mpcsapp / ( 1 + _PDV ) * gkolicin2
       ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )    // povrat
          nVrati := -mpc * kolicina
       ELSEIF pu_i == "3"    // nivelacija

@@ -11,11 +11,7 @@
 
 #include "f18.ch"
 
-
-/*
-   finansijsko stanje prodavnice
-*/
-FUNCTION finansijsko_stanje_prodavnica()
+FUNCTION kalk_finansijsko_stanje_prodavnice()
 
    LOCAL nKolUlaz
    LOCAL nKolIzlaz
@@ -29,10 +25,10 @@ FUNCTION finansijsko_stanje_prodavnica()
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "133", FIELD_LENGTH_IDKONTO )
 
-   o_koncij()
+   //o_koncij()
    // o_roba()
-   o_tarifa()
-   o_konto()
+   //o_tarifa()
+   //o_konto()
 
    dDatOd := CToD( "" )
    dDatDo := Date()
@@ -150,7 +146,6 @@ FUNCTION finansijsko_stanje_prodavnica()
    AAdd( aRFLLP, { Len( cPicIznos ), " PV sa PDV", " - pop." } )
    AAdd( aRFLLP, { Len( cPicIznos ), " PV sa PDV", " ukupno" } )
 
-
    PRIVATE cLine := SetRptLineAndText( aRFLLP, 0 )
    PRIVATE cText1 := SetRptLineAndText( aRFLLP, 1, "*" )
    PRIVATE cText2 := SetRptLineAndText( aRFLLP, 2, "*" )
@@ -178,7 +173,7 @@ FUNCTION finansijsko_stanje_prodavnica()
    // #DEFINE CMNEOF  !eof() .and. ncmRec<=ncmSLOGOVA
    // #XCOMMAND CMSKIP => ++ncmRec; if ncmrec>ncmslogova;exit;end; skip
 #define CMNEOF  !eof()
-#xcommand CMSKIP => skip
+
 
    CMINIT
    showkorner( ncmslogova, 1, 16 )
@@ -206,29 +201,25 @@ FUNCTION finansijsko_stanje_prodavnica()
          select_o_roba( KALK->idroba )
          SELECT KALK
 
-         showkorner( 1, 100 )
-
+         //showkorner( 1, 100 )
          IF cTU == "2" .AND.  roba->tip $ "UT"
             // prikaz dokumenata IP, a ne robe tipa "T"
-            CMSKIP
+            SKIP
             LOOP
          ENDIF
          IF cTU == "1" .AND. idvd == "IP"
-            CMSKIP
+            SKIP
             LOOP
          ENDIF
 
          select_o_roba( KALK->idroba )
          select_o_tarifa( KALK->idtarifa )
          SELECT KALK
-
          set_pdv_public_vars()
-
          IF field->pu_i == "1"
-
-            nMPVBU += mpc * kolicina
-            nMPVU += mpcsapp * kolicina
-            nNVU += nc * ( kolicina )
+            nMPVBU += kalk->mpc * kalk->kolicina
+            nMPVU += kalk->mpcsapp * kalk->kolicina
+            nNVU += kalk->nc * kalk->kolicina
 
          ELSEIF field->pu_i == "5"
 
@@ -239,37 +230,32 @@ FUNCTION finansijsko_stanje_prodavnica()
             nPor1 := aIPor[ 1 ]
 
             IF field->idvd $ "12#13"
-
-               nMPVBU -= mpc * kolicina
-               nMPVU -= mpcsapp * kolicina
-               nNVU -= nc * kolicina
-               nPopust -= rabatv * kolicina
-               nMPVIP -= ( mpc + nPor1 ) * kolicina
+               nMPVBU -= kalk->mpc * kalk->kolicina
+               nMPVU -= kalk->mpcsapp * kalk->kolicina
+               nNVU -= kalk->nc * kalk->kolicina
+               nPopust -= kalk->rabatv * kalk->kolicina
+               nMPVIP -= ( kalk->mpc + nPor1 ) * kalk->kolicina
             ELSE
-
-               nMPVBI += mpc * kolicina
-               nMPVI += mpcsapp * kolicina
-               nNVI += nc * kolicina
-               nPopust += rabatv * kolicina
-               nMPVIP += ( mpc + nPor1 ) * kolicina
-
+               nMPVBI += kalk->mpc * kalk->kolicina
+               nMPVI += kalk->mpcsapp * kalk->kolicina
+               nNVI += kalk->nc * kalk->kolicina
+               nPopust += kalk->rabatv * kalk->kolicina
+               nMPVIP += ( kalk->mpc + nPor1 ) * kalk->kolicina
             ENDIF
 
-         ELSEIF pu_i == "3" // nivelacija
-            nMPVBU += mpc * kolicina
-            nMPVU += mpcsapp * kolicina
+         ELSEIF kalk->pu_i == "3" // nivelacija
+            nMPVBU += kalk->mpc * kalk->kolicina
+            nMPVU += kalk->mpcsapp * kalk->kolicina
 
-         ELSEIF pu_i == "I"
-
+         ELSEIF kalk->pu_i == "I"
             set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi, field->idtarifa )
             nMPVBI += kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi ) * field->gkolicin2
-            // nMPVBI+=mpcsapp/((1+_OPP)*(1+_PPP))*gkolicin2
             nMPVI += mpcsapp * gkolicin2
             nNVI += nc * gkolicin2
 
          ENDIF
 
-         CMSKIP
+         SKIP
 
       ENDDO
 

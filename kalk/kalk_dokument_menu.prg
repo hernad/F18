@@ -20,7 +20,7 @@ FUNCTION kalk_pregled_dokumenata()
    LOCAL nIzbor := 1
 
    AAdd( aOpc, "1. štampa ažuriranog dokumenta              " )
-   AAdd( aOpcExe, {|| kalk_stampa_dokumenta( .T. ) } )
+   AAdd( aOpcExe, {|| kalk_stampa_azuriranog_dokumenta() } )
 
    AAdd( aOpc, "2. štampa liste dokumenata" )
    AAdd( aOpcExe, {|| kalk_stampa_liste_dokumenata() } )
@@ -31,7 +31,7 @@ FUNCTION kalk_pregled_dokumenata()
 */
 
    AAdd( aOpc, "4. pregled dokumenata - tabelarni pregled" )
-   AAdd( aOpcExe, {|| browse_kalk_dokumenti() } )
+   AAdd( aOpcExe, {|| kalk_pregled_dokumenata_tabela() } )
 
 /*
    AAdd( aOpc, "5. radni nalozi " )

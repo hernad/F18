@@ -21,7 +21,7 @@
     *   param: nMpcSaP Maloprodajna cijena sa porezom
 */
 
-FUNCTION kalk_porezi_maloprodaja( nMpcBp, aPorezi, nMpcSaP )
+FUNCTION kalk_porezi_maloprodaja( aPorezi, nMpcBp, nMpcSaP )
 
    LOCAL nPom
    LOCAL nUkPor
@@ -70,7 +70,6 @@ FUNCTION set_pdv_array( aPorezi )
 FUNCTION set_pdv_public_vars()
 
    PUBLIC _PDV := tarifa->opp / 100
-   PUBLIC _OPP := tarifa->opp / 100
    PUBLIC _PP := 0
    PUBLIC _ZPP := 0
    PUBLIC _PPP := 0

@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 
-
 /* -----------------------------------------------
  pomocna tabela finansijskog stanja prodavnice
 
@@ -31,8 +30,7 @@ koristi TKM
 
 FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
-   LOCAL _konto := ""
-   LOCAL _tarifa, _opp
+   LOCAL cIdKonto := ""
    LOCAL _datum_od := Date()
    LOCAL _datum_do := Date()
    LOCAL _tarife := ""
@@ -93,7 +91,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    ENDIF
 
    IF hb_HHasKey( hParamsIn, "konto" )
-      _konto :=  hParamsIn[ "konto" ]
+      cIdKonto :=  hParamsIn[ "konto" ]
    ENDIF
 
    _cre_tmp_tbl()
@@ -104,16 +102,16 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    ENDIF
 
    IF _vise_konta
-      IF !Empty( _konto )
-         _usl_konto := Parsiraj( _konto, "pkonto" )
+      IF !Empty( cIdKonto )
+         _usl_konto := Parsiraj( cIdKonto, "pkonto" )
       ENDIF
    ELSE
 
-      IF Len( Trim( _konto ) ) == 3
-         _konto := Trim( _konto )
-         hParams[ "pkonto_sint" ] := _konto
+      IF Len( Trim( cIdKonto ) ) == 3
+         cIdKonto := Trim( cIdKonto )
+         hParams[ "pkonto_sint" ] := cIdKonto
       ELSE
-         hParams[ "pkonto" ] := _konto
+         hParams[ "pkonto" ] := cIdKonto
       ENDIF
 
    ENDIF
@@ -137,7 +135,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
   */
 
 
-   select_o_koncij( _konto )
+   select_o_koncij( cIdKonto )
 
    SELECT kalk
 

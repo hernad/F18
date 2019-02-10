@@ -889,7 +889,6 @@ STATIC FUNCTION kalk_import_csv_obradi_dokument( lAsPokreni, lStampaj )
    ENDIF
 
    IF lAsPokreni
-
       kalk_pripr_obrada_stavki_sa_asistentom()
       IF __trosk == .T.
          o_kalk_edit()
@@ -899,8 +898,8 @@ STATIC FUNCTION kalk_import_csv_obradi_dokument( lAsPokreni, lStampaj )
       o_kalk_edit()
    ENDIF
 
-   IF lStampaj == .T.
-      kalk_stampa_dokumenta( NIL, NIL, .T. ) // odstampaj kalk
+   IF lStampaj
+      kalk_stampa_dokumenta_priprema( .T. )
    ENDIF
 
    kalk_azuriranje_dokumenta_auto_bez_stampe() // azuriraj kalk

@@ -13,8 +13,7 @@
 
 MEMVAR _Prevoz, _BankTr, _ZavTr, _CarDaz, _SpedTr
 MEMVAR _fcj, _rabat, _kolicina
-
-
+MEMVAR nPrevoz, nBankTr, nSpedTr, nMarza, nMarza2, nCarDaz, nZavTr
 
 FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
@@ -201,7 +200,7 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
                IF _idvd $ "RN" .AND. Val( _rbr ) < 900
                   IF Round( nRNUkupnoProdVrijednost, 4 ) == 0
-                     error_bar( "RN", "RN stavke - ukupna prodajna vrijednost 0?!")
+                     error_bar( "RN", "RN stavke - ukupna prodajna vrijednost 0?!" )
                      _fcj := _fcj2 := 0
                   ELSE
                      _fcj := _fcj2 := _vpc / nRNUkupnoProdVrijednost * nUkupanIznosFakture // nabavne cijene proporcionalno prodajnim
@@ -617,7 +616,6 @@ FUNCTION raspored_procent_tr( cTipPrevoz, nIznosPrevoz, cTipCarDaz, nIznosCarDaz
    RETURN hRet
 
 
-
 /*
  *     Proracun iznosa troskova pri unosu u kalk_pripremi
 */
@@ -626,11 +624,7 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    LOCAL nStvarnaKolicina := 0
 
-   //IF gKalo == "1"
-    //  nStvarnaKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
-   //ELSE
-      nStvarnaKolicina := field->Kolicina
-   //ENDIF
+   nStvarnaKolicina := field->Kolicina
 
 
    IF field->TPrevoz == "%"
@@ -705,7 +699,6 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    IF field->IdVD $ "14#94#15"   // izlaz po vp
       nMarza := field->VPC * ( 1 - field->Rabatv / 100 ) - field->NC
-
    ELSEIF field->idvd $ "11#12#13"
       nMarza := field->VPC - field->FCJ
    ELSE
@@ -714,10 +707,8 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    IF ( field->idvd $ "11#12#13" )
       nMarza2 := field->MPC - field->VPC - nPrevoz
-
    ELSEIF ( ( field->idvd $ "41#42#43#81" ) )
       nMarza2 := field->MPC - field->NC
-
    ELSE
       nMarza2 := field->MPC - field->VPC
    ENDIF

@@ -170,7 +170,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
 
 
             set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-            nPDV := kalk_porezi_maloprodaja( nMPC, aPorezi, field->mpcSaPP )
+            nPDV := kalk_porezi_maloprodaja( aPorezi, nMPC, field->mpcSaPP )
             nMpc := kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi )
 
             nPor1 := nPDV * nKolicina
@@ -192,7 +192,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
          ENDIF
 
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-         nPDV := kalk_porezi_maloprodaja( nMPV, aPorezi, nMpvSaPP )
+         nPDV := kalk_porezi_maloprodaja( aPorezi, nMPV, nMpvSaPP )
 
 
          @ PRow() + 1, 0 SAY Space( 3 ) + cIdKonto

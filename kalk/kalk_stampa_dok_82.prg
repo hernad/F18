@@ -70,8 +70,8 @@ FUNCTION kalk_stampa_dok_82()
       nTot3 +=  ( nU3 := NC * kolicina )
       nTot4 +=  ( nU4 := vpc * ( 1 - rabatv / 100 ) * Kolicina )
       nTot5 +=  ( nU5 := MPC * Kolicina )
-      nPor1 :=  MPC * _OPP
-      nPor2 :=  MPC * ( 1 + _OPP ) * _PPP
+      nPor1 :=  MPC * _PDV
+      nPor2 := 0
       nTot6 +=  ( nU6 := ( nPor1 + nPor2 ) * Kolicina )
       nTot7 +=  ( nU7 := MPcSaPP * Kolicina )
 
@@ -144,8 +144,8 @@ FUNCTION kalk_stampa_dok_82()
          SELECT kalk_pripr
          set_pdv_public_vars()
          nU1 += mpc * kolicina
-         nU2 += mpc * _OPP * kolicina
-         nU3 += mpc * ( 1 + _OPP ) * _PPP * kolicina
+         nU2 += mpc * _PDV * kolicina
+         nU3 += 0
          nU4 += mpcsapp * kolicina
          nTot5 += ( mpc - nc ) * kolicina
          SKIP
@@ -153,8 +153,8 @@ FUNCTION kalk_stampa_dok_82()
       nTot1 += nu1; nTot2 += nU2; nTot3 += nU3
       nTot4 += nU4
       ? cidtarifa
-      @ PRow(), PCol() + 1   SAY _OPP * 100 PICT picproc
-      @ PRow(), PCol() + 1   SAY _PPP * 100 PICT picproc
+      @ PRow(), PCol() + 1   SAY _PDV * 100 PICT picproc
+      @ PRow(), PCol() + 1   SAY 0 PICT picproc
       nCol1 := PCol() + 1
       @ PRow(), PCol() + 1   SAY nu1 PICT picdem
       @ PRow(), PCol() + 1   SAY nu2 PICT picdem

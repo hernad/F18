@@ -266,7 +266,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
          // nPom := kalk_pripr->( aIPor[ 1 ] * ( Kolicina - GKolicina - GKolicin2 ) )
 
          // PDV
-         REPLACE Porez WITH Round( kalk_porezi_maloprodaja( NIL, aPorezi, nKolicina * kalk_pripr->mpcSaPP ), nZaokruzenje )
+         REPLACE Porez WITH Round( kalk_porezi_maloprodaja( aPorezi, NIL, nKolicina * kalk_pripr->mpcSaPP ), nZaokruzenje )
          // ??E field->porez, "+"
 
          // ugostiteljstvo porez na potr

@@ -32,7 +32,6 @@ FUNCTION kalk_stampa_dok_19()
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, aPorezi
 
    aPorezi := {}
-
    cIdFirma := kalk_pripr->IdFirma
    cIdVd := kalk_pripr->Idvd
    cBrDok := kalk_pripr->brdok
@@ -89,7 +88,6 @@ FUNCTION kalk_stampa_dok_19()
       nTot5 +=  ( nU5 := MPcSaPP * Kolicina )
 
       check_nova_strana( bZagl, s_oPDF )
-
       // 1. red
       @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "999"
       @ PRow(), PCol() + 1 SAY  kalk_pripr->idRoba
@@ -253,7 +251,6 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    RETURN .T.
 
 
-
 STATIC FUNCTION zagl_obrazac()
 
    ?U s_cLinija
@@ -262,39 +259,3 @@ STATIC FUNCTION zagl_obrazac()
    ?U s_cLinija
 
    RETURN .T.
-
-/*
-  legacy global vars
-*/
-
-FUNCTION picdem( cPic )
-
-   IF cPic != NIL
-      picdem := cPic
-   ENDIF
-
-   RETURN picdem
-
-FUNCTION pickol( cPic )
-
-   IF cPic != NIL
-      pickol := cPic
-   ENDIF
-
-   RETURN pickol
-
-FUNCTION piccdem( cPic )
-
-   IF cPic != NIL
-      piccdem := cPic
-   ENDIF
-
-   RETURN piccdem
-
-FUNCTION picproc( cPic )
-
-   IF cPic != NIL
-      picproc := cPic
-   ENDIF
-
-   RETURN picproc

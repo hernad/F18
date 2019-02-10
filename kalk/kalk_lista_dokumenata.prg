@@ -17,6 +17,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
    LOCAL nUl, nIzl, nRbr
    LOCAL m
    LOCAL nC
+   LOCAL GetList := {}
 
    LOCAL cIdVd
    LOCAL _head
@@ -42,7 +43,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
 
    Box(, 12, 75 )
 
-   PRIVATE cStampaj := "N"
+   //PRIVATE cStampaj := "N"
    qqBrDok := ""
 
    cIdFirma := fetch_metric( "kalk_lista_dokumenata_firma", my_user(), cIdFirma )
@@ -62,9 +63,9 @@ FUNCTION kalk_stampa_liste_dokumenata()
 
    DO WHILE .T.
 
-         cIdFirma := PadR( cidfirma, 2 )
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma - prazno svi" GET cIdFirma valid {|| .T. }
-         READ
+      cIdFirma := PadR( cidfirma, 2 )
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma - prazno svi" GET cIdFirma VALID {|| .T. }
+      READ
 
 
       IF !Empty( cidfirma )
@@ -81,7 +82,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Prodavnička konta:" GET _pkonto PICT "@S30"
       @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Brojevi dokumenata (prazno-svi)" GET qqBrDok PICT "@!S40"
       @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Ispis naziva partnera (D/N)?" GET _partn_naz PICT "@!" VALID _partn_naz $ "DN"
-      @ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Štampanje sadržaja ovih dokumenata ?"  GET cStampaj PICT "@!" VALID cStampaj $ "DN"
+      //@ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Štampanje sadržaja ovih dokumenata ?"  GET cStampaj PICT "@!" VALID cStampaj $ "DN"
 
       READ
 
@@ -142,15 +143,14 @@ FUNCTION kalk_stampa_liste_dokumenata()
       cFilt += ( ".and." + _qqpkonto )
    ENDIF
 
-   SET FILTER to &cFilt
+   SET FILTER TO &cFilt
    GO TOP
 
-
-   IF cStampaj == "D"
-      kalk_stampa_dokumenta( .T., "IZDOKS" )
-      my_close_all_dbf()
-      RETURN .F.
-   ENDIF
+   //IF cStampaj == "D"
+  //    kalk_stampa_dokumenta( .T., "IZDOKS" )
+  //    my_close_all_dbf()
+  //    RETURN .F.
+   //ENDIF
 
    EOF CRET
 
@@ -162,7 +162,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
    Preduzece()
 
 
-      P_COND
+   P_COND
 
    ??U "KALK: Štampa dokumenata na dan:", Date(), Space( 10 ), "za period", dDatOd, "-", dDatDo
 
@@ -193,7 +193,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
       SELECT kalk_doks
 
       ? Str( ++nC, 6 ) + "."
-      info_bar( "k_lista", "kalk_stampa_liste_dok " + DToc( kalk_doks->datdok ) + Str( nC, 6) )
+      info_bar( "k_lista", "kalk_stampa_liste_dok " + DToC( kalk_doks->datdok ) + Str( nC, 6 ) )
 
       @ PRow(), PCol() + 1 SAY field->datdok
       @ PRow(), PCol() + 1 SAY PadR( field->idfirma + "-" + field->idVd + "-" + field->brdok, 16 )

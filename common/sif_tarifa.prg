@@ -303,7 +303,7 @@ FUNCTION kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc, nMpcSaPP, nNc )
    LOCAL nP1, nP2, nP3
 
    // PDV
-   nP1 := kalk_porezi_maloprodaja( nMpc, aPorezi, nMpcSaPP )
+   nP1 := kalk_porezi_maloprodaja( aPorezi, nMpc, nMpcSaPP )
    nP2 := 0
    nP3 := 0
 
