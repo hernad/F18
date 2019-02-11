@@ -300,8 +300,8 @@ METHOD FaktDokumenti:generisi_fakt_pripr()
    ELSE
       cSql += "kolicina, datdok, txt"
    ENDIF
-   cSql += " FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt "
-   cSql += " LEFT JOIN " + F18_PSQL_SCHEMA_DOT + "roba "
+   cSql += " FROM " + f18_sql_schema("fakt_fakt") + " "
+   cSql += " LEFT JOIN " + f18_sql_schema("roba") + " "
    cSql += " ON fakt_fakt.idroba=roba.id "
    cSql += " WHERE "
    cSql += "idfirma=" + sql_quote( ::p_idfirma ) + " AND  idtipdok=" + sql_quote( ::p_idtipdok )

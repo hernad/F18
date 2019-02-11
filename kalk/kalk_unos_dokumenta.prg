@@ -55,7 +55,7 @@ FUNCTION kalk_header_get1( lNoviDokument )
       _TBankTr := "%"
    ENDIF
 
-   @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma: "
+   @  box_x_koord() + 1, box_y_koord() + 2 SAY "cIdFirma: "
    ?? self_organizacija_id(), "-", self_organizacija_naziv()
    @  box_x_koord() + 2, box_y_koord() + 2 SAY "KALKULACIJA: "
    @  box_x_koord() + 2, Col() SAY "Vrsta:" GET _idvd VALID P_TipDok( @_idvd, 2, 25 ) PICT "@!"
@@ -1393,13 +1393,13 @@ FUNCTION kalk_open_tables_unos( lAzuriraniDok, cIdFirma, cIdVD, cBrDok )
    RETURN .T.
 
 
-FUNCTION kalkulacija_ima_sve_cijene( firma, tip_dok, br_dok )
+FUNCTION kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok )
 
    LOCAL cOk := ""
    LOCAL _area := Select()
    LOCAL nTrec := RecNo()
 
-   DO WHILE !Eof() .AND. field->idfirma + field->idvd + field->brdok == firma + tip_dok + br_dok
+   DO WHILE !Eof() .AND. field->idfirma + field->idvd + field->brdok == cIdFirma + cIdVd + cBrDok
 
       IF field->idvd $ "11#41#42#RN#19"
          IF field->fcj == 0

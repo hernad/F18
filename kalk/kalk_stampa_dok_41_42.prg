@@ -107,7 +107,6 @@ FUNCTION kalk_stampa_dok_41_42()
       nTotMPP += ( nUMPP := ( kalk_pripr->mpc + nPor1 ) * kalk_pripr->kolicina )
 
       check_nova_strana( bZagl, s_oPDF, .F., 0 )
-
       @ PRow() + 1, 0 SAY kalk_pripr->rbr PICT "999"
       @ PRow(), PCol() + 1 SAY IdRoba
       @ PRow(), PCol() + 1 SAY ROBA->barkod
@@ -272,7 +271,6 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
       nTotP += nUP
 
       check_nova_strana( bZagl, s_oPDF, .F., 3 )
-
       ? cIdtarifa
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICT picproc()
 

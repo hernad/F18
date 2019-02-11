@@ -654,13 +654,15 @@ ELSIF (TG_OP = 'INSERT') THEN
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_kalk WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING pKonto, NEW.idvd, NEW.datum, brDok;
          RAISE INFO 'THEN insert kalk_kalk S0 % % %', pKonto, brDok, NEW.datum;
-         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina) ' ||
+         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
                  ' (fmk.rbr_to_char( (row_number() over (order by idroba))::integer))::character(3) as rbr,' ||
-                 ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina ' ||
+                 ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina, ' ||
+                 ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj' ||
                  ' FROM p' || NEW.idpos || '.pos_pos ' ||
+                 ' LEFT JOIN public.tarifa on pos_pos.idtarifa = tarifa.id' ||
                  ' WHERE idvd=$2 AND datum=$4 AND idpos=$5' ||
-                 ' GROUP BY idroba,idtarifa,cijena,ncijena' ||
+                 ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
                  ' ORDER BY idroba)'
               USING 'S0', NEW.idvd, brDok, NEW.datum, NEW.idpos, pKonto;
          RETURN NEW;
@@ -702,13 +704,11 @@ CREATE TRIGGER pos_pos_insert_update_delete
 
 -- delete from p15.pos_pos where brdok='BRDOK01';
 
-
 -- TARIFE CLEANUP --
 
 CREATE TABLE IF NOT EXISTS public.tarifa AS  TABLE fmk.tarifa;
 ALTER TABLE public.tarifa OWNER TO admin;
 GRANT ALL ON TABLE public.tarifa TO xtrole;
-
 
 alter table public.tarifa drop column if exists match_code;
 alter table public.tarifa drop column if exists ppp;

@@ -119,26 +119,13 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
 
       ENDIF
 
-      // IF ( !Empty( cSeek ) .AND. cSeek != 'IZDOKS' )
-      // HSEEK cSeek
-      // cIdfirma := SubStr( cSeek, 1, 2 )
-      // cIdvd := SubStr( cSeek, 3, 2 )
-      // cBrDok := PadR( SubStr( cSeek, 5, 8 ), 8 )
-      // ELSE
-      HSEEK cIdFirma + cIdVD + cBrDok
-      // ENDIF
 
+      HSEEK cIdFirma + cIdVD + cBrDok
       IF !Empty( cOk := kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok ) ) // provjeri da li kalkulacija ima sve cijene ?
          MsgBeep( "Unutar kalkulacije nedostaju pojedine cijene bitne za obračun!##Stavke: " + cOk )
-         // my_close_all_dbf()
-         // RETURN .F.
       ENDIF
 
-      // IF ( cSeek != 'IZDOKS' )
       EOF CRET
-      // ELSE
-      // PRIVATE nStr := 1
-      // ENDIF
 
       IF !pdf_kalk_dokument( cIdVd )
          START PRINT CRET

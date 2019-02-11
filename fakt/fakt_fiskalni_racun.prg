@@ -21,11 +21,11 @@ STATIC s_lFiskalniPartnerIno
 STATIC s_lFiskalniPartnerPDV
 STATIC __vrsta_pl
 STATIC s_lFiskalniPrikaziPartnera
-STATIC __DRV_TREMOL := "TREMOL"
-STATIC __DRV_FPRINT := "FPRINT"
-STATIC __DRV_FLINK := "FLINK"
-STATIC __DRV_HCP := "HCP"
-STATIC __DRV_TRING := "TRING"
+STATIC s_cFiskalniDrajverTremol := "TREMOL"
+STATIC s_cFiskalniDrajverFPRINT := "FPRINT"
+STATIC s_cFiskalniDrajverFLINK := "FLINK"
+STATIC s_cFiskalniDrajverHCP := "HCP"
+STATIC s_cFiskalniDrajverTRING := "TRING"
 STATIC __DRV_CURRENT
 
 
@@ -104,20 +104,20 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
    CASE _dev_drv == "TEST"
       nErrorLevel := 0
 
-   CASE _dev_drv == __DRV_FPRINT
+   CASE _dev_drv == s_cFiskalniDrajverFPRINT
       nErrorLevel := fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
 
-   CASE _dev_drv == __DRV_TREMOL
+   CASE _dev_drv == s_cFiskalniDrajverTremol
       _cont := "1"
       nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ), _cont )
 
-   CASE _dev_drv == __DRV_HCP
+   CASE _dev_drv == s_cFiskalniDrajverHCP
       nErrorLevel := fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
 
-   CASE _dev_drv == __DRV_FLINK
+   CASE _dev_drv == s_cFiskalniDrajverFLINK
       nErrorLevel := fakt_to_flink( s_hFiskalniParams, cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
 
-   CASE _dev_drv == __DRV_TRING
+   CASE _dev_drv == s_cFiskalniDrajverTRING
       nErrorLevel := fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
 
    ENDCASE
@@ -131,7 +131,7 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
       " - " + AllTrim( _partn_data[ 1, 2 ] ), "NIL" ), 3 )
 
    IF nErrorLevel > 0
-      IF _dev_drv == __DRV_TREMOL
+      IF _dev_drv == s_cFiskalniDrajverTremol
          _cont := "2"
          nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ), _cont )
 
@@ -855,7 +855,7 @@ STATIC FUNCTION fakt_fiscal_podaci_partnera( cIdFirma, cIdTipDok, cBrDok, lStorn
 
 
 
-STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno )
+STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno )
 
    LOCAL _path := s_hFiskalniParams[ "out_dir" ]
    LOCAL _filename := s_hFiskalniParams[ "out_file" ]
@@ -866,7 +866,7 @@ STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, l
 
    fprint_delete_answer( s_hFiskalniParams )
 
-   fiskalni_fprint_racun( s_hFiskalniParams, aRacunData, head, lStorno )
+   fiskalni_fprint_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno )
 
    nErrorLevel := fprint_read_error( s_hFiskalniParams, @nFiskalniBroj, lStorno )
 
@@ -995,7 +995,7 @@ STATIC FUNCTION _get_partner_for_email( cIdFirma, cIdTipDok, cBrDok )
    izdavanje fiskalnog isjecka na TREMOL uredjaj
 */
 
-STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno, cContinue012 )
+STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno, cContinue012 )
 
    LOCAL nErrorLevel := 0
    LOCAL _f_name
@@ -1009,7 +1009,7 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, l
    ENDIF
 
 
-   nErrorLevel := tremol_rn( s_hFiskalniParams, aRacunData, head, lStorno, cContinue012 ) // stampaj racun
+   nErrorLevel := fiskalni_tremol_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno, cContinue012 ) // stampaj racun
    _f_name := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
    IF tremol_read_out( s_hFiskalniParams, _f_name, s_hFiskalniParams[ "timeout" ] ) // da li postoji ista na izlazu ?
       nErrorLevel := tremol_read_error( s_hFiskalniParams, _f_name, @nFiskalniBroj ) // procitaj sada gresku
@@ -1031,15 +1031,15 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, l
    RETURN nErrorLevel
 
 
-STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno )
+STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno )
 
    LOCAL nErrorLevel := 0
    LOCAL nFiskalniBroj := 0
 
-   nErrorLevel := hcp_rn( s_hFiskalniParams, aRacunData, head, lStorno, aRacunData[ 1, 14 ] )
+   nErrorLevel := fiskalni_hcp_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno, aRacunData[ 1, 14 ] )
    IF nErrorLevel = 0
 
-      nFiskalniBroj := hcp_fisc_no( s_hFiskalniParams, lStorno )
+      nFiskalniBroj := fiskalni_hcp_get_broj_racuna( s_hFiskalniParams, lStorno )
       IF nFiskalniBroj > 0
          fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj, lStorno )
 
@@ -1148,7 +1148,7 @@ STATIC FUNCTION fakt_fisk_stavi_u_fakturu( cFirma, cTD, cBroj, nFiscal, lStorno 
 // -------------------------------------------------------------
 // izdavanje fiskalnog isjecka na TFP uredjaj - tring
 // -------------------------------------------------------------
-STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno )
+STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno )
 
    LOCAL nErrorLevel := 0
    LOCAL _trig := 1
@@ -1162,7 +1162,7 @@ STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lS
    tring_delete_out( s_hFiskalniParams, _trig )
 
    // ispisi racun
-   tring_rn( s_hFiskalniParams, aRacunData, head, lStorno )
+   tring_rn( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno )
 
    // procitaj gresku
    nErrorLevel := tring_read_error( s_hFiskalniParams, @nFiskalniBroj, _trig )

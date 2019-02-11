@@ -151,7 +151,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       IF !lLowLevel
 
          AAdd( aOpc, "8. izbaci stanje računa    " )
-         AAdd( aOpcExe, {|| hcp_fisc_no( s_hFiskalniDeviceParams ) } )
+         AAdd( aOpcExe, {|| fiskalni_hcp_get_broj_racuna( s_hFiskalniDeviceParams ) } )
          AAdd( aOpc, "P. reset PLU " )
          AAdd( aOpcExe, {|| auto_plu( .T., NIL, s_hFiskalniDeviceParams ) } )
 

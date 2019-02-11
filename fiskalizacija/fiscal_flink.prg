@@ -22,7 +22,7 @@ THREAD STATIC F_POS_RN := "POS_RN" // pos komande
 // aData - podaci racuna
 // lStorno - da li se stampa storno ili ne (.T. ili .F. )
 // --------------------------------------------------------
-FUNCTION fiskalni_flink_pos_racun( cFPath, cFName, aData, lStorno, cError )
+FUNCTION fiskalni_flink_racun( cFPath, cFName, aData, lStorno, cError )
 
    LOCAL cSep := ";"
    LOCAL aPosData := {}

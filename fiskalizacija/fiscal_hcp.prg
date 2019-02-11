@@ -60,7 +60,7 @@ STATIC _tr_foo := "footer.XML"
 // --------------------------------------------------------------------------
 // stampa fiskalnog racuna tring fiskalizacija
 // --------------------------------------------------------------------------
-FUNCTION hcp_rn( hFiskalniParams, items, head, storno, rn_total )
+FUNCTION fiskalni_hcp_racun( hFiskalniParams, items, head, storno, rn_total )
 
    LOCAL _xml, _f_name
    LOCAL nI, _ibk, _rn_broj, _footer
@@ -765,7 +765,7 @@ FUNCTION hcp_s_rpt( hFiskalniParams )
 // -----------------------------------------------------
 // vraca broj fiskalnog racuna
 // -----------------------------------------------------
-FUNCTION hcp_fisc_no( hFiskalniParams, storno )
+FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, storno )
 
    LOCAL _cmd
    LOCAL _fiscal_no := 0
