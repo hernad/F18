@@ -136,7 +136,7 @@ FUNCTION kalk_get_1_95()
    ENDIF
 
    SELECT kalk_pripr
-   @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE gPicNC  VALID kalk_valid_kolicina_mag()
+   @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE gPicNC  VALID kalk_valid_kolicina_mag(nKols)
    PRIVATE _vpcsappp := 0
 
    READ

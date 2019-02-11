@@ -358,11 +358,9 @@ METHOD FaktDokumenti:generisi_fakt_pripr()
    ENDDO
 
    cVezaOtpremnice := "Račun formiran na osnovu otpremnica: " + cVezaOtpremnice
-
    renumeracija_fakt_pripr( cVezaOtpremnice, _datum_max )
 
    RETURN lOk
-
 
 
 
@@ -448,7 +446,6 @@ FUNCTION renumeracija_fakt_pripr( cVezaOtpremnica, dDatumPosljednjeOtpr )
    IF gDodPar == "1" .OR. gDatVal == "D"
 
       nRokPl := fakt_rok_placanja_dana()
-
       @  box_x_koord() + 6, box_y_koord() + 2 SAY "Datum fakture  :" GET _DatDok
 
       IF dDatumPosljednjeOtpr <> NIL

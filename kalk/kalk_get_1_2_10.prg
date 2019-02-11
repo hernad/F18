@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+MEMVAR GetList
 MEMVAR nKalkRBr
 
 STATIC s_cKonverzijaValuteDN // konverzija valute
@@ -51,10 +52,6 @@ FUNCTION kalk_get_1_10()
       nBoxKoordX := box_x_koord() + nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Magacinski Konto zadužuje" GET _IdKonto VALID {|| P_Konto( @_IdKonto ), ispisi_naziv_konto( nBoxKoordX, 40, 30 ) } PICT "@!"
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, box_y_koord() + 42  SAY "Zaduzuje: " GET _IdZaduz  PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz )
-      // ENDIF
-
       IF !Empty( cRNT1 )
          @ box_x_koord() + nX, box_y_koord() + 60  SAY "Rad.nalog:" GET _IdZaduz2  PICT "@!"
       ENDIF
@@ -76,10 +73,6 @@ FUNCTION kalk_get_1_10()
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Magacinski Konto zadužuje "
       ?? _IdKonto
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + nX, box_y_koord() + 42 SAY "Zaduzuje: "
-      // ?? _IdZaduz
-      // ENDIF
       ino_dobavljac_set_konverzija_valute( _idpartner, @s_cKonverzijaValuteDN )
 
    ENDIF
@@ -104,7 +97,6 @@ FUNCTION kalk_get_1_10()
 
    _MKonto := _Idkonto
    _MU_I := "1"
-   // check_datum_posljednje_kalkulacije()
 
    select_o_tarifa( _IdTarifa )
    SELECT kalk_pripr
@@ -284,7 +276,6 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
    IF koncij->naz != "N1" // magacin po nabavnim cijenama
 
       PRIVATE cProracunMarzeUnaprijed := " "
-
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2    SAY8 "Magacin. Marža     :" GET _TMarza VALID _Tmarza $ "%AU" PICTURE "@!"
       @ box_x_koord() + nX, Col() + 2 GET _Marza PICT PicDEM
@@ -299,7 +290,6 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
       ENDIF
 
       @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _vpc PICT PicDEM VALID {|| kalk_10_vaild_Marza_VP( _Idvd, ( cProracunMarzeUnaprijed == "F" ) ), .T. }
-
 
       IF ( gcMpcKalk10 == "D" )   // VPC se izracunava pomocu MPC cijene
 

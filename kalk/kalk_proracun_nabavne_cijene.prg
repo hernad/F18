@@ -11,8 +11,16 @@
 
 #include "f18.ch"
 
+MEMVAR _idfirma, _datdok, _mkonto, _idroba, _Kolicina, _nc, _fcj, _fcj2, _idvd
 
-MEMVAR _mkonto, _idroba, _Kolicina
+MEMVAR _marza, _vpc, _tmarza, _rabatv
+MEMVAR _Error
+MEMVAR _prevoz, _tprevoz, _cardaz, _tcardaz, _zavtr, _tzavtr, _banktr, _tbanktr, _spedtr, _TSpedTr
+
+MEMVAR nPrevoz, nCarDaz, nBanktr, nSpedTr, nZavTr
+MEMVAR cFieldName
+MEMVAR nMarza
+MEMVAR GetList
 
 STATIC s_nPragOdstupanjaNCSumnjiv := NIL
 STATIC s_nStandarnaStopaMarze := NIL
@@ -107,7 +115,7 @@ FUNCTION korekcija_nabavne_cijene_sa_zadnjom_ulaznom( nKolicina, nZadnjiUlazKol,
          @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "količina zadnji ulaz: " + AllTrim( say_kolicina( nZadnjiUlazKol ) )
          @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "      NC Zadnji ulaz: " + AllTrim( say_cijena( nZadnjaUlaznaNC ) ) + " <"
          nX += 2
-         @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 " Korigovati NC na zadnju ulaznu: D/N ?"  GET cDn VALID cDn $ "DN" PICT "@!"
+         @ box_x_koord() + nX, box_y_koord() + 2 SAY8 " Korigovati NC na zadnju ulaznu: D/N ?"  GET cDn VALID cDn $ "DN" PICT "@!"
 
          READ
          BoxC()
@@ -135,7 +143,6 @@ FUNCTION korekcija_nabavna_cijena_0( nSrednjaNabavnaCijena )
    RETURN nSrednjaNabavnaCijena
 
 
-
 FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
 
    LOCAL nStvarnaKolicina := 0
@@ -145,12 +152,7 @@ FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
       _nc := 9999
    ENDIF
 
-   // IF gKalo == "1" .AND. cIdvd == "10"
-   // nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   // ELSE
    nStvarnaKolicina := _Kolicina
-   // ENDIF
-
    IF _Marza == 0 .OR. _VPC <> 0 .AND. !lNaprijed
 
       nMarza := _VPC - _NC // unazad formiraj marzu
@@ -185,9 +187,6 @@ FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
    RETURN .T.
 
 
-/*
- *     veleprodajna marza
- */
 
 FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUnaprijed )
 
@@ -201,13 +200,7 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
       _NC := 9999
    ENDIF
 
-
-   // IF gKalo == "1" .AND. _idvd == "10"
-   // nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   // ELSE
    nStvarnaKolicina := _Kolicina
-   // ENDIF
-
 
    IF !Empty( cProracunMarzeUnaprijed ) // proračun unaprijed od nc -> vpc
       IF _TMarza == "%"
@@ -245,26 +238,19 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
 
    IF Round( _VPC, 5 ) == 0
       error_bar( "kalk_unos", "VPC=0" )
-      // RETURN .T.
    ENDIF
 
    IF Round( _NC, 9 ) == 0
       error_bar( "kalk", "NC=0" )
-      // RETURN .T.
    ENDIF
 
    IF ( nMarza / _NC ) > 100000
       error_bar( "kalk", "ERROR Marza > 100 000 x veća od NC: " + AllTrim( Str( nMarza, 14, 2 ) ) )
-      // RETURN .T.
    ENDIF
 
    RETURN .T.
 
 
-
-/*
- *     Fakticka veleprodajna cijena
- */
 
 FUNCTION kalk_vpc_po_kartici( nVPC, cIdFirma, cMKonto, cIdRoba, dDatum )
 
@@ -280,144 +266,31 @@ FUNCTION kalk_vpc_po_kartici( nVPC, cIdFirma, cMKonto, cIdRoba, dDatum )
       nVPC := 0
    ENDIF
 
-
    PushWA()
-
-
-   // SET FILTER TO
-   // nOrder:=indexord()
-   // SET ORDER TO TAG "3" // idFirma+mkonto+idroba+dtos(datdok)
-   // SEEK cseek + "X"
-   // SKIP -1
    find_kalk_by_mkonto_idroba( cIdFirma, cMKonto, cIdRoba )
+   DO WHILE !Bof() .AND. kalk->idfirma + kalk->mkonto + kalk->idroba == cIdFirma + cMKonto + cIdRoba
 
-
-   DO WHILE !Bof() .AND. idfirma + mkonto + idroba == cIdFirma + cMKonto + cIdRoba
-
-      IF dDatum <> NIL .AND. dDatum < datdok
+      IF dDatum <> NIL .AND. dDatum < kalk->datdok
          SKIP -1
          LOOP
       ENDIF
 
-      // if mu_i=="1" //.or. mu_i=="5"
-      IF idvd $ "RN#10#16#12#13"
+      IF kalk->idvd $ "RN#10#16#12#13"
          IF koncij->naz <> "P2"
-            nVPC := vpc
+            nVPC := kalk->vpc
          ENDIF
          EXIT
-      ELSEIF idvd == "18"
-         nVPC := mpcsapp + vpc
+      ELSEIF kalk->idvd == "18"
+         nVPC := kalk->mpcsapp + kalk->vpc
          EXIT
       ENDIF
       SKIP -1
    ENDDO
    PopWa()
-   // dbsetorder(nOrder)
 
    RETURN .T.
 
 
-
-/*
- *     Prati karticu magacina
- */
-
-FUNCTION PratiKMag( cIdFirma, cIdKonto, cIdRoba )
-
-   LOCAL nPom
-
-   find_kalk_by_mkonto_idroba( cIdFirma, cIdKonto, cIdRoba )
-
-   nVPV := 0
-   nKolicina := 0
-   DO WHILE !Eof() .AND.  cIdFirma + cIdKonto + cIdRoba == idfirma + idkonto + idroba
-
-      dDatDok := datdok
-      DO WHILE !Eof() .AND.  cIdFirma + cIdKonto + cIdRoba == idfirma + idkonto + idroba .AND. datdok == dDatDok
-
-
-         nVPC := vpc   // veleprodajna cijena
-         IF mu_i == "1"
-            nPom := kolicina - gkolicina - gkolicin2
-            nKolicina += nPom
-            nVPV += nPom * vpc
-         ELSEIF mu_i == "3"
-            nPom := kolicina
-            nVPV += nPom * vpc
-            // kod ove kalk mpcsapp predstavlja staru vpc
-            nVPC := vpc + mpcsapp
-         ELSEIF mu_i == "5"
-            nPom := kolicina
-            nVPV -= nPom * VPC
-         ENDIF
-
-         IF Round( nKolicina, 4 ) <> 0
-            IF Round( nVPV / nKolicina, 2 ) <> Round( nVPC, 2 )
-
-            ENDIF
-         ENDIF
-
-      ENDDO
-
-   ENDDO
-
-   RETURN .T.
-
-
-
-
-/* ObSetVPC(nNovaVrijednost)
- *     Obavezno setuj VPC
- */
-
-FUNCTION ObSetVPC( nNovaVrijednost )
-
-   LOCAL nArr := Select()
-   LOCAL hRec
-   PRIVATE cPom := "VPC"
-
-   IF koncij->naz == "P2"
-      cPom := "PLC"
-   ELSEIF koncij->naz == "V2"
-      cPom := "VPC2"
-   ELSE
-      cPom := "VPC"
-   ENDIF
-
-   SELECT roba
-   hRec := dbf_get_rec()
-
-   hRec[ Lower( cPom ) ] := nNovaVrijednost
-
-   update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
-
-   SELECT ( nArr )
-
-   RETURN .T.
-
-
-
-
-/* UzmiVPCSif(cMKonto,lKoncij)
- *     Za zadani magacinski konto daje odgovarajucu VPC iz sifrarnika robe
- */
-
-FUNCTION UzmiVPCSif( cMKonto, lKoncij )
-
-   LOCAL nCV := 0, nArr := Select()
-
-   select_o_koncij( cMKonto )
-   nCV := kalk_vpc_za_koncij()
-
-   SELECT ( nArr )
-
-   RETURN nCV
-
-
-
-/*
- *     Proracun nabavne cijene za ulaznu kalkulaciju 10
- */
 
 FUNCTION kalk_when_valid_nc_ulaz()
 
@@ -427,11 +300,7 @@ FUNCTION kalk_when_valid_nc_ulaz()
    LOCAL nNabCjZadnjaNabavka
    LOCAL nNabCj2 := 0
 
-   // IF gKalo == "1"
-   // nStvarnaKolicina := _Kolicina - _GKolicina - _GKolicin2
-   // ELSE
    nStvarnaKolicina := _Kolicina
-   // ENDIF
 
    IF _TPrevoz == "%"
       nPrevoz := _Prevoz / 100 * _FCj2
@@ -493,35 +362,10 @@ FUNCTION kalk_when_valid_nc_ulaz()
 
    nNabCjZadnjaNabavka := _nc // proslijediti nabavnu cijenu
    // proracun nabavne cijene radi utvrdjivanja odstupanja ove nabavne cijene od posljednje
-   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2 )
+   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2 )
 
    RETURN .T.
 
-
-
-
-/* NabCj2(n1,n2)
- *   param: n1 - ukucana NC
- *   param: n2 - izracunata NC
- *     Ova se f-ja koristi samo za 10-ku bez troskova (gVarijanta="1")
- */
-
-FUNCTION NabCj2( n1, n2 )
-
-   IF Round( _FCJ, 6 )  == 0
-      Alert( "Fakturna cijene ne moze biti 0" )
-      _FCJ := 1
-      RETURN .F.
-   ENDIF
-
-   IF Abs( n1 - n2 ) > 0.00001
-      // tj. ako je ukucana drugacija NC
-      _rabat := 100 - 100 * _NC / _FCJ
-      _FCJ2 := _NC
-      ShowGets()
-   ENDIF
-
-   RETURN .T.
 
 
 /* kalk_set_vpc_sifarnik(nNovaVrijednost,fUvijek)
@@ -538,30 +382,30 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
       lUvijek := .F.
    ENDIF
 
-   PRIVATE cPom := "VPC"
+   PRIVATE cFieldName := "VPC"
 
    IF koncij->naz == "N1"  // magacin se vodi po nabavnim cijenama
       RETURN .T.
    ENDIF
 
    IF koncij->naz == "P2"
-      cPom := "plc"
+      cFieldName := "plc"
       nVal := roba->plc
    ELSEIF koncij->naz == "V2"
-      cPom := "vpc2"
+      cFieldName := "vpc2"
       nVal := roba->VPC2
    ELSE
-      cPom := "vpc"
+      cFieldName := "vpc"
       nVal := roba->VPC
    ENDIF
 
    IF nVal == 0  .OR. Abs( Round( nVal - nNovaVrijednost, 2 ) ) > 0 .OR. lUvijek
 
-      IF gAutoCjen == "D" .AND. Pitanje( , "Staviti cijenu (" + cPom + ")" + " u šifarnik ?", "D" ) == "D"
+      IF gAutoCjen == "D" .AND. Pitanje( , "Staviti cijenu (" + cFieldName + ")" + " u šifarnik ?", "D" ) == "D"
 
          SELECT roba
          hVars := dbf_get_rec()
-         hVars[ cPom ] := nNovaVrijednost
+         hVars[ cFieldName ] := nNovaVrijednost
          update_rec_server_and_dbf( "roba", hVars, 1, "FULL" )
          SELECT kalk_pripr
       ENDIF
@@ -571,14 +415,7 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
 
 
 
-/* kalk_vpc_za_koncij()
- *     Daje odgovarajucu VPC iz sifrarnika robe
- */
-
 FUNCTION kalk_vpc_za_koncij()
-
-   // podrazumjeva da je nastimana tabela koncij
-   // ------------------------------------------
 
    IF koncij->naz == "P2"
       RETURN roba->plc
@@ -586,11 +423,9 @@ FUNCTION kalk_vpc_za_koncij()
       RETURN roba->VPC2
    ELSEIF koncij->naz == "V3"
       RETURN roba->VPC3
-   ELSE
-      RETURN roba->VPC
    ENDIF
 
-   RETURN ( NIL )
+   RETURN roba->VPC
 
 
 
@@ -611,51 +446,7 @@ FUNCTION kalk_marza_veleprodaja()
 
 
 
-/* PrerRar
- *     Rabat veleprodaje - 14
- */
-
-FUNCTION PrerRab()
-
-   LOCAL nPrRab
-
-   IF cTRabat == "%"
-      nPrRab := _rabatv
-   ELSEIF cTRabat == "A"
-      IF _VPC <> 0
-         nPrRab := _RABATV / _VPC * 100
-      ELSE
-         nPrRab := 0
-      ENDIF
-   ELSEIF cTRabat == "U"
-      IF _vpc * _kolicina <> 0
-         nprRab := _rabatV / ( _vpc * _kolicina ) * 100
-      ELSE
-         nPrRab := 0
-      ENDIF
-   ELSE
-      RETURN .F.
-   ENDIF
-   _rabatv := nPrRab
-   cTrabat := "%"
-   showgets()
-
-   RETURN .T.
-
-
-
-// Validacija u prilikom knjizenja (knjiz.prg) - VALID funkcija u get-u
-
-// Koristi sljedece privatne varijable:
-// nKols
-// kalk_metoda_nc()
-// _TBankTr - "X"  - ne provjeravaj - vrati .t.
-// ---------------------------------------------
-// Daje poruke:
-// Nabavna cijena manja od 0 ??
-// Ukupno na stanju samo XX robe !!
-
-FUNCTION kalk_valid_kolicina_mag()
+FUNCTION kalk_valid_kolicina_mag( nKols )
 
    IF ( ( _nc <= 0 ) .AND. !( _idvd $ "11#12#13#22" ) ) .OR. ( _fcj <= 0 .AND. _idvd $ "11#12#13#22" )
       // kod 11-ke se unosi fcj
@@ -666,229 +457,18 @@ FUNCTION kalk_valid_kolicina_mag()
       RETURN .F.
    ENDIF
 
-   IF roba->tip $ "UTY"; RETURN .T. ; ENDIF // usluge
+   IF roba->tip $ "UT"
+      RETURN .T.
+   ENDIF
 
-   IF Empty( kalk_metoda_nc() ) .OR. _TBankTR == "X" // bez ograde
+   IF Empty( kalk_metoda_nc() ) .OR. _TBankTr == "X" // parametri postavljeni - bez obračuna cijene
       RETURN .T.
    ENDIF
 
    IF nKolS < _Kolicina
-
       sumnjive_stavke_error()
       error_bar( "KA_" + _mkonto + "/" + _idroba, ;
          _mkonto + " / " + _idroba + "na stanju: " + AllTrim( Str( nKolS, 10, 4 ) ) + " treba " +  AllTrim( Str( _kolicina, 10, 4 ) ) )
-
    ENDIF
 
    RETURN .T.
-
-
-
-/* V_RabatV
- *     Ispisuje vrijednost rabata u VP
- */
-
-// Trenutna pozicija u tabeli KONCIJ (na osnovu koncij->naz ispituje cijene)
-// Trenutan pozicija u tabeli ROBA (roba->tip)
-
-FUNCTION V_RabatV()
-
-   LOCAL nPom, nMPCVT
-   LOCAL nRVPC := 0
-   PRIVATE getlist := {}, cPom := "VPC"
-
-   IF koncij->naz == "P2"
-      cPom := "PLC"
-   ELSEIF koncij->naz == "V2"
-      cPom := "VPC2"
-   ELSE
-      cPom := "VPC"
-   ENDIF
-
-   IF roba->tip $ "UTY"
-      RETURN .T.
-   ENDIF
-
-   nRVPC := kalk_vpc_za_koncij()
-   IF Round( nRVPC - _vpc, 4 ) <> 0  .AND. gMagacin == "2"
-      IF nRVPC == 0
-         Beep( 1 )
-         Box(, 3, 60 )
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Roba u sifrarniku ima " + cPom + " = 0 !??"
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Unesi " + cPom + " u sifrarnik:" GET _vpc PICT picdem
-
-         READ
-
-         SELECT roba
-         hRec := dbf_get_rec()
-
-         hRec[ Lower( cPom ) ] := _vpc
-         update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
-
-         SELECT kalk_pripr
-         BoxC()
-
-      ENDIF
-   ENDIF
-
-   nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC
-
-   @ box_x_koord() + 15, box_y_koord() + 41  SAY "PC b.pdv.-RAB:"
-   @ box_x_koord() + 15, Col() + 1 SAY _Vpc * ( 1 - _RabatV / 100 ) PICT picdem
-
-   ShowGets()
-
-   RETURN .T.
-
-
-
-/* ---------------------------------------------------------
-// dodaj u matricu robu koja je problematicna
-// ---------------------------------------------------------
-FUNCTION a_nc_ctrl( aCtrl, cIdRoba, nKol, nSnc, nZadnjaNC )
-
-   LOCAL nScan := 0
-   LOCAL nOdst := 0
-
-   IF nSNC <> 0 .AND. nZadnjaNC <> 0
-      nTmp := Round( nSNC, 4 ) - Round( nZadnjaNC, 4 )
-      nOdst := ( nTmp / Round( nZadnjaNC, 4 ) ) * 100
-   ENDIF
-
-   nScan := AScan( aCtrl, {| xVal| xVal[ 1 ] == cIdRoba } )
-
-   IF nScan = 0
-      // dodaj novi zapis
-      AAdd( aCtrl, { cIdRoba, nKol, nSNC, nZadnjaNC, nOdst } )
-   ELSE
-      // ispravi tekuce zapise
-      aCtrl[ nScan, 2 ] := nKol
-      aCtrl[ nScan, 3 ] := nSNC
-      aCtrl[ nScan, 4 ] := nZadnjaNC
-      aCtrl[ nScan, 5 ] := nOdst
-
-   ENDIF
-
-   RETURN .T.
-*/
-
-
-// ------------------------------------------------
-// popup kod nabavne cijene
-// ------------------------------------------------
-FUNCTION p_nc_popup( cIdRoba )
-
-   LOCAL nScan
-
-   // nScan := AScan( aNC_ctrl, {| xVal| xVal[ 1 ] == cIdRoba } )
-
-   // IF nScan <> 0
-
-   // nOdstupanje := Round( aNC_ctrl[ nScan, 5 ], 2 ) // prikazi odstupanje NC !
-   // MsgBeep( "Odstupanje u odnosu na zadnji ulaz je#" + AllTrim( Str( nOdstupanje ) ) + " %" )
-
-   // ENDIF
-
-   RETURN .T.
-
-
-// ------------------------------------------------
-// stampanje stanja iz kontrolne tabele
-// ------------------------------------------------
-FUNCTION p_nc_ctrl( aCtrl )
-
-   LOCAL nTArea := Select()
-   LOCAL i
-   LOCAL cLine := ""
-   LOCAL cTxt := ""
-   LOCAL nCnt := 0
-
-   IF Len( aCtrl ) = 0
-      RETURN
-   ENDIF
-
-   START PRINT CRET
-
-   ?
-   ? "Kontrola odstupanja nabavne cijene"
-   ? "- kontrolna tacka = " + AllTrim( Str( prag_odstupanja_nc_sumnjiv() ) ) + "%"
-   ?
-
-   cLine += Replicate( "-", 5 )
-   cLine += Space( 1 )
-   cLine += Replicate( "-", 10 )
-   cLine += Space( 1 )
-   cLine += Replicate( "-", 12 )
-   cLine += Space( 1 )
-   cLine += Replicate( "-", 12 )
-   cLine += Space( 1 )
-   cLine += Replicate( "-", 12 )
-   cLine += Space( 1 )
-   cLine += Replicate( "-", 12 )
-
-   cTxt += PadR( "r.br", 5 )
-   cTxt += Space( 1 )
-   cTxt += PadR( "artikal", 10 )
-   cTxt += Space( 1 )
-   cTxt += PadR( "kolicina", 12 )
-   cTxt += Space( 1 )
-   cTxt += PadR( "zadnja NC", 12 )
-   cTxt += Space( 1 )
-   cTxt += PadR( "nova NC", 12 )
-   cTxt += Space( 1 )
-   cTxt += PadR( "odstupanje", 12 )
-
-   ? cLine
-   ? cTxt
-   ? cLine
-
-   FOR i := 1 TO Len( aCtrl )
-
-      // rbr
-      ? PadL( AllTrim( Str( ++nCnt ) ), 4 ) + "."
-      // idroba
-      @ PRow(), PCol() + 1 SAY aCtrl[ i, 1 ]
-      // kolicina
-      @ PRow(), PCol() + 1 SAY aCtrl[ i, 2 ]
-      // zadnja nc
-      @ PRow(), PCol() + 1 SAY aCtrl[ i, 4 ]
-      // nova nc
-      @ PRow(), PCol() + 1 SAY aCtrl[ i, 3 ]
-      // odstupanje
-      @ PRow(), PCol() + 1 SAY aCtrl[ i, 5 ] PICT "9999%"
-
-   NEXT
-
-   FF
-   ENDPRINT
-
-   SELECT ( nTArea )
-
-   RETURN .T.
-
-
-
-
-// -------------------------------------
-// magacin samo po nabavnim cijenama
-// -------------------------------------
-FUNCTION IsMagSNab()
-
-   LOCAL lN1 := .F.
-
-   PushWA()
-
-   // da li je uopste otvoren koncij
-   SELECT F_KONCIJ
-   IF Used()
-      IF koncij->naz == "N1"
-         lN1 := .T.
-      ENDIF
-   ENDIF
-   PopWa()
-
-   IF ( gMagacin == "1" ) .OR. lN1
-      RETURN .T.
-   ELSE
-      RETURN .F.
-   ENDIF

@@ -17,7 +17,7 @@ MEMVAR _idroba
   Racuna nabavnu cijenu i stanje robe u magacinu
    1 - dDatDo datum do kojeg se obracunava
    2-4 cIdFirma, cIdRoba, cIdKonto,
-  5) kolicina na stanju
+  5) kolicina na stanju - mijenja se, parametar koji se proslijeđuje po referenci
   6) nKolZN - kolicina koja je na stanju od zadnje nabavke
   7) nNcZadnjaNabavka - zadnja nabavna cijena
   8) nSrednjaNabavnaCijena - srednja nabavna cijena
@@ -37,8 +37,6 @@ FUNCTION kalk_get_nabavna_mag( dDatDo, cIdFirma, cIdRoba, cIdKonto, ;
    LOCAL nKolicinaAbs
    LOCAL nKol_poz := 0 // posljednje pozitivno stanje
 
-   // LOCAL nUVr_poz, nIVr_poz
-   // LOCAL nUKol_poz, nIKol_poz
    LOCAL nTmp
    LOCAL nTmp_n_stanje, nTmp_n_nv, nTmp_s_nv
    LOCAL cIdVd, nLen
@@ -51,17 +49,9 @@ FUNCTION kalk_get_nabavna_mag( dDatDo, cIdFirma, cIdRoba, cIdKonto, ;
    IF Empty( kalk_metoda_nc() )  .OR. ( roba->tip $ "UT" )
       RETURN .F.
    ENDIF
-/*
---   IF lAutoObr == .T.
-      IF knab_cache( cIdKonto, cIdroba, @nUlKol, @nIzlKol, @nKolicina, @nUlNv, @nIzlNv, @nSrednjaNabavnaCijena ) == 1   // uzmi stanje iz cache tabele
-         SELECT kalk_pripr
-         RETURN .T.
-      ENDIF
-   ENDIF
-*/
+
    MsgO( "Proračun stanja u magacinu: " + AllTrim( cIdKonto ) + "/" + cIdRoba )
    my_use_refresh_stop()
-
 
    find_kalk_by_mkonto_idroba( cIdFirma, cIdKonto, cIdRoba )
    GO BOTTOM
@@ -126,16 +116,6 @@ FUNCTION kalk_get_nabavna_mag( dDatDo, cIdFirma, cIdRoba, cIdKonto, ;
 
          ENDIF
 
-/*
-         IF Round( nKolicina, 8 ) > 0  // ako je kolicinsko stanje pozitivno zapamti ga
-            nKol_poz := nKolicina
-            nUKol_poz := nUlKol
-            nIKol_poz := nIzlKol
-            nUVr_poz := nUlNv
-            nIVr_poz := nIzlNv
-         ENDIF
-*/
-
       ENDIF
       SKIP
 
@@ -149,7 +129,7 @@ FUNCTION kalk_get_nabavna_mag( dDatDo, cIdFirma, cIdRoba, cIdKonto, ;
       nSrednjaNcPoUlazima := 0
    ENDIF
 
-   // IF Round( nKol_poz, 8 ) == 0 // utvrdi srednju nabavnu cijenu na osnovu posljednjeg pozitivnog stanja
+
    IF Round( nKolicina, 4 ) == 0
       nSrednjaNabavnaCijena := 0
    ELSE

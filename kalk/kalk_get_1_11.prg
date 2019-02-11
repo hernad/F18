@@ -136,7 +136,7 @@ FUNCTION kalk_get_1_11()
    _vpc := _fcj
    @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "       NABAVNA CIJENA (NC):"
    IF _kolicina > 0
-      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE gPicNC VALID {|| lRet := kalk_valid_kolicina_mag(), _vpc := _fcj, lRet }
+      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE gPicNC VALID {|| lRet := kalk_valid_kolicina_mag(nKols), _vpc := _fcj, lRet }
    ELSE
       @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE PicDEM VALID {|| lRet := kalk_valid_kolicina_prod(), _vpc := _fcj, lRet }
    ENDIF

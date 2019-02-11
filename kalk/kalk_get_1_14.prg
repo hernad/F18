@@ -109,7 +109,7 @@ FUNCTION kalk_get_1_14()
    SELECT kalk_pripr
 
 
-   @ box_x_koord() + 13, box_y_koord() + 2    SAY8 "Nab.Cjena "  GET _NC  PICTURE PicDEM   VALID kalk_valid_kolicina_mag()
+   @ box_x_koord() + 13, box_y_koord() + 2    SAY8 "Nab.Cjena "  GET _NC  PICTURE PicDEM   VALID kalk_valid_kolicina_mag(nKols)
 
    PRIVATE _vpcsappp := 0
 
@@ -117,7 +117,7 @@ FUNCTION kalk_get_1_14()
 
    PRIVATE cTRabat := "%"
    @ box_x_koord() + 15, box_y_koord() + 2    SAY8 "RABAT    " GET  _RABATV PICT picdem
-   @ box_x_koord() + 15, Col() + 2  GET cTRabat  PICT "@!"  VALID {|| PrerRab(), V_RabatV(), ctrabat $ "%AU" }
+   @ box_x_koord() + 15, Col() + 2  GET cTRabat  PICT "@!"  VALID {|| kalk_preracun_rabatv_14(), V_RabatV(), cTrabat $ "%AU" }
 
    _PNAP := 0
    _MPC := tarifa->pdv
@@ -211,3 +211,90 @@ FUNCTION pPDV14( lRet )
    // _VPCSaP := iif( _VPC <> 0, _VPC * ( 1 -_RABATV / 100 ) + iif(  < 0, 0, nMarza ) * TARIFA->VPP / 100, 0 )
 
    RETURN lRet
+
+
+
+   /* V_RabatV
+    *     Ispisuje vrijednost rabata u VP
+    */
+
+// Trenutna pozicija u tabeli KONCIJ (na osnovu koncij->naz ispituje cijene)
+// Trenutan pozicija u tabeli ROBA (roba->tip)
+
+FUNCTION V_RabatV()
+
+   LOCAL nPom, nMPCVT
+   LOCAL nRVPC := 0
+   LOCAL getlist := {}
+
+   PRIVATE cPom := "VPC"
+
+   IF koncij->naz == "P2"
+      cPom := "PLC"
+   ELSEIF koncij->naz == "V2"
+      cPom := "VPC2"
+   ELSE
+      cPom := "VPC"
+   ENDIF
+
+   IF roba->tip $ "UTY"
+      RETURN .T.
+   ENDIF
+
+   nRVPC := kalk_vpc_za_koncij()
+   IF Round( nRVPC - _vpc, 4 ) <> 0  .AND. gMagacin == "2"
+      IF nRVPC == 0
+         Beep( 1 )
+         Box(, 3, 60 )
+         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Roba u sifrarniku ima " + cPom + " = 0 !??"
+         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Unesi " + cPom + " u sifrarnik:" GET _vpc PICT picdem
+
+         READ
+
+         SELECT roba
+         hRec := dbf_get_rec()
+
+         hRec[ Lower( cPom ) ] := _vpc
+         update_rec_server_and_dbf( "roba", hRec, 1, "FULL" )
+
+         SELECT kalk_pripr
+         BoxC()
+
+      ENDIF
+   ENDIF
+
+   nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC
+   @ box_x_koord() + 15, box_y_koord() + 41  SAY "PC b.pdv.-RAB:"
+   @ box_x_koord() + 15, Col() + 1 SAY _Vpc * ( 1 - _RabatV / 100 ) PICT picdem
+
+   ShowGets()
+
+   RETURN .T.
+
+
+STATIC FUNCTION kalk_preracun_rabatv_14()
+
+   LOCAL nPrRab
+
+   IF cTRabat == "%"
+      nPrRab := _rabatv
+   ELSEIF cTRabat == "A"
+      IF _VPC <> 0
+         nPrRab := _RABATV / _VPC * 100
+      ELSE
+         nPrRab := 0
+      ENDIF
+   ELSEIF cTRabat == "U"
+      IF _vpc * _kolicina <> 0
+         nprRab := _rabatV / ( _vpc * _kolicina ) * 100
+      ELSE
+         nPrRab := 0
+      ENDIF
+   ELSE
+      RETURN .F.
+   ENDIF
+   _rabatv := nPrRab
+   cTrabat := "%"
+   showgets()
+
+   RETURN .T.
