@@ -136,7 +136,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       cJmj := roba->jmj
       cRobaNaz := AllTrim( roba->naz )
       select_o_tarifa( cIdTarifa )
-      nPPDV := tarifa->opp
+      nPPDV := tarifa->pdv
 
       nStPP := 0
 

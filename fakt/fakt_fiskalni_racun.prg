@@ -345,19 +345,19 @@ STATIC FUNCTION fakt_izracunaj_total( aTarifaIznos, cIdPartner, cIdTipDok )
       select_o_tarifa( cIdTarifa )
 
       IF cIdTipDok $ "11#13#23"
-         IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. tarifa->opp > 0
+         IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. tarifa->pdv > 0
             hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + nIznos
-            hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + ( nIznos / ( 1 + tarifa->opp / 100 ) )
-            hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( ( nIznos / ( 1 + tarifa->opp / 100 ) ) * ( tarifa->opp / 100 ) )
+            hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + ( nIznos / ( 1 + tarifa->pdv / 100 ) )
+            hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( ( nIznos / ( 1 + tarifa->pdv / 100 ) ) * ( tarifa->pdv / 100 ) )
          ELSE
             hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + nIznos
             hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + nIznos
          ENDIF
       ELSE
-         IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. tarifa->opp > 0
-            hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + ( nIznos * ( 1 + tarifa->opp / 100 ) )
+         IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. tarifa->pdv > 0
+            hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + ( nIznos * ( 1 + tarifa->pdv / 100 ) )
             hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + nIznos
-            hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( nIznos * ( tarifa->opp / 100 ) )
+            hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( nIznos * ( tarifa->pdv / 100 ) )
          ELSE
             hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + nIznos
             hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + nIznos

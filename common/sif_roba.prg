@@ -236,8 +236,8 @@ FUNCTION MpcIzVpc()
    @ box_x_koord() + 3, Col() + 1 SAY _VPC&cVPC PICT kalk_pic_iznos_bilo_gpicdem()
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Postojeca MPC" + cMPC
    @ box_x_koord() + 4, Col() + 1 SAY roba->MPC&cMPC PICT kalk_pic_iznos_bilo_gpicdem()
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY "Zaokruziti cijenu na (broj decimala):" GET nZaokNa VALID {|| _MPC&cMPC := Round( _VPC&cVPC * ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 + tarifa->zpp / 100 ), nZaokNa ), .T. } PICT "9"
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY "MPC" + cMPC GET _MPC&cMPC WHEN {|| _MPC&cMPC := Round( _VPC&cVPC * ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 + tarifa->zpp / 100 ), nZaokNa ), .T. } PICT kalk_pic_iznos_bilo_gpicdem()
+   @ box_x_koord() + 5, box_y_koord() + 2 SAY "Zaokruziti cijenu na (broj decimala):" GET nZaokNa VALID {|| _MPC&cMPC := Round( _VPC&cVPC * ( 1 + tarifa->pdv / 100 ), nZaokNa ), .T. } PICT "9"
+   @ box_x_koord() + 6, box_y_koord() + 2 SAY "MPC" + cMPC GET _MPC&cMPC WHEN {|| _MPC&cMPC := Round( _VPC&cVPC * ( 1 + tarifa->pdv / 100 ), nZaokNa ), .T. } PICT kalk_pic_iznos_bilo_gpicdem()
    READ
 
    BoxC()
@@ -253,7 +253,7 @@ FUNCTION MpcIzVpc()
                Scatter()
                select_o_tarifa( _idtarifa )
                SELECT roba
-               _MPC&cMPC := Round( _VPC&cVPC * ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 + tarifa->zpp / 100 ), nZaokNa )
+               _MPC&cMPC := Round( _VPC&cVPC * ( 1 + tarifa->pdv / 100 ), nZaokNa )
                Gather()
             ENDIF
             Postotak( 2, ++nStigaoDo )
@@ -623,10 +623,10 @@ FUNCTION roba_setuj_mpc_iz_vpc()
 
       SELECT roba
 
-      IF tarifa->opp > 0
+      IF tarifa->pdv > 0
 
          // napravi kalkulaciju...
-         _rec[ _mpc_set ] := Round( _rec[ "vpc" ] * ( 1 + ( tarifa->opp / 100 ) ), 2 )
+         _rec[ _mpc_set ] := Round( _rec[ "vpc" ] * ( 1 + ( tarifa->pdv / 100 ) ), 2 )
 
          // zaokruzi na 5 pf
          IF _params[ "zaok_5pf" ] == "D"

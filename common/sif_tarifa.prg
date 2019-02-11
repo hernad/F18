@@ -14,7 +14,11 @@
 
 MEMVAR cPolje
 
+MEMVAR ImeKol, Kol
+
 FUNCTION P_Tarifa( cId, dx, dy )
+
+   LOCAL i
 
    PRIVATE ImeKol
    PRIVATE Kol
@@ -29,9 +33,9 @@ FUNCTION P_Tarifa( cId, dx, dy )
       select_o_tarifa()
    ENDIF
 
-   AAdd( ImeKol, { "ID", {|| id }, "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) }  } )
-   AAdd( ImeKol, { PadC( "Naziv", 35 ), {|| PadR( ToStrU( naz ), 35 ) }, "naz" } )
-   AAdd( ImeKol,  { "PDV ", {|| opp },  "opp", NIL, NIL, NIL, "999.99" } )
+   AAdd( ImeKol, { "ID", {|| tarifa->id }, "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) }  } )
+   AAdd( ImeKol, { PadC( "Naziv", 35 ), {|| PadR( ToStrU( tarifa->naz ), 35 ) }, "naz" } )
+   AAdd( ImeKol,  { "PDV ", {|| tarifa->pdv },  "pdv", NIL, NIL, NIL, "999.99" } )
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )
@@ -76,15 +80,15 @@ FUNCTION set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, cIdRoba, aP
          cPolje := "IdTarifa"
       ELSE
 
-         //IF ( koncij->region == "1" .OR. koncij->region == " " )
-            cPolje := "IdTarifa"
-         //ELSEIF koncij->region == "2"
-          //  cPolje := "IdTarifa2"
-         //ELSEIF koncij->region == "3"
-          //  cPolje := "IdTarifa3"
-         //ELSE
-        //    cPolje := "IdTarifa"
-         //ENDIF
+         // IF ( koncij->region == "1" .OR. koncij->region == " " )
+         cPolje := "IdTarifa"
+         // ELSEIF koncij->region == "2"
+         // cPolje := "IdTarifa2"
+         // ELSEIF koncij->region == "3"
+         // cPolje := "IdTarifa3"
+         // ELSE
+         // cPolje := "IdTarifa"
+         // ENDIF
 
       ENDIF
    ENDIF
@@ -316,7 +320,7 @@ FUNCTION kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc, nMpcSaPP, nNc )
 FUNCTION stopa_pdv( nPdv )
 
    IF nPdv == nil
-      nPdv := tarifa->opp
+      nPdv := tarifa->pdv
    ENDIF
 
    IF Round( nPdv, 1 ) == Round( nPdv, 0 )

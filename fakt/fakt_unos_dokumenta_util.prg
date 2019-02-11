@@ -195,7 +195,7 @@ FUNCTION fakt_setuj_cijenu( cTipCijene )
       IF gMP == "1"
          _cijena := roba->mpc
       ELSEIF gMP == "2"
-         _cijena := Round( roba->vpc * ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 ), 2 )
+         _cijena := Round( roba->vpc * ( 1 + tarifa->pdv / 100 ), 2 )
       ELSEIF gMP == "3"
          _cijena := roba->mpc2
       ELSEIF gMP == "4"
@@ -307,7 +307,7 @@ FUNCTION fakt_v_kolicina( cTipVpc )
             IF gMP == "1"
                _Cijena := MPC
             ELSEIF gMP == "2"
-               _Cijena := Round( VPC * ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 ), 2 )
+               _Cijena := Round( VPC * ( 1 + tarifa->pdv / 100 ), 2 )
             ELSEIF gMP == "3"
                _Cijena := MPC2
             ELSEIF gMP == "4"
@@ -468,7 +468,7 @@ FUNCTION fakt_valid_roba( cIdFirma, cIdTipDok, cIdRoba, cTxt1, cIdPartner, lFakt
    IF lPrikTar
       select_o_tarifa( roba->idtarifa )
       @ box_x_koord() + 16, box_y_koord() + 28 SAY "TBr: "
-      ?? roba->idtarifa, "PDV", Str( tarifa->opp, 7, 2 ) + "%"
+      ?? roba->idtarifa, "PDV", Str( tarifa->pdv, 7, 2 ) + "%"
       IF _IdTipdok == "13"
          @ box_x_koord() + 18, box_y_koord() + 47 SAY "MPC.s.PDV sif:"
          ?? Str( roba->mpc, 8, 2 )
@@ -681,25 +681,6 @@ FUNCTION fakt_box_stanje( aStanje, cIdroba )
    RETURN .T.
 
 
-/*
-FUNCTION V_Porez()
-
-   LOCAL nPor
-
-   IF _porez <> 0
-      IF roba->tip = "U"
-         nPor := tarifa->ppp
-      ELSE
-         nPor := tarifa->opp
-      ENDIF
-      IF nPor <> _Porez
-         Beep( 2 )
-         Msg( "Roba pripada tarifnom stavu " + roba->idtarifa + "#kod koga je porez " + Str( nPor, 5, 2 ) )
-      ENDIF
-   ENDIF
-
-   RETURN .T.
-*/
 
 FUNCTION fakt_unos_w_brotp( lNovi )
 
@@ -1118,7 +1099,7 @@ FUNCTION ObracunajPP( cSetPor, dDatDok )
          fakt_set_pozicija_sif_roba()
          IF select_o_tarifa( roba->idtarifa )
             SELECT fakt_pripr
-            REPLACE porez WITH tarifa->opp
+            REPLACE porez WITH tarifa->pdv
          ENDIF
       ENDIF
       IF datDok <> dDatdok

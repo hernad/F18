@@ -29,7 +29,7 @@ FUNCTION get_stopa_pdv_za_tarifu( cIdTar )
    IF !select_o_tarifa( PadR( cIdTar, 6 ) )
       nStopa := -999
    ELSE
-      nStopa := tarifa->opp
+      nStopa := tarifa->pdv
    ENDIF
 
    PopWa()

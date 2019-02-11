@@ -95,8 +95,8 @@ FUNCTION kalk_stampa_dok_10_txt()
       SKol := hRec[ "kolicina" ]
       // ENDIF
 
-      nPDVStopa := tarifa->opp
-      nPDV := hRec[ "mpcsapp" ] / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )
+      nPDVStopa := tarifa->pdv
+      nPDV := hRec[ "mpcsapp" ] / ( 1 + ( tarifa->pdv / 100 ) ) * ( tarifa->pdv / 100 )
 
       nTot +=  ( nU := Round( hRec[ "fcj" ] * hRec[ "kolicina" ], gZaokr ) )
       nTot1 += ( nU1 := Round( hRec[ "fcj2" ] * ( GKolicina + GKolicin2 ), gZaokr ) )

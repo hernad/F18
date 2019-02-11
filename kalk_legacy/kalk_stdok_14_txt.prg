@@ -101,7 +101,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
       nVPCIzbij := 0
 
       IF roba->tip == "X"
-         nVPCIzbij := ( MPCSAPP / ( 1 + tarifa->opp / 100 ) * tarifa->opp / 100 )
+         nVPCIzbij := ( MPCSAPP / ( 1 + tarifa->pdv / 100 ) * tarifa->pdv / 100 )
       ENDIF
 
       nTot4 +=  ( nU4 := Round( NC * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr )     )  // nv
@@ -170,7 +170,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
       @ PRow(), PCol() + 1 SAY VPC * ( 1 - RABATV / 100 ) - nVPCIzbij  PICTURE PiccDEM
 
       IF roba->tip $ "VKX"
-         @ PRow(), PCol() + 1 SAY PadL( "VT-" + Str( tarifa->opp, 5, 2 ) + "%", Len( picproc ) )
+         @ PRow(), PCol() + 1 SAY PadL( "VT-" + Str( tarifa->pdv, 5, 2 ) + "%", Len( picproc ) )
       ELSE
          IF idvd = "15"
             @ PRow(), PCol() + 1 SAY 0          PICTURE PicProc

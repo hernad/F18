@@ -68,7 +68,7 @@ STATIC FUNCTION artikal_je_gorivo( cIdRoba )
    oQuery := run_sql_query( cSql )
 
    IF query_row( oQuery, "tip" ) == "G"
-   //IF query_row( oQuery, "k1" ) == "GORI"
+      // IF query_row( oQuery, "k1" ) == "GORI"
       lRet := .T.
    ENDIF
 
@@ -218,22 +218,16 @@ STATIC FUNCTION dodaj_sifru_takse_u_tarife()
    LOCAL hRec
    LOCAL cTarifa := PadR( "PDVM0", 6 )
 
-   IF table_count( F18_PSQL_SCHEMA_DOT + "tarifa", "id = " + sql_quote( cTarifa ) ) > 0
+   IF table_count( f18_sql_schema( "tarifa" ), "id = " + sql_quote( cTarifa ) ) > 0
       RETURN lOk
    ENDIF
 
    o_tarifa()
-
    APPEND BLANK
    hRec := dbf_get_rec()
    hRec[ "id" ] := cTarifa
    hRec[ "naz" ] := "PDV 0 %"
-   hRec[ "opp" ] := 0
-   hRec[ "ppp" ] := 0
-   hRec[ "zpp" ] := 0
-   hRec[ "vpp" ] := 0
-   hRec[ "mpp" ] := 0
-   hRec[ "dlruc" ] := 0
+   hRec[ "pdv" ] := 0
 
    lOk := update_rec_server_and_dbf( "tarifa", hRec, 1, "FULL" )
 

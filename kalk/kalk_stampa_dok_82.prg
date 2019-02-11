@@ -53,7 +53,7 @@ FUNCTION kalk_stampa_dok_82()
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
-      nPDVProc := tarifa->opp / 100
+      nPDVProc := tarifa->pdv / 100
 
       IF PRow() > page_length()
          FF
@@ -83,7 +83,7 @@ FUNCTION kalk_stampa_dok_82()
       @ PRow(), PCol() + 1 SAY vpc * ( 1 - rabatv / 100 )   PICTURE PicCDEM
       @ PRow(), PCol() + 1 SAY MPC                  PICTURE PicCDEM
       nCol1 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY TARIFA->OPP          PICTURE PicProc
+      @ PRow(), PCol() + 1 SAY tarifa->pdv          PICTURE PicProc
       @ PRow(), PCol() + 1 SAY nPor1                PICTURE PiccDEM
       @ PRow(), PCol() + 1 SAY MPCSAPP              PICTURE PicCDEM
 

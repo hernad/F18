@@ -80,7 +80,7 @@ FUNCTION Get1_82()
       SELECT kalk_pripr
    ENDIF
 
-   nPDVProc := tarifa->opp / 100
+   nPDVProc := tarifa->pdv / 100
 
    nKolS := 0
    nKolZN := 0
@@ -111,7 +111,6 @@ FUNCTION Get1_82()
 
    _RabatV := 0
    @ box_x_koord() + 19, box_y_koord() + 2  SAY "PDV (%):"; @ Row(), Col() + 2 SAY  nPdvProc * 100 PICTURE "99.99"
-   //@ box_x_koord() + 19, Col() + 8  SAY "PPU (%):"; @ Row(), Col() + 2  SAY _PPP * 100 PICTURE "99.99"
 
    @ box_x_koord() + 20, box_y_koord() + 2 SAY "MPC SA POREZOM:"
    @ box_x_koord() + 20, box_y_koord() + 50 GET _MPCSaPP  PICTURE PicDEM ;

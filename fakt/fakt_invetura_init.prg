@@ -329,7 +329,7 @@ METHOD vldIdRoba()
 
    if ::lSilent
       @ box_x_koord() + 14, box_y_koord() + 28 SAY "TBr: "
-      ?? roba->idtarifa, "PPP", Str( tarifa->opp, 7, 2 ) + "%", "PPU", Str( tarifa->ppp, 7, 2 )
+      ?? roba->idtarifa, "PDV", Str( tarifa->pdv, 7, 2 ) + "%"
    ENDIF
 
    SELECT fakt_pripr

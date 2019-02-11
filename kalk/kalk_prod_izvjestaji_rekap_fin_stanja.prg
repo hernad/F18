@@ -170,7 +170,7 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
 
          select_o_roba( kalk->idroba )
          select_o_tarifa( kalk->idtarifa )
-         nPDVProc := tarifa->opp / 100
+         nPDVProc := tarifa->pdv / 100
          SELECT kalk
 
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( pkonto, idroba, @aPorezi, idtarifa )

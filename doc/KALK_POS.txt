@@ -18,8 +18,8 @@ tops_kalk_import_row_42()
 REPLACE kalk_pripr->mpcsapp WITH topska->mpc
 
 IF Round( topska->stmpc, 2 ) <> 0
-   IF _opp > 0
-      REPLACE field->rabatv with ( topska->stmpc / ( 1 + ( _opp / 100 ) ) )
+   IF _PDV > 0
+      REPLACE field->rabatv with ( topska->stmpc / ( 1 + ( _PDV / 100 ) ) )
       // izbijamo PDV iz ove stavke ako je tarifa PDV17
    ELSE
       REPLACE field->rabatv WITH topska->stmpc // tarifa nije PDV17

@@ -69,9 +69,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       kalk_open_tables_unos( lAzuriraniDokument )
    ENDIF
 
-   // IF ( cSeek == NIL )
-   // cSeek := ""
-   // ENDIF
 
    SELECT kalk_pripr
    SET ORDER TO TAG "1"

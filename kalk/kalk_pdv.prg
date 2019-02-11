@@ -51,7 +51,7 @@ FUNCTION set_pdv_array( aPorezi )
       // inicijaliziraj poreze
       aPorezi := { 0, 0, 0, 0, 0, 0, 0 }
    ENDIF
-   aPorezi[ POR_PPP ] := tarifa->opp
+   aPorezi[ POR_PPP ] := tarifa->pdv
 
    IF tarifa->( FieldPos( "mpp" ) ) <> 0
       aPorezi[ POR_PRUCMP ] := tarifa->mpp

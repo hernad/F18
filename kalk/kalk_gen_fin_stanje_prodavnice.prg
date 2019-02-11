@@ -282,8 +282,8 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
                _porez -= __porez * field->kolicina
 
                _rabatv -= field->rabatv * field->kolicina
-               IF tarifa->opp <> 0
-                  _rabatm -= field->kolicina * ( field->rabatv * ( 1 + tarifa->opp / 100 ) )
+               IF tarifa->pdv <> 0
+                  _rabatm -= field->kolicina * ( field->rabatv * ( 1 + tarifa->pdv / 100 ) )
                ELSE
                   _rabatm -= field->kolicina * field->rabatv
                ENDIF
@@ -296,8 +296,8 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
                _porez += __porez * field->kolicina
 
                _rabatv += field->rabatv * field->kolicina
-               IF tarifa->opp <> 0
-                  _rabatm += field->kolicina * ( field->rabatv * ( 1 + tarifa->opp / 100 ) )
+               IF tarifa->pdv <> 0
+                  _rabatm += field->kolicina * ( field->rabatv * ( 1 + tarifa->pdv / 100 ) )
                ELSE
                   _rabatm += field->kolicina * field->rabatv
                ENDIF

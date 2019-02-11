@@ -93,9 +93,9 @@ FUNCTION kalk_nivelacija_11()
          hRec[ "fcj" ] := nKalkStaraCijena
 
          IF hRec[ "mpc" ] <> 0
-            hRec[ "mpcsapp" ] := ( 1 + tarifa->opp / 100 ) * hRec[ "mpc" ] * ( 1 + tarifa->ppp / 100 )
+            hRec[ "mpcsapp" ] := ( 1 + tarifa->pdv / 100 ) * hRec[ "mpc" ]
          ELSE
-            hRec[ "mpc" ] := hRec[ "mpcsapp" ] / ( 1 + tarifa->opp / 100 ) / ( 1 + tarifa->ppp / 100 )
+            hRec[ "mpc" ] := hRec[ "mpcsapp" ] / ( 1 + tarifa->pdv / 100 )
          ENDIF
 
          IF cPromCj == "D"

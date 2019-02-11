@@ -190,11 +190,6 @@ FUNCTION fakt_fin_prenos()
             RREPLACE IdRj WITH cIdRjFakt
          ENDIF
 
-/*
-         IF cIDVD == "11" .AND. lNCPoSast .AND. TARIFA->mpp <> 0 .AND. FieldPos( "POREZ3" ) > 0
-            RREPLACE porez3 WITH fakt_porez_11( "MPP" )
-         ENDIF
-  */
          SELECT fakt
          SKIP
       ENDDO // brdok
@@ -218,69 +213,10 @@ FUNCTION fakt_porez_11( nFV, nRabat )
    LOCAL nVrati, nCSP
    LOCAL nPDV
 
-  // nMPP := tarifa->mpp / 100
-  nPDV := tarifa->opp / 100
-  // nPP := tarifa->zpp / 100
-  // nPPU := tarifa->ppp / 100
-
+   nPDV := tarifa->pdv / 100
    nCSP := nFV - nRabat     // cijena sa porezima
-
    nVrati := nCSP * ( nPDV / 100 ) / ( 1 + nPDV / 100 )
 
-/*
-   IF gUVarPP == "T"
-      nPor1 := nCSP * nPPP / ( 1 + nPPP )
-      nPor2 := ( nCSP - nPor1 - nNV ) * nMPP / ( 1 + nMPP )
-      nPor3 := ( nCSP - nPor2 ) * nPP
-      DO CASE
-      CASE cVar == "PP"
-         nVrati := nPor3
-      CASE cVar == "PPP"
-         nVrati := nPor1
-      CASE cVar == "PPU"
-         nVrati := 0
-      CASE cVar == "MPP"
-         nVrati := nPor2
-      ENDCASE
-      RETURN nVrati
-   ENDIF
-*/
-
-/*
-   IF  gUVarPP == "D"
-      nD := 1 + TARIFA->zpp / 100 + TARIFA->ppp / 100
-   ELSE
-      nD := ( 1 + TARIFA->opp / 100 ) * ( 1 + TARIFA->ppp / 100 ) + TARIFA->zpp / 100
-   ENDIF
-*/
-
-/*
-   DO CASE
-   CASE cVar == "PP"
-      nVrati := nCSP * ( TARIFA->zpp / 100 ) / nD
-   CASE cVar == "PPU"
-      IF gUVarPP == "D"
-         nVrati := nCSP * ( TARIFA->ppp / 100 ) / nD
-      ELSE
-         nVrati := nCSP * ( TARIFA->ppp / 100 ) * ( 1 + TARIFA->opp / 100 ) / nD
-      ENDIF
-   CASE cVar == "PPP"
-      IF gUVarPP == "D"
-         nVrati := nCSP * ( TARIFA->opp / 100 ) / ( ( 1 + TARIFA->opp / 100 ) * nD )
-      ELSE
-         nVrati := nCSP * ( TARIFA->opp / 100 ) / nD
-      ENDIF
-
-   CASE cVar == "MPP"
-      IF gUVarPP == "D"
-         nMPVBP := nCSP / ( ( 1 + TARIFA->opp / 100 ) * nD )
-      ELSE
-         nMPVBP := nCSP / nD
-      ENDIF
-      nPom   := nMPVBP - nNV
-      nVrati := Max( nCSP * ( TARIFA->dlruc / 100 ) * ( TARIFA->mpp / 100 ), TARIFA->mpp * nPom / ( 100 + TARIFA->mpp ) )
-   END CASE
-*/
    RETURN nVrati
 
 

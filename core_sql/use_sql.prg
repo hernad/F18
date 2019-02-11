@@ -161,7 +161,11 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
-   IF cTable == "tarifa" .OR. cTable == "partn" .OR. cTable == "valute" //  tarifa, partn se uvijek uzimaju iz knjigovodstva
+   IF cTable == "tarifa"
+      RETURN "public." + cTable
+   ENDIF
+
+   IF cTable == "partn" .OR. cTable == "valute" //  tarifa, partn se uvijek uzimaju iz knjigovodstva
       RETURN F18_PSQL_KNJIGOVODSTVO_SCHEMA + "." + cTable
    ENDIF
 
@@ -356,7 +360,7 @@ FUNCTION use_sql_pkonto()
 FUNCTION use_sql_tarifa( lMakeIndex )
 
    LOCAL cSql
-   LOCAL cTable := "tarifa"
+   LOCAL cTable := f18_sql_schema( "tarifa" )
 
    IF lMakeIndex == NIL
       lMakeIndex := .T.
@@ -365,15 +369,10 @@ FUNCTION use_sql_tarifa( lMakeIndex )
    cSql := "SELECT "
    cSql += "  id, "
    cSql += "  naz, "
-   cSql += "  COALESCE(opp,0)::numeric(6,2) AS opp, "
-   cSql += "  COALESCE(ppp,0)::numeric(6,2) AS ppp, "
-   cSql += "  COALESCE(zpp,0)::numeric(6,2) AS zpp, "
-   cSql += "  COALESCE(vpp,0)::numeric(6,2) AS vpp, "
-   cSql += "  COALESCE(mpp,0)::numeric(6,2) AS mpp, "
-   cSql += "  COALESCE(dlruc,0)::numeric(6,2) AS dlruc, "
+   cSql += "  COALESCE(pdv,0)::numeric(6,2) AS pdv, "
    cSql += "  match_code::char(10) "
-   cSql += "FROM " + F18_PSQL_SCHEMA_DOT + "tarifa "
-   cSQL += "ORDER BY id"
+   cSql += "FROM " + f18_sql_schema("tarifa")
+   cSQL += " ORDER BY id"
 
    SELECT F_TARIFA
    IF !use_sql( cTable, cSql )

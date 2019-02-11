@@ -23,7 +23,7 @@ FUNCTION epdv_valid_id_tar( cIdTar, nOsnov, nPdv,  nShow, lNova )
    P_Tarifa( @cIdTar )
 
    select_o_tarifa( cIdTar )
-   nStopa := tarifa->opp
+   nStopa := tarifa->pdv
 
    nPrerPdv := Round( nOsnov * nStopa / 100, ZAO_IZN() )
 

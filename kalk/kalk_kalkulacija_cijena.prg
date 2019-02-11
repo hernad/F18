@@ -333,7 +333,7 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
-         _porezna_stopa := tarifa->opp
+         _porezna_stopa := tarifa->pdv
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
          _a_porezi := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
          _porez := _a_porezi[ 1 ]
@@ -474,7 +474,7 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
 
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-      _porezna_stopa := tarifa->opp
+      _porezna_stopa := tarifa->pdv
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
       _a_porezi := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
       _porez := _a_porezi[ 1 ]
@@ -678,7 +678,7 @@ STATIC FUNCTION gen_kalk_vp_xml( vars )
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
-      _porezna_stopa := tarifa->opp
+      _porezna_stopa := tarifa->pdv
 
       _ima_mpcsapp := .F.
 

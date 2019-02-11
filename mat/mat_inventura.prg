@@ -853,7 +853,7 @@ FUNCTION mat_inv_obr_poreza()
       SELECT mat_invent
       nMPVSAPP := kolicina * cijena
       IF nMPVSAPP == 0; skip; loop; ENDIF
-      nMPV := nMPVSAPP / ( 1 + tarifa->ppp / 100 ) / ( 1 + tarifa->opp / 100 )
+      nMPV := nMPVSAPP / ( 1 + tarifa->pdv / 100 )
       SELECT pormp
       SEEK Str( nmjes, 2 ) + cidk + roba->idtarifa + "3. SAD.INVENT"
       IF !Found()

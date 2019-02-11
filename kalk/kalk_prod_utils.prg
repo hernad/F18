@@ -95,7 +95,7 @@ FUNCTION Marza2O( cProracunMarzeUnaprijed )
    ENDIF
 
    IF roba->tip == "K"  // samo za tip k
-      nPPP := 1 / ( 1 + tarifa->opp / 100 )
+      nPPP := 1 / ( 1 + tarifa->pdv / 100 )
    ELSE
       nPPP := 1
    ENDIF
@@ -155,7 +155,7 @@ FUNCTION Marza2R()
 
    LOCAL nPPP
 
-   nPPP := 1 / ( 1 + tarifa->opp / 100 )
+   nPPP := 1 / ( 1 + tarifa->pdv / 100 )
 
    IF _nc == 0
       _nc := _mpc
@@ -196,7 +196,7 @@ FUNCTION kalk_marza_realizacija_prodavnica()
 
    LOCAL nPPP
 
-   nPPP := 1 / ( 1 + tarifa->opp / 100 )
+   nPPP := 1 / ( 1 + tarifa->pdv / 100 )
 
    IF _nc == 0
       _nc := _mpc

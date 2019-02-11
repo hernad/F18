@@ -120,7 +120,7 @@ FUNCTION kalk_get_1_14()
    @ box_x_koord() + 15, Col() + 2  GET cTRabat  PICT "@!"  VALID {|| PrerRab(), V_RabatV(), ctrabat $ "%AU" }
 
    _PNAP := 0
-   _MPC := tarifa->opp
+   _MPC := tarifa->pdv
 
    @ box_x_koord() + 16, box_y_koord() + 2 SAY8 "PDV (%)  " + Transform( _MPC, "99.99" )
 

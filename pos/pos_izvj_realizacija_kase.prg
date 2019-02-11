@@ -660,34 +660,6 @@ STATIC FUNCTION pos_total_kasa( cIdPos, nTotPos, nTotPos3, nTotPosk, cPodvuci )
    RETURN .T.
 
 
-STATIC FUNCTION pos_prikazi_porez( nIznosSt, cIdTarifa )
-
-   LOCAL nArr
-   LOCAL nMpVBP, nPPPIznos, nPPIznos, nPPUIznos, nPPP, nPPU
-
-   nArr := Select()
-
-   select_o_tarifa( cIdTarifa )
-
-   nPPP := tarifa->opp
-   nPPU := tarifa->ppp
-
-   nMpVBP := nIznosSt / ( zpp / 100 + ( 1 + opp / 100 ) * ( 1 + ppp / 100 ) )
-   nPPPIznos := nMPVBP * opp / 100
-   nPPIznos := nMPVBP * zpp / 100
-
-
-   ? Space( 1 ) + "PPP(" + AllTrim( Str( nPPP ) ) + "%) " + AllTrim( Str( nPPPIznos ) )
-
-   nPPUIznos := ( nMPVBP + nPPPIznos ) * ppp / 100
-
-   ?? " PPU(" + AllTrim( Str( nPPU ) ) + "%) " + AllTrim( Str( nPPUIznos ) )
-
-   SELECT ( nArr )
-
-   RETURN .T.
-
-
 STATIC FUNCTION pos_realizacija_tbl_cre_pom()
 
    LOCAL aDbf := {}

@@ -84,8 +84,7 @@ FUNCTION pornar()
       ENDIF
 
       REPLACE idtarifa WITH tarifa->id, ;
-         ppp WITH tarifa->opp, ;
-         ppu WITH tarifa->ppp, ;
+         ppp WITH tarifa->pdv, ;
          mpvsap WITH mpvsap + suban->kolicina * ncijena, ;
          mpv WITH mpv + suban->kolicina * ncijena / ( 1 + ppu / 100 ) / ( 1 + ppp / 100 )
       SELECT mat_suban

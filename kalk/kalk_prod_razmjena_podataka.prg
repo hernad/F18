@@ -796,7 +796,7 @@ FUNCTION fakt_01_kalk_81()
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                mpcsapp WITH fakt->cijena, ;
-               fcj WITH fakt->cijena / ( 1 + tarifa->opp / 100 ) / ( 1 + tarifa->ppp / 100 ), ;
+               fcj WITH fakt->cijena / ( 1 + tarifa->pdv / 100 ), ;
                tmarza2 WITH "%"
 
             SELECT fakt
@@ -938,7 +938,7 @@ FUNCTION fakt_13_kalk_80()
                idzaduz2  WITH cidzaduz, ;
                kolicina WITH -fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
-               nc WITH fakt->cijena / ( 1 + tarifa->opp / 100 ) / ( 1 + tarifa->ppp / 100 ), ;
+               nc WITH fakt->cijena / ( 1 + tarifa->pdv / 100 ), ;
                mpc WITH 0, ;
                tmarza2 WITH "A", ;
                tprevoz WITH "A", ;
@@ -959,7 +959,7 @@ FUNCTION fakt_13_kalk_80()
                idzaduz2  WITH "", ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
-               nc WITH fakt->cijena / ( 1 + tarifa->opp / 100 ) / ( 1 + tarifa->ppp / 100 ), ;
+               nc WITH fakt->cijena / ( 1 + tarifa->pdv / 100 ), ;
                mpc WITH 0, ;
                tmarza2 WITH "A", ;
                tprevoz WITH "A", ;

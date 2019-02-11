@@ -75,8 +75,8 @@ FUNCTION kalk_stampa_dok_10()
 
       nKolicina := kalk_pripr->Kolicina
 
-      nPDVStopa := tarifa->opp
-      nPDV := kalk_pripr->MPCsaPP / ( 1 + ( tarifa->opp / 100 ) ) * ( tarifa->opp / 100 )
+      nPDVStopa := tarifa->pdv
+      nPDV := kalk_pripr->MPCsaPP / ( 1 + ( tarifa->pdv / 100 ) ) * ( tarifa->pdv / 100 )
 
       nTot +=  ( nU := Round( kalk_pripr->FCj * kalk_pripr->Kolicina, gZaokr ) )
       nTot1 += ( nU1 := Round( kalk_pripr->FCj2 * ( kalk_pripr->GKolicina + kalk_pripr->GKolicin2 ), gZaokr ) )

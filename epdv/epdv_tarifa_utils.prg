@@ -68,7 +68,7 @@ STATIC FUNCTION epdv_dodati_tarifu( cTarifaId, cNaziv, nIznos )
       hRec := dbf_get_rec()
       hRec[ "id" ] := cTarifaId
       hRec[ "naz" ] := cNaziv
-      hRec[ "opp" ] := nIznos
+      hRec[ "pdv" ] := nIznos
       update_rec_server_and_dbf( "tarifa", hRec, 1, "CONT" )
 
    ENDIF

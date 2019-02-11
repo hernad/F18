@@ -333,7 +333,7 @@ STATIC FUNCTION fill_porfakt_data( hDokument, hFillParams )
       cJmj := roba->jmj
 
       // procenat pdv-a
-      nPPDV := tarifa->opp
+      nPPDV := tarifa->pdv
 
       cIdPartner := field->idpartner
 

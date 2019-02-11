@@ -45,7 +45,7 @@ FUNCTION pos_rekapitulacija_tarifa( aTarife )
    FOR nCnt := 1 TO Len( aTarife )
 
       select_o_tarifa( aTarife[ nCnt ][ 1 ] )
-      nPDV := tarifa->opp
+      nPDV := tarifa->pdv
 
       ? aTarife[ nCnt ][ 1 ], "(" + Str( nPDV ) + "%)"
       ? Str( aTarife[ nCnt ][ 2 ], 12, 2 ), Str ( aTarife[ nCnt ][ 3 ], 12, 2 ), Str( Round( aTarife[ nCnt ][ 2 ], 2 ) + Round( aTarife[ nCnt ][ 3 ], 2 ), 12, 2 )
@@ -69,19 +69,15 @@ FUNCTION pos_setuj_tarife( cIdRoba, nIzn, aTarife, nPPP, nPPU, nOsn, nPP )
 
    nArr := Select()
 
-   //o_roba()
-   //o_tarifa()
-
    select_o_roba( cIdRoba )
    select_o_tarifa( roba->idtarifa )
 
    SELECT ( nArr )
 
-   nOsn := nIzn / ( tarifa->zpp / 100 + ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 ) )
-   nPPP := nOsn * tarifa->opp / 100
-   nPP := nOsn * tarifa->zpp / 100
-
-   nPPU := ( nOsn + nPPP ) * tarifa->ppp / 100
+   nOsn := nIzn / ( 1 + tarifa->pdv / 100 )
+   nPPP := nOsn * tarifa->pdv / 100
+   nPP := 0
+   nPPU := 0
 
    nPoz := AScan ( aTarife, {| x| x[ 1 ] == roba->IdTarifa } )
 

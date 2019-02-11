@@ -703,6 +703,28 @@ CREATE TRIGGER pos_pos_insert_update_delete
 -- delete from p15.pos_pos where brdok='BRDOK01';
 
 
+-- TARIFE CLEANUP --
+
+CREATE TABLE IF NOT EXISTS public.tarifa AS  TABLE fmk.tarifa;
+ALTER TABLE public.tarifa OWNER TO admin;
+GRANT ALL ON TABLE public.tarifa TO xtrole;
+
+
+alter table public.tarifa drop column if exists match_code;
+alter table public.tarifa drop column if exists ppp;
+alter table public.tarifa drop column if exists vpp;
+alter table public.tarifa drop column if exists mpp;
+alter table public.tarifa drop column if exists dlruc;
+alter table public.tarifa drop column if exists zpp;
+
+DO $$
+BEGIN
+  BEGIN
+    alter table public.tarifa rename column opp TO pdv;
+   EXCEPTION WHEN others THEN RAISE NOTICE 'tarifa column already renamed opp->pdv';
+  END;
+END $$;
+
 -- DO $$
 -- BEGIN
 --

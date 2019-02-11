@@ -142,7 +142,7 @@ FUNCTION pos_pdv_po_tarifama
       FOR nCnt := 1 TO Len( aTarife )
 
          select_o_tarifa( aTarife[ nCnt ][ 1 ] )
-         nPDV := tarifa->opp
+         nPDV := tarifa->pdv
          // SELECT pos_doks
 
          // ispisi opis i na realizaciji kao na racunu
@@ -232,12 +232,10 @@ STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife, cNaplaceno )
 
          SELECT POS
 
-         nOsn := nIzn / ( tarifa->zpp / 100 + ( 1 + tarifa->opp / 100 ) * ( 1 + tarifa->ppp / 100 ) )
-         nPPP := nOsn * tarifa->opp / 100
-         nPP := nOsn * tarifa->zpp / 100
-
-         nPPU := ( nOsn + nPPP ) * tarifa->ppp / 100
-
+         nOsn := nIzn / ( 1 + tarifa->pdv / 100 )
+         nPPP := nOsn * tarifa->pdv / 100
+         nPP := 0
+         nPPU := 0
 
          aPorezi := {}
          set_pdv_array( @aPorezi )

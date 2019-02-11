@@ -624,7 +624,7 @@ STATIC FUNCTION generacija_ugovora_za_partnera( cUId, cUPartn, dDatObr, dDatVal,
 
       nastimaj_se_na_roba_by_id( rugov->idroba )   // nastimaj roba na rugov-idroba
       select_o_tarifa( roba->idtarifa )
-      nPorez := tarifa->opp
+      nPorez := tarifa->pdv
 
       SELECT fakt_pripr
       APPEND BLANK

@@ -307,7 +307,7 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
          ++nX
          @ box_x_koord() + nX, box_y_koord() + 2 SAY "PRODAJNA CIJENA SA PDV:"
          @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _mpcsapp PICT PicDEM ;
-            VALID {|| _mpcsapp := iif( _mpcsapp = 0, Round( _vpc * ( 1 + TARIFA->opp / 100 ) / ( 1 + TARIFA->PPP / 100 ), 2 ), _mpcsapp ), _mpc := _mpcsapp / ( 1 + TARIFA->opp / 100 ) / ( 1 + TARIFA->PPP / 100 ), ;
+            VALID {|| _mpcsapp := iif( _mpcsapp = 0, Round( _vpc * ( 1 + tarifa->pdv / 100 ), 2 ), _mpcsapp ), _mpc := _mpcsapp / ( 1 + tarifa->pdv / 100 ), ;
             iif( _mpc <> 0, _vpc := Round( _mpc, 2 ), _vpc ), ShowGets(), .T. }
 
       ENDIF

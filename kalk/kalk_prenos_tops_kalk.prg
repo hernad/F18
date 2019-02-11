@@ -482,7 +482,7 @@ STATIC FUNCTION tops_kalk_import_row_42( cBrDok, cIdKontoProdavnica, nRbr )
    ENDIF
 
    select_o_tarifa( topska->idtarifa )
-   cTarifaPDVD := tarifa->opp
+   cTarifaPDVD := tarifa->pdv
 
    SELECT kalk_pripr
 

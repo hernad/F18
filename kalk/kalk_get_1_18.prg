@@ -83,7 +83,7 @@ FUNCTION kalk_get_1_18()
    IF gcMpcKalk10 == "D"
       PRIVATE _MPCPom := 0
       @ box_x_koord() + 18, box_y_koord() + 42    SAY "NOVA CIJENA  MPC :"  GET _mpcpom   PICTURE PicDEM ;
-         valid {|| nKalkNovaCijena := iif( nKalkNovaCijena = 0, Round( _mpcpom / ( 1 + TARIFA->opp / 100 ) / ( 1 + TARIFA->PPP / 100 ), 2 ), nKalkNovaCijena ), .T. }
+         valid {|| nKalkNovaCijena := iif( nKalkNovaCijena = 0, Round( _mpcpom / ( 1 + tarifa->pdv / 100 ), 2 ), nKalkNovaCijena ), .T. }
    ENDIF
 
    READ

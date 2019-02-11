@@ -596,11 +596,11 @@ FUNCTION fakt_lager_lista()
          select_o_tarifa( aPorezi[ i, 1 ] )
          fakt_vt_porezi()
          nMPV := aPorezi[ i, 2 ]
-         nMPV0 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) ), fakt_zaokruzenje() )
-         nPor1 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) ) * _OPP, fakt_zaokruzenje() )
-         nPor2 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) * ( 1 + _OPP ) ) * _PPP, fakt_zaokruzenje() )
-         nPor3 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) ) * _ZPP, fakt_zaokruzenje() )
-         ? aPorezi[ i, 1 ], TRANS( 100 * _OPP, gPicProc ), TRANS( 100 * _PPP, gPicProc ), TRANS( 100 * _ZPP, gPicProc ), TRANS( nMPV0, fakt_pic_iznos() ), TRANS( nPor1, fakt_pic_iznos() ), TRANS( nPor2, fakt_pic_iznos() ), TRANS( nPor3, fakt_pic_iznos() ), TRANS( nMPV, fakt_pic_iznos() )
+         nMPV0 := Round( nMPV / ( 1 + _PDV ) , fakt_zaokruzenje() )
+         nPor1 := Round( nMPV / ( 1 + _PDV ) * _PDV, fakt_zaokruzenje() )
+         nPor2 := Round( 0, fakt_zaokruzenje() )
+         nPor3 := Round( 0, fakt_zaokruzenje() )
+         ? aPorezi[ i, 1 ], TRANS( 100 * _PDV, gPicProc ), TRANS( 0,  gPicProc ), TRANS( 0, gPicProc ), TRANS( nMPV0, fakt_pic_iznos() ), TRANS( nPor1, fakt_pic_iznos() ), TRANS( nPor2, fakt_pic_iznos() ), TRANS( nPor3, fakt_pic_iznos() ), TRANS( nMPV, fakt_pic_iznos() )
          nUMPV += nMPV
          nUMPV0 += nMPV0
          nUPor1 += nPor1
@@ -994,19 +994,6 @@ STATIC FUNCTION fakt_lager_lista_get_data( hParams, lPocetnoStanje )
 
 FUNCTION fakt_vt_porezi()
 
-   PUBLIC _ZPP := 0
-
-   IF roba->tip == "V"
-      PUBLIC _OPP := 0, _PPP := tarifa->ppp / 100
-      PUBLIC _PORVT := tarifa->opp / 100
-   ELSEIF roba->tip == "K"
-      PUBLIC _OPP := tarifa->opp / 100, _PPP := tarifa->ppp / 100
-      PUBLIC _PORVT := tarifa->opp / 100
-   ELSE
-      PUBLIC _OPP := tarifa->opp / 100
-      PUBLIC _PPP := tarifa->ppp / 100
-      PUBLIC _ZPP := tarifa->zpp / 100
-      PUBLIC _PORVT := 0
-   ENDIF
+   PUBLIC _PDV := tarifa->pdv / 100
 
    RETURN .T.

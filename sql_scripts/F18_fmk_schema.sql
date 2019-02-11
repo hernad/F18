@@ -2388,14 +2388,8 @@ ALTER TABLE fmk.strspr OWNER TO admin;
 
 CREATE TABLE fmk.tarifa (
     id character(6) NOT NULL,
-    match_code character(10),
     naz character(50),
-    opp numeric(6,2),
-    ppp numeric(6,2),
-    zpp numeric(6,2),
-    vpp numeric(6,2),
-    mpp numeric(6,2),
-    dlruc numeric(6,2)
+    pdv numeric(6,2)
 );
 
 ALTER TABLE fmk.tarifa OWNER TO admin;

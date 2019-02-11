@@ -249,8 +249,8 @@ STATIC FUNCTION fill_exp( cIdFirma, cIdVd,  cBrDok, lVpcCij, lMpcCij )
          SELECT r_export
          REPLACE jmj WITH cPom2, ;
             naziv_roba WITH cPom1, ;
-            pst_tarifa WITH ( 1 - 1 / ( 1 + tarifa->opp / 100 ) ) * 100, ;
-            st_tarifa WITH tarifa->opp
+            pst_tarifa WITH ( 1 - 1 / ( 1 + tarifa->pdv / 100 ) ) * 100, ;
+            st_tarifa WITH tarifa->pdv
 
          REPLACE cij_nab_d WITH kalk->nc, ;
             cij_nab WITH roba->nc

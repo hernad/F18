@@ -294,7 +294,7 @@ STATIC FUNCTION fakt_gen_rekapitulacija_mp( hParams )
          IF lOslobodjenPDV
             nPPDV := 0
          ELSE
-            nPPDV := tarifa->opp  // procenat pdv-a
+            nPPDV := tarifa->pdv  // procenat pdv-a
          ENDIF
 
          nKol := field->kolicina
