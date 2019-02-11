@@ -65,8 +65,6 @@ METHOD FaktDokumenti:Lock()
 
 
 
-
-
 METHOD FaktDokumenti:za_partnera( idfirma, idtipdok, idpartner )
 
    LOCAL cQuery
@@ -79,11 +77,10 @@ METHOD FaktDokumenti:za_partnera( idfirma, idtipdok, idpartner )
    ::p_idtipdok := idtipdok
    ::p_idpartner := idpartner
 
-   cQuery := "SELECT fakt_doks.idfirma, fakt_doks.idtipdok, fakt_doks.brdok FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks "
+   cQuery := "SELECT fakt_doks.idfirma, fakt_doks.idtipdok, fakt_doks.brdok FROM " + f18_sql_schema( "fakt_doks" ) + " "
    cQuery += "WHERE "
 
    ::_sql_where := "fakt_doks.idfirma=" + sql_quote( ::p_idfirma ) +  " AND fakt_doks.idtipdok=" + sql_quote( ::p_idtipdok ) + " AND fakt_doks.idpartner=" + sql_quote( ::p_idpartner )
-
    cQuery += ::_sql_where
    oQry := run_sql_query( cQuery )
 
@@ -103,8 +100,6 @@ METHOD FaktDokumenti:za_partnera( idfirma, idtipdok, idpartner )
    RETURN nCnt
 
 
-
-
 METHOD FaktDokumenti:pretvori_otpremnice_u_racun()
 
    LOCAL _idfirma, _idtipdok, _idpartner
@@ -118,7 +113,6 @@ METHOD FaktDokumenti:pretvori_otpremnice_u_racun()
    o_fakt_pripr()
    GO TOP
 
-   // ako je priprema prazna
    IF RecCount2() <> 0
       MsgBeep( "FAKT priprema nije prazna" )
       RETURN .F.
@@ -144,13 +138,11 @@ METHOD FaktDokumenti:pretvori_otpremnice_u_racun()
    @ box_x_koord() + f18_max_rows() - 12, box_y_koord() + 2 SAY "Partner:"
    @ box_x_koord() + f18_max_rows() - 10, box_y_koord() + 2 SAY "Komande: <SPACE> markiraj otpremnicu"
 
-
    ::za_partnera( _idfirma, _idtipdok, _idpartner )
 
    _fakt_browse := BrowseFaktDokumenti():New( box_x_koord() + 5, box_y_koord() + 1, box_x_koord() + f18_max_rows() - 13, f18_max_cols() - 11, self )
    _fakt_browse:set_kolone_markiraj_otpremnice()
    _fakt_browse:Browse()
-
 
    BoxC()
 
@@ -176,9 +168,7 @@ METHOD FaktDokumenti:generisi_fakt_pripr_vars( hParams )
 
    Box(, 6, 65 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Sumirati stavke otpremnica (D/N) ?" GET _sumiraj ;
-      VALID _sumiraj $ "DN" PICT "@!"
-
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Sumirati stavke otpremnica (D/N) ?" GET _sumiraj VALID _sumiraj $ "DN" PICT "@!"
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Formirati tip racuna: 1 (veleprodaja)"
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "                      2 (maloprodaja)" GET _tip_rn ;
       VALID ( _tip_rn > 0 .AND. _tip_rn < 3 ) PICT "9"
@@ -194,7 +184,6 @@ METHOD FaktDokumenti:generisi_fakt_pripr_vars( hParams )
       RETURN lOk
    ENDIF
 
-   // snimi mi u matricu parametre
    hParams[ "tip_racuna" ] := _tip_rn
    hParams[ "sumiraj" ] := _sumiraj
    hParams[ "valuta" ] := Upper( _valuta )
@@ -283,7 +272,6 @@ METHOD FaktDokumenti:generisi_fakt_pripr()
       RETURN .F.
    ENDIF
 
-
    lSumirati := hGenParams[ "sumiraj" ] == "D"
    nVPiliMPRacun := hGenParams[ "tip_racuna" ]
    _valuta := hGenParams[ "valuta" ]
@@ -300,8 +288,8 @@ METHOD FaktDokumenti:generisi_fakt_pripr()
    ELSE
       cSql += "kolicina, datdok, txt"
    ENDIF
-   cSql += " FROM " + f18_sql_schema("fakt_fakt") + " "
-   cSql += " LEFT JOIN " + f18_sql_schema("roba") + " "
+   cSql += " FROM " + f18_sql_schema( "fakt_fakt" ) + " "
+   cSql += " LEFT JOIN " + f18_sql_schema( "roba" ) + " "
    cSql += " ON fakt_fakt.idroba=roba.id "
    cSql += " WHERE "
    cSql += "idfirma=" + sql_quote( ::p_idfirma ) + " AND  idtipdok=" + sql_quote( ::p_idtipdok )
@@ -395,8 +383,8 @@ FUNCTION renumeracija_fakt_pripr( cVezaOtpremnica, dDatumPosljednjeOtpr )
    LOCAL lSetujDatum := .F.
    LOCAL GetList := {}
    LOCAL nRokPl := 0
+   LOCAL nRbr, nTRec
 
-   // PRIVATE nRokPl := 0
    PRIVATE cSetPor := "N"
 
    SELECT fakt_pripr
@@ -422,7 +410,7 @@ FUNCTION renumeracija_fakt_pripr( cVezaOtpremnica, dDatumPosljednjeOtpr )
       SKIP
       nTrec := RecNo()
       SKIP -1
-      IF Empty( podbr )
+      IF Empty( fakt_pripr->podbr )
          REPLACE rbr WITH Str( ++nRbr, 3, 0 )
       ELSE
          IF nRbr == 0
@@ -438,21 +426,6 @@ FUNCTION renumeracija_fakt_pripr( cVezaOtpremnica, dDatumPosljednjeOtpr )
    GO TOP
 
    Scatter()
-
-   // _txt1 := _txt2 := _txt3a := _txt3b := _txt3c := ""
-
-   // _dest := Space( 150 )
-   // _m_dveza := Space( 500 )
-
-   // IF my_get_from_ini( 'FAKT', 'ProsiriPoljeOtpremniceNa50', 'N', KUMPATH ) == 'D'
-   // _BrOtp := Space( 50 )
-   // ELSE
-   // _BrOtp := Space( 8 )
-   // ENDIF
-
-   // _DatOtp := CToD( "" )
-   // _BrNar := Space( 8 )
-   // _DatPl := CToD( "" )
 
    IF cVezaOtpremnica == nil
       cVezaOtpremnica := ""
@@ -502,10 +475,6 @@ FUNCTION renumeracija_fakt_pripr( cVezaOtpremnica, dDatumPosljednjeOtpr )
          hFaktTxt[ "txt2" ] += NRED_DOS + "Veza otpremnice: " + cVezaOtpremnica
       ENDIF
    ENDIF
-
-   // _txt := fakt_ftxt_encode_3( _txt1, _txt2, _txt3a, _txt3b, _txt3c, ;
-   // _BrOtp, _BrNar, _DatOtp, _DatPl, cVezaOtpremnica, ;
-   // _dest, _m_dveza )
 
    _txt := fakt_ftxt_encode_5( hFaktTxt )
 

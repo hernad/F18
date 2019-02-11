@@ -1318,9 +1318,7 @@ FUNCTION kalk_set_diskont_mpc()
    ENDDO
 
    my_unlock()
-
-   kalk_asistent_start() // kalk_set_diskont_mpc
-
+   kalk_asistent_start()
    my_close_all_dbf()
 
    RETURN .T.
@@ -1404,14 +1402,10 @@ FUNCTION kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok )
       IF field->idvd $ "11#41#42#RN#19"
          IF field->fcj == 0
             cOk += AllTrim( field->rbr ) + ";"
-            // MsgBeep( "Stavka broj " + AllTrim( field->rbr ) + " FCJ <= 0 !" )
-            // EXIT
          ENDIF
       ELSEIF field->idvd $ "10#16#96#94#95#14#80#81#"
          IF field->nc == 0
             cOk += AllTrim( field->rbr ) + ";"
-            // MsgBeep( "Stavka broj " + AllTrim( field->rbr ) + " NC <= 0 !" )
-            // EXIT
          ENDIF
       ENDIF
       SKIP
