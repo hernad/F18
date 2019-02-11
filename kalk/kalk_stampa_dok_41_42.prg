@@ -11,6 +11,9 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
+STATIC s_nRobaNazivSirina := 39
+
 MEMVAR aPorezi
 MEMVAR nStr
 MEMVAR nPrevoz, nBankTr, nSpedTr, nMarza, nMarza2, nCarDaz, nZavTr
@@ -34,6 +37,8 @@ FUNCTION kalk_stampa_dok_41_42()
    LOCAL nU3, nU4, nU5, nU6, nU7, nU8, nU9, nUMPP
    LOCAL nPor1
    LOCAL aIPor
+   LOCAL cNaslov
+   LOCAL bZagl, xPrintOpt
 
    PRIVATE nMarza, nMarza2, aPorezi
 
@@ -45,21 +50,33 @@ FUNCTION kalk_stampa_dok_41_42()
    dDatFaktP := kalk_pripr->DatFaktP
    cPKonto := kalk_pripr->pKonto
 
-   P_10CPI
+   IF cIdVd == "41"
+      cNaslov := "IZLAZ IZ PRODAVNICE - KUPAC"
+   ELSE
+      cNaslov := "IZLAZ IZ PRODAVNICE"
+   ENDIF
 
-   kalk_naslov_41_42()
+   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
+
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
+
+   cLine := linija_za_podvlacenje()
+   bZagl := {|| kalk_naslov_41_42() }
 
    SELECT kalk_pripr
-   cLine := _get_line( cIdVd )
-   ? cLine
-   _print_report_header( cIdvd )
-   ? cLine
 
    nTot3 := nTot4 := nTot5 := nTotPorez := nTot7 := nTot8 := nTotPopust := 0
    nTot4a := 0
    nTotMPP := 0
 
-   //PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   Eval( bZagl )
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->idfirma .AND. cBrDok == kalk_pripr->brdok .AND. cIdVD == kalk_pripr->idvd
 
       Scatter()
@@ -73,7 +90,7 @@ FUNCTION kalk_stampa_dok_41_42()
       nPor1 := aIPor[ 1 ]
       print_nova_strana( 125, @nStr, 2 )
       // nabavna vrijednost
-      nTot3 += ( nU3 := IIF( roba->tip = "U", 0, kalk_pripr->nc ) * kalk_pripr->kolicina )
+      nTot3 += ( nU3 := iif( roba->tip = "U", 0, kalk_pripr->nc ) * kalk_pripr->kolicina )
       // marza
       nTot4 += ( nU4 := nMarza2 * kalk_pripr->kolicina )
       // maloprodajna vrijednost bez poreza (bez popusta)
@@ -89,17 +106,12 @@ FUNCTION kalk_stampa_dok_41_42()
       // mpv sa pdv - popust
       nTotMPP += ( nUMPP := ( kalk_pripr->mpc + nPor1 ) * kalk_pripr->kolicina )
 
-      // 1. red
+      check_nova_strana( bZagl, s_oPDF, .F., 0 )
+
       @ PRow() + 1, 0 SAY kalk_pripr->rbr PICT "999"
-      @ PRow(), 4 SAY  ""
-
-      ?? Trim( Left( roba->naz, 40 ) ), "(", roba->jmj, ")"
-      IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
-         ?? ", BK: " + roba->barkod
-      ENDIF
-
-      // 2. red
-      @ PRow() + 1, 4 SAY kalk_pripr->idroba
+      @ PRow(), PCol() + 1 SAY IdRoba
+      @ PRow(), PCol() + 1 SAY ROBA->barkod
+      @ PRow(), PCol() + 1 SAY PadR( ROBA->naz, s_nRobaNazivSirina ) + "(" + ROBA->jmj + ")"
       @ PRow(), PCol() + 1 SAY kalk_pripr->kolicina PICT pickol()
       nCol0 := PCol()
       @ PRow(), nCol0 SAY ""
@@ -160,7 +172,7 @@ FUNCTION kalk_stampa_dok_41_42()
 
    ENDDO
 
-   print_nova_strana( 125, @nStr, 3 )
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
    ? cLine
    @ PRow() + 1, 0 SAY "Ukupno:"
    @ PRow(), nCol0 SAY ""
@@ -180,62 +192,19 @@ FUNCTION kalk_stampa_dok_41_42()
    @ PRow(), PCol() + 1 SAY nTotMPP PICT picdem()
    // maloprodajna vrijednost sa porezom
    @ PRow(), PCol() + 1 SAY nTot7 PICT picdem()
-
    ? cLine
-   print_nova_strana( 125, @nStr, 10 )
 
-   //nRec := RecNo()
+   check_nova_strana( bZagl, s_oPDF, .F., 8 )
    PushWa()
-   // rekapitulacija tarifa PDV
-   kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, @nStr )
-   //SET ORDER TO TAG "1"
-   //GO nRec
+   kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
    PopWa()
 
-   RETURN .T.
-
-
-STATIC FUNCTION _get_line()
-
-   LOCAL cLine
-
-   cLine := "--- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
-   cLine += " ---------- ---------- ----------"
-
-   RETURN cLine
-
-
-STATIC FUNCTION _print_report_header()
-
-   ? "*R * ROBA     * Kolicina *  NAB.CJ  *  MARZA  * MPC bPDV *  Popust  * PC-pop.  *   PDV %  *   MPC    * MPC     *"
-   ? "*BR*          *          *   U MP   *         * MPV bPDV * (bez PDV)* PV-pop.  *   PDV    *  SA PDV  * SA PDV  *"
-   ? "*  *          *          *   sum    *         *    sum   *          *          *    sum   * - popust *  sum    *"
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
 
-STATIC FUNCTION _get_rekap_line()
-
-   LOCAL cLine
-   LOCAL nI
-
-   cLine := "------ "
-   FOR nI := 1 TO 7
-      cLine += Replicate( "-", 10 ) + " "
-   NEXT
-
-   RETURN cLine
-
-
-STATIC FUNCTION _print_rekap_header()
-
-   ?  "* Tar *  PDV%    *   MPV    *  Popust  * MPV-Pop  *   PDV   * MPV-Pop. *  MPV    *"
-   ?  "*     *          *  b.PDV   *  b.PDV   *  b.PDV   *   PDV   *  sa PDV  * sa PDV  *"
-
-   RETURN .T.
-
-
-FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
+FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
 
    LOCAL nTot1
    LOCAL nTot2
@@ -255,9 +224,10 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
    SET ORDER TO TAG "1"
    SEEK cIdfirma + cIdvd + cBrdok
 
-   cLine := _get_rekap_line()
+   cLine := linija_za_podvlacenje_pdv()
    ? cLine
-   _print_rekap_header()
+   ?  "* Tar *  PDV%    *   MPV    *  Popust  * MPV-Pop  *   PDV   * MPV-Pop. *  MPV    *"
+   ?  "*     *          *  b.PDV   *  b.PDV   *  b.PDV   *   PDV   *  sa PDV  * sa PDV  *"
    ? cLine
 
    nTot1 := 0
@@ -268,6 +238,7 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
    nTotP := 0
    aPorezi := {}
 
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
    DO WHILE !Eof() .AND. cIdfirma + cIdvd + cBrDok == kalk_pripr->idfirma + kalk_pripr->idvd + kalk_pripr->brdok
 
       cIdTarifa := kalk_pripr->idtarifa
@@ -300,6 +271,8 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
       nTot5 += nU5
       nTotP += nUP
 
+      check_nova_strana( bZagl, s_oPDF, .F., 3 )
+
       ? cIdtarifa
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICT picproc()
 
@@ -319,7 +292,7 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
 
    ENDDO
 
-   print_nova_strana( 125, @nStr, 4 )
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
    ? cLine
    ? "UKUPNO"
    // prodajna vrijednost bez popusta
@@ -345,27 +318,53 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, nStr )
    RETURN .T.
 
 
-FUNCTION kalk_naslov_41_42()
+STATIC FUNCTION kalk_naslov_41_42()
 
-   B_ON
-   IF cIdVd == "41"
-      ?? "IZLAZ IZ PRODAVNICE - KUPAC"
-   ELSE
-      ?? "IZLAZ IZ PRODAVNICE - PARAGON BLOK"
-   ENDIF
-   B_OFF
-   P_COND
-   ?
+   LOCAL cLine
 
-   ?? "KALK BR:",  cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), P_TipDok( cIdVD, - 2 ), Space( 2 ), "Datum:", kalk_pripr->DatDok
-   @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-
+   PushWa()
    select_o_partner( cIdPartner )
    IF cIdVd == "41"
       ?  "KUPAC:", cIdPartner, "-", PadR( partn->naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
    ENDIF
 
    select_o_konto( cPKonto )
-   ?  "Prodavnicki konto razduzuje:", cPKonto, "-", PadR( konto->naz, 60 )
+   ?  _u( "Prodavnički konto razdužuje:" ), cPKonto, "-", PadR( konto->naz, 60 )
+
+   cLine := linija_za_podvlacenje( cIdVd )
+   ? cLine
+
+   ?U "*R * ROBA     *" + PadC( "Barkod", 13 ) + "*" + PadC( "Naziv", s_nRobaNazivSirina + 5 ) +;
+      "* Količina *  NAB.CJ  *  MARZA  * MPC bPDV *  Popust   * MPV-pop. *   PDV %  *   MPC    * MPC/MPV *"
+
+   ?U "*BR*          *" + PadC( "      ", 13 ) + "*" + PadC( "     ", s_nRobaNazivSirina + 5 ) +;
+      "*          *   U MP   *         * MPV bPDV * (bez PDV) * (bez PDV)*   PDV    *  SA PDV  * SA PDV  *"
+
+   ? cLine
+   PopWa()
 
    RETURN NIL
+
+
+STATIC FUNCTION linija_za_podvlacenje()
+
+   LOCAL cLine
+
+   cLine := "--- ---------- " + Replicate( "-", 13 ) + " " + Replicate( "-", s_nRobaNazivSirina + 5 ) + ;
+            " ---------- ---------- ---------- ---------- ---------- ----------"
+   cLine += " ---------- ---------- ----------"
+
+   RETURN cLine
+
+
+STATIC FUNCTION linija_za_podvlacenje_pdv()
+
+   LOCAL cLine
+   LOCAL nI
+
+   cLine := "------ "
+   FOR nI := 1 TO 7
+      cLine += Replicate( "-", 10 ) + " "
+   NEXT
+
+   RETURN cLine

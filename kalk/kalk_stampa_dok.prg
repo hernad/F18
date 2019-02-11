@@ -148,20 +148,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
          ?
       ENDIF
 
-      // DO WHILE .T.
-
-      // IF ( cSeek == 'IZDOKS' )
-      // IF ( PRow() > 42 ) // stampati sve odjednom
-      // ++nStr
-      // FF
-      // ENDIF
-      // SELECT kalk_pripr
-      // cIdfirma := kalk_pripr->idfirma
-      // cIdvd := kalk_pripr->idvd
-      // cBrdok := kalk_pripr->brdok
-      // HSEEK cIdFirma + cIdVD + cBrDok
-      // ENDIF
-
       IF !pdf_kalk_dokument( cIdVd )
          Preduzece()
       ENDIF
@@ -192,7 +178,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
          kalk_stampa_dok_80()
 
       ELSEIF ( cIdvd == "81" )
-
          kalk_stampa_dok_81()
 
       ELSEIF ( cIdvd == "82" )
@@ -213,18 +198,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
          kalk_stampa_dok_pr()
       ENDIF
 
-      // IF ( cSeek != 'IZDOKS' )
-      // EXIT
-      // ELSE
-      // SELECT kalk_pripr
-      // SKIP
-      // IF Eof()
-      // EXIT
-      // ENDIF
-      // ?
-      // ?
-      // ENDIF
-      // ENDDO // cSEEK
 
       IF !pdf_kalk_dokument( cIdVd )
          IF ( gPotpis == "D" )
@@ -262,10 +235,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       IF ( cIdvd $ "10#11#81" )
          lDokumentZaFakt := .T.
       ENDIF
-
-      // IF ( !Empty( cSeek ) )
-      // EXIT
-      // ENDIF
 
       IF lAzuriraniDokument // stampa azuriranog KALK dokumenta
          IF cNaljepniceDN == "D"
@@ -345,11 +314,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
 
 
 
-
-   /*
-     legacy global vars
-   */
-
 FUNCTION picdem( cPic )
 
    IF cPic != NIL
@@ -388,4 +352,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80"  // implementirano za ove dokumente
+   RETURN cIdVd $ "10#14#19#80#41#42"  // implementirano za ove dokumente

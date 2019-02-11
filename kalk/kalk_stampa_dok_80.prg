@@ -191,7 +191,6 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
    nRec := RecNo()
    kalk_pripr_rekap_tarife( {|| check_nova_strana( bZagl, s_oPDF, .F., 5 ) }  )
-
    dok_potpis( 90, "L", NIL, NIL )
 
    f18_end_print( NIL, xPrintOpt )
