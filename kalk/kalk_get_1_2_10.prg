@@ -289,7 +289,7 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
          @ box_x_koord() + nX, box_y_koord() + 2    SAY "PRODAJNA CIJENA BEZ PDV   :"
       ENDIF
 
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _vpc PICT PicDEM VALID {|| kalk_10_vaild_Marza_VP( _Idvd, ( cProracunMarzeUnaprijed == "F" ) ), .T. }
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _vpc PICT PicDEM VALID {|| kalk_valid_marza_veleprodaja_10( _Idvd, ( cProracunMarzeUnaprijed == "F" ) ), .T. }
 
       IF ( gcMpcKalk10 == "D" )   // VPC se izracunava pomocu MPC cijene
 

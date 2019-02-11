@@ -1,14 +1,13 @@
 /*
- * This file is part of the bring.out FMK, a free and open source
- * accounting software suite,
- * Copyright (c) 1996-2011 by bring.out doo Sarajevo.
+ * This file is part of the bring.out knowhow ERP, a free and open source
+ * Enterprise Resource Planning software suite,
+ * Copyright (c) 1994-2018 by bring.out doo Sarajevo.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including FMK specific Exhibits)
- * is available in the file LICENSE_CPAL_bring.out_FMK.md located at the
+ * is available in the file LICENSE_CPAL_bring.out_knowhow.md located at the
  * root directory of this source code archive.
  * By using this software, you agree to be bound by its terms.
  */
-
 
 #include "f18.ch"
 
@@ -23,22 +22,23 @@ FUNCTION kalk_unos_dok_81( hParams )
 
    LOCAL nX := 5
    LOCAL nKoordX := 0
-   LOCAL _unos_left := 40
-   //LOCAL _use_opis := .F.
-   //LOCAL _opis := Space( 300 )
+   LOCAL nY := 40
+
+   // LOCAL _use_opis := .F.
+   // LOCAL _opis := Space( 300 )
    LOCAL _krabat := NIL
 
    IF hb_HHasKey( hParams, "opis" )
       _use_opis := .T.
    ENDIF
 
-   //IF _use_opis
-  //    IF !kalk_is_novi_dokument()
-  //       _opis := PadR( hParams[ "opis" ], 300 )
-  //    ENDIF
-   //ENDIF
+   // IF _use_opis
+   // IF !kalk_is_novi_dokument()
+   // _opis := PadR( hParams[ "opis" ], 300 )
+   // ENDIF
+   // ENDIF
 
-   IF Empty(_pkonto)
+   IF Empty( _pkonto )
       _pkonto := _idkonto2
       _idkonto2 := ""
    ENDIF
@@ -77,7 +77,6 @@ FUNCTION kalk_unos_dok_81( hParams )
       ?? _datfaktp
 
       ++nX
-
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje: "
       ?? _pkonto
 
@@ -90,8 +89,6 @@ FUNCTION kalk_unos_dok_81( hParams )
    nKoordX := box_x_koord() + nX
 
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), nKoordX, box_y_koord() + 2, @aPorezi, _idPartner )
-
-
 
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() - 20 ) SAY "Tarifa:" GET _idtarifa VALID P_Tarifa( @_IdTarifa )
 
@@ -106,10 +103,10 @@ FUNCTION kalk_unos_dok_81( hParams )
    select_o_koncij( _pkonto )
    SELECT kalk_pripr
 
-   //++nX
-   //IF _use_opis
-  //    @ box_x_koord() + nX, box_y_koord() + 30 SAY8 "Opis:" GET _opis PICT "@S40"
-   //ENDIF
+   // ++nX
+   // IF _use_opis
+   // @ box_x_koord() + nX, box_y_koord() + 30 SAY8 "Opis:" GET _opis PICT "@S40"
+   // ENDIF
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _kolicina PICT PicKol VALID _kolicina <> 0
@@ -132,13 +129,12 @@ FUNCTION kalk_unos_dok_81( hParams )
       @ box_x_koord() + nX, Col() + 1 SAY "EUR->" GET s_cKonverzijaValuteDN VALID kalk_ulaz_preracun_fakturne_cijene( s_cKonverzijaValuteDN ) PICT "@!"
    ENDIF
 
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _fcj PICT PicDEM ;
-      VALID {|| SetKey( K_ALT_T, {|| NIL } ), _fcj > 0 } WHEN valid_kolicina()
+   @ box_x_koord() + nX, box_y_koord() + nY GET _fcj PICT PicDEM VALID {|| SetKey( K_ALT_T, {|| NIL } ), _fcj > 0 } WHEN valid_kolicina()
    @ box_x_koord() + nX, Col() + 1 SAY "*** <ALT+T> unos ukupne FV"
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2   SAY "Rabat (%):"
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _rabat PICT PicDEM
+   @ box_x_koord() + nX, box_y_koord() + nY GET _rabat PICT PicDEM
 
 
    READ
@@ -146,11 +142,6 @@ FUNCTION kalk_unos_dok_81( hParams )
    ESC_RETURN K_ESC
 
    _fcj2 := _fcj * ( 1 - _rabat / 100 )
-
-
-  //IF _use_opis
-  //    hParams[ "opis" ] := _opis
-  // ENDIF
 
    obracun_kalkulacija_tip_81_pdv( nX )
 
@@ -175,7 +166,6 @@ STATIC FUNCTION _fv_ukupno()
    IF LastKey() == K_ESC .OR. Round( _uk_fv, 2 ) == 0
       RETURN _ok
    ENDIF
-
    _fcj := ( _uk_fv / _kolicina )
 
    RETURN _ok
@@ -189,8 +179,7 @@ STATIC FUNCTION valid_kolicina()
 
       nKolS := 0
       nKolZN := 0
-      nc1 := nc2 := 0
-
+      nC1 := nC2 := 0
       IF !Empty( kalk_metoda_nc() )
          kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolS, @nKolZN, @nc1, @nc2 )
          @ box_x_koord() + 12, box_y_koord() + 30 SAY "Ukupno na stanju "
@@ -213,14 +202,13 @@ STATIC FUNCTION valid_kolicina()
 STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
 
    LOCAL cSPom := " (%,A,U,R) "
-   LOCAL _unos_left := 40
+   LOCAL nY := 40
    LOCAL nKoordX
    LOCAL lSaTroskovima := .T.
    PRIVATE getlist := {}
    PRIVATE cProracunMarzeUnaprijed := " "
 
    nX += 2
-
    IF Empty( _TPrevoz )
       _TPrevoz := "%"
    ENDIF
@@ -231,48 +219,46 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    IF Empty( _TMarza );  _TMarza := "%" ; ENDIF
 
    IF lSaTroskovima == .T.
-
       // TROSKOVNIK
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Raspored troškova kalkulacije ->"
-      @ box_x_koord() + nX, box_y_koord() + _unos_left SAY c10T1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _Prevoz PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + _unos_left SAY c10T2 + cSPom GET _TBankTr VALID _TBankTr $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T2 + cSPom GET _TBankTr VALID _TBankTr $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _BankTr PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + _unos_left SAY c10T3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _SpedTr PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + _unos_left SAY c10T4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _CarDaz PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + _unos_left SAY c10T5 + cSPom GET _TZavTr VALID _TZavTr $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T5 + cSPom GET _TZavTr VALID _TZavTr $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _ZavTr PICT PicDEM ;
          VALID {|| kalk_when_valid_nc_ulaz(), .T. }
-
       nX += 2
 
    ENDIF
 
    // NC
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "NABAVNA CIJENA:"
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _nc PICT PicDEM
+   @ box_x_koord() + nX, box_y_koord() + nY GET _nc PICT PicDEM
 
    // MARZA
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MARZA:" GET _TMarza2 VALID _Tmarza2 $ "%AU" PICT "@!"
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _marza2 PICT PicDEM VALID {|| _vpc := _nc, .T. }
+   @ box_x_koord() + nX, box_y_koord() + nY GET _marza2 PICT PicDEM VALID {|| _vpc := _nc, .T. }
    @ box_x_koord() + nX, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"
 
    // PRODAJNA CIJENA
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC BEZ PDV:"
 
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc PICT PicDEM WHEN kalk_when_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
+   @ box_x_koord() + nX, box_y_koord() + nY GET _mpc PICT PicDEM WHEN kalk_when_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
       VALID kalk_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
 
    ++nX
@@ -282,7 +268,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
 
-   @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpcsapp PICT PicDEM ;
+   @ box_x_koord() + nX, box_y_koord() + nY GET _mpcsapp PICT PicDEM ;
       WHEN {|| cProracunMarzeUnaprijed := " ", _Marza2 := 0, .T. } VALID kalk_valid_mpcsapdv( "81", .F., @aPorezi, .T. )
 
    READ
@@ -295,7 +281,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    SELECT kalk_pripr
 
    _mkonto := ""
-   _idkonto := ""
+   // _idkonto := ""
    _pu_i := "1"
    _mu_i := ""
 

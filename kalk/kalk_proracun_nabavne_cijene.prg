@@ -11,12 +11,11 @@
 
 #include "f18.ch"
 
-MEMVAR _idfirma, _datdok, _mkonto, _idroba, _Kolicina, _nc, _fcj, _fcj2, _idvd
+MEMVAR gAutoCjen
 
+MEMVAR _idfirma, _datdok, _mkonto, _idroba, _Kolicina, _nc, _fcj, _fcj2, _idvd, _error
 MEMVAR _marza, _vpc, _tmarza, _rabatv
-MEMVAR _Error
 MEMVAR _prevoz, _tprevoz, _cardaz, _tcardaz, _zavtr, _tzavtr, _banktr, _tbanktr, _spedtr, _TSpedTr
-
 MEMVAR nPrevoz, nCarDaz, nBanktr, nSpedTr, nZavTr
 MEMVAR cFieldName
 MEMVAR nMarza
@@ -27,7 +26,7 @@ STATIC s_nStandarnaStopaMarze := NIL
 
 /*
 
-   ako je srednja nabavna cijena 0.2, ako je nabavna cijena posljednjeg ulaza 0.42
+   ako je srednja nabavna cijena 0.2 i ako je nabavna cijena posljednjeg ulaza 0.42
 
    irb(main):009:0> (0.2-0.42)/0.2*100
    => -109.999 %
@@ -65,7 +64,6 @@ FUNCTION standardna_stopa_marze( nSet )
    IF s_nStandarnaStopaMarze == NIL
       s_nStandarnaStopaMarze  := fetch_metric( "standarna_stopa_marze", NIL, 19.99 ) // 19.99%
    ENDIF
-
    IF nSet != NIL
       s_nStandarnaStopaMarze := nSet
       set_metric( "standarna_stopa_marze", NIL, nSet )
@@ -103,7 +101,6 @@ FUNCTION korekcija_nabavne_cijene_sa_zadnjom_ulaznom( nKolicina, nZadnjiUlazKol,
       ENDIF
       IF !lSilent
          CLEAR TYPEAHEAD
-
          nX := 2
          Box( "#" + "== Odstupanje NC " + AllTrim( _mkonto ) + "/" + AllTrim( _idroba ) + " ===", 12, 70, .T. )
 
@@ -143,12 +140,12 @@ FUNCTION korekcija_nabavna_cijena_0( nSrednjaNabavnaCijena )
    RETURN nSrednjaNabavnaCijena
 
 
-FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
+FUNCTION kalk_valid_marza_veleprodaja_10( cIdVd, lNaprijed )
 
    LOCAL nStvarnaKolicina := 0
    LOCAL nMarza
 
-   IF ( _nc == 0 )
+   IF ( Round( _nc, 7 ) == 0 )
       _nc := 9999
    ENDIF
 
@@ -164,8 +161,7 @@ FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
          _Marza := nMarza * nStvarnaKolicina
       ENDIF
 
-   ELSEIF Round( _VPC, 4 ) == 0  .OR. lNaprijed
-      // formiraj marzu "unaprijed" od nc do vpc
+   ELSEIF Round( _VPC, 4 ) == 0  .OR. lNaprijed // formiraj marzu "unaprijed" od nc do vpc
       IF _TMarza == "%"
          nMarza := _Marza / 100 * _NC
       ELSEIF _TMarza == "A"
@@ -187,7 +183,6 @@ FUNCTION kalk_10_vaild_Marza_VP( cIdVd, lNaprijed )
    RETURN .T.
 
 
-
 FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUnaprijed )
 
    LOCAL nStvarnaKolicina := 0, nMarza
@@ -196,7 +191,7 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
       cProracunMarzeUnaprijed := " "
    ENDIF
 
-   IF _NC == 0
+   IF ( Round( _nc, 7 ) == 0 )
       _NC := 9999
    ENDIF
 
@@ -291,6 +286,9 @@ FUNCTION kalk_vpc_po_kartici( nVPC, cIdFirma, cMKonto, cIdRoba, dDatum )
    RETURN .T.
 
 
+/*
+   koristi se u kalk PR, RN, 81
+*/
 
 FUNCTION kalk_when_valid_nc_ulaz()
 
@@ -355,7 +353,6 @@ FUNCTION kalk_when_valid_nc_ulaz()
    ENDIF
 
    _NC := _FCj2 + nPrevoz + nCarDaz + nBanktr + nSpedTr + nZavTr
-
    IF koncij->naz == "N1" // sirovine
       _VPC := _NC
    ENDIF
@@ -365,7 +362,6 @@ FUNCTION kalk_when_valid_nc_ulaz()
    kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2 )
 
    RETURN .T.
-
 
 
 /* kalk_set_vpc_sifarnik(nNovaVrijednost,fUvijek)
@@ -402,7 +398,6 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
    IF nVal == 0  .OR. Abs( Round( nVal - nNovaVrijednost, 2 ) ) > 0 .OR. lUvijek
 
       IF gAutoCjen == "D" .AND. Pitanje( , "Staviti cijenu (" + cFieldName + ")" + " u šifarnik ?", "D" ) == "D"
-
          SELECT roba
          hVars := dbf_get_rec()
          hVars[ cFieldName ] := nNovaVrijednost
