@@ -14,7 +14,7 @@
 MEMVAR _pkonto, _idkonto2
 MEMVAR GetList
 
-FUNCTION kalk_get_1_41()
+FUNCTION kalk_get_1_41_42()
 
    LOCAL lRet
 
@@ -39,9 +39,9 @@ FUNCTION kalk_get_1_41()
 
    ENDIF
 
-   @ box_x_koord() + 8, box_y_koord() + 2  SAY8 "Prodavnički Konto razdužuje" GET _pkonto VALID  P_Konto( @_pkonto, 21, 5 ) PICT "@!"
+   @ box_x_koord() + 8, box_y_koord() + 2  SAY8 "Prodavnički Konto razdužuje" GET _pkonto VALID  P_Konto( @_pkonto, 8, 38 ) PICT "@!"
 
-   _idkonto2 := ""
+   //_idkonto2 := ""
    _idzaduz2 := ""
 
    READ
@@ -52,7 +52,7 @@ FUNCTION kalk_get_1_41()
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _idVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
-   @ box_x_koord() + 12, box_y_koord() + 2  SAY "Kolicina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
+   @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
    READ
    ESC_RETURN K_ESC

@@ -51,9 +51,9 @@ FUNCTION kalk_stampa_dok_41_42()
    cPKonto := kalk_pripr->pKonto
 
    IF cIdVd == "41"
-      cNaslov := "IZLAZ IZ PRODAVNICE - KUPAC"
+      cNaslov := "PRODAVNICA PRODAJA - KUPAC"
    ELSE
-      cNaslov := "IZLAZ IZ PRODAVNICE"
+      cNaslov := "PRODAVNICA PRODAJA"
    ENDIF
 
    cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
