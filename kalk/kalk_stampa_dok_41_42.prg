@@ -338,7 +338,7 @@ STATIC FUNCTION kalk_naslov_41_42()
       "* Količina *  NAB.CJ  *  MARZA  * MPC bPDV *  Popust   * MPV-pop. *   PDV %  *   MPC    * MPC/MPV *"
 
    ?U "*BR*          *" + PadC( "      ", 13 ) + "*" + PadC( "     ", s_nRobaNazivSirina + 5 ) +;
-      "*          *   U MP   *         * MPV bPDV * (bez PDV) * (bez PDV)*   PDV    *  SA PDV  * SA PDV  *"
+      "*          *   U MP    *         * MPV bPDV * (bez PDV) * (bez PDV)*   PDV    *  SA PDV  * SA PDV  *"
 
    ? cLine
    PopWa()
