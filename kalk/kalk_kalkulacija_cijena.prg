@@ -237,7 +237,6 @@ STATIC FUNCTION seek_dokument( vars, azurirani )
    RETURN .T.
 
 
-
 STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
 
    LOCAL _firma := vars[ "id_firma" ]
@@ -431,11 +430,8 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
    PRIVATE aPorezi := {}
 
    select_o_konto( kalk_pripr->pkonto )
-
    select_o_partner( kalk_pripr->idpartner )
-
-   SELECT tdok
-   HSEEK kalk_pripr->idvd
+   select_o_tdok(kalk_pripr->idvd)
 
    SELECT kalk_pripr
 

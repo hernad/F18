@@ -11,10 +11,16 @@
 
 #include "f18.ch"
 
+MEMVAR _pkonto, _idkonto2
+MEMVAR GetList
 
 FUNCTION kalk_get_1_41()
 
    LOCAL lRet
+
+   IF Empty( _pkonto )
+      _pkonto := _idkonto2
+   ENDIF
 
    lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
    PRIVATE aPorezi := {}
@@ -24,47 +30,27 @@ FUNCTION kalk_get_1_41()
    ENDIF
 
    IF _idvd == "41"
-
       @  box_x_koord() + 6,  box_y_koord() + 2 SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 5, 30 )
       @  box_x_koord() + 7,  box_y_koord() + 2 SAY "Faktura Broj:" GET _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP
-
-   ELSEIF _idvd == "43"
-
-      @  box_x_koord() + 6,  box_y_koord() + 2 SAY "DOBAVLJAC KOMIS.ROBE:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 5, 30 )
-
    ELSE
       _idpartner := ""
       _brfaktP := ""
 
    ENDIF
 
-
-   @ box_x_koord() + 8, box_y_koord() + 2   SAY "Prodavnicki Konto razduzuje" GET _IdKonto VALID  P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
-
-   // IF gNW <> "X"
-   // @ box_x_koord() + 8, box_y_koord() + 50  SAY "Razduzuje: "   GET _IdZaduz  PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz, 21, 5 )
-   // ENDIF
+   @ box_x_koord() + 8, box_y_koord() + 2  SAY8 "Prodavnički Konto razdužuje" GET _pkonto VALID  P_Konto( @_pkonto, 21, 5 ) PICT "@!"
 
    _idkonto2 := ""
    _idzaduz2 := ""
 
    READ
 
-
    SELECT kalk_pripr
    ESC_RETURN K_ESC
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
-
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _idVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
-/*
-   IF roba_barkod_pri_unosu()
-      --@ box_x_koord() + 11, box_y_koord() + 2   SAY "Artikal  " GET _IdRoba PICT "@!S10" when {|| _IdRoba := PadR( _idroba, Val( --gDuzSifIni ) ), .T. } VALID VRoba()
-   ELSE
-      --@ box_x_koord() + 11, box_y_koord() + 2   SAY "Artikal  " GET _IdRoba PICT "@!" VALID VRoba()
-   ENDIF
-*/
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2  SAY "Kolicina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
@@ -76,20 +62,15 @@ FUNCTION kalk_get_1_41()
    ENDIF
 
    select_o_tarifa( _IdTarifa )
-   select_o_koncij( _idkonto )
+   select_o_koncij( _pkonto )
    SELECT kalk_pripr  // napuni tarifu
 
-   _PKonto := _Idkonto
-
-   // check_datum_posljednje_kalkulacije()
-   // kalk_dat_poslj_promjene_prod()
 
    _GKolicina := 0
    _GKolicin2 := 0
 
    IF kalk_is_novi_dokument()
-
-      select_o_koncij( _idkonto )
+      select_o_koncij( _pkonto )
       select_o_roba( _IdRoba )
       _MPCSaPP := kalk_get_mpc_by_koncij_pravilo()
 
@@ -108,15 +89,11 @@ FUNCTION kalk_get_1_41()
    ENDIF
 
    IF ( dozvoljeno_azuriranje_sumnjivih_stavki() .AND. ( _MpcSAPP == 0 .OR. kalk_is_novi_dokument() ) )
-      kalk_fakticka_mpc( @_MPCSAPP, _idfirma, _idkonto, _idroba )
+      kalk_fakticka_mpc( @_MPCSAPP, _idfirma, _pkonto, _idroba )
    ENDIF
 
-
-   IF roba->( FieldPos( "PLC" ) ) <> 0
-      _vpc := roba->plc // stavi plansku cijenu
-   ENDIF
-
-   IF ( ( _idvd <> "47" ) .AND. roba->tip != "T" )
+   _vpc := 0
+   IF ( roba->tip != "T" )
 
       nKolS := 0
       nKolZN := 0
@@ -129,7 +106,7 @@ FUNCTION kalk_get_1_41()
             nc1 := 0
             nc2 := 0
 
-            kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
+            kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolS, @nKolZN, @nc1, @nc2 )
 
             IF kalk_metoda_nc() $ "13"
                _fcj := nc1
@@ -167,7 +144,6 @@ FUNCTION kalk_get_1_41()
 
    ESC_RETURN K_ESC
 
-   _PKonto := _Idkonto
    _PU_I := "5" // izlaz iz prodavnice
    nKalkStrana := 2
 

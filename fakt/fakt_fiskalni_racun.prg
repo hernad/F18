@@ -9,7 +9,6 @@
  * By using this software, you agree to be bound by its terms.
  */
 
-
 #include "f18.ch"
 
 MEMVAR GetList
@@ -71,24 +70,12 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
 
    __DRV_CURRENT := _dev_drv
 
-   //select_o_fakt_doks_dbf()
-   //SET FILTER TO
-
-   //select_o_fakt_dbf()
-   //SET FILTER TO
-
-   // SELECT partn
-   // SET FILTER TO
-
-   //SELECT fakt_doks
-
    IF postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, _dev_drv )
       MsgBeep( "Za dokument " + cIdFirma + "-" + cIdTipDok + "-" + AllTrim( cBrDok ) + " već postoji izdat fiskalni račun !" )
       RETURN nErrorLevel
    ENDIF
 
    nStorno := fakt_is_storno_dok( cIdFirma, cIdTipDok, cBrDok )
-
    IF  nStorno == -1 // error
       RETURN nErrorLevel
    ENDIF
@@ -102,7 +89,6 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
    ENDIF
 
    _partn_data := fakt_fiscal_podaci_partnera( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), lRacunBezgBezPartnera )
-
    IF ValType( _partn_data ) == "L"
       RETURN 1
    ENDIF
@@ -145,7 +131,6 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
       " - " + AllTrim( _partn_data[ 1, 2 ] ), "NIL" ), 3 )
 
    IF nErrorLevel > 0
-
       IF _dev_drv == __DRV_TREMOL
          _cont := "2"
          nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ), _cont )
@@ -155,11 +140,9 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
          ENDIF
 
       ENDIF
-
    ENDIF
 
    RETURN nErrorLevel
-
 
 
 FUNCTION fakt_reklamirani_racun_box( nBrReklamiraniRacun )
@@ -1027,14 +1010,9 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, l
 
 
    nErrorLevel := tremol_rn( s_hFiskalniParams, aRacunData, head, lStorno, cContinue012 ) // stampaj racun
-
    _f_name := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
-
-
    IF tremol_read_out( s_hFiskalniParams, _f_name, s_hFiskalniParams[ "timeout" ] ) // da li postoji ista na izlazu ?
-
       nErrorLevel := tremol_read_error( s_hFiskalniParams, _f_name, @nFiskalniBroj ) // procitaj sada gresku
-
    ELSE
       nErrorLevel := -99
    ENDIF
@@ -1044,17 +1022,13 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, l
          IF !s_lFiskalniSilentPrint
             MsgBeep( "Kreiran fiskalni račun br: " + AllTrim( Str( nFiskalniBroj ) ) )
          ENDIF
-
          fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj ) // ubaci broj fiskalnog racuna u fakturu
 
       ENDIF
-
       FErase( s_hFiskalniParams[ "out_dir" ] + _f_name )
    ENDIF
 
    RETURN nErrorLevel
-
-
 
 
 STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno )
@@ -1063,11 +1037,9 @@ STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRa
    LOCAL nFiskalniBroj := 0
 
    nErrorLevel := hcp_rn( s_hFiskalniParams, aRacunData, head, lStorno, aRacunData[ 1, 14 ] )
-
    IF nErrorLevel = 0
 
       nFiskalniBroj := hcp_fisc_no( s_hFiskalniParams, lStorno )
-
       IF nFiskalniBroj > 0
          fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj, lStorno )
 
@@ -1153,9 +1125,7 @@ STATIC FUNCTION fakt_fisk_stavi_u_fakturu( cFirma, cTD, cBroj, nFiscal, lStorno 
    ENDIF
 
    seek_fakt_doks( cFirma, cTD, cBroj )
-
    hRec := dbf_get_rec()
-
    IF lStorno == .T.
       hRec[ "fisc_st" ] := nFiscal
    ELSE
@@ -1219,14 +1189,12 @@ STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lS
 
 
 
-
 FUNCTION fisc_isjecak( cFirma, cTipDok, cBrDok )
 
    LOCAL nTArea   := Select()
    LOCAL nFisc_no := 0
 
    seek_fakt_doks( cFirma, cTipDok, cBrDok )
-
    IF !Eof() // ako postoji broj reklamiranog racuna, onda uzmi taj
       IF field->fisc_st <> 0
          nFisc_no := field->fisc_st
@@ -1234,7 +1202,6 @@ FUNCTION fisc_isjecak( cFirma, cTipDok, cBrDok )
          nFisc_no := field->fisc_rn
       ENDIF
    ENDIF
-
    SELECT ( nTArea )
 
    RETURN AllTrim( Str( nFisc_no ) )

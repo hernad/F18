@@ -66,8 +66,6 @@ FUNCTION kalk_stampa_dok_10()
 
    SELECT kalk_pripr
 
-   //cIdd := kalk_pripr->idpartner + kalk_pripr->brfaktp + kalk_pripr->idkonto + idkonto2
-
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()

@@ -121,7 +121,6 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
    IF nUplaceniIznos == NIL
       nUplaceniIznos := 0
    ENDIF
-
    IF hFiskalniParams == NIL
       RETURN nErrorLevel
    ENDIF
@@ -165,7 +164,6 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
       IF cFiskalniDravjerIme == __DRV_TREMOL
          _cont := "2"
          nErrorLevel := pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aItems, lStorno, _cont )
-
          IF nErrorLevel > 0
             MsgBeep( "Problem sa štampanjem na fiskalni uređaj !" )
          ENDIF
@@ -190,15 +188,14 @@ STATIC FUNCTION pos_dok_is_storno( cIdPos, cIdTipDok, dDatDok, cBrDok )
    RETURN lStorno
 
 
-
 STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lStorno, nUplaceniIznos )
 
    LOCAL aItems := {}
-   LOCAL _plu
+   LOCAL nPLU
    LOCAL cReklamiraniRacun
-   LOCAL _rabat, _cijena
-   LOCAL _art_barkod, _art_id, _art_naz, _art_jmj
-   LOCAL _rbr := 0
+   LOCAL nPOSRabatProcenat, nCijena
+   LOCAL cRobaBarkod, cIdRoba, cRobaNaziv, cJMJ
+   LOCAL nRbr := 0
    LOCAL nPosRacunUkupno := 0
    LOCAL cVrstaPlacanja
    LOCAL nLevel
@@ -206,19 +203,15 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
    IF nUplaceniIznos == NIL
       nUplaceniIznos := 0
    ENDIF
-
    IF !seek_pos_doks( cIdPos, cIdTipDok, dDatDok, cBrDok )
       RETURN NIL
    ENDIF
-
-   cVrstaPlacanja := pos_get_vr_plac( field->idvrstep )
-
+   cVrstaPlacanja := pos_get_vrsta_placanja_0123( field->idvrstep )
    IF cVrstaPlacanja <> "0"
       nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok )
    ELSE
       nPosRacunUkupno := 0
    ENDIF
-
    IF nUplaceniIznos > 0
       nPosRacunUkupno := nUplaceniIznos
    ENDIF
@@ -230,55 +223,51 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
    DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdTipDok  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
 
       cReklamiraniRacun := ""
-      _rabat := 0
-      _plu := 0
-      _cijena := 0
-      _art_barkod := ""
-
+      nPOSRabatProcenat := 0
+      nPLU := 0
+      nCijena := 0
+      cRobaBarkod := ""
       cReklamiraniRacun := field->brdokStorn
+      cIdRoba := field->idroba
 
-      _art_id := field->idroba
-
-      select_o_roba( _art_id )
-
-      _plu := roba->fisc_plu
+      select_o_roba( cIdRoba )
+      nPLU := roba->fisc_plu
 
       IF s_hFiskalniUredjajParams[ "plu_type" ] == "D"
-         _plu := auto_plu( NIL, NIL, s_hFiskalniUredjajParams )
+         nPLU := auto_plu( NIL, NIL, s_hFiskalniUredjajParams )
       ENDIF
 
-      IF s_cFiskalniDrajverNaziv == "FPRINT" .AND. _plu == 0
+      IF s_cFiskalniDrajverNaziv == "FPRINT" .AND. nPLU == 0
          MsgBeep( "PLU artikla = 0, to nije moguće !" )
          RETURN NIL
       ENDIF
 
-      _cijena := pos_get_mpc()
-      _art_barkod := roba->barkod
-      _art_jmj := roba->jmj
+      nCijena := pos_get_mpc()
+      cRobaBarkod := roba->barkod
+      cJMJ := roba->jmj
 
       SELECT pos
       IF field->ncijena > 0
-         _rabat := ( field->ncijena / field->cijena ) * 100
+         nPOSRabatProcenat := ( field->ncijena / field->cijena ) * 100
       ENDIF
 
-      _art_naz := fiscal_art_naz_fix( roba->naz, s_hFiskalniUredjajParams[ "drv" ] )
-
+      cRobaNaziv := fiscal_art_naz_fix( roba->naz, s_hFiskalniUredjajParams[ "drv" ] )
       AAdd( aItems, { cBrDok, ;
-         AllTrim( Str( ++_rbr ) ), ;
-         _art_id, ;
-         _art_naz, ;
-         field->cijena, ;
-         Abs( field->kolicina ), ;
-         field->idtarifa, ;
+         AllTrim( Str( ++nRbr ) ), ;
+         cIdRoba, ;
+         cRobaNaziv, ;
+         pos->cijena, ;
+         Abs( pos->kolicina ), ;
+         pos->idtarifa, ;
          cReklamiraniRacun, ;
-         _plu, ;
-         field->cijena, ;
-         _rabat, ;
-         _art_barkod, ;
+         nPLU, ;
+         pos->cijena, ;
+         nPOSRabatProcenat, ;
+         cRobaBarkod, ;
          cVrstaPlacanja, ;
          nPosRacunUkupno, ;
          dDatDok, ;
-         _art_jmj } )
+         cJMJ } )
 
       SKIP
 
@@ -290,7 +279,6 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
    ENDIF
 
    nLevel := 1
-
    IF provjeri_kolicine_i_cijene_fiskalnog_racuna( @aItems, lStorno, nLevel, s_hFiskalniUredjajParams[ "drv" ] ) < 0
       RETURN NIL
    ENDIF
@@ -308,7 +296,6 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna
    fiskalni_fprint_racun( s_hFiskalniUredjajParams, aStavkeRacuna, NIL, lStorno )
 
    nErrorLevel := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnoRacuna )
-
    IF nErrorLevel = -9
       IF Pitanje(, "Da li je nestalo trake ?", "N" ) == "D"
          IF Pitanje(, "Zamjenite traku i pritisnite 'D'", "D" ) == "D"
@@ -322,7 +309,6 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna
    ENDIF
 
    IF nErrorLevel <> 0
-
       IF pos_da_li_je_racun_fiskalizovan( @nBrojFiskalnoRacuna )
          nErrorLevel := 0
       ELSE
@@ -333,7 +319,7 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna
    ENDIF
 
    IF ( nBrojFiskalnoRacuna > 0 .AND. nErrorLevel == 0 )
-      pos_doks_update_fisc_rn( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+      pos_doks_update_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
       MsgO( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
       Sleep( 2 )
       MsgC()
@@ -348,16 +334,15 @@ STATIC FUNCTION pos_to_flink( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna,
    LOCAL nErrorLevel := 0
 
    // idemo sada na upis rn u fiskalni fajl
-   nErrorLevel := fc_pos_rn( s_hFiskalniUredjajParams, aStavkeRacuna, lStorno )
+   nErrorLevel := fiskalni_flink_pos_racun( s_hFiskalniUredjajParams, aStavkeRacuna, lStorno )
 
    RETURN nErrorLevel
-
 
 
 STATIC FUNCTION pos_to_tremol( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna, lStorno, cContinue )
 
    LOCAL nErrorLevel := 0
-   LOCAL _f_name
+   LOCAL cFiskalniFajl
    LOCAL nBrojFiskalnoRacuna := 0
 
    IF cContinue == NIL
@@ -366,30 +351,22 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna
 
    // idemo sada na upis rn u fiskalni fajl
    nErrorLevel := tremol_rn( s_hFiskalniUredjajParams, aStavkeRacuna, NIL, lStorno, cContinue )
-
    IF cContinue <> "2"
-
       // naziv fajla
-      _f_name := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
-
-      IF tremol_read_out( s_hFiskalniUredjajParams, _f_name )
-
+      cFiskalniFajl := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
+      IF tremol_read_out( s_hFiskalniUredjajParams, cFiskalniFajl )
          // procitaj poruku greske
-         nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, _f_name, @nBrojFiskalnoRacuna )
-
-         IF nErrorLevel = 0 .AND. !lStorno .AND. nBrojFiskalnoRacuna > 0
-
-            pos_doks_update_fisc_rn( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-
+         nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
+         IF nErrorLevel == 0 .AND. !lStorno .AND. nBrojFiskalnoRacuna > 0
+            pos_doks_update_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
-
          ENDIF
 
       ENDIF
 
       // obrisi fajl
       // da ne bi ostao kada server proradi ako je greska
-      FErase( s_hFiskalniUredjajParams[ "out_dir" ] + _f_name )
+      FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl )
 
    ENDIF
 
@@ -407,12 +384,11 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna, l
 
    nErrorLevel := hcp_rn( s_hFiskalniUredjajParams, aStavkeRacuna, NIL, lStorno, nUplaceniIznos )
    IF nErrorLevel == 0
-
       // vrati broj racuna
       nBrojFiskalnoRacuna := hcp_fisc_no( s_hFiskalniUredjajParams, lStorno )
 
       IF nBrojFiskalnoRacuna > 0
-         pos_doks_update_fisc_rn( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+         pos_doks_update_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
          MsgBeep( "Kreiran fiskalni racun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
       ENDIF
 
@@ -421,49 +397,38 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdTipDok, dDatDok, cBrDok, aStavkeRacuna, l
    RETURN nErrorLevel
 
 
-
-STATIC FUNCTION pos_doks_update_fisc_rn( cIdPos, cIdTipDok, dDatDok, cBrDok, nFiskalniBroj )
+STATIC FUNCTION pos_doks_update_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nFiskalniBroj )
 
    LOCAL hRec
 
-   // SELECT pos_doks
-   // SET ORDER TO TAG "1"
-   // GO TOP
-
-   // SEEK cIdPos + cIdTipDok + DToS( dDatDok ) + cBrDok
-   // IF !Found()
    IF !seek_pos_doks( cIdPos, cIdTipDok, dDatDok, cBrDok )
       RETURN .F.
    ENDIF
-
    hRec := dbf_get_rec()
    hRec[ "fisc_rn" ] := nFiskalniBroj
-
    update_rec_server_and_dbf( "pos_doks", hRec, 1, "FULL" )
 
    RETURN .T.
 
 
-
-STATIC FUNCTION pos_get_vr_plac( cIdVrstePlacanja )
+STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
 
    LOCAL cRet := "0"
    LOCAL nDbfArea := Select()
-   LOCAL _naz := ""
+   LOCAL cVrstaPlacanjaNaziv := ""
 
    IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
       RETURN cRet
    ENDIF
 
    select_o_vrstep( cIdVrstePlacanja )
-
-   _naz := Upper( AllTrim( vrstep->naz ) )
+   cVrstaPlacanjaNaziv := Upper( AllTrim( vrstep->naz ) )
    DO CASE
-   CASE "KARTICA" $ _naz
+   CASE "KARTICA" $ cVrstaPlacanjaNaziv
       cRet := "1"
-   CASE "CEK" $ _naz
+   CASE "CEK" $ cVrstaPlacanjaNaziv
       cRet := "2"
-   CASE "VIRMAN" $ _naz
+   CASE "VIRMAN" $ cVrstaPlacanjaNaziv
       cRet := "3"
    OTHERWISE
       cRet := "0"

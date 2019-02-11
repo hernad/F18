@@ -391,13 +391,12 @@ FUNCTION UkupnoKolM( nTotalUlaz, nTotalIzlaz )
 
 FUNCTION kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
-   LOCAL nArea
+   LOCAL nArea := SELECT()
 
-   nArea := Select()
-
+   PushWa()
    select_o_roba( ( nArea )->IdRoba )
    select_o_tarifa( ( nArea )->IdTarifa )
-   SELECT ( nArea )
+   PopWa()
 
    RETURN .T.
 
@@ -407,9 +406,6 @@ FUNCTION kalk_gen_11_iz_10( cBrDok )
    LOCAL nArr
 
    nArr := Select()
-   //o_tarifa()
-   //o_koncij()
-   // o_roba()
    o_kalk_pripr9()
    cOtpremnica := Space( 10 )
    cIdKonto := "1320   "
@@ -459,7 +455,6 @@ FUNCTION kalk_gen_11_iz_10( cBrDok )
    ENDDO
 
    SELECT ( nArr )
-
    MsgBeep( "Formiran dokument " + AllTrim( self_organizacija_id() ) + "-11-" + AllTrim( cBrDok ) )
 
    RETURN .T.
@@ -470,7 +465,6 @@ FUNCTION kalk_get_11_from_pripr9_smece( cBrDok )
    LOCAL nArr
 
    nArr := Select()
-
    o_kalk_pripr9()
    SELECT kalk_pripr9
    GO TOP
@@ -497,7 +491,6 @@ FUNCTION kalk_get_11_from_pripr9_smece( cBrDok )
 
 FUNCTION kalk_generisati_11()
 
-   // {
    // daj mi vrstu dokumenta kalk_pripreme
    nTRecNo := RecNo()
    GO TOP
@@ -589,8 +582,6 @@ FUNCTION kopiraj_set_cijena()
    BoxC()
 
    RETURN .T.
-
-
 
 
 
@@ -699,133 +690,3 @@ STATIC FUNCTION rpt_dok_na_stanju( aDoks )
    ENDPRINT
 
    RETURN .T.
-
-
-/*
-// da li je vezni tops dokument na stanju
-//
-// funkcija vraca nNaStanju
-// 0 = nije na stanju
-// 1 = na stanju je
-// -1 = nije nesto podeseno u konciju
-// 2 = nije prenesen u TOPS
-// --------------------------------------------------------------
-STATIC FUNCTION tops_dok_na_stanju( cFirma, cIdVd, cBrDok, cKonto )
-
-   LOCAL nTArea := Select()
-   LOCAL nNaStanju := 1
-   LOCAL cTKPath := ""
-   LOCAL cTSPath := ""
-   LOCAL cTPM := ""
-
---   SELECT koncij
-   SET ORDER TO TAG "ID"
---   HSEEK cKonto
-
-   IF Found()
-      cTKPath := AllTrim( field->kumtops )
-      cTSPath := AllTrim( field->siftops )
-      cTPm := field->idprodmjes
-   ELSE
-      SELECT ( nTArea )
-      RETURN -1
-   ENDIF
-
-   AddBS( @cTKPath )
-   AddBS( @cTSPath )
-
-   // otvori kalk_doksRC i kalk_doks
-   --IF File( cTKPath + "DOKSRC.DBF" )
-      SELECT ( 248 )
-      --USE ( cTKPath + "DOKSRC" ) ALIAS TDOKSRC
-      SET ORDER TO TAG "2"
-   ELSE
-      SELECT ( nTArea )
-      RETURN -1
-   ENDIF
-   IF File( cTKPath + "DOKS.DBF" )
-      SELECT ( 249 )
-      USE ( cTKPath + "DOKS" ) ALIAS TDOKS
-      SET ORDER TO TAG "2"
-   ELSE
-      SELECT ( nTArea )
-      RETURN -1
-   ENDIF
-
-   --SELECT tdoksrc
-   GO TOP
-   SEEK PadR( "KALK", 10 ) + cFirma + cIdvd + cBrDok
-
-   // pronadji dokument TOPS - vezni
-   IF Found()
-
-      cTBrDok := tdoksrc->brdok
-      cTIdPos := tdoksrc->idfirma
-      cTIdVd := tdoksrc->idvd
-      dTDatum := tdoksrc->datdok
-
-      SELECT tdoks
-      SET ORDER TO TAG "1"
-      GO TOP
-      SEEK cTIdPos + cTIdVd + DToS( dTDatum ) + cTBrDok
-
-      IF Found()
-         IF AllTrim( tdoks->sto ) == "N"
-            nNaStanju := 0
-         ENDIF
-      ENDIF
-
-   ELSE
-      nNaStanju := 2
-   ENDIF
-
-   SELECT ( 248 )
-   USE
-
-   SELECT ( 249 )
-   USE
-
-   SELECT ( nTArea )
-
-   RETURN nNaStanju
-
-
-
-
-
-
-
-
-// --------------------------------------------
-// otvori pomocnu tabelu
-// --------------------------------------------
-STATIC FUNCTION o_p_tbl( cPath, cSezona, cT_sezona )
-
-   IF cSezona = "RADP" .OR. cSezona == cT_sezona
-      cSezona := ""
-   ENDIF
-
-   IF !Empty( cSezona )
-      cSezona := cSezona + SLASH
-   ENDIF
-
-   SELECT ( 248 )
-   USE ( cPath + cSezona + "KALK" ) ALIAS "kalk_s"
-   SELECT ( 249 )
-   USE ( cPath + cSezona + "DOKS" ) ALIAS "doks_s"
-
-   RETURN
-
-// ----------------------------------------------
-// zatvori pomocne sezonske tabele
-// ----------------------------------------------
-STATIC FUNCTION c_p_tbl()
-
-   SELECT ( 248 )
-   USE
-   SELECT ( 249 )
-   USE
-
-   RETURN
-
-*/

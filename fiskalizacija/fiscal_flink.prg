@@ -15,7 +15,6 @@ STATIC s_cPath, s_cPath2, s_cName
 
 THREAD STATIC F_POS_RN := "POS_RN" // pos komande
 
-
 // --------------------------------------------------------
 // fiskalni racun pos (FLINK)
 // cFPath - putanja do fajla
@@ -23,7 +22,7 @@ THREAD STATIC F_POS_RN := "POS_RN" // pos komande
 // aData - podaci racuna
 // lStorno - da li se stampa storno ili ne (.T. ili .F. )
 // --------------------------------------------------------
-FUNCTION fc_pos_rn( cFPath, cFName, aData, lStorno, cError )
+FUNCTION fiskalni_flink_pos_racun( cFPath, cFName, aData, lStorno, cError )
 
    LOCAL cSep := ";"
    LOCAL aPosData := {}
@@ -47,7 +46,6 @@ FUNCTION fc_pos_rn( cFPath, cFName, aData, lStorno, cError )
 
    // uzmi strukturu tabele za pos racun
    aStruct := _g_f_struct( F_POS_RN )
-
    // iscitaj pos matricu
    aPosData := __pos_rn( aData, lStorno )
 
@@ -55,7 +53,6 @@ FUNCTION fc_pos_rn( cFPath, cFName, aData, lStorno, cError )
    cTmp_time := Time()
 
    fiscal_array_to_file( cFPath, cFName, aStruct, aPosData )
-
    IF cError == "D"
       MsgO( "Provjera grešaka ..." )
       Sleep( 3 )
@@ -118,12 +115,10 @@ FUNCTION fc_pos_err( cFPath, cFName, cDate, cTime )
       cE_th := SubStr( AllTrim( aDir[ i, 4 ] ), 1, 2 )
       cE_tm := SubStr( AllTrim( aDir[ i, 4 ] ), 4, 2 )
       cE_ts := SubStr( AllTrim( aDir[ i, 4 ] ), 7, 2 )
-
       // patern pretrage
       cE_patt := AllTrim( cE_name ) + cE_date + cE_th + cE_tm
 
       IF cE_patt == cF_patt // imamo error fajl !!!
-
          nErr := 1
          EXIT
       ENDIF
@@ -176,7 +171,6 @@ STATIC FUNCTION fl_d_tmp()
 
 
 
-
 /*
 // fiskalno upisivanje robe
 // cFPath - putanja do fajla
@@ -218,7 +212,6 @@ STATIC FUNCTION __pos_art( aData )
    cLogic := "1"
 
    FOR i := 1 TO Len( aData )
-
       cTmp := "U"
       cTmp += cLogSep
       cTmp += cLogic
@@ -413,7 +406,6 @@ STATIC FUNCTION __pos_rn( aData, lStorno )
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
-
 
 
 // ----------------------------------------------------
