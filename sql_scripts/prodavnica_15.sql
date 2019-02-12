@@ -456,8 +456,8 @@ CREATE TRIGGER pos_doks_insert_update_delete
 
 CREATE TABLE IF NOT EXISTS p15.pos_stanje (
    id SERIAL,
-   datum_od date,
-   datum_do date,
+   dat_od date,
+   dat_do date,
    idroba varchar(10),
    ulazi text[],
    izlazi text[],
@@ -469,7 +469,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_stanje (
 ALTER TABLE p15.pos_stanje OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_stanje TO xtrole;
 
-ALTER TABLE p15.pos_stanje ALTER COLUMN datum_od SET NOT NULL;
+ALTER TABLE p15.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
 ALTER TABLE p15.pos_pos ALTER COLUMN idroba SET NOT NULL;
 ALTER TABLE p15.pos_pos ALTER COLUMN cijena SET NOT NULL;
 
@@ -507,7 +507,19 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION p15.pos_prijem_update_stanje(transakcija character(1), idpos character(2), idvd character(2), brdok character(8), datum_od date, datum_do, date, idroba varchar(10), kolicina numeric, cijena numeric, ncijena numeric) RETURNS boolean
+CREATE OR REPLACE FUNCTION p15.pos_prijem_update_stanje(
+   transakcija character(1),
+   idpos character(2),
+   idvd character(2),
+   brdok character(8),
+   datum date,
+   dat_od date,
+   dat_do date,
+   idroba varchar(10),
+   kolicina numeric,
+   cijena numeric,
+   ncijena numeric) RETURNS boolean
+
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -524,12 +536,21 @@ END IF;
 dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text;
 dokumenti := dokumenti || dokument;
 
+IF dat_od IS NULL then
+  dat_do := '1999-01-01';
+END IF;
+IF dat_do IS NULL then
+  dat_do := '3999-01-01';
+END IF;
+
 IF transakcija = '-' THEN -- on delete pos_pos stavka
 
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(ulazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4 AND datum_do = $5'
-     using dokument, idroba, cijena, ncijena, datum_do
+   -- treba da se poklope sve ove stavke: idroba / cijena / ncijena / dat_do, a da zadani dat_od bude >= od analiziranog
+   RAISE INFO 'delete = % % % % % %', dokument, idroba, cijena, ncijena, dat_od, dat_do;
+   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(ulazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4 AND $5 >= dat_od AND dat_do = $6'
+     using dokument, idroba, cijena, ncijena, dat_od, dat_do
      INTO idDokument;
-   -- RAISE INFO 'idDokument = %', idDokument;
+   RAISE INFO 'idDokument = %', idDokument;
 
    IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
       EXECUTE 'update p' || idPos || '.pos_stanje set kol_ulaz=kol_ulaz - $3, ulazi=array_remove(ulazi, $2)' ||
@@ -541,8 +562,10 @@ IF transakcija = '-' THEN -- on delete pos_pos stavka
 END IF;
 
 -- slijedi + transakcija on insert pos_pos
-EXECUTE  'select id from p' || idPos || '.pos_stanje where idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = $3 AND datum_do = $4'
-      using idroba, cijena, ncijena, datum_do
+-- (dat_od <= current_date AND dat_do >= current_date) = aktuelna cijena
+-- novi dat_od mora biti >= dat_od analiziranog zapisa, novi dat_do = dat_do zapisa
+EXECUTE  'select id from p' || idPos || '.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = $3 AND $4 >= dat_od AND dat_do = $5'
+      using idroba, cijena, ncijena, dat_od, dat_do
       INTO idRaspolozivo;
 
 RAISE INFO 'idDokument = %', idRaspolozivo;
@@ -553,9 +576,9 @@ IF NOT idRaspolozivo IS NULL then
         USING kolicina, idRaspolozivo, dokument;
 
 ELSE
-  EXECUTE 'insert into p' || idPos || '.pos_stanje(datum_od,datum_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+  EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
         ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-  USING datum_od, datum_do, idroba, dokumenti, '{}'::text[], kolicina, 0, cijena, ncijena;
+  USING dat_od, dat_do, idroba, dokumenti, '{}'::text[], kolicina, 0, cijena, ncijena;
 
 END IF;
 
@@ -566,14 +589,15 @@ $$;
 
 -- delete from p15.pos_stanje;
 --
--- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', current_date, NULL,'R01', 100, 2.5, 0);
--- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', current_date, NULL,'R01',  50, 2.5, 0);
--- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', current_date, NULL,'R01',  20, 2.0, 0);
--- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', current_date, NULL,'R02',  30,   3, 0);
+-- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK00', current_date-5, current_date-5, NULL,'R01', 40, 2.5, 0);
+-- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', current_date, current_date, NULL,'R01', 100, 2.5, 0);
+-- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', current_date, current_date, NULL,'R01',  50, 2.5, 0);
+-- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', current_date, current_date, NULL,'R01',  20, 2.0, 0);
+-- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', current_date, current_date, NULL,'R02',  30,   3, 0);
 
 -- select * from p15.pos_stanje;
 
--- select p15.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', current_date, 'R01',  50, 2.5);
+-- select p15.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
 
 -- select * from p15.pos_stanje;
 
@@ -626,7 +650,7 @@ IF NOT idRaspolozivo IS NULL then
         USING kolicina, idRaspolozivo, dokument;
 
 ELSE
-  EXECUTE 'insert into p' || idPos || '.pos_stanje(datum_od,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+  EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
         ' VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
   USING datum, idroba, '{}'::text[], dokumenti, 0, kolicina, cijena, ncijena;
 
