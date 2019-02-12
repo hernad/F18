@@ -20,7 +20,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
    LOCAL GetList := {}
 
    LOCAL cIdVd
-   LOCAL _head
+   LOCAL cHeader
    LOCAL _n_col := 20
    LOCAL _pkonto, _mkonto
    LOCAL _qqmkonto, _qqpkonto
@@ -66,7 +66,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
       cIdFirma := PadR( cidfirma, 2 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma - prazno svi" GET cIdFirma VALID {|| .T. }
       READ
-
 
       IF !Empty( cidfirma )
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Tip dokumenta (prazno svi tipovi)" GET cIdVd PICT "@!"
@@ -146,34 +145,28 @@ FUNCTION kalk_stampa_liste_dokumenata()
    SET FILTER TO &cFilt
    GO TOP
 
-
    EOF CRET
-
    gaZagFix := { 6, 3 }
-
    START PRINT CRET
    ?
 
    Preduzece()
 
-
    P_COND
 
    ??U "KALK: Štampa dokumenata na dan:", Date(), Space( 10 ), "za period", dDatOd, "-", dDatDo
-
    IF !Empty( cIdVd )
       ?? Space( 2 ), "za tipove dokumenta:", Trim( cIdVd )
    ENDIF
-
    IF !Empty( qqBrDok )
       ?? Space( 2 ), "za brojeve dokumenta:", Trim( qqBrDok )
    ENDIF
 
    m := _get_rpt_line()
-   _head := _get_rpt_header()
+   cHeader := _get_rpt_header()
 
    ? m
-   ? _head
+   ? cHeader
    ? m
 
    nC := 0
@@ -194,18 +187,14 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ PRow(), PCol() + 1 SAY PadR( field->idfirma + "-" + field->idVd + "-" + field->brdok, 16 )
 
       IF field->idvd == "80"
-
          find_kalk_by_broj_dokumenta( kalk_doks->idfirma, kalk_doks->idvd, kalk_doks->brdok )
-
          IF !Empty( kalk->idkonto2 )
             @ PRow(), PCol() + 1 SAY PadR( AllTrim( field->idkonto ) + "->" + AllTrim( field->idkonto2 ), 15 )
          ELSE
             @ PRow(), PCol() + 1 SAY PadR( kalk_doks->mkonto, 7 )
             @ PRow(), PCol() + 1 SAY PadR( kalk_doks->pkonto, 7 )
          ENDIF
-
          SELECT kalk_doks
-
       ELSE
          @ PRow(), PCol() + 1 SAY PadR( kalk_doks->mkonto, 7 )
          @ PRow(), PCol() + 1 SAY PadR( kalk_doks->pkonto, 7 )
@@ -222,14 +211,10 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ PRow(), PCol() + 1 SAY Str( rabat, 12, 2 )
       @ PRow(), PCol() + 1 SAY Str( mpv, 12, 2 )
       @ PRow(), PCol() + 1 SAY kalk_doks->brfaktp
-
-      find_kalk_doks_by_broj_dokumenta( idfirma, idvd, brdok )
       @ PRow(), PCol() + 1 SAY kalk_doks->datval
 
       SELECT kalk_doks
-      // IF FieldPos( "sifra" ) <> 0
-      @ PRow(), PCol() + 1 SAY PadR( iif( Empty( sifra ), Space( 2 ), Left( CryptSC( sifra ), 2 ) ), 6 )
-      // ENDIF
+      @ PRow(), PCol() + 1 SAY PadR( iif( Empty( sifra ), Space( 2 ), Left( CryptSC( kalk_doks->sifra ), 2 ) ), 6 )
 
 
       // drugi red
@@ -242,8 +227,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
       nVPV += VPV
       nRabat += Rabat
       nMPV += MPV
-
-
       SKIP
 
    ENDDO
@@ -261,7 +244,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    ENDIF
 
    ? m
-
    FF
    ENDPRINT
 
@@ -270,77 +252,76 @@ FUNCTION kalk_stampa_liste_dokumenata()
    RETURN .T.
 
 
-
 STATIC FUNCTION _get_rpt_header()
 
-   LOCAL _head := ""
+   LOCAL cHeader := ""
 
-   _head += PadC( "Rbr", 7 )
-   _head += Space( 1 )
-   _head += PadC( "Datum", 8 )
-   _head += Space( 1 )
-   _head += PadC( "Dokument", 16 )
-   _head += Space( 1 )
-   _head += PadC( "M-konto", 7 )
-   _head += Space( 1 )
-   _head += PadC( "P-konto", 7 )
-   _head += Space( 1 )
-   _head += PadC( "Part.", 6 )
-   _head += Space( 1 )
-   _head += PadC( "Zad.", 6 )
-   _head += Space( 1 )
-   _head += PadC( "Zad.2", 6 )
-   _head += Space( 1 )
-   _head += PadC( "NV", 12 )
-   _head += Space( 1 )
-   _head += PadC( "VPV", 12 )
-   _head += Space( 1 )
-   _head += PadC( "RABATV", 12 )
-   _head += Space( 1 )
-   _head += PadC( "MPV", 12 )
-   _head += Space( 1 )
-   _head += PadC( "brfaktp", 10 )
-   _head += Space( 1 )
-   _head += PadC( "DatVal", 8 )
-   _head += Space( 1 )
-   _head += PadC( "Op.", 6 )
+   cHeader += PadC( "Rbr", 7 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Datum", 8 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Dokument", 16 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "M-konto", 7 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "P-konto", 7 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Part.", 6 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Zad.", 6 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Zad.2", 6 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "NV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "VPV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "RABATV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "MPV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "brfaktp", 10 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "DatVal", 8 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Op.", 6 )
 
-   RETURN _head
+   RETURN cHeader
 
 
 
 STATIC FUNCTION _get_rpt_line()
 
-   LOCAL _line := ""
+   LOCAL cLinija := ""
 
-   _line += Replicate( "-", 7 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 8 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 16 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 7 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 7 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 6 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 6 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 6 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 10 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 8 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 6 )
+   cLinija += Replicate( "-", 7 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 8 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 16 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 7 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 7 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 6 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 6 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 6 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 10 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 8 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 6 )
 
-   RETURN _line
+   RETURN cLinija
