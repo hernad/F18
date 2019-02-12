@@ -34,7 +34,7 @@ FUNCTION kalk_stampa_dok_im()
    LOCAL nStr
    LOCAL cIdPartner
    LOCAL cBrFaktP
-   LOCAL dDatFaktP
+   //LOCAL dDatFaktP
    LOCAL cIdKonto
    LOCAL cIdKonto2
    LOCAL cSamoObrazac, cPrikazCijene, cCijenaTip, nCijena, nC1, nColTotal
@@ -52,7 +52,7 @@ FUNCTION kalk_stampa_dok_im()
    nStr := 0
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP   := kalk_pripr->BrFaktP
-   dDatFaktP  := kalk_pripr->DatFaktP
+   //dDatFaktP  := kalk_pripr->DatFaktP
    cIdKonto   := kalk_pripr->IdKonto
    cIdKonto2  := kalk_pripr->IdKonto2
 

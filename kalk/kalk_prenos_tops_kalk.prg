@@ -442,7 +442,7 @@ STATIC FUNCTION tops_kalk_import_row_in2ip( cBrDok, cIdKontoProdavnica, nRbr )
       REPLACE field->idvd WITH _tip_dok
       REPLACE field->brdok WITH cBrDok
       REPLACE field->datdok WITH topska->datum
-      REPLACE field->datfaktp WITH topska->datum
+      // REPLACE field->datfaktp WITH topska->datum
       REPLACE field->kolicina WITH topska->kol2
       REPLACE field->gkolicina WITH _kolicina
       REPLACE field->gkolicin2 WITH ( gkolicina - kolicina )
@@ -489,12 +489,11 @@ STATIC FUNCTION tops_kalk_import_row_42( cBrDok, cIdKontoProdavnica, nRbr )
    my_flock()
 
    APPEND BLANK
-
    REPLACE field->idfirma WITH self_organizacija_id()
    REPLACE field->idvd WITH topska->idvd
    REPLACE field->brdok WITH cBrDok
    REPLACE field->datdok WITH topska->datum
-   REPLACE field->datfaktp WITH topska->datum
+   //REPLACE field->datfaktp WITH topska->datum
    REPLACE field->kolicina WITH topska->kolicina
    REPLACE field->idkonto WITH cIdKontoProdavnica
    REPLACE field->idroba WITH topska->idroba
@@ -502,7 +501,6 @@ STATIC FUNCTION tops_kalk_import_row_42( cBrDok, cIdKontoProdavnica, nRbr )
    REPLACE field->tmarza2 WITH "%"
    REPLACE field->idtarifa WITH topska->idtarifa
    REPLACE field->mpcsapp WITH topska->mpc
-
    IF Round( topska->stmpc, 2 ) <> 0
       IF cTarifaPDVD > 0
          REPLACE field->rabatv WITH ( topska->stmpc / ( 1 + ( cTarifaPDVD / 100 ) ) )  // izbijamo PDV iz ove stavke ako je tarifa PDV17
@@ -925,12 +923,11 @@ STATIC FUNCTION tops_kalk_import_row_11( cBrDok, cIdKontoProdavnica, cIdKontoMag
    my_flock()
 
    APPEND BLANK
-
    REPLACE field->idfirma WITH self_organizacija_id()
    REPLACE field->idvd WITH _tip_dok
    REPLACE field->brdok WITH cBrDok
    REPLACE field->datdok WITH topska->datum
-   REPLACE field->datfaktp WITH topska->datum
+   //REPLACE field->datfaktp WITH topska->datum
    REPLACE field->kolicina WITH topska->kolicina
    REPLACE field->idkonto WITH cIdKontoProdavnica
    REPLACE field->idkonto2 WITH cIdKontoMagacin

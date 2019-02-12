@@ -419,7 +419,7 @@ FUNCTION kalk_lager_lista_prodavnica()
                REPLACE idkonto WITH cIdKonto
                REPLACE datdok WITH dDatDo + 1
                REPLACE idTarifa WITH set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, cIdRoba, @aPorezi )
-               REPLACE datfaktp WITH dDatDo + 1
+               //REPLACE datfaktp WITH dDatDo + 1
                REPLACE kolicina WITH nulaz - nizlaz
                REPLACE idvd WITH "80"
                REPLACE brdok WITH cBrDokPocStanje
@@ -437,13 +437,12 @@ FUNCTION kalk_lager_lista_prodavnica()
 
                   // 1 stavka (minus)
                   APPEND BLANK
-
                   REPLACE idFirma WITH cIdfirma
                   REPLACE idroba WITH cIdRoba
                   REPLACE idkonto WITH cIdKonto
                   REPLACE datdok WITH dDatDo + 1
                   REPLACE idTarifa WITH set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, cIdRoba, @aPorezi )
-                  REPLACE datfaktp WITH dDatDo + 1
+                  //REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH -1
                   REPLACE idvd WITH "80"
                   REPLACE brdok WITH cBrDokPocStanje
@@ -451,20 +450,18 @@ FUNCTION kalk_lager_lista_prodavnica()
                   REPLACE nc WITH 0
                   REPLACE mpcsapp WITH 0
                   REPLACE TMarza2 WITH "A"
-
                   IF koncij->NAZ == "N1"
                      REPLACE vpc WITH nc
                   ENDIF
 
                   // 2 stavka (plus i razlika mpv)
                   APPEND BLANK
-
                   REPLACE idFirma WITH cIdfirma
                   REPLACE idroba WITH cIdRoba
                   REPLACE idkonto WITH cIdKonto
                   REPLACE datdok WITH dDatDo + 1
                   REPLACE idTarifa WITH set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, cIdRoba, @aPorezi )
-                  REPLACE datfaktp WITH dDatDo + 1
+                  //REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH 1
                   REPLACE idvd WITH "80"
                   REPLACE brdok WITH cBrDokPocStanje
@@ -473,7 +470,6 @@ FUNCTION kalk_lager_lista_prodavnica()
                   REPLACE mpcsapp WITH ;
                      ( nMPVU - nMPVI + nPMPV )
                   REPLACE TMarza2 WITH "A"
-
                   IF koncij->NAZ == "N1"
                      REPLACE vpc WITH nc
                   ENDIF

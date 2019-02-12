@@ -92,7 +92,6 @@ FUNCTION Get1_RN()
                   mu_i WITH "5", ;
                   error WITH "0", ;
                   datdok WITH _datdok, ;
-                  datfaktp WITH _datdok, ;
                   idzaduz2 WITH _idzaduz2, ;
                   idkonto WITH _idkonto, idkonto2 WITH _idkonto2, ;
                   idtarifa WITH "XXXXXX", ;

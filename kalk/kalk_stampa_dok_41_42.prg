@@ -18,7 +18,7 @@ MEMVAR aPorezi
 MEMVAR nStr
 MEMVAR nPrevoz, nBankTr, nSpedTr, nMarza, nMarza2, nCarDaz, nZavTr
 
-MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, dDatFaktp, cPKonto
+MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cPKonto //dDatFaktp
 
 /*
    input cIdFirma, cIdVd, cBrDok
@@ -47,7 +47,7 @@ FUNCTION kalk_stampa_dok_41_42()
    nStr := 0
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
-   dDatFaktP := kalk_pripr->DatFaktP
+   //dDatFaktP := kalk_pripr->DatFaktP
    cPKonto := kalk_pripr->pKonto
 
    IF cIdVd == "41"
@@ -323,7 +323,7 @@ STATIC FUNCTION kalk_naslov_41_42()
    PushWa()
    select_o_partner( cIdPartner )
    IF cIdVd == "41"
-      ?  "KUPAC:", cIdPartner, "-", PadR( partn->naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
+      ?  "KUPAC:", cIdPartner, "-", PadR( partn->naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP  //, "Datum:", dDatFaktP
    ENDIF
 
    select_o_konto( cPKonto )

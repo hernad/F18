@@ -26,7 +26,7 @@ FUNCTION kalk_stampa_dok_81()
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
+   //dDatFaktP := DatFaktP
 
    cPKonto := kalk_pripr->pkonto
    //cIdKonto2 := IdKonto2
@@ -39,7 +39,7 @@ FUNCTION kalk_stampa_dok_81()
    @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
    select_o_partner( cIdPartner )
 
-   ?U  "DOBAVLJAČ:", cIdPartner, "-", PadR( naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
+   ?U  "DOBAVLJAČ:", cIdPartner, "-", PadR( naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP //, "Datum:", dDatFaktP
    select_o_konto( cPKonto )
 
    ?U  "KONTO zadužuje :", cPKonto, "-", AllTrim( naz )
@@ -211,7 +211,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
+   // dDatFaktP := DatFaktP
 
    cPKonto := kalk_pripr->Konto
    cIdKonto2 := IdKonto2
@@ -228,7 +228,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
 
    select_o_partner( cIdPartner )
 
-   ?U "DOBAVLJAČ:", cIdPartner, "-", PadR( naz, 20 ), Space( 5 ), "DOKUMENT Broj:", AllTrim( cBrFaktP ), "Datum:", dDatFaktP
+   ?U "DOBAVLJAČ:", cIdPartner, "-", PadR( naz, 20 ), Space( 5 ), "DOKUMENT Broj:", AllTrim( cBrFaktP ) //, "Datum:", dDatFaktP
 
    select_o_konto( cPKonto )
 

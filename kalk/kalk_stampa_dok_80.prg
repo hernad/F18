@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR cIdFirma, cIdPartner, cBrFaktP, dDatFaktP, cIdVd, cBrDok, cPKonto, cPKonto2
+MEMVAR cIdFirma, cIdPartner, cBrFaktP, cIdVd, cBrDok, cPKonto, cPKonto2 //dDatFaktP
 
 STATIC s_oPDF
 STATIC s_cLinija
@@ -38,7 +38,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
-   dDatFaktP := kalk_pripr->DatFaktP
+   //dDatFaktP := kalk_pripr->DatFaktP
 
    cPKonto := kalk_pripr->pkonto
    cPKonto2 := kalk_pripr->IdKonto2
@@ -54,7 +54,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    ENDIF
 
    select_o_partner( cIdPartner )
-   ?  "DOKUMENT Broj:", cBrFaktP, "Datum:", dDatFaktP
+   ?  "DOKUMENT Broj:", cBrFaktP //, "Datum:", dDatFaktP
    select_o_konto( cPKonto )
    ?  _u("KONTO zadužuje :"), cPKonto, "-", AllTrim( konto->naz )
 

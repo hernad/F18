@@ -16,8 +16,8 @@ FUNCTION set_a_dbf_kalk()
 
    set_a_sql_kalk_kalk()
 
-   set_a_sql_kalk_doks_doks2( "kalk_doks", "KALK_DOKS", F_KALK_DOKS  )
-   set_a_sql_kalk_doks_doks2( "kalk_doks2", "KALK_DOKS2", F_KALK_DOKS2 )
+   set_a_sql_kalk_doks( "kalk_doks", "KALK_DOKS", F_KALK_DOKS  )
+   //set_a_sql_kalk_doks_doks2( "kalk_doks2", "KALK_DOKS2", F_KALK_DOKS2 )
    set_a_sql_trfp( "trfp", "TRFP", F_TRFP )
    set_a_sql_trfp( "trfp2", "TRFP2", F_TRFP2 )
 
@@ -105,21 +105,19 @@ FUNCTION set_a_sql_kalk_kalk()
 
    RETURN .T.
 
-FUNCTION set_a_sql_kalk_doks_doks2( table, alias, wa )
+
+FUNCTION set_a_sql_kalk_doks( table, alias, wa )
 
    LOCAL _item, _alg, _tbl
 
    _tbl := table
-
    _item := hb_Hash()
-
    _item[ "alias" ] := alias
    _item[ "table" ] := _tbl
    _item[ "wa" ]    := wa
    _item[ "temp" ]  := .F.
    _item[ "sif" ] := .F.
    _item[ "sql" ] := .T.
-
    _item[ "algoritam" ] := {}
 
    // algoritam 1 - default
@@ -132,7 +130,6 @@ FUNCTION set_a_sql_kalk_doks_doks2( table, alias, wa )
    _alg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8)"
    _alg[ "dbf_tag" ]        := "1"
    AAdd( _item[ "algoritam" ], _alg )
-
    _item[ "sql_order" ] := "idfirma, idvd, brdok"
 
    f18_dbfs_add( _tbl, @_item )

@@ -875,8 +875,14 @@ BEGIN
   END;
 END $$;
 
-
-
+------------------------------------------------------------------------
+-- kalk_kalk, kalk_doks cleanup datumska polja
+-----------------------------------------------------------------------
+ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS datfaktp;
+ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS datkurs;
+ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS roktr;
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS datfaktp date;
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS datval date;
 
 -- DO $$
 -- BEGIN
@@ -888,22 +894,3 @@ END $$;
 --   END;
 --
 -- END $$;
-
-
-CREATE TABLE IF NOT EXISTS p15.pos_stanje (
-   datum_od date,
-   datum_do date,
-   idroba varchar(10),
-   ulazi text[],
-   izlazi text[],
-   kol_ulaz numeric(18,3),
-   kol_izlaz numeric(18,3),
-   cijena numeric(10,3),
-   ncijena numeric(10,3)
-);
-ALTER TABLE p15.pos_stanje OWNER TO admin;
-GRANT ALL ON TABLE p15.pos_stanje TO xtrole;
-
-ALTER TABLE p15.pos_stanje ALTER COLUMN datum_od SET NOT NULL;
-ALTER TABLE p15.pos_pos ALTER COLUMN idroba SET NOT NULL;
-ALTER TABLE p15.pos_pos ALTER COLUMN cijena SET NOT NULL;

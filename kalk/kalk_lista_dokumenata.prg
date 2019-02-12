@@ -146,11 +146,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    SET FILTER TO &cFilt
    GO TOP
 
-   //IF cStampaj == "D"
-  //    kalk_stampa_dokumenta( .T., "IZDOKS" )
-  //    my_close_all_dbf()
-  //    RETURN .F.
-   //ENDIF
 
    EOF CRET
 
@@ -226,11 +221,9 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ PRow(), PCol() + 1 SAY Str( vpv, 12, 2 )
       @ PRow(), PCol() + 1 SAY Str( rabat, 12, 2 )
       @ PRow(), PCol() + 1 SAY Str( mpv, 12, 2 )
-
       @ PRow(), PCol() + 1 SAY kalk_doks->brfaktp
 
-
-      find_kalk_doks2_by_broj_dokumenta( idfirma, idvd, brdok )
+      find_kalk_doks_by_broj_dokumenta( idfirma, idvd, brdok )
       @ PRow(), PCol() + 1 SAY kalk_doks2->datval
 
       SELECT kalk_doks

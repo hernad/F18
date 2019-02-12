@@ -85,7 +85,7 @@ FUNCTION kalk_povrat_dokumenta()
 
       run_sql_query( "BEGIN" )
 
-      IF !f18_lock_tables( { "kalk_doks", "kalk_kalk", "kalk_doks2" }, .T. )
+      IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
          run_sql_query( "COMMIT" )
          MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju povrata." )
          RETURN .F.
@@ -109,18 +109,17 @@ FUNCTION kalk_povrat_dokumenta()
          lOk := brisi_dokument_iz_tabele_doks( _id_firma, _id_vd, _br_dok )
       ENDIF
 
-      IF lOk
-         lOk := brisi_dokument_iz_tabele_doks2( _id_firma, _id_vd, _br_dok )
-      ENDIF
+      //IF lOk
+      //   lOk := brisi_dokument_iz_tabele_doks2( _id_firma, _id_vd, _br_dok )
+      //ENDIF
 
       MsgC()
 
       IF lOk
 
          hParams := hb_Hash()
-         hParams[ "unlock" ] :=  { "kalk_doks", "kalk_kalk", "kalk_doks2" }
+         hParams[ "unlock" ] :=  { "kalk_doks", "kalk_kalk" }
          run_sql_query( "COMMIT", hParams )
-
          log_write( "F18_DOK_OPER: KALK DOK_POV: " + _id_firma + "-" + _id_vd + "-" + AllTrim( _br_dok ), 2 )
       ELSE
          run_sql_query( "ROLLBACK" )
@@ -148,17 +147,17 @@ STATIC FUNCTION brisi_dokument_iz_tabele_doks( cIdFirma, cIdVd, cBrDok )
 
 
 
-STATIC FUNCTION brisi_dokument_iz_tabele_doks2( cIdFirma, cIdVd, cBrDok )
-
-   LOCAL lOk := .T.
-   LOCAL hRec
-
-   IF find_kalk_doks2_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
-      hRec := dbf_get_rec()
-      lOk := delete_rec_server_and_dbf( "kalk_doks2", hRec, 1, "CONT" )
-   ENDIF
-
-   RETURN lOk
+//STATIC FUNCTION brisi_dokument_iz_tabele_doks2( cIdFirma, cIdVd, cBrDok )
+//
+//   LOCAL lOk := .T.
+//   LOCAL hRec
+//
+//   IF find_kalk_doks2_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
+//      hRec := dbf_get_rec()
+//      lOk := delete_rec_server_and_dbf( "kalk_doks2", hRec, 1, "CONT" )
+//   ENDIF
+//
+//   RETURN lOk
 
 
 STATIC FUNCTION brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
@@ -172,9 +171,6 @@ STATIC FUNCTION brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
    ENDIF
 
    RETURN lOk
-
-
-
 
 
 STATIC FUNCTION kalk_kopiraj_dokument_u_tabelu_pripreme( cFirma, cIdVd, cBroj )
@@ -278,7 +274,6 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
          hRec := dbf_get_rec()
 
          SELECT kalk_pripr
-
          IF ! ( hRec[ "idvd" ] $ "97" .AND. hRec[ "tbanktr" ] == "X" )
 
             APPEND ncnl
@@ -316,7 +311,7 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
 
       run_sql_query( "BEGIN" )
 
-      IF !f18_lock_tables( { "kalk_doks", "kalk_kalk", "kalk_doks2" }, .T. )
+      IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
          run_sql_query( "ROLLBACK" )
          MsgBeep( "Ne mogu zaključati tabele !#Prekidam proceduru povrata." )
          RETURN lRet
@@ -327,7 +322,6 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
          _id_firma := field->idfirma
          _id_vd := field->idvd
          _br_dok := field->brdok
-
          _del_rec := dbf_get_rec()
 
          DO WHILE !Eof() .AND. field->idfirma == _id_firma .AND. field->idvd == _id_vd .AND. field->brdok == _br_dok
@@ -335,7 +329,6 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
          ENDDO
 
          nTrec := RecNo()
-
          _ok := .T.
 
          _hAttrId := hb_Hash()
@@ -378,9 +371,8 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
       IF lOk
          lRet := .T.
          hParams := hb_Hash()
-         hParams[ "unlock" ] := { "kalk_doks", "kalk_kalk", "kalk_doks2" }
+         hParams[ "unlock" ] := { "kalk_doks", "kalk_kalk" }
          run_sql_query( "COMMIT", hParams )
-
       ELSE
          run_sql_query( "ROLLBACK" )
          MsgBeep( "Problem sa brisanjem podataka iz KALK server tabela !" )

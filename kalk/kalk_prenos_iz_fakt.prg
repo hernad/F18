@@ -169,17 +169,8 @@ FUNCTION fakt_kalk_prenos_10_14()
             nRbr := Val( Rbr )
          ENDIF
 
-         // SELECT fakt
-         // IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktFirma + cIdTipDok + cBrDok + "'==IdFirma+IdTipDok+BrDok", "IDROBA", F_ROBA )
-         // MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u šifarniku!#Prenos nije izvršen!" )
-         // LOOP
-         // ENDIF
-
-         IF !find_kalk_doks2_by_broj_dokumenta( cIdFirma, "14", cBrKalk )
-            // SELECT kalk_doks2
-            // HSEEK cIdfirma + "14" + cBrkalk
-            // IF !Found()
-            APPEND BLANK
+         IF !find_kalk_doks_by_broj_dokumenta( cIdFirma, "14", cBrKalk )
+            APPEND BLANK // kalk_doks
             hRec := dbf_get_rec()
             hRec[ "idvd" ] := "14"
             hRec[ "idfirma" ] := cIdFirma
@@ -189,12 +180,7 @@ FUNCTION fakt_kalk_prenos_10_14()
          ENDIF
 
          hRec[ "datval" ] := dDatPl
-
-         // IF lVrsteP
-         // hRec[ "k2" ] := cIdVrsteP
-         // ENDIF
-
-         update_rec_server_and_dbf( "kalk_doks2", hRec, 1, "FULL" )
+         update_rec_server_and_dbf( "kalk_doks", hRec, 1, "FULL" )
 
          SELECT fakt
          DO WHILE !Eof() .AND. cFaktFirma + cIdTipDok + PADR( cBrDok, FIELD_LEN_FAKT_BRDOK ) == fakt->IdFirma + fakt->IdTipDok + PADR( fakt->BrDok, FIELD_LEN_FAKT_BRDOK )
@@ -434,7 +420,6 @@ FUNCTION fakt_kalk_prenos( cIndik )
 
             SELECT kalk_pripr
             APPEND BLANK
-
             hRec := dbf_get_rec()
             hRec[ "idfirma" ] := cIdFirma
             hRec[ "rbr" ] := Str( ++nRbr, 3 )

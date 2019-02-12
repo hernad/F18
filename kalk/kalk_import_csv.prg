@@ -802,7 +802,6 @@ STATIC FUNCTION TTbl2Kalk()
 
    DO WHILE !Eof()
 
-
       cTmpArt := AllTrim( temp->idroba )
       select_o_roba( cTmpArt )
 

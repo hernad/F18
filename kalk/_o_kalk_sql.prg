@@ -176,6 +176,7 @@ FUNCTION find_kalk_doks_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
    RETURN ! Eof()
 
 
+/*
 FUNCTION find_kalk_doks2_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
 
    LOCAL hParams := hb_Hash()
@@ -199,7 +200,7 @@ FUNCTION find_kalk_doks2_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
    GO TOP
 
    RETURN ! Eof()
-
+*/
 
 
 FUNCTION find_kalk_za_period( xIdFirma, cIdVd, cIdPartner, cIdRoba, dDatOd, dDatDo, cOrderBy )
@@ -418,8 +419,8 @@ FUNCTION use_kalk_doks( hParams )
    RETURN use_sql_kalk_doks( hParams )
 
 
-FUNCTION use_kalk_doks2( hParams )
-   RETURN use_sql_kalk_doks2( hParams )
+//FUNCTION use_kalk_doks2( hParams )
+//   RETURN use_sql_kalk_doks2( hParams )
 
 
 /*
@@ -481,7 +482,7 @@ FUNCTION use_sql_kalk( hParams )
    cSql += coalesce_char_zarez( "kalk_kalk.brdok", 8 )
    cSql += coalesce_char_zarez( "idroba", 10 )
    cSql += coalesce_char_zarez( "rbr", 3 )
-   cSql += "coalesce(kalk_kalk.datdok, TO_DATE('','yyyymmdd')) as datdok, coalesce( kalk_kalk.datfaktp, TO_DATE('','yyyymmdd')) as datfaktp,"
+   cSql += "coalesce(kalk_kalk.datdok, TO_DATE('','yyyymmdd')) as datdok, "
    cSql += coalesce_char_zarez( "kalk_kalk.brfaktp", 10 )
    cSql += coalesce_char_zarez( "kalk_kalk.idpartner", 6 )
    cSql += coalesce_char_zarez( "idtarifa", 6 )
@@ -546,7 +547,7 @@ FUNCTION use_sql_kalk( hParams )
    ENDIF
    cSql += coalesce_char( "kalk_kalk.podbr", 2 )
 
-   cSql += " FROM fmk.kalk_kalk "
+   cSql += " FROM " + f18_sql_schema("kalk_kalk") + " "
 
    IF hb_HHasKey( hParams, "obradjeno" )
 
@@ -912,7 +913,7 @@ STATIC FUNCTION sql_kalk_doks_order( hParams )
 
 
 
-
+/*
 FUNCTION use_sql_kalk_doks2( hParams )
 
    LOCAL cSql, cWhere, cOrder
@@ -999,7 +1000,7 @@ STATIC FUNCTION sql_kalk_doks2_order( hParams )
    ENDIF
 
    RETURN cOrder
-
+*/
 
 FUNCTION use_sql_kalk_kalk_atributi( hParams )
 

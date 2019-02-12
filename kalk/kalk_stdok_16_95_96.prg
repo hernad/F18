@@ -30,7 +30,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    nStr := 0
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
-   dDatFaktP := field->DatFaktP
+   //dDatFaktP := field->DatFaktP
    cIdKonto := field->IdKonto
    cIdKonto2 := field->IdKonto2
    cIdZaduz2 := field->IdZaduz2
@@ -110,14 +110,14 @@ FUNCTION kalk_stampa_dok_16_95_96()
 
       nT4 := nT5 := nT8 := nTVPV := 0
       cBrFaktP := field->brfaktp
-      dDatFaktP := field->datfaktp
+      //dDatFaktP := field->datfaktp
       cIdpartner := field->idpartner
 
       select_o_partner( cIdPartner )
       SELECT kalk_pripr
 
       DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND. cBrDok == field->BrDok .AND. cIdVD == field->IdVD ;
-            .AND. field->idpartner + field->brfaktp + DToS( field->datfaktp ) == cIdpartner + cBrfaktp + DToS( dDatfaktp )
+            .AND. field->idpartner + field->brfaktp== cIdpartner + cBrfaktp
 
          IF cIdVd $ "97" .AND. field->tbanktr == "X"
             SKIP 1
@@ -180,7 +180,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
 
       print_nova_strana( 125, @nStr, 5 )
 
-      ? "Broj fakture:", AllTrim( cBrFaktP ), "/", dDatFaktp
+      ? "Broj fakture:", AllTrim( cBrFaktP )  //, "/", dDatFaktp
       @ PRow(), nC1 SAY 0 PICT "@Z " + piccdem
       @ PRow(), PCol() + 1 SAY nT4 PICT picdem
 

@@ -20,12 +20,11 @@ FUNCTION kalk_stampa_dok_ip( fZaTops )
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, aPorezi
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
    aPorezi := {}
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
+   //dDatFaktP := DatFaktP
    cIdKonto := IdKonto
    cIdKonto2 := IdKonto2
 
@@ -244,7 +243,7 @@ FUNCTION stampa_obrasca_inventure_sank_lista()
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
+   //dDatFaktP := DatFaktP
    cIdKonto := IdKonto
    cIdKonto2 := IdKonto2
 

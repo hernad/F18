@@ -113,7 +113,7 @@ FUNCTION kalk_get_1_14()
 
    PRIVATE _vpcsappp := 0
 
-   @ box_x_koord() + 14, box_y_koord() + 2   SAY8 "PC BEZ PDV" GET _VPC  VALID {|| iif( gVarVP == "2" .AND. ( _vpc - _nc ) > 0, cisMarza := ( _vpc - _nc ) / ( 1 + tarifa->vpp ), _vpc - _nc ), .T. }  PICTURE PicDEM
+   @ box_x_koord() + 14, box_y_koord() + 2   SAY8 "PC BEZ PDV" GET _VPC  VALID {|| iif( gVarVP == "2" .AND. ( _vpc - _nc ) > 0, cisMarza := ( _vpc - _nc ), _vpc - _nc ), .T. }  PICTURE PicDEM
 
    PRIVATE cTRabat := "%"
    @ box_x_koord() + 15, box_y_koord() + 2    SAY8 "RABAT    " GET  _RABATV PICT picdem
@@ -208,7 +208,6 @@ FUNCTION pPDV14( lRet )
       QQOut( "   PDV:", Transform( _PNAP := _VPC * ( 1 - _RabatV / 100 ) * _MPC / 100, picdem ) )
    ENDIF
 
-   // _VPCSaP := iif( _VPC <> 0, _VPC * ( 1 -_RABATV / 100 ) + iif(  < 0, 0, nMarza ) * TARIFA->VPP / 100, 0 )
 
    RETURN lRet
 

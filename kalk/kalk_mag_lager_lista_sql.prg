@@ -318,12 +318,11 @@ STATIC FUNCTION kalk_mag_insert_ps_into_pripr( oDataSet, hParams )
       hRec[ "idtarifa" ] := roba->idtarifa
       hRec[ "mu_i" ] := "1"
       hRec[ "brfaktp" ] := PadR( "PS", Len( hRec[ "brfaktp" ] ) )
-      hRec[ "datfaktp" ] := dDatumKalk
+      //hRec[ "datfaktp" ] := dDatumKalk
       hRec[ "kolicina" ] := ( nUlaz - nIzlaz )
       hRec[ "nc" ] := ( nNvU - nNvI ) / ( nUlaz - nIzlaz )
       hRec[ "vpc" ] := ( nVPVUlaz - nVPVIzlaz ) / ( nUlaz - nIzlaz )
       hRec[ "error" ] := "0"
-
       IF _magacin_po_nabavnoj
          hRec[ "vpc" ] := hRec[ "nc" ]
       ENDIF

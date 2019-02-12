@@ -61,14 +61,7 @@ FUNCTION fakt_11_kalk_prenos_11()
    LOCAL aGetList := {}
 
    o_kalk_pripr()
-  // o_koncij()
-   // o_kalk()
-   // o_roba()
-   //o_konto()
-  // o_partner()
-  // o_tarifa()
 
-   //o_fakt_dbf()
 
    SET ORDER TO TAG "7" // idfirma + DTOS(datdok)
 
@@ -124,11 +117,7 @@ FUNCTION fakt_11_kalk_prenos_11()
          EXIT
       ENDIF
 
-      //SELECT fakt
-      //SET ORDER TO TAG "1"
-      //GO TOP
 
-      //SEEK cFaktIdFirma + cIdTipDok
       seek_fakt( cFaktIdFirma, cIdTipDok )
 
       cArtPocinju := Trim( cArtPocinju )
@@ -155,7 +144,6 @@ FUNCTION fakt_11_kalk_prenos_11()
             ENDIF
          ENDIF
 
-
          IF nLeftArt > 0 .AND. Left( fakt->idroba, nLeftArt ) != cArtPocinju
             SKIP
             LOOP
@@ -173,9 +161,7 @@ FUNCTION fakt_11_kalk_prenos_11()
 
          cIdRoba := fakt->idroba
          select_o_roba( cIdRoba )
-
          cIdTar := roba->idtarifa
-
          select_o_tarifa( cIdTar )
          select_o_koncij( cIdKonto )
 
@@ -194,7 +180,6 @@ FUNCTION fakt_11_kalk_prenos_11()
          ENDIF
 
          IF !Found()
-
             APPEND BLANK
             REPLACE idfirma WITH cIdFirma, ;
                rbr WITH Str( ++nRbr, 3 ), ;

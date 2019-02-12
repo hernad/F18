@@ -27,7 +27,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL _curr_user := "<>"
    LOCAL lExpDbf := .F.
    LOCAL cExpDbf := "N"
-   LOCAL cMoreInfo := "N"
+   LOCAL cPodaciOFakturiPartneraDN := "N"
    LOCAL cVpcIzSifarnikaDN := "D"
    LOCAL _print := "1"
    LOCAL GetList := {}
@@ -44,7 +44,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL cTxt3
    LOCAL cMIPart := ""
    LOCAL cMINumber := ""
-   LOCAL dMIDate := CToD( "" )
+   //LOCAL dMIDate := CToD( "" )
    LOCAL cMI_type := ""
    LOCAL cSrKolNula := "0"
    LOCAL dL_ulaz := CToD( "" )
@@ -186,7 +186,7 @@ FUNCTION kalk_lager_lista_magacin()
 
       @ box_x_koord() + 20, box_y_koord() + 2 SAY8 "Export izvještaja u XLSX?" GET cExpDbf VALID cExpDbf $ "DN" PICT "@!"
 
-      @ box_x_koord() + 20, Col() + 1 SAY "Pr.dodatnih informacija ?" GET cMoreInfo VALID cMoreInfo $ "DN" PICT "@!"
+      @ box_x_koord() + 20, Col() + 1 SAY "Podaci o fakturi partenra ?" GET cPodaciOFakturiPartneraDN VALID cPodaciOFakturiPartneraDN $ "DN" PICT "@!"
 
       READ
       ESC_BCR
@@ -392,7 +392,7 @@ FUNCTION kalk_lager_lista_magacin()
 
       cMIFakt := ""
       cMINumber := ""
-      dMIDate := CToD( "" )
+      //dMIDate := CToD( "" )
 
       dL_ulaz := CToD( "" )
       dL_izlaz := CToD( "" )
@@ -466,7 +466,6 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
 
       cIdkonto := kalk->mkonto
-
 
       DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, cIdFirma + cIdRoba == idFirma + field->idroba, cIdFirma + cIdKonto + cIdRoba == idFirma + mkonto + field->idroba ) .AND. IspitajPrekid()
 
@@ -557,7 +556,7 @@ FUNCTION kalk_lager_lista_magacin()
          ENDIF
 
          cMIPart := field->idpartner
-         dMIDate := field->datfaktp
+         //dMIDate := field->datfaktp
          cMINumber := field->brfaktp
          cMI_type := field->mu_i
 
@@ -608,10 +607,11 @@ FUNCTION kalk_lager_lista_magacin()
                   idkonto WITH cIdKonto, ;
                   datdok WITH dDatDo + 1, ;
                   idtarifa WITH roba->idtarifa, ;
-                  datfaktp WITH dDatDo + 1, ;
                   kolicina WITH nUlaz - nIzlaz, ;
                   idvd WITH "16", ;
                   brdok WITH cBrDokPocStanje
+
+                  //datfaktp WITH dDatDo + 1, ;
 
                REPLACE nc WITH ( nNVU - nNVI ) / ( nUlaz - nIzlaz )
                REPLACE vpc WITH ( nVPVU - nVPVI ) / ( nUlaz - nIzlaz )
@@ -625,13 +625,12 @@ FUNCTION kalk_lager_lista_magacin()
 
                   // 1 stavka (minus)
                   APPEND BLANK
-
                   REPLACE idfirma WITH cIdfirma
                   REPLACE idroba WITH cIdRoba
                   REPLACE idkonto WITH cIdKonto
                   REPLACE datdok WITH dDatDo + 1
                   REPLACE idtarifa WITH roba->idtarifa
-                  REPLACE datfaktp WITH dDatDo + 1
+                  //REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH -1
                   REPLACE idvd WITH "16"
                   REPLACE brdok WITH cBrDokPocStanje
@@ -643,20 +642,17 @@ FUNCTION kalk_lager_lista_magacin()
 
                   // 2 stavka (plus i nv)
                   APPEND BLANK
-
                   REPLACE idfirma WITH cIdfirma
                   REPLACE idroba WITH cIdRoba
                   REPLACE idkonto WITH cIdKonto
                   REPLACE datdok WITH dDatDo + 1
                   REPLACE idtarifa WITH roba->idtarifa
-                  REPLACE datfaktp WITH dDatDo + 1
+                  //REPLACE datfaktp WITH dDatDo + 1
                   REPLACE kolicina WITH 1
                   REPLACE idvd WITH "16"
                   REPLACE brdok WITH cBrDokPocStanje
                   REPLACE brfaktp WITH "#KOREK"
                   REPLACE nc WITH ( nNVU - nNVI )
-                  REPLACE vpc WITH 0
-
                   REPLACE vpc WITH nc
 
 
@@ -774,8 +770,8 @@ FUNCTION kalk_lager_lista_magacin()
          nTRabat += nRabat
 
          // prikaz dodatnih informacija na lager listi
-         IF cMoreInfo == "D"
-            ? Space( 6 ) + show_more_info( cMIPart, dMIDate, cMINumber, cMI_type )
+         IF cPodaciOFakturiPartneraDN == "D"
+            ? Space( 6 ) + podaci_o_fakturi_partnera( cMIPart, CTOD(""), cMINumber, cMI_type )
          ENDIF
 
          IF lExpDbf == .T.
@@ -880,6 +876,39 @@ FUNCTION kalk_lager_lista_magacin()
    RETURN .T.
 
 
+
+
+   STATIC FUNCTION podaci_o_fakturi_partnera( cPartner, dDatum, cFaktura, cMU_I )
+
+      LOCAL cRet := ""
+      LOCAL cMIPart := ""
+      LOCAL cTip := ""
+
+      IF !Empty( cPartner )
+
+         cMIPart := AllTrim( get_partner_naziv( cPartner ) )
+
+         IF cMU_I == "1"
+            cTip := "dob.:"
+         ELSE
+            cTip := "kup.:"
+         ENDIF
+
+         cRet := DToC( dDatum )
+         cRet += ", "
+         cRet += "br.dok: "
+         cRet += AllTrim( cFaktura )
+         cRet += ", "
+         cRet += cTip
+         cRet += " "
+         cRet += cPartner
+         cRet += " ("
+         cRet += cMIPart
+         cRet += ")"
+
+      ENDIF
+
+      RETURN cRet
 
 STATIC FUNCTION g_exp_fields()
 

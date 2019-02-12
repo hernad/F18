@@ -13,43 +13,6 @@
 #include "f18.ch"
 
 
-
-
-FUNCTION show_more_info( cPartner, dDatum, cFaktura, cMU_I )
-
-   LOCAL cRet := ""
-   LOCAL cMIPart := ""
-   LOCAL cTip := ""
-
-   IF !Empty( cPartner )
-
-      cMIPart := AllTrim( get_partner_naziv( cPartner ) )
-
-      IF cMU_I == "1"
-         cTip := "dob.:"
-      ELSE
-         cTip := "kup.:"
-      ENDIF
-
-      cRet := DToC( dDatum )
-      cRet += ", "
-      cRet += "br.dok: "
-      cRet += AllTrim( cFaktura )
-      cRet += ", "
-      cRet += cTip
-      cRet += " "
-      cRet += cPartner
-      cRet += " ("
-      cRet += cMIPart
-      cRet += ")"
-
-   ENDIF
-
-   RETURN cRet
-
-
-
-
 /*
  *     Funkcija vraca dobavljaca cIdRobe na osnovu polja roba->dob
  *   param: cIdRoba

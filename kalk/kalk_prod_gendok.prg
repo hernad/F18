@@ -614,12 +614,12 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
             REPLACE idfirma WITH self_organizacija_id(), idroba WITH cIdRoba, idkonto WITH cIdKonto, ;
                datdok WITH dDok, ;
                idtarifa WITH roba->idtarifa, ;
-               datfaktp WITH dDok, ;
                kolicina WITH nStanje, ;
                idvd WITH "19", brdok WITH cBrNiv, ;
                rbr WITH Str( nRbr, 3 ), ;
                pkonto WITH cIdKontoProdavnica, ;
                pu_i WITH "3"
+               //datfaktp WITH dDok, ;
 
             IF ROUND( nStanje, 4 ) <> 0 .AND. ABS( nVPV / nStanje ) < 99999
                REPLACE fcj WITH nVPV / nStanje

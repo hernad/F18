@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR cPKonto, cMKonto, cIdPartner, cBrFakt, dDatFaktP
+MEMVAR cPKonto, cMKonto, cIdPartner, cBrFakt  //,dDatFaktP
 
 FUNCTION kalk_stampa_dok_11( fZaTops )
 
@@ -27,10 +27,9 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
    PRIVATE nMarza, nMarza2
 
    nStr := 0
-   altd()
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
-   dDatFaktP := kalk_pripr->DatFaktP
+   //dDatFaktP := kalk_pripr->DatFaktP
    cPKonto := kalk_pripr->pkonto
    cMKonto := kalk_pripr->mkonto
 
@@ -61,8 +60,7 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
    @ PRow(), 123 SAY "Str:" + Str( ++nStr, 3 )
 
    select_o_partner( cIdPartner )
-
-   ? "OTPREMNICA Broj:", cBrFaktP, "Datum:", dDatFaktP
+   ? "OTPREMNICA Broj:", cBrFaktP  //, "Datum:", dDatFaktP
 
    IF cIdvd == "11"
       select_o_konto( cPKonto )
@@ -81,7 +79,6 @@ FUNCTION kalk_stampa_dok_11( fZaTops )
    m := "--- ---------- ---------- " +  "---------- " + "---------- ---------- " +  "---------- ---------- "  + "---------- ---------- ---------- --------- -----------"
 
    select_o_koncij( kalk_pripr->mkonto )
-
    lVPC := is_magacin_evidencija_vpc( kalk_pripr->mkonto )
 
    SELECT kalk_pripr

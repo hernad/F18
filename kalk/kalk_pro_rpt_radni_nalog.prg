@@ -23,7 +23,9 @@ FUNCTION kalk_stampa_dok_rn()
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    nStr := 0
-   cIdPartner := IdPartner; cBrFaktP := BrFaktP; dDatFaktP := DatFaktP
+   cIdPartner := IdPartner
+   cBrFaktP := BrFaktP
+   //dDatFaktP := DatFaktP
    cIdKonto := IdKonto; cIdKonto2 := IdKonto2
 
    P_COND
@@ -51,21 +53,12 @@ FUNCTION kalk_stampa_dok_rn()
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
       nT := nT1 := nT2 := nT3 := nT4 := nT5 := nT6 := nT7 := nT8 := nT9 := nTA := 0
-      cBrFaktP := brfaktp; dDatFaktP := datfaktp; cIdpartner := idpartner
-      DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD .AND. idpartner + brfaktp + DToS( datfaktp ) == cidpartner + cbrfaktp + DToS( ddatfaktp )
+      cBrFaktP := brfaktp
+      //dDatFaktP := datfaktp
+      cIdpartner := idpartner
+      DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD .AND. idpartner + brfaktp == cIdpartner + cBrfaktp
 
-/*
-   if gmagacin<>"1"
-    if idpartner+brfaktp+idkonto+idkonto2<>cidd
-     set device to screen
-     Beep(2)
-     Msg("Unutar kalkulacije se pojavilo vise dokumenata !",6)
-     set device to printer
-    endif
-   endif
-*/
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
          select_o_roba( kalk_pripr->IdRoba )
          select_o_tarifa( kalk_pripr->IdTarifa )
          SELECT kalk_pripr

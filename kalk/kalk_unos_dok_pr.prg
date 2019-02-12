@@ -274,7 +274,6 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
    DO WHILE !Eof() .AND. sast->id == _idroba
 
       select_o_roba( sast->id2 )
-
       SELECT kalk_pripr
       APPEND BLANK
       REPLACE field->idfirma WITH _IdFirma, ;
@@ -284,7 +283,6 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
          field->datdok WITH _Datdok, ;
          field->idtarifa WITH ROBA->idtarifa, ;
          field->brfaktp WITH _brfaktp, ;
-         field->datfaktp WITH _Datdok, ;
          field->idkonto   WITH _idkonto, ;
          field->idkonto2  WITH _idkonto2, ;
          field->kolicina WITH _kolicina * sast->kolicina, ;

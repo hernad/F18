@@ -5,10 +5,10 @@ FUNCTION get_kalk_14_datval( cBrojKalk )
    LOCAL dRet
 
    PushWa()
-   IF !find_kalk_doks2_by_broj_dokumenta( self_organizacija_id(), "14", cBrojKalk )
+   IF !find_kalk_doks_by_broj_dokumenta( self_organizacija_id(), "14", cBrojKalk )
       dRet := CToD( "" )
    ELSE
-      dRet := kalk_doks2->datval
+      dRet := kalk_doks->datval
    ENDIF
    PopWa()
 
@@ -20,7 +20,7 @@ FUNCTION update_kalk_14_datval( cBrojKalk, dDatVal )
    LOCAL hRec
 
    PushWa()
-   IF !find_kalk_doks2_by_broj_dokumenta( self_organizacija_id(), "14", cBrojKalk )
+   IF !find_kalk_doks_by_broj_dokumenta( self_organizacija_id(), "14", cBrojKalk )
       APPEND BLANK
    ENDIF
 
@@ -30,7 +30,7 @@ FUNCTION update_kalk_14_datval( cBrojKalk, dDatVal )
    hRec[ "idfirma" ] := self_organizacija_id()
    hRec[ "datval" ] := dDatVal
 
-   update_rec_server_and_dbf( "kalk_doks2", hRec, 1, "FULL" )
+   update_rec_server_and_dbf( "kalk_doks", hRec, 1, "FULL" )
    PopWa()
 
    RETURN .T.

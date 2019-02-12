@@ -790,8 +790,7 @@ FUNCTION DatVal()
 
 
    PushWA()
-
-   IF find_kalk_doks2_by_broj_dokumenta( finmat->idfirma, finmat->idvd, finmat->brdok )
+   IF find_kalk_doks_by_broj_dokumenta( finmat->idfirma, finmat->idvd, finmat->brdok )
       dDatVal := field->datval
    ELSE
       dDatVal := CToD( "" )
@@ -800,7 +799,6 @@ FUNCTION DatVal()
    dDatVal := fix_dat_var( dDatVal, .T. )
 
    IF Empty( dDatVal )
-
       // IF kalk_imp_autom() // osloni se na rok placanja
       nRokPartner := get_partn_sifk_sifv( "ROKP", finmat->idpartner, .T. )
       IF ValType( nRokPartner ) == "N"

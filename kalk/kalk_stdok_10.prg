@@ -19,7 +19,7 @@ MEMVAR gZaokr, gcMpcKalk10
 
 MEMVAR m
 MEMVAR PicDEM, PicKOL, PicPROC
-MEMVAR cIdFirma, cIdVD, cBrDok, cIdPartner, cBrFaktP, dDatFaktP, cIdKonto, cIdKonto2
+MEMVAR cIdFirma, cIdVD, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2  //dDatFaktP
 
 FIELD IdFirma, BrDok, IdVD, IdTarifa, rbr, DatDok, idpartner, brfaktp, idkonto, idkonto2, GKolicina, GKolicin2
 
@@ -43,7 +43,7 @@ FUNCTION kalk_stampa_dok_10()
 
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
-   dDatFaktP := field->DatFaktP
+   //dDatFaktP := field->DatFaktP
    cIdKonto := field->IdKonto
    cIdKonto2 := field->IdKonto2
 
@@ -90,13 +90,6 @@ FUNCTION kalk_stampa_dok_10()
       nTot8 += ( nU8 := Round( NC *    ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
       nTot9 += ( nU9 := Round( nMarza * ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
       nTotA += ( nUA := Round( VPC   * ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
-
-      IF gVarVP == "1"
-         nTotB += Round( nU9 * tarifa->vpp / 100, gZaokr ) // porez na razliku u cijeni
-      ELSE
-         PRIVATE cistaMar := Round( nU9 / ( 1 + tarifa->vpp / 100 ), gZaokr )
-         nTotB += Round( cistaMar * tarifa->vpp / 100, gZaokr )  // porez na razliku u cijeni
-      ENDIF
 
       nTotP += ( nUP := nPDV * kolicina ) // total porez
       nTotM += ( nUM := MPCsaPP * kolicina ) // total mpcsapp
@@ -205,7 +198,7 @@ STATIC FUNCTION zagl()
    zagl_organizacija( PRINT_LEFT_SPACE )
 
    select_o_partner( cIdPartner )
-   ?U  Space( PRINT_LEFT_SPACE ) + "DOBAVLJAČ:", cIdPartner, "-", Trim( field->naz ), Space( 5 ), "Faktura Br:", cBrFaktP, "Datum:", dDatFaktP
+   ?U  Space( PRINT_LEFT_SPACE ) + "DOBAVLJAČ:", cIdPartner, "-", Trim( field->naz ), Space( 5 ), "Faktura Br:", cBrFaktP  //, "Datum:", dDatFaktP
 
    SELECT kalk_pripr
 

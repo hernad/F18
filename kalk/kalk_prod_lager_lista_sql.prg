@@ -237,7 +237,6 @@ FUNCTION kalk_prod_pocetno_stanje()
    RETURN .T.
 
 
-
 STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
 
    LOCAL nCount := 0
@@ -254,9 +253,6 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
 
    o_kalk_pripr()
    o_kalk_doks()
-//   o_koncij()
-//   o_roba()
-//   o_tarifa()
 
    IF glKalkBrojacPoKontima
       // _sufix := kalk_sufiks_brdok( _p_konto )
@@ -288,7 +284,6 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
       nMpvIzlaz := oRow:FieldGet( oRow:FieldPos( "mpvi" ) )
 
       select_o_roba( cIdRoba )
-
       IF cRobaTipUslugeDN == "N" .AND. roba->tip $ "TU"
          oDataset:Skip()
          LOOP
@@ -303,12 +298,10 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
       APPEND BLANK
 
       hRec := dbf_get_rec()
-
       hRec[ "idfirma" ] := self_organizacija_id()
       hRec[ "idvd" ] := _kalk_tip
       hRec[ "brdok" ] := cKalkBrDok
       hRec[ "rbr" ] := Str( ++nCount, 3 )
-
       hRec[ "datdok" ] := _kalk_datum
       hRec[ "idroba" ] := cIdRoba
       hRec[ "idkonto" ] := _p_konto
@@ -317,7 +310,7 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
       hRec[ "tcardaz" ] := "%"
       hRec[ "pu_i" ] := "1"
       hRec[ "brfaktp" ] := PadR( "lPocetnoStanje", Len( hRec[ "brfaktp" ] ) )
-      hRec[ "datfaktp" ] := _kalk_datum
+      // hRec[ "datfaktp" ] := _kalk_datum
       hRec[ "tmarza2" ] := "A"
 
       hRec[ "kolicina" ] := ( nUlaz - nIzlaz )

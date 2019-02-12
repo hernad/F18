@@ -27,7 +27,7 @@ FUNCTION kalk_stampa_dok_pr()
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-   dDatFaktP := DatFaktP
+   //dDatFaktP := DatFaktP
    cIdKonto := IdKonto
    cIdKonto2 := IdKonto2
 
@@ -56,12 +56,12 @@ FUNCTION kalk_stampa_dok_pr()
       nTnabavna := nT1 := nT2 := nT3 := nT4 := nT5 := nT6 := nT7 := nT8 := nT9 := nTA := 0
 
       cBrFaktP := field->brfaktp
-      dDatFaktP := field->datfaktp
+      //dDatFaktP := field->datfaktp
       cIdpartner := field->idpartner
 
       cProizvod := "0"
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD ;
-            .AND. field->idpartner + field->brfaktp + DToS( field->datfaktp ) == cIdpartner + cBrFaktp + DToS( dDatfaktp )
+            .AND. field->idpartner + field->brfaktp == cIdpartner + cBrFaktp
 
 
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
