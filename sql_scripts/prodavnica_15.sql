@@ -310,7 +310,7 @@ DROP TABLE IF EXISTS p15.pos_dokspf;
 ---------------------------------------------------------------------------------------
 -- on kalk_kalk update p15.pos_pos_knjig, idvd = 11,19
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_kalk_kalk_insert_update_delete() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.on_kalk_kalk_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -322,13 +322,13 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '11' ) OR ( NEW.idvd <> '19' ) THEN
+   IF ( NEW.idvd <> '11' ) AND ( NEW.idvd <> '19' ) THEN  -- samo 11, 19
      RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
           from fmk.koncij where id=NEW.PKonto;
 ELSE
-   IF ( OLD.idvd <> '11' ) OR ( OLD.idvd <> '19' ) THEN
+   IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) THEN
       RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
@@ -336,16 +336,15 @@ ELSE
 END IF;
 
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete prodavnica %', idPos;
+      RAISE INFO 'delete % prodavnica %', OLD.idvd, idPos;
       EXECUTE 'DELETE FROM p' || idPos || '.pos_pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
          USING idpos, OLD.idvd, OLD.brdok, OLD.datdok, OLD.rbr;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-      RAISE INFO 'update prodavnica!? %', idPos;
+      RAISE INFO 'update % prodavnica!? %', NEW.idvd, idPos;
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
-
-      RAISE INFO 'insert prodavnica %', idPos;
+      RAISE INFO 'insert % prodavnica %', NEW.idvd, idPos;
       IF ( NEW.idvd = '19' ) THEN
         cijena := NEW.fcj;  -- stara cijena
         ncijena := NEW.mpcsapp + NEW.fcj; -- nova cijena
@@ -356,7 +355,6 @@ ELSIF (TG_OP = 'INSERT') THEN
       EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
         USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena;
       -- RAISE INFO 'sql: %', sql;
-
       RETURN NEW;
 END IF;
 
@@ -369,7 +367,7 @@ $$;
 ---------------------------------------------------------------------------------------
 -- on kalk_doks update p15.pos_doks_knjig
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_kalk_doks_insert_update_delete() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.on_kalk_doks_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -380,13 +378,13 @@ BEGIN
 
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-      IF ( NEW.idvd <> '11' ) OR ( NEW.idvd <> '19' ) THEN
+      IF ( NEW.idvd <> '11' ) AND ( NEW.idvd <> '19' ) THEN -- samo 11, 19
          RETURN NULL;
       END IF;
       SELECT idprodmjes INTO idPos
             from fmk.koncij where id=NEW.PKonto;
 ELSE
-     IF ( OLD.idvd <> '11' ) OR ( OLD.idvd <> '19' ) THEN
+     IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) THEN
         RETURN NULL;
      END IF;
       SELECT idprodmjes INTO idPos
@@ -416,19 +414,21 @@ END;
 $$;
 
 
--- fmk.kalk_kalk -> p15.pos_pos
-DROP TRIGGER IF EXISTS pos_insert_update_delete on fmk.kalk_kalk;
-CREATE TRIGGER pos_insert_update_delete
+-- fmk.kalk_kalk -> p15.pos_pos_knjig -> ... 
+
+DROP TRIGGER IF EXISTS t_kalk_crud on fmk.kalk_kalk;
+CREATE TRIGGER t_kalk_crud
    AFTER INSERT OR DELETE OR UPDATE
    ON fmk.kalk_kalk
-   FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_kalk_insert_update_delete();
+   FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_kalk_crud();
 
--- fmk.kalk_doks -> p15.pos_doks
-DROP TRIGGER IF EXISTS pos_doks_insert_update_delete on fmk.kalk_doks;
-CREATE TRIGGER pos_doks_insert_update_delete
+-- fmk.kalk_doks -> p15.pos_doks_knjig -> ...
+
+DROP TRIGGER IF EXISTS t_kalk_doks_crud on fmk.kalk_doks;
+CREATE TRIGGER t_kalk_doks_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON fmk.kalk_doks
-      FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_doks_insert_update_delete();
+      FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_doks_crud();
 
 
 -- test
@@ -453,7 +453,6 @@ CREATE TRIGGER pos_doks_insert_update_delete
 -- select * from p15.pos_pos_knjig;
 
 
-
 CREATE TABLE IF NOT EXISTS p15.pos_stanje (
    id SERIAL,
    dat_od date,
@@ -468,6 +467,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_stanje (
 );
 ALTER TABLE p15.pos_stanje OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_stanje TO xtrole;
+GRANT ALL ON SEQUENCE p15.pos_stanje_id_seq TO xtrole;
 
 ALTER TABLE p15.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
 ALTER TABLE p15.pos_pos ALTER COLUMN idroba SET NOT NULL;
@@ -604,7 +604,16 @@ $$;
 -- select id, ulazi from p15.pos_stanje where '15-11-BRDOK01-20190211' = ANY(ulazi)
 
 
-CREATE OR REPLACE FUNCTION p15.pos_izlaz_update_stanje(transakcija character(1), idpos character(2), idvd character(2), brdok character(8), datum date, idroba varchar(10), kolicina numeric, cijena numeric, ncijena numeric) RETURNS boolean
+CREATE OR REPLACE FUNCTION p15.pos_izlaz_update_stanje(
+   transakcija character(1),
+   idpos character(2),
+   idvd character(2),
+   brdok character(8),
+   datum date,
+   idroba varchar(10),
+   kolicina numeric,
+   cijena numeric, ncijena numeric) RETURNS boolean
+
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -612,6 +621,7 @@ DECLARE
    dokument text;
    idDokument bigint;
    idRaspolozivo bigint;
+   dat_do date DEFAULT '3999-01-01';
 BEGIN
 
 IF ( idvd <> '42' )  THEN
@@ -622,11 +632,11 @@ dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_cha
 dokumenti := dokumenti || dokument;
 
 IF transakcija = '-' THEN -- on delete pos_pos stavka
-
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(ulazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4'
+   RAISE INFO 'pos_stanje % % % %', dokument, idroba, cijena, ncijena;
+   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(izlazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4'
      using dokument, idroba, cijena, ncijena
      INTO idDokument;
-   -- RAISE INFO 'idDokument = %', idDokument;
+   RAISE INFO 'idDokument = %', idDokument;
 
    IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
       EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz - $3, izlazi=array_remove(ulazi, $2)' ||
@@ -638,7 +648,8 @@ IF transakcija = '-' THEN -- on delete pos_pos stavka
 END IF;
 
 -- slijedi + transakcija on insert pos_pos
-EXECUTE  'select id from p' || idPos || '.pos_stanje where idroba = $1 AND kol_izlaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = $3'
+-- (dat_od <= current_date AND dat_do >= current_date ) - cijena je aktuelna
+EXECUTE  'select id from p' || idPos || '.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = $3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 
@@ -649,10 +660,22 @@ IF NOT idRaspolozivo IS NULL then
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
 
-ELSE
-  EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
-        ' VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
-  USING datum, idroba, '{}'::text[], dokumenti, 0, kolicina, cijena, ncijena;
+ELSE -- kod izlaza se insert desava samo ako ako roba ide u minus !
+
+  -- u ovom naraednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
+  EXECUTE  'select id from p' || idPos || '.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
+      using idroba, cijena, ncijena
+      INTO idRaspolozivo;
+
+  IF NOT idRaspolozivo IS NULL THEN
+      EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
+          ' WHERE id=$2'
+          USING kolicina, idRaspolozivo, dokument;
+  ELSE -- nema 'kompatibilnih' stavki stanja (ni roba na stanju, ni prodaja u minus)
+      EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+           ' VALUES($1,$2,$3,$4,$5,0,$6,$7,$8)'
+           USING datum, dat_do, idroba, '{}'::text[], dokumenti, kolicina, cijena, ncijena, dat_do;
+  END IF;
 
 END IF;
 
@@ -660,6 +683,20 @@ RETURN TRUE;
 
 END;
 $$;
+
+-- prodaja
+-- select p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD01', current_date, 'R01', 60, 2.5, 0);
+-- select p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD03', current_date, 'R02', 20, 3, 0);
+--
+-- -- robe ima, ali ce je ova transakcija otjerati u minus
+-- select p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD90', current_date, 'R01', 500, 2.5, 0);
+-- -- nastavljamo sa minusom; minus se gomila na jednoj stavki
+-- select p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD91', current_date, 'R01',  40, 2.5, 0);
+--
+-- -- ove robe nema na stanju
+-- select p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD10', current_date, 'R03', 10, 30, 0);
+-- select p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD11', current_date, 'R03', 20, 30, 0);
+
 
 
 ---------------------------------------------------------------------------------------
@@ -672,7 +709,6 @@ CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_insert_update_delete() RETURNS t
 
 DECLARE
     idPos varchar := '15';
-    sql varchar;
 BEGIN
 
 IF (TG_OP = 'DELETE') THEN
@@ -782,6 +818,88 @@ BEGIN
 RETURN '***';
 END;
 $$;
+
+
+----------- TRIGERI na strani kase radi pracenja stanja -----------------------------------------------------
+
+-- on p15.pos_pos
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION p15.on_kasa_pos_pos_insert_update_delete() RETURNS trigger
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+    idPos varchar := '15';
+    lRet boolean;
+BEGIN
+
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '11' ) THEN -- samo 42, 11
+      RETURN NULL;
+   END IF;
+ELSE
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '11' ) THEN
+      RETURN NULL;
+   END IF;
+END IF;
+
+IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
+      RAISE INFO 'delete izlaz pos_pos  %  % %', OLD.idvd, OLD.brdok, OLD.datum;
+      -- select p15.pos_izlaz_update_stanje('-', '15', '42', 'PROD91', current_date, 'R01',  40, 2.5, 0);
+      EXECUTE 'SELECT p' || idPos || '.pos_izlaz_update_stanje(''-'', $1, $2, $3, $4, $5, $6, $7, $8)'
+         USING idPos, OLD.idvd, OLD.brdok, OLD.datum,  OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
+         INTO lRet;
+      RAISE INFO 'delete ret=%', lRet;
+      RETURN OLD;
+
+ELSIF (TG_OP = 'DELETE') AND ( OLD.idvd = '11' ) THEN
+      RAISE INFO 'delete 11 pos_pos  %  % %', OLD.idvd, OLD.brdok, OLD.datum;
+      -- select p15.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
+      EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $4, NULL, $5, $6, $7, $8)'
+               USING idPos, OLD.idvd, OLD.brdok, OLD.datum, OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
+               INTO lRet;
+      RAISE INFO 'delete 11 ret=%', lRet;
+      RETURN OLD;
+
+ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd = '42' ) THEN
+       RAISE INFO 'update 42 pos_pos?!  %  % %', OLD.idvd, OLD.brdok, OLD.datum;
+       RETURN NEW;
+
+ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd = '11' ) THEN
+        RAISE INFO 'update 11 pos_pos?!  %  % %', OLD.idvd, OLD.brdok, OLD.datum;
+        RETURN NEW;
+
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
+        RAISE INFO 'insert 42 pos_pos  % % %', NEW.idvd, NEW.brdok, NEW.datum;
+        -- p15.pos_izlaz_update_stanje('+', '15', '42', 'PROD10', current_date, 'R03', 10, 30, 0);
+        EXECUTE 'SELECT p' || idPos || '.pos_izlaz_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8)'
+              USING idPos, NEW.idvd, NEW.brdok, NEW.datum,  NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
+              INTO lRet;
+        RAISE INFO 'insert 42 ret=%', lRet;
+        RETURN NEW;
+
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '11' ) THEN
+        RAISE INFO 'insert 11 pos_pos  % % %', NEW.idvd, NEW.brdok, NEW.datum;
+        -- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', current_date, current_date, NULL,'R01', 100, 2.5, 0);
+        EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $4, NULL, $5, $6, $7, $8)'
+             USING idPos, NEW.idvd, NEW.brdok, NEW.datum, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
+             INTO lRet;
+             RAISE INFO 'insert 11 ret=%', lRet;
+        RETURN NEW;
+
+END IF;
+
+RETURN NULL; -- result is ignored since this is an AFTER trigger
+
+END;
+$$;
+
+-- p15.pos_pos na kasi
+DROP TRIGGER IF EXISTS  kasa_pos_pos_insert_update_delete on p15.pos_pos;
+CREATE TRIGGER kasa_pos_pos_insert_update_delete
+      AFTER INSERT OR DELETE OR UPDATE
+      ON p15.pos_pos
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_kasa_pos_pos_insert_update_delete();
+
 
 
 ----------- TRIGERI na strani knjigovodstva POS - KALK_KALK ! -----------------------------------------------------
