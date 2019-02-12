@@ -50,7 +50,7 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
    ?  "KUPAC:", cIdPartner, "-", PadR( naz, 20 ), " FAKT br.:", cBrFaktP, "Datum:", dDatFaktP
    SELECT kalk_pripr
    find_kalk_doks_by_broj_dokumenta( kalk_pripr->idfirma, kalk_pripr->idvd, kalk_pripr->brdok )
-   ?? "  DatVal:", kalk_doks2->datval
+   ?? "  DatVal:", kalk_doks->datval
 
    IF cIdvd == "94"
       select_o_konto( cIdkonto2 )

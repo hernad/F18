@@ -883,6 +883,9 @@ ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS datkurs;
 ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS roktr;
 ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS datfaktp date;
 ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS datval date;
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS dat_od date;
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS dat_do date;
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS opis text;
 
 -- DO $$
 -- BEGIN

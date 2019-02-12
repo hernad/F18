@@ -534,29 +534,30 @@ STATIC FUNCTION kalk_azur_sql()
    LOCAL _doks_vpv := 0
    LOCAL _doks_mpv := 0
    LOCAL _doks_rabat := 0
-   LOCAL _tbl_kalk
-   LOCAL _tbl_doks
+   LOCAL cKalkTableName
+   LOCAL cKalkDoksTableName
    LOCAL nI, _n
-   LOCAL _tmp_id
-   LOCAL _ids := {}
-   LOCAL _ids_kalk := {}
-   LOCAL _ids_doks := {}
+   //LOCAL _tmp_id
+   //LOCAL _ids := {}
+   //LOCAL _ids_kalk := {}
+   //LOCAL _ids_doks := {}
    LOCAL _log_dok := "0"
    LOCAL oAttr
    LOCAL hParams
+   LOCAL dDatFaktP
+   LOCAL cMessage
    LOCAL bDokument := {| cIdFirma, cIdVd, cBrDok |   cIdFirma == field->idFirma .AND. ;
       cIdVd == field->IdVd .AND. cBrDok == field->BrDok }
    LOCAL cIdVd, cIdFirma, cBrDok
 
-   _tbl_kalk := "kalk_kalk"
-   _tbl_doks := "kalk_doks"
+   cKalkTableName := "kalk_kalk"
+   cKalkDoksTableName := "kalk_doks"
 
    Box(, 5, 60 )
 
-   _tmp_id := "x"
+   //_tmp_id := "x"
 
    o_kalk_za_azuriranje()
-
    run_sql_query( "BEGIN" )
 
    o_kalk()  // otvoriti samo radi strukture tabele
@@ -565,19 +566,20 @@ STATIC FUNCTION kalk_azur_sql()
    SELECT kalk_pripr
    GO TOP
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "kalk_kalk -> server: " + _tmp_id
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "kalk_kalk -> server "
 
    DO WHILE !Eof()
 
-      cIdFirma := field->idFirma
-      cIdVd := field->idVd
-      cBrDok := field->brDok
+      cIdFirma := kalk_pripr->idFirma
+      cIdVd := kalk_pripr->idVd
+      cBrDok := kalk_pripr->brDok
       hRecKalkDok := hb_Hash()
       hRecKalkDok[ "idfirma" ] := cIdFirma
       hRecKalkDok[ "idvd" ] := cIdVd
       hRecKalkDok[ "brdok" ] := cBrDok
-      hRecKalkDok[ "datdok" ] := field->datdok
-      hRecKalkDok[ "brfaktp" ] := field->brfaktp
+      hRecKalkDok[ "datdok" ] := kalk_pripr->datdok
+      hRecKalkDok[ "brfaktp" ] := kalk_pripr->brfaktp
+      hRecKalkDok[ "datfaktp" ] := kalk_pripr->datfaktp
       hRecKalkDok[ "idpartner" ] := field->idpartner
       hRecKalkDok[ "idzaduz" ] := field->idzaduz
       hRecKalkDok[ "idzaduz2" ] := field->idzaduz2
@@ -586,14 +588,13 @@ STATIC FUNCTION kalk_azur_sql()
       hRecKalkDok[ "podbr" ] := field->podbr
       hRecKalkDok[ "sifra" ] := Space( 6 )
 
-      _tmp_id := hRecKalkDok[ "idfirma" ] + hRecKalkDok[ "idvd" ] + hRecKalkDok[ "brdok" ]
-      AAdd( _ids_kalk, "#2" + _tmp_id )  // kalk_kalk brisi sve stavke za jedan dokument
+      //_tmp_id := hRecKalkDok[ "idfirma" ] + hRecKalkDok[ "idvd" ] + hRecKalkDok[ "brdok" ]
+      //AAdd( _ids_kalk, "#2" + _tmp_id )  // kalk_kalk brisi sve stavke za jedan dokument
       _log_dok := hRecKalkDok[ "idfirma" ] + "-" + hRecKalkDok[ "idvd" ] + "-" + hRecKalkDok[ "brdok" ]
 
       DO WHILE !Eof() .AND.  Eval( bDokument, cIdFirma, cIdVd, cBrDok )
 
          kalk_set_doks_total_fields( @_doks_nv, @_doks_vpv, @_doks_mpv, @_doks_rabat )
-
          hRecKalkKalk := dbf_get_rec()
          IF !sql_table_update( "kalk_kalk", "ins", hRecKalkKalk )
             lOk := .F.
@@ -605,7 +606,6 @@ STATIC FUNCTION kalk_azur_sql()
             hRecKalkKalk[ "mkonto" ] := hRecKalkKalk[ "idkonto" ]
             hRecKalkKalk[ "mu_i" ] := "1"
             hRecKalkKalk[ "rbr" ] := PadL( Str( 900 + Val( AllTrim( hRecKalkKalk[ "rbr" ] ) ), 3 ), 3 )
-
             IF !sql_table_update( "kalk_kalk", "ins", hRecKalkKalk )
                lOk := .F.
                EXIT
@@ -614,17 +614,18 @@ STATIC FUNCTION kalk_azur_sql()
          SKIP
       ENDDO
 
-
       IF lOk
          hRecKalkDok[ "nv" ] := _doks_nv
          hRecKalkDok[ "vpv" ] := _doks_vpv
          hRecKalkDok[ "rabat" ] := _doks_rabat
          hRecKalkDok[ "mpv" ] := _doks_mpv
-
-         _tmp_id := hRecKalkDok[ "idfirma" ] + hRecKalkDok[ "idvd" ] + hRecKalkDok[ "brdok" ]
-         AAdd( _ids_doks, _tmp_id )
-
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "kalk_doks -> server: " + _tmp_id
+         hRecKalkDok[ "datval" ] := CtoD("")
+         hRecKalkDok[ "opis" ] := ""
+         hRecKalkDok[ "dat_od" ] := CtoD("")
+         hRecKalkDok[ "dat_do" ] := CtoD("")
+         //_tmp_id := hRecKalkDok[ "idfirma" ] + hRecKalkDok[ "idvd" ] + hRecKalkDok[ "brdok" ]
+         //AAdd( _ids_doks, _tmp_id )
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY "kalk_doks -> server " //+ _tmp_id
          IF !sql_table_update( "kalk_doks", "ins", hRecKalkDok )
             lOk := .F.
          ENDIF
@@ -642,22 +643,21 @@ STATIC FUNCTION kalk_azur_sql()
 
    ENDDO
 
-
    IF !lOk
       run_sql_query( "ROLLBACK" )
-      _msg := "kalk ažuriranje, trasakcija " + _tmp_id + " neuspješna ?!"
-      log_write( _msg, 2 )
-      MsgBeep( _msg )
+      cMessage := "kalk ažuriranje, transakcija neuspješna ?!"
+      log_write( cMessage, 2 )
+      MsgBeep( cMessage )
 
    ELSE
 
-      @ box_x_koord() + 4, box_y_koord() + 2 SAY "push ids to semaphore"
-      push_ids_to_semaphore( _tbl_kalk, _ids_kalk )
-      push_ids_to_semaphore( _tbl_doks, _ids_doks  )
-      @ box_x_koord() + 5, box_y_koord() + 2 SAY "update semaphore version"
+      //@ box_x_koord() + 4, box_y_koord() + 2 SAY "push ids to semaphore"
+      //push_ids_to_semaphore( cKalkTableName, _ids_kalk )
+      //push_ids_to_semaphore( cKalkDoksTableName, _ids_doks  )
+      //@ box_x_koord() + 5, box_y_koord() + 2 SAY "update semaphore version"
 
       hParams := hb_Hash()
-      hParams[ "unlock" ] := { _tbl_kalk, _tbl_doks }
+      hParams[ "unlock" ] := { cKalkTableName, cKalkDoksTableName }
       run_sql_query( "COMMIT", hParams )
 
       log_write( "F18_DOK_OPER: ažuriranje kalk dokumenta: " + _log_dok, 2 )

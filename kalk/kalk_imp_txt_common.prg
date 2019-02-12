@@ -163,7 +163,7 @@ FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdo
 
          SELECT kalk_pripr
          hRec[ "brdok" ] := cNoviKalkBrDok
-         hb_HDel( hRec, "datval" ) // datval se posebno azurira u kalk_doks2
+         hb_HDel( hRec, "datval" ) // datval se posebno azurira u kalk_doks
          dbf_update_rec( hRec )
 
          IF hRec[ "idvd" ] == "14"

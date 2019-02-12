@@ -166,7 +166,6 @@ FUNCTION find_kalk_doks_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
       hParams[ "brdok" ] := cBrDok
    ENDIF
 
-
    hParams[ "order_by" ] := "idfirma,idvd,brdok"
    hParams[ "indeks" ] := .F.  // ne trositi vrijeme na kreiranje indeksa
 
@@ -223,26 +222,19 @@ FUNCTION find_kalk_za_period( xIdFirma, cIdVd, cIdPartner, cIdRoba, dDatOd, dDat
    IF cIdVd != NIL
       hParams[ "idvd" ] := cIdVd
    ENDIF
-
    IF cIdPartner != NIL
       hParams[ "idpartner" ] := cIdPartner
    ENDIF
-
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba
    ENDIF
-
    IF dDatOd <> NIL
       hParams[ "dat_od" ] := dDatOd
    ENDIF
-
    IF dDatOd <> NIL
       hParams[ "dat_do" ] := dDatDo
    ENDIF
-
    hParams[ "order_by" ] := cOrderBy
-
-
    hParams[ "indeks" ] := .F.
    use_sql_kalk( hParams )
    GO TOP
@@ -550,7 +542,6 @@ FUNCTION use_sql_kalk( hParams )
    cSql += " FROM " + f18_sql_schema("kalk_kalk") + " "
 
    IF hb_HHasKey( hParams, "obradjeno" )
-
       // select kolicina, kalk_doks.obradjeno  from fmk.kalk_kalk
       // join fmk.kalk_doks on  kalk_doks.idfirma=kalk_kalk.idfirma and kalk_doks.idvd=kalk_kalk.idvd and kalk_doks.brdok=kalk_kalk.brdok
       // limit 1
@@ -761,7 +752,7 @@ FUNCTION use_sql_kalk_doks( hParams )
    cSql += coalesce_char_zarez( "idfirma", 2 )
    cSql += coalesce_char_zarez( "idvd", 2 )
    cSql += coalesce_char_zarez( "brdok", 8 )
-   cSql += " datdok, "
+   cSql += " datdok, datfaktp, datval, dat_od, dat_do, "
    cSql += coalesce_char_zarez( "brfaktp", 10 )
    cSql += coalesce_char_zarez( "idpartner", 6 )
    cSql += coalesce_char_zarez( "idzaduz", 6 )
@@ -773,6 +764,7 @@ FUNCTION use_sql_kalk_doks( hParams )
    cSql += coalesce_num_num_zarez( "rabat", 12, 2 )
    cSql += coalesce_num_num_zarez( "mpv", 12, 2 )
    cSql += coalesce_char_zarez( "podbr", 2 )
+   cSql += coalesce_char_zarez( "opis", 100 )
    cSql += coalesce_char( "sifra", 6 )
    cSql += " FROM fmk.kalk_doks "
 

@@ -224,7 +224,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ PRow(), PCol() + 1 SAY kalk_doks->brfaktp
 
       find_kalk_doks_by_broj_dokumenta( idfirma, idvd, brdok )
-      @ PRow(), PCol() + 1 SAY kalk_doks2->datval
+      @ PRow(), PCol() + 1 SAY kalk_doks->datval
 
       SELECT kalk_doks
       // IF FieldPos( "sifra" ) <> 0
