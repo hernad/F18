@@ -27,6 +27,7 @@ FUNCTION kalk_stampa_dok_81()
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
    dDatFaktP := DatFaktP
+
    cPKonto := kalk_pripr->pkonto
    //cIdKonto2 := IdKonto2
 
@@ -60,9 +61,8 @@ FUNCTION kalk_stampa_dok_81()
    SELECT kalk_pripr
 
    aPorezi := {}
-   //PRIVATE cIdd := idpartner + brfaktp + pkonto //+ idkonto2
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
+   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi )
@@ -126,9 +126,7 @@ FUNCTION kalk_stampa_dok_81()
       @ PRow(), PCol() + 1 SAY ( nPrevoz + nBankTr + nSpedtr + nCarDaz + nZavTr )   PICTURE Piccdem
       @ PRow(), PCol() + 1 SAY Space( Len( picdem ) )
       @ PRow(), PCol() + 1 SAY nMarza2              PICTURE PicCDEM
-      // IF lPrikPRUC
-      // @ PRow(), PCol() + 1 SAY nPRUC              PICTURE PicCDEM
-      // ENDIF
+
 
       @ PRow(), PCol() + 1 SAY Space( Len( picdem ) )
       @ PRow(), PCol() + 1 SAY nPDV  PICTURE PicCDEM
@@ -211,7 +209,9 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
    nStr := 0
-   cIdPartner := IdPartner; cBrFaktP := BrFaktP; dDatFaktP := DatFaktP
+   cIdPartner := IdPartner
+   cBrFaktP := BrFaktP
+   dDatFaktP := DatFaktP
 
    cPKonto := kalk_pripr->Konto
    cIdKonto2 := IdKonto2
@@ -263,7 +263,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
 
    SELECT kalk_pripr
 
-   //PRIVATE cIdd := idpartner + brfaktp + kalk_pripr->pkonto //+ idkonto2
+
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
@@ -416,7 +416,6 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
 
    ? m
 
-   // potpis na dokumentu
    dok_potpis( 90, "L", NIL, NIL )
 
    RETURN .T.

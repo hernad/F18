@@ -781,7 +781,7 @@ FUNCTION kalk_datval()
 
 FUNCTION DatVal()
 
-   LOCAL _uvecaj := 15
+   LOCAL nUvecati := 15
 
    // LOCAL hRec
    LOCAL nRokPartner
@@ -797,146 +797,24 @@ FUNCTION DatVal()
       dDatVal := CToD( "" )
    ENDIF
 
-   // IF lVrsteP
-   // cIdVrsteP := k2
-   // ENDIF
-
    dDatVal := fix_dat_var( dDatVal, .T. )
-
 
    IF Empty( dDatVal )
 
       // IF kalk_imp_autom() // osloni se na rok placanja
       nRokPartner := get_partn_sifk_sifv( "ROKP", finmat->idpartner, .T. )
       IF ValType( nRokPartner ) == "N"
-         _uvecaj := nRokPartner
+         nUvecati := nRokPartner
       ENDIF
       IF !Empty( fix_dat_var( finmat->datFaktP, .T. ) )
-         dDatVal := finmat->datFaktP + _uvecaj
+         dDatVal := finmat->datFaktP + nUvecati
       ENDIF
 
-/*
-      ELSE
-
-         Box(, 3, 60 )
-
-         SET CURSOR ON
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Datum dokumenta: "
-         ??  finmat->datfaktp
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Uvecaj dana    :" GET _uvecaj PICT "999"
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Valuta         :" GET dDatVal WHEN {|| dDatVal := finmat->datfaktp + _uvecaj, .T. }
-
-         // IF lVrsteP .AND. Empty( cIdVrsteP )
-         // @ box_x_koord() + 4, box_y_koord() + 2 SAY "Sifra vrste placanja:" GET cIdVrsteP PICT "@!"
-         // ENDIF
-
-         READ
-         BoxC()
-
-      ENDIF
-*/
    ENDIF
-
-/*
-      IF !find_kalk_doks2_by_broj_dokumenta( finmat->idfirma, finmat->idvd, finmat->brdok )
-         APPEND BLANK // ovo se moze desiti ako je neko mjenjao dokumenta u KALK
-         hRec := dbf_get_rec()
-         hRec[ "idfirma" ] := finmat->idfirma
-         hRec[ "idvd" ] := finmat->idvd
-         hRec[ "brdok" ] := finmat->brdok
-      ELSE
-         hRec := dbf_get_rec()
-      ENDIF
-
-      hRec[ "datval" ] := dDatVal
-
-      IF lVrsteP
-         hRec[ "k2" ] := cIdVrsteP
-      ENDIF
-
-      update_rec_server_and_dbf( "kalk_doks2", hRec, 1, "FULL" )
-
-*/
 
    PopWa()
 
    RETURN 0 // funkcija se koristi u kontiranju i mora vratiti 0
-
-
-
-
-
-/* Partner(nBroj,cDef,cTekst,lFaktura,dp)
- *   param: nBroj - 1 znaci da se sifrom partnera puni varijabla cPartner1
- *   param: cDef - default tj.ponudjeni tekst
- *   param: cTekst - opis podatka koji se unosi u varijablu cPartner1
- *   param: lFaktura - .t. i ako je npr.nBroj==1 filuju se i varijable cBrFakt1 i dDatFakt1 koje cuvaju broj i datum fakture, .f. - ne edituju se ove varijable sto je i default vrijednost
- *   param: dp - duzina sifre partnera, ako se ne navede default vrijednost=6
- *     Edit sifre partnera u varijablu cPartner1...ili...cPartner5 ukoliko je izabrana varijabla duzine 0 tj.nije joj vec dodijeljena vrijednost
- *  return 0
- */
-
-FUNCTION Partner( nBroj, cDef, cTekst, lFaktura, dp )
-
-   IF lFaktura == NIL; lFaktura := .F. ; ENDIF
-   IF dp == NIL; dp := 6; ENDIF
-   IF cDef == NIL; cDef := ""; ENDIF
-   IF cTekst == NIL; cTekst := "Sifra partnera " + AllTrim( Str( nBroj ) ); ENDIF
-   PRIVATE GetList := {}
-
-   IF ( nBroj == 1 .AND. Len( cPartner1 ) <> 0 ) .OR. ;
-         ( nBroj == 2 .AND. Len( cPartner2 ) <> 0 ) .OR. ;
-         ( nBroj == 3 .AND. Len( cPartner3 ) <> 0 ) .OR. ;
-         ( nBroj == 4 .AND. Len( cPartner4 ) <> 0 ) .OR. ;
-         ( nBroj == 5 .AND. Len( cPartner5 ) <> 0 )
-      RETURN 0
-   ENDIF
-
-   Box(, 2 + IF( lFaktura, 2, 0 ), 60 )
-   SET CURSOR ON
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY cTekst
-   IF nBroj == 1
-      cPartner1 := PadR( cdef, dp )
-      @ Row(), Col() + 1 GET cPartner1
-      IF lFaktura
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj fakture " GET cBrFakt1
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datum fakture" GET dDatFakt1
-      ENDIF
-   ELSEIF nBroj == 2
-      cPartner2 := PadR( cdef, dp )
-      @ Row(), Col() + 1 GET cPartner2
-      IF lFaktura
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj fakture " GET cBrFakt2
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datum fakture" GET dDatFakt2
-      ENDIF
-   ELSEIF nBroj == 3
-      cPartner3 := PadR( cdef, dp )
-      @ Row(), Col() + 1 GET cPartner3
-      IF lFaktura
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj fakture " GET cBrFakt3
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datum fakture" GET dDatFakt3
-      ENDIF
-   ELSEIF nBroj == 4
-      cPartner4 := PadR( cdef, dp )
-      @ Row(), Col() + 1 GET cPartner4
-      IF lFaktura
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj fakture " GET cBrFakt4
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datum fakture" GET dDatFakt4
-      ENDIF
-   ELSE
-      cPartner5 := PadR( cdef, dp )
-      @ Row(), Col() + 1 GET cPartner5
-      IF lFaktura
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj fakture " GET cBrFakt5
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datum fakture" GET dDatFakt5
-      ENDIF
-   ENDIF
-   READ
-   BoxC()
-
-   RETURN 0
-
-
 
 
 FUNCTION kalk_set_doks_total_fields( nNv, nVpv, nMpv, nRabat )

@@ -14,6 +14,7 @@
 MEMVAR nMPV80, nNVPredhodna
 MEMVAR nKalkRBr
 MEMVAR GetList
+MEMVAR _pkonto
 
 FUNCTION kalk_get1_80()
 
@@ -45,7 +46,6 @@ FUNCTION kalk_get1_80()
       ++nX
       _kord_x := box_x_koord() + nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  Prenos na konto: " GET _IdKonto2 VALID {|| Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2 ), ispisi_naziv_konto( _kord_x, 35, 30 )  } PICT "@!"
-
       READ
 
       ESC_RETURN K_ESC
@@ -94,15 +94,12 @@ FUNCTION kalk_get1_80()
 
 
    IF kalk_is_novi_dokument()
-
       select_o_koncij( _pkonto )
       select_o_roba( _idroba )
       _mpcsapp := kalk_get_mpc_by_koncij_pravilo()
-
       _TMarza2 := "%"
       _TCarDaz := "%"
       _CarDaz := 0
-
    ENDIF
 
    SELECT kalk_pripr
@@ -138,7 +135,6 @@ FUNCTION kalk_get1_80()
 
    SELECT kalk_pripr
 
-   _PKonto := _pkonto
    _PU_I := "1"
    _MKonto := ""
    _MU_I := ""
@@ -173,7 +169,6 @@ FUNCTION kalk_get_1_80_protustavka()
    READ
    AltD()
 
-
    set_metric( "kalk_dok_80_predispozicija_set_cijena", my_user(), cSvedi ) // zapamti zadnji unos
 
    nX := 12
@@ -190,7 +185,6 @@ FUNCTION kalk_get_1_80_protustavka()
    select_o_koncij( _pkonto )
 
    SELECT kalk_pripr
-
    _pkonto := _pkonto
 
    PRIVATE cProracunMarzeUnaprijed := " "

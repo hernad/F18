@@ -127,7 +127,6 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
       f18_delete_dbf( _table_name )
    ENDIF
 
-
    IF_NOT_FILE_DBF_CREATE
 
    CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
@@ -135,8 +134,6 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
    CREATE_INDEX( "3", "idFirma+idvd+brdok+idroba+rbr", _alias )
    CREATE_INDEX( "4", "idFirma+idvd+idroba", _alias )
    CREATE_INDEX( "5", "idFirma+idvd+idroba+STR(mpcsapp,12,2)", _alias )
-
-
 
    // KALK_PRIPR2
 
@@ -160,7 +157,6 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 020106 // 2.1.5
       f18_delete_dbf( _table_name )
    ENDIF
-
    IF_NOT_FILE_DBF_CREATE
 
 
@@ -179,10 +175,8 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
 
    CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
 
-
    _alias := "PRIPT"  // koristi kalk imp varazdin
    _table_name := "kalk_pript"
-
    AAdd( aDBf, { 'DATVAL', 'D',   8,  0 } ) // koristi kalk imp varazdin
 
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 020106 // 2.1.5

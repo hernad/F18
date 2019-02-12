@@ -31,7 +31,7 @@ MEMVAR Ch
 MEMVAR opc, Izbor, h
 
 MEMVAR aPorezi
-MEMVAR _idfirma, _idvd, _brdok, _datdok, _idkonto, _idkonto2, _vpc, _nc, _mpcsapp, _kolicina
+MEMVAR _idfirma, _idvd, _brdok, _datdok, _mkonto, _pkonto, _idkonto, _idkonto2, _vpc, _nc, _mpcsapp, _kolicina
 MEMVAR _TMarza
 MEMVAR cSection, cHistory, aHistory
 MEMVAR nKalkRBr, _rbr
@@ -349,14 +349,14 @@ FUNCTION kalk_edit_last_key( nSet )
 
 FUNCTION kalk_ispravka_postojeca_stavka()
 
-   LOCAL cIdkont, cIdkont2
+   LOCAL cIdKonto1, cIdKonto2
    LOCAL hParams := hb_Hash()
    LOCAL hDok
    LOCAL _opis, hKalkAtributi
-   LOCAL _old_dok, _new_dok
+   LOCAL hOldDokument, hRecNoviDokument
    LOCAL oAttr, nTrec
 
-   _old_dok := hb_Hash()
+   hOldDokument := hb_Hash()
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
    IF RecCount() == 0
@@ -365,7 +365,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    ENDIF
 
    Scatter()
-
    IF Left( _idkonto2, 3 ) = "XXX"
       Beep( 2 )
       Msg( "Ne možete ispravljati protustavke !" )
@@ -377,9 +376,9 @@ FUNCTION kalk_ispravka_postojeca_stavka()
 
    Box( "ist", BOX_HEIGHT, BOX_WIDTH, .F. )
 
-   _old_dok[ "idfirma" ] := _idfirma
-   _old_dok[ "idvd" ] := _idvd
-   _old_dok[ "brdok" ] := _brdok
+   hOldDokument[ "idfirma" ] := _idfirma
+   hOldDokument[ "idvd" ] := _idvd
+   hOldDokument[ "brdok" ] := _brdok
 
    hDok := hb_Hash()
    hDok[ "idfirma" ] := _idfirma
@@ -397,7 +396,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    ELSE
 
       BoxC()
-
       IF _error <> "1"
          _error := "0"
       ENDIF
@@ -427,31 +425,29 @@ FUNCTION kalk_ispravka_postojeca_stavka()
 
       IF nKalkRbr == 1
          nTrec := RecNo()
-         _new_dok := dbf_get_rec()
-         kalk_izmjeni_sve_stavke_dokumenta( _old_dok, _new_dok )
+         hRecNoviDokument := dbf_get_rec()
+         kalk_izmjeni_sve_stavke_dokumenta( hOldDokument, hRecNoviDokument )
          SELECT kalk_pripr
          GO ( nTrec )
       ENDIF
 
       IF _idvd $ "16#80" .AND. !Empty( _idkonto2 ) // protustavka
 
-         IF _idvd == "80"
-            cIdkont := _pkonto
-         ELSE
-            cIdKont := _mkonto
+         IF _idvd == "80" // prvi konto je prodavnicki
+            cIdKonto1 := _pkonto
+            cIdKonto2 := _idkonto2
+            _pkonto := _idkonto2 // konto protustavke je _idkonto predhodne stavke
+            _idkonto2 := "XXX"   // _idkonto2 se oznacava kao protustavka
          ENDIF
 
-         cIdkont2 := _idkonto2
-
-
-         IF _idvd == "80"
-            _pkonto := cIdKont2
-         ELSE
-            _mkonto := cIdKont2
+         IF _idvd == "16" // priv konto je magacinski
+            cIdKonto1 := _mkonto
+            cIdKonto2 := _idkonto2
+            _mkonto := _idkonto2 // konto protustavke je _idkonto predhodne stavke
+            _idkonto2 := "XXX"
          ENDIF
-         _idkonto2 := "XXX"
+
          _kolicina := - kalk_pripr->kolicina
-
          nKalkRbr := rbr_u_num( _rbr ) + 1
          _rbr := rbr_u_char( nKalkRbr )
 
@@ -460,7 +456,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
          DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + field->rbr
-            IF Left( field->idkonto2, 3 ) == "XXX"
+            IF Left( kalk_pripr->idkonto2, 3 ) == "XXX"
                Scatter()
                _tbanktr := ""
                EXIT
@@ -469,9 +465,9 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          ENDDO
 
          IF _idvd == "80"
-            _pkonto := cIdKont2
+            _pkonto := cIdKonto2
          ELSE
-            _mkonto := cIdKont2
+            _mkonto := cIdKonto2
          ENDIF
          _idkonto2 := "XXX"
 
@@ -526,12 +522,12 @@ FUNCTION kalk_unos_nova_stavka()
 
    LOCAL hParams := hb_Hash()
    LOCAL hDok, hKalkAtributi
-   LOCAL _old_dok := hb_Hash()
-   LOCAL _new_dok
+   LOCAL hOldDokument := hb_Hash()
+   LOCAL hRecNoviDokument
    LOCAL oAttr
    LOCAL _opis
    LOCAL _rbr_uvecaj := 0
-   LOCAL cIdKont, cIdKont2
+   LOCAL cIdKonto1, cIdKonto2
 
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
@@ -545,8 +541,8 @@ FUNCTION kalk_unos_nova_stavka()
       SKIP -1
    ENDIF
 
-   cIdkont := ""
-   cIdkont2 := ""
+   cIdKonto1 := ""
+   cIdKonto2 := ""
 
    DO WHILE .T.
 
@@ -560,8 +556,8 @@ FUNCTION kalk_unos_nova_stavka()
       _ERROR := ""
 
       IF _idvd $ "16#80" .AND. _idkonto2 = "XXX"
-         _idkonto := cIdkont
-         _idkonto2 := cIdkont2
+         _idkonto := cIdKonto1
+         _idkonto2 := cIdKonto2
       ENDIF
 
       IF _idvd == "PR" // locirati se na zadnji proizvod
@@ -591,9 +587,9 @@ FUNCTION kalk_unos_nova_stavka()
 
       nKalkRbr := rbr_u_num( _rbr ) + 1 + _rbr_uvecaj
 
-      _old_dok[ "idfirma" ] := _idfirma
-      _old_dok[ "idvd" ] := _idvd
-      _old_dok[ "brdok" ] := _brdok
+      hOldDokument[ "idfirma" ] := _idfirma
+      hOldDokument[ "idvd" ] := _idvd
+      hOldDokument[ "brdok" ] := _brdok
 
       IF kalk_edit_stavka( .T., @hParams ) == K_ESC
          EXIT
@@ -627,18 +623,18 @@ FUNCTION kalk_unos_nova_stavka()
       IF nKalkRbr == 1
          SELECT kalk_pripr
          nTrec := RecNo()
-         _new_dok := dbf_get_rec()
-         kalk_izmjeni_sve_stavke_dokumenta( _old_dok, _new_dok )
+         hRecNoviDokument := dbf_get_rec()
+         kalk_izmjeni_sve_stavke_dokumenta( hOldDokument, hRecNoviDokument )
          SELECT kalk_pripr
          GO ( nTrec )
       ENDIF
 
       IF _idvd $ "16#80" .AND. !Empty( _idkonto2 )
 
-         cIdkont := _idkonto
-         cIdkont2 := _idkonto2
+         cIdKonto1 := _idkonto
+         cIdKonto2 := _idkonto2
 
-         _idkonto := cIdKont2
+         _idkonto := cIdKonto2
          _idkonto2 := "XXX"
          _kolicina := -kolicina
 
@@ -664,8 +660,8 @@ FUNCTION kalk_unos_nova_stavka()
 
          BoxC()
 
-         _idkonto := cIdkont
-         _idkonto2 := cIdkont2
+         _idkonto := cIdKonto1
+         _idkonto2 := cIdKonto2
 
       ENDIF
 
@@ -681,11 +677,11 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
    LOCAL hParams := hb_Hash()
    LOCAL hDok
-   LOCAL oAttr, hKalkAtributi, _old_dok, _new_dok
+   LOCAL oAttr, hKalkAtributi, hOldDokument, hRecNoviDokument
    LOCAL _opis
    LOCAL nTr2
    LOCAL nDug, nPot, nTrec
-   LOCAL cIdKont, cIdKont2
+   LOCAL cIdKonto1, cIdKonto2
 
    PushWA()
 
@@ -708,7 +704,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
       nTR2 := RecNo()
       SKIP -1
 
-      _old_dok := dbf_get_rec()
+      hOldDokument := dbf_get_rec()
       Scatter()
 
       _error := ""
@@ -770,17 +766,17 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
       IF nKalkRbr == 1
          nTrec := RecNo()
-         _new_dok := dbf_get_rec()
-         kalk_izmjeni_sve_stavke_dokumenta( _old_dok, _new_dok )
+         hRecNoviDokument := dbf_get_rec()
+         kalk_izmjeni_sve_stavke_dokumenta( hOldDokument, hRecNoviDokument )
          SELECT kalk_pripr
          GO ( nTrec )
       ENDIF
 
       IF _idvd $ "16#80" .AND. !Empty( _idkonto2 )
 
-         cIdkont := _idkonto
-         cIdkont2 := _idkonto2
-         _idkonto := cIdkont2
+         cIdKonto1 := _idkonto
+         cIdKonto2 := _idkonto2
+         _idkonto := cIdKonto2
          _idkonto2 := "XXX"
          _kolicina := -kolicina
 
@@ -799,7 +795,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
             ENDIF
             SKIP
          ENDDO
-         _idkonto := cIdkont2
+         _idkonto := cIdKonto2
          _idkonto2 := "XXX"
          IF _idvd == "16"
             kalk_get_1_16()
@@ -1044,9 +1040,6 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ELSEIF _idvd $  "94"    // storno fakture, storno otpreme, doprema
       RETURN kalk_get_1_94()
 
-   ELSEIF _idvd == "82"
-      RETURN GET1_82()
-
    ELSEIF _idvd == "IM"
       RETURN kalk_get_1_im()
 
@@ -1192,7 +1185,6 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
       IF !_vise_konta
          hRec[ "idpartner" ] := _tek_dok[ "idpartner" ]
       ENDIF
-
       IF !( hRec[ "idvd" ] $ "16#80" ) .AND. !_vise_konta
          hRec[ "idkonto" ] := _tek_dok[ "idkonto" ]
          hRec[ "idkonto2" ] := _tek_dok[ "idkonto2" ]

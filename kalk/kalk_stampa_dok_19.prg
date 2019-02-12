@@ -36,7 +36,6 @@ FUNCTION kalk_stampa_dok_19()
    cIdVd := kalk_pripr->Idvd
    cBrDok := kalk_pripr->brdok
 
-   dDatFaktP := DatFaktP
    cPKonto := kalk_pripr->pkonto
 
    cNaslov := "NIVELACIJA PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
@@ -163,7 +162,6 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
 
-   dDatFaktP := DatFaktP
    cPKonto := kalk_pripr->pkonto
 
    cProred := "D"

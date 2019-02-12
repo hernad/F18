@@ -725,7 +725,7 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
 
          aDoksRec := dbf_get_rec()
 
-         hb_HDel( aDoksRec, "roktr" )
+         // hb_HDel( aDoksRec, "roktr" )
          hb_HDel( aDoksRec, "datkurs" )
 
          aDoksRec[ "rbr" ] := PadL( AllTrim( Str( ++nRedniRbroj ) ), 3 )

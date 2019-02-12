@@ -1225,94 +1225,6 @@ FUNCTION Koef( cDindem )
    RETURN 1
 
 
-
-
-/* SljBrDok13
- *
- *   param: cBrD
- *   param: nBrM
- *   param: cKon
-
-
-FUNCTION SljBrDok13( cBrD, nBrM, cKon )
-
-   LOCAL nPom
-   LOCAL cPom := ""
-   LOCAL cPom2
-
-   cPom2 := PadL( AllTrim( Str( Val( AllTrim( SubStr( cKon, 4 ) ) ) ) ), 2, "0" )
-   nPom := At( "/", cBrD )
-
-   IF Val( SubStr( cBrD, nPom + 1, 2 ) ) != nBrM
-      cPom := "01"
-   ELSE
-      cPom := NovaSifra( SubStr( cBrD, nPom - 2, 2 ) )
-   ENDIF
-
-   RETURN cPom2 + cPom + "/" + PadL( AllTrim( Str( nBrM ) ), 2, "0" )
-
-*/
-
-/*
-
-FUNCTION edit_fakt_doks2()
-
-   LOCAL cPom := ""
-   LOCAL nArr := Select()
-   LOCAL GetList := {}
-
-   cPom := my_get_from_ini( "FAKT", "Doks2Edit", "N", KUMPATH )
-   IF cPom == "N"
-      RETURN
-   ENDIF
-
-   cPom := my_get_from_ini( "FAKT", "Doks2opis", "dodatnih podataka", KUMPATH )
-
-   IF Pitanje( , "Želite li unos/ispravku " + cPom + "? (D/N)", "N" ) == "N"
-      Select( nArr )
-      RETURN
-   ENDIF
-
-   // ucitajmo dodatne podatke iz FMK.INI u aDodPar
-   // ---------------------------------------------
-   aDodPar := {}
-
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZK1", "K1", KUMPATH )  )
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZK2", "K2", KUMPATH )  )
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZK3", "K3", KUMPATH )  )
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZK4", "K4", KUMPATH )  )
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZK5", "K5", KUMPATH )  )
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZN1", "N1", KUMPATH )  )
-   AAdd( aDodPar, my_get_from_ini( "Doks2", "ZN2", "N2", KUMPATH )  )
-
-   nd2n1 := Val( d2n1 )
-   nd2n2 := Val( d2n2 )
-
-   Box(, 9, 75 )
-   @ box_x_koord() + 0, box_y_koord() + 2 SAY "Unos/ispravka " + cPom COLOR "GR+/B"
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY PadL( aDodPar[ 1 ], 30 ) GET d2k1
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY PadL( aDodPar[ 2 ], 30 ) GET d2k2
-   @ box_x_koord() + 4, box_y_koord() + 2 SAY PadL( aDodPar[ 3 ], 30 ) GET d2k3
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY PadL( aDodPar[ 4 ], 30 ) GET d2k4
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY PadL( aDodPar[ 5 ], 30 ) GET d2k5
-   @ box_x_koord() + 7, box_y_koord() + 2 SAY PadL( aDodPar[ 6 ], 30 ) GET nd2n1 PICT "999999999.99"
-   @ box_x_koord() + 8, box_y_koord() + 2 SAY PadL( aDodPar[ 7 ], 30 ) GET nd2n2 PICT "999999999.99"
-   READ
-   BoxC()
-
-   IF LastKey() <> K_ESC
-      d2n1 := IF( nd2n1 <> 0, AllTrim( Str( nd2n1 ) ), "" )
-      d2n2 := IF( nd2n2 <> 0, AllTrim( Str( nd2n2 ) ), "" )
-   ENDIF
-
-   SELECT ( nArr )
-
-   RETURN
-*/
-
-
-
-
 FUNCTION fakt_valid_cijena( nCijena, cTipDok, lNovidok )
 
    LOCAL lRet := .T.
@@ -1332,10 +1244,7 @@ FUNCTION fakt_valid_cijena( nCijena, cTipDok, lNovidok )
          nRCijena := roba->mpc3
       ELSEIF gMP == "5"
          nRCijena := roba->mpc4
-         // ELSEIF gMP == "6"
-         // nRCijena := roba->mpc5
-         // ELSEIF gMP == "7"
-         // nRCijena := roba->mpc6
+
       ENDIF
 
    ELSEIF cTipDok $ "10#"

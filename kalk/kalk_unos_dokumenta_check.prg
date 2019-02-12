@@ -617,10 +617,8 @@ FUNCTION get_mu_i( cIdVd )
    DO CASE
    CASE cIdVd $ "10#12#16#94"
       cRet := "1"
-   CASE cIdVd $ "11#14#82#95#96#97"
+   CASE cIdVd $ "11#14#95#96"
       cRet := "5"
-   CASE cIdVd == "15"
-      cRet := "8"
    CASE cIdVd == "18"
       cRet := "3"
    CASE cIdVd == "IM"

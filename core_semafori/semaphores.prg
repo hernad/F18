@@ -331,7 +331,6 @@ FUNCTION table_count( cTable, cCondition )
    ENDIF
 
    // log_write( "table: " + cTable + " count = " + AllTrim( Str( oQuery:FieldGet( 1 ) ) ), 8 )
-
    nResult := oQuery:FieldGet( 1 )
 
    RETURN nResult
@@ -519,7 +518,6 @@ FUNCTION update_semaphore_version_after_push( cTable, to_myself )
 
    _tbl := "sem." + Lower( cTable )
    _versions := get_semaphore_version_h( cTable )
-
    _last_ver := _versions[ "last_version" ]
 
    IF _last_ver < 0
@@ -566,10 +564,6 @@ FUNCTION nuliraj_ids_and_update_my_semaphore_ver( cTable )
    LOCAL _user := f18_user()
    LOCAL cQuery
    LOCAL hParams := hb_Hash()
-
-   //IF !insert_semaphore_if_not_exists( cTable )
-  //    RETURN .F.
-  // ENDIF
 
    // log_write( "START: nuliraj ids-ove - user: " + _user, 7 )
 
@@ -717,7 +711,6 @@ FUNCTION is_last_refresh_before( cTable, nSeconds )
    ENDIF
 
    RETURN .F.
-
 
 
 

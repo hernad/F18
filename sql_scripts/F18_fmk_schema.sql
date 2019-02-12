@@ -999,9 +999,6 @@ CREATE TABLE fmk.jprih (
 
 ALTER TABLE fmk.jprih OWNER TO admin;
 
---
--- Name: kalk_doks; Type: TABLE; Schema: fmk; Owner: admin
---
 
 CREATE TABLE fmk.kalk_doks (
     idfirma character(2) NOT NULL,
@@ -1056,7 +1053,7 @@ CREATE TABLE fmk.kalk_kalk (
     brfaktp character(10),
     datfaktp date,
     idpartner character(6),
-    datkurs date,
+    -- datkurs date,
     rbr character(3) NOT NULL,
     kolicina numeric(12,3),
     gkolicina numeric(12,3),
@@ -1091,7 +1088,7 @@ CREATE TABLE fmk.kalk_kalk (
     mpcsapp numeric(18,8),
     mkonto character(7),
     pkonto character(7),
-    roktr date,
+    -- roktr date,
     mu_i character(1),
     pu_i character(1),
     error character(1),

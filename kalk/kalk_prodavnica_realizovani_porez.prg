@@ -55,7 +55,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
 
 
    IF cVDok == "99"
-      cVDok := "41#42#43#47#82#IP"
+      cVDok := "41#42#43#47#IP"
    ENDIF
 
    find_kalk_za_period( cIdFirma, NIL, NIL, NIL, dDat1, dDat2, "idfirma,idtarifa,pkonto" )

@@ -18,13 +18,12 @@ FUNCTION kalk_stampa_dok_18()
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
 
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
-   //IF cSeek != 'IZDOKS'  // stampa se vise dokumenata odjednom
-      nStr := 1
-   //ENDIF
+   nStr := 1
 
-   cIdPartner := IdPartner; cBrFaktP := BrFaktP; dDatFaktP := DatFaktP
+   cIdPartner := IdPartner
+   cBrFaktP := BrFaktP
+
 
    cIdKonto := IdKonto; cIdKonto2 := IdKonto2
 

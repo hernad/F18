@@ -55,7 +55,6 @@ FUNCTION ids_synchro( cTable )
          // ponovo kreiraj hIdsQueries u slucaju da je bilo jos azuriranja
          hIdsQueries := create_queries_from_ids( aDbfRec[ 'cTable' ] )
 
-
       ELSE
          EXIT
       ENDIF
@@ -76,7 +75,6 @@ FUNCTION ids_synchro( cTable )
          ENDIF
 
          lRet := fill_dbf_from_server( aDbfRec[ 'cTable' ], hIdsQueries[ "qry" ][ nI ] )
-
          IF !lRet
             EXIT
          ENDIF
@@ -144,9 +142,7 @@ FUNCTION push_ids_to_semaphore( cTable, aIds, lToMySelf )
    _qry := ""
 
    FOR nI := 1 TO Len( aIds )
-
       _sql_ids := "ARRAY[" + sql_quote( aIds[ nI ] ) + "]"
-
       // full synchro
       IF aIds[ nI ] == "#F"
          // svi raniji id-ovi su nebitni

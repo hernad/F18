@@ -35,7 +35,7 @@ FUNCTION kalk_povrat_dokumenta()
    ENDIF
 */
 
-   otvori_kalk_tabele_za_povrat()
+   o_kalk_pripr()
 
    _id_firma := self_organizacija_id()
    _id_vd := Space( 2 )
@@ -94,7 +94,6 @@ FUNCTION kalk_povrat_dokumenta()
       o_kalk_za_azuriranje()
 
       MsgO( "Brisanje KALK dokumenata iz kumulativa ..." )
-
       find_kalk_by_broj_dokumenta( _id_firma, _id_vd, _br_dok )
 
       IF Found()
@@ -135,21 +134,6 @@ FUNCTION kalk_povrat_dokumenta()
    RETURN .T.
 
 
-
-
-STATIC FUNCTION otvori_kalk_tabele_za_povrat()
-
-   // o_kalk_doks()
-   // o_kalk_doks2()
-   o_kalk_pripr()
-   // o_kalk()
-   // SET ORDER TO TAG "1"
-
-   RETURN .T.
-
-
-
-
 STATIC FUNCTION brisi_dokument_iz_tabele_doks( cIdFirma, cIdVd, cBrDok )
 
    LOCAL lOk := .T.
@@ -175,7 +159,6 @@ STATIC FUNCTION brisi_dokument_iz_tabele_doks2( cIdFirma, cIdVd, cBrDok )
    ENDIF
 
    RETURN lOk
-
 
 
 STATIC FUNCTION brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
@@ -409,143 +392,3 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
    my_close_all_dbf()
 
    RETURN lRet
-
-
-
-/*
-STATIC FUNCTION povrat_najnovije_kalkulacije()
-
-   LOCAL nRec
-   LOCAL cBrsm
-   LOCAL fbof
-   LOCAL nVraceno := 0
-   LOCAL hRec, _del_rec
-   LOCAL lOk := .T.
-
-   otvori_kalk_tabele_za_povrat()
-
-   SELECT kalk
-   SET ORDER TO TAG "5"
-
-   cIdfirma := self_organizacija_id()
-   cIdVD := Space( 2 )
-   cBrDok := Space( 8 )
-
-   GO BOTTOM
-
-   cIdfirma := idfirma
-   dDatDok := datdok
-
-   IF Eof()
-      Msg( "Na stanju nema dokumenata !" )
-      my_close_all_dbf()
-      RETURN .F.
-   ENDIF
-
-   IF Pitanje(, "Vratiti u pripremu dokumente od " + DToC( dDatDok ) + " ?", "N" ) == "N"
-      my_close_all_dbf()
-      RETURN .F.
-   ENDIF
-
-   SELECT kalk
-
-   MsgO( "Povrat dokumenata od " + DToC( dDatDok ) + " u pripremu" )
-
-   DO WHILE !Bof() .AND. cIdFirma == IdFirma .AND. datdok == dDatDok
-
-      cIDFirma := idfirma
-      cIdvd := idvd
-      cBrDok := brdok
-      cBrSm := ""
-
-      DO WHILE !Bof() .AND. cIdFirma == IdFirma .AND. cidvd == idvd .AND. cbrdok == brdok
-
-         SELECT kalk
-
-         hRec := dbf_get_rec()
-
-         IF !( hRec[ "tbanktr" ] == "X" )
-
-            SELECT kalk_pripr
-            APPEND BLANK
-
-            hRec[ "error" ] := ""
-            dbf_update_rec( hRec )
-
-            nVraceno ++
-
-         ELSEIF hRec[ "tbanktr" ] == "X" .AND. ( hRec[ "mu_i" ] == "5" .OR. hRec[ "pu_i" ] == "5" )
-
-            SELECT kalk_pripr
-
-            IF rbr <> hRec[ "rbr" ] .OR. ( idfirma + idvd + brdok ) <> hRec[ "idfirma" ] + hRec[ "idvd" ] + hRec[ "brdok" ]
-               nVraceno++
-               APPEND BLANK
-               hRec[ "error" ] := ""
-            ELSE
-               hRec[ "kolicinai" ] += kalk_pripr->kolicina
-            ENDIF
-
-            hRec[ "error" ] := ""
-            hRec[ "tbanktr" ] := ""
-
-            dbf_update_rec( hRec )
-
-         ELSEIF hRec[ "tbanktr" ] == "X" .AND. ( hRec[ "mu_i" ] == "3" .OR. hRec[ "pu_i" ] == "3" )
-            IF cBrSm <> ( cBrSm := idfirma + "-" + idvd + "-" + brdok )
-               Beep( 1 )
-               Msg( "Dokument: " + cbrsm + " je izgenerisan,te je izbrisan bespovratno" )
-            ENDIF
-         ENDIF
-
-         SELECT kalk
-         SKIP -1
-
-         IF Bof()
-            fBof := .T.
-            nRec := 0
-         ELSE
-            fBof := .F.
-            nRec := RecNo()
-            SKIP 1
-         ENDIF
-
-         SELECT kalk_doks
-         SEEK kalk->( idfirma + idvd + brdok )
-
-         IF Found()
-            _del_rec := dbf_get_rec()
-            lOk := delete_rec_server_and_dbf( "kalk_doks", _del_rec, 1, "FULL" )
-         ENDIF
-
-         IF lOk
-            SELECT kalk
-            _del_rec := dbf_get_rec()
-            lOk := delete_rec_server_and_dbf( "kalk_kalk", _del_rec, 1, "FULL" )
-         ENDIF
-
-         IF !lOk
-            EXIT
-         ENDIF
-
-         GO nRec
-
-         IF fBof
-            EXIT
-         ENDIF
-
-      ENDDO
-
-      IF !lOk
-         EXIT
-      ENDIF
-
-   ENDDO
-
-   MsgC()
-
-   my_close_all_dbf()
-
-   RETURN
-
-*/

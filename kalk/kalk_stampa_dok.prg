@@ -164,8 +164,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       ELSEIF ( cIdvd == "81" )
          kalk_stampa_dok_81()
 
-      ELSEIF ( cIdvd == "82" )
-         kalk_stampa_dok_82()
 
       ELSEIF ( cIdvd == "IM" )
          kalk_stampa_dok_im()

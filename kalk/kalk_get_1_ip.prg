@@ -21,7 +21,7 @@ FUNCTION kalk_get_1_ip()
    LOCAL _left := 25
    PRIVATE aPorezi := {}
 
-   _datfaktp := _datdok
+   //_datfaktp := _datdok
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto koji zadužuje" GET _IdKonto  VALID P_Konto( @_IdKonto, nX, 35 ) PICT "@!"
 
@@ -247,7 +247,7 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, 
       IF cNulirati == "D"
          _kolicina := 0
       ENDIF
-      _datdok := _DatFaktP := dDatdok
+      _datdok := dDatdok
       _ERROR := ""
 
       _fcj := nMpvu - nMpvi // stanje mpvsapp
@@ -428,7 +428,7 @@ FUNCTION gen_ip_razlika()
          // popisana kolicina je trenutno stanje
          hRec[ "gkolicina" ] := nUlaz - nIzlaz
          hRec[ "datdok" ] := dDatDok
-         hRec[ "datfaktp" ] := dDatdok
+         //hRec[ "datfaktp" ] := dDatdok
          hRec[ "error" ] := ""
          hRec[ "fcj" ] := nMpvu - nMpvi
 

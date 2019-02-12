@@ -120,25 +120,15 @@ METHOD set_module_gvars()
    PUBLIC gnDS := 5             // duzina sifre artikla - sinteticki
    PUBLIC Kurslis := "1"
 
-
-
    PUBLIC gnLMarg := 6  // lijeva margina teksta
    PUBLIC gnLMargA5 := 6  // lijeva margina teksta
    PUBLIC gnTMarg := 11 // gornja margina
    PUBLIC gnTMarg2 := 3 // vertik.pomj. stavki u fakturi var.9
    PUBLIC gnTMarg3 := 0 // vertik.pomj. totala fakture var.9
    PUBLIC gnTMarg4 := 0 // vertik.pomj. za donji dio fakture var.9
-  // PUBLIC gIspPart := "N" // ispravka partnera u unosu novog dokumenta
-  // PUBLIC gResetRoba := "D" // resetuj uvijek artikal, pri unosu stavki dokumenta
 
    PUBLIC g10Str := hb_UTF8ToStr( "POREZNA FAKTURA br." )
    PUBLIC g10Str2T := "              Predao                  Odobrio                  Preuzeo"
-
-   //PUBLIC g16Str := hb_UTF8ToStr( "KONSIGNAC.RAČUN br." )
-   //PUBLIC g16Str2T := "              Predao                  Odobrio                  Preuzeo"
-
-   //PUBLIC g06Str := hb_UTF8ToStr( "ZADUŽ.KONS.SKLAD.br." )
-   //PUBLIC g06Str2T := "              Predao                  Odobrio                  Preuzeo"
 
    PUBLIC g20Str := hb_UTF8ToStr( "PREDRAČUN br." )
    PUBLIC g20Str2T := "                                                               Direktor"
@@ -237,8 +227,6 @@ METHOD set_module_gvars()
 
    PUBLIC gFNar := PadR( "NAR.TXT", 12 )
    PUBLIC gFUgRab := PadR( "UGRAB.TXT", 12 )
-
-   // PUBLIC gSamokol := "N"
 
    PUBLIC gRabIzRobe := "N"
 
@@ -387,7 +375,6 @@ METHOD set_module_gvars()
    g22Str2T := fetch_metric( "fakt_dokument_dok_22_potpis", NIL, g22Str2T )
    g22ftxt := fetch_metric( "fakt_dokument_dok_22_txt_lista", NIL, g22ftxt )
 
-
    gFZaok := fetch_metric( "fakt_zaokruzenje", NIL, gFZaok )
    gZ_5pf := fetch_metric( "fakt_zaokruzenje_5_pf", NIL, gZ_5pf )
 
@@ -499,6 +486,7 @@ METHOD set_module_gvars()
    SELECT params
    USE
 
+/*
    cSekcija := "SifRoba"
    cVar := "PitanjeOpis"
    my_get_from_ini ( cSekcija, cVar, my_get_from_ini( cSekcija, cVar, 'D' ), SIFPATH )
@@ -523,45 +511,28 @@ METHOD set_module_gvars()
    my_get_from_ini ( cSekcija, cVar, my_get_from_ini( cSekcija, cVar, '' ), SIFPATH )
    cSekcija := "BarKod"; cVar := "NazRTM"
    my_get_from_ini ( cSekcija, cVar, my_get_from_ini( cSekcija, cVar, 'barkod' ), SIFPATH )
+*/
 
-   //PUBLIC glDistrib := .F.
    PUBLIC gPovDob := "0"
-
-   //PUBLIC gUVarPP := "M"
-
    gModul := "FAKT"
 
-   //gRobaBlock := {| Ch | FaRobaBlock( Ch ) }
    gPartnBlock := NIL
-
-   PUBLIC glCij13Mpc := ( my_get_from_ini( "FAKT", "Cijena13MPC", "D", KUMPATH ) == "D" )
-
+   PUBLIC glCij13Mpc := .T. //( my_get_from_ini( "FAKT", "Cijena13MPC", "D", KUMPATH ) == "D" )
    PUBLIC glRadNal := .F.
-   glRadNal := ( my_get_from_ini( "FAKT", "RadniNalozi", "N", KUMPATH ) == "D" )
-
    PUBLIC gKonvZnWin
-   gKonvZnWin := my_get_from_ini( "DelphiRB", "Konverzija", "3", EXEPATH )
+   gKonvZnWin := "3" //my_get_from_ini( "DelphiRB", "Konverzija", "3", EXEPATH )
 
-   ::lOpcine := my_get_from_ini( "FAKT", "Opcine", "N", SIFPATH ) == "D"
-
-   ::lDoks2 := my_get_from_ini( "FAKT", "Doks2", "N", KUMPATH ) == "D"
-
-   ::lId_J := my_get_from_ini( "SifRoba", "ID_J", "N", SIFPATH ) == "D"
-
-   ::lCRoba := ( my_get_from_ini( 'CROBA', 'GledajFakt', 'N', KUMPATH ) == 'D' )
-
-   ::cRoba_Rj := my_get_from_ini( 'CROBA', 'CROBA_RJ', '10#20', KUMPATH )
+   ::lOpcine := .F. //my_get_from_ini( "FAKT", "Opcine", "N", SIFPATH ) == "D"
+   ::lDoks2 := .F. //my_get_from_ini( "FAKT", "Doks2", "N", KUMPATH ) == "D"
+   ::lId_J := .F. //my_get_from_ini( "SifRoba", "ID_J", "N", SIFPATH ) == "D"
+   ::lCRoba := .F. //( my_get_from_ini( 'CROBA', 'GledajFakt', 'N', KUMPATH ) == 'D' )
+   ::cRoba_Rj := "10#20" //my_get_from_ini( 'CROBA', 'CROBA_RJ', '10#20', KUMPATH )
 
    param_racun_na_email( .T. )
-
    fakt_opis_stavke()
-
    destinacije()
-
    ref_lot()
-
    fakt_params( .T. )
-
    fiscal_opt_active()
 
    info_bar( "FAKT", "params in cache: " + AllTrim( Str( params_in_cache() ) ) )

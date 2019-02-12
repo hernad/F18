@@ -211,7 +211,7 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                      REPLACE idfirma WITH cIdFirma, ;
                         rbr     WITH Str( ++nRbr, 3 ), ;
                         idvd WITH "96", ;   // izlazna faktura
-                     brdok WITH cBrKalk, ;
+                        brdok WITH cBrKalk, ;
                         datdok WITH dDatKalk, ;
                         idtarifa WITH ROBA->idtarifa, ;
                         brfaktp WITH "", ;
