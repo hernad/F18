@@ -96,7 +96,7 @@ FUNCTION kalk_stampa_dok_19()
       nC0 := PCol() + 1
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
       nC1 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ]            PICTURE picproc()
+      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ]            PICTURE picproc()
       @ PRow(), PCol() + 1 SAY nPor1                         PICTURE picdem()
       @ PRow(), PCol() + 1 SAY nPor1 * kalk_pripr->Kolicina                PICTURE picdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP                       PICTURE piccdem()

@@ -27,11 +27,11 @@ FUNCTION kalk_porezi_maloprodaja( aPorezi, nMpcBp, nMpcSaP )
    LOCAL nUkPor
 
    IF nMpcBp == NIL // zadate je cijena sa porezom, utvrdi cijenu bez poreza
-      nUkPor := aPorezi[ POR_PPP ] // POR_PPP - PDV
+      nUkPor := aPorezi[ POR_PDV ] // POR_PDV - PDV
       nMpcBp := nMpcSaP / ( nUkPor / 100 + 1 )
    ENDIF
 
-   nPom := nMpcBP * aPorezi[ POR_PPP ] / 100
+   nPom := nMpcBP * aPorezi[ POR_PDV ] / 100
 
    RETURN nPom
 
@@ -51,12 +51,6 @@ FUNCTION set_pdv_array( aPorezi )
       // inicijaliziraj poreze
       aPorezi := { 0, 0, 0, 0, 0, 0, 0 }
    ENDIF
-   aPorezi[ POR_PPP ] := tarifa->pdv
-
-   IF tarifa->( FieldPos( "mpp" ) ) <> 0
-      aPorezi[ POR_PRUCMP ] := tarifa->mpp
-   ELSE
-      aPorezi[ POR_PRUCMP ] := 0
-   ENDIF
+   aPorezi[ POR_PDV ] := tarifa->pdv
 
    RETURN NIL

@@ -120,7 +120,7 @@ FUNCTION VMpcSaPP( fRealizacija, cProracunMarzeUnaprijed )
 FUNCTION kalk_say_pdv_a_porezi_var( nRow )
 
    @ box_x_koord() + nRow, box_y_koord() + 2  SAY "PDV (%):"
-   @ Row(), Col() + 2 SAY aPorezi[ POR_PPP ] PICTURE "99.99"
+   @ Row(), Col() + 2 SAY aPorezi[ POR_PDV ] PICTURE "99.99"
 
    RETURN .T.
 
@@ -441,6 +441,6 @@ FUNCTION kalk_valid_mpcsapdv( cIdVd, lNaprijed, aPorezi, lShowGets )
 FUNCTION SayPorezi_lv( nRow, aPorezi )
 
    @ box_x_koord() + nRow, box_y_koord() + 2  SAY "PDV (%):"
-   @ Row(), Col() + 2 SAY  aPorezi[ POR_PPP ] PICTURE "99.99"
+   @ Row(), Col() + 2 SAY  aPorezi[ POR_PDV ] PICTURE "99.99"
 
    RETURN .T.

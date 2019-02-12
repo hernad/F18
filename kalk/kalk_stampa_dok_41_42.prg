@@ -131,7 +131,7 @@ FUNCTION kalk_stampa_dok_41_42()
       // mpc sa pdv umanjen za popust
       @ PRow(), PCol() + 1 SAY kalk_pripr->mpc PICT piccdem()
       // pdv
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICT picproc()
+      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc()
       // mpc sa porezom
       @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpc + nPor1 ) PICT piccdem()
       // mpc sa porezom
@@ -272,7 +272,7 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
 
       check_nova_strana( bZagl, s_oPDF, .F., 3 )
       ? cIdtarifa
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICT picproc()
+      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc()
 
       nCol1 := PCol()
       // mpv bez pdv

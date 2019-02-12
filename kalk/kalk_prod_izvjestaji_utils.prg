@@ -144,7 +144,7 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
 
          ? cIdTarifa
 
-         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICT picproc
+         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc
 
 
          nCol1 := PCol() + 1

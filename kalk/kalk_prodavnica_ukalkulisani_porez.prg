@@ -196,7 +196,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
 
          nCol1 := PCol() + 4
          @ PRow(), PCol() + 4 SAY n1 := nMPV PICT cPicIznos
-         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICT cPicProcenat
+         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT cPicProcenat
 
          @ PRow(), PCol() + 1 SAY nPDVUkupno := nPDV PICT cPicIznos
 

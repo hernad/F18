@@ -376,12 +376,7 @@
 #define D_S_TABELE
 
 
-// ostale definicije
-#define POR_PPP     1
-#define POR_PPU     2
-#define POR_PP      3
-#define POR_PRUC    4
-#define POR_PRUCMP  5
+#define POR_PDV     1
 
 
 #define POR_I_PRUC  1

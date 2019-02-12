@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 
-FUNCTION kalk_stampa_dok_ip( fZaTops )
+FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
 
    LOCAL nCol1 := nCol2 := 0
    LOCAL nPom := 0
@@ -28,11 +28,11 @@ FUNCTION kalk_stampa_dok_ip( fZaTops )
    cIdKonto := IdKonto
    cIdKonto2 := IdKonto2
 
-   IF fzatops == NIL
-      fZaTops := .F.
+   IF lKalkZaPOS == NIL
+      lKalkZaPOS := .F.
    ENDIF
 
-   IF !fZaTops
+   IF !lKalkZaPOS
       cSamoObraz := Pitanje(, "Prikaz samo obrasca inventure (D-da,N-ne,S-sank lista) ?",, "DNS" )
       IF cSamoObraz == "S"
          stampa_obrasca_inventure_sank_lista()
@@ -214,7 +214,7 @@ FUNCTION kalk_stampa_dok_ip( fZaTops )
    // Visak
    kalk_pripr_rekap_tarife( .T. )
 
-   IF !fZaTops
+   IF !lKalkZaPOS
       ?
       ?
       ? "Napomena: Ovaj dokument ima sljedeci efekat na karticama:"

@@ -263,7 +263,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV (%):"
-   @ box_x_koord() + nX, Col() + 2 SAY aPorezi[ POR_PPP ] PICTURE "99.99"
+   @ box_x_koord() + nX, Col() + 2 SAY aPorezi[ POR_PDV ] PICTURE "99.99"
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"

@@ -114,7 +114,7 @@ FUNCTION kalk_stampa_dok_81()
 
       @ PRow(), PCol() + 1 SAY MPC                   PICTURE PicCDEM
 
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICTURE PicProc
+      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICTURE PicProc
 
       @ PRow(), PCol() + 1 SAY MPCSaPP               PICTURE PicCDEM
 
@@ -328,7 +328,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
       ENDIF
       @ PRow(), PCol() + 1 SAY MPC                   PICTURE PicCDEM
 
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PPP ] PICTURE PicProc
+      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICTURE PicProc
 
       @ PRow(), PCol() + 1 SAY MPCSaPP               PICTURE PicCDEM
 

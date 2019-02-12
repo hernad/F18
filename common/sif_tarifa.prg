@@ -129,7 +129,7 @@ FUNCTION MpcSaPor( nMPCBp, aPorezi, aPoreziIzn )
    LOCAL nPP
    LOCAL nPPP
 
-   nPDV := aPorezi[ POR_PPP ] / 100
+   nPDV := aPorezi[ POR_PDV ] / 100
 
    nPP := 0
 
@@ -137,26 +137,6 @@ FUNCTION MpcSaPor( nMPCBp, aPorezi, aPoreziIzn )
 
    // bez poreza * ( 0.17 + 0 + 1)
    nPom := nMpcBp * ( nPDV + nPP + 1 )
-
-   RETURN nPom
-
-
-FUNCTION MpcSaPorO( nMPCBp, aPorezi, aPoreziIzn )
-
-   LOCAL nPom
-   LOCAL nDLRUC
-   LOCAL nMPP
-   LOCAL nPP
-   LOCAL nPPP
-   LOCAL nPPU
-
-   nDLRUC := 0
-   nMPP := 0
-   nPP := aPorezi[ POR_PP ] / 100
-   nPPP := aPorezi[ POR_PPP ] / 100
-   nPPU := aPorezi[ POR_PPU ] / 100
-
-   nPom := nMpcBp * ( nPP + ( nPPP + 1 ) * ( 1 + nPPU ) )
 
    RETURN nPom
 
@@ -185,7 +165,7 @@ FUNCTION MpcBezPor( nMpcSaPP, aPorezi, nRabat, nNC )
       nRabat := 0
    ENDIF
 
-   nPDV := aPorezi[ POR_PPP ]
+   nPDV := aPorezi[ POR_PDV ]
 
    nPP := 0
 
