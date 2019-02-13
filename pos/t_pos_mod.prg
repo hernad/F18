@@ -99,13 +99,10 @@ METHOD set_module_gvars()
    PUBLIC gIdRadnik
    // prezime i ime korisnika (iz OSOB)
    PUBLIC gKorIme
-
-   // status radnika
-   PUBLIC gSTRAD
-
+   PUBLIC gSTRAD // status radnika
    PUBLIC gPopust := 0
    PUBLIC gPopDec := 2
-   PUBLIC gPopZcj := "N"
+   //PUBLIC gPopZcj := "N"
    PUBLIC gPopProc := "N"
    PUBLIC gPopIzn := 0
    PUBLIC gPopIznP := 0
@@ -120,12 +117,9 @@ METHOD set_module_gvars()
    PUBLIC CRinitDone       // da li je uradjen init kase (na pocetku smjene)
 
    PUBLIC gDomValuta
-   PUBLIC gGotPlac         // sifra za gotovinsko (default) placanje
    PUBLIC gDugPlac
 
-
    PUBLIC gDisplay  // koristiti ispis na COM DISPLAY
-
    PUBLIC gLocPort := "LPT1" // lokalni port za stampanje racuna
 
    PUBLIC gStamPazSmj      // da li se automatski stampa pazar smjene
@@ -166,20 +160,18 @@ METHOD set_module_gvars()
    SC_Opisi[ 4 ] := "4"
    SC_Opisi[ 5 ] := "5"
 
-   PUBLIC gPopZcj := "N"
    PUBLIC gPopProc := "N"
    PUBLIC gIsPopust := .F.
    PUBLIC gKolDec := 2
    PUBLIC gCijDec := 2
    PUBLIC gStariObrPor := .F.
-   PUBLIC gPratiStanje := "N"
+   PUBLIC gPosPratiStanjePriProdaji := "N"
    PUBLIC gIdPos := "1 "
    PUBLIC gPostDO := "N"
    PUBLIC nFeedLines := 6
    PUBLIC gStamPazSmj := "D"
    PUBLIC gStamStaPun := "D"
    PUBLIC CRinitDone := .T.
-   PUBLIC gGotPlac := "01"
    PUBLIC gDugPlac := "DP"
    PUBLIC gSifPath := my_home()
    PUBLIC LocSIFPATH := my_home()
@@ -218,12 +210,11 @@ METHOD set_module_gvars()
    gPostDO := fetch_metric( "ZasebneCjelineObjekta", NIL, gPostDO )
    gUseChkDir := fetch_metric( "KoristitiDirektorijProvjere", my_user(), gUseChkDir )
    gLocPort := fetch_metric( "OznakaLokalnogPorta", my_user(), gLocPort )
-   gGotPlac := fetch_metric( "OznakaGotovinskogPlacanja", NIL, gGotPlac )
    gDugPlac := fetch_metric( "OznakaDugPlacanja", NIL, gDugPlac )
    gRnSpecOpc := fetch_metric( "RacunSpecifOpcije", NIL, gRnSpecOpc )
    gDupliArt := fetch_metric( "DupliArtikli", NIL, gDupliArt )
    gDupliUpoz := fetch_metric( "DupliUnosUpozorenje", NIL, gDupliUpoz )
-   gPratiStanje := fetch_metric( "PratiStanjeRobe", NIL, gPratiStanje )
+   gPosPratiStanjePriProdaji := fetch_metric( "PratiStanjeRobe", NIL, gPosPratiStanjePriProdaji )
    gStamPazSmj := fetch_metric( "StampanjePazara", NIL, gStamPazSmj )
    gStamStaPun := fetch_metric( "StampanjePunktova", NIL, gStamStaPun )
    gSezonaTip := fetch_metric( "TipSezone", NIL, gSezonaTip )
@@ -250,12 +241,10 @@ METHOD set_module_gvars()
    // izgled racuna
    grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
    grbStId := fetch_metric( "RacunStampaIDArtikla", NIL, grbStId )
-
    // cijene
-
    gPopust := fetch_metric( "Popust", NIL, gPopust )
    gPopDec := fetch_metric( "PopustDecimale", NIL, gPopDec )
-   gPopZCj := fetch_metric( "PopustZadavanjemCijene", NIL, gPopZCj )
+   //gPopZCj := fetch_metric( "PopustZadavanjemCijene", NIL, gPopZCj )
    gPopProc := fetch_metric( "PopustProcenat", NIL, gPopProc )
    gPopIzn := fetch_metric( "PopustIznos", NIL, gPopIzn )
    gPopIznP := fetch_metric( "PopustVrijednostProcenta", NIL, gPopIznP )

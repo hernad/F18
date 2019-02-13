@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-MEMVAR gGotPlac
 
 FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
@@ -52,7 +51,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    hRec[ "datum" ] := danasnji_datum()
    hRec[ "brdok" ] := cBrDok
    hRec[ "vrijeme" ] := cVrijeme
-   hRec[ "idvrstep" ] := iif( cNacPlac == NIL, gGotPlac, cNacPlac )
+   hRec[ "idvrstep" ] := iif( cNacPlac == NIL, POS_IDVRSTEP_GOTOVINSKO_PLACANJE, cNacPlac )
    hRec[ "idpartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
    hRec[ "idradnik" ] := _pos_pripr->idradnik
    hRec[ "brdokstorn" ] := _pos_pripr->brdokStorn

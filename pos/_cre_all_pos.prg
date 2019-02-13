@@ -50,10 +50,8 @@ FUNCTION cre_all_pos( ver )
 
    aDbf := g_pos_pripr_fields()
 
-
    _alias := "_POS_PRIPR"
    _table_name := "_pos_pripr"
-
    IF_NOT_FILE_DBF_CREATE
 
    CREATE_INDEX ( "1", "IdRoba", _alias )
@@ -61,10 +59,8 @@ FUNCTION cre_all_pos( ver )
 
    _alias := "PRIPRZ"
    _table_name := "pos_priprz"
-
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX ( "1", "IdRoba", _alias )
-
 
    aDbf := {}
    AAdd ( aDbf, { "KEYCODE", "N",  4, 0 } )
@@ -73,7 +69,6 @@ FUNCTION cre_all_pos( ver )
    create_porezna_faktura_temp_dbfs()
 
    RETURN .T.
-
 
 
 FUNCTION pos_check_brdok()
@@ -116,7 +111,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
    AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
    AAdd ( aDbf, { "IDROBA",    "C", 10, 0 } )
-
    AAdd ( aDbf, { "IDTARIFA",  "C",  6, 0 } )
    AAdd ( aDbf, { "IDVD",      "C",  2, 0 } )
    AAdd ( aDbf, { "IDVRSTEP",  "C",  2, 0 } )

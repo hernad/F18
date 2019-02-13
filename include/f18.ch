@@ -567,6 +567,7 @@
 #define POS_IDVD_NIVELACIJA          "19"
 #define POS_IDVD_INVENTURA           "IP"       // inventura
 
+#define POS_IDVRSTEP_GOTOVINSKO_PLACANJE      "01"
 
 // ako ima potrebe, brojeve zaokruzujemo na
 #define N_ROUNDTO    2

@@ -26,20 +26,18 @@ FUNCTION param_tezinski_barkod( read_par )
    RETURN s_cTezinkiBarkodDN
 
 
-FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
+FUNCTION pos_postoji_roba( cId, nRow, nCol, cBarkodVratiti, aGetList )
 
    LOCAL aZabrane
    LOCAL nI
    LOCAL cBarkod := ""
    LOCAL lSveJeOk := .F.
-   LOCAL nTezina := 0
-   LOCAL _order
+   //LOCAL nTezina := 0
 
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
 
    PushWA()
-
    IF cId != NIL .AND. !Empty( cId )
       select_o_roba( "XXXXXXX" ) // cId je zadan, otvoriti samo dummy tabelu sa 0 zapisa
    ELSE
@@ -57,23 +55,21 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
    AAdd( ImeKol, { PadC( "Naziv", 40 ), {|| PadR( roba->naz, 40 ) }, "" } )
    AAdd( ImeKol, { PadC( "JMJ", 5 ), {|| PadC( roba->jmj, 5 ) }, "" } )
    AAdd( ImeKol, { "BARKOD", {|| roba->barkod }, "" } )
-   AAdd( ImeKol, { "Cijena", {|| transform(roba->mpc, "99999.99") }, "" } )
-
+   AAdd( ImeKol, { "Cijena", {|| Transform( roba->mpc, "99999.99" ) }, "" } )
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
    NEXT
-
    IF pos_prodavac()
       aZabrane := { K_CTRL_T, K_CTRL_N, K_F4, K_F2, k_ctrl_f9() }
    ELSE
       aZabrane := {}
    ENDIF
 
-   IF !tezinski_barkod( @cId, @nTezina )
-      cBarkod := barkod_or_roba_id( @cId )
-   ELSE
-      cBarkod := PadR( "T", 13 )
-   ENDIF
+   // IF !tezinski_barkod( @cId, @nTezina )
+   cBarkod := barkod_or_roba_id( @cId )
+   // ELSE
+   // cBarkod := PadR( "T", 13 )
+   // ENDIF
 
    lSveJeOk := p_sifra( F_ROBA, "ID", f18_max_rows() - 15, f18_max_cols() - 7, "POS artikli", @cId, NIL, NIL, NIL, NIL, NIL, aZabrane )
 
@@ -82,29 +78,18 @@ FUNCTION pos_postoji_roba( cId, dx, dy, cBarkodVratiti, aGetList )
       lSveJeOk := .F.
    ELSE
 
-      @ box_x_koord() + dx, box_y_koord() + dy SAY PadR( AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 50 )
-      IF nTezina <> 0
-         _kolicina := nTezina
-      ENDIF
+      @ box_x_koord() + nRow, box_y_koord() + nCol SAY PadR( AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 50 )
+      //IF nTezina <> 0
+      //   _kolicina := nTezina
+      //ENDIF
       IF roba->tip <> "T"
          _cijena := pos_get_mpc()
       ENDIF
 
    ENDIF
-
-/*
-   IF fetch_metric( "pos_kontrola_cijene_pri_unosu_stavke", NIL, "N" ) == "D"
-      IF Round( _cijena, 5 ) == 0
-         MsgBeep( "Cijena 0.00, ne mogu napraviti račun !##STOP!" )
-         lSveJeOk := .F.
-      ENDIF
-   ENDIF
-   pos_set_key_handler_ispravka_racuna()
-*/
    cBarkodVratiti := cBarkod
 
    PopWA()
-
 
    RETURN lSveJeOk
 

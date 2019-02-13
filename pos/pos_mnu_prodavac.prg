@@ -18,7 +18,7 @@ FUNCTION pos_main_menu_prodavac()
    LOCAL nIzbor := 1
 
    AAdd( aOpc, "1. priprema računa                        " )
-   AAdd( aOpcExe, {|| pos_unos_ispravka_racuna() } )
+   AAdd( aOpcExe, {|| pos_racun_unos_ispravka() } )
 
    AAdd( aOpc, "2. pregled ažuriranih računa  " )
    AAdd( aOpcExe, {|| pos_pregled_racuna( .F. ) } )

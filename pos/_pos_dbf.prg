@@ -12,11 +12,9 @@
 #include "f18.ch"
 
 FUNCTION o_pos_priprz()
-
    RETURN o_dbf_table( F_PRIPRZ, { "PRIPRZ", "pos_priprz" }, "1" )
 
 FUNCTION o_pos__pripr()
-
    RETURN o_dbf_table( F__PRIPR, { "_POS_PRIPR", "_pos_pripr" }, "1" )
 
 
@@ -48,8 +46,6 @@ STATIC FUNCTION pos_dodaj_u_sifarnik_prioriteta( cId, cPrioritet, cOpis )
    RETURN lOk
 
 
-
-
 STATIC FUNCTION pos_dodaj_u_sifarnik_radnika( cId, cLozinka, cOpis, cStatus )
 
    LOCAL lOk := .T.
@@ -71,34 +67,16 @@ STATIC FUNCTION pos_dodaj_u_sifarnik_radnika( cId, cLozinka, cOpis, cStatus )
    RETURN lOk
 
 
-
 STATIC FUNCTION pos_definisi_inicijalne_podatke()
 
-   LOCAL lOk := .T., hParams
+   LOCAL hParams
 
-   lOk := pos_dodaj_u_sifarnik_prioriteta( "0", "0", "Nivo adm." )
-
-   // IF lOk
-   lOk := pos_dodaj_u_sifarnik_prioriteta( "1", "1", "Nivo upr." )
-   // ENDIF
-
-   // IF lOk
-   lOk := pos_dodaj_u_sifarnik_prioriteta( "3", "3", "Nivo prod." )
-   // ENDIF
-
-
-   lOk := pos_dodaj_u_sifarnik_radnika( "0001", "PARSON", "Admin", "0" )
-
-   // IF lOk
-   lOk := pos_dodaj_u_sifarnik_radnika( "0010", "P1", "Prodavac 1", "3" )
-   // ENDIF
-
-   // IF lOk
-   lOk := pos_dodaj_u_sifarnik_radnika( "0011", "P2", "Prodavac 2", "3" )
-   // ENDIF
-
-
-
+   pos_dodaj_u_sifarnik_prioriteta( "0", "0", "Nivo adm." )
+   pos_dodaj_u_sifarnik_prioriteta( "1", "1", "Nivo upr." )
+   pos_dodaj_u_sifarnik_prioriteta( "3", "3", "Nivo prod." )
+   pos_dodaj_u_sifarnik_radnika( "0001", "PARSON", "Admin", "0" )
+   pos_dodaj_u_sifarnik_radnika( "0010", "P1", "Prodavac 1", "3" )
+   pos_dodaj_u_sifarnik_radnika( "0011", "P2", "Prodavac 2", "3" )
    my_close_all_dbf()
 
    RETURN .T.
@@ -111,14 +89,12 @@ FUNCTION o_pos_tables( lOtvoriKumulativ )
    IF lOtvoriKumulativ == NIL
       lOtvoriKumulativ := .T.
    ENDIF
-
    IF lOtvoriKumulativ
       o_pos_kumulativne_tabele()
    ENDIF
 
    o_pos_priprz()
    o_pos__pripr()
-
    IF lOtvoriKumulativ
       SELECT pos_doks
    ELSE
@@ -134,107 +110,3 @@ FUNCTION o_pos_kumulativne_tabele()
    o_pos_doks()
 
    RETURN .T.
-
-
-
-
-FUNCTION pos_iznos_dokumenta( lUI )
-
-   LOCAL cRet := Space( 13 )
-   LOCAL l_u_i
-   LOCAL nIznos := 0
-   LOCAL cIdPos, cIdVd, cBrDok
-   LOCAL dDatum
-
-   SELECT pos_doks
-
-   cIdPos := pos_doks->idPos
-   cIdVd := pos_doks->idVd
-   cBrDok := pos_doks->brDok
-   dDatum := pos_doks->datum
-
-   IF ( ( lUI == NIL ) .OR. lUI )
-
-      IF pos_doks->IdVd $ POS_IDVD_ULAZI
-
-         seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
-         DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
-            nIznos += pos->kolicina * pos->cijena
-            SKIP
-         ENDDO
-
-      ENDIF
-   ENDIF
-
-   IF ( ( lUI == NIL ) .OR. !lUI ) // izlazi
-      IF pos_doks->idvd $ POS_IDVD_RACUN + "#" + "IN" + "#" + POS_IDVD_NIVELACIJA
-
-         seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
-
-         DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
-            DO CASE
-            CASE pos_doks->idvd = POS_IDVD_INVENTURA
-               // samo ako je razlicit iznos od 0
-               // ako je 0 onda ne treba mnoziti sa cijenom
-               IF pos->kol2 <> 0
-                  nIznos += pos->kol2 * pos->cijena
-               ENDIF
-            CASE pos_doks->IdVd == POS_IDVD_NIVELACIJA
-               nIznos += pos->kolicina * ( pos->ncijena - pos->cijena )
-            OTHERWISE
-               nIznos += pos->kolicina * pos->cijena
-            ENDCASE
-            SKIP
-         ENDDO
-      ENDIF
-   ENDIF
-
-   SELECT pos_doks
-   cRet := Str( nIznos, 13, 2 )
-
-   RETURN ( cRet )
-
-
-
-
-FUNCTION Del_Skip()
-
-   LOCAL nNextRec
-
-   nNextRec := 0
-   SKIP
-   nNextRec := RecNo()
-   SKIP -1
-   my_delete()
-   GO nNextRec
-
-   RETURN .T.
-
-
-
-FUNCTION GoTop2()
-
-   GO TOP
-   IF Deleted()
-      SKIP
-   ENDIF
-
-   RETURN .T.
-
-
-FUNCTION pos_racun_sadrzi_artikal( cIdPos, cIdVd, dDatum, cBroj, cIdRoba )
-
-   LOCAL lRet := .F.
-   LOCAL cWhere
-
-   cWhere := " idpos " + sql_quote( cIdPos )
-   cWhere += " AND idvd = " + sql_quote( cIdVd )
-   cWhere += " AND datum = " + sql_quote( dDatum )
-   cWhere += " AND brdok = " + sql_quote( cBroj )
-   cWhere += " AND idroba = " + sql_quote( cIdRoba )
-
-   IF table_count( f18_sql_schema( "pos_pos" ), cWhere ) > 0
-      lRet := .T.
-   ENDIF
-
-   RETURN lRet

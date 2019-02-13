@@ -11,199 +11,6 @@
 
 #include "f18.ch"
 
-/*
-
-- Table: fmk.pos_pos
-
--- DROP TABLE fmk.pos_pos;
-
-CREATE TABLE fmk.pos_pos
-(
-  idpos character varying(2),
-  idvd character varying(2),
-  brdok character varying(6),
-  datum date,
-  -- idcijena character varying(1),
-  -- idodj character(2),
-  idradnik character varying(4),
-  idroba character(10),
-  idtarifa character(6),
-  -- m1 character varying(1),
-  -- mu_i character varying(1),
-  prebacen character varying(1),
-  --smjena character varying(1),
-  -- brdokStorn character varying(6),
-  -- c_2 character varying(10),
-  -- c_3 character varying(50),
-  kolicina numeric(18,3),
-  kol2 numeric(18,3),
-  cijena numeric(10,3),
-  ncijena numeric(10,3),
-  rbr character varying(5)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE fmk.pos_pos
-  OWNER TO admin;
-GRANT ALL ON TABLE fmk.pos_pos TO admin;
-GRANT ALL ON TABLE fmk.pos_pos TO xtrole;
-
--- Index: fmk.pos_pos_id1
-
--- DROP INDEX fmk.pos_pos_id1;
-
-CREATE INDEX pos_pos_id1
-  ON fmk.pos_pos
-  USING btree
-  (idpos COLLATE pg_catalog."default", idvd COLLATE pg_catalog."default", datum, brdok COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", idcijena COLLATE pg_catalog."default");
-
--- Index: fmk.pos_pos_id2
-
--- DROP INDEX fmk.pos_pos_id2;
-
--- CREATE INDEX pos_pos_id2
---  ON fmk.pos_pos
---  USING btree
---  (idodj COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", datum);
-
--- Index: fmk.pos_pos_id3
-
--- DROP INDEX fmk.pos_pos_id3;
-
-CREATE INDEX pos_pos_id3
-  ON fmk.pos_pos
-  USING btree
-  (prebacen COLLATE pg_catalog."default");
-
--- Index: fmk.pos_pos_id4
-
--- DROP INDEX fmk.pos_pos_id4;
-
-CREATE INDEX pos_pos_id4
-  ON fmk.pos_pos
-  USING btree
-  (datum);
-
--- Index: fmk.pos_pos_id5
-
--- DROP INDEX fmk.pos_pos_id5;
-
-CREATE INDEX pos_pos_id5
-  ON fmk.pos_pos
-  USING btree
-  (idpos COLLATE pg_catalog."default", idroba COLLATE pg_catalog."default", datum);
-
--- Index: fmk.pos_pos_id6
-
--- DROP INDEX fmk.pos_pos_id6;
-
-CREATE INDEX pos_pos_id6
-  ON fmk.pos_pos
-  USING btree
-  (idroba COLLATE pg_catalog."default");
-
-*/
-
-
-/*
-
-
--- DROP TABLE fmk.pos_doks;
-
-CREATE TABLE fmk.pos_doks
-(
-kljuc:
----
-  idpos character varying(2) NOT NULL,
-  idvd character varying(2) NOT NULL,
-  brdok character varying(6) NOT NULL,
-  datum date,
----
-  idPartner character varying(8),
-  idradnik character varying(4),
-  idvrstep character(2),
-  -- m1 character varying(1),
---  placen character(1),
-  prebacen character(1),
---  smjena character varying(1),
-  sto character varying(3),
-  vrijeme character varying(5),
-  brdokStorn character varying(6),
-  -- c_2 character varying(10),
-  -- c_3 character varying(50),
-  fisc_rn numeric(10,0),
-  zak_br numeric(6,0),
-  sto_br numeric(3,0),
-  -- fisc_st character(10),
-  -- rabat numeric(15,5),
-  ukupno numeric(15,5),
-  CONSTRAINT pos_doks_pkey PRIMARY KEY (idpos, idvd, brdok)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE fmk.pos_doks
-  OWNER TO admin;
-GRANT ALL ON TABLE fmk.pos_doks TO admin;
-GRANT ALL ON TABLE fmk.pos_doks TO xtrole;
-
--- Index: fmk.pos_doks_id1
-
--- DROP INDEX fmk.pos_doks_id1;
-
-CREATE INDEX pos_doks_id1
-  ON fmk.pos_doks
-  USING btree
-  (idpos COLLATE pg_catalog."default", idvd COLLATE pg_catalog."default", datum, brdok COLLATE pg_catalog."default");
-
--- Index: fmk.pos_doks_id2
-
--- DROP INDEX fmk.pos_doks_id2;
-
--- CREATE INDEX pos_doks_id2
---  ON fmk.pos_doks
---  USING btree
---  (idvd COLLATE pg_catalog."default", datum, smjena COLLATE pg_catalog."default");
-
--- Index: fmk.pos_doks_id3
-
--- DROP INDEX fmk.pos_doks_id3;
-
-CREATE INDEX pos_doks_id3
-  ON fmk.pos_doks
-  USING btree
---  (idPartner COLLATE pg_catalog."default", placen COLLATE pg_catalog."default", datum);
-
--- Index: fmk.pos_doks_id4
-
--- DROP INDEX fmk.pos_doks_id4;
-
-CREATE INDEX pos_doks_id4
-  ON fmk.pos_doks
-  USING btree
---  (idvd COLLATE pg_catalog."default", m1 COLLATE pg_catalog."default");
-
--- Index: fmk.pos_doks_id5
-
--- DROP INDEX fmk.pos_doks_id5;
-
-CREATE INDEX pos_doks_id5
-  ON fmk.pos_doks
-  USING btree
-  (prebacen COLLATE pg_catalog."default");
-
--- Index: fmk.pos_doks_id6
-
--- DROP INDEX fmk.pos_doks_id6;
-
-CREATE INDEX pos_doks_id6
-  ON fmk.pos_doks
-  USING btree
-  (datum);
-
-*/
-
 FUNCTION seek_pos_pos_2( cIdRoba, dDatum )
 
    LOCAL hParams := hb_Hash()
@@ -499,16 +306,14 @@ FUNCTION h_pos_doks_indexes()
 
 FUNCTION pos_stanje_artikla( cIdPos, cIdRoba )
 
-   LOCAL cQuery, _qry_ret, oTable
+   LOCAL cQuery, oTable
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL nStanje := 0
    LOCAL cKalkKontoMagacin := PadR( pos_kalk_konto_magacin(), 7 )
 
    IF !Empty( pos_kalk_konto_magacin() )
-
       RETURN kalk_kol_stanje_artikla_magacin( cKalkKontoMagacin, cIdRoba, Date() )
-
    ENDIF
 
    cQuery := "SELECT SUM( CASE WHEN idvd IN ('00','11','80','81') THEN kolicina WHEN idvd IN ('42') THEN -kolicina WHEN idvd IN ('IN') THEN -(kolicina - kol2) ELSE 0 END ) AS stanje FROM " + f18_sql_schema( "pos_pos" ) + " " + ;
@@ -533,7 +338,6 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
    LOCAL nTotal := 0
 
    PushWA()
-
    IF PCount() == 0
       cIdPos := pos_doks->IdPos
       cIdVD := pos_doks->IdVD
@@ -551,13 +355,10 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
    cSql += " AND datum = " + sql_quote( dDatum )
 
    oData := run_sql_query( cSql )
-
    PopWa()
-
    IF !is_var_objekat_tpqquery( oData )
       RETURN nTotal
    ENDIF
-
    nTotal := oData:FieldGet( 1 )
 
    RETURN nTotal
@@ -576,7 +377,6 @@ FUNCTION pos_get_mpc()
    cQry += " WHERE id = " + sql_quote( roba->id )
 
    oData := run_sql_query( cQry )
-
    IF !is_var_objekat_tpqquery( oData )
       MsgBeep( "Problem sa SQL upitom !" )
    ELSE

@@ -95,31 +95,12 @@ FUNCTION SetNazDVal()
 
    GO TOP
 
-   // Seek2( "P" )
-   // gStrValuta := AllTrim( naz2 )
-
-   // IF !lOpened
-   // USE
-   // ENDIF
-
    PopWA()
 
    RETURN .T.
 
 
-
-FUNCTION ispisi_donji_dio_forme_unosa( txt, nRow )
-
-   IF nRow == nil
-      nRow := 1
-   ENDIF
-
-   @ box_x_koord() + ( f18_max_rows() - 12 ) + nRow, 2 SAY PadR( txt, f18_max_cols() / 2 )
-
-   RETURN .T.
-
-
-FUNCTION ispisi_iznos_veliki_brojevi( nIznos, nRow, nCol )
+FUNCTION ispis_veliki_brojevi_iznos( nIznos, nRow, nCol )
 
    LOCAL cIznos
    LOCAL nCnt, cChar, nNextY
