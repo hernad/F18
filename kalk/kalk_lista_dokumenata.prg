@@ -11,52 +11,56 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
+
+MEMVAR cIdfirma // fn preduzece trazi privatnu varijablu
+
 FUNCTION kalk_stampa_liste_dokumenata()
 
    LOCAL nCol1 := 0, cImeKup
    LOCAL nUl, nIzl, nRbr
-   LOCAL m
+   LOCAL cLinija
    LOCAL nC
    LOCAL GetList := {}
 
    LOCAL cIdVd
-   LOCAL cHeader
    LOCAL _n_col := 20
-   LOCAL _pkonto, _mkonto
-   LOCAL _qqmkonto, _qqpkonto
-   LOCAL _partn_naz := "N"
+   LOCAL cFilterMkonto, cFilterPKonto
+   LOCAL cPartnerNazivDN := "N"
+   LOCAL cNaslov
+   LOCAL bZagl, xPrintOpt
+   LOCAL dDatOd, dDatDo
+   LOCAL cBrojeviDokumenata, cMagacinskaKonta, cProdavnickaKonta
 
    PRIVATE qqTipDok
-   PRIVATE ddatod, ddatdo
-   PRIVATE cIdfirma := self_organizacija_id() // fn preduzece trazi privatnu varijablu
+
+   PRIVATE cIdfirma := self_organizacija_id()
 
    my_close_all_dbf()
-
    dDatOd := CToD( "" )
    dDatDo := Date()
-   _mkonto := Space( 300 )
-   _pkonto := Space( 300 )
-   _qqpkonto := ""
-   _qqmkonto := ""
-
+   cMagacinskaKonta := Space( 300 )
+   cProdavnickaKonta := Space( 300 )
+   cFilterPKonto := ""
+   cFilterMkonto := ""
    cIdVd := ""
 
    Box(, 12, 75 )
 
-   //PRIVATE cStampaj := "N"
-   qqBrDok := ""
+   // PRIVATE cStampaj := "N"
+   cBrojeviDokumenata := ""
 
    cIdFirma := fetch_metric( "kalk_lista_dokumenata_firma", my_user(), cIdFirma )
    cIdVd := fetch_metric( "kalk_lista_dokumenata_vd", my_user(), cIdVd )
-   qqBrDok := fetch_metric( "kalk_lista_dokumenata_brdok", my_user(), qqBrDok )
+   cBrojeviDokumenata := fetch_metric( "kalk_lista_dokumenata_brdok", my_user(), cBrojeviDokumenata )
    dDatOd := fetch_metric( "kalk_lista_dokumenata_datum_od", my_user(), dDatOd )
    dDatDo := fetch_metric( "kalk_lista_dokumenata_datum_do", my_user(), dDatDo )
-   _mkonto := fetch_metric( "kalk_lista_dokumenata_mkonto", my_user(), _mkonto )
-   _pkonto := fetch_metric( "kalk_lista_dokumenata_pkonto", my_user(), _pkonto )
-   _partn_naz := fetch_metric( "kalk_lista_dokumenata_ispis_partnera", my_user(), _partn_naz )
+   cMagacinskaKonta := fetch_metric( "kalk_lista_dokumenata_mkonto", my_user(), cMagacinskaKonta )
+   cProdavnickaKonta := fetch_metric( "kalk_lista_dokumenata_pkonto", my_user(), cProdavnickaKonta )
+   cPartnerNazivDN := fetch_metric( "kalk_lista_dokumenata_ispis_partnera", my_user(), cPartnerNazivDN )
 
    cIdVd := PadR( cIdVd, 2 )
-   qqBrDok := PadR( qqBrDok, 60 )
+   cBrojeviDokumenata := PadR( cBrojeviDokumenata, 60 )
 
    cImeKup := Space( 20 )
    cIdPartner := Space( 6 )
@@ -66,7 +70,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
       cIdFirma := PadR( cidfirma, 2 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma - prazno svi" GET cIdFirma VALID {|| .T. }
       READ
-
       IF !Empty( cidfirma )
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Tip dokumenta (prazno svi tipovi)" GET cIdVd PICT "@!"
          cIdVd := "  "
@@ -77,43 +80,40 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Od datuma "  GET dDatOd
       @ box_x_koord() + 3, Col() + 1 SAY8 "do"  GET dDatDo
       @ box_x_koord() + 5, box_y_koord() + 2 SAY8 "Partner" GET cIdPartner PICT "@!" VALID Empty( cIdpartner ) .OR. p_partner( @cIdPartner )
-      @ box_x_koord() + 6, box_y_koord() + 2 SAY8 " Magacinska konta:" GET _mkonto PICT "@S30"
-      @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Prodavnička konta:" GET _pkonto PICT "@S30"
-      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Brojevi dokumenata (prazno-svi)" GET qqBrDok PICT "@!S40"
-      @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Ispis naziva partnera (D/N)?" GET _partn_naz PICT "@!" VALID _partn_naz $ "DN"
-      //@ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Štampanje sadržaja ovih dokumenata ?"  GET cStampaj PICT "@!" VALID cStampaj $ "DN"
+      @ box_x_koord() + 6, box_y_koord() + 2 SAY8 " Magacinska konta:" GET cMagacinskaKonta PICT "@S30"
+      @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Prodavnička konta:" GET cProdavnickaKonta PICT "@S30"
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Brojevi dokumenata (prazno-svi)" GET cBrojeviDokumenata PICT "@!S40"
+      @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Ispis naziva partnera (D/N)?" GET cPartnerNazivDN PICT "@!" VALID cPartnerNazivDN $ "DN"
+      // @ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Štampanje sadržaja ovih dokumenata ?"  GET cStampaj PICT "@!" VALID cStampaj $ "DN"
 
       READ
-
       ESC_BCR
 
-      aUsl1 := Parsiraj( qqBrDok, "BRDOK" )
-
-      IF !Empty( _mkonto )
-         _qqmkonto := Parsiraj( _mkonto, "mkonto" )
+      cFilterBrDok := Parsiraj( cBrojeviDokumenata, "BRDOK" )
+      IF !Empty( cMagacinskaKonta )
+         cFilterMkonto := Parsiraj( cMagacinskaKonta, "mkonto" )
+      ENDIF
+      IF !Empty( cProdavnickaKonta )
+         cFilterPKonto := Parsiraj( cProdavnickaKonta, "pkonto" )
       ENDIF
 
-      IF !Empty( _pkonto )
-         _qqpkonto := Parsiraj( _pkonto, "pkonto" )
-      ENDIF
-
-      IF aUsl1 <> NIL
+      IF cFilterBrDok <> NIL
          EXIT
       ENDIF
 
    ENDDO
 
    cIdVd := Trim( cIdVd )
-   qqBrDok := Trim( qqBrDok )
+   cBrojeviDokumenata := Trim( cBrojeviDokumenata )
 
    set_metric( "kalk_lista_dokumenata_firma", my_user(), cIdFirma )
    set_metric( "kalk_lista_dokumenata_vd", my_user(), cIdVd )
-   set_metric( "kalk_lista_dokumenata_brdok", my_user(), qqBrDok )
+   set_metric( "kalk_lista_dokumenata_brdok", my_user(), cBrojeviDokumenata )
    set_metric( "kalk_lista_dokumenata_datum_od", my_user(), dDatOd )
    set_metric( "kalk_lista_dokumenata_datum_do", my_user(), dDatDo )
-   set_metric( "kalk_lista_dokumenata_mkonto", my_user(), _mkonto )
-   set_metric( "kalk_lista_dokumenata_pkonto", my_user(), _pkonto )
-   set_metric( "kalk_lista_dokumenata_ispis_partnera", my_user(), _partn_naz )
+   set_metric( "kalk_lista_dokumenata_mkonto", my_user(), cMagacinskaKonta )
+   set_metric( "kalk_lista_dokumenata_pkonto", my_user(), cProdavnickaKonta )
+   set_metric( "kalk_lista_dokumenata_ispis_partnera", my_user(), cPartnerNazivDN )
 
    BoxC()
 
@@ -122,64 +122,49 @@ FUNCTION kalk_stampa_liste_dokumenata()
    ENDIF
    find_kalk_doks_by_tip_datum( cIdFirma, cIdVd, dDatOd, dDatDo )
 
-
-   PRIVATE cFilt := ".t."
-
-
+   PRIVATE cFilterLista := ".t."
    IF !Empty( cIdPartner )
-      cFilt += ".and. idpartner==" + dbf_quote( cIdPartner )
+      cFilterLista += ".and. idpartner==" + dbf_quote( cIdPartner )
+   ENDIF
+   IF !Empty( cBrojeviDokumenata )
+      cFilterLista += ( ".and." + cFilterBrDok )
+   ENDIF
+   IF !Empty( cFilterMkonto )
+      cFilterLista += ( ".and." + cFilterMkonto )
+   ENDIF
+   IF !Empty( cFilterPKonto )
+      cFilterLista += ( ".and." + cFilterPKonto )
    ENDIF
 
-   IF !Empty( qqBrDok )
-      cFilt += ( ".and." + aUsl1 )
-   ENDIF
-
-   IF !Empty( _qqmkonto )
-      cFilt += ( ".and." + _qqmkonto )
-   ENDIF
-
-   IF !Empty( _qqpkonto )
-      cFilt += ( ".and." + _qqpkonto )
-   ENDIF
-
-   SET FILTER TO &cFilt
+   SET FILTER TO &cFilterLista
    GO TOP
-
    EOF CRET
-   gaZagFix := { 6, 3 }
-   START PRINT CRET
-   ?
 
-   Preduzece()
-
-   P_COND
-
-   ??U "KALK: Štampa dokumenata na dan:", Date(), Space( 10 ), "za period", dDatOd, "-", dDatDo
-   IF !Empty( cIdVd )
-      ?? Space( 2 ), "za tipove dokumenta:", Trim( cIdVd )
-   ENDIF
-   IF !Empty( qqBrDok )
-      ?? Space( 2 ), "za brojeve dokumenta:", Trim( qqBrDok )
+   cNaslov := "KALK Lista dokumenata za period: " + DToC( dDatOd ) + "-" +  DToC( dDatDo ) + " NA DAN " + DToC( danasnji_datum() )
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
    ENDIF
 
-   m := _get_rpt_line()
-   cHeader := _get_rpt_header()
-
-   ? m
-   ? cHeader
-   ? m
+   bZagl := {|| zagl( cIdVd, cMagacinskaKonta, cProdavnickaKonta, cBrojeviDokumenata, cLinija ) }
+   cLinija := get_linija()
 
    nC := 0
    nCol1 := 30
    nNV := nVPV := nRabat := nMPV := 0
    nUkStavki := 0
 
-   DO WHILE !Eof() .AND. IdFirma == cIdFirma
+   Eval( bZagl )
+   DO WHILE !Eof() .AND. kalk_doks->IdFirma == cIdFirma
 
       select_o_partner( kalk_doks->idpartner )
-
       SELECT kalk_doks
 
+      check_nova_strana( bZagl, s_oPDF )
       ? Str( ++nC, 6 ) + "."
       info_bar( "k_lista", "kalk_stampa_liste_dok " + DToC( kalk_doks->datdok ) + Str( nC, 6 ) )
 
@@ -205,92 +190,72 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ PRow(), PCol() + 1 SAY PadR( field->idzaduz2, 6 )
 
       nCol1 := PCol() + 1
-
-      @ PRow(), PCol() + 1 SAY Str( nv, 12, 2 )
-      @ PRow(), PCol() + 1 SAY Str( vpv, 12, 2 )
-      @ PRow(), PCol() + 1 SAY Str( rabat, 12, 2 )
-      @ PRow(), PCol() + 1 SAY Str( mpv, 12, 2 )
+      @ PRow(), PCol() + 1 SAY Str( kalk_doks->nv, 12, 2 )
+      @ PRow(), PCol() + 1 SAY Str( kalk_doks->vpv, 12, 2 )
+      @ PRow(), PCol() + 1 SAY Str( kalk_doks->rabat, 12, 2 )
+      @ PRow(), PCol() + 1 SAY Str( kalk_doks->mpv, 12, 2 )
       @ PRow(), PCol() + 1 SAY kalk_doks->brfaktp
       @ PRow(), PCol() + 1 SAY kalk_doks->datval
 
       SELECT kalk_doks
       @ PRow(), PCol() + 1 SAY PadR( iif( Empty( sifra ), Space( 2 ), Left( CryptSC( kalk_doks->sifra ), 2 ) ), 6 )
 
-
       // drugi red
-      IF _partn_naz == "D" .AND. !Empty( field->idpartner )
+      IF cPartnerNazivDN == "D" .AND. !Empty( field->idpartner )
          ?
          @ PRow(), _n_col SAY AllTrim( partn->naz )
       ENDIF
 
-      nNV += NV
-      nVPV += VPV
-      nRabat += Rabat
-      nMPV += MPV
+      nNV += kalk_doks->NV
+      nVPV += kalk_doks->VPV
+      nRabat += kalk_doks->Rabat
+      nMPV += kalk_doks->MPV
       SKIP
 
    ENDDO
 
-   ? m
+   check_nova_strana( bZagl, s_oPDF, .F., 3 )
+   ? cLinija
    ? "UKUPNO   "
-
-   @ PRow(), nCol1 SAY Str( nnv, 12, 2 )
-   @ PRow(), PCol() + 1 SAY Str( nvpv, 12, 2 )
-   @ PRow(), PCol() + 1 SAY Str( nrabat, 12, 2 )
-   @ PRow(), PCol() + 1 SAY Str( nmpv, 12, 2 )
-
+   @ PRow(), nCol1 SAY Str( nNv, 12, 2 )
+   @ PRow(), PCol() + 1 SAY Str( nVpv, 12, 2 )
+   @ PRow(), PCol() + 1 SAY Str( nRabat, 12, 2 )
+   @ PRow(), PCol() + 1 SAY Str( nMpv, 12, 2 )
    IF FieldPos( "sifra" ) <> 0
       ?? "       "
    ENDIF
+   ? cLinija
 
-   ? m
-   FF
-   ENDPRINT
-
+   f18_end_print( NIL, xPrintOpt )
    my_close_all_dbf()
 
    RETURN .T.
 
 
-STATIC FUNCTION _get_rpt_header()
 
-   LOCAL cHeader := ""
+STATIC FUNCTION zagl( cIdVd, cMagacinskaKonta, cProdavnickaKonta, cBrojeviDokumenata, cLinija )
 
-   cHeader += PadC( "Rbr", 7 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Datum", 8 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Dokument", 16 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "M-konto", 7 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "P-konto", 7 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Part.", 6 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Zad.", 6 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Zad.2", 6 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "NV", 12 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "VPV", 12 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "RABATV", 12 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "MPV", 12 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "brfaktp", 10 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "DatVal", 8 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Op.", 6 )
+   Preduzece()
+   IF !Empty( cMagacinskaKonta )
+      ? "Magacini:", Trim( cMagacinskaKonta )
+   ENDIF
+   IF !Empty( cProdavnickaKonta )
+      ? "Prodavnice:", Trim( cProdavnickaKonta )
+   ENDIF
+   IF !Empty( cIdVd )
+      ? "Tipovi dokumenata:", Trim( cIdVd )
+   ENDIF
+   IF !Empty( cBrojeviDokumenata )
+      ? "Brojevi dokumenata:", Trim( cBrojeviDokumenata )
+   ENDIF
 
-   RETURN cHeader
+   ? cLinija
+   ? get_header()
+   ? cLinija
 
+   RETURN .T.
 
-
-STATIC FUNCTION _get_rpt_line()
+STATIC FUNCTION get_linija()
 
    LOCAL cLinija := ""
 
@@ -325,3 +290,41 @@ STATIC FUNCTION _get_rpt_line()
    cLinija += Replicate( "-", 6 )
 
    RETURN cLinija
+
+
+
+STATIC FUNCTION get_header()
+
+   LOCAL cHeader := ""
+
+   cHeader += PadC( "Rbr", 7 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Datum", 8 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Dokument", 16 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "cLinija-konto", 7 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "P-konto", 7 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Part.", 6 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Zad.", 6 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Zad.2", 6 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "NV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "VPV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "RABATV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "MPV", 12 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "brfaktp", 10 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "DatVal", 8 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Op.", 6 )
+
+   RETURN cHeader
