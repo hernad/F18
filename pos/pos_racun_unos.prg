@@ -11,10 +11,9 @@
 
 #include "f18.ch"
 
-
 FUNCTION pos_racun_unos_ispravka()
 
-   LOCAL lStalnoUnos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" ) == "D"
+   // LOCAL lStalnoUnos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" ) == "D"
 
    DO WHILE .T.
 
@@ -24,8 +23,10 @@ FUNCTION pos_racun_unos_ispravka()
       IF reccount2() <> 0
          IF AllTrim( field->brdok ) != POS_BRDOK_PRIPREMA
             GO TOP // ako je racun vracen u pripremu, inicijaliziraj brdok
+            SET ORDER TO
             DO WHILE !Eof()
                RREPLACE brdok WITH POS_BRDOK_PRIPREMA
+               SKIP
             ENDDO
             GO TOP
          ENDIF
@@ -41,7 +42,6 @@ FUNCTION pos_racun_unos_ispravka()
       ELSE
          EXIT
       ENDIF
-
 
    ENDDO
 
@@ -76,7 +76,6 @@ FUNCTION pos_zakljuci_racun()
    ELSE
       lRet := .F.
    ENDIF
-
    my_close_all_dbf()
 
    RETURN lRet
@@ -84,7 +83,7 @@ FUNCTION pos_zakljuci_racun()
 
 STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
-   LOCAL lOk := .T.
+   LOCAL lOk
    LOCAL cVrijeme
    LOCAL cBrDok
    LOCAL cDokumentNaziv
@@ -128,7 +127,7 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
    LOCAL nDeviceId
    LOCAL hDeviceParams
    LOCAL lRet := .F.
-   LOCAL nError := 0
+   LOCAL nError
 
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
    IF nDeviceId > 0
@@ -154,36 +153,6 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
    lRet := .T.
 
    RETURN lRet
-
-
-
-STATIC FUNCTION koliko_treba_povrata_kupcu( hParams )
-
-   LOCAL nDbfArea := Select()
-   LOCAL nTrec := RecNo()
-   LOCAL cIdPos := hParams[ "idpos" ]
-   LOCAL cIdVd := hParams[ "idvd" ]
-   LOCAL cBrDok := hParams[ "brdok" ]
-   LOCAL dDatum := hParams[ "datum" ]
-   LOCAL nIznosNeto := 0
-   LOCAL nIznos := 0
-   LOCAL nPopust := 0
-
-   SELECT _pos_pripr
-   GO TOP
-   DO WHILE !Eof() .AND. AllTrim( field->brdok ) == POS_BRDOK_PRIPREMA
-      nIznos += field->kolicina * field->cijena
-      nPopust += field->kolicina * field->ncijena
-      SKIP
-   ENDDO
-
-   nIznosNeto := nIznos - nPopust
-
-   SELECT ( nDbfArea )
-   GO ( nTrec )
-
-   RETURN nIznosNeto
-
 
 STATIC FUNCTION ispisi_iznos_i_kusur_za_kupca( nUplaceno, nIznosRacuna, nX, nY )
 
@@ -259,7 +228,31 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
 STATIC FUNCTION pos_valid_primljeni_novac( nUplaceno, hParams, nX, nY )
 
    IF nUplaceno <> 0
-      ispisi_iznos_i_kusur_za_kupca( nUplaceno, koliko_treba_povrata_kupcu( hParams ), nX, nY )
+      ispisi_iznos_i_kusur_za_kupca( nUplaceno, koliko_treba_povrata_kupcu(), nX, nY )
    ENDIF
 
    RETURN .T.
+
+
+STATIC FUNCTION koliko_treba_povrata_kupcu()
+
+   LOCAL nDbfArea := Select()
+   LOCAL nTrec := RecNo()
+
+   LOCAL nIznos := 0
+   LOCAL nPopust := 0
+   LOCAL nIznosNeto
+
+   SELECT _pos_pripr
+   GO TOP
+   DO WHILE !Eof() .AND. AllTrim( _pos_pripr->brdok ) == POS_BRDOK_PRIPREMA
+      nIznos += _pos_pripr->kolicina * _pos_pripr->cijena
+      nPopust += _pos_pripr->kolicina * _pos_pripr->ncijena
+      SKIP
+   ENDDO
+
+   nIznosNeto := nIznos - nPopust
+   SELECT ( nDbfArea )
+   GO ( nTrec )
+
+   RETURN nIznosNeto

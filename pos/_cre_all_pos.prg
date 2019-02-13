@@ -53,14 +53,13 @@ FUNCTION cre_all_pos( ver )
    _alias := "_POS_PRIPR"
    _table_name := "_pos_pripr"
    IF_NOT_FILE_DBF_CREATE
-
-   CREATE_INDEX ( "1", "IdRoba", _alias )
+   CREATE_INDEX ( "1", "IdRoba+Transform(nCijena,'99999.99')+Transform(ncijena,'99999.99')", _alias )
    CREATE_INDEX ( "2", "IdPos+IdVd+dtos(datum)+BrDok", _alias )
 
    _alias := "PRIPRZ"
    _table_name := "pos_priprz"
    IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdRoba", _alias )
+   CREATE_INDEX ( "1", "IdRoba+Transform(nCijena,'99999.99')+Transform(ncijena,'99999.99')", _alias )
 
    aDbf := {}
    AAdd ( aDbf, { "KEYCODE", "N",  4, 0 } )
@@ -102,7 +101,7 @@ FUNCTION g_pos_pripr_fields()
 
    LOCAL aDbf
 
-   // _POS, _PRIPR, PRIPRZ, PRIPRG, _POSP
+   // _PRIPR, PRIPRZ
    aDbf := {}
    AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
    AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )

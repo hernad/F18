@@ -13,6 +13,42 @@
 #include "f18_color.ch"
 
 STATIC s_nIznosRacuna, s_nPopust
+STATIC s_hRacunSumarno
+
+
+/*
+    R01  x 2 kom,  cijena=10, nCijena=0
+    R01  x 1 kom,  cijena=10, nCijena=2 ( => neto_cijena = 8, 20% rabat)
+    R01  x 5 kom,  cijena=10, nCijena=0
+    R02  x 3 kom,  cijena=1, nCijena=0
+    ======================================
+    suma =
+    =======================================
+    R01  x 7 kom,  cijena=10, nCijena=0
+    R01  x 1 kom,  cijena=10, nCijena=2 ( => neto_cijena = 8, 20% rabat)
+    R02  x 3 kom,  cijena=1, nCijena=0
+*/
+
+FUNCTION pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena, nKolicina )
+
+   LOCAL cKey
+
+   IF s_hRacunSumarno == NIL
+      s_hRacunSumarno := hb_Hash()
+   ENDIF
+
+   // npr. cKey = 'R01     10.00       0.00'
+   cKey :=  cIdRoba + "" + Transform( nCijena, "99999.99" ) + Transform( nNCijena, "99999.99" )
+
+   IF nKolicina != NIL
+      s_hRacunSumarno[ cKey ] :=  nKolicina
+   ENDIF
+
+   IF !hb_HHasKey( s_hRacunSumarno, cKey )
+      RETURN 0
+   ENDIF
+
+   RETURN s_hRacunSumarno[ cKey ]
 
 
 FUNCTION pos_racun_iznos_neto()
@@ -61,5 +97,12 @@ FUNCTION pos_racun_artikal_info( nLinija, cIdRoba, cMessage )
    @ box_x_koord() + ( f18_max_rows() - 11 ) + nLinija, box_y_koord() + 2 SAY Space( f18_max_cols() / 2 )
    @ box_x_koord() + ( f18_max_rows() - 11 ) + nLinija, box_y_koord() + 2 SAY _u( cIdRoba + " : " + cMessage )
    SetColor( nColor )
+
+   RETURN .T.
+
+
+FUNCTION pos_racun_info( cBrRn )
+
+   info_bar( "pos", "POS račun broj: " + cBrRN )
 
    RETURN .T.
