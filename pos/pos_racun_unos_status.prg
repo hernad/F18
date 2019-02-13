@@ -29,6 +29,11 @@ STATIC s_hRacunSumarno
     R02  x 3 kom,  cijena=1, nCijena=0
 */
 
+FUNCTION pos_racun_sumarno_init()
+
+   s_hRacunSumarno := hb_hash()
+   
+
 FUNCTION pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena, nKolicina )
 
    LOCAL cKey

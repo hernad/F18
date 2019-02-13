@@ -108,7 +108,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
           WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena )
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _kolicina PICT "999999.999" ;
           WHEN pos_when_racun_kolicina( @_kolicina ) ;
-          VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena )
+          VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena, _ncijena )
 
       READ
 

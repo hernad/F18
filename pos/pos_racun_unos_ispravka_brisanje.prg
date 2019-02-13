@@ -58,7 +58,7 @@ FUNCTION pos_ispravi_stavku_racuna()
    @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "    Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
       WHEN pos_when_racun_artikal( @_idroba ) VALID pos_valid_racun_artikal( @_idroba, GetList, 1, 28 )
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "     Cijena:" GET _Cijena  PICTURE "99999.999" WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena )
-   @ box_x_koord() + 3, box_y_koord() + 3 SAY8 "   količina:" GET _Kolicina VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena ) PICT "999999.999"
+   @ box_x_koord() + 3, box_y_koord() + 3 SAY8 "   količina:" GET _Kolicina VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena, _ncijena ) PICT "999999.999"
 
    READ
 

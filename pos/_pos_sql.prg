@@ -304,21 +304,28 @@ FUNCTION h_pos_doks_indexes()
 
 
 
-FUNCTION pos_stanje_artikla( cIdPos, cIdRoba )
+FUNCTION pos_dostupno_artikal( cIdRoba, nCijena, nNCijena )
 
    LOCAL cQuery, oTable
-   LOCAL _data := {}
    LOCAL nI, oRow
-   LOCAL nStanje := 0
+   LOCAL nStanje
+   /* ovo je bas naopako
    LOCAL cKalkKontoMagacin := PadR( pos_kalk_konto_magacin(), 7 )
 
-   IF !Empty( pos_kalk_konto_magacin() )
+   IF !Empty( pos_kalk_konto_magacin() ) // stanje uzimati sa magacinskog konta?!
       RETURN kalk_kol_stanje_artikla_magacin( cKalkKontoMagacin, cIdRoba, Date() )
    ENDIF
+   */
 
-   cQuery := "SELECT SUM( CASE WHEN idvd IN ('00','11','80','81') THEN kolicina WHEN idvd IN ('42') THEN -kolicina WHEN idvd IN ('IN') THEN -(kolicina - kol2) ELSE 0 END ) AS stanje FROM " + f18_sql_schema( "pos_pos" ) + " " + ;
-      " WHERE idpos = " + sql_quote( cIdPos ) + ;
-      " AND idroba = " + sql_quote( cIdRoba )
+   // select * from p15.pos_stanje
+   // where idroba = '000020' and cijena=1 and ncijena=0
+   // and current_date>=dat_od and current_date<=dat_do;
+
+   cQuery := "SELECT kol_ulaz-kol_izlaz as stanje FROM " + f18_sql_schema("pos_stanje")
+   cQuery += " WHERE rtrim(idroba)=" + sql_quote(TRIM(cIdRoba))
+   cQuery += " AND cijena=" + sql_quote(nCijena)
+   cQuery += " AND ncijena=" + sql_quote(nNCijena)
+   cQuery += " AND current_date>=dat_od AND current_date<=dat_do";
 
    oTable := run_sql_query( cQuery )
    oRow := oTable:GetRow( 1 )
@@ -329,7 +336,6 @@ FUNCTION pos_stanje_artikla( cIdPos, cIdRoba )
    ENDIF
 
    RETURN nStanje
-
 
 
 FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
@@ -401,8 +407,6 @@ STATIC FUNCTION pos_get_mpc_field()
    */
 
    RETURN cField
-
-
 
 
 FUNCTION o_vrstep( cId )
@@ -486,8 +490,6 @@ FUNCTION use_sql_pos_strad( cId )
    ENDIF
 
    RETURN !Eof()
-
-
 
 
 FUNCTION find_pos_osob_by_naz( cNaz )

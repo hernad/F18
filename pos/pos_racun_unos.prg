@@ -34,7 +34,7 @@ FUNCTION pos_racun_unos_ispravka()
 
       // SET KEY "'" to
       my_close_all_dbf()
-
+      pos_racun_sumarno_init()
       IF pos_racun_unos_browse( POS_BRDOK_PRIPREMA )
          IF !pos_zakljuci_racun()
             EXIT
@@ -115,13 +115,6 @@ STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
    RETURN .T.
 
 
-STATIC FUNCTION pos_racun_info( cBrRn )
-
-   info_bar( "pos", "POS račun broj: " + cBrRN )
-
-   RETURN .T.
-
-
 STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
 
    LOCAL nDeviceId
@@ -154,6 +147,7 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
 
    RETURN lRet
 
+
 STATIC FUNCTION ispisi_iznos_i_kusur_za_kupca( nUplaceno, nIznosRacuna, nX, nY )
 
    LOCAL nVratiti := nUplaceno - nIznosRacuna
@@ -165,7 +159,6 @@ STATIC FUNCTION ispisi_iznos_i_kusur_za_kupca( nUplaceno, nIznosRacuna, nX, nY )
    ENDIF
 
    RETURN .T.
-
 
 
 STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
@@ -206,7 +199,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    ENDIF
 
    @ nX := box_x_koord() + 5, nY := box_y_koord() + 2 SAY8 "Primljeni novac:" GET nUplaceno PICT "9999999.99" ;
-      VALID {|| pos_valid_primljeni_novac( nUplaceno, hParams, nX, nY ) }
+      VALID {|| pos_valid_primljeni_novac( nUplaceno, nX, nY ) }
 
    @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Ažurirati POS račun (D/N) ?" GET cAzuriratiDN PICT "@!" VALID cAzuriratiDN $ "DN"
    READ
@@ -225,7 +218,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    RETURN .T.
 
 
-STATIC FUNCTION pos_valid_primljeni_novac( nUplaceno, hParams, nX, nY )
+STATIC FUNCTION pos_valid_primljeni_novac( nUplaceno, nX, nY )
 
    IF nUplaceno <> 0
       ispisi_iznos_i_kusur_za_kupca( nUplaceno, koliko_treba_povrata_kupcu(), nX, nY )

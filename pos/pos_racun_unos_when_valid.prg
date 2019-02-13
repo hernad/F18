@@ -35,8 +35,6 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
    lOk := pos_postoji_roba( @cIdroba, nRow, nCol, @cBarkodProcitati, aGetList ) ;
       .AND. pos_racun_provjera_dupli_artikal( cIdroba )
 
-   pos_racun_artikal_info( 1, cIdRoba, "Stanje: " + AllTrim( Str( pos_stanje_artikla( gIdPos, cIdRoba ), 12, 2 ) ) )
-
    IF gOcitBarKod
       hb_keyPut( K_ENTER )
    ENDIF
@@ -81,7 +79,8 @@ FUNCTION pos_when_racun_cijena_ncijena( cIdRoba, nCijena, nNCijena )
    IF roba->tip == "T"
       RETURN .T.
    ENDIF
-
+altd()
+   pos_racun_artikal_info( 1, cIdRoba, "Stanje: " + AllTrim( Str( pos_dostupno_artikal( cIdRoba, nCijena, nNCijena ), 12, 3 ) ) )
    nPotrebnaKolicinaStavka := pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena )
    pos_racun_artikal_info( 3, cIdRoba, "Potrebna količina do sada: " + AllTrim( Str( nPotrebnaKolicinaStavka, 12, 3 ) ) + "" )
 
@@ -100,14 +99,14 @@ FUNCTION pos_when_racun_kolicina( nKolicina )
    RETURN .T.
 
 
-FUNCTION pos_valid_racun_kolicina( cIdRoba, nKolicina, nCijena )
+FUNCTION pos_valid_racun_kolicina( cIdRoba, nKolicina, nCijena, nNCijena )
 
-   RETURN pos_provjera_stanje( cIdRoba, nKolicina ) .AND. ;
-          pos_provjera_max_kolicine( @nKolicina ) .AND. ;
-          pos_cijena_nije_nula( nCijena )
+   RETURN pos_provjera_stanje( cIdRoba, nKolicina, nCijena, nNCijena ) .AND. ;
+      pos_provjera_max_kolicine( @nKolicina ) .AND. ;
+      pos_cijena_nije_nula( nCijena )
 
 
-STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina )
+STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina, nCijena, nNCijena )
 
    LOCAL lOk := .F.
    LOCAL cMsg
@@ -127,12 +126,11 @@ STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina )
       lOk := .T.
       RETURN lOk
    ENDIF
-   nStanjeRobe := pos_stanje_artikla( gIdPos, cIdroba )
+   nStanjeRobe := pos_dostupno_artikal( cIdroba, nCijena, nNCijena )
 
    lOk := .T.
    IF ( nKolicina > nStanjeRobe )
-
-      cMsg := "Artikal: " + _idroba + " Trenutno na stanju: " + Str( nStanjeRobe, 12, 2 )
+      cMsg := "Artikal: " + cIdroba + " Trenutno na stanju: " + Str( nStanjeRobe, 12, 2 )
       IF gPosPratiStanjePriProdaji = "!"
          cMsg += "#Unos artikla onemogućen !?"
          lOk := .F.
