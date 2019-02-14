@@ -34,7 +34,6 @@ FUNCTION kalk_get_1_14()
       @ box_x_koord() + 7, Col() + 2 SAY "DatVal:" GET dDatVal ;
          WHEN  {|| dDatVal := get_kalk_14_datval( _brdok ), .T. } ;
          VALID {|| update_kalk_14_datval( _BrDok, dDatVal ), .T. }
-      _IdZaduz := ""
       _Idkonto := "2110"
       PRIVATE cNBrDok := _brdok
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto razdužuje"  GET _IdKonto2  VALID ( Empty( _IdKonto2 ) .OR. P_Konto( @_IdKonto2, 21, 5 ) )
@@ -44,7 +43,6 @@ FUNCTION kalk_get_1_14()
       @ box_x_koord() + 7, box_y_koord() + 2   SAY8 "Faktura Broj: "; ?? _BrFaktP
       @ box_x_koord() + 7, Col() + 2 SAY8 "Datum: "; ?? _DatFaktP
 
-      _IdZaduz := ""
       _Idkonto := "2110"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto razdužuje "; ?? _IdKonto2
 

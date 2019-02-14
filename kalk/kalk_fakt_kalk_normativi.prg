@@ -41,7 +41,6 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
    LOCAL cBrKalk := Space( 8 )
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL cIdKonto := PadR( "", 7 )
-   LOCAL cIdZaduz2 := Space( 6 )
 
    IF PCount() == 0
       cIdTipDok := "10;11;12;      "
@@ -74,8 +73,6 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
          @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 96 -" GET cBrKalk PICT "@!"
          @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
          @ box_x_koord() + 3, box_y_koord() + 2   SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
-
-
          @ box_x_koord() + 4, box_y_koord() + 2   SAY "Konto zaduzuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
 
          cIdRjFakt := cIdFirma
@@ -114,7 +111,6 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
 
             cFBrDok := fakt->brdok
 
-
             find_kalk_doks_by_broj_fakture( "96", PadR( cFBrDok, 10 ) )
 
             IF !Eof()
@@ -123,13 +119,11 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                dTmpDate := fakt->datdok
 
                select_o_partner( fakt->idpartner )
-
                cTmpPartn := AllTrim( partn->naz )
 
                SELECT kalk_doks
 
-               nScan := AScan( aNotIncl, {| xVar| xVar[ 1 ] == cTmp } )
-
+               nScan := AScan( aNotIncl, {| xVar | xVar[ 1 ] == cTmp } )
                IF nScan == 0
                   AAdd( aNotIncl, { cTmp, dTmpDate, cTmpPartn, kalk_doks->idvd + "-" + kalk_doks->brdok } )
                ENDIF
@@ -145,7 +139,7 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
 
                cTmp := Parsiraj( cRobaUsl, "idroba" )
 
-               if &cTmp
+               IF &cTmp
                   IF cRobaIncl == "I"
                      SELECT fakt
                      SKIP
@@ -173,11 +167,9 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                      ENDIF
                   ENDIF
 
-                select_o_roba( sast->id2 )
-
+                  select_o_roba( sast->id2 )
                   SELECT kalk_pripr
                   LOCATE FOR idroba == sast->id2
-
                   IF Found()
                      RREPLACE kolicina WITH kolicina + fakt->kolicina * sast->kolicina
 
@@ -193,7 +185,6 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                         brfaktp WITH "", ;
                         idkonto   WITH cidkonto, ;
                         idkonto2  WITH cidkonto2, ;
-                        idzaduz2  WITH cidzaduz2, ;
                         kolicina WITH fakt->kolicina * sast->kolicina, ;
                         idroba WITH sast->id2, ;
                         nc  WITH ROBA->nc, ;
@@ -201,7 +192,7 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                         rabatv WITH fakt->rabat, ;
                         mpc WITH fakt->porez
 
-                        //datfaktp WITH dDatKalk, ;
+                     // datfaktp WITH dDatKalk, ;
 
                   ENDIF
 
@@ -218,7 +209,7 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                      REPLACE field->brdok WITH fakt->idtipdok + ;
                         "-" + fakt->brdok
                      REPLACE field->kolicina WITH fakt->kolicina
-                     REPLACE field->kol_sast with ;
+                     REPLACE field->kol_sast WITH ;
                         fakt->kolicina * sast->kolicina
 
 
@@ -304,12 +295,6 @@ STATIC FUNCTION rpt_not_incl( aArr )
 STATIC FUNCTION o_tables()
 
    o_kalk_pripr()
-   // o_kalk()
-   //o_kalk_doks()
-   //o_konto()
-   //o_partner()
-   //o_tarifa()
-   //o_fakt_dbf()
 
    RETURN .T.
 
@@ -319,33 +304,31 @@ STATIC FUNCTION o_tables()
 // -------------------------------------------
 STATIC FUNCTION o_tbl_roba( lTest, cSezSif )
 
-   //LOCAL cSifPath
-
    IF lTest == .T.
       my_close_all_dbf()
 
-      //cSifPath := PadR( SIFPATH, 14 )
+      // cSifPath := PadR( SIFPATH, 14 )
       // "c:\sigma\sif1\"
 
-      //IF !Empty( cSezSif ) .AND. cSezSif <> "RADP"
-      //   cSifPath += cSezSif + SLASH
-      //ENDIF
+      // IF !Empty( cSezSif ) .AND. cSezSif <> "RADP"
+      // cSifPath += cSezSif + SLASH
+      // ENDIF
 
-      //SELECT ( F_ROBA )
-      //USE
-      //SELECT ( F_ROBA )
-      //USE ( cSifPath + "ROBA" ) ALIAS "ROBA"
-      //SET ORDER TO TAG "ID"
+      // SELECT ( F_ROBA )
+      // USE
+      // SELECT ( F_ROBA )
+      // USE ( cSifPath + "ROBA" ) ALIAS "ROBA"
+      // SET ORDER TO TAG "ID"
 
-      //SELECT ( F_SAST )
-      //USE
-      //SELECT ( F_SAST )
-      //USE ( cSifPath + "SAST" ) ALIAS "SAST"
-      //SET ORDER TO TAG "ID"
+      // SELECT ( F_SAST )
+      // USE
+      // SELECT ( F_SAST )
+      // USE ( cSifPath + "SAST" ) ALIAS "SAST"
+      // SET ORDER TO TAG "ID"
 
    ELSE
-    //  o_roba()
-      //o_sastavnice()
+      // o_roba()
+      // o_sastavnice()
    ENDIF
 
    RETURN .T.
@@ -369,7 +352,6 @@ FUNCTION PrenosNoFakt()
    dDatKalk := Date()
    cIdKonto := PadR( "", 7 )
    cIdKonto2 := PadR( "1310", 7 )
-   cIdZaduz2 := Space( 6 )
 
    cBrkalk := Space( 8 )
 
@@ -385,20 +367,13 @@ FUNCTION PrenosNoFakt()
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 96 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
       @ box_x_koord() + 3, box_y_koord() + 2   SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
-
-      //IF gNW <> "X"
-      //   @ box_x_koord() + 3, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )
-      //ENDIF
-
       @ box_x_koord() + 4, box_y_koord() + 2   SAY "Konto zaduzuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
 
       cIdRjFakt := cIdFirma
 
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "RJ u FAKT: " GET  cIdRjFakt
       @ box_x_koord() + 7, box_y_koord() + 2 SAY "Dokument tipa u fakt:" GET cIdTipDok
-
       @ box_x_koord() + 8, box_y_koord() + 2 SAY "Broj dokumenta u fakt:" GET cFaBrDok
-
 
       READ
 
@@ -407,13 +382,6 @@ FUNCTION PrenosNoFakt()
       ENDIF
 
       seek_fakt( cIdRjFakt )
-
-      //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cIdRjFakt + "'==IdFirma", "IDROBA", F_ROBA, "idtipdok = '" + cIdTipdok + "' .and. brdok = '" + cFaBrDok + "'" )
-
-      //   MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u tekucem sifrarniku!#Prenos nije izvrsen!" )
-      //   LOOP
-      //ENDIF
-
       DO WHILE !Eof() .AND. cIdRjFakt == IdFirma
 
          IF idtipdok = cIdTipdok .AND. cFaBrDok = brdok
@@ -424,7 +392,7 @@ FUNCTION PrenosNoFakt()
                select_o_sastavnice( fakt->idroba )
                DO WHILE !Eof() .AND. id == fakt->idroba
                   // setaj kroz sast
-                select_o_roba(sast->id2 )
+                  select_o_roba( sast->id2 )
                   SELECT kalk_pripr
                   LOCATE FOR idroba == sast->id2
                   IF Found()
@@ -442,7 +410,6 @@ FUNCTION PrenosNoFakt()
                         idpartner WITH fakt->idpartner, ;
                         idkonto   WITH cidkonto, ;
                         idkonto2  WITH cidkonto2, ;
-                        idzaduz2  WITH cidzaduz2, ;
                         kolicina WITH fakt->kolicina * sast->kolicina, ;
                         idroba WITH sast->id2, ;
                         nc  WITH ROBA->nc, ;
@@ -450,7 +417,7 @@ FUNCTION PrenosNoFakt()
                         rabatv WITH fakt->rabat, ;
                         mpc WITH fakt->porez
 
-                        // datfaktp WITH dDatKalk, ;
+                     // datfaktp WITH dDatKalk, ;
                   ENDIF
 
                   SELECT sast
@@ -467,11 +434,9 @@ FUNCTION PrenosNoFakt()
       @ box_x_koord() + 10, box_y_koord() + 2 SAY "Dokumenti su preneseni !!"
 
       kalk_fix_brdok_add_1( @cBrKalk )
-
       cFaBrDok := UBrojDok( Val( Left( cFaBrDok, 5 ) ) + 1, 5, Right( cFaBrDok, 3 ) )
 
       Inkey( 4 )
-
       @ box_x_koord() + 8, box_y_koord() + 2 SAY Space( 30 )
 
    ENDDO
@@ -495,20 +460,11 @@ FUNCTION fakt_kalk_prenos_normativi()
    LOCAL GetList := {}
 
    o_kalk_pripr()
-   // o_kalk()
-  // o_roba()
-   //o_konto()
-   //o_partner()
-   //o_tarifa()
-  // o_sastavnice()
-   //o_fakt_dbf()
 
    dDatKalk := Date()
    cIdKonto := PadR( "5100", 7 )
-   cIdZaduz2 := Space( 6 )
 
    kalk_set_brkalk_za_idvd( "10", @cBrKalk )
-
 
    Box(, 15, 60 )
 
@@ -536,10 +492,10 @@ FUNCTION fakt_kalk_prenos_normativi()
       ENDIF
 
       seek_fakt( cIdRjFakt )
-      //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cIdRjFakt + "'==IdFirma", "IDROBA", F_ROBA, "idtipdok $ '" + cIdTipdok + "' .and. dDatFOd<=datdok .and. dDatFDo>=datdok" )
-      //   MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u tekucem sifrarniku!#Prenos nije izvrsen!" )
-      //   LOOP
-      //ENDIF
+      // IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cIdRjFakt + "'==IdFirma", "IDROBA", F_ROBA, "idtipdok $ '" + cIdTipdok + "' .and. dDatFOd<=datdok .and. dDatFDo>=datdok" )
+      // MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u tekucem sifrarniku!#Prenos nije izvrsen!" )
+      // LOOP
+      // ENDIF
 
       DO WHILE !Eof() .AND. cIdRjFakt == IdFirma
 
@@ -572,7 +528,7 @@ FUNCTION fakt_kalk_prenos_normativi()
                      kolicina WITH fakt->kolicina, ;
                      mpc WITH fakt->porez
 
-                     //datfaktp WITH dDatKalk, ;
+                  // datfaktp WITH dDatKalk, ;
                ENDIF
 
             ENDIF

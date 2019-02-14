@@ -190,9 +190,7 @@ FUNCTION fakt_11_kalk_prenos_11()
                brfaktp WITH "", ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cPKonto, ;
-               idzaduz  WITH cidzaduz, ;
                idkonto2  WITH cidkonto2, ;
-               idzaduz2  WITH cidzaduz2, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
                vpc WITH fakt->cijena, ;
@@ -292,17 +290,12 @@ FUNCTION fakt_13_kalk_11()
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 11 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
       @ box_x_koord() + 3, box_y_koord() + 2   SAY "Magac. konto razduzuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 3, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )
-      // ENDIF
+
 
       IF gVar13u11 == "1"
          @ box_x_koord() + 4, box_y_koord() + 2   SAY "Prodavn. konto zaduzuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
       ENDIF
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + 4, Col() + 2 SAY "Zaduzuje:" GET cIdZaduz  PICT "@!"      VALID Empty( cidzaduz ) .OR. p_partner( @cIdZaduz )
-      // ENDIF
 
       cFaktIdFirma := cIdFirma
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Broj otpremnice u MP: " GET cFaktIdFirma
@@ -371,9 +364,7 @@ FUNCTION fakt_13_kalk_11()
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cPKonto, ;
-               idzaduz  WITH cidzaduz, ;
                idkonto2  WITH cidkonto2, ;
-               idzaduz2  WITH cidzaduz2, ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
@@ -538,7 +529,6 @@ FUNCTION fakt_11_kalk_41()
                PRIVATE aPorezi := {}
 
                set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, fakt->idRoba, @aPorezi )
-
                nMPVBP := MpcBezPor( fakt->( kolicina * cijena ), aPorezi )
 
                APPEND BLANK
@@ -552,7 +542,6 @@ FUNCTION fakt_11_kalk_41()
                   brfaktp WITH fakt->brdok, ;
                   datfaktp WITH fakt->datdok, ;
                   idkonto WITH cidkonto, ;
-                  idzaduz WITH cidzaduz, ;
                   kolicina WITH fakt->kolicina, ;
                   idroba WITH fakt->idroba, ;
                   mpcsapp WITH fakt->cijena, ;
@@ -631,7 +620,6 @@ FUNCTION fakt_11_kalk_41()
                REPLACE brfaktp WITH fakt->brdok
                REPLACE datfaktp WITH fakt->datdok
                REPLACE idkonto WITH cIdKonto
-               REPLACE idzaduz WITH cIdZaduz
                REPLACE kolicina WITH fakt->kolicina
                REPLACE idroba WITH fakt->idroba
                REPLACE mpcsapp WITH fakt->cijena
@@ -777,7 +765,6 @@ FUNCTION fakt_01_kalk_81()
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cidkonto, ;
-               idzaduz  WITH cidzaduz, ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                mpcsapp WITH fakt->cijena, ;
@@ -841,13 +828,8 @@ FUNCTION fakt_13_kalk_80()
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 80 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
       @ box_x_koord() + 3, box_y_koord() + 2   SAY "Prodavn. konto zaduzuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 3, Col() + 2 SAY "Zaduzuje:" GET cIdZaduz  PICT "@!"      VALID Empty( cidzaduz ) .OR. p_partner( @cIdZaduz )
-      // ENDIF
       @ box_x_koord() + 4, box_y_koord() + 2   SAY "CM. konto razduzuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 4, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )
-      // ENDIF
+
 
       cFaktIdFirma := cIdFirma
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Broj otpremnice u MP: " GET cFaktIdFirma
@@ -918,9 +900,7 @@ FUNCTION fakt_13_kalk_80()
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cidkonto2, ;
-               idzaduz  WITH cidzaduz2, ;
                idkonto2  WITH cidkonto, ;
-               idzaduz2  WITH cidzaduz, ;
                kolicina WITH -fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc WITH fakt->cijena / ( 1 + tarifa->pdv / 100 ), ;
@@ -939,9 +919,7 @@ FUNCTION fakt_13_kalk_80()
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cidkonto, ;
-               idzaduz  WITH cidzaduz, ;
                idkonto2  WITH "XXX", ;
-               idzaduz2  WITH "", ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc WITH fakt->cijena / ( 1 + tarifa->pdv / 100 ), ;
@@ -1146,7 +1124,6 @@ FUNCTION fakt_11_kalk_42()
                REPLACE brfaktp WITH fakt->brdok
                REPLACE datfaktp WITH fakt->datdok
                REPLACE idkonto WITH cidkonto
-               REPLACE idzaduz WITH cidzaduz
                REPLACE kolicina WITH fakt->kolicina
                REPLACE idroba WITH fakt->idroba
                REPLACE mpcsapp WITH fakt->cijena
@@ -1240,7 +1217,6 @@ FUNCTION fakt_11_kalk_42()
                      REPLACE idkonto WITH cIdKonto
                   ENDIF
 
-                  REPLACE idzaduz WITH cIdZaduz
                   REPLACE kolicina WITH fakt->kolicina
                   REPLACE idroba WITH fakt->idroba
                   REPLACE mpcsapp WITH fakt->cijena

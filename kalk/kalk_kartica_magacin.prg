@@ -54,7 +54,6 @@ FUNCTION kalk_kartica_magacin()
    dDatDo := Date()
    cPredh := "N"
 
-
    cPrikazBrojaFaktureDN := "N"
    cPrikFCJ2 := "N"
 
@@ -94,7 +93,6 @@ FUNCTION kalk_kartica_magacin()
          IF !Empty( cRNT1 )
             @ box_x_koord() + 4, box_y_koord() + 2 SAY "Broj radnog naloga:" GET cRNalBroj PICT "@S20"
          ENDIF
-
          @ box_x_koord() + 5, box_y_koord() + 2 SAY "Partner (prazno-svi)"  GET cIdPArtner  VALID Empty( cIdPartner ) .OR. p_partner( @cIdPartner )  PICT "@!"
          @ box_x_koord() + 7, box_y_koord() + 2 SAY "Datum od " GET dDatOd
          @ box_x_koord() + 7, Col() + 2 SAY "do" GET dDatDo
@@ -106,7 +104,6 @@ FUNCTION kalk_kartica_magacin()
 
          @ box_x_koord() + 12, box_y_koord() + 2 SAY "Tip dokumenta (;) :"  GET cIdVd PICT "@S20"
          @ box_x_koord() + 14, box_y_koord() + 2 SAY "Prikaz srednje nabavne cijene ?" GET cPrikSredNc VALID cPrikSredNc $ "DN" PICT "@!"
-
          @ box_x_koord() + 16, box_y_koord() + 2 SAY "Export XLSX:"  GET cExportDn PICT "@!" VALID cExportDN $ "DN"
          READ
          ESC_BCR
@@ -115,13 +112,13 @@ FUNCTION kalk_kartica_magacin()
             lExport := .T.
             create_dbf_r_export( kalk_kartica_magacin_export_dbf_struct() )
          ENDIF
-         IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
-            PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
-         ENDIF
+         // IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
+         // PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
+         // ENDIF
 
-         IF ( Empty( cRNT1 ) .OR. Empty( cRNalBroj ) .OR. aUslRn <> NIL )
-            EXIT
-         ENDIF
+         // IF ( Empty( cRNT1 ) .OR. Empty( cRNalBroj ) .OR. aUslRn <> NIL )
+         EXIT
+         // ENDIF
 
       ENDDO
       BoxC()
@@ -144,10 +141,10 @@ FUNCTION kalk_kartica_magacin()
          cIdRobaTackaZarez := Trim( StrTran( cIdroba, ";", "" ) )
       ENDIF
 
-      //IF Right( Trim( cIdRoba ), 1 ) == ">"
-      //   cIdRobaTackaZarez := Trim( StrTran( cIdroba, ">", "" ) )
-      //   lRobaTackaZarez := .T.
-      //ENDIF
+      // IF Right( Trim( cIdRoba ), 1 ) == ">"
+      // cIdRobaTackaZarez := Trim( StrTran( cIdroba, ">", "" ) )
+      // lRobaTackaZarez := .T.
+      // ENDIF
 
       IF LastKey() <> K_ESC
          set_metric( "kalk_kartica_magacin_id_roba", my_user(), cIdRoba )
@@ -180,9 +177,9 @@ FUNCTION kalk_kartica_magacin()
       cFilt += ".and.IdPartner==" + dbf_quote( cIdPartner )
    ENDIF
 
-   IF !Empty( cRNT1 ) .AND. !Empty( cRNalBroj )
-      cFilt += ".and." + aUslRn
-   ENDIF
+   // IF !Empty( cRNT1 ) .AND. !Empty( cRNalBroj )
+   // cFilt += ".and." + aUslRn
+   // ENDIF
 
    IF Empty( cIdRoba )
       find_kalk_by_mkonto_idroba_idvd( cIdFirma, cIdVd, cIdKonto, NIL, cOrderBy )
@@ -198,9 +195,7 @@ FUNCTION kalk_kartica_magacin()
    EOF CRET
 
    select_o_koncij( cIdKonto )
-
    SELECT kalk
-
    gaZagFix := { 7, 4 }
 
    START PRINT CRET
@@ -353,10 +348,10 @@ FUNCTION kalk_kartica_magacin()
 
                IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY field->brfaktp
-                  IF !Empty( idzaduz2 )
-                     @ PRow(), PCol() + 1 SAY " RN: "
-                     ?? idzaduz2
-                  ENDIF
+                  //IF !Empty( idzaduz2 )
+                  //   @ PRow(), PCol() + 1 SAY " RN: "
+                  //   ?? idzaduz2
+                  //ENDIF
                ENDIF
 
                IF cPrikFCJ2 == "D" .AND. field->idvd == "10"
@@ -419,9 +414,9 @@ FUNCTION kalk_kartica_magacin()
 
                IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY brfaktp
-                  IF !Empty( field->idzaduz2 )
-                     @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
-                  ENDIF
+                  //IF !Empty( field->idzaduz2 )
+                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
+                  //ENDIF
                ENDIF
             ENDIF
 
@@ -471,9 +466,9 @@ FUNCTION kalk_kartica_magacin()
 
                IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY brfaktp
-                  IF !Empty( idzaduz2 )
-                     @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
-                  ENDIF
+                  //IF !Empty( idzaduz2 )
+                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
+                  //ENDIF
                ENDIF
             ENDIF
 
@@ -497,9 +492,9 @@ FUNCTION kalk_kartica_magacin()
 
                IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY brfaktp
-                  IF !Empty( idzaduz2 )
-                     @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
-                  ENDIF
+                  //IF !Empty( idzaduz2 )
+                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
+                  //ENDIF
                ENDIF
             ENDIF
 
@@ -540,9 +535,9 @@ FUNCTION kalk_kartica_magacin()
 
                IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY field->brfaktp
-                  IF !Empty( field->idzaduz2 )
-                     @ PRow(), PCol() + 1 SAY " RN: "; ?? field->idzaduz2
-                  ENDIF
+                  //IF !Empty( field->idzaduz2 )
+                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? field->idzaduz2
+                  //ENDIF
                ENDIF
             ENDIF
          ENDIF
@@ -687,13 +682,13 @@ STATIC FUNCTION kartica_magacin_open_tabele()
       USE
    ENDIF
 
-  // o_partner()
-//   o_tarifa()
-//   o_sifk()
-//   o_sifv()
+   // o_partner()
+// o_tarifa()
+// o_sifk()
+// o_sifv()
    // o_roba()
-//   o_konto()
-//   o_koncij()
+// o_konto()
+// o_koncij()
    o_kalk() // kalk_kartica
 
    RETURN .T.

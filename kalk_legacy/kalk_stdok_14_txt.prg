@@ -52,16 +52,13 @@ FUNCTION kalk_stampa_dok_14_txt_legacy()
    find_kalk_doks_by_broj_dokumenta( kalk_pripr->idfirma, kalk_pripr->idvd, kalk_pripr->brdok )
    ?? "  DatVal:", kalk_doks->datval
 
-   IF cIdvd == "94"
-      select_o_konto( cIdkonto2 )
-      ?  "Storno razduzenja KONTA:", cIdKonto, "-", AllTrim( naz )
-   ELSE
-      select_o_konto( cIdkonto2 )
-      ?  "KONTO razduzuje:", kalk_pripr->mkonto, "-", AllTrim( naz )
-      IF !Empty( kalk_pripr->Idzaduz2 )
-         ?? " Rad.nalog:", kalk_pripr->Idzaduz2
-      ENDIF
-   ENDIF
+
+   select_o_konto( cIdkonto2 )
+   ?  "KONTO razduzuje:", kalk_pripr->mkonto, "-", AllTrim( naz )
+   // IF !Empty( kalk_pripr->Idzaduz2 )
+   // ?? " Rad.nalog:", kalk_pripr->Idzaduz2
+   // ENDIF
+
 
    SELECT kalk_pripr
    select_o_koncij( kalk_pripr->mkonto )

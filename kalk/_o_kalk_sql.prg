@@ -97,8 +97,8 @@ FUNCTION find_kalk_doks_za_tip_zadnji_broj( cIdFirma, cIdvd )
 
    RETURN ! Eof()
 
-
-FUNCTION find_kalk_doks_by_broj_radnog_naloga( cIdFirma, cMKonto, cIdZaduz2, cIdVd )
+/*
+--FUNCTION find_kalk_doks_by_broj_radnog_naloga( cIdFirma, cMKonto, cIdZaduz2, cIdVd )
 
    LOCAL hParams := hb_Hash()
 
@@ -110,35 +110,30 @@ FUNCTION find_kalk_doks_by_broj_radnog_naloga( cIdFirma, cMKonto, cIdZaduz2, cId
       hParams[ "mkonto" ] := cMKonto
    ENDIF
 
-
-   IF cIdZaduz2 <> NIL
-      hParams[ "idzaduz2" ] := cIdZaduz2
-   ENDIF
-
    IF cIdVd <> NIL .AND. !( Empty( cIdVd ) )
       hParams[ "idvd" ] := cIdVd
    ENDIF
 
-
    hParams[ "indeks" ] := .F.  // ne trositi vrijeme na kreiranje indeksa
-
    use_sql_kalk_doks( hParams )
    GO TOP
 
    RETURN ! Eof()
+*/
 
 
-
-FUNCTION find_kalk_doks_by_broj_fakture( cIdVd, cBrFaktP )
+FUNCTION find_kalk_doks_by_broj_fakture( cIdVd, cBrFaktP, cMKonto )
 
    LOCAL hParams := hb_Hash()
 
    IF cIdVd <> NIL
       hParams[ "idvd" ] := cIdVd
    ENDIF
-
    IF cBrFaktP <> NIL
       hParams[ "broj_fakture" ] := cBrFaktP
+   ENDIF
+   IF cMKonto <> NIL
+      hParams[ "mkonto" ] := cMKonto
    ENDIF
 
    hParams[ "order_by" ] := "brfaktp,idvd"
@@ -483,8 +478,6 @@ FUNCTION use_sql_kalk( hParams )
    cSql += coalesce_char_zarez( "idkonto", 7 )
    cSql += coalesce_char_zarez( "idkonto2", 7 )
 
-   cSql += coalesce_char_zarez( "kalk_kalk.idzaduz", 6 )
-   cSql += coalesce_char_zarez( "kalk_kalk.idzaduz2", 6 )
 
    IF !( lReportMagacin  .OR. lReportProdavnica )
 
@@ -583,7 +576,7 @@ FUNCTION use_sql_kalk( hParams )
 
    IF is_sql_rdd_treba_indeks( hParams )
       INDEX ON ( idfirma + idvd + brdok ) TAG "1" TO cTable
-      INDEX ON ( idfirma + mkonto + idzaduz2 + idvd + brdok ) TAG "2" TO cTable
+      INDEX ON ( idfirma + mkonto + idvd + brdok ) TAG "2" TO cTable
       INDEX ON ( idfirma + DToS( datdok ) + podbr + idvd + brdok ) TAG "3" TO cTable
       INDEX ON ( datdok ) TAG "DAT" TO cTable
       INDEX ON ( brfaktp + idvd ) TAG "V_BRF" TO cTable
@@ -755,8 +748,6 @@ FUNCTION use_sql_kalk_doks( hParams )
    cSql += " datdok, datfaktp, datval, dat_od, dat_do, "
    cSql += coalesce_char_zarez( "brfaktp", 10 )
    cSql += coalesce_char_zarez( "idpartner", 6 )
-   cSql += coalesce_char_zarez( "idzaduz", 6 )
-   cSql += coalesce_char_zarez( "idzaduz2", 6 )
    cSql += coalesce_char_zarez( "pkonto", 7 )
    cSql += coalesce_char_zarez( "mkonto", 7 )
    cSql += coalesce_num_num_zarez( "nv", 12, 2 )
@@ -801,7 +792,7 @@ FUNCTION use_sql_kalk_doks( hParams )
 
    IF is_sql_rdd_treba_indeks( hParams )
       INDEX ON ( idfirma + idvd + brdok ) TAG "1" TO cTable
-      INDEX ON ( idfirma + mkonto + idzaduz2 + idvd + brdok ) TAG "2" TO cTable
+      INDEX ON ( idfirma + mkonto + idvd + brdok ) TAG "2" TO cTable
       INDEX ON ( idfirma + DToS( datdok ) + podbr + idvd + brdok ) TAG "3" TO cTable
       INDEX ON ( datdok ) TAG "DAT" TO cTable
       INDEX ON ( brfaktp + idvd ) TAG "V_BRF" TO cTable
@@ -842,12 +833,6 @@ STATIC FUNCTION sql_kalk_doks_where( hParams )
       cWhere += "brfaktp = " + sql_quote( hParams[ "broj_fakture" ] )
    ENDIF
 
-   IF hb_HHasKey( hParams, "idzaduz2" )
-      IF !Empty( cWhere )
-         cWhere += " AND "
-      ENDIF
-      cWhere += "idzaduz2 = " + sql_quote( hParams[ "idzaduz2" ] )
-   ENDIF
 
    IF hb_HHasKey( hParams, "mkonto" )
       IF !Empty( cWhere )
@@ -855,7 +840,6 @@ STATIC FUNCTION sql_kalk_doks_where( hParams )
       ENDIF
       cWhere += "mkonto = " + sql_quote( hParams[ "mkonto" ] )
    ENDIF
-
 
    IF hb_HHasKey( hParams, "pkonto" )
       IF !Empty( cWhere )

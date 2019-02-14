@@ -992,22 +992,19 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ENDIF
 
    SELECT kalk_pripr
+   kalk_check_idzaduz2()
 
    IF _idvd != "PR"
       SET FILTER TO
    ENDIF
 
    IF _idvd == "10"
-
       RETURN kalk_get_1_10()
 
    ELSEIF _idvd == "11"
       RETURN kalk_get_1_11()
 
-   ELSEIF _idvd == "12"
-      RETURN kalk_get_1_12()
-
-   ELSEIF _idvd == "13"
+   ELSEIF _idvd $ "12#13"    // ?
       RETURN kalk_get_1_12()
 
    ELSEIF _idvd $ "14#KO"
@@ -1031,11 +1028,8 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ELSEIF _idvd == "80"
       RETURN kalk_get1_80( @hParams )
 
-   ELSEIF _idvd $ "95#96#97"
-      RETURN kalk_get_1_95()
-
-   ELSEIF _idvd $  "94"    // storno fakture, storno otpreme, doprema
-      RETURN kalk_get_1_94()
+   ELSEIF _idvd $ "95#96"
+      RETURN kalk_get_1_95_96()
 
    ELSEIF _idvd == "IM"
       RETURN kalk_get_1_im()
@@ -1044,7 +1038,7 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
       RETURN kalk_get_1_ip()
 
    ELSEIF _idvd == "RN"
-      RETURN GET1_RN()
+      RETURN kalk_get_1_rn()
 
    ELSEIF _idvd == "PR"
       RETURN kalk_unos_dok_pr()
@@ -1124,7 +1118,7 @@ FUNCTION ispisi_naziv_roba( x, y, len )
 FUNCTION kalk_unos_2()
 
    IF _idvd == "RN"
-      RETURN Get2_RN()
+      RETURN kalk_get_2_rn()
    ELSEIF _idvd == "PR"
       RETURN kalk_get_pr_2()
    ENDIF

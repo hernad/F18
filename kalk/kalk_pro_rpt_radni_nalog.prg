@@ -30,7 +30,7 @@ FUNCTION kalk_stampa_dok_rn()
    @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
    select_o_partner( cIdPartner )
 
-   ? "RADNI NALOG:", kalk_pripr->IDZADUZ2
+   ? "RADNI NALOG:", kalk_pripr->brfaktp
 
    m := "--- ------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
    ? m

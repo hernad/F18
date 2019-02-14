@@ -61,17 +61,13 @@ STATIC FUNCTION prenos()
 
    O_MAT_PRIPR
    O_MAT_NALOG
-  // o_roba()
-  // o_sifk()
-//   o_sifv()
-//   o_konto()
-//   o_partner()
+
    o_valute()
-   //o_fakt_dbf()
+
 
    dDatMat := Date()
    cIdKonto := cIdKonto2 := Space( 7 )
-   cIdZaduz2 := Space( 6 )
+   //cIdZaduz2 := Space( 6 )
 
    SELECT mat_nalog
    SET ORDER TO TAG "1"
@@ -92,7 +88,7 @@ STATIC FUNCTION prenos()
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj mat_naloga mat " + gVN + " -" GET cBrMat PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatMat
       @ box_x_koord() + 3, box_y_koord() + 2   SAY "Konto zaduzuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
-      @ box_x_koord() + 3, Col() + 2 SAY "Zaduzuje:" GET cIdZaduz  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz )
+      //@ box_x_koord() + 3, Col() + 2 SAY "Zaduzuje:" GET cIdZaduz  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz )
 
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Broj fakture: " + cIdFirma
       @ box_x_koord() + 6, Col() + 1 SAY "- " + cidtipdok

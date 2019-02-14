@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION cre_fin_mat( ver )
 
    LOCAL aDbf
@@ -45,7 +44,6 @@ Harbour extended Field Types
    AAdd( aDBf, { "IDTARIFA", "C",   6,  0 } )
    AAdd( aDBf, { "IDPARTNER", "C",   6,  0 } )
    AAdd( aDBf, { 'IDZADUZ', 'C',   6,  0 } )
-   AAdd( aDBf, { 'IDZADUZ2', 'C',   6,  0 } )
    AAdd( aDBf, { "IDVD", "C",   2,  0 } )
    AAdd( aDBf, { "BRDOK", "C",   8,  0 } )
    AAdd( aDBf, { "DATDOK", "D",   8,  0 } )
@@ -93,7 +91,6 @@ Harbour extended Field Types
    _alias := "FINMAT"
    _table_name := "finmat"
 
-
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 020104 // 2.1.2 - rbr numeric
       f18_delete_dbf( "finmat" )
    ENDIF
@@ -104,7 +101,6 @@ Harbour extended Field Types
    IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 0901
       modstru( { "*" + _table_name, "A K1 C 1 0", "A K2 C 1 0" } )
    ENDIF
-
 
    CREATE_INDEX( "1", "idFirma+IdVD+BRDok", _alias )
 

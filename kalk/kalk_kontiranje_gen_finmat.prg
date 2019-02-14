@@ -223,8 +223,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
             IdKonto2  WITH kalk_pripr->IdKonto2, ;
             IdTarifa  WITH kalk_pripr->IdTarifa, ;
             IdPartner WITH kalk_pripr->IdPartner, ;
-            IdZaduz   WITH kalk_pripr->IdZaduz, ;
-            IdZaduz2  WITH kalk_pripr->IdZaduz2, ;
             BrFaktP   WITH kalk_pripr->BrFaktP, ;
             DatFaktP  WITH kalk_pripr->DatFaktP, ;
             IdVD      WITH kalk_pripr->IdVD, ;

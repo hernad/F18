@@ -41,9 +41,6 @@ FUNCTION kalk_get_1_41_42()
 
    @ box_x_koord() + 8, box_y_koord() + 2  SAY8 "Prodavnički Konto razdužuje" GET _pkonto VALID  P_Konto( @_pkonto, 8, 38 ) PICT "@!"
 
-   //_idkonto2 := ""
-   _idzaduz2 := ""
-
    READ
 
    SELECT kalk_pripr

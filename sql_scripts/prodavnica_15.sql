@@ -1100,13 +1100,26 @@ ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS dat_od date;
 ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS dat_do date;
 ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS opis text;
 
--- DO $$
--- BEGIN
---
---   BEGIN
---     ALTER TABLE p15.pos_pos_knjig ADD CONSTRAINT rbr NOT NULL;
---   EXCEPTION
---     WHEN duplicate_object THEN RAISE NOTICE 'Table constraint foo.bar already exists';
---   END;
---
--- END $$;
+DO $$
+DECLARE
+  nCount numeric;
+BEGIN
+    BEGIN
+      SELECT count(*) as count from fmk.kalk_kalk where btrim(coalesce(idzaduz2,''))<>''
+        INTO nCount;
+      IF (nCount > 1) THEN
+         RAISE EXCEPTION 'kalk idzaduz2 se koristi % !?', nCount
+            USING HINT = 'Vjerovatno ima veze sa pracenjem proizvodnje';
+      END IF;
+      ALTER TABLE fmk.kalk_doks DROP COLUMN idzaduz;
+      ALTER TABLE fmk.kalk_doks DROP COLUMN idzaduz2;
+
+      ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz;
+      ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz2;
+      ALTER TABLE fmk.kalk_kalk DROP COLUMN fcj3;
+
+	EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'idzaduz2 garant ne postoji';
+	END;
+END;
+$$;

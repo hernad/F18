@@ -18,9 +18,6 @@ FUNCTION kalk_get_1_18()
    _DatFaktP := _datdok
 
    @ box_x_koord() + 8, box_y_koord() + 2   SAY "Konto koji zaduzuje" GET _IdKonto VALID  P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
-   // IF gNW <> "X"
-   // @ box_x_koord() + 8, box_y_koord() + 35  SAY "Zaduzuje: "   GET _IdZaduz  PICT "@!" VALID Empty( _idZaduz ) .OR. p_partner( @_IdZaduz, 21, 5 )
-   // ENDIF
    read
    ESC_RETURN K_ESC
 

@@ -9,9 +9,7 @@
  * By using this software, you agree to be bound by its terms.
  */
 
-
 #include "f18.ch"
-
 
 FUNCTION prenos_fakt_kalk_magacin()
 
@@ -73,8 +71,6 @@ FUNCTION fakt_kalk_prenos_10_14()
    dDatKalk := fetch_metric( "kalk_fakt_prenos_10_14_datum", my_user(), Date() )
    cIdKonto := fetch_metric( "kalk_fakt_prenos_10_14_konto_1", my_user(), PadR( "1200", 7 ) )
    cIdKonto2 := fetch_metric( "kalk_fakt_prenos_10_14_konto_2", my_user(), PadR( "1310", 7 ) )
-   cIdZaduz2 := Space( 6 )
-
 
    IF glKalkBrojacPoKontima
       Box( "#FAKT->KALK", 3, 70 )
@@ -84,19 +80,14 @@ FUNCTION fakt_kalk_prenos_10_14()
    ENDIF
    cBrKalk :=  kalk_get_next_broj_v5( cIdFirma, "14", cIdKonto2 )
 
-
    Box(, 15, 60 )
 
    DO WHILE .T.
-
       nRBr := 0
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 14 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
       @ box_x_koord() + 4, box_y_koord() + 2   SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto2 )
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + 4, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )
-      // ENDIF
 
       cFaktFirma := iif( cIdKonto2 == gKomKonto, gKomFakt, cIdFirma )
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Broj fakture: " GET cFaktFirma
@@ -215,7 +206,6 @@ FUNCTION fakt_kalk_prenos_10_14()
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cIdkonto, ;
                idkonto2  WITH cIdkonto2, ;
-               idzaduz2  WITH cIdzaduz2, ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
@@ -259,7 +249,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
    LOCAL cBrKalk := Space( 8 )
    LOCAL cTipKalk := "96"
    LOCAL cFaktDob := Space( 10 )
-   LOCAL dDatKalk, cIdZaduz2, cIdKonto, cIdKonto2
+   LOCAL dDatKalk, cIdKonto, cIdKonto2
    LOCAL cSufix
    LOCAL hRec
    LOCAL cIdPartner := Space( 6 ), cBeze
@@ -297,7 +287,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
 
    cIdKonto := fetch_metric( "kalk_fakt_prenos_otpr_konto_1", my_user(), cIdKonto )
    cIdKonto2 := fetch_metric( "kalk_fakt_prenos_otpr_konto_2", my_user(), cIdKonto2 )
-   cIdZaduz2 := Space( 6 )
+   //cIdZaduz2 := Space( 6 )
 
    IF glKalkBrojacPoKontima
 
@@ -317,16 +307,10 @@ FUNCTION fakt_kalk_prenos( cIndik )
       nRBr := 0
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Broj kalkulacije " + cTipKalk + " -" GET cBrKalk PICT "@!"
-
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto zaduzuje :" GET cIdKonto  PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto )
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Konto razduzuje:" GET cIdKonto2 PICT "@!" VALID Empty( cidkonto2 ) .OR. P_Konto( @cIdKonto2 )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 4, Col() + 2 SAY "Razduzuje:" GET cIdZaduz2  PICT "@!"      VALID Empty( cidzaduz2 ) .OR. p_partner( @cIdZaduz2 )
-      // ENDIF
 
       cFaktFirma := cIdFirma
-
-
       @ box_x_koord() + 6, box_y_koord() + 2 SAY Space( 60 )
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Broj dokumenta u FAKT: " GET cFaktFirma
       @ box_x_koord() + 6, Col() + 1 SAY "-" GET cIdTipDok VALID cIdTipDok $ "00#01#10#12#19#16"
@@ -399,12 +383,6 @@ FUNCTION fakt_kalk_prenos( cIndik )
 
          select_o_koncij( cIdKonto )
 
-         //SELECT fakt
-
-         //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktFirma + cIdTipDok + cBrDok + "'==IdFirma+IdTipDok+BrDok", "IDROBA", F_ROBA )
-          //  MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u tekucem sifrarniku!#Prenos nije izvrsen!" )
-          //  LOOP
-         //ENDIF
 
          SELECT FAKT
          DO WHILE !Eof() .AND. cFaktFirma + cIdTipDok + PADR( cBrDok, FIELD_LEN_FAKT_BRDOK ) == fakt->IdFirma + fakt->IdTipDok + PADR( fakt->BrDok, FIELD_LEN_FAKT_BRDOK )
@@ -432,7 +410,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
             hRec[ "datfaktp" ] := fakt->datdok
             hRec[ "idkonto" ] := cIdKonto
             hRec[ "idkonto2" ] := cIdKonto2
-            hRec[ "idzaduz2" ] := cIdZaduz2
+            //hRec[ "idzaduz2" ] := cIdZaduz2
             hRec[ "kolicina" ] := fakt->kolicina
             hRec[ "idroba" ] := fakt->idroba
             hRec[ "nc" ] := fakt->cijena
@@ -450,9 +428,9 @@ FUNCTION fakt_kalk_prenos( cIndik )
 
             IF cTipKalk $ "96"  // veza radni nalog !
                _tmp := aMemo[ 20 ]
-               IF !Empty( _tmp )
-                  hRec[ "idzaduz2" ] := _tmp
-               ENDIF
+               //IF !Empty( _tmp )
+               //    hRec[ "idzaduz2" ] := _tmp
+               //ENDIF
             ENDIF
 
             dbf_update_rec( hRec )
@@ -629,14 +607,6 @@ FUNCTION kalk_fakt_prenos_period()
                vpc WITH fakt->cijena, ;
                rabatv WITH fakt->rabat, ;
                mpc WITH fakt->porez
-
-            IF cIdVdKalk $ "96" .AND. fakt->( FieldPos( "idrnal" ) ) <> 0
-               REPLACE idzaduz2 WITH fakt->idRNal
-            ENDIF
-
-            IF cIdVdKalk $ "10"
-               REPLACE idzaduz2 WITH fakt->rabat
-            ENDIF
 
          ENDIF
 

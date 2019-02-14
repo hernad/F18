@@ -343,7 +343,6 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
    LOCAL cIdVd
    LOCAL cBrDok
    LOCAL dDatDok
-   LOCAL cIdZaduz2
 
    o_kalk_za_azuriranje()
 
@@ -358,7 +357,6 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
       cIdVd := field->idvd
       cBrDok := field->brdok
       dDatDok := field->datdok
-      cIdzaduz2 := field->idzaduz2
 
       DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdVd == field->idvd .AND. cBrdok == field->brdok
 
@@ -397,13 +395,6 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
          IF field->idvd <> "24" .AND. Empty( field->mu_i ) .AND. Empty( field->pu_i )
             Beep( 2 )
             Msg( "Stavka broj " + field->rbr + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
-            my_close_all_dbf()
-            RETURN .F.
-         ENDIF
-
-         IF cIdzaduz2 <> field->idzaduz2
-            Beep( 2 )
-            Msg( "Stavka broj " + field->rbr + ". različito polje RN u odnosu na prvu stavku" )
             my_close_all_dbf()
             RETURN .F.
          ENDIF
@@ -581,8 +572,6 @@ STATIC FUNCTION kalk_azur_sql()
       hRecKalkDok[ "brfaktp" ] := kalk_pripr->brfaktp
       hRecKalkDok[ "datfaktp" ] := kalk_pripr->datfaktp
       hRecKalkDok[ "idpartner" ] := field->idpartner
-      hRecKalkDok[ "idzaduz" ] := field->idzaduz
-      hRecKalkDok[ "idzaduz2" ] := field->idzaduz2
       hRecKalkDok[ "pkonto" ] := field->pkonto
       hRecKalkDok[ "mkonto" ] := field->mkonto
       hRecKalkDok[ "podbr" ] := field->podbr

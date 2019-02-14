@@ -16,8 +16,23 @@ FUNCTION cre_all_kalk( ver )
    kreiraj_kalk_bazirane_tabele( ver )
    kreiraj_ostale_kalk_tabele( ver )
 
+
    RETURN .T.
 
+/*
+FUNCTION kalk_idzaduz2_se_koristi()
+
+   LOCAL cQuery, oTable, oRow, nCount
+
+   cQuery := "select count(*) as count from " + f18_sql_schema( "kalk_kalk" )
+   cQuery += " where btrim(coalesce(idzaduz2,''))<>''"
+   run_sql_query( cQuery )
+   oTable := run_sql_query( cQuery )
+   oRow := oTable:GetRow( 1 )
+   nCount := oRow:FieldGet( oRow:FieldPos( "count" ) )
+
+   RETURN nCount > 0
+*/
 
 STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
 
@@ -33,8 +48,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDBf, { 'DATDOK', 'D',   8,  0 } )
    AAdd( aDBf, { 'BRFAKTP', 'C',  10,  0 } )
    AAdd( aDBf, { 'IDPARTNER', 'C',   6,  0 } )
-   AAdd( aDBf, { 'IdZADUZ', 'C',   6,  0 } )
-   AAdd( aDBf, { 'IdZADUZ2', 'C',   6,  0 } )
    AAdd( aDBf, { 'PKONTO', 'C',   7,  0 } )
    AAdd( aDBf, { 'MKONTO', 'C',   7,  0 } )
    AAdd( aDBf, { 'NV', 'N',  12,  2 } )
@@ -198,8 +211,6 @@ STATIC FUNCTION definicija_kalk_tabele()
    AAdd( aDBf, { 'IDROBA', 'C',  10,  0 } )
    AAdd( aDBf, { 'IDKONTO', 'C',   7,  0 } )
    AAdd( aDBf, { 'IDKONTO2', 'C',   7,  0 } )
-   AAdd( aDBf, { 'IDZADUZ', 'C',   6,  0 } )
-   AAdd( aDBf, { 'IDZADUZ2', 'C',   6,  0 } )
    AAdd( aDBf, { 'IDVD', 'C',   2,  0 } )
    AAdd( aDBf, { 'BRDOK', 'C',   FIELD_LEN_KALK_BRDOK,  0 } )
    AAdd( aDBf, { 'DATDOK', 'D',   8,  0 } )
@@ -246,3 +257,28 @@ STATIC FUNCTION definicija_kalk_tabele()
    AAdd( aDBf, { 'VPCSAP', 'N', 18, 8 } )
 
    RETURN aDbf
+
+
+/*
+   vec otvorena dbf tabela: kalk_pripr
+*/
+FUNCTION kalk_check_idzaduz2()
+
+   LOCAL aTabele, nI, cFile
+
+   IF ( FieldPos( "idzaduz2" ) != 0 )
+      Alert( "Serviser F18 - finmat->idzaduz2 postoji, brisanje, restart!" )
+      my_close_all_dbf()
+      aTabele := { "finmat", "kalk_pripr", "kalk_priprt", "kalk_pripr2", "kalk_pripr9" }
+      FOR nI := 1 TO Len( aTabele )
+         cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".dbf"
+         info_bar( "pos_brdok", cFile )
+         FErase( cFile )
+         cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".cdx"
+         info_bar( "pos_brdok", cFile )
+         FErase( cFile )
+         Quit_1
+      NEXT
+   ENDIF
+
+   RETURN .T.

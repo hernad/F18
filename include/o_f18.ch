@@ -23,7 +23,7 @@
 #xcommand O_VOZILA   => SELECT (F_VOZILA)  ;  my_use  ("vozila")    ; set order to tag "ID"
 
 #xcommand O_RELATION => SELECT (F_RELATION);  my_use ("relation")  ; set order to tag "1"
-#xcommand O_FINMAT   => select (F_FINMAT)  ;  my_use ("finmat")    ; set order to tag "1"
+
 //#xcommand O_ULIMIT   => o_ulimit()
 #xcommand O_TIPBL    => SELECT (F_TIPBL)   ;  my_use ("tipbl")      ; set order to tag "1"
 

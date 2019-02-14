@@ -88,19 +88,7 @@ FUNCTION fakt_fin_prenos()
    ENDIF
 
 
-   O_FINMAT
-   // o_konto()
-   // o_partner()
-   // o_tdok()
-   // o_roba()
-   // o_tarifa()
-
-   // IF lNCPoSast
-   // o_sastavnice()
-   // SET ORDER TO TAG "1"
-   // ENDIF
-
-
+   o_finmat()
    SELECT FINMAT
    my_dbf_zap()
 
@@ -232,7 +220,7 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
    LOCAL cidfirma, cidvd, cbrdok, lafin, lafin2
 
    // o_roba()
-   O_FINMAT
+   o_finmat()
    o_trfp2()
    o_koncij()
    o_valute()

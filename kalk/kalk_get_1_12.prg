@@ -28,11 +28,8 @@ FUNCTION kalk_get_1_12()
       _DatFaktP := _datdok
 
       @ box_x_koord() + 8, box_y_koord() + 2   SAY "Prodavnicki konto razduzuje " GET _IdKonto VALID P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
-
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto zadužuje   "  GET _IdKonto2 VALID Empty( _IdKonto2 ) .OR. P_Konto( @_IdKonto2, 24 )
-      // IF gNW <> "X"
-      // @ box_x_koord() + 9, box_y_koord() + 40  SAY "Zaduzuje  " GET _IdZaduz2   PICT "@!"  VALID Empty( _idZaduz2 ) .OR. p_partner( @_IdZaduz2, 21, 5 )
-      // ENDIF
+
       READ
       ESC_RETURN K_ESC
    ELSE

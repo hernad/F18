@@ -40,7 +40,6 @@ METHOD TKalkMod:mMenu()
    RETURN NIL
 
 
-
 METHOD TKalkMod:programski_modul_osnovni_meni()
 
    LOCAL opc := {}
@@ -193,9 +192,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC lPrikPRUC := .F.
    //PUBLIC FIELD_LENGTH_IDKONTO
 
-   //o_kalk_pripr()
    //FIELD_LENGTH_IDKONTO := Len( mkonto )
-
 
    PUBLIC glZabraniVisakIP
    PUBLIC glKalkBrojacPoKontima := .F.
@@ -208,7 +205,6 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC lAutoObr := .F.
 
    cOdradjeno := "D"
-
 
    c10T1 := fetch_metric( "kalk_dokument_10_trosak_1", nil, c10T1 )
    c10T2 := fetch_metric( "kalk_dokument_10_trosak_2", nil, c10T2 )
@@ -287,7 +283,6 @@ METHOD TKalkMod:set_module_gvars()
 
    glZabraniVisakIP := fetch_metric( "kalk_zabrani_visak_kod_ip", nil, glZabraniVisakIP )
    glKalkBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glKalkBrojacPoKontima )
-
 
    info_bar( ::cName, ::cName + " - kalk set gvars end" )
    info_bar( "KALK", "params in cache: " + AllTrim( Str( params_in_cache() ) ) )

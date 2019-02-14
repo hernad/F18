@@ -200,11 +200,11 @@ FUNCTION kalk_lager_lista_magacin()
       qqRGr := AllTrim( qqRGr )
       qqRGr2 := AllTrim( qqRGr2 )
 
-      IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
-         PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
-      ENDIF
+      //IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
+      //   PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
+      //ENDIF
 
-      IF aUsl1 <> NIL .AND. aUsl2 <> NIL .AND. aUsl3 <> NIL .AND. aUsl4 <> NIL .AND. ( Empty( cRnT1 ) .OR. Empty( cRNalBroj ) .OR. aUslRn <> NIL ) .AND. aUsl5 <> nil
+      IF aUsl1 <> NIL .AND. aUsl2 <> NIL .AND. aUsl3 <> NIL .AND. aUsl4 <> NIL .AND. ( Empty( cRnT1 ) .OR. Empty( cRNalBroj ) /*.OR. aUslRn <> NIL*/ ) .AND. aUsl5 <> nil
          EXIT
       ENDIF
    ENDDO
@@ -278,9 +278,9 @@ FUNCTION kalk_lager_lista_magacin()
       cSintK := ""
    ENDIF
 
-   IF !Empty( cRNT1 ) .AND. !Empty( cRNalBroj )
-      cFilt += ".and." + aUslRn
-   ENDIF
+   //IF !Empty( cRNT1 ) .AND. !Empty( cRNalBroj )
+  //    cFilt += ".and." + aUslRn
+   //ENDIF
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    IF fSint .AND. lSaberiStanjeZaSvaKonta

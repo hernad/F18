@@ -17,7 +17,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
 
    LOCAL cKto1
    LOCAL cKto2
-   LOCAL cIdZaduz2
+   //LOCAL cIdZaduz2
    LOCAL cPom
    LOCAL _naslov
    LOCAL nCol1 := nCol2 := 0, nPom := 0
@@ -33,7 +33,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    //dDatFaktP := field->DatFaktP
    cIdKonto := field->IdKonto
    cIdKonto2 := field->IdKonto2
-   cIdZaduz2 := field->IdZaduz2
+   //cIdZaduz2 := field->IdZaduz2
 
    P_12CPI
 
@@ -76,12 +76,10 @@ FUNCTION kalk_stampa_dok_16_95_96()
 
    ENDIF
 
-   IF !Empty( cIdZaduz2 )
-
-      select_o_fakt_objekti( cIdZaduz2 )
-      ? PadL( "Rad.nalog:", 14 ), AllTrim( cIdZaduz2 ) + " - " + AllTrim( fakt_objekti->naz )
-
-   ENDIF
+   //IF !Empty( cIdZaduz2 )
+  //    select_o_fakt_objekti( cIdZaduz2 )
+  //    ? PadL( "Rad.nalog:", 14 ), AllTrim( cIdZaduz2 ) + " - " + AllTrim( fakt_objekti->naz )
+   //ENDIF
 
    ?
 

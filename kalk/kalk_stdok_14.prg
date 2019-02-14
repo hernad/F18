@@ -232,9 +232,9 @@ STATIC FUNCTION zagl()
    ELSE
       select_o_partner( cIdkonto2 )
       ?  "KONTO razduzuje:", kalk_pripr->mkonto, "-", AllTrim( naz )
-      IF !Empty( kalk_pripr->Idzaduz2 )
-         ?? " Rad.nalog:", kalk_pripr->Idzaduz2
-      ENDIF
+      //IF !Empty( kalk_pripr->Idzaduz2 )
+      //   ?? " Rad.nalog:", kalk_pripr->Idzaduz2
+      //ENDIF
    ENDIF
 
    SELECT kalk_pripr

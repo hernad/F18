@@ -41,9 +41,7 @@ FUNCTION cre_all_dbfs( ver )
 
    cre_params_dbf()
    cre_sif_konto( ver )
-
    fill_tbl_valute() // upisi default valute ako ne postoje
-
    cre_barkod( ver )
    cre_fin_mat( ver )
 

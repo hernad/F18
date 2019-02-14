@@ -186,8 +186,8 @@ FUNCTION kalk_stampa_liste_dokumenata()
       ENDIF
 
       @ PRow(), _n_col := PCol() + 1 SAY PadR( field->idpartner, 6 )
-      @ PRow(), PCol() + 1 SAY PadR( field->idzaduz, 6 )
-      @ PRow(), PCol() + 1 SAY PadR( field->idzaduz2, 6 )
+      @ PRow(), PCol() + 1 SAY PadR( "", 6 )
+      @ PRow(), PCol() + 1 SAY PadR( "", 6 )
 
       nCol1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY Str( kalk_doks->nv, 12, 2 )

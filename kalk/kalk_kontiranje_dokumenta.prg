@@ -37,7 +37,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL lAFin2
    LOCAL lAMat2
    LOCAL nRecNo
-   LOCAL lPrvoDzok := ( fetch_metric( "kalk_kontiranje_prioritet_djokera", nil, "N" ) == "D" )
+   LOCAL lPrvoDzok := ( fetch_metric( "kalk_kontiranje_prioritet_djokera", NIL, "N" ) == "D" )
    LOCAL _fakt_params := fakt_params()
    LOCAL nIznosKontiratiDEM
    LOCAL hRecTrfp, cStavka
@@ -47,38 +47,20 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    IF ( lAGen == NIL )
       lAGen := .F.
    ENDIF
-
    IF ( lViseKalk == NIL )
       lViseKalk := .F.
    ENDIF
-
    IF ( dDatMax == NIL )
       dDatMax := CToD( "" )
    ENDIF
-
-
    IF ( lAutoBrojac == NIL )
       lAutoBrojac := .T.
    ENDIF
 
-  // SELECT F_SIFK
-//   IF !Used()
-//      o_sifk()
-//   ENDIF
-
-//   SELECT F_SIFV
-//   IF !Used()
-//      o_sifv()
-//   ENDIF
-
-  // SELECT F_ROBA
-  // IF !Used()
-  ///    o_roba()
-  // ENDIF
 
    SELECT F_FINMAT
    IF !Used()
-      O_finmat
+      o_finmat()
    ENDIF
 
    SELECT F_TRFP
@@ -118,7 +100,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    lAFin := ( gAFin == "D" )
 
    IF lAFin
-
       Beep( 1 )
       IF !lAGen
          lAfin := Pitanje(, "Formirati FIN nalog?", "D" ) == "D"
@@ -160,10 +141,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    SELECT finmat
    GO TOP
 
-   //SELECT koncij
-   //GO TOP
-
-   IF finmat->idvd $ "14#94#96#95"
+   IF finmat->idvd $ "14#95#96"
       select_o_koncij( finmat->idkonto2 )
    ELSE
       select_o_koncij( finmat->idkonto )
@@ -277,8 +255,8 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
          lDatFakt := .F.
 
-         IF finmat->idvd $ "14#94#96#95"
-             select_o_koncij( finmat->idkonto2 )
+         IF finmat->idvd $ "14#95#96"
+            select_o_koncij( finmat->idkonto2 )
          ELSE
             select_o_koncij( finmat->idkonto )
          ENDIF
@@ -343,14 +321,8 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                ENDIF
 
                IF gBaznaV == "P"
-                  // nIznosKontiratiDEM := ROUND7( nIznosKontiratiDEM, Right( trfp->naz, 2 ) )
-                  // nIznosKontiratiKM := ROUND7( nIznosKontiratiDEM * Kurs( dDFDok, "P", "D" ), Right( trfp->naz, 2 ) )
-
                   nIznosKontiratiKM :=  nIznosKontiratiDEM * Kurs( dDFDok, "P", "D" )
-
                ELSE
-                  // nIznosKontiratiKM := ROUND7( nIznosKontiratiDEM, Right( trfp->naz, 2 ) )
-                  // nIznosKontiratiDEM := ROUND7( nIznosKontiratiKM * Kurs( dDFDok, "D", "P" ), Right( trfp->naz, 2 ) )
                   nIznosKontiratiKM := nIznosKontiratiDEM
                   nIznosKontiratiDEM := nIznosKontiratiKM * Kurs( dDFDok, "D", "P" )
 
@@ -381,18 +353,12 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                      select_o_koncij( finmat->idkonto2 )
                      cIdkonto := StrTran( cIdkonto, "(2)", "" )
                      cIdkonto := koncij->( &cIdkonto )
-                     //SELECT koncij
-                     //GO nRecNo
-                     // vrati se na glavni konto
                      SELECT fin_pripr
 
                   ELSEIF Right( Trim( cIdkonto ), 3 ) == "(1)"  // trazi idkonto
                      select_o_koncij( finmat->idkonto )
                      cIdkonto := StrTran( cIdkonto, "(1)", "" )
                      cIdkonto := koncij->( &cIdkonto )
-                     //SELECT koncij
-                     //GO nRecNo
-                     // vrati se na glavni konto
                      SELECT fin_pripr
 
                   ELSE
@@ -404,7 +370,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   cIdkonto := StrTran( cIdkonto, "F1", &cPomFK777 )
                   cPomFK777 := Trim( gFunKon2 )
                   cIdkonto := StrTran( cIdkonto, "F2", &cPomFK777 )
-
                   cIdkonto := StrTran( cIdkonto, "A1", Right( Trim( finmat->idkonto ), 1 ) )
                   cIdkonto := StrTran( cIdkonto, "A2", Right( Trim( finmat->idkonto ), 2 ) )
                   cIdkonto := StrTran( cIdkonto, "B1", Right( Trim( finmat->idkonto2 ), 1 ) )
@@ -432,10 +397,10 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                cBrDok := Space( 8 )
                dDatDok := finmat->datdok
 
-               IF hRecTrfp[ "dokument" ] == "R"
+               //IF hRecTrfp[ "dokument" ] == "R"
                   // radni nalog
-                  cBrDok := finmat->idZaduz2
-               ELSEIF hRecTrfp[ "dokument" ] == "1"
+                //  cBrDok := finmat->idZaduz2
+               IF hRecTrfp[ "dokument" ] == "1"
                   cBrDok := finmat->brdok
                ELSEIF hRecTrfp[ "dokument" ] == "2"
                   cBrDok := finmat->brfaktp
@@ -449,10 +414,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                cIdPartner := Space( 6 )
                IF hRecTrfp[ "partner" ] == "1"  // stavi Partnera
                   cIdPartner := finmat->IdPartner
-               ELSEIF hRecTrfp[ "partner" ] == "2"   // stavi  Lice koje se zaduzuje
-                  cIdpartner := finmat->IdZaduz
-               ELSEIF hRecTrfp[ "partner" ] == "3"   // stavi  Lice koje se zaduz2
-                  cIdpartner := finmat->IdZaduz2
+
                ELSEIF hRecTrfp[ "partner" ] == "A"
                   cIdpartner := cPartner1
                   IF !Empty( dDatFakt1 )
@@ -549,7 +511,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   fin_pripr->BrNal    WITH cBrNalF, ;
                   fin_pripr->IdTipDok WITH finmat->IdVD, ;
                   fin_pripr->BrDok    WITH cBrDok, ;
-                  fin_pripr->DatDok   WITH dDatDok,;
+                  fin_pripr->DatDok   WITH dDatDok, ;
                   fin_pripr->opis     WITH hRecTrfp[ "naz" ]
 
                IF Left( Right( hRecTrfp[ "naz" ], 2 ), 1 ) $ ".;"  // nacin zaokruzenja
@@ -875,11 +837,11 @@ FUNCTION IspitajRezim()
 
 FUNCTION kalk_open_tabele_za_kontiranje()
 
-   O_FINMAT
+   o_finmat()
    o_konto()
    o_partner()
    o_tdok()
-  // o_roba()
+   // o_roba()
    o_tarifa()
 
    RETURN .T.

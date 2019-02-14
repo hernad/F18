@@ -16,7 +16,7 @@ MEMVAR _IdFirma, _IdVd, _BrDok, _TBankTr, _TPrevoz, _TSpedTr, _TZavTr, _TCarDaz,
 MEMVAR _TMarza, _IdKonto, _IdKonto2, _IdTarifa, _IDRoba, _Kolicina, _DatFaktP, _datDok, _brFaktP, _VPC, _NC, _FCJ, _FCJ2, _Rabat
 MEMVAR _MKonto, _MU_I, _Error
 MEMVAR PicDEM, PicKol
-MEMVAR cRNT1, cRNT2, cRNT3, cRNT4, cRNT5
+MEMVAR cRNT2, cRNT3, cRNT4, cRNT5
 
 FUNCTION kalk_unos_dok_pr()
 

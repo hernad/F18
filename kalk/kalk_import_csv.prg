@@ -832,8 +832,6 @@ STATIC FUNCTION TTbl2Kalk()
       // razduzuje
       REPLACE idkonto2 WITH ""
 
-      REPLACE idzaduz2 WITH ""
-
       REPLACE kolicina WITH temp->kolicina
       REPLACE idroba WITH roba->id
 
@@ -853,8 +851,7 @@ STATIC FUNCTION TTbl2Kalk()
       REPLACE tspedtr WITH "R"
       REPLACE tcardaz WITH "R"
       REPLACE tzavtr WITH "R"
-
-      IF nRbr = 1
+      IF nRbr == 1
          REPLACE prevoz WITH temp->trosk1
          REPLACE banktr WITH temp->trosk2
          REPLACE spedtr WITH temp->trosk3

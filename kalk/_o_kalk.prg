@@ -23,17 +23,17 @@ FUNCTION o_kalk_doks()
 
 // FUNCTION o_kalk_doks2()
 //
-//   RETURN use_sql_kalk_doks2()
+// RETURN use_sql_kalk_doks2()
 
 
 // FUNCTION select_o_kalk_doks2()
 //
-//    SELECT ( F_KALK_DOKS2 )
-//    IF Used()
-//       RETURN .T.
-//    ENDIF
+// SELECT ( F_KALK_DOKS2 )
+// IF Used()
+// RETURN .T.
+// ENDIF
 //
-//    RETURN o_kalk_doks2()
+// RETURN o_kalk_doks2()
 
 
 FUNCTION o_kalk_imp_temp()
@@ -92,3 +92,8 @@ FUNCTION select_o_kalk_pripr9()
 FUNCTION o_kalk_kartica()
 
    RETURN o_dbf_table( F_KALK_DOKS, "kalk_kartica", "ID" )
+
+
+FUNCTION o_finmat()
+
+   RETURN o_dbf_table( F_FINMAT, "finmat", "1" )
