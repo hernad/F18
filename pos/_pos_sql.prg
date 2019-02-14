@@ -184,7 +184,6 @@ FUNCTION seek_pos_h( hParams )
    RETURN !Eof()
 
 
-
 FUNCTION h_pos_pos_indexes()
 
    LOCAL hIndexes := hb_Hash()
@@ -201,6 +200,7 @@ FUNCTION h_pos_pos_indexes()
 
 FUNCTION seek_pos_doks_2( cIdVd, dDatum )
    RETURN seek_pos_doks( NIL, cIdVd, dDatum, NIL, "2" )
+
 
 FUNCTION seek_pos_doks_2_za_period( cIdVd, dDatOd, dDatDo )
    RETURN seek_pos_doks( NIL, cIdVd, NIL, NIL, "2", dDatOd, dDatDo )
@@ -287,7 +287,6 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
    RETURN !Eof()
 
 
-
 FUNCTION h_pos_doks_indexes()
 
    LOCAL hIndexes := hb_Hash()
@@ -301,7 +300,6 @@ FUNCTION h_pos_doks_indexes()
    hIndexes[ "FISC" ] := "STR(fisc_rn,10)+idpos+idvd"
 
    RETURN hIndexes
-
 
 
 FUNCTION pos_dostupno_artikal( cIdRoba, nCijena, nNCijena )
@@ -368,7 +366,6 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
    nTotal := oData:FieldGet( 1 )
 
    RETURN nTotal
-
 
 
 FUNCTION pos_get_mpc()
@@ -447,7 +444,6 @@ FUNCTION use_sql_vrstep( cId )
    ENDIF
 
    RETURN !Eof()
-
 
 
 // set_a_sql_sifarnik( "pos_strad", "STRAD", F_STRAD   )

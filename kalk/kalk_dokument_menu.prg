@@ -24,20 +24,8 @@ FUNCTION kalk_pregled_dokumenata()
 
    AAdd( aOpc, "2. štampa liste dokumenata" )
    AAdd( aOpcExe, {|| kalk_stampa_liste_dokumenata() } )
-
-/*
-   AAdd( aOpc, "3. pregled dokumenata po hronologiji obrade" )
-   AAdd( aOpcExe, {|| kalk_pregled_dokumenata_hronoloski() } )
-*/
-
    AAdd( aOpc, "4. pregled dokumenata - tabelarni pregled" )
    AAdd( aOpcExe, {|| kalk_pregled_dokumenata_tabela() } )
-
-/*
-   AAdd( aOpc, "5. radni nalozi " )
-   AAdd( aOpcExe, {|| BrowseRn() } )
-*/
-
    AAdd( aOpc, "8. kalkulacija cijena" )
    AAdd( aOpcExe, {|| kalkulacija_cijena() } )
 

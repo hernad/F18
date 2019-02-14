@@ -55,7 +55,7 @@ FUNCTION kalk_kartica_magacin()
    cPredh := "N"
 
 
-   cBrFDa := "N"
+   cPrikazBrojaFaktureDN := "N"
    cPrikFCJ2 := "N"
 
    IF !Empty( cRNT1 )
@@ -76,7 +76,7 @@ FUNCTION kalk_kartica_magacin()
       dDatOd := fetch_metric( "kalk_kartica_magacin_datum_od", my_user(), dDatOd )
       dDatDo := fetch_metric( "kalk_kartica_magacin_datum_do", my_user(), dDatDo )
       cPredh := fetch_metric( "kalk_kartica_magacin_prethodni_promet", my_user(), cPredh )
-      cBrFDa := fetch_metric( "kalk_kartica_magacin_prikaz_broja_fakture", my_user(), cBrFDa )
+      cPrikazBrojaFaktureDN := fetch_metric( "kalk_kartica_magacin_prikaz_broja_fakture", my_user(), cPrikazBrojaFaktureDN )
       cPrikFCJ2 := fetch_metric( "kalk_kartica_magacin_prikaz_fakturne_cijene", my_user(), cPrikFCJ2 )
       cPVSS := fetch_metric( "kalk_kartica_magacin_prikaz_samo_saldo", my_user(), cPVSS )
       cIdKonto := PadR( cIdKonto, FIELD_LENGTH_IDKONTO )
@@ -99,7 +99,7 @@ FUNCTION kalk_kartica_magacin()
          @ box_x_koord() + 7, box_y_koord() + 2 SAY "Datum od " GET dDatOd
          @ box_x_koord() + 7, Col() + 2 SAY "do" GET dDatDo
          @ box_x_koord() + 8, box_y_koord() + 2 SAY "sa prethodnim prometom (D/N)" GET cPredh PICT "@!" VALID cpredh $ "DN"
-         @ box_x_koord() + 9, box_y_koord() + 2 SAY "Prikaz broja fakt/otpremice D/N"  GET cBrFDa  VALID cBrFDa $ "DN" PICT "@!"
+         @ box_x_koord() + 9, box_y_koord() + 2 SAY "Prikaz broja fakt/otpremice D/N"  GET cPrikazBrojaFaktureDN  VALID cPrikazBrojaFaktureDN $ "DN" PICT "@!"
          @ box_x_koord() + 10, box_y_koord() + 2 SAY "Prikaz fakturne cijene kod ulaza (KALK 10) D/N"  GET cPrikFCJ2  VALID cPrikFCJ2 $ "DN" PICT "@!"
 
          @ box_x_koord() + 11, box_y_koord() + 2 SAY "Prikaz vrijednosti samo u saldu ? (D/N)"  GET cPVSS VALID cPVSS $ "DN" PICT "@!"
@@ -155,7 +155,7 @@ FUNCTION kalk_kartica_magacin()
          set_metric( "kalk_kartica_magacin_datum_od", my_user(), dDatOd )
          set_metric( "kalk_kartica_magacin_datum_do", my_user(), dDatDo )
          set_metric( "kalk_kartica_magacin_prethodni_promet", my_user(), cPredh )
-         set_metric( "kalk_kartica_magacin_prikaz_broja_fakture", my_user(), cBrFDa )
+         set_metric( "kalk_kartica_magacin_prikaz_broja_fakture", my_user(), cPrikazBrojaFaktureDN )
          set_metric( "kalk_kartica_magacin_prikaz_fakturne_cijene", my_user(), cPrikFCJ2 )
          set_metric( "kalk_kartica_magacin_prikaz_samo_saldo", my_user(), cPVSS )
       ENDIF
@@ -351,7 +351,7 @@ FUNCTION kalk_kartica_magacin()
                   @ PRow(), PCol() + 1 SAY say_cijena( vpc )
                ENDIF
 
-               IF cBrFDa == "D"
+               IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY field->brfaktp
                   IF !Empty( idzaduz2 )
                      @ PRow(), PCol() + 1 SAY " RN: "
@@ -360,7 +360,7 @@ FUNCTION kalk_kartica_magacin()
                ENDIF
 
                IF cPrikFCJ2 == "D" .AND. field->idvd == "10"
-                  @ PRow() + iif( cBrFDa == "D", 0, 1 ), nColFCJ2 SAY say_cijena( field->fcj2 )
+                  @ PRow() + iif( cPrikazBrojaFaktureDN == "D", 0, 1 ), nColFCJ2 SAY say_cijena( field->fcj2 )
                ENDIF
             ENDIF
 
@@ -417,7 +417,7 @@ FUNCTION kalk_kartica_magacin()
                   @ PRow(), PCol() + 1 SAY say_cijena( vpc )
                ENDIF
 
-               IF cBrFDa == "D"
+               IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY brfaktp
                   IF !Empty( field->idzaduz2 )
                      @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
@@ -469,7 +469,7 @@ FUNCTION kalk_kartica_magacin()
                   @ PRow(), PCol() + 1 SAY say_cijena( vpc )
                ENDIF
 
-               IF cBrFDa == "D"
+               IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY brfaktp
                   IF !Empty( idzaduz2 )
                      @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
@@ -495,7 +495,7 @@ FUNCTION kalk_kartica_magacin()
                @ PRow(), PCol() + 1 SAY say_cijena( vpc + mpcsapp )
                @ PRow(), PCol() + 1 SAY say_cijena( vpc         )
 
-               IF cBrFDa == "D"
+               IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY brfaktp
                   IF !Empty( idzaduz2 )
                      @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
@@ -538,7 +538,7 @@ FUNCTION kalk_kartica_magacin()
                   @ PRow(), PCol() + 1 SAY say_cijena( vpc  )
                ENDIF
 
-               IF cBrFDa == "D"
+               IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY field->brfaktp
                   IF !Empty( field->idzaduz2 )
                      @ PRow(), PCol() + 1 SAY " RN: "; ?? field->idzaduz2

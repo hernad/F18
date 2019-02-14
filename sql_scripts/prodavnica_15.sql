@@ -30,7 +30,9 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     fisc_rn numeric(10,0),
     ukupno numeric(15,5),
     brFaktP varchar(10),
-    opis varchar(100)
+    opis varchar(100),
+    dat_od date,
+    dat_do date
 );
 ALTER TABLE p15.pos_doks OWNER TO admin;
 
@@ -168,7 +170,9 @@ CREATE TABLE p15.pos_doks_knjig (
    fisc_rn numeric(10,0),
    ukupno numeric(15,5),
    brFaktP varchar(10),
-   opis varchar(100)
+   opis varchar(100),
+   dat_od date,
+   dat_do date
 );
 ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
 CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
@@ -200,7 +204,6 @@ CREATE INDEX pos_pos_id5_knjig ON p15.pos_pos_knjig USING btree (idpos, idroba, 
 CREATE INDEX pos_pos_id6_knjig ON p15.pos_pos_knjig USING btree (idroba);
 GRANT ALL ON TABLE p15.pos_pos_knjig TO xtrole;
 
-
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS funk;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS sto;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS sto_br;
@@ -219,6 +222,8 @@ ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS rabat;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS brFaktP varchar(10);
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS opis varchar(100);
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS dat_od date;
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS dat_do date;
 ALTER TABLE p15.pos_doks DROP COLUMN IF EXISTS placen;
 
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS funk;
@@ -239,8 +244,9 @@ ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS rabat;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS brFaktP varchar(10);
 ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS opis varchar(100);
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS dat_od date;
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS dat_do date;
 ALTER TABLE p15.pos_doks_knjig DROP COLUMN IF EXISTS placen;
-
 
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS iddio;
 ALTER TABLE p15.pos_pos ALTER COLUMN brdok TYPE varchar(8);
@@ -567,7 +573,7 @@ END IF;
 -- 'ORDER BY kol_ulaz - kol_izlaz LIMIT 1' obezbjedjuje da stavke koji su negativne
 -- (znaci nedostaju im ulazi) napunimo ulazom, LIMIT 1 - stavka sa najmanjom kolicinom
 --
---  $4 <= current_date => dat_od otpremnice manji ili jednak danasnjem datumu, znaci da je aktuelan 
+--  $4 <= current_date => dat_od otpremnice manji ili jednak danasnjem datumu, znaci da je aktuelan
 EXECUTE  'select id from p' || idPos || '.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz <> 0 AND cijena = $2 AND  ncijena = $3 AND $4 <= current_date AND dat_do = $5' ||
          ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
       using idroba, cijena, ncijena, dat_od, dat_do
@@ -765,12 +771,39 @@ CREATE TRIGGER pos_pos_knjig_insert_update_delete
    FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_insert_update_delete();
 
 
+-- SELECT public.kalk_brdok_iz_pos('15', '42', '4', current_date); => 1402/15
+-- SELECT public.kalk_brdok_iz_pos('15', '89', '    3', current_date); => 1402/3
+
+CREATE OR REPLACE FUNCTION public.kalk_brdok_iz_pos(
+   idpos varchar,
+   idvd varchar,
+   posBrdok varchar,
+   datum date) RETURNS varchar
+
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  brdok varchar;
+BEGIN
+
+IF ( idvd = '42' ) THEN
+  -- 01.02.2019, idpos=15 -> 0102/15
+  SELECT TO_CHAR(datum, 'ddmm/' || idpos ) INTO brDok;
+ELSIF ( idvd = '89' ) THEN
+   -- 01.02.2019, brdok='      3' -> 0102/3
+   SELECT TO_CHAR(datum, 'ddmm/' || btrim(posBrdok) ) INTO brDok;
+END IF;
+
+RETURN brDok;
+
+END;
+$$
 
 ----------- TRIGERI na strani knjigovodstva POS_DOKS - KALK_DOKS ! -----------------------------------------------------
 
 -- on p15.pos_doks -> fmk.kalk_doks
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_pos_doks_insert_update_delete() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.on_pos_doks_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
 
@@ -781,37 +814,38 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) THEN -- samo 42-ke
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '89' ) THEN -- samo 42-ke, 89
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
           from fmk.koncij where idprodmjes=NEW.idpos;
-   -- 01.02.2019, idpos=15 -> 0102/15
-   SELECT TO_CHAR(NEW.datum, 'ddmm/' || NEW.idpos ) INTO brDok;
+   SELECT public.kalk_brdok_iz_pos(NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum)
+          INTO brDok;
 ELSE
-   IF ( OLD.idvd <> '42' ) THEN -- samo 42-ke
+   IF ( OLD.idvd <> '42' ) AND ( NEW.idvd <> '89' ) THEN -- samo 42-ke, 89
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
        from fmk.koncij where idprodmjes=OLD.idpos;
-   SELECT TO_CHAR(OLD.datum, 'ddmm/' || OLD.idpos ) INTO brDok;
+   SELECT public.kalk_brdok_iz_pos(OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum)
+        INTO brDok;
 END IF;
 
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete kalk_doks %  %  % %', pKonto, OLD.idvd, OLD.datum, brDok;
-      EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brdok=$4'
-            USING pKonto, OLD.idvd, OLD.datum, brDok;
+      RAISE INFO 'delete kalk_doks % % % % %', OLD.idpos, pKonto, OLD.idvd, OLD.datum, brDok;
+      EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE idfirma=$1 pkonto=$2 AND idvd=$3 AND datdok=$4 AND brdok=$5'
+            USING OLD.idpos, pKonto, OLD.idvd, OLD.datum, brDok;
          RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-         RAISE INFO 'update kalk_doks !? % %', pKonto, brDok;
+         RAISE INFO 'update kalk_doks !? % % %', pKonto, brDok, NEW.idvd;
          RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
-         RAISE INFO 'FIRST delete kalk_doks  % % %', pKonto, NEW.datum, brDok;
+         RAISE INFO 'FIRST delete kalk_doks % % % %', NEW.idvd, pKonto, NEW.datum, brDok;
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING pKonto, NEW.idvd, NEW.datum, brDok;
-         RAISE INFO 'THEN insert kalk_doks S0 % % %', pKonto, brDok, NEW.datum;
+         RAISE INFO 'THEN insert kalk_doks % % % %', pKonto, brDok, NEW.datum;
          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_doks(idfirma,idvd,brdok,datdok,pkonto) VALUES($1,$2,$3,$4,$5)'
-                     USING 'S0', NEW.idvd, brDok, NEW.datum, pKonto;
+                     USING NEW.idpos, NEW.idvd, brDok, NEW.datum, pKonto;
          RETURN NEW;
 END IF;
 
@@ -923,7 +957,7 @@ CREATE TRIGGER kasa_pos_pos_insert_update_delete
 
 -- on p15.pos_pos -> fmk.kalk_kalk
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_pos_pos_insert_update_delete() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.on_pos_pos_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
 
@@ -931,23 +965,23 @@ DECLARE
        knjigShema varchar := 'fmk';
        pKonto varchar;
        brDok varchar;
+       pdvStopa numeric;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) THEN -- samo 42-ke
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '89' ) THEN -- samo 42-ke, 89
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
           from fmk.koncij where idprodmjes=NEW.idpos;
-   -- 01.02.2019, idpos=15 -> 0102/15
-   SELECT TO_CHAR(NEW.datum, 'ddmm/' || NEW.idpos ) INTO brDok;
+   brDok := public.kalk_brdok_iz_pos(NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum);
 ELSE
-   IF ( OLD.idvd <> '42' ) THEN -- samo 42-ke
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '89' ) THEN -- samo 42-ke, 89
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
        from fmk.koncij where idprodmjes=OLD.idpos;
-   SELECT TO_CHAR(OLD.datum, 'ddmm/' || OLD.idpos ) INTO brDok;
+   brDok := public.kalk_brdok_iz_pos(OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum);
 END IF;
 
 IF (TG_OP = 'DELETE') THEN
@@ -958,11 +992,11 @@ IF (TG_OP = 'DELETE') THEN
 ELSIF (TG_OP = 'UPDATE') THEN
          RAISE INFO 'update kalk_kalk !? % %', pKonto, brDok;
          RETURN NEW;
-ELSIF (TG_OP = 'INSERT') THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
          RAISE INFO 'FIRST delete kalk_kalk  % % %', pKonto, NEW.datum, brDok;
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_kalk WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING pKonto, NEW.idvd, NEW.datum, brDok;
-         RAISE INFO 'THEN insert kalk_kalk S0 % % %', pKonto, brDok, NEW.datum;
+         RAISE INFO 'THEN insert kalk_kalk 42 % % % %', NEW.idpos, pKonto, brDok, NEW.datum;
          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
                  ' (fmk.rbr_to_char( (row_number() over (order by idroba))::integer))::character(3) as rbr,' ||
@@ -973,8 +1007,23 @@ ELSIF (TG_OP = 'INSERT') THEN
                  ' WHERE idvd=$2 AND datum=$4 AND idpos=$5' ||
                  ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
                  ' ORDER BY idroba)'
-              USING 'S0', NEW.idvd, brDok, NEW.datum, NEW.idpos, pKonto;
+              USING NEW.idpos, NEW.idvd, brDok, NEW.datum, NEW.idpos, pKonto;
          RETURN NEW;
+
+  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '89' ) THEN
+
+         EXECUTE 'SELECT pdv from public.tarifa where id=$1'
+                USING NEW.idtarifa
+                INTO pdvStopa;
+
+         RAISE INFO 'THEN insert kalk_kalk 89 % % % %', NEW.idpos, pKonto, brDok, NEW.datum;
+         -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
+         -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
+         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
+                  'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $13/100), $11, $12)'
+                 USING NEW.idpos, NEW.idvd, NEW.rbr, brDok, NEW.datum, pKonto, NEW.idroba, NEW.idtarifa,
+                 -NEW.ncijena, NEW.kolicina, 0, NEW.cijena, pdvStopa;
+          RETURN NEW;
 END IF;
 
 RETURN NULL; -- result is ignored since this is an AFTER trigger
@@ -984,18 +1033,18 @@ $$;
 
 
 -- p15.pos_doks -> fmk.kalk_doks
-DROP TRIGGER IF EXISTS  pos_doks_insert_update_delete on p15.pos_doks;
-CREATE TRIGGER pos_doks_insert_update_delete
+DROP TRIGGER IF EXISTS  pos_doks_crud on p15.pos_doks;
+CREATE TRIGGER pos_doks_crud
    AFTER INSERT OR DELETE OR UPDATE
    ON p15.pos_doks
-   FOR EACH ROW EXECUTE PROCEDURE public.on_pos_doks_insert_update_delete();
+   FOR EACH ROW EXECUTE PROCEDURE public.on_pos_doks_crud();
 
 -- p15.pos_pos -> fmk.kalk_kalk
-DROP TRIGGER IF EXISTS  pos_pos_insert_update_delete on p15.pos_pos;
-CREATE TRIGGER pos_pos_insert_update_delete
+DROP TRIGGER IF EXISTS  pos_pos_crud on p15.pos_pos;
+CREATE TRIGGER pos_pos_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON p15.pos_pos
-      FOR EACH ROW EXECUTE PROCEDURE public.on_pos_pos_insert_update_delete();
+      FOR EACH ROW EXECUTE PROCEDURE public.on_pos_pos_crud();
 
 -- test pos->knjig
 
@@ -1012,6 +1061,11 @@ CREATE TRIGGER pos_pos_insert_update_delete
 -- select * from fmk.kalk_doks where brdok=TO_CHAR(current_date, 'ddmm/15') and idvd='42';
 
 -- delete from p15.pos_pos where brdok='BRDOK01';
+
+
+-- insert into p15.pos_pos(idpos, idvd, brdok, datum, rbr, idroba, kolicina, cijena, ncijena, idtarifa)
+--		values('15', '89', '       4', current_date, '  1', 'R01', 5, 2.5, 0.5, 'PDV17');
+
 
 -- TARIFE CLEANUP --
 

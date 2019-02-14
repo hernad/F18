@@ -88,18 +88,18 @@ STATIC FUNCTION pos_kalk_prenos_dir()
 
 STATIC FUNCTION pos_get_idvd( cIdVd )
 
-   LOCAL _ret := "16"
+   LOCAL cRet := "16"
 
    DO CASE
    CASE cIdVd $ "11#80#81"
-      _ret := "16"
+      cRet := "16"
    CASE cIdVd $ "19"
-      _ret := "NI"
+      cRet := "NI"
    CASE cIdVd $ "IP"
-      _ret := "IN"
+      cRet := "IN"
    ENDCASE
 
-   RETURN _ret
+   RETURN cRet
 
 
 STATIC FUNCTION _brisi_fajlove_importa( cImportFile )

@@ -92,7 +92,7 @@ METHOD set_module_gvars()
 
    PUBLIC gOcitBarKod := .F.
    PUBLIC gSmijemRaditi := 'D'
-   PUBLIC gSamoProdaja := 'N'
+   PUBLIC gPosSamoProdaja := 'N'
    PUBLIC gZauzetSam := 'N'
 
    // sifra radnika
@@ -109,7 +109,7 @@ METHOD set_module_gvars()
    PUBLIC SC_Opisi[ 5 ]      // nazivi (opisi) setova cijena
    PUBLIC gSmjena := " "   // identifikator smjene
 
-   PUBLIC gDupliArt        // da li dopusta unos duplih artikala na racunu
+   //PUBLIC gDupliArt        // da li dopusta unos duplih artikala na racunu
    PUBLIC gDupliUpoz       // ako se dopusta, da li se radnik upozorava na duple
 
    PUBLIC gIdPos           // id prodajnog mjesta
@@ -191,7 +191,6 @@ METHOD set_module_gvars()
    // fiskalni parametri
 
    gRnSpecOpc := "N"
-   gDupliArt := "D"
    gDupliUpoz := "N"
    gDisplay := "N"
 
@@ -212,7 +211,6 @@ METHOD set_module_gvars()
    gLocPort := fetch_metric( "OznakaLokalnogPorta", my_user(), gLocPort )
    gDugPlac := fetch_metric( "OznakaDugPlacanja", NIL, gDugPlac )
    gRnSpecOpc := fetch_metric( "RacunSpecifOpcije", NIL, gRnSpecOpc )
-   gDupliArt := fetch_metric( "DupliArtikli", NIL, gDupliArt )
    gDupliUpoz := fetch_metric( "DupliUnosUpozorenje", NIL, gDupliUpoz )
    gPosPratiStanjePriProdaji := fetch_metric( "PratiStanjeRobe", NIL, gPosPratiStanjePriProdaji )
    gStamPazSmj := fetch_metric( "StampanjePazara", NIL, gStamPazSmj )
@@ -252,12 +250,8 @@ METHOD set_module_gvars()
    gDuplo := fetch_metric( "AzurirajUPomocnuBazu", NIL, gDuplo )
    gDuploKum := fetch_metric( "KumulativPomocneBaze", NIL, gDuploKum )
    gDuploSif := fetch_metric( "SifrarnikPomocneBaze", NIL, gDuploSif )
-
-   gSamoProdaja := fetch_metric( "SamoProdaja", NIL, gSamoProdaja )
-
-
+   gPosSamoProdaja := fetch_metric( "SamoProdaja", NIL, gPosSamoProdaja )
    PUBLIC glRetroakt := .F.
-
    PUBLIC glPorezNaSvakuStavku := .F.
 
    CLOSE ALL
@@ -271,23 +265,3 @@ METHOD set_module_gvars()
    set_sql_search_path( radna_prodavnica_sql_schema() )
 
    RETURN .T.
-
-
-FUNCTION pos_dokument_naziv( cIdVd )
-
-   DO CASE
-   CASE cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
-      RETURN "Ulaz"
-
-   CASE cIdVd == POS_IDVD_OTPREMNICA_MAGACIN
-      RETURN "Otpremnica magacin"
-
-   CASE cIdVd == POS_IDVD_PRIJEM_PRODAVNICA
-      RETURN "Prijem prodavnica"
-
-   CASE cIdVD == POS_IDVD_POCETNO_STANJE_PRODAVNICA
-      RETURN "Početno stanje"
-
-   ENDCASE
-
-   RETURN "<undefined>"

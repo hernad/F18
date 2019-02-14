@@ -626,7 +626,6 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    nStvarnaKolicina := field->Kolicina
 
-
    IF field->TPrevoz == "%"
       nPrevoz := field->Prevoz / 100 * field->FCj2
    ELSEIF field->TPrevoz == "A"

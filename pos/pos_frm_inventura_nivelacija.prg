@@ -28,7 +28,7 @@ FUNCTION pos_inventura_nivelacija()
 
    PRIVATE cIdVd
 
-   IF gSamoProdaja == "D"
+   IF gPosSamoProdaja == "D"
       MsgBeep( "Ne možete vršiti unos zaduženja !" )
       RETURN .F.
    ENDIF

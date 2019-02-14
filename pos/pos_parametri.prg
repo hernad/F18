@@ -147,7 +147,7 @@ FUNCTION pos_principi_rada_kase()
 
    aNiz := {}
 
-   AAdd ( aNiz, { "Dopustiti dupli unos artikala na računu (D/N)", "gDupliArt", "gDupliArt$'DN'", "@!", } )
+   //AAdd ( aNiz, { "Dopustiti dupli unos artikala na računu (D/N)", "gDupliArt", "gDupliArt$'DN'", "@!", } )
    AAdd ( aNiz, { "Ako se dopusta dupli unos, da li se radnik upozorava(D/N)", "gDupliUpoz", "gDupliUpoz$'DN'", "@!", } )
    AAdd ( aNiz, { "Da li se prati stanje artikla na unosu (D/N/!)", "gPosPratiStanjePriProdaji", "gPosPratiStanjePriProdaji$'DN!'", "@!", } )
 
@@ -166,7 +166,6 @@ FUNCTION pos_principi_rada_kase()
 
       MsgO( "Ažuriranje parametara" )
       set_metric( "RacunSpecifOpcije", nil, gRnSpecOpc )
-      set_metric( "DupliArtikli", nil, gDupliArt )
       set_metric( "DupliUnosUpozorenje", nil, gDupliUpoz )
       set_metric( "PratiStanjeRobe", nil, gPosPratiStanjePriProdaji )
       set_metric( "StampanjePazara", nil, gStamPazSmj )

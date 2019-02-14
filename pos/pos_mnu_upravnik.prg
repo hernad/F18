@@ -48,12 +48,18 @@ FUNCTION pos_menu_dokumenti()
    LOCAL aOpcexe := {}
 
    nIzbor := 1
-   AAdd( aOpc, "Z. zaduženje                       " )
-   AAdd( aOpcexe, {|| pos_zaduzenje() } )
+   AAdd( aOpc, "1. ulaz u prodavnicu direktno od dobavljača   " )
+   AAdd( aOpcexe, {|| pos_zaduzenje("81") } )
+
+   AAdd( aOpc, "2. zahtjev za sniženje dijela zalihe     " )
+   AAdd( aOpcexe, {|| pos_zaduzenje("89") } )
+
+   /*
    AAdd( aOpc, "I. inventura" )
    AAdd( aOpcexe, {|| pos_inventura_nivelacija( .T. ) } )
    AAdd( aOpc, "N. nivelacija" )
    AAdd( aOpcexe, {|| pos_inventura_nivelacija( .F. ) } )
+   */
 
    f18_menu( "pos6", .F., nIzbor, aOpc, aOpcexe )
 

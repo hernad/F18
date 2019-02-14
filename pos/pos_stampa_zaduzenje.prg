@@ -93,7 +93,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
 
    ?U cLM
    ?? "    UKUPNO:"
-   @ PRow() + 1, nCol SAY TRANS( nFinZad, cPicIzn )
+   @ PRow(), nCol SAY TRANS( nFinZad, cPicIzn )
    ?U cLine2
    ?
 

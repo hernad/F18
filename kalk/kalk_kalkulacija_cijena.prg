@@ -11,8 +11,6 @@
 
 #include "f18.ch"
 
-
-
 FUNCTION kalkulacija_cijena( azurirana )
 
    LOCAL _vars
@@ -117,7 +115,6 @@ FUNCTION mp_predispozicija( firma, tip_dok, br_dok )
    SEEK firma + tip_dok + br_dok
 
    hRec := RecNo()
-
    DO WHILE !Eof() .AND. field->idfirma + field->idvd + field->brdok == firma + tip_dok + br_dok
       IF field->idkonto2 = "XXX"
          _ret := .T.
@@ -147,11 +144,6 @@ STATIC FUNCTION o_tables( azurirana )
    IF !Used()
       o_koncij()
    ENDIF
-
-   // SELECT F_ROBA
-// IF !Used()
-// o_roba()
-// ENDIF
 
    SELECT F_TARIFA
    IF !Used()
@@ -226,7 +218,6 @@ STATIC FUNCTION seek_dokument( vars, azurirani )
    IF azurirani
 
       SEEK _firma + _tip_dok + _br_dok
-
       IF !Found()
          MsgBeep( "Trazeni dokument " + _firma + "-" + _tip_dok + "-" + AllTrim( _br_dok ) + " ne postoji !" )
          RETURN .F.
@@ -483,7 +474,6 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
       _t_kol += _s_kolicina
 
       _u_fv := Round( field->fcj * field->kolicina, gZaokr )
-      _u_fv += Round( field->fcj2 * ( field->gkolicina + field->gkolicin2 ), gZaokr )
       _t_fv += _u_fv
 
       _u_rabat := Round( - field->rabat, gZaokr )

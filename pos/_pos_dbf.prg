@@ -69,7 +69,6 @@ STATIC FUNCTION pos_dodaj_u_sifarnik_radnika( cId, cLozinka, cOpis, cStatus )
 
 STATIC FUNCTION pos_definisi_inicijalne_podatke()
 
-   LOCAL hParams
 
    pos_dodaj_u_sifarnik_prioriteta( "0", "0", "Nivo adm." )
    pos_dodaj_u_sifarnik_prioriteta( "1", "1", "Nivo upr." )

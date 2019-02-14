@@ -9,10 +9,7 @@
  * By using this software, you agree to be bound by its terms.
  */
 
-
 #include "f18.ch"
-
-
 
 FUNCTION kalk_stampa_dok_rn()
 
@@ -25,7 +22,7 @@ FUNCTION kalk_stampa_dok_rn()
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-   //dDatFaktP := DatFaktP
+   // dDatFaktP := DatFaktP
    cIdKonto := IdKonto; cIdKonto2 := IdKonto2
 
    P_COND
@@ -49,14 +46,14 @@ FUNCTION kalk_stampa_dok_rn()
 
    SELECT kalk_pripr
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+   //PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
       nT := nT1 := nT2 := nT3 := nT4 := nT5 := nT6 := nT7 := nT8 := nT9 := nTA := 0
-      cBrFaktP := brfaktp
-      //dDatFaktP := datfaktp
-      cIdpartner := idpartner
-      DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD .AND. idpartner + brfaktp == cIdpartner + cBrfaktp
+      cBrFaktP := kalk_pripr->brfaktp
+      // dDatFaktP := datfaktp
+      cIdpartner := kalk_pripr->idpartner
+      DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD .AND. kalk_pripr->idpartner + kalk_pripr->brfaktp == cIdpartner + cBrfaktp
 
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          select_o_roba( kalk_pripr->IdRoba )
@@ -68,29 +65,30 @@ FUNCTION kalk_stampa_dok_rn()
             @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
          ENDIF
 
-         //IF gKalo == "1"
-        //    SKol := Kolicina - GKolicina - GKolicin2
-         //ELSE
-            SKol := Kolicina
-         //ENDIF
+         // IF gKalo == "1"
+         // SKol := Kolicina - GKolicina - GKolicin2
+         // ELSE
+         SKol := kalk_pripr->Kolicina
+         // ENDIF
 
-         nU := FCj * Kolicina
-         //IF gKalo == "1"
-          //  nU1 := FCj2 * ( GKolicina + GKolicin2 )
-         //ELSE
-            nU1 := NC * ( GKolicina + GKolicin2 )
-         //ENDIF
+         nU := kalk_pripr->FCj * kalk_pripr->Kolicina
+         // IF gKalo == "1"
+         // nU1 := FCj2 * ( GKolicina + GKolicin2 )
+         // ELSE
+         // nU1 := NC * ( GKolicina + GKolicin2 )
+         // ENDIF
+         nU1 := 0
 
          nU3 := nPrevoz * SKol
          nU4 := nBankTr * SKol
          nU5 := nSpedTr * SKol
          nU6 := nCarDaz * SKol
          nU7 := nZavTr * SKol
-         nU8 := NC *    ( Kolicina - Gkolicina - GKolicin2 )
+         nU8 := kalk_pripr->NC *    ( Kolicina - Gkolicina - GKolicin2 )
          nU9 := nMarza * ( Kolicina - Gkolicina - GKolicin2 )
-         nUA := VPC   * ( Kolicina - Gkolicina - GKolicin2 )
+         nUA := kalk_pripr->VPC   * ( Kolicina - Gkolicina - GKolicin2 )
 
-         IF Val( Rbr ) > 900
+         IF Val( kalk_pripr->Rbr ) > 900
             nT += nU
             nT3 += nU3; nT4 += nU4; nT5 += nU5; nT6 += nU6
             nT7 += nU7
@@ -99,7 +97,7 @@ FUNCTION kalk_stampa_dok_rn()
             nT8 += nU8; nT9 += nU9; nTA += nUA
          ENDIF
 
-         IF rbr == "901"
+         IF kalk_pripr->rbr == "901"
             ? m
             @ PRow() + 1, 0        SAY "Ukupno:"
             @ PRow(), nCol1     SAY nT1        PICTURE         picdem

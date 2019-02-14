@@ -78,7 +78,8 @@ FUNCTION pos_check_brdok()
    SELECT _pos_pripr
 
    IF ( Len( _pos_pripr->brdok ) <> FIELD_LEN_POS_BRDOK ) .OR. ;
-         ( FieldPos( "idpartner" ) == 0 )
+         ( FieldPos( "idpartner" ) == 0 ) .OR. ;
+         ( FieldPos( "dat_od" ) == 0 )
 
       Alert( "Serviser F18 brdok[" + AllTrim( Str( Len( _pos_pripr->brdok ) ) ) + "] - pobrisati pos tabele pripreme!" )
       my_close_all_dbf()
@@ -90,6 +91,7 @@ FUNCTION pos_check_brdok()
          cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".cdx"
          info_bar( "pos_brdok", cFile )
          FErase( cFile )
+         Quit_1
       NEXT
 
    ENDIF
@@ -127,5 +129,7 @@ FUNCTION g_pos_pripr_fields()
    AAdd( aDBf, { 'BRFAKTP', 'C',  10,  0 } )
    AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
    AAdd( aDBf, { 'OPIS', 'C',  100,  0 } )
+   AAdd( aDBf, { 'DAT_OD', 'D',  8,  0 } )
+   AAdd( aDBf, { 'DAT_DO', 'D',  8,  0 } )
 
    RETURN aDbf

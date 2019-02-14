@@ -230,9 +230,9 @@ FUNCTION kalk_kontiranje_gen_finmat()
             IdVD      WITH kalk_pripr->IdVD, ;
             BrDok     WITH kalk_pripr->BrDok, ;
             DatDok    WITH kalk_pripr->DatDok, ;
-            GKV       WITH Round( kalk_PRIPR->( GKolicina * FCJ2 ), nZaokruzenje ), ;   // vrijednost transp.kala
-         GKV2      WITH Round( kalk_PRIPR->( GKolicin2 * FCJ2 ), nZaokruzenje ), ;   // vrijednost ostalog kala
-         Prevoz    WITH Round( kalk_PRIPR->( nPrevoz * nKolicina ), nZaokruzenje ), ;
+            GKV       WITH 0, ;
+            GKV2      WITH 0, ;
+            Prevoz    WITH Round( kalk_PRIPR->( nPrevoz * nKolicina ), nZaokruzenje ), ;
             CarDaz    WITH Round( kalk_PRIPR->( nCarDaz * nKolicina ), nZaokruzenje ), ;
             BankTr    WITH Round( kalk_PRIPR->( nBankTr * nKolicina ), nZaokruzenje ), ;
             SpedTr    WITH Round( kalk_PRIPR->( nSpedTr * nKolicina ), nZaokruzenje ), ;

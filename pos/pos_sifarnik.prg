@@ -144,7 +144,7 @@ FUNCTION pos_osob_key_handler( Ch )
 
    CASE Ch == K_CTRL_N
 
-      IF gSamoProdaja == "D"
+      IF gPosSamoProdaja == "D"
          MsgBeep( "SamoProdaja=D#Nemate ovlastenje za ovu opciju !" )
          nVrati := DE_CONT
       ELSE
@@ -173,7 +173,7 @@ FUNCTION pos_osob_key_handler( Ch )
 
    CASE Ch == K_F2
 
-      IF gSamoProdaja == "D"
+      IF gPosSamoProdaja == "D"
          MsgBeep( "SamoProdaja=D#Nemate ovlastenje za ovu opciju !" )
          nVrati := DE_CONT
       ELSE
@@ -199,7 +199,7 @@ FUNCTION pos_osob_key_handler( Ch )
 
    CASE Ch == K_CTRL_T
 
-      IF gSamoProdaja == "D"
+      IF gPosSamoProdaja == "D"
          MsgBeep( "Nemate ovlastenje za ovu opciju !" )
          nVrati := DE_CONT
       ELSE

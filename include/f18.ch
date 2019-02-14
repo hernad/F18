@@ -178,7 +178,6 @@
 #define SEMAPHORE_LOCK_TIME 10
 
 
-
 #define RPT_PAGE_LEN fetch_metric( "rpt_duzina_stranice", my_user(), 60 )
 
 #define F18_CLIENT_ID_INI_SECTION "client_id"
@@ -561,6 +560,7 @@
 #define POS_IDVD_PRIJEM_PRODAVNICA          "80"
 #define POS_IDVD_DOBAVLJAC_PRODAVNICA       "81"
 #define POS_IDVD_OTPREMNICA_MAGACIN         "11"
+#define POS_IDVD_ZAHTJEV_SNIZENJE           "89"
 
 #define POS_IDVD_IZLAZI_NIVELACIJE_INVENTURE "42#19#IP"
 #define POS_IDVD_RACUN               "42"
