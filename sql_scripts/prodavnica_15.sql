@@ -1113,6 +1113,7 @@ BEGIN
       END IF;
       ALTER TABLE fmk.kalk_doks DROP COLUMN idzaduz;
       ALTER TABLE fmk.kalk_doks DROP COLUMN idzaduz2;
+      ALTER TABLE fmk.kalk_doks DROP COLUMN sifra;
 
       ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz;
       ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz2;

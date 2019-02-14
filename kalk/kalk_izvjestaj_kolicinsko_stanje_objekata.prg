@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 STATIC nCol1 := 0
 STATIC cPicCDem
 STATIC cPicProc
@@ -65,9 +64,6 @@ FUNCTION kalk_izvj_stanje_po_objektima()
 
    cPodvuci := "N"
 
-// o_sifk()
-// o_sifv()
-// o_roba()
    o_k1()
    kalk_o_objekti()
 
@@ -823,9 +819,7 @@ STATIC FUNCTION zaglavlje_izvjestaja( nStr )
          SKIP
          LOOP
       ENDIF
-
       ?? " " + PadC( AllTrim( objekti->naz ), KOLICINA_LEN )
-
       SKIP
 
    ENDDO
@@ -1126,12 +1120,10 @@ FUNCTION resetuj_vrijednosti_tabele_pobjekti()
    DO WHILE !Eof()
 
       hRec := dbf_get_rec()
-
       hRec[ "prodtu" ] := 0
       hRec[ "produ" ] := 0
       hRec[ "zaltu" ] := 0
       hRec[ "zalu" ] := 0
-
       dbf_update_rec( hRec )
 
       SKIP

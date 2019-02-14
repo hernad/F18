@@ -756,7 +756,7 @@ FUNCTION use_sql_kalk_doks( hParams )
    cSql += coalesce_num_num_zarez( "mpv", 12, 2 )
    cSql += coalesce_char_zarez( "podbr", 2 )
    cSql += coalesce_char_zarez( "opis", 100 )
-   cSql += coalesce_char( "sifra", 6 )
+   cSql += " korisnik, obradjeno"
    cSql += " FROM fmk.kalk_doks "
 
    IF !Empty( cWhere )

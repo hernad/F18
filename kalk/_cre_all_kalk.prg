@@ -55,8 +55,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDBf, { 'RABAT', 'N',  12,  2 } )
    AAdd( aDBf, { 'MPV', 'N',  12,  2 } )
    AAdd( aDBf, { 'PODBR', 'C',   2,  0 } )
-   AAdd( aDBf, { 'SIFRA', 'C',   6,  0 } )
-
 
    aDbf := {} // kalk_doks2
    AAdd( aDBf, { 'IDFIRMA', 'C',   2,  0 } )

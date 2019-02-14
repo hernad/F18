@@ -700,7 +700,6 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
       export_import_add_to_details( @a_details, aDokDetail )
 
       aDoksRec[ "podbr" ] := ""
-      aDoksRec[ "sifra" ] := "import"
 
       IF !hParams[ "pript" ]
          SELECT kalk_doks

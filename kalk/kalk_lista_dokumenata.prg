@@ -24,7 +24,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
    LOCAL GetList := {}
 
    LOCAL cIdVd
-   LOCAL _n_col := 20
+   LOCAL nCol2 := 20
    LOCAL cFilterMkonto, cFilterPKonto
    LOCAL cPartnerNazivDN := "N"
    LOCAL cNaslov
@@ -185,10 +185,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
          @ PRow(), PCol() + 1 SAY PadR( kalk_doks->pkonto, 7 )
       ENDIF
 
-      @ PRow(), _n_col := PCol() + 1 SAY PadR( field->idpartner, 6 )
-      @ PRow(), PCol() + 1 SAY PadR( "", 6 )
-      @ PRow(), PCol() + 1 SAY PadR( "", 6 )
-
+      @ PRow(), nCol2 := PCol() + 1 SAY PadR( field->idpartner, 6 )
       nCol1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY Str( kalk_doks->nv, 12, 2 )
       @ PRow(), PCol() + 1 SAY Str( kalk_doks->vpv, 12, 2 )
@@ -196,14 +193,13 @@ FUNCTION kalk_stampa_liste_dokumenata()
       @ PRow(), PCol() + 1 SAY Str( kalk_doks->mpv, 12, 2 )
       @ PRow(), PCol() + 1 SAY kalk_doks->brfaktp
       @ PRow(), PCol() + 1 SAY kalk_doks->datval
+      @ PRow(), PCol() + 1 SAY Padr(kalk_doks->korisnik, 20)
+      @ PRow(), PCol() + 1 SAY Padr(kalk_doks->obradjeno, 16)
 
       SELECT kalk_doks
-      @ PRow(), PCol() + 1 SAY PadR( iif( Empty( sifra ), Space( 2 ), Left( CryptSC( kalk_doks->sifra ), 2 ) ), 6 )
-
-      // drugi red
       IF cPartnerNazivDN == "D" .AND. !Empty( field->idpartner )
          ?
-         @ PRow(), _n_col SAY AllTrim( partn->naz )
+         @ PRow(), nCol2 SAY AllTrim( partn->naz )
       ENDIF
 
       nNV += kalk_doks->NV
@@ -221,9 +217,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    @ PRow(), PCol() + 1 SAY Str( nVpv, 12, 2 )
    @ PRow(), PCol() + 1 SAY Str( nRabat, 12, 2 )
    @ PRow(), PCol() + 1 SAY Str( nMpv, 12, 2 )
-   IF FieldPos( "sifra" ) <> 0
-      ?? "       "
-   ENDIF
    ? cLinija
 
    f18_end_print( NIL, xPrintOpt )
@@ -271,10 +264,6 @@ STATIC FUNCTION get_linija()
    cLinija += Space( 1 )
    cLinija += Replicate( "-", 6 )
    cLinija += Space( 1 )
-   cLinija += Replicate( "-", 6 )
-   cLinija += Space( 1 )
-   cLinija += Replicate( "-", 6 )
-   cLinija += Space( 1 )
    cLinija += Replicate( "-", 12 )
    cLinija += Space( 1 )
    cLinija += Replicate( "-", 12 )
@@ -287,7 +276,9 @@ STATIC FUNCTION get_linija()
    cLinija += Space( 1 )
    cLinija += Replicate( "-", 8 )
    cLinija += Space( 1 )
-   cLinija += Replicate( "-", 6 )
+   cLinija += Replicate( "-", 20 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 16 )
 
    RETURN cLinija
 
@@ -303,15 +294,11 @@ STATIC FUNCTION get_header()
    cHeader += Space( 1 )
    cHeader += PadC( "Dokument", 16 )
    cHeader += Space( 1 )
-   cHeader += PadC( "cLinija-konto", 7 )
+   cHeader += PadC( "M-konto", 7 )
    cHeader += Space( 1 )
    cHeader += PadC( "P-konto", 7 )
    cHeader += Space( 1 )
-   cHeader += PadC( "Part.", 6 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Zad.", 6 )
-   cHeader += Space( 1 )
-   cHeader += PadC( "Zad.2", 6 )
+   cHeader += PadC( "Partn.", 6 )
    cHeader += Space( 1 )
    cHeader += PadC( "NV", 12 )
    cHeader += Space( 1 )
@@ -325,6 +312,9 @@ STATIC FUNCTION get_header()
    cHeader += Space( 1 )
    cHeader += PadC( "DatVal", 8 )
    cHeader += Space( 1 )
-   cHeader += PadC( "Op.", 6 )
+   cHeader += PadC( "Korisnik", 20 )
+   cHeader += Space( 1 )
+   cHeader += PadC( "Obrada", 16 )
+
 
    RETURN cHeader

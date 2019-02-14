@@ -575,7 +575,6 @@ STATIC FUNCTION kalk_azur_sql()
       hRecKalkDok[ "pkonto" ] := field->pkonto
       hRecKalkDok[ "mkonto" ] := field->mkonto
       hRecKalkDok[ "podbr" ] := field->podbr
-      hRecKalkDok[ "sifra" ] := Space( 6 )
 
       //_tmp_id := hRecKalkDok[ "idfirma" ] + hRecKalkDok[ "idvd" ] + hRecKalkDok[ "brdok" ]
       //AAdd( _ids_kalk, "#2" + _tmp_id )  // kalk_kalk brisi sve stavke za jedan dokument
