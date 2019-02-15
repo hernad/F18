@@ -22,7 +22,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    LOCAL cLinija
    LOCAL nC
    LOCAL GetList := {}
-
    LOCAL cIdVd
    LOCAL nCol2 := 20
    LOCAL cFilterMkonto, cFilterPKonto
@@ -31,9 +30,13 @@ FUNCTION kalk_stampa_liste_dokumenata()
    LOCAL bZagl, xPrintOpt
    LOCAL dDatOd, dDatDo
    LOCAL cBrojeviDokumenata, cMagacinskaKonta, cProdavnickaKonta
+   LOCAL nNV, nVPV, nRabat, nMPV
+   LOCAL nUkStavki
+   LOCAL cIdPartner
+   LOCAL cFilterBrDok
+   LOCAL cFilterLista := ".t."
 
    PRIVATE qqTipDok
-
    PRIVATE cIdfirma := self_organizacija_id()
 
    my_close_all_dbf()
@@ -61,7 +64,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
 
    cIdVd := PadR( cIdVd, 2 )
    cBrojeviDokumenata := PadR( cBrojeviDokumenata, 60 )
-
    cImeKup := Space( 20 )
    cIdPartner := Space( 6 )
 
@@ -122,7 +124,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
    ENDIF
    find_kalk_doks_by_tip_datum( cIdFirma, cIdVd, dDatOd, dDatDo )
 
-   PRIVATE cFilterLista := ".t."
+   //PRIVATE cFilterLista := ".t."
    IF !Empty( cIdPartner )
       cFilterLista += ".and. idpartner==" + dbf_quote( cIdPartner )
    ENDIF
@@ -152,7 +154,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
 
    bZagl := {|| zagl( cIdVd, cMagacinskaKonta, cProdavnickaKonta, cBrojeviDokumenata, cLinija ) }
    cLinija := get_linija()
-
    nC := 0
    nCol1 := 30
    nNV := nVPV := nRabat := nMPV := 0
@@ -225,7 +226,6 @@ FUNCTION kalk_stampa_liste_dokumenata()
    RETURN .T.
 
 
-
 STATIC FUNCTION zagl( cIdVd, cMagacinskaKonta, cProdavnickaKonta, cBrojeviDokumenata, cLinija )
 
    Preduzece()
@@ -247,6 +247,7 @@ STATIC FUNCTION zagl( cIdVd, cMagacinskaKonta, cProdavnickaKonta, cBrojeviDokume
    ? cLinija
 
    RETURN .T.
+
 
 STATIC FUNCTION get_linija()
 
@@ -283,7 +284,6 @@ STATIC FUNCTION get_linija()
    RETURN cLinija
 
 
-
 STATIC FUNCTION get_header()
 
    LOCAL cHeader := ""
@@ -315,6 +315,5 @@ STATIC FUNCTION get_header()
    cHeader += PadC( "Korisnik", 20 )
    cHeader += Space( 1 )
    cHeader += PadC( "Obrada", 16 )
-
 
    RETURN cHeader
