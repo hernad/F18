@@ -1,0 +1,32 @@
+/*
+ * This file is part of the bring.out knowhow ERP, a free and open source
+ * Enterprise Resource Planning software suite,
+ * Copyright (c) 1994-2018 by bring.out doo Sarajevo.
+ * It is licensed to you under the Common Public Attribution License
+ * version 1.0, the full text of which (including FMK specific Exhibits)
+ * is available in the file LICENSE_CPAL_bring.out_knowhow.md located at the
+ * root directory of this source code archive.
+ * By using this software, you agree to be bound by its terms.
+ */
+
+#include "f18.ch"
+
+#define POS_ROBA_DUZINA_SIFRE 13  // citanje barkoda
+
+STATIC s_nMaxKolicinaPosRacun := NIL
+
+MEMVAR gIdPos, gOcitBarKod
+MEMVAR _cijena, _ncijena
+
+
+FUNCTION pos_when_89_ncijena( nNovaCijena, nCijena, nNCijena )
+
+   nNovaCijena := nCijena - nNCijena
+
+   RETURN .T.
+
+FUNCTION pos_valid_89_ncijena( nNovaCijena, nCijena, nNCijena )
+
+   nNcijena := nCijena - nNovaCijena
+
+   RETURN .T.
