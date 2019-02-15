@@ -36,7 +36,6 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
       ENDIF
    ENDIF
 
-
    IF hb_HHasKey( hParams, "brdok" ) // uzmi dokument cije ce stavke biti osnova npr. 10-10-000222
       find_kalk_by_broj_dokumenta( hParams[ "idfirma" ], hParams[ "idvd" ], hParams[ "brdok" ], "kalk_select", F_KALK_SELECT )
       hParams[ "idkonto" ] := field->mkonto // iz dokumenta uzeti konto i datum do koga se kartica sravnjava
@@ -67,9 +66,7 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
       RETURN .F.
    ENDIF
 
-//   select_o_roba()
-   select_o_koncij()
-   select_o_tarifa()
+
    cBrDok := kalk_get_next_broj_v5( cIdFirma, "95", NIL )
 
    SELECT kalk_select
@@ -151,6 +148,8 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
 
 
 STATIC FUNCTION get_vars( hParams )
+
+   LOCAL GetList := {}
 
    Box( "bv", 5, 75 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "  Magacinski konto: " GET  hParams[ "idkonto" ]

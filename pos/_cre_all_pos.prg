@@ -91,8 +91,8 @@ FUNCTION pos_check_brdok()
          cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".cdx"
          info_bar( "pos_brdok", cFile )
          FErase( cFile )
-         Quit_1
       NEXT
+      Quit_1
 
    ENDIF
 

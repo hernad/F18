@@ -236,7 +236,6 @@ FUNCTION set_a_dbf_fakt_fakt()
    cTable := "fakt_fakt"
 
    hItem := hb_Hash()
-
    hItem[ "alias" ] := "FAKT"
    hItem[ "table" ] := cTable
    hItem[ "wa" ]    := F_FAKT

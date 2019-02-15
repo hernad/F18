@@ -354,7 +354,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    LOCAL hDok
    LOCAL _opis, hKalkAtributi
    LOCAL hOldDokument, hRecNoviDokument
-   LOCAL oAttr, nTrec
+   LOCAL nTrec
 
    hOldDokument := hb_Hash()
    _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
@@ -386,10 +386,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    hDok[ "brdok" ] := _brdok
    hDok[ "rbr" ] := _rbr
 
-   IF _opis
-      hParams[ "opis" ] := get_kalk_attr_opis( hDok, .F. )
-   ENDIF
-
    IF kalk_edit_stavka( .F., @hParams ) == K_ESC
       BoxC()
       RETURN DE_CONT
@@ -417,12 +413,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       hKalkAtributi[ "brdok" ] := field->brdok
       hKalkAtributi[ "rbr" ] := field->rbr
 
-      oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-      oAttr:hAttrId := hKalkAtributi
-      oAttr:push_attr_from_mem_to_dbf( hParams )
-
       SELECT kalk_pripr
-
       IF nKalkRbr == 1
          nTrec := RecNo()
          hRecNoviDokument := dbf_get_rec()
@@ -524,37 +515,28 @@ FUNCTION kalk_unos_nova_stavka()
    LOCAL hDok, hKalkAtributi
    LOCAL hOldDokument := hb_Hash()
    LOCAL hRecNoviDokument
-   LOCAL oAttr
    LOCAL _opis
-   LOCAL _rbr_uvecaj := 0
+   LOCAL nRbrUvecaj := 0
    LOCAL cIdKonto1, cIdKonto2
-
-   _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
+   LOCAL nTrec
 
    Box( "knjn", BOX_HEIGHT, BOX_WIDTH, .F., "Unos novih stavki" )
 
    _TMarza := "A"
-
    GO BOTTOM
    IF Left( field->idkonto2, 3 ) = "XXX"
-      _rbr_uvecaj := 1
+      nRbrUvecaj := 1
       SKIP -1
    ENDIF
 
    cIdKonto1 := ""
    cIdKonto2 := ""
-
    DO WHILE .T.
 
       Scatter()
       hParams := hb_Hash()
 
-      IF _opis
-         hParams[ "opis" ] := Space( 300 )
-      ENDIF
-
       _ERROR := ""
-
       IF _idvd $ "16#80" .AND. _idkonto2 = "XXX"
          _idkonto := cIdKonto1
          _idkonto2 := cIdKonto2
@@ -583,10 +565,9 @@ FUNCTION kalk_unos_nova_stavka()
          _Prevoz := _Prevoz2 := _Banktr := _SpedTr := _CarDaz := _ZavTr := 0
       ENDIF
 
-      _NC := _VPC := _VPCSaP := _MPC := _MPCSaPP := 0
+      _NC := _VPC := _MPC := _MPCSaPP := 0
 
-      nKalkRbr := rbr_u_num( _rbr ) + 1 + _rbr_uvecaj
-
+      nKalkRbr := rbr_u_num( _rbr ) + 1 + nRbrUvecaj
       hOldDokument[ "idfirma" ] := _idfirma
       hOldDokument[ "idvd" ] := _idvd
       hOldDokument[ "brdok" ] := _brdok
@@ -609,16 +590,11 @@ FUNCTION kalk_unos_nova_stavka()
       nNVPredhodna := _nc * _kolicina
 
       Gather()
-
       hKalkAtributi := hb_Hash()
       hKalkAtributi[ "idfirma" ] := field->idfirma
       hKalkAtributi[ "idtipdok" ] := field->idvd
       hKalkAtributi[ "brdok" ] := field->brdok
       hKalkAtributi[ "rbr" ] := field->rbr
-
-      oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-      oAttr:hAttrId := hKalkAtributi
-      oAttr:push_attr_from_mem_to_dbf( hParams )
 
       IF nKalkRbr == 1
          SELECT kalk_pripr
@@ -633,10 +609,9 @@ FUNCTION kalk_unos_nova_stavka()
 
          cIdKonto1 := _idkonto
          cIdKonto2 := _idkonto2
-
          _idkonto := cIdKonto2
          _idkonto2 := "XXX"
-         _kolicina := -kolicina
+         _kolicina := - kalk_pripr->kolicina
 
          nKalkRbr := rbr_u_num( _rbr ) + 1
          _Rbr := rbr_u_char( nKalkRbr )
@@ -645,7 +620,6 @@ FUNCTION kalk_unos_nova_stavka()
 
          IF _idvd == "16"
             kalk_get_16_1()
-
          ELSE
             kalk_get_1_80_protustavka()
          ENDIF
@@ -677,8 +651,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
    LOCAL hParams := hb_Hash()
    LOCAL hDok
-   LOCAL oAttr, hKalkAtributi, hOldDokument, hRecNoviDokument
-   LOCAL _opis
+   LOCAL hOldDokument, hRecNoviDokument
    LOCAL nTr2
    LOCAL nDug, nPot, nTrec
    LOCAL cIdKonto1, cIdKonto2
@@ -691,13 +664,10 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
    ENDIF
    hb_default( @lStartPocetak, .F. )
 
-   _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
-
    Box( "anal", BOX_HEIGHT, BOX_WIDTH, .F., "Ispravka naloga" )
 
    nDug := 0
    nPot := 0
-
    DO WHILE !Eof()
 
       SKIP
@@ -708,7 +678,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
       Scatter()
 
       _error := ""
-
       IF Left( _idkonto2, 3 ) == "XXX"  // 80-ka
          SKIP 1
          SKIP 1
@@ -722,7 +691,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
       ENDIF
 
       nKalkRbr := rbr_u_num( _rbr )
-
       IF lAsistentObrada .AND. !kalk_asistent_pause()
          kalk_asistent_send_entere()
          hb_idleSleep( 0.1 )
@@ -733,10 +701,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
       hDok[ "idtipdok" ] := _idvd
       hDok[ "brdok" ] := _brdok
       hDok[ "rbr" ] := _rbr
-
-      IF _opis
-         hParams[ "opis" ] := get_kalk_attr_opis( hDok, .F. )
-      ENDIF
 
       IF kalk_edit_stavka( .F., @hParams ) == K_ESC
          IF lAsistentObrada
@@ -753,14 +717,9 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
 
       nMPV80 := _mpcsapp * _kolicina  // vrijednost prosle stavke
       nNVPredhodna := _nc * _kolicina
-
       my_rlock()
       Gather()
       my_unlock()
-
-      oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-      oAttr:hAttrId := hDok
-      oAttr:push_attr_from_mem_to_dbf( hParams )
 
       SELECT kalk_pripr
 
@@ -778,13 +737,12 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          cIdKonto2 := _idkonto2
          _idkonto := cIdKonto2
          _idkonto2 := "XXX"
-         _kolicina := -kolicina
+         _kolicina := - kalk_pripr->kolicina
 
          nKalkRbr := rbr_u_num( _rbr ) + 1
          _Rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
-
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
          DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + field->rbr
@@ -826,7 +784,6 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
    RETURN DE_REFRESH
 
 
-
 PROCEDURE kalk_asistent_pause_handler( lAsistentObrada )
 
    LOCAL cButton
@@ -848,7 +805,6 @@ PROCEDURE kalk_asistent_pause_handler( lAsistentObrada )
    ENDIF
 
    hb_DispOutAt( f18_max_rows(), 1, cButton, F18_COLOR_INFO_PANEL )
-
    IF  MINRECT( f18_max_rows(), 1, f18_max_rows(), 12 ) .OR. ;
          ( kalk_asistent_pause() .AND. Upper( Chr( kalk_edit_last_key() ) ) == "C" )
 
@@ -984,7 +940,7 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
 FUNCTION kalk_unos_1( lNoviDokument, hParams )
 
-   PRIVATE lKalkIzgenerisaneStavke := .F.
+   //PRIVATE lKalkIzgenerisaneStavke := .F.
    PRIVATE Getlist := {}
 
    IF kalk_header_get1( lNoviDokument ) == 0
@@ -1082,7 +1038,6 @@ FUNCTION ispisi_naziv_partner( x, y, len )
    ENDIF
 
    cNaz := AllTrim( field->naz )
-
    @ x, y SAY PadR( cNaz, len )
 
    PopWa()
@@ -1133,83 +1088,65 @@ FUNCTION valid_kalk_rbr_stavke( cIdVd )
 
 STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
 
-   LOCAL _old_firma := old_dok[ "idfirma" ]
-   LOCAL _old_brdok := old_dok[ "brdok" ]
-   LOCAL _old_tipdok := old_dok[ "idvd" ]
-   LOCAL hRec, _tek_dok, nTrec
-   LOCAL _new_firma := new_dok[ "idfirma" ]
-   LOCAL _new_brdok := new_dok[ "brdok" ]
-   LOCAL _new_tipdok := new_dok[ "idvd" ]
-   LOCAL oAttr
-   LOCAL _vise_konta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" ) == "D"
+   LOCAL cIdFirmaOld := old_dok[ "idfirma" ]
+   LOCAL cBrDokOld := old_dok[ "brdok" ]
+   LOCAL cIdVdOld := old_dok[ "idvd" ]
+   LOCAL hRec, hRecTekuci, nTrec
+   LOCAL cIdFirmaNew := new_dok[ "idfirma" ]
+   LOCAL cBrDokNew := new_dok[ "brdok" ]
+   LOCAL cIdVdNew := new_dok[ "idvd" ]
+   LOCAL lViseKonta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" ) == "D"
 
    SELECT kalk_pripr
    GO TOP
 
-   SEEK _new_firma + _new_tipdok + _new_brdok
-
+   SEEK cIdFirmaNew + cIdVdNew + cBrDokNew
    IF !Found()
       RETURN .F.
    ENDIF
 
-   _tek_dok := dbf_get_rec()
-
+   hRecTekuci := dbf_get_rec()
    GO TOP
-   SEEK _old_firma + _old_tipdok + _old_brdok
-
+   SEEK cIdFirmaOld + cIdVdOld + cBrDokOld
    IF !Found()
       RETURN .F.
    ENDIF
 
-   DO WHILE !Eof() .AND. field->idfirma + field->idvd + field->brdok == _old_firma + _old_tipdok + _old_brdok
-
+   DO WHILE !Eof() .AND. kalk_pripr->idfirma + kalk_pripr->idvd + kalk_pripr->brdok == cIdFirmaOld + cIdVdOld + cBrDokOld
       SKIP 1
       nTrec := RecNo()
       SKIP -1
-
       hRec := dbf_get_rec()
-      hRec[ "idfirma" ] := _tek_dok[ "idfirma" ]
-      hRec[ "idvd" ] := _tek_dok[ "idvd" ]
-      hRec[ "brdok" ] := _tek_dok[ "brdok" ]
-      hRec[ "datdok" ] := _tek_dok[ "datdok" ]
-
-      IF !_vise_konta
-         hRec[ "idpartner" ] := _tek_dok[ "idpartner" ]
+      hRec[ "idfirma" ] := hRecTekuci[ "idfirma" ]
+      hRec[ "idvd" ] := hRecTekuci[ "idvd" ]
+      hRec[ "brdok" ] := hRecTekuci[ "brdok" ]
+      hRec[ "datdok" ] := hRecTekuci[ "datdok" ]
+      IF !lViseKonta
+         hRec[ "idpartner" ] := hRecTekuci[ "idpartner" ]
       ENDIF
-      IF !( hRec[ "idvd" ] $ "16#80" ) .AND. !_vise_konta
-         hRec[ "idkonto" ] := _tek_dok[ "idkonto" ]
-         hRec[ "idkonto2" ] := _tek_dok[ "idkonto2" ]
-         hRec[ "pkonto" ] := _tek_dok[ "pkonto" ]
-         hRec[ "mkonto" ] := _tek_dok[ "mkonto" ]
+      IF !( hRec[ "idvd" ] $ "16#80" ) .AND. !lViseKonta
+         hRec[ "idkonto" ] := hRecTekuci[ "idkonto" ]
+         hRec[ "idkonto2" ] := hRecTekuci[ "idkonto2" ]
+         hRec[ "pkonto" ] := hRecTekuci[ "pkonto" ]
+         hRec[ "mkonto" ] := hRecTekuci[ "mkonto" ]
       ENDIF
       dbf_update_rec( hRec )
       GO ( nTrec )
-
    ENDDO
-   GO TOP
-
-   oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-   oAttr:open_attr_dbf()
 
    GO TOP
-
    DO WHILE !Eof()
-
       SKIP 1
       nTrec := RecNo()
       SKIP -1
-
       hRec := dbf_get_rec()
-      hRec[ "idfirma" ] := _tek_dok[ "idfirma" ]
-      hRec[ "idtipdok" ] := _tek_dok[ "idvd" ]
-      hRec[ "brdok" ] := _tek_dok[ "brdok" ]
-
+      hRec[ "idfirma" ] := hRecTekuci[ "idfirma" ]
+      hRec[ "idtipdok" ] := hRecTekuci[ "idvd" ]
+      hRec[ "brdok" ] := hRecTekuci[ "brdok" ]
       dbf_update_rec( hRec )
       GO ( nTrec )
-
    ENDDO
 
-   USE
    SELECT kalk_pripr
    GO TOP
 
@@ -1292,9 +1229,7 @@ FUNCTION kalk_set_diskont_mpc()
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pKonto, kalk_pripr->idRoba, @aPorezi )
       SELECT kalk_pripr
       Scatter()
-
       _mpcSaPP := MpcSaPor( roba->vpc, aPorezi )
-
       _ERROR := " "
       Gather()
       SKIP 1

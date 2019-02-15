@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkStrana
+
 MEMVAR nMPV80, nNVPredhodna
 MEMVAR nKalkRBr
 MEMVAR GetList
@@ -36,18 +38,14 @@ FUNCTION kalk_get1_80()
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
       _kord_x := box_x_koord() + nX
-
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Temeljnica:" GET _BrFaktP
       @ box_x_koord() + nX, Col() + 1 SAY "Datum:" GET _DatFaktP
-
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prodavnički konto: " GET _pkonto VALID {|| P_Konto( @_pkonto ), ispisi_naziv_konto( _kord_x - 1, 35, 30 ) } PICT "@!"
-
       ++nX
       _kord_x := box_x_koord() + nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  Prenos na konto: " GET _IdKonto2 VALID {|| Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2 ), ispisi_naziv_konto( _kord_x, 35, 30 )  } PICT "@!"
       READ
-
       ESC_RETURN K_ESC
 
    ELSE
@@ -92,7 +90,6 @@ FUNCTION kalk_get1_80()
 
    SELECT kalk_pripr
 
-
    IF kalk_is_novi_dokument()
       select_o_koncij( _pkonto )
       select_o_roba( _idroba )
@@ -119,10 +116,8 @@ FUNCTION kalk_get1_80()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MALOPROD. CIJENA (MPC):"
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _mpc ;
       PICT PicDEM  WHEN kalk_when_valid_mpc_80_81_41_42( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) VALID kalk_valid_mpc_80_81_41_42( "80", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
-
    ++nX
    SayPorezi_lv( nX, aPorezi )
-
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
    @ box_x_koord() + nX, box_y_koord() + _unos_left GET _MPCSaPP PICT PicDEM VALID kalk_valid_mpcsapdv( "80", .F., @aPorezi, .T. )
@@ -138,12 +133,9 @@ FUNCTION kalk_get1_80()
    _PU_I := "1"
    _MKonto := ""
    _MU_I := ""
-
    nKalkStrana := 3
 
    RETURN LastKey()
-
-
 
 
 // PROTUSTAVKA 80-ka, druga strana

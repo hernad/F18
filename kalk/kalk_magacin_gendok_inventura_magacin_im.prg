@@ -109,7 +109,6 @@ FUNCTION kalk_generacija_inventura_magacin_im()
             LOOP
          ENDIF
 
-altd()
          IF cCijenaTIP == "2"
             RowNC( @nNVU, @nNVI )
             // vpc = nc, magacin po nabavnim
@@ -127,9 +126,7 @@ altd()
       IF cNule == "D" .OR. ( ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nVpvU - nVpvI, 4 ) <> 0 ) )
 
          select_o_roba( cIdroba )
-
          SELECT kalk_pripr
-
          IF lOsvjezi
             kalk_azuriraj_im_stavku( cIdFirma, cIdKonto, cBrDok, dDatDok, @nRbr, cIdRoba, nUlaz, nIzlaz, nVpvU, nVpvI, nNvU, nNvI )
          ELSE
@@ -162,7 +159,6 @@ altd()
       SELECT kalk_pripr
 
       SET RELATION TO idroba INTO ROBA
-
       INDEX ON idFirma + idvd + brdok + roba->sifradob TO "SDOB"
       GO TOP
 
@@ -187,7 +183,6 @@ altd()
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 
@@ -297,7 +292,7 @@ FUNCTION kalk_generisanje_inventure_razlike_postojeca_magacin_im()
          ELSE
              RowVpvRabat( @nVpvU, @nVpvI, @nRabat )
          ENDIF
-         
+
          RowKolicina( @nUlaz, @nIzlaz )
          SKIP
       ENDDO

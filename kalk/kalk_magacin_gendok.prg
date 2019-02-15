@@ -13,7 +13,7 @@
 #include "f18.ch"
 
 
-FUNCTION GenMag()
+FUNCTION kalk_magacin_generacija_dokumenata()
 
    LOCAL _opc := {}
    LOCAL _opcexe := {}
@@ -21,22 +21,10 @@ FUNCTION GenMag()
 
    AAdd( _opc, "1. magacin početno stanje                    " )
    AAdd( _opcexe, {|| kalk_pocetno_stanje_magacin() } )
-
-/*
-   AAdd( _opc, "2. magacin početno stanje (stara opcija)" )
-   AAdd( _opcexe, {|| kalk_pocetno_stanje_magacin_legacy() } )
-   */
-
    AAdd( _opc, "3. inventure" )
    AAdd( _opcexe, {|| kalk_inventura_magacin_im_meni() } )
-
-
    AAdd( _opc, "4. magacin generacija 95 usklađenje nc" )
    AAdd( _opcexe, {|| kalk_gen_uskladjenje_nc_95() } )
-/*
-   AAdd( _opc, "4. nivelacija po zadatom %" )
-   AAdd( _opcexe, {|| MNivPoProc() } )
-*/
 
    f18_menu( "mmg", .F., _izbor, _opc, _opcexe )
 

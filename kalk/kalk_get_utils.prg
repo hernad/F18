@@ -129,9 +129,9 @@ FUNCTION kalk_say_pdv_a_porezi_var( nRow )
 /*
  *     Puni polja izgenerisane stavke
  *   param: pIzgStavke - .f. ne puni, .t. puni
- */
 
-FUNCTION kalk_puni_polja_za_izgenerisane_stavke( pIzgStavke )
+
+--FUNCTION kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    IF lKalkIzgenerisaneStavke .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
       PRIVATE nRRec := RecNo()
@@ -170,7 +170,7 @@ FUNCTION kalk_puni_polja_za_izgenerisane_stavke( pIzgStavke )
    ENDIF
 
    RETURN .T.
-
+*/
 
 
 /*

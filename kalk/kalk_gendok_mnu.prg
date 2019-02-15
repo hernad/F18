@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 
-
 FUNCTION kalk_mnu_generacija_dokumenta()
 
    LOCAL _Opc := {}
@@ -20,14 +19,10 @@ FUNCTION kalk_mnu_generacija_dokumenta()
    LOCAL _Izbor := 1
 
    AAdd( _opc, "1. magacin - generacija dokumenata    " )
-   AAdd( _opcexe, {|| GenMag() } )
+   AAdd( _opcexe, {|| kalk_magacin_generacija_dokumenata() } )
    AAdd( _opc, "2. prodavnica - generacija dokumenata" )
    AAdd( _opcexe, {|| kalk_prod_generacija_dokumenata() } )
-
-   //AAdd( _opc, "3. proizvodnja - generacija dokumenata" )
-   //AAdd( _opcexe, {|| GenProizvodnja() } )
-
-   AAdd( _opc, "4. storno dokument" )
+   AAdd( _opc, "4. storno kalk dokumenta" )
    AAdd( _opcexe, {|| storno_kalk_dokument() } )
 
    f18_menu( "mgend", .F., _izbor, _opc, _opcexe )

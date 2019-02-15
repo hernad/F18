@@ -199,14 +199,13 @@ FUNCTION is_kalk_konverzija_valute_na_unosu()
 
 FUNCTION kalk_par_razno()
 
-   LOCAL _brojac := "N"
+   LOCAL cKalkBrojacDN := "N"
    LOCAL cUnosBarKodDN := "N"
    LOCAL nX := 1
    LOCAL _reset_roba := fetch_metric( "kalk_reset_artikla_kod_unosa", my_user(), "N" )
    LOCAL _rabat := fetch_metric( "pregled_rabata_kod_ulaza", my_user(), "N" )
    LOCAL _vise_konta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" )
-
-   LOCAL _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" )
+   LOCAL cKalkOpisDN := fetch_metric( "kalk_dodatnicKalkOpisDN_kod_unosa_dokumenta", NIL, "N" )
    LOCAL nLenBrKalk :=  kalk_duzina_brojaca_dokumenta()
    LOCAL cRobaTrazi := PadR( roba_trazi_po_sifradob(), 20 )
    LOCAL nPragOdstupanjaNc := prag_odstupanja_nc_sumnjiv()
@@ -214,7 +213,7 @@ FUNCTION kalk_par_razno()
    LOCAL GetList := {}
 
    IF glKalkBrojacPoKontima
-      _brojac := "D"
+      cKalkBrojacDN := "D"
    ENDIF
 
    IF roba_barkod_pri_unosu()
@@ -227,7 +226,7 @@ FUNCTION kalk_par_razno()
    @ box_x_koord() + nX, Col() + 2 SAY8 "dužina brojača:" GET nLenBrKalk PICT "9" VALID ( nLenBrKalk > 0 .AND. nLenBrKalk < 10 )
    ++nX
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Brojac kalkulacija po kontima (D/N)" GET _brojac VALID _brojac $ "DN" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Brojac kalkulacija po kontima (D/N)" GET cKalkBrojacDN VALID cKalkBrojacDN $ "DN" PICT "@!"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Koristiti BARKOD pri unosu kalkulacija (D/N)" GET cUnosBarKodDN VALID cUnosBarKodDN $ "DN" PICT "@!"
    ++nX
@@ -236,7 +235,6 @@ FUNCTION kalk_par_razno()
    nX += 2
    @ box_x_koord() + nX, Col() + 2 SAY "Vise konta na dokumentu (D/N) ?" GET _vise_konta VALID _vise_konta $ "DN" PICT "@!"
    ++nX
-
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "F-ja za odredjivanje dzokera F1 u kontiranju" GET gFunKon1 PICT "@S28"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "F-ja za odredjivanje dzokera F2 u kontiranju" GET gFunKon2 PICT "@S28"
@@ -254,33 +252,29 @@ FUNCTION kalk_par_razno()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Standardna stopa marze [NC x ( 1 + ST_STOPA ) = Roba.VPC] :" GET nStandardnaStopaMarza PICT "999.99"
    @ box_x_koord() + nX, Col() SAY "%"
-
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Traži robu prema (prazno/SIFRADOB/)" GET cRobaTrazi PICT "@15"
-
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Reset artikla prilikom unosa dokumenta (D/N)" GET _reset_roba PICT "@!" VALID _reset_roba $ "DN"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Pregled rabata za dobavljaca kod unosa ulaza (D/N)" GET _rabat PICT "@!" VALID _rabat $ "DN"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Def.opisa kod unosa (D/N)" GET _opis VALID _opis $ "DN" PICT "@!"
-
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Def.opisa kod unosa (D/N)" GET cKalkOpisDN VALID cKalkOpisDN $ "DN" PICT "@!"
 
    READ
 
    BoxC()
 
    IF LastKey() <> K_ESC
-
-      IF _brojac == "D"
+      IF cKalkBrojacDN == "D"
          glKalkBrojacPoKontima := .T.
       ELSE
          glKalkBrojacPoKontima := .F.
       ENDIF
 
       roba_barkod_pri_unosu( cUnosBarKodDN == "D" )
-      set_metric( "kalk_brojac_kalkulacija", NIL, gBrojacKalkulacija )
-      set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glKalkBrojacPoKontima )
+      set_metric( "kalkcKalkBrojacDN_kalkulacija", NIL, gBrojacKalkulacija )
+      set_metric( "kalkcKalkBrojacDN_dokumenta_po_kontima", NIL, glKalkBrojacPoKontima )
       set_metric( "kalk_potpis_na_kraju_naloga", NIL, gPotpis )
 
       //set_metric( "kalk_zabrana_promjene_tarifa", NIL, gPromTar )
@@ -295,7 +289,7 @@ FUNCTION kalk_par_razno()
       standardna_stopa_marze( nStandardnaStopaMarza )
       set_metric( "kalk_reset_artikla_kod_unosa", my_user(), _reset_roba )
       set_metric( "pregled_rabata_kod_ulaza", my_user(), _rabat )
-      set_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, _opis )
+      set_metric( "kalk_dodatnicKalkOpisDN_kod_unosa_dokumenta", NIL, cKalkOpisDN )
       set_metric( "kalk_dokument_vise_konta", NIL, _vise_konta )
 
    ENDIF
@@ -412,7 +406,6 @@ FUNCTION kalk_par_cijene()
    RETURN .T.
 
 
-
 FUNCTION is_kalk_fin_isti_broj()
 
    RETURN kalk_fin_isti_broj() == "D"
@@ -476,7 +469,6 @@ FUNCTION kalk_par_zavisni_dokumenti()
    RETURN NIL
 
 
-
 FUNCTION kalk_tops_generacija_kalk_11_na_osnovu_pos_42( cSet )
 
    IF s_cKalkPosGeneracijaKalk11NaOsnovuPos42DN == NIL
@@ -513,7 +505,6 @@ FUNCTION kalk_troskovi_10ka()
       set_metric( "kalk_dokument_10_trosak_3", NIL, c10T3 )
       set_metric( "kalk_dokument_10_trosak_4", NIL, c10T4 )
       set_metric( "kalk_dokument_10_trosak_5", NIL, c10T5 )
-
    ENDIF
 
    RETURN NIL
@@ -543,7 +534,6 @@ FUNCTION kalk_par_troskovi_rn()
    cIspravka := "N"
 
    RETURN NIL
-
 
 
 FUNCTION kalk_par_troskovi_24()

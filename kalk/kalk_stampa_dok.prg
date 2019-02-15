@@ -14,7 +14,7 @@
 MEMVAR cIdfirma, cIdvd, cBrdok
 MEMVAR gTops, gFakt
 MEMVAR __print_opt
-MEMVAR  PicCDEM, PicProc, PicDEM, PicKol, gPicPROC
+MEMVAR  PicCDEM, PicProc, PicDEM, PicKol, gPicPROC, gPicNC
 
 MEMVAR nStr
 
@@ -285,6 +285,10 @@ FUNCTION picdem( cPic )
    ENDIF
 
    RETURN picdem
+
+FUNCTION picnc()
+   RETURN gPicNC
+
 
 FUNCTION pickol( cPic )
 

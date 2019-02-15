@@ -11,16 +11,20 @@
 
 #include "f18.ch"
 
-MEMVAR nKalkRBr
 STATIC aPorezi := {}
+
+MEMVAR nKalkRBr
+MEMVAR GetList
+MEMVAR _datfaktp, _datdok, _idkonto, _mkonto, _idkonto2
 
 FUNCTION kalk_get_1_95_96()
 
-   lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
+   //lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
 
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
+      _mkonto := _idkonto
    ENDIF
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
@@ -28,39 +32,34 @@ FUNCTION kalk_get_1_95_96()
       @  box_x_koord() + 5, box_y_koord() + 2   SAY "Dokument Broj:" GET _BrFaktP VALID !Empty( _BrFaktP )
       @  box_x_koord() + 5, Col() + 1 SAY "Datum:" GET _DatFaktP  VALID {||  datum_not_empty_upozori_godina( _datFaktP, "Datum fakture" ) }
 
-      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Magacinski konto razdužuje"  GET _IdKonto2 ;
-         VALID Empty( _IdKonto2 ) .OR. P_Konto( @_IdKonto2, 21, 5 )
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Magacinski konto razdužuje"  GET _mkonto ;
+         VALID Empty( _mkonto ) .OR. P_Konto( @_mkonto, 21, 5 )
 
-      //IF !Empty( cRNT1 ) .AND. _idvd $ "95#96"
-      //   IF ( IsRamaGlas() )
-      //      @ box_x_koord() + 8, box_y_koord() + 60 SAY "Rad.nalog:" GET _IdZaduz2 PICT "@!" VALID RadNalOK()
-      //   ELSE
-      //      @ box_x_koord() + 8, box_y_koord() + 60 SAY "Rad.nalog:" GET _IdZaduz2   PICT "@!"
-      //   ENDIF
-      //ENDIF
+      // IF !Empty( cRNT1 ) .AND. _idvd $ "95#96"
+      // IF ( IsRamaGlas() )
+      // @ box_x_koord() + 8, box_y_koord() + 60 SAY "Rad.nalog:" GET _IdZaduz2 PICT "@!" VALID RadNalOK()
+      // ELSE
+      // @ box_x_koord() + 8, box_y_koord() + 60 SAY "Rad.nalog:" GET _IdZaduz2   PICT "@!"
+      // ENDIF
+      // ENDIF
 
-      IF _idvd $ "95#96"    // ako je otprema, gdje to ide
+      @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Konto zadužuje            " GET _IdKonto VALID  Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
 
-         @ box_x_koord() + 9, box_y_koord() + 2   SAY "Konto zaduzuje            " GET _IdKonto VALID  Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
-
-         IF gMagacin == "1"
-            @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
-         ELSE
-            IF _idvd == "96"
-               @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
-            ENDIF
-         ENDIF
-
+      IF gMagacin == "1"
+         @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
       ELSE
-         _idkonto := ""
+         IF _idvd == "96"
+            @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
+         ENDIF
       ENDIF
+
 
    ELSE
 
       @  box_x_koord() + 6, box_y_koord() + 2   SAY "Dokument Broj: "; ?? _BrFaktP
       @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       _IdZaduz := ""
-      @ box_x_koord() + 8, box_y_koord() + 2 SAY "Magacinski konto razduzuje "; ?? _IdKonto2
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY "Magacinski konto razduzuje "; ?? _mkonto
       @ box_x_koord() + 9, box_y_koord() + 2 SAY "Konto zaduzuje "; ?? _IdKonto
 
    ENDIF
@@ -78,10 +77,8 @@ FUNCTION kalk_get_1_95_96()
       _idRoba := Left( _idRoba, 10 )
    ENDIF
 
-   _MKonto := _Idkonto2
 
-
-   select_o_koncij( _idkonto2 )
+   select_o_koncij( _mkonto )
    select_o_tarifa( _IdTarifa )
    SELECT kalk_pripr  // napuni tarifu
 
@@ -90,26 +87,22 @@ FUNCTION kalk_get_1_95_96()
    _GKolicina := 0
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
-      IF koncij->naz == "P2"
-         _VPC := PLC
-      ELSE
-         _VPC := kalk_vpc_za_koncij()
-      ENDIF
+      _VPC := kalk_vpc_za_koncij()
       _NC := NC
    ENDIF
 
    IF dozvoljeno_azuriranje_sumnjivih_stavki() .AND. kalk_is_novi_dokument()
-      kalk_vpc_po_kartici( @_VPC, _idfirma, _idkonto2, _idroba )
+      kalk_vpc_po_kartici( @_VPC, _idfirma, _mkonto, _idroba )
       SELECT kalk_pripr
    ENDIF
 
    nKolS := 0
    nKolZN := 0
-   nc1 := nc2 := 0
+   nC1 := nC2 := 0
 
    IF _TBankTr <> "X"
 
-      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _idkonto2, @nKolS, @nKolZN, @nC1, @nC2 )
+      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, @nC1, @nC2 )
       @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
       @ box_x_koord() + 13, box_y_koord() + 30   SAY "Srednja nc "; @ box_x_koord() + 13, Col() + 2 SAY nc2 PICT pickol
 
@@ -126,7 +119,7 @@ FUNCTION kalk_get_1_95_96()
                SELECT roba
                hRec := dbf_get_rec()
                hRec[ "nc" ] := _nc
-               update_rec_server_and_dbf( Alias(), hRec, 1, "FULL" )
+               update_rec_server_and_dbf( "ROBA", hRec, 1, "FULL" )
                SELECT kalk_pripr // nafiluj sifrarnik robe sa nc sirovina, robe
             ENDIF
          ENDIF
@@ -135,23 +128,27 @@ FUNCTION kalk_get_1_95_96()
    ENDIF
 
    SELECT kalk_pripr
-   @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE gPicNC  VALID kalk_valid_kolicina_mag(nKols)
-   PRIVATE _vpcsappp := 0
+   @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  VALID kalk_valid_kolicina_mag( nKols )
 
    READ
-   _Marza := 0; _TMarza := "A"; _VPC := _NC
+
 
    nKalkStrana := 2
+   _Marza := 0
+   _TMarza := "A"
+   _VPC := _NC
    _marza := _vpc - _nc
-   _MKonto := _Idkonto2;_MU_I := "5"     // izlaz iz magacina
-   _PKonto := ""; _PU_I := ""
+   _MU_I := "5"
+   _PKonto := ""
+   _PU_I := ""
 
-   IF lKalkIzgenerisaneStavke  .AND. _kolicina > 0 .AND.  LastKey() <> K_ESC // izgenerisane stavke postoje
+/*
+--   IF lKalkIzgenerisaneStavke  .AND. _kolicina > 0 .AND.  LastKey() <> K_ESC // izgenerisane stavke postoje
       PRIVATE nRRec := RecNo()
       GO TOP
       my_flock()
       DO WHILE !Eof()  // nafiluj izgenerisane stavke
-         IF kolicina == 0
+         IF kalk_pripr->kolicina == 0
             SKIP
             PRIVATE nRRec2 := RecNo()
             SKIP -1
@@ -159,12 +156,11 @@ FUNCTION kalk_get_1_95_96()
             GO nRRec2
             LOOP
          ENDIF
-         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nKalkRbr
+         IF kalk_pripr->brdok == _brdok .AND. kalk_pripr->idvd == _idvd .AND. Val( kalk_pripr->Rbr ) == nKalkRbr
 
-            //nMarza := 0
-            REPLACE vpc WITH kalk_pripr->nc, vpcsap WITH  kalk_pripr->nc, rabatv WITH  0, ;
+            // nMarza := 0
+            REPLACE vpc WITH kalk_pripr->nc, rabatv WITH  0, ;
                marza WITH  0
-
             REPLACE  mkonto WITH _mkonto, ;
                tmarza  WITH _tmarza, ;
                mpc WITH  _MPC, ;
@@ -178,7 +174,7 @@ FUNCTION kalk_get_1_95_96()
       my_unlock()
       GO nRRec
    ENDIF
-
+*/
    SET KEY K_ALT_K TO
 
    RETURN LastKey()

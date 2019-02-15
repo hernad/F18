@@ -11,18 +11,24 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkStrana
 MEMVAR _pkonto, _idkonto2
-MEMVAR GetList
+MEMVAR GetList, aPorezi
+MEMVAR _idfirma, _fcj, _datdok, _idvd, _idpartner, _brfaktp, _datfaktp, _idtarifa
 
 FUNCTION kalk_get_1_41_42()
 
    LOCAL lRet
+   LOCAL nKolicinaNaStanju
+   LOCAL nKolicinaPriZadnjojNabavci
+   LOCAL nNabCjenaPriZadnjojNabavci
+   LOCAL nNabCjSrednja
 
    IF Empty( _pkonto )
       _pkonto := _idkonto2
    ENDIF
 
-   lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
+   //lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
    PRIVATE aPorezi := {}
 
    IF kalk_is_novi_dokument()
@@ -36,11 +42,9 @@ FUNCTION kalk_get_1_41_42()
    ELSE
       _idpartner := ""
       _brfaktP := ""
-
    ENDIF
 
    @ box_x_koord() + 8, box_y_koord() + 2  SAY8 "Prodavnički Konto razdužuje" GET _pkonto VALID  P_Konto( @_pkonto, 8, 38 ) PICT "@!"
-
    READ
 
    SELECT kalk_pripr
@@ -62,7 +66,6 @@ FUNCTION kalk_get_1_41_42()
    select_o_koncij( _pkonto )
    SELECT kalk_pripr  // napuni tarifu
 
-
    _GKolicina := 0
    _GKolicin2 := 0
 
@@ -70,14 +73,8 @@ FUNCTION kalk_get_1_41_42()
       select_o_koncij( _pkonto )
       select_o_roba( _IdRoba )
       _MPCSaPP := kalk_get_mpc_by_koncij_pravilo()
-
-      IF gMagacin == "2"
-         _FCJ := NC
-         _VPC := 0
-      ELSE
-         _FCJ := NC
-         _VPC := 0
-      ENDIF
+      _FCJ := NC
+      _VPC := 0
 
       SELECT kalk_pripr
       _Marza2 := 0
@@ -92,29 +89,29 @@ FUNCTION kalk_get_1_41_42()
    _vpc := 0
    IF ( roba->tip != "T" )
 
-      nKolS := 0
-      nKolZN := 0
-      nc1 := 0
-      nc2 := 0
+      nKolicinaNaStanju := 0
+      nKolicinaPriZadnjojNabavci := 0
+      nNabCjenaPriZadnjojNabavci := 0
+      nNabCjSrednja := 0
 
       // ako je X onda su stavke vec izgenerisane
       IF _TBankTr <> "X"
          IF !Empty( kalk_metoda_nc() )
-            nc1 := 0
-            nc2 := 0
+            nNabCjenaPriZadnjojNabavci := 0
+            nNabCjSrednja := 0
 
-            kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolS, @nKolZN, @nc1, @nc2 )
+            kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolicinaNaStanju, @nKolicinaPriZadnjojNabavci, @nNabCjenaPriZadnjojNabavci, @nNabCjSrednja )
 
-            IF kalk_metoda_nc() $ "13"
-               _fcj := nc1
-            ELSEIF kalk_metoda_nc() == "2"
-               _fcj := nc2
+            // IF kalk_metoda_nc() $ "13"
+            // _fcj := nNabCjenaPriZadnjojNabavci
+            IF kalk_metoda_nc() == "2"
+               _fcj := nNabCjSrednja
             ENDIF
          ENDIF
       ENDIF
 
       @ box_x_koord() + 12, box_y_koord() + 30 SAY "Ukupno na stanju "
-      @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
+      @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol
 
       @ box_x_koord() + 14, box_y_koord() + 2 SAY "NC  :" GET _fcj PICT picdem ;
          VALID {|| lRet := kalk_valid_kolicina_prod(), _tprevoz := "A", _prevoz := 0, _nc := _fcj, lRet }
@@ -138,13 +135,12 @@ FUNCTION kalk_get_1_41_42()
    @ box_x_koord() + 20, box_y_koord() + 50 GET _mpcsapp PICT PicDEM VALID kalk_valid_mpcsapdv( _IdVd, .F., @aPorezi, .T. )
 
    READ
-
    ESC_RETURN K_ESC
 
-   _PU_I := "5" // izlaz iz prodavnice
+   _PU_I := "5"
    nKalkStrana := 2
 
-   kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
+   //kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()
 

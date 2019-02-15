@@ -41,31 +41,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    LOCAL _created
    LOCAL _tbl
 
-   aDbf := {}
-   AAdd( aDBf, { 'IDFIRMA', 'C',   2,  0 } )
-   AAdd( aDBf, { 'IDVD', 'C',   2,  0 } )
-   AAdd( aDBf, { 'BRDOK', 'C',   FIELD_LEN_KALK_BRDOK,  0 } )
-   AAdd( aDBf, { 'DATDOK', 'D',   8,  0 } )
-   AAdd( aDBf, { 'BRFAKTP', 'C',  10,  0 } )
-   AAdd( aDBf, { 'IDPARTNER', 'C',   6,  0 } )
-   AAdd( aDBf, { 'PKONTO', 'C',   7,  0 } )
-   AAdd( aDBf, { 'MKONTO', 'C',   7,  0 } )
-   AAdd( aDBf, { 'NV', 'N',  12,  2 } )
-   AAdd( aDBf, { 'VPV', 'N',  12,  2 } )
-   AAdd( aDBf, { 'RABAT', 'N',  12,  2 } )
-   AAdd( aDBf, { 'MPV', 'N',  12,  2 } )
-   AAdd( aDBf, { 'PODBR', 'C',   2,  0 } )
-
-   aDbf := {} // kalk_doks2
-   AAdd( aDBf, { 'IDFIRMA', 'C',   2,  0 } )
-   AAdd( aDBf, { 'IDvd', 'C',   2,  0 } )
-   AAdd( aDBf, { 'BRDOK', 'C',   8,  0 } )
-   AAdd( aDBf, { 'DATVAL', 'D',   8,  0 } )
-   AAdd( aDBf, { 'Opis', 'C',  20,  0 } )
-   AAdd( aDBf, { 'K1', 'C',  1,  0 } )
-   AAdd( aDBf, { 'K2', 'C',  2,  0 } )
-   AAdd( aDBf, { 'K3', 'C',  3,  0 } )
-
 
    // objekti
    _alias := "OBJEKTI"
@@ -75,7 +50,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDbf, { "id", "C", 2, 0 } )
    AAdd( aDbf, { "naz", "C", 10, 0 } )
    AAdd( aDbf, { "IdObj", "C", 7, 0 } )
-
    IF_NOT_FILE_DBF_CREATE
 
    CREATE_INDEX( "ID", "ID", _alias )
@@ -85,7 +59,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
 
    _alias := "POBJEKTI"
    _table_name := "kalk_pobjekti"
-
    aDbf := {}
    AAdd( aDbf, { "id", "C", 2, 0 } )
    AAdd( aDbf, { "naz", "C", 10, 0 } )
@@ -98,7 +71,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDbf, { "prodtu", "N", 18, 5 } )
    AAdd( aDbf, { "prodg", "N", 18, 5 } )
    AAdd( aDbf, { "produ", "N", 18, 5 } )
-
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX( "ID", "id", _alias )
 
@@ -112,11 +84,8 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    AAdd( aDbf, { "VPC", "N", 15, 3 } )
    AAdd( aDbf, { "MPC", "N", 15, 3 } )
    AAdd( aDbf, { "MPV", "N", 15, 3 } )
-
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX( "ID", "id", _alias )
-
-   DokAttr():new( "kalk", F_KALK_ATTR ):create_dbf()
 
    RETURN .T.
 
@@ -169,8 +138,6 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
       f18_delete_dbf( _table_name )
    ENDIF
    IF_NOT_FILE_DBF_CREATE
-
-
    CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
    CREATE_INDEX( "2", "idFirma+idvd+brdok+IDTarifa", _alias )
    CREATE_INDEX( "3", "dtos(datdok)+mu_i+pu_i", _alias )
@@ -185,7 +152,6 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
    IF_NOT_FILE_DBF_CREATE
 
    CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
-
    _alias := "PRIPT"  // koristi kalk imp varazdin
    _table_name := "kalk_pript"
    AAdd( aDBf, { 'DATVAL', 'D',   8,  0 } ) // koristi kalk imp varazdin
@@ -241,7 +207,6 @@ STATIC FUNCTION definicija_kalk_tabele()
    AAdd( aDBf, { 'GKOLICIN2', 'N', 18, 8 } )
    AAdd( aDBf, { 'FCJ', 'N', 18, 8 } )
    AAdd( aDBf, { 'FCJ2', 'N', 18, 8 } )
-   AAdd( aDBf, { 'FCJ3', 'N', 18, 8 } )
    AAdd( aDBf, { 'RABAT', 'N', 18, 8 } )
    AAdd( aDBf, { 'PREVOZ', 'N', 18, 8 } )
    AAdd( aDBf, { 'BANKTR', 'N', 18, 8 } )
@@ -252,7 +217,10 @@ STATIC FUNCTION definicija_kalk_tabele()
    AAdd( aDBf, { 'MARZA', 'N', 18, 8 } )
    AAdd( aDBf, { 'MARZA2', 'N', 18, 8 } )
    AAdd( aDBf, { 'RABATV', 'N', 18, 8 } )
-   AAdd( aDBf, { 'VPCSAP', 'N', 18, 8 } )
+   AAdd( aDBf, { 'DATVAL', 'D',   8,  0 } )
+   AAdd( aDBf, { 'DAT_OD', 'D',   8,  0 } )
+   AAdd( aDBf, { 'DAT_DO', 'D',   8,  0 } )
+   AAdd( aDBf, { 'opis', 'C',   150,  0 } )
 
    RETURN aDbf
 
@@ -264,19 +232,19 @@ FUNCTION kalk_check_idzaduz2()
 
    LOCAL aTabele, nI, cFile
 
-   IF ( FieldPos( "idzaduz2" ) != 0 )
-      Alert( "Serviser F18 - finmat->idzaduz2 postoji, brisanje, restart!" )
+   IF ( FieldPos( "idzaduz2" ) != 0 .OR. FieldPos( "datval" ) == 0 )
+      Alert( "Serviser F18 - kalk fix idzaduz2, datval, brisanje, restart!" )
       my_close_all_dbf()
       aTabele := { "finmat", "kalk_pripr", "kalk_priprt", "kalk_pripr2", "kalk_pripr9" }
       FOR nI := 1 TO Len( aTabele )
          cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".dbf"
-         info_bar( "pos_brdok", cFile )
+         info_bar( "kalk", cFile )
          FErase( cFile )
          cFile := my_home() + my_dbf_prefix() + aTabele[ nI ] + ".cdx"
-         info_bar( "pos_brdok", cFile )
+         info_bar( "kalk", cFile )
          FErase( cFile )
-         Quit_1
       NEXT
+      Quit_1
    ENDIF
 
    RETURN .T.

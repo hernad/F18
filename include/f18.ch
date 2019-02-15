@@ -552,7 +552,7 @@
 #define SP_I      "I"           // inventura - stanje
 #define SP_N      "N"           // nivelacija
 
-#define KALK_IDVD_MAGACIN "10#16#18#IM"
+#define KALK_IDVD_MAGACIN "10#16#18#IM#14"
 
 #define POS_IDVD_ULAZI "P0#11#80#81"
 

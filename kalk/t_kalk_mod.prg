@@ -102,7 +102,6 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC KursLis := "1"
    PUBLIC gStavitiUSifarnikNovuCijenuDefault := "D"
    PUBLIC gDecKol := 5
-   // PUBLIC gKalo := "2"
    PUBLIC gMagacin := "2"
    PUBLIC gRCRP := "C"
    PUBLIC gPotpis := "N"

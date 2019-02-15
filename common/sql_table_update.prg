@@ -121,12 +121,11 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
       FOR nI := 1 TO Len( hDbfRec[ "dbf_fields" ] )
 
          cTmp := hDbfRec[ "dbf_fields" ][ nI ]
-
          IF field_in_blacklist( cTmp, hDbfRec[ "blacklisted" ] )
             LOOP
          ENDIF
 
-         IF cTmp != "match_code" .AND. !hb_HHasKey( hRecord, cTmp ) // match_code su nebitna polja
+         IF !(cTmp $ "match_code#korisnik#obradjeno") .AND.  !hb_HHasKey( hRecord, cTmp ) // match_code su nebitna polja
             cMsg := "record " + cSqlOperator + " ne sadrzi " + cTmp + " field !?## pogledaj log !"
             log_write( cMsg + " " + pp( hRecord ), 2 )
             MsgBeep( cMsg )

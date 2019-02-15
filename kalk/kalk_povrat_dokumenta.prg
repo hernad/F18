@@ -17,14 +17,14 @@ FUNCTION kalk_povrat_dokumenta()
 
    LOCAL lBrisiKumulativ
    LOCAL hRec
-   LOCAL _id_firma
-   LOCAL _id_vd
-   LOCAL _br_dok
-   LOCAL _del_rec
+   LOCAL cIdFirma
+   LOCAL cIdVd
+   LOCAL cBrDok
+   LOCAL hRecDelete
    LOCAL nTrec
-   LOCAL _hAttrId, oAttr
    LOCAL lOk := .T.
    LOCAL hParams
+   LOCAL GetList := {}
 
 /*
    IF dozvoljeno_azuriranje_sumnjivih_stavki() .AND. Pitanje(, "Zadati broj (D) / Povrat po hronologiji obrade (N) ?", "D" ) = "N"
@@ -36,91 +36,72 @@ FUNCTION kalk_povrat_dokumenta()
 */
 
    o_kalk_pripr()
-
-   _id_firma := self_organizacija_id()
-   _id_vd := Space( 2 )
-   _br_dok := Space( 8 )
+   cIdFirma := self_organizacija_id()
+   cIdVd := Space( 2 )
+   cBrDok := Space( 8 )
 
    Box( "", 1, 35 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:"
-   @ box_x_koord() + 1, Col() + 1 SAY _id_firma
+   @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
 
-   @ box_x_koord() + 1, Col() + 1 SAY "-" GET _id_vd PICT "@!"
-   @ box_x_koord() + 1, Col() + 1 SAY "-" GET _br_dok VALID {|| _br_dok := kalk_fix_brdok( _br_dok ), .T. }
+   @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVd PICT "@!"
+   @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrDok VALID {|| cBrDok := kalk_fix_brdok( cBrDok ), .T. }
    READ
    ESC_BCR
    BoxC()
 
-   IF _br_dok = "."
-      kalk_povrat_prema_kriteriju()
+   IF cBrDok = "."
+      //kalk_povrat_prema_kriteriju()
       my_close_all_dbf()
       RETURN .F.
    ENDIF
 
-   IF !kalk_dokument_postoji( _id_firma, _id_vd, _br_dok )
+   IF !kalk_dokument_postoji( cIdFirma, cIdVd, cBrDok )
       MsgBeep( "Traženi dokument ne postoji na serveru !"  )
       my_close_all_dbf()
       RETURN .F.
    ENDIF
 
-   IF Pitanje( "", "Kalk. " + _id_firma + "-" + _id_vd + "-" + _br_dok + " vratiti u pripremu (D/N) ?", "D" ) == "N"
+   IF Pitanje( "", "Kalk. " + cIdFirma + "-" + cIdVd + "-" + cBrDok + " vratiti u pripremu (D/N) ?", "D" ) == "N"
       my_close_all_dbf()
       RETURN .F.
    ENDIF
 
    lBrisiKumulativ := Pitanje(, "Izbrisati dokument iz kumulativne tabele (D/N) ?", "D" ) == "D"
 
-   kalk_kopiraj_dokument_u_tabelu_pripreme( _id_firma, _id_vd, _br_dok )
-
-   _hAttrId := hb_Hash()
-   _hAttrId[ "idfirma" ] := _id_firma
-   _hAttrId[ "idtipdok" ] := _id_vd
-   _hAttrId[ "brdok" ] := _br_dok
-
-   oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-   oAttr:hAttrId := _hAttrId
-   oAttr:get_attr_from_server_to_dbf()
-
+   kalk_kopiraj_dokument_u_tabelu_pripreme( cIdFirma, cIdVd, cBrDok )
    IF lBrisiKumulativ
 
       run_sql_query( "BEGIN" )
-
-      IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
-         run_sql_query( "COMMIT" )
-         MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju povrata." )
-         RETURN .F.
-      ENDIF
+      //IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
+      //   run_sql_query( "COMMIT" )
+      //   MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju povrata." )
+      //   RETURN .F.
+      //ENDIF
 
       o_kalk_za_azuriranje()
 
       MsgO( "Brisanje KALK dokumenata iz kumulativa ..." )
-      find_kalk_by_broj_dokumenta( _id_firma, _id_vd, _br_dok )
+      find_kalk_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
 
       IF Found()
-         _del_rec := dbf_get_rec()
-         lOk := oAttr:delete_attr_from_server()
+         hRecDelete := dbf_get_rec()
       ENDIF
 
       IF lOk
-         lOk := brisi_dokument_iz_tabele_kalk( _id_firma, _id_vd, _br_dok )
+         lOk := brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
       ENDIF
-
       IF lOk
-         lOk := brisi_dokument_iz_tabele_doks( _id_firma, _id_vd, _br_dok )
+         lOk := brisi_dokument_iz_tabele_doks( cIdFirma, cIdVd, cBrDok )
       ENDIF
-
-      //IF lOk
-      //   lOk := brisi_dokument_iz_tabele_doks2( _id_firma, _id_vd, _br_dok )
-      //ENDIF
 
       MsgC()
 
       IF lOk
-
          hParams := hb_Hash()
-         hParams[ "unlock" ] :=  { "kalk_doks", "kalk_kalk" }
+         //hParams[ "unlock" ] :=  { "kalk_doks", "kalk_kalk" }
          run_sql_query( "COMMIT", hParams )
-         log_write( "F18_DOK_OPER: KALK DOK_POV: " + _id_firma + "-" + _id_vd + "-" + AllTrim( _br_dok ), 2 )
+         log_write( "F18_DOK_OPER: KALK DOK_POV: " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ), 2 )
       ELSE
          run_sql_query( "ROLLBACK" )
          MsgBeep( "Operacija povrata dokumenta u pripremu neuspješna !" )
@@ -147,17 +128,17 @@ STATIC FUNCTION brisi_dokument_iz_tabele_doks( cIdFirma, cIdVd, cBrDok )
 
 
 
-//STATIC FUNCTION brisi_dokument_iz_tabele_doks2( cIdFirma, cIdVd, cBrDok )
+// STATIC FUNCTION brisi_dokument_iz_tabele_doks2( cIdFirma, cIdVd, cBrDok )
 //
-//   LOCAL lOk := .T.
-//   LOCAL hRec
+// LOCAL lOk := .T.
+// LOCAL hRec
 //
-//   IF find_kalk_doks2_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
-//      hRec := dbf_get_rec()
-//      lOk := delete_rec_server_and_dbf( "kalk_doks2", hRec, 1, "CONT" )
-//   ENDIF
+// IF find_kalk_doks2_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
+// hRec := dbf_get_rec()
+// lOk := delete_rec_server_and_dbf( "kalk_doks2", hRec, 1, "CONT" )
+// ENDIF
 //
-//   RETURN lOk
+// RETURN lOk
 
 
 STATIC FUNCTION brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
@@ -177,6 +158,7 @@ STATIC FUNCTION kalk_kopiraj_dokument_u_tabelu_pripreme( cFirma, cIdVd, cBroj )
 
    LOCAL hRec
 
+   find_kalk_doks_by_broj_dokumenta( cFirma, cIdVd, cBroj )
    find_kalk_by_broj_dokumenta( cFirma, cIdVd, cBroj )
 
    MsgO( "Prebacujem dokument u pripremu ..." )
@@ -186,13 +168,16 @@ STATIC FUNCTION kalk_kopiraj_dokument_u_tabelu_pripreme( cFirma, cIdVd, cBroj )
       SELECT kalk
       hRec := dbf_get_rec()
       SELECT kalk_pripr
-
-      IF ! ( hRec[ "idvd" ] $ "97" .AND. hRec[ "tbanktr" ] == "X" )
          APPEND ncnl
          hRec[ "error" ] := ""
+         hRec[ "opis"  ] := kalk_doks->opis
+         hRec[ "dat_od"  ] := kalk_doks->dat_od
+         hRec[ "dat_do"  ] := kalk_doks->dat_do
+         hRec[ "datval"  ] := kalk_doks->datval
+         hRec[ "opis"  ] := kalk_doks->opis
+         hRec[ "datfaktp" ] := kalk_doks->datfaktp
+         hRec[ "brfaktp" ] := kalk_doks->brfaktp
          dbf_update_rec( hRec )
-      ENDIF
-
       SELECT kalk
       SKIP
 
@@ -203,25 +188,25 @@ STATIC FUNCTION kalk_kopiraj_dokument_u_tabelu_pripreme( cFirma, cIdVd, cBroj )
    RETURN .T.
 
 
-
+/*
 STATIC FUNCTION kalk_povrat_prema_kriteriju()
 
-   LOCAL _br_dok := Space( 80 )
-   LOCAL _dat_dok := Space( 80 )
-   LOCAL _id_vd := Space( 80 )
-   LOCAL _usl_br_dok
-   LOCAL _usl_dat_dok
-   LOCAL _usl_id_vd
+   LOCAL cBrDokUslov := Space( 80 )
+   LOCAL cDatDokUslov := Space( 80 )
+   LOCAL cIdVdUslov := Space( 80 )
+   LOCAL cBrDokFilter
+   LOCAL cDatDokFilter
+   LOCAL cIdVdFilter
    LOCAL lBrisiKumulativ := .F.
-   LOCAL _filter
-   LOCAL _id_firma := self_organizacija_id()
+   LOCAL cFilter
    LOCAL hRec
-   LOCAL _del_rec
-   LOCAL _hAttrId, oAttr, __firma, __idvd, __brdok
+   LOCAL hRecDelete
+   LOCAL cIdFirma := self_organizacija_id(), cIdVd, cBrDok
    LOCAL lOk := .T.
    LOCAL lRet := .F.
    LOCAL hParams
    LOCAL nTrec
+   LOCAL GetList := {}
 
    IF !spec_funkcije_sifra()
       my_close_all_dbf()
@@ -231,14 +216,14 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
    Box(, 3, 60 )
 
    DO WHILE .T.
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Vrste kalk.    " GET _id_vd PICT "@S40"
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj dokumenata" GET _br_dok PICT "@S40"
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datumi         " GET _dat_dok PICT "@S40"
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Vrste kalk.    " GET cIdVdUslov PICT "@S40"
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj dokumenata" GET cBrDokUslov PICT "@S40"
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datumi         " GET cDatDokUslov PICT "@S40"
       READ
-      _usl_br_dok := Parsiraj( _br_dok, "BrDok", "C" )
-      _usl_dat_dok := Parsiraj( _dat_dok, "DatDok", "D" )
-      _usl_id_vd := Parsiraj( _id_vd, "IdVD", "C" )
-      IF _usl_br_dok <> NIL .AND. _usl_dat_dok <> NIL .AND. _usl_id_vd <> NIL
+      cBrDokFilter := Parsiraj( cBrDokUslov, "BrDok", "C" )
+      cDatDokFilter := Parsiraj( cDatDokUslov, "DatDok", "D" )
+      cIdVdFilter := Parsiraj( cIdVdUslov, "IdVD", "C" )
+      IF cBrDokFilter <> NIL .AND. cDatDokFilter <> NIL .AND. cIdVdFilter <> NIL
          EXIT
       ENDIF
    ENDDO
@@ -248,55 +233,13 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
    IF Pitanje(, "Vratiti u pripremu kalk dokumente sa ovim kriterijom (D/N) ?", "N" ) == "D"
 
       lBrisiKumulativ := Pitanje(, "Izbrisati dokument iz kumulativne tabele (D/N) ?", "D" ) == "D"
-
       SELECT kalk
 
-      _filter := "IDFIRMA==" + dbf_quote( _id_firma ) + ".and." + _usl_br_dok + ".and." + _usl_id_vd + ".and." + _usl_dat_dok
-      _filter := StrTran( _filter, ".t..and.", "" )
-
-      IF !( _filter == ".t." )
-         SET FILTER TO &( _filter )
+      cFilter := "IDFIRMA==" + dbf_quote( cIdFirma ) + ".and." + cBrDokFilter + ".and." + cIdVdFilter + ".and." + cDatDokFilter
+      cFilter := StrTran( cFilter, ".t..and.", "" )
+      IF cFilter != ".t."
+         SET FILTER TO &( cFilter )
       ENDIF
-
-      SELECT kalk
-      GO TOP
-
-      MsgO( "Prolaz kroz kumulativnu datoteku KALK..." )
-
-      DO WHILE !Eof()
-
-         SELECT kalk
-
-         __firma := field->idfirma
-         __idvd := field->idvd
-         __brdok := field->brdok
-
-         hRec := dbf_get_rec()
-
-         SELECT kalk_pripr
-         IF ! ( hRec[ "idvd" ] $ "97" .AND. hRec[ "tbanktr" ] == "X" )
-
-            APPEND ncnl
-            hRec[ "error" ] := ""
-            dbf_update_rec( hRec )
-
-            _hAttrId := hb_Hash()
-            _hAttrId[ "idfirma" ] := __firma
-            _hAttrId[ "idtipdok" ] := __idvd
-            _hAttrId[ "brdok" ] := __brdok
-
-            oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-            oAttr:hAttrId := _hAttrId
-            oAttr:get_attr_from_server_to_dbf()
-
-         ENDIF
-
-         SELECT kalk
-         SKIP
-
-      ENDDO
-
-      MsgC()
 
       SELECT kalk
       SET ORDER TO TAG "1"
@@ -310,50 +253,36 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
       MsgO( "Brišem tabele sa servera ..." )
 
       run_sql_query( "BEGIN" )
-
-      IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
-         run_sql_query( "ROLLBACK" )
-         MsgBeep( "Ne mogu zaključati tabele !#Prekidam proceduru povrata." )
-         RETURN lRet
-      ENDIF
+      //IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
+      //   run_sql_query( "ROLLBACK" )
+      //   MsgBeep( "Ne mogu zaključati tabele !#Prekidam proceduru povrata." )
+      //   RETURN lRet
+      //ENDIF
 
       DO WHILE !Eof()
 
-         _id_firma := field->idfirma
-         _id_vd := field->idvd
-         _br_dok := field->brdok
-         _del_rec := dbf_get_rec()
-
-         DO WHILE !Eof() .AND. field->idfirma == _id_firma .AND. field->idvd == _id_vd .AND. field->brdok == _br_dok
+         cIdFirma := field->idfirma
+         cIdVd := field->idvd
+         cBrDok := field->brdok
+         hRecDelete := dbf_get_rec()
+         DO WHILE !Eof() .AND. field->idfirma == cIdFirma .AND. field->idvd == cIdVd .AND. field->brdok == cBrDok
             SKIP
          ENDDO
 
          nTrec := RecNo()
-         _ok := .T.
-
-         _hAttrId := hb_Hash()
-         _hAttrId[ "idfirma" ] := _id_firma
-         _hAttrId[ "idtipdok" ] := _id_vd
-         _hAttrId[ "brdok" ] := _br_dok
-
-         oAttr := DokAttr():new( "kalk", F_KALK_ATTR )
-         oAttr:hAttrId := _hAttrId
-
-         lOk := oAttr:delete_attr_from_server()
-
+         lOk := .T.
          IF lOk
-            lOk := delete_rec_server_and_dbf( "kalk_kalk", _del_rec, 2, "CONT" )
+            lOk := delete_rec_server_and_dbf( "kalk_kalk", hRecDelete, 2, "CONT" )
          ENDIF
 
          IF lOk
             SELECT kalk_doks
             GO TOP
-            SEEK _id_firma + _id_vd + _br_dok
-
+            SEEK cIdFirma + cIdVd + cBrDok
             IF Found()
-               log_write( "F18_DOK_OPER: kalk brisanje vise dokumenata: " + _id_firma + _id_vd + _br_dok, 2 )
-               _del_rec := dbf_get_rec()
-               lOk :=  delete_rec_server_and_dbf( "kalk_doks", _del_rec, 1, "CONT" )
+               log_write( "F18_DOK_OPER: kalk brisanje vise dokumenata: " + cIdFirma + cIdVd + cBrDok, 2 )
+               hRecDelete := dbf_get_rec()
+               lOk :=  delete_rec_server_and_dbf( "kalk_doks", hRecDelete, 1, "CONT" )
             ENDIF
          ENDIF
 
@@ -363,24 +292,22 @@ STATIC FUNCTION kalk_povrat_prema_kriteriju()
 
          SELECT kalk
          GO ( nTrec )
-
       ENDDO
-
       MsgC()
 
       IF lOk
-         lRet := .T.
-         hParams := hb_Hash()
-         hParams[ "unlock" ] := { "kalk_doks", "kalk_kalk" }
-         run_sql_query( "COMMIT", hParams )
+         //lRet := .T.
+         //hParams := hb_Hash()
+         //hParams[ "unlock" ] := { "kalk_doks", "kalk_kalk" }
+         run_sql_query( "COMMIT" )
       ELSE
          run_sql_query( "ROLLBACK" )
          MsgBeep( "Problem sa brisanjem podataka iz KALK server tabela !" )
       ENDIF
-
 
    ENDIF
 
    my_close_all_dbf()
 
    RETURN lRet
+*/

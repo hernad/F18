@@ -1118,6 +1118,7 @@ BEGIN
       ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz;
       ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz2;
       ALTER TABLE fmk.kalk_kalk DROP COLUMN fcj3;
+      ALTER TABLE fmk.kalk_kalk DROP COLUMN vpcsap;
 
 	EXCEPTION WHEN OTHERS THEN
         RAISE NOTICE 'idzaduz2 garant ne postoji';

@@ -101,7 +101,6 @@
 #xcommand O__FAKT          => select(F__FAKT)      ; my_use ("_fakt")
 #xcommand O_FAKT_PRIPR9    => select (F_FAKT_PRIPR9)    ; my_use  ("fakt_pripr9") ; set order to tag  "1"
 #xcommand O_FAKT_ATTR     => select (F_FAKT_ATTR) ; my_use ("fakt_attr") ; set order to tag  "1"
-#xcommand O_KALK_ATTR     => select (F_KALK_ATTR) ; my_use ("kalk_attr") ; set order to tag  "1"
 
 #xcommand O__SDIM          => select(F__SDIM)      ; my_use ("_sdim"); set order to tag "1"
 

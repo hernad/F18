@@ -11,8 +11,9 @@
 
 #include "f18.ch"
 
-MEMVAR _Prevoz, _BankTr, _ZavTr, _CarDaz, _SpedTr
-MEMVAR _fcj, _rabat, _kolicina
+MEMVAR gZaokr
+MEMVAR _Prevoz, _TPrevoz, _BankTr, _ZavTr, _CarDaz, _SpedTr
+MEMVAR _fcj, _vpc, _rabat, _kolicina, _idvd, _rbr, _fcj2
 MEMVAR nPrevoz, nBankTr, nSpedTr, nMarza, nMarza2, nCarDaz, nZavTr
 
 FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
@@ -65,9 +66,9 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
    ENDIF
 
-   IF field->idvd $ "16#80"
+   IF kalk_pripr->idvd $ "16#80"
       Box(, 1, 55 )
-      IF idvd == "16"
+      IF kalk_pripr->idvd == "16"
          @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Stopa marže (vpc - stopa*vpc)=nc:" GET nStUc PICT "999.999"
       ELSE
          @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Stopa marže (mpc-stopa*mpcsapp)=nc:" GET nStUc PICT "999.999"
@@ -101,10 +102,10 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
       cBrDok := field->Brdok
 
       nPrviRec := RecNo()
-      DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdVd == field->idvd .AND. cBrDok == field->BrDok
+      DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->idfirma .AND. cIdVd == kalk_pripr->idvd .AND. cBrDok == kalk_pripr->BrDok
 
          cJmj := "KG "
-         nUkupnoTezina += svedi_na_jedinicu_mjere( field->kolicina, field->idroba, @cJmj )
+         nUkupnoTezina += svedi_na_jedinicu_mjere( kalk_pripr->kolicina, kalk_pripr->idroba, @cJmj )
          nUkupnoKolicina += field->kolicina
 
          IF cIdVd $ "10#16#81#80"
@@ -116,7 +117,7 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
          ENDIF
 
          IF cIdVd $ "RN"
-            IF Val( Rbr ) < 900
+            IF Val( kalk_pripr->Rbr ) < 900
                nRNUkupnoProdVrijednost += Round( field->vpc * field->kolicina, gZaokr )
             ELSE
                nUkupanIznosFakture += Round( field->nc * field->kolicina, gZaokr )  // sirovine
@@ -134,31 +135,23 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
             cTipPrevoz := "0"
             nIznosPrevoz := 0
-
             cTipCarDaz := "0"
             nIznosCarDaz := 0
-
             cTipBankTr := "0"
             nIznosBankTr := 0
-
             cTipSpedTr := "0"
             nIznosSpedTr := 0
-
             cTipZavTr := "0"
             nIznosZavTr := 0
 
             cTipPrevoz := field->TPrevoz
             nIznosPrevoz := field->Prevoz
-
             cTipCarDaz :=  field->TCarDaz
             nIznosCarDaz := field->CarDaz
-
             cTipBankTr := field->TBankTr
             nIznosBankTr := field->BankTr
-
             cTipSpedTr := field->TSpedTr
             nIznosSpedTr := field->SpedTr
-
             cTipZavTr := field->TZavTr
             nIznosZavTr := field->ZavTr
 
@@ -198,7 +191,7 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
                Scatter()
 
-               IF _idvd $ "RN" .AND. Val( _rbr ) < 900
+               IF _idvd == "RN" .AND. Val( _rbr ) < 900
                   IF Round( nRNUkupnoProdVrijednost, 4 ) == 0
                      error_bar( "RN", "RN stavke - ukupna prodajna vrijednost 0?!" )
                      _fcj := _fcj2 := 0
@@ -222,7 +215,7 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
                      nUPrevoz += _Prevoz
                      IF Abs( nIznosPrevoz - nUPrevoz ) < 0.1 // sitnish, baci ga na zadnju st.
                         SKIP
-                        IF !( !Eof() .AND. cIdFirma == idfirma .AND. cIdVd == idvd .AND. cBrDok == BrDok )
+                        IF !( !Eof() .AND. cIdFirma == kalk_pripr->idfirma .AND. cIdVd == kalk_pripr->idvd .AND. cBrDok == kalk_pripr->BrDok )
                            _Prevoz += ( nIznosPrevoz - nUPrevoz )
                         ENDIF
                         SKIP -1
@@ -232,13 +225,11 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
 
                ELSEIF cTipPrevoz == "%"
-
                   IF cSet == "prevoz" .AND. _Prevoz > 0
                      _Prevoz += hTrosakSet[ cSet + "_step" ]
                   ENDIF
                   nUPrevoz += _fcj * ( 1 - _Rabat / 100 ) * _kolicina * _Prevoz / 100
                ENDIF
-
 
                IF cTipCarDaz $ "RT"   // troskovi 2
                   IF Round( nUkupanIznosFakture, 4 ) == 0
@@ -421,7 +412,6 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
                SKIP
             ENDDO
 
-
             @ box_x_koord() + 3, box_y_koord() + 2 SAY "Step set " + cSet + " iznos: "
             SWITCH cSet
             CASE "prevoz"
@@ -541,7 +531,6 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
       hTrosakSet := raspored_procent_tr( cTipPrevoz, nUPrevoz, cTipCarDaz, nUCarDaz, ;
          cTipBankTr, nUBankTr, cTipSpedTr, nUSpedTr, cTipZavTr, nUZavTr )
 
-
       IF hb_HHasKey( hTrosakSet, "prevoz" ) .AND. ( hTrosakSet[ "prevoz" ] - hTrosakSet[ "prevoz_0" ]  <> 0 )
          RETURN kalk_raspored_troskova( lSilent, hTrosakSet, "prevoz" )
       ENDIF
@@ -557,7 +546,6 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
       IF hb_HHasKey( hTrosakSet, "zavtr" ) .AND. ( hTrosakSet[ "zavtr" ] - hTrosakSet[ "zavtr_0" ]  <> 0 )
          RETURN kalk_raspored_troskova( lSilent, hTrosakSet, "zavtr" )
       ENDIF
-
 
    ENDIF
 
@@ -604,7 +592,6 @@ FUNCTION raspored_procent_tr( cTipPrevoz, nIznosPrevoz, cTipCarDaz, nIznosCarDaz
    ENDIF
 
    READ
-
    BoxC()
 
    IF LastKey() == K_ESC
@@ -696,7 +683,7 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       nSpedTr := 0
    ENDIF
 
-   IF field->IdVD $ "14#94#15"   // izlaz po vp
+   IF field->IdVD $ "14"   // izlaz po vp
       nMarza := field->VPC * ( 1 - field->Rabatv / 100 ) - field->NC
    ELSEIF field->idvd $ "11#12#13"
       nMarza := field->VPC - field->FCJ
@@ -706,7 +693,7 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    IF ( field->idvd $ "11#12#13" )
       nMarza2 := field->MPC - field->VPC - nPrevoz
-   ELSEIF ( ( field->idvd $ "41#42#43#81" ) )
+   ELSEIF ( ( field->idvd $ "41#42#81" ) )
       nMarza2 := field->MPC - field->NC
    ELSE
       nMarza2 := field->MPC - field->VPC

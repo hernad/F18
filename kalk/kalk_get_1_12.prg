@@ -17,7 +17,7 @@ FUNCTION kalk_get_1_12()
 
    LOCAL lRet
 
-   lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
+   //lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
    PRIVATE aPorezi := {}
 
    _GKolicina := _GKolicin2 := 0
@@ -29,7 +29,6 @@ FUNCTION kalk_get_1_12()
 
       @ box_x_koord() + 8, box_y_koord() + 2   SAY "Prodavnicki konto razduzuje " GET _IdKonto VALID P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto zadužuje   "  GET _IdKonto2 VALID Empty( _IdKonto2 ) .OR. P_Konto( @_IdKonto2, 24 )
-
       READ
       ESC_RETURN K_ESC
    ELSE
@@ -41,13 +40,7 @@ FUNCTION kalk_get_1_12()
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
 
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
-   /*
-   IF roba_barkod_pri_unosu()
-    --  @ box_x_koord() + 11, box_y_koord() + 2   SAY "Artikal  " GET _IdRoba PICT "@!S10" when {|| _IdRoba := PadR( _idroba, Val( --gDuzSifIni ) ), .T. } VALID VRoba()
-   ELSE
-    --  @ box_x_koord() + 11, box_y_koord() + 2   SAY "Artikal  " GET _IdRoba PICT "@!" VALID VRoba()
-   ENDIF
-   */
+
 
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY "Kolicina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
@@ -64,7 +57,6 @@ FUNCTION kalk_get_1_12()
 
    _PKonto := _Idkonto
    _MKonto := _Idkonto2
-
    _GKolicina := 0
 
    IF kalk_is_novi_dokument()
@@ -127,6 +119,6 @@ FUNCTION kalk_get_1_12()
    _PKonto := _Idkonto
    _PU_I := "5"
 
-   kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
+   //kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()

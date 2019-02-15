@@ -11,19 +11,21 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkStrana
+
 MEMVAR nVPV16, nNVPredhodna
 MEMVAR nKalkRbr
 MEMVAR GetList
-MEMVAR _idkonto, _idkonto2, _kolicina, _IdTarifa
-
+MEMVAR _idvd, _idkonto, _idkonto2, _kolicina, _IdTarifa, _nc, _idroba, _vpc, _marza, _mkonto, _pkonto, _mu_i, _pu_i
+MEMVAR _idpartner, _brfaktp, _datfaktp, _datdok, _TMarza
 STATIC aPorezi := {}
 
 FUNCTION kalk_get_1_16()
 
    LOCAL nRVPC
 
-   lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
-   //SET KEY K_ALT_K TO kalk_alt_k_kartica_magacin()
+   //lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
+   // SET KEY K_ALT_K TO kalk_alt_k_kartica_magacin()
 
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
@@ -39,9 +41,9 @@ FUNCTION kalk_get_1_16()
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP  VALID {|| .T. }
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje"  GET _IdKonto VALID Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 )
 
-      //IF !Empty( cRNT1 )
-      //   @ box_x_koord() + 9, box_y_koord() + 40 SAY "Rad.nalog:"   GET _IdZaduz2  PICT "@!"
-      //ENDIF
+      // IF !Empty( cRNT1 )
+      // @ box_x_koord() + 9, box_y_koord() + 40 SAY "Rad.nalog:"   GET _IdZaduz2  PICT "@!"
+      // ENDIF
 
       IF _idvd == "16" .AND. _idkonto2 != "XXX"
          @ box_x_koord() + 10, box_y_koord() + 2   SAY "Prenos na konto          " GET _IdKonto2   VALID Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2, 21, 5 ) PICT "@!"
@@ -59,7 +61,7 @@ FUNCTION kalk_get_1_16()
    kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
 
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
-   @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
+   @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE pickol() VALID _Kolicina <> 0
 
    READ
    ESC_RETURN K_ESC
@@ -70,35 +72,21 @@ FUNCTION kalk_get_1_16()
 
    select_o_koncij( _idkonto )
    select_o_tarifa( _IdTarifa )
-
    SELECT kalk_pripr
    _MKonto := _Idkonto
    _MU_I := "1"
-
-
-   _GKolicina := 0
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
-      IF koncij->naz == "P2"
-         _nc := plc
-         _vpc := plc
-      ELSE
-         _VPC := kalk_vpc_za_koncij()
-         _NC := NC
-      ENDIF
+      _VPC := kalk_vpc_za_koncij()
+      _NC := roba->NC
    ENDIF
    SELECT kalk_pripr
 
-   @ box_x_koord() + 14, box_y_koord() + 2   SAY "NAB.CJ   "  GET _NC  PICTURE gPicNC  WHEN V_kol10()
+   @ box_x_koord() + 14, box_y_koord() + 2   SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  WHEN V_kol10()
    READ
 
-   PRIVATE _vpcsappp := 0
-
    _VPC := _nc
-   marza := 0
-
    nKalkStrana := 2
-
    _marza := _vpc - _nc
    _MKonto := _Idkonto
    _MU_I := "1"
@@ -117,7 +105,7 @@ FUNCTION kalk_get_16_1()
 
    kalk_is_novi_dokument( .T. )
 
-   PRIVATE PicDEM := "9999999.99999999", PicKol := "999999.999"
+   PRIVATE PicDEM := "9999999.99999999", Pickol := "999999.999"
 
    Beep( 1 )
 
@@ -125,7 +113,7 @@ FUNCTION kalk_get_16_1()
    @ box_x_koord() + 2, Col() + 2 GET cSvedi VALID csvedi $ " S" PICT "@!"
    READ
 
-   @ box_x_koord() + 11, box_y_koord() + 66 SAY "Tarif.brĿ"
+   @ box_x_koord() + 11, box_y_koord() + 66 SAY "Tarif.br:"
    @ box_x_koord() + 12, box_y_koord() + 2  SAY "Artikal  " GET _IdRoba PICT "@!" ;
       VALID  {|| P_Roba( @_IdRoba ), say_from_valid( 12, 23, Trim( Left( roba->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 ), _IdTarifa := ROBA->idtarifa, .T. }
    @ box_x_koord() + 12, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
@@ -138,9 +126,8 @@ FUNCTION kalk_get_16_1()
 
    _PKonto := _Idkonto
 
-
    PRIVATE cProracunMarzeUnaprijed := " "
-   @ box_x_koord() + 13, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
+   @ box_x_koord() + 13, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE pickol() VALID _Kolicina <> 0
 
    select_o_koncij( _idkonto )
    select_o_roba(  _IdRoba )
@@ -153,10 +140,7 @@ FUNCTION kalk_get_16_1()
    SELECT kalk_pripr
 
 
-   @ box_x_koord() + 14, box_y_koord() + 2    SAY "NAB.CJ   "  GET _NC  PICTURE  gPicNC  WHEN V_kol10()
-
-   PRIVATE _vpcsappp := 0
-
+   @ box_x_koord() + 14, box_y_koord() + 2    SAY "NAB.CJ   "  GET _NC  PICTURE  picnc()  WHEN V_kol10()
 
    // vodi se po nc
    _vpc := _nc

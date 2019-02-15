@@ -172,7 +172,7 @@ FUNCTION kalk_valid_marza_veleprodaja_10( cIdVd, lNaprijed )
       _VPC := Round( ( nMarza + _NC ), 2 )
 
    ELSE
-      IF cIdvd $ "14#94"
+      IF cIdvd == "14"
          nMarza := _VPC * ( 1 - _Rabatv / 100 ) - _NC
       ELSE
          nMarza := _VPC - _NC
@@ -246,19 +246,12 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
    RETURN .T.
 
 
-
 FUNCTION kalk_vpc_po_kartici( nVPC, cIdFirma, cMKonto, cIdRoba, dDatum )
-
-   LOCAL nOrder
 
    IF koncij->naz == "V2" .AND. roba->( FieldPos( "vpc2" ) ) <> 0
       nVPC := roba->vpc2
-   ELSEIF koncij->naz == "P2"
-      nVPC := roba->plc
-   ELSEIF roba->( FieldPos( "vpc" ) ) <> 0
-      nVPC := roba->vpc
    ELSE
-      nVPC := 0
+      nVPC := roba->vpc
    ENDIF
 
    PushWA()
@@ -409,12 +402,9 @@ FUNCTION kalk_set_vpc_sifarnik( nNovaVrijednost, lUvijek )
    RETURN .T.
 
 
-
 FUNCTION kalk_vpc_za_koncij()
 
-   IF koncij->naz == "P2"
-      RETURN roba->plc
-   ELSEIF koncij->naz == "V2"
+   IF koncij->naz == "V2"
       RETURN roba->VPC2
    ELSEIF koncij->naz == "V3"
       RETURN roba->VPC3
@@ -423,10 +413,9 @@ FUNCTION kalk_vpc_za_koncij()
    RETURN roba->VPC
 
 
-
 FUNCTION kalk_marza_veleprodaja()
 
-   LOCAL nStvarnaKolicina := 0, nMarza
+   LOCAL nStvarnaKolicina, nMarza
 
    nStvarnaKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
    IF field->TMarza == "%" .OR. Empty( field->tmarza )
@@ -443,6 +432,14 @@ FUNCTION kalk_marza_veleprodaja()
 
 FUNCTION kalk_valid_kolicina_mag( nKols )
 
+   IF roba->tip $ "UT"
+      RETURN .T.
+   ENDIF
+
+   IF Empty( kalk_metoda_nc() ) .OR. _TBankTr == "X" // parametri postavljeni - bez obračuna cijene
+      RETURN .T.
+   ENDIF
+
    IF ( ( _nc <= 0 ) .AND. !( _idvd $ "11#12#13#22" ) ) .OR. ( _fcj <= 0 .AND. _idvd $ "11#12#13#22" )
       // kod 11-ke se unosi fcj
       Msg( _idroba + " Nabavna cijena <= 0 ! STOP!" )
@@ -450,14 +447,6 @@ FUNCTION kalk_valid_kolicina_mag( nKols )
       _ERROR := "1"
       automatska_obrada_error( .T. )
       RETURN .F.
-   ENDIF
-
-   IF roba->tip $ "UT"
-      RETURN .T.
-   ENDIF
-
-   IF Empty( kalk_metoda_nc() ) .OR. _TBankTr == "X" // parametri postavljeni - bez obračuna cijene
-      RETURN .T.
    ENDIF
 
    IF nKolS < _Kolicina

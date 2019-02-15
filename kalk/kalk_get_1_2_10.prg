@@ -17,7 +17,7 @@ MEMVAR nKalkRBr
 STATIC s_cKonverzijaValuteDN // konverzija valute
 STATIC aPorezi := {}
 STATIC s_lIsNoviDokument := .F.
-
+MEMVAR _rabat
 
 FUNCTION kalk_is_novi_dokument( lSet )
 
@@ -124,13 +124,10 @@ FUNCTION kalk_get_1_10()
       @ box_x_koord() + nX, Col() + 1 SAY "EUR (D/N)->" GET s_cKonverzijaValuteDN VALID kalk_ulaz_preracun_fakturne_cijene( s_cKonverzijaValuteDN ) PICT "@!"
    ENDIF
 
-   @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _fcj PICT gPicNC VALID {|| _fcj > 0 .AND. _set_konv( @_fcj, @s_cKonverzijaValuteDN ) } WHEN V_kol10()
-
+   @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _fcj PICT picnc() VALID {|| _fcj > 0 .AND. _set_konv( @_fcj, @s_cKonverzijaValuteDN ) } WHEN V_kol10()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Rabat (%):"
-   @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _Rabat PICT PicDEM
-
-
+   @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _Rabat PICT picdem()
 
    READ
 
@@ -248,37 +245,37 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Raspored troškova kalkulacije ->"
 
       @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AURT" PICTURE "@!"
-      @ box_x_koord() + nX, Col() + 2 GET _Prevoz PICT  PicDEM
+      @ box_x_koord() + nX, Col() + 2 GET _Prevoz PICT  picdem()
 
       ++nX
       @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T2 + cSPom  GET _TBankTr VALID _TBankTr $ "%AURT" PICT "@!"
-      @ box_x_koord() + nX, Col() + 2 GET _BankTr PICT PicDEM
+      @ box_x_koord() + nX, Col() + 2 GET _BankTr PICT picdem()
 
       ++nX
       @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AURT" PICT "@!"
-      @ box_x_koord() + nX, Col() + 2 GET _SpedTr PICT PicDEM
+      @ box_x_koord() + nX, Col() + 2 GET _SpedTr PICT picdem()
 
       ++nX
       @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AURT" PICTURE "@!"
-      @ box_x_koord() + nX, Col() + 2 GET _CarDaz PICT PicDEM
+      @ box_x_koord() + nX, Col() + 2 GET _CarDaz PICT picdem()
 
       ++nX
       @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T5 + cSPom GET _TZavTr VALID _TZavTr $ "%AURT" PICTURE "@!"
-      @ box_x_koord() + nX, Col() + 2 GET _ZavTr PICT PicDEM
+      @ box_x_koord() + nX, Col() + 2 GET _ZavTr PICT picdem()
 
       nX += 2
 
    ENDIF
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "NABAVNA CJENA:"
-   @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _nc PICT gPicNC WHEN {|| kalk_when_valid_nc_ulaz(), .T. }
+   @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _nc PICT picnc() WHEN {|| kalk_when_valid_nc_ulaz(), .T. }
 
    IF koncij->naz != "N1" // magacin po nabavnim cijenama
 
       PRIVATE cProracunMarzeUnaprijed := " "
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2    SAY8 "Magacin. Marža     :" GET _TMarza VALID _Tmarza $ "%AU" PICTURE "@!"
-      @ box_x_koord() + nX, Col() + 2 GET _Marza PICT PicDEM
+      @ box_x_koord() + nX, Col() + 2 GET _Marza PICT picdem()
       @ box_x_koord() + nX, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!" VALID {|| kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( @cProracunMarzeUnaprijed ) }
 
       // PRODAJNA CIJENA / PLANSKA CIJENA
@@ -289,14 +286,14 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
          @ box_x_koord() + nX, box_y_koord() + 2    SAY "PRODAJNA CIJENA BEZ PDV   :"
       ENDIF
 
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _vpc PICT PicDEM VALID {|| kalk_valid_marza_veleprodaja_10( _Idvd, ( cProracunMarzeUnaprijed == "F" ) ), .T. }
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _vpc PICT picdem() VALID {|| kalk_valid_marza_veleprodaja_10( _Idvd, ( cProracunMarzeUnaprijed == "F" ) ), .T. }
 
       IF ( gcMpcKalk10 == "D" )   // VPC se izracunava pomocu MPC cijene
 
          _mpcsapp := roba->mpc
          ++nX
          @ box_x_koord() + nX, box_y_koord() + 2 SAY "PRODAJNA CIJENA SA PDV:"
-         @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _mpcsapp PICT PicDEM ;
+         @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _mpcsapp PICT picdem() ;
             VALID {|| _mpcsapp := iif( _mpcsapp = 0, Round( _vpc * ( 1 + tarifa->pdv / 100 ), 2 ), _mpcsapp ), _mpc := _mpcsapp / ( 1 + tarifa->pdv / 100 ), ;
             iif( _mpc <> 0, _vpc := Round( _mpc, 2 ), _vpc ), ShowGets(), .T. }
 

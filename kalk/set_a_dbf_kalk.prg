@@ -11,11 +11,9 @@
 
 #include "f18.ch"
 
-
 FUNCTION set_a_dbf_kalk()
 
    set_a_sql_kalk_kalk()
-
    set_a_sql_kalk_doks( "kalk_doks", "KALK_DOKS", F_KALK_DOKS  )
    //set_a_sql_kalk_doks_doks2( "kalk_doks2", "KALK_DOKS2", F_KALK_DOKS2 )
    set_a_sql_trfp( "trfp", "TRFP", F_TRFP )
@@ -65,106 +63,108 @@ FUNCTION set_a_dbf_kalk()
 
 FUNCTION set_a_sql_kalk_kalk()
 
-   LOCAL _item, _alg, _tbl
+   LOCAL hItem, hAlg, _tbl
 
    _tbl := "kalk_kalk"
-   _item := hb_Hash()
+   hItem := hb_Hash()
 
-   _item[ "alias" ] := "KALK"
-   _item[ "table" ] := _tbl
-   _item[ "wa" ]    := F_KALK
-   _item[ "temp" ]  := .F.
-   _item[ "sif" ] := .F.
-   _item[ "sql" ] := .T.
-   // _item[ "sql" ] := .T.  BUG_CPU100
-   _item[ "algoritam" ] := {}
+   hItem[ "alias" ] := "KALK"
+   hItem[ "table" ] := _tbl
+   hItem[ "wa" ]    := F_KALK
+   hItem[ "temp" ]  := .F.
+   hItem[ "sif" ] := .F.
+   hItem[ "sql" ] := .T.
+   // hItem[ "sql" ] := .T.  BUG_CPU100
+   hItem[ "algoritam" ] := {}
 
    // algoritam 1 - default
    // t_kalk_db.prg
    // -------------------------------------------------------------------------------
-   _alg := hb_Hash()
-   _alg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok + field->rbr }
-   _alg[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + SPACE( FIELD_LEN_KALK_BRDOK ) + SPACE( FIELD_LEN_KALK_RBR )
-   _alg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok", "rbr" }
-   _alg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8) || lpad(rbr,3)"
-   _alg[ "dbf_tag" ]        := "1"
-   AAdd( _item[ "algoritam" ], _alg )
+   hAlg := hb_Hash()
+   hAlg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok + field->rbr }
+   hAlg[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + SPACE( FIELD_LEN_KALK_BRDOK ) + SPACE( FIELD_LEN_KALK_RBR )
+   hAlg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok", "rbr" }
+   hAlg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8) || lpad(rbr,3)"
+   hAlg[ "dbf_tag" ]        := "1"
+   AAdd( hItem[ "algoritam" ], hAlg )
 
    // algoritam 2
    // -------------------------------------------------------------------------------
-   _alg := hb_Hash()
-   _alg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok }
-   _alg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok" }
-   _alg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8)"
-   _alg[ "dbf_tag" ]        := "1"
-   AAdd( _item[ "algoritam" ], _alg )
+   hAlg := hb_Hash()
+   hAlg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok }
+   hAlg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok" }
+   hAlg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8)"
+   hAlg[ "dbf_tag" ]        := "1"
+   AAdd( hItem[ "algoritam" ], hAlg )
 
-   _item[ "sql_order" ] := "idfirma, idvd, brdok, rbr"
+   hItem[ "sql_order" ] := "idfirma, idvd, brdok, rbr"
 
-   f18_dbfs_add( _tbl, @_item )
+   f18_dbfs_add( _tbl, @hItem )
 
    RETURN .T.
 
 
 FUNCTION set_a_sql_kalk_doks( table, alias, wa )
 
-   LOCAL _item, _alg, _tbl
+   LOCAL hItem, hAlg, _tbl
 
    _tbl := table
-   _item := hb_Hash()
-   _item[ "alias" ] := alias
-   _item[ "table" ] := _tbl
-   _item[ "wa" ]    := wa
-   _item[ "temp" ]  := .F.
-   _item[ "sif" ] := .F.
-   _item[ "sql" ] := .T.
-   _item[ "algoritam" ] := {}
+   hItem := hb_Hash()
+   hItem[ "alias" ] := alias
+   hItem[ "table" ] := _tbl
+   hItem[ "wa" ]    := wa
+   hItem[ "temp" ]  := .F.
+   hItem[ "sif" ] := .F.
+   hItem[ "sql" ] := .T.
+   hItem[ "algoritam" ] := {}
 
    // algoritam 1 - default
    // t_kalk_db.prg
    // -------------------------------------------------------------------------------
-   _alg := hb_Hash()
-   _alg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok }
-   _alg[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + SPACE( FIELD_LEN_KALK_BRDOK )
-   _alg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok" }
-   _alg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8)"
-   _alg[ "dbf_tag" ]        := "1"
-   AAdd( _item[ "algoritam" ], _alg )
-   _item[ "sql_order" ] := "idfirma, idvd, brdok"
+   hAlg := hb_Hash()
+   hAlg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok }
+   hAlg[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + SPACE( FIELD_LEN_KALK_BRDOK )
+   hAlg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok" }
+   hAlg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8)"
+   hAlg[ "dbf_tag" ]        := "1"
+   AAdd( hItem[ "algoritam" ], hAlg )
+   hItem[ "sql_order" ] := "idfirma, idvd, brdok"
+   hItem[ "blacklisted" ] := { "obradjeno", "korisnik" } // polja obradjen i korisnik su autogenerisana na serverskoj strani
 
-   f18_dbfs_add( _tbl, @_item )
+
+   f18_dbfs_add( _tbl, @hItem )
 
    RETURN .T.
 
 
 FUNCTION set_a_sql_trfp( table, alias, wa )
 
-   LOCAL _item, _alg, _tbl
+   LOCAL hItem, hAlg, _tbl
 
    _tbl := table
 
-   _item := hb_Hash()
+   hItem := hb_Hash()
 
-   _item[ "alias" ] := alias
-   _item[ "table" ] := _tbl
-   _item[ "wa" ]    := wa
-   _item[ "temp" ]  := .F.
-   _item[ "sql" ] := .T.
-   _item[ "sif" ] := .F.
-   _item[ "chk0" ] := .F.
-   _item[ "algoritam" ] := {}
+   hItem[ "alias" ] := alias
+   hItem[ "table" ] := _tbl
+   hItem[ "wa" ]    := wa
+   hItem[ "temp" ]  := .F.
+   hItem[ "sql" ] := .T.
+   hItem[ "sif" ] := .F.
+   hItem[ "chk0" ] := .F.
+   hItem[ "algoritam" ] := {}
 
    // algoritam 1 - default
    // -------------------------------------------------------------------------------
-   _alg := hb_Hash()
-   _alg[ "dbf_key_block" ]  := {|| field->idvd + field->shema + field->idkonto + field->id + field->idtarifa + field->idvn + field->naz }
-   _alg[ "dbf_key_fields" ] := { "idvd", "shema", "idkonto", "id", "idtarifa", "idvn", "naz" }
-   _alg[ "sql_in" ]         := " rpad( idvd,2) || rpad( shema,1)  || rpad(idkonto,8) || rpad(id,60) || rpad(idtarifa,6) || rpad(idvn,2) || rpad(naz,20) "
-   _alg[ "dbf_tag" ]        := "ID"
-   AAdd( _item[ "algoritam" ], _alg )
+   hAlg := hb_Hash()
+   hAlg[ "dbf_key_block" ]  := {|| field->idvd + field->shema + field->idkonto + field->id + field->idtarifa + field->idvn + field->naz }
+   hAlg[ "dbf_key_fields" ] := { "idvd", "shema", "idkonto", "id", "idtarifa", "idvn", "naz" }
+   hAlg[ "sql_in" ]         := " rpad( idvd,2) || rpad( shema,1)  || rpad(idkonto,8) || rpad(id,60) || rpad(idtarifa,6) || rpad(idvn,2) || rpad(naz,20) "
+   hAlg[ "dbf_tag" ]        := "ID"
+   AAdd( hItem[ "algoritam" ], hAlg )
 
-   _item[ "sql_order" ] := "idvd, shema, idkonto, id, idtarifa"
+   hItem[ "sql_order" ] := "idvd, shema, idkonto, id, idtarifa"
 
-   f18_dbfs_add( _tbl, @_item )
+   f18_dbfs_add( _tbl, @hItem )
 
    RETURN .T.

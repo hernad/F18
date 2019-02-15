@@ -31,7 +31,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL cMpcIzSif := "N"
    LOCAL cMinK := "N"
    LOCAL _istek_roka := CToD( "" )
-   LOCAL _hAttrId
+
    LOCAL cPrintPdfOdt := "1"
    LOCAL cIdFirma, dDatOd, dDatDo, lPocStanje
    LOCAL hZaglParams := hb_Hash()

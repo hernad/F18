@@ -25,9 +25,11 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    LOCAL nCol2 := 0
    LOCAL nPom := 0
    LOCAL lVPC := .F.
-   LOCAL nVPC, nUVPV, nTVPV, nTotVPV
+   LOCAL nVPC, nUVPV, nTVPV
    LOCAL bZagl, xPrintOpt, cNaslov
    LOCAL cLinija
+   LOCAL nTot1, nTot1b, nTot2, nTotVPV, nTotMarzaVP, nTotMarzaMP, nTot5, nTot6, nTot7
+   LOCAL nTot4c
 
    PRIVATE aPorezi
    PRIVATE nMarza, nMarza2
@@ -60,7 +62,6 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    lVPC := is_magacin_evidencija_vpc( kalk_pripr->mkonto )
 
    SELECT kalk_pripr
-
    bZagl := {|| zagl_11( cLinija ) }
    Eval( bZagl )
 
@@ -88,14 +89,12 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       nPor1 := aIPor[ 1 ]
 
       check_nova_strana( bZagl, s_oPDF )
-
       nTot1 +=  ( nU1 := FCJ * Kolicina   )
       nTot1b += ( nU1b := NC * Kolicina  )
       nTot2 +=  ( nU2 := Prevoz * Kolicina   )
       nTotVPV +=  ( nU3 := _VPC * kolicina )
       nTotMarzaVP +=  ( nU4 := nMarza * Kolicina )
       nTotMarzaMP +=  ( nU4b := nMarza2 * Kolicina )
-
       nTot5 +=  ( nU5 := MPC * Kolicina )
       nTot6 +=  ( nU6 := ( nPor1 ) * Kolicina )
       nTot7 +=  ( nU7 := MPcSaPP * Kolicina )
@@ -109,32 +108,25 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       @ PRow(), PCol() + 1 SAY FCJ                  PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY VPC                  PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY Prevoz               PICTURE piccdem()
-
       @ PRow(), PCol() + 1 SAY _VPC                   PICTURE piccdem() // _VPC
       @ PRow(), PCol() + 1 SAY nMarza               PICTURE piccdem()  // marza vp
       @ PRow(), PCol() + 1 SAY nMarza2              PICTURE piccdem()
-
       @ PRow(), PCol() + 1 SAY MPC                  PICTURE piccdem()
       nCol1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ]     PICTURE picproc()
       @ PRow(), PCol() + 1 SAY nPor1                PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY MPCSAPP              PICTURE piccdem()
-
       // =========  red 2 ===================
       @ PRow() + 1, 4 SAY IdTarifa + roba->tip
       @ PRow(), PCol() + 1 SAY "   " + ROBA->barkod
-
       @ PRow(), nCol0    SAY  kalk_pripr->fcj * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->nc * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->prevoz * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  _VPC * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  nMarza * kalk_pripr->kolicina      PICTURE picdem()
-
       @ PRow(), nMPos := PCol() + 1 SAY  nMarza2 * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->mpc * kalk_pripr->kolicina      PICTURE picdem()
-
       @ PRow(), nCol1    SAY aPorezi[ POR_PDV ]   PICTURE picproc()
-
       @ PRow(),  PCol() + 1 SAY  nU6             PICTURE piccdem()
       @ PRow(),  PCol() + 1 SAY  nU7             PICTURE piccdem()
 
@@ -146,7 +138,6 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       SKIP
 
    ENDDO
-
 
    check_nova_strana( bZagl, s_oPDF )
    ? cLinija
@@ -168,15 +159,12 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
 
    nTot5 := nTot6 := nTot7 := 0
    kalk_pripr_rekap_tarife()
-
    f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
 
-
 STATIC FUNCTION zagl_11( cLine )
-
 
 /*
    IF cIdvd == "11"
@@ -204,11 +192,9 @@ STATIC FUNCTION zagl_11( cLine )
    // ENDIF
 
    ? cLine
-
    ?U "*R *          *                ROBA                   * Količina *  NAB.CJ  *    NC    *  TROSAK  *   VP.CJ  *  MARŽA   *  MARŽA   * PROD.CJ  *   PDV %  *   PDV   * PROD.CJ  *"
    ?U "*BR*          *                                       *          *   U VP   *          *   U MP   *          *   VP     *   MP     * BEZ PDV  *          *         *  SA PDV  *"
    ?U "*  *          *                                       *          *          *          *          *          *          *          *          *          *         *          *"
-
    ? cLine
 
    RETURN .T.

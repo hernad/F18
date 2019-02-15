@@ -25,10 +25,6 @@ FUNCTION kalk_stampa_dok_14()
    LOCAL nPom := 0
    LOCAL oPDF, xPrintOpt, bZagl
 
-   IF is_legacy_ptxt()
-      RETURN kalk_stampa_dok_14_txt_legacy()
-   ENDIF
-
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
 
    m := "--- ---------- ---------- ----------  ---------- ---------- ---------- ----------- --------- ----------"
@@ -208,6 +204,8 @@ FUNCTION kalk_stampa_dok_14()
 
 STATIC FUNCTION zagl()
 
+   LOCAL dDatVal
+
    IF cIdvd == "14" .OR. cIdvd == "74"
       ?U "IZLAZ KUPCU PO VELEPRODAJI"
    ELSEIF cIdvd == "15"
@@ -217,14 +215,17 @@ STATIC FUNCTION zagl()
    ENDIF
 
    ? "KALK BR:",  cIdFirma + "-" + cIdVD + "-" + cBrDok, ", Datum:", DatDok
-
    select_o_partner( cIdPartner )
-
    ? "KUPAC:", cIdPartner, "-", PadR( naz, 20 ), " FAKT br.:", cBrFaktP  // , "Datum:", dDatFaktP
 
    SELECT kalk_pripr
-   find_kalk_doks_by_broj_dokumenta( kalk_pripr->idfirma, kalk_pripr->idvd, kalk_pripr->brdok )
-   ?? "  DatVal:", kalk_doks->datval
+   IF FieldPos( "datval" ) > 0
+      dDatVal := kalk_pripr->datval
+   ELSE
+      find_kalk_doks_by_broj_dokumenta( kalk_pripr->idfirma, kalk_pripr->idvd, kalk_pripr->brdok )
+      dDatVal := kalk_doks->datval
+   ENDIF
+   ?? "  DatVal:", dDatVal
 
    IF cIdvd == "94"
       select_o_partner( cIdkonto2 )
@@ -232,9 +233,9 @@ STATIC FUNCTION zagl()
    ELSE
       select_o_partner( cIdkonto2 )
       ?  "KONTO razduzuje:", kalk_pripr->mkonto, "-", AllTrim( naz )
-      //IF !Empty( kalk_pripr->Idzaduz2 )
-      //   ?? " Rad.nalog:", kalk_pripr->Idzaduz2
-      //ENDIF
+      // IF !Empty( kalk_pripr->Idzaduz2 )
+      // ?? " Rad.nalog:", kalk_pripr->Idzaduz2
+      // ENDIF
    ENDIF
 
    SELECT kalk_pripr

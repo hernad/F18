@@ -492,11 +492,8 @@ FUNCTION use_sql_kalk( hParams )
       cSql += coalesce_char_zarez( "tmarza2", 1 )
       cSql += coalesce_num_num_zarez( "rabat", 18, 8 )
       cSql += coalesce_num_num_zarez( "marza2", 18, 8 )
-
-      cSql += coalesce_num_num_zarez( "fcj3", 18, 8 )
       cSql += coalesce_num_num_zarez( "prevoz", 18, 8 )
       cSql += coalesce_num_num_zarez( "prevoz2", 18, 8 )
-
       cSql += coalesce_num_num_zarez( "banktr", 18, 8 )
       cSql += coalesce_num_num_zarez( "cardaz", 18, 8 )
       cSql += coalesce_num_num_zarez( "spedtr", 18, 8 )
@@ -515,7 +512,6 @@ FUNCTION use_sql_kalk( hParams )
 
    IF !lReportProdavnica
       cSql += coalesce_num_num_zarez( "rabatv", 18, 8 )
-      cSql += coalesce_num_num_zarez( "vpcsap", 18, 8 )
    ENDIF
 
    IF !lReportMagacin
