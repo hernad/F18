@@ -37,10 +37,10 @@ FUNCTION datum_server( lSet )
 
 STATIC FUNCTION datum_server_sql()
 
-   LOCAL _qry := "SELECT CURRENT_DATE;"
+   LOCAL cQuery := "SELECT CURRENT_DATE;"
    LOCAL _res
 
-   _res := run_sql_query( _qry )
+   _res := run_sql_query( cQuery )
 
    IF sql_error_in_query( _res )
       RETURN Date()

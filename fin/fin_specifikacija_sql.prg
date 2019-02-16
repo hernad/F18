@@ -178,7 +178,7 @@ STATIC FUNCTION _cre_rpt( rpt_vars )
 
    LOCAL _rasclan, _nule, _sintetika, _konto, _partner, _brdok, _idvn
    LOCAL _datum_od, _datum_do, _tip_valute
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
    LOCAL _where, _opcina
    LOCAL _fld_iznos
    LOCAL _rj_fond_funk := ""
@@ -237,7 +237,7 @@ STATIC FUNCTION _cre_rpt( rpt_vars )
       _order_cond += ", sub.idrj, sub.fond, sub.funk "
    ENDIF
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       " sub.idkonto as konto_id, " + ;
       " kto.naz as konto_naz, " + ;
       " sub.idpartner as partner_id, " + ;
@@ -248,12 +248,12 @@ STATIC FUNCTION _cre_rpt( rpt_vars )
       "FROM " + F18_PSQL_SCHEMA_DOT + "fin_suban sub " + ;
       "LEFT JOIN " + F18_PSQL_SCHEMA_DOT + "partn part ON sub.idpartner = part.id " + ;
       "LEFT JOIN " + F18_PSQL_SCHEMA_DOT + "konto kto ON sub.idkonto = kto.id "
-   _qry += _where_cond
-   _qry += _group_cond
-   _qry += _order_cond
+   cQuery += _where_cond
+   cQuery += _group_cond
+   cQuery += _order_cond
 
    MsgO( "formiranje sql upita u toku ..." )
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    MsgC()
 
    IF !is_var_objekat_tpqquery( _table )

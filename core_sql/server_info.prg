@@ -12,12 +12,12 @@
 
 FUNCTION server_show( var )
 
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _ret
 
-   _qry := "SHOW " + var
+   cQuery := "SHOW " + var
 
-   _ret := run_sql_query( _qry )
+   _ret := run_sql_query( cQuery )
 
    IF !is_var_objekat_tpqquery( _ret )
       RETURN -1
@@ -32,15 +32,15 @@ FUNCTION server_show( var )
 
 FUNCTION server_sys_info( var )
 
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _ret_sql
    LOCAL _ret := hb_Hash()
    LOCAL hParams := hb_hash()
 
-   _qry := "select inet_client_addr(), inet_client_port(),  inet_server_addr(), inet_server_port(), user"
+   cQuery := "select inet_client_addr(), inet_client_port(),  inet_server_addr(), inet_server_port(), user"
 
    hParams[ "log" ] := .F.
-   _ret_sql := run_sql_query( _qry, hParams )
+   _ret_sql := run_sql_query( cQuery, hParams )
 
    IF sql_error_in_query( _ret_sql )
       RETURN NIL

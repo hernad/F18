@@ -116,9 +116,9 @@ METHOD FaktDokument:set_sql_where()
 METHOD FaktDokument:exists()
 
    LOCAL _ret
-   LOCAL _qry := "SELECT count(*)  FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks WHERE " + ::p_sql_where
+   LOCAL cQuery := "SELECT count(*)  FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks WHERE " + ::p_sql_where
 
-   _ret := _qry:FieldGet( 1 )
+   _ret := cQuery:FieldGet( 1 )
 
    IF _ret > 1
       ::err_msg := "Dokument dupliran !?  cnt=" + to_str( _ret )
@@ -127,7 +127,7 @@ METHOD FaktDokument:exists()
       RETURN .F.
    ENDIF
 
-   _ret := _qry:FieldGet( 1 )
+   _ret := cQuery:FieldGet( 1 )
 
    RETURN _ret
 
@@ -142,7 +142,7 @@ METHOD FaktDokument:refresh_info()
 METHOD FaktDokument:get_info()
 
    LOCAL _ret := hb_Hash()
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _qry_str
 
    if ::p_h_info != NIL
@@ -150,26 +150,26 @@ METHOD FaktDokument:get_info()
    ENDIF
 
    _qry_str := "SELECT sum(kolicina * cijena * (1-Rabat/100)) from " + F18_PSQL_SCHEMA_DOT + "fakt_fakt WHERE " + ::p_sql_where
-   _qry := run_sql_query( _qry_str )
-   _ret[ "neto_vrijednost" ] := _qry:FieldGet( 1 )
+   cQuery := run_sql_query( _qry_str )
+   _ret[ "neto_vrijednost" ] := cQuery:FieldGet( 1 )
 
    _qry_str := "SELECT count(*) from " + F18_PSQL_SCHEMA_DOT + "fakt_fakt WHERE " + ::p_sql_where
-   _qry := run_sql_query( _qry_str )
-   _ret[ "broj_stavki" ] := _qry:FieldGet( 1 )
+   cQuery := run_sql_query( _qry_str )
+   _ret[ "broj_stavki" ] := cQuery:FieldGet( 1 )
 
    _qry_str := "SELECT DISTINCT(idroba) from " + F18_PSQL_SCHEMA_DOT + "fakt_fakt WHERE " + ::p_sql_where
-   _qry := run_sql_query( _qry_str )
+   cQuery := run_sql_query( _qry_str )
 
    _ret[ "distinct_idroba" ] := {}
-   DO WHILE !_qry:Eof()
-      AAdd( _ret[ "distinct_idroba" ], _qry:FieldGet( 1 ) )
-      _qry:skip()
+   DO WHILE !cQuery:Eof()
+      AAdd( _ret[ "distinct_idroba" ], cQuery:FieldGet( 1 ) )
+      cQuery:skip()
    ENDDO
 
    _qry_str := "SELECT datdok, idpartner from " + F18_PSQL_SCHEMA_DOT + "fakt_doks WHERE " + ::p_sql_where
-   _qry := run_sql_query( _qry_str )
-   _ret[ "datdok" ] := _qry:FieldGet( 1 )
-   _ret[ "idpartner" ] := _qry:FieldGet( 2 )
+   cQuery := run_sql_query( _qry_str )
+   _ret[ "datdok" ] := cQuery:FieldGet( 1 )
+   _ret[ "idpartner" ] := cQuery:FieldGet( 2 )
 
    ::p_h_info := _ret
 
@@ -203,7 +203,7 @@ METHOD FaktDokument:refresh_dbfs()
 
 METHOD FaktDokument:change_idtipdok( new_idtipdok )
 
-   LOCAL _sql, _qry
+   LOCAL _sql, cQuery
    LOCAL cSqlTempTable := f18_user() + "_tmp_fakt_atributi"
 
    cSqlTempTable := StrTran( cSqlTempTable, "-", "_")  // ernad.husremovic_tmp_fakt_atributi - ernad_husremovic_tmp_fakt_atributi
@@ -237,9 +237,9 @@ METHOD FaktDokument:change_idtipdok( new_idtipdok )
 
    _sql += "INSERT INTO " + F18_PSQL_SCHEMA_DOT + "fakt_fakt_atributi (SELECT * from " + cSqlTempTable + ")"
 
-   _qry := run_sql_query( _sql )
+   cQuery := run_sql_query( _sql )
 
-   IF !sql_error_in_query( _qry )
+   IF !sql_error_in_query( cQuery )
       ::refresh_dbfs()
       ::p_idtipdok := new_idtipdok
       ::refresh_dbfs()

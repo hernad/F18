@@ -107,7 +107,7 @@ FUNCTION push_ids_to_semaphore( cTable, aIds, lToMySelf )
    LOCAL _result
    LOCAL _user := f18_user()
    LOCAL _ret
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _sql_ids
    LOCAL nI
    LOCAL _set_1, _set_2
@@ -139,7 +139,7 @@ FUNCTION push_ids_to_semaphore( cTable, aIds, lToMySelf )
       RETURN .T.
    ENDIF
 
-   _qry := ""
+   cQuery := ""
 
    FOR nI := 1 TO Len( aIds )
       _sql_ids := "ARRAY[" + sql_quote( aIds[ nI ] ) + "]"
@@ -155,28 +155,28 @@ FUNCTION push_ids_to_semaphore( cTable, aIds, lToMySelf )
          _set_2 := " AND ((ids IS NULL) OR NOT ( (" + _sql_ids + " <@ ids) OR ids = ARRAY['#F'] ) )"
       ENDIF
 
-      _qry += "UPDATE " + _tbl + " " + _set_1 + _sql_ids + " WHERE "
+      cQuery += "UPDATE " + _tbl + " " + _set_1 + _sql_ids + " WHERE "
       IF !lToMySelf
-         _qry += "user_code <> " + sql_quote( _user )
+         cQuery += "user_code <> " + sql_quote( _user )
       ELSE
-         _qry += "true"
+         cQuery += "true"
       ENDIF
-      _qry +=  _set_2 + ";"
+      cQuery +=  _set_2 + ";"
 
    NEXT
 
    // ako id sadrzi vise od 2000 stavki, korisnik je dugo neaktivan, pokreni full sync
-   _qry += "UPDATE " + _tbl + " SET ids = ARRAY['#F']  WHERE "
+   cQuery += "UPDATE " + _tbl + " SET ids = ARRAY['#F']  WHERE "
    IF !lToMySelf
-      _qry += "user_code <> " + sql_quote( _user ) + " AND "
+      cQuery += "user_code <> " + sql_quote( _user ) + " AND "
    ENDIF
-   _qry += "ids IS NOT NULL AND array_length(ids,1) > 2000"
+   cQuery += "ids IS NOT NULL AND array_length(ids,1) > 2000"
 
 #ifdef F18_DEBUG_SYNC
-   ?E "push_ids_to_semaphore", _qry
+   ?E "push_ids_to_semaphore", cQuery
 #endif
 
-   _ret := run_sql_query( _qry )
+   _ret := run_sql_query( cQuery )
    IF sql_error_in_query( _ret, "UPDATE" )
       error_bar( "syn_ids", "UPDATE push_ids: " + cTable )
       RETURN .F.
@@ -201,7 +201,7 @@ FUNCTION get_ids_from_semaphore( cTable )
 
    LOCAL _tbl
    LOCAL _tbl_obj, _update_obj, oQry
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL cIds, _num_arr, _arr, nI
    LOCAL _user := f18_user()
    LOCAL _tok, _versions, _tmp
@@ -254,8 +254,8 @@ FUNCTION get_ids_from_semaphore( cTable )
 
 #endif
 
-      _qry := "SELECT ids FROM " + _tbl + " WHERE user_code=" + sql_quote( _user )
-      _tbl_obj := run_sql_query( _qry )
+      cQuery := "SELECT ids FROM " + _tbl + " WHERE user_code=" + sql_quote( _user )
+      _tbl_obj := run_sql_query( cQuery )
       IF sql_error_in_query( _tbl_obj, "SELECT" )
          run_sql_query( "ROLLBACK", hParams )
          LOG_CALL_STACK cLogMsg
@@ -265,9 +265,9 @@ FUNCTION get_ids_from_semaphore( cTable )
 
       ENDIF
 
-      _qry := "UPDATE " + _tbl + " SET  ids=NULL, dat=NULL, version=last_trans_version"
-      _qry += " WHERE user_code =" + sql_quote( _user )
-      _update_obj := run_sql_query( _qry )
+      cQuery := "UPDATE " + _tbl + " SET  ids=NULL, dat=NULL, version=last_trans_version"
+      cQuery += " WHERE user_code =" + sql_quote( _user )
+      _update_obj := run_sql_query( cQuery )
       IF sql_error_in_query( _update_obj, "UPDATE" )
          run_sql_query( "ROLLBACK", hParams )
          LOG_CALL_STACK cLogMsg

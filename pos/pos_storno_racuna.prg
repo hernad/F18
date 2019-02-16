@@ -15,7 +15,7 @@ MEMVAR gIdPos
 
 FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna )
 
-   LOCAL cQuery, _qry_ret, oTable
+   LOCAL cQuery, oTable
    LOCAL nI, oRow
    LOCAL cIdPos := gIdPos
    LOCAL aPosStavke
@@ -39,15 +39,12 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna
    IF oTable:LastRec() > 1
 
       aPosStavke := {}
-
       DO WHILE !oTable:Eof()
          oRow := oTable:GetRow()
          AAdd( aPosStavke, { oRow:FieldGet( 1 ), oRow:FieldGet( 2 ), oRow:FieldGet( 3 ), oRow:FieldGet( 4 ), oRow:FieldGet( 5 ) } )
          oTable:Skip()
       ENDDO
-
       izaberi_racun_iz_liste( aPosStavke, @cBrDok, @dDatumRacuna )
-
       lOk := .T.
 
    ELSE
@@ -55,7 +52,6 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna
       IF oTable:LastRec() == 0
          RETURN lOk
       ENDIF
-
       lOk := .T.
       oRow := oTable:GetRow()
       cBrDok := oRow:FieldGet( oRow:FieldPos( "brdok" ) )

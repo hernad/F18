@@ -88,7 +88,7 @@ FUNCTION kalk_kartica_magacin()
 
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto  " GET cIdKonto VALID P_Konto( @cIdKonto )
 
-         form_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
+         kalk_kartica_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
 
          IF !Empty( cRNT1 )
             @ box_x_koord() + 4, box_y_koord() + 2 SAY "Broj radnog naloga:" GET cRNalBroj PICT "@S20"

@@ -17,17 +17,17 @@
 // ----------------------------------------
 FUNCTION get_fin_partner_saldo( id_partner, id_konto, id_firma )
 
-   LOCAL _qry, _qry_ret, _table
+   LOCAL cQuery, _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _saldo := 0
 
-   _qry := "SELECT SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
+   cQuery := "SELECT SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
       " WHERE idpartner = " + sql_quote( id_partner ) + ;
       " AND idkonto = " + sql_quote( id_konto ) + ;
       " AND idfirma = " + sql_quote( id_firma )
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    oRow := _table:GetRow( 1 )
 
    _saldo := oRow:FieldGet( oRow:FieldPos( "saldo" ) )
@@ -45,21 +45,19 @@ FUNCTION get_fin_partner_saldo( id_partner, id_konto, id_firma )
 // -----------------------------------------
 FUNCTION g_dpupl_part( id_partner, id_konto, id_firma )
 
-   LOCAL _qry, _qry_ret, _table
+   LOCAL cQuery, _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _max := CToD( "" )
 
-   _qry := "SELECT MAX( datdok ) AS uplata FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
+   cQuery := "SELECT MAX( datdok ) AS uplata FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
       " WHERE idpartner = " + sql_quote( id_partner ) + ;
       " AND idkonto = " + sql_quote( id_konto ) + ;
       " AND idfirma = " + sql_quote( id_firma ) + ;
       " AND d_p = '2' "
 
-   _table := run_sql_query( _qry )
-
+   _table := run_sql_query( cQuery )
    oRow := _table:GetRow( 1 )
-
    _max := oRow:FieldGet( oRow:FieldPos( "uplata" ) )
 
    IF ValType( _max ) == "L"
@@ -67,27 +65,23 @@ FUNCTION g_dpupl_part( id_partner, id_konto, id_firma )
    ENDIF
 
    RETURN _max
-
-
 
 
 
 FUNCTION datum_posljednje_promjene_kupac_dobavljac( id_partner, id_konto, id_firma )
 
-   LOCAL _qry, _qry_ret, _table
+   LOCAL cQuery, _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _max := CToD( "" )
 
-   _qry := "SELECT MAX( datdok ) AS uplata FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
+   cQuery := "SELECT MAX( datdok ) AS uplata FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
       " WHERE idpartner = " + sql_quote( id_partner ) + ;
       " AND idkonto = " + sql_quote( id_konto ) + ;
       " AND idfirma = " + sql_quote( id_firma )
 
-   _table := run_sql_query( _qry )
-
+   _table := run_sql_query( cQuery )
    oRow := _table:GetRow( 1 )
-
    _max := oRow:FieldGet( oRow:FieldPos( "uplata" ) )
 
    IF ValType( _max ) == "L"
@@ -95,7 +89,6 @@ FUNCTION datum_posljednje_promjene_kupac_dobavljac( id_partner, id_konto, id_fir
    ENDIF
 
    RETURN _max
-
 
 
 

@@ -21,7 +21,7 @@ FUNCTION test_semaphores()
    LOCAL _ime_f
    LOCAL _dbf_struct := {}
    LOCAL _server_params
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _table_name, _alias
    LOCAL _thread_2_id
    LOCAL _rec
@@ -33,13 +33,13 @@ FUNCTION test_semaphores()
 
    TEST_LINE( login_as( "admin" ), .T. )
 
-   _qry := "drop table if exists fmk." + _ime_f + "; "
-   _qry += "create table " + _ime_f + "("
-   _qry += " id varchar(4) PRIMARY KEY, naz varchar(20)"
-   _qry += "); "
-   _qry += "GRANT ALL ON TABLE fmk." + _ime_f + " TO xtrole;"
+   cQuery := "drop table if exists fmk." + _ime_f + "; "
+   cQuery += "create table " + _ime_f + "("
+   cQuery += " id varchar(4) PRIMARY KEY, naz varchar(20)"
+   cQuery += "); "
+   cQuery += "GRANT ALL ON TABLE fmk." + _ime_f + " TO xtrole;"
 
-   run_sql_query( _qry )
+   run_sql_query( cQuery )
 
    create_semaphore( _ime_f )
 
@@ -61,12 +61,12 @@ FUNCTION test_semaphores()
 
    login_as( "admin" )
 
-   _qry := "drop table if exists fmk." + _ime_f + "; "
-   _qry += "create table " + _ime_f + "("
-   _qry += " godina int, mjesec int, oznaka varchar(2), naz varchar(10), PRIMARY KEY(godina, mjesec, oznaka)"
-   _qry += "); "
-   _qry += "GRANT ALL ON TABLE fmk." + _ime_f + " TO xtrole;"
-   run_sql_query( _qry )
+   cQuery := "drop table if exists fmk." + _ime_f + "; "
+   cQuery += "create table " + _ime_f + "("
+   cQuery += " godina int, mjesec int, oznaka varchar(2), naz varchar(10), PRIMARY KEY(godina, mjesec, oznaka)"
+   cQuery += "); "
+   cQuery += "GRANT ALL ON TABLE fmk." + _ime_f + " TO xtrole;"
+   run_sql_query( cQuery )
 
    create_semaphore( _ime_f )
 
@@ -219,15 +219,15 @@ STATIC FUNCTION login_as( user )
 
 FUNCTION create_semaphore( table_name )
 
-   LOCAL _qry, _ret
+   LOCAL cQuery, _ret
 
-   _qry := "drop table if exists sem." + table_name + "; "
-   _qry += "create table sem." + table_name + "("
-   _qry += "user_code varchar(20), b_year integer DEFAULT date_part('year', now())  CHECK (b_year > 1990 AND b_year < 2990), b_season integer DEFAULT 0, client_id integer DEFAULT 0, version bigint NOT NULL, last_trans_version bigint, last_trans_time timestamp DEFAULT now(), last_trans_user_code varchar(20), dat date, algorithm varchar(20) DEFAULT 'full', ids text[], PRIMARY KEY(user_code, b_year, b_season, client_id)"
-   _qry += "); "
-   _qry += "GRANT ALL ON TABLE sem." + table_name + " TO xtrole;"
+   cQuery := "drop table if exists sem." + table_name + "; "
+   cQuery += "create table sem." + table_name + "("
+   cQuery += "user_code varchar(20), b_year integer DEFAULT date_part('year', now())  CHECK (b_year > 1990 AND b_year < 2990), b_season integer DEFAULT 0, client_id integer DEFAULT 0, version bigint NOT NULL, last_trans_version bigint, last_trans_time timestamp DEFAULT now(), last_trans_user_code varchar(20), dat date, algorithm varchar(20) DEFAULT 'full', ids text[], PRIMARY KEY(user_code, b_year, b_season, client_id)"
+   cQuery += "); "
+   cQuery += "GRANT ALL ON TABLE sem." + table_name + " TO xtrole;"
 
-   _ret := run_sql_query( _qry )
+   _ret := run_sql_query( cQuery )
 
    IF ValType( _ret )  == "O"
       RETURN .T.
@@ -240,13 +240,13 @@ FUNCTION create_semaphore( table_name )
 
 FUNCTION upgrade_test_tables_semaphore_v2()
 
-   LOCAL _qry, _qry_obj, _table
+   LOCAL cQuery, _qry_obj, _table
 
    // select tablename from pg_catalog.pg_tables where schemaname = 'fmk' and NOT ( (tablename LIKE 'semaphores_%') OR (tablename LIKE 'test_%') OR (tablename LIKE 'pkg%') OR (tablename = 'metric') OR (tablename = 'client_id')) order by tablename;
 
-   _qry := "select tablename from pg_catalog.pg_tables where schemaname = 'fmk' and (tablename LIKE 'test_%')  order by tablename;"
+   cQuery := "select tablename from pg_catalog.pg_tables where schemaname = 'fmk' and (tablename LIKE 'test_%')  order by tablename;"
 
-   _qry_obj := run_sql_query( _qry )
+   _qry_obj := run_sql_query( cQuery )
 
    DO WHILE ! _qry_obj:Eof()
       _table := _qry_obj:FieldGet( 1 )
@@ -263,13 +263,13 @@ FUNCTION upgrade_test_tables_semaphore_v2()
 
 FUNCTION alter_table_semaphore_v2( table )
 
-   LOCAL _qry, _ret
+   LOCAL cQuery, _ret
 
-   _qry := "ALTER TABLE fmk." + table + " ADD COLUMN org_id integer DEFAULT 0,  ADD COLUMN b_year integer DEFAULT 0, ADD COLUMN b_seasson integer DEFAULT 0;"
+   cQuery := "ALTER TABLE fmk." + table + " ADD COLUMN org_id integer DEFAULT 0,  ADD COLUMN b_year integer DEFAULT 0, ADD COLUMN b_seasson integer DEFAULT 0;"
 
-   _qry += "ALTER TABLE fmk." +  table + " DROP CONSTRAINT " + table + "_pkey, ADD PRIMARY KEY " + sql_primary_key( table ) + ";"
+   cQuery += "ALTER TABLE fmk." +  table + " DROP CONSTRAINT " + table + "_pkey, ADD PRIMARY KEY " + sql_primary_key( table ) + ";"
 
-   _ret := run_sql_query( _qry )
+   _ret := run_sql_query( cQuery )
 
    IF ValType( _ret )  == "O"
       RETURN .T.
@@ -280,11 +280,11 @@ FUNCTION alter_table_semaphore_v2( table )
 
 FUNCTION is_table_column_exists( table, column )
 
-   LOCAL _qry, _ret
+   LOCAL cQuery, _ret
 
-   _qry := "SELECT count(column_name) FROM information_schema.columns WHERE table_name =" + sql_quote( table ) + " AND table_schema='fmk' AND column_name=" + sql_quote( Lower( column ) )
+   cQuery := "SELECT count(column_name) FROM information_schema.columns WHERE table_name =" + sql_quote( table ) + " AND table_schema='fmk' AND column_name=" + sql_quote( Lower( column ) )
 
-   _ret := run_sql_query( _qry )
+   _ret := run_sql_query( cQuery )
 
    IF ValType( _ret )  == "O"
       RETURN ( _ret:FieldGet( 1 ) == 1 )

@@ -88,7 +88,7 @@ FUNCTION kalk_unos_dok_81( hParams )
    nX += 2
    nKoordX := box_x_koord() + nX
 
-   kalk_pripr_form_get_roba( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), nKoordX, box_y_koord() + 2, @aPorezi, _idPartner )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), nKoordX, box_y_koord() + 2, @aPorezi, _idPartner )
 
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() - 20 ) SAY "Tarifa:" GET _idtarifa VALID P_Tarifa( @_IdTarifa )
 

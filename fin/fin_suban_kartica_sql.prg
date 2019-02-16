@@ -189,7 +189,7 @@ STATIC FUNCTION _cre_rpt( rpt_vars, otv_stavke )
 
    LOCAL _brza, _konto, _partner, _brdok, _idvn, _opcina
    LOCAL _datum_od, _datum_do, _tip_valute, _saldo_nula
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
    LOCAL _fld_iznos
    LOCAL _nula_cond := ""
 
@@ -218,7 +218,7 @@ STATIC FUNCTION _cre_rpt( rpt_vars, otv_stavke )
       _nula_cond := ""
    ENDIF
 
-   _qry := "SELECT s.idkonto, k.naz as konto_naz, s.idpartner, p.naz as partn_naz, s.idvn, s.brnal, s.rbr, s.brdok, s.datdok, s.datval, s.opis, " + ;
+   cQuery := "SELECT s.idkonto, k.naz as konto_naz, s.idpartner, p.naz as partn_naz, s.idvn, s.brnal, s.rbr, s.brdok, s.datdok, s.datval, s.opis, " + ;
       "( CASE WHEN s.d_p = '1' THEN " + _fld_iznos + " ELSE 0 END ) AS duguje, " + ;
       "( CASE WHEN s.d_p = '2' THEN " + _fld_iznos + " ELSE 0 END ) AS potrazuje " + ;
       "FROM " + F18_PSQL_SCHEMA_DOT + "fin_suban s " + ;
@@ -226,38 +226,38 @@ STATIC FUNCTION _cre_rpt( rpt_vars, otv_stavke )
       "JOIN " + F18_PSQL_SCHEMA_DOT + "konto k ON s.idkonto = k.id " + ;
       "WHERE idfirma = " + sql_quote( self_organizacija_id() )
 
-   _qry += " AND " + _sql_date_parse( "s.datdok", _datum_od, _datum_do )
+   cQuery += " AND " + _sql_date_parse( "s.datdok", _datum_od, _datum_do )
 
    IF _brza == "D"
-      _qry += " AND " + _sql_cond_parse( "s.idkonto", _konto )
+      cQuery += " AND " + _sql_cond_parse( "s.idkonto", _konto )
       IF !Empty( _partner )
-         _qry += " AND " + _sql_cond_parse( "s.idpartner", _partner )
+         cQuery += " AND " + _sql_cond_parse( "s.idpartner", _partner )
       ENDIF
    ELSE
       IF !Empty( _konto )
-         _qry += " AND " + _sql_cond_parse( "s.idkonto", _konto )
+         cQuery += " AND " + _sql_cond_parse( "s.idkonto", _konto )
       ENDIF
       IF !Empty( _partner )
-         _qry += " AND " + _sql_cond_parse( "s.idpartner", _partner )
+         cQuery += " AND " + _sql_cond_parse( "s.idpartner", _partner )
       ENDIF
    ENDIF
 
    IF !Empty( _brdok )
-      _qry += " AND " + _sql_cond_parse( "s.brdok", _brdok )
+      cQuery += " AND " + _sql_cond_parse( "s.brdok", _brdok )
    ENDIF
 
    IF !Empty( _idvn )
-      _qry += " AND " + _sql_cond_parse( "s.idvn", _idvn )
+      cQuery += " AND " + _sql_cond_parse( "s.idvn", _idvn )
    ENDIF
 
    IF !Empty( _opcina )
-      _qry += " AND " + _sql_cond_parse( "p.idops", _opcina )
+      cQuery += " AND " + _sql_cond_parse( "p.idops", _opcina )
    ENDIF
 
-   _qry += " ORDER BY s.idkonto, s.idpartner, s.datdok, s.brnal"
+   cQuery += " ORDER BY s.idkonto, s.idpartner, s.datdok, s.brnal"
 
    MsgO( "formiranje sql upita u toku ..." )
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    MsgC()
 
    IF sql_error_in_query( _table )

@@ -136,7 +136,7 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
    LOCAL _year_sez := Year( _date_to )
    LOCAL _year_tek := Year( dDatDok )
    LOCAL _id_pos := hParams[ "id_pos" ]
-   LOCAL _qry, oDataset, oRow
+   LOCAL cQuery, oDataset, oRow
    LOCAL nCount := 0
    LOCAL hRec, cIdRoba, nKolicina, nVrijednost
    LOCAL cBrDok
@@ -146,7 +146,7 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
    prebaci_se_u_bazu( _db_params, _tek_database, _year_sez )
 
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       "idroba, " + ;
       "SUM( CASE " + ;
       "WHEN idvd IN ('16', '00') THEN kolicina " + ;
@@ -160,14 +160,14 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
       "END ) as vrijednost " + ;
       "FROM " + f18_sql_schema( "pos_pos " )
 
-   _qry += " WHERE "
-   _qry += _sql_cond_parse( "idpos", _id_pos )
-   _qry += " AND " + _sql_date_parse( "datum", _date_from, _date_to )
-   _qry += " GROUP BY idroba "
-   _qry += " ORDER BY idroba "
+   cQuery += " WHERE "
+   cQuery += _sql_cond_parse( "idpos", _id_pos )
+   cQuery += " AND " + _sql_date_parse( "datum", _date_from, _date_to )
+   cQuery += " GROUP BY idroba "
+   cQuery += " ORDER BY idroba "
 
    MsgO( "pocetno stanje sql query u toku..." )
-   oDataset := run_sql_query( _qry )
+   oDataset := run_sql_query( cQuery )
    MsgC()
 
    prebaci_se_u_bazu( _db_params, _tek_database, _year_tek )

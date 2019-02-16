@@ -251,41 +251,26 @@ FUNCTION fakt_v_kolicina( cTipVpc )
    // IF JeStorno10()
    // _kolicina := - Abs( _kolicina )
    // ENDIF
-   IF YEAR( _datdok ) < 2007 // podrska za podatke <= 2001
+   IF Year( _datdok ) < 2007 // podrska za podatke <= 2001
       RETURN .T.
    ENDIF
 
-   //IF _podbr <> " ."
+   // IF _podbr <> " ."
 
-      select_o_rj( _idfirma )
+   select_o_rj( _idfirma )
 
-      cRjTip := rj->tip
+   cRjTip := rj->tip
 
-      fakt_set_pozicija_sif_roba( _IdRoba )
-      lRoba := ( roba->tip != "U" )
-      lFaktIzlaz := Left( _idtipdok, 1 ) $ "12"
+   fakt_set_pozicija_sif_roba( _IdRoba )
+   lRoba := ( roba->tip != "U" )
+   lFaktIzlaz := Left( _idtipdok, 1 ) $ "12"
 
 
-      IF lRoba
-         IF _idtipdok == "13" .AND. ( gVar13 == "2" .OR. glCij13Mpc ) .AND. gVarNum == "1"
-            IF gVar13 == "2" .AND. _idtipdok == "13"
-               _cijena := fakt_mpc_iz_sifrarnika()
-            ELSE
-               // IF g13dcij == "6"
-               // _cijena := MPC6
-               // ELSEIF g13dcij == "5"
-               // _cijena := MPC5
-               IF g13dcij == "4"
-                  _cijena := MPC4
-               ELSEIF g13dcij == "3"
-                  _cijena := MPC3
-               ELSEIF g13dcij == "2"
-                  _cijena := MPC2
-               ELSE
-                  _cijena := MPC
-               ENDIF
-            ENDIF
-         ELSEIF _idtipdok == "13" .AND. ( gVar13 == "2" .OR. glCij13Mpc ) .AND. gVarNum == "2"
+   IF lRoba
+      IF _idtipdok == "13" .AND. ( gVar13 == "2" .OR. glCij13Mpc ) .AND. gVarNum == "1"
+         IF gVar13 == "2" .AND. _idtipdok == "13"
+            _cijena := fakt_mpc_iz_sifrarnika()
+         ELSE
             // IF g13dcij == "6"
             // _cijena := MPC6
             // ELSEIF g13dcij == "5"
@@ -299,57 +284,72 @@ FUNCTION fakt_v_kolicina( cTipVpc )
             ELSE
                _cijena := MPC
             ENDIF
-         ELSEIF cRjtip = "M"
-            _cijena := fakt_mpc_iz_sifrarnika()
-
-         ELSEIF _idtipdok $ "11#15#27"
-
-            IF gMP == "1"
-               _Cijena := MPC
-            ELSEIF gMP == "2"
-               _Cijena := Round( VPC * ( 1 + tarifa->pdv / 100 ), 2 )
-            ELSEIF gMP == "3"
-               _Cijena := MPC2
-            ELSEIF gMP == "4"
-               _Cijena := MPC3
-            ELSEIF gMP == "5"
-               _Cijena := MPC4
-               // ELSEIF gMP == "6"
-               // _Cijena := MPC5
-               // ELSEIF gMP == "7"
-               // _Cijena := MPC6
-            ENDIF
-
-         ELSEIF _idtipdok == "25" .AND. _cijena <> 0
-         ELSEIF cRjTip = "V" .AND. _idTipDok $ "10#20"
-            _cijena := fakt_vpc_iz_sifrarnika()
-
+         ENDIF
+      ELSEIF _idtipdok == "13" .AND. ( gVar13 == "2" .OR. glCij13Mpc ) .AND. gVarNum == "2"
+         // IF g13dcij == "6"
+         // _cijena := MPC6
+         // ELSEIF g13dcij == "5"
+         // _cijena := MPC5
+         IF g13dcij == "4"
+            _cijena := MPC4
+         ELSEIF g13dcij == "3"
+            _cijena := MPC3
+         ELSEIF g13dcij == "2"
+            _cijena := MPC2
          ELSE
-            IF cTipVpc == "1"
+            _cijena := MPC
+         ENDIF
+      ELSEIF cRjtip = "M"
+         _cijena := fakt_mpc_iz_sifrarnika()
+
+      ELSEIF _idtipdok $ "11#15#27"
+
+         IF gMP == "1"
+            _Cijena := MPC
+         ELSEIF gMP == "2"
+            _Cijena := Round( VPC * ( 1 + tarifa->pdv / 100 ), 2 )
+         ELSEIF gMP == "3"
+            _Cijena := MPC2
+         ELSEIF gMP == "4"
+            _Cijena := MPC3
+         ELSEIF gMP == "5"
+            _Cijena := MPC4
+            // ELSEIF gMP == "6"
+            // _Cijena := MPC5
+            // ELSEIF gMP == "7"
+            // _Cijena := MPC6
+         ENDIF
+
+      ELSEIF _idtipdok == "25" .AND. _cijena <> 0
+      ELSEIF cRjTip = "V" .AND. _idTipDok $ "10#20"
+         _cijena := fakt_vpc_iz_sifrarnika()
+
+      ELSE
+         IF cTipVpc == "1"
+            _Cijena := vpc
+         ELSEIF FieldPos( "vpc2" ) <> 0
+            IF gVarC == "1"
+               _Cijena := vpc2
+            ELSEIF gVarc == "2"
                _Cijena := vpc
-            ELSEIF FieldPos( "vpc2" ) <> 0
-               IF gVarC == "1"
-                  _Cijena := vpc2
-               ELSEIF gVarc == "2"
-                  _Cijena := vpc
-                  IF vpc <> 0
-                     _Rabat := ( vpc - vpc2 ) / vpc * 100
-                  ENDIF
-               ELSEIF gVarc == "3"
-                  _Cijena := nc
+               IF vpc <> 0
+                  _Rabat := ( vpc - vpc2 ) / vpc * 100
                ENDIF
-            ELSE
-               _Cijena := 0
+            ELSEIF gVarc == "3"
+               _Cijena := nc
             ENDIF
+         ELSE
+            _Cijena := 0
          ENDIF
       ENDIF
-   //ENDIF
+   ENDIF
+   // ENDIF
 
 
-   //lBezMinusa := .F.
-   //select_o_roba( _IdRoba )
+   // lBezMinusa := .F.
+   // select_o_roba( _IdRoba )
 
-   IF lRoba .AND. lFaktIzlaz .AND. is_fakt_pratiti_kolicinu()   //.AND. !( Left( _idtipdok, 1 ) == "1" .AND. Left( _serbr, 1 ) == "*" )
+   IF lRoba .AND. lFaktIzlaz .AND. is_fakt_pratiti_kolicinu()   // .AND. !( Left( _idtipdok, 1 ) == "1" .AND. Left( _serbr, 1 ) == "*" )
 
       MsgO( "Izračunavam trenutno stanje FAKT ..." )
 
@@ -389,13 +389,13 @@ FUNCTION fakt_v_kolicina( cTipVpc )
 
          fakt_box_stanje( { { _IdFirma, nUl, nIzl, nRevers, nRezerv } }, _idroba )
 
-         //IF LEFT( _idtipdok, 1 ) == "1"  //.AND. lBezMinusa = .T.
-         //    SELECT fakt_pripr
-         //    RETURN .F.
-         //ENDIF
+         // IF LEFT( _idtipdok, 1 ) == "1"  //.AND. lBezMinusa = .T.
+         // SELECT fakt_pripr
+         // RETURN .F.
+         // ENDIF
 
       ELSE
-          info_bar( "fakt_stanje", "Artikal: " + _idRoba + " stanje: " + Alltrim( Str(nUl - nIzl - nRevers - nRezerv, 12, 3) ) )
+         info_bar( "fakt_stanje", "Artikal: " + _idRoba + " stanje: " + AllTrim( Str( nUl - nIzl - nRevers - nRezerv, 12, 3 ) ) )
       ENDIF
    ENDIF
 
@@ -430,9 +430,10 @@ FUNCTION fakt_valid_roba( cIdFirma, cIdTipDok, cIdRoba, cTxt1, cIdPartner, lFakt
    LOCAL cPom
    LOCAL lPrikTar := .T.
    LOCAL nArr
-   //PRIVATE cVarIDROBA
 
-   //cVarIDROBA := "_IDROBA"
+   // PRIVATE cVarIDROBA
+
+   // cVarIDROBA := "_IDROBA"
 
    // IF lPrikTar == nil
    // lPrikTar := .T.
@@ -493,7 +494,6 @@ STATIC FUNCTION fakt_trenutno_na_stanju_kalk( cIdRj, cIdTipDok, cIdRoba )
    LOCAL _color := "W/N+"
 
    select_o_rj( cIdRj )
-
    select_fakt_pripr()
 
    IF rj->( FieldPos( "konto" ) ) == 0 .OR. Empty( rj->konto )
@@ -501,7 +501,6 @@ STATIC FUNCTION fakt_trenutno_na_stanju_kalk( cIdRj, cIdTipDok, cIdRoba )
    ENDIF
 
    cIdKonto := rj->konto
-
    SELECT ( nDbfArea )
 
    IF cIdTipDok $ "10#12"
@@ -523,9 +522,6 @@ STATIC FUNCTION fakt_trenutno_na_stanju_kalk( cIdRj, cIdTipDok, cIdRoba )
    ENDIF
 
    RETURN .T.
-
-
-
 
 
 FUNCTION fakt_stanje_roba( cIdRoba )
@@ -571,12 +567,12 @@ FUNCTION fakt_stanje_roba( cIdRoba )
 
 FUNCTION fakt_roba_key_handler( Ch )
 
-      IF Upper( Chr( Ch ) ) == "S"
-         fakt_stanje_roba( roba->id )
-         RETURN DE_CONT
-      ENDIF
-
+   IF Upper( Chr( Ch ) ) == "S"
+      fakt_stanje_roba( roba->id )
       RETURN DE_CONT
+   ENDIF
+
+   RETURN DE_CONT
 
 
 
@@ -590,16 +586,16 @@ FUNCTION fakt_box_stanje( aStanje, cIdroba )
 
    // ucitajmo dodatne parametre stanja iz FMK.INI u aDodPar
 
-   //aDodPar := {}
-   //FOR i := 1 TO 6
-      //cI := AllTrim( Str( i ) )
-      //cPomZ := my_get_from_ini( "roba_box_stanje", "ZaglavljeStanje" + cI, "", KUMPATH )
-      //cPomF := my_get_from_ini( "roba_box_stanje", "FormulaStanje" + cI, "", KUMPATH )
-      //IF !Empty( cPomF )
-      //   AAdd( aDodPar, { cPomZ, cPomF } )
-      //ENDIF
-   //NEXT
-   //nLenDP := IIF( Len( aDodPar ) > 0, Len( aDodPar ) + 1, 0 )
+   // aDodPar := {}
+   // FOR i := 1 TO 6
+   // cI := AllTrim( Str( i ) )
+   // cPomZ := my_get_from_ini( "roba_box_stanje", "ZaglavljeStanje" + cI, "", KUMPATH )
+   // cPomF := my_get_from_ini( "roba_box_stanje", "FormulaStanje" + cI, "", KUMPATH )
+   // IF !Empty( cPomF )
+   // AAdd( aDodPar, { cPomZ, cPomF } )
+   // ENDIF
+   // NEXT
+   // nLenDP := IIF( Len( aDodPar ) > 0, Len( aDodPar ) + 1, 0 )
 
 
    select_o_roba( cIdRoba )
@@ -774,7 +770,7 @@ STATIC FUNCTION fakt_unos_stavka_usluga( lFaktNovaStavka, cTxt1, nX, nY )
       ENDIF
 
       _porez := 0
-      @ box_x_koord() + nX, box_y_koord() + nY SAY SPACE( 70 )
+      @ box_x_koord() + nX, box_y_koord() + nY SAY Space( 70 )
       @ box_x_koord() + nX, box_y_koord() + nY SAY "opis usluge:" GET cTxt1 PICT "@S50"
 
       READ
@@ -816,6 +812,52 @@ FUNCTION fakt_unos_provjera_dupla_stavka( lFaktNovaStavka )
 
    RETURN ( .T. )
 
+
+FUNCTION fakt_zadnji_izlazi_info( cIdPartner, cIdRoba )
+
+   LOCAL _data := {}
+   LOCAL _count := 3
+
+   IF fetch_metric( "pregled_rabata_kod_izlaza", my_user(), "N" ) == "N"
+      RETURN .T.
+   ENDIF
+
+   _data := fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
+
+   IF Len( _data ) > 0
+      _prikazi_info( _data, "F", _count )
+   ENDIF
+
+   RETURN .T.
+
+
+STATIC FUNCTION fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
+
+   LOCAL cQuery, _table
+   LOCAL _data := {}
+   LOCAL nI, oRow
+
+   cQuery := "SELECT idfirma, idtipdok, brdok, datdok, cijena, rabat FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt " + ;
+      " WHERE idpartner = " + sql_quote( cIdPartner ) + ;
+      " AND idroba = " + sql_quote( cIdRoba ) + ;
+      " AND ( idtipdok = " + sql_quote( "10" ) + " OR idtipdok = " + sql_quote( "11" ) + " ) " + ;
+      " ORDER BY datdok"
+
+   _table := run_sql_query( cQuery )
+   _table:GoTo( 1 )
+
+   FOR nI := 1 TO _table:LastRec()
+
+      oRow := _table:GetRow( nI )
+      AAdd( _data, { oRow:FieldGet( oRow:FieldPos( "idfirma" ) ), ;
+         oRow:FieldGet( oRow:FieldPos( "idtipdok" ) ) + "-" + AllTrim( oRow:FieldGet( oRow:FieldPos( "brdok" ) ) ), ;
+         oRow:FieldGet( oRow:FieldPos( "datdok" ) ), ;
+         oRow:FieldGet( oRow:FieldPos( "cijena" ) ), ;
+         oRow:FieldGet( oRow:FieldPos( "rabat" ) ) } )
+
+   NEXT
+
+   RETURN _data
 
 
 

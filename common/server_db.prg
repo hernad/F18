@@ -16,14 +16,14 @@ STATIC s_nServerVersion
 
 FUNCTION server_db_version( lInit )
 
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _ret
 
    hb_default( @lInit, .F. )
 
    IF lInit .OR. HB_ISNIL( s_nServerVersion )
-      _qry := "SELECT max(version) from public.schema_migrations"
-      _ret := run_sql_query( _qry )
+      cQuery := "SELECT max(version) from public.schema_migrations"
+      _ret := run_sql_query( cQuery )
       IF sql_error_in_query( _ret, "SELECT" )
          s_nServerVersion := -1
       ELSE

@@ -36,7 +36,7 @@ FUNCTION ld_kred_specifikacija()
 STATIC FUNCTION _get_data( hParams )
 
    LOCAL _data := {}
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _where
    LOCAL _order
 
@@ -61,7 +61,7 @@ STATIC FUNCTION _get_data( hParams )
 
    _order := " lk.idkred, lk.idradn, lk.naosnovu "
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       " lk.idradn, " + ;
       " rd.naz AS radn_prezime, " + ;
       " rd.ime AS radn_ime, " + ;
@@ -83,7 +83,7 @@ STATIC FUNCTION _get_data( hParams )
       " ORDER BY " + _order
 
    MsgO( "formiranje sql upita u toku ..." )
-   _data := run_sql_query( _qry )
+   _data := run_sql_query( cQuery )
    MsgC()
 
    IF sql_error_in_query( _data )

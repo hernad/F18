@@ -51,7 +51,7 @@ POS pocetno stanje
 IN - inventura (kolicina-kol2)
 
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       "idroba, " + ;
       "SUM( CASE " + ;
       "WHEN idvd IN ('16', '00') THEN kolicina " + ;

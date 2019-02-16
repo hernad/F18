@@ -14,7 +14,7 @@
 STATIC s_lRobaBarkodPriUnosu := NIL
 
 
-FUNCTION form_get_roba_id( cIdRoba, nX, nY, GetList )
+FUNCTION kalk_kartica_get_roba_id( cIdRoba, nX, nY, GetList )
 
    LOCAL bWhen, bValid
 
@@ -23,7 +23,6 @@ FUNCTION form_get_roba_id( cIdRoba, nX, nY, GetList )
       bWhen := {|| cIdRoba := PadR( cIdRoba, roba_duzina_sifre() ), .T. }
       bValid := {|| cIdRoba := iif( Len( Trim( cIdRoba ) ) <= 10, Left( cIdRoba, 10 ), cIdRoba ), ;
          Empty( cIdRoba ) .OR. Right( Trim( cIdRoba ), 1 ) == ";" .OR. P_Roba( @cIdRoba ) }
-
    ELSE
       bWhen := {|| .T. }
       bValid := {|| Empty( cIdroba ) .OR. Right( Trim( cIdRoba ), 1 ) == ";" .OR. P_Roba( @cIdRoba ) }
@@ -34,8 +33,7 @@ FUNCTION form_get_roba_id( cIdRoba, nX, nY, GetList )
    RETURN .T.
 
 
-
-FUNCTION kalk_pripr_form_get_roba( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDokument, nKoordX, nKoordY, aPorezi, cIdPartner )
+FUNCTION kalk_unos_get_roba_id( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDokument, nKoordX, nKoordY, aPorezi, cIdPartner )
 
    LOCAL bWhen, bValid, cProdMag := "M"
 
@@ -51,7 +49,7 @@ FUNCTION kalk_pripr_form_get_roba( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDoku
 
    bValid := {|| kalk_valid_roba( @cIdRoba, @cIdTarifa, lNoviDokument, @aPorezi ), ;
       ispisi_naziv_roba( nKoordX, 25, 41 ), ;
-      kalk_zadnji_ulazi_info( cIdpartner, cIdroba, cProdMag ), !Empty( cIdRoba) }
+      kalk_zadnji_ulazi_info( cIdpartner, cIdroba, cProdMag ), !Empty( cIdRoba ) }
 
    // _ocitani_barkod := _idroba, ;
    // P_Roba( @_IdRoba ), ;
@@ -83,7 +81,6 @@ STATIC FUNCTION kalk_valid_roba( cIdRoba, cIdTarifa, lNoviDokument, aPorezi )
    IF lNoviDokument
       cTarifa := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( _IdKonto, cIdRoba, @aPorezi ) // nadji odgovarajucu tarifu regiona
    ELSE
-
       select_o_tarifa( cIdTarifa )
       set_pdv_array( @aPorezi )
    ENDIF
@@ -92,15 +89,13 @@ STATIC FUNCTION kalk_valid_roba( cIdRoba, cIdTarifa, lNoviDokument, aPorezi )
       cIdTarifa := cTarifa
    ENDIF
 
-   IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
+   // IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
+   // _kolicina := _tezina // ako je ocitan tezinski barkod
+   // IF _idvd == "80" .AND. ( !Empty( _idkonto2 ) .AND. _idkonto2 <> "XXX" ) // kod predispozicije kolicina treba biti negativna kod prvog ocitanja
+   // _kolicina := -_kolicina
+   // ENDIF
 
-      _kolicina := _tezina // ako je ocitan tezinski barkod
-
-      IF _idvd == "80" .AND. ( !Empty( _idkonto2 ) .AND. _idkonto2 <> "XXX" ) // kod predispozicije kolicina treba biti negativna kod prvog ocitanja
-         _kolicina := -_kolicina
-      ENDIF
-
-   ENDIF
+   // ENDIF
 
    RETURN .T.
 
@@ -150,62 +145,9 @@ FUNCTION kalk_zadnji_ulazi_info( cIdPartner, cIdRoba, cProdMag )
    RETURN .T.
 
 
-
-FUNCTION fakt_zadnji_izlazi_info( cIdPartner, cIdRoba )
-
-   LOCAL _data := {}
-   LOCAL _count := 3
-
-   IF fetch_metric( "pregled_rabata_kod_izlaza", my_user(), "N" ) == "N"
-      RETURN .T.
-   ENDIF
-
-   _data := fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
-
-   IF Len( _data ) > 0
-      _prikazi_info( _data, "F", _count )
-   ENDIF
-
-   RETURN .T.
-
-
-
-STATIC FUNCTION fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
-
-   LOCAL _qry, _qry_ret, _table
-   LOCAL _data := {}
-   LOCAL nI, oRow
-
-   _qry := "SELECT idfirma, idtipdok, brdok, datdok, cijena, rabat FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt " + ;
-      " WHERE idpartner = " + sql_quote( cIdPartner ) + ;
-      " AND idroba = " + sql_quote( cIdRoba ) + ;
-      " AND ( idtipdok = " + sql_quote( "10" ) + " OR idtipdok = " + sql_quote( "11" ) + " ) " + ;
-      " ORDER BY datdok"
-
-   _table := run_sql_query( _qry )
-   _table:GoTo( 1 )
-
-   FOR nI := 1 TO _table:LastRec()
-
-      oRow := _table:GetRow( nI )
-
-      AAdd( _data, { oRow:FieldGet( oRow:FieldPos( "idfirma" ) ), ;
-         oRow:FieldGet( oRow:FieldPos( "idtipdok" ) ) + "-" + AllTrim( oRow:FieldGet( oRow:FieldPos( "brdok" ) ) ), ;
-         oRow:FieldGet( oRow:FieldPos( "datdok" ) ), ;
-         oRow:FieldGet( oRow:FieldPos( "cijena" ) ), ;
-         oRow:FieldGet( oRow:FieldPos( "rabat" ) ) } )
-
-
-   NEXT
-
-   RETURN _data
-
-
-
-
 STATIC FUNCTION _kalk_get_ulazi( cIdPartner, cIdRoba, cMagIliProd )
 
-   LOCAL _qry, _qry_ret, _table
+   LOCAL cQuery, _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _u_i := "pu_i"
@@ -214,27 +156,23 @@ STATIC FUNCTION _kalk_get_ulazi( cIdPartner, cIdRoba, cMagIliProd )
       _u_i := "mu_i"
    ENDIF
 
-   _qry := "SELECT idkonto, idvd, brdok, datdok, fcj, rabat FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk WHERE idfirma = " + ;
+   cQuery := "SELECT idkonto, idvd, brdok, datdok, fcj, rabat FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk WHERE idfirma = " + ;
       sql_quote( self_organizacija_id() ) + ;
       " AND idpartner = " + sql_quote( cIdPartner ) + ;
       " AND idroba = " + sql_quote( cIdRoba ) + ;
       " AND " + _u_i + " = " + sql_quote( "1" ) + ;
       " ORDER BY datdok"
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    _table:GoTo( 1 )
 
    FOR nI := 1 TO _table:LastRec()
-
       oRow := _table:GetRow( nI )
-
       AAdd( _data, { oRow:FieldGet( oRow:FieldPos( "idkonto" ) ), ;
          oRow:FieldGet( oRow:FieldPos( "idvd" ) ) + "-" + AllTrim( oRow:FieldGet( oRow:FieldPos( "brdok" ) ) ), ;
          oRow:FieldGet( oRow:FieldPos( "datdok" ) ), ;
          oRow:FieldGet( oRow:FieldPos( "fcj" ) ), ;
          oRow:FieldGet( oRow:FieldPos( "rabat" ) ) } )
-
-
    NEXT
 
    RETURN _data

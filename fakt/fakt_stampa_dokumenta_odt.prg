@@ -267,7 +267,7 @@ STATIC FUNCTION _grupno_params( params )
 STATIC FUNCTION _grupno_sql_gen( racuni, params )
 
    LOCAL _ok := .F.
-   LOCAL _qry, _table, _where
+   LOCAL cQuery, _table, _where
    LOCAL oRow
    LOCAL _scan
 
@@ -293,15 +293,15 @@ STATIC FUNCTION _grupno_sql_gen( racuni, params )
    ENDIF
 
    // glavni upit !
-   _qry := "SELECT f.idfirma, f.idtipdok, f.brdok, MAX( f.rbr ) " + ;
+   cQuery := "SELECT f.idfirma, f.idtipdok, f.brdok, MAX( f.rbr ) " + ;
       "FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt f "
 
-   _qry += _where
+   cQuery += _where
 
-   _qry += " GROUP BY f.idfirma, f.idtipdok, f.brdok "
-   _qry += " ORDER BY f.idfirma, f.idtipdok, f.brdok "
+   cQuery += " GROUP BY f.idfirma, f.idtipdok, f.brdok "
+   cQuery += " ORDER BY f.idfirma, f.idtipdok, f.brdok "
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    IF sql_error_in_query( _table )
       RETURN NIL
    ENDIF

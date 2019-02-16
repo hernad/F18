@@ -69,15 +69,15 @@ FUNCTION modstru_test()
 // ------------------------------------
 FUNCTION create_sql_table_f18_test()
 
-   LOCAL _qry, _ret
+   LOCAL cQuery, _ret
 
-   _qry := "drop table if exists fmk.f18_test;"
-   _qry += "create table f18_test ("
-   _qry += "id varchar(2), naz varchar(40)"
-   _qry += "); "
-   _qry += "GRANT ALL ON TABLE fmk.f18_test TO xtrole;"
+   cQuery := "drop table if exists fmk.f18_test;"
+   cQuery += "create table f18_test ("
+   cQuery += "id varchar(2), naz varchar(40)"
+   cQuery += "); "
+   cQuery += "GRANT ALL ON TABLE fmk.f18_test TO xtrole;"
 
-   _ret := run_sql_query( _qry )
+   _ret := run_sql_query( cQuery )
 
    IF ValType( _ret )  == "O"
       RETURN .T.

@@ -130,10 +130,10 @@ STATIC FUNCTION gen_rpt( vars )
 
 STATIC FUNCTION _izdvoji_ulaze( vars )
 
-   LOCAL _qry := ""
+   LOCAL cQuery := ""
    LOCAL _date := ""
    LOCAL _dat_od, _dat_do, _dob, _artikli, _p_konto, _id_firma
-   LOCAL _qry_ret, _table
+   LOCAL _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _cnt := 0
@@ -150,11 +150,9 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
    ENDIF
 
    IF _dat_do <> CToD( "" )
-
       IF !Empty( _date )
          _date += " AND "
       ENDIF
-
       _date += "kalk.datdok <= " + sql_quote( _dat_do )
 
    ENDIF
@@ -163,7 +161,7 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
       _date := " AND (" + _date + ")"
    ENDIF
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       "kalk.pkonto pkonto, " + ;
       "kalk.idroba idroba, " + ;
       "roba.barkod barkod, " + ;
@@ -177,8 +175,8 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
       "ELSE 0 " + ;
       "END " + ;
       ") as ulaz " + ;
-      "FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk kalk " + ;
-      "LEFT JOIN " + F18_PSQL_SCHEMA_DOT + " roba roba ON kalk.idroba = roba.id " + ;
+      "FROM " + f18_sql_schema( "kalk_kalk" ) + " kalk " + ;
+      "LEFT JOIN " + f18_sql_schema("roba") + " roba ON kalk.idroba = roba.id " + ;
       "WHERE " + ;
       "kalk.idfirma = " + sql_quote( _id_firma ) + ;
       " AND kalk.pkonto = " + sql_quote( _p_konto ) + ;
@@ -188,7 +186,7 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
       "GROUP BY kalk.pkonto, kalk.idroba, roba.barkod, roba.naz, roba.idtarifa, roba.jmj " + ;
       "ORDER BY kalk.idroba"
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
 
    IF !is_var_objekat_tpqquery( _table )
       RETURN 0
@@ -201,14 +199,12 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
    FOR nI := 1 TO _table:LastRec()
 
       ++_cnt
-
       oRow := _table:GetRow( nI )
 
       SELECT r_export
       APPEND BLANK
 
       hRec := dbf_get_rec()
-
       hRec[ "idpartner" ] := _dob
       hRec[ "idkonto" ] := oRow:FieldGet( oRow:FieldPos( "pkonto" ) )
       hRec[ "idroba" ] := PadR( oRow:FieldGet( oRow:FieldPos( "idroba" ) ), 10 )
@@ -218,7 +214,6 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
       hRec[ "jmj" ] := oRow:FieldGet( oRow:FieldPos( "jmj" ) )
       hRec[ "ulaz" ] := oRow:FieldGet( oRow:FieldPos( "ulaz" ) )
       hRec[ "stanje" ] := ( hRec[ "ulaz" ] - hRec[ "izlaz" ] )
-
       dbf_update_rec( hRec )
 
    NEXT
@@ -230,14 +225,15 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
 
 STATIC FUNCTION _izdvoji_prodaju( vars )
 
-   LOCAL _qry := ""
+   LOCAL cQuery := ""
    LOCAL _date := ""
    LOCAL _dat_od, _dat_do, _dob, _artikli, _p_konto, _id_firma
-   LOCAL _qry_ret, _table
+   LOCAL _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _cnt := 0
    LOCAL cIdRoba
+   LOCAL hRec
 
    _p_konto := vars[ "p_konto" ]
    _dat_od := vars[ "datum_od" ]
@@ -251,20 +247,17 @@ STATIC FUNCTION _izdvoji_prodaju( vars )
    ENDIF
 
    IF _dat_do <> CToD( "" )
-
       IF !Empty( _date )
          _date += " AND "
       ENDIF
-
       _date += " kalk.datdok <= " + sql_quote( _dat_do ) + " "
-
    ENDIF
 
    IF !Empty( _date )
       _date := " AND (" + _date + ")"
    ENDIF
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       "kalk.pkonto pkonto, " + ;
       "kalk.idroba idroba, " + ;
       "SUM( " + ;
@@ -275,8 +268,8 @@ STATIC FUNCTION _izdvoji_prodaju( vars )
       "ELSE 0 " + ;
       "END " + ;
       ") as izlaz " + ;
-      "FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk kalk " + ;
-      "LEFT JOIN " + F18_PSQL_SCHEMA_DOT + " roba roba ON kalk.idroba = roba.id " + ;
+      "FROM " + f18_sql_schema("kalk_kalk") + " kalk " + ;
+      "LEFT JOIN " + f18_sql_schema("roba") + " roba ON kalk.idroba = roba.id " + ;
       "WHERE " + ;
       "kalk.idfirma = " + sql_quote( _id_firma ) + ;
       " AND kalk.pkonto = " + sql_quote( _p_konto ) + ;
@@ -286,36 +279,26 @@ STATIC FUNCTION _izdvoji_prodaju( vars )
       "ORDER BY kalk.idroba"
 
    MsgO( "Prikupljanje podataka o izlazima robe... sačekajte !" )
-
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    _table:GoTo( 1 )
 
    FOR nI := 1 TO _table:LastRec()
-
       ++_cnt
-
       oRow := _table:GetRow( nI )
-
       cIdRoba := oRow:FieldGet( oRow:FieldPos( "idroba" ) )
-
       SELECT r_export
       SET ORDER TO TAG "roba"
       GO TOP
       SEEK PadR( cIdRoba, 10 )
-
       IF Found()
-
          ++_cnt
-
          hRec := dbf_get_rec()
          hRec[ "izlaz" ] := oRow:FieldGet( oRow:FieldPos( "izlaz" ) )
          hRec[ "stanje" ] := ( hRec[ "ulaz" ] - hRec[ "izlaz" ]  )
          dbf_update_rec( hRec )
-
       ENDIF
 
    NEXT
-
    MsgC()
 
    RETURN _cnt

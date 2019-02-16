@@ -16,7 +16,7 @@
 FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
 
    LOCAL oDataSet
-   LOCAL _qry, _where
+   LOCAL cQuery, _where
    LOCAL _dat_od, _dat_do, _dat_ps, _p_konto
    LOCAL _art_filter, _dok_filter, _tar_filter, _part_filter
    LOCAL _db_params := my_server_params()
@@ -43,7 +43,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
    _where += " AND " + _sql_cond_parse( "k.idfirma", self_organizacija_id() )
    _where += " AND " + _sql_cond_parse( "k.pkonto", _p_konto )
 
-   _qry := " SELECT " + ;
+   cQuery := " SELECT " + ;
       " k.idroba, " + ;
       " SUM( CASE " + ;
       "WHEN k.pu_i = '1' THEN k.kolicina " + ;
@@ -72,10 +72,10 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
       "END ) AS mpvi " + ;
       " FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk k "
 
-   _qry += _where
+   cQuery += _where
 
-   _qry += " GROUP BY k.idroba "
-   _qry += " ORDER BY k.idroba "
+   cQuery += " GROUP BY k.idroba "
+   cQuery += " ORDER BY k.idroba "
 
    IF lPocetnoStanje
       switch_to_database( _db_params, _tek_database, _year_sez )
@@ -87,7 +87,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
       MsgO( "formiranje podataka u toku..." )
    ENDIF
 
-   oDataSet := run_sql_query( _qry )
+   oDataSet := run_sql_query( cQuery )
 
    IF !is_var_objekat_tpqquery( oDataSet )
       oDataSet := NIL

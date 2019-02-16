@@ -487,9 +487,9 @@ FUNCTION rpt_dupli_barkod()
 
 STATIC FUNCTION __dupli_bk_sql()
 
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
 
-   _qry := "SELECT id, naz, barkod " + ;
+   cQuery := "SELECT id, naz, barkod " + ;
       "FROM " + F18_PSQL_SCHEMA + ".roba r1 " + ;
       "WHERE barkod <> '' AND barkod IN ( " + ;
       "SELECT barkod " + ;
@@ -499,7 +499,7 @@ STATIC FUNCTION __dupli_bk_sql()
       ") " + ;
       "ORDER BY barkod"
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    IF sql_error_in_query( _table, "SELECT" )
       RETURN NIL
    ENDIF

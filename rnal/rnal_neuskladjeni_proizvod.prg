@@ -62,10 +62,10 @@ METHOD RNALDamageDocument:New()
 METHOD RNALDamageDocument:get_damage_data()
 
    LOCAL _ok := .F.
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
    LOCAL _log_type := "21"
 
-   _qry := "SELECT " + ;
+   cQuery := "SELECT " + ;
       "  lit.doc_no, " + ;
       "  lit.doc_log_no, " + ;
       "  lit.doc_lit_no, " + ;
@@ -86,7 +86,7 @@ METHOD RNALDamageDocument:get_damage_data()
       "ORDER BY lit.doc_no, lit.doc_log_no, lit.doc_lit_no"
 
    MsgO( "formiranje sql upita u toku ..." )
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    MsgC()
 
    IF _table == NIL
@@ -452,13 +452,13 @@ METHOD RNALDamageDocument:config_tbl_struct()
 // ------------------------------------------------------
 METHOD RNALDamageDocument:get_rnal_header_data()
 
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
 
-   _qry := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "rnal_docs " + ;
+   cQuery := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "rnal_docs " + ;
       " WHERE doc_no = " + docno_str( ::doc_no ) + ;
       " ORDER BY doc_no"
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    IF sql_error_in_query( _table )
       RETURN NIL
    ENDIF
@@ -471,15 +471,15 @@ METHOD RNALDamageDocument:get_rnal_header_data()
 // ------------------------------------------------------
 METHOD RNALDamageDocument:get_rnal_items_data()
 
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
    LOCAL _items_cond := ::get_damage_items_cond( "doc_it_no" )
    LOCAL nI
 
-   _qry := " SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_it " + ;
+   cQuery := " SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_it " + ;
       " WHERE doc_no = " + AllTrim( Str( ::doc_no ) ) + _items_cond + ;
       " ORDER BY doc_no, doc_it_no "
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
 
    IF sql_error_in_query( _table ) == NIL
       RETURN NIL
@@ -493,14 +493,14 @@ METHOD RNALDamageDocument:get_rnal_items_data()
 // ------------------------------------------------------
 METHOD RNALDamageDocument:get_rnal_opers_data()
 
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
    LOCAL _items_cond := ::get_damage_items_cond( "doc_it_no" )
 
-   _qry := " SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_ops " + ;
+   cQuery := " SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "rnal_doc_ops " + ;
       " WHERE doc_no = " + AllTrim( Str( ::doc_no ) ) + _items_cond + ;
       " ORDER BY doc_no, doc_it_no, doc_op_no"
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    IF sql_error_in_query( _table )
       RETURN NIL
    ENDIF

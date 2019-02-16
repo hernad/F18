@@ -18,7 +18,7 @@
 
 FUNCTION update_dbf_from_server( cTabela, cAlgoritam )
 
-   //LOCAL _qry
+   //LOCAL cQuery
    LOCAL _counter
    LOCAL _rec
    LOCAL _qry_obj

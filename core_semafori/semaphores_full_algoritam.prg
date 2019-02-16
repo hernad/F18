@@ -21,7 +21,7 @@ FUNCTION full_synchro( cDbfTable, nStepSize, cInfo )
    LOCAL _seconds
    LOCAL nCountSql
    LOCAL _offset
-   LOCAL _qry
+   LOCAL cQuery
    LOCAL _sql_table, _sql_fields
    LOCAL aDbfRec
    LOCAL _sql_order
@@ -90,13 +90,13 @@ WARNING:  there is already a transaction in progress
 
    FOR _offset := 0 TO nCountSql STEP nStepSize
 
-      _qry :=  "SELECT " + _sql_fields + " FROM " + _sql_table
-      _qry += " ORDER BY " + _sql_order
-      _qry += " LIMIT " + Str( nStepSize ) + " OFFSET " + Str( _offset )
+      cQuery :=  "SELECT " + _sql_fields + " FROM " + _sql_table
+      cQuery += " ORDER BY " + _sql_order
+      cQuery += " LIMIT " + Str( nStepSize ) + " OFFSET " + Str( _offset )
 
-      // log_write( "GET FROM SQL full_synchro tabela: " + cDbfTable + " " + AllTrim( Str( _offset ) ) + " / qry: " + _qry, 7 )
+      // log_write( "GET FROM SQL full_synchro tabela: " + cDbfTable + " " + AllTrim( Str( _offset ) ) + " / qry: " + cQuery, 7 )
 
-      lRet := fill_dbf_from_server( cDbfTable, _qry, @_sql_fetch_time, @_dbf_write_time, .T. )
+      lRet := fill_dbf_from_server( cDbfTable, cQuery, @_sql_fetch_time, @_dbf_write_time, .T. )
 
       IF !lRet
          run_sql_query( "ROLLBACK", hParams )

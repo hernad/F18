@@ -312,7 +312,7 @@ FUNCTION fakt_unos_set_broj_dokumenta()
 FUNCTION fakt_postoji_li_rupa_u_brojacu( cIdFirma, cIdTipDok, cBrDok )
 
    LOCAL nRet := 0
-   LOCAL _qry, _table
+   LOCAL cQuery, _table
    LOCAL _max_dok, _par_dok, _param
    LOCAL hParams := fakt_params()
    LOCAL cIdTipDokTrazi, _tmp
@@ -334,12 +334,12 @@ FUNCTION fakt_postoji_li_rupa_u_brojacu( cIdFirma, cIdTipDok, cBrDok )
       cIdTipDokTrazi := cIdTipDok
    ENDIF
 
-   _qry := " SELECT MAX( brdok ) FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks " + ;
+   cQuery := " SELECT MAX( brdok ) FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks " + ;
       " WHERE idfirma = " + sql_quote( cIdFirma ) + ;
       " AND idtipdok = " + sql_quote( cIdTipDokTrazi )
 
 
-   _table := run_sql_query( _qry )
+   _table := run_sql_query( cQuery )
    _dok := _table:FieldGet( 1 )
    _tmp := TokToNiz( _dok, "/" )
    IF Len( _tmp ) > 0

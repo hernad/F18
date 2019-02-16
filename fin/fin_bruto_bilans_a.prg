@@ -283,7 +283,7 @@ METHOD FinBrutoBilans:get_vars()
 
 METHOD FinBrutoBilans:get_data()
 
-   LOCAL _qry, _data, _where
+   LOCAL cQuery, _data, _where
    LOCAL _konto := ::hParams[ "konto" ]
    LOCAL _dat_od := ::hParams[ "datum_od" ]
    LOCAL _dat_do := ::hParams[ "datum_do" ]
@@ -337,66 +337,66 @@ METHOD FinBrutoBilans:get_data()
       ENDIF
    ENDIF
 
-   _qry := "SELECT "
+   cQuery := "SELECT "
 
    IF ::tip == 1 .OR. ::tip == 2
-      _qry += "sub.idkonto, "
+      cQuery += "sub.idkonto, "
    ELSEIF ::tip == 3
-      _qry += " rpad( sub.idkonto, 3 ) AS idkonto, "
+      cQuery += " rpad( sub.idkonto, 3 ) AS idkonto, "
    ELSEIF ::tip == 4
-      _qry += " rpad( sub.idkonto, 2 ) AS idkonto, "
+      cQuery += " rpad( sub.idkonto, 2 ) AS idkonto, "
    ENDIF
 
    IF ::tip == 1
 
-      _qry += "sub.idpartner, "
+      cQuery += "sub.idpartner, "
 
-      _qry += "SUM( CASE WHEN sub.d_p = '1' AND sub.idvn = '00' THEN sub." + _iznos_dug + " END ) as ps_dug, "
-      _qry += "SUM( CASE WHEN sub.d_p = '2' AND sub.idvn = '00' THEN sub." + _iznos_pot + " END ) as ps_pot, "
+      cQuery += "SUM( CASE WHEN sub.d_p = '1' AND sub.idvn = '00' THEN sub." + _iznos_dug + " END ) as ps_dug, "
+      cQuery += "SUM( CASE WHEN sub.d_p = '2' AND sub.idvn = '00' THEN sub." + _iznos_pot + " END ) as ps_pot, "
 
       IF ::hParams[ "kolona_tek_prom" ]
-         _qry += "SUM( CASE WHEN sub.d_p = '1' AND sub.idvn <> '00' THEN sub." + _iznos_dug + " END ) as tek_dug, "
-         _qry += "SUM( CASE WHEN sub.d_p = '2' AND sub.idvn <> '00' THEN sub." + _iznos_pot + " END ) as tek_pot, "
+         cQuery += "SUM( CASE WHEN sub.d_p = '1' AND sub.idvn <> '00' THEN sub." + _iznos_dug + " END ) as tek_dug, "
+         cQuery += "SUM( CASE WHEN sub.d_p = '2' AND sub.idvn <> '00' THEN sub." + _iznos_pot + " END ) as tek_pot, "
       ENDIF
 
-      _qry += "SUM( CASE WHEN sub.d_p = '1' THEN sub." + _iznos_dug + " END ) as kum_dug, "
-      _qry += "SUM( CASE WHEN sub.d_p = '2' THEN sub." + _iznos_pot + " END ) as kum_pot "
+      cQuery += "SUM( CASE WHEN sub.d_p = '1' THEN sub." + _iznos_dug + " END ) as kum_dug, "
+      cQuery += "SUM( CASE WHEN sub.d_p = '2' THEN sub." + _iznos_pot + " END ) as kum_pot "
 
    ELSEIF ::tip > 1
 
-      _qry += "SUM( CASE WHEN sub.idvn = '00' THEN sub." + _iznos_dug + " END ) as ps_dug, "
-      _qry += "SUM( CASE WHEN sub.idvn = '00' THEN sub." + _iznos_pot + " END ) as ps_pot, "
+      cQuery += "SUM( CASE WHEN sub.idvn = '00' THEN sub." + _iznos_dug + " END ) as ps_dug, "
+      cQuery += "SUM( CASE WHEN sub.idvn = '00' THEN sub." + _iznos_pot + " END ) as ps_pot, "
 
       IF ::hParams[ "kolona_tek_prom" ]
-         _qry += "SUM( CASE WHEN sub.idvn <> '00' THEN sub." + _iznos_dug + " END ) as tek_dug, "
-         _qry += "SUM( CASE WHEN sub.idvn <> '00' THEN sub." + _iznos_pot + " END ) as tek_pot, "
+         cQuery += "SUM( CASE WHEN sub.idvn <> '00' THEN sub." + _iznos_dug + " END ) as tek_dug, "
+         cQuery += "SUM( CASE WHEN sub.idvn <> '00' THEN sub." + _iznos_pot + " END ) as tek_pot, "
       ENDIF
 
-      _qry += "SUM( sub." + _iznos_dug + " ) as kum_dug, "
-      _qry += "SUM( sub." + _iznos_pot + " ) as kum_pot "
+      cQuery += "SUM( sub." + _iznos_dug + " ) as kum_dug, "
+      cQuery += "SUM( sub." + _iznos_pot + " ) as kum_pot "
 
    ENDIF
 
-   _qry += "FROM " + _table + " sub "
+   cQuery += "FROM " + _table + " sub "
 
-   _qry += _where + " "
+   cQuery += _where + " "
 
    IF ::tip == 1
-      _qry += "GROUP BY sub.idkonto, sub.idpartner "
-      _qry += "ORDER BY sub.idkonto, sub.idpartner "
+      cQuery += "GROUP BY sub.idkonto, sub.idpartner "
+      cQuery += "ORDER BY sub.idkonto, sub.idpartner "
    ELSEIF ::tip == 2
-      _qry += "GROUP BY sub.idkonto "
-      _qry += "ORDER BY sub.idkonto "
+      cQuery += "GROUP BY sub.idkonto "
+      cQuery += "ORDER BY sub.idkonto "
    ELSEIF ::tip == 3
-      _qry += "GROUP BY rpad( sub.idkonto, 3 ) "
-      _qry += "ORDER BY rpad( sub.idkonto, 3 ) "
+      cQuery += "GROUP BY rpad( sub.idkonto, 3 ) "
+      cQuery += "ORDER BY rpad( sub.idkonto, 3 ) "
    ELSEIF ::tip == 4
-      _qry += "GROUP BY rpad( sub.idkonto, 2 ) "
-      _qry += "ORDER BY rpad( sub.idkonto, 2 ) "
+      cQuery += "GROUP BY rpad( sub.idkonto, 2 ) "
+      cQuery += "ORDER BY rpad( sub.idkonto, 2 ) "
    ENDIF
 
    MsgO( "formiranje sql upita u toku ..." )
-   _data := run_sql_query( _qry )
+   _data := run_sql_query( cQuery )
    MsgC()
 
    IF sql_error_in_query( _data )

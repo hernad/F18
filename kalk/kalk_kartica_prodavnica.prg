@@ -68,7 +68,7 @@ FUNCTION kalk_kartica_prodavnica()
          ?? self_organizacija_id(), "-", self_organizacija_naziv()
 
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " GET cIdKonto VALID P_Konto( @cIdKonto )
-         form_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
+         kalk_kartica_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
          @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum od " GET dDatOd
          @ box_x_koord() + 5, Col() + 2 SAY "do" GET dDatDo
          @ box_x_koord() + 6, box_y_koord() + 2 SAY "sa prethodnim prometom (D/N)" GET cPredh PICT "@!" VALID cpredh $ "DN"
