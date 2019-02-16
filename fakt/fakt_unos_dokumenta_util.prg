@@ -784,7 +784,6 @@ STATIC FUNCTION fakt_unos_stavka_usluga( lFaktNovaStavka, cTxt1, nX, nY )
    RETURN .T.
 
 
-
 FUNCTION fakt_unos_provjera_dupla_stavka( lFaktNovaStavka )
 
    LOCAL nEntBK, ibk, uEntBK
@@ -798,7 +797,6 @@ FUNCTION fakt_unos_provjera_dupla_stavka( lFaktNovaStavka )
    SELECT fakt_pripr
 
    nPrevRec := RecNo()
-
    LOCATE FOR idfirma + idtipdok + brdok + idroba == _idfirma + _idtipdok + _brdok + _idroba .AND. ( RecNo() <> nPrevrec .OR. lFaktNovaStavka )
 
    IF Found ()
@@ -823,9 +821,8 @@ FUNCTION fakt_zadnji_izlazi_info( cIdPartner, cIdRoba )
    ENDIF
 
    _data := fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
-
    IF Len( _data ) > 0
-      _prikazi_info( _data, "F", _count )
+      kalk_podaci_o_rabatima( _data, "F", _count )
    ENDIF
 
    RETURN .T.
@@ -858,123 +855,6 @@ STATIC FUNCTION fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
    NEXT
 
    RETURN _data
-
-
-
-/*
- *     Preracunavanje paketa i komada ...
- *   param: cIdRoba  - sifra artikla
- *   param: nPak     - broj paketa/kartona
- *   param: nKom     - broj komada u ostatku (dijelu paketa/kartona)
- *   param: nKol     - ukupan broj komada
- *   param: nKOLuPAK - .t. -> preracunaj pakete (nPak,nKom) .f. -> preracunaj komade (nKol)
-
-
-FUNCTION Prepak( cIdRoba, cPako, nPak, nKom, nKol, lKolUPak )
-
-   LOCAL lVrati := .F., nArr := Select(), aNaz := {}, cKar := "AMB ", nKO := 1, n_Pos := 0
-
-   IF lKOLuPAK == NIL; lKOLuPAK := .T. ; ENDIF
-   SELECT SIFV
-   SET ORDER TO TAG "ID"
---   HSEEK "ROBA    " + cKar + PadR( cIdRoba, 15 )
-   DO WHILE !Eof() .AND. id + oznaka + idsif == "ROBA    " + cKar + PadR( cIdRoba, 15 )
-
-      IF !Empty( naz )
-         AAdd( aNaz, naz )
-      ENDIF
-      SKIP 1
-
-   ENDDO
-
-   IF Len( aNaz ) > 0
-      nOpc  := 1  // za sad ne uvodim meni
-      n_Pos := At( "_", aNaz[ nOpc ] )
-      cPako := "(" + AllTrim( Left( aNaz[ nOpc ], n_Pos - 1 ) ) + ")"
-      nKO   := Val( AllTrim( SubStr( aNaz[ nOpc ], n_Pos + 1 ) ) )
-      IF nKO <> 0
-         IF lKOLuPAK
-            nPak := Int( nKol / nKO )
-            nKom := nKol - nPak * nKO
-         ELSE
-            nKol := nPak * nKO + nKom
-         ENDIF
-      ENDIF
-      lVrati := .T.
-   ELSEIF lKOLuPAK
-      nPak := 0
-      nKom := nKol
-   ENDIF
-   SELECT ( nArr )
-
-   RETURN lVrati
-*/
-
-
-/* UGenNar()
- *     U Generalnoj Narudzbi
-
-
-FUNCTION UGenNar()
-
-   LOCAL lVrati := .T., nArr := Select(), nIsporuceno, nNaruceno, dNajstariji := CToD( "" )
-
-   SELECT ( F_UGOV )
-   IF !Used()
-  --    o_ugov()
-   ENDIF
-   SET ORDER TO TAG "1"
-  -- HSEEK "D" + "G" + _idpartner
-   IF Found()
-      SELECT ( F_RUGOV )
-      IF !Used()
-    --     o_rugov()
-      ENDIF
-      SET ORDER TO TAG "ID"
-      SELECT UGOV
-      nNaruceno := 0
-      // izracunajmo ukupnu narucenu kolicinu i utvrdimo datum najstarije
-      // / narudzbe
-      DO WHILE !Eof() .AND. aktivan + vrsta + idpartner == "D" + "G" + _idpartner
-         SELECT RUGOV
-         HSEEK UGOV->id + _idroba
-         IF Found()
-            IF Empty( dNajstariji )
-               dNajstariji := UGOV->datod
-            ELSE
-               dNajstariji := Min( UGOV->datod, dNajstariji )
-            ENDIF
-            nNaruceno += kolicina
-         ENDIF
-         SELECT UGOV
-         SKIP 1
-      ENDDO
-      // izracunati dosadasnju isporuku (nIsporuceno)
-      nIsporuceno := 0
-      SELECT FAKT
-      SET ORDER TO TAG "6"
-      // sabiram sve isporuke od datuma vazenja najstarijeg ugovora do danas
-      SEEK _idfirma + _idpartner + _idroba + "10" + DToS( dNajstariji )
-      DO WHILE !Eof() .AND. idfirma + idpartner + idroba + idtipdok == ;
-            _idfirma + _idpartner + _idroba + "10"
-         nIsporuceno += kolicina
-         SKIP 1
-      ENDDO
-      IF _kolicina + nIsporuceno > nNaruceno
-         lVrati := .F.
-         MsgBeep( "Količina: " + AllTrim( TRANS( _kolicina, fakt_pic_kolicina() ) ) + ". Naručeno: " + AllTrim( TRANS( nNaruceno, fakt_pic_kolicina() ) ) + ". Dosad isporuceno: " + AllTrim( TRANS( nIsporuceno, fakt_pic_kolicina() ) ) + ". #" + ;
-            "Za ovoliku isporuku artikla morate imati novu generalnu narudžbenicu!" )
-      ENDIF
-   ENDIF
-   SELECT ( nArr )
-
-   RETURN lVrati
-
-
-
-
-*/
-
 
 
 FUNCTION fakt_valid_preracun_cijene_u_valutu_dokumenta( cPretvori, cDinDem, dDatDok, nCijena )
@@ -1038,66 +918,6 @@ FUNCTION fakt_set_cijena_sif_roba( cIdTipDok, cIdRoba, nCijena, nRabat )
 
 
 
-/*
-
-FUNCTION IniVars()
-
-   SET CURSOR ON
-
-   // varijable koje se inicijalizuju iz baze
---   _txt1 := _txt2 := _txt3a := _txt3b := _txt3c := ""        // txt1  -  naziv robe,usluge
-   _BrOtp := Space( 8 )
-   _DatOtp := CToD( "" )
-   _BrNar := Space( 8 )
-   _DatPl := CToD( "" )
-   _VezOtpr := ""
-
-   aMemo := fakt_ftxt_decode( _txt )
-   IF Len( aMemo ) > 0
-      _txt1 := aMemo[ 1 ]
-   ENDIF
-   IF Len( aMemo ) >= 2
---      _txt2 := aMemo[ 2 ]
-   ENDIF
-   IF Len( aMemo ) >= 5
-      _txt3a := aMemo[ 3 ]; _txt3b := aMemo[ 4 ]; _txt3c := aMemo[ 5 ]
-   ENDIF
-   IF Len( aMemo ) >= 9
-      _BrOtp := aMemo[ 6 ]; _DatOtp := CToD( aMemo[ 7 ] ); _BrNar := amemo[ 8 ]; _DatPl := CToD( aMemo[ 9 ] )
-   ENDIF
-   IF Len ( aMemo ) >= 10
-      _VezOtpr := aMemo[ 10 ]
-   ENDIF
-
-
-
-
-FUNCTION SetVars()
-
-   // {
-   IF _podbr == " ." .OR.  roba->tip = "U" .OR. ( Val( _Rbr ) <= 1 .AND. Val( _podbr ) < 1 )
---      _txt2 := OdsjPLK( _txt2 )           // odsjeci na kraju prazne linije
---      IF ! "Faktura formirana na osnovu" $ _txt2
---         _txt2 += Chr( 13 ) + Chr( 10 ) + _VezOtpr
-      ENDIF
-  --    _txt := Chr( 16 ) + Trim( _txt1 ) + Chr( 17 ) + Chr( 16 ) + _txt2 + Chr( 17 ) + ;
-         Chr( 16 ) + Trim( _txt3a ) + Chr( 17 ) + Chr( 16 ) + _txt3b + Chr( 17 ) + ;
-         Chr( 16 ) + Trim( _txt3c ) + Chr( 17 ) + ;
-         Chr( 16 ) + _BrOtp + Chr( 17 ) + ;
-         Chr( 16 ) + DToC( _DatOtp ) + Chr( 17 ) + ;
-         Chr( 16 ) + _BrNar + Chr( 17 ) + ;
-         Chr( 16 ) + DToC( _DatPl ) + Chr( 17 ) + ;
-         iif ( Empty ( _VezOtpr ), "", Chr( 16 ) + _VezOtpr + Chr( 17 ) )
-   ELSE
-      _txt := ""
-   ENDIF
-
-   RETURN
-
-
-*/
-
-
 FUNCTION Tb_V_RBr()
 
    REPLACE Rbr WITH Str( nRbr, 3 )
@@ -1119,87 +939,6 @@ FUNCTION TbRobaNaz()
 
    RETURN Left( Roba->naz, 25 )
 
-
-/*
-FUNCTION ObracunajPP( cSetPor, dDatDok )
-
-   select_o_fakt_pripr()
-
-
-
-   SELECT fakt_pripr
-   GO TOP
-   IF dDatDok = NIL
-      dDatDok := fakt_pripr->DatDok
-   ENDIF
-   IF cSetPor = NIL
-      cSetPor := "D"
-   ENDIF
-
-   DO WHILE !Eof()
-      IF cSetPor == "D"
-         fakt_set_pozicija_sif_roba()
-         IF select_o_tarifa( roba->idtarifa )
-            SELECT fakt_pripr
-            REPLACE porez WITH tarifa->pdv
-         ENDIF
-      ENDIF
-      IF datDok <> dDatdok
-         REPLACE DatDok WITH dDatDok
-      ENDIF
-      SELECT fakt_pripr
-      SKIP
-   ENDDO
-
-   GO TOP
-
-   RETURN
-*/
-
-/*
- *     Tarifa na osnovu region + roba
- *   param: cRegion
- *   param: cIdRoba
- *   param: aPorezi
- *  \note preradjena funkcija jer Fakt nema cIdKonto
-
-
-FUNCTION TarifaR( cRegion, cIdRoba, aPorezi )
-
-   LOCAL cTarifa
-   PRIVATE cPolje
-
-   PushWA()
-
-   IF Empty( cRegion )
-      cPolje := "IdTarifa"
-   ELSE
-      IF cRegion == "1" .OR. cRegion == " "
-         cPolje := "IdTarifa"
-      ELSEIF cRegion == "2"
-         cPolje := "IdTarifa2"
-      ELSEIF cRegion == "3"
-         cPolje := "IdTarifa3"
-      ELSE
-         cPolje := "IdTarifa"
-      ENDIF
-   ENDIF
-
-   SELECT ( F_ROBA )
-
-   select_o_roba()
-
-  -- SEEK cIdRoba
-   cTarifa := &cPolje
-
-   select_o_tarifa( cTarifa )
-
-   set_pdv_array( @aPorezi )
-
-   PopWa()
-
-   RETURN tarifa->id
-*/
 
 
 // ----------------------------------------
@@ -1255,7 +994,6 @@ FUNCTION get_serbr_opis()
 
 
 
-
 FUNCTION Koef( cDindem )
 
    LOCAL nNaz, nRet, nArr, dDat
@@ -1303,9 +1041,6 @@ FUNCTION fakt_valid_cijena( nCijena, cTipDok, lNovidok )
    ENDIF
 
    RETURN lRet
-
-
-
 
 
 FUNCTION GetKarC3N2( mx )
@@ -1375,36 +1110,6 @@ FUNCTION SljPozGet( x, y, nKor, mx, nDod )
    RETURN .T.
 
 
-/*
-FUNCTION TekDokument()
-
-   LOCAL nRec
-   LOCAL aMemo
-   LOCAL cTxt
-
-   cTxt := PadR( "-", 60 )
-
-   IF RecCount2() <> 0
-      nRec := RecNo()
-      GO TOP
-      aMemo := fakt_ftxt_decode( txt )
-      IF Len( aMemo ) >= 5
-         cTxt := Trim( amemo[ 3 ] ) + " " + Trim( amemo[ 4 ] ) + "," + Trim( amemo[ 5 ] )
-      ELSE
-         cTxt := ""
-      ENDIF
-      cTxt := PadR( cTxt, 30 )
-      cTxt := " " + AllTrim( cTxt ) + ", Broj: " + idfirma + "-" + idtipdok + "-" + brdok + ", od " + DToC( datdok ) + " "
-      GO nRec
-   ENDIF
-
-   @ box_x_koord() + 0, box_y_koord() + 2 SAY cTxt
-
-   RETURN
-*/
-
-
-
 FUNCTION fakt_rbr()
 
    LOCAL cRet
@@ -1458,8 +1163,6 @@ FUNCTION CijeneOK( cStr )
 
 
 
-
-
 FUNCTION Part1Stavka()
 
    LOCAL cRet := ""
@@ -1469,7 +1172,6 @@ FUNCTION Part1Stavka()
    ENDIF
 
    RETURN cRet
-
 
 
 FUNCTION fakt_prikazi_Roba()
@@ -1491,7 +1193,6 @@ FUNCTION fakt_prikazi_Roba()
    ENDCASE
 
    RETURN PadR( cRet, 30 )
-
 
 
 FUNCTION fakt_brisi_stavku_pripreme()
@@ -1606,7 +1307,6 @@ FUNCTION fakt_tip_dok_arr()
    AAdd( aOpcije, "20 - Ponuda/Avansna faktura" )
    AAdd( aOpcije, "21 - Revers" )
    AAdd( aOpcije, "22 - Realizovane otpremnice   " )
-// AAdd( aOpcije, "23 - Realizovane otpremnice MP" )
    AAdd( aOpcije, "25 - Knjižna obavijest " )
    AAdd( aOpcije, "26 - Narudžbenica " )
    AAdd( aOpcije, "27 - Ponuda/Avansna faktura gotovina" )
