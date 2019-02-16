@@ -384,7 +384,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
             ENDIF
          ENDIF
 
-         IF field->idvd <> "24" .AND. Empty( field->mu_i ) .AND. Empty( field->pu_i )
+         IF Empty( field->mu_i ) .AND. Empty( field->pu_i )
             Beep( 2 )
             Msg( "Stavka broj " + field->rbr + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
             my_close_all_dbf()

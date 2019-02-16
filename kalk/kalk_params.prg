@@ -38,9 +38,6 @@ FUNCTION kalk_params()
    AAdd( aOpc, "4. nazivi troškova za 10-ku " )
    AAdd( aOpcExe, {|| kalk_troskovi_10ka( 'D' ) } )
 
-   AAdd( aOpc, "5. nazivi troškova za 24-ku" )
-   AAdd( aOpcExe, {|| kalk_par_troskovi_24( 'D' ) } )
-
    AAdd( aOpc, "6. nazivi troskova za RN" )
    AAdd( aOpcExe, {|| kalk_par_troskovi_rn( 'D' ) } )
 
