@@ -179,8 +179,8 @@ FUNCTION kalk_par_razno()
    LOCAL cUnosBarKodDN := "N"
    LOCAL nX := 1
    LOCAL _reset_roba := fetch_metric( "kalk_reset_artikla_kod_unosa", my_user(), "N" )
-   LOCAL _rabat := fetch_metric( "pregled_rabata_kod_ulaza", my_user(), "N" )
-   LOCAL _vise_konta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" )
+   //LOCAL _rabat := fetch_metric( "pregled_rabata_kod_ulaza", my_user(), "N" )
+   //LOCAL _vise_konta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" )
    LOCAL cKalkOpisDN := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" )
    LOCAL nLenBrKalk :=  kalk_duzina_brojaca_dokumenta()
    LOCAL cRobaTrazi := PadR( roba_trazi_po_sifradob(), 20 )
@@ -206,8 +206,8 @@ FUNCTION kalk_par_razno()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Koristiti BARKOD pri unosu kalkulacija (D/N)" GET cUnosBarKodDN VALID cUnosBarKodDN $ "DN" PICT "@!"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Potpis na kraju naloga D/N     " GET gPotpis VALID gPotpis $ "DN"
-   nX += 2
-   @ box_x_koord() + nX, Col() + 2 SAY "Vise konta na dokumentu (D/N) ?" GET _vise_konta VALID _vise_konta $ "DN" PICT "@!"
+   //nX += 2
+   //@ box_x_koord() + nX, Col() + 2 SAY "Vise konta na dokumentu (D/N) ?" GET _vise_konta VALID _vise_konta $ "DN" PICT "@!"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "F-ja za odredjivanje dzokera F1 u kontiranju" GET gFunKon1 PICT "@S28"
    ++nX
@@ -260,9 +260,9 @@ FUNCTION kalk_par_razno()
       roba_trazi_po_sifradob( cRobaTrazi )
       standardna_stopa_marze( nStandardnaStopaMarza )
       set_metric( "kalk_reset_artikla_kod_unosa", my_user(), _reset_roba )
-      set_metric( "pregled_rabata_kod_ulaza", my_user(), _rabat )
+      //set_metric( "pregled_rabata_kod_ulaza", my_user(), _rabat )
       set_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, cKalkOpisDN )
-      set_metric( "kalk_dokument_vise_konta", NIL, _vise_konta )
+      //set_metric( "kalk_dokument_vise_konta", NIL, _vise_konta )
 
    ENDIF
 

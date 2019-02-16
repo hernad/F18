@@ -65,23 +65,18 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    IF hb_HHasKey( hParams, "konto" )
       cUslovKonto := hParams[ "konto" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "datum_od" )
       dDatumOd := hParams[ "datum_od" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "datum_do" )
       dDatumDo := hParams[ "datum_do" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "tarife" )
       _tarife := hParams[ "tarife" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "vrste_dok" )
       _vrste_dok := hParams[ "vrste_dok" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "gledati_usluge" )
       cGledatiUslugeDN := hParams[ "gledati_usluge" ]
    ENDIF

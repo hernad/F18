@@ -1095,7 +1095,7 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
    LOCAL cIdFirmaNew := new_dok[ "idfirma" ]
    LOCAL cBrDokNew := new_dok[ "brdok" ]
    LOCAL cIdVdNew := new_dok[ "idvd" ]
-   LOCAL lViseKonta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" ) == "D"
+   //LOCAL lViseKonta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" ) == "D"
 
    SELECT kalk_pripr
    GO TOP
@@ -1121,10 +1121,10 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
       hRec[ "idvd" ] := hRecTekuci[ "idvd" ]
       hRec[ "brdok" ] := hRecTekuci[ "brdok" ]
       hRec[ "datdok" ] := hRecTekuci[ "datdok" ]
-      IF !lViseKonta
-         hRec[ "idpartner" ] := hRecTekuci[ "idpartner" ]
-      ENDIF
-      IF !( hRec[ "idvd" ] $ "16#80" ) .AND. !lViseKonta
+      //IF !lViseKonta
+      hRec[ "idpartner" ] := hRecTekuci[ "idpartner" ]
+      //ENDIF
+      IF !( hRec[ "idvd" ] $ "16#80" )  //.AND. !lViseKonta
          hRec[ "idkonto" ] := hRecTekuci[ "idkonto" ]
          hRec[ "idkonto2" ] := hRecTekuci[ "idkonto2" ]
          hRec[ "pkonto" ] := hRecTekuci[ "pkonto" ]

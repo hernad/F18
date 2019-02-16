@@ -143,12 +143,9 @@ STATIC FUNCTION stampaj_tkv( hParams )
          LOOP
       ENDIF
 
-
       ? PadL( AllTrim( Str( ++_red_br ) ), 6 ) + "."
-
       // datum dokumenta
       @ PRow(), PCol() + 1 SAY field->datum
-
       // generisi string za opis knjizenja...
       _opis_knjizenja := AllTrim( field->vr_dok )
       _opis_knjizenja += " "
@@ -162,7 +159,6 @@ STATIC FUNCTION stampaj_tkv( hParams )
       _opis_knjizenja += AllTrim( field->part_adr )
       _opis_knjizenja += ", "
       _opis_knjizenja += AllTrim( field->part_mj )
-
       _a_opis := SjeciStr( _opis_knjizenja, __LEN_OPIS )
 
       // opis knjizenja

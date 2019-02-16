@@ -49,7 +49,7 @@ FUNCTION kalk_unos_get_roba_id( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDokumen
 
    bValid := {|| kalk_valid_roba( @cIdRoba, @cIdTarifa, lNoviDokument, @aPorezi ), ;
       ispisi_naziv_roba( nKoordX, 25, 41 ), ;
-      kalk_zadnji_ulazi_info( cIdpartner, cIdroba, cProdMag ), !Empty( cIdRoba ) }
+      /* kalk_zadnji_ulazi_info( cIdpartner, cIdroba, cProdMag ), */ !Empty( cIdRoba ) }
 
    // _ocitani_barkod := _idroba, ;
    // P_Roba( @_IdRoba ), ;
@@ -118,7 +118,7 @@ FUNCTION roba_barkod_pri_unosu( lSet )
    RETURN s_lRobaBarkodPriUnosu
 
 
-
+/*
 FUNCTION kalk_zadnji_ulazi_info( cIdPartner, cIdRoba, cProdMag )
 
    LOCAL aData := {}
@@ -142,7 +142,7 @@ FUNCTION kalk_zadnji_ulazi_info( cIdPartner, cIdRoba, cProdMag )
    ENDIF
 
    RETURN .T.
-
+*/
 
 STATIC FUNCTION kalk_get_ulazi( cIdPartner, cIdRoba, cMagIliProd )
 
