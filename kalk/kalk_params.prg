@@ -73,8 +73,6 @@ FUNCTION kalk_par_varijante_prikaza()
 
    Box(, 23, 76, .F., "Varijante obrade i prikaza pojedinih dokumenata" )
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "14 - Nivelaciju izvršiti na ukupno stanje/na prodanu kolicinu  1/2 ?" GET gNiv14  VALID gNiv14 $ "12"
-   nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "10 - prikaz ukalkulisanog poreza (D/N)" GET  g10Porez  PICT "@!" VALID g10Porez $ "DN"
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "10 - automatsko preuzimanje troškova iz sifrarnika robe ? (0/D/N)" GET cRobaTrosk VALID cRobaTrosk $ "0DN" PICT "@!"
@@ -118,7 +116,6 @@ FUNCTION kalk_par_varijante_prikaza()
       set_metric( "kalk_dokument_14_varijanta_poreza", NIL, gVarVP )
       set_metric( "kalk_dokument_11_bez_nc", NIL, g11bezNC )
       set_metric( "kalk_dokument_80_rekap_po_tar", NIL, g80VRT )
-      set_metric( "kalk_tip_nivelacije_14", NIL, gNiv14 )
       set_metric( "kalk_varijanta_fakt_13_kalk_11_cijena", NIL, gVar13u11 )
       set_metric( "kalk_pomoc_sa_mpc", NIL, gcMpcKalk10 )
       set_metric( "kalk_kolicina_kod_nivelacije_fakt", NIL, gKolicFakt )
