@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 
-
 /* Omogucava izradu naljepnica u dvije varijante:
  1 - prikaz naljepnica sa tekucom cijenom
  2 - prikaz naljepnica sa novom cijenom, kao i prekrizenom starom cijenom
@@ -70,7 +69,6 @@ FUNCTION kalk_roba_naljepnice_stampa( cIdFirma, cIdVd, cBrDok )
    _gen_xml( _xml_file, _tkm_no, _len_naz )
 
    my_close_all_dbf()
-
    IF generisi_odt_iz_xml( _template, _xml_file )
       prikazi_odt()
    ENDIF
@@ -108,9 +106,7 @@ STATIC FUNCTION GetVars( cVarijanta, cKolicina, tkm_no, len_naz )
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "2 - sa prikazom stare cijene (prekrizeno)"
 
    @ box_x_koord() + 6, box_y_koord() + 3 SAY "Odaberi zeljenu varijantu "  GET cVarijanta VALID cVarijanta $ "12"
-
    @ box_x_koord() + 7, box_y_koord() + 2 SAY "Broj TKM:" GET tkm_no
-
    @ box_x_koord() + 8, box_y_koord() + 2 SAY "Naziv skrati na broj karaktera:" GET len_naz PICT "999"
 
    READ
@@ -131,8 +127,6 @@ STATIC FUNCTION GetVars( cVarijanta, cKolicina, tkm_no, len_naz )
    set_metric( "rlabel_naz_len", NIL, len_naz )
 
    RETURN .T.
-
-
 
 
 
@@ -286,11 +280,9 @@ STATIC FUNCTION _gen_xml( xml_file, tkm_no, len_naz )
    USE
 
    xml_subnode( "lab", .T. )
-
    close_xml()
 
    RETURN .T.
-
 
 
    /*
@@ -335,8 +327,6 @@ STATIC FUNCTION cre_open_roba_naljepnice()
    AAdd( aDBf, { 'vpc', 'N',  8, 2 } )
    AAdd( aDBf, { 'mpc', 'N',  8, 2 } )
    AAdd( aDBf, { 'porez', 'N',  8, 2 } )
-   AAdd( aDBf, { 'porez2', 'N',  8, 2 } )
-   AAdd( aDBf, { 'porez3', 'N',  8, 2 } )
 
    dbCreate( _dbf, aDbf )
 

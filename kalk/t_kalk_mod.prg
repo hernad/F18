@@ -102,7 +102,6 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC KursLis := "1"
    PUBLIC gStavitiUSifarnikNovuCijenuDefault := "D"
    PUBLIC gDecKol := 5
-   PUBLIC gMagacin := "2"
    PUBLIC gRCRP := "C"
    PUBLIC gPotpis := "N"
    PUBLIC g10Porez := "N"
@@ -120,14 +119,6 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC gAFakt := "D"
    PUBLIC gAutoCjen := "D"
    PUBLIC gVarEv := "1"  // 1-sa cijenama   2-bez cijena
-   PUBLIC c24T1 := PadR( "Tr 1", 15 )
-   PUBLIC c24T2 := PadR( "Tr 2", 15 )
-   PUBLIC c24T3 := PadR( "Tr 3", 15 )
-   PUBLIC c24T4 := PadR( "Tr 4", 15 )
-   PUBLIC c24T5 := PadR( "Tr 5", 15 )
-   PUBLIC c24T6 := PadR( "Tr 6", 15 )
-   PUBLIC c24T7 := PadR( "Tr 7", 15 )
-   PUBLIC c24T8 := PadR( "Tr 8", 15 )
    PUBLIC c10T1 := "PREVOZ.T"
    PUBLIC c10T2 := "AKCIZE  "
    PUBLIC c10T3 := "SPED.TR "
@@ -217,20 +208,11 @@ METHOD TKalkMod:set_module_gvars()
    cRNT4 := fetch_metric( "kalk_dokument_rn_trosak_4", nil, cRNT4 )
    cRNT5 := fetch_metric( "kalk_dokument_rn_trosak_5", nil, cRNT5 )
 
-   c24T1 := fetch_metric( "kalk_dokument_24_trosak_1", nil, c24T1 )
-   c24T2 := fetch_metric( "kalk_dokument_24_trosak_2", nil, c24T2 )
-   c24T3 := fetch_metric( "kalk_dokument_24_trosak_3", nil, c24T3 )
-   c24T4 := fetch_metric( "kalk_dokument_24_trosak_4", nil, c24T4 )
-   c24T5 := fetch_metric( "kalk_dokument_24_trosak_5", nil, c24T5 )
-   c24T6 := fetch_metric( "kalk_dokument_24_trosak_6", nil, c24T6 )
-   c24T7 := fetch_metric( "kalk_dokument_24_trosak_7", nil, c24T7 )
-   c24T8 := fetch_metric( "kalk_dokument_24_trosak_8", nil, c24T8 )
-
    gAFin := fetch_metric( "kalk_kontiranje_fin", f18_user(), gAFin )
    gAMat := fetch_metric( "kalk_kontiranje_mat", f18_user(), gAMat )
    gAFakt := fetch_metric( "kalk_kontiranje_fakt", f18_user(), gAFakt )
    gBrojacKalkulacija := fetch_metric( "kalk_brojac_kalkulacija", nil, gBrojacKalkulacija )
-   gMagacin := fetch_metric( "kalk_magacin_po_nc", nil, gMagacin )
+
    gCijene := fetch_metric( "kalk_azuriranje_sumnjivih_dokumenata", nil, gCijene )
    gSetForm := fetch_metric( "kalk_set_formula", nil, gSetForm )
    gGen16 := fetch_metric( "kalk_generisi_16_nakon_96", f18_user(), gGen16 )

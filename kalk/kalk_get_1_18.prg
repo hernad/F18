@@ -52,7 +52,7 @@ FUNCTION kalk_get_1_18()
    ENDIF
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE PicKol VALID _kolicina > 0
 
-   IF kalk_is_novi_dokument() .AND. gMagacin == "2" .AND. _TBankTr <> "X"
+   IF kalk_is_novi_dokument() .AND. _TBankTr <> "X"
       nKalkStaraCijena := kalk_vpc_za_koncij()
    ELSE
       nKalkStaraCijena := _MPCSAPP
@@ -71,9 +71,6 @@ FUNCTION kalk_get_1_18()
 
   cNaziv := "VPC"
 
-   IF gmagacin == "1"
-      cNaziv := "NC"
-   ENDIF
    @ box_x_koord() + 17, box_y_koord() + 2    SAY "STARA CIJENA  (" + cNaziv + ") :"  GET nKalkStaraCijena  PICTURE PicDEM
    @ box_x_koord() + 18, box_y_koord() + 2    SAY "NOVA CIJENA   (" + cNaziv + ") :"  GET nKalkNovaCijena   PICTURE PicDEM
 

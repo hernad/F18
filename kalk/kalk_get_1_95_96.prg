@@ -27,7 +27,7 @@ FUNCTION kalk_get_1_95_96()
       _mkonto := _idkonto
    ENDIF
 
-   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
+   IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
       @  box_x_koord() + 5, box_y_koord() + 2   SAY "Dokument Broj:" GET _BrFaktP VALID !Empty( _BrFaktP )
       @  box_x_koord() + 5, Col() + 1 SAY "Datum:" GET _DatFaktP  VALID {||  datum_not_empty_upozori_godina( _datFaktP, "Datum fakture" ) }
@@ -44,21 +44,12 @@ FUNCTION kalk_get_1_95_96()
       // ENDIF
 
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Konto zadužuje            " GET _IdKonto VALID  Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
-
-      IF gMagacin == "1"
-         @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
-      ELSE
-         IF _idvd == "96"
-            @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
-         ENDIF
-      ENDIF
-
+      @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
 
    ELSE
 
       @  box_x_koord() + 6, box_y_koord() + 2   SAY "Dokument Broj: "; ?? _BrFaktP
       @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
-      _IdZaduz := ""
       @ box_x_koord() + 8, box_y_koord() + 2 SAY "Magacinski konto razduzuje "; ?? _mkonto
       @ box_x_koord() + 9, box_y_koord() + 2 SAY "Konto zaduzuje "; ?? _IdKonto
 

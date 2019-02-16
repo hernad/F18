@@ -41,7 +41,7 @@ FUNCTION kalk_get_1_10()
       _DatFaktP := _datdok
    ENDIF
 
-   IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
+   IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
 
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "DOBAVLJAČ:" GET _IdPartner PICT "@!"  VALID {|| kalk_valid_dobavljac( @_IdPartner, box_x_koord() + nX ) }
 

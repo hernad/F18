@@ -43,7 +43,6 @@ Harbour extended Field Types
    AAdd( aDBf, { "IDKONTO2", "C",   7,  0 } )
    AAdd( aDBf, { "IDTARIFA", "C",   6,  0 } )
    AAdd( aDBf, { "IDPARTNER", "C",   6,  0 } )
-   AAdd( aDBf, { 'IDZADUZ', 'C',   6,  0 } )
    AAdd( aDBf, { "IDVD", "C",   2,  0 } )
    AAdd( aDBf, { "BRDOK", "C",   8,  0 } )
    AAdd( aDBf, { "DATDOK", "D",   8,  0 } )
@@ -56,9 +55,6 @@ Harbour extended Field Types
    AAdd( aDBf, { 'BANKTR', 'B',  8,  8 } )
    AAdd( aDBf, { 'SPEDTR', 'B',  8,  8 } )
    AAdd( aDBf, { 'ZAVTR', 'B',  8,  8 } )
-   AAdd( aDBf, { 'VPVSAP', 'B',  8,  8 } )
-   AAdd( aDBf, { 'PRUCMP', 'B',  8,  8 } )
-   AAdd( aDBf, { 'PORPOT', 'B',  8,  8 } )
    AAdd( aDBf, { "FV", "B",  8,  8 } )
    AAdd( aDBf, { "GKV", "B",  8,  8 } )
    AAdd( aDBf, { "GKV2", "B",  8,  8 } )
@@ -76,32 +72,16 @@ Harbour extended Field Types
    AAdd( aDBf, { "MPV", "B",  8,  8 } )
    AAdd( aDBf, { "MARZA2", "B",  8,  8 } )
    AAdd( aDBf, { "POREZ", "B",  8,  10 } )
-   AAdd( aDBf, { "POREZ2", "B",  8,  8 } )
-   AAdd( aDBf, { "POREZ3", "B",  8,  8 } )
    AAdd( aDBf, { "MPVSAPP", "B",  8,  8 } )
    AAdd( aDBf, { "IDROBA", "C",  10,  0 } )
    AAdd( aDBf, { "KOLICINA", "B",  8,  8 } )
    AAdd( aDBf, { "GKol", "B",  8,  8 } )
    AAdd( aDBf, { "GKol2", "B",  8,  8 } )
-   AAdd( aDBf, { "PORVT", "B",  8,  8 } )
-   AAdd( aDBf, { "UPOREZV", "B",  8,  8 } )
    AAdd( aDBf, { "K1", "C",   1,  0 } )
    AAdd( aDBf, { "K2", "C",   1,  0 } )
-
    _alias := "FINMAT"
    _table_name := "finmat"
-
-   IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 020104 // 2.1.2 - rbr numeric
-      f18_delete_dbf( "finmat" )
-   ENDIF
-
    IF_NOT_FILE_DBF_CREATE
-
-   // 0.9.1
-   IF ver[ "current" ] > 0 .AND. ver[ "current" ] < 0901
-      modstru( { "*" + _table_name, "A K1 C 1 0", "A K2 C 1 0" } )
-   ENDIF
-
    CREATE_INDEX( "1", "idFirma+IdVD+BRDok", _alias )
 
    RETURN .T.

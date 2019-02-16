@@ -185,7 +185,6 @@ FUNCTION kalk_generacija_inventura_magacin_im()
    RETURN .T.
 
 
-
 FUNCTION kalk_generisanje_inventure_razlike_postojeca_magacin_im()
 
    LOCAL cIdFirma, cIdKonto, dDatDok, cArtikli, cPosition, cOldBrDok

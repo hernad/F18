@@ -28,7 +28,7 @@ FUNCTION kalk_get_1_rn()
       RETURN  LastKey()
    ENDIF
 
-   IF nRbr == 1  .OR. !kalk_is_novi_dokument() .OR. gMagacin == "1"
+   IF nRbr == 1  .OR. !kalk_is_novi_dokument()
       @  box_x_koord() + 6, box_y_koord() + 2   SAY8 "  ZATVORITI RADNI NALOG :" GET _BrFaktP PICT "@!"
       @  box_x_koord() + 7, box_y_koord() + 2   SAY8 "Mag. proizvodnje u toku :" GET _IdKonto2 PICT "@!" VALID P_Konto( @_IdKonto2 )
       @ box_x_koord() + 10, box_y_koord() + 2   SAY8 "Mag. gotovih proizvoda zadužuje:" GET _IdKonto VALID  P_Konto( @_IdKonto, 24 ) PICT "@!"

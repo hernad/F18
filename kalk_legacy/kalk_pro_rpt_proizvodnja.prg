@@ -46,19 +46,7 @@ FUNCTION leg_StKalkPR()
       cBrFaktP := brfaktp; dDatFaktP := datfaktp; cIdpartner := idpartner
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD .AND. idpartner + brfaktp + DToS( datfaktp ) == cidpartner + cbrfaktp + DToS( ddatfaktp )
 
-/*
-   if gmagacin<>"1"
-    if idpartner+brfaktp+idkonto+idkonto2<>cidd
-     set device to screen
-     Beep(2)
-     Msg("Unutar kalkulacije se pojavilo vise dokumenata !",6)
-     set device to printer
-    endif
-   endif
-*/
-
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
          SELECT kalk_pripr
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 

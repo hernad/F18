@@ -210,11 +210,11 @@ STATIC FUNCTION kalk_14_valid_rabatv()
    ENDIF
 
    nVpcKoncij := kalk_vpc_za_koncij()
-   IF Round( nVpcKoncij - _vpc, 4 ) <> 0  .AND. gMagacin == "2"
+   IF Round( nVpcKoncij - _vpc, 4 ) <> 0
       IF nVpcKoncij == 0
          Beep( 1 )
          Box(, 3, 60 )
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Roba u sifarniku ima " + cPom + " = 0 !??"
+         @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Roba u šifarniku ima " + cPom + " = 0 !??"
          @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Unesi " + cPom + " u šifarnik:" GET _vpc PICT picdem()
          READ
 

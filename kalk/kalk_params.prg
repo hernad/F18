@@ -108,9 +108,6 @@ FUNCTION kalk_par_varijante_prikaza()
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Mogućnost konverzije valute pri unosu dokumenta (D/N)" GET cKonverzijaValuteDn VALID cKonverzijaValuteDn $ "DN" PICT "@!"
 
-   nX += 1
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Program se koristi isključivo za vođenje magacina po NC  Da-1 / Ne-2 " GET gMagacin VALID gMagacin $ "12"
-
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta FAKT13->KALK11 ( 1-mpc iz šifarnika, 2-mpc iz FAKT13)" GET  gVar13u11  PICT "@!" VALID gVar13u11 $ "12"
    nX += 2
@@ -532,36 +529,6 @@ FUNCTION kalk_par_troskovi_rn()
    ENDIF
 
    cIspravka := "N"
-
-   RETURN NIL
-
-
-FUNCTION kalk_par_troskovi_24()
-
-   PRIVATE  GetList := {}
-
-   Box(, 5, 76, .T., "24 - USLUGE" )
-   @ box_x_koord() + 1, box_y_koord() + 2  SAY "T 1:" GET c24T1
-   @ box_x_koord() + 1, box_y_koord() + 40 SAY "T 2:" GET c24T2
-   @ box_x_koord() + 2, box_y_koord() + 2  SAY "T 3:" GET c24T3
-   @ box_x_koord() + 2, box_y_koord() + 40 SAY "T 4:" GET c24T4
-   @ box_x_koord() + 3, box_y_koord() + 2  SAY "T 5:" GET c24T5
-   @ box_x_koord() + 3, box_y_koord() + 40 SAY "T 6:" GET c24T6
-   @ box_x_koord() + 4, box_y_koord() + 2  SAY "T 7:" GET c24T7
-   @ box_x_koord() + 4, box_y_koord() + 40 SAY "T 8:" GET c24T8
-   READ
-   BoxC()
-
-   IF LastKey() <> K_ESC
-      set_metric( "kalk_dokument_24_trosak_1", NIL, c24T1 )
-      set_metric( "kalk_dokument_24_trosak_2", NIL, c24T2 )
-      set_metric( "kalk_dokument_24_trosak_3", NIL, c24T3 )
-      set_metric( "kalk_dokument_24_trosak_4", NIL, c24T4 )
-      set_metric( "kalk_dokument_24_trosak_5", NIL, c24T5 )
-      set_metric( "kalk_dokument_24_trosak_6", NIL, c24T6 )
-      set_metric( "kalk_dokument_24_trosak_7", NIL, c24T7 )
-      set_metric( "kalk_dokument_24_trosak_8", NIL, c24T8 )
-   ENDIF
 
    RETURN NIL
 
