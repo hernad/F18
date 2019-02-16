@@ -139,8 +139,6 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC g80VRT := "1"
    PUBLIC gCijene := "2" // cijene iz sifrarnika, validnost
    PUBLIC gGen16 := "1"
-   PUBLIC gNiv14 := "1"
-
    // PUBLIC gTabela := 0
    PUBLIC gPicNC := "999999.99999999"
    PUBLIC gKomFakt := "20"
@@ -218,41 +216,31 @@ METHOD TKalkMod:set_module_gvars()
    gGen16 := fetch_metric( "kalk_generisi_16_nakon_96", f18_user(), gGen16 )
    gKomFakt := fetch_metric( "kalk_oznaka_rj_u_fakt", nil, gKomFakt )
    gKomKonto := fetch_metric( "kalk_komision_konto", nil, gKomKonto )
-   gNiv14 := fetch_metric( "kalk_tip_nivelacije_14", nil, gNiv14 )
-
    gDecKol := fetch_metric( "kalk_broj_decimala_za_kolicinu", nil, gDeckol )
    gStavitiUSifarnikNovuCijenuDefault := fetch_metric( "kalk_promjena_cijena_odgovor", nil, gStavitiUSifarnikNovuCijenuDefault )
    gVarEv := fetch_metric( "kalk_varijanta_evidencije", nil, gVarEv )
-
    gPicProc := fetch_metric( "kalk_format_prikaza_procenta", nil, gPicProc )
-
    gPicNc := fetch_metric( "kalk_format_prikaza_nabavne_cijene", nil, gPicNC )
-
    gPotpis := fetch_metric( "kalk_potpis_na_kraju_naloga", nil, gPotpis )
    gRCRP := fetch_metric( "kalk_varijanta_popusta_na_dokumentima", nil, gRCRP )
-
    gAutoCjen := fetch_metric( "kalk_automatsko_azuriranje_cijena", nil, gAutoCjen )
    gRobaTr1Tip := fetch_metric( "kalk_trosak_1_tip", nil, gRobaTr1Tip )
    gRobaTr2Tip := fetch_metric( "kalk_trosak_2_tip", nil, gRobaTr2Tip )
    gRobaTr3Tip := fetch_metric( "kalk_trosak_3_tip", nil, gRobaTr3Tip )
    gRobaTr4Tip := fetch_metric( "kalk_trosak_4_tip", nil, gRobaTr4Tip )
    gRobaTr5Tip := fetch_metric( "kalk_trosak_5_tip", nil, gRobaTr5Tip )
-
    g10Porez := fetch_metric( "kalk_dokument_10_prikaz_ukalk_poreza", nil, g10Porez )
    g11BezNC := fetch_metric( "kalk_dokument_11_bez_nc", nil, g11bezNC )
    g80VRT := fetch_metric( "kalk_dokument_80_rekap_po_tar", nil, g80VRT )
    gVarVP := fetch_metric( "kalk_dokument_14_varijanta_poreza", nil, gVarVP )
    gVar13u11 := fetch_metric( "kalk_varijanta_fakt_13_kalk_11_cijena", nil, gVar13u11 )
-
    gTops := fetch_metric( "kalk_prenos_pos", f18_user(), gTops )
    gFakt := fetch_metric( "kalk_prenos_fakt", f18_user(), gFakt )
-
    gcMpcKalk10 := fetch_metric( "kalk_pomoc_sa_mpc", nil, gcMpcKalk10 )
    gKolicFakt := fetch_metric( "kalk_kolicina_kod_nivelacije_fakt", nil, gKolicFakt )
    //gPromTar := fetch_metric( "kalk_zabrana_promjene_tarifa", nil, gPromTar )
    gFunKon1 := fetch_metric( "kalk_djoker_f1_kod_kontiranja", nil, gFunKon1 )
    gFunKon2 := fetch_metric( "kalk_djoker_f2_kod_kontiranja", nil, gFunKon2 )
-
    gAzurTimeout := fetch_metric( "kalk_timeout_kod_azuriranja", nil, gAzurTimeout )
    gAzurFinTO := fetch_metric( "kalk_timeout_kod_azuriranja_fin_naloga", nil, gAzurFinTO )
    gCache := fetch_metric( "kalk_cache_tabela", f18_user(), gCache )
