@@ -8,7 +8,6 @@
  * root directory of this source code archive.
  * By using this software, you agree to be bound by its terms.
  */
-
 #include "f18.ch"
 #include "f18_color.ch"
 
@@ -35,7 +34,7 @@ MEMVAR _idfirma, _idvd, _brdok, _datdok, _mkonto, _pkonto, _idkonto, _idkonto2, 
 MEMVAR _TMarza
 MEMVAR cSection, cHistory, aHistory
 MEMVAR nKalkRBr, _rbr
-MEMVAR nVPV16, nMPV80, nNVPredhodna
+MEMVAR nKalkVPV16PredhodnaStavka, nKalkMpvSaPDV80PredhodnaStavka, nKalkNVPredhodnaStavka
 MEMVAR _ERROR
 
 
@@ -44,7 +43,6 @@ STATIC cENTER := Chr( K_ENTER ) + Chr( K_ENTER ) + Chr( K_ENTER )
 FUNCTION kalk_header_get1( lNoviDokument )
 
    LOCAL GetList := {}
-
    // LOCAL cOpisDokumenta := SPACE(100)
 
    IF lNoviDokument
@@ -59,14 +57,12 @@ FUNCTION kalk_header_get1( lNoviDokument )
    ?? self_organizacija_id(), "-", self_organizacija_naziv()
    @  box_x_koord() + 2, box_y_koord() + 2 SAY "KALKULACIJA: "
    @  box_x_koord() + 2, Col() SAY "Vrsta:" GET _idvd VALID P_TipDok( @_idvd, 2, 25 ) PICT "@!"
-
    READ
 
    ESC_RETURN 0
 
    IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> kalk_pripr->idfirma .OR. _idvd <> kalk_pripr->idvd )
       _brDok := get_kalk_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
-      AltD()
       SELECT kalk_pripr
    ENDIF
 
@@ -96,7 +92,7 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    LOCAL nI
    LOCAL cOpcijaRed, nWidth
    LOCAL cSeparator := hb_UTF8ToStrBox( BROWSE_COL_SEP )
-   LOCAL cPicKol := "999999.999"
+   //LOCAL cPicKol := "999999.999"
    LOCAL bPodvuci := {|| iif( field->ERROR == "1", .T., .F. ) }
 
    hb_default( @lAsistentObrada, .F. )
@@ -171,7 +167,7 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    IF lAsistentObrada
       KEYBOARD Chr( K_LEFT )
    ENDIF
-   my_browse( "PNal", nMaxRow, nMaxCol, {| lPrviPoziv | kalk_pripr_key_handler( lAsistentObrada ) }, "<F5>-kartica magacin, <F6>-kartica prodavnica", "Priprema...", , , , bPodvuci, 4 )
+   my_browse( "PNal", nMaxRow, nMaxCol, {|| kalk_pripr_key_handler( lAsistentObrada ) }, "<F5>-kartica magacin, <F6>-kartica prodavnica", "Priprema...", , , , bPodvuci, 4 )
 
    BoxC()
 
@@ -226,7 +222,6 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
       ENDIF
 
    CASE Ch == K_ALT_L
-
       my_close_all_dbf()
       fakt_labeliranje_barkodova()
       o_kalk_edit()
@@ -240,7 +235,6 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
          o_kalk_edit()
          GO TOP
          RETURN DE_REFRESH
-
       ENDIF
 
       RETURN DE_CONT
@@ -275,9 +269,7 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
          log_write( "F18_DOK_OPER: kalk, brisanje stavke u pripremi: " + cLogInfo + " stavka br: " + cStavka, 2 )
          RETURN DE_REFRESH
       ENDIF
-
       RETURN DE_CONT
-
 
    CASE Ch == K_ENTER
       kalk_is_novi_dokument( .F. )
@@ -352,12 +344,12 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    LOCAL cIdKonto1, cIdKonto2
    LOCAL hParams := hb_Hash()
    LOCAL hDok
-   LOCAL _opis, hKalkAtributi
+   //LOCAL _opis, hKalkAtributi
    LOCAL hOldDokument, hRecNoviDokument
    LOCAL nTrec
 
    hOldDokument := hb_Hash()
-   _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
+   //_opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
    IF RecCount() == 0
       Msg( "Ako želite započeti unos novog dokumenta: <Ctrl-N>" )
@@ -379,7 +371,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    hOldDokument[ "idfirma" ] := _idfirma
    hOldDokument[ "idvd" ] := _idvd
    hOldDokument[ "brdok" ] := _brdok
-
    hDok := hb_Hash()
    hDok[ "idfirma" ] := _idfirma
    hDok[ "idtipdok" ] := _idvd
@@ -395,23 +386,22 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       IF _error <> "1"
          _error := "0"
       ENDIF
-
       IF _idvd == "16"
-         nVPV16 := _vpc * _kolicina
+         nKalkVPV16PredhodnaStavka := _vpc * _kolicina
       ELSE
-         nMPV80 := _mpcsapp * _kolicina
+         nKalkMpvSaPDV80PredhodnaStavka := _mpcsapp * _kolicina
       ENDIF
-      nNVPredhodna := _nc * _kolicina
+      nKalkNVPredhodnaStavka := _nc * _kolicina
 
       my_rlock()
       Gather()
       my_unlock()
 
-      hKalkAtributi := hb_Hash()
-      hKalkAtributi[ "idfirma" ] := field->idfirma
-      hKalkAtributi[ "idtipdok" ] := field->idvd
-      hKalkAtributi[ "brdok" ] := field->brdok
-      hKalkAtributi[ "rbr" ] := field->rbr
+      //hKalkAtributi := hb_Hash()
+      //hKalkAtributi[ "idfirma" ] := field->idfirma
+      //hKalkAtributi[ "idtipdok" ] := field->idvd
+      //hKalkAtributi[ "brdok" ] := field->brdok
+      //hKalkAtributi[ "rbr" ] := field->rbr
 
       SELECT kalk_pripr
       IF nKalkRbr == 1
@@ -443,7 +433,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          _rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
-
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
          DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + field->rbr
@@ -461,7 +450,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
             _mkonto := cIdKonto2
          ENDIF
          _idkonto2 := "XXX"
-
          IF _idvd == "16"
             kalk_get_1_16()
          ELSE
@@ -471,7 +459,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          IF _tbanktr == "X"
             APPEND ncnl
          ENDIF
-
          IF _error <> "1"
             _error := "0"
          ENDIF
@@ -479,7 +466,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          my_rlock()
          Gather()
          my_unlock()
-
          BoxC()
 
       ENDIF
@@ -583,11 +569,11 @@ FUNCTION kalk_unos_nova_stavka()
       ENDIF
 
       IF _idvd == "16"
-         nVPV16 := _vpc * _kolicina
+         nKalkVPV16PredhodnaStavka := _vpc * _kolicina
       ELSE
-         nMPV80 := _mpcsapp * _kolicina
+         nKalkMpvSaPDV80PredhodnaStavka := _mpcsapp * _kolicina
       ENDIF
-      nNVPredhodna := _nc * _kolicina
+      nKalkNVPredhodnaStavka := _nc * _kolicina
 
       Gather()
       hKalkAtributi := hb_Hash()
@@ -715,8 +701,8 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          _error := "0"
       ENDIF
 
-      nMPV80 := _mpcsapp * _kolicina  // vrijednost prosle stavke
-      nNVPredhodna := _nc * _kolicina
+      nKalkMpvSaPDV80PredhodnaStavka := _mpcsapp * _kolicina  // vrijednost prosle stavke
+      nKalkNVPredhodnaStavka := _nc * _kolicina
       my_rlock()
       Gather()
       my_unlock()
@@ -880,8 +866,8 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
    LOCAL nRet, nR
 
-   // PRIVATE nMarza := 0
-   // PRIVATE nMarza2 := 0
+   // PRIVATE nKalkMarzaVP := 0
+   // PRIVATE nKalkMarzaMP := 0
 
    PRIVATE PicDEM := "9999999.99999999"
    PRIVATE PicKol := kalk_pic_kolicina_bilo_gpickol()
@@ -1229,7 +1215,7 @@ FUNCTION kalk_set_diskont_mpc()
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pKonto, kalk_pripr->idRoba, @aPorezi )
       SELECT kalk_pripr
       Scatter()
-      _mpcSaPP := MpcSaPor( roba->vpc, aPorezi )
+      _mpcSaPP := mpc_sa_pdv_by_tarifa( roba->vpc )
       _ERROR := " "
       Gather()
       SKIP 1

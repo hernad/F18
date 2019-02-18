@@ -421,18 +421,3 @@ FUNCTION TacnoN( cIzraz, bIni, bWhile, bSkip, bEnd )
    Eval( bEnd )
 
    RETURN fRez
-
-
-FUNCTION SkLoNMark( cSifDBF, cId )
-
-   LOCAL nArea
-
-   nArea := Select()
-   SELECT ( cSifDBF )
-   HSEEK cID
-   SELECT ( nArea )
-   IF ( ( cSifDBF )->_M1_ <> "*" )
-      RETURN .T.
-   ENDIF
-
-   RETURN .F.

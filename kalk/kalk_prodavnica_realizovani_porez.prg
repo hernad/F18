@@ -62,8 +62,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
 
 
    PRIVATE cFilt1 := ""
-
-
    cFilt1 := cUslovPKonto + ".and.(IDVD$" + dbf_quote( cVDOK ) + ")"
 
    // IF aUsl2 <> ".t."
@@ -92,8 +90,8 @@ FUNCTION kalk_realizovani_porez_prodavnice()
    START PRINT CRET
    ?
 
-   PRIVATE nKI, nPRUC
-   nKI := nPRUC := 0
+   PRIVATE nKI
+   nKI := 0
 
    nMPVUkupno := nPDVUkupno := n5 := n6 := n7 := nMPVSaPPUkupno := 0
 
@@ -113,7 +111,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
       // ?
 
       P_COND
-
       ?
       ? cLine
       ? cText1
@@ -125,7 +122,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
       nTP := 0
       cLastTarifa := ""
 
-      aPorezi := {}
+      // aPorezi := {}
 
       DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. IspitajPrekid()
 
@@ -142,48 +139,30 @@ FUNCTION kalk_realizovani_porez_prodavnice()
          nNv := 0
          nPopust := 0
          nMPVSaPP := 0
-
-
          cPoDok := IDVD + BRDOK
          cLastTarifa := cIdTarifa
-         nPRUC := 0
          DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdtarifa == kalk->IdTarifa .AND. cIdKonto == kalk->pkonto .AND. IspitajPrekid()
 
             select_o_roba( kalk->idroba )
             SELECT KALK
-
-/*
-               IF cTU == "2" .AND.  roba->tip $ "UT"
-                  SKIP 1
-                  LOOP
-               ENDIF
-               IF cTU == "1" .AND. idvd == "IP"
-                  SKIP 1
-                  LOOP
-               ENDIF
-*/
             IF pu_i == "I"
                nKolicina := gKolicin2
             ELSE
-               nKolicina := kolicina
+               nKolicina := kalk->kolicina
             ENDIF
 
-
-            set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-            nPDV := kalk_porezi_maloprodaja( aPorezi, nMPC, field->mpcSaPP )
-            nMpc := kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi )
-
+            nMpc := kalk->mpc
+            // set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
+            nPDV := kalk->mpc * pdv_procenat_by_tarifa( cIdTarifa )
+            // nMpc := kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi )
             nPor1 := nPDV * nKolicina
-
             nMPV += nMpc * nKolicina
             nMpvSaPP += field->mpcSaPP * nKolicina
             nNv += field->nc * nKolicina
-
             IF !pu_i == "I"
                nPopust += RabatV * nKolicina
             ENDIF
-
-            SKIP 1
+            SKIP
 
          ENDDO
 
@@ -191,20 +170,17 @@ FUNCTION kalk_realizovani_porez_prodavnice()
             FF
          ENDIF
 
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-         nPDV := kalk_porezi_maloprodaja( aPorezi, nMPV, nMpvSaPP )
-
+         // set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
+         nPDVUkupno := nMPV * pdv_procenat_by_tarifa( cIdTarifa )
 
          @ PRow() + 1, 0 SAY Space( 3 ) + cIdKonto
          @ PRow(), PCol() + 1 SAY Space( 6 ) + cIdTarifa
 
          nCol1 := PCol() + 4
          @ PRow(), PCol() + 4 SAY nMPVUkupno := nMPV     PICT   cPicIznos
+         @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) * 100 PICT   cPicProcenat
 
-         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT   cPicProcenat
-
-         @ PRow(), PCol() + 1 SAY nPDVUkupno := nPDV   PICT   cPicIznos
-
+         @ PRow(), PCol() + 1 SAY nPDVUkupno   PICT   cPicIznos
          @ PRow(), PCol() + 1 SAY nPopust := nPopust PICTURE   cPicIznos
          @ PRow(), PCol() + 1 SAY nMPVSaPPUkupno := nMPVSAPP PICTURE   cPicIznos
 
@@ -213,7 +189,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
 
          nTP += nPopust
          nMPVSaPorezTotal += nMPVSaPPUkupno
-
 
       ENDDO
 
@@ -226,9 +201,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
       ? "UKUPNO:"
       @ PRow(), nCol1     SAY  nT1     PICT cPicIznos
       @ PRow(), PCol() + 1  SAY  0      PICT "@Z " + cPicProcenat
-
       @ PRow(), PCol() + 1  SAY  nPDVTotal     PICT cPicIznos
-
       @ PRow(), PCol() + 1  SAY  nTP     PICT cPicIznos
       @ PRow(), PCol() + 1  SAY  nMPVSaPorezTotal     PICT cPicIznos
 

@@ -15,7 +15,6 @@ MEMVAR GetList
 MEMVAR nKalkRBr
 
 STATIC s_cKonverzijaValuteDN // konverzija valute
-STATIC aPorezi := {}
 STATIC s_lIsNoviDokument := .F.
 MEMVAR _rabat
 
@@ -44,10 +43,8 @@ FUNCTION kalk_get_1_10()
    IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
 
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "DOBAVLJAČ:" GET _IdPartner PICT "@!"  VALID {|| kalk_valid_dobavljac( @_IdPartner, box_x_koord() + nX ) }
-
       @ box_x_koord() + nX, 50 SAY "Broj fakture:" GET _BrFaktP VALID !Empty ( _brFaktP )
       @ box_x_koord() + nX, Col() + 1 SAY "Datum:" GET _DatFaktP VALID {||  datum_not_empty_upozori_godina( _datFaktP, "Datum fakture" ) }
-
       ++nX
       nBoxKoordX := box_x_koord() + nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Magacinski Konto zadužuje" GET _IdKonto VALID {|| P_Konto( @_IdKonto ), ispisi_naziv_konto( nBoxKoordX, 40, 30 ) } PICT "@!"
@@ -55,7 +52,6 @@ FUNCTION kalk_get_1_10()
       //IF !Empty( cRNT1 )
       //   @ box_x_koord() + nX, box_y_koord() + 60  SAY "Rad.nalog:" GET _IdZaduz2  PICT "@!"
       //ENDIF
-
       READ
 
       ESC_RETURN K_ESC
@@ -68,7 +64,6 @@ FUNCTION kalk_get_1_10()
       ?? _BrFaktP
       @ box_x_koord() + nX, Col() + 1 SAY "Datum: "
       ?? _DatFaktP
-
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Magacinski Konto zadužuje "
       ?? _IdKonto
@@ -78,32 +73,27 @@ FUNCTION kalk_get_1_10()
    ENDIF
 
    nX += 2
-
    nBoxKoordX := box_x_koord() + nX
-
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), nBoxKoordX, box_y_koord() + 2, @aPorezi, _idPartner )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), nBoxKoordX, box_y_koord() + 2, _idPartner )
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() - 20  ) SAY "Tarifa:" GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
 
    READ
-
    ESC_RETURN K_ESC
 
-   IF roba_barkod_pri_unosu()
-      _idRoba := Left( _idRoba, 10 )
-   ENDIF
+   //IF roba_barkod_pri_unosu()
+  //    _idRoba := Left( _idRoba, 10 )
+   //ENDIF
 
    select_o_koncij( _idkonto )
    SELECT kalk_pripr
 
    _MKonto := _Idkonto
    _MU_I := "1"
-
    select_o_tarifa( _IdTarifa )
    SELECT kalk_pripr
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _Kolicina PICT PicKol VALID _Kolicina <> 0
-
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
       _VPC := kalk_vpc_za_koncij()
@@ -123,28 +113,22 @@ FUNCTION kalk_get_1_10()
    IF is_kalk_konverzija_valute_na_unosu()
       @ box_x_koord() + nX, Col() + 1 SAY "EUR (D/N)->" GET s_cKonverzijaValuteDN VALID kalk_ulaz_preracun_fakturne_cijene( s_cKonverzijaValuteDN ) PICT "@!"
    ENDIF
-
    @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _fcj PICT picnc() VALID {|| _fcj > 0 .AND. _set_konv( @_fcj, @s_cKonverzijaValuteDN ) } WHEN V_kol10()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Rabat (%):"
    @ box_x_koord() + nX, box_y_koord() + nSayDeltaY GET _Rabat PICT picdem()
-
    READ
-
    ESC_RETURN K_ESC
 
    _FCJ2 := _FCJ * ( 1 - _Rabat / 100 )
-
    kalk_get_2_10( nX, _idPartner )
 
    RETURN LastKey()
 
 
-
 STATIC FUNCTION kalk_valid_dobavljac( cIdPartner, nX )
 
    p_partner( @cIdPartner )
-
    ispisi_naziv_partner( nX - 1, 22, 20 )
    ino_dobavljac_set_konverzija_valute( cIdpartner, @s_cKonverzijaValuteDN )
 
@@ -193,8 +177,6 @@ FUNCTION _set_konv( nFcj, cPretv )
    ENDIF
 
    RETURN .T.
-
-
 
 
 STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
@@ -422,15 +404,15 @@ STATIC FUNCTION _auto_set_trosk( lNewItem )
 FUNCTION V_kol10()
 
    IF _kolicina < 0  // storno
-      nKolS := 0
+      nKolicinaNaStanju := 0
       nKolZN := 0
       nc1 := nc2 := 0
 
       IF !Empty( kalk_metoda_nc() )
 
-         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, @nC1, @nC2 )
+         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, @nC1, @nC2 )
 
-         @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
+         @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol
       ENDIF
 
       IF _idvd == "16"  // storno prijema
@@ -440,11 +422,11 @@ FUNCTION V_kol10()
             _nc := nc2
          ENDIF
       ENDIF
-      IF nKols < Abs( _kolicina )
+      IF nKolicinaNaStanju < Abs( _kolicina )
          _ERROR := "1"
          Beep( 2 )
          error_bar( "KA_" + _idfirma + "-" + _idvd + "-" + _brdok, ;
-            _idroba + " kol na stanju:" + AllTrim( Str( nKols, 12, 3 ) ) + " treba: " + AllTrim( Str( _kolicina, 12, 3 ) ) )
+            _idroba + " kol na stanju:" + AllTrim( Str( nKolicinaNaStanju, 12, 3 ) ) + " treba: " + AllTrim( Str( _kolicina, 12, 3 ) ) )
       ENDIF
       SELECT kalk_pripr
    ENDIF

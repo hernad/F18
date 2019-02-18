@@ -16,9 +16,10 @@ MEMVAR nKalkRBr
 FUNCTION kalk_get_1_12()
 
    LOCAL lRet
-
-   //lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
-   PRIVATE aPorezi := {}
+   LOCAL nKolicinaNaStanju
+   LOCAL nKolicinaZadnjeNabavke
+   LOCAL nNcjZadnjaNabavka
+   LOCAL nNcjSrednja
 
    _GKolicina := _GKolicin2 := 0
    _IdPartner := ""
@@ -39,9 +40,7 @@ FUNCTION kalk_get_1_12()
    ENDIF
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
 
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
-
-
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY "Kolicina " GET _Kolicina PICTURE PicKol VALID _Kolicina <> 0
 
@@ -78,35 +77,36 @@ FUNCTION kalk_get_1_12()
       kalk_vpc_po_kartici( @_VPC, _idfirma, _mkonto, _idroba )
    ENDIF
 
-   nKolS := 0
-   nKolZN := 0
-   nc1 := nc2 := 0
+   nKolicinaNaStanju := 0
+   nKolicinaZadnjeNabavke := 0
+   nNcjZadnjaNabavka := nNcjSrednja := 0
 
    IF _TBankTr <> "X"
       IF !Empty( kalk_metoda_nc() )
-         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolS, @nKolZN, @nc1, @nc2 )
-
-         IF kalk_metoda_nc() $ "13"; _fcj := nc1; ELSEIF kalk_metoda_nc() == "2"; _fcj := nc2; ENDIF
+         kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, @nKolicinaNaStanju, @nKolicinaZadnjeNabavke, @nNcjZadnjaNabavka, @nNcjSrednja )
+         //IF kalk_metoda_nc() $ "13"; _fcj := nNcjZadnjaNabavka; ELSE
+         IF kalk_metoda_nc() == "2"
+           _fcj := nNcjSrednja
+         ENDIF
       ENDIF
    ENDIF
 
-   @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nkols PICT pickol
+   @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol
    @ box_x_koord() + 14, box_y_koord() + 2    SAY "NABAVNA CIJENA (NC)         :"
-   @ box_x_koord() + 14, box_y_koord() + 50   GET _FCJ    PICTURE PicDEM VALID {|| lRet := kalk_valid_kolicina_prod(), _vpc := _fcj, lRet }
-
+   @ box_x_koord() + 14, box_y_koord() + 50   GET _FCJ    PICTURE PicDEM VALID {|| lRet := kalk_valid_kolicina_prod(nKolicinaNaStanju), _vpc := _fcj, lRet }
 
    _TPrevoz := "R"
-
    @ box_x_koord() + 16, box_y_koord() + 2  SAY8 "MP marža:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
    @ box_x_koord() + 16, Col() + 1  GET _Marza2 PICTURE  PicDEM ;
       VALID {|| _nc := _fcj + iif( _TPrevoz == "A", _Prevoz, 0 ), _Tmarza := "A", _marza := _vpc - _fcj, .T. }
    @ box_x_koord() + 17, box_y_koord() + 2  SAY "MALOPROD. CJENA (MPC):"
-   @ box_x_koord() + 17, box_y_koord() + 50 GET _MPC PICT PicDEM WHEN WMpc() VALID VMpc()
+   @ box_x_koord() + 17, box_y_koord() + 50 GET _MPC PICT PicDEM ;
+      WHEN kalk_when_mpc_bez_pdv_11_12() VALID kalk_valid_mpc_bez_pdv_11_12()
 
    kalk_say_pdv_a_porezi_var( 19 )
 
    @ box_x_koord() + 19, box_y_koord() + 2 SAY "MPC SA PDV    :"
-   @ box_x_koord() + 19, box_y_koord() + 50 GET _MPCSaPP PICT PicDEM VALID VMpcSaPP()
+   @ box_x_koord() + 19, box_y_koord() + 50 GET _MPCSaPP PICT PicDEM VALID kalk_valid_mpc_sa_pdv_11( NIL, _IdTarifa)
 
    READ
 

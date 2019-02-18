@@ -30,10 +30,14 @@ FUNCTION kalk_kartica_get_roba_id( cIdRoba, nX, nY, GetList )
 
    @ nX, nY SAY "Roba  " GET cIdRoba WHEN Eval( bWhen )  VALID  Eval( bValid ) PICT "@!S10"
 
+   IF roba_barkod_pri_unosu()
+      cIdRoba := PadR( cIdRoba, 10 )
+   ENDIF
+
    RETURN .T.
 
 
-FUNCTION kalk_unos_get_roba_id( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDokument, nKoordX, nKoordY, aPorezi, cIdPartner )
+FUNCTION kalk_unos_get_roba_id( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDokument, nKoordX, nKoordY, cIdPartner )
 
    LOCAL bWhen, bValid, cProdMag := "M"
 
@@ -47,18 +51,16 @@ FUNCTION kalk_unos_get_roba_id( GetList, cIdRoba, cIdTarifa, cIdVd, lNoviDokumen
       cProdMag := "P"
    ENDIF
 
-   bValid := {|| kalk_valid_roba( @cIdRoba, @cIdTarifa, lNoviDokument, @aPorezi ), ;
+   bValid := {|| kalk_valid_roba( @cIdRoba, @cIdTarifa, lNoviDokument ), ;
       ispisi_naziv_roba( nKoordX, 25, 41 ), ;
       /* kalk_zadnji_ulazi_info( cIdpartner, cIdroba, cProdMag ), */ !Empty( cIdRoba ) }
 
    // _ocitani_barkod := _idroba, ;
    // P_Roba( @_IdRoba ), ;
    // if ( !tezinski_barkod_get_tezina( @_ocitani_barkod, @_kolicina ), .T., .T. ), ;
-
    @ nKoordX, nKoordY SAY "Artikal: " GET cIdRoba PICT "@!S10" WHEN  Eval( bWhen ) VALID Eval( bValid )
 
    RETURN .T.
-
 
 
 FUNCTION roba_duzina_sifre()
@@ -70,24 +72,23 @@ FUNCTION roba_duzina_sifre()
    RETURN 10
 
 
-STATIC FUNCTION kalk_valid_roba( cIdRoba, cIdTarifa, lNoviDokument, aPorezi )
+STATIC FUNCTION kalk_valid_roba( cIdRoba, cIdTarifa, lNoviDokument )
 
    LOCAL _tezina := 0
    LOCAL _ocitani_barkod := cIdRoba
    LOCAL cTarifa
 
    P_Roba( @cIdRoba )
+   // IF lNoviDokument
+   // cTarifa := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( _IdKonto, cIdRoba, @aPorezi ) // nadji odgovarajucu tarifu regiona
+   // ELSE
+   select_o_tarifa( cIdTarifa )
+   // set_pdv_array( @aPorezi )
+   // ENDIF
 
-   IF lNoviDokument
-      cTarifa := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( _IdKonto, cIdRoba, @aPorezi ) // nadji odgovarajucu tarifu regiona
-   ELSE
-      select_o_tarifa( cIdTarifa )
-      set_pdv_array( @aPorezi )
-   ENDIF
-
-   IF lNoviDokument
-      cIdTarifa := cTarifa
-   ENDIF
+   // IF lNoviDokument
+   // cIdTarifa := cTarifa
+   // ENDIF
 
    // IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
    // _kolicina := _tezina // ako je ocitan tezinski barkod
@@ -155,7 +156,7 @@ STATIC FUNCTION kalk_get_ulazi( cIdPartner, cIdRoba, cMagIliProd )
       _u_i := "mu_i"
    ENDIF
 
-   cQuery := "SELECT idkonto, idvd, brdok, datdok, fcj, rabat FROM " + f18_sql_schema("kalk_kalk") + " WHERE idfirma = " + ;
+   cQuery := "SELECT idkonto, idvd, brdok, datdok, fcj, rabat FROM " + f18_sql_schema( "kalk_kalk" ) + " WHERE idfirma = " + ;
       sql_quote( self_organizacija_id() ) + ;
       " AND idpartner = " + sql_quote( cIdPartner ) + ;
       " AND idroba = " + sql_quote( cIdRoba ) + ;
@@ -177,62 +178,62 @@ STATIC FUNCTION kalk_get_ulazi( cIdPartner, cIdRoba, cMagIliProd )
    RETURN aData
 
 
-   FUNCTION kalk_podaci_o_rabatima( aUlazi, cMagIliProd, nUlaziCount )
+FUNCTION kalk_podaci_o_rabatima( aUlazi, cMagIliProd, nUlaziCount )
 
-         LOCAL GetList := {}
-         LOCAL cLine := ""
-         LOCAL cHeader := ""
-         LOCAL cNastavi := " "
-         LOCAL nX := 4
-         LOCAL nI, nLen
+   LOCAL GetList := {}
+   LOCAL cLine := ""
+   LOCAL cHeader := ""
+   LOCAL cNastavi := " "
+   LOCAL nX := 4
+   LOCAL nI, nLen
 
-         nLen := Len( aUlazi )
-         cHeader := PadR( iif( cMagIliProd == "F", "FIRMA", "KONTO" ), 7 )
-         cHeader += " "
-         cHeader += PadR( "DOKUMENT", 10 )
-         cHeader += " "
-         cHeader += PadR( "DATUM", 8 )
-         cHeader += " "
-         cHeader += PadL( IF ( cMagIliProd == "F", "CIJENA", "NC" ), 12 )
-         cHeader += " "
-         cHeader += PadL( "RABAT", 13 )
+   nLen := Len( aUlazi )
+   cHeader := PadR( iif( cMagIliProd == "F", "FIRMA", "KONTO" ), 7 )
+   cHeader += " "
+   cHeader += PadR( "DOKUMENT", 10 )
+   cHeader += " "
+   cHeader += PadR( "DATUM", 8 )
+   cHeader += " "
+   cHeader += PadL( IF ( cMagIliProd == "F", "CIJENA", "NC" ), 12 )
+   cHeader += " "
+   cHeader += PadL( "RABAT", 13 )
 
-         DO WHILE .T.
+   DO WHILE .T.
 
-            nX := 4
-            Box(, 5 + nUlaziCount, 60 )
-            @ box_x_koord() + 1, box_y_koord() + 2 SAY PadR( "*** Pregled rabata", 59 ) COLOR f18_color_i()
-            @ box_x_koord() + 2, box_y_koord() + 2 SAY cHeader
-            @ box_x_koord() + 3, box_y_koord() + 2 SAY Replicate( "-", 59 )
+      nX := 4
+      Box(, 5 + nUlaziCount, 60 )
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY PadR( "*** Pregled rabata", 59 ) COLOR f18_color_i()
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY cHeader
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY Replicate( "-", 59 )
 
-            FOR nI := nLen TO ( nLen - nUlaziCount ) STEP -1
+      FOR nI := nLen TO ( nLen - nUlaziCount ) STEP -1
 
-               IF nI > 0
-                  cLine := PadR( aUlazi[ nI, 1 ], 7 )
-                  cLine += " "
-                  cLine += PadR( aUlazi[ nI, 2 ], 10 )
-                  cLine += " "
-                  cLine += DToC( aUlazi[ nI, 3 ] )
-                  cLine += " "
-                  cLine += Str( aUlazi[ nI, 4 ], 12, 3 )
-                  cLine += " "
-                  cLine += Str( aUlazi[ nI, 5 ], 12, 3 ) + "%"
-                  @ box_x_koord() + nX, box_y_koord() + 2 SAY cLine
-                  ++nX
-
-               ENDIF
-            NEXT
-
-            @ box_x_koord() + nX, box_y_koord() + 2 SAY Replicate( "-", 59 )
+         IF nI > 0
+            cLine := PadR( aUlazi[ nI, 1 ], 7 )
+            cLine += " "
+            cLine += PadR( aUlazi[ nI, 2 ], 10 )
+            cLine += " "
+            cLine += DToC( aUlazi[ nI, 3 ] )
+            cLine += " "
+            cLine += Str( aUlazi[ nI, 4 ], 12, 3 )
+            cLine += " "
+            cLine += Str( aUlazi[ nI, 5 ], 12, 3 ) + "%"
+            @ box_x_koord() + nX, box_y_koord() + 2 SAY cLine
             ++nX
-            @ box_x_koord() + nX, box_y_koord() + 2 SAY "Pritisni 'ENTER' za nastavak ..." GET cNastavi
-            READ
 
-            BoxC()
-            IF LastKey() == K_ENTER
-               EXIT
-            ENDIF
+         ENDIF
+      NEXT
 
-         ENDDO
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY Replicate( "-", 59 )
+      ++nX
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Pritisni 'ENTER' za nastavak ..." GET cNastavi
+      READ
 
-         RETURN .T.
+      BoxC()
+      IF LastKey() == K_ENTER
+         EXIT
+      ENDIF
+
+   ENDDO
+
+   RETURN .T.

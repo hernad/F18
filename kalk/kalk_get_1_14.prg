@@ -12,8 +12,6 @@
 #include "f18.ch"
 
 MEMVAR nKalkRBr
-
-STATIC aPorezi := {}
 MEMVAR GetList
 MEMVAR _mkonto, _idkonto, _datfaktp, _datdok, _datval, _idpartner, _brdok, _kolicina, _idroba, _vpc, _nc, _idtarifa
 
@@ -21,7 +19,6 @@ FUNCTION kalk_get_1_14()
 
    LOCAL nNabCj1, nNabCj2
 
-   //lKalkIzgenerisaneStavke := .F.
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
 
    IF Empty( _mkonto )
@@ -53,7 +50,7 @@ FUNCTION kalk_get_1_14()
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br ->"
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE pickol() VALID _Kolicina <> 0
 
@@ -81,7 +78,7 @@ FUNCTION kalk_get_1_14()
    ENDIF
 
    _GKolicina := 0
-   nKolS := 0
+   nKolicinaNaStanju := 0
    nKolZN := 0
    nNabCj1 := 0
    nNabCj2 := 0
@@ -89,9 +86,9 @@ FUNCTION kalk_get_1_14()
    IF _TBankTr <> "X"   // ako je X onda su stavke vec izgenerisane
 
       IF !Empty( kalk_metoda_nc() )
-         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, @nNabCj1, @nNabCj2 )
+         kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, @nNabCj1, @nNabCj2 )
          @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "
-         @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol()
+         @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol()
       ENDIF
 
       // Vindija trazi da se uvijek nudi srednja nabavna cijena
@@ -104,7 +101,7 @@ FUNCTION kalk_get_1_14()
    ENDIF
    SELECT kalk_pripr
 
-   @ box_x_koord() + 13, box_y_koord() + 2   SAY8 " Nab. Cjena:" GET _NC  PICTURE picdem()   VALID kalk_valid_kolicina_mag( nKols )
+   @ box_x_koord() + 13, box_y_koord() + 2   SAY8 " Nab. Cjena:" GET _NC  PICTURE picdem()   VALID kalk_valid_kolicina_mag( nKolicinaNaStanju )
    @ box_x_koord() + 14, box_y_koord() + 2   SAY8 "VPC bez PDV:" GET _VPC  VALID {|| iif( gVarVP == "2" .AND. ( _vpc - _nc ) > 0, cisMarza := ( _vpc - _nc ), _vpc - _nc ), .T. }  PICTURE picdem()
 
    PRIVATE cTRabat := "%"
@@ -228,7 +225,7 @@ STATIC FUNCTION kalk_14_valid_rabatv()
       ENDIF
    ENDIF
 
-   nMarza := _VPC * ( 1 - _RabatV / 100 ) - _NC
+   nKalkMarzaVP := _VPC * ( 1 - _RabatV / 100 ) - _NC
    @ box_x_koord() + 15, nCol := box_y_koord() + 34  SAY " NETO VPC b.PDV:"
    @ box_x_koord() + 15, Col() + 1 SAY _Vpc * ( 1 - _RabatV / 100 ) PICT picdem()
    @ box_x_koord() + 16, nCol  SAY "NETO VPC SA PDV:"

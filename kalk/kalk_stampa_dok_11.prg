@@ -32,7 +32,7 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    LOCAL nTot4c
 
    PRIVATE aPorezi
-   PRIVATE nMarza, nMarza2
+   PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
@@ -82,22 +82,19 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
          _VPC := nVPC
       ENDIF
 
-      kalk_Marza_11( NIL, .F. ) // ne diraj _VPC
-      nMarza := _marza
-      set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi, field->idtarifa )
-      aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcSaPP, field->nc )
-      nPor1 := aIPor[ 1 ]
-
+      kalk_proracun_marzamp_11_80( NIL, .F. ) // ne diraj _VPC
+      nKalkMarzaVP := _marza
+      nPDVCijena := kalk_pripr->mpc * pdv_procenat_by_tarifa( kalk_pripr->idtarifa )
       check_nova_strana( bZagl, s_oPDF )
-      nTot1 +=  ( nU1 := FCJ * Kolicina   )
-      nTot1b += ( nU1b := NC * Kolicina  )
-      nTot2 +=  ( nU2 := Prevoz * Kolicina   )
-      nTotVPV +=  ( nU3 := _VPC * kolicina )
-      nTotMarzaVP +=  ( nU4 := nMarza * Kolicina )
-      nTotMarzaMP +=  ( nU4b := nMarza2 * Kolicina )
-      nTot5 +=  ( nU5 := MPC * Kolicina )
-      nTot6 +=  ( nU6 := ( nPor1 ) * Kolicina )
-      nTot7 +=  ( nU7 := MPcSaPP * Kolicina )
+      nTot1 +=  ( nU1 := kalk_pripr->FCJ * kalk_pripr->Kolicina   )
+      nTot1b += ( nU1b := kalk_pripr->NC * kalk_pripr->Kolicina  )
+      nTot2 +=  ( nU2 := kalk_pripr->Prevoz * kalk_pripr->Kolicina   )
+      nTotVPV +=  ( nU3 := _VPC * kalk_pripr->kolicina )
+      nTotMarzaVP +=  ( nU4 := nKalkMarzaVP * kalk_pripr->Kolicina )
+      nTotMarzaMP +=  ( nU4b := nKalkMarzaMP * kalk_pripr->Kolicina )
+      nTot5 +=  ( nU5 := kalk_pripr->MPC * kalk_pripr->Kolicina )
+      nTot6 +=  ( nU6 := nPDVCijena * kalk_pripr->Kolicina )
+      nTot7 +=  ( nU7 := kalk_pripr->MPcSaPP * kalk_pripr->Kolicina )
 
       @ PRow() + 1, 0 SAY kalk_pripr->rbr PICT "999"
       @ PRow(), PCol() + 1 SAY IdRoba
@@ -105,16 +102,16 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       @ PRow(), PCol() + 1  SAY kalk_pripr->Kolicina             PICTURE PicCDEM
 
       nCol0 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY FCJ                  PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY VPC                  PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY Prevoz               PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                  PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->VPC                  PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY 0               PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY _VPC                   PICTURE piccdem() // _VPC
-      @ PRow(), PCol() + 1 SAY nMarza               PICTURE piccdem()  // marza vp
-      @ PRow(), PCol() + 1 SAY nMarza2              PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY MPC                  PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY nKalkMarzaVP               PICTURE piccdem()  // marza vp
+      @ PRow(), PCol() + 1 SAY nKalkMarzaMP              PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
       nCol1 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ]     PICTURE picproc()
-      @ PRow(), PCol() + 1 SAY nPor1                PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa(kalk_pripr->idtarifa)*100  PICTURE picproc()
+      @ PRow(), PCol() + 1 SAY nPDVCijena                PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY MPCSAPP              PICTURE piccdem()
       // =========  red 2 ===================
       @ PRow() + 1, 4 SAY IdTarifa + roba->tip
@@ -123,8 +120,8 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->nc * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->prevoz * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  _VPC * kalk_pripr->kolicina      PICTURE picdem()
-      @ PRow(),  PCol() + 1 SAY  nMarza * kalk_pripr->kolicina      PICTURE picdem()
-      @ PRow(), nMPos := PCol() + 1 SAY  nMarza2 * kalk_pripr->kolicina      PICTURE picdem()
+      @ PRow(),  PCol() + 1 SAY  nKalkMarzaVP * kalk_pripr->kolicina      PICTURE picdem()
+      @ PRow(), nMPos := PCol() + 1 SAY  nKalkMarzaMP * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->mpc * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(), nCol1    SAY aPorezi[ POR_PDV ]   PICTURE picproc()
       @ PRow(),  PCol() + 1 SAY  nU6             PICTURE piccdem()
@@ -132,7 +129,7 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
 
       // red 3
       IF Round( kalk_pripr->nc, 5 ) <> 0
-         @ PRow() + 1, nMPos SAY ( nMarza2 / nc ) * 100  PICTURE picproc()
+         @ PRow() + 1, nMPos SAY ( nKalkMarzaMP / nc ) * 100  PICTURE picproc()
       ENDIF
 
       SKIP

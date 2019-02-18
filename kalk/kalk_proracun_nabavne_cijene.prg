@@ -18,7 +18,7 @@ MEMVAR _marza, _vpc, _tmarza, _rabatv
 MEMVAR _prevoz, _tprevoz, _cardaz, _tcardaz, _zavtr, _tzavtr, _banktr, _tbanktr, _spedtr, _TSpedTr
 MEMVAR nPrevoz, nCarDaz, nBanktr, nSpedTr, nZavTr
 MEMVAR cFieldName
-MEMVAR nMarza
+MEMVAR nKalkMarzaVP
 MEMVAR GetList
 
 STATIC s_nPragOdstupanjaNCSumnjiv := NIL
@@ -143,7 +143,7 @@ FUNCTION korekcija_nabavna_cijena_0( nSrednjaNabavnaCijena )
 FUNCTION kalk_valid_marza_veleprodaja_10( cIdVd, lNaprijed )
 
    LOCAL nStvarnaKolicina := 0
-   LOCAL nMarza
+   LOCAL nKalkMarzaVP
 
    IF ( Round( _nc, 7 ) == 0 )
       _nc := 9999
@@ -152,30 +152,30 @@ FUNCTION kalk_valid_marza_veleprodaja_10( cIdVd, lNaprijed )
    nStvarnaKolicina := _Kolicina
    IF _Marza == 0 .OR. _VPC <> 0 .AND. !lNaprijed
 
-      nMarza := _VPC - _NC // unazad formiraj marzu
+      nKalkMarzaVP := _VPC - _NC // unazad formiraj marzu
       IF _TMarza == "%"
          _Marza := 100 * ( _VPC / _NC - 1 )
       ELSEIF _TMarza == "A"
-         _Marza := nMarza
+         _Marza := nKalkMarzaVP
       ELSEIF _TMarza == "U"
-         _Marza := nMarza * nStvarnaKolicina
+         _Marza := nKalkMarzaVP * nStvarnaKolicina
       ENDIF
 
    ELSEIF Round( _VPC, 4 ) == 0  .OR. lNaprijed // formiraj marzu "unaprijed" od nc do vpc
       IF _TMarza == "%"
-         nMarza := _Marza / 100 * _NC
+         nKalkMarzaVP := _Marza / 100 * _NC
       ELSEIF _TMarza == "A"
-         nMarza := _Marza
+         nKalkMarzaVP := _Marza
       ELSEIF _TMarza == "U"
-         nMarza := _Marza / nStvarnaKolicina
+         nKalkMarzaVP := _Marza / nStvarnaKolicina
       ENDIF
-      _VPC := Round( ( nMarza + _NC ), 2 )
+      _VPC := Round( ( nKalkMarzaVP + _NC ), 2 )
 
    ELSE
       IF cIdvd == "14"
-         nMarza := _VPC * ( 1 - _Rabatv / 100 ) - _NC
+         nKalkMarzaVP := _VPC * ( 1 - _Rabatv / 100 ) - _NC
       ELSE
-         nMarza := _VPC - _NC
+         nKalkMarzaVP := _VPC - _NC
       ENDIF
    ENDIF
    AEval( GetList, {| o | o:display() } )
@@ -185,7 +185,7 @@ FUNCTION kalk_valid_marza_veleprodaja_10( cIdVd, lNaprijed )
 
 FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUnaprijed )
 
-   LOCAL nStvarnaKolicina := 0, nMarza
+   LOCAL nStvarnaKolicina := 0, nKalkMarzaVP
 
    IF cProracunMarzeUnaprijed == NIL
       cProracunMarzeUnaprijed := " "
@@ -199,30 +199,30 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
 
    IF !Empty( cProracunMarzeUnaprijed ) // proračun unaprijed od nc -> vpc
       IF _TMarza == "%"
-         nMarza := _Marza / 100 * _NC
+         nKalkMarzaVP := _Marza / 100 * _NC
       ELSEIF _TMarza == "A"
-         nMarza := _Marza
+         nKalkMarzaVP := _Marza
       ELSEIF _TMarza == "U"
-         nMarza := _Marza / nStvarnaKolicina
+         nKalkMarzaVP := _Marza / nStvarnaKolicina
       ENDIF
-      _VPC := Round( nMarza + _NC, 2 )
+      _VPC := Round( nKalkMarzaVP + _NC, 2 )
 
    ELSE // proračun unazad
       IF _Marza == 0 .OR. _VPC <> 0
 
-         nMarza := _VPC - _NC
+         nKalkMarzaVP := _VPC - _NC
          IF _TMarza == "%"
             _Marza := 100 * ( _VPC / _NC - 1 )
          ELSEIF _TMarza == "A"
-            _Marza := nMarza
+            _Marza := nKalkMarzaVP
          ELSEIF _TMarza == "U"
-            _Marza := nMarza * nStvarnaKolicina
+            _Marza := nKalkMarzaVP * nStvarnaKolicina
          ENDIF
       ELSE
          IF _idvd $ "14#94"
-            nMarza := _VPC * ( 1 - _Rabatv / 100 ) - _NC
+            nKalkMarzaVP := _VPC * ( 1 - _Rabatv / 100 ) - _NC
          ELSE
-            nMarza := _VPC - _NC
+            nKalkMarzaVP := _VPC - _NC
          ENDIF
       ENDIF
 
@@ -239,8 +239,8 @@ FUNCTION kalk_10_pr_rn_valid_vpc_set_marza_polje_nakon_iznosa( cProracunMarzeUna
       error_bar( "kalk", "NC=0" )
    ENDIF
 
-   IF ( nMarza / _NC ) > 100000
-      error_bar( "kalk", "ERROR Marza > 100 000 x veća od NC: " + AllTrim( Str( nMarza, 14, 2 ) ) )
+   IF ( nKalkMarzaVP / _NC ) > 100000
+      error_bar( "kalk", "ERROR Marza > 100 000 x veća od NC: " + AllTrim( Str( nKalkMarzaVP, 14, 2 ) ) )
    ENDIF
 
    RETURN .T.
@@ -286,7 +286,7 @@ FUNCTION kalk_vpc_po_kartici( nVPC, cIdFirma, cMKonto, cIdRoba, dDatum )
 FUNCTION kalk_when_valid_nc_ulaz()
 
    LOCAL nStvarnaKolicina
-   LOCAL nKolS := 0
+   LOCAL nKolicinaNaStanju := 0
    LOCAL nKolZN := 0
    LOCAL nNabCjZadnjaNabavka
    LOCAL nNabCj2 := 0
@@ -352,7 +352,7 @@ FUNCTION kalk_when_valid_nc_ulaz()
 
    nNabCjZadnjaNabavka := _nc // proslijediti nabavnu cijenu
    // proracun nabavne cijene radi utvrdjivanja odstupanja ove nabavne cijene od posljednje
-   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2 )
+   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, nNabCjZadnjaNabavka, @nNabCj2 )
 
    RETURN .T.
 
@@ -415,22 +415,22 @@ FUNCTION kalk_vpc_za_koncij()
 
 FUNCTION kalk_marza_veleprodaja()
 
-   LOCAL nStvarnaKolicina, nMarza
+   LOCAL nStvarnaKolicina, nKalkMarzaVP
 
    nStvarnaKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
    IF field->TMarza == "%" .OR. Empty( field->tmarza )
-      nMarza := nStvarnaKolicina * field->Marza / 100 * field->NC
+      nKalkMarzaVP := nStvarnaKolicina * field->Marza / 100 * field->NC
    ELSEIF field->TMarza == "A"
-      nMarza := field->Marza * nStvarnaKolicina
+      nKalkMarzaVP := field->Marza * nStvarnaKolicina
    ELSEIF field->TMarza == "U"
-      nMarza := field->Marza
+      nKalkMarzaVP := field->Marza
    ENDIF
 
-   RETURN nMarza
+   RETURN nKalkMarzaVP
 
 
 
-FUNCTION kalk_valid_kolicina_mag( nKols )
+FUNCTION kalk_valid_kolicina_mag( nKolicinaNaStanju )
 
    IF roba->tip $ "UT"
       RETURN .T.
@@ -449,10 +449,10 @@ FUNCTION kalk_valid_kolicina_mag( nKols )
       RETURN .F.
    ENDIF
 
-   IF nKolS < _Kolicina
+   IF nKolicinaNaStanju < _Kolicina
       sumnjive_stavke_error()
       error_bar( "KA_" + _mkonto + "/" + _idroba, ;
-         _mkonto + " / " + _idroba + "na stanju: " + AllTrim( Str( nKolS, 10, 4 ) ) + " treba " +  AllTrim( Str( _kolicina, 10, 4 ) ) )
+         _mkonto + " / " + _idroba + "na stanju: " + AllTrim( Str( nKolicinaNaStanju, 10, 4 ) ) + " treba " +  AllTrim( Str( _kolicina, 10, 4 ) ) )
    ENDIF
 
    RETURN .T.

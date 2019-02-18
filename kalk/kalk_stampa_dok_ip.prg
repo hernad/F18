@@ -17,7 +17,7 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    LOCAL nCol1 := nCol2 := 0
    LOCAL nPom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, aPorezi
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, aPorezi
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
    aPorezi := {}
@@ -236,7 +236,7 @@ FUNCTION stampa_obrasca_inventure_sank_lista()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 

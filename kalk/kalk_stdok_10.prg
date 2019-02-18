@@ -39,7 +39,7 @@ FUNCTION kalk_stampa_dok_10()
    //    RETURN kalk_stampa_dok_10_txt()
    //ENDIF
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
@@ -88,7 +88,7 @@ FUNCTION kalk_stampa_dok_10()
       nTot6 += ( nU6 := Round( nCarDaz * nKolicina, gZaokr ) )
       nTot7 += ( nU7 := Round( nZavTr * nKolicina, gZaokr ) )
       nTot8 += ( nU8 := Round( NC *    ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
-      nTot9 += ( nU9 := Round( nMarza * ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
+      nTot9 += ( nU9 := Round( nKalkMarzaVP * ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
       nTotA += ( nUA := Round( VPC   * ( Kolicina - Gkolicina - GKolicin2 ), gZaokr ) )
 
       nTotP += ( nUP := nPDV * kolicina ) // total porez
@@ -115,7 +115,7 @@ FUNCTION kalk_stampa_dok_10()
       @ PRow(), PCol() + 1 SAY nCarDaz / FCJ2 * 100      PICTURE PicProc
       @ PRow(), PCol() + 1 SAY nZavTr / FCJ2 * 100       PICTURE PicProc
       @ PRow(), PCol() + 1 SAY NC                    PICTURE PicCDEM
-      @ PRow(), PCol() + 1 SAY nMarza / NC * 100         PICTURE PicProc
+      @ PRow(), PCol() + 1 SAY nKalkMarzaVP / NC * 100         PICTURE PicProc
       @ PRow(), PCol() + 1 SAY VPC                   PICTURE PicCDEM
 
       IF gcMpcKalk10 == "D"
@@ -134,7 +134,7 @@ FUNCTION kalk_stampa_dok_10()
       @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE PicCDEM
       @ PRow(), PCol() + 1 SAY nZavTr               PICTURE PicCDEM
       @ PRow(), PCol() + 1 SAY 0                    PICTURE PicDEM
-      @ PRow(), PCol() + 1 SAY nMarza               PICTURE PicCDEM
+      @ PRow(), PCol() + 1 SAY nKalkMarzaVP               PICTURE PicCDEM
       IF gcMpcKalk10 == "D"
          @ PRow(), PCol() + 1 SAY 0              PICTURE PicCDEM
          @ PRow(), PCol() + 1 SAY nPDV           PICTURE PicCDEM

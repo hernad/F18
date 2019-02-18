@@ -14,6 +14,48 @@
 
 
 /*
+ *   Ispitivanje tarife, te punjenje matrice aPorezi
+ * param: cIdKonto - Oznaka konta
+ * param: cIdRoba - Oznaka robe
+ * param: aPorezi - matrica za vrijednosti poreza
+ * param: cIdTar - oznaka tarife, ovaj parametar je nil, ali se koristi za izvjestaje radi starih dokumenata (gdje je bilo promjene tarifa)
+ */
+
+FUNCTION set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, cIdRoba, aPorezi, cIdTar )
+
+   LOCAL cTarifa
+   LOCAL lUsedRoba
+   LOCAL lUsedTarifa
+   LOCAL cIdTarifa
+
+   PRIVATE cPolje
+
+   lUsedRoba := .T.
+   lUsedTarifa := .T.
+
+   PushWA()
+
+   cPolje := "IdTarifa"
+
+   IF cIdTar == nil
+      select_o_roba( cIdRoba )
+      cTarifa := roba->idtarifa  // &cPolje  // F18 roba ima samo idtarifa
+      select_o_tarifa( cTarifa )
+      cIdTarifa := tarifa->id
+   ELSE
+      cTarifa := cIdTar
+      select_o_tarifa( cTarifa )
+      cIdTarifa := cIdTar
+   ENDIF
+
+   ??set_pdv_array( @aPorezi )
+
+   PopWa()
+
+   RETURN cIdTarifa
+
+
+/*
  *     Racuna iznos PPP
     *   param: nMpcBp Maloprodajna cijena bez poreza
     *   param: aPorezi Matrica poreza
@@ -21,36 +63,75 @@
     *   param: nMpcSaP Maloprodajna cijena sa porezom
 */
 
-FUNCTION kalk_porezi_maloprodaja( aPorezi, nMpcBp, nMpcSaP )
+FUNCTION kalk_porezi_maloprodaja( aPorezi, nMpcBp, nMpcSaP ) ??
 
    LOCAL nPom
-   LOCAL nUkPor
+   LOCAL nPDV
 
    IF nMpcBp == NIL // zadate je cijena sa porezom, utvrdi cijenu bez poreza
-      nUkPor := aPorezi[ POR_PDV ] // POR_PDV - PDV
-      nMpcBp := nMpcSaP / ( nUkPor / 100 + 1 )
+      nPDV := aPorezi[ POR_PDV ] // POR_PDV - PDV
+      nMpcBp := nMpcSaP / ( nPDV / 100 + 1 )
    ENDIF
 
-   nPom := nMpcBP * aPorezi[ POR_PDV ] / 100
-
-   RETURN nPom
+   RETURN nMpcBP * aPorezi[ POR_PDV ] / 100
 
 
 
-/*
-    *   Filovanje matrice aPorezi sa porezima
-    *   param: aPorezi Matrica poreza, aPorezi:={PPP,PP,PPU,PRUC,PRUCMP,DLRUC}
+FUNCTION kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc, nMpcSaPP ) ??
 
-*/
-FUNCTION set_pdv_array( aPorezi )
+   LOCAL nPDV
 
-   IF ( aPorezi == nil )
-      aPorezi := {}
+   nPDV := kalk_porezi_maloprodaja( aPorezi, nMpc, nMpcSaPP )
+
+   RETURN { nPDV, 0, 0 }
+
+
+
+FUNCTION pdv_procenat_by_tarifa( cIdTarifa )
+
+   PushWa()
+   select_o_tarifa( cIdTarifa )
+   PopWa()
+
+   RETURN tarifa->pdv / 100
+
+
+// formatiraj stopa pdv kao string
+// " 17 %"
+// "15.5%"
+
+FUNCTION format_stopa_pdv_string( nPdv )
+
+   IF nPdv == nil
+      nPdv := tarifa->pdv
    ENDIF
-   IF ( Len( aPorezi ) == 0 )
-      // inicijaliziraj poreze
-      aPorezi := { 0, 0, 0, 0, 0, 0, 0 }
-   ENDIF
-   aPorezi[ POR_PDV ] := tarifa->pdv
 
-   RETURN NIL
+   IF Round( nPdv, 1 ) == Round( nPdv, 0 )
+      RETURN Str( nPdv, 3, 0 ) + " %"
+   ENDIF
+
+   RETURN Str( nPdv, 3, 1 ) + "%"
+
+
+FUNCTION mpc_sa_pdv_by_tarifa( cIdTarifa, nMPCBp )
+
+   LOCAL nPDV
+
+   PushWa()
+   select_o_tarifa( cIdTarifa )
+   nPDV := tarifa->pdv / 100
+   PopWa()
+
+   RETURN nMpcBp * ( nPDV + 1 )
+
+
+FUNCTION mpc_bez_pdv_by_tarifa( cIdTarifa, nMpcSaPP )
+
+   LOCAL nPDV
+
+   PushWa()
+   select_o_tarifa( cIdTarifa )
+   nPDV := tarifa->pdv / 100
+   PopWa()
+
+   RETURN nMpcSaPP / ( 1 + nPDV )

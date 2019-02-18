@@ -22,7 +22,7 @@ FUNCTION kalk_stampa_dok_pr()
       RETURN leg_StKalkPR()
    ENDIF
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nStr := 0
    cIdPartner := IdPartner
@@ -98,7 +98,7 @@ FUNCTION kalk_stampa_dok_pr()
          nU6 := nCarDaz * SKol
          nU7 := nZavTr * SKol
          nU8 := field->NC * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
-         nU9 := nMarza * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
+         nU9 := nKalkMarzaVP * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
          nUA := field->VPC * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
 
          IF Val( field->Rbr ) > 99
@@ -145,7 +145,7 @@ FUNCTION kalk_stampa_dok_pr()
             @ PRow(), PCol() + 1 SAY field->NC                    PICTURE PicCDEM
 
             IF Round( field->nc, 4 ) != 0
-               nProc := nMarza / field->NC * 100
+               nProc := nKalkMarzaVP / field->NC * 100
             ELSE
                nProc := -1
             ENDIF
@@ -163,7 +163,7 @@ FUNCTION kalk_stampa_dok_pr()
             @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY nZavTr               PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY 0                    PICTURE pic_vrijednost()
-            @ PRow(), PCol() + 1 SAY nMarza               PICTURE pic_vrijednost()
+            @ PRow(), PCol() + 1 SAY nKalkMarzaVP               PICTURE pic_vrijednost()
          ENDIF
 
          @ PRow() + 1, nCol1   SAY nUnabavna       PICTURE         pic_vrijednost()

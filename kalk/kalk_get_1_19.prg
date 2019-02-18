@@ -17,7 +17,6 @@ MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pko
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
 MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
 MEMVAR gStavitiUSifarnikNovuCijenuDefault
-MEMVAR aPorezi
 
 FUNCTION kalk_get_1_19()
 
@@ -29,26 +28,22 @@ FUNCTION kalk_get_1_19()
    _PKonto := _Idkonto2
    _PU_I := "3"
 
-   PRIVATE aPorezi := {}
-
    @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Konto koji zadužuje" GET _PKonto VALID  P_Konto( @_PKonto, 8, 30 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _idVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _idVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
-
    READ
    ESC_RETURN K_ESC
 
-   IF roba_barkod_pri_unosu()
-      _idRoba := Left( _idRoba, 10 )
-   ENDIF
+   //IF roba_barkod_pri_unosu()
+   //    _idRoba := Left( _idRoba, 10 )
+   //ENDIF
 
    select_o_koncij( _pkonto )
    SELECT kalk_pripr
-
    IF kalk_is_novi_dokument()
       _Kolicina := 0
    ENDIF
@@ -88,14 +83,13 @@ FUNCTION kalk_get_1_19()
    @ box_x_koord() + 17, box_y_koord() + 50 GET nKalkNovaCijena     PICT "999999.9999"
 
    kalk_say_pdv_a_porezi_var( 19 )
-
    READ
    ESC_RETURN K_ESC
 
    _MPCSaPP := nKalkNovaCijena - nKalkStaraCijena
    _MPC := 0
    _fcj := nKalkStaraCijena
-   _mpc := MpcBezPor( nKalkNovaCijena, aPorezi, , _nc ) - MpcBezPor( nKalkStaraCijena, aPorezi, , _nc )
+   _mpc := mpc_bez_pdv_by_tarifa( _idtarifa, nKalkNovaCijena - nKalkStaraCijena )
 
    IF Round( nKolicinaNaStanju - _kolicina, 4 ) == 0
       IF Pitanje(, "Staviti u šifarnik novu cijenu", gStavitiUSifarnikNovuCijenuDefault ) == "D"

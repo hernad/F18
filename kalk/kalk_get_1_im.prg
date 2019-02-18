@@ -11,24 +11,20 @@
 
 #include "f18.ch"
 
-STATIC aPorezi := {}
+MEMVAR GetList, nKalkStrana
 
 FUNCTION kalk_get_1_im()
 
    LOCAL nFaktVPC
 
    _DatFaktP := _datdok
-
    @ box_x_koord() + 8, box_y_koord() + 2  SAY "Konto koji zaduzuje" GET _IdKonto VALID  P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
-
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 10, box_y_koord() + 2, @aPorezi )
-
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 10, box_y_koord() + 2 )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
-
    READ
    ESC_RETURN K_ESC
    IF roba_barkod_pri_unosu()

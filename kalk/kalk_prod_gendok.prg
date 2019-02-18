@@ -190,278 +190,15 @@ FUNCTION kalk_generisi_niv_prodavnica_na_osnovu_druge_niv()
    RETURN .T.
 
 
-/*
-
- Generisanje dokumenta tipa 19 tj. nivelacije na osnovu zadanog %
-
-FUNCTION NivPoProc()
-
-   LOCAL nStopa := 0.0
-   LOCAL nZaokr := 1
-
-   o_konto()
-   o_tarifa()
---   o_sifk()
---   o_sifv()
-   o_roba()
-
-   cVarijanta := "2"
-
-   Box(, 7, 60 )
-   cIdFirma := self_organizacija_id()
-   cIdkonto := PadR( "1320", 7 )
-   dDatDok := Date()
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodavnica :" GET  cidkonto VALID P_Konto( @cidkonto )
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum      :" GET  dDatDok
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY "Cijenu zaokruziti na (br.decimalnih mjesta) :" GET nZaokr PICT "9"
-   @ box_x_koord() + 4, box_y_koord() + 2 SAY "(1) Popust prema stopama iz polja ROBA->N1"
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY "(2) popust prema stopama iz polja ROBA->N2"
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY "(3) popust prema jedinstvenoj stopi      ?"  GET cVarijanta VALID cVarijanta $ "123"
-
-   READ
-   ESC_BCR
-
-   IF cVarijanta == "3"
-      @ box_x_koord() + 7, box_y_koord() + 2 SAY "Stopa promjene cijena (- za smanjenje)      :" GET nStopa PICT "999.99%"
-      READ
-      ESC_BCR
-   ENDIF
-
-   BoxC()
-
-   o_koncij()
-   o_kalk_pripr()
-   -- o_kalk()
-   --PRIVATE cBrDok := kalk_sljedeci_broj( cidfirma, "19", 8 )
-
-   nRbr := 0
-   SET ORDER TO TAG "4"
-
-   MsgO( "Generacija dokumenta 19 - " + cbrdok )
-
-  -- SELECT koncij
-   SEEK Trim( cidkonto )
-   SELECT kalk
-  -- HSEEK cidfirma + cidkonto
-
-   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == idFirma + pKonto
-
-      cIdRoba := idRoba
-      nUlaz := nIzlaz := 0
-      nMPVU := nMPVI := nNVU := nNVI := 0
-      nRabat := 0
-      SELECT roba
-      HSEEK cIdRoba
-      SELECT kalk
-
-      DO WHILE !Eof() .AND. cIdFirma + cIdKonto + cIdRoba == idFirma + pKonto + idRoba
-
-         IF dDatDok < datDok  // preskoci
-            SKIP
-            LOOP
-         ENDIF
-         IF roba->tip $ "UT"
-            SKIP
-            LOOP
-         ENDIF
-
-         IF pu_i == "1"
-            nUlaz += kolicina - gKolicina - gKolicin2
-            nMPVU += mpcSaPp * kolicina
-            nNVU += nc * kolicina
-
-         ELSEIF pu_i == "5"  .AND. !( idVd $ "12#13#22" )
-            nIzlaz += kolicina
-            nMPVI += mpcSaPp * kolicina
-            nNVI += nc * kolicina
-
-         ELSEIF pu_i == "5"  .AND. ( idVd $ "12#13#22" )    // povrat
-            nUlaz -= kolicina
-            nMPVU -= mpcSaPp * kolicina
-            nNVU -= nc * kolicina
-
-         ELSEIF pu_i == "3"    // nivelacija
-            nMPVU += mpcSaPp * kolicina
-
-         ELSEIF pu_i == "I"
-            nIzlaz += gKolicin2
-            nMPVI += mpcSaPp * gKolicin2
-            nNVI += nc * gKolicin2
-         ENDIF
-
-         SKIP
-      ENDDO
-
-      SELECT roba
-      HSEEK cIdRoba
-
-      SELECT kalk
-
-      IF ( cVarijanta = "1" .AND. roba->n1 = 0 )
-         // skip
-         LOOP
-      ENDIF
-
-      IF ( cVarijanta = "2" .AND. roba->n2 = 0 )
-         // skip
-         LOOP
-      ENDIF
-
-
-      IF ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nMpvU - nMpvI, 4 ) <> 0 )
-         PushWA()
-         SELECT kalk_pripr
-         scatter()
-         APPEND ncnl
-         _idfirma := cIdFirma
-         _pkonto := _idKonto := cIdKonto
-         _mkonto := ""
-         _mu_i := ""
-         _pu_i := "3"
-         _idroba := cIdRoba
-         _idtarifa := roba->idtarifa
-         _idvd := "19"
-         _brdok := cBrDok
-         _rbr := rbr_u_char( ++nRbr )
-         _kolicina := nUlaz - nIzlaz
-         _datdok := _DatFaktP := dDatDok
-         _error := "0"
-         _fcj := kalk_get_mpc_by_koncij_pravilo()
-
-         IF cVarijanta == "1"  // roba->n1
-            _mpcsapp := Round( -_fcj * roba->N1 / 100, nZaokr )
-         ELSEIF cVarijanta == "2"
-            _mpcsapp := Round( -_fcj * roba->N2 / 100, nZaokr )
-         ELSE
-            _mpcsapp := Round( _fcj * nStopa / 100, nZaokr )
-         ENDIF
-
-         PRIVATE aPorezi := {}
-         --PRIVATE fNovi := .T.
-         --VRoba( .F. )
-         // P_Tarifa(@_idTarifa)
-         SELECT kalk_pripr
-         my_rlock()
-         Gather2()
-         my_unlock()
-         SELECT kalk
-         PopWA()
-      ENDIF
-
-   ENDDO
-
-   MsgC()
-   my_close_all_dbf()
-
-   RETURN .F.
-
-*/
-
-
-/*
-  Generise novu 19-ku tj.nivelaciju na osnovu vec azurirane
-
-FUNCTION VratiZadNiv()
-
-   LOCAL nSlog := 0, nPom := 0, cStBrDok := ""
-
-   o_konto()
-   o_tarifa()
---   o_sifk()
---   o_sifv()
-   o_roba()
-
-   Box(, 4, 60 )
-   cIdFirma := self_organizacija_id()
-   cIdKonto := PadR( "1320", 7 )
-   dDatDok := Date()
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodavnica :" GET  cIdKonto VALID P_Konto( @cIdKonto )
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum      :" GET  dDatDok
-   READ
-   ESC_BCR
-
-   BoxC()
-
-   o_kalk_doks()
-   SET ORDER TO TAG "1"
-   GO TOP
-   SEEK cIdFirma + "20"
-   SKIP -1
-
-   DO WHILE ( !Bof() .AND. idvd == "19" )
-      IF ( pkonto == cIdKonto .AND. datdok <= dDatDok )
-         EXIT
-      ENDIF
-      SKIP -1
-   ENDDO
-
-   IF ( idvd != "19" .OR. pkonto != cIdKonto )
-      Msg( "Ne postoji nivelacija za zadanu prodavnicu u periodu do unesenog datuma!", 6 )
-      CLOSERET
-   ELSE
-      cStBrDok := kalk_doks->brdok
-      Box(, 4, 60 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nivel. broj " + cIdFirma + " - 19 -" GET cStBrDok
-      READ
-      ESC_BCR
-      BoxC()
-   ENDIF
-
-   o_kalk_pripr()
-   -- o_kalk()
-   --PRIVATE cBrDok := kalk_sljedeci_broj( cIdFirma, "19", 8 )
-
-   nRbr := 0
-   SELECT KALK
-   SET ORDER TO TAG "1"
-   GO TOP
-   SEEK cIdFirma + "19" + cStBrDok
-
-   MsgO( "Generacija dokumenta 19 - " + cBrDok )
-   DO WHILE !Eof() .AND. idvd == "19" .AND. brdok == cStBrDok
-  --    SELECT ROBA; HSEEK KALK->idroba
-      SELECT KALK; nSlog := RecNo()
-      // nPom := StanjeProd( cIdFirma+cIdKonto+KALK->idroba , ddatdok )
-      SET ORDER TO TAG "1"
-      GO nSlog
-      Scatter()
-      SELECT kalk_pripr; APPEND NCNL
-
-      _idkonto := cidkonto; _pkonto := cidkonto; _pu_i := _mu_i := ""
-      _idtarifa := roba->idtarifa
-      _idvd := "19"; _brdok := cbrdok
-      _rbr := rbr_u_char( ++nrbr )
-      _kolicina := nPom
-      _datdok := _DatFaktP := ddatdok
-      _ERROR := ""
-      _fcj := _fcj + _mpcsapp
-      _mpcsapp := -_mpcsapp
-
-      Gather2()
-      SELECT KALK
-      SKIP 1
-   ENDDO
-   MsgC()
-
-   my_close_all_dbf()
-
-   RETURN
-
-
-*/
-
-
-
 FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
 
    LOCAL dDok := Date()
    LOCAL nPom := 0
    PRIVATE cIdKontoProdavnica := fetch_metric( "kalk_sredi_karicu_mpc", my_user(), PadR( "1330", 7 ) )
 
-   o_konto()
+   //o_konto()
 
    cSravnitiD := "D"
-
    PRIVATE cUvijekSif := "D"
 
    Box(, 6, 50 )
@@ -475,10 +212,9 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
    ESC_BCR
    BoxC()
 
-   o_koncij()
-   SEEK Trim( cIdKontoProdavnica )
+   select_o_koncij( cIdKontoProdavnica )
 
-   o_roba()
+   //o_roba()
    o_kalk_pripr()
 
 
@@ -489,9 +225,7 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
    PRIVATE nRbr := 0
 
    cBrNiv := kalk_get_next_broj_v5( self_organizacija_id(), "19", NIL )
-
    find_kalk_by_pkonto_idroba( self_organizacija_id(), cIdKontoProdavnica )
-
 
    Box(, 6, 65 )
 
@@ -513,7 +247,6 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
       ENDIF
 
       cIdkonto := pkonto
-
       nUlazVPC  := kalk_get_mpc_by_koncij_pravilo()
       nStartMPC := nUlazVPC
       // od ove cijene pocinjemo
@@ -522,7 +255,6 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
 
       @ 2 + box_x_koord(), 2 + box_y_koord() SAY "ID roba: " + cIdRoba
       @ 3 + box_x_koord(), 2 + box_y_koord() SAY "Cijena u sifrarniku " + AllTrim( Str( nUlazVpc ) )
-
       DO WHILE !Eof() .AND. self_organizacija_id() + cidkonto + cidroba == idFirma + pkonto + idroba
 
          IF roba->tip $ "TU"
@@ -575,7 +307,6 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
       nRazlika := 0
       // nStanje := ROUND( nUlaz - nIzlaz, 4 )
       // nVPV := ROUND( nVPVU - nVPVI, 4 )
-
       nStanje := ( nUlaz - nIzlaz )
       nVPV := ( nVPVU - nVPVI )
 
@@ -606,7 +337,6 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
          IF Round( nRazlika, 4 ) <> 0
 
             lGenerisao := .T.
-
             @ 4 + box_x_koord(), 2 + box_y_koord() SAY "Generisao stavki: " + AllTrim( Str( ++nRbr ) )
 
             APPEND BLANK

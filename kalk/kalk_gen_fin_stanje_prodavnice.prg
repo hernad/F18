@@ -52,27 +52,19 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    LOCAL _gledati_usluge := "N"
    LOCAL _cnt := 0
    LOCAL _a_porezi
-   LOCAL __porez, _porez, _d_opis
+   LOCAL nPDV, nUPDV, _d_opis
    LOCAL hParams
-
-   aPorezi := {}
-
 
    hParams := hb_Hash()
    hParams[ "idfirma" ] := cIdFirma
 
-
    IF hb_HHasKey( hParamsIn, "datum_od" )
       hParams[ "dat_od" ] := hParamsIn[ "datum_od" ]
    ENDIF
-
    IF hb_HHasKey( hParamsIn, "datum_do" )
       hParams[ "dat_do" ] := hParamsIn[ "datum_do" ]
    ENDIF
-
    hParams[ "order_by" ] := "idFirma,datdok,idvd,brdok,rbr"
-
-
    IF hb_HHasKey( hParamsIn, "vise_konta" )
       _v_konta := hParamsIn[ "vise_konta" ]
    ENDIF
@@ -183,7 +175,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
       _tr_prevoz := 0
       _tr_prevoz_2 := 0
       _tr_sped := 0
-      _porez := 0
+      nUPDV := 0
 
       _id_d_firma := field->idfirma
       _d_br_dok := field->brdok
@@ -260,26 +252,19 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
          SELECT kalk
 
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi )
-
          IF field->pu_i == "1"
-
             _mp_ulaz += field->mpc * field->kolicina
             _mp_ulaz_p += field->mpcsapp * field->kolicina
             _nv_ulaz += field->nc * field->kolicina
 
          ELSEIF field->pu_i == "5"
 
-            _a_porezi := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
-
-            __porez := _a_porezi[ 1 ]
-
+            nPDV := field->mpc * pdv_procenat_by_tarifa(field->IdTarifa)
             IF field->idvd $ "12#13"
-
                _mp_ulaz -= field->mpc * field->kolicina
                _mp_ulaz_p -= field->mpcsapp * field->kolicina
                _nv_ulaz -= field->nc * field->kolicina
-               _porez -= __porez * field->kolicina
+               nUPDV -= nPDV * field->kolicina
 
                _rabatv -= field->rabatv * field->kolicina
                IF tarifa->pdv <> 0
@@ -293,8 +278,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
                _mp_izlaz += field->mpc * field->kolicina
                _mp_izlaz_p += field->mpcsapp * field->kolicina
                _nv_izlaz += field->nc * field->kolicina
-               _porez += __porez * field->kolicina
-
+               nUPDV += nPDV * field->kolicina
                _rabatv += field->rabatv * field->kolicina
                IF tarifa->pdv <> 0
                   _rabatm += field->kolicina * ( field->rabatv * ( 1 + tarifa->pdv / 100 ) )
@@ -305,15 +289,11 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
             ENDIF
 
          ELSEIF field->pu_i == "3"
-
             _mp_ulaz += field->mpc * field->kolicina
             _mp_ulaz_p += field->mpcsapp * field->kolicina
 
          ELSEIF field->pu_i == "I"
-
-            set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi )
-
-            _mp_izlaz += kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi ) * field->gkolicin2
+            _mp_izlaz += field->mpc * field->gkolicin2
             _mp_izlaz_p += field->mpcsapp * field->gkolicin2
             _nv_izlaz += field->nc * field->gkolicin2
 
@@ -331,7 +311,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
          _nv_ulaz, _nv_izlaz, _nv_ulaz - _nv_izlaz, ;
          _mp_ulaz, _mp_izlaz, _mp_ulaz - _mp_izlaz, ;
          _mp_ulaz_p, _mp_izlaz_p, _mp_ulaz_p - _mp_izlaz_p, ;
-         _rabatv, _rabatm, _porez, 0, 0, 0, 0, 0, 0 )
+         _rabatv, _rabatm, nUPDV, 0, 0, 0, 0, 0, 0 )
 
       ++ _cnt
 

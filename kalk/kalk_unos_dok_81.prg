@@ -177,18 +177,18 @@ STATIC FUNCTION valid_kolicina()
 
    IF _kolicina < 0
 
-      nKolS := 0
+      nKolicinaNaStanju := 0
       nKolZN := 0
       nC1 := nC2 := 0
       IF !Empty( kalk_metoda_nc() )
-         kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolS, @nKolZN, @nc1, @nc2 )
+         kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolicinaNaStanju, @nKolZN, @nc1, @nc2 )
          @ box_x_koord() + 12, box_y_koord() + 30 SAY "Ukupno na stanju "
-         @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
+         @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol
       ENDIF
 
-      IF nKols < Abs( _kolicina )
+      IF nKolicinaNaStanju < Abs( _kolicina )
          sumnjive_stavke_error()
-         error_bar( "KA_" + _idroba + "/" + _pkonto, _idroba + "/" + _pkonto + " kolicina nedovoljna:" + AllTrim( Str( nKols, 12, 3 ) ) )
+         error_bar( "KA_" + _idroba + "/" + _pkonto, _idroba + "/" + _pkonto + " kolicina nedovoljna:" + AllTrim( Str( nKolicinaNaStanju, 12, 3 ) ) )
       ENDIF
       SELECT kalk_pripr
    ENDIF
@@ -258,8 +258,8 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC BEZ PDV:"
 
-   @ box_x_koord() + nX, box_y_koord() + nY GET _mpc PICT PicDEM WHEN kalk_when_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
-      VALID kalk_valid_mpc_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
+   @ box_x_koord() + nX, box_y_koord() + nY GET _mpc PICT PicDEM WHEN kalk_when_mpc_bez_pdv_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi ) ;
+      VALID kalk_valid_mpc_bez_pdv_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ), @aPorezi )
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV (%):"
@@ -269,7 +269,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
 
    @ box_x_koord() + nX, box_y_koord() + nY GET _mpcsapp PICT PicDEM ;
-      WHEN {|| cProracunMarzeUnaprijed := " ", _Marza2 := 0, .T. } VALID kalk_valid_mpcsapdv( "81", .F., @aPorezi, .T. )
+      WHEN {|| cProracunMarzeUnaprijed := " ", _Marza2 := 0, .T. } VALID kalk_valid_mpc_sa_pdv_41_42_81( "81", .F., .T. )
 
    READ
 

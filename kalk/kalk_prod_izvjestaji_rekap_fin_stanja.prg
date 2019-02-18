@@ -19,23 +19,12 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
    LOCAL nKolIzlaz
    LOCAL nPDVProc
 
-   PRIVATE aPorezi
-
-   aPorezi := {}
 
    PicDEM := kalk_prosiri_pic_iznos_za_2()
    PicCDEM := kalk_prosiri_pic_cjena_za_2()
 
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "132.", FIELD_LENGTH_IDKONTO )
-
-  // o_sifk()
-//   o_sifv()
-  // o_roba()
-  // o_tarifa()
-  // o_koncij()
-  // o_konto()
-  // o_partner()
 
    dDatOd := CToD( "" )
    dDatDo := Date()
@@ -173,12 +162,9 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
          nPDVProc := tarifa->pdv / 100
          SELECT kalk
 
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( pkonto, idroba, @aPorezi, idtarifa )
-
          nBezP := 0
          nSaP := 0
          nNV := 0
-
          IF pu_i == "1"
             nBezP := mpc * kolicina
             nMPVBU += nBezP
@@ -206,7 +192,7 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
             nSaP := mpcsapp * kolicina
             nMPVU += nSaP
          ELSEIF pu_i == "I"
-            nBezP := -MpcBezPor( mpcsapp, aPorezi,, nc ) * gkolicin2
+            nBezP := -mpc_bez_pdv_by_tarifa( idtarifa, mpcsapp ) * gkolicin2
             nMPVBI -= nBezP
             nSaP := -mpcsapp * gkolicin2
             nMPVI += -nSaP
@@ -215,8 +201,7 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
          ENDIF
 
          nElem := AScan( aRTar, {| x| x[ 1 ] == TARIFA->ID } )
-
-         nP1 := kalk_porezi_maloprodaja( aPorezi, nBezP, nSaP )
+         nP1 := nSaP - nBezP
          nP2 := 0
          nP3 := 0
 

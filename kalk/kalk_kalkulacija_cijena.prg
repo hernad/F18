@@ -178,16 +178,16 @@ STATIC FUNCTION o_tables( azurirana )
    RETURN
 
 
-STATIC FUNCTION get_vars( vars )
+STATIC FUNCTION get_vars( hParams )
 
-   LOCAL _firma := self_organizacija_id()
+   LOCAL cIdFirma := self_organizacija_id()
    LOCAL _tip := "10"
    LOCAL _broj := Space( 8 )
    LOCAL _ret := .F.
 
    Box(, 1, 40 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Broj dokumenta:"
-   @ box_x_koord() + 1, Col() + 1 GET _firma
+   @ box_x_koord() + 1, Col() + 1 GET cIdFirma
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET _tip VALID !Empty( _tip )
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET _broj VALID !Empty( _broj )
    READ
@@ -197,19 +197,19 @@ STATIC FUNCTION get_vars( vars )
       RETURN _ret
    ENDIF
 
-   vars := hb_Hash()
-   vars[ "id_firma" ] := _firma
-   vars[ "tip_dok" ] := _tip
-   vars[ "br_dok" ] := _broj
+   hParams := hb_Hash()
+   hParams[ "id_firma" ] := cIdFirma
+   hParams[ "tip_dok" ] := _tip
+   hParams[ "br_dok" ] := _broj
 
    RETURN .T.
 
 
-STATIC FUNCTION seek_dokument( vars, azurirani )
+STATIC FUNCTION seek_dokument( hParams, azurirani )
 
-   LOCAL _firma := vars[ "id_firma" ]
-   LOCAL _tip_dok := vars[ "tip_dok" ]
-   LOCAL _br_dok := vars[ "br_dok" ]
+   LOCAL cIdFirma := hParams[ "id_firma" ]
+   LOCAL cIdVd := hParams[ "tip_dok" ]
+   LOCAL cBrDok := hParams[ "br_dok" ]
 
    SELECT kalk_pripr
    SET ORDER TO TAG "1"
@@ -217,9 +217,9 @@ STATIC FUNCTION seek_dokument( vars, azurirani )
 
    IF azurirani
 
-      SEEK _firma + _tip_dok + _br_dok
+      SEEK cIdFirma + cIdVd + cBrDok
       IF !Found()
-         MsgBeep( "Trazeni dokument " + _firma + "-" + _tip_dok + "-" + AllTrim( _br_dok ) + " ne postoji !" )
+         MsgBeep( "Trazeni dokument " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ) + " ne postoji !" )
          RETURN .F.
       ENDIF
 
@@ -228,53 +228,47 @@ STATIC FUNCTION seek_dokument( vars, azurirani )
    RETURN .T.
 
 
-STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
+STATIC FUNCTION gen_kalk_predispozicija_xml( hParams )
 
-   LOCAL _firma := vars[ "id_firma" ]
-   LOCAL _tip_dok := vars[ "tip_dok" ]
-   LOCAL _br_dok := vars[ "br_dok" ]
+   LOCAL cIdFirma := hParams[ "id_firma" ]
+   LOCAL cIdVd := hParams[ "tip_dok" ]
+   LOCAL cBrDok := hParams[ "br_dok" ]
    LOCAL _generated := 0
    LOCAL _xml_file := my_home() + "data.xml"
    LOCAL nTrec
-   LOCAL _redni_broj := 0
-   LOCAL _porezna_stopa, _porez
+   LOCAL nRbr := 0
+   LOCAL nPDVStopa, nPDVCijena
    LOCAL _s_kolicina, _tmp, _a_porezi
    LOCAL _u_porez, _t_porez, _u_pv, _t_pv, _u_pv_porez, _t_pv_porez, _t_kol
    LOCAL _razd_id, _razd_naz
    LOCAL _zad_id, _zad_naz
    LOCAL _dio
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
-   PRIVATE aPorezi := {}
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    select_o_konto( kalk_pripr->pkonto )
-
    _razd_id := kalk_pripr->pkonto
    _razd_naz := konto->naz
 
    select_o_konto( kalk_pripr->idkonto2 )
-
    _zad_id := kalk_pripr->idkonto2
    _zad_naz := konto->naz
 
-   SELECT tdok
-   HSEEK kalk_pripr->idvd
+   select_o_tdok(kalk_pripr->idvd)
 
    SELECT kalk_pripr
-
    nTrec := RecNo()
 
    create_xml( _xml_file )
    xml_head()
 
    xml_subnode( "kalk", .F. )
-
    xml_node( "org_id", AllTrim( self_organizacija_id() ) )
    xml_node( "org_naziv", to_xml_encoding( AllTrim( self_organizacija_naziv() ) ) )
 
    xml_node( "dok_naziv", to_xml_encoding( AllTrim( tdok->naz ) ) )
    xml_node( "dok_tip", field->idvd )
-   xml_node( "dok_broj", to_xml_encoding( AllTrim( _br_dok ) ) )
+   xml_node( "dok_broj", to_xml_encoding( AllTrim( cBrDok ) ) )
    xml_node( "dok_datum", DToC( field->datdok ) )
 
    xml_node( "zad_id", to_xml_encoding( AllTrim( _zad_id ) ) )
@@ -287,25 +281,23 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
    xml_node( "rn_datum", DToC( field->datfaktp ) )
 
    FOR _dio := 1 TO 2
-
       IF _dio == 1
          xml_subnode( "razd", .F. )
       ELSE
          xml_subnode( "zad", .F. )
       ENDIF
 
-      _redni_broj := 0
-
+      nRbr := 0
       SELECT kalk_pripr
       GO TOP
-      SEEK _firma + _tip_dok + _br_dok
+      SEEK cIdFirma + cIdVd + cBrDok
 
       _u_nv := _t_nv := _u_marza := _t_marza := 0
       _u_porez := _t_porez := 0
       _u_pv := _t_pv := _u_pv_porez := _t_pv_porez := 0
       _t_kol := 0
 
-      DO WHILE !Eof() .AND. _firma == field->idfirma .AND. _tip_dok == field->idvd .AND. _br_dok == field->brdok
+      DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->idfirma .AND. cIdVd == kalk_pripr->idvd .AND. cBrDok == kalk_pripr->brdok
 
          IF _dio == 1
             IF field->idkonto2 = "XXX"
@@ -320,30 +312,22 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
          ENDIF
 
          ++_generated
-
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
-         _porezna_stopa := tarifa->pdv
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
-         _a_porezi := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
-         _porez := _a_porezi[ 1 ]
+         nPDVStopa := tarifa->pdv
+         nPDVCijena := field->mpc * pdv_procenat_by_tarifa( kalk_pripr->idtarifa)
 
-         _s_kolicina := field->kolicina - field->gkolicina - field->gkolicin2
+         _s_kolicina := field->kolicina
          _t_kol += _s_kolicina
-
          _u_nv := Round( field->nc * _s_kolicina, gZaokr )
          _t_nv += _u_nv
-
-         _u_marza := Round( nMarza2 * _s_kolicina, gZaokr )
+         _u_marza := Round( nKalkMarzaMP * _s_kolicina, gZaokr )
          _t_marza += _u_marza
-
          _u_pv := Round( field->mpc * _s_kolicina, gZaokr )
          _t_pv += _u_pv
-
-         _u_porez := ( _porez * field->kolicina )
+         _u_porez := ( nPDVCijena * field->kolicina )
          _t_porez += _u_porez
-
          _u_pv_porez := ( field->mpcsapp * field->kolicina )
          _t_pv_porez += _u_pv_porez
 
@@ -353,7 +337,7 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
          xml_node( "art_naz", to_xml_encoding( AllTrim( roba->naz ) ) + iif( roba_barkod_pri_unosu(), ", BK: " + roba->barkod, "" ) )
          xml_node( "art_jmj", to_xml_encoding( AllTrim( roba->jmj ) ) )
          xml_node( "tarifa", to_xml_encoding( AllTrim( field->idtarifa ) ) )
-         xml_node( "rbr", PadL( AllTrim( Str( ++_redni_broj ) ), 4 ) + "." )
+         xml_node( "rbr", PadL( AllTrim( Str( ++nRbr ) ), 4 ) + "." )
 
          xml_node( "kol", Str( field->kolicina, 12, 2 ) )
          xml_node( "g_kol", Str( field->gkolicina, 12, 2 ) )
@@ -361,11 +345,11 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
          xml_node( "skol", Str( _s_kolicina, 12, 2 ) )
 
          xml_node( "nc", Str( field->nc, 12, 2 ) )
-         xml_node( "marzap", Str( nMarza2 / field->nc * 100, 12, 2 ) )
-         xml_node( "marza", Str( nMarza2, 12, 2 ) )
+         xml_node( "marzap", Str( nKalkMarzaMP / field->nc * 100, 12, 2 ) )
+         xml_node( "marza", Str( nKalkMarzaMP, 12, 2 ) )
          xml_node( "pc", Str( field->mpc, 12, 2 ) )
-         xml_node( "por_st", Str( _porezna_stopa, 12, 2 ) )
-         xml_node( "porez", Str( _porez, 12, 2 ) )
+         xml_node( "por_st", Str( nPDVStopa, 12, 2 ) )
+         xml_node( "porez", Str( nPDVCijena, 12, 2 ) )
          xml_node( "pcsap", Str( field->mpcsapp, 12, 2 ) )
 
          xml_node( "unv", Str( _u_nv, 12, 2 ) )
@@ -402,23 +386,22 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( vars )
    RETURN _generated
 
 
-STATIC FUNCTION gen_kalk_mp_xml( vars )
+STATIC FUNCTION gen_kalk_mp_xml( hParams )
 
-   LOCAL _firma := vars[ "id_firma" ]
-   LOCAL _tip_dok := vars[ "tip_dok" ]
-   LOCAL _br_dok := vars[ "br_dok" ]
+   LOCAL cIdFirma := hParams[ "id_firma" ]
+   LOCAL cIdVd := hParams[ "tip_dok" ]
+   LOCAL cBrDok := hParams[ "br_dok" ]
    LOCAL _generated := 0
    LOCAL _xml_file := my_home() + "data.xml"
    LOCAL nTrec
-   LOCAL _redni_broj := 0
-   LOCAL _porezna_stopa, _porez
+   LOCAL nRbr := 0
+   LOCAL nPDVStopa, nPDVCijena
    LOCAL _s_kolicina, _tmp, _a_porezi
    LOCAL _u_fv, _t_fv, _u_fv_r, _t_fv_r, _u_tr_prevoz, _u_tr_bank, _u_tr_carina, _u_tr_zavisni, _u_tr_sped, _u_tr_svi
    LOCAL _t_tr_prevoz, _t_tr_bank, _t_tr_carina, _t_tr_zavisni, _t_tr_sped, _t_tr_svi, _u_nv, _t_nv, _u_marza, _t_marza
    LOCAL _u_porez, _t_porez, _u_pv, _t_pv, _u_pv_porez, _t_pv_porez, _t_kol, _u_rabat, _t_rabat
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
-   PRIVATE aPorezi := {}
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    select_o_konto( kalk_pripr->pkonto )
    select_o_partner( kalk_pripr->idpartner )
@@ -438,7 +421,7 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
 
    xml_node( "dok_naziv", to_xml_encoding( AllTrim( tdok->naz ) ) )
    xml_node( "dok_tip", field->idvd )
-   xml_node( "dok_broj", to_xml_encoding( AllTrim( _br_dok ) ) )
+   xml_node( "dok_broj", to_xml_encoding( AllTrim( cBrDok ) ) )
    xml_node( "dok_datum", DToC( field->datdok ) )
 
    xml_node( "zad_id", to_xml_encoding( AllTrim( field->pkonto ) ) )
@@ -459,18 +442,16 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
    _t_kol := 0
    _u_rabat := _t_rabat := 0
 
-   DO WHILE !Eof() .AND. _firma == field->idfirma .AND. _tip_dok == field->idvd .AND. _br_dok == field->brdok
+   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdVd == field->idvd .AND. cBrDok == field->brdok
 
       ++_generated
 
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-      _porezna_stopa := tarifa->pdv
-      set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
-      _a_porezi := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
-      _porez := _a_porezi[ 1 ]
+      nPDVStopa := tarifa->pdv
+      nPDVCijena := field->mpc * nPDVStopa/100
 
-      _s_kolicina := field->kolicina - field->gkolicina - field->gkolicin2
+      _s_kolicina := field->kolicina
       _t_kol += _s_kolicina
 
       _u_fv := Round( field->fcj * field->kolicina, gZaokr )
@@ -499,15 +480,14 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
       _u_nv := Round( field->nc * _s_kolicina, gZaokr )
       _t_nv += _u_nv
 
-      _u_marza := Round( nMarza2 * _s_kolicina, gZaokr )
+      _u_marza := Round( nKalkMarzaMP * _s_kolicina, gZaokr )
       _t_marza += _u_marza
 
       _u_pv := Round( field->mpc * _s_kolicina, gZaokr )
       _t_pv += _u_pv
 
-      _u_porez := ( _porez * field->kolicina )
+      _u_porez := ( nPDVCijena * field->kolicina )
       _t_porez += _u_porez
-
       _u_pv_porez := ( field->mpcsapp * field->kolicina )
       _t_pv_porez += _u_pv_porez
 
@@ -517,7 +497,7 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
       xml_node( "art_naz", to_xml_encoding( AllTrim( roba->naz ) ) + iif( roba_barkod_pri_unosu(), ", BK: " + roba->barkod, "" ) )
       xml_node( "art_jmj", to_xml_encoding( AllTrim( roba->jmj ) ) )
       xml_node( "tarifa", to_xml_encoding( AllTrim( field->idtarifa ) ) )
-      xml_node( "rbr", PadL( AllTrim( Str( ++_redni_broj ) ), 4 ) + "." )
+      xml_node( "rbr", PadL( AllTrim( Str( ++nRbr ) ), 4 ) + "." )
 
       xml_node( "kol", Str( field->kolicina, 12, 2 ) )
       xml_node( "g_kol", Str( field->gkolicina, 12, 2 ) )
@@ -528,11 +508,11 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
       xml_node( "rabat", Str( - field->rabat, 12, 2 ) )
       xml_node( "fcjr", Str( - field->rabat / 100 * field->fcj, 12, 2 ) )
       xml_node( "nc", Str( field->nc, 12, 2 ) )
-      xml_node( "marzap", Str( nMarza2 / field->nc * 100, 12, 2 ) )
-      xml_node( "marza", Str( nMarza2, 12, 2 ) )
+      xml_node( "marzap", Str( nKalkMarzaMP / field->nc * 100, 12, 2 ) )
+      xml_node( "marza", Str( nKalkMarzaMP, 12, 2 ) )
       xml_node( "pc", Str( field->mpc, 12, 2 ) )
-      xml_node( "por_st", Str( _porezna_stopa, 12, 2 ) )
-      xml_node( "porez", Str( _porez, 12, 2 ) )
+      xml_node( "por_st", Str( nPDVStopa, 12, 2 ) )
+      xml_node( "porez", Str( nPDVCijena, 12, 2 ) )
       xml_node( "pcsap", Str( field->mpcsapp, 12, 2 ) )
 
       _pr_tr_prev := if( nPrevoz <> 0, nPrevoz / field->fcj2 * 100, 0 )
@@ -601,30 +581,27 @@ STATIC FUNCTION gen_kalk_mp_xml( vars )
 
 
 
-STATIC FUNCTION gen_kalk_vp_xml( vars )
+STATIC FUNCTION gen_kalk_vp_xml( hParams )
 
-   LOCAL _firma := vars[ "id_firma" ]
-   LOCAL _tip_dok := vars[ "tip_dok" ]
-   LOCAL _br_dok := vars[ "br_dok" ]
+   LOCAL cIdFirma := hParams[ "id_firma" ]
+   LOCAL cIdVd := hParams[ "tip_dok" ]
+   LOCAL cBrDok := hParams[ "br_dok" ]
    LOCAL _generated := 0
    LOCAL _xml_file := my_home() + "data.xml"
    LOCAL nTrec
-   LOCAL _redni_broj := 0
-   LOCAL _porezna_stopa, _porez
+   LOCAL nRbr := 0
+   LOCAL nPDVStopa, nPDVCijena
    LOCAL _s_kolicina, _tmp
    LOCAL _u_fv, _t_fv, _u_fv_r, _t_fv_r, _u_tr_prevoz, _u_tr_bank, _u_tr_carina, _u_tr_zavisni, _u_tr_sped, _u_tr_svi
    LOCAL _t_tr_prevoz, _t_tr_bank, _t_tr_carina, _t_tr_zavisni, _t_tr_sped, _t_tr_svi, _u_nv, _t_nv, _u_marza, _t_marza
    LOCAL _u_porez, _t_porez, _u_pv, _t_pv, _u_pv_porez, _t_pv_porez, _t_kol, _u_rabat, _t_rabat
    LOCAL _ima_mpcsapp := .F.
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    select_o_konto( kalk_pripr->mkonto )
-
    select_o_partner( kalk_pripr->idpartner )
-
-   SELECT tdok
-   HSEEK kalk_pripr->idvd
+   select_o_tdok( kalk_pripr->idvd )
 
    SELECT kalk_pripr
 
@@ -640,7 +617,7 @@ STATIC FUNCTION gen_kalk_vp_xml( vars )
 
    xml_node( "dok_naziv", to_xml_encoding( AllTrim( tdok->naz ) ) )
    xml_node( "dok_tip", field->idvd )
-   xml_node( "dok_broj", to_xml_encoding( AllTrim( _br_dok ) ) )
+   xml_node( "dok_broj", to_xml_encoding( AllTrim( cBrDok ) ) )
    xml_node( "dok_datum", DToC( field->datdok ) )
 
    xml_node( "zad_id", to_xml_encoding( AllTrim( field->mkonto ) ) )
@@ -661,21 +638,21 @@ STATIC FUNCTION gen_kalk_vp_xml( vars )
    _t_kol := 0
    _u_rabat := _t_rabat := 0
 
-   DO WHILE !Eof() .AND. _firma == field->idfirma .AND. _tip_dok == field->idvd .AND. _br_dok == field->brdok
+   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdVd == field->idvd .AND. cBrDok == field->brdok
 
       ++_generated
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
-      _porezna_stopa := tarifa->pdv
+      nPDVStopa := tarifa->pdv
 
       _ima_mpcsapp := .F.
 
       IF Round( field->mpcsapp, 2 ) == 0
-         _porez := field->vpc * ( _porezna_stopa / 100 )
+         nPDVCijena := field->vpc * ( nPDVStopa / 100 )
       ELSE
-         _porez := field->mpcsapp / ( 1 + ( _porezna_stopa / 100 ) ) * ( _porezna_stopa / 100 )
+         nPDVCijena := field->mpcsapp / ( 1 + ( nPDVStopa / 100 ) ) * ( nPDVStopa / 100 )
          _ima_mpcsapp := .T.
       ENDIF
 
@@ -709,13 +686,13 @@ STATIC FUNCTION gen_kalk_vp_xml( vars )
       _u_nv := Round( field->nc * _s_kolicina, gZaokr )
       _t_nv += _u_nv
 
-      _u_marza := Round( nMarza * _s_kolicina, gZaokr )
+      _u_marza := Round( nKalkMarzaVP * _s_kolicina, gZaokr )
       _t_marza += _u_marza
 
       _u_pv := Round( field->vpc * _s_kolicina, gZaokr )
       _t_pv += _u_pv
 
-      _u_porez := ( _porez * field->kolicina )
+      _u_porez := ( nPDVCijena * field->kolicina )
       _t_porez += _u_porez
 
       IF _ima_mpcsapp
@@ -731,7 +708,7 @@ STATIC FUNCTION gen_kalk_vp_xml( vars )
       xml_node( "art_naz", to_xml_encoding( AllTrim( roba->naz ) ) )
       xml_node( "art_jmj", to_xml_encoding( AllTrim( roba->jmj ) ) )
       xml_node( "tarifa", to_xml_encoding( AllTrim( field->idtarifa ) ) )
-      xml_node( "rbr", PadL( AllTrim( Str( ++_redni_broj ) ), 4 ) + "." )
+      xml_node( "rbr", PadL( AllTrim( Str( ++nRbr ) ), 4 ) + "." )
 
       xml_node( "kol", Str( field->kolicina, 12, 2 ) )
       xml_node( "g_kol", Str( field->gkolicina, 12, 2 ) )
@@ -742,16 +719,16 @@ STATIC FUNCTION gen_kalk_vp_xml( vars )
       xml_node( "rabat", Str( - field->rabat, 12, 2 ) )
       xml_node( "fcjr", Str( - field->rabat / 100 * field->fcj, 12, 2 ) )
       xml_node( "nc", Str( field->nc, 12, 2 ) )
-      xml_node( "marzap", Str( nMarza / field->nc * 100, 12, 2 ) )
-      xml_node( "marza", Str( nMarza, 12, 2 ) )
+      xml_node( "marzap", Str( nKalkMarzaVP / field->nc * 100, 12, 2 ) )
+      xml_node( "marza", Str( nKalkMarzaVP, 12, 2 ) )
       xml_node( "pc", Str( field->vpc, 12, 2 ) )
-      xml_node( "por_st", Str( _porezna_stopa, 12, 2 ) )
-      xml_node( "porez", Str( _porez, 12, 2 ) )
+      xml_node( "por_st", Str( nPDVStopa, 12, 2 ) )
+      xml_node( "porez", Str( nPDVCijena, 12, 2 ) )
 
       IF _ima_mpcsapp
          xml_node( "pcsap", Str( field->mpcsapp, 12, 2 ) )
       ELSE
-         xml_node( "pcsap", Str( field->vpc + _porez, 12, 2 ) )
+         xml_node( "pcsap", Str( field->vpc + nPDVCijena, 12, 2 ) )
       ENDIF
 
       IF Round( field->fcj2, 4 ) != 0

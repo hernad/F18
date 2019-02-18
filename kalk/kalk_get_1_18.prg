@@ -11,8 +11,6 @@
 
 #include "f18.ch"
 
-STATIC aPorezi := {}
-
 FUNCTION kalk_get_1_18()
 
    _DatFaktP := _datdok
@@ -23,7 +21,7 @@ FUNCTION kalk_get_1_18()
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
 
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
 
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    READ
@@ -37,7 +35,6 @@ FUNCTION kalk_get_1_18()
    SELECT kalk_pripr  // napuni tarifu
 
    _MKonto := _Idkonto
-
    IF kalk_is_novi_dokument()
       _Kolicina := 0
    ENDIF
@@ -57,7 +54,6 @@ FUNCTION kalk_get_1_18()
    ELSE
       nKalkStaraCijena := _MPCSAPP
    ENDIF
-
    IF kalk_is_novi_dokument()
       nKalkNovaCijena := 0
    ELSE
@@ -68,9 +64,7 @@ FUNCTION kalk_get_1_18()
       MsgBeep( "Za robu tipa X ne rade se nivelacije" )
    ENDIF
 
-
   cNaziv := "VPC"
-
    @ box_x_koord() + 17, box_y_koord() + 2    SAY "STARA CIJENA  (" + cNaziv + ") :"  GET nKalkStaraCijena  PICTURE PicDEM
    @ box_x_koord() + 18, box_y_koord() + 2    SAY "NOVA CIJENA   (" + cNaziv + ") :"  GET nKalkNovaCijena   PICTURE PicDEM
 
@@ -84,13 +78,10 @@ FUNCTION kalk_get_1_18()
    ESC_RETURN K_ESC
 
    IF _TBankTr <> "X"
-
       //SELECT roba
       kalk_set_vpc_sifarnik( nKalkNovaCijena )
-
       SELECT kalk_pripr
    ENDIF
-
 
    IF gcMpcKalk10 == "D"
       IF ( roba->mpc == 0 .OR. roba->mpc <> Round( _mpcpom, 2 ) ) .AND. Round( _mpcpom, 2 ) <> 0 .AND. Pitanje(, "Staviti MPC u šifarnik" ) == "D"

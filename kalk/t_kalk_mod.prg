@@ -102,7 +102,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC KursLis := "1"
    PUBLIC gStavitiUSifarnikNovuCijenuDefault := "D"
    PUBLIC gDecKol := 5
-   PUBLIC gRCRP := "C"
+   PUBLIC gPopustMaloprodajaPrekoProcentaIliCijene := "C"
    PUBLIC gPotpis := "N"
    PUBLIC g10Porez := "N"
    PUBLIC gDirFin := ""
@@ -222,7 +222,7 @@ METHOD TKalkMod:set_module_gvars()
    gPicProc := fetch_metric( "kalk_format_prikaza_procenta", nil, gPicProc )
    gPicNc := fetch_metric( "kalk_format_prikaza_nabavne_cijene", nil, gPicNC )
    gPotpis := fetch_metric( "kalk_potpis_na_kraju_naloga", nil, gPotpis )
-   gRCRP := fetch_metric( "kalk_varijanta_popusta_na_dokumentima", nil, gRCRP )
+   gPopustMaloprodajaPrekoProcentaIliCijene := fetch_metric( "kalk_varijanta_popusta_na_dokumentima", nil, gPopustMaloprodajaPrekoProcentaIliCijene )
    gAutoCjen := fetch_metric( "kalk_automatsko_azuriranje_cijena", nil, gAutoCjen )
    gRobaTr1Tip := fetch_metric( "kalk_trosak_1_tip", nil, gRobaTr1Tip )
    gRobaTr2Tip := fetch_metric( "kalk_trosak_2_tip", nil, gRobaTr2Tip )

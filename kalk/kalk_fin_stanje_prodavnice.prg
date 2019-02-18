@@ -18,6 +18,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    LOCAL hParams
    LOCAL dDatOd, dDatDo
    LOCAL cIdFirma
+   LOCAL nPDV
 
    cPicIznos := kalk_prosiri_pic_iznos_za_2()
    cPicCijena := kalk_prosiri_pic_cjena_za_2()
@@ -25,10 +26,10 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "133", FIELD_LENGTH_IDKONTO )
 
-   //o_koncij()
+   // o_koncij()
    // o_roba()
-   //o_tarifa()
-   //o_konto()
+   // o_tarifa()
+   // o_konto()
 
    dDatOd := CToD( "" )
    dDatDo := Date()
@@ -43,7 +44,6 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    DO WHILE .T.
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto   " GET cIdKonto VALID P_Konto( @cIdKonto )
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Tarife  " GET qqTarifa PICT "@!S50"
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "Vrste dokumenata  " GET qqIDVD PICT "@!S30"
@@ -53,7 +53,6 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
       @ box_x_koord() + 8, box_y_koord() + 2  SAY "Prikaz: roba tipa T / dokumenati IP (1/2)" GET cTU  VALID cTU $ "12"
 
       READ
-
       ESC_BCR
 
       PRIVATE aUsl2 := Parsiraj( qqTarifa, "idtarifa" )
@@ -79,9 +78,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    // ovo je napusteno ...
    // fSaberikol := ( my_get_from_ini( 'Svi', 'SaberiKol', 'N' ) == 'D' )
 
-
    hParams := hb_Hash()
-
    hParams[ "idfirma" ] := cIdFirma
 
    IF Len( Trim( cIdkonto ) ) == 3  // sinteticki konto
@@ -156,14 +153,12 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    gpO_Land()
 
    PRIVATE nTStrana := 0
-   PRIVATE bZagl := {|| Zaglfinansijsko_stanje_prodavnica( dDatOd, dDatDo ) }
-   PRIVATE aPorezi := {}
+   PRIVATE bZagl := {|| kalk_zagl_fin_stanje_prodavnica( dDatOd, dDatDo ) }
 
    Eval( bZagl, dDatOd, dDatDo )
    nTUlaz := nTIzlaz := 0
    ntMPVBU := ntMPVBI := ntMPVU := ntMPVI := ntNVU := ntNVI := ntMPVIP := 0
    ntPopust := 0
-
    nCol1 := nCol0 := 10
    PRIVATE nRbr := 0
 
@@ -172,12 +167,11 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
 #xcommand CMINIT => ncmSlogova:=100; ncmRec:=1
    // #DEFINE CMNEOF  !eof() .and. ncmRec<=ncmSLOGOVA
    // #XCOMMAND CMSKIP => ++ncmRec; if ncmrec>ncmslogova;exit;end; skip
-#define CMNEOF  !eof()
 
 
    CMINIT
-   showkorner( ncmslogova, 1, 16 )
-   showkorner( 0, 100 )
+   // showkorner( ncmslogova, 1, 16 )
+   // showkorner( 0, 100 )
 
 
    PRIVATE nKU := nKI := 0 // kolicine ulaz/izlaz
@@ -185,7 +179,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    nKolUlaz := 0
    nKolIzlaz := 0
 
-   DO WHILE CMNEOF .AND. cidfirma == idfirma .AND.  IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdfirma == idfirma .AND.  IspitajPrekid()
 
       nUlaz := nIzlaz := 0
       nMPVBU := nMPVBI := nMPVU := nMPVI := nNVU := nNVI := nMPVIP := 0
@@ -196,12 +190,12 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
       dDatDok := datdok
       cBroj := idvd + "-" + brdok
 
-      DO WHILE CMNEOF  .AND. cidfirma + DToS( ddatdok ) + cbroj == idFirma + DToS( datdok ) + idvd + "-" + brdok .AND.  IspitajPrekid()
+      DO WHILE !Eof()  .AND. cIdfirma + DToS( ddatdok ) + cBroj == idFirma + DToS( datdok ) + idvd + "-" + brdok .AND.  IspitajPrekid()
 
          select_o_roba( KALK->idroba )
          SELECT KALK
 
-         //showkorner( 1, 100 )
+         // showkorner( 1, 100 )
          IF cTU == "2" .AND.  roba->tip $ "UT"
             // prikaz dokumenata IP, a ne robe tipa "T"
             SKIP
@@ -223,24 +217,20 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
 
          ELSEIF field->pu_i == "5"
 
-            set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi, field->idtarifa )
-            // uracunaj i popust
-            // kalk_porezi_maloprodaja_legacy_array( matrica, mp_bez_pdv, mp_sa_pdv, nc )
-            aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcsapp, field->nc )
-            nPor1 := aIPor[ 1 ]
+            nPDV := field->mpc * pdv_procenat_by_tarifa( kalk->idtarifa )
 
             IF field->idvd $ "12#13"
                nMPVBU -= kalk->mpc * kalk->kolicina
                nMPVU -= kalk->mpcsapp * kalk->kolicina
                nNVU -= kalk->nc * kalk->kolicina
                nPopust -= kalk->rabatv * kalk->kolicina
-               nMPVIP -= ( kalk->mpc + nPor1 ) * kalk->kolicina
+               nMPVIP -= ( kalk->mpc + nPDV ) * kalk->kolicina
             ELSE
                nMPVBI += kalk->mpc * kalk->kolicina
                nMPVI += kalk->mpcsapp * kalk->kolicina
                nNVI += kalk->nc * kalk->kolicina
                nPopust += kalk->rabatv * kalk->kolicina
-               nMPVIP += ( kalk->mpc + nPor1 ) * kalk->kolicina
+               nMPVIP += ( kalk->mpc + nPDV ) * kalk->kolicina
             ENDIF
 
          ELSEIF kalk->pu_i == "3" // nivelacija
@@ -248,13 +238,10 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
             nMPVU += kalk->mpcsapp * kalk->kolicina
 
          ELSEIF kalk->pu_i == "I"
-            set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idRoba, @aPorezi, field->idtarifa )
-            nMPVBI += kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi ) * field->gkolicin2
+            nMPVBI += field->mpc * field->gkolicin2
             nMPVI += mpcsapp * gkolicin2
             nNVI += nc * gkolicin2
-
          ENDIF
-
          SKIP
 
       ENDDO
@@ -288,12 +275,8 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
       @ PRow(), PCol() + 1 SAY ntMPVBU - ntMPVBI PICT cPicIznos
       @ PRow(), PCol() + 1 SAY nMPVU PICT cPicIznos
       @ PRow(), PCol() + 1 SAY nMPVI PICT cPicIznos
-
-
       @ PRow(), PCol() + 1 SAY nPopust PICT cPicIznos
       @ PRow(), PCol() + 1 SAY nMPVIP PICT cPicIznos
-
-
       @ PRow(), PCol() + 1 SAY ntMPVU - ntMPVI PICT cPicIznos
 
    ENDDO
@@ -309,11 +292,8 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    @ PRow(), PCol() + 1 SAY ntMPVBU - ntMPVBI PICT cPicIznos
    @ PRow(), PCol() + 1 SAY ntMPVU PICT cPicIznos
    @ PRow(), PCol() + 1 SAY ntMPVI PICT cPicIznos
-
    @ PRow(), PCol() + 1 SAY ntPopust PICT cPicIznos
    @ PRow(), PCol() + 1 SAY ntMPVIP PICT cPicIznos
-
-
    @ PRow(), PCol() + 1 SAY ntMPVU - ntMPVI PICT cPicIznos
 
    ? cLine
@@ -327,7 +307,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    RETURN .T.
 
 
-FUNCTION Zaglfinansijsko_stanje_prodavnica( dDatOd, dDatDo )
+FUNCTION kalk_zagl_fin_stanje_prodavnica( dDatOd, dDatDo )
 
    select_o_konto( cIdKonto )
    Preduzece()

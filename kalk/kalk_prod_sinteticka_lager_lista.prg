@@ -140,11 +140,6 @@ FUNCTION sint_lager_lista_prodavnice()
       nMPVU := nMPVI := nNVU := nNVI := 0
       nRabat := 0
 
-      IF lSMark .AND. SkLoNMark( "ROBA", cIdroba )
-         SKIP
-         LOOP
-      ENDIF
-
       IF Len( aUsl2 ) <> 0
          IF !Tacno( aUsl2 )
             SKIP
@@ -170,11 +165,6 @@ FUNCTION sint_lager_lista_prodavnice()
                SKIP
                LOOP
             ENDIF
-         ENDIF
-
-         IF lSMark .AND. SkLoNMark( "ROBA", cIdroba )
-            SKIP
-            LOOP
          ENDIF
 
          IF datdok < dDatOd .OR. datdok > dDatDo

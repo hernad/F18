@@ -1051,31 +1051,6 @@ FUNCTION say_from_valid( x, y, cString, nP )
    RETURN .T.
 
 
-FUNCTION ShowKorner( nS, nStep, nDelta )
-
-   STATIC i := 0
-   LOCAL cPom
-
-   IF nS == 0 // nS - tekuca vrijednost
-      i := 0
-   ELSEIF nS == 1
-      i++
-   ELSE
-      i := nS
-   ENDIF
-   IF ndelta = NIL
-      nDelta := 0
-   ENDIF
-   IF i % nStep == 0
-      cPom := Set( _SET_DEVICE )
-      SET DEVICE TO SCREEN
-      @ f18_max_rows() - 1, ( f18_max_cols() - 7 - nDelta ) SAY  i PICT "999999"
-      Set( _SET_DEVICE, cPom )
-   ENDIF
-
-   RETURN .T.
-
-
 
 FUNCTION IzreziPath( cPath, cTekst )
 

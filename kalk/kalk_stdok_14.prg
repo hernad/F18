@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 MEMVAR m
-MEMVAR nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+MEMVAR nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 MEMVAR nStr, cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2  // dDatFaktP
 
 FIELD IdPartner, BrFaktP, DatFaktP, IdKonto, IdKonto2, Kolicina, DatDok
@@ -25,7 +25,7 @@ FUNCTION kalk_stampa_dok_14()
    LOCAL nPom := 0
    LOCAL oPDF, xPrintOpt, bZagl
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    m := "--- ---------- ---------- ----------  ---------- ---------- ---------- ----------- --------- ----------"
 
@@ -88,7 +88,7 @@ FUNCTION kalk_stampa_dok_14()
          IF ( roba->tip $ "UT" )
             nU5 := 0
          ELSE
-            nTot5 +=  ( Round( nU5 := nMarza * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr )  ) // ruc
+            nTot5 +=  ( Round( nU5 := nKalkMarzaVP * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr )  ) // ruc
          ENDIF
          nTot6 +=  ( nU6 := 0 )  // pruc
          nTot7 +=  ( nU7 := nU5 )    // ruc-pruc
@@ -97,12 +97,12 @@ FUNCTION kalk_stampa_dok_14()
          IF ( roba->tip $ "UT" )
             nU5 := 0
          ELSE
-            nU5 := Round( nMarza * Kolicina, gZaokr ) // ruc
+            nU5 := Round( nKalkMarzaVP * Kolicina, gZaokr ) // ruc
          ENDIF
 
          nU6 := 0 // nU6 = pruc
-         IF Round( nMarza * Kolicina, gZaokr ) > 0 // pozitivna marza
-            nU5 :=  Round( nMarza * Kolicina, gZaokr ) - nU6
+         IF Round( nKalkMarzaVP * Kolicina, gZaokr ) > 0 // pozitivna marza
+            nU5 :=  Round( nKalkMarzaVP * Kolicina, gZaokr ) - nU6
          ENDIF
          nU7 := nU5 + nU6      // ruc+pruc
 

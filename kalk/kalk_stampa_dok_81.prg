@@ -18,16 +18,15 @@ FUNCTION kalk_stampa_dok_81()
    LOCAL nCol1 := nCol2 := 0, npom := 0
    PRIVATE aPorezi
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, nPRUC
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
-   nMarza := nMarza2 := nPRUC := 0
+   nKalkMarzaVP := nKalkMarzaMP := 0
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
    //dDatFaktP := DatFaktP
-
    cPKonto := kalk_pripr->pkonto
    //cIdKonto2 := IdKonto2
 
@@ -47,7 +46,6 @@ FUNCTION kalk_stampa_dok_81()
    m := "---- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- -----------"
    m += " ----------"
 
-
    ? m
    ? "*R * ROBA     *  FCJ     * RABAT    *  FCJ-RAB  * TROSKOVI *    NC    * MARZA.   *    PC    *  PDV(%)  *    PC    *"
    ? "*BR* TARIFA   *  KOLICINA* DOBAVLJ  *           *          *          *          *  BEZ PDV *  PDV     *  SA PDV  *"
@@ -59,7 +57,6 @@ FUNCTION kalk_stampa_dok_81()
    nPDV := 0
 
    SELECT kalk_pripr
-
    aPorezi := {}
 
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
@@ -79,7 +76,6 @@ FUNCTION kalk_stampa_dok_81()
       ENDIF
 
       SKol := Kolicina
-
       nTot +=  ( nU := FCj * Kolicina )
       nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
       nTot2 += ( nU2 := -Rabat / 100 * FCJ * Kolicina )
@@ -89,7 +85,7 @@ FUNCTION kalk_stampa_dok_81()
       nTot6 += ( nU6 := nCarDaz * SKol )
       nTot7 += ( nU7 := nZavTr * SKol )
       nTot8 += ( nU8 := NC *    ( Kolicina - Gkolicina - GKolicin2 ) )
-      nTot9 += ( nU9 := nMarza2 * ( Kolicina - Gkolicina - GKolicin2 ) )
+      nTot9 += ( nU9 := nKalkMarzaMP * ( Kolicina - Gkolicina - GKolicin2 ) )
 
       nTotA += ( nUA := MPC   * ( Kolicina - Gkolicina - GKolicin2 ) )
       nTotB += ( nUB := MPCSAPP * ( Kolicina - Gkolicina - GKolicin2 ) )
@@ -110,7 +106,7 @@ FUNCTION kalk_stampa_dok_81()
       @ PRow(), PCol() + 1 SAY fcj * ( 1 - Rabat / 100 )     PICTURE piccdem
       @ PRow(), PCol() + 1 SAY ( nPrevoz + nBankTr + nSpedtr + nCarDaz + nZavTr ) / FCJ2 * 100       PICTURE PicProc
       @ PRow(), PCol() + 1 SAY NC                    PICTURE PicCDEM
-      @ PRow(), PCol() + 1 SAY nMarza2 / NC * 100        PICTURE PicProc
+      @ PRow(), PCol() + 1 SAY nKalkMarzaMP / NC * 100        PICTURE PicProc
 
       @ PRow(), PCol() + 1 SAY MPC                   PICTURE PicCDEM
 
@@ -125,7 +121,7 @@ FUNCTION kalk_stampa_dok_81()
       @ PRow(), PCol() + 1 SAY Space( Len( piccdem ) )
       @ PRow(), PCol() + 1 SAY ( nPrevoz + nBankTr + nSpedtr + nCarDaz + nZavTr )   PICTURE Piccdem
       @ PRow(), PCol() + 1 SAY Space( Len( picdem ) )
-      @ PRow(), PCol() + 1 SAY nMarza2              PICTURE PicCDEM
+      @ PRow(), PCol() + 1 SAY nKalkMarzaMP              PICTURE PicCDEM
 
 
       @ PRow(), PCol() + 1 SAY Space( Len( picdem ) )
@@ -202,9 +198,9 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
    LOCAL nCol1 := nCol2 := 0, nPom := 0
    LOCAL nPDV
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, nPRUC, aPorezi
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, aPorezi
 
-   nMarza := nMarza2 := nPRUC := 0
+   nKalkMarzaVP := nKalkMarzaMP := 0
    aPorezi := {}
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
@@ -293,7 +289,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
       nTot6 += ( nU6 := nCarDaz * SKol )
       nTot7 += ( nU7 := nZavTr * SKol )
       nTot8 += ( nU8 := NC *    ( Kolicina - Gkolicina - GKolicin2 ) )
-      nTot9 += ( nU9 := nMarza2 * ( Kolicina - Gkolicina - GKolicin2 ) )
+      nTot9 += ( nU9 := nKalkMarzaMP * ( Kolicina - Gkolicina - GKolicin2 ) )
 
       nTotA += ( nUA := MPC   * ( Kolicina - Gkolicina - GKolicin2 ) )
       nTotB += ( nUB := MPCSAPP * ( Kolicina - Gkolicina - GKolicin2 ) )
@@ -321,7 +317,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow(), PCol() + 1 SAY nCarDaz / FCJ2 * 100      PICTURE PicProc
          @ PRow(), PCol() + 1 SAY nZavTr / FCJ2 * 100       PICTURE PicProc
          @ PRow(), PCol() + 1 SAY NC                    PICTURE PicCDEM
-         @ PRow(), PCol() + 1 SAY nMarza2 / NC * 100        PICTURE PicProc
+         @ PRow(), PCol() + 1 SAY nKalkMarzaMP / NC * 100        PICTURE PicProc
 
       ELSE
          @ PRow(), PCol() + 1 SAY Kolicina             PICTURE PicCDEM
@@ -344,7 +340,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE PicCDEM
          @ PRow(), PCol() + 1 SAY nZavTr               PICTURE PicCDEM
          @ PRow(), PCol() + 1 SAY Space( Len( picdem ) )
-         @ PRow(), PCol() + 1 SAY nMarza2              PICTURE PicCDEM
+         @ PRow(), PCol() + 1 SAY nKalkMarzaMP              PICTURE PicCDEM
 
          @ PRow(), PCol() + 1 SAY Space( Len( PicCDEM ) )
 

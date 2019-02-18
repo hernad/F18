@@ -25,7 +25,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    IF lStampatiBezNabavneCijene == NIL
       lStampatiBezNabavneCijene := .F.
@@ -103,11 +103,10 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi )
-
          aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, field->mpcSaPP, field->nc )
          SKol := kalk_pripr->Kolicina
          nTot8 += ( nU8 := NC *    ( Kolicina ) )
-         nTot9 += ( nU9 := nMarza2 * ( Kolicina ) )
+         nTot9 += ( nU9 := nKalkMarzaMP * ( Kolicina ) )
          nTotA += ( nUA := MPC   * ( Kolicina ) )
          nTotB += ( nUB := MPCSAPP * ( Kolicina  ) )
 
@@ -122,7 +121,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
          IF !lStampatiBezNabavneCijene  // bez nc
             @ PRow(), nCol1    SAY kalk_pripr->NC                    PICTURE PicCDEM
             IF Round( nc, 5 ) <> 0
-               @ PRow(), PCol() + 1 SAY nMarza2 / kalk_pripr->NC * 100        PICTURE PicProc
+               @ PRow(), PCol() + 1 SAY nKalkMarzaMP / kalk_pripr->NC * 100        PICTURE PicProc
             ELSE
                @ PRow(), PCol() + 1 SAY 0        PICTURE PicProc
             ENDIF

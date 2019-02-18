@@ -18,8 +18,6 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
    LOCAL _pict := "99999999999.99"
    LOCAL nKolona
    LOCAL aPKonta
-   LOCAL nIznPRuc
-   PRIVATE aPorezi
 
    IF bCheckPDFNovaStrana != NIL
       Eval( bCheckPDFNovaStrana )
@@ -43,8 +41,6 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
    m := "------ ----------"
 
    nKolona := 3
-
-
    FOR i := 1 TO nKolona
       m += " --------------"
    NEXT
@@ -57,7 +53,6 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
    aPKonta := PKontoCnt( cIdFirma + cIdvd + cBrDok )
    nCntKonto := Len( aPKonta )
 
-   aPorezi := {}
 
    FOR i := 1 TO nCntKonto
 
@@ -88,9 +83,7 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
          nU3 := 0
 
          select_o_tarifa( cIdtarifa )
-
          SELECT kalk_pripr
-
          DO WHILE !Eof() .AND. cIdfirma + cIdvd + cBrDok == field->idfirma + field->idvd + field->brdok ;
                .AND. field->idtarifa == cIdTarifa
 
@@ -98,60 +91,28 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
                SKIP
                LOOP
             ENDIF
-
             select_o_roba(  kalk_pripr->idroba )
-            set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi, cIdTarifa )
             SELECT kalk_pripr
-
-            nMpc := kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi )
-
-            IF field->idvd == "19"
-
-               // nova cijena
-               nMpcsaPdv1 := field->mpcSaPP + field->fcj
-               nMpc1 := MpcBezPor( nMpcsaPdv1, aPorezi,, field->nc )
-               aIPor1 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc1, nMpcsaPdv1, field->nc )
-
-               // stara cijena
-               nMpcsaPdv2 := field->fcj
-               nMpc2 := MpcBezPor( nMpcsaPdv2, aPorezi,, field->nc )
-               aIPor2 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc2, nMpcsaPdv2, field->nc )
-               aIPor := { 0, 0, 0 }
-               aIPor[ 1 ] := aIPor1[ 1 ] - aIPor2[ 1 ]
-
-            ELSE
-
-               aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc, field->mpcsapp, field->nc )
-
-            ENDIF
-
-            nKolicina := DokKolicina( field->idvd )
+            nMpc := field->mpc
+            nKolicina := field->kolicina
             nU1 += nMpc * nKolicina
-            nU2 += aIPor[ 1 ] * nKolicina
+            nU2 += nMpc * pdv_procenat_by_tarifa( cIdTarifa ) * nKolicina
             nU3 += field->mpcsapp * nKolicina
-
             // ukupna bruto marza
             nTot6 += ( nMpc - kalk_pripr->nc ) * nKolicina
-
-            SKIP 1
+            SKIP
 
          ENDDO
 
          nTot1 += nU1
          nTot2 += nU2
-
          nTot3 += nU3
-
          ? cIdTarifa
 
-         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc
-
-
+         @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) PICT picproc()
          nCol1 := PCol() + 1
-
          @ PRow(), PCol() + 1   SAY nU1 PICT _pict
          @ PRow(), PCol() + 1   SAY nU2 PICT _pict
-
          @ PRow(), PCol() + 1   SAY nU3 PICT _pict
 
       ENDDO
@@ -176,7 +137,6 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
    RETURN .T.
 
 
-
 /* PKontoCnt(cSeek)
  *     Kreira niz prodavnickih konta koji se nalaze u zadanom dokumentu
  *   param: cSeek - firma + tip dok + broj dok
@@ -198,38 +158,3 @@ FUNCTION PKontoCnt( cSeek )
    ENDDO
 
    RETURN aPKonta
-
-
-FUNCTION DokKolicina( cIdVd )
-
-   LOCAL nKol
-
-   IF cIdVd == "IP"
-
-      // kolicina = popisana kolicina
-      // gkolicina = knjizna kolicina
-
-      // nKol := ( field->kolicina - field->gkolicina )
-      nKol := field->kolicina
-      // stajalo je nKol := gKolicin2 ali mi je rekapitulacija davala pogresnu
-      // stvar
-
-   ELSE
-      nKol := field->kolicina
-   ENDIF
-
-   RETURN nKol
-
-
-
-FUNCTION kalk_mpc_by_vrsta_dokumenta( cIdVd, aPorezi )
-
-   LOCAL nMpc
-
-   IF cIdVd == "IP"
-      nMpc := MpcBezPor( field->mpcsapp, aPorezi, , field->nc )
-   ELSE
-      nMpc := field->mpc
-   ENDIF
-
-   RETURN nMpc

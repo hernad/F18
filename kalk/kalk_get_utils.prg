@@ -11,105 +11,45 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkMarzaMP
+MEMVAR _mpc, _mpcsapp, _tmarza2, _marza2, _idtarifa, _rabatv, _vpc, _kolicina, _fcj
+MEMVAR GetList
 
-/*
- *     When blok za unos MPC
- *   param: fRealizacija -
- *   param: cProracunMarzeUnaprijed -
- */
-
-FUNCTION WMpc( fRealizacija, cProracunMarzeUnaprijed )
-
-   IF fRealizacija == nil
-      fRealizacija := .F.
-   ENDIF
-
-   IF fRealizacija
-      cProracunMarzeUnaprijed := " "
-   ENDIF
+FUNCTION kalk_when_mpc_bez_pdv_11_12()
 
    IF _mpcsapp <> 0
       _marza2 := 0
-      _mpc := MpcBezPor( _mpcsapp, aPorezi, , _nc )
-   ENDIF
-
-   IF fRealizacija
-      IF ( _idvd == "47" )
-         _nc := _mpc
-      ENDIF
+      _mpc := mpc_bez_pdv_by_tarifa( _idtarifa, _mpcsapp )
    ENDIF
 
    RETURN .T.
 
 
-
-/* VMpc(fRealizacija,cProracunMarzeUnaprijed)
- *     Valid blok za unos MPC
- *   param: fRealizacija -
- *   param: cProracunMarzeUnaprijed -
- */
-FUNCTION VMpc( fRealizacija, cProracunMarzeUnaprijed )
-
-   IF fRealizacija == NIL
-      fRealizacija := .F.
-   ENDIF
-
-   IF fRealizacija
-      cProracunMarzeUnaprijed := " "
-   ENDIF
+FUNCTION kalk_valid_mpc_bez_pdv_11_12( cProracunMarzeUnaprijed )
 
    IF cProracunMarzeUnaprijed == NIL
       cProracunMarzeUnaprijed := " "
    ENDIF
 
-   kalk_marza_11( cProracunMarzeUnaprijed )
-
+   kalk_proracun_marzamp_11_80( cProracunMarzeUnaprijed )
    IF _mpcsapp == 0
-      _MPCSaPP := Round( MpcSaPor( _mpc, aPorezi ), 2 )
+      _MPCSaPP := Round( mpc_sa_pdv_by_tarifa( _idtarifa, _mpc ), 2 )
    ENDIF
 
    RETURN .T.
 
 
+FUNCTION kalk_valid_mpc_sa_pdv_11( cProracunMarzeUnaprijed, cIdTarifa )
 
-/* VMpcSaPP(fRealizacija,cProracunMarzeUnaprijed)
- *     Valid blok za unos MpcSaPP
- *   param: fRealizacija -
- *   param: cProracunMarzeUnaprijed -
- */
-FUNCTION VMpcSaPP( fRealizacija, cProracunMarzeUnaprijed )
-
-   LOCAL nRabat
-
-   IF fRealizacija == NIL
-      fRealizacija := .F.
-   ENDIF
-
-   IF fRealizacija
-      nRabat := _rabatv
-   ELSE
-      nRabat := 0
-   ENDIF
 
    IF cProracunMarzeUnaprijed == NIL
       cProracunMarzeUnaprijed := " "
    ENDIF
-
    IF _mpcsapp <> 0 .AND. Empty( cProracunMarzeUnaprijed )
-
-      _mpc := MpcBezPor( _mpcsapp, aPorezi, nRabat, _nc )
-
+      _mpc := mpc_bez_pdv_by_tarifa( cIdTarifa, _mpcsapp )
       _marza2 := 0
-      IF fRealizacija
-         Marza2R()
-      ELSE
-         kalk_Marza_11()
-      ENDIF
+      kalk_proracun_marzamp_11_80()
       ShowGets()
-
-      IF fRealizacija
-         // DuplRoba()
-      ENDIF
    ENDIF
 
    cProracunMarzeUnaprijed := " "
@@ -120,168 +60,59 @@ FUNCTION VMpcSaPP( fRealizacija, cProracunMarzeUnaprijed )
 FUNCTION kalk_say_pdv_a_porezi_var( nRow )
 
    @ box_x_koord() + nRow, box_y_koord() + 2  SAY "PDV (%):"
-   @ Row(), Col() + 2 SAY aPorezi[ POR_PDV ] PICTURE "99.99"
+   @ Row(), Col() + 2 SAY pdv_procenat_by_tarifa( _idtarifa ) PICTURE "99.99"
 
    RETURN .T.
 
 
+FUNCTION kalk_when_mpc_bez_pdv_80_81_41_42( cIdVd, lNaprijed )
 
-/*
- *     Puni polja izgenerisane stavke
- *   param: pIzgStavke - .f. ne puni, .t. puni
+   LOCAL nMpcSaPDVBruto
+   LOCAL nPopustMaloprodaja
 
-
---FUNCTION kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
-
-   IF lKalkIzgenerisaneStavke .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
-      PRIVATE nRRec := RecNo()
-      GO TOP
-      my_flock()
-      DO WHILE !Eof()  // nafiluj izgenerisane stavke
-         IF kolicina == 0
-            SKIP
-            PRIVATE nRRec2 := RecNo()
-            SKIP -1
-            my_delete()
-            GO nRRec2
-            LOOP
-         ENDIF
-         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nKalkRbr
-            REPLACE nc WITH kalk_pripr->fcj, ;
-               vpc WITH _vpc, ;
-               tprevoz WITH _tprevoz, ;
-               prevoz WITH _prevoz, ;
-               mpc    WITH _mpc, ;
-               mpcsapp WITH _mpcsapp, ;
-               tmarza  WITH _tmarza, ;
-               marza  WITH _vpc - kalk_pripr->fcj, ;      // konkretna vp marza
-               tmarza2  WITH _tmarza2, ;
-               marza2  WITH _marza2, ;
-               mkonto WITH _mkonto, ;
-               mu_i WITH  _mu_i, ;
-               pkonto WITH _pkonto, ;
-               pu_i WITH  _pu_i, ;
-               error WITH "0"
-         ENDIF
-         SKIP
-      ENDDO
-      my_unlock()
-      GO nRRec
-   ENDIF
-
-   RETURN .T.
-*/
-
-
-/*
- *     When blok za unos MPC
- *   param: fRealizacija -
- *   param: cProracunMarzeUnaprijed -
- *  note koriste se lokalne varijable
- */
-FUNCTION WMpc_lv( fRealizacija, cProracunMarzeUnaprijed, aPorezi )
-
-   // legacy
-
-   IF fRealizacija == nil
-      fRealizacija := .F.
-   ENDIF
-
-   IF fRealizacija
-      cProracunMarzeUnaprijed := " "
-   ENDIF
-
-   IF _MpcSapp <> 0
-      _marza2 := 0
-      _Mpc := MpcBezPor( _MpcSaPP, aPorezi, , _nc )
-   ENDIF
-
-   IF fRealizacija
-      IF ( _idvd == "47" )
-         _nc := _mpc
-      ENDIF
-   ENDIF
-
-   RETURN .T.
-
-
-
-/* VMpc_lv(fRealizacija, cProracunMarzeUnaprijed, aPorezi)
- *     Valid blok za unos MPC
- *   param: fRealizacija -
- *   param: cProracunMarzeUnaprijed -
- *  note koriste se lokalne varijable
- */
-FUNCTION VMpc_lv( fRealizacija, cProracunMarzeUnaprijed, aPorezi )
-
-   IF fRealizacija == nil
-      fRealizacija := .F.
-   ENDIF
-   IF fRealizacija
-      cProracunMarzeUnaprijed := " "
-   ENDIF
-   IF cProracunMarzeUnaprijed == nil
-      cProracunMarzeUnaprijed := " "
-   ENDIF
-
-   kalk_marza_11( cProracunMarzeUnaprijed )
-   IF ( _mpcsapp == 0 )
-      _MPCSaPP := Round( MpcSaPor( _mpc, aPorezi ), 2 )
-   ENDIF
-
-   RETURN .T.
-
-
-
-FUNCTION kalk_when_valid_mpc_80_81_41_42( cIdVd, lNaprijed, aPorezi )
-
-   LOCAL _st_popust
-
-   // formiraj cijenu naprijed
    IF lNaprijed
-      // postavi _Mpc bez poreza
-      MarzaMP( cIdVd, .T., aPorezi )
+      kalk_set_vars_marza_maloprodaja( cIdVd, .T. )
    ENDIF
 
-   IF cIdVd $ "41#42#47"
-      nMpcSaPDV := _MpcSaPP
-      _st_popust := _rabatv
+   nMpcSaPDVBruto := _MpcSaPP
+   IF cIdVd $ "41#42"
+      nPopustMaloprodaja := _rabatv // ne sadrzi pdv
    ELSE
-      nMpcSaPDV := _MpcSapp
-      _st_popust := 0
+      nPopustMaloprodaja := 0
    ENDIF
 
-   // postoji MPC, idi unazad
    IF !lNaprijed .AND. _MpcSapp <> 0
       _Marza2 := 0
-      _Mpc := MpcBezPor( nMpcSaPDV, aPorezi, , _nc ) - _st_popust
+      // mpc_bruto - popust (field rabatv) = mpc_neto (field mpc)
+      // mpc_neto = mpc_sa_pdv_neto
+      // mpc_bruto = mpc_sa_pdv_bruto bez pdv
+      _Mpc := mpc_bez_pdv_by_tarifa( _idtarifa, nMpcSaPDVBruto ) - nPopustMaloprodaja
    ENDIF
 
    RETURN .T.
 
 
-FUNCTION kalk_valid_mpc_80_81_41_42( cIdVd, lNaprijed, aPorezi )
+FUNCTION kalk_valid_mpc_bez_pdv_80_81_41_42( cIdVd, lNaprijed )
 
-   LOCAL nPopust
+   LOCAL nMpcBezPDVNeto, nPopustMaloprodaja
 
-   IF cIdVd $ "41#42#47"
-      nPopust := _RabatV
+   nMpcBezPDVNeto := _mpc
+   IF cIdVd $ "41#42"
+      nPopustMaloprodaja := _RabatV
    ELSE
-      nPopust := 0
+      nPopustMaloprodaja := 0
    ENDIF
 
-   MarzaMp( cIdVd, lNaprijed, aPorezi )
-
+   kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
    IF ( _Mpcsapp == 0 )
-      _mpcsapp := Round( MpcSaPor( _mpc, aPorezi ), 2 ) + nPopust
+      // mpc_sa_pdv_bruto = mpc_bruto = (mpc_neto + popust) sa pdv
+      _mpcsapp := Round( mpc_sa_pdv_by_tarifa( _idtarifa, nMpcBezPDVNeto + nPopustMaloprodaja ), 2 )
    ENDIF
 
    RETURN .T.
 
 
-STATIC FUNCTION MarzaMP( cIdVd, lNaprijed, aPorezi )
-
-   LOCAL nPrevMP
+STATIC FUNCTION kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
 
    // za svaki slucaj setujemo ovo ako slucajno u dokumentu nije ispranvo
    IF cIdVD $ "11#12#13"
@@ -290,157 +121,61 @@ STATIC FUNCTION MarzaMP( cIdVd, lNaprijed, aPorezi )
       _VPC := _FCJ
    ENDIF
 
-   IF cIdVD $ "80"
+   IF cIdVD == "80"
       _vpc := _nc
       _fcj := _nc
    ENDIF
 
-   // ako je prevoz u MP rasporedjen uzmi ga u obzir
-   IF  ( cIdVd $ "11#12#13" ) .AND. ( _TPrevoz == "A" )
-      nPrevMP := _Prevoz
-   ELSE
-      nPrevMP := 0
-   ENDIF
-
    IF  ( _Marza2 == 0 ) .AND. !lNaprijed
-
-      nMarza2 := _MPC - _VPC - nPrevMP
-
+      nKalkMarzaMP := _MPC - _VPC
       IF _TMarza2 == "%"
          IF Round( _VPC, 5 ) <> 0
-            _Marza2 := 100 * ( _MPC / ( _VPC + nPrevMP ) - 1 )
+            _Marza2 := 100 * ( _MPC / _VPC - 1 )
          ELSE
             _Marza2 := 0
          ENDIF
-
       ELSEIF _TMarza2 == "A"
-         _Marza2 := nMarza2
+         _Marza2 := nKalkMarzaMP
 
       ELSEIF _TMarza2 == "U"
-         _Marza2 := nMarza2 * ( _Kolicina )
+         _Marza2 := nKalkMarzaMP * ( _Kolicina )
       ENDIF
 
    ELSEIF ( _MPC == 0 ) .OR. lNaprijed
 
       IF _TMarza2 == "%"
-         nMarza2 := _Marza2 / 100 * ( _VPC + nPrevMP )
+         nKalkMarzaMP := _Marza2 / 100 * ( _VPC )
       ELSEIF _TMarza2 == "A"
-         nMarza2 := _Marza2
+         nKalkMarzaMP := _Marza2
       ELSEIF _TMarza2 == "U"
-         nMarza2 := _Marza2 / ( _Kolicina )
+         nKalkMarzaMP := _Marza2 / ( _Kolicina )
       ENDIF
-
-      _MPC := Round( nMarza2 + _VPC, 2 )
-
-      _MpcSaPP := Round( MpcSaPor( _mpc, aPorezi ), 2 )
+      _MPC := Round( nKalkMarzaMP + _VPC, 2 )
+      _MpcSaPP := Round( mpc_sa_pdv_by_tarifa( _idtarifa, _mpc ), 2 )
 
    ELSE
-      nMarza2 := _MPC - _VPC - nPrevMP
+      nKalkMarzaMP := _MPC - _VPC
    ENDIF
 
    AEval( GetList, {| o | o:display() } )
 
-   RETURN
-
-
-
-/* VMpcSaPP_lv(fRealizacija, cProracunMarzeUnaprijed, aPorezi)
- *     Valid blok za unos MpcSaPP
- *   param: fRealizacija -
- *   param: cProracunMarzeUnaprijed -
- */
-FUNCTION VMpcSaPP_lv( fRealizacija, cProracunMarzeUnaprijed, aPorezi, lShowGets )
-
-   LOCAL nPom
-
-   IF lShowGets == nil
-      lShowGets := .T.
-   ENDIF
-
-   IF fRealizacija == NIL
-      fRealizacija := .F.
-   ENDIF
-
-   IF fRealizacija
-      nPom := _mpcsapp
-   ELSE
-      nPom := _mpcsapp
-   ENDIF
-
-   IF cProracunMarzeUnaprijed == nil
-      cProracunMarzeUnaprijed := " "
-   ENDIF
-
-   IF _mpcsapp <> 0 .AND. Empty( cProracunMarzeUnaprijed )
-      _mpc := MpcBezPor ( nPom, aPorezi, , _nc ) - _rabatv
-      _marza2 := 0
-      IF fRealizacija
-         Marza2R()
-      ELSE
-         kalk_marza_11()
-      ENDIF
-      IF lShowGets
-         ShowGets()
-      ENDIF
-      IF fRealizacija
-         // DuplRoba()
-      ENDIF
-   ENDIF
-
-   cProracunMarzeUnaprijed := " "
-
    RETURN .T.
 
 
-// ---------------------------------------------------------------
-// racuna mpc sa porezom
-// ---------------------------------------------------------------
-FUNCTION kalk_valid_mpcsapdv( cIdVd, lNaprijed, aPorezi, lShowGets )
-
-   LOCAL nPom
+FUNCTION kalk_valid_mpc_sa_pdv_41_42_81( cIdVd, lNaprijed, lShowGets )
 
    IF lShowGets == nil
       lShowGets := .T.
-   ENDIF
-
-   IF cIdvd $ "41#42"
-      nPom := _mpcsapp
-   ELSE
-      nPom := _mpcsapp
    ENDIF
 
    IF _Mpcsapp <> 0 .AND. !lNaprijed
-
       // mpc ce biti umanjena mpc sa pp - porez - rabat (ako postoji)
-      _mpc := MpcBezPor( nPom, aPorezi, , _nc ) - _rabatv
-
+      _mpc := mpc_bez_pdv_by_tarifa( _idtarifa, _mpcsapp ) - _rabatv
       _marza2 := 0
-
-      MarzaMP( cIdVd, lNaprijed, aPorezi )
-
+      kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
       IF lShowGets
          ShowGets()
       ENDIF
-
-      IF cIdVd $ "41#42"
-         // DuplRoba()
-      ENDIF
-
    ENDIF
-
-   RETURN .T.
-
-
-
-/*
- *     Ispisuje poreze
- *   param: nRow - relativna kooordinata reda u kojem se ispisuju porezi
- *  aPorezi - koristi lokalne varijable
- */
-
-FUNCTION SayPorezi_lv( nRow, aPorezi )
-
-   @ box_x_koord() + nRow, box_y_koord() + 2  SAY "PDV (%):"
-   @ Row(), Col() + 2 SAY  aPorezi[ POR_PDV ] PICTURE "99.99"
 
    RETURN .T.

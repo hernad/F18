@@ -70,27 +70,27 @@ FUNCTION Gen9999()
    RETURN .T.
 
 
-/* KalkNaF(cidroba,nKols)
+/* KalkNaF(cidroba,nKolicinaNaStanju)
  *     Stanje zadanog artikla u FAKT
  */
 
-FUNCTION KalkNaF( cIdroba, nKols )
+FUNCTION KalkNaF( cIdroba, nKolicinaNaStanju )
 
    //SELECT ( F_FAKT )
    //IF !Used(); o_fakt_dbf(); ENDIF
 
    //SELECT fakt
    //SET ORDER TO TAG "3" // fakt idroba
-   nKols := 0
+   nKolicinaNaStanju := 0
    //SEEK cidroba
    seek_fakt_3( NIL, cIdRoba )
 
    DO WHILE !Eof() .AND. cIdroba == idroba
       IF idtipdok = "0"  // ulaz
-         nKols += kolicina
+         nKolicinaNaStanju += kolicina
       ELSEIF idtipdok = "1"   // izlaz faktura
          IF !( serbr = "*" .AND. idtipdok == "10" ) // za fakture na osnovu otpremince ne ra~unaj izlaz
-            nKols -= kolicina
+            nKolicinaNaStanju -= kolicina
          ENDIF
       ENDIF
       SKIP
@@ -123,28 +123,6 @@ FUNCTION kalk_dokument_postoji( cFirma, cIdVd, cBroj, lSilent )
 
 
 
-
-
-
-/* kalk_marza_maloprodaja()
- *     Daje iznos maloprodajne marze
- */
-
-FUNCTION kalk_marza_maloprodaja()
-
-   IF TMarza2 == "%" .OR. Empty( tmarza2 )
-      nMarza2 := kolicina * Marza2 / 100 * VPC
-   ELSEIF TMarza2 == "A"
-      nMarza2 := Marza2 * kolicina
-   ELSEIF TMarza2 == "U"
-      nMarza2 := Marza2
-   ENDIF
-
-   RETURN nMarza2
-
-
-
-
 // -------------------------------------------------
 // brisanje pripreme od do
 // -------------------------------------------------
@@ -158,7 +136,6 @@ FUNCTION kalk_pripr_brisi_od_do()
    GO TOP
 
    _od := PadR( field->rbr, 4 )
-
    Box(, 1, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Briši stavke od" GET _od PICT "@S4"
    @ box_x_koord() + 1, Col() + 1 SAY "do" GET _do PICT "@S4"
@@ -265,130 +242,6 @@ FUNCTION KaKaProd( nUlaz, nIzlaz, nMPV, nNV )
    RETURN .T.
 
 
-
-
-
-
-/* ima_u_kalk_kumulativ(cKljuc,cTag)
- *     Ispituje postojanje zadanog kljuca u zadanom indeksu kumulativa KALK
- */
-
-FUNCTION ima_u_kalk_kumulativ( cKljuc, cTag )
-
-   // {
-   LOCAL lVrati := .F.
-   LOCAL lUsed := .T.
-   LOCAL nArr := Select()
-   SELECT ( F_KALK )
-   IF !Used()
-      lUsed := .F.
-      o_kalk()
-   ELSE
-      PushWA()
-   ENDIF
-   IF !Empty( IndexKey( Val( cTag ) + 1 ) )
-      SET ORDER TO TAG ( cTag )
-      SEEK cKljuc
-      lVrati := Found()
-   ENDIF
-   IF !lUsed
-      USE
-   ELSE
-      PopWA()
-   ENDIF
-   SELECT ( nArr )
-
-   RETURN lVrati
-// }
-
-
-
-/* \fn UkupnoKolP(nTotalUlaz, nTotalIzlaz)
- *    Obracun kolicine za prodavnicu
- * \note funkciju staviti unutar petlje koja prolazi kroz kalk
- * \code
- *    nUlazKP:=0
- *    nIzlazKP:=0
- *    do while .t.
- *      SELECT KALK
- *      UkupnoKolP(@nUlazKP,@nIzlazKP)
- *      SKIP
- *    enddo
- *    ? nUlazKP, nIzlazKP
- * \endcode
- */
-
-FUNCTION UkupnoKolP( nTotalUlaz, nTotalIzlaz )
-
-   // {
-   LOCAL cIdRoba
-   LOCAL lUsedRoba
-
-   cIdRoba := field->idRoba
-
-   nSelect := Select()
-
-
-   select_o_roba( cIdRoba )
-
-   SELECT ( nSelect )
-
-   IF field->pu_i == "1"
-      kalk_sumiraj_kolicinu( kolicina, 0, @nTotalUlaz, 0 )
-   ELSEIF field->pu_i == "5"
-      IF field->idvd $ "12#13"
-         kalk_sumiraj_kolicinu( - kolicina, 0, @nTotalUlaz, 0 )
-      ELSE
-         kalk_sumiraj_kolicinu( 0, kolicina, 0, @nTotalIzlaz )
-      ENDIF
-   ELSEIF field->pu_i == "3"
-      // nivelacija
-   ELSEIF field->pu_i == "I"
-      kalk_sumiraj_kolicinu( 0, gkolicin2, 0, @nTotalIzlaz )
-   ENDIF
-
-   RETURN
-// }
-
-/* UkupnoKolM(nTotalUlaz, nTotalIzlaz)
- *  \sa UkupnoKolP
- */
-
-FUNCTION UkupnoKolM( nTotalUlaz, nTotalIzlaz )
-
-   // {
-   LOCAL cIdRoba
-   LOCAL lUsedRoba
-
-   cIdRoba := field->idRoba
-
-   nSelect := Select()
-
-   select_o_roba( cIdRoba )
-
-   SELECT ( nSelect )
-   IF field->mu_i == "1"
-      IF !( field->idVd $ "12#22#94" )
-         kalk_sumiraj_kolicinu( field->kolicina - field->gKolicina - field->gKolicin2, 0, @nTotalUlaz, 0 )
-
-      ELSE
-         kalk_sumiraj_kolicinu( 0, - field->kolicina, 0, @nTotalIzlaz )
-      ENDIF
-
-   ELSEIF field->mu_i == "5"
-      kalk_sumiraj_kolicinu( 0, field->kolicina, 0, @nTotalIzlaz )
-
-   ELSEIF field->mu_i == "3"
-
-   ELSEIF field->mu_i == "8"
-      // sta je mu_i==8 ??
-      kalk_sumiraj_kolicinu( - field->kolicina, - field->kolicina, @nTotUlaz, @nTotalIzlaz )
-   ENDIF
-
-   RETURN .T.
-
-
-
 FUNCTION kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
    LOCAL nArea := SELECT()
@@ -404,6 +257,8 @@ FUNCTION kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 FUNCTION kalk_gen_11_iz_10( cBrDok )
 
    LOCAL nArr
+   LOCAL GetList := {}
+   LOCAL cIdTarifa
 
    nArr := Select()
    o_kalk_pripr9()
@@ -419,15 +274,13 @@ FUNCTION kalk_gen_11_iz_10( cBrDok )
    SELECT kalk_pripr
    GO TOP
    DO WHILE !Eof()
-      aPorezi := {}
       cProracunMarzeUnaprijed := " "
       ++nBrojac
       cKonto := kalk_pripr->idKonto
       cRoba := kalk_pripr->idRoba
-      cTarifa := kalk_pripr->idtarifa
+      cIdTarifa := kalk_pripr->idtarifa
       select_o_roba( cRoba )
-      select_o_tarifa( cTarifa )
-      set_pdv_array( @aPorezi )
+      select_o_tarifa( cIdTarifa )
       SELECT kalk_pripr
       Scatter()
       SELECT kalk_pripr9
@@ -442,8 +295,8 @@ FUNCTION kalk_gen_11_iz_10( cBrDok )
       _marza := _vpc - _fcj
       _tMarza2 := "A"
       _mpcsapp := kalk_get_mpc_by_koncij_pravilo()
-      VMPC( .F., cProracunMarzeUnaprijed )
-      VMPCSaPP( .F., cProracunMarzeUnaprijed )
+      kalk_valid_mpc_bez_pdv_11_12( cProracunMarzeUnaprijed )
+      kalk_valid_mpc_sa_pdv_11( cProracunMarzeUnaprijed, cIdTarifa )
       _MU_I := "5"
       _PU_I := "1"
       _mKonto := cKonto
@@ -500,13 +353,8 @@ FUNCTION kalk_generisati_11()
    IF ( cIdVD <> "10" )
       RETURN .F.
    ENDIF
-   IF my_get_from_ini( "KALK", "AutoGen11", "N", KUMPATH ) == "D" .AND. Pitanje(, "Formirati 11-ku (D/N)?", "D" ) == "D"
-      RETURN .T.
-   ELSE
-      RETURN .F.
-   ENDIF
 
-   RETURN
+   RETURN .F.
 
 
 // ---------------------------------------------

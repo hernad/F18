@@ -44,7 +44,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
    _where += " AND " + _sql_cond_parse( "k.pkonto", _p_konto )
 
    cQuery := " SELECT " + ;
-      " k.idroba, " + ;
+      " k.idroba, k.idtarifa, " + ;
       " SUM( CASE " + ;
       "WHEN k.pu_i = '1' THEN k.kolicina " + ;
       "WHEN k.pu_i = '5' AND k.idvd IN ('12', '13') THEN -k.kolicina " + ;
@@ -70,12 +70,12 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
       "WHEN k.pu_i = '5' AND k.idvd NOT IN ('12', '13') THEN k.kolicina * k.mpcsapp " + ;
       "WHEN k.pu_i = 'I' THEN k.gkolicin2 * k.mpcsapp " + ;
       "END ) AS mpvi " + ;
-      " FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk k "
+      " FROM " + f18_sql_schema("kalk_kalk") + " k "
 
    cQuery += _where
 
-   cQuery += " GROUP BY k.idroba "
-   cQuery += " ORDER BY k.idroba "
+   cQuery += " GROUP BY k.idroba, k.idtarifa "
+   cQuery += " ORDER BY k.idroba, k.idtarifa "
 
    IF lPocetnoStanje
       switch_to_database( _db_params, _tek_database, _year_sez )
@@ -246,10 +246,8 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
    LOCAL _p_konto := hParams[ "p_konto" ]
    LOCAL cRobaTipUslugeDN := hParams[ "roba_tip_tu" ]
    LOCAL oRow, _sufix
-   LOCAL nUlaz, nIzlaz, nNVUlaz, nNVIzlaz, nMpvUlaz, nMpvIzlaz, cIdRoba
+   LOCAL nUlaz, nIzlaz, nNVUlaz, nNVIzlaz, nMpvUlaz, nMpvIzlaz, cIdRoba, cIdTarifa
    LOCAL hRec
-
-   PRIVATE aPorezi := {}
 
    o_kalk_pripr()
    o_kalk_doks()
@@ -274,8 +272,8 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
    DO WHILE !oDataset:Eof()
 
       oRow := oDataset:GetRow()
-
       cIdRoba := hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "idroba" ) ) )
+      cIdTarifa := oRow:FieldGet( oRow:FieldPos( "idtarifa" ) )
       nUlaz := oRow:FieldGet( oRow:FieldPos( "ulaz" ) )
       nIzlaz := oRow:FieldGet( oRow:FieldPos( "izlaz" ) )
       nNVUlaz := oRow:FieldGet( oRow:FieldPos( "nvu" ) )
@@ -306,26 +304,23 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
       hRec[ "idroba" ] := cIdRoba
       hRec[ "idkonto" ] := _p_konto
       hRec[ "pkonto" ] := _p_konto
-      hRec[ "idtarifa" ] := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( _p_konto, cIdRoba, @aPorezi )
+      hRec[ "idtarifa" ] := cIdTarifa
       hRec[ "tcardaz" ] := "%"
       hRec[ "pu_i" ] := "1"
       hRec[ "brfaktp" ] := PadR( "lPocetnoStanje", Len( hRec[ "brfaktp" ] ) )
       // hRec[ "datfaktp" ] := _kalk_datum
       hRec[ "tmarza2" ] := "A"
-
       hRec[ "kolicina" ] := ( nUlaz - nIzlaz )
       hRec[ "nc" ] := ( nNVUlaz - nNVIzlaz ) / ( nUlaz - nIzlaz )
       hRec[ "fcj" ] := hRec[ "nc" ]
       hRec[ "vpc" ] := hRec[ "nc" ]
       hRec[ "error" ] := "0"
       hRec[ "mpcsapp" ] := Round( ( nMpvUlaz - nMpvIzlaz ) / ( nUlaz - nIzlaz ), 2 )
-
       IF hParams[ "set_mpc" ]
          hRec[ "mpcsapp" ] := kalk_get_mpc_by_koncij_pravilo()
       ENDIF
-
       IF hRec[ "mpcsapp" ] <> 0
-         hRec[ "mpc" ] := MpcBezPor( hRec[ "mpcsapp" ], aPorezi, NIL, hRec[ "nc" ] )
+         hRec[ "mpc" ] := mpc_bez_pdv_by_tarifa( hRec["idtarifa"], hRec[ "mpcsapp" ] )
          hRec[ "marza2" ] := hRec[ "mpc" ] - hRec[ "nc" ]
       ENDIF
 

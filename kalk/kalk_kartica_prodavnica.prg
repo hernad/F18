@@ -32,7 +32,7 @@ FUNCTION kalk_kartica_prodavnica()
    LOCAL lRobaTackaZarez := .F.
    LOCAL cOrderBy
    LOCAL nCol1, nCol2
-
+   LOCAL nPDVCijena
    LOCAL nUlaz, nIzlaz
    LOCAL nMPV, nNV, nMPVDug, nMPVPot
 
@@ -40,13 +40,12 @@ FUNCTION kalk_kartica_prodavnica()
    PRIVATE PicProc := gPicProc
    PRIVATE PicDEM := kalk_prosiri_pic_iznos_za_2()
    PRIVATE PicKol := kalk_prosiri_pic_kolicina_za_2()
-   PRIVATE nMarza, nMarza2, nPRUC, aPorezi
+   PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
    cPredh := "N"
    dDatOd := Date()
    dDatDo := Date()
-   aPorezi := {}
-   nMarza := nMarza2 := nPRUC := 0
+   nKalkMarzaVP := nKalkMarzaMP := 0
 
    IF cIdKonto == NIL
 
@@ -75,7 +74,6 @@ FUNCTION kalk_kartica_prodavnica()
          @ box_x_koord() + 7, box_y_koord() + 2 SAY "Tip dokumenta (;) :"  GET cIdVd PICT "@S20"
          @ box_x_koord() + 9, box_y_koord() + 2 SAY "Prikaz srednje nabavne cijene ?" GET cPrikSredNc VALID cPrikSredNc $ "DN" PICT "@!"
          @ box_x_koord() + 11, box_y_koord() + 2 SAY "Export XLSX:"  GET cExportDn PICT "@!" VALID cExportDN $ "DN"
-
          READ
          ESC_BCR
 
@@ -163,7 +161,6 @@ FUNCTION kalk_kartica_prodavnica()
    nMPV := nNV := 0
 
    fPrviProl := .T.
-
    DO WHILE !Eof() .AND. iif( lRobaTackaZarez, field->idfirma + field->pkonto + field->idroba >= cIdFirma + cIdKonto + cIdRobaTackaZarez, field->idfirma + field->pkonto + field->idroba == cIdFirma + cIdKonto + cIdRobaTackaZarez )
 
       cIdRoba := field->idroba
@@ -172,10 +169,8 @@ FUNCTION kalk_kartica_prodavnica()
       select_o_tarifa( roba->idtarifa )
 
       ? s_cLine
-
       ? "Artikal:", cIdRoba, "-", Trim( Left( roba->naz, 40 ) ) + ;
          iif( roba_barkod_pri_unosu(), " BK: " + roba->barkod, "" ) + " (" + AllTrim( roba->jmj ) + ")"
-
       ? s_cLine
 
       SELECT kalk
@@ -262,14 +257,10 @@ FUNCTION kalk_kartica_prodavnica()
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
             ENDIF
 
-         ELSEIF field->pu_i == "5" .AND. !( field->idvd $ "12#13#22" )
+         ELSEIF field->pu_i == "5" .AND. !( field->idvd $ "12#13" )
 
-            aPorezi := {}
             nIzlaz += field->kolicina
-
-            set_pdv_array_by_koncij_region_roba_idtarifa_2_3( field->pkonto, field->idroba, @aPorezi, field->idtarifa )
-            aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, field->mpc, kalk->mpcsapp, field->nc )
-            nPor1 := aIPor[ 1 ]
+            nPDVCijena := field->mpc * pdv_procenat_by_tarifa( cIdTarifa )
 
             IF kalk->datdok >= dDatod
 
@@ -329,7 +320,7 @@ FUNCTION kalk_kartica_prodavnica()
 
             ENDIF
 
-         ELSEIF field->pu_i == "5" .AND. ( field->idvd $ "12#13#22" )
+         ELSEIF field->pu_i == "5" .AND. ( field->idvd $ "12#13" )
 
             nUlaz -= field->kolicina
             IF field->datdok >= dDatod
@@ -398,7 +389,6 @@ FUNCTION kalk_kartica_prodavnica()
             ENDIF
 
             ? Space( 71 ), cTransakcija, " SNc:", say_kolicina( nSredNc ), ""
-
             IF Abs( nOdstupanje ) > 60
                ?? ">>>> ODST SNc-Nc: "
             ELSE

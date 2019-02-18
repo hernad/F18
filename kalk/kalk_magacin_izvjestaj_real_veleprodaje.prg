@@ -83,7 +83,7 @@ FUNCTION kalk_real_partnera()
    PRIVATE s_nStrana := 0
    kalk_zagl_real_partnera()
 
-   nVPV := nNV := nVPVBP := nPRUC := nPP := nZarada := nRabat := 0
+   nVPV := nNV := nVPVBP := nPP := nZarada := nRabat := 0
    nRuc := 0
    nNivP := nNivS := 0
    // nivelacija povecanje, snizenje
@@ -201,7 +201,6 @@ FUNCTION kalk_real_partnera()
 
       nNV += nPaNV
       nVPV += nPaVPV
-      nPRuc += 0
       nZarada += nPaZarada
       nRuc += nPaRuc
       nPP += nPaPP

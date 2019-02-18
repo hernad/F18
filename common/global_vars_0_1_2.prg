@@ -257,7 +257,7 @@ FUNCTION set_global_vars_roba()
    glUgost := .F.
 
    // RMarza_DLimit - osnovica realizovana marza ili donji limit
-   // MpcSaPor - Maloprodajna cijena sa porezom
+   // mpc_sa_pdv - Maloprodajna cijena sa porezom
    gUgostVarijanta := "Rmarza_DLimit"
    //gUVarPP := "N"
    //gRobaBlock := NIL

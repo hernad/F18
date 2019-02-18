@@ -16,7 +16,7 @@ FUNCTION kalk_stampa_dok_18()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0, nCR := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
 
    nStr := 1

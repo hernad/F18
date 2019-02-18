@@ -218,11 +218,11 @@ FUNCTION fakt_lager_lista()
 
    BoxC()
 
-   fSMark := .F.
-   IF Right( qqRoba, 1 ) = "*"
+   //fSMark := .F.
+   //IF Right( qqRoba, 1 ) = "*"
       // izvrsena je markacija robe ..
-      fSMark := .T.
-   ENDIF
+  //    fSMark := .T.
+   //ENDIF
 
 
    PRIVATE cFilt := ".t."
@@ -703,8 +703,6 @@ FUNCTION fakt_zagl_lager_lista()
 
    ? Space( gnLMarg )
    ?? m
-
-   ShowKorner( nStr, 1, 16 )
 
    RETURN .T.
 

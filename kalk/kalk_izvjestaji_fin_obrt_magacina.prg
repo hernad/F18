@@ -114,19 +114,19 @@ FUNCTION kalk_finansijski_obrt()
    SELECT params
    USE
 
-   PRIVATE fSMark := .F.
-   IF Right( Trim( qqRoba ), 1 ) = "*"
-      fSMark := .T.
-   ENDIF
+   //PRIVATE fSMark := .F.
+   //IF Right( Trim( qqRoba ), 1 ) = "*"
+  //    fSMark := .T.
+   //ENDIF
 
    CreTblRek2()
 
    O_REKAP2
    O_REKA22
-   o_koncij()
+   //o_koncij()
    // o_roba()
-   o_konto()
-   o_tarifa()
+   //o_konto()
+   //o_tarifa()
    // o_kalk()
    o_k1()
    kalk_o_objekti()
@@ -140,7 +140,7 @@ FUNCTION kalk_finansijski_obrt()
       lPrDatumOd := .T.
    ENDIF
 
-   GenRekap2( .T., cCijena, lPrDatumOd, lVpRabat, fSMark )
+   kalk_gen_rekap_2( .T., cCijena, lPrDatumOd, lVpRabat )
 
    // setuj liniju za izvjestaj
    aLineArgs := {}
@@ -181,7 +181,6 @@ FUNCTION kalk_finansijski_obrt()
       ?? "#%PORTR#"
    ENDIF
 
-
    nStr := 0
    ZagOPomF()
    nCol1 := 10
@@ -191,7 +190,6 @@ FUNCTION kalk_finansijski_obrt()
    nRekaRecCount = RecCount()
 
    GO TOP
-
    nT1 := 0
    nT2 := 0
    nT3 := 0

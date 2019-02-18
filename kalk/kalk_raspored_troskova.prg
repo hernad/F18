@@ -14,7 +14,7 @@
 MEMVAR gZaokr
 MEMVAR _Prevoz, _TPrevoz, _BankTr, _ZavTr, _CarDaz, _SpedTr
 MEMVAR _fcj, _vpc, _rabat, _kolicina, _idvd, _rbr, _fcj2
-MEMVAR nPrevoz, nBankTr, nSpedTr, nMarza, nMarza2, nCarDaz, nZavTr
+MEMVAR nPrevoz, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, nCarDaz, nZavTr
 
 FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
@@ -489,7 +489,7 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
          GO nPrviRec
          cTipPrevoz := .F. ;nIznosPrevoz := 0
          IF TPrevoz == "R"; cTipPrevoz := .T. ;nIznosPrevoz := Prevoz; ENDIF
-         nMarza2 := 0
+         nKalkMarzaMP := 0
          DO WHILE !Eof() .AND. cIdFirma == idfirma .AND. cIdVd == idvd .AND. cBrDok == BrDok
             Scatter()
             IF cTipPrevoz    // troskovi 1
@@ -507,9 +507,9 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
             select_o_roba( _idroba )
             select_o_tarifa( _idtarifa )
             SELECT kalk_pripr
-            kalk_Marza_11()
+            kalk_proracun_marzamp_11_80()
             _TMarza2 := "A"
-            _Marza2 := nMarza2
+            _Marza2 := nKalkMarzaMP
             my_rlock()
             Gather()
             my_unlock()
@@ -684,19 +684,19 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
    ENDIF
 
    IF field->IdVD $ "14"   // izlaz po vp
-      nMarza := field->VPC * ( 1 - field->Rabatv / 100 ) - field->NC
+      nKalkMarzaVP := field->VPC * ( 1 - field->Rabatv / 100 ) - field->NC
    ELSEIF field->idvd $ "11#12#13"
-      nMarza := field->VPC - field->FCJ
+      nKalkMarzaVP := field->VPC - field->FCJ
    ELSE
-      nMarza := field->VPC - field->NC
+      nKalkMarzaVP := field->VPC - field->NC
    ENDIF
 
    IF ( field->idvd $ "11#12#13" )
-      nMarza2 := field->MPC - field->VPC - nPrevoz
+      nKalkMarzaMP := field->MPC - field->VPC - nPrevoz
    ELSEIF ( ( field->idvd $ "41#42#81" ) )
-      nMarza2 := field->MPC - field->NC
+      nKalkMarzaMP := field->MPC - field->NC
    ELSE
-      nMarza2 := field->MPC - field->VPC
+      nKalkMarzaMP := field->MPC - field->VPC
    ENDIF
 
    RETURN .T.

@@ -69,9 +69,9 @@ FUNCTION kalk_nivelacija_11()
          ENDIF
          fNivelacija := .T.
 
-         PRIVATE nKolZn := nKols := nc1 := nc2 := 0
+         PRIVATE nKolZn := nKolicinaNaStanju := nc1 := nc2 := 0
 
-         kalk_get_nabavna_prod( hRec[ "idfirma" ], hRec[ "idroba" ], hRec[ "idkonto" ], @nKolS, @nKolZN, @nc1, @nc2 )
+         kalk_get_nabavna_prod( hRec[ "idfirma" ], hRec[ "idroba" ], hRec[ "idkonto" ], @nKolicinaNaStanju, @nKolZN, @nc1, @nc2 )
 
 
          SELECT kalk_pripr2
@@ -111,7 +111,7 @@ FUNCTION kalk_nivelacija_11()
          hRec[ "mkonto" ] := ""
          hRec[ "mu_i" ] := ""
 
-         hRec[ "kolicina" ] := nKolS
+         hRec[ "kolicina" ] := nKolicinaNaStanju
          hRec[ "brdok" ] := cBrniv
          hRec[ "idvd" ] := "19"
 

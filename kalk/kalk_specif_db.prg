@@ -12,11 +12,10 @@
 #include "f18.ch"
 
 
+FUNCTION kalk_sumiraj_kolicinu( nUlaz, nIzlaz, nTotalUlaz, nTotalIzlaz, lPocStanje, lPrikazK2 )
 
-FUNCTION kalk_sumiraj_kolicinu( nUlaz, nIzlaz, nTotalUlaz, nTotalIzlaz, fPocStanje, lPrikazK2 )
-
-   IF fPocStanje == nil
-      fPocStanje := .F.
+   IF lPocStanje == nil
+      lPocStanje := .F.
    ENDIF
 
    IF lPrikazK2 == nil
@@ -27,7 +26,6 @@ FUNCTION kalk_sumiraj_kolicinu( nUlaz, nIzlaz, nTotalUlaz, nTotalIzlaz, fPocStan
    nTotalIzlaz += nIzlaz
 
    RETURN .T.
-
 
 
 
@@ -241,7 +239,7 @@ FUNCTION CrePPProd()
 
 
 
-FUNCTION GenRekap2( lK2X, cC, lPrDatOd, lVpRab, lMarkiranaRoba )
+FUNCTION kalk_gen_rekap_2( lK2X, cC, lPrDatOd, lVpRab )
 
    LOCAL lMagacin
    LOCAL lProdavnica
@@ -258,12 +256,7 @@ FUNCTION GenRekap2( lK2X, cC, lPrDatOd, lVpRab, lMarkiranaRoba )
       lVpRab := .T.
    ENDIF
 
-   IF ( lMarkiranaRoba == nil )
-      lMarkiranaRoba := .F.
-   ENDIF
-
    find_kalk_by_mkonto_idroba_idvd( self_organizacija_id(), NIL, NIL, qqRoba, "idkonto,idroba" )
-
 
    PRIVATE cFilt3 := ""
 
@@ -280,10 +273,7 @@ FUNCTION GenRekap2( lK2X, cC, lPrDatOd, lVpRab, lMarkiranaRoba )
    nStavki := 0
    Box(, 2, 70 )
    DO WHILE !Eof()
-      IF lMarkiranaRoba .AND. SkLoNMark( "ROBA", kalk->idroba )
-         SKIP
-         LOOP
-      ENDIF
+
       SELECT roba
       HSEEK kalk->idRoba
 
@@ -781,7 +771,7 @@ FUNCTION IsRobaInProdavnica( cPKonto, cIdRoba )
 
 FUNCTION GetNcForProdavnica( cPKonto, cIdRoba )
 
-   LOCAL nKolS
+   LOCAL nKolicinaNaStanju
    LOCAL nKolZn
    LOCAL nNc1
    LOCAL nSredNc
@@ -795,7 +785,7 @@ FUNCTION GetNcForProdavnica( cPKonto, cIdRoba )
    ENDIF
 
    _DatDok = Date()
-   kalk_get_nabavna_prod( self_organizacija_id(), cIdRoba, cPKonto, @nKolS, @nKolZN, @nNc1, @nSredNc, @dDatNab )
+   kalk_get_nabavna_prod( self_organizacija_id(), cIdRoba, cPKonto, @nKolicinaNaStanju, @nKolZN, @nNc1, @nSredNc, @dDatNab )
 
    RETURN nSredNc
 

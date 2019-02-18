@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-STATIC aPorezi := {}
 
 MEMVAR nKalkRBr
 MEMVAR GetList
@@ -57,7 +56,7 @@ FUNCTION kalk_get_1_95_96()
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
 
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
 
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
 
@@ -87,14 +86,14 @@ FUNCTION kalk_get_1_95_96()
       SELECT kalk_pripr
    ENDIF
 
-   nKolS := 0
+   nKolicinaNaStanju := 0
    nKolZN := 0
    nC1 := nC2 := 0
 
    IF _TBankTr <> "X"
 
-      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolS, @nKolZN, @nC1, @nC2 )
-      @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKols PICT pickol
+      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, @nC1, @nC2 )
+      @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol
       @ box_x_koord() + 13, box_y_koord() + 30   SAY "Srednja nc "; @ box_x_koord() + 13, Col() + 2 SAY nc2 PICT pickol
 
       IF !( roba->tip $ "UT" )
@@ -119,7 +118,7 @@ FUNCTION kalk_get_1_95_96()
    ENDIF
 
    SELECT kalk_pripr
-   @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  VALID kalk_valid_kolicina_mag( nKols )
+   @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  VALID kalk_valid_kolicina_mag( nKolicinaNaStanju )
 
    READ
 
@@ -149,7 +148,7 @@ FUNCTION kalk_get_1_95_96()
          ENDIF
          IF kalk_pripr->brdok == _brdok .AND. kalk_pripr->idvd == _idvd .AND. Val( kalk_pripr->Rbr ) == nKalkRbr
 
-            // nMarza := 0
+            // nKalkMarzaVP := 0
             REPLACE vpc WITH kalk_pripr->nc, rabatv WITH  0, ;
                marza WITH  0
             REPLACE  mkonto WITH _mkonto, ;

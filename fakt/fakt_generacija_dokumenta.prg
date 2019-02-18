@@ -35,107 +35,11 @@ FUNCTION fakt_mnu_generacija_dokumenta()
    RETURN .T.
 
 
-/*
-FUNCTION fakt_generisi_inventuru( cIdRj )
-
-   LOCAL cIdRoba
-   LOCAL cBrDok
-   LOCAL nUl
-   LOCAL nIzl
-   LOCAL nRezerv
-   LOCAL nRevers
-   LOCAL nRbr
-   LOCAL lFoundUPripremi
-
-   //o_fakt_doks_dbf()
-   //o_roba()
-   //o_tarifa()
-
-   o_fakt_pripr()
-   SET ORDER TO TAG "3"
-
-  -- o_fakt_dbf()
-
-   MsgO( "scaniram tabelu fakt" )
-   nRbr := 0
-
-   GO TOP
-   cBrDok := PadR( Replicate( "0", gNumDio ), 8 )
-
-   DO WHILE !Eof()
-      IF ( field->idFirma <> cIdRj )
-         SKIP
-         LOOP
-      ENDIF
-
-      SELECT fakt_pripr
-      cIdRoba := fakt->idRoba
-      SEEK cIdRj + cIdRoba // vidi imali ovo u pripremi; ako ima stavka je obradjena
-      lFoundUPripremi := Found()
-
-      PushWA()
-      IF !( lFoundUPripremi )
-         fakt_stanje_artikla( cIdRj, cIdroba, @nUl, @nIzl, @nRezerv, @nRevers, .T. )
-         IF ( nUl - nIzl - nRevers ) <> 0
-            SELECT fakt_pripr
-            nRbr++
-            ShowKorner( nRbr, 10 )
-            cRbr := rbr_u_char( nRbr )
-            fakt_dodaj_stavku_inventura( cIdRj, cIdRoba, cBrDok, nUl - nIzl - nRevers, cRbr )
-         ENDIF
-      ENDIF
-      PopWa()
-
-      SKIP
-   ENDDO
-   MsgC()
-
-   my_close_all_dbf()
-
-   RETURN .T.
-
-
-
-
-STATIC FUNCTION fakt_dodaj_stavku_inventura( cIdRj, cIdRoba, cBrDok, nKolicina, cRbr )
-
-   APPEND BLANK
-   REPLACE idFirma WITH cIdRj
-   REPLACE idRoba  WITH cIdRoba
-   REPLACE datDok  WITH Date()
-   REPLACE idTipDok WITH "IM"
-   REPLACE serBr   WITH Str( nKolicina, 15, 4 )
-   REPLACE kolicina WITH nKolicina
-   REPLACE rBr WITH cRbr
-
-   IF Val( cRbr ) == 1
-      cTxt := ""
-      AddTxt( @cTxt, "" )
-      AddTxt( @cTxt, "" )
-      AddTxt( @cTxt, self_organizacija_naziv() )
-      AddTxt( @cTxt, "RJ:" + cIdRj )
-      AddTxt( @cTxt, gMjStr )
-      REPLACE txt WITH cTxt
-   ENDIF
-
-   REPLACE brDok WITH cBrDok
-   REPLACE dinDem WITH valuta_domaca_skraceni_naziv()
-
-   select_o_roba( cIdRoba )
-
-   SELECT fakt_pripr
-   REPLACE cijena WITH roba->vpc
-
-   RETURN .T.
-
-*/
-
 STATIC FUNCTION AddTxt( cTxt, cStr )
 
    cTxt := cTxt + Chr( 16 ) + cStr + Chr( 17 )
 
    RETURN NIL
-
 
 
 FUNCTION fakt_inventura_manjak( cIdRj, cBrDok )

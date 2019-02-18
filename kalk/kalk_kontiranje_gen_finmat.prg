@@ -35,9 +35,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
    // kontira se vise kalkulacija
    LOCAL lViseKalk := .F.
    LOCAL _predispozicija := .F.
-   LOCAL aPorezi
-
-   aPorezi := {}
 
    IF PCount() == 0
       fStara := .F.
@@ -94,9 +91,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
          Box( "", 1, 50 )
          SET CURSOR ON
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument broj:"
-
          @ box_x_koord() + 1, Col() + 2  SAY cIdFirma
-
          @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVD
          @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrDok
          READ
@@ -157,9 +152,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
       BoxC()
 
       IF LastKey() == K_ESC .OR. cDalje <> "D"
-
          RETURN .F.
-
       ENDIF
 
    ENDIF
@@ -176,16 +169,11 @@ FUNCTION kalk_kontiranje_gen_finmat()
       cIdKonto := IdKonto
       cIdKonto2 := IdKonto2
 
-
       //select_o_konto( cIdKonto )
-
       select_o_konto( cIdKonto2 )
       SELECT KALK_PRIPR
 
-
-      cIdd := idpartner + brfaktp + idkonto + idkonto2
-
-
+      //cIdd := idpartner + brfaktp + idkonto + idkonto2
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
          IF cIdVd == "97"
@@ -197,7 +185,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
 
          // iznosi troskova koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-         PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+         PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
          nFV := FCj * Kolicina
 
@@ -212,7 +200,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
          SELECT KALK_PRIPR
 
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( pkonto, idroba, @aPorezi )
          kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
          SELECT finmat
@@ -235,41 +222,31 @@ FUNCTION kalk_kontiranje_gen_finmat()
             BankTr    WITH Round( kalk_PRIPR->( nBankTr * nKolicina ), nZaokruzenje ), ;
             SpedTr    WITH Round( kalk_PRIPR->( nSpedTr * nKolicina ), nZaokruzenje ), ;
             ZavTr     WITH Round( kalk_PRIPR->( nZavTr * nKolicina ), nZaokruzenje ), ;
-            NV        WITH Round( kalk_PRIPR->( NC * ( Kolicina - GKolicina - GKolicin2 ) ), nZaokruzenje ), ;
-            Marza     WITH Round( kalk_PRIPR->( nMarza * ( Kolicina - GKolicina - GKolicin2 ) ), nZaokruzenje ), ;           // marza se ostvaruje nad stvarnom kolicinom
-         VPV       WITH Round( kalk_PRIPR->( VPC * ( Kolicina - GKolicina - GKolicin2 ) ), nZaokruzenje )        // vpv se formira nad stvarnom kolicinom
-
+            NV        WITH Round( kalk_PRIPR->( NC * Kolicina ), nZaokruzenje ), ;
+            Marza     WITH Round( nKalkMarzaVP * kalk_pripr->Kolicina, nZaokruzenje ), ;           // marza se ostvaruje nad stvarnom kolicinom
+            VPV       WITH Round( kalk_PRIPR->VPC * kalk_pripr->Kolicina , nZaokruzenje )        // vpv se formira nad stvarnom kolicinom
 
          nPom := kalk_pripr->( RabatV / 100 * VPC * Kolicina )
          nPom := Round( nPom, nZaokruzenje )
          REPLACE RABATV  WITH nPom
 
-
-         nPom := kalk_pripr->( nMarza2 * ( Kolicina - GKolicina - GKolicin2 ) )
+         nPom := nKalkMarzaMP * kalk_pripr->Kolicina
          nPom := Round( nPom, nZaokruzenje )
          REPLACE Marza2 WITH nPom
 
-         IF kalk_pripr->idvd $ "14#94"
-            nPom := kalk_pripr->( VPC * ( 1 -RabatV / 100 ) * MPC / 100 * Kolicina )
+         IF kalk_pripr->idvd == "14"
+            nPom := kalk_pripr->VPC * ( 1 - kalk_pripr->RabatV / 100 ) * kalk_pripr->MPC / 100 * kalk_pripr->Kolicina
          ELSE
-            nPom := kalk_pripr->( MPC * ( Kolicina - GKolicina - GKolicin2 ) )
+            nPom := kalk_pripr->MPC * kalk_pripr->Kolicina
          ENDIF
          nPom := Round( nPom, nZaokruzenje )
          REPLACE MPV WITH nPom
 
+         // PDV = mpc_sa_pdv_bruto - mpc_bez_pdv_neto - popust
+         nPom := mpc_sa_pdv(kalk_pripr->idtarifa, kalk_pripr->mpc ) - kalk_pripr->mpc
+         REPLACE Porez WITH Round(  nKolicina * nPom, nZaokruzenje )
 
-         // aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, nKolicina * field->mpc, nKolicina * field->mpcSaPP, field->nc )
-         // nPom := kalk_pripr->( aIPor[ 1 ] * ( Kolicina - GKolicina - GKolicin2 ) )
-
-         // PDV
-         REPLACE Porez WITH Round( kalk_porezi_maloprodaja( aPorezi, NIL, nKolicina * kalk_pripr->mpcSaPP ), nZaokruzenje )
-         // ??E field->porez, "+"
-
-         // ugostiteljstvo porez na potr
-         // REPLACE Porez2    WITH Round( kalk_PRIPR->( aIPor[ 3 ] * ( Kolicina - GKolicina - GKolicin2 ) ), nZaokruzenje )
-
-
-         nPom := kalk_pripr->( MPCSaPP * ( Kolicina - GKolicina - GKolicin2 ) )
+         nPom := kalk_pripr->MPCSaPP * kalk_pripr->Kolicina
          nPom := Round( nPom, nZaokruzenje )
          REPLACE MPVSaPP WITH nPom
 
@@ -283,7 +260,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
          IF !( kalk_pripr->IdVD $ "IM#IP" )
             REPLACE   FV        WITH Round( nFV, nZaokruzenje ), ;
-               Rabat     WITH Round( kalk_pripr->( nFV * Rabat / 100 ), nZaokruzenje )
+                      Rabat     WITH Round( kalk_pripr->( nFV * Rabat / 100 ), nZaokruzenje )
          ENDIF
 
          IF field->idvd == "IP"
@@ -291,18 +268,9 @@ FUNCTION kalk_kontiranje_gen_finmat()
                GKol2 WITH kalk_pripr->( Gkolicina - Kolicina )
          ENDIF
 
-         IF field->idvd $ "14#94"
-            REPLACE  MPVSaPP   WITH  kalk_pripr->( VPC * ( 1 -RabatV / 100 ) * ( Kolicina - GKolicina - GKolicin2 ) )
+         IF field->idvd == "14"
+            REPLACE  MPVSaPP   WITH  kalk_pripr->VPC * ( 1 - kalk_pripr->RabatV / 100 ) * kalk_pripr->Kolicina
          ENDIF
-
-
-         //IF gKalo == "2" .AND.  kalk_pripr->idvd $ "10#81"  // kalo ima vrijednost po NC
-        //    REPLACE GKV   WITH Round( kalk_pripr->( GKolicina * NC ), nZaokruzenje ), ;   // vrijednost transp.kala
-        //    GKV2  WITH Round( kalk_pripr->( GKolicin2 * NC ), nZaokruzenje ), ;   // vrijednost ostalog kala
-        //    GKol  WITH Round( kalk_pripr->GKolicina, nZaokruzenje ), ;
-        //       GKol2 WITH Round( kalk_pripr->GKolicin2, nZaokruzenje ), ;
-        //       POREZV WITH Round( nMarza * kalk_pripr->( GKolicina + Gkolicin2 ), nZaokruzenje ) // negativna marza za kalo
-         //ENDIF
 
          IF kalk_pripr->IDVD $ "18#19"
             REPLACE Kolicina WITH 0
@@ -314,7 +282,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
                MsgBeep( "Popust MP = finmat->rabat " + Str( Rabat, 10, 2 ) )
             ENDIF
          ENDIF
-
 
          IF _predispozicija // napuni marker da se radi o predispoziciji
             REPLACE k1 WITH "P"
@@ -340,7 +307,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
       // ovo ispod kontiranje se koristi kada se kontira azurirani dokument
       kalk_kontiranje_fin_naloga( .F., NIL, lViseKalk, NIL, cFinAutoBrojDN == "D" )  // kontiranje dokumenta
-
       IF cAutoRav == "D" // automatska ravnoteza naloga
          kontrola_zbira_naloga_u_pripremi( .T. )
       ENDIF

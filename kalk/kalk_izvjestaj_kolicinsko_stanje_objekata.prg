@@ -53,7 +53,6 @@ FUNCTION kalk_izvj_stanje_po_objektima()
    LOCAL n7
    LOCAL nRecno, hRec
    LOCAL cPodvuci
-   LOCAL lMarkiranaRoba
    PRIVATE dDatOd
    PRIVATE dDatDo
    PRIVATE aUTar := {}
@@ -67,7 +66,6 @@ FUNCTION kalk_izvj_stanje_po_objektima()
    o_k1()
    kalk_o_objekti()
 
-   lMarkiranaRoba := .F.
    cPicCDem := "999999.999"
    cPicProc := "999999.99%"
    cPicDem := "9999999.99"
@@ -79,19 +77,11 @@ FUNCTION kalk_izvj_stanje_po_objektima()
       RETURN .F.
    ENDIF
 
-   IF Right( Trim( s_cUslovIdRoba ), 1 ) = "*"
-      lMarkiranaRoba := .T.
-   ENDIF
-
    brisi_tabelu_pobjekti()
-
    napuni_tabelu_pobjekti_iz_objekti()
-
    kalk_cre_tabela_kalk_rekap1( "1" )
-
    otvori_tabele()
-
-   kalk_gen_rekap1( s_cUslovPKonto, s_cUslovMKonto, s_cUslovIdRoba, "N", "1", "N", lMarkiranaRoba, NIL, cK9 )
+   kalk_gen_rekap1( s_cUslovPKonto, s_cUslovMKonto, s_cUslovIdRoba, "N", "1", "N", NIL, cK9 )
 
    set_linije_razdvajanja()
 
@@ -142,7 +132,6 @@ FUNCTION kalk_izvj_stanje_po_objektima()
       DO WHILE ( !Eof() .AND. cG1 == field->g1 )
          ++nRecno
 
-         ShowKorner( nRecno, 100 )
          cIdroba := rekap1->idRoba
 
          select_o_roba( cIdRoba )
@@ -273,16 +262,12 @@ FUNCTION select_o_k1( cId )
    RETURN o_k1( cId )
 
 
-FUNCTION kalk_gen_rekap1( aUsl1, aUsl2, s_cUslovIdRoba, cKartica, cVarijanta, cKesiraj, lMarkiranaRoba,  cK1, cK7, cK9, cIdKPovrata, aUslSez )
+FUNCTION kalk_gen_rekap1( aUsl1, aUsl2, s_cUslovIdRoba, cKartica, cVarijanta, cKesiraj,  cK1, cK7, cK9, cIdKPovrata, aUslSez )
 
    LOCAL nSec
 
    IF ( cKesiraj = NIL )
       cKesiraj := "N"
-   ENDIF
-
-   IF ( lMarkiranaRoba == NIL )
-      lMarkiranaRoba := .F.
    ENDIF
 
    IF ( cK1 == NIL )
@@ -325,17 +310,11 @@ FUNCTION kalk_gen_rekap1( aUsl1, aUsl2, s_cUslovIdRoba, cKartica, cVarijanta, cK
    SELECT kalk
    SET FILTER TO &cFilt1
 
-   showkorner( rloptlevel() + 100, 1, 66 )
 
    GO TOP
-
    nStavki := 0
    Box(, 2, 70 )
    DO WHILE !Eof()
-      IF lMarkiranaRoba .AND. SkLoNMark( "ROBA", kalk->idroba )
-         SKIP
-         LOOP
-      ENDIF
 
       select_o_roba(  kalk->idroba )
       IF cK7 == "D" .AND. Empty( roba->k7 )
@@ -343,7 +322,6 @@ FUNCTION kalk_gen_rekap1( aUsl1, aUsl2, s_cUslovIdRoba, cKartica, cVarijanta, cK
          SKIP
          LOOP
       ENDIF
-
 
       IF ( cK1 <> "9999" .AND. !Empty( cK1 ) .AND. roba->k1 <> cK1 )
          SELECT kalk

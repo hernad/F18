@@ -13,38 +13,30 @@
 
 MEMVAR nKalkStrana
 
-MEMVAR nVPV16, nNVPredhodna
+MEMVAR nKalkVPV16PredhodnaStavka, nKalkNVPredhodnaStavka
 MEMVAR nKalkRbr
 MEMVAR GetList
 MEMVAR _idvd, _idkonto, _idkonto2, _kolicina, _IdTarifa, _nc, _idroba, _vpc, _marza, _mkonto, _pkonto, _mu_i, _pu_i
 MEMVAR _idpartner, _brfaktp, _datfaktp, _datdok, _TMarza
-STATIC aPorezi := {}
 
 FUNCTION kalk_get_1_16()
 
    LOCAL nRVPC
 
-   //lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
-   // SET KEY K_ALT_K TO kalk_alt_k_kartica_magacin()
-
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
-
    IF Empty( _TMarza )
       _TMarza := "%"
    ENDIF
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
-
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura/Otpremnica Broj:" GET _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP  VALID {|| .T. }
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje"  GET _IdKonto VALID Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 )
-
       // IF !Empty( cRNT1 )
       // @ box_x_koord() + 9, box_y_koord() + 40 SAY "Rad.nalog:"   GET _IdZaduz2  PICT "@!"
       // ENDIF
-
       IF _idvd == "16" .AND. _idkonto2 != "XXX"
          @ box_x_koord() + 10, box_y_koord() + 2   SAY "Prenos na konto          " GET _IdKonto2   VALID Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2, 21, 5 ) PICT "@!"
       ENDIF
@@ -58,8 +50,7 @@ FUNCTION kalk_get_1_16()
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br "
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
-
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE pickol() VALID _Kolicina <> 0
 
@@ -98,17 +89,14 @@ FUNCTION kalk_get_1_16()
    RETURN LastKey()
 
 
-
 FUNCTION kalk_get_16_1()
 
    LOCAL cSvedi := " "
 
    kalk_is_novi_dokument( .T. )
-
    PRIVATE PicDEM := "9999999.99999999", Pickol := "999999.999"
 
    Beep( 1 )
-
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "PROTUSTAVKA   (svedi na staru vrijednost - kucaj S):"
    @ box_x_koord() + 2, Col() + 2 GET cSvedi VALID csvedi $ " S" PICT "@!"
    READ
@@ -139,18 +127,14 @@ FUNCTION kalk_get_16_1()
 
    SELECT kalk_pripr
 
-
    @ box_x_koord() + 14, box_y_koord() + 2    SAY "NAB.CJ   "  GET _NC  PICTURE  picnc()  WHEN V_kol10()
-
    // vodi se po nc
    _vpc := _nc
-   marza := 0
-
+   //marza := 0
    cBeze := " "
    @ box_x_koord() + 17, box_y_koord() + 2 GET cBeze VALID SvediM( cSvedi )
 
    READ
-
 
    nKalkStrana := 2
    _marza := _vpc - _nc
@@ -164,7 +148,6 @@ FUNCTION kalk_get_16_1()
    RETURN LastKey()
 
 
-
 /*
   *   Svodjenje kolicine u protustavci da bi se dobila ista vrijednost (kada su cijene u stavci i protustavci razlicite)
 */
@@ -176,12 +159,12 @@ STATIC FUNCTION SvediM( cSvedi )
    ENDIF
    IF csvedi == "S"
       IF _vpc <> 0
-         _kolicina := -Round( nVPV16 / _vpc, 4 )
+         _kolicina := -Round( nKalkVPV16PredhodnaStavka / _vpc, 4 )
       ELSE
          _kolicina := 99999999
       ENDIF
       IF _kolicina <> 0
-         _nc := Abs( nNVPredhodna / _kolicina )
+         _nc := Abs( nKalkNVPredhodnaStavka / _kolicina )
       ELSE
          _nc := 0
       ENDIF

@@ -28,16 +28,16 @@ FUNCTION kalk_stampa_dok_19()
    LOCAL nPom := 0
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
+   LOCAL nMpcSaPDVNovaCijena, nMpcSaPDVStaraCijena, nMpcBezPDVNovaCijena, nMpcBezPDVStaraCijena
+   LOCAL nPDVNovaCijena, nPDVStaraCijena
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2, aPorezi
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, aPorezi
 
    aPorezi := {}
    cIdFirma := kalk_pripr->IdFirma
    cIdVd := kalk_pripr->Idvd
    cBrDok := kalk_pripr->brdok
-
    cPKonto := kalk_pripr->pkonto
-
    cNaslov := "NIVELACIJA PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
 
    s_oPDF := PDFClass():New()
@@ -51,7 +51,7 @@ FUNCTION kalk_stampa_dok_19()
 
    @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
    select_o_konto( cPKonto )
-   ?  _u("KONTO zadužuje :"), cPKonto, "-", konto->naz
+   ?  _u( "KONTO zadužuje :" ), cPKonto, "-", konto->naz
 
    SELECT kalk_pripr
 
@@ -65,25 +65,27 @@ FUNCTION kalk_stampa_dok_19()
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-      set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi )
+
+      // set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi )
 
       // nova cijena
-      nMpcSaPP1 := kalk_pripr->mpcSaPP + kalk_pripr->fcj
-      nMpc1 := MpcBezPor( nMpcSaPP1, aPorezi,, field->nc )
-      aIPor1 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc1, nMpcSaPP1, field->nc )
+      nMpcSaPDVNovaCijena := kalk_pripr->mpcSaPP + kalk_pripr->fcj
+      nMpcBezPDVNovaCijena := mpc_bez_pdv_by_tarifa( kalk_pripr->idtarifa, nMpcSaPDVNovaCijena )
+      // aIPor1 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpcBezPDVNovaCijena, nMpcSaPDVNovaCijena, field->nc )
 
       // stara cijena
-      nMpcSaPP2 := field->fcj
-      nMpc2 := MpcBezPor( nMpcSaPP2, aPorezi,, field->nc )
-      aIPor2 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpc2, nMpcSaPP2, field->nc )
+      nMpcSaPDVStaraCijena := field->fcj
+      nMpcBezPDVStaraCijena := mpc_bez_pdv_by_tarifa( kalk_pripr->idtarifa, nMpcSaPDVStaraCijena )
+      // aIPor2 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpcBezPDVStaraCijena, nMpcSaPDVStaraCijena, field->nc )
+
 
       print_nova_strana( 125, @nStr, 2 )
       nTot3 +=  ( nU3 := MPC * Kolicina )
-      nPor1 := aIPor1[ 1 ] - aIPor2[ 1 ]
-      nPor2 := aIPor1[ 2 ] - aIPor2[ 2 ]
+      nPDVNovaCijena := nMpcSaPDVNovaCijena - nMpcBezPDVNovaCijena
+      nPDVStaraCijena := nMpcSaPDVStaraCijena - nMpcBezPDVStaraCijena
 
-      nTot4 +=  ( nU4 := ( nPor1 + nPor2 ) * Kolicina )
-      nTot5 +=  ( nU5 := MPcSaPP * Kolicina )
+      nTot4 +=  ( nU4 := ( nPDVNovaCijena + nPDVStaraCijena ) * kalk_pripr->Kolicina )
+      nTot5 +=  ( nU5 := kalk_pripr->MPcSaPP * kalk_pripr->Kolicina )
 
       check_nova_strana( bZagl, s_oPDF )
       // 1. red
@@ -97,15 +99,15 @@ FUNCTION kalk_stampa_dok_19()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
       nC1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ]            PICTURE picproc()
-      @ PRow(), PCol() + 1 SAY nPor1                         PICTURE picdem()
-      @ PRow(), PCol() + 1 SAY nPor1 * kalk_pripr->Kolicina                PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY nPDVNovaCijena                         PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY nPDVNovaCijena * kalk_pripr->Kolicina                PICTURE picdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP                       PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ                   PICTURE piccdem()
 
       // 2. red
       @ PRow() + 1, nC1 SAY 0   PICTURE picproc()
-      @ PRow(), PCol() + 1 SAY nPor2   PICTURE picdem()
-      @ PRow(), PCol() + 1 SAY nPor2 * kalk_pripr->Kolicina  PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY nPDVStaraCijena   PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY nPDVStaraCijena * kalk_pripr->Kolicina  PICTURE picdem()
 
       IF Round( field->FCJ, 4 ) == 0
          @ PRow(), PCol() + 1 SAY 9999999  PICTURE picproc() // error fcj=0
@@ -160,7 +162,7 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    LOCAL GetList := {}
    LOCAL cNaslov
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    cPKonto := kalk_pripr->pkonto
 

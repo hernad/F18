@@ -164,9 +164,6 @@ FUNCTION fakt_11_kalk_prenos_11()
          cIdTar := roba->idtarifa
          select_o_tarifa( cIdTar )
          select_o_koncij( cIdKonto )
-
-         PRIVATE aPorezi := {}
-
          cPKonto := cIdKonto
 
          SELECT kalk_pripr
@@ -186,7 +183,7 @@ FUNCTION fakt_11_kalk_prenos_11()
                idvd WITH "11", ;
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
-               idtarifa WITH set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cPKonto, fakt->idroba, @aPorezi ), ;
+               idtarifa WITH roba->idtarifa, ;
                brfaktp WITH "", ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cPKonto, ;
@@ -354,13 +351,13 @@ FUNCTION fakt_13_kalk_11()
             SELECT kalk_pripr
             APPEND BLANK
             cPKonto := IF( gVar13u11 == "1", cidkonto, fakt->idpartner )
-            PRIVATE aPorezi := {}
+
             REPLACE idfirma WITH cIdFirma, ;
                rbr     WITH Str( ++nRbr, 3 ), ;
                idvd WITH "11", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
-               idtarifa WITH set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cPKonto, fakt->idroba, @aPorezi ), ;
+               idtarifa WITH roba->idtarifa, ;
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cPKonto, ;
@@ -518,6 +515,7 @@ FUNCTION fakt_11_kalk_41()
             DO WHILE !Eof() .AND. cFaktIdFirma + cIdTipDok + cBrDok == IdFirma + IdTipDok + BrDok
                select_o_roba( fakt->idroba )
                select_o_tarifa( roba->idtarifa )
+
                SELECT fakt
                IF AllTrim( podbr ) == "."
                   SKIP
@@ -526,11 +524,7 @@ FUNCTION fakt_11_kalk_41()
 
                SELECT kalk_pripr
 
-               PRIVATE aPorezi := {}
-
-               set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, fakt->idRoba, @aPorezi )
-               nMPVBP := MpcBezPor( fakt->( kolicina * cijena ), aPorezi )
-
+               nMPVBP := mpc_bez_pdv_by_tarifa( ROBA->idtarifa, fakt->kolicina * fakt->cijena )
                APPEND BLANK
                REPLACE idfirma WITH cIdFirma, ;
                   rbr WITH Str( ++nRbr, 3 ), ;
@@ -593,23 +587,11 @@ FUNCTION fakt_11_kalk_41()
                   nRbr := Val( Rbr )
                ENDIF
 
-               //SELECT fakt
-
-               //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktIdFirma + cIdTipDok + "'==IdFirma+IdTipDok", "IDROBA", F_ROBA )
-              //    MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u tekucem sifrarniku!#Prenos nije izvrsen!" )
-              //    LOOP
-               //ENDIF
 
                SELECT kalk_pripr
 
-               PRIVATE aPorezi := {}
-
-               set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, fakt->idRoba, @aPorezi )
-
-               nMPVBP := MpcBezPor( fakt->( kolicina * cijena ), aPorezi )
-
+               nMPVBP := mpc_bez_pdv_by_tarifa( roba->idtarifa, fakt->kolicina * fakt->cijena )
                APPEND BLANK
-
                REPLACE idfirma WITH cIdFirma
                REPLACE rbr WITH Str( ++nRbr, 3 )
                REPLACE idvd WITH "41"
@@ -887,8 +869,6 @@ FUNCTION fakt_13_kalk_80()
                LOOP
             ENDIF
             cPKonto := cIdKonto
-            PRIVATE aPorezi := {}
-            cIdTarifa := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cPKonto, fakt->idroba, @aPorezi )
             SELECT kalk_pripr
             APPEND BLANK
             REPLACE idfirma WITH cIdFirma, ;
@@ -896,7 +876,7 @@ FUNCTION fakt_13_kalk_80()
                idvd WITH "80", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
-               idtarifa WITH cIdTarifa, ;
+               idtarifa WITH roba->idtarifa, ;
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cidkonto2, ;
@@ -1088,12 +1068,6 @@ FUNCTION fakt_11_kalk_42()
             ENDIF
 
             SELECT fakt
-            //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktIdFirma + cIdTipDok + cBrDok + "'==IdFirma+IdTipDok+BrDok", "IDROBA", F_ROBA )
-            //   MsgBeep( "U ovom dokumentu nalaze se sifre koje ne postoje u tekucem sifarniku!#Prenos nije izvrsen!" )
-            //   LOOP
-            //ENDIF
-
-
             DO WHILE !Eof() .AND. cFaktIdFirma + cIdTipDok + cBrDok == IdFirma + IdTipDok + BrDok
 
                select_o_roba( fakt->idroba )
@@ -1107,13 +1081,8 @@ FUNCTION fakt_11_kalk_42()
                ENDIF
 
                SELECT kalk_pripr
-
-               PRIVATE aPorezi := {}
-               set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, fakt->idRoba, @aPorezi )
-               nMPVBP := MpcBezPor( fakt->( kolicina * cijena ), aPorezi )
-
+               nMPVBP := mpc_bez_pdv_by_tarifa( roba->idtarifa, fakt->kolicina * fakt->cijena )
                APPEND BLANK
-
                REPLACE idfirma WITH cIdFirma
                REPLACE rbr WITH Str( ++nRbr, 3 )
                REPLACE idvd WITH _kalk_tip_dok
@@ -1193,13 +1162,8 @@ FUNCTION fakt_11_kalk_42()
 
                ELSE
 
-                  PRIVATE aPorezi := {}
-
-                  set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, fakt->idRoba, @aPorezi )
-                  nMPVBP := MpcBezPor( fakt->( kolicina * cijena ), aPorezi )
-
+                  nMPVBP := mpc_bez_pdv_by_tarifa( roba->idtarifa, fakt->kolicina * fakt->cijena)
                   APPEND BLANK
-
                   REPLACE idfirma WITH cIdFirma, ;
                      rbr WITH Str( ++nRbr, 3 ), ;
                      idvd WITH _kalk_tip_dok, ;

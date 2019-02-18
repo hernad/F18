@@ -137,10 +137,10 @@ FUNCTION fakt_stanje_robe()
 
    BoxC()
 
-   fSMark := .F.
-   IF ( Right( qqRoba, 1 ) == "*" )
-      fSMark := .T. // izvrsena je markacija robe
-   ENDIF
+   //fSMark := .F.
+   //IF ( Right( qqRoba, 1 ) == "*" )
+  //    fSMark := .T. // izvrsena je markacija robe
+   //ENDIF
 
    PRIVATE cFilt := ".t."
 

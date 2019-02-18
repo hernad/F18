@@ -15,15 +15,16 @@ MEMVAR nKalkRBr
 MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena
 MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
-MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
+MEMVAR _TBankTr, _Marza2, _TMarza2, _Prevoz, _TPrevoz, _TMarza, _Marza
 MEMVAR _BrFaktP
-MEMVAR aPorezi
 
 FUNCTION kalk_get_1_11()
 
    LOCAL lRet
    LOCAL GetList := {}
-   //LOCAL lKalkIzgenerisaneStavke
+   LOCAL cProracunMarzeUnaprijed := " "
+
+   // LOCAL lKalkIzgenerisaneStavke
    LOCAL nKolicinaNaStanju
    LOCAL nKolZN
    LOCAL nNcPosljednjegUlaza
@@ -36,53 +37,35 @@ FUNCTION kalk_get_1_11()
       _PKonto := _Idkonto2
    ENDIF
 
-   //lKalkIzgenerisaneStavke := .F.   // izgenerisane stavke jos ne postoje
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
 
-   PRIVATE aPorezi := {}
-
    IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
-      _GKolicina := _GKolicin2 := 0
-      IF _IdVD $ "11#12#13#22"
-         _IdPartner := ""
-         @  box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj:" GET _BrFaktP
-         @  box_x_koord() + 6, Col() + 2 SAY "Datum:" GET _DatFaktP
-      ENDIF
-
+      _IdPartner := ""
+      @  box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj:" GET _BrFaktP
+      @  box_x_koord() + 6, Col() + 2 SAY "Datum:" GET _DatFaktP
       @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Prodavnički Konto zadužuje" GET _pkonto VALID  P_Konto( @_pkonto, 8, 40 ) PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto razdužuje"  GET _mkonto VALID Empty( _mkonto ) .OR. P_Konto( @_mkonto, 9, 40 )
-
       READ
       ESC_RETURN K_ESC
-
    ELSE
-      IF _IdVD $ "11#12#13"
-         @  box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj: "; ?? _BrFaktP
-         @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
-      ENDIF
+      @  box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj: "; ?? _BrFaktP
+      @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Prodavnički Konto zadužuje "; ?? _pkonto
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto razdužuje "; ?? _mkonto
-
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarifa ->"
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2, @aPorezi )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
    @ box_x_koord() + 12, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE pickol() VALID _Kolicina <> 0
 
    READ
    ESC_RETURN K_ESC
 
-   IF roba_barkod_pri_unosu()
-      _idRoba := Left( _idRoba, 10 )
-   ENDIF
-
    select_o_koncij( _pkonto )
    SELECT kalk_pripr
-
-   _GKolicina := _GKolicin2 := 0
    IF kalk_is_novi_dokument()
       _MPCSaPP := kalk_get_mpc_by_koncij_pravilo( _pkonto )
       _FCJ := roba->NC
@@ -104,7 +87,6 @@ FUNCTION kalk_get_1_11()
    nKolZN := 0
    nNcPosljednjegUlaza := 0
    nNcSrednja := 0
-
    IF _TBankTr <> "X"
       IF !Empty( kalk_metoda_nc() )
          nNcPosljednjegUlaza := nNcSrednja := 0
@@ -137,27 +119,28 @@ FUNCTION kalk_get_1_11()
    IF _kolicina > 0
       @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE picnc() VALID {|| lRet := kalk_valid_kolicina_mag( nKolicinaNaStanju ), _vpc := _fcj, lRet }
    ELSE
-      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE picdem() VALID {|| lRet := kalk_valid_kolicina_prod(), _vpc := _fcj, lRet }
+      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE picdem() VALID {|| lRet := kalk_valid_kolicina_prod( nKolicinaNaStanju ), _vpc := _fcj, lRet }
    ENDIF
 
    select_o_koncij( _pkonto )
    SELECT kalk_pripr
-
    IF kalk_is_novi_dokument()
       _TPrevoz := "R"
    ENDIF
 
-   PRIVATE cProracunMarzeUnaprijed := " "
    @ box_x_koord() + 16, box_y_koord() + 2 SAY8 "MP marza:" GET _TMarza2  VALID _Tmarza2 $ "%AU" PICTURE "@!"
    @ box_x_koord() + 16, Col() + 1  GET _Marza2 PICTURE  picdem() ;
       VALID {|| _nc := _fcj + iif( _TPrevoz == "A", _Prevoz, 0 ), _Tmarza := "A", _marza := _vpc - _fcj, .T. }
-   @ box_x_koord() + 16, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"   VALID {|| kalk_Marza_11( cProracunMarzeUnaprijed ), cProracunMarzeUnaprijed := " ", .T. }
+   @ box_x_koord() + 16, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"   VALID {|| kalk_proracun_marzamp_11_80( cProracunMarzeUnaprijed ), cProracunMarzeUnaprijed := " ", .T. }
 
    @ box_x_koord() + 18, box_y_koord() + 2 SAY8 "                MP BEZ PDV:"
-   @ box_x_koord() + 18, box_y_koord() + 50 GET _MPC PICTURE picdem() VALID VMpc( .F., cProracunMarzeUnaprijed ) WHEN WMpc( .F., cProracunMarzeUnaprijed )
+   @ box_x_koord() + 18, box_y_koord() + 50 GET _MPC PICTURE picdem() ;
+      WHEN kalk_when_mpc_bez_pdv_11_12() ;
+      VALID kalk_valid_mpc_bez_pdv_11_12( cProracunMarzeUnaprijed )
    kalk_say_pdv_a_porezi_var( 19 )
    @ box_x_koord() + 20, box_y_koord() + 2 SAY8 "Maloprodajna cijena SA PDV:"
-   @ box_x_koord() + 20, box_y_koord() + 50 GET _MPCSaPP  PICTURE picdem() VALID VMPCSaPP( .F., cProracunMarzeUnaprijed )
+   @ box_x_koord() + 20, box_y_koord() + 50 GET _MPCSaPP  PICTURE picdem() ;
+      VALID kalk_valid_mpc_sa_pdv_11( cProracunMarzeUnaprijed, _idTarifa )
    READ
 
    ESC_RETURN K_ESC
@@ -172,6 +155,6 @@ FUNCTION kalk_get_1_11()
    _PU_I := "1"
 
    nKalkStrana := 2
-   //kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
+   // kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()

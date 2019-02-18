@@ -98,7 +98,7 @@ FUNCTION kalk_par_varijante_prikaza()
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Pri ulaznoj kalkulaciji pomoć sa C.sa PDV (D/N)" GET  gcMpcKalk10 PICT "@!" VALID gcMpcKalk10 $ "DN"
    nX += 1
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta popusta na dokumentima, default P-%, C-cijena" GET gRCRP
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta popusta na dokumentima, default P-%, C-cijena" GET gPopustMaloprodajaPrekoProcentaIliCijene
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "80 - var.rek.po tarifama ( 1 -samo ukupno / 2 -prod.1,prod.2,ukupno)" GET  g80VRT PICT "9" VALID g80VRT $ "12"
    nX += 2
@@ -120,7 +120,7 @@ FUNCTION kalk_par_varijante_prikaza()
       set_metric( "kalk_pomoc_sa_mpc", NIL, gcMpcKalk10 )
       set_metric( "kalk_kolicina_kod_nivelacije_fakt", NIL, gKolicFakt )
       kalk_preuzimanje_troskova_iz_sif_roba( cRobaTrosk )
-      set_metric( "kalk_varijanta_popusta_na_dokumentima", NIL, gRCRP )
+      set_metric( "kalk_varijanta_popusta_na_dokumentima", NIL, gPopustMaloprodajaPrekoProcentaIliCijene )
       set_metric( "kalk_automatsko_azuriranje_cijena", NIL, gAutoCjen )
       set_metric( "kalk_trosak_1_tip", NIL, gRobaTr1Tip )
       set_metric( "kalk_trosak_2_tip", NIL, gRobaTr2Tip )

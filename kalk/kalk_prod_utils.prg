@@ -11,232 +11,112 @@
 
 #include "f18.ch"
 
+MEMVAR GetList
 MEMVAR cMpcFieldName
+MEMVAR nKalkMarzaMP
+MEMVAR _kolicina, _pkonto, _TBankTr, _idroba, _error, _idvd, _fcj, _vpc, _mpc, _mpcsapp
+MEMVAR _TMarza2, _Marza2, _idtarifa, _nc
 
-/*
- *     Postavi _Marza2, _mpc, _mpcsapp
- */
+FUNCTION kalk_proracun_marzamp_11_80( cProracunMarzeUnaprijed, lSvediVPCNaNC )
 
-FUNCTION kalk_Marza_11( cProracunMarzeUnaprijed, lSvediVPCNaNC )
-
-   LOCAL nPrevMP, nPPP
 
    hb_default( @lSvediVPCNaNC, .T. )
-
-
    IF cProracunMarzeUnaprijed == nil
       cProracunMarzeUnaprijed := " "
    ENDIF
-
-   IF lSvediVPCNaNC
+   IF lSvediVPCNaNC // izjednačiti vpc sa nc
       _VPC := _FCJ
    ENDIF
 
-
    // ako je prevoz u MP rasporedjen uzmi ga u obzir
-   IF _TPrevoz == "A"
-      nPrevMP := _Prevoz
-   ELSE
-      nPrevMP := 0
-   ENDIF
+   //IF _TPrevoz == "A"
+  //    nPrevMP := _Prevoz
+   //ELSE
+  //    nPrevMP := 0
+   //ENDIF
 
    IF _FCj == 0
       _FCj := _mpc
    ENDIF
 
    IF  _Marza2 == 0 .AND. Empty( cProracunMarzeUnaprijed )
-      nMarza2 := _MPC - _VPC - nPrevMP
-
+      nKalkMarzaMP := _MPC - _VPC //- nPrevMP
       IF _TMarza2 == "%"
          IF Round( _vpc, 5 ) <> 0
-            _Marza2 := 100 * ( _MPC / ( _VPC + nPrevMP ) - 1 )
+            _Marza2 := 100 * ( _MPC /_VPC  - 1 )
          ELSE
             _Marza2 := 0
          ENDIF
-
       ELSEIF _TMarza2 == "A"
-         _Marza2 := nMarza2
+         _Marza2 := nKalkMarzaMP
 
       ELSEIF _TMarza2 == "U"
-         _Marza2 := nMarza2 * ( _Kolicina )
+         _Marza2 := nKalkMarzaMP * _Kolicina
       ENDIF
 
    ELSEIF _MPC == 0 .OR. !Empty( cProracunMarzeUnaprijed )
 
       IF _TMarza2 == "%"
-         nMarza2 := _Marza2 / 100 * ( _VPC + nPrevMP )
+         nKalkMarzaMP := _Marza2 / 100 * _VPC
       ELSEIF _TMarza2 == "A"
-         nMarza2 := _Marza2
+         nKalkMarzaMP := _Marza2
       ELSEIF _TMarza2 == "U"
-         nMarza2 := _Marza2 / ( _Kolicina )
+         nKalkMarzaMP := _Marza2 / _Kolicina
       ENDIF
-      _MPC := Round( nMarza2 + _VPC, 2 )
-
+      _MPC := Round( nKalkMarzaMP + _VPC, 2 )
       IF !Empty( cProracunMarzeUnaprijed )
-         _MpcSaPP := Round( MpcSaPor( _mpc, aPorezi ), 2 )
+         _MpcSaPP := Round( mpc_sa_pdv_by_tarifa( _idtarifa, _mpc ), 2 )
       ENDIF
-
    ELSE
-      nMarza2 := _MPC - _VPC - nPrevMP
+      nKalkMarzaMP := _MPC - _VPC
    ENDIF
-
    AEval( GetList, {| o | o:display() } )
 
    RETURN .T.
 
 
 
-FUNCTION Marza2O( cProracunMarzeUnaprijed )
+FUNCTION kalk_marza_realizacija_prodavnica_41_42()
 
-   LOCAL nPrevMP, nPPP
+   LOCAL nPDV, nMpcBezPDVNeto
 
-   IF cProracunMarzeUnaprijed == nil
-      cProracunMarzeUnaprijed := " "
-   ENDIF
-
-   IF roba->tip == "K"  // samo za tip k
-      nPPP := 1 / ( 1 + tarifa->pdv / 100 )
-   ELSE
-      nPPP := 1
-   ENDIF
-
-   // ako je prevoz u MP rasporedjen uzmi ga u obzir
-   IF _TPrevoz == "A"
-      nPrevMP := _Prevoz
-   ELSE
-      nPrevMP := 0
-   ENDIF
-
-   IF _fcj == 0
-      _fcj := _mpc
-   ENDIF
-
-   IF  _Marza2 == 0 .AND. Empty( cProracunMarzeUnaprijed )
-      nMarza2 := _MPC - _VPC * nPPP - nPrevMP
-      IF _TMarza2 == "%"
-         IF Round( _vpc, 5 ) <> 0
-            _Marza2 := 100 * ( _MPC / ( _VPC * nPPP + nPrevMP ) - 1 )
-         ELSE
-            _Marza2 := 0
-         ENDIF
-      ELSEIF _TMarza2 == "A"
-         _Marza2 := nMarza2
-      ELSEIF _TMarza2 == "U"
-         _Marza2 := nMarza2 * ( _Kolicina )
-      ENDIF
-
-   ELSEIF _MPC == 0 .OR. !Empty( cProracunMarzeUnaprijed )
-      IF _TMarza2 == "%"
-         nMarza2 := _Marza2 / 100 * ( _VPC * nPPP + nPrevMP )
-      ELSEIF _TMarza2 == "A"
-         nMarza2 := _Marza2
-      ELSEIF _TMarza2 == "U"
-         nMarza2 := _Marza2 / ( _Kolicina )
-      ENDIF
-      _MPC := Round( nMarza2 + _VPC, 2 )
-      IF !Empty( cProracunMarzeUnaprijed )
-        _mpcsapp := Round( MpcSaPor( _mpc, aPorezi ), 2 )
-      ENDIF
-
-   ELSE
-      nMarza2 := _MPC - _VPC * nPPP - nPrevMP
-   ENDIF
-
-   AEval( GetList, {| o | o:display() } )
-
-   RETURN .T.
-
-
-/*
- *     Marza2 pri realizaciji prodavnice je MPC-NC
- */
-
-FUNCTION Marza2R()
-
-   LOCAL nPPP
-
-   nPPP := 1 / ( 1 + tarifa->pdv / 100 )
-
+   nPDV := 1 / ( 1 + tarifa->pdv / 100 )
    IF _nc == 0
       _nc := _mpc
    ENDIF
-
-   IF  _Marza2 == 0
-      nMarza2 := _MPC - _NC
-      IF roba->tip == "V"
-         nMarza2 := ( _MPC - roba->VPC ) + roba->vpc * nPPP - _NC
-      ENDIF
-
-      IF _TMarza2 == "%"
-         _Marza2 := 100 * ( _MPC / _NC - 1 )
-      ELSEIF _TMarza2 == "A"
-         _Marza2 := nMarza2
-      ELSEIF _TMarza2 == "U"
-         _Marza2 := nMarza2 * ( _Kolicina )
-      ENDIF
-   ELSEIF _MPC == 0
-      IF _TMarza2 == "%"
-         nMarza2 := _Marza2 / 100 * _NC
-      ELSEIF _TMarza2 == "A"
-         nMarza2 := _Marza2
-      ELSEIF _TMarza2 == "U"
-         nMarza2 := _Marza2 / ( _Kolicina )
-      ENDIF
-      _MPC := nMarza2 + _NC
-   ELSE
-      nMarza2 := _MPC - _NC
-   ENDIF
-   AEval( GetList, {| o | o:display() } )
-
-   RETURN .T.
-
-
-
-FUNCTION kalk_marza_realizacija_prodavnica()
-
-   LOCAL nPPP
-
-   nPPP := 1 / ( 1 + tarifa->pdv / 100 )
-
-   IF _nc == 0
-      _nc := _mpc
-   ENDIF
-
-   nMpcSaPop := _MPC - RabatV
+   nMpcBezPDVNeto := _MPC
 
    IF  ( _Marza2 == 0 )
-      nMarza2 := nMpcSaPop - _NC
-
+      nKalkMarzaMP := nMpcBezPDVNeto - _NC
       IF _TMarza2 == "%"
          IF Round( _nc - 1, 4 ) != 0
-            _Marza2 := 100 * ( nMpcSaPop / _NC - 1 )
+            _Marza2 := 100 * ( nMpcBezPDVNeto / _NC - 1 )
          ELSE
             _Marza2 := 999
             error_bar( "kalk", "dijeljenje sa 0: nc - 1" )
          ENDIF
       ELSEIF _TMarza2 == "A"
-         _Marza2 := nMarza2
+         _Marza2 := nKalkMarzaMP
       ELSEIF _TMarza2 == "U"
-         _Marza2 := nMarza2 * ( _Kolicina )
+         _Marza2 := nKalkMarzaMP * _Kolicina
       ENDIF
    ELSEIF ( _MPC == 0 )
       IF _TMarza2 == "%"
-         nMarza2 := _Marza2 / 100 * _NC
+         nKalkMarzaMP := _Marza2 / 100 * _NC
       ELSEIF _TMarza2 == "A"
-         nMarza2 := _Marza2
+         nKalkMarzaMP := _Marza2
       ELSEIF _TMarza2 == "U"
          IF Round( _kolicina, 4 ) != 0
-            nMarza2 := _Marza2 / ( _Kolicina )
+            nKalkMarzaMP := _Marza2 / _Kolicina
          ELSE
             error_bar( "kalk", "dijeljenje sa 0: kolicina" )
-            nMarza2 := 999
+            nKalkMarzaMP := 999
          ENDIF
       ENDIF
-
-      _MPC := nMarza2 + _NC + _RabatV
+      _MPC := nKalkMarzaMP + _NC
 
    ELSE
-      nMarza2 := nMpcSaPop - _NC
+      nKalkMarzaMP := nMpcBezPDVNeto - _NC
    ENDIF
    AEval( GetList, {| o | o:display() } )
 
@@ -254,7 +134,6 @@ FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 
    find_kalk_by_pkonto_idroba( cIdFirma, cPKonto, cIdRoba )
    GO BOTTOM
-
    DO WHILE !Bof() .AND. idfirma + pkonto + idroba == cIdFirma + cPKonto + cIdRoba
 
       IF dDatum <> NIL .AND. dDatum < datdok
@@ -275,7 +154,6 @@ FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
    PopWa()
 
    RETURN .T.
-
 
 
 
@@ -366,20 +244,19 @@ FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
    RETURN lRet
 
 
+FUNCTION kalk_valid_kolicina_prod(nKolicinaNaStanju)
 
-FUNCTION kalk_valid_kolicina_prod()
-
-   LOCAL ppKolicina
+   LOCAL nKol
 
    IF Empty( kalk_metoda_nc() ) .OR. _TBankTr == "X"
       RETURN .T.
    ENDIF
 
-   IF roba->tip $ "UTY"; RETURN .T. ; ENDIF
+   IF roba->tip $ "UT"; RETURN .T. ; ENDIF
 
-   ppKolicina := _Kolicina
+   nKol := _Kolicina
    IF _idvd == "11"
-      ppKolicina := Abs( _Kolicina )
+      nKol := Abs( _Kolicina )
    ENDIF
 
    IF _fcj <= 0
@@ -390,54 +267,23 @@ FUNCTION kalk_valid_kolicina_prod()
       RETURN .F.
    ENDIF
 
-   IF nKolS < ppKolicina
-
+   IF nKolicinaNaStanju < nKol
       sumnjive_stavke_error()
-
       error_bar( "KA_" + _pkonto + "/" + _idroba, ;
-         _pkonto + " / " + _idroba + "na stanju: " + AllTrim( Str( nKolS, 10, 4 ) ) + " treba " +  AllTrim( Str( _kolicina, 10, 4 ) ) )
-
+         _pkonto + " / " + _idroba + "na stanju: " + AllTrim( Str( nKolicinaNaStanju, 10, 4 ) ) + " treba " +  AllTrim( Str( _kolicina, 10, 4 ) ) )
    ENDIF
 
    RETURN .T.
 
 
+FUNCTION kalk_marza_maloprodaja()
 
-/* StanjeProd(cKljuc,ddatdok)
- *
- */
-
-FUNCTION StanjeProd( cKljuc, dDatdok )
-
-   LOCAL nUlaz := 0, nIzlaz := 0
-
-   SELECT KALK
-   SET ORDER TO TAG "4"
-   GO TOP
-   SEEK cKljuc
-   DO WHILE !Eof() .AND. cKljuc == idfirma + pkonto + idroba
-      IF ddatdok < datdok
-         skip; LOOP
-      ENDIF
-      IF roba->tip $ "UT"
-         skip
-         LOOP
+      IF TMarza2 == "%" .OR. Empty( Tmarza2 )
+         nKalkMarzaMP := kolicina * Marza2 / 100 * VPC
+      ELSEIF TMarza2 == "A"
+         nKalkMarzaMP := Marza2 * kolicina
+      ELSEIF TMarza2 == "U"
+         nKalkMarzaMP := Marza2
       ENDIF
 
-      IF pu_i == "1"
-         nUlaz += kolicina - GKolicina - GKolicin2
-
-      ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
-         nIzlaz += kolicina
-
-      ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )    // povrat
-         nUlaz -= kolicina
-
-      ELSEIF pu_i == "I"
-         nIzlaz += gkolicin2
-      ENDIF
-
-      SKIP 1
-   ENDDO
-
-   RETURN ( nUlaz - nIzlaz )
+      RETURN nKalkMarzaMP

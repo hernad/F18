@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR nKalkRBr
+MEMVAR nKalkRBr, nKalkStrana, GetList
 
 FUNCTION kalk_get_1_ip()
 
@@ -19,34 +19,25 @@ FUNCTION kalk_get_1_ip()
    LOCAL nX := 8
    LOCAL _pos_x, _pos_y
    LOCAL _left := 25
-   PRIVATE aPorezi := {}
 
-   //_datfaktp := _datdok
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto koji zadužuje" GET _IdKonto  VALID P_Konto( @_IdKonto, nX, 35 ) PICT "@!"
-
    READ
    ESC_RETURN K_ESC
 
    nX += 2
    _pos_x := box_x_koord() + nX
 
-   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + nX, box_y_koord() + 2, @aPorezi )
+   kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + nX, box_y_koord() + 2 )
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() - 20 ) SAY "Tarifa:" GET _idtarifa VALID P_Tarifa( @_idtarifa )
-
    READ
-
    ESC_RETURN K_ESC
 
-   IF roba_barkod_pri_unosu()
-      _idroba := Left( _idroba, 10 )
-   ENDIF
-
-
-
+   //IF roba_barkod_pri_unosu()
+  //    _idroba := Left( _idroba, 10 )
+   //ENDIF
    select_o_tarifa( _idtarifa )
    select_o_roba( _idroba )
-
    _mpcsapp := kalk_get_mpc_by_koncij_pravilo( _IdKonto )
 
    SELECT kalk_pripr
@@ -74,10 +65,8 @@ FUNCTION kalk_get_1_ip()
    _gkolicin2 := _gkolicina - _kolicina // ovo je kolicina izlaza koja nije proknjizena
    _mkonto := ""
    _pkonto := _idkonto
-
    _mu_i := ""
    _pu_i := "I" // inventura
-
    nKalkStrana := 3
 
    RETURN LastKey()

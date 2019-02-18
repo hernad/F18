@@ -39,7 +39,7 @@ FUNCTION epdv_valid_id_tar( cIdTar, nOsnov, nPdv,  nShow, lNova )
    ENDIF
 
    IF nShow <> nil
-      @ Row(), nShow + 2 SAY "Tarifa:" + stopa_pdv( nStopa )
+      @ Row(), nShow + 2 SAY "Tarifa:" + format_stopa_pdv_string( nStopa )
       @ Row(), Col() + 2 SAY "iznos PDV: "
       @ Row(), Col() + 2 SAY nPdV PICT PIC_IZN()
    ENDIF

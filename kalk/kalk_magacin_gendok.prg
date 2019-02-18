@@ -201,7 +201,7 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
 
       IF Round( kolicina - gkolicina, 3 ) <> 0   // popisana-stvarna=(>0 visak,<0 manjak)
          IF lOdvojiVisak .AND. Round( kolicina - gkolicina, 3 ) > 0  // visak odvojiti
-            PRIVATE nKolZn := nKols := nc1 := nc2 := 0
+            PRIVATE nKolZn := nKolicinaNaStanju := nc1 := nc2 := 0
 
             SELECT kalk_pripr9
             APPEND BLANK
@@ -227,7 +227,7 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             _ERROR := ""
             gather()
          ELSE
-            PRIVATE nKolZn := nKols := nc1 := nc2 := 0
+            PRIVATE nKolZn := nKolicinaNaStanju := nc1 := nc2 := 0
             SELECT kalk_pripr2
             APPEND BLANK
 

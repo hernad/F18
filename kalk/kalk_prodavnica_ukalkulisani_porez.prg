@@ -9,7 +9,6 @@
  * By using this software, you agree to be bound by its terms.
  */
 
-
 #include "f18.ch"
 
 
@@ -29,7 +28,8 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
    LOCAL nTT6 := 0
    LOCAL nTT7 := 0
    LOCAL n1 := 0
-   LOCAL nPDVUkupno := 0
+   LOCAL nPDVUkupno
+   LOCAL cIdTarifa
    LOCAL n5 := 0
    LOCAL n5a := 0
    LOCAL n6 := 0
@@ -76,7 +76,6 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
    find_kalk_za_period( cIdFirma, NIL, NIL, NIL, dDat1, dDat2, "idfirma,idtarifa,pkonto" )
 
    PRIVATE cFilt1 := ""
-
 
    cFilt1 := cUslovPKonto + ".and.(IDVD$" + dbf_quote( cVDOK ) + ")"
 
@@ -154,10 +153,9 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
       SELECT KALK
       DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. IspitajPrekid()
 
-         cIdKonto := PKonto
-         cIdTarifa := IdTarifa
+         cIdKonto := kalk->PKonto
+         cIdTarifa := kalk->IdTarifa
          select_o_tarifa( cIdtarifa )
-
          SELECT kalk
          // cIdTarifa := Tarifa( pkonto, idRoba, @aPorezi, cIdTarifa )
          nMPV := 0
@@ -188,17 +186,17 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
             FF
          ENDIF
 
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-         nPDV := kalk_porezi_maloprodaja( aPorezi, nMPV, nMPVSaPP )
+
+         nPDVUkupno :=  nMPV * pdv_procenat_by_tarifa(cIdTarifa)
 
          @ PRow() + 1, 0 SAY Space( 3 ) + cIdKonto
          @ PRow(), PCol() + 1 SAY Space( 6 ) + cIdTarifa
 
          nCol1 := PCol() + 4
          @ PRow(), PCol() + 4 SAY n1 := nMPV PICT cPicIznos
-         @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT cPicProcenat
+         @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa(cIdTarifa)*100 PICT cPicProcenat
 
-         @ PRow(), PCol() + 1 SAY nPDVUkupno := nPDV PICT cPicIznos
+         @ PRow(), PCol() + 1 SAY nPDVUkupno PICT cPicIznos
 
          @ PRow(), PCol() + 1 SAY n7 := nMPVSAPP PICTURE cPicIznos
          nT1 += n1

@@ -44,8 +44,8 @@ FUNCTION kalk_stampa_dok_im()
    PRIVATE nZavTr
    PRIVATE nBankTr
    PRIVATE nSpedTr
-   PRIVATE nMarza
-   PRIVATE nMarza2
+   PRIVATE nKalkMarzaVP
+   PRIVATE nKalkMarzaMP
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 

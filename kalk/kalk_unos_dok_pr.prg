@@ -255,7 +255,7 @@ FUNCTION kalk_pripr_pobrisi_sirovine( cIdFirma, cIdVd, cBrDok, nKalkRbr, bDokume
 FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
 
    LOCAL nRbr100
-   LOCAL nKolS, nKolZN, nC1, nC2
+   LOCAL nKolicinaNaStanju, nKolZN, nC1, nC2
    LOCAL hRec
 
    select_o_roba( _idroba )
@@ -294,13 +294,13 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
          field->error WITH "0", ;
          field->mkonto WITH _idkonto2
 
-      nKolS := 0
+      nKolicinaNaStanju := 0
       nKolZN := 0
       nC1 := 0
       nC2 := 0
 
       info_bar( _idkonto2 + "/" + sast->id2, "sirovina: " + _idkonto2 + "/" + sast->id2 )
-      kalk_get_nabavna_mag( _datdok, _idfirma, sast->id2, _idkonto2, @nKolS, @nKolZN, @nc1, @nc2 )
+      kalk_get_nabavna_mag( _datdok, _idfirma, sast->id2, _idkonto2, @nKolicinaNaStanju, @nKolZN, @nc1, @nc2 )
       info_bar( _idkonto2 + "/" + sast->id2, NIL )
 
       IF _kolicina >= 0 .OR. Round( _NC, 3 ) == 0 .AND. !( roba->tip $ "UT" )
@@ -313,7 +313,7 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
       ENDIF
 
       SELECT kalk_pripr // nc sirovine, gkolicina se puni sa kolicinom na stanju
-      RREPLACE field->nc WITH nC2, field->gKolicina WITH nKolS
+      RREPLACE field->nc WITH nC2, field->gKolicina WITH nKolicinaNaStanju
 
       SELECT sast
       SKIP

@@ -16,9 +16,9 @@ STATIC s_nRobaNazivSirina := 39
 
 MEMVAR aPorezi
 MEMVAR nStr
-MEMVAR nPrevoz, nBankTr, nSpedTr, nMarza, nMarza2, nCarDaz, nZavTr
+MEMVAR nPrevoz, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, nCarDaz, nZavTr
 
-MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cPKonto //dDatFaktp
+MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cPKonto // dDatFaktp
 
 /*
    input cIdFirma, cIdVd, cBrDok
@@ -28,26 +28,28 @@ MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cPKonto //dDatFaktp
 
 FUNCTION kalk_stampa_dok_41_42()
 
-   LOCAL nCol0
-   LOCAL nCol1
+   LOCAL nCol0, nCol1, nCol2, nCol3
    LOCAL cLine
-   LOCAL nMPos
-   LOCAL nTot3, nTot4, nTot5, nTotPorez, nTot7, nTot8, nTotPopust
-   LOCAL nTot4a, nTotMPP
-   LOCAL nU3, nU4, nU5, nU6, nU7, nU8, nU9, nUMPP
    LOCAL nPor1
    LOCAL aIPor
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
 
-   PRIVATE nMarza, nMarza2, aPorezi
+   LOCAL nTotPopustBezPDV, nTotNabVr, nTotMarzaMPBruto, nTotMPVbezPDV, nTotPDV, nTotMpvBezPDVNeto
+   LOCAL nTotMPVSaPDVNeto, nTotMPvSaPDV
 
-   nMarza := nMarza2 := 0
+   LOCAL nUPopustBezPDV, nUNabVr, nUMarzaMPBruto, nUMPVbezPDV, nUPDV, nUMpvBezPDVNeto
+   LOCAL nUMPVSaPDVNeto, nUMPvSaPDV
+
+
+   PRIVATE nKalkMarzaVP, nKalkMarzaMP, aPorezi
+
+   nKalkMarzaVP := nKalkMarzaMP := 0
    aPorezi := {}
    nStr := 0
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
-   //dDatFaktP := kalk_pripr->DatFaktP
+   // dDatFaktP := kalk_pripr->DatFaktP
    cPKonto := kalk_pripr->pKonto
 
    IF cIdVd == "41"
@@ -72,16 +74,15 @@ FUNCTION kalk_stampa_dok_41_42()
 
    SELECT kalk_pripr
 
-   nTot3 := nTot4 := nTot5 := nTotPorez := nTot7 := nTot8 := nTotPopust := 0
-   nTot4a := 0
-   nTotMPP := 0
+   nTotNabVr := nTotMarzaMPBruto := nTotMPVbezPDV := nTotPDV := nTotMpvSaPDV := nTotMpvBezPDVNeto := nTotPopustBezPDV := 0
+   nTotMPVSaPDVNeto := 0
 
    Eval( bZagl )
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->idfirma .AND. cBrDok == kalk_pripr->brdok .AND. cIdVD == kalk_pripr->idvd
 
       Scatter()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-      kalk_marza_realizacija_prodavnica()
+      kalk_marza_realizacija_prodavnica_41_42()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idRoba, @aPorezi, kalk_pripr->idtarifa )
 
@@ -89,26 +90,18 @@ FUNCTION kalk_stampa_dok_41_42()
       aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, kalk_pripr->mpc, kalk_pripr->mpcsapp, kalk_pripr->nc )
       nPor1 := aIPor[ 1 ]
       print_nova_strana( 125, @nStr, 2 )
-      // nabavna vrijednost
-      nTot3 += ( nU3 := iif( roba->tip = "U", 0, kalk_pripr->nc ) * kalk_pripr->kolicina )
-      // marza
-      nTot4 += ( nU4 := nMarza2 * kalk_pripr->kolicina )
-      // maloprodajna vrijednost bez poreza (bez popusta)
-      nTot5 += ( nU5 := ( kalk_pripr->mpc + kalk_pripr->rabatv ) * kalk_pripr->kolicina )
-      // porez
-      nTotPorez += ( nU6 := ( nPor1 ) * kalk_pripr->kolicina )
-      // maloprodajna vrijednost sa porezom
-      nTot7 += ( nU7 := kalk_pripr->mpcsapp * kalk_pripr->kolicina )
-      // maloprodajna vrijednost sa popustom bez poreza
-      nTot8 += ( nU8 := ( kalk_pripr->mpc * kalk_pripr->kolicina ) )
-      // popust
-      nTotPopust += ( nU9 := kalk_pripr->rabatv * kalk_pripr->kolicina )
-      // mpv sa pdv - popust
-      nTotMPP += ( nUMPP := ( kalk_pripr->mpc + nPor1 ) * kalk_pripr->kolicina )
+      nTotNabVr += ( nUNabVr := iif( roba->tip == "U", 0, kalk_pripr->nc ) * kalk_pripr->kolicina )
+      nTotMarzaMPBruto += ( nUMarzaMPBruto := ( nKalkMarzaMP + kalk_pripr->rabatv ) * kalk_pripr->kolicina )
+      nTotMPVbezPDV += ( nUMPVbezPDV := ( kalk_pripr->mpc + kalk_pripr->rabatv ) * kalk_pripr->kolicina )
+      nTotPDV += ( nUPdv := ( nPor1 ) * kalk_pripr->kolicina )
+      nTotMpvBezPDVNeto += ( nUMpvBezPDVNeto := ( kalk_pripr->mpc * kalk_pripr->kolicina ) )
+      nTotMpvSaPDV += ( nUMpvSaPDV := kalk_pripr->mpcsapp * kalk_pripr->kolicina )
+      nTotPopustBezPDV += ( nUPopustBezPDV := kalk_pripr->rabatv * kalk_pripr->kolicina )
+      nTotMPVSaPDVNeto += ( nUMpvSaPDVNeto := ( kalk_pripr->mpc + nPor1 ) * kalk_pripr->kolicina )
 
       check_nova_strana( bZagl, s_oPDF, .F., 0 )
       @ PRow() + 1, 0 SAY kalk_pripr->rbr PICT "999"
-      @ PRow(), PCol() + 1 SAY IdRoba
+      @ PRow(), PCol() + 1 SAY kalk_pripr->IdRoba
       @ PRow(), PCol() + 1 SAY ROBA->barkod
       @ PRow(), PCol() + 1 SAY PadR( ROBA->naz, s_nRobaNazivSirina ) + "(" + ROBA->jmj + ")"
       @ PRow(), PCol() + 1 SAY kalk_pripr->kolicina PICT pickol()
@@ -121,52 +114,42 @@ FUNCTION kalk_stampa_dok_41_42()
       ELSE
          @ PRow(), PCol() + 1 SAY kalk_pripr->nc PICT piccdem()
       ENDIF
-      // marza
-      @ PRow(), nMPos := PCol() + 1 SAY nMarza2 PICT piccdem()
-      @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpc + kalk_pripr->rabatv ) PICT piccdem()// mpc ili prodajna cijena uvecana za rabat
-      nCol1 := PCol() + 1
-
-      // popust
-      @ PRow(), PCol() + 1 SAY kalk_pripr->rabatv PICT piccdem()
-      // mpc sa pdv umanjen za popust
-      @ PRow(), PCol() + 1 SAY kalk_pripr->mpc PICT piccdem()
-      // pdv
+      @ PRow(), nCol1 := PCol() + 1 SAY nKalkMarzaMP + kalk_pripr->rabatv PICT piccdem() // marza bruto
+      @ PRow(), PCol() + 1 SAY kalk_pripr->mpc + kalk_pripr->rabatv PICT piccdem() // mpc ili prodajna cijena uvecana za rabat
+      @ PRow(), nCol2 := PCol() + 1 SAY kalk_pripr->rabatv PICT piccdem() // popust bez pdv
+      @ PRow(), PCol() + 1 SAY kalk_pripr->mpc PICT piccdem() // mpc neto
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc()
-      // mpc sa porezom
-      @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpc + nPor1 ) PICT piccdem()
-      // mpc sa porezom
-      @ PRow(), PCol() + 1 SAY kalk_pripr->mpcsapp PICT piccdem()
+      @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpc + nPor1 ) PICT piccdem() // mpc sa pdv neto
+      @ PRow(), PCol() + 1 SAY kalk_pripr->mpcsapp PICT piccdem() // mpc sa pdv bruto
 
       // 3. red : totali stavke
       // tarifa
       @ PRow() + 1, 4 SAY kalk_pripr->idtarifa
       @ PRow(), nCol0 SAY ""
 
-      IF roba->tip = "U"
+      IF roba->tip == "U"
          @ PRow(), PCol() + 1 SAY 0 PICT picdem()
       ELSE
          @ PRow(), PCol() + 1 SAY ( kalk_pripr->nc * kalk_pripr->kolicina ) PICT picdem()
       ENDIF
 
-      // ukupna marza stavke
-      @ PRow(), PCol() + 1 SAY ( nMarza2 * kalk_pripr->kolicina ) PICT picdem()
-      // ukupna mpv bez poreza ili ukupna prodajna vrijednost
-      @ PRow(), PCol() + 1 SAY ( ( kalk_pripr->mpc + kalk_pripr->rabatv ) * kalk_pripr->kolicina ) PICT picdem()
-      // ukupne vrijednosti mpc sa porezom sa rabatom i sam rabat
-      @ PRow(), PCol() + 1 SAY ( kalk_pripr->rabatv * kalk_pripr->kolicina ) PICT picdem()
-      @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpc * kalk_pripr->kolicina ) PICT picdem()
-      // ukupni PDV stavke
-      @ PRow(), PCol() + 1 SAY ( nPor1 * kalk_pripr->kolicina ) PICT piccdem()
-      // ukupni PDV stavke
-      @ PRow(), PCol() + 1 SAY ( ( nPor1 + kalk_pripr->mpc ) * kalk_pripr->kolicina ) PICT piccdem()
-      // ukupna maloprodajna vrijednost (sa PDV-om)
-      @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpcsapp * kalk_pripr->kolicina ) PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUMarzaMPBruto PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUMPvBezPDV PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUPopustBezPDV PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUMpvBezPDVNeto PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUPdv PICT piccdem()
+      @ PRow(), PCol() + 1 SAY nUMpvSaPDVNeto PICT piccdem()
+      @ PRow(), PCol() + 1 SAY nUMpvSaPDV PICT picdem()
+
+      // treći red
       // marza iskazana u procentu
       IF Round( kalk_pripr->nc, 4 ) <> 0
-         @ PRow() + 1, nMPos SAY ( nMarza2 / kalk_pripr->nc ) * 100 PICT picproc()
+         @ PRow() + 1, nCol1 SAY ( nKalkMarzaMP / kalk_pripr->nc ) * 100 PICT picproc()
       ELSE
-         @ PRow() + 1, nMPos SAY 0 PICT picproc()
+         @ PRow() + 1, nCol1 SAY 0 PICT picproc()
       ENDIF
+      // procenat popusta u malaprodaji
+      @ PRow(), nCol2 SAY kalk_pripr->rabatv / ( kalk_pripr->mpc + kalk_pripr->rabatv ) * 100 PICT picproc()
       SKIP 1
 
    ENDDO
@@ -176,28 +159,25 @@ FUNCTION kalk_stampa_dok_41_42()
    @ PRow() + 1, 0 SAY "Ukupno:"
    @ PRow(), nCol0 SAY ""
    // nabavna vrijednost
-   @ PRow(), PCol() + 1 SAY nTot3 PICT picdem()
-   // marza
-   @ PRow(), PCol() + 1 SAY nTot4 PICT picdem()
-   // prodajna vrijednost
-   @ PRow(), PCol() + 1 SAY nTot5 PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotNabVr PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotMarzaMPBruto PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotMPVbezPDV PICT picdem()
    // popust
-   @ PRow(), PCol() + 1 SAY nTotPopust PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotPopustBezPDV PICT picdem()
    // prodajna vrijednost - popust
-   @ PRow(), PCol() + 1 SAY nTot8 PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotMpvBezPDVNeto PICT picdem()
    // porez
-   @ PRow(), PCol() + 1 SAY nTotPorez PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotPDV PICT picdem()
    // maloprodajna vrijednost sa porezom - popust
-   @ PRow(), PCol() + 1 SAY nTotMPP PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotMPVSaPDVNeto PICT picdem()
    // maloprodajna vrijednost sa porezom
-   @ PRow(), PCol() + 1 SAY nTot7 PICT picdem()
+   @ PRow(), PCol() + 1 SAY nTotMpvSaPDV PICT picdem()
    ? cLine
 
    check_nova_strana( bZagl, s_oPDF, .F., 8 )
    PushWa()
    kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
    PopWa()
-
    f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
@@ -205,17 +185,18 @@ FUNCTION kalk_stampa_dok_41_42()
 
 FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
 
-   LOCAL nTot1
-   LOCAL nTot2
-   LOCAL nTot5, nTotRuc
-   LOCAL nTotP
+   LOCAL nTotMpvNeto
+   LOCAL nTotPDV
+   LOCAL nTotRealizovanaRuc
+   LOCAL nTotPopustBezPDV
    LOCAL aPorezi
    LOCAL cLine
    LOCAL cIdTarifa
-   LOCAL nU1
-   LOCAL nU2
-   LOCAL nU5
-   LOCAL nUp
+   LOCAL nUMpvNeto
+   LOCAL nUPdv
+   LOCAL nUMPvSaPDV
+   LOCAL nTotMPvSaPDV
+   LOCAL nUPopustBezPDV
    LOCAL aIPor
    LOCAL nCol1
 
@@ -225,92 +206,74 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
 
    cLine := linija_za_podvlacenje_pdv()
    ? cLine
-   ?  "* Tar *  PDV%    *   MPV    *  Popust  * MPV-Pop  *   PDV   * MPV-Pop. *  MPV    *"
+   ?  "* Tar *  PDV%    *   MPV    *  Popust  * MPV NETO *   PDV   * MPV NETO *  MPV    *"
    ?  "*     *          *  b.PDV   *  b.PDV   *  b.PDV   *   PDV   *  sa PDV  * sa PDV  *"
    ? cLine
 
-   nTot1 := 0
-   nTot2 := 0
-   nTot5 := 0
-   nTotRuc := 0
-   // popust
-   nTotP := 0
+   nTotMpvNeto := 0
+   nTotPDV := 0
+   nTotMPVSaPDV := 0
+   nTotRealizovanaRuc := 0
+   nTotPopustBezPDV := 0
    aPorezi := {}
 
    check_nova_strana( bZagl, s_oPDF, .F., 5 )
    DO WHILE !Eof() .AND. cIdfirma + cIdvd + cBrDok == kalk_pripr->idfirma + kalk_pripr->idvd + kalk_pripr->brdok
-
       cIdTarifa := kalk_pripr->idtarifa
-      nU1 := 0
-      nU2 := 0
-      nU5 := 0
-      nUp := 0
+      nUMpvNeto := 0
+      nUPdv := 0
+      nUMPvSaPDV := 0
+      nUPopustBezPDV := 0
       select_o_tarifa( cIdtarifa )
       set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi, kalk_pripr->idtarifa )
 
       SELECT kalk_pripr
       DO WHILE !Eof() .AND. cIdfirma + cIdVd + cBrDok == kalk_pripr->idFirma + kalk_pripr->idVd + kalk_pripr->brDok .AND. kalk_pripr->idTarifa == cIdTarifa
-
          select_o_roba( kalk_pripr->idroba )
          SELECT kalk_pripr
          set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idRoba, @aPorezi, kalk_pripr->idtarifa )
-         // mpc bez poreza sa uracunatim popustom
-         nU1 += kalk_pripr->mpc * kalk_pripr->kolicina
+         nUMpvNeto += kalk_pripr->mpc * kalk_pripr->kolicina
          aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, kalk_pripr->mpc, kalk_pripr->mpcsapp, kalk_pripr->nc )
-         // PDV
-         nU2 += aIPor[ 1 ] * kalk_pripr->kolicina
-         nU5 += kalk_pripr->mpcsapp * kalk_pripr->kolicina
-         nUP += kalk_pripr->rabatv * kalk_pripr->kolicina
-         nTotRuc += ( kalk_pripr->mpc - kalk_pripr->nc ) * kalk_pripr->kolicina
+         nUPdv += aIPor[ 1 ] * kalk_pripr->kolicina
+         nUMPvSaPDV += kalk_pripr->mpcsapp * kalk_pripr->kolicina
+         nUPopustBezPDV += kalk_pripr->rabatv * kalk_pripr->kolicina
+         nTotRealizovanaRuc += ( kalk_pripr->mpc - kalk_pripr->nc ) * kalk_pripr->kolicina
          SKIP
       ENDDO
-
-      nTot1 += nU1
-      nTot2 += nU2
-      nTot5 += nU5
-      nTotP += nUP
+      nTotMpvNeto += nUMpvNeto
+      nTotPDV += nUPdv
+      nTotMPVSaPDV += nUMPvSaPDV
+      nTotPopustBezPDV += nUPopustBezPDV
 
       check_nova_strana( bZagl, s_oPDF, .F., 3 )
       ? cIdtarifa
       @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc()
-
       nCol1 := PCol()
-      // mpv bez pdv
-      @ PRow(), nCol1 + 1 SAY nU1 + nUP PICT picdem()
-      // popust
-      @ PRow(), PCol() + 1 SAY nUp PICT picdem()
-      // mpv - popust
-      @ PRow(), PCol() + 1 SAY nU1 PICT picdem()
-      // PDV
-      @ PRow(), PCol() + 1 SAY nU2 PICT picdem()
-      // mpv
-      @ PRow(), PCol() + 1 SAY ( nU1 + nU2 ) PICT picdem()
-      // mpv sa originalnom cijemo
-      @ PRow(), PCol() + 1 SAY nU5 PICT picdem()
+      @ PRow(), nCol1 + 1 SAY nUMpvNeto + nUPopustBezPDV PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUPopustBezPDV PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUMpvNeto PICT picdem()
+      @ PRow(), PCol() + 1 SAY nUPdv PICT picdem()
+      @ PRow(), PCol() + 1 SAY ( nUMpvNeto + nUPdv ) PICT picdem()
+      @ PRow(), PCol() + 1 SAY nTotMPvSaPDV PICT picdem()
 
    ENDDO
 
    check_nova_strana( bZagl, s_oPDF, .F., 5 )
    ? cLine
    ? "UKUPNO"
-   // prodajna vrijednost bez popusta
-   @ PRow(), nCol1 + 1 SAY ( nTot1 + nTotP ) PICT picdem()
-   // popust
-   @ PRow(), PCol() + 1 SAY nTotP PICT picdem()
-   // prodajna vrijednost - popust
-   @ PRow(), PCol() + 1 SAY nTot1 PICT picdem()
-   // pdv
-   @ PRow(), PCol() + 1 SAY nTot2 PICT picdem()
+   @ PRow(), nCol1 + 1 SAY ( nTotMpvNeto + nTotPopustBezPDV ) PICT picdem() // MPV bruto
+   @ PRow(), PCol() + 1 SAY nTotPopustBezPDV PICT picdem()  // popust
+   @ PRow(), PCol() + 1 SAY nTotMpvNeto PICT picdem() // MPV neto
+   @ PRow(), PCol() + 1 SAY nTotPDV PICT picdem() // pdv
    // mpv sa uracunatim popustom
-   @ PRow(), PCol() + 1 SAY ( nTot1 + nTot2 ) PICT picdem()
-   // mpv
-   @ PRow(), PCol() + 1 SAY nTot5 PICT picdem()
+   @ PRow(), PCol() + 1 SAY ( nTotMpvNeto + nTotPDV ) PICT picdem() // mpv neto + pdv = mpv neto sa pdv
+   @ PRow(), PCol() + 1 SAY nTotMPVSaPDV PICT picdem() // mpv sa pdv bruto
 
    ? cLine
-   ? "        UKUPNA RUC:"
-   @ PRow(), PCol() + 1 SAY nTotRuc PICT picdem()
-   ? "UKUPNO POPUST U MP:"
-   @ PRow(), PCol() + 1 SAY nTot5 - ( nTot1 + nTot2 ) PICT picdem()
+   ? "        REALIZOVANI (NETO) RUC:"
+   @ PRow(), PCol() + 1 SAY nTotRealizovanaRuc PICT picdem()
+   ? "    UKUPNO POPUST bez PDV U MP:"
+   @ PRow(), PCol() + 1 SAY nTotPopustBezPDV PICT picdem()
    ? cLine
 
    RETURN .T.
@@ -323,7 +286,7 @@ STATIC FUNCTION kalk_naslov_41_42()
    PushWa()
    select_o_partner( cIdPartner )
    IF cIdVd == "41"
-      ?  "KUPAC:", cIdPartner, "-", PadR( partn->naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP  //, "Datum:", dDatFaktP
+      ?  "KUPAC:", cIdPartner, "-", PadR( partn->naz, 20 ), Space( 5 ), "DOKUMENT Broj:", cBrFaktP  // , "Datum:", dDatFaktP
    ENDIF
 
    select_o_konto( cPKonto )
@@ -332,11 +295,11 @@ STATIC FUNCTION kalk_naslov_41_42()
    cLine := linija_za_podvlacenje( cIdVd )
    ? cLine
 
-   ?U "*R * ROBA     *" + PadC( "Barkod", 13 ) + "*" + PadC( "Naziv", s_nRobaNazivSirina + 5 ) +;
-      "* Količina *  NAB.CJ  *  MARZA  * MPC bPDV *  Popust   * MPV-pop. *   PDV %  *   MPC    * MPC/MPV *"
+   ?U "*R * ROBA     *" + PadC( "Barkod", 13 ) + "*" + PadC( "Naziv", s_nRobaNazivSirina + 5 ) + ;
+      "* Količina *  NAB.CJ  *  MARZA  * MPC bPDV *  Popust   * MPV NETO *   PDV %  *  MPC/MPV * MPC/MPV *"
 
-   ?U "*BR*          *" + PadC( "      ", 13 ) + "*" + PadC( "     ", s_nRobaNazivSirina + 5 ) +;
-      "*          *   U MP    *         * MPV bPDV * (bez PDV) * (bez PDV)*   PDV    *  SA PDV  * SA PDV  *"
+   ?U "*BR*          *" + PadC( "      ", 13 ) + "*" + PadC( "     ", s_nRobaNazivSirina + 5 ) + ;
+      "*          *   U MP    * (bruto) * MPV bPDV * (bez PDV) *(bez PDV)*   PDV    *   NETO   * SA PDV  *"
 
    ? cLine
    PopWa()
@@ -349,7 +312,7 @@ STATIC FUNCTION linija_za_podvlacenje()
    LOCAL cLine
 
    cLine := "--- ---------- " + Replicate( "-", 13 ) + " " + Replicate( "-", s_nRobaNazivSirina + 5 ) + ;
-            " ---------- ---------- ---------- ---------- ---------- ----------"
+      " ---------- ---------- ---------- ---------- ---------- ----------"
    cLine += " ---------- ---------- ----------"
 
    RETURN cLine

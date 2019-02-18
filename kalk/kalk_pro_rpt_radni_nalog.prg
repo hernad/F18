@@ -15,7 +15,7 @@ FUNCTION kalk_stampa_dok_rn()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
@@ -85,7 +85,7 @@ FUNCTION kalk_stampa_dok_rn()
          nU6 := nCarDaz * SKol
          nU7 := nZavTr * SKol
          nU8 := kalk_pripr->NC *    ( Kolicina - Gkolicina - GKolicin2 )
-         nU9 := nMarza * ( Kolicina - Gkolicina - GKolicin2 )
+         nU9 := nKalkMarzaVP * ( Kolicina - Gkolicina - GKolicin2 )
          nUA := kalk_pripr->VPC   * ( Kolicina - Gkolicina - GKolicin2 )
 
          IF Val( kalk_pripr->Rbr ) > 900
@@ -135,7 +135,7 @@ FUNCTION kalk_stampa_dok_rn()
             @ PRow(), PCol() + 1 SAY nCarDaz / FCJ2 * 100      PICTURE PicProc
             @ PRow(), PCol() + 1 SAY nZavTr / FCJ2 * 100       PICTURE PicProc
             @ PRow(), PCol() + 1 SAY NC                    PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nMarza / NC * 100         PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkMarzaVP / NC * 100         PICTURE PicProc
             @ PRow(), PCol() + 1 SAY VPC                   PICTURE PicCDEM
          ENDIF
 
@@ -148,7 +148,7 @@ FUNCTION kalk_stampa_dok_rn()
             @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY nZavTr               PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY 0                    PICTURE PicDEM
-            @ PRow(), PCol() + 1 SAY nMarza               PICTURE PicDEM
+            @ PRow(), PCol() + 1 SAY nKalkMarzaVP               PICTURE PicDEM
          ENDIF
 
          @ PRow() + 1, nCol1   SAY nU          PICTURE         PICDEM
