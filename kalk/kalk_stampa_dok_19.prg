@@ -18,7 +18,6 @@ MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pko
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
 MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
 MEMVAR cIdPar
-MEMVAR aPorezi
 MEMVAR cIdFirma, cIdVd, cBrDok, cPKonto
 
 FUNCTION kalk_stampa_dok_19()
@@ -31,9 +30,8 @@ FUNCTION kalk_stampa_dok_19()
    LOCAL nMpcSaPDVNovaCijena, nMpcSaPDVStaraCijena, nMpcBezPDVNovaCijena, nMpcBezPDVStaraCijena
    LOCAL nPDVNovaCijena, nPDVStaraCijena
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, aPorezi
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
-   aPorezi := {}
    cIdFirma := kalk_pripr->IdFirma
    cIdVd := kalk_pripr->Idvd
    cBrDok := kalk_pripr->brdok
@@ -66,18 +64,13 @@ FUNCTION kalk_stampa_dok_19()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
-      // set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi )
-
       // nova cijena
       nMpcSaPDVNovaCijena := kalk_pripr->mpcSaPP + kalk_pripr->fcj
       nMpcBezPDVNovaCijena := mpc_bez_pdv_by_tarifa( kalk_pripr->idtarifa, nMpcSaPDVNovaCijena )
-      // aIPor1 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpcBezPDVNovaCijena, nMpcSaPDVNovaCijena, field->nc )
 
       // stara cijena
       nMpcSaPDVStaraCijena := field->fcj
       nMpcBezPDVStaraCijena := mpc_bez_pdv_by_tarifa( kalk_pripr->idtarifa, nMpcSaPDVStaraCijena )
-      // aIPor2 := kalk_porezi_maloprodaja_legacy_array( aPorezi, nMpcBezPDVStaraCijena, nMpcSaPDVStaraCijena, field->nc )
-
 
       print_nova_strana( 125, @nStr, 2 )
       nTot3 +=  ( nU3 := MPC * Kolicina )
@@ -98,7 +91,7 @@ FUNCTION kalk_stampa_dok_19()
       nC0 := PCol() + 1
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
       nC1 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ]            PICTURE picproc()
+      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa(kalk_pripr->idtarifa)*100   PICTURE picproc()
       @ PRow(), PCol() + 1 SAY nPDVNovaCijena                         PICTURE picdem()
       @ PRow(), PCol() + 1 SAY nPDVNovaCijena * kalk_pripr->Kolicina                PICTURE picdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP                       PICTURE piccdem()
@@ -120,7 +113,6 @@ FUNCTION kalk_stampa_dok_19()
    ENDDO
 
    check_nova_strana( bZagl, s_oPDF, .F., 10 )
-
    ? s_cLinija
    @ PRow() + 1, 0        SAY "Ukupno:"
    @ PRow(), nC0        SAY  nTot3         PICTURE        picdem()
@@ -243,8 +235,6 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    ?
 
    kalk_clanovi_komisije()
-
-
    f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.

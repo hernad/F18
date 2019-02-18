@@ -79,16 +79,8 @@ STATIC FUNCTION kalk_valid_roba( cIdRoba, cIdTarifa, lNoviDokument )
    LOCAL cTarifa
 
    P_Roba( @cIdRoba )
-   // IF lNoviDokument
-   // cTarifa := set_pdv_array_by_koncij_region_roba_idtarifa_2_3( _IdKonto, cIdRoba, @aPorezi ) // nadji odgovarajucu tarifu regiona
-   // ELSE
-   select_o_tarifa( cIdTarifa )
-   // set_pdv_array( @aPorezi )
-   // ENDIF
 
-   // IF lNoviDokument
-   // cIdTarifa := cTarifa
-   // ENDIF
+   select_o_tarifa( cIdTarifa )
 
    // IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
    // _kolicina := _tezina // ako je ocitan tezinski barkod

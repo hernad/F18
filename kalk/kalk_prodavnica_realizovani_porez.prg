@@ -24,7 +24,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
    LOCAL cPicIznos := "9 999 999.99"
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL i := 0
-   LOCAL aPorezi
 
    dDat1 := dDat2 := CToD( "" )
    cVDok := "99"
@@ -46,7 +45,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
       ESC_BCR
 
       cUslovPKonto := Parsiraj( qqKonto, "PKonto" )
-
       IF cUslovPKonto <> NIL
          EXIT
       ENDIF
@@ -122,7 +120,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
       nTP := 0
       cLastTarifa := ""
 
-      // aPorezi := {}
 
       DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. IspitajPrekid()
 
@@ -131,9 +128,6 @@ FUNCTION kalk_realizovani_porez_prodavnice()
          select_o_roba( kalk->idroba )
          select_o_tarifa( cIdTarifa )
          SELECT kalk
-
-         // VtPorezi()
-         // cIdTarifa := Tarifa( pkonto, idroba, @aPorezi, cIdTarifa )
 
          nMPV := 0
          nNv := 0
@@ -152,9 +146,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
             ENDIF
 
             nMpc := kalk->mpc
-            // set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
-            nPDV := kalk->mpc * pdv_procenat_by_tarifa( cIdTarifa )
-            // nMpc := kalk_mpc_by_vrsta_dokumenta( field->idvd, aPorezi )
+            nPDV := nMpc * pdv_procenat_by_tarifa( cIdTarifa )
             nPor1 := nPDV * nKolicina
             nMPV += nMpc * nKolicina
             nMpvSaPP += field->mpcSaPP * nKolicina
@@ -170,23 +162,18 @@ FUNCTION kalk_realizovani_porez_prodavnice()
             FF
          ENDIF
 
-         // set_pdv_array_by_koncij_region_roba_idtarifa_2_3( cIdKonto, NIL, @aPorezi, cIdTarifa )
          nPDVUkupno := nMPV * pdv_procenat_by_tarifa( cIdTarifa )
-
          @ PRow() + 1, 0 SAY Space( 3 ) + cIdKonto
          @ PRow(), PCol() + 1 SAY Space( 6 ) + cIdTarifa
-
          nCol1 := PCol() + 4
          @ PRow(), PCol() + 4 SAY nMPVUkupno := nMPV     PICT   cPicIznos
          @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) * 100 PICT   cPicProcenat
-
          @ PRow(), PCol() + 1 SAY nPDVUkupno   PICT   cPicIznos
          @ PRow(), PCol() + 1 SAY nPopust := nPopust PICTURE   cPicIznos
          @ PRow(), PCol() + 1 SAY nMPVSaPPUkupno := nMPVSAPP PICTURE   cPicIznos
 
          nT1 += nMPVUkupno
          nPDVTotal += nPDVUkupno
-
          nTP += nPopust
          nMPVSaPorezTotal += nMPVSaPPUkupno
 

@@ -17,10 +17,8 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    LOCAL nCol1 := nCol2 := 0
    LOCAL nPom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, aPorezi
+   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-   aPorezi := {}
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
@@ -47,11 +45,9 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    SELECT kalk_pripr
 
    ?? "INVENTURA PRODAVNICA ", cIdkonto, "-", AllTrim( konto->naz )
-
    IspisNaDan( 10 )
 
    P_COND
-
    ?
    ? "DOKUMENT BR. :", cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), "Datum:", DatDok
    ?
@@ -78,23 +74,13 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    nTotd := 0
    nTotKol := 0
    nTotGKol := 0
-
-
    nTotVisak := 0
    nTotManjak := 0
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
-
+   //PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-/*
-      IF idpartner + brfaktp + idkonto + idkonto2 <> cIdd
-         Beep( 2 )
-         Msg( "Unutar kalkulacije se pojavilo vise dokumenata !", 6 )
-      ENDIF
-*/
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
       select_o_roba(  kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
 
@@ -111,7 +97,6 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
       @ PRow(), 4 SAY  ""
 
       ?? field->idroba, Trim( Left( roba->naz, 40 ) ), "(", roba->jmj, ")"
-
       IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
          ?? ", BK: " + roba->barkod
       ENDIF
@@ -150,15 +135,12 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
       IF cSamoObraz == "D"
          @ PRow(), PCol() + 1 SAY nU4 PICT Replicate( " ", Len( PicDEM ) )
       ELSE
-
          IF ( nU4 < 0 )
-
             // manjak
             @ PRow(), PCol() + 1 SAY 0 PICT picdem
             @ PRow(), PCol() + 1 SAY nU4 PICT picdem
             nTotManjak += nU4
          ELSE
-
             // visak
             @ PRow(), PCol() + 1 SAY nU4 PICT picdem
             @ PRow(), PCol() + 1 SAY 0 PICT picdem

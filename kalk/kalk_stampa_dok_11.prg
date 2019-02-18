@@ -14,7 +14,6 @@
 STATIC s_oPDF
 STATIC s_nRobaNazivSirina := 34
 
-MEMVAR aPorezi
 MEMVAR cPKonto, cMKonto, cIdPartner, cBrFaktP  // ,dDatFaktP
 MEMVAR cIdFirma, cIdVd, cBrDok
 
@@ -31,7 +30,6 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    LOCAL nTot1, nTot1b, nTot2, nTotVPV, nTotMarzaVP, nTotMarzaMP, nTot5, nTot6, nTot7
    LOCAL nTot4c
 
-   PRIVATE aPorezi
    PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
    cIdPartner := kalk_pripr->IdPartner
@@ -71,7 +69,6 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    nTot1 := nTot1b := nTot2 := nTotVPV := nTotMarzaVP := nTotMarzaMP := nTot5 := nTot6 := nTot7 := 0
    nTot4c := 0
 
-   aPorezi := {}
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
@@ -110,9 +107,9 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       @ PRow(), PCol() + 1 SAY nKalkMarzaMP              PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
       nCol1 := PCol() + 1
-      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa(kalk_pripr->idtarifa)*100  PICTURE picproc()
+      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( kalk_pripr->idtarifa ) * 100  PICTURE picproc()
       @ PRow(), PCol() + 1 SAY nPDVCijena                PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY MPCSAPP              PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP              PICTURE piccdem()
       // =========  red 2 ===================
       @ PRow() + 1, 4 SAY IdTarifa + roba->tip
       @ PRow(), PCol() + 1 SAY "   " + ROBA->barkod
@@ -123,13 +120,13 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       @ PRow(),  PCol() + 1 SAY  nKalkMarzaVP * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(), nMPos := PCol() + 1 SAY  nKalkMarzaMP * kalk_pripr->kolicina      PICTURE picdem()
       @ PRow(),  PCol() + 1 SAY  kalk_pripr->mpc * kalk_pripr->kolicina      PICTURE picdem()
-      @ PRow(), nCol1    SAY aPorezi[ POR_PDV ]   PICTURE picproc()
+      @ PRow(), nCol1    SAY pdv_procenat_by_tarifa( kalk_pripr->idtarifa ) * 100   PICTURE picproc()
       @ PRow(),  PCol() + 1 SAY  nU6             PICTURE piccdem()
       @ PRow(),  PCol() + 1 SAY  nU7             PICTURE piccdem()
 
       // red 3
       IF Round( kalk_pripr->nc, 5 ) <> 0
-         @ PRow() + 1, nMPos SAY ( nKalkMarzaMP / nc ) * 100  PICTURE picproc()
+         @ PRow() + 1, nMPos SAY ( nKalkMarzaMP / kalk_pripr->nc ) * 100  PICTURE picproc()
       ENDIF
 
       SKIP

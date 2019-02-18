@@ -243,7 +243,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
          REPLACE MPV WITH nPom
 
          // PDV = mpc_sa_pdv_bruto - mpc_bez_pdv_neto - popust
-         nPom := mpc_sa_pdv(kalk_pripr->idtarifa, kalk_pripr->mpc ) - kalk_pripr->mpc
+         nPom := mpc_sa_pdv_by_tarifa(kalk_pripr->idtarifa, kalk_pripr->mpc ) - kalk_pripr->mpc
          REPLACE Porez WITH Round(  nKolicina * nPom, nZaokruzenje )
 
          nPom := kalk_pripr->MPCSaPP * kalk_pripr->Kolicina

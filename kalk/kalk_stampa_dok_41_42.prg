@@ -14,10 +14,8 @@
 STATIC s_oPDF
 STATIC s_nRobaNazivSirina := 39
 
-MEMVAR aPorezi
 MEMVAR nStr
 MEMVAR nPrevoz, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, nCarDaz, nZavTr
-
 MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cPKonto // dDatFaktp
 
 /*
@@ -41,11 +39,9 @@ FUNCTION kalk_stampa_dok_41_42()
    LOCAL nUPopustBezPDV, nUNabVr, nUMarzaMPBruto, nUMPVbezPDV, nUPDV, nUMpvBezPDVNeto
    LOCAL nUMPVSaPDVNeto, nUMPvSaPDV
 
-
-   PRIVATE nKalkMarzaVP, nKalkMarzaMP, aPorezi
+   PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
    nKalkMarzaVP := nKalkMarzaMP := 0
-   aPorezi := {}
    nStr := 0
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
@@ -84,11 +80,8 @@ FUNCTION kalk_stampa_dok_41_42()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_marza_realizacija_prodavnica_41_42()
       kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-      set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idRoba, @aPorezi, kalk_pripr->idtarifa )
 
-      // uracunaj i popust
-      aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, kalk_pripr->mpc, kalk_pripr->mpcsapp, kalk_pripr->nc )
-      nPor1 := aIPor[ 1 ]
+      nPor1 := kalk_pripr->mpc * pdv_procenat_by_tarifa( kalk_pripr->idtarifa )
       print_nova_strana( 125, @nStr, 2 )
       nTotNabVr += ( nUNabVr := iif( roba->tip == "U", 0, kalk_pripr->nc ) * kalk_pripr->kolicina )
       nTotMarzaMPBruto += ( nUMarzaMPBruto := ( nKalkMarzaMP + kalk_pripr->rabatv ) * kalk_pripr->kolicina )
@@ -118,7 +111,7 @@ FUNCTION kalk_stampa_dok_41_42()
       @ PRow(), PCol() + 1 SAY kalk_pripr->mpc + kalk_pripr->rabatv PICT piccdem() // mpc ili prodajna cijena uvecana za rabat
       @ PRow(), nCol2 := PCol() + 1 SAY kalk_pripr->rabatv PICT piccdem() // popust bez pdv
       @ PRow(), PCol() + 1 SAY kalk_pripr->mpc PICT piccdem() // mpc neto
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc()
+      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( kalk_pripr->idtarifa ) PICT picproc()
       @ PRow(), PCol() + 1 SAY ( kalk_pripr->mpc + nPor1 ) PICT piccdem() // mpc sa pdv neto
       @ PRow(), PCol() + 1 SAY kalk_pripr->mpcsapp PICT piccdem() // mpc sa pdv bruto
 
@@ -189,7 +182,6 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
    LOCAL nTotPDV
    LOCAL nTotRealizovanaRuc
    LOCAL nTotPopustBezPDV
-   LOCAL aPorezi
    LOCAL cLine
    LOCAL cIdTarifa
    LOCAL nUMpvNeto
@@ -215,7 +207,6 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
    nTotMPVSaPDV := 0
    nTotRealizovanaRuc := 0
    nTotPopustBezPDV := 0
-   aPorezi := {}
 
    check_nova_strana( bZagl, s_oPDF, .F., 5 )
    DO WHILE !Eof() .AND. cIdfirma + cIdvd + cBrDok == kalk_pripr->idfirma + kalk_pripr->idvd + kalk_pripr->brdok
@@ -225,16 +216,13 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
       nUMPvSaPDV := 0
       nUPopustBezPDV := 0
       select_o_tarifa( cIdtarifa )
-      set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idroba, @aPorezi, kalk_pripr->idtarifa )
-
       SELECT kalk_pripr
-      DO WHILE !Eof() .AND. cIdfirma + cIdVd + cBrDok == kalk_pripr->idFirma + kalk_pripr->idVd + kalk_pripr->brDok .AND. kalk_pripr->idTarifa == cIdTarifa
+      DO WHILE !Eof() .AND. cIdfirma + cIdVd + cBrDok == kalk_pripr->idFirma + kalk_pripr->idVd + kalk_pripr->brDok ;
+            .AND. kalk_pripr->idTarifa == cIdTarifa
          select_o_roba( kalk_pripr->idroba )
          SELECT kalk_pripr
-         set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pkonto, kalk_pripr->idRoba, @aPorezi, kalk_pripr->idtarifa )
          nUMpvNeto += kalk_pripr->mpc * kalk_pripr->kolicina
-         aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, kalk_pripr->mpc, kalk_pripr->mpcsapp, kalk_pripr->nc )
-         nUPdv += aIPor[ 1 ] * kalk_pripr->kolicina
+         nUPdv += kalk_pripr->mpc * pdv_procenat_by_tarifa( kalk_pripr->idtarifa ) * kalk_pripr->kolicina
          nUMPvSaPDV += kalk_pripr->mpcsapp * kalk_pripr->kolicina
          nUPopustBezPDV += kalk_pripr->rabatv * kalk_pripr->kolicina
          nTotRealizovanaRuc += ( kalk_pripr->mpc - kalk_pripr->nc ) * kalk_pripr->kolicina
@@ -247,7 +235,7 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
 
       check_nova_strana( bZagl, s_oPDF, .F., 3 )
       ? cIdtarifa
-      @ PRow(), PCol() + 1 SAY aPorezi[ POR_PDV ] PICT picproc()
+      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) PICT picproc()
       nCol1 := PCol()
       @ PRow(), nCol1 + 1 SAY nUMpvNeto + nUPopustBezPDV PICT picdem()
       @ PRow(), PCol() + 1 SAY nUPopustBezPDV PICT picdem()

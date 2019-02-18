@@ -38,7 +38,6 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
    LOCAL cPicProcenat := "99.99%"
    LOCAL cPicIznos := "9 999 999.99"
    LOCAL cIdFirma := self_organizacija_id()
-   LOCAL aPorezi
    LOCAL cLine, cText1, cText2
    LOCAL GetList := {}
 
@@ -107,7 +106,6 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
    n6 := 0
    n7 := 0
 
-   aPorezi := {}
    DO WHILE !Eof() .AND. IspitajPrekid()
       B := 0
       cIdFirma := KALK->IdFirma
@@ -122,20 +120,6 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
       ? "KALK: PREGLED UKALKULISANI PDV " + Trim( qqKonto ) + " ZA PERIOD OD", dDat1, "DO", dDAt2, "  NA DAN:", Date()
       ? "      Tipovi dokumenta: ", cVDOK
 
-/*
-      ? "Prodavnica: "
-      aUsl2 := Parsiraj( qqKonto, "id" )
-  --    SELECT KONTO
-      GO TOP
-      SEEK "132"
-      DO WHILE id = "132"
-         IF Tacno( aUsl2 )
-            ?? id + " - " + naz
-            ? Space( 12 )
-         ENDIF
-         SKIP
-      ENDDO
-*/
       ?
       ? cLine
       ? cText1
@@ -157,9 +141,8 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
          cIdTarifa := kalk->IdTarifa
          select_o_tarifa( cIdtarifa )
          SELECT kalk
-         // cIdTarifa := Tarifa( pkonto, idRoba, @aPorezi, cIdTarifa )
          nMPV := 0
-         nMPVSaPP := 0
+         nMPVSaPDV := 0
          nNV := 0
          DO WHILE !Eof() .AND. cIdFirma == kalk->IdFirma .AND. cIdKonto == kalk->pkonto .AND.  cIdtarifa == kalk->IdTarifa .AND. IspitajPrekid()
 
@@ -168,40 +151,37 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
             // nReal += mpcsapp * kolicina
             IF IdVD $ "12#13" // povrat robe se uzima negativno
                nMPV -= MPC * ( Kolicina )
-               nMPVSaPP -= MPCSaPP * ( Kolicina )
+               nMPVSaPDV -= MPCSaPP * ( Kolicina )
                nNV -= nc * kolicina
             ELSE
                nMPV += MPC * ( Kolicina )
-               nMPVSaPP += MPCSaPP * ( Kolicina )
+               nMPVSaPDV += MPCSaPP * ( Kolicina )
                nNV += nc * kolicina
             ENDIF
 
             SKIP
          ENDDO
 
-         // IF cStope == "D"
-         // AAdd( aTarife, { cIdTarifa, nMPVSAPP } )
-         // ENDIF
+
          IF PRow() > ( RPT_PAGE_LEN + + dodatni_redovi_po_stranici() )
             FF
          ENDIF
 
 
          nPDVUkupno :=  nMPV * pdv_procenat_by_tarifa(cIdTarifa)
-
          @ PRow() + 1, 0 SAY Space( 3 ) + cIdKonto
          @ PRow(), PCol() + 1 SAY Space( 6 ) + cIdTarifa
 
          nCol1 := PCol() + 4
-         @ PRow(), PCol() + 4 SAY n1 := nMPV PICT cPicIznos
+         @ PRow(), PCol() + 4 SAY nMPV PICT cPicIznos
          @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa(cIdTarifa)*100 PICT cPicProcenat
 
          @ PRow(), PCol() + 1 SAY nPDVUkupno PICT cPicIznos
 
-         @ PRow(), PCol() + 1 SAY n7 := nMPVSAPP PICTURE cPicIznos
-         nT1 += n1
+         @ PRow(), PCol() + 1 SAY nMPVSaPDV PICTURE cPicIznos
+         nT1 += nMPV
          nT4 += nPDVUkupno
-         nT7 += n7
+         nT7 += nMPVSaPDV
       ENDDO
 
 

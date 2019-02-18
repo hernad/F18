@@ -149,7 +149,6 @@ FUNCTION pos_pdv_po_tarifama
          ? aTarife[ nCnt ][ 1 ], "(" + Str( nPDV ) + "%)"
 
          ? Str( aTarife[ nCnt ][ 2 ], 12, 2 ), Str( aTarife[ nCnt ][ 3 ], 12, 2 ), Str( Round( aTarife[ nCnt ][ 6 ], 2 ), 12, 2 )
-
          nTotOsn += Round( aTarife[ nCnt ][ 6 ], 2 ) - Round( aTarife[ nCnt ][ 3 ], 2 )
          nTotPDV += Round( aTarife[ nCnt ][ 3 ], 2 )
       NEXT
@@ -209,13 +208,11 @@ STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife, cNaplaceno )
          select_o_tarifa( POS->IdTarifa )
 
          IF cNaplaceno == "1"
-
             nIzn := pos->( Cijena * Kolicina )
 
          ELSE  // cnaplaceno="3"
 
             select_o_roba( pos->idroba )
-
             nNeplaca := 0
 
             // IF gPopVar = "P"
@@ -233,24 +230,17 @@ STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife, cNaplaceno )
          SELECT POS
 
          nOsn := nIzn / ( 1 + tarifa->pdv / 100 )
-         nPPP := nOsn * tarifa->pdv / 100
-         nPP := 0
-         nPPU := 0
+         nPDV := nOsn * tarifa->pdv / 100
 
-         aPorezi := {}
-         set_pdv_array( @aPorezi )
-         aIPor := kalk_porezi_maloprodaja_legacy_array( aPorezi, nOsn, nIzn, 0 )
          nPoz := AScan( aTarife, {| x | x[ 1 ] == POS->IdTarifa } )
+
          IF nPoz == 0
-            AAdd( aTarife, { POS->IdTarifa, nOsn, aIPor[ 1 ], aIPor[ 2 ], aIPor[ 3 ], nIzn } )
+            AAdd( aTarife, { POS->IdTarifa, nOsn, nPDV, nIzn } )
          ELSE
             aTarife[ nPoz ][ 2 ] += nOsn
-            aTarife[ nPoz ][ 3 ] += aIPor[ 1 ]
-            aTarife[ nPoz ][ 4 ] += aIPor[ 2 ]
-            aTarife[ nPoz ][ 5 ] += aIPor[ 3 ]
-            aTarife[ nPoz ][ 6 ] += nIzn
+            aTarife[ nPoz ][ 3 ] += nPDV
+            aTarife[ nPoz ][ 4 ] += nIzn
          ENDIF
-
 
          SKIP
       ENDDO

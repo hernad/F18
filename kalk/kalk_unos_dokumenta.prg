@@ -29,7 +29,6 @@ MEMVAR gBrojacKalkulacija
 MEMVAR Ch
 MEMVAR opc, Izbor, h
 
-MEMVAR aPorezi
 MEMVAR _idfirma, _idvd, _brdok, _datdok, _mkonto, _pkonto, _idkonto, _idkonto2, _vpc, _nc, _mpcsapp, _kolicina
 MEMVAR _TMarza
 MEMVAR cSection, cHistory, aHistory
@@ -1203,7 +1202,6 @@ FUNCTION kalk_plus_minus_kol()
  */
 FUNCTION kalk_set_diskont_mpc()
 
-   aPorezi := {}
    o_kalk_edit()
    SELECT kalk_pripr
    GO TOP
@@ -1212,10 +1210,9 @@ FUNCTION kalk_set_diskont_mpc()
    DO WHILE !Eof()
       select_o_roba(  kalk_pripr->idroba )
       select_o_tarifa( ROBA->idtarifa )
-      set_pdv_array_by_koncij_region_roba_idtarifa_2_3( kalk_pripr->pKonto, kalk_pripr->idRoba, @aPorezi )
       SELECT kalk_pripr
       Scatter()
-      _mpcSaPP := mpc_sa_pdv_by_tarifa( roba->vpc )
+      _mpcSaPP := mpc_sa_pdv_by_tarifa( roba->idtarifa, roba->vpc )
       _ERROR := " "
       Gather()
       SKIP 1
