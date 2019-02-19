@@ -13,11 +13,13 @@
 
 STATIC s_cLine
 STATIC s_cTxt1
-MEMVAR cIdFirma, cIdRoba, cIdKonto
+MEMVAR cIdFirma, cIdRoba, cPKonto
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
+STATIC s_oPDF
 
 FUNCTION kalk_kartica_prodavnica()
 
-   PARAMETERS cIdFirma, cIdRoba, cIdKonto
+   PARAMETERS cIdFirma, cIdRoba, cPKonto
 
    LOCAL cLine
    LOCAL cTxt1
@@ -32,14 +34,17 @@ FUNCTION kalk_kartica_prodavnica()
    LOCAL lRobaTackaZarez := .F.
    LOCAL cOrderBy
    LOCAL nCol1, nCol2
-   LOCAL nPDVCijena
    LOCAL nUlaz, nIzlaz
    LOCAL nMPV, nNV, nMPVDug, nMPVPot
+   LOCAL dDatOd, dDatDo
+   LOCAL xPrintOpt, bZagl, cNaslov
+   LOCAL lPrviProlaz
 
    PRIVATE PicCDEM := kalk_prosiri_pic_cjena_za_2()
    PRIVATE PicProc := gPicProc
    PRIVATE PicDEM := kalk_prosiri_pic_iznos_za_2()
    PRIVATE PicKol := kalk_prosiri_pic_kolicina_za_2()
+
    PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
    cPredh := "N"
@@ -47,14 +52,14 @@ FUNCTION kalk_kartica_prodavnica()
    dDatDo := Date()
    nKalkMarzaVP := nKalkMarzaMP := 0
 
-   IF cIdKonto == NIL
+   IF cPKonto == NIL
 
       cIdFirma := self_organizacija_id()
       cIdRoba := Space( 10 )
-      cIdKonto := PadR( "1330", 7 )
+      cPKonto := PadR( "1330", 7 )
       cPredh := "N"
       cIdRoba := fetch_metric( "kalk_kartica_prod_id_roba", my_user(), cIdRoba )
-      cIdKonto := fetch_metric( "kalk_kartica_prod_id_konto", my_user(), cIdKonto )
+      cPKonto := fetch_metric( "kalk_kartica_prod_id_konto", my_user(), cPKonto )
       dDatOd := fetch_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
       dDatDo := fetch_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
       cPredh := fetch_metric( "kalk_kartica_prod_prethodni_promet", my_user(), cPredh )
@@ -66,7 +71,7 @@ FUNCTION kalk_kartica_prodavnica()
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
          ?? self_organizacija_id(), "-", self_organizacija_naziv()
 
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " GET cIdKonto VALID P_Konto( @cIdKonto )
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " GET cPKonto VALID P_Konto( @cPKonto )
          kalk_kartica_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
          @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum od " GET dDatOd
          @ box_x_koord() + 5, Col() + 2 SAY "do" GET dDatDo
@@ -84,7 +89,7 @@ FUNCTION kalk_kartica_prodavnica()
 
       IF LastKey() != K_ESC
          set_metric( "kalk_kartica_prod_id_roba", my_user(), cIdRoba )
-         set_metric( "kalk_kartica_prod_id_konto", my_user(), cIdKonto )
+         set_metric( "kalk_kartica_prod_id_konto", my_user(), cPKonto )
          set_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
          set_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
          set_metric( "kalk_kartica_prod_prethodni_promet", my_user(), cPredh )
@@ -123,9 +128,9 @@ FUNCTION kalk_kartica_prodavnica()
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
 
    IF Empty( cIdRoba )
-      find_kalk_by_pkonto_idroba_idvd( cIdFirma, cIdVd, cIdKonto, NIL, cOrderBy )
+      find_kalk_by_pkonto_idroba_idvd( cIdFirma, cIdVd, cPKonto, NIL, cOrderBy )
    ELSE
-      find_kalk_by_pkonto_idroba_idvd( cIdFirma, cIdVd, cIdKonto, cIdRoba, cOrderBy )
+      find_kalk_by_pkonto_idroba_idvd( cIdFirma, cIdVd, cPKonto, cIdRoba, cOrderBy )
    ENDIF
 
    MsgC()
@@ -139,9 +144,13 @@ FUNCTION kalk_kartica_prodavnica()
    GO TOP
    EOF CRET
 
-   gaZagFix := { 7, 3 }
 
-   START PRINT CRET
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "font_size" ] := 9
+   xPrintOpt[ "opdf" ] := s_oPDF
 
    ?
    nLen := 1
@@ -152,7 +161,7 @@ FUNCTION kalk_kartica_prodavnica()
 
    nTStrana := 0
 
-   Zagl()
+   bZagl := {|| zagl( cPKonto, dDatOd, dDatDo ) }
 
    nCol1 := 10
    nCol2 := 20
@@ -160,11 +169,19 @@ FUNCTION kalk_kartica_prodavnica()
    nMPVDug := nMPVPot := 0
    nMPV := nNV := 0
 
-   fPrviProl := .T.
-   DO WHILE !Eof() .AND. iif( lRobaTackaZarez, field->idfirma + field->pkonto + field->idroba >= cIdFirma + cIdKonto + cIdRobaTackaZarez, field->idfirma + field->pkonto + field->idroba == cIdFirma + cIdKonto + cIdRobaTackaZarez )
+   cNaslov := "KARTICA PRODAVNICA [" + AllTrim( cPKonto ) + "] " + DToC( dDatOd ) + " - " + DToC( dDatDo )  + "  NA DAN: " + DToC( Date() )
+
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
+   Eval( bZagl )
+
+   lPrviProlaz := .T.
+   DO WHILE !Eof() .AND. iif( lRobaTackaZarez, field->idfirma + field->pkonto + field->idroba >= cIdFirma + cPKonto + cIdRobaTackaZarez, field->idfirma + field->pkonto + field->idroba == cIdFirma + cPKonto + cIdRobaTackaZarez )
+
+      check_nova_strana( bZagl, s_oPDF )
 
       cIdRoba := field->idroba
-
       select_o_roba( cIdRoba )
       select_o_tarifa( roba->idtarifa )
 
@@ -178,30 +195,28 @@ FUNCTION kalk_kartica_prodavnica()
       nCol2 := 10
       nUlaz := nIzlaz := 0
       nNV := nMPV := 0
-      fPrviProl := .T.
+      lPrviProlaz := .T.
       nRabat := 0
       nColDok := 9
       nColFCJ2 := 68
 
-      DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == field->idFirma + field->pkonto + field->idroba
+      DO WHILE !Eof() .AND. cIdfirma + cPKonto + cIdroba == field->idFirma + field->pkonto + field->idroba
 
-         IF field->datdok < dDatOd .AND. cPredh == "N"
+         IF kalk->datdok < dDatOd .AND. cPredh == "N"
+            SKIP
+            LOOP
+         ENDIF
+         IF kalk->datdok > dDatDo
             SKIP
             LOOP
          ENDIF
 
-         IF field->datdok > dDatDo
-            SKIP
-            LOOP
-         ENDIF
+         IF cPredh == "D" .AND. field->datdok >= dDatod .AND. lPrviProlaz
 
-         IF cPredh == "D" .AND. field->datdok >= dDatod .AND. fPrviProl
-
-            fPrviprol := .F.
+            lPrviProlaz := .F.
             ? "Stanje do ", dDatOd
-
             @ PRow(), 35 SAY say_kolicina( nUlaz )
-            @ PRow(), PCol() + 1 SAY say_kolicina( nIzlaz       )
+            @ PRow(), PCol() + 1 SAY say_kolicina( nIzlaz )
             @ PRow(), PCol() + 1 SAY say_kolicina( nUlaz - nIzlaz )
 
             IF Round( nUlaz - nIzlaz, 4 ) <> 0 // kolicinski <> 0
@@ -219,16 +234,11 @@ FUNCTION kalk_kartica_prodavnica()
             ENDIF
          ENDIF
 
-         IF ( PRow() - dodatni_redovi_po_stranici() ) > 62
-            FF
-            Zagl()
-         ENDIF
-
+         check_nova_strana( bZagl, s_oPDF )
          IF field->pu_i == "1"
 
             nUlaz += field->kolicina - field->GKolicina - kalk->gkolicin2
             IF field->datdok >= dDatod
-
                ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa, field->idpartner
                nCol1 := PCol() + 1
                @ PRow(), PCol() + 1 SAY say_kolicina( field->kolicina )
@@ -240,7 +250,7 @@ FUNCTION kalk_kartica_prodavnica()
                   cTransakcija := "-U=I"
                ENDIF
                @ PRow(), PCol() + 1 SAY say_cijena( nNc )
-               //@ PRow(), PCol() + 1 SAY say_cijena( field->vpc )
+               // @ PRow(), PCol() + 1 SAY say_cijena( field->vpc )
                @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp )
 
             ENDIF
@@ -260,10 +270,9 @@ FUNCTION kalk_kartica_prodavnica()
          ELSEIF field->pu_i == "5" .AND. !( field->idvd $ "12#13" )
 
             nIzlaz += field->kolicina
-            nPDVCijena := field->mpc * pdv_procenat_by_tarifa( cIdTarifa )
+            // nPDVCijena := field->mpc * pdv_procenat_by_tarifa( cIdTarifa )
 
             IF kalk->datdok >= dDatod
-
                ? kalk->datdok, field->idvd + "-" + field->brdok, field->idtarifa, field->idpartner
                nCol1 := PCol() + 1
                @ PRow(), PCol() + 1 SAY say_kolicina( 0 )
@@ -275,7 +284,7 @@ FUNCTION kalk_kartica_prodavnica()
                   cTransakcija := "-I=U"
                ENDIF
                @ PRow(), PCol() + 1 SAY say_cijena( nNc )
-               //@ PRow(), PCol() + 1 SAY say_cijena( field->mpc )
+               // @ PRow(), PCol() + 1 SAY say_cijena( field->mpc )
                @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp )
 
             ENDIF
@@ -303,7 +312,7 @@ FUNCTION kalk_kartica_prodavnica()
                nNc := field->nc
                cTransakcija := " INV"
                @ PRow(), PCol() + 1 SAY say_cijena( nNc )
-               //@ PRow(), PCol() + 1 SAY say_cijena( 0 )
+               // @ PRow(), PCol() + 1 SAY say_cijena( 0 )
                @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp )
             ENDIF
 
@@ -335,7 +344,7 @@ FUNCTION kalk_kartica_prodavnica()
                   cTransakcija := "-I=U"
                ENDIF
                @ PRow(), PCol() + 1 SAY say_cijena( nNc )
-               //@ PRow(), PCol() + 1 SAY say_cijena( field->vpc )
+               // @ PRow(), PCol() + 1 SAY say_cijena( field->vpc )
                @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp )
             ENDIF
 
@@ -399,7 +408,7 @@ FUNCTION kalk_kartica_prodavnica()
          ENDIF
 
          IF lExport
-            hParams[ "idkonto" ] := cIdKonto
+            hParams[ "idkonto" ] := cPKonto
             hParams[ "idroba" ] := cIdRoba
             hParams[ "kolicina" ] := field->kolicina
             hParams[ "brdok" ] := field->brdok
@@ -419,13 +428,12 @@ FUNCTION kalk_kartica_prodavnica()
 
       ENDDO
 
+      check_nova_strana( bZagl, s_oPDF, .F., 5 )
       ? s_cLine
       ? "Ukupno:"
-
       @ PRow(), nCol1 SAY say_kolicina( nUlaz )
       @ PRow(), PCol() + 1 SAY say_kolicina( nIzlaz )
       @ PRow(), PCol() + 1 SAY say_kolicina( nUlaz - nIzlaz )
-
       IF Round( nUlaz - nIzlaz, 4 ) <> 0
          @ PRow(), PCol() + 1 SAY say_cijena( nNV / ( nUlaz - nIzlaz ) )
          @ PRow(), PCol() + 1 SAY say_cijena( nMPV / ( nUlaz - nIzlaz ) )
@@ -435,12 +443,9 @@ FUNCTION kalk_kartica_prodavnica()
       ELSE
          @ PRow(), PCol() + 1 SAY say_cijena( 0 )
       ENDIF
-
       @ PRow(), nCol2 SAY kalk_say_iznos( nMpvDug )
       @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
       @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
-
-
       ? s_cLine
       ?
       ? Replicate( "-", 60 )
@@ -457,11 +462,23 @@ FUNCTION kalk_kartica_prodavnica()
       open_r_export_table()
    ENDIF
 
-   FF
-   ENDPRINT
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
+
+STATIC FUNCTION zagl( cPKonto, dDatOd, dDatDo )
+
+   Preduzece()
+   // IspisNaDan( 10 )
+   select_o_konto( cPKonto )
+   ? "Konto: ", cPKonto, "-", konto->naz
+   SELECT kalk
+   ? s_cLine
+   ? s_cTxt1
+   ? s_cLine
+
+   RETURN .T.
 
 STATIC FUNCTION set_zagl( cLine, cTxt1 )
 
@@ -484,7 +501,7 @@ STATIC FUNCTION set_zagl( cLine, cTxt1 )
 
    nPom := Len( kalk_prosiri_pic_iznos_za_2() )
    AAdd( aKProd, { nPom, PadC( "NC", nPom ) } )
-   //AAdd( aKProd, { nPom, PadC( "MPCbezPDV", nPom ) } )
+   // AAdd( aKProd, { nPom, PadC( "MPCbezPDV", nPom ) } )
    AAdd( aKProd, { nPom, PadC( "MPC", nPom ) } )
    AAdd( aKProd, { nPom, PadC( "MPV.Dug", nPom ) } )
    AAdd( aKProd, { nPom, PadC( "MPV.Pot", nPom ) } )
@@ -505,24 +522,6 @@ FUNCTION Test( cIdRoba )
    ENDIF
 
    RETURN cIdRoba
-
-
-STATIC FUNCTION Zagl()
-
-   select_o_konto( cIdKonto )
-   Preduzece()
-   P_12CPI
-   ?? "KARTICA PRODAVNICA za period", ddatod, "-", ddatdo, Space( 10 ), "Str:", Str( ++nTStrana, 3 )
-   IspisNaDan( 10 )
-
-   ? "Konto: ", cIdkonto, "-", konto->naz
-   SELECT kalk
-   P_COND
-   ? s_cLine
-   ? s_cTxt1
-   ? s_cLine
-
-   RETURN .T.
 
 
 STATIC FUNCTION kalk_kartica_prodavnica_add_item_to_r_export( hParams )
@@ -555,6 +554,7 @@ STATIC FUNCTION kalk_kartica_prodavnica_add_item_to_r_export( hParams )
 FUNCTION kalk_kartica_prodavnica_export_dbf_struct()
 
    LOCAL aDbf := {}
+
    AAdd( aDbf, { "idkonto", "C", 7, 0 }  )
    AAdd( aDbf, { "idroba", "C", 10, 0 }  )
    AAdd( aDbf, { "idvd", "C", 2, 0 }  )

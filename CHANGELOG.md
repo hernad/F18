@@ -2,7 +2,7 @@
 
 ## 2019-02-07
 
-- POS grand cleanup/1
+- POS grande cleanup/1
 
 ## 2019-01-30
 

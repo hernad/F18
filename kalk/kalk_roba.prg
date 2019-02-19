@@ -13,7 +13,6 @@
 
 STATIC s_lRobaBarkodPriUnosu := NIL
 
-
 FUNCTION kalk_kartica_get_roba_id( cIdRoba, nX, nY, GetList )
 
    LOCAL bWhen, bValid
@@ -74,13 +73,14 @@ FUNCTION roba_duzina_sifre()
 
 STATIC FUNCTION kalk_valid_roba( cIdRoba, cIdTarifa, lNoviDokument )
 
-   LOCAL _tezina := 0
-   LOCAL _ocitani_barkod := cIdRoba
-   LOCAL cTarifa
+   //LOCAL _tezina := 0
+   //LOCAL _ocitani_barkod := cIdRoba
+   //LOCAL cTarifa
 
    P_Roba( @cIdRoba )
 
-   select_o_tarifa( cIdTarifa )
+   select_o_tarifa( roba->idtarifa )
+   cIdTarifa := tarifa->id
 
    // IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
    // _kolicina := _tezina // ako je ocitan tezinski barkod

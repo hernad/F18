@@ -280,6 +280,7 @@ FUNCTION kalk_lager_lista_prodavnica()
 
       DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
 
+         check_nova_strana( bZagl, s_oPDF )
          IF cPredhStanje == "D"
             IF kalk->datdok < dDatOd
                IF kalk->pu_i == "1"
@@ -456,13 +457,11 @@ FUNCTION kalk_lager_lista_prodavnica()
          _mpc := kalk_get_mpc_by_koncij_pravilo()
 
          SELECT kalk
-
          IF Round( nUlaz - nIzlaz + nPKOL, 2 ) <> 0
             @ PRow(), PCol() + 1 SAY ( nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ) PICT kalk_pic_cijena_bilo_gpiccdem()
 
          ELSE // stanje artikla je 0
             @ PRow(), PCol() + 1 SAY 0 PICT kalk_pic_iznos_bilo_gpicdem()
-
             IF Round( ( nMPVU - nMPVI + nPMPV ), 4 ) <> 0
                ?? " ERR"
                lImaGresaka := .T.

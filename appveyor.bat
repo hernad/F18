@@ -29,7 +29,7 @@ bash -xlc "pacman --noconfirm -S --needed mingw-w64-%MSYS2_ARCH%-postgresql"
 
 rem Invoke subsequent bash in the build tree
 cd %APPVEYOR_BUILD_FOLDER%
-bash -xlc "cd /c ; curl -LO https://dl.bintray.com/hernad/windows/hbwin.tar.gz ; tar xf hbwin.tar.gz"
+bash -xlc "cd /c ; curl -LO https://dl.bintray.com/bringout/harbour/harbour-windows-x86_20190119.4.zip ; mkdir hbwin ; cd hbwin ; unzip ../harbour-windows-x86_20190119.4.zip"
 set PATH=C:\hbwin\bin;%PATH%
 
 rem Build/test scripting
@@ -38,7 +38,7 @@ bash -xlc "set pwd"
 
 REM build hello.hbp
 
-bash -xlc "export HB_ARCHITECTURE=win; export HB_COMPILER=mingw; export F18_VER=${APPVEYOR_REPO_TAG_NAME:=0.0.0} ; scripts/update_f18_ver_ch.sh $F18_VER; export F18_POS=1; export F18_RNAL=1; source scripts/mingw_appveyor_set_envars.sh ; hbmk2 -workdir=.h F18.hbp"
+bash -xlc "export HB_ARCHITECTURE=win; export HB_COMPILER=mingw; export F18_VER=${APPVEYOR_REPO_TAG_NAME:=0.0.0} ; scripts/update_f18_ver_ch.sh $F18_VER; export F18_POS=1; source scripts/mingw_appveyor_set_envars.sh ; hbmk2 -workdir=.h F18.hbp"
 
 
 REM postgresql dlls libpq.dll i kompanija

@@ -16,7 +16,8 @@ STATIC s_nMjesecDo
 STATIC s_nGodinaOd
 STATIC s_nGodinaDo
 STATIC s_nXml0ili1 := 0
-
+MEMVAR GetList
+MEMVAR dPerOd, dPerDo, nPorGodina
 
 FUNCTION ld_olp_gip_obrazac()
 
@@ -42,9 +43,11 @@ FUNCTION ld_olp_gip_obrazac()
    LOCAL cObracun := gObracun
    LOCAL cWinPrint := "E"
    LOCAL nOper := 1
+   LOCAL nGodina
+
+   nGodina := Year( danasnji_datum() ) - 1
 
    ol_tmp_tbl()    // kreiraj pomocnu tabelu
-
    cIdRj := gLDRadnaJedinica
    nMjesecOd := ld_tekuci_mjesec()
    nMjesecDo := ld_tekuci_mjesec()
@@ -55,32 +58,27 @@ FUNCTION ld_olp_gip_obrazac()
    cPredAdr := Space( 50 )
    cPredJMB := Space( 13 )
 
-   nPorGodina := 2009
    cOperacija := "Novi"
    dDatUnosa := Date()
    dDatPodnosenja := Date()
    nBrZahtjeva := 1
 
-
    ol_o_tbl()
-
    cPredNaz := PadR( fetch_metric( "obracun_plata_preduzece_naziv", NIL, cPredNaz ), 100 )
    cPredAdr := PadR( fetch_metric( "obracun_plata_preduzece_adresa", NIL, cPredAdr ), 100 )
    cPredJMB := PadR( fetch_metric( "obracun_plata_preduzece_id_broj", NIL, cPredJMB ), 13 )
 
    Box( "#OBRAČUNSKI LISTOVI RADNIKA OLP, GIP", 17, 75 )
-
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Radne jedinice: " GET cRadneJedinice PICT "@!S25"
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Period od:" GET nMjesecOd PICT "99"
    @ box_x_koord() + 2, Col() + 1 SAY "/" GET nGodinaOd PICT "9999"
 
    @ box_x_koord() + 2, Col() + 1 SAY "do:" GET nMjesecDo PICT "99"
    @ box_x_koord() + 2, Col() + 1 SAY "/" GET nGodinaDo PICT "9999"
-
+   @ box_x_koord() + 2, Col() + 1 SAY " GIP za godinu:" GET nGodina PICT "9999"
    IF ld_vise_obracuna()
-      @ box_x_koord() + 2, Col() + 2 SAY "Obracun:" GET cObracun WHEN ld_help_broj_obracuna( .T., cObracun ) VALID ld_valid_obracun( .T., cObracun )
+      @ box_x_koord() + 2, Col() + 2 SAY8 "Obračun:" GET cObracun WHEN ld_help_broj_obracuna( .T., cObracun ) VALID ld_valid_obracun( .T., cObracun )
    ENDIF
-
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Radnik (prazno-svi radnici): " GET cIdRadnik  VALID Empty( cIdRadnik ) .OR. P_RADN( @cIdRadnik )
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "    Isplate u usl. ili dobrima:"  GET cPrimDobra PICT "@S30"
    @ box_x_koord() + 6, box_y_koord() + 2 SAY "Tipovi koji ne ulaze u obrazac:"  GET cTP_off PICT "@S30"
@@ -88,7 +86,6 @@ FUNCTION ld_olp_gip_obrazac()
    @ box_x_koord() + 8, box_y_koord() + 2 SAY "   Doprinos iz zdr: " GET cDopr11
    @ box_x_koord() + 9, box_y_koord() + 2 SAY "   Doprinos iz nez: " GET cDopr12
    @ box_x_koord() + 10, box_y_koord() + 2 SAY "Doprinos iz ukupni: " GET cDopr1X
-
    @ box_x_koord() + 12, box_y_koord() + 2 SAY "Naziv preduzeca: " GET cPredNaz PICT "@S30"
    @ box_x_koord() + 12, Col() + 1 SAY "JID: " GET cPredJMB
    @ box_x_koord() + 13, box_y_koord() + 2 SAY "Adresa: " GET cPredAdr PICT "@S30"
@@ -97,23 +94,20 @@ FUNCTION ld_olp_gip_obrazac()
    @ box_x_koord() + 15, Col() + 2 SAY "def.rj" GET cIdRjTekuca
    @ box_x_koord() + 15, Col() + 2 SAY "st./exp.(S/E)?" GET cWinPrint  VALID cWinPrint $ "SE" PICT "@!"
 
+
    READ
-
-   dPerOd := Date()
-   dPerDo := Date()
-
-
-   g_per_oddo( nMjesecOd, nGodinaOd, nMjesecDo, nGodinaDo, @dPerOd, @dPerDo )    // daj period od - do
+   // aRet := get_period_od_do( nMjesecOd, nGodinaOd, nMjesecDo, nGodinaDo )
+   // dPerOd := aRet[ 1 ]
+   // dPerDo := aRet[ 2 ]
+   dPerOd := CToD( "01.01." + AllTrim( Str( nGodina ) ) )
+   dPerDo := CToD( "31.12." + AllTrim( Str( nGodina ) ) )
 
    IF cWinPrint == "E"
-
-      nPorGodina := nGodinaDo
+      nPorGodina := nGodina
       @ box_x_koord() + 16, box_y_koord() + 2 SAY "P.godina" GET nPorGodina PICT "9999"
       @ box_x_koord() + 16, Col() + 2 SAY "Dat.podnos." GET dDatPodnosenja
       @ box_x_koord() + 16, Col() + 2 SAY "Dat.unosa" GET dDatUnosa
-
       @ box_x_koord() + 17, box_y_koord() + 2 SAY "operacija: 1 (novi) 2 (izmjena) 3 (brisanje)" GET nOper PICT "9"
-
       READ
    ENDIF
 
@@ -146,12 +140,9 @@ FUNCTION ld_olp_gip_obrazac()
    set_metric( "obracun_plata_preduzece_id_broj", NIL, cPredJMB )
 
    seek_ld( NIL, { nGodinaOd, nGodinaDo }, NIL, NIL, cIdRadnik ) // seek_ld( cIdRj, nGodina, nMjesec, cObracun, cIdRadn, cTag )
-
    ld_obracunski_list_sort( cRadneJedinice, nGodinaOd, nGodinaDo, nMjesecOd, nMjesecDo, cIdRadnik, cVarijantaIzvjestaja, cObracun )
-
    ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjesecOd, nMjesecDo, cIdRadnik, ;
       cPrimDobra, cTP_off, cDopr10, cDopr11, cDopr12, cDopr1X, cVarijantaIzvjestaja, cObracun )
-
 
    IF s_nXml0ili1 == 1    // stampa izvjestaja xml/oo3
       _xml_print( cVarijantaIzvjestaja )
@@ -230,7 +221,7 @@ FUNCTION ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjese
       cTipRada := get_ld_rj_tip_rada( ld->idradn, ld->idrj )
       lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
-      ld_pozicija_parobr( ld->mjesec, ld->godina, IIF( ld_vise_obracuna(), ld->obr, ), ld->idrj )
+      ld_pozicija_parobr( ld->mjesec, ld->godina, iif( ld_vise_obracuna(), ld->obr, ), ld->idrj )
 
       select_o_radn( cIdRadnikTekuci )
 
@@ -708,12 +699,10 @@ STATIC FUNCTION _fill_e_xml( file_name )
       xml_node( "AdresaPrebivalista", to_xml_encoding( AllTrim( radn->streetname ) + ;
          " " + AllTrim( radn->streetnum ) ) )
       xml_node( "PoreznaGodina", Str( nPorGodina ) )
-
       xml_node( "PeriodOd", xml_date( dPerOd ) )
       xml_node( "PeriodDo", xml_date( dPerDo ) )
 
       xml_subnode( "Dio1PodaciOPoslodavcuIPoreznomObvezniku", .T. )
-
       xml_subnode( "Dio2PodaciOPrihodimaDoprinosimaIPorezu", .F. )
 
       nT_prih := 0
@@ -1113,27 +1102,23 @@ FUNCTION ld_godina_mjesec_string( nGod, nMj )
 
    RETURN cRet
 
-// --------------------------------------
-// vraca period od-do
-// --------------------------------------
-STATIC FUNCTION g_per_oddo( nMjesecOd, nGodinaOd, nMjesecDo, nGodinaDo, ;
-      dPerOd, dPerDo )
+
+STATIC FUNCTION get_period_od_do( nMjesecOd, nGodinaOd, nMjesecDo, nGodinaDo )
 
    LOCAL cTmp := ""
+   LOCAL dPerOd, dPerDo
 
    cTmp += "01" + "."
    cTmp += PadL( AllTrim( Str( nMjesecOd ) ), 2, "0" ) + "."
    cTmp += AllTrim( Str( nGodinaOd ) )
-
    dPerOd := CToD( cTmp )
 
    cTmp := g_day( nMjesecDo ) + "."
    cTmp += PadL( AllTrim( Str( nMjesecDo ) ), 2, "0" ) + "."
    cTmp += AllTrim( Str( nGodinaDo ) )
-
    dPerDo := CToD( cTmp )
 
-   RETURN .T.
+   RETURN { dPerOd, dPerDo }
 
 // ------------------------------------------
 // vraca koliko dana ima u mjesecu
@@ -1291,8 +1276,8 @@ FUNCTION ld_obracunski_list_sort( cRadneJedinice, nGodinaOd, nGodinaDo, nMjesecO
          INDEX ON SortPrez( idradn ) + Str( godina, 4, 0 ) + Str( mjesec, 4, 0 ) + idrj TO "tmpld"
          GO TOP
       ELSE
-       INDEX ON Str( godina, 4, 0 ) + Str( mjesec, 4, 0 ) + SortPrez( idradn ) + idrj TO "tmpld"
-       GO TOP
+         INDEX ON Str( godina, 4, 0 ) + Str( mjesec, 4, 0 ) + SortPrez( idradn ) + idrj TO "tmpld"
+         GO TOP
       ENDIF
    ELSE
       SET ORDER TO TAG ( ld_index_tag_vise_obracuna( "2" ) )
