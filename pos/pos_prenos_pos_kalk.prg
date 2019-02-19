@@ -150,7 +150,6 @@ STATIC FUNCTION import_row( cIdTipDk, cBrDok )
    REPLACE idtarifa WITH katops->idtarifa
    REPLACE jmj WITH katops->jmj
    REPLACE robanaz WITH katops->naziv
-
    REPLACE barkod WITH katops->barkod
    REPLACE IDRADNIK WITH gIdRadnik
    REPLACE IdPos WITH KATOPS->IdPos

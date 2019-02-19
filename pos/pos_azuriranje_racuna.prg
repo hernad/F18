@@ -70,18 +70,16 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
-         hRec[ "idradnik" ] := _pos_pripr->idradnik
+         //hRec[ "idradnik" ] := _pos_pripr->idradnik
          hRec[ "idroba" ] := _pos_pripr->idroba
          hRec[ "idtarifa" ] := _pos_pripr->idtarifa
          hRec[ "kolicina" ] := _pos_pripr->kolicina
          hRec[ "ncijena" ] := _pos_pripr->ncijena
          hRec[ "cijena" ] := _pos_pripr->cijena
-
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
          IF !lOk
             EXIT
          ENDIF
-
          SELECT _pos_pripr
          SKIP
 

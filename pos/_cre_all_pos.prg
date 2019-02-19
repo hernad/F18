@@ -105,31 +105,37 @@ FUNCTION g_pos_pripr_fields()
 
    // _PRIPR, PRIPRZ
    aDbf := {}
-   AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
-   AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )
-   AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
-   AAdd ( aDbf, { "idPartner",    "C",  FIELD_LEN_PARTNER_ID, 0 } )
+   // pos_pos & pos_doks (id dokumenta)
    AAdd ( aDbf, { "IDPOS",     "C",  2, 0 } )
-   AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
-   AAdd ( aDbf, { "IDROBA",    "C", 10, 0 } )
-   AAdd ( aDbf, { "IDTARIFA",  "C",  6, 0 } )
    AAdd ( aDbf, { "IDVD",      "C",  2, 0 } )
-   AAdd ( aDbf, { "IDVRSTEP",  "C",  2, 0 } )
-   AAdd ( aDbf, { "JMJ",       "C",  3, 0 } )
+   AAdd ( aDbf, { "BRDOK",     "C",  FIELD_LEN_POS_BRDOK, 0 } )
+   AAdd ( aDbf, { "DATUM",     "D",  8, 0 } )
+   // END pos_pos & pos_doks (id dokumenta)
 
-   // za inventuru, nivelaciju
+   // pos_pos
+   AAdd ( aDbf, { "CIJENA",    "N", 10, 3 } )
+   AAdd ( aDbf, { "NCIJENA",   "N", 10, 3 } )
+   AAdd ( aDbf, { "IDROBA",    "C", 10, 0 } )
+   AAdd ( aDbf, { "ROBANAZ",   "C", 40, 0 } )
+   AAdd ( aDbf, { "IDTARIFA",  "C",  6, 0 } )
    AAdd ( aDbf, { "KOL2",      "N", 18, 3 } )
    AAdd ( aDbf, { "KOLICINA",  "N", 18, 3 } )
-   AAdd ( aDbf, { "NCIJENA",   "N", 10, 3 } )
-   AAdd ( aDbf, { "ROBANAZ",   "C", 40, 0 } )
-   AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
-   AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
 
-   AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
+   // pos_doks
+   AAdd ( aDbf, { "IDRADNIK",  "C",  4, 0 } )
    AAdd( aDBf, { 'BRFAKTP', 'C',  10,  0 } )
+   AAdd ( aDbf, { "VRIJEME",   "C",  5, 0 } )
+   AAdd ( aDbf, { "IDVRSTEP",  "C",  2, 0 } )
+   AAdd ( aDbf, { "idPartner",    "C",  FIELD_LEN_PARTNER_ID, 0 } )
    AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
    AAdd( aDBf, { 'OPIS', 'C',  100,  0 } )
    AAdd( aDBf, { 'DAT_OD', 'D',  8,  0 } )
    AAdd( aDBf, { 'DAT_DO', 'D',  8,  0 } )
+   AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
+
+   // roba
+   AAdd( aDBf, { 'BARKOD', 'C',  13,  0 } )
+   AAdd ( aDbf, { "JMJ",       "C",  3, 0 } )
+
 
    RETURN aDbf

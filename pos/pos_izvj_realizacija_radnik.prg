@@ -314,11 +314,7 @@ FUNCTION pos_radnik_izvuci( cIdVd )
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
       DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
 
-
          select_o_roba( pos->idroba )
-
-         nNeplaca := 0
-         nNeplaca += pos->( NCijena * kolicina )
 
          SELECT POM
          GO TOP
@@ -326,13 +322,9 @@ FUNCTION pos_radnik_izvuci( cIdVd )
 
          IF !Found()
             APPEND BLANK
-            REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, Kolicina WITH POS->KOlicina, Iznos WITH POS->Kolicina * POS->Cijena, iznos3 WITH nNeplaca
-
+            REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, Kolicina WITH POS->KOlicina, Iznos WITH POS->Kolicina * POS->Cijena
          ELSE
-            REPLACE Kolicina WITH Kolicina + POS->Kolicina, Iznos WITH Iznos + POS->Kolicina * POS->Cijena, iznos3 WITH iznos3 + nNeplaca
-            // IF gPopVar = "A"
-            // REPLACE Iznos2   WITH Iznos2 + pos->( ncijena )
-            // ENDIF
+            REPLACE Kolicina WITH Kolicina + POS->Kolicina, Iznos WITH Iznos + POS->Kolicina * POS->Cijena
          ENDIF
          SELECT POS
          SKIP

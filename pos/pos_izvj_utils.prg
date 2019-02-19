@@ -22,9 +22,7 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
 
    MsgO( "formiranje pomoćne tabele za izvještaj..." )
 
-   // SEEK cIdVd + DToS( dDatum0 )
    seek_pos_doks_2( cIdVd, dDatum0 )
-
    DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatum1
 
       IF ( !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos )
@@ -45,10 +43,6 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
             ENDIF
          ENDIF
 
-         nNeplaca := 0
-         nNeplaca += pos->( kolicina * nCijena )
-
-
          SELECT pom
          GO TOP
          SEEK pos_doks->IdPos + pos_doks->IdRadnik + pos_doks->IdVrsteP + pos->IdRoba
@@ -59,18 +53,12 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
             REPLACE IdRadnik WITH pos_doks->IdRadnik
             REPLACE IdVrsteP WITH pos_doks->IdVrsteP
             REPLACE IdRoba WITH pos->IdRoba
-
             REPLACE Kolicina WITH pos->Kolicina
             REPLACE Iznos WITH pos->Kolicina * POS->Cijena
-            REPLACE Iznos3 WITH nNeplaca
             REPLACE Iznos2 WITH pos->nCijena
-
-
          ELSE
             REPLACE Kolicina WITH Kolicina + POS->Kolicina
             REPLACE Iznos WITH Iznos + POS->Kolicina * POS->Cijena
-            REPLACE Iznos3 WITH Iznos3 + nNeplaca
-
          ENDIF
 
          SELECT pos

@@ -145,6 +145,8 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    hRec[ "idpartner" ] := priprz->idPartner
    hRec[ "idradnik" ] := priprz->idradnik
    hRec[ "brdokstorn" ] := priprz->brdokStorn
+   hRec[ "dat_od" ] := priprz->dat_od
+   hRec[ "dat_do" ] := priprz->dat_do
 
    cTipDok := hRec[ "idvd" ]
    cDokument := AllTrim( hRec[ "idpos" ] ) + "-" + hRec[ "idvd" ] + "-" + AllTrim( hRec[ "brdok" ] ) + " " + DToC( hRec[ "datum" ] )
@@ -155,7 +157,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
 
 
    IF lOk
-
       seek_pos_pos( "XX", "XX" )
       SELECT PRIPRZ
       DO WHILE !Eof()
@@ -168,7 +169,7 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "idvd" ] := priprz->idvd
          hRec[ "datum" ] := priprz->datum
          hRec[ "brdok" ] := priprz->brdok
-         hRec[ "idradnik" ] := priprz->idradnik
+         //hRec[ "idradnik" ] := priprz->idradnik
          hRec[ "idroba" ] := priprz->idroba
          hRec[ "idtarifa" ] := priprz->idtarifa
          hRec[ "kolicina" ] := priprz->kolicina

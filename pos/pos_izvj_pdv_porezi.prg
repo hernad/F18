@@ -213,17 +213,8 @@ STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife, cNaplaceno )
          ELSE  // cnaplaceno="3"
 
             select_o_roba( pos->idroba )
-            nNeplaca := 0
+            nIzn := pos->( Cijena * kolicina )
 
-            // IF gPopVar = "P"
-            nNeplaca += pos->( kolicina * NCijena )
-            // ENDIF
-
-            // IF gPopVar == "A"
-            // nIzn := pos->( Cijena * kolicina ) - nNeplaca + pos->ncijena
-            // ELSE
-            nIzn := pos->( Cijena * kolicina ) - nNeplaca
-            // ENDIF
 
          ENDIF
 
@@ -231,7 +222,6 @@ STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife, cNaplaceno )
 
          nOsn := nIzn / ( 1 + tarifa->pdv / 100 )
          nPDV := nOsn * tarifa->pdv / 100
-
          nPoz := AScan( aTarife, {| x | x[ 1 ] == POS->IdTarifa } )
 
          IF nPoz == 0

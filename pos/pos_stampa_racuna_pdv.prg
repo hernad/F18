@@ -100,7 +100,6 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       //cIdVrsteP := _pos->idvrstep
    ENDIF
 
-
    find_pos_osob_by_naz( cIdRadnik )
    cRdnkNaz := osob->naz
 

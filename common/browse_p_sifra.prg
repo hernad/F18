@@ -250,7 +250,7 @@ FUNCTION p_sifra_da_li_vec_postoji_sifra( cId, cIdBK, cUslovSrch, cNazSrch ) // 
    ENDIF
 
    IF Alias() == "OS" .OR. Alias() == "SII"
-       find_os_sii_by_naz_or_id( cId )
+      find_os_sii_by_naz_or_id( cId )
    ELSEIF Alias() == "REVAL"
       find_reval_by_id( cId )
    ELSEIF Alias() == "AMORT"
@@ -649,7 +649,7 @@ STATIC FUNCTION my_browse_p_sifra_key_handler( Ch, nWa, cNaslov, bBlok, aZabrane
       Tb:RefreshCurrent()
 
       IF my_browse_edit_red( Ch, cOrderTag, aZabIsp, .T. )
-         //altd() ENTER keystorm
+         // altd() ENTER keystorm
          RETURN DE_REFRESH
       ENDIF
 
@@ -1230,27 +1230,22 @@ FUNCTION sifarnik_brisi_stavku()
       RETURN DE_CONT
    ENDIF
 
-
    PushWA()
    hRecDbf := dbf_get_rec()
-
    hRec := hRecDbf
-
    lOk := delete_rec_server_and_dbf( cAlias, hRecDbf, 1, "CONT" )
 
-   IF lOk .AND. Alias() != "SIFK" .AND. hb_HHasKey( hRecDbf, "id" )
-      // o_sifk()
-      // o_sifv()
-      o_sifk_sifv_empty()
-
-      hRec := hb_Hash()
-      hRec[ "id" ]    := PadR( cAlias, 8 )
-      hRec[ "idsif" ] := PadR( hRecDbf[ "id" ], 15 )
-      lOk := delete_rec_server_and_dbf( "sifv", hRec, 3, "CONT" )
+   IF programski_modul() != "POS" // POS ne koristi sifk, sifv
+      IF lOk .AND. Alias() != "SIFK" .AND. hb_HHasKey( hRecDbf, "id" )
+         o_sifk_sifv_empty()
+         hRec := hb_Hash()
+         hRec[ "id" ]    := PadR( cAlias, 8 )
+         hRec[ "idsif" ] := PadR( hRecDbf[ "id" ], 15 )
+         lOk := delete_rec_server_and_dbf( "sifv", hRec, 3, "CONT" )
+      ENDIF
    ENDIF
 
    IF lOk
-
 #ifdef F18_DEBUG
       MsgBeep( "table " + cAlias  + " updated and locked" )
 #endif

@@ -207,7 +207,6 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
          APPEND BLANK
 
          hRec := dbf_get_rec()
-
          hRec[ "idpos" ] := _id_pos
          hRec[ "idvd" ] := "16"
          hRec[ "brdok" ] := cBrDok
@@ -216,7 +215,6 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
          hRec[ "kolicina" ] := nKolicina
          hRec[ "cijena" ] := pos_get_mpc()
          hRec[ "datum" ] := dDatDok
-         hRec[ "idradnik" ] := "XXXX"
          hRec[ "idtarifa" ] := roba->idtarifa
 
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )

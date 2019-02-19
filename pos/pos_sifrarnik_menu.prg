@@ -30,8 +30,6 @@ FUNCTION pos_sifarnici()
    AAdd( aOpcexe, {|| P_Odj() } )
    AAdd( aOpc, "7. kase (prodajna mjesta)" )
    AAdd( aOpcexe, {|| p_pos_kase() } )
-   AAdd( aOpc, "8. sifk" )
-   AAdd( aOpcexe, {|| P_SifK() } )
 
    IF pos_admin()
       AAdd( aOpc, "A. statusi radnika" )

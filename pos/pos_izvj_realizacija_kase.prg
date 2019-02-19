@@ -32,7 +32,7 @@ FUNCTION realizacija_kase
    PRIVATE cRD
 
    PRIVATE aNiz
-   PRIVATE aUsl1 := {}
+   PRIVATE cFilterIdRadnik := {}
    PRIVATE aUsl2 := {}
    PRIVATE fPrik := "O"
    PRIVATE cFilter := ".t."
@@ -46,7 +46,6 @@ FUNCTION realizacija_kase
       dDatum1 := danasnji_datum()
    ENDIF
 
-
    pos_realizacija_tbl_cre_pom()
    o_pos_tables()
    o_pom_table()
@@ -57,7 +56,7 @@ FUNCTION realizacija_kase
    cVrijDo := "23:59"
 
 
-   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @aUsl1, @aUsl2, @cVrsteP, @cAPrometa, @cSifraDob, @cPartId ) == 0
+   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @cFilterIdRadnik, @aUsl2, @cVrsteP, @cAPrometa, @cSifraDob, @cPartId ) == 0
       RETURN 0
    ENDIF
 
@@ -73,18 +72,12 @@ FUNCTION realizacija_kase
 
 
    bZagl := {|| pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP ) }
-
    Eval( bZagl )
-
    o_pos_tables()
    o_pom_table()
 
    SELECT pos_doks
-
-   pos_set_filter_pos_doks( @cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cPartId )
-
-
-   pos_kasa_pripremi_pom_za_izvjestaj( "01", cSifraDob )
+   pos_set_filter_pos_doks( @cFilter, cFilterIdRadnik, aUsl2, cVrijOd, cVrijDo, cPartId )
    pos_kasa_pripremi_pom_za_izvjestaj( "42", cSifraDob )
 
    PRIVATE nTotal := 0
@@ -96,7 +89,6 @@ FUNCTION realizacija_kase
 
       SELECT POM
       SET ORDER TO TAG "1"
-
       IF ( fPrik $ "PO" )
          check_nova_strana( bZagl, s_oPDF )
          pos_realizacija_po_radnicima( fPrik, @nTotal3 )
@@ -119,7 +111,7 @@ FUNCTION realizacija_kase
    RETURN .T.
 
 
-STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, aUsl1, aUsl2, cVrsteP, cAPrometa, cSifraDob, cPartId )
+STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, cFilterIdRadnik, aUsl2, cVrsteP, cAPrometa, cSifraDob, cPartId )
 
    LOCAL aNiz
 
@@ -152,11 +144,11 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
          RETURN 0
       ENDIF
 
-      aUsl1 := Parsiraj( cRadnici, "IdRadnik" )
+      cFilterIdRadnik := Parsiraj( cRadnici, "IdRadnik" )
       aUsl2 := Parsiraj( cVrsteP, "IdVrsteP" )
-      IF aUsl1 <> NIL .AND. aUsl2 <> NIL .AND. dDatum0 <= dDatum1
+      IF cFilterIdRadnik <> NIL .AND. aUsl2 <> NIL .AND. dDatum0 <= dDatum1
          EXIT
-      ELSEIF aUsl1 == nil
+      ELSEIF cFilterIdRadnik == nil
          Msg( "Kriterij za radnike nije korektno postavljen!" )
       ELSEIF aUsl2 == nil
          Msg( "Kriterij za vrste placanja nije korektno postavljen!" )
@@ -195,24 +187,21 @@ STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrste
    RETURN .T.
 
 
-STATIC FUNCTION pos_set_filter_pos_doks( cFilter, aUsl1, aUsl2, cVrijOd, cVrijDo, cPartId )
+STATIC FUNCTION pos_set_filter_pos_doks( cFilter, cFilterIdRadnik, aUsl2, cVrijOd, cVrijDo, cPartId )
 
    SELECT pos_doks
    SET ORDER TO TAG "2"  // "2" - "IdVd+DTOS (Datum)"
 
-   IF aUsl1 <> ".t."
-      cFilter += ".and." + aUsl1
+   IF cFilterIdRadnik <> ".t."
+      cFilter += ".and." + cFilterIdRadnik
    ENDIF
 
    IF aUsl2 <> ".t."
       cFilter += ".and." + aUsl2
    ENDIF
-
    IF !( cVrijOd == "00:00" .AND. cVrijDo == "23:59" )
       cFilter += ".and. Vrijeme>='" + cVrijOd + "'.and. Vrijeme<='" + cVrijDo + "'"
    ENDIF
-
-
    IF !Empty( cPartId )
       cFilter += ".and. idPartner==" + dbf_quote( cPartId )
    ENDIF
@@ -254,7 +243,6 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
    DO WHILE !Eof()
 
       _IdPos := pom->IdPos
-
       IF Empty( cIdPos )
          select_o_pos_kase( _IdPos )
          ?
@@ -421,7 +409,6 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
 
             nRobaIzn3 := 0
             DO WHILE !Eof() .AND. POM->IdPos + POM->IdRoba == _IdPos + _IdRoba
-
                nRobaKol += POM->Kolicina
                nRobaIzn += POM->Iznos
                nRobaIzn3 += POM->Iznos3
