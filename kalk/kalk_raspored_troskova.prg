@@ -603,11 +603,8 @@ FUNCTION raspored_procent_tr( cTipPrevoz, nIznosPrevoz, cTipCarDaz, nIznosCarDaz
    RETURN hRet
 
 
-/*
- *     Proracun iznosa troskova pri unosu u kalk_pripremi
-*/
 
-FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+FUNCTION kalk_set_vars_troskovi_marzavp_marzamp()
 
    LOCAL nStvarnaKolicina := 0
 
@@ -683,7 +680,7 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       nKalkSpedTr := 0
    ENDIF
 
-   IF field->IdVD $ "14"   // izlaz po vp
+   IF field->IdVD == "14"   // izlaz po vp
       nKalkMarzaVP := field->VPC * ( 1 - field->Rabatv / 100 ) - field->NC
    ELSEIF field->idvd $ "11#12#13"
       nKalkMarzaVP := field->VPC - field->FCJ

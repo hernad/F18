@@ -18,8 +18,6 @@ FUNCTION leg_StKalkPR()
 
    PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nMarza, nMarza2
 
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
    nStr := 0
    cIdPartner := IdPartner; cBrFaktP := BrFaktP; dDatFaktP := DatFaktP
    cIdKonto := IdKonto; cIdKonto2 := IdKonto2
@@ -46,7 +44,7 @@ FUNCTION leg_StKalkPR()
       cBrFaktP := brfaktp; dDatFaktP := datfaktp; cIdpartner := idpartner
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD .AND. idpartner + brfaktp + DToS( datfaktp ) == cidpartner + cbrfaktp + DToS( ddatfaktp )
 
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+         kalk_set_vars_troskovi_marzavp_marzamp()
          SELECT kalk_pripr
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
