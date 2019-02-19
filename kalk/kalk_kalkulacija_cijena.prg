@@ -11,6 +11,13 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
+
 FUNCTION kalkulacija_cijena( azurirana )
 
    LOCAL _vars
@@ -244,7 +251,7 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( hParams )
    LOCAL _zad_id, _zad_naz
    LOCAL _dio
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    select_o_konto( kalk_pripr->pkonto )
    _razd_id := kalk_pripr->pkonto
@@ -312,12 +319,10 @@ STATIC FUNCTION gen_kalk_predispozicija_xml( hParams )
          ENDIF
 
          ++_generated
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+         kalk_set_vars_troskovi_marzavp_marzamp()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-
          nPDVStopa := tarifa->pdv
          nPDVCijena := field->mpc * pdv_procenat_by_tarifa( kalk_pripr->idtarifa)
-
          _s_kolicina := field->kolicina
          _t_kol += _s_kolicina
          _u_nv := Round( field->nc * _s_kolicina, gZaokr )
@@ -401,7 +406,7 @@ STATIC FUNCTION gen_kalk_mp_xml( hParams )
    LOCAL _t_tr_prevoz, _t_tr_bank, _t_tr_carina, _t_tr_zavisni, _t_tr_sped, _t_tr_svi, _u_nv, _t_nv, _u_marza, _t_marza
    LOCAL _u_porez, _t_porez, _u_pv, _t_pv, _u_pv_porez, _t_pv_porez, _t_kol, _u_rabat, _t_rabat
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    select_o_konto( kalk_pripr->pkonto )
    select_o_partner( kalk_pripr->idpartner )
@@ -446,7 +451,7 @@ STATIC FUNCTION gen_kalk_mp_xml( hParams )
 
       ++_generated
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       nPDVStopa := tarifa->pdv
       nPDVCijena := field->mpc * nPDVStopa/100
@@ -463,11 +468,11 @@ STATIC FUNCTION gen_kalk_mp_xml( hParams )
       _u_fv_r := Round( - field->rabat / 100 * field->fcj * field->kolicina, gZaokr )
       _t_fv_r += _u_fv_r
 
-      _u_tr_prevoz := Round( nPrevoz * _s_kolicina, gZaokr )
-      _u_tr_bank := Round( nBankTr * _s_kolicina, gZaokr )
-      _u_tr_sped := Round( nSpedTr * _s_kolicina, gZaokr )
-      _u_tr_carina := Round( nCarDaz * _s_kolicina, gZaokr )
-      _u_tr_zavisni := Round( nZavTr * _s_kolicina, gZaokr )
+      _u_tr_prevoz := Round( nKalkPrevoz * _s_kolicina, gZaokr )
+      _u_tr_bank := Round( nKalkBankTr * _s_kolicina, gZaokr )
+      _u_tr_sped := Round( nKalkSpedTr * _s_kolicina, gZaokr )
+      _u_tr_carina := Round( nKalkCarDaz * _s_kolicina, gZaokr )
+      _u_tr_zavisni := Round( nKalkZavTr * _s_kolicina, gZaokr )
       _u_tr_svi := ( _u_tr_prevoz + _u_tr_bank + _u_tr_sped + _u_tr_carina + _u_tr_zavisni )
 
       _t_tr_prevoz += _u_tr_prevoz
@@ -515,11 +520,11 @@ STATIC FUNCTION gen_kalk_mp_xml( hParams )
       xml_node( "porez", Str( nPDVCijena, 12, 2 ) )
       xml_node( "pcsap", Str( field->mpcsapp, 12, 2 ) )
 
-      _pr_tr_prev := if( nPrevoz <> 0, nPrevoz / field->fcj2 * 100, 0 )
-      _pr_tr_bank := if( nBankTr <> 0, nBankTr / field->fcj2 * 100, 0 )
-      _pr_tr_sped := if( nSpedTr <> 0, nSpedTr / field->fcj2 * 100, 0 )
-      _pr_tr_car := if( nCarDaz <> 0, nCarDaz / field->fcj2 * 100, 0 )
-      _pr_tr_zav := if( nZavTr <> 0, nZavTr / field->fcj2 * 100, 0 )
+      _pr_tr_prev := if( nKalkPrevoz <> 0, nKalkPrevoz / field->fcj2 * 100, 0 )
+      _pr_tr_bank := if( nKalkBankTr <> 0, nKalkBankTr / field->fcj2 * 100, 0 )
+      _pr_tr_sped := if( nKalkSpedTr <> 0, nKalkSpedTr / field->fcj2 * 100, 0 )
+      _pr_tr_car := if( nKalkCarDaz <> 0, nKalkCarDaz / field->fcj2 * 100, 0 )
+      _pr_tr_zav := if( nKalkZavTr <> 0, nKalkZavTr / field->fcj2 * 100, 0 )
       _pr_tr_svi := ( _pr_tr_prev + _pr_tr_bank + _pr_tr_sped + _pr_tr_car + _pr_tr_zav )
 
       xml_node( "tr1p", Str( _pr_tr_prev, 12, 2 ) )
@@ -529,12 +534,12 @@ STATIC FUNCTION gen_kalk_mp_xml( hParams )
       xml_node( "tr5p", Str( _pr_tr_zav, 12, 2 ) )
       xml_node( "trsp", Str( _pr_tr_svi, 12, 2 ) )
 
-      _tmp := nPrevoz + nBankTr + nSpedTr + nCarDaz + nZavTr
-      xml_node( "tr1", Str( nPrevoz, 12, 2 ) )
-      xml_node( "tr2", Str( nBankTr, 12, 2 ) )
-      xml_node( "tr3", Str( nSpedTr, 12, 2 ) )
-      xml_node( "tr4", Str( nCarDaz, 12, 2 ) )
-      xml_node( "tr5", Str( nZavTr, 12, 2 ) )
+      _tmp := nKalkPrevoz + nKalkBankTr + nKalkSpedTr + nKalkCarDaz + nKalkZavTr
+      xml_node( "tr1", Str( nKalkPrevoz, 12, 2 ) )
+      xml_node( "tr2", Str( nKalkBankTr, 12, 2 ) )
+      xml_node( "tr3", Str( nKalkSpedTr, 12, 2 ) )
+      xml_node( "tr4", Str( nKalkCarDaz, 12, 2 ) )
+      xml_node( "tr5", Str( nKalkZavTr, 12, 2 ) )
       xml_node( "trs", Str( _tmp, 12, 2 ) )
 
       xml_node( "ufv", Str( _u_fv, 12, 2 ) )
@@ -597,7 +602,7 @@ STATIC FUNCTION gen_kalk_vp_xml( hParams )
    LOCAL _u_porez, _t_porez, _u_pv, _t_pv, _u_pv_porez, _t_pv_porez, _t_kol, _u_rabat, _t_rabat
    LOCAL _ima_mpcsapp := .F.
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    select_o_konto( kalk_pripr->mkonto )
    select_o_partner( kalk_pripr->idpartner )
@@ -643,7 +648,7 @@ STATIC FUNCTION gen_kalk_vp_xml( hParams )
       ++_generated
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
 
       nPDVStopa := tarifa->pdv
 
@@ -669,11 +674,11 @@ STATIC FUNCTION gen_kalk_vp_xml( hParams )
       _u_fv_r := Round( - field->rabat / 100 * field->fcj * field->kolicina, gZaokr )
       _t_fv_r += _u_fv_r
 
-      _u_tr_prevoz := Round( nPrevoz * _s_kolicina, gZaokr )
-      _u_tr_bank := Round( nBankTr * _s_kolicina, gZaokr )
-      _u_tr_sped := Round( nSpedTr * _s_kolicina, gZaokr )
-      _u_tr_carina := Round( nCarDaz * _s_kolicina, gZaokr )
-      _u_tr_zavisni := Round( nZavTr * _s_kolicina, gZaokr )
+      _u_tr_prevoz := Round( nKalkPrevoz * _s_kolicina, gZaokr )
+      _u_tr_bank := Round( nKalkBankTr * _s_kolicina, gZaokr )
+      _u_tr_sped := Round( nKalkSpedTr * _s_kolicina, gZaokr )
+      _u_tr_carina := Round( nKalkCarDaz * _s_kolicina, gZaokr )
+      _u_tr_zavisni := Round( nKalkZavTr * _s_kolicina, gZaokr )
       _u_tr_svi := ( _u_tr_prevoz + _u_tr_bank + _u_tr_sped + _u_tr_carina + _u_tr_zavisni )
 
       _t_tr_prevoz += _u_tr_prevoz
@@ -732,11 +737,11 @@ STATIC FUNCTION gen_kalk_vp_xml( hParams )
       ENDIF
 
       IF Round( field->fcj2, 4 ) != 0
-         _pr_tr_prev := nPrevoz / field->fcj2 * 100
-         _pr_tr_bank := nBankTr / field->fcj2 * 100
-         _pr_tr_sped := nSpedTr / field->fcj2 * 100
-         _pr_tr_car := nCarDaz / field->fcj2 * 100
-         _pr_tr_zav := nZavTr / field->fcj2 * 100
+         _pr_tr_prev := nKalkPrevoz / field->fcj2 * 100
+         _pr_tr_bank := nKalkBankTr / field->fcj2 * 100
+         _pr_tr_sped := nKalkSpedTr / field->fcj2 * 100
+         _pr_tr_car := nKalkCarDaz / field->fcj2 * 100
+         _pr_tr_zav := nKalkZavTr / field->fcj2 * 100
          _pr_tr_svi := ( _pr_tr_prev + _pr_tr_bank + _pr_tr_sped + _pr_tr_car + _pr_tr_zav )
 
       ELSE
@@ -757,12 +762,12 @@ STATIC FUNCTION gen_kalk_vp_xml( hParams )
       xml_node( "tr5p", Str( _pr_tr_zav, 12, 2 ) )
       xml_node( "trsp", Str( _pr_tr_svi, 12, 2 ) )
 
-      _tmp := nPrevoz + nBankTr + nSpedTr + nCarDaz + nZavTr
-      xml_node( "tr1", Str( nPrevoz, 12, 2 ) )
-      xml_node( "tr2", Str( nBankTr, 12, 2 ) )
-      xml_node( "tr3", Str( nSpedTr, 12, 2 ) )
-      xml_node( "tr4", Str( nCarDaz, 12, 2 ) )
-      xml_node( "tr5", Str( nZavTr, 12, 2 ) )
+      _tmp := nKalkPrevoz + nKalkBankTr + nKalkSpedTr + nKalkCarDaz + nKalkZavTr
+      xml_node( "tr1", Str( nKalkPrevoz, 12, 2 ) )
+      xml_node( "tr2", Str( nKalkBankTr, 12, 2 ) )
+      xml_node( "tr3", Str( nKalkSpedTr, 12, 2 ) )
+      xml_node( "tr4", Str( nKalkCarDaz, 12, 2 ) )
+      xml_node( "tr5", Str( nKalkZavTr, 12, 2 ) )
       xml_node( "trs", Str( _tmp, 12, 2 ) )
 
       xml_node( "ufv", Str( _u_fv, 12, 2 ) )

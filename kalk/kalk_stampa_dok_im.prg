@@ -39,15 +39,13 @@ FUNCTION kalk_stampa_dok_im()
    LOCAL cIdKonto2
    LOCAL cSamoObrazac, cPrikazCijene, cCijenaTip, nCijena, nC1, nColTotal
 
-   PRIVATE nPrevoz
-   PRIVATE nCarDaz
-   PRIVATE nZavTr
-   PRIVATE nBankTr
-   PRIVATE nSpedTr
+   PRIVATE nKalkPrevoz
+   PRIVATE nKalkCarDaz
+   PRIVATE nKalkZavTr
+   PRIVATE nKalkBankTr
+   PRIVATE nKalkSpedTr
    PRIVATE nKalkMarzaVP
    PRIVATE nKalkMarzaMP
-
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    nStr := 0
    cIdPartner := kalk_pripr->IdPartner
@@ -57,13 +55,10 @@ FUNCTION kalk_stampa_dok_im()
    cIdKonto2  := kalk_pripr->IdKonto2
 
    cSamoObrazac := Pitanje(, "Prikaz samo obrasca inventure? (D/N)" )
-
    cPrikazCijene := "D"
-
    IF cSamoObrazac == "D"
       cPrikazCijene := Pitanje(, "Prikazati cijenu na obrascu? (D/N)" )
    ENDIF
-
    cCijenaTip := Pitanje(, "Na obrascu prikazati VPC (D) ili NC (N)?", "N" )
 
    P_10CPI
@@ -103,7 +98,7 @@ FUNCTION kalk_stampa_dok_im()
 
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVd
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       print_nova_strana( 125, @nStr, 3 )
       SKol := Kolicina

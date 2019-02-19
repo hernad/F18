@@ -14,7 +14,7 @@
 MEMVAR gZaokr
 MEMVAR _Prevoz, _TPrevoz, _BankTr, _ZavTr, _CarDaz, _SpedTr
 MEMVAR _fcj, _vpc, _rabat, _kolicina, _idvd, _rbr, _fcj2
-MEMVAR nPrevoz, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, nCarDaz, nZavTr
+MEMVAR nKalkPrevoz, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP, nKalkCarDaz, nKalkZavTr
 
 FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
 
@@ -614,73 +614,73 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
    nStvarnaKolicina := field->Kolicina
 
    IF field->TPrevoz == "%"
-      nPrevoz := field->Prevoz / 100 * field->FCj2
+      nKalkPrevoz := field->Prevoz / 100 * field->FCj2
    ELSEIF field->TPrevoz == "A"
-      nPrevoz := field->Prevoz
+      nKalkPrevoz := field->Prevoz
    ELSEIF field->TPrevoz == "U"
       IF nStvarnaKolicina <> 0
-         nPrevoz := field->Prevoz / nStvarnaKolicina
+         nKalkPrevoz := field->Prevoz / nStvarnaKolicina
       ELSE
-         nPrevoz := 0
+         nKalkPrevoz := 0
       ENDIF
    ELSE
-      nPrevoz := 0
+      nKalkPrevoz := 0
    ENDIF
 
    IF field->TCarDaz == "%"
-      nCarDaz := field->CarDaz / 100 * field->FCj2
+      nKalkCarDaz := field->CarDaz / 100 * field->FCj2
    ELSEIF field->TCarDaz == "A"
-      nCarDaz := field->CarDaz
+      nKalkCarDaz := field->CarDaz
    ELSEIF field->TCarDaz == "U"
       IF nStvarnaKolicina <> 0
-         nCarDaz := field->CarDaz / nStvarnaKolicina
+         nKalkCarDaz := field->CarDaz / nStvarnaKolicina
       ELSE
-         nCarDaz := 0
+         nKalkCarDaz := 0
       ENDIF
    ELSE
-      nCarDaz := 0
+      nKalkCarDaz := 0
    ENDIF
 
    IF field->TZavTr == "%"
-      nZavTr := field->ZavTr / 100 * field->FCj2
+      nKalkZavTr := field->ZavTr / 100 * field->FCj2
    ELSEIF field->TZavTr == "A"
-      nZavTr := field->ZavTr
+      nKalkZavTr := field->ZavTr
    ELSEIF field->TZavTr == "U"
       IF nStvarnaKolicina <> 0
-         nZavTr := field->ZavTr / nStvarnaKolicina
+         nKalkZavTr := field->ZavTr / nStvarnaKolicina
       ELSE
-         nZavTr := 0
+         nKalkZavTr := 0
       ENDIF
    ELSE
-      nZavTr := 0
+      nKalkZavTr := 0
    ENDIF
 
    IF field->TBankTr == "%"
-      nBankTr := field->BankTr / 100 * field->FCj2
+      nKalkBankTr := field->BankTr / 100 * field->FCj2
    ELSEIF field->TBankTr == "A"
-      nBankTr := field->BankTr
+      nKalkBankTr := field->BankTr
    ELSEIF field->TBankTr == "U"
       IF nStvarnaKolicina <> 0
-         nBankTr := field->BankTr / nStvarnaKolicina
+         nKalkBankTr := field->BankTr / nStvarnaKolicina
       ELSE
-         nBankTr := 0
+         nKalkBankTr := 0
       ENDIF
    ELSE
-      nBankTr := 0
+      nKalkBankTr := 0
    ENDIF
 
    IF field->TSpedTr == "%"
-      nSpedTr := field->SpedTr / 100 * field->FCj2
+      nKalkSpedTr := field->SpedTr / 100 * field->FCj2
    ELSEIF field->TSpedTr == "A"
-      nSpedTr := field->SpedTr
+      nKalkSpedTr := field->SpedTr
    ELSEIF field->TSpedTr == "U"
       IF nStvarnaKolicina <> 0
-         nSpedTr := field->SpedTr / nStvarnaKolicina
+         nKalkSpedTr := field->SpedTr / nStvarnaKolicina
       ELSE
-         nSpedTr := 0
+         nKalkSpedTr := 0
       ENDIF
    ELSE
-      nSpedTr := 0
+      nKalkSpedTr := 0
    ENDIF
 
    IF field->IdVD $ "14"   // izlaz po vp
@@ -692,7 +692,7 @@ FUNCTION kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
    ENDIF
 
    IF ( field->idvd $ "11#12#13" )
-      nKalkMarzaMP := field->MPC - field->VPC - nPrevoz
+      nKalkMarzaMP := field->MPC - field->VPC - nKalkPrevoz
    ELSEIF ( ( field->idvd $ "41#42#81" ) )
       nKalkMarzaMP := field->MPC - field->NC
    ELSE

@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 MEMVAR nKalkMarzaMP
-MEMVAR _mpc, _mpcsapp, _tmarza2, _marza2, _idtarifa, _rabatv, _vpc, _kolicina, _fcj
+MEMVAR _mpc, _mpcsapp, _tmarza2, _marza2, _idtarifa, _rabatv, _vpc, _kolicina, _fcj, _nc
 MEMVAR GetList
 
 FUNCTION kalk_when_mpc_bez_pdv_11_12()
@@ -41,7 +41,6 @@ FUNCTION kalk_valid_mpc_bez_pdv_11_12( cProracunMarzeUnaprijed )
 
 FUNCTION kalk_valid_mpc_sa_pdv_11( cProracunMarzeUnaprijed, cIdTarifa )
 
-
    IF cProracunMarzeUnaprijed == NIL
       cProracunMarzeUnaprijed := " "
    ENDIF
@@ -60,7 +59,7 @@ FUNCTION kalk_valid_mpc_sa_pdv_11( cProracunMarzeUnaprijed, cIdTarifa )
 FUNCTION kalk_say_pdv_a_porezi_var( nRow )
 
    @ box_x_koord() + nRow, box_y_koord() + 2  SAY "PDV (%):"
-   @ Row(), Col() + 2 SAY pdv_procenat_by_tarifa( _idtarifa ) PICTURE "99.99"
+   @ Row(), Col() + 2 SAY pdv_procenat_by_tarifa( _idtarifa ) * 100 PICTURE "99.99"
 
    RETURN .T.
 
@@ -71,7 +70,7 @@ FUNCTION kalk_when_mpc_bez_pdv_80_81_41_42( cIdVd, lNaprijed )
    LOCAL nPopustMaloprodaja
 
    IF lNaprijed
-      kalk_set_vars_marza_maloprodaja( cIdVd, .T. )
+      kalk_set_vars_marza_maloprodaja_80_81_41_42( cIdVd, .T. )
    ENDIF
 
    nMpcSaPDVBruto := _MpcSaPP
@@ -103,7 +102,7 @@ FUNCTION kalk_valid_mpc_bez_pdv_80_81_41_42( cIdVd, lNaprijed )
       nPopustMaloprodaja := 0
    ENDIF
 
-   kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
+   kalk_set_vars_marza_maloprodaja_80_81_41_42( cIdVd, lNaprijed )
    IF ( _Mpcsapp == 0 )
       // mpc_sa_pdv_bruto = mpc_bruto = (mpc_neto + popust) sa pdv
       _mpcsapp := Round( mpc_sa_pdv_by_tarifa( _idtarifa, nMpcBezPDVNeto + nPopustMaloprodaja ), 2 )
@@ -112,19 +111,10 @@ FUNCTION kalk_valid_mpc_bez_pdv_80_81_41_42( cIdVd, lNaprijed )
    RETURN .T.
 
 
-STATIC FUNCTION kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
+STATIC FUNCTION kalk_set_vars_marza_maloprodaja_80_81_41_42( cIdVd, lNaprijed )
 
-   // za svaki slucaj setujemo ovo ako slucajno u dokumentu nije ispranvo
-   IF cIdVD $ "11#12#13"
-      // inace je _fcj kod ovih dokumenata  = nabavnoj cijeni
-      // _nc u ovim dokumentima moze biti uvecana za troskove prevoza
-      _VPC := _FCJ
-   ENDIF
-
-   IF cIdVD == "80"
-      _vpc := _nc
-      _fcj := _nc
-   ENDIF
+   _fcj := _nc
+   _vpc := _nc
 
    IF  ( _Marza2 == 0 ) .AND. !lNaprijed
       nKalkMarzaMP := _MPC - _VPC
@@ -143,12 +133,13 @@ STATIC FUNCTION kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
 
    ELSEIF ( _MPC == 0 ) .OR. lNaprijed
 
+altd()
       IF _TMarza2 == "%"
-         nKalkMarzaMP := _Marza2 / 100 * ( _VPC )
+         nKalkMarzaMP := _VPC * _Marza2 / 100
       ELSEIF _TMarza2 == "A"
          nKalkMarzaMP := _Marza2
       ELSEIF _TMarza2 == "U"
-         nKalkMarzaMP := _Marza2 / ( _Kolicina )
+         nKalkMarzaMP := _Marza2 / _Kolicina
       ENDIF
       _MPC := Round( nKalkMarzaMP + _VPC, 2 )
       _MpcSaPP := Round( mpc_sa_pdv_by_tarifa( _idtarifa, _mpc ), 2 )
@@ -172,7 +163,7 @@ FUNCTION kalk_valid_mpc_sa_pdv_41_42_81( cIdVd, lNaprijed, lShowGets )
       // mpc ce biti umanjena mpc sa pp - porez - rabat (ako postoji)
       _mpc := mpc_bez_pdv_by_tarifa( _idtarifa, _mpcsapp ) - _rabatv
       _marza2 := 0
-      kalk_set_vars_marza_maloprodaja( cIdVd, lNaprijed )
+      kalk_set_vars_marza_maloprodaja_80_81_41_42( cIdVd, lNaprijed )
       IF lShowGets
          ShowGets()
       ENDIF

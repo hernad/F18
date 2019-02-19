@@ -15,8 +15,13 @@ STATIC s_oPDF
 STATIC s_nRobaNazivSirina := 39
 
 MEMVAR nStr
-MEMVAR nPrevoz, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP, nCarDaz, nZavTr
 MEMVAR cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cPKonto // dDatFaktp
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 /*
    input cIdFirma, cIdVd, cBrDok
@@ -79,7 +84,7 @@ FUNCTION kalk_stampa_dok_41_42()
       Scatter()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       kalk_marza_realizacija_prodavnica_41_42()
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
 
       nPor1 := kalk_pripr->mpc * pdv_procenat_by_tarifa( kalk_pripr->idtarifa )
       print_nova_strana( 125, @nStr, 2 )

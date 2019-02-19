@@ -12,6 +12,12 @@
 #include "f18.ch"
 
 MEMVAR m
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 FUNCTION kalk_stampa_dok_pr()
 
@@ -22,7 +28,7 @@ FUNCTION kalk_stampa_dok_pr()
       RETURN leg_StKalkPR()
    ENDIF
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nStr := 0
    cIdPartner := IdPartner
@@ -50,7 +56,6 @@ FUNCTION kalk_stampa_dok_pr()
 
    bProizvod := {|| AllTrim( Str( Round( Val( field->rBr ) / 100, 0 ) ) ) }
 
-   PRIVATE cIdd := field->idpartner + field->brfaktp + field->idkonto + field->idkonto2
    DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND.  cBrDok == field->BrDok .AND. cIdVD == field->IdVD
 
       nTnabavna := nT1 := nT2 := nT3 := nT4 := nT5 := nT6 := nT7 := nT8 := nT9 := nTA := 0
@@ -63,8 +68,7 @@ FUNCTION kalk_stampa_dok_pr()
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD ;
             .AND. field->idpartner + field->brfaktp == cIdpartner + cBrFaktp
 
-
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+         kalk_set_vars_troskovi_marzavp_marzamp()
          select_o_roba( kalk_pripr->IdRoba )
          select_o_tarifa( kalk_pripr->IdTarifa )
 
@@ -92,11 +96,11 @@ FUNCTION kalk_stampa_dok_pr()
             nU1 := field->NC * ( field->GKolicina + field->GKolicin2 )
          //ENDIF
 
-         nU3 := nPrevoz * SKol
-         nU4 := nBankTr * SKol
-         nU5 := nSpedTr * SKol
-         nU6 := nCarDaz * SKol
-         nU7 := nZavTr * SKol
+         nU3 := nKalkPrevoz * SKol
+         nU4 := nKalkBankTr * SKol
+         nU5 := nKalkSpedTr * SKol
+         nU6 := nKalkCarDaz * SKol
+         nU7 := nKalkZavTr * SKol
          nU8 := field->NC * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
          nU9 := nKalkMarzaVP * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
          nUA := field->VPC * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
@@ -137,11 +141,11 @@ FUNCTION kalk_stampa_dok_pr()
 
          IF Val( rbr ) < 10
             @ PRow(), PCol() + 1 SAY field->fcj                   PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nPrevoz / field->FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nBankTr / field->FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nSpedTr / field->FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nCarDaz / field->FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nZavTr / field->FCJ2 * 100       PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkPrevoz / field->FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkBankTr / field->FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkSpedTr / field->FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkCarDaz / field->FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkZavTr / field->FCJ2 * 100       PICTURE PicProc
             @ PRow(), PCol() + 1 SAY field->NC                    PICTURE PicCDEM
 
             IF Round( field->nc, 4 ) != 0
@@ -157,11 +161,11 @@ FUNCTION kalk_stampa_dok_pr()
          IF Val( rbr ) < 10
             @ PRow() + 1, 11 SAY IdTarifa
             @ PRow(), nCol1    SAY Space( Len( PicCDEM ) )
-            @ PRow(), PCol() + 1 SAY nPrevoz              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nBankTr              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nSpedTr              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nZavTr               PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkPrevoz              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkBankTr              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkSpedTr              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkCarDaz              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkZavTr               PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY 0                    PICTURE pic_vrijednost()
             @ PRow(), PCol() + 1 SAY nKalkMarzaVP               PICTURE pic_vrijednost()
          ENDIF

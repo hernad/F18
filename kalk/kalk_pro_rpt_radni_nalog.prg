@@ -11,13 +11,18 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
+
 FUNCTION kalk_stampa_dok_rn()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
-
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nStr := 0
    cIdPartner := IdPartner
@@ -55,11 +60,10 @@ FUNCTION kalk_stampa_dok_rn()
       cIdpartner := kalk_pripr->idpartner
       DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD .AND. kalk_pripr->idpartner + kalk_pripr->brfaktp == cIdpartner + cBrfaktp
 
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+         kalk_set_vars_troskovi_marzavp_marzamp()
          select_o_roba( kalk_pripr->IdRoba )
          select_o_tarifa( kalk_pripr->IdTarifa )
          SELECT kalk_pripr
-
          IF PRow() > page_length()
             FF
             @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
@@ -79,11 +83,11 @@ FUNCTION kalk_stampa_dok_rn()
          // ENDIF
          nU1 := 0
 
-         nU3 := nPrevoz * SKol
-         nU4 := nBankTr * SKol
-         nU5 := nSpedTr * SKol
-         nU6 := nCarDaz * SKol
-         nU7 := nZavTr * SKol
+         nU3 := nKalkPrevoz * SKol
+         nU4 := nKalkBankTr * SKol
+         nU5 := nKalkSpedTr * SKol
+         nU6 := nKalkCarDaz * SKol
+         nU7 := nKalkZavTr * SKol
          nU8 := kalk_pripr->NC *    ( Kolicina - Gkolicina - GKolicin2 )
          nU9 := nKalkMarzaVP * ( Kolicina - Gkolicina - GKolicin2 )
          nUA := kalk_pripr->VPC   * ( Kolicina - Gkolicina - GKolicin2 )
@@ -129,11 +133,11 @@ FUNCTION kalk_stampa_dok_rn()
          nCol1 := PCol() + 1
          @ PRow(), PCol() + 1 SAY fcj                   PICTURE PicCDEM
          IF Val( rbr ) < 900
-            @ PRow(), PCol() + 1 SAY nPrevoz / FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nBankTr / FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nSpedTr / FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nCarDaz / FCJ2 * 100      PICTURE PicProc
-            @ PRow(), PCol() + 1 SAY nZavTr / FCJ2 * 100       PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkPrevoz / FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkBankTr / FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkSpedTr / FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkCarDaz / FCJ2 * 100      PICTURE PicProc
+            @ PRow(), PCol() + 1 SAY nKalkZavTr / FCJ2 * 100       PICTURE PicProc
             @ PRow(), PCol() + 1 SAY NC                    PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY nKalkMarzaVP / NC * 100         PICTURE PicProc
             @ PRow(), PCol() + 1 SAY VPC                   PICTURE PicCDEM
@@ -142,11 +146,11 @@ FUNCTION kalk_stampa_dok_rn()
          IF Val( rbr ) < 900
             @ PRow() + 1, 11 SAY IdTarifa
             @ PRow(), nCol1    SAY Space( Len( PicCDEM ) )
-            @ PRow(), PCol() + 1 SAY nPrevoz              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nBankTr              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nSpedTr              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE PicCDEM
-            @ PRow(), PCol() + 1 SAY nZavTr               PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkPrevoz              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkBankTr              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkSpedTr              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkCarDaz              PICTURE PicCDEM
+            @ PRow(), PCol() + 1 SAY nKalkZavTr               PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY 0                    PICTURE PicDEM
             @ PRow(), PCol() + 1 SAY nKalkMarzaVP               PICTURE PicDEM
          ENDIF

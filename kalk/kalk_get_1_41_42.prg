@@ -27,6 +27,7 @@ FUNCTION kalk_get_1_41_42()
    LOCAL nKolicinaPriZadnjojNabavci
    LOCAL nNabCjenaPriZadnjojNabavci
    LOCAL nNabCjSrednja
+   LOCAL nMpcBezPDVBruto
    LOCAL cPopustPrekoProcentaIliCijene := gPopustMaloprodajaPrekoProcentaIliCijene
 
    IF Empty( _pkonto )
@@ -106,23 +107,25 @@ FUNCTION kalk_get_1_41_42()
       @ box_x_koord() + 14, box_y_koord() + 2 SAY "NC  :" GET _fcj PICT picdem() ;
          VALID {|| lRet := kalk_valid_kolicina_prod( nKolicinaNaStanju ), _tprevoz := "A", _prevoz := 0, _nc := _fcj, lRet }
 
-      @ box_x_koord() + 15, box_y_koord() + 40 SAY "MP marza:" GET _TMarza2  VALID _TMarza2 $ "%AU" PICTURE "@!"
-      @ box_x_koord() + 15, Col() + 1 GET _Marza2 PICTURE  picdem()
+      @ box_x_koord() + 14, box_y_koord() + 35 SAY8 "MP marža:" GET _TMarza2  VALID _TMarza2 $ "%AU" PICTURE "@!"
+      @ box_x_koord() + 14, Col() + 1 GET _Marza2 PICTURE  picdem()
 
    ENDIF
 
-   @ box_x_koord() + 17, box_y_koord() + 2 SAY "MPC bez PDV   :"
-   @ box_x_koord() + 17, box_y_koord() + 50 GET _mpc PICT picdem() ;
+   @ box_x_koord() + 16, box_y_koord() + 2 SAY "MPC bez PDV (bruto) :"
+   @ box_x_koord() + 16, box_y_koord() + 50 GET nMpcBezPDVBruto PICT picdem() ;
+      WHEN { || nMpcBezPDVBruto := _mpc + _rabatv, .F. }
+
+   @ box_x_koord() + 17, box_y_koord() + 2 SAY "POPUST (C-CIJENA,P-%):" GET cPopustPrekoProcentaIliCijene VALID cPopustPrekoProcentaIliCijene $ "CP" PICT "@!"
+   @ box_x_koord() + 17, box_y_koord() + 50 GET _Rabatv PICT picdem() VALID kalk_42_rabat_procenat_to_cijena( @cPopustPrekoProcentaIliCijene, nMpcBezPDVBruto )
+
+   @ box_x_koord() + 18, box_y_koord() + 2 SAY "MPC bez PDV (neto)  :"
+   @ box_x_koord() + 18, box_y_koord() + 50 GET _mpc PICT picdem() ;
       WHEN kalk_when_mpc_bez_pdv_80_81_41_42( IdVd, .F. ) ;
       VALID kalk_valid_mpc_bez_pdv_80_81_41_42( _IdVd, .F. )
 
-   // PRIVATE cPopustPrekoProcentaIliCijene := gPopustMaloprodajaPrekoProcentaIliCijene
-
-   @ box_x_koord() + 18, box_y_koord() + 2 SAY "POPUST (C-CIJENA,P-%)" GET cPopustPrekoProcentaIliCijene VALID cPopustPrekoProcentaIliCijene $ "CP" PICT "@!"
-   @ box_x_koord() + 18, box_y_koord() + 50 GET _Rabatv PICT picdem() VALID kalk_42_rabat_procenat_to_cijena( @cPopustPrekoProcentaIliCijene )
-
    kalk_say_pdv_a_porezi_var( 19 )
-   @ box_x_koord() + 20, box_y_koord() + 2 SAY "MPC SA PDV    :"
+   @ box_x_koord() + 20, box_y_koord() + 2 SAY "MPC SA PDV (bruto) :"
    @ box_x_koord() + 20, box_y_koord() + 50 GET _mpcsapp PICT picdem() VALID kalk_valid_mpc_sa_pdv_41_42_81( _IdVd, .F., .T. )
 
    READ
@@ -134,10 +137,10 @@ FUNCTION kalk_get_1_41_42()
    RETURN LastKey()
 
 
-STATIC FUNCTION kalk_42_rabat_procenat_to_cijena( cPopustPrekoProcentaIliCijene )
+STATIC FUNCTION kalk_42_rabat_procenat_to_cijena( cPopustPrekoProcentaIliCijene, nMpcBezPDVBruto )
 
    IF cPopustPrekoProcentaIliCijene == "P"
-      _rabatv := _mpc * _rabatv / 100
+      _rabatv := nMpcBezPDVBruto * _rabatv / 100
       cPopustPrekoProcentaIliCijene := "C"
       ShowGets()
    ENDIF

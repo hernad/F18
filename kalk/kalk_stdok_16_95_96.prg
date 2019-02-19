@@ -13,6 +13,13 @@
 
 MEMVAR m
 
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
+
 FUNCTION kalk_stampa_dok_16_95_96()
 
    LOCAL cKto1
@@ -26,7 +33,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    LOCAL lVPC := .F.
    LOCAL nVPC, nUVPV, nTVPV, nTotVPV
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP
 
    nStr := 0
    cIdPartner := field->IdPartner
@@ -110,7 +117,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
          select_o_roba( kalk_pripr->idroba )
          select_o_tarifa( kalk_pripr->idtarifa )
          SELECT kalk_pripr
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+         kalk_set_vars_troskovi_marzavp_marzamp()
          print_nova_strana( 125, @nStr, 5 )
 
          // sKol := field->kolicina

@@ -12,6 +12,12 @@
 #include "f18.ch"
 
 MEMVAR cIdFirma, cIdPartner, cBrFaktP, cIdVd, cBrDok, cPKonto, cPKonto2 // dDatFaktP
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 STATIC s_oPDF
 STATIC s_cLinija
@@ -25,7 +31,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    IF lStampatiBezNabavneCijene == NIL
       lStampatiBezNabavneCijene := .F.
@@ -85,7 +91,6 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
       check_nova_strana( bZagl, s_oPDF )
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
          IF ( nProlaza == 2 .AND. nProlaz == 1 .AND. Left( kalk_pripr->idkonto2, 3 ) == "XXX" )
             // prvi prolaz ignorisati idkonto==XXX
             SKIP
@@ -96,7 +101,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
             SKIP
             LOOP
          ENDIF
-         kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+         kalk_set_vars_troskovi_marzavp_marzamp()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
          nTot8 += ( nU8 := NC * kalk_pripr->Kolicina )
          nTot9 += ( nU9 := nKalkMarzaMP * kalk_pripr->Kolicina )

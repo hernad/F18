@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 MEMVAR m
-MEMVAR nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+MEMVAR nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 MEMVAR nStr, cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2  // dDatFaktP
 
 FIELD IdPartner, BrFaktP, DatFaktP, IdKonto, IdKonto2, Kolicina, DatDok
@@ -25,7 +25,7 @@ FUNCTION kalk_stampa_dok_14()
    LOCAL nPom := 0
    LOCAL oPDF, xPrintOpt, bZagl
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    m := "--- ---------- ---------- ----------  ---------- ---------- ---------- ----------- --------- ----------"
 
@@ -53,24 +53,14 @@ FUNCTION kalk_stampa_dok_14()
 
    fNafta := .F.
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-/*
-    if idpartner+brfaktp+idkonto+idkonto2<>cidd
-     set device to screen
-      Beep(2)
-      Msg("Unutar kalkulacije se pojavilo vise dokumenata !",6)
-      set device to printer
-    endif
-*/
 
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
-
+      kalk_set_vars_troskovi_marzavp_marzamp()
       check_nova_strana( bZagl, oPdf )
 
       IF kalk_pripr->idvd = "15"
@@ -80,8 +70,6 @@ FUNCTION kalk_stampa_dok_14()
       ENDIF
 
       nVPCIzbij := 0
-
-
       nTot4 +=  ( nU4 := Round( NC * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr )     )  // nv
 
       IF gVarVP == "1"
@@ -114,7 +102,6 @@ FUNCTION kalk_stampa_dok_14()
 
       nTot8 +=  ( nU8 := Round( ( VPC - nVPCIzbij ) * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )
       nTot9 +=  ( nU9 := Round( RABATV / 100 * VPC * Kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )
-
       nTota +=  ( nUa := Round( nU8 - nU9, gZaokr ) )     // vpv sa ukalk rabatom
 
       IF idvd == "15" // kod 15-ke nema poreza na promet
@@ -124,7 +111,6 @@ FUNCTION kalk_stampa_dok_14()
       ENDIF
       nTotb +=  nUb
       nTotc +=  ( nUc := nUa + nUb )   // vpv+ppp
-
 
       IF koncij->naz = "P"
          nTotd +=  ( nUd := Round( fcj * kolicina * iif( idvd = "15", - 1, 1 ), gZaokr ) )  // trpa se planska cijena
@@ -163,7 +149,6 @@ FUNCTION kalk_stampa_dok_14()
       ELSE
          @ PRow(), PCol() + 1 SAY MPC        PICTURE PicProc
       ENDIF
-
 
       @ PRow(), PCol() + 1 SAY VPC * ( 1 - RabatV / 100 ) * ( 1 + mpc / 100 ) PICTURE PicCDEM
 

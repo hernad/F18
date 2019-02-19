@@ -19,6 +19,12 @@ MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
 MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
 MEMVAR cIdPar
 MEMVAR cIdFirma, cIdVd, cBrDok, cPKonto
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 FUNCTION kalk_stampa_dok_19()
 
@@ -30,7 +36,7 @@ FUNCTION kalk_stampa_dok_19()
    LOCAL nMpcSaPDVNovaCijena, nMpcSaPDVStaraCijena, nMpcBezPDVNovaCijena, nMpcBezPDVStaraCijena
    LOCAL nPDVNovaCijena, nPDVStaraCijena
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    cIdFirma := kalk_pripr->IdFirma
    cIdVd := kalk_pripr->Idvd
@@ -47,7 +53,6 @@ FUNCTION kalk_stampa_dok_19()
       RETURN .F.
    ENDIF
 
-   @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
    select_o_konto( cPKonto )
    ?  _u( "KONTO zadužuje :" ), cPKonto, "-", konto->naz
 
@@ -62,7 +67,7 @@ FUNCTION kalk_stampa_dok_19()
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVd == kalk_pripr->IdVd
 
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
 
       // nova cijena
       nMpcSaPDVNovaCijena := kalk_pripr->mpcSaPP + kalk_pripr->fcj
@@ -72,7 +77,6 @@ FUNCTION kalk_stampa_dok_19()
       nMpcSaPDVStaraCijena := field->fcj
       nMpcBezPDVStaraCijena := mpc_bez_pdv_by_tarifa( kalk_pripr->idtarifa, nMpcSaPDVStaraCijena )
 
-      print_nova_strana( 125, @nStr, 2 )
       nTot3 +=  ( nU3 := MPC * Kolicina )
       nPDVNovaCijena := nMpcSaPDVNovaCijena - nMpcBezPDVNovaCijena
       nPDVStaraCijena := nMpcSaPDVStaraCijena - nMpcBezPDVStaraCijena
@@ -123,7 +127,6 @@ FUNCTION kalk_stampa_dok_19()
    ? s_cLinija
    ?
    kalk_pripr_rekap_tarife( {|| check_nova_strana( bZagl, s_oPDF, .F., 5 ) } )
-
    kalk_clanovi_komisije()
 
    f18_end_print( NIL, xPrintOpt )
@@ -154,7 +157,7 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    LOCAL GetList := {}
    LOCAL cNaslov
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    cPKonto := kalk_pripr->pkonto
 
@@ -181,7 +184,6 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
 
    ?
    Preduzece()
-
    ? PadL( "Prodavnica __________________________", 74 )
    ?
    ?
@@ -196,12 +198,10 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    cBrDok := kalk_pripr->brdok
 
    nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
-   // ENDIF
 
    s_cLinija := "--- --------------------------------------------------- ---------- ---------- ---------- ------------- -------------"
 
    bZagl := {|| zagl_obrazac() }
-
    Eval( bZagl )
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND. cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
@@ -226,7 +226,6 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    ENDDO
 
    check_nova_strana( bZagl, s_oPDF, .F., 5 )
-
    ? s_cLinija
    ? " UKUPNO "
    ? s_cLinija

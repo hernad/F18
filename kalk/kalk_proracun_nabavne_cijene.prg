@@ -16,7 +16,7 @@ MEMVAR gAutoCjen
 MEMVAR _idfirma, _datdok, _mkonto, _idroba, _Kolicina, _nc, _fcj, _fcj2, _idvd, _error
 MEMVAR _marza, _vpc, _tmarza, _rabatv
 MEMVAR _prevoz, _tprevoz, _cardaz, _tcardaz, _zavtr, _tzavtr, _banktr, _tbanktr, _spedtr, _TSpedTr
-MEMVAR nPrevoz, nCarDaz, nBanktr, nSpedTr, nZavTr
+MEMVAR nKalkPrevoz, nKalkCarDaz, nKalkBankTr, nKalkSpedTr, nKalkZavTr
 MEMVAR cFieldName
 MEMVAR nKalkMarzaVP
 MEMVAR GetList
@@ -294,58 +294,58 @@ FUNCTION kalk_when_valid_nc_ulaz()
    nStvarnaKolicina := _Kolicina
 
    IF _TPrevoz == "%"
-      nPrevoz := _Prevoz / 100 * _FCj2
+      nKalkPrevoz := _Prevoz / 100 * _FCj2
    ELSEIF _TPrevoz == "A"
-      nPrevoz := _Prevoz
+      nKalkPrevoz := _Prevoz
    ELSEIF _TPrevoz == "U"
-      nPrevoz := _Prevoz / nStvarnaKolicina
+      nKalkPrevoz := _Prevoz / nStvarnaKolicina
    ELSEIF _TPrevoz == "R"
-      nPrevoz := 0
+      nKalkPrevoz := 0
    ELSE
-      nPrevoz := 0
+      nKalkPrevoz := 0
    ENDIF
    IF _TCarDaz == "%"
-      nCarDaz := _CarDaz / 100 * _FCj2
+      nKalkCarDaz := _CarDaz / 100 * _FCj2
    ELSEIF _TCarDaZ == "A"
-      nCarDaz := _CarDaz
+      nKalkCarDaz := _CarDaz
    ELSEIF _TCArDaz == "U"
-      nCarDaz := _CarDaz / nStvarnaKolicina
+      nKalkCarDaz := _CarDaz / nStvarnaKolicina
    ELSEIF _TCArDaz == "R"
-      nCarDaz := 0
+      nKalkCarDaz := 0
    ELSE
-      nCardaz := 0
+      nKalkCarDaz := 0
    ENDIF
    IF _TZavTr == "%"
-      nZavTr := _ZavTr / 100 * _FCj2
+      nKalkZavTr := _ZavTr / 100 * _FCj2
    ELSEIF _TZavTr == "A"
-      nZavTr := _ZavTr
+      nKalkZavTr := _ZavTr
    ELSEIF _TZavTr == "U"
-      nZavTr := _ZavTr / nStvarnaKolicina
+      nKalkZavTr := _ZavTr / nStvarnaKolicina
    ELSEIF _TZavTr == "R"
-      nZavTr := 0
+      nKalkZavTr := 0
    ELSE
-      nZavTr := 0
+      nKalkZavTr := 0
    ENDIF
    IF _TBankTr == "%"
-      nBankTr := _BankTr / 100 * _FCj2
+      nKalkBankTr := _BankTr / 100 * _FCj2
    ELSEIF _TBankTr == "A"
-      nBankTr := _BankTr
+      nKalkBankTr := _BankTr
    ELSEIF _TBankTr == "U"
-      nBankTr := _BankTr / nStvarnaKolicina
+      nKalkBankTr := _BankTr / nStvarnaKolicina
    ELSE
-      nBankTr := 0
+      nKalkBankTr := 0
    ENDIF
    IF _TSpedTr == "%"
-      nSpedTr := _SpedTr / 100 * _FCj2
+      nKalkSpedTr := _SpedTr / 100 * _FCj2
    ELSEIF _TSpedTr == "A"
-      nSpedTr := _SpedTr
+      nKalkSpedTr := _SpedTr
    ELSEIF _TSpedTr == "U"
-      nSpedTr := _SpedTr / nStvarnaKolicina
+      nKalkSpedTr := _SpedTr / nStvarnaKolicina
    ELSE
-      nSpedTr := 0
+      nKalkSpedTr := 0
    ENDIF
 
-   _NC := _FCj2 + nPrevoz + nCarDaz + nBanktr + nSpedTr + nZavTr
+   _NC := _FCj2 + nKalkPrevoz + nKalkCarDaz + nKalkBankTr + nKalkSpedTr + nKalkZavTr
    IF koncij->naz == "N1" // sirovine
       _VPC := _NC
    ENDIF

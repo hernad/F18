@@ -11,21 +11,25 @@
 
 #include "f18.ch"
 
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 FUNCTION kalk_stampa_dok_18()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0, nCR := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
-
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nStr := 1
 
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
-
-
-   cIdKonto := IdKonto; cIdKonto2 := IdKonto2
+   cIdKonto := IdKonto
+   cIdKonto2 := IdKonto2
 
    P_10CPI
    B_ON
@@ -51,24 +55,13 @@ FUNCTION kalk_stampa_dok_18()
    nTotA := nTotB := nTotC := 0
 
 
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
-
-/*
- if idpartner+brfaktp+idkonto+idkonto2<>cidd
-  set device to screen
-  Beep(2)
-  Msg("Unutar kalkulacije se pojavilo vise dokumenata !",6)
-  set device to printer
- endif
-*/
-
 
       select_o_roba(  kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
 
       IF PRow() > page_length()
          FF

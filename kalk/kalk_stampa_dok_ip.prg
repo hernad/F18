@@ -17,7 +17,7 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    LOCAL nCol1 := nCol2 := 0
    LOCAL nPom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nStr := 0
    cIdPartner := IdPartner
@@ -80,7 +80,7 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    //PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
       select_o_roba(  kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
 
@@ -125,7 +125,6 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
       ENDIF
 
       @ PRow(), PCol() + 1 SAY field->mpcsapp PICT PicCDEM
-
       nTotb += field->fcj
       nTotc += field->kolicina * field->mpcsapp
       nTot4 += ( nU4 := ( field->MPCSAPP * field->Kolicina ) - field->fcj )
@@ -218,9 +217,7 @@ FUNCTION stampa_obrasca_inventure_sank_lista()
 
    LOCAL nCol1 := nCol2 := 0, npom := 0
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
-
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nStr := 0
    cIdPartner := IdPartner
@@ -258,7 +255,7 @@ FUNCTION stampa_obrasca_inventure_sank_lista()
          Msg( "Unutar kalkulacije se pojavilo vise dokumenata !", 6 )
       ENDIF
 */
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+      kalk_set_vars_troskovi_marzavp_marzamp()
 
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )

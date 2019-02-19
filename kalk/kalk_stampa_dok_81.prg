@@ -12,14 +12,19 @@
 #include "f18.ch"
 
 MEMVAR m
+MEMVAR nKalkPrevoz
+MEMVAR nKalkBankTr
+MEMVAR nKalkSpedTr
+MEMVAR nKalkCarDaz
+MEMVAR nKalkZavTr
+MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 FUNCTION kalk_stampa_dok_81()
 
    LOCAL nCol1 := nCol2 := 0, nPom := 0
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    nKalkMarzaVP := nKalkMarzaMP := 0
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
 
    nStr := 0
    cIdPartner := IdPartner
@@ -55,9 +60,8 @@ FUNCTION kalk_stampa_dok_81()
    nPDV := 0
 
    SELECT kalk_pripr
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
       SELECT kalk_pripr
@@ -68,15 +72,16 @@ FUNCTION kalk_stampa_dok_81()
          @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
+      kalk_set_vars_troskovi_marzavp_marzamp()
       //SKol := Kolicina
       nTot +=  ( nU := FCj * kalk_pripr->Kolicina )
       nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
       nTot2 += ( nU2 := -Rabat / 100 * FCJ * Kolicina )
-      nTot3 += ( nU3 := nPrevoz * kalk_pripr->kolicina )
-      nTot4 += ( nU4 := nBankTr * kalk_pripr->kolicina )
-      nTot5 += ( nU5 := nSpedTr * kalk_pripr->kolicina )
-      nTot6 += ( nU6 := nCarDaz * kalk_pripr->kolicina )
-      nTot7 += ( nU7 := nZavTr * kalk_pripr->kolicina )
+      nTot3 += ( nU3 := nKalkPrevoz * kalk_pripr->kolicina )
+      nTot4 += ( nU4 := nKalkBankTr * kalk_pripr->kolicina )
+      nTot5 += ( nU5 := nKalkSpedTr * kalk_pripr->kolicina )
+      nTot6 += ( nU6 := nKalkCarDaz * kalk_pripr->kolicina )
+      nTot7 += ( nU7 := nKalkZavTr * kalk_pripr->kolicina )
       nTot8 += ( nU8 := kalk_pripr->NC * kalk_pripr->kolicina )
       nTot9 += ( nU9 := nKalkMarzaMP * kalk_pripr->kolicina )
       nTotA += ( nUA := kalk_pripr->MPC   * kalk_pripr->kolicina )
@@ -94,7 +99,7 @@ FUNCTION kalk_stampa_dok_81()
       @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ  PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY - kalk_pripr->Rabat PICTURE picproc()
       @ PRow(), PCol() + 1 SAY kalk_pripr->fcj * ( 1 - kalk_pripr->Rabat / 100 )     PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY ( nPrevoz + nBankTr + nSpedtr + nCarDaz + nZavTr ) / kalk_pripr->FCJ2 * 100  PICTURE picproc()
+      @ PRow(), PCol() + 1 SAY ( nKalkPrevoz + nKalkBankTr + nKalkSpedTr + nKalkCarDaz + nKalkZavTr ) / kalk_pripr->FCJ2 * 100  PICTURE picproc()
       @ PRow(), PCol() + 1 SAY kalk_pripr->NC PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY nKalkMarzaMP / kalk_pripr->NC * 100 PICTURE picproc()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPC PICTURE piccdem()
@@ -106,7 +111,7 @@ FUNCTION kalk_stampa_dok_81()
       @ PRow(), nCol1    SAY kalk_pripr->Kolicina PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY -kalk_pripr->Rabat / 100 * kalk_pripr->FCJ PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY Space( Len( piccdem() ) )
-      @ PRow(), PCol() + 1 SAY nPrevoz + nBankTr + nSpedtr + nCarDaz + nZavTr PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY nKalkPrevoz + nKalkBankTr + nKalkSpedTr + nKalkCarDaz + nKalkZavTr PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY Space( Len( picdem() ) )
       @ PRow(), PCol() + 1 SAY nKalkMarzaMP PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY Space( Len( picdem() ) )
@@ -170,7 +175,6 @@ FUNCTION kalk_stampa_dok_81()
    nTot1 := nTot2 := nTot2b := nTot3 := nTot4 := 0
    nTot5 := nTot6 := nTot7 := 0
    kalk_pripr_rekap_tarife()
-
    ? "RUC:";  @ PRow(), PCol() + 1 SAY nTot6 PICT picdem()
    ? m
 
@@ -182,10 +186,10 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
    LOCAL nCol1 := nCol2 := 0, nPom := 0
    LOCAL nPDV
 
-   PRIVATE nPrevoz, nCarDaz, nZavTr, nBankTr, nSpedTr, nKalkMarzaVP, nKalkMarzaMP
+   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
    nKalkMarzaVP := nKalkMarzaMP := 0
 
-   // iznosi troskova i marzi koji se izracunavaju u kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
+
    nStr := 0
    cIdPartner := IdPartner
    cBrFaktP := BrFaktP
@@ -232,12 +236,10 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
    SELECT kalk_pripr
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-      kalk_set_troskovi_priv_vars_ntrosakx_nmarzax()
       select_o_roba( kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
-
       SELECT kalk_pripr
-
+      kalk_set_vars_troskovi_marzavp_marzamp()
       nPDV := field->mpc * pdv_procenat_by_tarifa(kalk_pripr->idtarifa)
       IF PRow() > page_length() - 4
          FF
@@ -247,11 +249,11 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
       nTot +=  ( nU := kalk_pripr->FCj * kalk_pripr->kolicina )
       nTot1 += ( nU1 := NC * ( GKolicina + GKolicin2 ) )
       nTot2 += ( nU2 := -kalk_pripr->Rabat / 100 * kalk_pripr->FCJ * kalk_pripr->kolicin )
-      nTot3 += ( nU3 := nPrevoz * kalk_pripr->kolicina )
-      nTot4 += ( nU4 := nBankTr * kalk_pripr->kolicina )
-      nTot5 += ( nU5 := nSpedTr * kalk_pripr->kolicina )
-      nTot6 += ( nU6 := nCarDaz * kalk_pripr->kolicina )
-      nTot7 += ( nU7 := nZavTr * kalk_pripr->kolicina )
+      nTot3 += ( nU3 := nKalkPrevoz * kalk_pripr->kolicina )
+      nTot4 += ( nU4 := nKalkBankTr * kalk_pripr->kolicina )
+      nTot5 += ( nU5 := nKalkSpedTr * kalk_pripr->kolicina )
+      nTot6 += ( nU6 := nKalkCarDaz * kalk_pripr->kolicina )
+      nTot7 += ( nU7 := nKalkZavTr * kalk_pripr->kolicina )
       nTot8 += ( nU8 := kalk_pripr->NC * kalk_pripr->kolicina )
       nTot9 += ( nU9 := nKalkMarzaMP * kalk_pripr->kolicina )
       nTotA += ( nUA := MPC * kalk_pripr->kolicina )
@@ -273,11 +275,11 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                   PICTURE piccdem()
          @ PRow(), PCol() + 1 SAY kalk_pripr->GKolicina             PICTURE PicKol
          @ PRow(), PCol() + 1 SAY -kalk_pripr->Rabat                PICTURE picproc()
-         @ PRow(), PCol() + 1 SAY nPrevoz / kalk_pripr->FCJ2 * 100      PICTURE picproc()
-         @ PRow(), PCol() + 1 SAY nBankTr / kalk_pripr->FCJ2 * 100      PICTURE picproc()
-         @ PRow(), PCol() + 1 SAY nSpedTr / kalk_pripr->FCJ2 * 100      PICTURE picproc()
-         @ PRow(), PCol() + 1 SAY nCarDaz / kalk_pripr->FCJ2 * 100      PICTURE picproc()
-         @ PRow(), PCol() + 1 SAY nZavTr / kalk_pripr->FCJ2 * 100       PICTURE picproc()
+         @ PRow(), PCol() + 1 SAY nKalkPrevoz / kalk_pripr->FCJ2 * 100      PICTURE picproc()
+         @ PRow(), PCol() + 1 SAY nKalkBankTr / kalk_pripr->FCJ2 * 100      PICTURE picproc()
+         @ PRow(), PCol() + 1 SAY nKalkSpedTr / kalk_pripr->FCJ2 * 100      PICTURE picproc()
+         @ PRow(), PCol() + 1 SAY nKalkCarDaz / kalk_pripr->FCJ2 * 100      PICTURE picproc()
+         @ PRow(), PCol() + 1 SAY nKalkZavTr / kalk_pripr->FCJ2 * 100       PICTURE picproc()
          @ PRow(), PCol() + 1 SAY kalk_pripr->NC                    PICTURE piccdem()
          @ PRow(), PCol() + 1 SAY nKalkMarzaMP / kalk_pripr->NC * 100        PICTURE picproc()
 
@@ -294,11 +296,11 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
          @ PRow(), nCol1    SAY kalk_pripr->Kolicina             PICTURE piccdem()
          @ PRow(), PCol() + 1 SAY GKolicin2            PICTURE PicKol
          @ PRow(), PCol() + 1 SAY -kalk_pripr->Rabat / 100 * kalk_pripr->FCJ       PICTURE piccdem()
-         @ PRow(), PCol() + 1 SAY nPrevoz              PICTURE piccdem()
-         @ PRow(), PCol() + 1 SAY nBankTr              PICTURE piccdem()
-         @ PRow(), PCol() + 1 SAY nSpedTr              PICTURE piccdem()
-         @ PRow(), PCol() + 1 SAY nCarDaz              PICTURE piccdem()
-         @ PRow(), PCol() + 1 SAY nZavTr               PICTURE piccdem()
+         @ PRow(), PCol() + 1 SAY nKalkPrevoz              PICTURE piccdem()
+         @ PRow(), PCol() + 1 SAY nKalkBankTr              PICTURE piccdem()
+         @ PRow(), PCol() + 1 SAY nKalkSpedTr              PICTURE piccdem()
+         @ PRow(), PCol() + 1 SAY nKalkCarDaz              PICTURE piccdem()
+         @ PRow(), PCol() + 1 SAY nKalkZavTr               PICTURE piccdem()
          @ PRow(), PCol() + 1 SAY Space( Len( picdem() ) )
          @ PRow(), PCol() + 1 SAY nKalkMarzaMP              PICTURE piccdem()
          @ PRow(), PCol() + 1 SAY Space( Len( piccdem() ) )
