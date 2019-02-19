@@ -20,7 +20,7 @@ MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 FUNCTION kalkulacija_cijena( azurirana )
 
-   LOCAL _vars
+   LOCAL hParams
    LOCAL _template
    LOCAL _tip := "V"
    LOCAL _predisp := .F.
@@ -36,32 +36,32 @@ FUNCTION kalkulacija_cijena( azurirana )
 
    o_tables( azurirana )
 
-   IF azurirana .AND. !get_vars( @_vars )
+   IF azurirana .AND. !get_vars( @hParams )
       RETURN .F.
    ENDIF
 
    IF !azurirana
-      _vars := hb_Hash()
-      _vars[ "id_firma" ] := kalk_pripr->idfirma
-      _vars[ "tip_dok" ] := kalk_pripr->idvd
-      _vars[ "br_dok" ] := kalk_pripr->brdok
+      hParams := hb_Hash()
+      hParams[ "id_firma" ] := kalk_pripr->idfirma
+      hParams[ "tip_dok" ] := kalk_pripr->idvd
+      hParams[ "br_dok" ] := kalk_pripr->brdok
    ENDIF
 
-   IF !( _vars[ "tip_dok" ] $ "10#16#95#96#81#80" )
+   IF !( hParams[ "tip_dok" ] $ "10#16#95#96#81#80" )
       RETURN .F.
    ENDIF
 
-   IF _vars[ "tip_dok" ] $ "10#16#95#96"
+   IF hParams[ "tip_dok" ] $ "10#16#95#96"
 
       _tip := "V"
       _template := "kalk_vp.odt"
 
-   ELSEIF _vars[ "tip_dok" ] $ "80#81"
+   ELSEIF hParams[ "tip_dok" ] $ "80#81"
 
       _tip := "M"
       _template := "kalk_mp.odt"
 
-      IF mp_predispozicija( _vars[ "id_firma" ], _vars[ "tip_dok" ], _vars[ "br_dok" ] )
+      IF mp_predispozicija( hParams[ "id_firma" ], hParams[ "tip_dok" ], hParams[ "br_dok" ] )
          _template := "kalk_mp_pred.odt"
          _predisp := .T.
       ENDIF
@@ -73,11 +73,11 @@ FUNCTION kalkulacija_cijena( azurirana )
       RETURN .F.
    ENDIF
 
-   IF !seek_dokument( _vars, azurirana )
+   IF !seek_dokument( hParams, azurirana )
       RETURN .F.
    ENDIF
 
-   IF !Empty ( cOk := kalkulacija_ima_sve_cijene( _vars[ "id_firma" ], _vars[ "tip_dok" ], _vars[ "br_dok" ] ) )
+   IF !Empty ( cOk := kalkulacija_ima_sve_cijene( hParams[ "id_firma" ], hParams[ "tip_dok" ], hParams[ "br_dok" ] ) )
       MsgBeep( "Unutar kalkulacije nedostaju pojedine cijene bitne za obračun!##Stavke: " + cOk )
       // RETURN .F.
    ENDIF
@@ -85,20 +85,17 @@ FUNCTION kalkulacija_cijena( azurirana )
    DO CASE
 
    CASE _predisp == .T.
-
-      IF gen_kalk_predispozicija_xml( _vars ) > 0
+      IF gen_kalk_predispozicija_xml( hParams ) > 0
          st_kalkulacija_cijena_odt( _template )
       ENDIF
 
    CASE _tip == "M"
-
-      IF gen_kalk_mp_xml( _vars ) > 0
+      IF gen_kalk_mp_xml( hParams ) > 0
          st_kalkulacija_cijena_odt( _template )
       ENDIF
 
    CASE _tip == "V"
-
-      IF gen_kalk_vp_xml( _vars ) > 0
+      IF gen_kalk_vp_xml( hParams ) > 0
          st_kalkulacija_cijena_odt( _template )
       ENDIF
 

@@ -343,7 +343,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT barkod, naz INTO barkodRoba, robaNaz
           from fmk.roba where id=NEW.idroba;
 ELSE
-   IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) AND ( NEW.idvd <> '80' ) THEN
+   IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '80' ) THEN
       RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos

@@ -65,7 +65,7 @@ FUNCTION kalk_get1_80()
    kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + nX, box_y_koord() + 2 )
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() - 20 ) SAY "Tarifa:" GET _IdTarifa  VALID P_Tarifa( @_IdTarifa )
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _Kolicina PICT pickol() VALID _Kolicina <> 0
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _Kolicina PICT pickol()
    READ
    ESC_RETURN K_ESC
 

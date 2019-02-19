@@ -49,7 +49,6 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    ImeKol := {}
 
    PushWA()
-
    IF cId != NIL .AND. !Empty( cId )
       select_o_roba( "XXXXXXX" ) // cId je zadan, otvoriti samo dummy tabelu sa 0 zapisa
    ELSE
@@ -63,7 +62,6 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    AAdd( ImeKol, { PadC( "PLU kod", 8 ),  {|| PadR( fisc_plu, 10 ) }, "fisc_plu", {|| gen_plu( @wfisc_plu ), .F. }, {|| .T. } } )
    AAdd( ImeKol, { PadC( "S.dobav.", 13 ), {|| PadR( sifraDob, 13 ) }, "sifradob"   } )
 
-
    IF programski_modul() != "POS"
       AAdd( ImeKol, { PadC( "VPC", 10 ), {|| Transform( field->VPC, "999999.999" ) }, "vpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
       AAdd( ImeKol, { PadC( "VPC2", 10 ), {|| Transform( field->VPC2, "999999.999" ) }, "vpc2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()   } )
@@ -71,16 +69,16 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
       AAdd( ImeKol, { PadC( "MPC1", 10 ), {|| Transform( field->MPC, "999999.999" ) }, "mpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
 
       FOR nI := 2 TO 4
-
          cPom := "mpc" + AllTrim( Str( nI ) )
          cPom2 := '{|| transform(' + cPom + ',"999999.999")}'
          cPrikazi := fetch_metric( "roba_prikaz_" + cPom, NIL, "D" )
          IF cPrikazi == "D"
             AAdd( ImeKol, { PadC( Upper( cPom ), 10 ), &( cPom2 ), cPom, NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem() } )
          ENDIF
-
       NEXT
       AAdd( ImeKol, { PadC( "NC", 10 ), {|| Transform( field->NC, kalk_pic_cijena_bilo_gpiccdem() ) }, "NC", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+   ELSE
+      AAdd( ImeKol, { PadC( "MPC", 10 ), {|| Transform( field->MPC, "999999.999" ) }, "mpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
    ENDIF
 
    AAdd( ImeKol, { "Tarifa", {|| field->IdTarifa }, "IdTarifa", {|| .T. }, {|| P_Tarifa( @wIdTarifa ), roba_opis_edit()  }   } )
@@ -88,7 +86,6 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    // " " - roba, "G" - roba gorivo, "U" - usluge, "P" - proizvod, "S" - sirovina
    AAdd( ImeKol, { "Tip", {|| " " + field->Tip + " " }, "Tip", {|| .T. }, {|| wTip $ " UPSG" }, NIL, NIL, NIL, NIL, 27 } )
    AAdd ( ImeKol, { PadC( "BARKOD", 14 ), {|| field->BARKOD }, "BarKod", {|| .T. }, {|| roba_valid_barkod( Ch, @wId, @wBarkod ) }  } )
-
    AAdd ( ImeKol, { PadC( "MINK", 10 ), {|| Transform( field->MINK, "999999.99" ) }, "MINK"   } )
 
    IF programski_modul() != "POS"
@@ -121,7 +118,7 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    NEXT
 
    SELECT ROBA
-   if programski_modul() != "POS"
+   IF programski_modul() != "POS"
       sifk_fill_ImeKol( "ROBA", @ImeKol, @Kol )
    ENDIF
 
@@ -165,33 +162,31 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
 
 
 
-FUNCTION roba_opis_edit( view )
+FUNCTION roba_opis_edit( lView )
 
    LOCAL _op := "N"
    LOCAL GetList := {}
 
-   IF view == NIL
-      view := .F.
+   IF programski_modul() == "POS"
+      RETURN .T.
    ENDIF
 
-   IF !view
+   IF lView == NIL
+      lView := .F.
+   ENDIF
 
-      @ box_x_koord() + 7, box_y_koord() + 43 SAY "Definisati opis artikla (D/N) ?" GET _op PICT "@!" VALID _op $ "DN"
+   IF !lView
+      @ box_x_koord() + 7, box_y_koord() + 43 SAY "Unijeti opis artikla (D/N) ?" GET _op PICT "@!" VALID _op $ "DN"
       READ
-
       IF _op == "N"
          RETURN .T.
       ENDIF
-
    ENDIF
 
    Box(, 14, 55 )
-
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "OPIS ARTIKLA # " + if( !view, "<c-W> za kraj unosa...", "" )
-
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "OPIS ARTIKLA # " + if( !lView, "<c-W> za kraj unosa...", "" )
    // otvori memo edit
-   wopis := MemoEdit( field->opis, box_x_koord() + 3, box_y_koord() + 1, box_x_koord() + 14, box_y_koord() + 55 )
-
+   wOpis := MemoEdit( field->opis, box_x_koord() + 3, box_y_koord() + 1, box_x_koord() + 14, box_y_koord() + 55 )
    BoxC()
 
    RETURN .T.

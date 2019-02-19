@@ -505,7 +505,7 @@ FUNCTION use_sql_kalk( hParams )
    cSql += coalesce_num_num_zarez( "gkolicin2", 12, 3  )
 
    cSql += coalesce_num_num_zarez( "fcj", 18, 8 )
-   //cSql += coalesce_num_num_zarez( "fcj2", 18, 8 )
+   cSql += coalesce_num_num_zarez( "fcj2", 18, 8 )
    cSql += coalesce_num_num_zarez( "nc", 18, 8 )
    cSql += coalesce_num_num_zarez( "marza", 18, 8 )
    cSql += coalesce_num_num_zarez( "vpc", 18, 8 )
