@@ -24,6 +24,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    LOCAL nMaxCols := f18_max_cols()
    LOCAL nMaxRows := f18_max_rows()
    LOCAL i
+   LOCAL nCijenaSaPopustom, nPopust
    LOCAL aUnosMsg := {}
    LOCAL GetList := {}
    LOCAL cTmp
@@ -44,8 +45,9 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    AAdd( ImeKol, { _u( "Količina" ), {|| Str( _pos_pripr->kolicina, 8, 3 ) } } )
    AAdd( ImeKol, { "Cijena", {|| Str( _pos_pripr->cijena, 8, 2 ) } } )
    AAdd( ImeKol, { "Ukupno", {|| Str( _pos_pripr->kolicina * _pos_pripr->cijena, 10, 2 ) } } )
+   AAdd( ImeKol, { "Popust", {|| Str( pos_pripr_popust(), 8, 2 ) } } )
+   AAdd( ImeKol, { "Ukupno NETO", {|| Str( _pos_pripr->kolicina * pos_pripr_cijena_sa_popustom(), 10, 2 ) } } )
    AAdd( ImeKol, { "Tarifa", {|| _pos_pripr->idtarifa } } )
-
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )
    NEXT
@@ -70,7 +72,6 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY "UKUPNO:"
    @ box_x_koord() + 4, box_y_koord() + ( nMaxCols - 30 ) SAY "POPUST:"
    @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY " TOTAL:"
-
    pos_racun_prikazi_ukupno( .T. )
 
    SELECT _pos_pripr
@@ -97,6 +98,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
       _idroba := Space( Len( _idroba ) )
       _kolicina := 0
+      nPopust := 0
+      nCijenaSaPopustom := 0
 
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space ( 40 )
       SET CURSOR ON
@@ -105,10 +108,16 @@ FUNCTION pos_racun_unos_browse( cBrDok )
          WHEN pos_when_racun_artikal( @_idroba ) ;
          VALID pos_valid_racun_artikal( @_idroba, GetList, 2, 27 )
       @ box_x_koord() + 3, box_y_koord() + 5 SAY "  Cijena:" GET _Cijena PICT "99999.999"  ;
-          WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena )
+         WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena )
+
+      @ box_x_koord() + 3, Col() + 2 SAY "Popust" GET nPopust PICT "999999.99" ;
+         WHEN {|| nPopust := pos_popust( _cijena, _ncijena ), .F. }
+      @ box_x_koord() + 3, Col() + 2 SAY "Sa popustom:" GET nCijenaSaPopustom PICT "999999.99" ;
+         WHEN {|| nCijenaSaPopustom := _cijena - nPopust, .F. }
+
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _kolicina PICT "999999.999" ;
-          WHEN pos_when_racun_kolicina( @_kolicina ) ;
-          VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena, _ncijena )
+         WHEN pos_when_racun_kolicina( @_kolicina ) ;
+         VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena, _ncijena )
 
       READ
 
@@ -132,8 +141,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-
-      IF !( roba->tip == "T" )
+      IF roba->tip <> "T"
          _cijena := pos_get_mpc()
       ENDIF
       Gather()
@@ -167,25 +175,6 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    ENDIF
 
    RETURN .T.
-
-
-FUNCTION pos_racun_tekuci_saldo()
-
-   LOCAL nIznos := 0
-   LOCAL nPopust := 0
-
-   PushWa()
-   SELECT _pos_pripr
-   GO TOP
-   DO WHILE !Eof()
-      nIznos += _pos_pripr->kolicina *  _pos_pripr->cijena
-      nPopust += _pos_pripr->kolicina * _pos_pripr->ncijena
-      SKIP
-   ENDDO
-   PopWa()
-
-   RETURN { nIznos, nPopust }
-
 
 
 FUNCTION pos_set_key_handler_ispravka_racuna()

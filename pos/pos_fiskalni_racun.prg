@@ -145,8 +145,8 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
       cJMJ := roba->jmj
 
       SELECT pos
-      IF field->ncijena > 0
-         nPOSRabatProcenat := ( field->ncijena / field->cijena ) * 100
+      IF field->ncijena > 0  // cijena = 100, ncijena = 90, popust = 10
+         nPOSRabatProcenat := ( (field->cijena - field->ncijena) / field->cijena ) * 100
       ENDIF
 
       cRobaNaziv := fiscal_art_naz_fix( roba->naz, s_hFiskalniUredjajParams[ "drv" ] )

@@ -81,15 +81,13 @@ FUNCTION f18_menu_sa_priv_vars_opc_opcexe_izbor( cIzp, lMain )
 
 FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
 
-   LOCAL xM := 0, nYm := 0
+   LOCAL nOpcija := 0, nYm := 0
 
-   xM := Len( aNiz )
+   nOpcija := Len( aNiz )
    AEval( aNiz, {| x | iif( Len( x ) > nYm, nYm := Len( x ), ) } )
 
-   box_crno_na_zuto( nX1, nY1, nX1 + xM + 1, nY1 + nYm + 1,,,,,, 0 )
-
-   nIzb := meni_0_inkey( nX1 + 1, nY1 + 1, nX1 + xM, nY1 + nYm, aNiz, nIzb )
-
+   box_crno_na_zuto( nX1, nY1, nX1 + nOpcija + 1, nY1 + nYm + 1,,,,,, 0 )
+   nIzb := meni_0_inkey( nX1 + 1, nY1 + 1, nX1 + nOpcija + 1, nY1 + nYm, aNiz, nIzb )
    box_crno_na_zuto_end()
 
    RETURN nIzb
@@ -334,7 +332,7 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
       ENDIF
 
       nChar := Inkey( 0 )
-      
+
       IF ValType( goModul ) == "O"
          goModul:GProc( nChar )
       ENDIF

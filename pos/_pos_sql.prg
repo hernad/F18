@@ -291,30 +291,19 @@ FUNCTION h_pos_doks_indexes()
    RETURN hIndexes
 
 
-FUNCTION pos_dostupno_artikal( cIdRoba, nCijena, nNCijena )
+FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
 
    LOCAL cQuery, oTable
    LOCAL nI, oRow
    LOCAL nStanje
-   /* ovo je bas naopako
-   LOCAL cKalkKontoMagacin := PadR( pos_kalk_konto_magacin(), 7 )
-
-   IF !Empty( pos_kalk_konto_magacin() ) // stanje uzimati sa magacinskog konta?!
-      RETURN kalk_kol_stanje_artikla_magacin( cKalkKontoMagacin, cIdRoba, Date() )
-   ENDIF
-   */
-
-   // select * from p15.pos_stanje
-   // where idroba = '000020' and cijena=1 and ncijena=0
-   // and current_date>=dat_od and current_date<=dat_do;
 
    cQuery := "SELECT kol_ulaz-kol_izlaz as stanje FROM " + f18_sql_schema( "pos_stanje" )
    cQuery += " WHERE rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
    cQuery += " AND cijena=" + sql_quote( nCijena )
    cQuery += " AND ncijena=" + sql_quote( nNCijena )
-   cQuery += " AND current_date>=dat_od AND current_date<=dat_do";
+   cQuery += " AND current_date>=dat_od AND current_date<=dat_do"
 
-      oTable := run_sql_query( cQuery )
+   oTable := run_sql_query( cQuery )
    oRow := oTable:GetRow( 1 )
    nStanje := oRow:FieldGet( oRow:FieldPos( "stanje" ) )
 
@@ -324,6 +313,31 @@ FUNCTION pos_dostupno_artikal( cIdRoba, nCijena, nNCijena )
 
    RETURN nStanje
 
+
+FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
+
+   LOCAL cQuery, oTable
+   LOCAL nI, oRow
+   LOCAL nStanje
+   LOCAL aCijene := {}
+
+   cQuery := "SELECT cijena, ncijena, dat_od, dat_do FROM " + f18_sql_schema( "pos_stanje" )
+   cQuery += " WHERE rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
+   cQuery += " AND kol_ulaz-kol_izlaz>0"
+   cQuery += " AND dat_od<=current_date AND dat_do>=current_date"
+
+   PushWa()
+   SELECT F_POM
+   use_sql( "POM", cQuery, "POM" )
+   oTable := run_sql_query( cQuery )
+   DO WHILE !Eof()
+      AAdd( aCijene, { pom->cijena, pom->ncijena, pom->dat_od, pom->dat_do } )
+      SKIP
+   ENDDO
+   USE
+   PopWa()
+
+   RETURN aCijene
 
 FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
 
@@ -339,7 +353,7 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
    ENDIF
 
    cSql := "SELECT "
-   cSql += " SUM( ( kolicina * cijena ) - ( kolicina * ncijena ) ) AS total "
+   cSql += " SUM( ( kolicina * cijena ) - ( kolicina * (CASE WHEN (ncijena <>0) THEN cijena-ncijena ELSE 0.00 END) ) ) AS total "
    cSql += "FROM " + f18_sql_schema( "pos_pos" )
    cSql += " WHERE "
    cSql += " idpos = " + sql_quote( cIdPos )

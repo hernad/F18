@@ -16,6 +16,7 @@
 STATIC s_nMaxKolicinaPosRacun := NIL
 
 MEMVAR gIdPos, gOcitBarKod, gPosPratiStanjePriProdaji
+MEMVAR _cijena, _ncijena
 
 FUNCTION pos_when_racun_artikal( cIdRoba )
 
@@ -25,15 +26,60 @@ FUNCTION pos_when_racun_artikal( cIdRoba )
 
    RETURN .T.
 
+
+FUNCTION pos_racun_odabir_cijene( aCijene )
+
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
+   LOCAL nIzbor := 1
+   LOCAL cCijena, nI
+   LOCAL lCentury
+   LOCAL nCijena, nNCijena, nPopust, nPopustProc
+
+   lCentury := __SetCentury( .T. )
+   FOR nI := 1 TO Len( aCijene )
+      nCijena := aCijene[ nI, 1 ]
+      nNCijena := aCijene[ nI, 2 ]
+      IF Round( nNCijena, 4 ) <> 0
+         nPopust := nCijena - nNCijena
+         nPopustProc := nPopust / nCijena * 100
+      ELSE
+         nPopust := 0
+         nPopustProc := 0
+      ENDIF
+
+      IF nPopust == 0
+         cCijena := PadR( Transform( nCijena, "999999.99" ), 30 )
+      ELSE
+         cCijena := PadR( Transform( nCijena, "999999.99" ) + " - " + Transform( nPopustProc, "99.99%" ) + " = " + Transform( nCijena - nPopust, "99999.99" ), 30 )
+      ENDIF
+      cCijena += " [" + DToC( aCijene[ nI, 3 ] ) + " - " + DToC( aCijene[ nI, 4 ] ) + "] "
+      AAdd( aOpc, cCijena )
+   NEXT
+   __SetCentury( lCentury )
+
+   RETURN meni_fiksna_lokacija( box_x_koord() + 3, box_y_koord() + 10, aOpc, nIzbor )
+
+
+
+
 /*
    cIdRoba - parametar po referenci
 */
 FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
 
-   LOCAL lOk, cBarkodProcitati
+   LOCAL lOk, cBarkodProcitati, aCijene, nOdabranaCijena
 
    lOk := pos_postoji_roba( @cIdroba, nRow, nCol, @cBarkodProcitati, aGetList ) ;
       .AND. pos_racun_provjera_dupli_artikal( cIdroba )
+
+   aCijene := pos_dostupne_cijene_za_artikal( cIdRoba )
+   nOdabranaCijena := pos_racun_odabir_cijene( aCijene )
+   IF LastKey() == K_ESC
+      RETURN .F.
+   ENDIF
+   _cijena := aCijene[ nOdabranaCijena, 1 ]
+   _ncijena := aCijene[ nOdabranaCijena, 2 ]
 
    IF gOcitBarKod
       hb_keyPut( K_ENTER )
@@ -80,7 +126,7 @@ FUNCTION pos_when_racun_cijena_ncijena( cIdRoba, nCijena, nNCijena )
       RETURN .T.
    ENDIF
 
-   pos_racun_artikal_info( 1, cIdRoba, "Stanje: " + AllTrim( Str( pos_dostupno_artikal( cIdRoba, nCijena, nNCijena ), 12, 3 ) ) )
+   pos_racun_artikal_info( 1, cIdRoba, "Stanje: " + AllTrim( Str( pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena ), 12, 3 ) ) )
    nPotrebnaKolicinaStavka := pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena )
    pos_racun_artikal_info( 3, cIdRoba, "Potrebna količina do sada: " + AllTrim( Str( nPotrebnaKolicinaStavka, 12, 3 ) ) + "" )
 
@@ -108,38 +154,42 @@ FUNCTION pos_valid_racun_kolicina( cIdRoba, nKolicina, nCijena, nNCijena )
 
 STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina, nCijena, nNCijena )
 
-   LOCAL lOk := .F.
    LOCAL cMsg
-   LOCAL nStanjeRobe
+   LOCAL nStanjeRobe, nPotrebnaKolicinaVecUnesenoUPripremu
 
    IF LastKey() == K_UP
-      lOk := .T.
-      RETURN lOk
+      RETURN .T.
    ENDIF
 
    IF ( nKolicina == 0 )
       MsgBeep( "Nepravilan unos količine! Ponovite unos!", 15 )
-      RETURN lOk
+      RETURN .F.
    ENDIF
 
    IF gPosPratiStanjePriProdaji == "N" .OR. roba->tip $ "TU"
-      lOk := .T.
-      RETURN lOk
+      RETURN .T.
    ENDIF
-   nStanjeRobe := pos_dostupno_artikal( cIdroba, nCijena, nNCijena )
+   nStanjeRobe := pos_dostupno_artikal_za_cijenu( cIdroba, nCijena, nNCijena )
+   nPotrebnaKolicinaVecUnesenoUPripremu := pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena )
 
-   lOk := .T.
-   IF ( nKolicina > nStanjeRobe )
-      cMsg := "Artikal: " + cIdroba + " Trenutno na stanju: " + Str( nStanjeRobe, 12, 2 )
-      IF gPosPratiStanjePriProdaji = "!"
+   IF ( nKolicina + nPotrebnaKolicinaVecUnesenoUPripremu ) > nStanjeRobe
+      cMsg := AllTrim( cIdroba ) + " na stanju: " + AllTrim( Str( nStanjeRobe, 12, 3 ) )
+      cMsg += " vi želite prodati " +  AllTrim( Str( nKolicina + nPotrebnaKolicinaVecUnesenoUPripremu, 12, 3 ) )
+      IF gPosPratiStanjePriProdaji == "!"
          cMsg += "#Unos artikla onemogućen !?"
-         lOk := .F.
+         MsgBeep( cMsg )
+         RETURN .F.
+      ELSE
+         Alert( _u( cMsg ) )
+         IF Pitanje( , "Ignorisati nedostatak robe na stanju (N/D)?", "N" ) == "D"
+            RETURN .T.
+         ELSE
+            RETURN .F.
+         ENDIF
       ENDIF
-      MsgBeep( cMsg )
-
    ENDIF
 
-   RETURN lOk
+   RETURN .T.
 
 
 FUNCTION pos_max_kolicina_kod_unosa( nMaxKolicina )
@@ -213,3 +263,47 @@ FUNCTION pos_racun_prikazi_ukupno( lRekalkulisati )
    GO TOP
 
    RETURN .T.
+
+
+FUNCTION pos_popust( nCijena, nNCijena )
+
+   IF Round( nNcijena, 4 ) == 0
+      RETURN 0
+   ENDIF
+
+   RETURN nCijena - nNCijena
+
+FUNCTION pos_pripr_popust()
+
+   IF Round( _pos_pripr->ncijena, 4 ) == 0
+      RETURN 0
+   ENDIF
+
+   RETURN _pos_pripr->cijena - _pos_pripr->ncijena
+
+
+FUNCTION pos_pripr_cijena_sa_popustom()
+
+   IF Round( _pos_pripr->ncijena, 4 ) == 0
+      RETURN _pos_pripr->cijena
+   ENDIF
+
+   RETURN _pos_pripr->ncijena
+
+
+FUNCTION pos_racun_tekuci_saldo()
+
+   LOCAL nIznos := 0
+   LOCAL nPopust := 0
+
+   PushWa()
+   SELECT _pos_pripr
+   GO TOP
+   DO WHILE !Eof()
+      nIznos += _pos_pripr->kolicina *  _pos_pripr->cijena
+      nPopust += _pos_pripr->kolicina * pos_pripr_popust()
+      SKIP
+   ENDDO
+   PopWa()
+
+   RETURN { nIznos, nPopust }
