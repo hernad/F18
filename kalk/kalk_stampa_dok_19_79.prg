@@ -38,7 +38,7 @@ FUNCTION kalk_stampa_dok_19_79()
    LOCAL nPDVNovaCijena, nPDVStaraCijena
    LOCAL nTot1, nTot2, nTot3, nTot4, nTot5, nTot6, nTot7
    LOCAL nU3, nU4, nU5
-   LOCAL nC0, nC1
+   LOCAL nC0, nC1, nC2, nC3
    LOCAL dDatOd, dDatDo, cOpis
 
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
@@ -109,23 +109,26 @@ FUNCTION kalk_stampa_dok_19_79()
       check_nova_strana( bZagl, s_oPDF )
       // 1. red
       @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "999"
+      nC3 := PCol() + 1
       @ PRow(), PCol() + 1 SAY  kalk_pripr->idRoba
+      nC2 := PCol() + 1
       @ PRow(), PCol() + 1 SAY  PadR( Trim( ROBA->naz ) + " (" + ROBA->jmj + ")", s_nRobaSirina )
 
       @ PRow(), PCol() + 1 SAY kalk_pripr->Kolicina             PICTURE pickol()
       @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                  PICTURE piccdem()
       nC0 := PCol() + 1
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPC                  PICTURE piccdem()
-      nC1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( kalk_pripr->idtarifa ) * 100   PICTURE picproc()
+      nC1 := PCol() + 1
       @ PRow(), PCol() + 1 SAY nPDVNovaCijena                         PICTURE picdem()
-      @ PRow(), PCol() + 1 SAY nPDVNovaCijena * kalk_pripr->Kolicina                PICTURE picdem()
+      @ PRow(), PCol() + 1 SAY nPDVNovaCijena * kalk_pripr->Kolicina     PICTURE picdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP                       PICTURE piccdem()
-      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ                   PICTURE piccdem()
+      @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ     PICTURE piccdem()
 
       // 2. red
-      @ PRow() + 1, nC1 SAY 0   PICTURE picproc()
-      @ PRow(), PCol() + 1 SAY nPDVStaraCijena   PICTURE picdem()
+      @ PRow() + 1, nC3 SAY kalk_pripr->idtarifa
+      @ PRow(), nC2 SAY roba->barkod
+      @ PRow(), nC1        SAY nPDVStaraCijena   PICTURE picdem()
       @ PRow(), PCol() + 1 SAY nPDVStaraCijena * kalk_pripr->Kolicina  PICTURE picdem()
 
       IF Round( field->FCJ, 4 ) == 0
@@ -141,7 +144,7 @@ FUNCTION kalk_stampa_dok_19_79()
    check_nova_strana( bZagl, s_oPDF, .F., 10 )
    ? s_cLinija
    @ PRow() + 1, 0        SAY "Ukupno:"
-   @ PRow(), nC0        SAY  nTot3         PICTURE        picdem()
+   @ PRow(), nC0          SAY  nTot3         PICTURE        picdem()
    @ PRow(), PCol() + 1   SAY  Space( Len( picdem() ) )
    @ PRow(), PCol() + 1   SAY  Space( Len( picdem() ) )
    @ PRow(), PCol() + 1   SAY  nTot4         PICTURE        picdem()
@@ -163,9 +166,8 @@ STATIC FUNCTION zagl( dDatOd, dDatDo, cOpis )
    ENDIF
    ? _u( "Važeći period" ), dDatOd, "-", dDatDo
    ? s_cLinija
-   ?U "*R * ROBA                                            * Količina *  STARA   * RAZLIKA  * PDV   %  *IZN. PDV  * UK. PDV  * RAZLIKA  *  NOVA    *"
-   ?U "*BR*                                                 *          * MPCsaPDV *   MPC    *          *          *          * MPCsaPDV * MPCsaPDV *"
-   ?U "*  *                                                 *          *   sum    *   sum    *          *   sum    *   sum    *   sum    *   sum    *"
+   ?U "*R * ROBA                                              * Količina *  STARA   * RAZLIKA  *   PDV%   * Izn.PDV  * Uk.PDV  * RAZLIKA  *  NOVA    *"
+   ?U "*BR*                                                   *          * MPCsaPDV *   MPC    *          * N/Stara  * N/Stara * MPCsaPDV * MPCsaPDV *"
    ? s_cLinija
 
    RETURN .T.
