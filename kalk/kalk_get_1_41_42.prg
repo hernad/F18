@@ -20,7 +20,7 @@ MEMVAR _TMarza2, _Marza2
 MEMVAR _rabatv  // popust u maloprodaji
 MEMVAR _TPrevoz, _Prevoz, _nc
 
-FUNCTION kalk_get_1_41_42()
+FUNCTION kalk_get_1_41_42_49()
 
    LOCAL lRet
    LOCAL nKolicinaNaStanju

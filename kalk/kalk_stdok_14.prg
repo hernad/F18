@@ -191,10 +191,8 @@ STATIC FUNCTION zagl()
 
    LOCAL dDatVal
 
-   IF cIdvd == "14" .OR. cIdvd == "74"
+   IF cIdvd == "14"
       ?U "IZLAZ KUPCU PO VELEPRODAJI"
-   ELSEIF cIdvd == "15"
-      ?U "OBRAČUN VELEPRODAJE"
    ELSE
       ?U "STORNO IZLAZA KUPCU PO VELEPRODAJI"
    ENDIF

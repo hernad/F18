@@ -29,7 +29,7 @@ MEMVAR nKalkMarzaVP, nKalkMarzaMP
    kalk_pripr->rabatv - popust u maloprodaji (bez uracunatog poreza)
 */
 
-FUNCTION kalk_stampa_dok_41_42()
+FUNCTION kalk_stampa_dok_41_42_49()
 
    LOCAL nCol0, nCol1, nCol2
    LOCAL cLine
@@ -51,7 +51,9 @@ FUNCTION kalk_stampa_dok_41_42()
    cBrFaktP := kalk_pripr->BrFaktP
    cPKonto := kalk_pripr->pKonto
 
-   IF cIdVd == "41"
+   IF cIdVd == "49"
+      cNaslov := "POS PRENOS PRODAJE"
+   ELSEIF cIdVd == "41"
       cNaslov := "PRODAVNICA PRODAJA - KUPAC"
    ELSE
       cNaslov := "PRODAVNICA PRODAJA"
