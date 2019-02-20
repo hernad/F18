@@ -24,7 +24,6 @@ FUNCTION pos_zaduzenje( cIdVd )
    LOCAL GetList := {}
    LOCAL lAzuriratiBezStampeSilent := .F.
    LOCAL hParams
-   LOCAL nNovaCijena
    LOCAL nI
 
    IF gPosSamoProdaja == "D"
@@ -44,7 +43,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    AAdd( ImeKol, { _u( "Količina" ), {|| priprz->kolicina   }, "kolicina"  } )
    AAdd( ImeKol,  { "Cijena",   {|| priprz->Cijena },      "cijena"    } )
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
-      AAdd( ImeKol,  { _u( "Sniženje" ),   {|| priprz->ncijena },      "ncijena"    } )
+      AAdd( ImeKol,  { _u( "Sniženje" ),   {|| priprz->cijena - priprz->ncijena }, "ncijena"    } )
    ENDIF
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
@@ -104,7 +103,7 @@ FUNCTION pos_zaduzenje( cIdVd )
       _Kolicina := 0
       _cijena := 0
       _ncijena := 0
-      nNovaCijena := 0
+
 
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space( 50 )
       @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + s_cRobaDuzinaSifre ;
@@ -116,8 +115,8 @@ FUNCTION pos_zaduzenje( cIdVd )
       IF cIdvd == POS_IDVD_ZAHTJEV_SNIZENJE
          @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" ;
             WHEN {|| .F. } VALID {|| .T. }
-         @  Row(), Col() + 2 SAY "Nova cijena:" GET nNovaCijena  PICT "99999.999" ;
-            WHEN pos_when_89_ncijena( @nNovaCijena, @_cijena, @_ncijena ) VALID  pos_valid_89_ncijena( @nNovaCijena, @_cijena, @_ncijena )
+         @  Row(), Col() + 2 SAY "Nova cijena:" GET _ncijena  PICT "99999.999" ;
+            VALID { || _ncijena <> 0 }
       ELSE
          @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" ;
             WHEN {|| .F. } VALID {|| .T. }
@@ -151,7 +150,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    pos_unset_key_handler_ispravka_zaduzenja()
    BoxC()
 
-   IF Pitanje(, "Unos završen ?", " ") == "N"
+   IF Pitanje(, "Unos završen ?", " " ) == "N"
       my_close_all_dbf()
       RETURN .F.
    ENDIF
@@ -170,19 +169,14 @@ FUNCTION pos_zaduzenje( cIdVd )
       hParams[ "opis" ] := hb_StrToUTF8( priprz->opis )
       hParams[ "brfaktp" ] := priprz->brfaktp
       hParams[ "priprema" ] := .T.
-
       Beep( 4 )
-      // IF !lAzuriratiBezStampeSilent .AND. Pitanje(, "Želite li odštampati dokument (D/N) ?", "N" ) == "D"
-      pos_stampa_zaduzenja( hParams )
+      pos_stampa_dokumenta( hParams )
       o_pos_tables()
-      // ENDIF
-
       IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + hParams[ "idpos" ] + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] ) + " ažurirati (D/N) ?", " " ) == "D"
          hParams[ "brdok" ] := pos_novi_broj_dokumenta( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ] )
          hParams[ "opis" ] := hb_UTF8ToStr( hParams[ "opis" ] )
          pos_azuriraj_zaduzenje( hParams )
       ENDIF
-
    ENDIF
 
    my_close_all_dbf()
@@ -260,13 +254,15 @@ FUNCTION pos_ispravi_zaduzenje()
    cGetId := _idroba
    nGetKol := _Kolicina
    cColor := SetColor()
-   prikaz_dostupnih_opcija_crno_na_zuto( { "<Enter>-Ispravi stavku", "<B>-Brisi stavku", "<Esc>-Kraj ispravke" } )
+   prikaz_dostupnih_opcija_crno_na_zuto( { _u("<B>-Briši stavku"), "<Esc>-Kraj ispravke" } )
    SetColor( cColor )
 
    s_oBrowse:autolite := .T.
    s_oBrowse:configure()
-   aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) }, {| Ch | Ch == K_ENTER } }
-   aProcs := { {|| pos_brisi_stavku_zaduzenja() }, {|| pos_ispravi_stavku_zaduzenja() } }
+   //aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) }, {| Ch | Ch == K_ENTER } }
+   //aProcs := { {|| pos_brisi_stavku_zaduzenja() }, {|| pos_ispravi_stavku_zaduzenja() } }
+   aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) } }
+   aProcs := { {|| pos_brisi_stavku_zaduzenja() } }
    ShowBrowse( s_oBrowse, aConds, aProcs )
    s_oBrowse:autolite := .F.
    s_oBrowse:dehilite()
@@ -275,6 +271,7 @@ FUNCTION pos_ispravi_zaduzenje()
    _idroba := cGetId
    _Kolicina := nGetKol
 
+   box_crno_na_zuto_end()
    pos_set_key_handler_ispravka_zaduzenja()
 
    RETURN .T.

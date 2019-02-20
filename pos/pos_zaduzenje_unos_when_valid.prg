@@ -19,14 +19,14 @@ MEMVAR gIdPos, gOcitBarKod
 MEMVAR _cijena, _ncijena
 
 
-FUNCTION pos_when_89_ncijena( nNovaCijena, nCijena, nNCijena )
-
-   nNovaCijena := nCijena - nNCijena
-
-   RETURN .T.
-
-FUNCTION pos_valid_89_ncijena( nNovaCijena, nCijena, nNCijena )
-
-   nNcijena := nCijena - nNovaCijena
-
-   RETURN .T.
+//FUNCTION pos_when_71_ncijena( nNovaCijena, nCijena, nNCijena )
+//
+//   nNovaCijena := nCijena - nNCijena
+//
+//   RETURN .T.
+//
+//FUNCTION pos_valid_71_ncijena( nNovaCijena, nCijena, nNCijena )
+//
+//   nNcijena := nCijena - nNovaCijena
+//
+//   RETURN .T.

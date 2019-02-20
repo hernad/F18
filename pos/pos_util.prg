@@ -11,6 +11,17 @@
 
 #include "f18.ch"
 
+FUNCTION pos_stampa_dokumenta( hParams )
+
+   IF hParams[ "idvd" ] $ POS_IDVD_NIVELACIJE_SNIZENJA
+      pos_stampa_nivelacija( hParams )
+   ELSE
+      pos_stampa_zaduzenja( hParams )
+   ENDIF
+
+   RETURN .T.
+
+
 FUNCTION pos_racun_sadrzi_artikal( cIdPos, cIdVd, dDatum, cBroj, cIdRoba )
 
    LOCAL lRet := .F.

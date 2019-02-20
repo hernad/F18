@@ -48,7 +48,9 @@ FUNCTION kalk_stampa_dok_19_79()
    cBrDok := kalk_pripr->brdok
    cPKonto := kalk_pripr->pkonto
 
-   IF cIdVd == "79"
+   IF cIdVd == "71"
+      cNaslov := "ZAHTJEV ZA SNIŽENJE"
+   ELSEIF cIdVd == "79"
       cNaslov := "ODOBRENO SNIŽENJE"
    ELSE
       cNaslov := "NIVELACIJA"

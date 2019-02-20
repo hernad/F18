@@ -49,7 +49,6 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
       _sql_fields := sql_fields( _dbf_fields )
 
       _sql_order  := hDbfRec[ "sql_order" ]
-
       _dbf_wa    := hDbfRec[ "wa" ]
       _dbf_alias := hDbfRec[ "alias" ]
       lSqlTable := hDbfRec[ "sql" ]

@@ -72,6 +72,9 @@ FUNCTION kalk_get_1_19_79()
       @ Row(), Col() + 2  SAY8 "do" GET _dat_do ;
          WHEN {|| _dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ), .T. } ;
          VALID {|| Empty( _dat_do ) .OR. _dat_do >= _dat_od }
+   ELSE
+      _dat_od := _datdok
+      _dat_do := CtoD("")
    ENDIF
    READ
 

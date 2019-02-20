@@ -12,7 +12,7 @@
 
 #include "f18.ch"
 
-FUNCTION pos_stampa_dokumenta()
+FUNCTION pos_stampa_liste_dokumenata()
 
    LOCAL cIdVd
    LOCAL dDatOd := CToD( "" )
@@ -29,7 +29,7 @@ FUNCTION pos_stampa_dokumenta()
    SET CURSOR ON
 
    cIdPos := gIdPos
-   cIdRadnik := Space( FIELD_LEN_POS_OSOB_ID )
+   cIdRadnik := Space( FIELD_LEN_POS_IDRADNIK )
    cIdVd := Space( 2 )
 
    SET CURSOR ON
@@ -45,15 +45,11 @@ FUNCTION pos_stampa_dokumenta()
 
    BoxC()
 
-   SELECT pos_doks
-   cFilt1 := "DATUM>=" + dbf_quote( dDatOd ) + ".and.DATUM<=" + dbf_quote( dDatDo )
-   SET FILTER TO &cFilt1
-   SEEK cIdPos + cIdVd
+   seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo )
 
    EOF CRET
 
    START PRINT CRET
-
    ?
    ? PadC( "KASA " + gIdPos, 40 )
    ?U PadC( "ŠTAMPA LISTE DOKUMENATA", nSir )
@@ -74,7 +70,7 @@ FUNCTION pos_stampa_dokumenta()
 
    DO WHILE !Eof()
 
-      IF ( !Empty( cIdVd ) .AND. pos_doks->IdVd <> cIdVd ) .OR. ( !Empty( cIdRadnik ) .AND. pos_doks->IdRadnik <> cIdRadnik )
+      IF !Empty( cIdRadnik ) .AND. pos_doks->IdRadnik <> cIdRadnik
          SKIP
          LOOP
       ENDIF

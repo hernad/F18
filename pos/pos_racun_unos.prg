@@ -57,7 +57,7 @@ FUNCTION pos_zakljuci_racun()
    my_dbf_pack()
    IF _pos_pripr->( RecCount2() ) == 0
       my_close_all_dbf()
-      RETURN lRet
+      RETURN .F.
    ENDIF
 
    GO TOP

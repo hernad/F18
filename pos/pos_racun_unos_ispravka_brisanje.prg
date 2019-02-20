@@ -23,22 +23,21 @@ FUNCTION pos_racun_ispravka()
 
    cColor := SetColor()
    prikaz_dostupnih_opcija_crno_na_zuto( { ;
-      " <Enter>-Ispravi stavku", ;
       _u( " <B>-Briši stavku" ), ;
       _u( " <Esc>-Završi" ) } )
-
    SetColor( cColor )
 
    pos_racun_browse_objekat():autolite := .T.
    pos_racun_browse_objekat():configure()
-   aConds := { {| nCh | Upper( Chr( nCh ) ) == "B" }, {| nCh | nCh == K_ENTER } }
-   aProcs := { {|| pos_brisi_stavku_racuna() }, {|| pos_ispravi_stavku_racuna() } }
+   aConds := { {| nCh | Upper( Chr( nCh ) ) == "B" } }
+   aProcs := { {|| pos_brisi_stavku_racuna() } }
 
    ShowBrowse( pos_racun_browse_objekat(), aConds, aProcs )
    pos_racun_browse_objekat():autolite := .F.
    pos_racun_browse_objekat():dehilite()
    pos_racun_browse_objekat():stabilize()
    pos_set_key_handler_ispravka_racuna()
+   box_crno_na_zuto_end()
 
    RETURN .T.
 

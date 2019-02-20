@@ -17,7 +17,7 @@ MEMVAR nKalkRBr
 MEMVAR GetList
 MEMVAR _idfirma, _kolicina, _nc, _idroba, _pkonto, _pu_i, _mkonto, _mu_i, _datfaktp, _datdok
 MEMVAR _idtarifa, _idvd, _idkonto2, _brfaktp, _mpcsapp
-MEMVAR _Vpc, _Mpc, _TMarza2, _Marza2, _TCarDaz, _CarDaz
+MEMVAR _Vpc, _Mpc, _TMarza2, _Marza2, _TCarDaz, _CarDaz, _dat_od, _dat_do
 
 FUNCTION kalk_get1_80()
 
@@ -25,6 +25,9 @@ FUNCTION kalk_get1_80()
    LOCAL nXCurrent := 0
    LOCAL nYCurrent := 40
    PRIVATE cProracunMarzeUnaprijed := " "
+
+   _dat_od := CToD( "" )
+   _dat_do := CToD( "" )
 
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok

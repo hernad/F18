@@ -83,7 +83,7 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
       RETURN .F.
    ENDIF
 
-   //DokAttr():new( "kalk", F_KALK_ATTR ):zap_attr_dbf()
+   // DokAttr():new( "kalk", F_KALK_ATTR ):zap_attr_dbf()
 
    kalk_gen_zavisni_fin_fakt_nakon_azuriranja( lGenerisiZavisne, lAuto, lStampaj )
 
@@ -508,12 +508,13 @@ STATIC FUNCTION kalk_azur_sql()
    LOCAL lOk := .T.
    LOCAL lRet := .F.
    LOCAL hRecKalkDok, hRecKalkKalk
-   LOCAL _doks_nv := 0
-   LOCAL _doks_vpv := 0
-   LOCAL _doks_mpv := 0
-   LOCAL _doks_rabat := 0
-   LOCAL cKalkTableName
-   LOCAL cKalkDoksTableName
+   LOCAL nDokNV := 0
+   LOCAL nDokVPV := 0
+   LOCAL nDokMPV := 0
+   LOCAL nDokRabat := 0
+
+   // LOCAL cKalkTableName
+   // LOCAL cKalkDoksTableName
    LOCAL nI, _n
    LOCAL cDokument := "0"
    LOCAL hParams
@@ -523,14 +524,12 @@ STATIC FUNCTION kalk_azur_sql()
       cIdVd == field->IdVd .AND. cBrDok == field->BrDok }
    LOCAL cIdVd, cIdFirma, cBrDok
 
-   cKalkTableName := "kalk_kalk"
-   cKalkDoksTableName := "kalk_doks"
+   // cKalkTableName := "kalk_kalk"
+   // cKalkDoksTableName := "kalk_doks"
 
    Box(, 5, 60 )
 
    o_kalk_za_azuriranje()
-   run_sql_query( "BEGIN" )
-
    o_kalk()  // otvoriti samo radi strukture tabele
    o_kalk_doks() // otvoriti samo radi strukture tabele
 
@@ -560,11 +559,39 @@ STATIC FUNCTION kalk_azur_sql()
       hRecKalkDok[ "opis" ] := kalk_pripr->opis
       hRecKalkDok[ "datval" ] := kalk_pripr->datval
 
+      // proracun sumarnih polja za dokument
       cDokument := hRecKalkDok[ "idfirma" ] + "-" + hRecKalkDok[ "idvd" ] + "-" + hRecKalkDok[ "brdok" ]
 
-      DO WHILE !Eof() .AND.  Eval( bDokument, cIdFirma, cIdVd, cBrDok )
+      PushWa()
+      DO WHILE !Eof() .AND. Eval( bDokument, cIdFirma, cIdVd, cBrDok )
+         kalk_set_doks_total_fields( @nDokNV, @nDokVPV, @nDokMPV, @nDokRabat )
+         SKIP
+      ENDDO
+      PopWa()
 
-         kalk_set_doks_total_fields( @_doks_nv, @_doks_vpv, @_doks_mpv, @_doks_rabat )
+      IF lOk
+         run_sql_query( "BEGIN" )
+         // fill kalk_doks
+         hRecKalkDok[ "nv" ] := nDokNV
+         hRecKalkDok[ "vpv" ] := nDokVPV
+         hRecKalkDok[ "rabat" ] := nDokRabat
+         hRecKalkDok[ "mpv" ] := nDokMPV
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY "kalk_doks -> server "
+         IF !sql_table_update( "kalk_doks", "ins", hRecKalkDok )
+            lOk := .F.
+            run_sql_query( "ROLLBACK" )
+            BoxC()
+            RETURN .F.
+         ELSE
+            run_sql_query( "COMMIT" )
+         ENDIF
+
+      ENDIF
+
+      run_sql_query( "BEGIN" )
+      SELECT kalk_pripr
+      DO WHILE !Eof() .AND. Eval( bDokument, cIdFirma, cIdVd, cBrDok )
+         // fill kalk_kalk
          hRecKalkKalk := dbf_get_rec()
          IF !sql_table_update( "kalk_kalk", "ins", hRecKalkKalk )
             lOk := .F.
@@ -573,40 +600,24 @@ STATIC FUNCTION kalk_azur_sql()
          SKIP
       ENDDO
 
-      IF lOk
-         hRecKalkDok[ "nv" ] := _doks_nv
-         hRecKalkDok[ "vpv" ] := _doks_vpv
-         hRecKalkDok[ "rabat" ] := _doks_rabat
-         hRecKalkDok[ "mpv" ] := _doks_mpv
+      IF !lOk
+         // rolback kalk_kalk transakcije
+         run_sql_query( "ROLLBACK" )
 
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "kalk_doks -> server " //+ _tmp_id
-         IF !sql_table_update( "kalk_doks", "ins", hRecKalkDok )
-            lOk := .F.
-         ENDIF
+         // pobrisati kalk_doks stavku
+         run_sql_query( "BEGIN" )
+         sql_table_update( "kalk_doks", "del", hRecKalkDok )
+         run_sql_query( "COMMIT" )
+
+         cMessage := "kalk ažuriranje, transakcija neuspješna ?!"
+         log_write( cMessage, 2 )
+         MsgBeep( cMessage )
+         EXIT
+      ELSE
+         run_sql_query( "COMMIT" )
+         log_write( "F18_DOK_OPER: ažuriranje kalk dokumenta: " + cDokument, 2 )
       ENDIF
-
    ENDDO
-
-   IF !lOk
-      run_sql_query( "ROLLBACK" )
-      cMessage := "kalk ažuriranje, transakcija neuspješna ?!"
-      log_write( cMessage, 2 )
-      MsgBeep( cMessage )
-
-   ELSE
-
-      //@ box_x_koord() + 4, box_y_koord() + 2 SAY "push ids to semaphore"
-      //push_ids_to_semaphore( cKalkTableName, _ids_kalk )
-      //push_ids_to_semaphore( cKalkDoksTableName, _ids_doks  )
-      //@ box_x_koord() + 5, box_y_koord() + 2 SAY "update semaphore version"
-
-      hParams := hb_Hash()
-      hParams[ "unlock" ] := { cKalkTableName, cKalkDoksTableName }
-      run_sql_query( "COMMIT", hParams )
-
-      log_write( "F18_DOK_OPER: ažuriranje kalk dokumenta: " + cDokument, 2 )
-
-   ENDIF
 
    BoxC()
 

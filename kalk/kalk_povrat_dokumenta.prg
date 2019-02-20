@@ -26,14 +26,6 @@ FUNCTION kalk_povrat_dokumenta()
    LOCAL hParams
    LOCAL GetList := {}
 
-/*
-   IF dozvoljeno_azuriranje_sumnjivih_stavki() .AND. Pitanje(, "Zadati broj (D) / Povrat po hronologiji obrade (N) ?", "D" ) = "N"
-      Beep( 1 )
-      povrat_najnovije_kalkulacije()
-      my_close_all_dbf()
-      RETURN .F.
-   ENDIF
-*/
 
    o_kalk_pripr()
    cIdFirma := self_organizacija_id()

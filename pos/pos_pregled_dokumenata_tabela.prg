@@ -49,7 +49,7 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    AAdd( ImeKol, { "Fisk.rn", {|| pos_doks_2->fisc_rn } } )
    AAdd( ImeKol, { "Datum", {|| pos_doks_2->datum } } )
    AAdd( ImeKol, { "VP", {|| pos_doks_2->IdVrsteP } } )
-   AAdd( ImeKol, { PadC( "Iznos", 10 ), {|| pos_iznos_dokumenta() } } )
+   AAdd( ImeKol, { PadC( "Iznos", 10 ), {|| pos_browse_iznos_dokumenta() } } )
    AAdd( ImeKol, { "Radnik", {|| pos_doks_2->IdRadnik } } )
 
    FOR i := 1 TO Len( ImeKol )
@@ -155,7 +155,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          hParams[ "samo_napuni_rn_dbf" ] := .F.
          hParams[ "priprema" ] := .F.
          // pos_stampa_racun( hParams )
-         pos_pregled_stavki_racuna( hParams[ "idpos" ], hParams["idvd"], hParams[ "datum" ], hParams[ "brdok" ] )
+         pos_pregled_stavki_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
          PopWa()
          RETURN DE_CONT
 
@@ -173,11 +173,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          hParams[ "opis" ] := hb_StrToUTF8( pos_doks_2->opis )
          hParams[ "brfaktp" ] := pos_doks_2->brfaktp
          hParams[ "priprema" ] := .F.
-         IF pos_doks_2->idvd $ POS_IDVD_NIVELACIJE_SNIZENJA
-            pos_stampa_nivelacija( hParams )
-         ELSE
-            pos_stampa_zaduzenja( hParams )
-         ENDIF
+         pos_stampa_dokumenta( hParams )
          PopWa()
 
          // CASE pos_doks->IdVd == POS_IDVD_INVENTURA
@@ -212,12 +208,12 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
       // RETURN ( DE_REFRESH )
 
 
-      // CASE Ch == K_CTRL_P
+   CASE Ch == K_CTRL_P
 
-      // PushWa()
-      // pos_stampa_dokumenta()
-      // PopWa()
-      // RETURN DE_CONT
+      PushWa()
+      pos_stampa_liste_dokumenata()
+      PopWa()
+      RETURN DE_CONT
 
       // CASE Ch == Asc( "E" ) .OR. Ch == Asc( "e" )
 
@@ -267,7 +263,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
 
 
-FUNCTION pos_pregled_stavki_racuna(cIdPos, cIdVd, dDatum, cBrDok)
+FUNCTION pos_pregled_stavki_racuna( cIdPos, cIdVd, dDatum, cBrDok )
 
    LOCAL oBrowse
    LOCAL cPrevCol
@@ -343,7 +339,8 @@ STATIC FUNCTION pos_racun_browse_kolone( aImeKol, aKol )
 
    RETURN .T.
 
-STATIC FUNCTION pos_iznos_dokumenta()
+
+STATIC FUNCTION pos_browse_iznos_dokumenta()
 
    LOCAL cRet := Space( 13 )
    LOCAL l_u_i
@@ -358,32 +355,25 @@ STATIC FUNCTION pos_iznos_dokumenta()
    dDatum := pos_doks_2->datum
 
 
-   IF pos_doks_2->IdVd $ POS_IDVD_ULAZI
-      seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
-      DO WHILE !Eof() .AND. pos->IdPos +  pos->IdVd + DToS(  pos->datum ) +  pos->BrDok == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
-         nIznos += pos->kolicina * pos->cijena
-         SKIP
-      ENDDO
-   ENDIF
+   seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
+   DO WHILE !Eof() .AND. pos->IdPos +  pos->IdVd + DToS(  pos->datum ) +  pos->BrDok == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
 
-   IF pos_doks_2->idvd $ POS_IDVD_RACUN + "#" + "IN" + "#" + POS_IDVD_NIVELACIJA
-      seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
-      DO WHILE !Eof() .AND. pos->IdPos +  pos->IdVd + DToS(  pos->datum ) +  pos->BrDok == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
-         DO CASE
-         CASE pos_doks_2->idvd $ POS_IDVD_INVENTURA
-            // samo ako je razlicit iznos od 0
-            // ako je 0 onda ne treba mnoziti sa cijenom
-            IF pos->kol2 <> 0
-               nIznos += pos->kol2 * pos->cijena
-            ENDIF
-         CASE pos_doks_2->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
-            nIznos += pos->kolicina * ( pos->ncijena - pos->cijena )
-         OTHERWISE
-            nIznos += pos->kolicina * pos->cijena
-         ENDCASE
-         SKIP
-      ENDDO
-   ENDIF
+      DO CASE
+      CASE pos_doks_2->idvd == POS_IDVD_INVENTURA
+         // samo ako je razlicit iznos od 0
+         // ako je 0 onda ne treba mnoziti sa cijenom
+         IF pos->kol2 <> 0
+            nIznos += pos->kol2 * pos->cijena
+         ENDIF
+      CASE pos_doks_2->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
+         nIznos += pos->kolicina * ( pos->ncijena - pos->cijena )
+      OTHERWISE
+         nIznos += pos->kolicina * pos->cijena
+      ENDCASE
+
+      SKIP
+   ENDDO
+
 
    SELECT pos_doks_2
    cRet := Str( nIznos, 13, 2 )

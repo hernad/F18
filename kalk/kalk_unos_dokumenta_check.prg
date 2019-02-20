@@ -111,7 +111,7 @@ FUNCTION kalk_dokument_postoji( cFirma, cIdVd, cBroj, lSilent )
    cWhere += " AND idvd = " + sql_quote( cIdVd )
    cWhere += " AND brdok = " + sql_quote( cBroj )
 
-   IF table_count( F18_PSQL_SCHEMA_DOT + "kalk_doks", cWhere ) > 0
+   IF table_count( f18_sql_schema("kalk_doks"), cWhere ) > 0
       lExist := .T.
    ENDIF
 

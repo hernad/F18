@@ -35,7 +35,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
    cLM := ""
 
    IF !hParams[ "priprema" ]
-      IF !seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok, "1", "PRIPRZ" )
+      IF !seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"], "1", "PRIPRZ" )
          RETURN .F.
       ENDIF
    ENDIF
