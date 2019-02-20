@@ -74,12 +74,24 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
       .AND. pos_racun_provjera_dupli_artikal( cIdroba )
 
    aCijene := pos_dostupne_cijene_za_artikal( cIdRoba )
-   nOdabranaCijena := pos_racun_odabir_cijene( aCijene )
-   IF LastKey() == K_ESC
-      RETURN .F.
+   IF Len( aCijene ) > 1
+      nOdabranaCijena := pos_racun_odabir_cijene( aCijene )
+      IF LastKey() == K_ESC
+         RETURN .F.
+      ENDIF
+      _cijena := aCijene[ nOdabranaCijena, 1 ]
+      _ncijena := aCijene[ nOdabranaCijena, 2 ]
+
+   ELSEIF Len( aCijene ) == 1
+      nOdabranaCijena := 1
+      _cijena := aCijene[ nOdabranaCijena, 1 ]
+      _ncijena := aCijene[ nOdabranaCijena, 2 ]
+   ELSE
+      Alert( "Artikla " + cIdRoba + " nema na stanju !?" )
+      _cijena := pos_get_mpc()
+      _ncijena := 0
    ENDIF
-   _cijena := aCijene[ nOdabranaCijena, 1 ]
-   _ncijena := aCijene[ nOdabranaCijena, 2 ]
+
 
    IF gOcitBarKod
       hb_keyPut( K_ENTER )

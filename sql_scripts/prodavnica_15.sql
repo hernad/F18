@@ -542,7 +542,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( idvd <> '11' ) AND ( idvd <> '80' ) THEN
+IF ( idvd <> '11' ) AND ( idvd <> '80' ) AND ( idvd <> '89' ) THEN
         RETURN FALSE;
 END IF;
 
@@ -1079,11 +1079,11 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF (NEW.idvd <> '42') AND (NEW.idvd <> '11') AND (NEW.idvd <> '80') AND (NEW.idvd <> '19') AND (NEW.idvd <> '79')  THEN -- 42, 11, 80, 19, 79
+   IF (NEW.idvd <> '42') AND (NEW.idvd <> '11') AND (NEW.idvd <> '80') AND (NEW.idvd <> '19') AND (NEW.idvd <> '79') AND (NEW.idvd <> '89')  THEN -- 42, 11, 80, 19, 79, 89
       RETURN NULL;
    END IF;
 ELSE
-   IF (OLD.idvd <> '42') AND ( OLD.idvd <> '11') AND (OLD.idvd <> '80') AND (OLD.idvd <> '19') AND (OLD.idvd <> '79')  THEN
+   IF (OLD.idvd <> '42') AND ( OLD.idvd <> '11') AND (OLD.idvd <> '80') AND (OLD.idvd <> '19') AND (OLD.idvd <> '79') AND (OLD.idvd <> '89')  THEN
       RETURN NULL;
    END IF;
 END IF;
@@ -1097,7 +1097,7 @@ IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
       RETURN OLD;
 
-ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='11') OR (OLD.idvd='80') ) THEN
+ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='11') OR (OLD.idvd='80') OR (OLD.idvd='89') ) THEN
       RAISE INFO 'delete pos_prijem_update_stanje  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       -- select p15.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '999', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
       EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
@@ -1118,7 +1118,7 @@ ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd = '42' ) THEN
        RAISE INFO 'update 42 pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr ;
        RETURN NEW;
 
-ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '11') OR (NEW.idvd = '80') ) THEN
+ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '11') OR (NEW.idvd = '80') OR (NEW.idvd = '89') ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
@@ -1135,8 +1135,8 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
         RAISE INFO 'insert 42 ret=%', lRet;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '11') OR (NEW.idvd = '80') ) THEN
-        RAISE INFO 'insert pos_prijem_update_stanje % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
+ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '11') OR ( NEW.idvd = '80') OR ( NEW.idvd = '89') ) THEN
+        RAISE INFO 'insert pos_prijem_update_stanje % % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.idroba, NEW.rbr;
         -- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '999', current_date, current_date, NULL,'R01', 100, 2.5, 0);
         EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena

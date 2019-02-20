@@ -54,13 +54,11 @@ FUNCTION f18_menu( cIzp, lOsnovniMeni, nIzbor, aOpc, aOpcExe )
 
          IF aOpcExe[ nIzbor ] <> nil
             nMenuExeOpcija := aOpcExe[ nIzbor ]
-
             IF ValType( nMenuExeOpcija ) == "B"
                Eval( nMenuExeOpcija )
             ELSE
                MsgBeep( "meni čudan ?" + hb_ValToStr( nIzbor ) )
             ENDIF
-
          ENDIF
 
       ENDCASE
