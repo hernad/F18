@@ -17,7 +17,6 @@ STATIC s_cPicIznos := "9999999.99"
 STATIC s_cPicKolicina := "9999999.99"
 STATIC s_cRobaNazDuzina := 45
 
-
 FUNCTION pos_stampa_nivelacija( hParams )
 
    LOCAL cIdRoba, nUkupno
@@ -33,7 +32,10 @@ FUNCTION pos_stampa_nivelacija( hParams )
    dDatum := hParams[ "datum" ]
    // cBrFaktP := hParams["brfaktp"]
 
-   cNaslov := "POS NIVELACIJA " + cIdPos + "-" + cIdVd + "-" + cBrDok + " od " + DToC( dDatum ) + "   NA DAN " + DToC( danasnji_datum() )
+
+cNaslov := pos_dokument_naziv( cIdVd )
+
+   cNaslov += " " + cIdPos + "-" + cIdVd + "-" + AllTrim(cBrDok) + " od " + DToC( dDatum ) + "   NA DAN " + DToC( danasnji_datum() )
    PushWA()
 
    bZagl := {|| zagl() }
@@ -51,7 +53,6 @@ FUNCTION pos_stampa_nivelacija( hParams )
 
    Eval( bZagl )
    seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
-
    DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd .AND. pos->datum == dDatum .AND. pos->brDok == cBrDok
 
       check_nova_strana( bZagl, s_oPDF )
