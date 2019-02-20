@@ -49,10 +49,9 @@ FUNCTION pos_menu_dokumenti()
 
    nIzbor := 1
    AAdd( aOpc, "1. ulaz u prodavnicu direktno od dobavljača   " )
-   AAdd( aOpcexe, {|| pos_zaduzenje("81") } )
-
+   AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_DOBAVLJAC_PRODAVNICA ) } )
    AAdd( aOpc, "2. zahtjev za sniženje dijela zalihe     " )
-   AAdd( aOpcexe, {|| pos_zaduzenje("89") } )
+   AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_SNIZENJE ) } )
 
    /*
    AAdd( aOpc, "I. inventura" )

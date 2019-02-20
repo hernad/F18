@@ -788,9 +788,10 @@ CREATE TRIGGER pos_pos_knjig_insert_update_delete
    ON p15.pos_pos_knjig
    FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_insert_update_delete();
 
-
--- SELECT public.kalk_brdok_iz_pos('15', '42', '4', current_date); => 1402/15
--- SELECT public.kalk_brdok_iz_pos('15', '89', '    3', current_date); => 1402/3
+-- POS 42 - racuni, zbirno u KALK
+-- SELECT public.kalk_brdok_iz_pos('15', '42', '4', current_date); => 150214
+-- POS 71 - dokument, zahtjev za snizenje - pojedinacno u KALK
+-- SELECT public.kalk_brdok_iz_pos('15', '71', '    3', current_date); => 15021403
 
 CREATE OR REPLACE FUNCTION public.kalk_brdok_iz_pos(
    idpos varchar,
@@ -805,11 +806,11 @@ DECLARE
 BEGIN
 
 IF ( idvd = '42' ) THEN
-  -- 01.02.2019, idpos=15 -> 0102/15
-  SELECT TO_CHAR(datum, 'ddmm/' || idpos ) INTO brDok;
-ELSIF ( idvd = '89' ) THEN
-   -- 01.02.2019, brdok='      3' -> 0102/3
-   SELECT TO_CHAR(datum, 'ddmm/' || btrim(posBrdok) ) INTO brDok;
+  -- 01.02.2019, idpos=15 -> 150201
+  SELECT TO_CHAR(datum, idpos || 'mmdd' ) INTO brDok;
+ELSIF ( idvd = '71' ) THEN
+   -- 01.02.2019, brdok='      3' -> 15020103
+   SELECT TO_CHAR(datum, idpos || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 END IF;
 
 RETURN brDok;
@@ -829,10 +830,11 @@ DECLARE
        knjigShema varchar := 'fmk';
        pKonto varchar;
        brDok varchar;
+       idFirma varchar;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '89' ) THEN -- samo 42-ke, 89
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) THEN -- samo 42-ke, 71
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -840,7 +842,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT public.kalk_brdok_iz_pos(NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '89' ) THEN -- samo 42-ke, 89
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) THEN -- samo 42-ke, 71
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -849,21 +851,23 @@ ELSE
         INTO brDok;
 END IF;
 
+SELECT fmk.fetchmetrictext('org_id') INTO idFirma;
+
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete kalk_doks % % % % %', OLD.idpos, pKonto, OLD.idvd, OLD.datum, brDok;
-      EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE idfirma=$1 pkonto=$2 AND idvd=$3 AND datdok=$4 AND brdok=$5'
-            USING OLD.idpos, pKonto, OLD.idvd, OLD.datum, brDok;
+      RAISE INFO 'delete kalk_doks % % % % %', idFirma, pKonto, OLD.idvd, OLD.datum, brDok;
+      EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE idfirma=$1 AND pkonto=$2 AND idvd=$3 AND datdok=$4 AND brdok=$5'
+            USING idFirma, pKonto, OLD.idvd, OLD.datum, brDok;
          RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
          RAISE INFO 'update kalk_doks !? % % %', pKonto, brDok, NEW.idvd;
          RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
-         RAISE INFO 'FIRST delete kalk_doks % % % %', NEW.idvd, pKonto, NEW.datum, brDok;
-         EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
-                USING pKonto, NEW.idvd, NEW.datum, brDok;
-         RAISE INFO 'THEN insert kalk_doks % % % %', NEW.idvd, pKonto, brDok, NEW.datum;
-         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_doks(idfirma,idvd,brdok,datdok,pkonto) VALUES($1,$2,$3,$4,$5)'
-                     USING NEW.idpos, NEW.idvd, brDok, NEW.datum, pKonto;
+         RAISE INFO 'FIRST delete kalk_doks % % % %', idFirma, pKonto, NEW.datum, brDok;
+         EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_doks WHERE idFirma=$1 AND pkonto=$2 AND idvd=$3 AND datdok=$4 AND brDok=$5'
+                USING idFirma, pKonto, NEW.idvd, NEW.datum, brDok;
+         RAISE INFO 'THEN insert kalk_doks % % % %', idFirma, pKonto, brDok, NEW.datum;
+         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_doks(idfirma,idvd,brdok,datdok,pkonto,dat_od,dat_do,idPartner,brFaktP,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'
+                     USING idFirma, NEW.idvd, brDok, NEW.datum, pKonto, NEW.dat_od, NEW.dat_do, NEW.idPartner, NEW.brFaktP, NEW.opis;
          RETURN NEW;
 END IF;
 
@@ -922,7 +926,6 @@ BEGIN
    END IF;
 END;
 $$;
-
 
 
 
@@ -1021,23 +1024,26 @@ DECLARE
        pKonto varchar;
        brDok varchar;
        pdvStopa numeric;
+       idFirma varchar;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '89' ) THEN -- samo 42-ke, 89
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
           from fmk.koncij where idprodmjes=NEW.idpos;
    brDok := public.kalk_brdok_iz_pos(NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum);
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '89' ) THEN -- samo 42-ke, 89
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
        from fmk.koncij where idprodmjes=OLD.idpos;
    brDok := public.kalk_brdok_iz_pos(OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum);
 END IF;
+
+SELECT fmk.fetchmetrictext('org_id') INTO idFirma;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete kalk_kalk % % % %', pKonto, OLD.idvd, OLD.datum, brDok;
@@ -1047,11 +1053,11 @@ IF (TG_OP = 'DELETE') THEN
 ELSIF (TG_OP = 'UPDATE') THEN
          RAISE INFO 'update kalk_kalk !? % %', pKonto, brDok;
          RETURN NEW;
-ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 POS
          RAISE INFO 'FIRST delete kalk_kalk  % % %', pKonto, NEW.datum, brDok;
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_kalk WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING pKonto, NEW.idvd, NEW.datum, brDok;
-         RAISE INFO 'THEN insert kalk_kalk 42 % % % %', NEW.idpos, pKonto, brDok, NEW.datum;
+         RAISE INFO 'THEN insert POS 42 => kalk_kalk 49 % % % %', NEW.idpos, pKonto, brDok, NEW.datum;
          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
                  ' (fmk.rbr_to_char( (row_number() over (order by idroba))::integer))::character(3) as rbr,' ||
@@ -1062,21 +1068,21 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
                  ' WHERE idvd=$2 AND datum=$4 AND idpos=$5' ||
                  ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
                  ' ORDER BY idroba)'
-              USING NEW.idpos, NEW.idvd, brDok, NEW.datum, NEW.idpos, pKonto;
+              USING idFirma, '49', brDok, NEW.datum, NEW.idpos, pKonto;
          RETURN NEW;
 
-  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '89' ) THEN
+  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '71' ) THEN
 
          EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                 USING NEW.idtarifa
                 INTO pdvStopa;
 
-         RAISE INFO 'THEN insert kalk_kalk 89 % % % %', NEW.idpos, pKonto, brDok, NEW.datum;
+         RAISE INFO 'THEN insert kalk_kalk 71 % % % %', NEW.idpos, pKonto, brDok, NEW.datum;
          -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
          -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
                   'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $13/100), $11, $12)'
-                 USING NEW.idpos, NEW.idvd, NEW.rbr, brDok, NEW.datum, pKonto, NEW.idroba, NEW.idtarifa,
+                 USING idFirma, NEW.idvd, NEW.rbr, brDok, NEW.datum, pKonto, NEW.idroba, NEW.idtarifa,
                  -NEW.ncijena, NEW.kolicina, 0, NEW.cijena, pdvStopa;
           RETURN NEW;
 END IF;

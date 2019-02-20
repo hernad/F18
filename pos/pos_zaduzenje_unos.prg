@@ -65,13 +65,13 @@ FUNCTION pos_zaduzenje( cIdVd )
 
    Box( "#" + cIdVd + "-" + pos_dokument_naziv( cIdVd ), 8, f18_max_cols() - 15 )
    SET CURSOR ON
-   IF cIdVd == "81"
+   IF cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
       @ box_x_koord() + 2, box_y_koord() + 2 SAY " Partner:" GET _idPartner PICT "@!" VALID  !Empty( _idPartner ) .AND. p_partner( @_idPartner )
       @ box_x_koord() + 2, Col() + 2 SAY "Broj fakture:" GET _BrFaktP VALID !Empty( _brFaktP )
    ENDIF
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "    Opis:" GET _Opis PICTURE "@S50"
    @ box_x_koord() + 6, box_y_koord() + 2 SAY " Datum dok:" GET _Datum PICT "@D" VALID _Datum <= Date()
-   IF cIdVd == "89"
+   IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
       @ Row(), Col() + 2 SAY "Datumski interval od:" GET _dat_od
       @ Row(), Col() + 2 SAY "do:" GET _dat_do VALID Empty( _dat_do ) .OR. _dat_do >= _dat_od
    ENDIF

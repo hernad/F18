@@ -11,13 +11,25 @@
 
 #include "f18.ch"
 
+MEMVAR m
+MEMVAR cIdFirma, cIdvd, cBrDok
+MEMVAR nStr
 
-// PDV obracun
 FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
 
    LOCAL _pict := "99999999999.99"
    LOCAL nKolona
    LOCAL aPKonta
+   LOCAL nRec, i, nCntKonto
+   LOCAL nTot1
+   LOCAL nTot2
+   LOCAL nTot3
+   LOCAL cIdtarifa
+   LOCAL nMPV
+   LOCAL nPDV
+   LOCAL nMPVSaPDV
+   LOCAL nCol1
+   LOCAL nMpc, nKolicina
 
    IF bCheckPDFNovaStrana != NIL
       Eval( bCheckPDFNovaStrana )
@@ -53,19 +65,12 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
    aPKonta := PKontoCnt( cIdFirma + cIdvd + cBrDok )
    nCntKonto := Len( aPKonta )
 
-
    FOR i := 1 TO nCntKonto
 
       SEEK cIdFirma + cIdVd + cBrdok
       nTot1 := 0
       nTot2 := 0
-      nTot2b := 0
       nTot3 := 0
-      nTot4 := 0
-      nTot5 := 0
-      nTot6 := 0
-      nTot7 := 0
-
       DO WHILE !Eof() .AND. cIdFirma + cIdVd + cBrDok == field->idfirma + field->idvd + field->brdok
 
          IF aPKonta[ i ] <> field->pkonto
@@ -74,14 +79,9 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
          ENDIF
 
          cIdtarifa := field->idtarifa
-
-         // mpv
-         nU1 := 0
-         // pdv
-         nU2 := 0
-         // mpv sa porezom
-         nU3 := 0
-
+         nMPV := 0
+         nPDV := 0
+         nMPVSaPDV := 0
          select_o_tarifa( cIdtarifa )
          SELECT kalk_pripr
          DO WHILE !Eof() .AND. cIdfirma + cIdvd + cBrDok == field->idfirma + field->idvd + field->brdok ;
@@ -95,33 +95,34 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
             SELECT kalk_pripr
             nMpc := field->mpc
             nKolicina := field->kolicina
-            nU1 += nMpc * nKolicina
-            nU2 += nMpc * pdv_procenat_by_tarifa( cIdTarifa ) * nKolicina
-            nU3 += field->mpcsapp * nKolicina
-            // ukupna bruto marza
-            nTot6 += ( nMpc - kalk_pripr->nc ) * nKolicina
+            nMPV += nMpc * nKolicina
+            nPDV += nMpc * pdv_procenat_by_tarifa( cIdTarifa ) * nKolicina
+            nMPVSaPDV += field->mpcsapp * nKolicina
             SKIP
 
          ENDDO
 
-         nTot1 += nU1
-         nTot2 += nU2
-         nTot3 += nU3
+         nTot1 += nMPV
+         nTot2 += nPDV
+         nTot3 += nMPVSaPDV
          ? cIdTarifa
 
-         @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) PICT picproc()
+         @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) * 100 PICT picproc()
          nCol1 := PCol() + 1
-         @ PRow(), PCol() + 1   SAY nU1 PICT _pict
-         @ PRow(), PCol() + 1   SAY nU2 PICT _pict
-         @ PRow(), PCol() + 1   SAY nU3 PICT _pict
+         @ PRow(), PCol() + 1   SAY nMPV PICT _pict
+         @ PRow(), PCol() + 1   SAY nPDV PICT _pict
+         @ PRow(), PCol() + 1   SAY nMPVSaPDV PICT _pict
 
       ENDDO
 
-      IF PRow() > page_length()
-         FF
-         @ PRow(), 123 SAY "Str:" + Str( ++nStr, 3 )
+      IF bCheckPDFNovaStrana != NIL
+         Eval( bCheckPDFNovaStrana, .F.,  )
+      ELSE
+         IF PRow() > page_length()
+            FF
+            @ PRow(), 123 SAY "Str:" + Str( ++nStr, 3 )
+         ENDIF
       ENDIF
-
       ? m
       ? "UKUPNO " + aPKonta[ i ]
       @ PRow(), nCol1 SAY nTot1 PICT _pict
@@ -137,11 +138,6 @@ FUNCTION kalk_pripr_rekap_tarife( bCheckPDFNovaStrana )
    RETURN .T.
 
 
-/* PKontoCnt(cSeek)
- *     Kreira niz prodavnickih konta koji se nalaze u zadanom dokumentu
- *   param: cSeek - firma + tip dok + broj dok
- */
-
 FUNCTION PKontoCnt( cSeek )
 
    LOCAL nPos, aPKonta
@@ -149,10 +145,10 @@ FUNCTION PKontoCnt( cSeek )
    aPKonta := {}
    // baza: kalk_pripr, order: 2
    SEEK cSeek
-   DO WHILE !Eof() .AND. ( IdFirma + Idvd + BrDok ) = cSeek
-      nPos := AScan( aPKonta, PKonto )
+   DO WHILE !Eof() .AND. ( kalk_pripr->IdFirma + kalk_pripr->Idvd + kalk_pripr->BrDok ) == cSeek
+      nPos := AScan( aPKonta, kalk_pripr->PKonto )
       IF nPos < 1
-         AAdd( aPKonta, PKonto )
+         AAdd( aPKonta, kalk_pripr->PKonto )
       ENDIF
       SKIP
    ENDDO
