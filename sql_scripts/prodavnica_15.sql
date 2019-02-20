@@ -335,7 +335,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '11' ) AND ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '80' ) THEN  -- samo 11, 19, 80
+   IF ( NEW.idvd <> '11' ) AND ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) THEN  --  11, 19, 79, 80
      RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
@@ -343,7 +343,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT barkod, naz INTO barkodRoba, robaNaz
           from fmk.roba where id=NEW.idroba;
 ELSE
-   IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '80' ) THEN
+   IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) THEN
       RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
@@ -360,7 +360,7 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert % prodavnica % % %', NEW.idvd, idPos, NEW.idroba, public.barkod_ean13_to_num(barkodRoba,3);
-      IF ( NEW.idvd = '19' ) THEN
+      IF ( NEW.idvd = '19' ) OR ( NEW.idvd = '79' ) THEN
         cijena := NEW.fcj;  -- stara cijena
         ncijena := NEW.mpcsapp + NEW.fcj; -- nova cijena
       ELSE

@@ -155,9 +155,10 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "P"
-      pos_pregled_stavki_racuna( pos_doks->IdPos, pos_doks->datum, pos_doks->BrDok )
+      pos_pregled_stavki_racuna( pos_doks->IdPos, pos_doks->idvd, pos_doks->datum, pos_doks->BrDok )
       RETURN DE_REFRESH
    ENDIF
+
 
    IF Upper( Chr( nCh ) ) == "F"
       hParams[ "idpos" ] := pos_doks->idpos
@@ -185,7 +186,6 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF nCh == K_CTRL_V
-
       IF pos_doks->idvd <> "42"
          RETURN DE_CONT
       ENDIF

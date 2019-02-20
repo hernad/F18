@@ -144,7 +144,7 @@ METHOD set_module_gvars()
    // postavljanje globalnih varijabli
    PUBLIC gLocPort := "LPT1"
    PUBLIC gDiskFree := "N"
-   PUBLIC grbCjen := 2
+   //PUBLIC grbCjen := 2
    PUBLIC grbStId := "D"
 
    self:cName := "POS"
@@ -237,7 +237,8 @@ METHOD set_module_gvars()
    gRnFuter := fetch_metric( "RacunFooter", NIL, gRnFuter )
 
    // izgled racuna
-   grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
+   //grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
+   
    grbStId := fetch_metric( "RacunStampaIDArtikla", NIL, grbStId )
    // cijene
    gPopust := fetch_metric( "Popust", NIL, gPopust )

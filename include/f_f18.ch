@@ -134,10 +134,10 @@
 
 // modul POS (wa 130-160)
 #define F_POS_DOKS      130
+#define F_POS_DOKS_2    133
 #define F_POS           131
 #define F_POS_POS       131
 
-#define F__POS      133
 #define F__PRIPR    134
 #define F_PRIPRZ    135
 #define F_PRIPRG    136

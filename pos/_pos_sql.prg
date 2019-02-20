@@ -18,11 +18,9 @@ FUNCTION seek_pos_pos_2( cIdRoba, dDatum )
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba
    ENDIF
-
    IF dDatum != NIL
       hParams[ "datum" ] := dDatum
    ENDIF
-
    hParams[ "tag" ] := "2"
 
    RETURN seek_pos_h( hParams )
@@ -35,12 +33,9 @@ FUNCTION seek_pos_pos_5( cIdPos, cIdRoba, dDatum )
    IF cIdPos != NIL
       hParams[ "idpos" ] := cIdPos
    ENDIF
-
-
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba
    ENDIF
-
    IF dDatum != NIL
       hParams[ "datum" ] := dDatum
    ENDIF
@@ -57,7 +52,11 @@ FUNCTION seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok, cTag, cAlias )
    hParams[ "idvd" ] := cIdVd
    hParams[ "datum" ] := dDatum
    hParams[ "brdok" ] := cBrDok
-   hParams[ "tag" ] := cTag
+   IF cTag == NIL
+      hParams[ "tag" ] := 1
+   ELSE
+      hParams[ "tag" ] := cTag
+   ENDIF
    IF cAlias != NIL
       hParams[ "alias" ] := cAlias
    ENDIF
@@ -78,7 +77,6 @@ FUNCTION seek_pos_h( hParams )
    IF hb_HHasKey( hParams, "alias" )
       cAlias := hParams[ "alias" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "idpos" )
       cIdPos := hParams[ "idpos" ]
    ENDIF
@@ -88,11 +86,9 @@ FUNCTION seek_pos_h( hParams )
    IF hb_HHasKey( hParams, "datum" )
       dDatum := hParams[ "datum" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "brdok" )
       cBrDok := hParams[ "brdok" ]
    ENDIF
-
    IF hb_HHasKey( hParams, "idroba" )
       cIdRoba := hParams[ "idroba" ]
    ENDIF
@@ -111,7 +107,6 @@ FUNCTION seek_pos_h( hParams )
       ENDIF
       cSql += "idpos=" + sql_quote( cIdPos )
    ENDIF
-
    IF cIdVD != NIL .AND. !Empty( cIdVD )
       IF lWhere
          cSql += " AND "
@@ -121,8 +116,6 @@ FUNCTION seek_pos_h( hParams )
       ENDIF
       cSql += "idvd=" + sql_quote( cIdVd )
    ENDIF
-
-
    IF cIdRoba != NIL .AND. !Empty( cIdRoba )
       IF lWhere
          cSql += " AND "
@@ -132,7 +125,6 @@ FUNCTION seek_pos_h( hParams )
       ENDIF
       cSql += "idroba=" + sql_quote( cIdRoba )
    ENDIF
-
    IF dDatum != NIL .AND. !Empty( dDatum )
       IF lWhere
          cSql += " AND "
@@ -141,7 +133,6 @@ FUNCTION seek_pos_h( hParams )
       ENDIF
       cSql += "datum=" + sql_quote( dDatum )
    ENDIF
-
    IF hb_HHasKey( hParams, "dat_do" )
       IF !hb_HHasKey( hParams, "dat_od" )
          dDatOd := CToD( "" )
@@ -170,11 +161,9 @@ FUNCTION seek_pos_h( hParams )
    use_sql( cTable, cSql, cAlias )
 
    hIndexes := h_pos_pos_indexes()
-
    FOR EACH cKey IN hIndexes:Keys
       INDEX ON  &( hIndexes[ cKey ] )  TAG ( cKey ) TO ( cAlias )
    NEXT
-
    IF cTag == NIL
       cTag := "1"
    ENDIF
@@ -206,13 +195,13 @@ FUNCTION seek_pos_doks_2_za_period( cIdVd, dDatOd, dDatDo )
    RETURN seek_pos_doks( NIL, cIdVd, NIL, NIL, "2", dDatOd, dDatDo )
 
 
-FUNCTION seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo )
-   RETURN seek_pos_doks( cIdPos, cIdVd, NIL, NIL, "1", dDatOd, dDatDo )
+FUNCTION seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo, cAlias )
+   RETURN seek_pos_doks( cIdPos, cIdVd, NIL, NIL, "1", dDatOd, dDatDo, cAlias )
 
-FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
+FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
 
    LOCAL cSql
-   LOCAL cTable := "pos_doks", cAlias := "POS_DOKS"
+   LOCAL cTable := "pos_doks"
    LOCAL hIndexes, cKey
    LOCAL lWhere := .F.
 
@@ -227,7 +216,6 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
       ENDIF
       cSql += "idpos=" + sql_quote( cIdPos )
    ENDIF
-
    IF cIdVD != NIL .AND. !Empty( cIdVD )
       IF lWhere
          cSql += " AND "
@@ -237,7 +225,6 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
       ENDIF
       cSql += "idvd=" + sql_quote( cIdVd )
    ENDIF
-
    IF dDatum != NIL .AND. !Empty( dDatum )
       IF lWhere
          cSql += " AND "
@@ -246,7 +233,6 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
       ENDIF
       cSql += "datum=" + sql_quote( dDatum )
    ENDIF
-
    IF dDatDo != NIL
       IF dDatOd == NIL
          dDatOd := CToD( "" )
@@ -258,7 +244,6 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
       ENDIF
       cSql +=  parsiraj_sql_date_interval( "datum", dDatOd, dDatDo )
    ENDIF
-
    IF cBrDok != NIL .AND. !Empty( cBrDok )
       IF lWhere
          cSql += " AND "
@@ -268,10 +253,14 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo )
       ENDIF
       cSql += "brdok=" + sql_quote( cBrDok )
    ENDIF
+   IF cAlias == NIL
+      cAlias := "POS_DOKS"
+      SELECT F_POS_DOKS
+   ELSE
+      SELECT F_POS_DOKS_2
+   ENDIF
 
-   SELECT F_POS_DOKS
    use_sql( cTable, cSql, cAlias )
-
    hIndexes := h_pos_doks_indexes()
 
    FOR EACH cKey IN hIndexes:Keys
@@ -319,13 +308,13 @@ FUNCTION pos_dostupno_artikal( cIdRoba, nCijena, nNCijena )
    // where idroba = '000020' and cijena=1 and ncijena=0
    // and current_date>=dat_od and current_date<=dat_do;
 
-   cQuery := "SELECT kol_ulaz-kol_izlaz as stanje FROM " + f18_sql_schema("pos_stanje")
-   cQuery += " WHERE rtrim(idroba)=" + sql_quote(TRIM(cIdRoba))
-   cQuery += " AND cijena=" + sql_quote(nCijena)
-   cQuery += " AND ncijena=" + sql_quote(nNCijena)
+   cQuery := "SELECT kol_ulaz-kol_izlaz as stanje FROM " + f18_sql_schema( "pos_stanje" )
+   cQuery += " WHERE rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
+   cQuery += " AND cijena=" + sql_quote( nCijena )
+   cQuery += " AND ncijena=" + sql_quote( nNCijena )
    cQuery += " AND current_date>=dat_od AND current_date<=dat_do";
 
-   oTable := run_sql_query( cQuery )
+      oTable := run_sql_query( cQuery )
    oRow := oTable:GetRow( 1 )
    nStanje := oRow:FieldGet( oRow:FieldPos( "stanje" ) )
 

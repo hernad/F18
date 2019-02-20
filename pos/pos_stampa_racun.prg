@@ -11,44 +11,38 @@
 
 #include "f18.ch"
 
-FUNCTION pos_stampa_racuna_pdv( hParams )
+
+FUNCTION pos_stampa_racun( hParams )
 
    LOCAL cVrijeme
 
    pos_napuni_drn_rn_dbf( hParams )
+   pos_stampa_racun_napunjen_drn( hParams[ "priprema" ] )
 
-   IF !fiscal_opt_active() // fiskalni racun - ne stampati !
-      pos_racun_print()
-   ENDIF
-
-   RETURN cVrijeme
-
+   RETURN .T.
 
 FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    LOCAL cPosDB
-
    LOCAL cIdRoba
    LOCAL cIdTarifa
    LOCAL cRobaNaz
    LOCAL nRbr
-
    LOCAL nCjenBPDV
    LOCAL nCjenPDV
    LOCAL nKolicina
    LOCAL nPopust
    LOCAL nCjen2BPDV
    LOCAL nCjen2PDV
-   LOCAL nVPDV
-   LOCAL nPPDV
-   LOCAL nPDV, nIznPop
-
+   LOCAL nMPVSaPDV
+   LOCAL nPDV
+   LOCAL nIznPop
    LOCAL nUkStavka
    LOCAL nUkupno
    LOCAL cJmj
 
    // drn vars
-   LOCAL nUBPDV
+   LOCAL nMPVBezPDV
    LOCAL nUPDV
    LOCAL nUPopust
    LOCAL nUBPDVPopust
@@ -65,6 +59,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
    LOCAL cIdVrsteP := hParams[ "idvrstep" ]
    LOCAL cVrijeme := hParams[ "vrijeme" ]
 
+   PushWa()
    close_open_racun_tbl()
    zap_racun_tbl()
    firma_params_fill()
@@ -80,7 +75,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
    nCSum := 0
    nUkupno := 0
    nUkStavka := 0
-   nUBPDV := 0
+   nMPVBezPDV := 0
    nUPDV := 0
    nUPopust := 0
    nUBPDVPopust := 0
@@ -88,16 +83,15 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    IF !hParams[ "priprema" ]
       seek_pos_pos( cIdPos, POS_IDVD_RACUN, dDatum, cBrDok )
-      SELECT pos_doks
-      //cVrijeme := pos_doks->vrijeme
-      //cIdVrsteP := pos_doks->idvrstep
+      // cVrijeme := pos_doks->vrijeme
+      // cIdVrsteP := pos_doks->idvrstep
    ELSE
       SELECT _pos_pripr
       SET ORDER TO TAG "1"
       GO TOP
       SEEK cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok
-      //cVrijeme := Left( Time(), 5 )
-      //cIdVrsteP := _pos->idvrstep
+      // cVrijeme := Left( Time(), 5 )
+      // cIdVrsteP := _pos->idvrstep
    ENDIF
 
    find_pos_osob_by_naz( cIdRadnik )
@@ -115,9 +109,7 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       SELECT pos
    ENDIF
 
-   DO WHILE !Eof() .AND. iif( !hParams[ "priprema" ], ;
-         ( pos->idpos + pos->idvd + DToS( pos->datum ) + pos->brdok ) == ( cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok ), ;
-         ( _pos_pripr->idpos + _pos_pripr->idvd + DToS( _pos_pripr->datum ) + _pos_pripr->brdok ) == ( cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok ) )
+   DO WHILE !Eof() .AND. field->idpos + field->idvd + DToS( field->datum ) + field->brdok == cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok
 
       nCjenBPDV := 0
       nCjenPDV := 0
@@ -125,53 +117,44 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       nPopust := 0
       nCjen2BPDV := 0
       nCjen2PDV := 0
-      nPDV := 0
       nIznPop := 0
-
       cIdRoba := field->idroba
       cIdTarifa := field->idtarifa
-
       select_o_roba( cIdRoba )
       cJmj := roba->jmj
       cRobaNaz := AllTrim( roba->naz )
       select_o_tarifa( cIdTarifa )
-      nPPDV := tarifa->pdv
-
-      nStPP := 0
+      nPDV := tarifa->pdv
 
       IF hParams[ "priprema" ]
          SELECT _POS_PRIPR
       ELSE
          SELECT pos
       ENDIF
-
-      nKolicina := kolicina
-      nCjenPDV :=  cijena
-      nCjenBPDV := nCjenPDV / ( 1 + ( nPPDV + nStPP ) / 100 )
+      nKolicina := field->kolicina
+      nCjenPDV :=  field->cijena
+      nCjenBPDV := nCjenPDV / ( 1 + nPDV / 100 )
       nIznPop := field->ncijena
 
       nPopust := 0
-
       IF Round( nIznPop, 4 ) <> 0
          // cjena 2 : cjena sa pdv - iznos popusta
          nCjen2PDV := nCjenPDV - nIznPop
          // cjena 2 : cjena bez pdv - iznos popusta bez pdv
-         nCjen2BPDV := nCjenBPDV - ( nIznPop / ( 1 + nPPDV / 100 ) )
+         nCjen2BPDV := nCjenBPDV - ( nIznPop / ( 1 + nPDV / 100 ) )
          // procenat popusta
-         nPopust := ( ( nIznPop / ( 1 + nPPDV / 100 ) ) / nCjenBPDV ) * 100
-
+         nPopust := ( ( nIznPop / ( 1 + nPDV / 100 ) ) / nCjenBPDV ) * 100
       ENDIF
 
       // izracunaj ukupno za stavku
-      nUkupno := ( nKolicina * nCjenPDV ) - ( nKolicina * nIznPop )
+      nUkupno := nKolicina * nCjenPDV - nKolicina * nIznPop
 
       // izracunaj ukupnu vrijednost pdv-a
-      nVPDV := ( ( nKolicina * nCjenBPDV ) - ( nKolicina * ( nIznPop / ( 1 + nPPDV / 100 ) ) ) ) * ( nPPDV / 100 )
-
+      nMPVSaPDV := ( ( nKolicina * nCjenBPDV ) - ( nKolicina * ( nIznPop / ( 1 + nPDV / 100 ) ) ) ) * ( nPDV / 100 )
       // ukupno bez pdv-a
-      nUBPDV += nKolicina * nCjenBPDV
+      nMPVBezPDV += nKolicina * nCjenBPDV
       // ukupno pdv
-      nUPDV += nVPDV
+      nUPDV += nMPVSaPDV
       // total racuna
       nUTotal += nUkupno
 
@@ -181,18 +164,13 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       ENDIF
 
       // ukupno bez pdv-a - popust
-      nUBPDVPopust := nUBPDV - nUPopust
-
-      IF grbCjen == 2
-         nUkStavka := nUkupno
-      ELSE
-         nUkStavka := nUBPDVPopust
-      ENDIF
+      nUBPDVPopust := nMPVBezPDV - nUPopust
+      nUkStavka := nUkupno
 
       ++nCSum
 
       // cre_porezna_faktura_dbf.prg
-      dodaj_stavku_racuna( cBrDok, Str( nCSum, 3 ), "", cIdRoba, cRobaNaz, cJmj, nKolicina, Round( nCjenPDV, 3 ), Round( nCjenBPDV, 3 ), Round( nCjen2PDV, 3 ), Round( nCjen2BPDV, 3 ), Round( nPopust, 2 ), Round( nPPDV, 2 ), Round( nVPDV, 3 ), Round( nUkStavka, 3 ), 0, 0 )
+      dodaj_stavku_racuna( cBrDok, Str( nCSum, 3 ), "", cIdRoba, cRobaNaz, cJmj, nKolicina, Round( nCjenPDV, 3 ), Round( nCjenBPDV, 3 ), Round( nCjen2PDV, 3 ), Round( nCjen2BPDV, 3 ), Round( nPopust, 2 ), Round( nPDV, 2 ), Round( nMPVSaPDV, 3 ), Round( nUkStavka, 3 ), 0, 0 )
 
       IF hParams[ "priprema" ]
          SELECT _pos_pripr
@@ -203,13 +181,13 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    ENDDO
 
+
    // dodaj zapis u drn.dbf
-   add_drn( cBrDok, dDatum, NIL, NIL, cVrijeme, Round( nUBPDV, 2 ), Round( nUPopust, 2 ), Round( nUBPDVPopust, 2 ), Round( nUPDV, 2 ), Round( nUTotal - nFZaokr, 2 ), nCSum, 0, nFZaokr, 0 )
+   add_drn( cBrDok, dDatum, NIL, NIL, cVrijeme, Round( nMPVBezPDV, 2 ), Round( nUPopust, 2 ), Round( nUBPDVPopust, 2 ), Round( nUPDV, 2 ), Round( nUTotal - nFZaokr, 2 ), nCSum, 0, nFZaokr, 0 )
    // mjesto nastanka racuna
    add_drntext( "R01", gRnMjesto )
    // dodaj naziv radnika
    add_drntext( "R02", cRdnkNaz )
-
    // vrsta placanja
    add_drntext( "R05", cNazVrstaP )
    // dodatni text na racunu 3 linije
@@ -232,12 +210,15 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
       add_drntext( "D01", "A" ) // prepis racuna
    ENDIF
 
+   PopWa()
+
    RETURN .T.
 
 
 STATIC FUNCTION gvars_fill()
 
-   add_drntext( "P20", AllTrim( Str( grbCjen ) ) ) // prikaz cijene sa pdv, bez pdv
+   //add_drntext( "P20", AllTrim( Str( grbCjen ) ) ) // prikaz cijene sa pdv, bez pdv
+   add_drntext( "P20", AllTrim( "2" ) ) // prikaz cijene sa pdv
    add_drntext( "P21", grbStId ) // stampa id robe na racunu
 
    RETURN .T.

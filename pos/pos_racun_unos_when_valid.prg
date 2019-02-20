@@ -79,7 +79,7 @@ FUNCTION pos_when_racun_cijena_ncijena( cIdRoba, nCijena, nNCijena )
    IF roba->tip == "T"
       RETURN .T.
    ENDIF
-altd()
+
    pos_racun_artikal_info( 1, cIdRoba, "Stanje: " + AllTrim( Str( pos_dostupno_artikal( cIdRoba, nCijena, nNCijena ), 12, 3 ) ) )
    nPotrebnaKolicinaStavka := pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena )
    pos_racun_artikal_info( 3, cIdRoba, "Potrebna količina do sada: " + AllTrim( Str( nPotrebnaKolicinaStavka, 12, 3 ) ) + "" )

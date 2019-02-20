@@ -241,7 +241,6 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
    ENDIF
 
    cre_pom_topska_dbf()
-
    IF !pos_dokument_postoji( cIdPos, cIdTipDk, dDatDok, cBrDok )
       MsgBeep( "Dokument: " + cIdPos + "-" + cIdTipDk + "-" + PadL( cBrDok, FIELD_LEN_POS_BRDOK ) + " ne postoji !" )
       RETURN .F.
@@ -284,11 +283,9 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
       hRec[ "barkod" ] := roba->barkod
       hRec[ "robanaz" ] := roba->naz
       hRec[ "jmj" ] := roba->jmj
-
       dbf_update_rec( hRec )
 
       ++nRbr
-
       SELECT pos
       SKIP
 

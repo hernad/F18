@@ -103,38 +103,38 @@ FUNCTION fakt_stdok_pdv( cIdFirma, cIdTipDok, cBrDok, lJFill )
       fakt_otpremnica_mp_13_print()
    ELSE
 
-#ifdef F18_POS
-      IF cIdTipDok == "11" .AND. gMPPrint $ "DXT"
-         IF gMPPrint == "D" .OR. ( gMpPrint == "X" .AND. Pitanje(, "Stampati na traku (D/N)?", "D" ) == "D" ) .OR. gMPPrint == "T"
-
-            // stampa na traku
-            gLocPort := "LPT" + AllTrim( gMpLocPort )
-
-            lStartPrint := .T.
-
-            cPrn := gPrinter
-            gPrinter := "0"
-
-            IF gMPPrint == "T"
-               // test mode
-               gPrinter := "R"
-            ENDIF
-
-            st_rb_traka( lStartPrint, lPrepisDok )
-
-            gPrinter := cPrn
-
-         ELSE
-            pf_a4_print( NIL, cDocumentName )
-         ENDIF
-
-      ELSE
-         pf_a4_print( NIL, cDocumentName )
-      ENDIF
-
-#else
+//#ifdef F18_POS
+//      IF cIdTipDok == "11" .AND. gMPPrint $ "DXT"
+//         IF gMPPrint == "D" .OR. ( gMpPrint == "X" .AND. Pitanje(, "Stampati na traku (D/N)?", "D" ) == "D" ) .OR. gMPPrint == "T"
+//
+//            // stampa na traku
+//            gLocPort := "LPT" + AllTrim( gMpLocPort )
+//
+//            lStartPrint := .T.
+//
+//            cPrn := gPrinter
+//            gPrinter := "0"
+//
+//            IF gMPPrint == "T"
+//               // test mode
+//               gPrinter := "R"
+//            ENDIF
+//
+//            st_rb_traka( lStartPrint, lPrepisDok )
+//
+//            gPrinter := cPrn
+//
+//         ELSE
+//            pf_a4_print( NIL, cDocumentName )
+//         ENDIF
+//
+//      ELSE
+//         pf_a4_print( NIL, cDocumentName )
+//      ENDIF
+//
+//#else
       pf_a4_print( NIL, cDocumentName )
-#endif
+//#endif
 
    ENDIF
    my_close_all_dbf()
