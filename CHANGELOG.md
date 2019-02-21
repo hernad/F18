@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-02-20
+
+- KALK, POS maloprodaja init 
+
 ## 2019-02-07
 
 - POS grande cleanup/1
