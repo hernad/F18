@@ -98,7 +98,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpcExe, {|| fprint_dupliciraj_racun( s_hFiskalniDeviceParams ) } )
 
       AAdd( aOpc, "7. zatvori račun (cmd 56)       " )
-      AAdd( aOpcExe, {|| fprint_rn_close( s_hFiskalniDeviceParams ) } )
+      AAdd( aOpcExe, {|| fiscal_fprint_zatvori_racun( s_hFiskalniDeviceParams ) } )
 
       AAdd( aOpc, "8. zatvori nasilno račun (cmd 301) " )
       AAdd( aOpcExe, {|| fprint_komanda_301_zatvori_racun( s_hFiskalniDeviceParams ) } )

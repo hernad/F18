@@ -39,25 +39,20 @@ FUNCTION fiskalni_flink_racun( cFPath, cFName, aData, lStorno, cError )
    ENDIF
 
    fl_d_tmp() // pobrisi temp fajlove
-
    cFName := f_filepos( aData[ 1, 1 ] ) // naziv fajla
-
    _f_err_delete( cFPath, cFName ) // izbrisi fajl greske odmah na pocetku ako postoji
-
    // uzmi strukturu tabele za pos racun
    aStruct := _g_f_struct( F_POS_RN )
    // iscitaj pos matricu
    aPosData := __pos_rn( aData, lStorno )
-
    cTmp_date := DToC( Date() )
    cTmp_time := Time()
-
    fiscal_array_to_file( cFPath, cFName, aStruct, aPosData )
    IF cError == "D"
       MsgO( "Provjera grešaka ..." )
       Sleep( 3 )
       MsgC()
-      nErr := fc_pos_err( cFPath, cFName, cTmp_date, cTmp_time ) // provjeri da li je racun odstampan
+      nErr := flink_pos_error( cFPath, cFName, cTmp_date, cTmp_time ) // provjeri da li je racun odstampan
    ENDIF
 
    RETURN nErr
@@ -65,7 +60,7 @@ FUNCTION fiskalni_flink_racun( cFPath, cFName, aData, lStorno, cError )
 // ---------------------------------------------------
 // citanje log fajla
 // ---------------------------------------------------
-FUNCTION fc_pos_err( cFPath, cFName, cDate, cTime )
+FUNCTION flink_pos_error( cFPath, cFName, cDate, cTime )
 
    LOCAL nErr := 0
    LOCAL aDir := {}
@@ -89,8 +84,6 @@ FUNCTION fc_pos_err( cFPath, cFName, cDate, cTime )
    ENDIF
 
    aDir := Directory( cTmp )
-
-
    IF Len( aDir ) == 0  // nema fajla
       RETURN nErr
    ENDIF
@@ -103,11 +96,8 @@ FUNCTION fc_pos_err( cFPath, cFName, cDate, cTime )
 
    cF_patt := AllTrim( Upper( cFName ) ) + cDate + cF_th + cF_tm
 
-   // ima fajla...
-   // provjeri jos samo datum i vrijeme
-
+   // ima fajla, provjeri jos samo datum i vrijeme
    FOR i := 1 TO Len( aDir )
-
       cE_name := Upper( AllTrim( aDir[ i, 1 ] ) )
       // datum fajla
       cE_date := DToC( aDir[ i, 3 ] )
@@ -117,7 +107,6 @@ FUNCTION fc_pos_err( cFPath, cFName, cDate, cTime )
       cE_ts := SubStr( AllTrim( aDir[ i, 4 ] ), 7, 2 )
       // patern pretrage
       cE_patt := AllTrim( cE_name ) + cE_date + cE_th + cE_tm
-
       IF cE_patt == cF_patt // imamo error fajl !!!
          nErr := 1
          EXIT
@@ -132,7 +121,6 @@ FUNCTION fc_pos_err( cFPath, cFName, cDate, cTime )
 STATIC FUNCTION _f_err_delete( cFPath, cFName )
 
    LOCAL cTmp := cFPath + "printe~1" + SLASH + cFName
-
    FErase( cTmp )
 
    RETURN .T.
