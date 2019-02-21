@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+/*
 FUNCTION pos_menu_robmat()
 
    PRIVATE Opc := {}
@@ -26,9 +26,9 @@ FUNCTION pos_menu_robmat()
    f18_menu_sa_priv_vars_opc_opcexe_izbor( "mrbm" )
 
    RETURN .T.
+*/
 
-
-
+/*
 FUNCTION pos_menu_gendok()
 
    PRIVATE Opc := {}
@@ -44,4 +44,4 @@ FUNCTION pos_menu_gendok()
    f18_menu_sa_priv_vars_opc_opcexe_izbor( "gdok" )
 
    RETURN .T.
-   
+*/

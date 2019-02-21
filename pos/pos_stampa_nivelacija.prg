@@ -22,6 +22,7 @@ FUNCTION pos_stampa_nivelacija( hParams )
    LOCAL cIdRoba, nUkupno
    LOCAL xPrintOpt, bZagl
    LOCAL nCol := 50
+   LOCAL nCnt
 
    LOCAL cNaslov
    LOCAL cIdPos, cIdVd, dDatum, cBrDok // , cBrFaktP
@@ -32,15 +33,17 @@ FUNCTION pos_stampa_nivelacija( hParams )
    dDatum := hParams[ "datum" ]
    // cBrFaktP := hParams["brfaktp"]
 
-
-cNaslov := pos_dokument_naziv( cIdVd )
-
-   cNaslov += " " + cIdPos + "-" + cIdVd + "-" + AllTrim(cBrDok) + " od " + DToC( dDatum ) + "   NA DAN " + DToC( danasnji_datum() )
+   cNaslov := pos_dokument_naziv( cIdVd )
+   cNaslov += " " + cIdPos + "-" + cIdVd + "-" + AllTrim( cBrDok ) + " od " + DToC( dDatum ) + "   NA DAN " + DToC( danasnji_datum() )
    PushWA()
+   IF !hParams[ "priprema" ]
+      IF !seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"], "1", "PRIPRZ" )
+         RETURN .F.
+      ENDIF
+   ENDIF
 
    bZagl := {|| zagl() }
    nUkupno := 0
-
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
@@ -52,30 +55,35 @@ cNaslov := pos_dokument_naziv( cIdVd )
    ENDIF
 
    Eval( bZagl )
-   seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
-   DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd .AND. pos->datum == dDatum .AND. pos->brDok == cBrDok
+   SELECT PRIPRZ
+   nCnt := 0
+   DO WHILE !Eof() .AND. PRIPRZ->idpos == cIdPos .AND. PRIPRZ->idvd == cIdVd .AND. PRIPRZ->datum == dDatum .AND. PRIPRZ->brDok == cBrDok
 
       check_nova_strana( bZagl, s_oPDF )
-      cIdRoba := pos->idRoba
+      cIdRoba := PRIPRZ->idRoba
       select_o_roba( cIdRoba )
-      SELECT POS
-      ? pos->rbr, cIdRoba
+      SELECT PRIPRZ
+      IF FIELDPOS("RBR") <> 0
+         nCnt := VAL(PRIPRZ->RBR)
+      ELSE
+        nCnt++
+      ENDIF
+      ? TRANSFORM(nCnt, "999"), cIdRoba
       ?? PadR( roba->naz, s_cRobaNazDuzina ) + " "
-      ?? Transform( pos->kolicina, s_cPicKolicina ) + " "
-      ?? Transform( pos->cijena, s_cPicCijena ) + " "
-      ?? Transform( pos->ncijena, s_cPicCijena ) + " "
-      ?? Transform( pos->ncijena - pos->cijena, s_cPicCijena ) + " "
-      nCol := pcol()
-      ?? Transform( pos->kolicina * (pos->ncijena - pos->cijena), s_cPicIznos )
-      nUkupno += pos->kolicina * ( pos->ncijena - pos->cijena )
-
+      ?? Transform( PRIPRZ->kolicina, s_cPicKolicina ) + " "
+      ?? Transform( PRIPRZ->cijena, s_cPicCijena ) + " "
+      ?? Transform( PRIPRZ->ncijena, s_cPicCijena ) + " "
+      ?? Transform( PRIPRZ->ncijena - PRIPRZ->cijena, s_cPicCijena ) + " "
+      nCol := PCol()
+      ?? Transform( PRIPRZ->kolicina * ( PRIPRZ->ncijena - PRIPRZ->cijena ), s_cPicIznos )
+      nUkupno += PRIPRZ->kolicina * ( PRIPRZ->ncijena - PRIPRZ->cijena )
       SKIP
    ENDDO
    check_nova_strana( bZagl, s_oPDF, .F., 3 )
    zagl( "-" )
    ?U "  UKUPNO DOKUMENT:"
 
-    @ prow(), nCol SAY Transform( nUkupno, s_cPicIznos )
+   @ PRow(), nCol SAY Transform( nUkupno, s_cPicIznos )
    zagl( "-" )
 
    PopWa()
