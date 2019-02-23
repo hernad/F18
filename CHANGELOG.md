@@ -3,11 +3,11 @@
 ## 2019-02-23
 
 - ci fix
-- debug pdf-view
+- debug pdf-view inkey(0.2) -> inkey(0)
 
 ## 2019-02-20
 
-- KALK, POS maloprodaja init 
+- KALK, POS maloprodaja init
 
 ## 2019-02-07
 
