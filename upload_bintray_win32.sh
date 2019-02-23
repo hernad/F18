@@ -88,7 +88,7 @@ pacman -Qi mingw-w64-$MINGW_ARCH-openssl
 
 DLLS+=" wget.exe"
 DLLS+=" libpsl-5.dll libcares-3.dll libgpgme-11.dll libwinpthread-1.dll"
-DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-4.dll"
+DLLS+=" libassuan-0.dll libgpg-error-0.dll libiconv-2.dll libidn2-0.dll"
 DLLS+=" libintl-8.dll libunistring-2.dll libmetalink-3.dll libexpat-1.dll"
 DLLS+=" libpcre2-8-0.dll zlib1.dll"
 
