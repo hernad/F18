@@ -31,7 +31,7 @@ FUNCTION PDF_open_dokument( cFile )
        SetPRC( 0, 0 )
        OutStd("[vscode#pdf.view]" + cFile + "[vscode#end]")
        OutStd("")
-       inkey(0.2)
+       inkey(0)
        RESTORE SCREEN FROM cScr
        //Alert("View PDF:" + cFile)
        RETURN .T.
