@@ -74,11 +74,11 @@ FUNCTION kalk_get_1_16()
    SELECT kalk_pripr
 
    @ box_x_koord() + 14, box_y_koord() + 2   SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  WHEN V_kol10()
+   @ box_x_koord() + 15, box_y_koord() + 2   SAY "VPC      "  GET _VPC  PICTURE piccdem() WHEN set_vpc_mag_16_95_96()
+
    READ
 
-   _VPC := _nc
    nKalkStrana := 2
-   _marza := _vpc - _nc
    _MKonto := _Idkonto
    _MU_I := "1"
    _PKonto := ""

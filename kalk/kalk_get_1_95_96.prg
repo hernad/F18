@@ -15,10 +15,11 @@
 MEMVAR nKalkRBr
 MEMVAR GetList
 MEMVAR _datfaktp, _datdok, _idkonto, _mkonto, _idkonto2
+MEMVAR _vpc, _nc, _marza
 
 FUNCTION kalk_get_1_95_96()
 
-   //lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
+   // lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
 
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
@@ -117,8 +118,12 @@ FUNCTION kalk_get_1_95_96()
       ENDIF
    ENDIF
 
+
+altd()
    SELECT kalk_pripr
    @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  VALID kalk_valid_kolicina_mag( nKolicinaNaStanju )
+
+   @ box_x_koord() + 15, box_y_koord() + 2  SAY "VPC      "  GET _VPC  PICTURE piccdem() WHEN set_vpc_mag_16_95_96()
 
    READ
 
@@ -126,8 +131,6 @@ FUNCTION kalk_get_1_95_96()
    nKalkStrana := 2
    _Marza := 0
    _TMarza := "A"
-   _VPC := _NC
-   _marza := _vpc - _nc
    _MU_I := "5"
    _PKonto := ""
    _PU_I := ""
@@ -194,3 +197,11 @@ STATIC FUNCTION RadNalOK()
 
    RETURN lOK
 */
+
+
+FUNCTION set_vpc_mag_16_95_96()
+
+   _vpc := vpc_magacin_rs_priprema()
+   _marza := _vpc - _nc
+
+   RETURN .F.

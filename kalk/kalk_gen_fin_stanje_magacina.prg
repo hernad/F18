@@ -325,6 +325,11 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    RETURN _cnt
 
 
+
+FUNCTION vpc_magacin_rs_priprema()
+   RETURN vpc_magacin_rs( .T. )
+
+
 FUNCTION vpc_magacin_rs( lKalkPriprema )
 
    LOCAL nVPC, nAlias
@@ -332,11 +337,12 @@ FUNCTION vpc_magacin_rs( lKalkPriprema )
    hb_default( @lKalkPriprema, .F. )
 
    IF lKalkPriprema
-      IF kalk_pripr->IdVd $ "14#10"
+      IF kalk_pripr->IdVd $ "14#10" // u dokumentu je vpc
          nVPC := kalk_pripr->vpc
       ELSE
+         // HACK: u dokument nije pohranjena vpc, uzeti iz robe
          // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
-         IF kalk_pripr->idpartner == PadR( "118169", 7 ) // majop
+         IF kalk_pripr->idpartner == PadR( "118169", 7 ) // HACK-2: majop
             nVPC := roba->vpc2
          ELSE
             nVPC := roba->vpc

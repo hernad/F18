@@ -359,6 +359,10 @@ METHOD MaxCol() CLASS PDFClass
          RETURN 240
       ENDIF
 
+      IF ::nFontSize == 7.5
+         RETURN 175
+      ENDIF
+
       SWITCH Round(::nFontSize, 0)
       CASE 10
          RETURN 135

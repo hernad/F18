@@ -11,31 +11,39 @@
 
 #include "f18.ch"
 
-MEMVAR m
+STATIC s_oPDF
+STATIC s_cLinija
+STATIC s_nLijevaMargina := 4
 
+MEMVAR nKalkMarzaVP
 MEMVAR nKalkPrevoz
 MEMVAR nKalkBankTr
 MEMVAR nKalkSpedTr
 MEMVAR nKalkCarDaz
 MEMVAR nKalkZavTr
-MEMVAR nKalkMarzaVP, nKalkMarzaMP
+MEMVAR cIdFirma, cIdVd, cBrDok
 
 FUNCTION kalk_stampa_dok_16_95_96()
 
-   LOCAL cKto1
-   LOCAL cKto2
-
-   // LOCAL cIdZaduz2
    LOCAL cPom
-   LOCAL cNaslov
-   LOCAL nCol1 := nCol2 := 0, nPom := 0
    LOCAL _page_len := RPT_PAGE_LEN
    LOCAL lVPC := .F.
    LOCAL nVPC, nUVPV, nTVPV, nTotVPV
+   LOCAL nTotNv, nTot6, nTot7, nTot8, nTot9, nTota, nTotb, nTotc, nTotd
+   LOCAL nUNv, nTNv
+   LOCAL cNaslov
+   LOCAL bZagl, xPrintOpt
+   LOCAL cIdKonto, cIdKonto2
+   LOCAL cIdKontoGlavni
+   LOCAL nC1, nC2, nC3
+   LOCAL cIdPartner, cBrFaktP
+   LOCAL nMarzaVPStopa, nTMarzaVP, nTotMarzaVP
 
-   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP
+   SELECT kalk_pripr
+   cIdFirma := kalk_pripr->idfirma
+   cIdVd := kalk_pripr->idvd
+   cBrDok := kalk_pripr->brdok
 
-   nStr := 0
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
    // dDatFaktP := field->DatFaktP
@@ -43,63 +51,35 @@ FUNCTION kalk_stampa_dok_16_95_96()
    cIdKonto2 := field->IdKonto2
    // cIdZaduz2 := field->IdZaduz2
 
-   P_12CPI
-   ?? "KALK BR:", cIdFirma + "-" + cIdVD + "-" + AllTrim( cBrDok ), "  Datum:", field->datdok
-
-   @ PRow(), 76 SAY "Str:" + Str( ++nStr, 3 )
-   cNaslov := _get_naslov_dokumenta( cIdVd )
-
-   ?
-   ? cNaslov
-   ?
-   IF cIdVd $ "95#96"
-      cPom := "Razduzuje:"
-      cKto1 := cIdKonto2
-      cKto2 := cIdKonto
-   ELSE
-      cPom := "Zaduzuje:"
-      cKto1 := cIdKonto
-      cKto2 := cIdKonto2
+   cNaslov := _get_naslov_dokumenta( cIdVd ) + ": " + cIdFirma + "-" + cIdVD + "-" + AllTrim( cBrDok ) + "  Datum:" +  DToC( field->datdok )
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
    ENDIF
 
-   lVPC := is_magacin_evidencija_vpc( cKto1 )
-   select_o_konto( cKto1 )
-   ? PadL( cPom, 14 ), AllTrim( cKto1 ) + " - " + PadR( konto->naz, 60 )
 
-   IF !Empty( cKto2 )
-      IF cIdVd $ "95#96"
-         cPom := "Zaduzuje:"
-      ELSE
-         cPom := "Razduzuje:"
-      ENDIF
-      select_o_konto( cKto2 )
-      ? PadL( cPom, 14 ), AllTrim( cKto2 ) + " - " + PadR( konto->naz, 60 )
-   ENDIF
-
+   bZagl := {|| zagl( cIdKonto, cIdKonto2, @lVpc ) }
    // IF !Empty( cIdZaduz2 )
    // select_o_fakt_objekti( cIdZaduz2 )
    // ? PadL( "Rad.nalog:", 14 ), AllTrim( cIdZaduz2 ) + " - " + AllTrim( fakt_objekti->naz )
    // ENDIF
 
-   ?
-   SELECT kalk_pripr
-   P_10CPI
-   P_COND
-   m := _get_line( lVPC )
-   ? m
-   ?U "*Rbr.* Konto * ARTIKAL  (šifra-naziv-jmj)                                 * Količina *   NC     *    NV     *"
-   IF lVPC
-      ??U "   PC    *    PV     *"
-   ENDIF
-   ? m
+   Eval( bZagl )
 
-   nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTota := nTotb := nTotc := nTotd := 0
+   nTot6 := nTot7 := nTot8 := nTot9 := nTota := nTotb := nTotc := nTotd := 0
+   nTotNv := 0
+   nTotMarzaVP := 0
    nTotVPV := 0
 
-   // PRIVATE cIdd := field->idpartner + field->brfaktp + field->idkonto + field->idkonto2
    DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND. cBrDok == field->BrDok .AND. cIdVD == field->IdVD
 
-      nT4 := nT5 := nT8 := nTVPV := 0
+      nTNv := 0
+      nTVPV := 0
+      nTMarzaVP := 0
       cBrFaktP := field->brfaktp
       // dDatFaktP := field->datfaktp
       cIdpartner := field->idpartner
@@ -109,78 +89,84 @@ FUNCTION kalk_stampa_dok_16_95_96()
       DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND. cBrDok == field->BrDok .AND. cIdVD == field->IdVD ;
             .AND. field->idpartner + field->brfaktp == cIdpartner + cBrfaktp
 
-         IF cIdVd $ "97" .AND. field->tbanktr == "X"
-            SKIP 1
-            LOOP
-         ENDIF
+         // IF field->tbanktr == "X" // izgenerisani dokument
+         // SKIP 1
+         // LOOP
+         // ENDIF
 
          select_o_roba( kalk_pripr->idroba )
          select_o_tarifa( kalk_pripr->idtarifa )
          SELECT kalk_pripr
          kalk_set_vars_troskovi_marzavp_marzamp()
-         print_nova_strana( 125, @nStr, 5 )
 
-         // sKol := field->kolicina
-         // NV
-         nT4 += ( nU4 := field->nc * field->kolicina )
+         check_nova_strana( bZagl, s_oPDF )
+         nTNv += ( nUNv := Round( field->nc * field->kolicina, 2 ) )
 
-         @ PRow() + 1, 0 SAY field->rbr PICT "99999"
+         @ PRow() + 1, s_nLijevaMargina SAY field->rbr PICT "99999"
          IF field->idvd == "16"
-            cNKonto := field->idkonto
+            cIdKontoGlavni := field->idkonto
          ELSE
-            cNKonto := field->idkonto2
+            cIdKontoGlavni := field->idkonto2
          ENDIF
-
-         @ PRow(), 6 SAY ""
-         ?? PadR( cNKonto, 7 ), PadR( AllTrim( field->idroba ) + "-" + AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 60 )
-         @ PRow(), nC1 := PCol() + 1 SAY field->kolicina PICT pickol()
-         @ PRow(), PCol() + 1 SAY field->nc PICT piccdem
-         @ PRow(), PCol() + 1 SAY nU4 PICT picdem()
+         ?? "  ", PadR( cIdKontoGlavni, 7 ), PadR( AllTrim( field->idroba ) + "-" + AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 60 )
+         @ PRow(), PCol() + 1 SAY field->kolicina PICT pickol()
+         @ PRow(), PCol() + 1 SAY field->nc PICT piccdem()
+         @ PRow(), nC1 := PCol() + 1 SAY nUNv PICT picdem()
          IF lVPC
             nVPC := vpc_magacin_rs( .T. )
             SELECT kalk_pripr
-            nTVPV += ( nUVPV := nVPC * field->kolicina )
-            @ PRow(), PCol() + 1 SAY nVPC PICT piccdem
-            @ PRow(), PCol() + 1 SAY nUVPV PICT picdem()
+            nUVPV := nVPC * field->kolicina
+            // nv * (marzavp% + 1) = vpv =>  marzavp% = vpv/nv - 1 x 100%
+            IF Round( nUNV, 4 ) == 0
+               nMarzaVPStopa :=  0
+            ELSE
+               nMarzaVPStopa := ( nUVPV / nUNV - 1 ) * 100
+            ENDIF
+            @ PRow(), PCol() + 1 SAY nVPC PICT piccdem()
+            @ PRow(), PCol() + 1 SAY nMarzaVPStopa PICT picproc()
+            @ PRow(), nC2 := PCol() + 1 SAY nUVPV - nUNV PICT picdem()
+            @ PRow(), nC3 := PCol() + 1 SAY nUVPV PICT picdem()
+            nTMarzaVP += Round( nUVPV - nUNV, 2 )
+            nTVPV += Round( nUVPV, 2 )
+
          ENDIF
          SKIP
 
       ENDDO
 
-      nTot4 += nT4
-      // nTot5 += nT5
-      // nTot8 += nT8
+      nTotNv += nTNv
       IF lVPC
+         nTotMarzaVP += nTMarzaVP
          nTotVPV += nTVPV
       ENDIF
-      ? m
+      ? s_cLinija
 
-      print_nova_strana( 125, @nStr, 5 )
-      @ PRow() + 1, 0 SAY "Ukupno za: "
-      ?? AllTrim( cIdpartner ) +  " - " + AllTrim( partn->naz )
-      print_nova_strana( 125, @nStr, 5 )
-      ? "Broj fakture:", AllTrim( cBrFaktP )  // , "/", dDatFaktp
-      @ PRow(), nC1 SAY 0 PICT "@Z " + piccdem
-      @ PRow(), PCol() + 1 SAY nT4 PICT picdem()
+      check_nova_strana( bZagl, s_oPDF, .F., 3 )
+
+      // ukupno za dokument
+      // @ PRow() + 1, 0 SAY "Ukupno za: "
+      // ?? AllTrim( cIdpartner ) +  " - " + AllTrim( partn->naz )
+      ? Space( s_nLijevaMargina ) + "Broj fakture:", AllTrim( cBrFaktP )
+      @ PRow(), nC1 SAY nTNv PICT picdem()
       IF lVPC
-         @ PRow(), PCol() + 1 SAY 0 PICT "@Z " + piccdem
-         @ PRow(), PCol() + 1 SAY nTotVPV PICT picdem()
+         @ PRow(), nC2 SAY nTMarzaVP PICT picdem()
+         @ PRow(), nC3 SAY nTVPV PICT picdem()
       ENDIF
-      ? m
+      ? s_cLinija
 
    ENDDO
 
-   print_nova_strana( 125, @nStr, 5 )
-
-   ? m
-   @ PRow() + 1, 0 SAY "Ukupno:"
-   @ PRow(), nC1 SAY 0 PICT "@Z " + piccdem()
-   @ PRow(), PCol() + 1 SAY nTot4 PICT picdem()
+   check_nova_strana( bZagl, s_oPDF, .F., 3 )
+   ? s_cLinija
+   @ PRow() + 1, s_nLijevaMargina SAY "Ukupno za sve dokumente:"
+   @ PRow(), nC1 SAY nTotNv PICT picdem()
    IF lVPC
-      @ PRow(), PCol() + 1 SAY 0 PICT "@Z " + piccdem()
-      @ PRow(), PCol() + 1 SAY nTotVPV PICT picdem()
+      @ PRow(), nC2 SAY nTotMarzaVP PICT picdem()
+      @ PRow(), nC3 SAY nTotVPV PICT picdem()
    ENDIF
-   ? m
+   ? s_cLinija
+
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
@@ -197,26 +183,54 @@ FUNCTION is_magacin_evidencija_vpc( cIdKonto )
    RETURN lVpc
 
 
-STATIC FUNCTION _get_naslov_dokumenta( cIdVd )
+STATIC FUNCTION zagl( cIdKonto, cIdkonto2, lVpc )
 
-   LOCAL cRet := "????"
+   LOCAL cPom
 
-   IF cIdVd == "16"
-      cRet := "PRIJEM U MAGACIN (INTERNI DOKUMENT):"
-   ELSEIF cIdVd == "96"
-      cRet := "OTPREMA IZ MAGACINA (INTERNI DOKUMENT):"
-      // ELSEIF cIdVd == "97"
-      // cRet := "PREBACIVANJE IZ MAGACINA U MAGACIN (INTERNI DOKUMENT):"
-   ELSEIF cIdVd == "95"
-      cRet := "OTPIS MAGACIN:"
+   ?
+   PushWa()
+   IF cIdVd $ "95#96"
+      lVPC := is_magacin_evidencija_vpc( cIdKonto2 )
+      cPom := "Razdužuje:"
+      select_o_konto( cIdKonto2 )
+      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 1 ), AllTrim( cIdKonto2 ) + " - " + PadR( _u( konto->naz ), 60 )
+
+      IF !Empty( cIdKonto )
+         cPom := "Zadužuje:"
+         select_o_konto( cIdKonto )
+         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( _u( konto->naz ), 60 )
+      ENDIF
+
+   ELSE // 16
+      lVPC := is_magacin_evidencija_vpc( cIdKonto )
+      cPom := "Zadužuje:"
+      select_o_konto( cIdKonto )
+      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( _u( konto->naz ), 60 )
+
+      IF !Empty( cIdKonto2 )
+         cPom := "Razdužuje:"
+         select_o_konto( cIdKonto2 )
+         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto2 ) + " - " + PadR( _u( konto->naz ), 60 )
+      ENDIF
    ENDIF
+   ?
 
-   RETURN cRet
+   s_cLinija := get_linija( lVPC )
+   ? s_cLinija
+   ?U Space( s_nLijevaMargina ) + "*Rbr.* Konto * ARTIKAL  (šifra-naziv-jmj)                                 * Količina *   NC     *    NV     *"
+   IF lVPC
+      ??U "   VPC   *  Marža % *   Marža  *   VPV   *"
+   ENDIF
+   ? s_cLinija
+
+   PopWa()
+
+   RETURN .T.
 
 
-STATIC FUNCTION _get_line( lVPC )
+STATIC FUNCTION get_linija( lVPC )
 
-   LOCAL cLine := ""
+   LOCAL cLine := Space( s_nLijevaMargina )
 
    hb_default( @lVPC, .F. )
    cLine += Replicate( "-", 5 )
@@ -229,12 +243,31 @@ STATIC FUNCTION _get_line( lVPC )
    cLine += Space( 1 )
    cLine += Replicate( "-", 10 )
    cLine += Space( 1 )
-   cLine += Replicate( "-", 11 )
+   cLine += Replicate( "-", 10 )
    IF lVPC
       cLine += Space( 1 )
       cLine += Replicate( "-", 10 )
       cLine += Space( 1 )
-      cLine += Replicate( "-", 11 )
+      cLine += Replicate( "-", 10 )
+      cLine += Space( 1 )
+      cLine += Replicate( "-", 10 )
+      cLine += Space( 1 )
+      cLine += Replicate( "-", 10 )
    ENDIF
 
    RETURN cLine
+
+
+STATIC FUNCTION _get_naslov_dokumenta( cIdVd )
+
+   LOCAL cRet := ""
+
+   IF cIdVd == "16"
+      cRet := "PRIJEM U MAGACIN (INTERNI DOKUMENT)"
+   ELSEIF cIdVd == "96"
+      cRet := "OTPREMA IZ MAGACINA (INTERNI DOKUMENT)"
+   ELSEIF cIdVd == "95"
+      cRet := "OTPIS MAGACIN"
+   ENDIF
+
+   RETURN cRet
