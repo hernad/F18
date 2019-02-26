@@ -88,21 +88,21 @@ FUNCTION kalk_get_1_95_96()
    ENDIF
 
    nKolicinaNaStanju := 0
-   nKolZN := 0
-   nC1 := nC2 := 0
+   nKolicinaZadnjaNabavka := 0
+   nNabCjZadnjaNabavka := nNabCjSrednja := 0
 
    IF _TBankTr <> "X"
 
-      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, @nC1, @nC2 )
+      kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolicinaZadnjaNabavka, @nNabCjZadnjaNabavka, @nNabCjSrednja )
       @ box_x_koord() + 12, box_y_koord() + 30   SAY "Ukupno na stanju "; @ box_x_koord() + 12, Col() + 2 SAY nKolicinaNaStanju PICT pickol
-      @ box_x_koord() + 13, box_y_koord() + 30   SAY "Srednja nc "; @ box_x_koord() + 13, Col() + 2 SAY nc2 PICT pickol
+      @ box_x_koord() + 13, box_y_koord() + 30   SAY "Srednja nc "; @ box_x_koord() + 13, Col() + 2 SAY nNabCjSrednja PICT pickol
 
       IF !( roba->tip $ "UT" )
 
          IF kalk_metoda_nc() $ "13"
-            _nc := nc1
+            _nc := nNabCjZadnjaNabavka
          ELSEIF kalk_metoda_nc() == "2"
-            _nc := nc2
+            _nc := nNabCjSrednja
          ENDIF
 
          IF kalk_metoda_nc() == "2"

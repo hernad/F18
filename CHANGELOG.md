@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-02-26
+
+- KALK IM obrazac PDF
+
 ## 2019-02-25
 
 - KALK 16, 95, 96
