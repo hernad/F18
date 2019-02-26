@@ -11,14 +11,17 @@
 
 #include "f18.ch"
 
-MEMVAR m
+STATIC s_oPDF
+STATIC s_cLinija
+STATIC s_nRobaNazivDuzina := 66
+MEMVAR cIdFirma, cIdVd, cBrDok
 
 FUNCTION kalk_stampa_dok_im()
 
+   LOCAL nColIdRoba, nColKolicina
    LOCAL nCol1 := 0
    LOCAL nCol2 := 0
    LOCAL nPom := 0
-
    LOCAL nTotalVisak, nTotalManjak, nU4
    LOCAL nTot5 := 0
    LOCAL nTot6 := 0
@@ -34,9 +37,10 @@ FUNCTION kalk_stampa_dok_im()
    LOCAL nStr
    LOCAL cIdPartner
    LOCAL cBrFaktP
-   //LOCAL dDatFaktP
+   LOCAL xPrintOpt, bZagl, cNaslov
+
+   // LOCAL dDatFaktP
    LOCAL cIdKonto
-   LOCAL cIdKonto2
    LOCAL cSamoObrazac, cPrikazCijene, cCijenaTip, nCijena, nC1, nColTotal
 
    PRIVATE nKalkPrevoz
@@ -47,12 +51,18 @@ FUNCTION kalk_stampa_dok_im()
    PRIVATE nKalkMarzaVP
    PRIVATE nKalkMarzaMP
 
-   nStr := 0
+   // nStr := 0
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP   := kalk_pripr->BrFaktP
-   //dDatFaktP  := kalk_pripr->DatFaktP
+   // dDatFaktP  := kalk_pripr->DatFaktP
    cIdKonto   := kalk_pripr->IdKonto
-   cIdKonto2  := kalk_pripr->IdKonto2
+   cIdFirma := kalk_pripr->IdFirma
+   cIdVd := kalk_pripr->Idvd
+   cBrDok := kalk_pripr->brdok
+
+   select_o_konto( cIdkonto )
+   SELECT kalk_pripr
+
 
    cSamoObrazac := Pitanje(, "Prikaz samo obrasca inventure? (D/N)" )
    cPrikazCijene := "D"
@@ -61,27 +71,23 @@ FUNCTION kalk_stampa_dok_im()
    ENDIF
    cCijenaTip := Pitanje(, "Na obrascu prikazati VPC (D) ili NC (N)?", "N" )
 
-   P_10CPI
-   select_o_konto( cIdkonto )
-   SELECT kalk_pripr
-   ?? "INVENTURA MAGACIN ", cIdkonto, "-", konto->naz
-   P_COND2
-   ?
-   ? "DOKUMENT BR. :", cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), "Datum:", kalk_pripr->DatDok
-   ?
-   @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
+   cNaslov := "INVENTURA MAGACIN " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( konto->naz ) + " , Datum: " + DToC( kalk_pripr->DatDok )
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size"] := 9
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
 
+   bZagl := {|| zagl() }
 
    SELECT kalk_pripr
-   m := "--- --------------------------------------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- -----------"
-   ?U m
-   ?U  "*R * ROBA                                  *  Popisana*  Knjižna *  Knjižna * Popisana *  Razlika *  Cijena  *   VIŠAK  *  MANJAK  *"
-   ?U  "*BR* TARIFA                                *  Kolicina*  Količina*vrijednost*vrijednost*  (kol)   *          *          *          *"
-   ?U m
 
    nTotalVisak := 0
    nTotalManjak := 0
-
    nTot5 := 0
    nTot6 := 0
    nTot7 := 0
@@ -94,14 +100,13 @@ FUNCTION kalk_stampa_dok_im()
    nTotKol := 0
    nTotGKol := 0
 
-   PRIVATE cIdd := idPartner + brFaktP + idKonto + idKonto2
-
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVd
+   Eval( bZagl )
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVd
 
       kalk_set_vars_troskovi_marzavp_marzamp()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-      print_nova_strana( 125, @nStr, 3 )
-      SKol := Kolicina
+
+      // SKol := kalk_pripr->Kolicina
 
       IF cCijenaTIP == "N"
          nCijena := field->nc
@@ -109,33 +114,38 @@ FUNCTION kalk_stampa_dok_im()
          nCijena := field->vpc
       ENDIF
 
-      @ PRow() + 1, 0 SAY  Rbr PICTURE "XXX"
-      @ PRow(), 4 SAY  ""
-      ?? idroba, Trim( Left( ROBA->naz, 40 ) ), "(", ROBA->jmj, ")"
+      check_nova_strana( bZagl, s_oPDF )
 
+      @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "XXX"
+      @ PRow(), nColIdRoba := PCol() + 1 SAY  kalk_pripr->idroba
+      @ PRow(), PCol() + 1  SAY PadR( Trim( ROBA->naz ), s_nRobaNazivDuzina )
+      @ PRow(), PCol() + 1  SAY ROBA->jmj
+      nColKolicina := PCol() + 1
+
+      @ PRow() + 1, nColIdRoba SAY kalk_pripr->IdTarifa
       IF roba_barkod_pri_unosu() .AND. !Empty( roba->barkod )
-         ?? ", BK: " + ROBA->barkod
+         ?? " BK: " + ROBA->barkod
       ENDIF
 
-      @ PRow() + 1, 4 SAY IdTarifa + Space( 4 )
       IF cSamoObrazac == "D"
-         @ PRow(), PCol() + 30 SAY Kolicina  PICTURE Replicate( "_", Len( kalk_pic_kolicina_bilo_gpickol() ) )
-         @ PRow(), PCol() + 1 SAY GKolicina  PICTURE Replicate( " ", Len( kalk_pic_kolicina_bilo_gpickol() ) )
+         @ PRow(), nColKolicina SAY kalk_pripr->Kolicina  PICTURE Replicate( "_", Len( kalk_pic_kolicina_bilo_gpickol() ) )
+         @ PRow(), PCol() + 1 SAY kalk_pripr->GKolicina  PICTURE Replicate( " ", Len( kalk_pic_kolicina_bilo_gpickol() ) )
       ELSE
-         @ PRow(), PCol() + 30 SAY Kolicina  PICTURE kalk_pic_kolicina_bilo_gpickol()
-         @ PRow(), PCol() + 1 SAY GKolicina  PICTURE kalk_pic_kolicina_bilo_gpickol()
+         @ PRow(), nColKolicina SAY kalk_pripr->Kolicina  PICTURE kalk_pic_kolicina_bilo_gpickol()
+         @ PRow(), PCol() + 1 SAY kalk_pripr->GKolicina  PICTURE kalk_pic_kolicina_bilo_gpickol()
       ENDIF
       nC1 := PCol() + 1
 
       IF cSamoObrazac == "D"
-         @ PRow(), PCol() + 1 SAY gkolicina * nCijena  PICTURE Replicate( " ", Len( kalk_pic_iznos_bilo_gpicdem() ) )
-         @ PRow(), PCol() + 1 SAY kolicina * nCijena   PICTURE Replicate( "_", Len( kalk_pic_iznos_bilo_gpicdem() ) )
-         @ PRow(), PCol() + 1 SAY Kolicina - GKolicina  PICTURE Replicate( " ", Len( kalk_pic_kolicina_bilo_gpickol() ) )
+         @ PRow(), PCol() + 1 SAY kalk_pripr->gkolicina * nCijena  PICTURE Replicate( " ", Len( kalk_pic_iznos_bilo_gpicdem() ) )
+         @ PRow(), PCol() + 1 SAY kalk_pripr->kolicina * nCijena   PICTURE Replicate( "_", Len( kalk_pic_iznos_bilo_gpicdem() ) )
+         @ PRow(), PCol() + 1 SAY kalk_pripr->Kolicina - GKolicina  PICTURE Replicate( " ", Len( kalk_pic_kolicina_bilo_gpickol() ) )
       ELSE
-         @ PRow(), PCol() + 1 SAY gkolicina * nCijena PICTURE kalk_pic_iznos_bilo_gpicdem() // knjizna vrijednost
-         @ PRow(), PCol() + 1 SAY kolicina * nCijena  PICTURE kalk_pic_iznos_bilo_gpicdem() // popisana vrijednost
-         @ PRow(), PCol() + 1 SAY Kolicina - GKolicina  PICTURE kalk_pic_kolicina_bilo_gpickol() // visak-manjak
+         @ PRow(), PCol() + 1 SAY kalk_pripr->gkolicina * nCijena PICTURE kalk_pic_iznos_bilo_gpicdem() // knjizna vrijednost
+         @ PRow(), PCol() + 1 SAY kalk_pripr->kolicina * nCijena  PICTURE kalk_pic_iznos_bilo_gpicdem() // popisana vrijednost
+         @ PRow(), PCol() + 1 SAY kalk_pripr->Kolicina - kalk_pripr->GKolicina  PICTURE kalk_pic_kolicina_bilo_gpickol() // visak-manjak
       ENDIF
+
       IF ( cPrikazCijene == "D" )
          @ PRow(), PCol() + 1 SAY nCijena  PICTURE PicCDEM // veleprodajna cij
       ELSE
@@ -144,7 +154,6 @@ FUNCTION kalk_stampa_dok_im()
 
       nTotb += kalk_pripr->gkolicina * nCijena
       nTotc += kalk_pripr->kolicina * nCijena
-
       nU4 := nCijena * ( kalk_pripr->Kolicina - kalk_pripr->gKolicina )
 
       IF nU4 > 0 // popisana - knjizna > 0 - visak
@@ -167,14 +176,16 @@ FUNCTION kalk_stampa_dok_im()
 
    ENDDO
 
-   print_nova_strana( 125, @nStr, 5 )
-
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
    IF cSamoObrazac == "D"
       kalk_clanovi_komisije()
-      RETURN .F.
+      f18_end_print( NIL, xPrintOpt )
+      RETURN .T.
    ENDIF
 
-   ? m
+
+   check_nova_strana( bZagl, s_oPDF, .F., 3 )
+   ? s_cLinija
    @ PRow() + 1, 0 SAY "Ukupno:"
    @ PRow(), ( PCol() * 6 ) + 2 SAY nTotKol PICT kalk_pic_kolicina_bilo_gpickol()
    @ PRow(), PCol() + 1 SAY nTotGKol PICT kalk_pic_kolicina_bilo_gpickol()
@@ -203,8 +214,73 @@ FUNCTION kalk_stampa_dok_im()
       @ PRow(), nColTotal SAY Space( Len( kalk_pic_iznos_bilo_gpicdem() ) )
       @ PRow(), PCol() + 1 SAY - nTotalVisak + nTotalManjak PICT kalk_pic_iznos_bilo_gpicdem()
    ENDIF
+   ? s_cLinija
 
-
-   ? m
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
+
+
+STATIC FUNCTION zagl()
+
+   LOCAL nI, cHeader1, cHeader2
+
+   s_cLinija := "---"
+   s_cLinija += Space( 1 )
+   cHeader1 := "*R *"
+   cHeader2 := "*br*"
+
+   s_cLinija += Replicate( "-", 10 ) // cIdroba
+   s_cLinija += Space( 1 )
+
+   s_cLinija += Replicate( "-", s_nRobaNazivDuzina )
+   s_cLinija += Space( 1 )
+
+   cHeader1 += PadC( "ID", 10 ) + "*"
+   cHeader2 += PadC( " ", 10 ) + "*"
+
+   cHeader1 += PadC( "Roba", s_nRobaNazivDuzina ) + "*"
+   cHeader2 += PadC( " ", s_nRobaNazivDuzina ) + "*"
+
+   s_cLinija += "---"
+   s_cLinija += Space( 1 )
+
+   cHeader1 += "JMJ*"
+   cHeader2 += "   *"
+
+   cHeader1 += PadC( _u( "Popisana" ), 10 ) + "*"
+   cHeader2 += PadC( _u( "kol" ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "Knjižna" ), 10 ) + "*"
+   cHeader2 += PadC( _u( "kol" ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "Knjižna" ), 10 ) + "*"
+   cHeader2 += PadC( _u( "vrij." ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "Popisana" ), 10 ) + "*"
+   cHeader2 += PadC( _u( "vrij." ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "Razlika" ), 10 ) + "*"
+   cHeader2 += PadC( _u( "(količina)" ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "Cijena" ), 10 ) + "*"
+   cHeader2 += PadC( _u( " " ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "VIŠAK" ), 10 ) + "*"
+   cHeader2 += PadC( _u( " " ), 10 ) + "*"
+
+   cHeader1 += PadC( _u( "MANJAK" ), 9 ) + "*"
+   cHeader2 += PadC( _u( " " ), 9 ) + "*"
+
+   FOR nI := 1 TO 7
+      s_cLinija += Replicate( "-", 10 )
+      s_cLinija += Space( 1 )
+   NEXT
+
+   s_cLinija += Replicate( "-", 10 )
+   s_cLinija += Space( 1 )
+
+   ? s_cLinija
+   ? cHeader1
+   ? cHeader2
+   ?U s_cLinija

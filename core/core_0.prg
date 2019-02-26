@@ -160,7 +160,7 @@ FUNCTION f18_util_path()
 FUNCTION f18_template_path()
    RETURN SLASH + ".." + SLASH + "F18_template" + SLASH
 
-FUNCTION f18_exe_template_file_name( cTemplate )
+FUNCTION f18_template_file_name( cTemplate )
    RETURN f18_exe_path() + f18_template_path() + cTemplate
 
 FUNCTION is_gt_console()

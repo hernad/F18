@@ -12,13 +12,21 @@
 #include "f18.ch"
 
 MEMVAR GetList, nKalkStrana
+MEMVAR _idfirma, _idvd, _idroba, _mkonto, _idkonto, _datdok, _datfaktp
 
 FUNCTION kalk_get_1_im()
 
    LOCAL nFaktVPC
+   LOCAL nKolicinaNaStanju := 0
+   LOCAL nKolicinaZadnjaNabavka := 0
+   LOCAL nNabCjZadnjaNabavka := 0
+
+   IF Empty( _mkonto )
+      _mkonto := _idkonto
+   ENDIF
 
    _DatFaktP := _datdok
-   @ box_x_koord() + 8, box_y_koord() + 2  SAY "Konto koji zaduzuje" GET _IdKonto VALID  P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
+   @ box_x_koord() + 8, box_y_koord() + 2  SAY "Konto koji zaduzuje" GET _mkonto VALID  P_Konto( @_mkonto, 8, 30 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
 
@@ -36,14 +44,23 @@ FUNCTION kalk_get_1_im()
 
    @ box_x_koord() + 13, box_y_koord() + 2  SAY8 "Knjižna kolicina " GET _GKolicina PICTURE PicKol WHEN {|| iif( kalk_metoda_nc() == " ", .T., .F. ) }
    @ box_x_koord() + 13, Col() + 2 SAY8 "Popisana Količina" GET _Kolicina PICTURE PicKol
-   @ box_x_koord() + 15, box_y_koord() + 2 SAY8 "CIJENA" GET _vpc PICT picdem
+   READ
+
+   IF kalk_is_novi_dokument()
+      _VPC := kalk_vpc_za_koncij()
+      _NC := roba->NC
+      SELECT kalk_pripr
+   ENDIF
+   kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolicinaZadnjaNabavka, @nNabCjZadnjaNabavka, @_nc )
+
+   @ box_x_koord() + 15, box_y_koord() + 2 SAY8 "NC:" GET _nc PICT picdem
+   @ box_x_koord() + 15, COL() + 2 SAY8 "VPC:" GET _vpc PICT picdem
 
    READ
    ESC_RETURN K_ESC
 
-   _MKonto := _Idkonto
+   //_MKonto := _Idkonto
    _MU_I := "I" // inventura
-
    _PKonto := ""
    _PU_I := ""
 

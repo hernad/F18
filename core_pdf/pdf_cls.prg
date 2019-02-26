@@ -2,8 +2,9 @@
 
 // http://www.harbourdoc.com.br/show.asp?seek=description&key=PDFClass
 
-STATIC s_font := "Courier"
+STATIC s_cFont := "Courier"
 STATIC s_codePage := "CP1250"
+STATIC s_cEmbeddedFontFileName := 'ubuntu-mono.ttf'
 
 CREATE CLASS PDFClass
 
@@ -14,7 +15,7 @@ CREATE CLASS PDFClass
    VAR    nLeftSpace        INIT 0
    VAR    nCol              INIT 0
    VAR    nAngle            INIT 0
-   VAR    cFontName         INIT s_font
+   VAR    cFontName         INIT s_cFont
    VAR    nFontSize         INIT 7
    VAR    nLineHeight       INIT 1.3
    VAR    nMargin           INIT 30
@@ -23,14 +24,17 @@ CREATE CLASS PDFClass
    VAR    nPageNumber       INIT 0
    VAR    cHeader           INIT {}
    VAR    cCodePage         INIT s_codePage
+   VAR    cEmbeddedFontName
+   VAR    nXScale           INIT 1
+   VAR    nYScale           INIT 1
    METHOD AddPage()
    METHOD RowToPDFRow( nRow )
    METHOD ColToPDFCol( nCol )
    METHOD MaxRow()
    METHOD MaxCol()
-   METHOD DrawText( nRow, nCol, xValue, cPicture, nFontSize, cFontName, nAngle, anRGB )
+   METHOD DrawText( nRow, nCol, xValue, cPicture, nFontSize, cFontName, nAngle, aNRGB )
    METHOD DrawLine( nRowi, nColi, nRowf, nColf, nPenSize )
-   METHOD DrawRectangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, anRGB )
+   METHOD DrawRectangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, aNRGB )
    METHOD DrawImage( cJPEGFile, nRow, nCol, nWidth, nHeight )
    METHOD Cancel()
    METHOD PrnToPdf( cInputFile )
@@ -48,6 +52,14 @@ ENDCLASS
 
 METHOD BEGIN() CLASS PDFClass
 
+   LOCAL cFontFile
+
+   cFontFile := f18_template_file_name( s_cEmbeddedFontFileName )
+   IF File( cFontFile )
+      ::nXScale := 1.10
+      ::nYScale := 1.20
+   ENDIF
+
    IF ::nType == PDF_TXT_PORTRAIT .OR. ::nType == PDF_TXT_LANDSCAPE
       IF Empty( ::cFileName )
          ::cFileName := MyTempFile( "LST" )
@@ -60,6 +72,13 @@ METHOD BEGIN() CLASS PDFClass
       ENDIF
       ::oPdf := HPDF_New()
       HPDF_SetCompressionMode( ::oPdf, HPDF_COMP_ALL )
+
+      IF File( cFontFile )
+         ::cEmbeddedFontName := HPDF_LoadTTFontFromFile( ::oPdf, cFontFile, .T. )
+         info_bar( "pdf", ::cEmbeddedFontName + " / " + AllTrim( Str( ::nFontSize ) ) )
+         ::cFontName := ::cEmbeddedFontName
+      ENDIF
+
       IF ::cCodePage != NIL
          HPDF_SetCurrentEncoder( ::oPDF, ::cCodePage )
       ENDIF
@@ -140,7 +159,7 @@ METHOD SetLeftSpace( nLeft ) CLASS PDFClass
 
 METHOD AddPage() CLASS PDFClass
 
-   IF ! ( ::nType == PDF_TXT_PORTRAIT .OR. ::nType == PDF_TXT_LANDSCAPE )
+   IF !( ::nType == PDF_TXT_PORTRAIT .OR. ::nType == PDF_TXT_LANDSCAPE )
       ::oPage := HPDF_AddPage( ::oPdf )
       HPDF_Page_SetSize( ::oPage, HPDF_PAGE_SIZE_A4, iif( ::nType == PDF_PORTRAIT, HPDF_PAGE_PORTRAIT, HPDF_PAGE_LANDSCAPE ) )
       HPDF_Page_SetFontAndSize( ::oPage, HPDF_GetFont( ::oPdf, ::cFontName, ::cCodePage ), ::nFontSize )
@@ -159,7 +178,7 @@ METHOD Cancel() CLASS PDFClass
    RETURN NIL
 
 
-METHOD DrawText( nRow, nCol, xValue, cPicture, nFontSize, cFontName, nAngle, anRGB ) CLASS PDFClass
+METHOD DrawText( nRow, nCol, xValue, cPicture, nFontSize, cFontName, nAngle, aNRGB ) CLASS PDFClass
 
    LOCAL nRadian, cTexto
 
@@ -180,18 +199,18 @@ METHOD DrawText( nRow, nCol, xValue, cPicture, nFontSize, cFontName, nAngle, anR
       nRow := ::RowToPDFRow( nRow )
       nCol := ::ColToPDFCol( nCol )
       HPDF_Page_SetFontAndSize( ::oPage, HPDF_GetFont( ::oPdf, cFontName, ::cCodePage ), nFontSize )
-      IF anRGB != NIL
-         HPDF_Page_SetRGBFill( ::Page, anRGB[ 1 ], anRGB[ 2 ], anRGB[ 3 ] )
-         HPDF_Page_SetRGBStroke( ::Page, anRGB[ 1 ], anRGB[ 2 ], anRGB[ 3 ] )
+      IF aNRGB != NIL
+         HPDF_Page_SetRGBFill( ::oPage, aNRGB[ 1 ], aNRGB[ 2 ], aNRGB[ 3 ] )
+         HPDF_Page_SetRGBStroke( ::oPage, aNRGB[ 1 ], aNRGB[ 2 ], aNRGB[ 3 ] )
       ENDIF
       HPDF_Page_BeginText( ::oPage )
       nRadian := ( nAngle / 180 ) * 3.141592
-      HPDF_Page_SetTextMatrix( ::oPage, Cos( nRadian ), Sin( nRadian ), -Sin( nRadian ), Cos( nRadian ), nCol, nRow )
+      HPDF_Page_SetTextMatrix( ::oPage, Cos( nRadian ), Sin( nRadian ), - Sin( nRadian ), Cos( nRadian ), nCol, nRow )
       HPDF_Page_ShowText( ::oPage, cTexto )
       HPDF_Page_EndText( ::oPage )
-      IF anRGB != NIL
-         HPDF_Page_SetRGBFill( ::Page, 0, 0, 0 )
-         HPDF_Page_SetRGBStroke( ::Page, 0, 0, 0 )
+      IF aNRGB != NIL
+         HPDF_Page_SetRGBFill( ::oPage, 0, 0, 0 )
+         HPDF_Page_SetRGBStroke( ::oPage, 0, 0, 0 )
       ENDIF
    ENDIF
 
@@ -235,7 +254,7 @@ METHOD DrawImage( cJPEGFile, nRow, nCol, nWidth, nHeight ) CLASS PDFClass
    RETURN NIL
 
 
-METHOD DrawRectangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, anRGB ) CLASS PDFClass
+METHOD DrawRectangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, aNRGB ) CLASS PDFClass
 
    IF ::nType == PDF_TXT_PORTRAIT .OR. ::nType == PDF_TXT_LANDSCAPE
       RETURN NIL
@@ -247,9 +266,9 @@ METHOD DrawRectangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, anRGB )
    nWidth    := ( nWidth ) * ::nFontSize / 1.666
    nHeight   := -( nHeight ) * :: nFontSize
    HPDF_Page_SetLineWidth( ::oPage, nPenSize )
-   IF anRGB != NIL
-      HPDF_Page_SetRGBFill( ::oPage, anRGB[ 1 ], anRGB[ 2 ], anRGB[ 3 ] )
-      HPDF_Page_SetRGBStroke( ::oPage, anRGB[ 1 ], anRGB[ 2 ], anRGB[ 3 ] )
+   IF aNRGB != NIL
+      HPDF_Page_SetRGBFill( ::oPage, aNRGB[ 1 ], aNRGB[ 2 ], aNRGB[ 3 ] )
+      HPDF_Page_SetRGBStroke( ::oPage, aNRGB[ 1 ], aNRGB[ 2 ], aNRGB[ 3 ] )
    ENDIF
    HPDF_Page_Rectangle( ::oPage, nLeft, nTop, nWidth, nHeight )
    IF nFillType == 1
@@ -259,7 +278,7 @@ METHOD DrawRectangle( nTop, nLeft, nWidth, nHeight, nPenSize, nFillType, anRGB )
    ELSE
       HPDF_Page_FillStroke( ::oPage ) // all
    ENDIF
-   IF anRGB != NIL
+   IF aNRGB != NIL
       HPDF_Page_SetRGBStroke( ::oPage, 0, 0, 0 )
       HPDF_Page_SetRGBFill( ::oPage, 0, 0, 0 )
    ENDIF
@@ -277,48 +296,48 @@ METHOD MaxRow() CLASS PDFClass
    LOCAL nPageHeight, nMaxRow
 
    IF ::nType == PDF_TXT_PORTRAIT
-      SWITCH Round(::nFontSize, 0)
+      SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN 60
+         RETURN Round( 60 * ::nXScale, 0 )
       CASE 9
-         RETURN 63
+         RETURN Round( 63 * ::nXScale, 0 )
       CASE 8
-         RETURN 65
+         RETURN Round( 65 * ::nXScale, 0 )
       CASE 7
-         RETURN 80
+         RETURN Round( 80 * ::nXScale, 0 )
       CASE 6
-         RETURN 82
+         RETURN Round( 82 * ::nXScale, 0 )
       CASE 5
-         RETURN 85
+         RETURN Round( 85 * ::nXScale, 0 )
       OTHERWISE
-         RETURN 66
+         RETURN Round( 66 * ::nXScale, 0 )
       ENDSWITCH
    ENDIF
 
    IF ::nType == PDF_TXT_LANDSCAPE
       IF ::nFontSize == 5.5
-        RETURN 65
+         RETURN Round( 65 * ::nXScale, 0 )
       ENDIF
 
       IF ::nFontSize == 6.5
-        RETURN 62
+         RETURN Round( 62 * ::nXScale, 0 )
       ENDIF
 
-      SWITCH Round( ::nFontSize, 0)
+      SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN 35
+         RETURN Round( 35 * ::nXScale, 0 )
       CASE 9
-         RETURN 40
+         RETURN Round( 40 * ::nXScale, 0 )
       CASE 8
-         RETURN 45
+         RETURN Round( 45 * ::nXScale, 0 )
       CASE 7
-         RETURN 50
+         RETURN Round( 50 * ::nXScale, 0 )
       CASE 6
-         RETURN 60
+         RETURN Round( 60 * ::nXScale, 0 )
       CASE 5
-         RETURN 70
+         RETURN Round( 70 * ::nXScale, 0 )
       OTHERWISE
-         RETURN 40
+         RETURN Round( 40 * ::nXScale, 0 )
       ENDSWITCH
    ENDIF
 
@@ -333,21 +352,21 @@ METHOD MaxCol() CLASS PDFClass
    LOCAL nPageWidth, nMaxCol
 
    IF ::nType == PDF_TXT_PORTRAIT
-      SWITCH ROUND(::nFontSize, 0)
+      SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN 92
+         RETURN Round( 92 * ::nYScale, 0 )
       CASE 9
-         RETURN 102
+         RETURN Round( 102 * ::nYScale, 0 )
       CASE 8
-         RETURN 115
+         RETURN Round( 115 * ::nYScale, 0 )
       CASE 7
-         RETURN 132
+         RETURN Round( 132 * ::nYScale, 0 )
       CASE 6
-         RETURN 145
+         RETURN Round( 145 * ::nYScale, 0 )
       CASE 5
-         RETURN 152
+         RETURN Round( 152 * ::nYScale, 0 )
       OTHERWISE
-         RETURN 102
+         RETURN Round( 102 * ::nYScale, 0 )
       ENDSWITCH
 
    ENDIF
@@ -356,28 +375,28 @@ METHOD MaxCol() CLASS PDFClass
    IF ::nType == PDF_TXT_LANDSCAPE
 
       IF ::nFontSize == 5.5
-         RETURN 240
+         RETURN Round( 240 * ::nYScale, 0 )
       ENDIF
 
       IF ::nFontSize == 7.5
-         RETURN 175
+         RETURN Round( 175 * ::nYScale, 0 )
       ENDIF
 
-      SWITCH Round(::nFontSize, 0)
+      SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN 135
+         RETURN Round( 135 * ::nYScale, 0 )
       CASE 9
-         RETURN 150
+         RETURN Round( 150 * ::nYScale, 0 )
       CASE 8
-         RETURN 170
+         RETURN Round( 170 * ::nYScale, 0 )
       CASE 7
-         RETURN 180
+         RETURN Round( 180 * ::nYScale, 0 )
       CASE 6
-         RETURN 190
+         RETURN Round( 190 * ::nYScale, 0 )
       CASE 5
-         RETURN 225
+         RETURN Round( 225 * ::nYScale, 0 )
       OTHERWISE
-         RETURN 155
+         RETURN Round( 155 * ::nYScale, 0 )
       ENDSWITCH
    ENDIF
 
@@ -391,6 +410,13 @@ METHOD MaxCol() CLASS PDFClass
 METHOD PrnToPdf( cInputFile ) CLASS PDFClass
 
    LOCAL cTxtReport, cTxtPage, cTxtLine, nRow
+   LOCAL nLineLength
+   LOCAL cPicture
+   LOCAL nFontSize
+   LOCAL cFontName
+   LOCAL nAngle
+   LOCAL aNRGB := { 0.0, 0.5, 0.5 }
+   LOCAL aTmp
 
    cTxtReport := MemoRead( cInputFile ) + Chr( 12 )
    TokenInit( @cTxtReport, Chr( 12 ) )
@@ -405,7 +431,15 @@ METHOD PrnToPdf( cInputFile ) CLASS PDFClass
          DO WHILE At( hb_eol(), cTxtPage ) != 0
             cTxtLine := SubStr( cTxtPage, 1, At( hb_eol(), cTxtPage ) - 1 )
             cTxtPage := SubStr( cTxtPage, At( hb_eol(), cTxtPage ) + 1 )
-            ::DrawText( nRow++, 0, Space( ::nLeftSpace ) + cTxtLine )
+            nLineLength := LEN(cTxtLine)
+            //::DrawText( nRow, 0, Replicate( " ", ::nLeftSpace + nLineLength ), cPicture, nFontSize, cFontName, nAngle, aNRGB  )
+            //IF nRow % 2 == 0
+               //aTmp := NIL
+            //ELSE
+               //aTmp := aNRGB
+               //::DrawRectangle( nRow, 0,  HPDF_Page_GetWidth( ::oPage ), ::nFontSize, 0, NIL, aNRGB)
+            //ENDIF
+            ::DrawText( nRow++, 0, Space( ::nLeftSpace ) + cTxtLine, cPicture, nFontSize, cFontName, nAngle, NIL )
          ENDDO
       ENDIF
    ENDDO
@@ -419,11 +453,12 @@ METHOD PageHeader() CLASS PDFClass
    ::nPdfPage    += 1
    ::nPageNumber += 1
    ::nRow        := 0
+   info_bar( "debug", Str( ::MaxCol() ) )
    ::AddPage()
    ::DrawText( 0, 0, "(c) bring.out" )
    ::DrawText( 0, ( ::MaxCol() - Len( ::cHeader ) ) / 2, ::cHeader )
    ::DrawText( 0, ::MaxCol() - 16, "Str: " + StrZero( ::nPageNumber, 6 ) )
-   ::DrawLine( 0.5, 1.5 , 0.5, ::MaxCol() - 2 )
+   ::DrawLine( 0.5, 1.5, 0.5, ::MaxCol() - 2 )
    ::nRow := 2
    ::nCol := 0
 

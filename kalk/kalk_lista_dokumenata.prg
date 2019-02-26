@@ -147,6 +147,7 @@ FUNCTION kalk_stampa_liste_dokumenata()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "font_size" ] := 9
    xPrintOpt[ "opdf" ] := s_oPDF
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.

@@ -193,24 +193,24 @@ STATIC FUNCTION zagl( cIdKonto, cIdkonto2, lVpc )
       lVPC := is_magacin_evidencija_vpc( cIdKonto2 )
       cPom := "Razdužuje:"
       select_o_konto( cIdKonto2 )
-      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 1 ), AllTrim( cIdKonto2 ) + " - " + PadR( _u( konto->naz ), 60 )
+      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 1 ), AllTrim( cIdKonto2 ) + " - " + PadR( konto->naz, 60 )
 
       IF !Empty( cIdKonto )
          cPom := "Zadužuje:"
          select_o_konto( cIdKonto )
-         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( _u( konto->naz ), 60 )
+         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( konto->naz, 60 )
       ENDIF
 
    ELSE // 16
       lVPC := is_magacin_evidencija_vpc( cIdKonto )
       cPom := "Zadužuje:"
       select_o_konto( cIdKonto )
-      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( _u( konto->naz ), 60 )
+      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( konto->naz, 60 )
 
       IF !Empty( cIdKonto2 )
          cPom := "Razdužuje:"
          select_o_konto( cIdKonto2 )
-         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto2 ) + " - " + PadR( _u( konto->naz ), 60 )
+         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto2 ) + " - " + PadR( konto->naz, 60 )
       ENDIF
    ENDIF
    ?

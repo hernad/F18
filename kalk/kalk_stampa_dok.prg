@@ -320,4 +320,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96"  // implementirano za ove dokumente
+   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM"  // implementirano za ove dokumente

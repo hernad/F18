@@ -66,7 +66,6 @@ FUNCTION kalk_get_1_14()
    select_o_koncij( _mkonto )
    SELECT kalk_pripr
 
-
    IF kalk_is_novi_dokument()
       _VPC := kalk_vpc_za_koncij()
       _NC := roba->NC
