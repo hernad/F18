@@ -21,8 +21,8 @@ FUNCTION pos_dokument_naziv( cIdVd )
    CASE cIdVd == POS_IDVD_PRIJEM_PRODAVNICA
       RETURN "Prijem prodavnica"
 
-   CASE cIdVd == POS_IDVD_OTPREMNICA_MAGACIN
-      RETURN "Otpremnica magacin"
+      // CASE cIdVd == POS_IDVD_OTPREMNICA_MAGACIN
+      // RETURN "Otpremnica magacin"
 
    CASE cIdVd == POS_IDVD_NIVELACIJA
       RETURN "Nivelacija"
@@ -37,7 +37,13 @@ FUNCTION pos_dokument_naziv( cIdVd )
       RETURN "Odobreno sniženje"
 
    CASE cIdVD == POS_IDVD_ZAHTJEV_NABAVKA
-         RETURN "Zahtjev za nabavku"
+      RETURN "Zahtjev za nabavku"
+
+   CASE cIdVD == POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+      RETURN "Zahtjev za prijem iz magacina"
+
+   CASE cIdVD == POS_IDVD_OTPREMNICA_MAGACIN_PRIJEM
+      RETURN "POS prijem iz magacina"
    ENDCASE
 
    RETURN "<undefined>"

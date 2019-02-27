@@ -42,7 +42,15 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
       lKalkZaPOS := .F.
    ENDIF
 
-   cNaslov := "OTPREMNICA PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
+   IF cIdVd == "21"
+      cNaslov := "POS Zahtjev za prijem iz magacina"
+   ELSEIF cIdVd == "22"
+      cNaslov := "POS prijem iz magacina"
+   ELSE
+      cNaslov := "OTPREMNICA PRODAVNICA"
+   ENDIF
+
+   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"

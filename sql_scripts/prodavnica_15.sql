@@ -320,7 +320,13 @@ ALTER TABLE p15.roba DROP COLUMN IF EXISTS idkonto;
 DROP TABLE IF EXISTS p15.pos_dokspf;
 
 ---------------------------------------------------------------------------------------
--- on kalk_kalk update p15.pos_pos_knjig, idvd = 11,19,80
+-- on kalk_kalk update p15.pos_pos_knjig,
+-- idvd = 19 - nivelacija prodavnica,
+--        02 - pocetno stanje prodavnica
+--        21 - zahtjev za prijem robe iz magacina
+--        80 - prijem prodavnica
+--        79 - odobreno snizenje
+--        72 - akcijske cijene
 ---------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.on_kalk_kalk_crud() RETURNS trigger
     LANGUAGE plpgsql
@@ -335,7 +341,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '11' ) AND ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) THEN  --  11, 19, 79, 80
+   IF ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '02' ) AND ( NEW.idvd <> '21' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) AND ( NEW.idvd <> '72' ) THEN
      RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
@@ -343,7 +349,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT barkod, naz INTO barkodRoba, robaNaz
           from fmk.roba where id=NEW.idroba;
 ELSE
-   IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) THEN
+   IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
       RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
@@ -360,7 +366,7 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert % prodavnica % % %', NEW.idvd, idPos, NEW.idroba, public.barkod_ean13_to_num(barkodRoba,3);
-      IF ( NEW.idvd = '19' ) OR ( NEW.idvd = '79' ) THEN
+      IF ( NEW.idvd = '19' ) OR ( NEW.idvd = '79' ) OR ( NEW.idvd = '72' ) THEN
         cijena := NEW.fcj;  -- stara cijena
         ncijena := NEW.mpcsapp + NEW.fcj; -- nova cijena
       ELSE
@@ -391,13 +397,13 @@ BEGIN
 
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-      IF ( NEW.idvd <> '11' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '79' ) THEN -- 11, 80, 19, 79
+      IF ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '02' ) AND ( NEW.idvd <> '21' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) AND ( NEW.idvd <> '72' ) THEN
          RETURN NULL;
       END IF;
       SELECT idprodmjes INTO idPos
             from fmk.koncij where id=NEW.PKonto;
 ELSE
-     IF ( OLD.idvd <> '11' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '79' ) THEN
+     IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
         RETURN NULL;
      END IF;
       SELECT idprodmjes INTO idPos
@@ -490,7 +496,7 @@ ALTER TABLE p15.pos_pos ALTER COLUMN cijena SET NOT NULL;
 
 -- on p15.pos_doks_knjig -> p15.pos_doks
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION p15.on_pos_doks_knjig_insert_update_delete() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_pos_doks_knjig_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -846,7 +852,7 @@ $$;
 -- TRIGER na strani prodavnice !
 -- on p15.pos_pos_knjig -> p15.pos_pos
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_insert_update_delete() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -870,7 +876,7 @@ ELSIF (TG_OP = 'INSERT') THEN
          USING NEW.idroba
          INTO robaId;
 
-      IF (NEW.idvd = '19') THEN
+      IF (NEW.idvd = '19') OR (NEW.idvd = '72') THEN
          robaCijena := NEW.ncijena;
       ELSE
          robaCijena := NEW.cijena;
@@ -898,17 +904,19 @@ $$;
 
 -- p15.pos_doks_knjig -> p15.pos_doks
 DROP TRIGGER IF EXISTS pos_doks_knjig_insert_update_delete on p15.pos_doks_knjig;
+DROP TRIGGER IF EXISTS pos_doks_knjig_crud on p15.pos_doks_knjig;
 CREATE TRIGGER pos_doks_knjig_insert_update_delete
       AFTER INSERT OR DELETE OR UPDATE
       ON p15.pos_doks_knjig
-      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_doks_knjig_insert_update_delete();
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_doks_knjig_crud();
 
 -- p15.pos_pos_knjig -> p15.pos_pos
 DROP TRIGGER IF EXISTS pos_pos_knjig_insert_update_delete on p15.pos_pos_knjig;
-CREATE TRIGGER pos_pos_knjig_insert_update_delete
+DROP TRIGGER IF EXISTS pos_pos_knjig_crud on p15.pos_pos_knjig;
+CREATE TRIGGER pos_pos_knjig_crud
    AFTER INSERT OR DELETE OR UPDATE
    ON p15.pos_pos_knjig
-   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_insert_update_delete();
+   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_crud();
 
 -- POS 42 - racuni, zbirno u KALK
 -- SELECT public.kalk_brdok_iz_pos('15', '49', '4', current_date); => 150214
@@ -930,7 +938,7 @@ BEGIN
 IF ( idvdKalk = '49' ) THEN
   -- 01.02.2019, idpos=15 -> 150201
   SELECT TO_CHAR(datum, idpos || 'mmdd' ) INTO brDok;
-ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) ) THEN
+ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) OR ( idvdKalk = '22' ) ) THEN
    -- 01.02.2019, brdok='      3' -> 15020103
    SELECT TO_CHAR(datum, idpos || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 ELSE
@@ -959,7 +967,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) THEN --  42, 71-zahtjev snizenje, 61-zahtjev narudzba
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) THEN --  42, 71-zahtjev snizenje, 61-zahtjev narudzba, 22 -pos potvrda prijema magacin
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -972,7 +980,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) THEN -- samo 42-ke, 71
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -1194,7 +1202,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba, 22-pos potvrda prijema magacin
       RETURN NULL;
    END IF;
    IF ( NEW.idvd = '42') THEN
@@ -1207,7 +1215,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    brDok := public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum);
 
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) THEN
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) THEN
       RETURN NULL;
    END IF;
    IF ( OLD.idvd = '42') THEN
@@ -1248,7 +1256,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
               USING idFirma, idvdKalk, brDok, NEW.datum, NEW.idpos, pKonto;
          RETURN NEW;
 
-  ELSIF (TG_OP = 'INSERT') AND  ( NEW.idvd = '61' ) THEN
+  ELSIF (TG_OP = 'INSERT') AND  (( NEW.idvd = '61' ) OR ( NEW.idvd = '22' )) THEN
 
                 EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                        USING NEW.idtarifa

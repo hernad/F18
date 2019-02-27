@@ -942,7 +942,7 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    IF _idvd == "10"
       RETURN kalk_get_1_10()
 
-   ELSEIF _idvd == "11"
+   ELSEIF _idvd $ "11#21"
       RETURN kalk_get_1_11()
 
    ELSEIF _idvd $ "12#13"    // ?
