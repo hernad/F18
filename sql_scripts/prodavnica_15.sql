@@ -930,7 +930,7 @@ BEGIN
 IF ( idvdKalk = '49' ) THEN
   -- 01.02.2019, idpos=15 -> 150201
   SELECT TO_CHAR(datum, idpos || 'mmdd' ) INTO brDok;
-ELSIF ( idvdKalk = '71' ) THEN
+ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) ) THEN
    -- 01.02.2019, brdok='      3' -> 15020103
    SELECT TO_CHAR(datum, idpos || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 ELSE
@@ -959,7 +959,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) THEN -- samo 42-ke, 71
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) THEN --  42, 71-zahtjev snizenje, 61-zahtjev narudzba
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -972,7 +972,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) THEN -- samo 42-ke, 71
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) THEN -- samo 42-ke, 71
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -1194,7 +1194,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba
       RETURN NULL;
    END IF;
    IF ( NEW.idvd = '42') THEN
@@ -1207,7 +1207,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    brDok := public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum);
 
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) THEN
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) THEN
       RETURN NULL;
    END IF;
    IF ( OLD.idvd = '42') THEN
@@ -1248,7 +1248,21 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
               USING idFirma, idvdKalk, brDok, NEW.datum, NEW.idpos, pKonto;
          RETURN NEW;
 
-  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '71' ) THEN
+  ELSIF (TG_OP = 'INSERT') AND  ( NEW.idvd = '61' ) THEN
+
+                EXECUTE 'SELECT pdv from public.tarifa where id=$1'
+                       USING NEW.idtarifa
+                       INTO pdvStopa;
+                RAISE INFO 'THEN insert kalk_kalk % % % % %', NEW.idpos, idvdKalk, pKonto, brDok, NEW.datum;
+                -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
+                -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
+                EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc) ' ||
+                         'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $12/100), $11)'
+                        USING idFirma, idvdKalk, NEW.rbr, brDok, NEW.datum, pKonto, NEW.idroba, NEW.idtarifa,
+                        NEW.cijena, NEW.kolicina, 0, pdvStopa;
+                 RETURN NEW;
+
+  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '71' )  THEN
 
          EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                 USING NEW.idtarifa

@@ -52,7 +52,8 @@ FUNCTION pos_menu_dokumenti()
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_DOBAVLJAC_PRODAVNICA ) } )
    AAdd( aOpc, "2. zahtjev za sniženje dijela zalihe     " )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_SNIZENJE ) } )
-
+   AAdd( aOpc, "3. zahtjev za nabavku - narudžbe    " )
+   AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_NABAVKA ) } )
    /*
    AAdd( aOpc, "I. inventura" )
    AAdd( aOpcexe, {|| pos_inventura_nivelacija( .T. ) } )

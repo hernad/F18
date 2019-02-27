@@ -35,6 +35,9 @@ FUNCTION pos_dokument_naziv( cIdVd )
 
    CASE cIdVD == POS_IDVD_ODOBRENO_SNIZENJE
       RETURN "Odobreno sniženje"
+
+   CASE cIdVD == POS_IDVD_ZAHTJEV_NABAVKA
+         RETURN "Zahtjev za nabavku"
    ENDCASE
 
    RETURN "<undefined>"
