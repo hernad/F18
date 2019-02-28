@@ -26,10 +26,17 @@ STATIC s_nRobaNazivSirina := 39
 FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
    LOCAL nCol1 := 0
-   LOCAL nCol2 := 0
    LOCAL nPom := 0
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
+   LOCAL nProlaz, nProlaza, nRec
+   LOCAL nTot1, nTot2, nTot3, nTot4, nTot5, nTot6, nTot7, nTotNV, nTotMarzaMP, nTotMPVBezPDV, nTotMPVSaPDV, nTot9a
+   LOCAL nUTot, nUTot1, nUTot2, nUTot3, nUTot4, nUTot5, nUTot6, nUTot7, nUTot8, nUTot9, nUTotA, nUTotb, nUTot9a
+   LOCAL nUNv
+   LOCAL nUMarzaMP
+   LOCAL nUMpvBezPDV
+   LOCAL nUMpvSaPDV
+
 
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
@@ -48,7 +55,13 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    cPKonto := kalk_pripr->pkonto
    cPKonto2 := kalk_pripr->IdKonto2
 
-   cNaslov := "PRIJEM PRODAVNICA " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
+   IF cIdVd == "02"
+      cNaslov := "POS POČETNO STANJE"
+   ELSE
+      cNaslov := "PRIJEM PRODAVNICA"
+   ENDIF
+
+   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
@@ -72,24 +85,24 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
    SELECT kalk_pripr
    nRec := RecNo()
-   PRIVATE cIdd := kalk_pripr->idpartner + kalk_pripr->brfaktp + kalk_pripr->idkonto + kalk_pripr->idkonto2
+
    IF !Empty( cPKonto2 ) // postoje stavka i protustavka
       nProlaza := 2
    ELSE
       nProlaza := 1
    ENDIF
 
-   unTot := unTot1 := unTot2 := unTot3 := unTot4 := unTot5 := unTot6 := unTot7 := unTot8 := unTot9 := unTotA := unTotb := 0
-   unTot9a := 0
+   nUTot := nUTot1 := nUTot2 := nUTot3 := nUTot4 := nUTot5 := nUTot6 := nUTot7 := nUTot8 := nUTot9 := nUTotA := nUTotb := 0
+   nUTot9a := 0
 
    Eval( bZagl )
    FOR nProlaz := 1 TO nProlaza
-      nTot := nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTotA := nTotb := 0
+      nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTotNV := nTotMarzaMP := nTotMPVBezPDV := nTotMPVSaPDV := 0
       nTot9a := 0
       GO nRec
 
       check_nova_strana( bZagl, s_oPDF )
-      DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+      DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
          IF ( nProlaza == 2 .AND. nProlaz == 1 .AND. Left( kalk_pripr->idkonto2, 3 ) == "XXX" )
             // prvi prolaz ignorisati idkonto==XXX
@@ -103,10 +116,10 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
          ENDIF
          kalk_set_vars_troskovi_marzavp_marzamp()
          kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
-         nTot8 += ( nU8 := NC * kalk_pripr->Kolicina )
-         nTot9 += ( nU9 := nKalkMarzaMP * kalk_pripr->Kolicina )
-         nTotA += ( nUA := kalk_pripr->MPC * kalk_pripr->Kolicina )
-         nTotB += ( nUB := kalk_pripr->MPCSAPP * kalk_pripr->Kolicina )
+         nTotNV += ( nUNv := kalk_pripr->NC * kalk_pripr->Kolicina )
+         nTotMarzaMP += ( nUMarzaMP := nKalkMarzaMP * kalk_pripr->Kolicina )
+         nTotMPVBezPDV += ( nUMpvBezPDV := kalk_pripr->MPC * kalk_pripr->Kolicina )
+         nTotMPVSaPDV += ( nUMpvSaPDV := kalk_pripr->MPCSAPP * kalk_pripr->Kolicina )
 
          check_nova_strana( bZagl, s_oPDF )
          @ PRow() + 1, 0 SAY kalk_pripr->rbr PICT "999"
@@ -118,7 +131,7 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
          nCol1 := PCol() + 1
          IF !lStampatiBezNabavneCijene  // bez nc
             @ PRow(), nCol1    SAY kalk_pripr->NC                    PICTURE piccdem()
-            IF Round( nc, 5 ) <> 0
+            IF Round( kalk_pripr->nc, 5 ) <> 0
                @ PRow(), PCol() + 1 SAY nKalkMarzaMP / kalk_pripr->NC * 100        PICTURE picproc()
             ELSE
                @ PRow(), PCol() + 1 SAY 0  PICTURE picproc()
@@ -129,20 +142,19 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
          // @ PRow() + 1, 4 SAY kalk_pripr->IdTarifa
          IF !lStampatiBezNabavneCijene
-            @ PRow(), nCol1     SAY nU8         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nU9         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nUA         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nUB         PICTURE         picdem()
+            @ PRow() + 1, nCol1   SAY nUNv         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nUMarzaMP         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nUMpvBezPDV         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nUMpvSaPDV         PICTURE         picdem()
          ELSE
-            @ PRow(), nCol1 SAY nUA  PICTURE  picdem()
-            @ PRow(), PCol() + 1  SAY nUB PICTURE         picdem()
+            @ PRow() + 1, nCol1 SAY nUMpvBezPDV  PICTURE  picdem()
+            @ PRow(), PCol() + 1  SAY nUMpvSaPDV PICTURE         picdem()
          ENDIF
 
          SKIP
       ENDDO
 
       IF nProlaza == 2
-
          check_nova_strana( bZagl, s_oPDF, .F., 3 )
          ? s_cLinija
          ? "Konto "
@@ -152,34 +164,34 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
             ?? cPKonto2
          ENDIF
          IF !lStampatiBezNabavneCijene
-            @ PRow(), nCol1       SAY   nTot8         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nTot9         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nTotA         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nTotB         PICTURE         picdem()
+            @ PRow(), nCol1       SAY   nTotNV         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nTotMarzaMP         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nTotMPVBezPDV         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nTotMPVSaPDV         PICTURE         picdem()
          ELSE
-            @ PRow(), nCol1  SAY nTotA         PICTURE         picdem()
-            @ PRow(), PCol() + 1  SAY nTotB         PICTURE         picdem()
+            @ PRow(), nCol1  SAY nTotMPVBezPDV         PICTURE         picdem()
+            @ PRow(), PCol() + 1  SAY nTotMPVSaPDV         PICTURE         picdem()
          ENDIF
          ? s_cLinija
       ENDIF
-      unTot8  += nTot8
-      unTot9  += nTot9
-      unTot9a += nTot9a
-      unTotA  += nTotA
-      unTotB  += nTotB
+      nUTot8  += nTotNV
+      nUTot9  += nTotMarzaMP
+      nUTot9a += nTot9a
+      nUTotA  += nTotMPVBezPDV
+      nUTotB  += nTotMPVSaPDV
    NEXT
 
    check_nova_strana( bZagl, s_oPDF, .F., 3 )
    ? s_cLinija
    @ PRow() + 1, 0        SAY "Ukupno:"
    IF !lStampatiBezNabavneCijene
-      @ PRow(), nCol1     SAY unTot8         PICTURE         picdem()
-      @ PRow(), PCol() + 1  SAY unTot9         PICTURE         picdem()
-      @ PRow(), PCol() + 1  SAY unTotA         PICTURE         picdem()
-      @ PRow(), PCol() + 1  SAY unTotB         PICTURE         picdem()
+      @ PRow(), nCol1     SAY nUTot8         PICTURE         picdem()
+      @ PRow(), PCol() + 1  SAY nUTot9         PICTURE         picdem()
+      @ PRow(), PCol() + 1  SAY nUTotA         PICTURE         picdem()
+      @ PRow(), PCol() + 1  SAY nUTotB         PICTURE         picdem()
    ELSE
-      @ PRow(), nCol1     SAY unTotA         PICTURE         picdem()
-      @ PRow(), PCol() + 1  SAY unTotB         PICTURE         picdem()
+      @ PRow(), nCol1     SAY nUTotA         PICTURE         picdem()
+      @ PRow(), PCol() + 1  SAY nUTotB         PICTURE         picdem()
    ENDIF
    ? s_cLinija
 

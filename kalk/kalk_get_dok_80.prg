@@ -42,8 +42,10 @@ FUNCTION kalk_get1_80()
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prodavnički konto: " GET _pkonto VALID {|| P_Konto( @_pkonto ), ispisi_naziv_konto( nXCurrent - 1, 35, 30 ) } PICT "@!"
       ++nX
-      nXCurrent := box_x_koord() + nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  Prenos na konto: " GET _IdKonto2 VALID {|| Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2 ), ispisi_naziv_konto( nXCurrent, 35, 30 )  } PICT "@!"
+      IF _IdVd <> POS_IDVD_POCETNO_STANJE_PRODAVNICA
+         nXCurrent := box_x_koord() + nX
+         @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  Prenos na konto: " GET _IdKonto2 VALID {|| Empty( _idkonto2 ) .OR. P_Konto( @_IdKonto2 ), ispisi_naziv_konto( nXCurrent, 35, 30 )  } PICT "@!"
+      ENDIF
       READ
       ESC_RETURN K_ESC
 
@@ -101,12 +103,12 @@ FUNCTION kalk_get1_80()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MALOPROD. CIJENA (MPC):"
    @ box_x_koord() + nX, box_y_koord() + nYCurrent GET _mpc PICT picdem();
-      WHEN kalk_when_mpc_bez_pdv_80_81_41_42( "80", ( cProracunMarzeUnaprijed == "F" ) ) ;
-      VALID kalk_valid_mpc_bez_pdv_80_81_41_42( "80", ( cProracunMarzeUnaprijed == "F" ) )
+      WHEN kalk_when_mpc_bez_pdv_80_81_41_42( _idvd, ( cProracunMarzeUnaprijed == "F" ) ) ;
+      VALID kalk_valid_mpc_bez_pdv_80_81_41_42( _idvd, ( cProracunMarzeUnaprijed == "F" ) )
    ++nX
    say_pdv_procenat( nX, _idtarifa )
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "MPC saPDV:"
    @ box_x_koord() + nX, box_y_koord() + nYCurrent GET _MPCSaPP PICT picdem() VALID kalk_valid_mpc_sa_pdv_41_42_81( "80", .F., .T. )
 
    READ

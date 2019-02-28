@@ -137,10 +137,10 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       ELSEIF ( cIdvd == "18" )
          kalk_stampa_dok_18()
 
-      ELSEIF ( cIdvd $ "19#71#79" )
+      ELSEIF ( cIdvd $ "19#71#79#72" )
          kalk_stampa_dok_19_79()
 
-      ELSEIF ( cIdvd == "80" )
+      ELSEIF ( cIdvd $ "02#80" )
          kalk_stampa_dok_80()
 
       ELSEIF ( cIdvd == "81" )
@@ -320,4 +320,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72"  // implementirano za ove dokumente
+   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02"  // implementirano za ove dokumente

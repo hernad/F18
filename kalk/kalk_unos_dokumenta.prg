@@ -957,7 +957,7 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ELSEIF _idvd == "18"
       RETURN kalk_get_1_18()
 
-   ELSEIF _idvd $ "19#79"
+   ELSEIF _idvd $ "19#79#72"
       RETURN kalk_get_1_19_79()
 
    ELSEIF _idvd $ "41#42"
@@ -966,7 +966,7 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ELSEIF _idvd == "81"
       RETURN kalk_unos_dok_81( @hParams )
 
-   ELSEIF _idvd == "80"
+   ELSEIF _idvd $ "02#80"
       RETURN kalk_get1_80( @hParams )
 
    ELSEIF _idvd $ "95#96"

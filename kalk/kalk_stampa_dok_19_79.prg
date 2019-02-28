@@ -48,10 +48,12 @@ FUNCTION kalk_stampa_dok_19_79()
    cBrDok := kalk_pripr->brdok
    cPKonto := kalk_pripr->pkonto
 
-   IF cIdVd == "71"
+   IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
       cNaslov := "ZAHTJEV ZA SNIŽENJE"
-   ELSEIF cIdVd == "79"
+   ELSEIF cIdVd == POS_IDVD_ODOBRENO_SNIZENJE
       cNaslov := "ODOBRENO SNIŽENJE"
+   ELSEIF cIdVd == POS_IDVD_AKCIJSKE_CIJENE
+         cNaslov := "Akcijske cijene"
    ELSE
       cNaslov := "NIVELACIJA"
    ENDIF

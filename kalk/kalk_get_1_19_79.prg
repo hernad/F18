@@ -27,6 +27,8 @@ FUNCTION kalk_get_1_19_79()
    _IdKonto := ""
    IF _IdVd == POS_IDVD_ODOBRENO_SNIZENJE
       _PU_I = KALK_TRANSAKCIJA_PRODAVNICA_SNIZENJE_PROCENAT
+   ELSEIF _IdVd == POS_IDVD_AKCIJSKE_CIJENE
+      _PU_I = KALK_TRANSAKCIJA_PRODAVNICA_SNIZENJE_AKCIJA
    ELSE
       _PU_I := KALK_TRANSAKCIJA_PRODAVNICA_NIVELACIJA
    ENDIF
@@ -65,16 +67,16 @@ FUNCTION kalk_get_1_19_79()
    ENDIF
 
    @ box_x_koord() + 12, box_y_koord() + 23  SAY8 "stanje: " + Transform( nKolicinaNaStanju, pickol() )
-   @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE pickol()
+   @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE pickol() WHEN kalk_when_kolicina_19_72_79()
 
-   IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE
+   IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE .OR. _idvd == POS_IDVD_AKCIJSKE_CIJENE
       @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "Važi za period:" GET _dat_od WHEN {|| _dat_od := iif( Empty( _dat_od ), Date(), _dat_od ), .T. }
       @ Row(), Col() + 2  SAY8 "do" GET _dat_do ;
          WHEN {|| _dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ), .T. } ;
          VALID {|| Empty( _dat_do ) .OR. _dat_do >= _dat_od }
    ELSE
       _dat_od := _datdok
-      _dat_do := CtoD("")
+      _dat_do := CToD( "" )
    ENDIF
    READ
 
@@ -130,3 +132,13 @@ FUNCTION kalk_get_1_19_79()
    _MU_I := ""
 
    RETURN LastKey()
+
+
+STATIC FUNCTION kalk_when_kolicina_19_72_79()
+
+   IF _idvd == POS_IDVD_AKCIJSKE_CIJENE
+      _kolicina := 0
+      RETURN .F.
+   ENDIF
+
+   RETURN .T.

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#DOCKER_IMAGE=sameersbn/postgresql:10
+#DOCKER_IMAGE=psql_tds_fdw
+DOCKER_IMAGE=f18_postgresql:10-1
+
+
 if [ -z "$PG_PASSWORD" ] ; then
    echo "set envar PG_PASSWORD"
    exit 1
@@ -27,7 +32,7 @@ docker run \
   -v $PWD/scripts:/scripts \
   -v $PWD/postgresql_data:/var/lib/postgresql \
   -p 5432:5432 \
-  sameersbn/postgresql:10 \
+  $DOCKER_IMAGE \
   -c logging_collector=on
 
 docker logs $PG_DOCKER_NAME

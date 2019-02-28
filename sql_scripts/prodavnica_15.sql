@@ -938,7 +938,7 @@ BEGIN
 IF ( idvdKalk = '49' ) THEN
   -- 01.02.2019, idpos=15 -> 150201
   SELECT TO_CHAR(datum, idpos || 'mmdd' ) INTO brDok;
-ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) OR ( idvdKalk = '22' ) ) THEN
+ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) OR ( idvdKalk = '22' ) OR ( idvdKalk = '29' ) ) THEN
    -- 01.02.2019, brdok='      3' -> 15020103
    SELECT TO_CHAR(datum, idpos || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 ELSE
@@ -967,7 +967,8 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) THEN --  42, 71-zahtjev snizenje, 61-zahtjev narudzba, 22 -pos potvrda prijema magacin
+   --  42 - prodaja, 71-zahtjev snizenje, 61-zahtjev narudzba, 22 -pos potvrda prijema magacin, 29 - pos nivelacija
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) AND ( NEW.idvd <> '29' ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -980,7 +981,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) THEN
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) AND ( OLD.idvd <> '29' ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -1202,7 +1203,7 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba, 22-pos potvrda prijema magacin
+   IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) AND ( NEW.idvd <> '29' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba, 22-pos potvrda prijema magacin
       RETURN NULL;
    END IF;
    IF ( NEW.idvd = '42') THEN
@@ -1215,7 +1216,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    brDok := public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum);
 
 ELSE
-   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) THEN
+   IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) AND ( OLD.idvd <> '29' ) THEN
       RETURN NULL;
    END IF;
    IF ( OLD.idvd = '42') THEN
@@ -1270,7 +1271,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                         NEW.cijena, NEW.kolicina, 0, pdvStopa;
                  RETURN NEW;
 
-  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '71' )  THEN
+  ELSIF (TG_OP = 'INSERT') AND (( NEW.idvd = '71' ) OR ( NEW.idvd = '29' )) THEN
 
          EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                 USING NEW.idtarifa
@@ -1384,3 +1385,161 @@ BEGIN
 	END;
 END;
 $$;
+
+
+
+-- pgcrypto
+
+drop function if exists digest(bytea, text);
+drop function if exists digest(text, text);
+DROP FUNCTION if exists hmac(bytea, bytea, text);
+DROP FUNCTION if exists hmac(text,text,text);
+drop function if exists crypt(text,text);
+drop function if exists gen_salt(text);
+drop function if exists gen_salt(text,integer);
+drop function if exists encrypt(bytea,bytea,text);
+drop function if exists encrypt(bytea,bytea,bytea,text);
+drop function if exists decrypt(bytea,bytea,bytea,text);
+drop function if exists decrypt(bytea,bytea,text);
+drop function if exists encrypt_iv(bytea,bytea,bytea,text);
+drop function if exists decrypt_iv(bytea,bytea,bytea,text);
+
+drop function if exists pgp_pub_decrypt(bytea,bytea);
+drop function if exists pgp_pub_decrypt(bytea,bytea,text);
+drop function if exists pgp_pub_decrypt(bytea,bytea,text,text);
+drop function if exists pgp_pub_decrypt_bytea(bytea,bytea);
+drop function if exists pgp_pub_decrypt_bytea(bytea,bytea,text);
+
+drop function if exists pgp_pub_encrypt(text,bytea);
+drop function if exists pgp_pub_encrypt(text,bytea,text);
+drop function if exists pgp_pub_encrypt(text,bytea,text,text);
+
+drop function if exists pgp_pub_encrypt_bytea(bytea,bytea);
+drop function if exists pgp_pub_encrypt_bytea(bytea,bytea,text);
+
+drop function if exists pgp_sym_decrypt(bytea,text);
+drop function if exists pgp_sym_decrypt(bytea,text,text);
+
+drop function if exists pgp_sym_decrypt_bytea(bytea,text);
+drop function if exists pgp_sym_decrypt_bytea(bytea,text,text);
+
+drop function if exists pgp_sym_encrypt(text,text);
+drop function if exists pgp_sym_encrypt(text,text,text);
+
+drop function if exists pgp_sym_encrypt_bytea(bytea,text);
+drop function if exists pgp_sym_encrypt_bytea(bytea,text,text);
+
+drop function if exists pgp_key_id(bytea);
+drop function if exists armor(bytea);
+drop function if exists dearmor(text);
+
+drop extension if exists pgcrypto;
+create extension pgcrypto;
+
+
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS  uuid uuid DEFAULT gen_random_uuid();
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS ref uuid;
+ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;
+
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS uuid uuid DEFAULT gen_random_uuid();
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS ref uuid;
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;
+
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS uuid uuid DEFAULT gen_random_uuid();
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS ref uuid;
+ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS ref_2 uuid;
+
+
+
+CREATE OR REPLACE FUNCTION p15.pos_novi_broj_dokumenta(cIdPos varchar, cIdVd varchar, dDatum date) RETURNS varchar
+  LANGUAGE plpgsql
+  AS $$
+
+DECLARE
+   cBrDok varchar;
+BEGIN
+
+    SELECT brdok from p15.pos_doks where idvd=cIdVd and datum=dDatum order by brdok desc limit 1
+           INTO cBrDok;
+    IF cBrdok IS NULL THEN
+        cBrDok := to_char(1, '99999999');
+    ELSE
+        cBrDok := to_char( to_number(cBrDok, '09999999') + 1, '99999999');
+    END IF;
+
+    RETURN lpad(btrim(cBrDok), 8, ' ');
+
+END;
+$$
+
+CREATE OR REPLACE FUNCTION p15.nivelacija_start_create(uuidPos uuid) RETURNS void
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar;
+      cIdVd varchar;
+      cBrDok varchar;
+      dDatum date;
+      cIdRoba varchar;
+      dDat_od date;
+      uuid2 uuid;
+      nC numeric;
+      nC2 numeric;
+      cRbr varchar;
+      cBrDokNew varchar;
+      dDatumNew date;
+BEGIN
+
+      EXECUTE 'select idpos,idvd,brdok,datum, dat_od from p15.pos_doks where uuid = $1'
+         USING uuidPos
+         INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_od;
+      RAISE INFO 'nivelacija_start_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_od;
+
+      EXECUTE 'select uuid from p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND ref=$3'
+          USING cIdPos, '29', uuidPos
+          INTO uuid2;
+
+      IF uuid2 IS NOT NULL THEN
+          RAISE EXCEPTION 'ERROR nivelacija_start dokument vec postoji: % % % %', cIdPos, '29', cBrDok, dDatum;
+      END IF;
+
+      dDatumNew := dDat_od;
+      cBrDokNew := p15.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
+
+
+      insert into p15.pos_doks(idPos,idVd,brDok,datum,dat_od,ref) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos)
+          RETURNING uuid into uuid2;
+
+      -- referenca na '29' unutar dokumenta idvd '72'
+      EXECUTE 'update p15.pos_doks set ref=$2 WHERE uuid=$1'
+         USING uuidPos, uuid2;
+
+      FOR cRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
+      LOOP
+         EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+             using cIdPos, '29', cBrDokNew, dDatumNew, cRbr, cIdRoba, 1, nC, nC2;
+      END LOOP;
+
+      RETURN;
+END;
+$$
+
+CREATE OR REPLACE FUNCTION p15.cron_akcijske_cijene_nivelacija_start() RETURNS void
+       LANGUAGE plpgsql
+       AS $$
+
+DECLARE
+       knjigShema varchar := 'fmk';
+       uuidPos uuid;
+BEGIN
+     -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
+     FOR uuidPos IN SELECT uuid FROM p15.pos_doks
+          WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
+     LOOP
+            RAISE INFO 'pos_doks %', uuidPos;
+            PERFORM p15.nivelacija_start_create( uuidPos );
+     END LOOP;
+
+     RETURN;
+END;
+$$
