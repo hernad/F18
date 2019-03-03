@@ -258,7 +258,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
    @ box_x_koord() + nX, box_y_koord() + nY GET _mpcsapp PICT PicDEM ;
-      WHEN {|| cProracunMarzeUnaprijed := " ", _Marza2 := 0, .T. } VALID kalk_valid_mpc_sa_pdv_41_42_81( "81", .F., .T. )
+      WHEN {|| cProracunMarzeUnaprijed := " ", _Marza2 := 0, .T. } VALID kalk_valid_mpc_sa_pdv_41_42_81( _idvd, .F., .T. )
 
    READ
 

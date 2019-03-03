@@ -109,7 +109,7 @@ FUNCTION kalk_get1_80()
    say_pdv_procenat( nX, _idtarifa )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MPC saPDV:"
-   @ box_x_koord() + nX, box_y_koord() + nYCurrent GET _MPCSaPP PICT picdem() VALID kalk_valid_mpc_sa_pdv_41_42_81( "80", .F., .T. )
+   @ box_x_koord() + nX, box_y_koord() + nYCurrent GET _MPCSaPP PICT picdem() VALID kalk_valid_mpc_sa_pdv_41_42_81( _idvd, .F., .T. )
 
    READ
    ESC_RETURN K_ESC

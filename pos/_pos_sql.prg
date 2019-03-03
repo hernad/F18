@@ -204,9 +204,12 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAl
    LOCAL cTable := "pos_doks"
    LOCAL hIndexes, cKey
    LOCAL lWhere := .F.
+   LOCAL cFields
 
-   cSql := "SELECT * from " + f18_sql_schema( cTable )
+   cFields := "idpos, idvd, brdok, datum, idPartner, idradnik,"
+   cFields += "idvrstep,vrijeme,brdokStorn,fisc_rn,ukupno,brFaktP,opis,dat_od,dat_do"
 
+   cSql := "SELECT " + cFields + " from " + f18_sql_schema( cTable )
    IF cIdPos != NIL .AND. !Empty( cIdPos )
       IF lWhere
          cSql += " AND "
@@ -302,6 +305,7 @@ FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
    cQuery += " AND cijena=" + sql_quote( nCijena )
    cQuery += " AND ncijena=" + sql_quote( nNCijena )
    cQuery += " AND current_date>=dat_od AND current_date<=dat_do"
+   cQuery += " AND kol_ulaz-kol_izlaz <> 0"
 
    oTable := run_sql_query( cQuery )
    oRow := oTable:GetRow( 1 )

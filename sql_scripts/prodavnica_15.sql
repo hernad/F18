@@ -548,7 +548,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( idvd <> '11' ) AND ( idvd <> '80' ) AND ( idvd <> '89' ) THEN
+IF ( idvd <> '02' ) AND ( idvd <> '80' ) AND ( idvd <> '89' ) AND ( idvd <> '22' ) THEN
         RETURN FALSE;
 END IF;
 
@@ -757,7 +757,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( idvd <> '19' ) AND ( idvd <> '79' ) THEN
+IF ( idvd <> '19' ) AND ( idvd <> '29' ) AND ( idvd <> '79' ) THEN
         RETURN FALSE;
 END IF;
 
@@ -815,7 +815,7 @@ IF NOT idRaspolozivo IS NULL then
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
   -- dodati zalihu po novim cijenama
-  IF ( idvd = '19' ) THEN
+  IF ( idvd = '19' ) OR ( idvd = '29' ) THEN
       cijena := ncijena; -- nivelacija - nova cijena postaje osnovna
       ncijena := 0;
   END IF;
@@ -1088,11 +1088,11 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF (NEW.idvd <> '42') AND (NEW.idvd <> '11') AND (NEW.idvd <> '80') AND (NEW.idvd <> '19') AND (NEW.idvd <> '79') AND (NEW.idvd <> '89')  THEN -- 42, 11, 80, 19, 79, 89
+   IF (NEW.idvd <> '42') AND (NEW.idvd <> '02') AND (NEW.idvd <> '22') AND (NEW.idvd <> '80') AND (NEW.idvd <> '29') AND (NEW.idvd <> '19') AND (NEW.idvd <> '79') AND (NEW.idvd <> '89')  THEN   -- 42, 11, 80, 19, 79, 89
       RETURN NULL;
    END IF;
 ELSE
-   IF (OLD.idvd <> '42') AND ( OLD.idvd <> '11') AND (OLD.idvd <> '80') AND (OLD.idvd <> '19') AND (OLD.idvd <> '79') AND (OLD.idvd <> '89')  THEN
+   IF (OLD.idvd <> '42') AND ( OLD.idvd <> '02') AND ( OLD.idvd <> '22') AND (OLD.idvd <> '80') AND (OLD.idvd <> '29') AND (OLD.idvd <> '19') AND (OLD.idvd <> '79') AND (OLD.idvd <> '89')  THEN
       RETURN NULL;
    END IF;
 END IF;
@@ -1106,7 +1106,7 @@ IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
       RETURN OLD;
 
-ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='11') OR (OLD.idvd='80') OR (OLD.idvd='89') ) THEN
+ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='02') OR (OLD.idvd='22') OR (OLD.idvd='80') OR (OLD.idvd='89') ) THEN
       RAISE INFO 'delete pos_prijem_update_stanje  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       -- select p15.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '999', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
       EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
@@ -1115,7 +1115,7 @@ ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='11') OR (OLD.idvd='80') OR (OLD.idvd='
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
       RETURN OLD;
 
-ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd = '19') OR (OLD.idvd='79') ) THEN
+ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd = '19') OR (OLD.idvd = '29') OR (OLD.idvd='79') ) THEN
         RAISE INFO 'delete pos_pos  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
         EXECUTE 'SELECT p' || idPos || '.pos_promjena_cijena_update_stanje(''-'', $1,$2,$3,$4,$5,$5,NULL,$6,$7,$8,$9)'
                    USING idPos, OLD.idvd, OLD.brdok, OLD.rbr, OLD.datum, OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
@@ -1127,11 +1127,11 @@ ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd = '42' ) THEN
        RAISE INFO 'update 42 pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr ;
        RETURN NEW;
 
-ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '11') OR (NEW.idvd = '80') OR (NEW.idvd = '89') ) THEN
+ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '02') OR (NEW.idvd = '22') OR (NEW.idvd = '80') OR (NEW.idvd = '89') ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
-ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '19') OR (NEW.idvd = '79') ) THEN
+ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '19') OR (NEW.idvd = '29') OR (NEW.idvd = '79') ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
@@ -1144,7 +1144,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
         RAISE INFO 'insert 42 ret=%', lRet;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '11') OR ( NEW.idvd = '80') OR ( NEW.idvd = '89') ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '02') OR (NEW.idvd = '22') OR ( NEW.idvd = '80') OR ( NEW.idvd = '89') ) THEN
         RAISE INFO 'insert pos_prijem_update_stanje % % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.idroba, NEW.rbr;
         -- select p15.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '999', current_date, current_date, NULL,'R01', 100, 2.5, 0);
         EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
@@ -1153,7 +1153,7 @@ ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '11') OR ( NEW.idvd = '80') OR ( NEW.
              RAISE INFO 'insert ret=%', lRet;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '19') OR (NEW.idvd = '79') ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '19') OR (NEW.idvd = '29') OR (NEW.idvd = '79') ) THEN
         RAISE INFO 'insert pos_pos % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- u pos_doks se nalazi dat_od, dat_do
         EXECUTE 'SELECT dat_od, dat_do FROM p' || idPos || '.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
@@ -1200,6 +1200,7 @@ DECLARE
        pdvStopa numeric;
        idFirma varchar;
        idvdKalk varchar;
+       pUI varchar;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
@@ -1271,18 +1272,24 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                         NEW.cijena, NEW.kolicina, 0, pdvStopa;
                  RETURN NEW;
 
+  -- 71 - zahtjev snizenje, 29 - pos nivelacija generisana na osnovu akcijskih cijena
   ELSIF (TG_OP = 'INSERT') AND (( NEW.idvd = '71' ) OR ( NEW.idvd = '29' )) THEN
 
+         IF (NEW.idvd = '29') THEN
+             pUI := '3';
+         ELSE
+             pUI := '%';
+         END IF;
          EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                 USING NEW.idtarifa
                 INTO pdvStopa;
          RAISE INFO 'THEN insert kalk_kalk % % % % %', NEW.idpos, idvdKalk, pKonto, brDok, NEW.datum;
          -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
          -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
-         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
-                  'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $13/100), $11, $12)'
+         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj, pu_i) ' ||
+                  'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $13/100), $11, $12, $13)'
                  USING idFirma, idvdKalk, NEW.rbr, brDok, NEW.datum, pKonto, NEW.idroba, NEW.idtarifa,
-                 NEW.ncijena-NEW.cijena, NEW.kolicina, 0, NEW.cijena, pdvStopa;
+                 NEW.ncijena-NEW.cijena, NEW.kolicina, 0, NEW.cijena, pdvStopa, pUI;
           RETURN NEW;
 END IF;
 
@@ -1472,6 +1479,49 @@ BEGIN
 END;
 $$
 
+
+CREATE OR REPLACE FUNCTION p15.pos_dostupno_artikal_za_cijenu(cIdRoba varchar, nCijena numeric, nNCijena numeric) RETURNS numeric
+       LANGUAGE plpgsql
+       AS $$
+
+DECLARE
+   idPos varchar DEFAULT '15';
+   nStanje numeric;
+BEGIN
+   EXECUTE 'SELECT kol_ulaz-kol_izlaz as stanje FROM p' || idPos || '.pos_stanje' ||
+           ' WHERE rtrim(idroba)=$1  AND cijena=$2 AND ncijena=$3 AND current_date>=dat_od AND current_date<=dat_do' ||
+           ' AND kol_ulaz - kol_izlaz <> 0'
+           USING trim(cIdroba), nCijena, nNCijena
+           INTO nStanje;
+
+   IF nStanje IS NOT NULL THEN
+         RETURN nStanje;
+   ELSE
+         RETURN 0;
+   END IF;
+END;
+$$
+
+
+CREATE OR REPLACE FUNCTION p15.cron_akcijske_cijene_nivelacija_start() RETURNS void
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+       uuidPos uuid;
+BEGIN
+     -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
+     FOR uuidPos IN SELECT uuid FROM p15.pos_doks
+          WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
+     LOOP
+            RAISE INFO 'pos_doks %', uuidPos;
+            PERFORM p15.nivelacija_start_create( uuidPos );
+     END LOOP;
+
+     RETURN;
+END;
+$$
+
+
 CREATE OR REPLACE FUNCTION p15.nivelacija_start_create(uuidPos uuid) RETURNS void
        LANGUAGE plpgsql
        AS $$
@@ -1488,6 +1538,7 @@ DECLARE
       cRbr varchar;
       cBrDokNew varchar;
       dDatumNew date;
+      nStanje numeric;
 BEGIN
 
       EXECUTE 'select idpos,idvd,brdok,datum, dat_od from p15.pos_doks where uuid = $1'
@@ -1506,7 +1557,6 @@ BEGIN
       dDatumNew := dDat_od;
       cBrDokNew := p15.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
 
-
       insert into p15.pos_doks(idPos,idVd,brDok,datum,dat_od,ref) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos)
           RETURNING uuid into uuid2;
 
@@ -1516,20 +1566,76 @@ BEGIN
 
       FOR cRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
       LOOP
+         -- aktuelna osnovna cijena;
+         nStanje := p15.pos_dostupno_artikal_za_cijenu(cIdRoba, nC, 0.00);
          EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, cRbr, cIdRoba, 1, nC, nC2;
+             using cIdPos, '29', cBrDokNew, dDatumNew, cRbr, cIdRoba, nStanje, nC, nC2;
       END LOOP;
 
       RETURN;
 END;
 $$
 
+CREATE OR REPLACE FUNCTION p15.nivelacija_end_create(uuidPos uuid) RETURNS void
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar;
+      cIdVd varchar;
+      cBrDok varchar;
+      dDatum date;
+      cIdRoba varchar;
+      dDat_do date;
+      uuid2 uuid;
+      nC numeric;
+      nC2 numeric;
+      cRbr varchar;
+      cBrDokNew varchar;
+      dDatumNew date;
+      nStanje numeric;
+BEGIN
+
+      EXECUTE 'select idpos,idvd,brdok,datum, dat_od from p15.pos_doks where uuid = $1'
+         USING uuidPos
+         INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_do;
+      RAISE INFO 'nivelacija_end_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_do;
+
+      EXECUTE 'select uuid from p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND ref_2=$3'
+          USING cIdPos, '29', uuidPos
+          INTO uuid2;
+
+      IF uuid2 IS NOT NULL THEN
+          RAISE EXCEPTION 'ERROR nivelacija_end dokument vec postoji: % % % %', cIdPos, '29', cBrDok, dDatum;
+      END IF;
+
+      dDatumNew := dDat_do;
+      cBrDokNew := p15.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
+
+      insert into p15.pos_doks(idPos,idVd,brDok,datum,dat_od,ref) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos)
+          RETURNING uuid into uuid2;
+
+      -- referenca (2) na '29' unutar dokumenta idvd '72'
+      EXECUTE 'update p15.pos_doks set ref_2=$2 WHERE uuid=$1'
+         USING uuidPos, uuid2;
+
+      FOR cRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
+      LOOP
+         -- trenutno aktuelna osnovna cijena je akcijkska
+         nStanje := p15.pos_dostupno_artikal_za_cijenu(cIdRoba, nC2, 0);
+         EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+             using cIdPos, '29', cBrDokNew, dDatumNew, cRbr, cIdRoba, nStanje, nC2, nC;
+      END LOOP;
+
+      RETURN;
+END;
+$$
+
+
 CREATE OR REPLACE FUNCTION p15.cron_akcijske_cijene_nivelacija_start() RETURNS void
        LANGUAGE plpgsql
        AS $$
 
 DECLARE
-       knjigShema varchar := 'fmk';
        uuidPos uuid;
 BEGIN
      -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
@@ -1538,6 +1644,26 @@ BEGIN
      LOOP
             RAISE INFO 'pos_doks %', uuidPos;
             PERFORM p15.nivelacija_start_create( uuidPos );
+     END LOOP;
+
+     RETURN;
+END;
+$$
+
+
+CREATE OR REPLACE FUNCTION p15.cron_akcijske_cijene_nivelacija_end() RETURNS void
+       LANGUAGE plpgsql
+       AS $$
+
+DECLARE
+       uuidPos uuid;
+BEGIN
+     -- ref_2 nije popunjen => zavrsna nivelacija nije napravljena, a planirana je za danas
+     FOR uuidPos IN SELECT uuid FROM p15.pos_doks
+          WHERE idvd='72' AND ref_2 IS NULL AND dat_do = current_date
+     LOOP
+            RAISE INFO 'pos_doks %', uuidPos;
+            PERFORM p15.nivelacija_end_create( uuidPos );
      END LOOP;
 
      RETURN;
