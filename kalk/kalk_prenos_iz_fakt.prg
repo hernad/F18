@@ -188,7 +188,7 @@ FUNCTION fakt_kalk_prenos_10_14()
             ENDIF
 
             SELECT fakt
-            IF AllTrim( podbr ) == "."  .OR. roba->tip $ "UY"
+            IF AllTrim( fakt->podbr ) == "."  .OR. roba->tip $ "UY"
                SKIP
                LOOP
             ENDIF
@@ -383,7 +383,6 @@ FUNCTION fakt_kalk_prenos( cIndik )
 
          select_o_koncij( cIdKonto )
 
-
          SELECT FAKT
          DO WHILE !Eof() .AND. cFaktFirma + cIdTipDok + PADR( cBrDok, FIELD_LEN_FAKT_BRDOK ) == fakt->IdFirma + fakt->IdTipDok + PADR( fakt->BrDok, FIELD_LEN_FAKT_BRDOK )
 
@@ -477,7 +476,7 @@ FUNCTION kalk_fakt_prenos_period()
    LOCAL _dat_kalk
    LOCAL cIdKonto
    LOCAL _id_konto_2
-   LOCAL _sufix, nRbr, _razduzuje
+   LOCAL _sufix, nRbr
    LOCAL _fakt_dobavljac := Space( 10 )
    LOCAL _artikli := Space( 150 )
    LOCAL cFilterRoba
@@ -488,7 +487,6 @@ FUNCTION kalk_fakt_prenos_period()
    _dat_kalk := Date()
    cIdKonto := PadR( "", 7 )
    _id_konto_2 := PadR( "1010", 7 )
-   _razduzuje := Space( 6 )
    dDatOd := Date()
    dDatDo := Date()
    _br_kalk_dok := kalk_get_next_kalk_doc_uvecaj( cIdFirma, cIdVdKalk )
@@ -507,9 +505,6 @@ FUNCTION kalk_fakt_prenos_period()
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto zaduzuje :" GET cIdKonto PICT "@!" VALID Empty( cIdKonto ) .OR. P_Konto( @cIdKonto )
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Konto razduzuje:" GET _id_konto_2 PICT "@!" VALID Empty( _id_konto_2 ) .OR. P_Konto( @_id_konto_2 )
 
-      // IF gNW <> "X"
-      // @ box_x_koord() + 4, Col() + 2 SAY "Razduzuje:" GET _razduzuje PICT "@!" VALID Empty( _razduzuje ) .OR. p_partner( @_razduzuje )
-      // ENDIF
 
       cFaktIdFirma := cIdFirma
 
@@ -551,7 +546,6 @@ FUNCTION kalk_fakt_prenos_period()
          IF !Empty( _artikli )  // provjera po robama
 
             cFilterRoba := Parsiraj( _artikli, "idroba" )
-
             IF !( &cFilterRoba )
                SKIP
                LOOP
@@ -600,7 +594,6 @@ FUNCTION kalk_fakt_prenos_period()
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cIdKonto, ;
                idkonto2  WITH _id_konto_2, ;
-               idzaduz2  WITH _razduzuje, ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;

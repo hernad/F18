@@ -133,40 +133,6 @@ FUNCTION kalk_get_1_14()
       _MU_I := "4" // ne utice na stanje
    ENDIF
 
-/*
---   IF lKalkIzgenerisaneStavke .AND. _kolicina > 0 .AND. LastKey() <> K_ESC // izgenerisane stavke postoje
-      PRIVATE nRRec := RecNo()
-      GO TOP
-      my_flock()
-      DO WHILE !Eof()  // nafiluj izgenerisane stavke
-         IF kolicina == 0
-            SKIP
-            PRIVATE nRRec2 := RecNo()
-            SKIP -1
-            my_delete()
-            GO nRRec2
-            LOOP
-         ENDIF
-         IF brdok == _brdok .AND. idvd == _idvd .AND. Val( Rbr ) == nKalkRbr
-
-            REPLACE vpc WITH _vpc, ;
-               rabatv WITH _rabatv, ;
-               mkonto WITH _mkonto, ;
-               tmarza  WITH _tmarza, ;
-               mpc     WITH  _MPC, ;
-               marza  WITH _vpc - kalk_pripr->nc, ;   // mora se uzeti nc iz ove stavke
-               mu_i WITH  _mu_i, ;
-               pkonto WITH "", ;
-               pu_i WITH  "", ;
-               error WITH "0"
-
-         ENDIF
-         SKIP
-      ENDDO
-      my_unlock()
-      GO nRRec
-   ENDIF
-*/
 
    SET KEY K_ALT_K TO
 

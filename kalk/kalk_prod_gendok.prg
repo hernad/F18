@@ -491,7 +491,9 @@ FUNCTION kalk_iz_11_u_41_42()
    DO WHILE !Eof() .AND. cIdFirma + cIdVDU + cBrDokU == IDFIRMA + IDVD + BRDOK
 
       PushWA()
-      SELECT kalk_pripr; APPEND BLANK; Scatter()
+      SELECT kalk_pripr
+      APPEND BLANK
+      Scatter()
       _idfirma   := cIdFirma
       _idroba    := KALK->idroba
       _idkonto   := KALK->idkonto
@@ -519,8 +521,6 @@ FUNCTION kalk_iz_11_u_41_42()
 
          ?
          kalk_get_nabavna_prod( _idfirma, _idroba, _idkonto, 0, 0, @nc1, @nc2, )
-
-
          IF kalk_metoda_nc() $ "13"; _fcj := nc1; ELSEIF kalk_metoda_nc() == "2"; _fcj := nc2; ENDIF
       ENDIF
 
