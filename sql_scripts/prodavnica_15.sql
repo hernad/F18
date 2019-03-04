@@ -1669,3 +1669,9 @@ BEGIN
      RETURN;
 END;
 $$
+
+
+
+-- kalk podbr out
+ALTER TABLE fmk.kalk_doks DROP COLUMN IF EXISTS podbr;
+ALTER TABLE p15.kalk_kalk DROP COLUMN IF EXISTS podbr;

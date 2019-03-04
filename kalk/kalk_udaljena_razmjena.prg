@@ -699,8 +699,6 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
       aDokDetail[ "tip" ] := "import"
       export_import_add_to_details( @a_details, aDokDetail )
 
-      aDoksRec[ "podbr" ] := ""
-
       IF !hParams[ "pript" ]
          SELECT kalk_doks
          APPEND BLANK
@@ -728,7 +726,6 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
          hb_HDel( aDoksRec, "datkurs" )
 
          aDoksRec[ "rbr" ] := PadL( AllTrim( Str( ++nRedniRbroj ) ), 3 )
-         aDoksRec[ "podbr" ] := ""
 
          _gl_brojac += nRedniRbroj
 

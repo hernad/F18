@@ -553,7 +553,6 @@ STATIC FUNCTION kalk_azur_sql()
       hRecKalkDok[ "idpartner" ] := kalk_pripr->idpartner
       hRecKalkDok[ "pkonto" ] := kalk_pripr->pkonto
       hRecKalkDok[ "mkonto" ] := kalk_pripr->mkonto
-      hRecKalkDok[ "podbr" ] := kalk_pripr->podbr
       hRecKalkDok[ "dat_od" ] := kalk_pripr->dat_od
       hRecKalkDok[ "dat_do" ] := kalk_pripr->dat_do
       hRecKalkDok[ "opis" ] := kalk_pripr->opis

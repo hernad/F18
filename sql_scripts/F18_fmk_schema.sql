@@ -1015,7 +1015,7 @@ CREATE TABLE fmk.kalk_doks (
     vpv numeric(12,2),
     rabat numeric(12,2),
     mpv numeric(12,2),
-    podbr character(2),
+    --podbr character(2),
     sifra character(6),
     obradjeno timestamp without time zone DEFAULT now(),
     korisnik text DEFAULT "current_user"()
@@ -1092,7 +1092,7 @@ CREATE TABLE fmk.kalk_kalk (
     mu_i character(1),
     pu_i character(1),
     error character(1),
-    podbr character(2)
+    --podbr character(2)
 );
 
 ALTER TABLE fmk.kalk_kalk OWNER TO admin;

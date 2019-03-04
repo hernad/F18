@@ -343,7 +343,7 @@ FUNCTION fakt_13_kalk_11()
             select_o_koncij( cidkonto )
 
             SELECT fakt
-            IF AllTrim( podbr ) == "."  .OR. idroba = "U"
+            IF AllTrim( fakt->podbr ) == "."  .OR. idroba == "U"
                SKIP
                LOOP
             ENDIF
@@ -517,7 +517,7 @@ FUNCTION fakt_11_kalk_41()
                select_o_tarifa( roba->idtarifa )
 
                SELECT fakt
-               IF AllTrim( podbr ) == "."
+               IF AllTrim( fakt->podbr ) == "."
                   SKIP
                   LOOP
                ENDIF
@@ -731,8 +731,9 @@ FUNCTION fakt_01_kalk_81()
             select_o_tarifa( roba->idtarifa )
 
             SELECT fakt
-            IF AllTrim( podbr ) == "."
-               skip; LOOP
+            IF AllTrim( fakt->podbr ) == "."
+               skip
+               LOOP
             ENDIF
 
             SELECT kalk_pripr
@@ -864,7 +865,7 @@ FUNCTION fakt_13_kalk_80()
             select_o_koncij( cIdkonto )
 
             SELECT fakt
-            IF AllTrim( podbr ) == "."  .OR. idroba = "U"
+            IF AllTrim( fakt->podbr ) == "."  .OR. idroba == "U"
                skip
                LOOP
             ENDIF
@@ -1075,7 +1076,7 @@ FUNCTION fakt_11_kalk_42()
 
                SELECT fakt
 
-               IF AllTrim( podbr ) == "."
+               IF AllTrim( fakt->podbr ) == "."
                   SKIP
                   LOOP
                ENDIF

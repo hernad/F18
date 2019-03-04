@@ -120,13 +120,6 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    find_kalk_za_period( hParams )
    MsgC()
 
-/*
-   SELECT kalk
-   SET ORDER TO TAG "5"  CREATE_INDEX( "5", "idFirma+dtos(datdok)+podbr+idvd+brdok", _alias )
-   HSEEK cIdFirma
-  */
-
-
    select_o_koncij( cIdKonto )
 
    SELECT kalk

@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-FIELD idfirma, idvd, brdok, rbr, podbr, idtarifa, mkonto, pkonto, idroba, mu_i, pu_i, datdok, idpartner
+FIELD idfirma, idvd, brdok, rbr, idtarifa, mkonto, pkonto, idroba, mu_i, pu_i, datdok, idpartner
 
 
 FUNCTION find_kalk_doks_by_tip_datum( cIdFirma, cIdVd, dDatOd, dDatDo )
@@ -241,7 +241,7 @@ FUNCTION find_kalk_by_mkonto_idroba_idvd( cIdFirma, cIdVd, cIdKonto, cIdRoba, cO
 
    LOCAL hParams := hb_Hash()
 
-   hb_default( @cOrderBy, "idfirma,mkonto,idroba,datdok,podbr,mu_i,idvd" )
+   hb_default( @cOrderBy, "idfirma,mkonto,idroba,datdok,mu_i,idvd" )
 
    IF "obradjeno" $ cOrderBy
       hParams[ "obradjeno" ] := .T.
@@ -281,7 +281,7 @@ FUNCTION find_kalk_by_mkonto_idroba( cIdFirma, cIdKonto, cIdRoba, cOrderBy, lRep
 
    LOCAL hParams := hb_Hash()
 
-   hb_default( @cOrderBy, "idfirma,mkonto,idroba,datdok,podbr,mu_i,idvd" )
+   hb_default( @cOrderBy, "idfirma,mkonto,idroba,datdok,mu_i,idvd" )
    hb_default( @lReport, .T. )
    hb_default( @cDistinct, "" )
 
@@ -328,7 +328,7 @@ FUNCTION find_kalk_by_pkonto_idroba( cIdFirma, cIdKonto, cIdRoba )
    IF cIdRoba != NIL
       hParams[ "idroba" ] := cIdRoba
    ENDIF
-   hParams[ "order_by" ] := "idfirma,pkonto,idroba,datdok,podbr,pu_i,idvd"
+   hParams[ "order_by" ] := "idfirma,pkonto,idroba,datdok,pu_i,idvd"
 
    use_sql_kalk( hParams )
    GO TOP
@@ -356,7 +356,7 @@ FUNCTION find_kalk_by_pkonto_idroba_idvd( cIdFirma, cIdVd, cIdKonto, cIdRoba, cO
    IF cOrderBy != NIL
       hParams[ "order_by" ] := cOrderBy
    ELSE
-      hParams[ "order_by" ] := "idfirma,pkonto,idroba,datdok,podbr,pu_i,idvd"
+      hParams[ "order_by" ] := "idfirma,pkonto,idroba,datdok,pu_i,idvd"
    ENDIF
 
    use_sql_kalk( hParams )
@@ -521,12 +521,12 @@ FUNCTION use_sql_kalk( hParams )
 
    cSql += coalesce_char_zarez( "mu_i", 1 )
    cSql += coalesce_char_zarez( "pu_i", 1 )
-   cSql += coalesce_char_zarez( "error", 1 )
+
 
    IF hb_HHasKey( hParams, "obradjeno" )
       cSql += " kalk_doks.obradjeno as obradjeno, "
    ENDIF
-   cSql += coalesce_char( "kalk_kalk.podbr", 2 )
+   cSql += coalesce_char( "error", 1 )
 
    cSql += " FROM " + f18_sql_schema("kalk_kalk") + " "
 
@@ -573,15 +573,15 @@ FUNCTION use_sql_kalk( hParams )
    IF is_sql_rdd_treba_indeks( hParams )
       INDEX ON ( idfirma + idvd + brdok ) TAG "1" TO cTable
       INDEX ON ( idfirma + mkonto + idvd + brdok ) TAG "2" TO cTable
-      INDEX ON ( idfirma + DToS( datdok ) + podbr + idvd + brdok ) TAG "3" TO cTable
+      INDEX ON ( idfirma + DToS( datdok ) + idvd + brdok ) TAG "3" TO cTable
       INDEX ON ( datdok ) TAG "DAT" TO cTable
       INDEX ON ( brfaktp + idvd ) TAG "V_BRF" TO cTable
 
       INDEX ON idFirma + IdVD + BrDok + RBr  TAG "1" TO cTable
       INDEX ON idFirma + idvd + brdok + IDTarifa TAG "2" TO cTable
-      INDEX ON idFirma + mkonto + idroba + DToS( datdok ) + podbr + MU_I + IdVD TAG "3" TO cTable
-      INDEX ON idFirma + Pkonto + idroba + DToS( datdok ) + podbr + PU_I + IdVD TAG "4" TO cTable
-      INDEX ON idFirma + DToS( datdok ) + podbr + idvd + brdok TAG "5" TO cTable
+      INDEX ON idFirma + mkonto + idroba + DToS( datdok ) + MU_I + IdVD TAG "3" TO cTable
+      INDEX ON idFirma + Pkonto + idroba + DToS( datdok ) + PU_I + IdVD TAG "4" TO cTable
+      INDEX ON idFirma + DToS( datdok ) + idvd + brdok TAG "5" TO cTable
       INDEX ON idFirma + IdTarifa + idroba TAG "6" TO cTable
       INDEX ON idroba + idvd TAG "7" TO cTable
       INDEX ON mkonto TAG "8" TO cTable
@@ -750,7 +750,6 @@ FUNCTION use_sql_kalk_doks( hParams )
    cSql += coalesce_num_num_zarez( "vpv", 12, 2 )
    cSql += coalesce_num_num_zarez( "rabat", 12, 2 )
    cSql += coalesce_num_num_zarez( "mpv", 12, 2 )
-   cSql += coalesce_char_zarez( "podbr", 2 )
    cSql += coalesce_char_zarez( "opis", 100 )
    cSql += " korisnik, obradjeno"
    cSql += " FROM fmk.kalk_doks "
@@ -789,7 +788,7 @@ FUNCTION use_sql_kalk_doks( hParams )
    IF is_sql_rdd_treba_indeks( hParams )
       INDEX ON ( idfirma + idvd + brdok ) TAG "1" TO cTable
       INDEX ON ( idfirma + mkonto + idvd + brdok ) TAG "2" TO cTable
-      INDEX ON ( idfirma + DToS( datdok ) + podbr + idvd + brdok ) TAG "3" TO cTable
+      INDEX ON ( idfirma + DToS( datdok ) + idvd + brdok ) TAG "3" TO cTable
       INDEX ON ( datdok ) TAG "DAT" TO cTable
       INDEX ON ( brfaktp + idvd ) TAG "V_BRF" TO cTable
       SET ORDER TO TAG "1"
