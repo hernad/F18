@@ -41,7 +41,6 @@ STATIC FUNCTION kreiraj_ostale_kalk_tabele( ver )
    LOCAL _created
    LOCAL _tbl
 
-
    // objekti
    _alias := "OBJEKTI"
    _table_name := "objekti"
@@ -109,9 +108,9 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
 
    IF_NOT_FILE_DBF_CREATE
 
-   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
+   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+TRANSFORM(RBr,'99999')", _alias )
    CREATE_INDEX( "2", "idFirma+idvd+brdok+IDTarifa", _alias )
-   CREATE_INDEX( "3", "idFirma+idvd+brdok+idroba+rbr", _alias )
+   CREATE_INDEX( "3", "idFirma+idvd+brdok+idroba+TRANSFORM(RBr,'99999')", _alias )
    CREATE_INDEX( "4", "idFirma+idvd+idroba", _alias )
    CREATE_INDEX( "5", "idFirma+idvd+idroba+STR(mpcsapp,12,2)", _alias )
 
@@ -126,7 +125,7 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
 
    IF_NOT_FILE_DBF_CREATE
 
-   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
+   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+TRANSFORM(RBr,'99999')", _alias )
    CREATE_INDEX( "2", "idFirma+idvd+brdok+IDTarifa", _alias )
 
    // KALK_PRIPR2
@@ -138,7 +137,7 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
       f18_delete_dbf( _table_name )
    ENDIF
    IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
+   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+TRANSFORM(RBr,'99999')", _alias )
    CREATE_INDEX( "2", "idFirma+idvd+brdok+IDTarifa", _alias )
    CREATE_INDEX( "3", "dtos(datdok)+mu_i+pu_i", _alias )
 
@@ -151,7 +150,7 @@ STATIC FUNCTION kreiraj_kalk_bazirane_tabele( ver )
    ENDIF
    IF_NOT_FILE_DBF_CREATE
 
-   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+RBr", _alias )
+   CREATE_INDEX( "1", "idFirma+IdVD+BrDok+TRANSFORM(RBr,'99999')", _alias )
    _alias := "PRIPT"  // koristi kalk imp varazdin
    _table_name := "kalk_pript"
    AAdd( aDBf, { 'DATVAL', 'D',   8,  0 } ) // koristi kalk imp varazdin
@@ -181,7 +180,8 @@ STATIC FUNCTION definicija_kalk_tabele()
    AAdd( aDBf, { 'BRFAKTP', 'C',  10,  0 } )
    AAdd( aDBf, { 'DATFAKTP', 'D',   8,  0 } )
    AAdd( aDBf, { 'IDPARTNER', 'C',   6,  0 } )
-   AAdd( aDBf, { 'RBR', 'C',   FIELD_LEN_KALK_RBR,  0 } )
+   //AAdd( aDBf, { 'RBR', 'C',   FIELD_LEN_KALK_RBR,  0 } )
+   AAdd( aDBf, { "RBR", "I", 4,  0 } )
    AAdd( aDBf, { 'TPREVOZ', 'C',   1,  0 } )
    AAdd( aDBf, { 'TPREVOZ2', 'C',   1,  0 } )
    AAdd( aDBf, { 'TBANKTR', 'C',   1,  0 } )
@@ -230,9 +230,19 @@ STATIC FUNCTION definicija_kalk_tabele()
 FUNCTION kalk_check_idzaduz2()
 
    LOCAL aTabele, nI, cFile
+   LOCAL cAlert
 
    IF ( FieldPos( "idzaduz2" ) != 0 .OR. FieldPos( "datval" ) == 0 )
-      Alert( "Serviser F18 - kalk fix idzaduz2, datval, brisanje, restart!" )
+     cAlert := "Serviser F18 - kalk fix idzaduz2, datval, brisanje, restart!"
+   endif
+
+altd()
+   IF ( ValType( field->rbr) == "C" )
+     cAlert := "Serviser F18 - kalk fix rbr char -> num, bisanje, restart!"
+   endif
+
+   IF cAlert != NIL
+      Alert( cAlert )
       my_close_all_dbf()
       aTabele := { "finmat", "kalk_pripr", "kalk_priprt", "kalk_pripr2", "kalk_pripr9" }
       FOR nI := 1 TO Len( aTabele )

@@ -50,7 +50,6 @@ FUNCTION set_a_dbf_kalk()
 
    set_a_dbf_temp( "kalk_r_uio", "R_UIO", F_R_UIO         )
    set_a_dbf_temp( "kalk_rpt_tmp", "RPT_TMP", F_RPT_TMP       )
-   set_a_dbf_temp( "kalk_attr", "KALK_ATTR", F_KALK_ATTR )
 
    set_a_dbf_temp( "kalk_kartica", "KALK_KARTICA", F_KALK_KARTICA )
 
@@ -81,12 +80,13 @@ FUNCTION set_a_sql_kalk_kalk()
    // t_kalk_db.prg
    // -------------------------------------------------------------------------------
    hAlg := hb_Hash()
-   hAlg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok + field->rbr }
+   hAlg[ "dbf_key_block" ]  := {|| field->idfirma + field->idvd + field->brdok + STR(field->rbr,5,0) }
    hAlg[ "dbf_key_empty_rec" ] := SPACE( 2 ) + SPACE( 2 ) + SPACE( FIELD_LEN_KALK_BRDOK ) + SPACE( FIELD_LEN_KALK_RBR )
-   hAlg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok", "rbr" }
-   hAlg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8) || lpad(rbr,3)"
+   hAlg[ "dbf_key_fields" ] := { "idfirma", "idvd", "brdok", {"rbr",5} }
+   hAlg[ "sql_in" ]         := "rpad( idfirma,2) || rpad( idvd,2)  || rpad(brdok,8) || lpad(rbr::char(5),5)"
    hAlg[ "dbf_tag" ]        := "1"
    AAdd( hItem[ "algoritam" ], hAlg )
+
 
    // algoritam 2
    // -------------------------------------------------------------------------------
@@ -144,7 +144,6 @@ FUNCTION set_a_sql_trfp( table, alias, wa )
    _tbl := table
 
    hItem := hb_Hash()
-
    hItem[ "alias" ] := alias
    hItem[ "table" ] := _tbl
    hItem[ "wa" ]    := wa

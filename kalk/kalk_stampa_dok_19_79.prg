@@ -248,7 +248,7 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
          ?
       ENDIF
       ?
-      ?? kalk_pripr->rbr + " " + kalk_pripr->idroba + " " + PadR( Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 )
+      ?? TRANSFORM(kalk_pripr->rbr, '999') + " " + kalk_pripr->idroba + " " + PadR( Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 )
       @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                  PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ          PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP              PICTURE piccdem()

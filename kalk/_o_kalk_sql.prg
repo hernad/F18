@@ -406,18 +406,6 @@ FUNCTION use_kalk_doks( hParams )
    RETURN use_sql_kalk_doks( hParams )
 
 
-//FUNCTION use_kalk_doks2( hParams )
-//   RETURN use_sql_kalk_doks2( hParams )
-
-
-/*
-FUNCTION use_kalk_kalk( hParams )
-   --RETURN use_sql_kalk_kalk( hParams )
-*/
-
-FUNCTION use_kalk_kalk_atributi( hParams )
-   RETURN use_sql_kalk_kalk_atributi( hParams )
-
 
 FUNCTION kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
 
@@ -468,7 +456,7 @@ FUNCTION use_sql_kalk( hParams )
    cSql += coalesce_char_zarez( "kalk_kalk.idvd", 2 )
    cSql += coalesce_char_zarez( "kalk_kalk.brdok", 8 )
    cSql += coalesce_char_zarez( "idroba", 10 )
-   cSql += coalesce_char_zarez( "rbr", 3 )
+   cSql += "rbr,"
    cSql += "coalesce(kalk_kalk.datdok, TO_DATE('','yyyymmdd')) as datdok, "
    cSql += coalesce_char_zarez( "kalk_kalk.brfaktp", 10 )
    cSql += coalesce_char_zarez( "kalk_kalk.idpartner", 6 )
@@ -532,7 +520,7 @@ FUNCTION use_sql_kalk( hParams )
       // select kolicina, kalk_doks.obradjeno  from fmk.kalk_kalk
       // join fmk.kalk_doks on  kalk_doks.idfirma=kalk_kalk.idfirma and kalk_doks.idvd=kalk_kalk.idvd and kalk_doks.brdok=kalk_kalk.brdok
       // limit 1
-      cSql += "JOIN fmk.kalk_doks on  kalk_doks.idfirma=kalk_kalk.idfirma and kalk_doks.idvd=kalk_kalk.idvd and kalk_doks.brdok=kalk_kalk.brdok "
+      cSql += "JOIN " + f18_sql_schema("kalk_doks") + " ON kalk_doks.idfirma=kalk_kalk.idfirma and kalk_doks.idvd=kalk_kalk.idvd and kalk_doks.brdok=kalk_kalk.brdok "
    ENDIF
 
    cWhere := use_sql_kalk_where( hParams )
@@ -575,7 +563,7 @@ FUNCTION use_sql_kalk( hParams )
       INDEX ON ( datdok ) TAG "DAT" TO cTable
       INDEX ON ( brfaktp + idvd ) TAG "V_BRF" TO cTable
 
-      INDEX ON idFirma + IdVD + BrDok + RBr  TAG "1" TO cTable
+      INDEX ON idFirma + IdVD + BrDok + TRANSFORM(RBr,'99999')  TAG "1" TO cTable
       INDEX ON idFirma + idvd + brdok + IDTarifa TAG "2" TO cTable
       INDEX ON idFirma + mkonto + idroba + DToS( datdok ) + MU_I + IdVD TAG "3" TO cTable
       INDEX ON idFirma + Pkonto + idroba + DToS( datdok ) + PU_I + IdVD TAG "4" TO cTable
@@ -596,7 +584,6 @@ FUNCTION use_sql_kalk( hParams )
    ENDIF
 
    RETURN .T.
-
 
 
 STATIC FUNCTION use_sql_kalk_order( hParams )
@@ -750,7 +737,7 @@ FUNCTION use_sql_kalk_doks( hParams )
    cSql += coalesce_num_num_zarez( "mpv", 12, 2 )
    cSql += coalesce_char_zarez( "opis", 100 )
    cSql += " korisnik, obradjeno"
-   cSql += " FROM fmk.kalk_doks "
+   cSql += " FROM " + f18_sql_schema("kalk_doks") + " "
 
    IF !Empty( cWhere )
       cSql += " WHERE " + cWhere
@@ -847,7 +834,7 @@ STATIC FUNCTION sql_kalk_doks_where( hParams )
       ENDIF
 
 /*
-      select * from fmk.kalk_doks
+      -- select * from fmk.kalk_doks
       where substr(brdok,6) ='/T'
       order by substr(brdok,6),left(brdok,5) DESC
 */
@@ -876,178 +863,6 @@ STATIC FUNCTION sql_kalk_doks_order( hParams )
       cOrder := " ORDER BY " + hParams[ "order_by" ]
    ELSE
       cOrder := " ORDER BY idfirma, idvd, brdok "
-   ENDIF
-
-   RETURN cOrder
-
-
-
-/*
-FUNCTION use_sql_kalk_doks2( hParams )
-
-   LOCAL cSql, cWhere, cOrder
-   LOCAL cTable := "KALK_DOKS2"
-
-   default_if_nil( @hParams, hb_Hash() )
-
-   cWhere := sql_kalk_doks2_where( hParams )
-   cOrder := sql_kalk_doks2_order( hParams )
-
-   cSql := "SELECT "
-   cSql += coalesce_char_zarez( "idfirma", 2 )
-   cSql += coalesce_char_zarez( "idvd", 2 )
-   cSql += coalesce_char_zarez( "brdok", 8 )
-   cSql += "datval, "
-   cSql += coalesce_char_zarez( "opis", 20 )
-   cSql += coalesce_char_zarez( "k1", 1 )
-   cSql += coalesce_char_zarez( "k2", 2 )
-   cSql += coalesce_char( "k3", 3 )
-   cSql += " FROM fmk.kalk_doks2 "
-
-   IF !Empty( cWhere )
-      cSql += " WHERE " + cWhere
-      IF !Empty( cOrder )
-         cSql += cOrder
-      ENDIF
-   ELSE
-      cSql += " OFFSET 0 LIMIT 1 "
-   ENDIF
-
-   IF hb_HHasKey( hParams, "alias" )
-      cTable := hParams[ "alias" ]
-   ENDIF
-
-   SELECT ( F_KALK_DOKS2 )
-   use_sql( cTable, cSql )
-
-   IF is_sql_rdd_treba_indeks( hParams )
-      INDEX ON ( idfirma + idvd + brdok ) TAG "1" TO cTable
-      INDEX ON ( idfirma + DToS( datval ) + idvd + brdok ) TAG "2" TO cTable
-      INDEX ON ( datval ) TAG "DAT" TO cTable
-      SET ORDER TO TAG "1"
-      GO TOP
-   ENDIF
-
-   RETURN .T.
-
-
-
-STATIC FUNCTION sql_kalk_doks2_where( hParams )
-
-   LOCAL cWhere := ""
-
-   IF hb_HHasKey( hParams, "idfirma" )
-      cWhere += "idfirma = " + sql_quote( hParams[ "idfirma" ] )
-   ENDIF
-
-   IF hb_HHasKey( hParams, "idvd" )
-      IF !Empty( cWhere )
-         cWhere += " AND "
-      ENDIF
-      cWhere += "idvd = " + sql_quote( hParams[ "idvd" ] )
-   ENDIF
-
-   IF hb_HHasKey( hParams, "brdok" )
-      IF !Empty( cWhere )
-         cWhere += " AND "
-      ENDIF
-      cWhere += "brdok = " + sql_quote( hParams[ "brdok" ] )
-   ENDIF
-
-   RETURN cWhere
-
-
-
-STATIC FUNCTION sql_kalk_doks2_order( hParams )
-
-   LOCAL cOrder
-
-   IF hb_HHasKey( hParams, "order_by" )
-      cOrder := " ORDER BY " + hParams[ "order_by" ]
-   ELSE
-      cOrder := " ORDER BY idfirma, idvd, brdok "
-   ENDIF
-
-   RETURN cOrder
-*/
-
-FUNCTION use_sql_kalk_kalk_atributi( hParams )
-
-   LOCAL cSql, cWhere, cOrder
-   LOCAL cTable := "KALK_KALK_ATRIBUTI"
-
-   default_if_nil( @hParams, hb_Hash() )
-
-   cWhere := sql_kalk_kalk_atributi_where( hParams )
-   cOrder := sql_kalk_kalk_atributi_order( hParams )
-
-   cSql := "SELECT "
-   cSql += coalesce_char_zarez( "idfirma", 2 )
-   cSql += coalesce_char_zarez( "idtipdok", 2 )
-   cSql += coalesce_char_zarez( "brdok", 8 )
-   cSql += coalesce_char_zarez( "rbr", 3 )
-   cSql += coalesce_char( "atribut", 50 )
-   cSql += " FROM fmk.kalk_kalk_atributi "
-
-   IF !Empty( cWhere )
-      cSql += " WHERE " + cWhere
-      IF !Empty( cOrder )
-         cSql += cOrder
-      ENDIF
-   ELSE
-      cSql += " OFFSET 0 LIMIT 1 "
-   ENDIF
-
-   IF hb_HHasKey( hParams, "alias" )
-      cTable := hParams[ "alias" ]
-   ENDIF
-
-   SELECT ( F_KALK_ATRIBUTI )
-   use_sql( cTable, cSql )
-
-   IF is_sql_rdd_treba_indeks( hParams )
-      INDEX ON ( idfirma + idtipdok + brdok ) TAG "1" TO cTable
-      SET ORDER TO TAG "1"
-      GO TOP
-   ENDIF
-
-   RETURN .T.
-
-
-STATIC FUNCTION sql_kalk_kalk_atributi_where( hParams )
-
-   LOCAL cWhere := ""
-
-   IF hb_HHasKey( hParams, "idfirma" )
-      cWhere += "idfirma = " + sql_quote( hParams[ "idfirma" ] )
-   ENDIF
-
-   IF hb_HHasKey( hParams, "idtipdok" )
-      IF !Empty( cWhere )
-         cWhere += " AND "
-      ENDIF
-      cWhere += "idtipdok = " + sql_quote( hParams[ "idtipdok" ] )
-   ENDIF
-
-   IF hb_HHasKey( hParams, "brdok" )
-      IF !Empty( cWhere )
-         cWhere += " AND "
-      ENDIF
-      cWhere += "brdok = " + sql_quote( hParams[ "brdok" ] )
-   ENDIF
-
-   RETURN cWhere
-
-
-
-STATIC FUNCTION sql_kalk_kalk_atributi_order( hParams )
-
-   LOCAL cOrder
-
-   IF hb_HHasKey( hParams, "order_by" )
-      cOrder := " ORDER BY " + hParams[ "order_by" ]
-   ELSE
-      cOrder := " ORDER BY idfirma, idtipdok, brdok "
    ENDIF
 
    RETURN cOrder

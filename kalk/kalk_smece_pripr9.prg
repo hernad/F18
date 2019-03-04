@@ -120,7 +120,7 @@ STATIC FUNCTION ka_pripr9_set_filter( aUslFirma, aUslDok, dDat1, dDat2 )
    SET ORDER TO TAG "1"
 
    // obavezno postavi filter po rbr
-   cFilter := "rbr = '  1'"
+   cFilter := "rbr == 1"
 
    IF !Empty( aUslFirma )
       cFilter += " .and. idfirma='" + aUslFirma + "'"

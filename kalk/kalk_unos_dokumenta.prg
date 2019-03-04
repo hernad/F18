@@ -343,7 +343,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    LOCAL cIdKonto1, cIdKonto2
    LOCAL hParams := hb_Hash()
    LOCAL hDok
-   //LOCAL _opis, hKalkAtributi
    LOCAL hOldDokument, hRecNoviDokument
    LOCAL nTrec
 
@@ -362,7 +361,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       RETURN DE_CONT
    ENDIF
 
-   nKalkRbr := rbr_u_num( _Rbr )
+   nKalkRbr := _Rbr
    _ERROR := ""
 
    Box( "ist", BOX_HEIGHT, BOX_WIDTH, .F. )
@@ -396,11 +395,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
       Gather()
       my_unlock()
 
-      //hKalkAtributi := hb_Hash()
-      //hKalkAtributi[ "idfirma" ] := field->idfirma
-      //hKalkAtributi[ "idtipdok" ] := field->idvd
-      //hKalkAtributi[ "brdok" ] := field->brdok
-      //hKalkAtributi[ "rbr" ] := field->rbr
 
       SELECT kalk_pripr
       IF nKalkRbr == 1
@@ -428,13 +422,13 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          ENDIF
 
          _kolicina := - kalk_pripr->kolicina
-         nKalkRbr := rbr_u_num( _rbr ) + 1
-         _rbr := rbr_u_char( nKalkRbr )
+         nKalkRbr := _rbr + 1
+         _rbr := nKalkRbr
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
-         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + field->rbr
+         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + TRANSFORM(field->rbr, '99999')
             IF Left( kalk_pripr->idkonto2, 3 ) == "XXX"
                Scatter()
                _tbanktr := ""
@@ -497,7 +491,7 @@ STATIC FUNCTION kalk_kontiraj_alt_k()
 FUNCTION kalk_unos_nova_stavka()
 
    LOCAL hParams := hb_Hash()
-   LOCAL hDok, hKalkAtributi
+   LOCAL hDok
    LOCAL hOldDokument := hb_Hash()
    LOCAL hRecNoviDokument
    LOCAL _opis
@@ -528,8 +522,8 @@ FUNCTION kalk_unos_nova_stavka()
       ENDIF
 
       IF _idvd == "PR" // locirati se na zadnji proizvod
-         DO WHILE !Bof() .AND. Val( field->rBr ) > 9
-            IF Val( field->rBr ) > 9
+         DO WHILE !Bof() .AND. field->rBr > 9
+            IF field->rBr > 9
                SKIP -1
             ELSE
                EXIT
@@ -552,7 +546,7 @@ FUNCTION kalk_unos_nova_stavka()
 
       _NC := _VPC := _MPC := _MPCSaPP := 0
 
-      nKalkRbr := rbr_u_num( _rbr ) + 1 + nRbrUvecaj
+      nKalkRbr := _rbr + 1 + nRbrUvecaj
       hOldDokument[ "idfirma" ] := _idfirma
       hOldDokument[ "idvd" ] := _idvd
       hOldDokument[ "brdok" ] := _brdok
@@ -575,11 +569,6 @@ FUNCTION kalk_unos_nova_stavka()
       nKalkNVPredhodnaStavka := _nc * _kolicina
 
       Gather()
-      hKalkAtributi := hb_Hash()
-      hKalkAtributi[ "idfirma" ] := field->idfirma
-      hKalkAtributi[ "idtipdok" ] := field->idvd
-      hKalkAtributi[ "brdok" ] := field->brdok
-      hKalkAtributi[ "rbr" ] := field->rbr
 
       IF nKalkRbr == 1
          SELECT kalk_pripr
@@ -598,8 +587,8 @@ FUNCTION kalk_unos_nova_stavka()
          _idkonto2 := "XXX"
          _kolicina := - kalk_pripr->kolicina
 
-         nKalkRbr := rbr_u_num( _rbr ) + 1
-         _Rbr := rbr_u_char( nKalkRbr )
+         nKalkRbr := _rbr + 1
+         //_Rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
 
@@ -675,7 +664,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          ENDIF
       ENDIF
 
-      nKalkRbr := rbr_u_num( _rbr )
+      nKalkRbr := _rbr
       IF lAsistentObrada .AND. !kalk_asistent_pause()
          kalk_asistent_send_entere()
          hb_idleSleep( 0.1 )
@@ -724,13 +713,13 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          _idkonto2 := "XXX"
          _kolicina := - kalk_pripr->kolicina
 
-         nKalkRbr := rbr_u_num( _rbr ) + 1
-         _Rbr := rbr_u_char( nKalkRbr )
+         nKalkRbr := _rbr + 1
+         _Rbr := nKalkRbr
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
-         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + field->rbr
+         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + TRANSFORM(field->rbr, '99999')
             IF Left( field->idkonto2, 3 ) == "XXX"
                Scatter()
                _tbanktr := ""
@@ -911,7 +900,7 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
    nRet := LastKey()
    IF ( nRet ) <> K_ESC
-      _Rbr := rbr_u_char( nKalkRbr )
+      _Rbr := nKalkRbr
       // _Dokument := P_TipDok( _IdVD, - 2 )
       RETURN nRet
    ENDIF
@@ -925,6 +914,7 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
 FUNCTION kalk_unos_1( lNoviDokument, hParams )
 
+altd()
    //PRIVATE lKalkIzgenerisaneStavke := .F.
    PRIVATE Getlist := {}
 
@@ -1302,11 +1292,11 @@ FUNCTION kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok )
 
       IF field->idvd $ "11#41#42#RN#19"
          IF field->fcj == 0
-            cOk += AllTrim( field->rbr ) + ";"
+            cOk += AllTrim( Transform(field->rbr, '99999') ) + ";"
          ENDIF
       ELSEIF field->idvd $ "10#16#96#94#95#14#80#81#"
          IF field->nc == 0
-            cOk += AllTrim( field->rbr ) + ";"
+            cOk += AllTrim( Transform(field->rbr, '99999') ) + ";"
          ENDIF
       ENDIF
       SKIP

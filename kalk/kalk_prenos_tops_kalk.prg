@@ -321,7 +321,7 @@ FUNCTION pos_kalk_napuni_kalk_pripr( cTopskaImeDbf, cIdVdKalk ) // , lAutoRazduz
 
       cIdKontoProdavnica := koncij->id
       nRedniBroj := rbr_u_num( cRedniBroj ) + 1
-      cRedniBroj := rbr_u_char( nRedniBroj )
+      //cRedniBroj :=  nRedniBroj )
 
 /*
       // provjeri da li roba postoji u sifarniku, ako ne postoji dodaj, dodati u kontrolnu matricu ove informacije

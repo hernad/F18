@@ -299,7 +299,7 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
       hRec[ "idfirma" ] := self_organizacija_id()
       hRec[ "idvd" ] := _kalk_tip
       hRec[ "brdok" ] := cKalkBrDok
-      hRec[ "rbr" ] := Str( ++nCount, 3 )
+      hRec[ "rbr" ] := ++nCount
       hRec[ "datdok" ] := _kalk_datum
       hRec[ "idroba" ] := cIdRoba
       hRec[ "idkonto" ] := _p_konto

@@ -135,39 +135,7 @@ altd()
    _PKonto := ""
    _PU_I := ""
 
-/*
---   IF lKalkIzgenerisaneStavke  .AND. _kolicina > 0 .AND.  LastKey() <> K_ESC // izgenerisane stavke postoje
-      PRIVATE nRRec := RecNo()
-      GO TOP
-      my_flock()
-      DO WHILE !Eof()  // nafiluj izgenerisane stavke
-         IF kalk_pripr->kolicina == 0
-            SKIP
-            PRIVATE nRRec2 := RecNo()
-            SKIP -1
-            my_delete()
-            GO nRRec2
-            LOOP
-         ENDIF
-         IF kalk_pripr->brdok == _brdok .AND. kalk_pripr->idvd == _idvd .AND. Val( kalk_pripr->Rbr ) == nKalkRbr
 
-            // nKalkMarzaVP := 0
-            REPLACE vpc WITH kalk_pripr->nc, rabatv WITH  0, ;
-               marza WITH  0
-            REPLACE  mkonto WITH _mkonto, ;
-               tmarza  WITH _tmarza, ;
-               mpc WITH  _MPC, ;
-               mu_i WITH  _mu_i, ;
-               pkonto WITH _pkonto, ;
-               pu_i WITH  _pu_i, ;
-               error WITH "0"
-         ENDIF
-         SKIP
-      ENDDO
-      my_unlock()
-      GO nRRec
-   ENDIF
-*/
    SET KEY K_ALT_K TO
 
    RETURN LastKey()

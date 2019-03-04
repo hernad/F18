@@ -129,16 +129,16 @@ FUNCTION kalk_dokument_postoji( cFirma, cIdVd, cBroj, lSilent )
 FUNCTION kalk_pripr_brisi_od_do()
 
    LOCAL _ret := .F.
-   LOCAL _od := Space( 4 )
-   LOCAL _do := Space( 4 )
+   LOCAL _od
+   LOCAL _do := 9999
 
    SELECT kalk_pripr
    GO TOP
 
-   _od := PadR( field->rbr, 4 )
+   _od := field->rbr
    Box(, 1, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Briši stavke od" GET _od PICT "@S4"
-   @ box_x_koord() + 1, Col() + 1 SAY "do" GET _do PICT "@S4"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Briši stavke od" GET _od PICT "9999"
+   @ box_x_koord() + 1, Col() + 1 SAY "do" GET _do PICT "9999"
    READ
    BoxC()
 
@@ -147,7 +147,7 @@ FUNCTION kalk_pripr_brisi_od_do()
    ENDIF
 
    DO WHILE !Eof()
-      IF AllTrim( field->rbr ) >= AllTrim( _od ) .AND. IF( AllTrim( _do ) <> "", AllTrim( field->rbr ) <= AllTrim( _do ), .T. )
+      IF field->rbr  >= _od  .AND. IIF( _do <> 9999, field->rbr <= _do, .T. )
          my_delete()
       ENDIF
       SKIP
@@ -176,7 +176,7 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
 
    IF !silent
       IF Pitanje(, "Renumerisati pripremu ?", "N" ) == "N"
-         RETURN
+         RETURN .F.
       ENDIF
    ENDIF
 
@@ -193,7 +193,7 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
 
    my_flock()
    DO WHILE !Eof()
-      REPLACE field->rbr WITH rbr_u_char( ++_rbr )
+      REPLACE field->rbr WITH ++_rbr
       SKIP
    ENDDO
    my_unlock()
@@ -202,7 +202,7 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
    SET ORDER TO TAG "1"
    GO TOP
 
-   RETURN
+   RETURN .T.
 
 
 

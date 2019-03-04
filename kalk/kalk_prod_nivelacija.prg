@@ -120,7 +120,7 @@ FUNCTION kalk_nivelacija_11()
 
          IF Round( hRec[ "kolicina" ], 3 ) <> 0
             APPEND ncnl
-            hRec[ "rbr" ] := Str( ++nRbr, 3 )
+            hRec[ "rbr" ] :=  ++nRbr
             dbf_update_rec( hRec )
          ENDIF
 

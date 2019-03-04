@@ -117,7 +117,7 @@ FUNCTION kalk_raspored_troskova( lSilent, hTrosakSet, cSet, nSetStep )
          ENDIF
 
          IF cIdVd $ "RN"
-            IF Val( kalk_pripr->Rbr ) < 900
+            IF kalk_pripr->Rbr < 900
                nRNUkupnoProdVrijednost += Round( field->vpc * field->kolicina, gZaokr )
             ELSE
                nUkupanIznosFakture += Round( field->nc * field->kolicina, gZaokr )  // sirovine

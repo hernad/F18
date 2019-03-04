@@ -179,7 +179,7 @@ FUNCTION fakt_11_kalk_prenos_11()
          IF !Found()
             APPEND BLANK
             REPLACE idfirma WITH cIdFirma, ;
-               rbr WITH Str( ++nRbr, 3 ), ;
+               rbr WITH ++nRbr, ;
                idvd WITH "11", ;
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
@@ -330,7 +330,9 @@ FUNCTION fakt_13_kalk_11()
             READ
          ENDIF
          GO BOTTOM
-         IF brdok == cBrKalk; nRbr := Val( Rbr ); ENDIF
+         IF brdok == cBrKalk
+            nRbr := kalk_pripr->Rbr
+         ENDIF
 
          SELECT fakt
          //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktIdFirma + cIdTipDok + cBrDok + "'==IdFirma+IdTipDok+BrDok", "IDROBA", F_ROBA )
@@ -353,7 +355,7 @@ FUNCTION fakt_13_kalk_11()
             cPKonto := IF( gVar13u11 == "1", cidkonto, fakt->idpartner )
 
             REPLACE idfirma WITH cIdFirma, ;
-               rbr     WITH Str( ++nRbr, 3 ), ;
+               rbr  WITH ++nRbr, ;
                idvd WITH "11", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
@@ -503,7 +505,7 @@ FUNCTION fakt_11_kalk_41()
             ENDIF
             GO BOTTOM
             IF brdok == cBrKalk
-               nRbr := Val( Rbr )
+               nRbr := kalk_pripr->Rbr
             ENDIF
 
             SELECT fakt
@@ -527,7 +529,7 @@ FUNCTION fakt_11_kalk_41()
                nMPVBP := mpc_bez_pdv_by_tarifa( ROBA->idtarifa, fakt->kolicina * fakt->cijena )
                APPEND BLANK
                REPLACE idfirma WITH cIdFirma, ;
-                  rbr WITH Str( ++nRbr, 3 ), ;
+                  rbr WITH ++nRbr, ;
                   idvd WITH "41", ;
                   brdok WITH cBrKalk, ;
                   datdok WITH dDatKalk, ;
@@ -584,16 +586,15 @@ FUNCTION fakt_11_kalk_41()
                GO BOTTOM
 
                IF brdok == cBrKalk
-                  nRbr := Val( Rbr )
+                  nRbr := kalk_pripr->Rbr
                ENDIF
-
 
                SELECT kalk_pripr
 
                nMPVBP := mpc_bez_pdv_by_tarifa( roba->idtarifa, fakt->kolicina * fakt->cijena )
                APPEND BLANK
                REPLACE idfirma WITH cIdFirma
-               REPLACE rbr WITH Str( ++nRbr, 3 )
+               REPLACE rbr WITH ++nRbr
                REPLACE idvd WITH "41"
                REPLACE brdok WITH cBrKalk
                REPLACE datdok WITH dDatKalk
@@ -718,7 +719,9 @@ FUNCTION fakt_01_kalk_81()
             LOOP
          ENDIF
          GO BOTTOM
-         IF brdok == cBrKalk; nRbr := Val( Rbr ); ENDIF
+         IF brdok == cBrKalk
+           nRbr := kalk_pripr->Rbr
+         ENDIF
 
          SELECT fakt
          //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktIdFirma + cIdTipDok + cBrDok + "'==IdFirma+IdTipDok+BrDok", "IDROBA", F_ROBA )
@@ -739,7 +742,7 @@ FUNCTION fakt_01_kalk_81()
             SELECT kalk_pripr
             APPEND BLANK
             REPLACE idfirma WITH cIdFirma, ;
-               rbr     WITH Str( ++nRbr, 3 ), ;
+               rbr  WITH ++nRbr, ;
                idvd WITH "81", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
@@ -851,7 +854,9 @@ FUNCTION fakt_13_kalk_80()
             READ
          ENDIF
          GO BOTTOM
-         IF brdok == cBrKalk; nRbr := Val( Rbr ); ENDIF
+         IF brdok == cBrKalk
+           nRbr := kalk_pripr->Rbr
+         ENDIF
 
          SELECT fakt
          //IF !provjerisif_izbaciti_ovu_funkciju( "!eof() .and. '" + cFaktIdFirma + cIdTipDok + cBrDok + "'==IdFirma+IdTipDok+BrDok", "IDROBA", F_ROBA )
@@ -873,7 +878,7 @@ FUNCTION fakt_13_kalk_80()
             SELECT kalk_pripr
             APPEND BLANK
             REPLACE idfirma WITH cIdFirma, ;
-               rbr     WITH Str( ++nRbr, 3 ), ;
+               rbr  WITH ++nRbr, ;
                idvd WITH "80", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
@@ -892,7 +897,7 @@ FUNCTION fakt_13_kalk_80()
 
             APPEND BLANK // protustavka
             REPLACE idfirma WITH cIdFirma, ;
-               rbr     WITH Str( nRbr, 3 ), ;
+               rbr  WITH nRbr, ;
                idvd WITH "80", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
@@ -1065,7 +1070,7 @@ FUNCTION fakt_11_kalk_42()
             GO BOTTOM
 
             IF brdok == cBrKalk
-               nRbr := Val( Rbr )
+               nRbr := kalk_pripr->Rbr
             ENDIF
 
             SELECT fakt
@@ -1085,7 +1090,7 @@ FUNCTION fakt_11_kalk_42()
                nMPVBP := mpc_bez_pdv_by_tarifa( roba->idtarifa, fakt->kolicina * fakt->cijena )
                APPEND BLANK
                REPLACE idfirma WITH cIdFirma
-               REPLACE rbr WITH Str( ++nRbr, 3 )
+               REPLACE rbr WITH ++nRbr
                REPLACE idvd WITH _kalk_tip_dok
                REPLACE brdok WITH cBrKalk
                REPLACE datdok WITH _dat_kalk
@@ -1139,7 +1144,7 @@ FUNCTION fakt_11_kalk_42()
                GO BOTTOM
 
                IF field->brdok == cBrKalk
-                  nRbr := Val( Rbr )
+                  nRbr := kalk_pripr->Rbr
                ENDIF
 
                SELECT fakt
@@ -1166,7 +1171,7 @@ FUNCTION fakt_11_kalk_42()
                   nMPVBP := mpc_bez_pdv_by_tarifa( roba->idtarifa, fakt->kolicina * fakt->cijena)
                   APPEND BLANK
                   REPLACE idfirma WITH cIdFirma, ;
-                     rbr WITH Str( ++nRbr, 3 ), ;
+                     rbr WITH ++nRbr, ;
                      idvd WITH _kalk_tip_dok, ;
                      brdok WITH cBrKalk, ;
                      datdok WITH _dat_kalk, ;

@@ -54,7 +54,7 @@ FUNCTION kalk_stampa_dok_pr()
 
    SELECT kalk_pripr
 
-   bProizvod := {|| AllTrim( Str( Round( Val( field->rBr ) / 100, 0 ) ) ) }
+   bProizvod := {|| AllTrim( Str( Round( field->rBr / 100, 0 ) ) ) }
 
    DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND.  cBrDok == field->BrDok .AND. cIdVD == field->IdVD
 
@@ -86,7 +86,7 @@ FUNCTION kalk_stampa_dok_pr()
         // ENDIF
 
          nUnabavna := field->FCj * field->Kolicina
-         IF Val( field->rbr ) > 99
+         IF field->rbr > 99
             nUnabavna := field->NC * field->Kolicina
          ENDIF
 
@@ -105,7 +105,7 @@ FUNCTION kalk_stampa_dok_pr()
          nU9 := nKalkMarzaVP * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
          nUA := field->VPC * ( field->Kolicina - field->Gkolicina - field->GKolicin2 )
 
-         IF Val( field->Rbr ) > 99
+         IF field->Rbr > 99
             nTNabavna += nUnabavna; nT1 += nU1
             nT3 += nU3; nT4 += nU4; nT5 += nU5; nT6 += nU6
             nT7 += nU7; nT8 += nU8; nT9 += nU9; nTA += nUA
@@ -113,7 +113,7 @@ FUNCTION kalk_stampa_dok_pr()
          ENDIF
 
 
-         IF Val( field->rbr ) > 100 .AND. cProizvod != Eval( bProizvod )
+         IF field->rbr > 100 .AND. cProizvod != Eval( bProizvod )
 
             cProizvod := Eval( bProizvod )
             ?
@@ -124,8 +124,8 @@ FUNCTION kalk_stampa_dok_pr()
 
          ENDIF
 
-         @ PRow() + 1, 0 SAY  Rbr PICTURE "999"
-         IF Val( rbr ) < 10
+         @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "999"
+         IF kalk_pripr->rbr < 10
             @  PRow(), PCol() + 1 SAY  field->idkonto
          ELSE
             @  PRow(), PCol() + 1 SAY  Space( 7 )
@@ -135,11 +135,11 @@ FUNCTION kalk_stampa_dok_pr()
          @ PRow(), PCol() + 1 SAY field->Kolicina             PICTURE PicKol
          nCol1 := PCol() + 1
 
-         IF Val( rbr ) > 10
+         IF kalk_pripr->rbr > 10
             @ PRow(), PCol() + 1 SAY field->nc                   PICTURE PicCDEM
          ENDIF
 
-         IF Val( rbr ) < 10
+         IF kalk_pripr->rbr < 10
             @ PRow(), PCol() + 1 SAY field->fcj                   PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY nKalkPrevoz / field->FCJ2 * 100      PICTURE PicProc
             @ PRow(), PCol() + 1 SAY nKalkBankTr / field->FCJ2 * 100      PICTURE PicProc
@@ -158,7 +158,7 @@ FUNCTION kalk_stampa_dok_pr()
             @ PRow(), PCol() + 1 SAY field->VPC                   PICTURE PicCDEM
          ENDIF
 
-         IF Val( rbr ) < 10
+         IF kalk_pripr->rbr < 10
             @ PRow() + 1, 11 SAY IdTarifa
             @ PRow(), nCol1    SAY Space( Len( PicCDEM ) )
             @ PRow(), PCol() + 1 SAY nKalkPrevoz              PICTURE PicCDEM
@@ -171,7 +171,7 @@ FUNCTION kalk_stampa_dok_pr()
          ENDIF
 
          @ PRow() + 1, nCol1   SAY nUnabavna       PICTURE         pic_vrijednost()
-         IF Val( rbr ) < 10
+         IF kalk_pripr->rbr < 10
             @ PRow(), PCol() + 1  SAY nU3         PICTURE         pic_vrijednost()
             @ PRow(), PCol() + 1  SAY nU4         PICTURE         pic_vrijednost()
             @ PRow(), PCol() + 1  SAY nU5         PICTURE         pic_vrijednost()

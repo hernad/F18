@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION cre_all_fin( ver )
 
    LOCAL aDbf
@@ -27,7 +26,7 @@ FUNCTION cre_all_fin( ver )
    AAdd( aDBf, { "IDPARTNER", "C",   6,  0 } )
    AAdd( aDBf, { "IDVN", "C",   2,  0 } )
    AAdd( aDBf, { "BRNAL", "C",   8,  0 } )
-   AAdd( aDBf, { "RBR", "I",        4,  0 } )
+   AAdd( aDBf, { "RBR", "I", 4,  0 } )
    AAdd( aDBf, { "IDTIPDOK", "C",   2,  0 } )
    AAdd( aDBf, { "BRDOK", "C",   10,  0 } )
    AAdd( aDBf, { "DATDOK", "D",   8,  0 } )

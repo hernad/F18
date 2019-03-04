@@ -99,14 +99,14 @@ STATIC FUNCTION kalk_sljedeci_brdok( cTipKalk, cIdFirma, cSufiks )
       cBrKalk := field->brDok
    ENDIF
 
-   /*
-   update fmk.kalk_doks set brdok=lPad( (100000 + substr(brdok,2)::integer)::text, 8, '0')
+/*
+--   update fmk.kalk_doks set brdok=lPad( (100000 + substr(brdok,2)::integer)::text, 8, '0')
     where left(brdok,1)='A' and  not brdok like '%/%';
-   update fmk.kalk_doks set brdok=lPad( (110000 + substr(brdok,2)::integer)::text, 8, '0')
+--   update fmk.kalk_doks set brdok=lPad( (110000 + substr(brdok,2)::integer)::text, 8, '0')
     where left(brdok,1)='B' and  not brdok like '%/%';
-   update fmk.kalk_doks set brdok=lPad( trim(brdok), 8, '0')
+--   update fmk.kalk_doks set brdok=lPad( trim(brdok), 8, '0')
     where Length(trim(brdok))<8  and not brdok like '%/%'
-   */
+*/
 
    IF AllTrim( cBrKalk ) >= Replicate( "9", nLenGlavni )  // 10_0001 -> A0001, 11_0001 -> B0001
       cBrKalk := PadR( novasifra( AllTrim( cBrKalk ) ), nLenGlavni ) + Right( cBrKalk, nLenSufiks )

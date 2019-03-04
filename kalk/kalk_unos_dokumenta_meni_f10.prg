@@ -359,7 +359,7 @@ FUNCTION kalk_pripr_spoji_duple_artikle()
    nRbr := 1
    ordSetFocus( 0 )
    GO TOP
-   dbEval( {|| field->rbr := Str( nRbr, 3 ), nRbr++ } )  // renumeracija
+   dbEval( {|| field->rbr := nRbr, nRbr++ } )  // renumeracija
    MsgC()
 
    my_unlock()

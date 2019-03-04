@@ -21,7 +21,7 @@ MEMVAR cRNT2, cRNT3, cRNT4, cRNT5
 FUNCTION kalk_unos_dok_pr()
 
    LOCAL GetList := {}
-   LOCAL bProizvodPripadajuceSirovine := {|| Round( Val( field->rBr ) / 100, 0 )  }
+   LOCAL bProizvodPripadajuceSirovine := {|| Round( field->rBr / 100, 0 )  }
    LOCAL bDokument := {| cIdFirma, cIdVd, cBrDok |   cIdFirma == field->idFirma .AND. ;
       cIdVd == field->IdVd .AND. cBrDok == field->BrDok }
    LOCAL cIdFirma, cIdVd, cBrDok
@@ -236,10 +236,10 @@ FUNCTION kalk_pripr_pobrisi_sirovine( cIdFirma, cIdVd, cBrDok, nKalkRbr, bDokume
       SKIP
       nTrec := RecNo()
       SKIP -1
-      IF Val( field->rbr ) > 99 .AND. ;
+      IF field->rbr > 99 .AND. ;
             Eval( bDokument, cIdFirma, cIdVd, cBrDok ) .AND. ;
-            ( InRange( Val( field->rBr ), nKalkRbr * 100 + 1, nKalkRbr * 100 + 99 ) .OR. ; // nKalkRbr = 2, delete 201-299
-         Val( field->rBr ) > 900 )
+            ( InRange( field->rBr, nKalkRbr * 100 + 1, nKalkRbr * 100 + 99 ) .OR. ; // nKalkRbr = 2, delete 201-299
+         field->rBr > 900 )
          my_delete()
       ENDIF
       GO nTrec
@@ -277,7 +277,7 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
       SELECT kalk_pripr
       APPEND BLANK
       REPLACE field->idfirma WITH _IdFirma, ;
-         field->rbr WITH Str( ++nRbr100, 3 ), ;
+         field->rbr WITH ++nRbr100, ;
          field->idvd WITH "PR", ;
          field->brdok WITH _Brdok, ;
          field->datdok WITH _Datdok, ;

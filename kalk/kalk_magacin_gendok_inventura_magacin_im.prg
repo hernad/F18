@@ -166,7 +166,7 @@ FUNCTION kalk_generacija_inventura_magacin_im()
 
       DO WHILE !Eof()
          scatter()
-         _rbr := rbr_u_char( ++nRbr )
+         _rbr := ++nRbr
          my_rlock()
          gather()
          my_unlock()
@@ -344,7 +344,7 @@ FUNCTION kalk_azuriraj_im_stavku( cIdFirma, cIdKonto, cBrDok, dDatDok, nRbr, cId
 
    ELSE
       GO BOTTOM
-      nRbr := Val( AllTrim( field->rbr ) )
+      nRbr := field->rbr
       Scatter()
       APPEND NCNL
       _idfirma := cIdFirma
@@ -355,7 +355,7 @@ FUNCTION kalk_azuriraj_im_stavku( cIdFirma, cIdKonto, cBrDok, dDatDok, nRbr, cId
       _idtarifa := roba->idTarifa
       _idvd := "IM"
       _brdok := cBrdok
-      _rbr := rbr_u_char( ++nRbr )
+      _rbr := ++nRbr
       _kolicina := nUlaz - nIzlaz
       _gkolicina := nUlaz - nIzlaz
       _DatDok := dDatDok
@@ -400,7 +400,7 @@ STATIC FUNCTION kalk_dodaj_im_stavku( cIdFirma, cIdKonto, cBrDok, dDatDok, nRbr,
    _IdTarifa := roba->idtarifa
    _IdVd := "IM"
    _Brdok := cBrdok
-   _RBr := rbr_u_char( ++nRbr )
+   _RBr := ++nRbr
    _kolicina := _gkolicina := nUlaz - nIzlaz
 
    IF lKolNula // ako je lKolNula setuj na 0 popisanu kolicinu

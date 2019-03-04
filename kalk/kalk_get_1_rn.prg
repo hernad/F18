@@ -44,7 +44,7 @@ FUNCTION kalk_get_1_rn()
       SELECT kalk_pripr
       GO BOTTOM
       my_flock()
-      DO WHILE !Bof() .AND. Val( rbr ) > 900
+      DO WHILE !Bof() .AND. kalk_pripr->rbr > 900
          SKIP -1
          nTrec := RecNo()
          SKIP
@@ -79,12 +79,14 @@ FUNCTION kalk_get_1_rn()
 
             SELECT kalk_pripr
             SET ORDER TO TAG "3" // kalk pripr tag 3 idFirma+idvd+brdok+idroba+rbr
-            SEEK _idfirma + _idvd + _brdok + kalk->idroba + "9" // nadji odgovoarajucu stavku iznad 900
+            SEEK _idfirma + _idvd + _brdok + kalk->idroba + "  9" // nadji odgovoarajucu stavku iznad 900
             IF !Found()
                ++nCntR
                APPEND BLANK
-               REPLACE idfirma WITH _idfirma, idvd WITH _idvd, brdok WITH _brdok, ;
-                  rbr  WITH Str( 900 + nCntR, 3 ), idroba WITH kalk->idroba, ;
+               REPLACE idfirma WITH _idfirma, ;
+                  idvd WITH _idvd, ;
+                  brdok WITH _brdok, ;
+                  rbr  WITH 900 + nCntR, idroba WITH kalk->idroba, ;
                   mkonto WITH kalk->mkonto, ;
                   mu_i WITH "5", ;
                   error WITH "0", ;
@@ -120,7 +122,7 @@ FUNCTION kalk_get_1_rn()
       nNV := 0
       my_flock()
       DO WHILE !Eof()
-         IF Val( RBr ) > 900
+         IF kalk_pripr->RBr > 900
             nNV += field->NC  // ovo je u stvari nabavna vrijednost
             REPLACE NC WITH field->NC / field->Kolicina,  vpc WITH field->NC, fcj WITH field->nc
          ENDIF

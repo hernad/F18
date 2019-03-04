@@ -161,7 +161,7 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
-   IF cTable == "tarifa"
+   IF cTable == "tarifa" .OR. cTable == "kalk_kalk" .OR. cTable == "kalk_doks"
       RETURN "public." + cTable
    ENDIF
 

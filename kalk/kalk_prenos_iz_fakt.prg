@@ -157,7 +157,7 @@ FUNCTION fakt_kalk_prenos_10_14()
 
          GO BOTTOM
          IF kalk_pripr->brdok == cBrKalk
-            nRbr := Val( Rbr )
+            nRbr := kalk_pripr->Rbr
          ENDIF
 
          IF !find_kalk_doks_by_broj_dokumenta( cIdFirma, "14", cBrKalk )
@@ -196,7 +196,7 @@ FUNCTION fakt_kalk_prenos_10_14()
             SELECT kalk_pripr
             APPEND BLANK
             REPLACE idfirma WITH cIdFirma, ;
-               rbr     WITH Str( ++nRbr, 3 ), ;
+               rbr  WITH ++nRbr, ;
                idvd WITH "14", ;   // izlazna faktura
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
@@ -378,7 +378,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
          GO BOTTOM
 
          IF field->brdok == cBrKalk
-            nRbr := Val( field->rbr )
+            nRbr := field->rbr
          ENDIF
 
          select_o_koncij( cIdKonto )
@@ -399,7 +399,7 @@ FUNCTION fakt_kalk_prenos( cIndik )
             APPEND BLANK
             hRec := dbf_get_rec()
             hRec[ "idfirma" ] := cIdFirma
-            hRec[ "rbr" ] := Str( ++nRbr, 3 )
+            hRec[ "rbr" ] := ++nRbr
             hRec[ "idvd" ] := cTipKalk
             hRec[ "brdok" ] := cBrKalk
             hRec[ "datdok" ] := dDatKalk
@@ -584,7 +584,7 @@ FUNCTION kalk_fakt_prenos_period()
             APPEND BLANK // nema artikla, dodaj novi
 
             REPLACE idfirma WITH cIdFirma, ;
-               rbr WITH Str( ++nRbr, 3 ), ;
+               rbr WITH ++nRbr, ;
                idvd WITH cIdVdKalk, ;
                brdok WITH _br_kalk_dok, ;
                datdok WITH _dat_kalk, ;

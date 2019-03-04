@@ -162,7 +162,7 @@ FUNCTION kalk_prenos_fakt()
          ENDIF
 
          IF kalk_pripr->idvd $ "PR#RN"
-            IF Val( kalk_pripr->rbr ) > 899
+            IF kalk_pripr->rbr > 899
                SKIP
                LOOP
             ENDIF
@@ -170,42 +170,14 @@ FUNCTION kalk_prenos_fakt()
 
          SELECT fakt_pripr
 
-         IF kalk_pripr->idvd == "97"
-            IF lRJKon97
-               HSEEK cFF97 + kalk_pripr->( cIdFakt97 + cBrFakt + rbr )
-               IF Found()
-                  RREPLACE kolicina WITH kolicina + nkolicina
-               ELSE
-                  APPEND BLANK
-                  REPLACE idfirma WITH cFF97
-                  REPLACE idtipdok WITH cIdFakt97
-                  REPLACE brdok WITH cBrFakt
-                  REPLACE rbr WITH kalk_pripr->rbr
-                  REPLACE kolicina WITH nkolicina
-               ENDIF
-            ENDIF
-            IF lRJKon97_2
-               HSEEK cFF97_2 + kalk_pripr->( cIdFakt97_2 + cBrFakt + rbr )
-               IF Found()
-                  RREPLACE kolicina WITH kolicina + nkolicina
-               ELSE
-                  APPEND BLANK
-                  REPLACE idfirma WITH cFF97_2
-                  REPLACE idtipdok WITH cIdFakt97_2
-                  REPLACE brdok WITH cBrFakt
-                  REPLACE rbr WITH kalk_pripr->rbr
-                  REPLACE kolicina WITH nkolicina
-               ENDIF
-            ENDIF
 
     //     ELSEIF ( kalk_pripr->idvd == "16" ) // .AND. IsVindija() )
     //        APPEND BLANK
     //        REPLACE kolicina WITH nKolicina
 
-         ELSE
 
-            HSEEK cFaktFirma + kalk_pripr->( cIdFakt + cBrFakt + rbr )
 
+            HSEEK cFaktFirma + cIdFakt + cBrFakt + TRANSFORM(kalk_pripr->rbr, '999')
             IF Found()
                RREPLACE kolicina WITH kolicina + nkolicina
             ELSE
@@ -213,42 +185,8 @@ FUNCTION kalk_prenos_fakt()
                REPLACE kolicina WITH nkolicina
             ENDIF
 
-         ENDIF
 
          IF fFirst
-
-            IF kalk_pripr->idvd == "97"
-               IF lRJKon97
-                  SELECT fakt_pripr
-                  HSEEK cFF97 + pripr->( cIdFakt97 + cBrFakt + rbr )
-                  select_o_konto( kalk_pripr->idkonto )
-                  cTxta := PadR( kalk_pripr->idkonto, 30 )
-                  cTxtb := PadR( konto->naz, 30 )
-                  cTxtc := PadR( "", 30 )
-                  ctxt := Chr( 16 ) + " " + Chr( 17 ) + ;
-                     Chr( 16 ) + " " + Chr( 17 ) + ;
-                     Chr( 16 ) + cTxta + Chr( 17 ) + Chr( 16 ) + cTxtb + Chr( 17 ) + ;
-                     Chr( 16 ) + cTxtc + Chr( 17 )
-                  SELECT fakt_pripr
-                  RREPLACE txt WITH ctxt
-               ENDIF
-               IF lRJKon97_2
-                  SELECT fakt_pripr
-                  HSEEK cFF97_2 + pripr->( cIdFakt97_2 + cBrFakt + rbr )
-                  select_o_konto( kalk_pripr->idkonto2 )
-                  cTxta := PadR( kalk_pripr->idkonto2, 30 )
-                  cTxtb := PadR( konto->naz, 30 )
-                  cTxtc := PadR( "", 30 )
-                  cTxt := Chr( 16 ) + " " + Chr( 17 ) + ;
-                     Chr( 16 ) + " " + Chr( 17 ) + ;
-                     Chr( 16 ) + cTxta + Chr( 17 ) + Chr( 16 ) + cTxtb + Chr( 17 ) + ;
-                     Chr( 16 ) + cTxtc + Chr( 17 )
-                  SELECT fakt_pripr
-                  RREPLACE txt WITH ctxt
-               ENDIF
-               fFirst := .F.
-
-            ELSE
 
                select_o_partner( kalk_pripr->idpartner )
 
@@ -275,26 +213,15 @@ FUNCTION kalk_prenos_fakt()
                SELECT fakt_pripr
                RREPLACE txt WITH cTxt
 
-            ENDIF
          ENDIF
 
          FOR i := 1 TO 2
 
-            IF kalk_pripr->idvd == "97"
-               IF i == 1
-                  IF !lRJKon97
-                     LOOP
-                  ENDIF
-                  HSEEK cFF97 + kalk_pripr->( cIdFakt97 + cBrFakt + rbr )
-               ELSE
-                  IF !lRJKon97_2
-                     LOOP
-                  ENDIF
-                  HSEEK cFF97_2 + kalk_pripr->( cIdFakt97_2 + cBrFakt + rbr )
-               ENDIF
-            ELSE
-               RREPLACE idfirma WITH IF( cFaktFirma != cIdFirma .OR. lRJKonto, cFaktFirma, kalk_pripr->idfirma ), rbr WITH kalk_pripr->Rbr, idtipdok WITH cIdFakt, brdok WITH cBrFakt
-            ENDIF
+
+               RREPLACE idfirma WITH IF( cFaktFirma != cIdFirma .OR. lRJKonto, cFaktFirma, kalk_pripr->idfirma ), ;
+                    rbr WITH TRANSFORM(kalk_pripr->Rbr, '999'),;
+                    idtipdok WITH cIdFakt, brdok WITH cBrFakt
+
 
             my_rlock()
 

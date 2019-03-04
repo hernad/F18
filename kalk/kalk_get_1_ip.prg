@@ -231,7 +231,8 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, 
       _idvd := "IP"
       _brdok := cBrdok
 
-      _rbr := rbr_u_char( nRbr++ )
+      //_rbr := rbr_u_char( nRbr++ )
+      _rbr := nRbr++
       _kolicina := _gkolicina := nUlaz - nIzlaz
       IF cNulirati == "D"
          _kolicina := 0
@@ -400,7 +401,6 @@ FUNCTION gen_ip_razlika()
          APPEND BLANK
 
          hRec := dbf_get_rec()
-
          hRec[ "idfirma" ] := cIdfirma
          hRec[ "idkonto" ] := cIdkonto
          hRec[ "mkonto" ] := ""
@@ -411,7 +411,9 @@ FUNCTION gen_ip_razlika()
          hRec[ "idtarifa" ] := roba->idtarifa
          hRec[ "idvd" ] := "IP"
          hRec[ "brdok" ] := cBrdok
-         hRec[ "rbr" ] := rbr_u_char( ++nRbr )
+         //hRec[ "rbr" ] := rbr_u_char( ++nRbr )
+         hRec[ "rbr" ] := ++nRbr
+
          // kolicinu odmah setuj na 0
          hRec[ "kolicina" ] := 0
          // popisana kolicina je trenutno stanje

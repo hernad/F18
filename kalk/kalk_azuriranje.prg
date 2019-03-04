@@ -83,8 +83,6 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
       RETURN .F.
    ENDIF
 
-   // DokAttr():new( "kalk", F_KALK_ATTR ):zap_attr_dbf()
-
    kalk_gen_zavisni_fin_fakt_nakon_azuriranja( lGenerisiZavisne, lAuto, lStampaj )
 
    IF lViseDok == .T. .AND. Len( aOstaju ) > 0
@@ -361,7 +359,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 
          IF kalk_metoda_nc() <> " " .AND. field->error == "1"
             Beep( 2 )
-            MSG( "Utvrđena greška pri obradi dokumenta, rbr: " + field->rbr, 6 )
+            Msg( "Utvrđena greška pri obradi dokumenta, rbr: " + TRANSFORM(field->rbr,'99999'), 6 )
             my_close_all_dbf()
             RETURN .F.
          ENDIF
@@ -386,7 +384,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 
          IF Empty( field->mu_i ) .AND. Empty( field->pu_i )
             Beep( 2 )
-            Msg( "Stavka broj " + field->rbr + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
+            Msg( "Stavka broj " + TRANSFORM(field->rbr, '99999') + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
             my_close_all_dbf()
             RETURN .F.
          ENDIF
@@ -454,7 +452,7 @@ STATIC FUNCTION kalk_provjeri_duple_dokumente( aRezim )
 
          // TODO: cleanup sumnjive stavke
          IF field->ERROR == "1"
-            error_bar( field->idfirma + "-" + field->idvd + "-" + field->brdok, " /  Rbr." + field->rbr + " sumnjiva! " )
+            error_bar( field->idfirma + "-" + field->idvd + "-" + field->brdok, " /  Rbr." + Transform(field->rbr, '99999') + " sumnjiva! " )
             IF Pitanje(, "Želite li dokument ažurirati bez obzira na sumnjive stavke? (D/N)", "N" ) == "D"
                aRezim := {}
                // AAdd( aRezim, gCijene )

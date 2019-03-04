@@ -92,7 +92,7 @@ FUNCTION kalk_stampa_dok_rn()
          nU9 := nKalkMarzaVP * ( Kolicina - Gkolicina - GKolicin2 )
          nUA := kalk_pripr->VPC   * ( Kolicina - Gkolicina - GKolicin2 )
 
-         IF Val( kalk_pripr->Rbr ) > 900
+         IF kalk_pripr->Rbr > 900
             nT += nU
             nT3 += nU3; nT4 += nU4; nT5 += nU5; nT6 += nU6
             nT7 += nU7
@@ -101,7 +101,7 @@ FUNCTION kalk_stampa_dok_rn()
             nT8 += nU8; nT9 += nU9; nTA += nUA
          ENDIF
 
-         IF kalk_pripr->rbr == "901"
+         IF kalk_pripr->rbr == 901
             ? m
             @ PRow() + 1, 0        SAY "Ukupno:"
             @ PRow(), nCol1     SAY nT1        PICTURE         picdem
@@ -121,18 +121,19 @@ FUNCTION kalk_stampa_dok_rn()
             ? m
 
          ENDIF
-         @ PRow() + 1, 0 SAY  Rbr PICTURE "999"
-         IF Val( rbr ) < 900
+         @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "999"
+         IF kalk_pripr->rbr < 900
             @  PRow(), PCol() + 1 SAY  idkonto
          ELSE
             @  PRow(), PCol() + 1 SAY  Space( 7 )
          ENDIF
-         @ PRow(), 11 SAY  "";?? Trim( Left( ROBA->naz, 40 ) ), "(", ROBA->jmj, ")"
+         @ PRow(), 11 SAY  ""
+         ?? Trim( Left( ROBA->naz, 40 ) ), "(", ROBA->jmj, ")"
          @ PRow() + 1, 11 SAY IdRoba
          @ PRow(), PCol() + 1 SAY Kolicina             PICTURE PicKol
          nCol1 := PCol() + 1
          @ PRow(), PCol() + 1 SAY fcj                   PICTURE PicCDEM
-         IF Val( rbr ) < 900
+         IF kalk_pripr->rbr < 900
             @ PRow(), PCol() + 1 SAY nKalkPrevoz / FCJ2 * 100      PICTURE PicProc
             @ PRow(), PCol() + 1 SAY nKalkBankTr / FCJ2 * 100      PICTURE PicProc
             @ PRow(), PCol() + 1 SAY nKalkSpedTr / FCJ2 * 100      PICTURE PicProc
@@ -141,9 +142,6 @@ FUNCTION kalk_stampa_dok_rn()
             @ PRow(), PCol() + 1 SAY NC                    PICTURE PicCDEM
             @ PRow(), PCol() + 1 SAY nKalkMarzaVP / NC * 100         PICTURE PicProc
             @ PRow(), PCol() + 1 SAY VPC                   PICTURE PicCDEM
-         ENDIF
-
-         IF Val( rbr ) < 900
             @ PRow() + 1, 11 SAY IdTarifa
             @ PRow(), nCol1    SAY Space( Len( PicCDEM ) )
             @ PRow(), PCol() + 1 SAY nKalkPrevoz              PICTURE PicCDEM
@@ -157,7 +155,7 @@ FUNCTION kalk_stampa_dok_rn()
 
          @ PRow() + 1, nCol1   SAY nU          PICTURE         PICDEM
          // @ prow(),pcol()+1  SAY nU1         picture         PICDEM
-         IF Val( rbr ) < 900
+         IF kalk_pripr->rbr < 900
             @ PRow(), PCol() + 1  SAY nU3         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nU4         PICTURE         PICDEM
             @ PRow(), PCol() + 1  SAY nU5         PICTURE         PICDEM
@@ -186,4 +184,3 @@ FUNCTION kalk_stampa_dok_rn()
    ? m
 
    RETURN ( NIL )
-// }

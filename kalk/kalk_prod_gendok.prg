@@ -163,7 +163,7 @@ FUNCTION kalk_generisi_niv_prodavnica_na_osnovu_druge_niv()
       _idfirma := cidfirma; _idkonto := cidkonto; _pkonto := cidkonto; _pu_i := "3"
       _idroba := cidroba; _idtarifa := kalk->idtarifa
       _idvd := "19"; _brdok := cbrdok
-      _rbr := rbr_u_char( ++nrbr )
+      _rbr := ++nRbr
       _kolicina := nUlaz - nIzlaz
       _datdok := _DatFaktP := ddatdok
       _fcj := kalk->fcj

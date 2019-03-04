@@ -223,12 +223,12 @@ FUNCTION ImpCSVDok()
 
    IF !CheckDok()
       MsgBeep( "Prekidamo operaciju !!!#Nepostojece sifre!!!" )
-      RETURN
+      RETURN .F.
    ENDIF
 
    IF CheckBrFakt( @aFaktEx ) == 0
       MsgBeep( "Operacija prekinuta!" )
-      RETURN
+      RETURN .F.
    ENDIF
 
    IF TTbl2Kalk() == 0

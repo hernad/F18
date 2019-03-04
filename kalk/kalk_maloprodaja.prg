@@ -108,7 +108,7 @@ FUNCTION kalk_mp_inicijalizacija()
 
    /*
    -- select distinct(idroba), fmk.roba.mpc2 from fmk.kalk_kalk
-     LEFT JOIN fmk.roba ON kalk_kalk.idroba = roba.id
+   --   LEFT JOIN fmk.roba ON kalk_kalk.idroba = roba.id
     where kalk_kalk.pkonto='13315  ' and roba.mpc2 <> 0
     */
 

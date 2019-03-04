@@ -177,7 +177,7 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                      SELECT kalk_pripr
                      APPEND BLANK
                      REPLACE idfirma WITH cIdFirma, ;
-                        rbr     WITH Str( ++nRbr, 3 ), ;
+                        rbr  WITH ++nRbr, ;
                         idvd WITH "96", ;   // izlazna faktura
                         brdok WITH cBrKalk, ;
                         datdok WITH dDatKalk, ;
@@ -205,7 +205,7 @@ FUNCTION kalk_fakt_kalk_prenos_normativi( dD_from, dD_to, cIdKonto2, cIdTipDok, 
                      REPLACE field->idroba WITH fakt->idroba
                      REPLACE field->r_naz WITH ""
                      REPLACE field->idpartner WITH fakt->idpartner
-                     REPLACE field->rbr WITH fakt->rbr
+                     REPLACE field->rbr WITH VAL(fakt->rbr)
                      REPLACE field->brdok WITH fakt->idtipdok + ;
                         "-" + fakt->brdok
                      REPLACE field->kolicina WITH fakt->kolicina
@@ -401,7 +401,7 @@ FUNCTION PrenosNoFakt()
                      SELECT kalk_pripr
                      APPEND BLANK
                      REPLACE idfirma WITH cIdFirma, ;
-                        rbr     WITH Str( ++nRbr, 3 ), ;
+                        rbr  WITH ++nRbr, ;
                         idvd WITH "96", ;
                         brdok WITH cBrKalk, ;
                         datdok WITH dDatKalk, ;
@@ -515,7 +515,7 @@ FUNCTION fakt_kalk_prenos_normativi()
                   SELECT kalk_pripr
                   APPEND BLANK
                   REPLACE idfirma WITH cIdFirma, ;
-                     rbr     WITH Str( ++nRbr, 3 ), ;
+                     rbr  WITH nRbr, ;
                      idvd WITH "10", ;   // izlazna faktura
                      brdok WITH cBrKalk, ;
                      datdok WITH dDatKalk, ;

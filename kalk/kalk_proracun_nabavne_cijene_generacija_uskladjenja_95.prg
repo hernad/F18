@@ -119,7 +119,7 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
 
       hRec[ "idroba" ] := cIdRoba
       hRec[ "datdok" ] := hParams[ "datdok" ]
-      hRec[ "rbr" ] := Str( nRbr++, 3 )
+      hRec[ "rbr" ] := nRbr++
       hRec[ "idtarifa" ] := roba->idtarifa
 
 
@@ -135,7 +135,7 @@ FUNCTION kalk_gen_uskladjenje_nc_95( hParams )
          hRec[ "kolicina" ] := -nKolicina
          hRec[ "nc" ] := nSrednjaNcPoUlazima
       ENDIF
-      hRec[ "rbr" ] := Str( nRbr++, 3 )
+      hRec[ "rbr" ] := nRbr++
       dbf_update_rec( hRec )
 
       SELECT kalk_select
