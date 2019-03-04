@@ -1051,7 +1051,7 @@ CREATE TABLE fmk.kalk_kalk (
     brdok character varying(12) NOT NULL,
     datdok date,
     brfaktp character(10),
-    datfaktp date,
+    -- datfaktp date,
     idpartner character(6),
     -- datkurs date,
     rbr character(3) NOT NULL,
@@ -3208,19 +3208,7 @@ CREATE INDEX jprih_naz ON fmk.jprih USING btree (naz);
 --
 
 CREATE INDEX kalk_doks2_id1 ON fmk.kalk_doks2 USING btree (idfirma, idvd, brdok);
-
-
---
--- Name: kalk_doks_datdok; Type: INDEX; Schema: fmk; Owner: admin
---
-
 CREATE INDEX kalk_doks_datdok ON fmk.kalk_doks USING btree (datdok);
-
-
---
--- Name: kalk_doks_id1; Type: INDEX; Schema: fmk; Owner: admin
---
-
 CREATE INDEX kalk_doks_id1 ON fmk.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
 
 
@@ -3236,26 +3224,8 @@ CREATE INDEX kalk_kalk_atributi_id1 ON fmk.kalk_kalk_atributi USING btree (idfir
 --
 
 CREATE INDEX kalk_kalk_datdok ON fmk.kalk_kalk USING btree (datdok);
-
-
---
--- Name: kalk_kalk_id1; Type: INDEX; Schema: fmk; Owner: admin
---
-
 CREATE INDEX kalk_kalk_id1 ON fmk.kalk_kalk USING btree (idfirma, idvd, brdok, rbr, mkonto, pkonto);
-
-
---
--- Name: kalk_kalk_mkonto; Type: INDEX; Schema: fmk; Owner: admin
---
-
 CREATE INDEX kalk_kalk_mkonto ON fmk.kalk_kalk USING btree (idfirma, mkonto, idroba);
-
-
---
--- Name: kalk_kalk_pkonto; Type: INDEX; Schema: fmk; Owner: admin
---
-
 CREATE INDEX kalk_kalk_pkonto ON fmk.kalk_kalk USING btree (idfirma, pkonto, idroba);
 
 

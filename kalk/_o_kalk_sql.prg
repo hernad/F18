@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 FIELD idfirma, idvd, brdok, rbr, idtarifa, mkonto, pkonto, idroba, mu_i, pu_i, datdok, idpartner
-
+FIELD brfaktp
 
 FUNCTION find_kalk_doks_by_tip_datum( cIdFirma, cIdVd, dDatOd, dDatDo )
 
@@ -478,7 +478,6 @@ FUNCTION use_sql_kalk( hParams )
    cSql += coalesce_char_zarez( "idkonto", 7 )
    cSql += coalesce_char_zarez( "idkonto2", 7 )
 
-
    IF !( lReportMagacin  .OR. lReportProdavnica )
 
       cSql += coalesce_char_zarez( "trabat", 1 )
@@ -521,7 +520,6 @@ FUNCTION use_sql_kalk( hParams )
 
    cSql += coalesce_char_zarez( "mu_i", 1 )
    cSql += coalesce_char_zarez( "pu_i", 1 )
-
 
    IF hb_HHasKey( hParams, "obradjeno" )
       cSql += " kalk_doks.obradjeno as obradjeno, "
@@ -568,8 +566,8 @@ FUNCTION use_sql_kalk( hParams )
    ?E cSql
 #endif
 
-   use_sql( cTable, cSql )
 
+   use_sql( cTable, cSql )
    IF is_sql_rdd_treba_indeks( hParams )
       INDEX ON ( idfirma + idvd + brdok ) TAG "1" TO cTable
       INDEX ON ( idfirma + mkonto + idvd + brdok ) TAG "2" TO cTable
@@ -608,7 +606,7 @@ STATIC FUNCTION use_sql_kalk_order( hParams )
    IF hb_HHasKey( hParams, "order_by" )
       cOrder += " ORDER BY " + hParams[ "order_by" ]
    ELSE
-      cOrder += " ORDER BY idfirma, idvd, brdok"
+      cOrder += " ORDER BY idfirma, idvd, brdok, rbr"
    ENDIF
 
    RETURN cOrder
