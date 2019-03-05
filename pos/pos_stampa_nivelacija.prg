@@ -63,11 +63,7 @@ FUNCTION pos_stampa_nivelacija( hParams )
       cIdRoba := PRIPRZ->idRoba
       select_o_roba( cIdRoba )
       SELECT PRIPRZ
-      IF FIELDPOS("RBR") <> 0
-         nCnt := VAL(PRIPRZ->RBR)
-      ELSE
-        nCnt++
-      ENDIF
+      nCnt++
       ? TRANSFORM(nCnt, "999"), cIdRoba
       ?? PadR( roba->naz, s_cRobaNazDuzina ) + " "
       ?? Transform( PRIPRZ->kolicina, s_cPicKolicina ) + " "

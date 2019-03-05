@@ -31,11 +31,6 @@ FUNCTION set_a_dbf_kalk()
 
    set_a_dbf_temp( "kalk_pormp", "PORMP", F_PORMP        )
 
-/*
-   --set_a_dbf_temp( "kalk_doksrc", "KALK_DOKSRC", F_DOKSRC       )
-   --set_a_dbf_temp( "p_kalk_doksrc", "P_KALK_DOKSRC", F_P_DOKSRC     )
-*/
-
    set_a_dbf_temp( "kalk_ppprod", "PPPROD", F_PPPROD        )
    set_a_dbf_temp( "prodaja", "PRODAJA", F_PRODAJA        )
 

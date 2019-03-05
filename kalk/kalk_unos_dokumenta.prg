@@ -259,7 +259,7 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
    CASE Ch == K_CTRL_T
       IF Pitanje(, "Želite izbrisati ovu stavku (D/N) ?", "D" ) == "D"
          cLogInfo := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
-         cStavka := kalk_pripr->rbr
+         cStavka := AllTrim(Transform(kalk_pripr->rbr, '99999'))
          // cArtikal := kalk_pripr->idroba
          // nKolicina := kalk_pripr->kolicina
          // nNc := kalk_pripr->nc

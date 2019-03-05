@@ -53,7 +53,7 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
       SELECT pos
       APPEND BLANK
 
-      hRec["rbr"] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
+      hRec["rbr"] := ++nCount
       hRec["idroba"] := priprz->idroba
       hRec["cijena"] := priprz->cijena
       hRec["kolicina"] := priprz->kolicina
@@ -176,7 +176,7 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
          hRec[ "kol2" ] := priprz->kol2
          hRec[ "ncijena" ] := priprz->ncijena
          hRec[ "cijena" ] := priprz->cijena
-         hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
+         hRec[ "rbr" ] :=  ++nCount
 
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Stavka " + AllTrim( Str( nCount ) ) + " roba: " + hRec[ "idroba" ]
 

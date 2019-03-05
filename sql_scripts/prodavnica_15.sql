@@ -20,7 +20,7 @@ ALTER TABLE p15.roba OWNER TO admin;
 CREATE TABLE IF NOT EXISTS p15.pos_doks (
     idpos character varying(2) NOT NULL,
     idvd character varying(2) NOT NULL,
-    brdok character varying(6) NOT NULL,
+    brdok character varying(8) NOT NULL,
     datum date,
     idPartner character varying(6),
     idradnik character varying(4),
@@ -39,17 +39,17 @@ ALTER TABLE p15.pos_doks OWNER TO admin;
 CREATE TABLE IF NOT EXISTS p15.pos_pos (
     idpos character varying(2),
     idvd character varying(2),
-    brdok character varying(6),
+    brdok character varying(8),
     datum date,
-    --idradnik character varying(4),
     idroba character(10),
     idtarifa character(6),
     kolicina numeric(18,3),
     kol2 numeric(18,3),
     cijena numeric(10,3),
     ncijena numeric(10,3),
-    rbr character(3) NOT NULL,
-    robanaz varchar
+    rbr integer NOT NULL,
+    robanaz varchar,
+    jmj varchar
 );
 ALTER TABLE p15.pos_pos OWNER TO admin;
 
@@ -161,7 +161,7 @@ GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 CREATE TABLE p15.pos_doks_knjig (
    idpos character varying(2) NOT NULL,
    idvd character varying(2) NOT NULL,
-   brdok character varying(6) NOT NULL,
+   brdok character varying(8) NOT NULL,
    datum date,
    idPartner character varying(6),
    idradnik character varying(4),
@@ -186,7 +186,7 @@ GRANT ALL ON TABLE p15.pos_doks_knjig TO xtrole;
 CREATE TABLE IF NOT EXISTS p15.pos_pos_knjig (
    idpos character varying(2),
    idvd character varying(2),
-   brdok character varying(6),
+   brdok character varying(8),
    datum date,
    idroba character(10),
    idtarifa character(6),
@@ -194,8 +194,9 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos_knjig (
    kol2 numeric(18,3),
    cijena numeric(10,3),
    ncijena numeric(10,3),
-   rbr character varying(3),
-   robanaz varchar
+   rbr integer,
+   robanaz varchar,
+   jmj varchar
 );
 ALTER TABLE p15.pos_pos_knjig OWNER TO admin;
 CREATE INDEX pos_pos_id1_knjig ON p15.pos_pos_knjig USING btree (idpos, idvd, datum, brdok, idroba);
@@ -261,8 +262,9 @@ ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS mu_i;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS idcijena;
 ALTER TABLE p15.pos_pos DROP COLUMN IF EXISTS idradnik;
-update p15.pos_pos set rbr = lpad(ltrim(rbr),3);
-ALTER TABLE p15.pos_pos ALTER COLUMN rbr TYPE character(3);
+--update p15.pos_pos set rbr = lpad(ltrim(rbr),3);
+--ALTER TABLE p15.pos_pos ALTER COLUMN rbr TYPE character(3);
+--ALTER TABLE p15.pos_pos ALTER COLUMN rbr TYPE integer;
 ALTER TABLE p15.pos_pos ALTER COLUMN rbr SET NOT NULL;
 ALTER TABLE p15.pos_pos ADD COLUMN IF NOT EXISTS robanaz varchar;
 
@@ -279,8 +281,8 @@ ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS prebacen;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS mu_i;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS idcijena;
 ALTER TABLE p15.pos_pos_knjig DROP COLUMN IF EXISTS idradnik;
-update p15.pos_pos_knjig set rbr = lpad(ltrim(rbr),3);
-ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr TYPE character(3);
+--update p15.pos_pos_knjig set rbr = lpad(ltrim(rbr),3);
+--ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr TYPE character(3);
 ALTER TABLE p15.pos_pos_knjig ALTER COLUMN rbr SET NOT NULL;
 ALTER TABLE p15.pos_pos_knjig ADD COLUMN IF NOT EXISTS robanaz varchar;
 
@@ -328,7 +330,7 @@ DROP TABLE IF EXISTS p15.pos_dokspf;
 --        79 - odobreno snizenje
 --        72 - akcijske cijene
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_kalk_kalk_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION f18.on_kalk_kalk_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -338,6 +340,7 @@ DECLARE
     ncijena decimal;
     barkodRoba varchar DEFAULT '';
     robaNaz varchar;
+    robaJmj varchar;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
@@ -346,7 +349,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    END IF;
    SELECT idprodmjes INTO idPos
           from fmk.koncij where id=NEW.PKonto;
-   SELECT barkod, naz INTO barkodRoba, robaNaz
+   SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
           from fmk.roba where id=NEW.idroba;
 ELSE
    IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
@@ -373,8 +376,8 @@ ELSIF (TG_OP = 'INSERT') THEN
         cijena := NEW.mpcsapp;
         ncijena := 0;
       END IF;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, public.barkod_ean13_to_num(barkodRoba,3), NEW.idtarifa, robaNaz;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, public.barkod_ean13_to_num(barkodRoba,3), NEW.idtarifa, robaNaz,robaJmj;
       RETURN NEW;
 END IF;
 
@@ -387,7 +390,7 @@ $$;
 ---------------------------------------------------------------------------------------
 -- on kalk_doks update p15.pos_doks_knjig
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_kalk_doks_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION f18.on_kalk_doks_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -432,29 +435,29 @@ END;
 $$;
 
 
--- fmk.kalk_kalk -> p15.pos_pos_knjig -> ...
+-- f18.kalk_kalk -> p15.pos_pos_knjig -> ...
 
-DROP TRIGGER IF EXISTS t_kalk_crud on fmk.kalk_kalk;
+DROP TRIGGER IF EXISTS t_kalk_crud on f18.kalk_kalk;
 CREATE TRIGGER t_kalk_crud
    AFTER INSERT OR DELETE OR UPDATE
-   ON fmk.kalk_kalk
-   FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_kalk_crud();
+   ON f18.kalk_kalk
+   FOR EACH ROW EXECUTE PROCEDURE f18.on_kalk_kalk_crud();
 
--- fmk.kalk_doks -> p15.pos_doks_knjig -> ...
+-- f18.kalk_doks -> p15.pos_doks_knjig -> ...
 
-DROP TRIGGER IF EXISTS t_kalk_doks_crud on fmk.kalk_doks;
+DROP TRIGGER IF EXISTS t_kalk_doks_crud on f18.kalk_doks;
 CREATE TRIGGER t_kalk_doks_crud
       AFTER INSERT OR DELETE OR UPDATE
-      ON fmk.kalk_doks
-      FOR EACH ROW EXECUTE PROCEDURE public.on_kalk_doks_crud();
+      ON f18.kalk_doks
+      FOR EACH ROW EXECUTE PROCEDURE f18.on_kalk_doks_crud();
 
 
 -- test
 
 -- step 1
--- insert into fmk.kalk_doks(idfirma, idvd, brdok, datdok, brfaktP, pkonto) values('10', '11', 'BRDOK01', current_date, 'FAKTP01', '13322');
--- insert into fmk.kalk_kalk(idfirma, idvd, brdok, datdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'BRDOK01', current_date, 1, '13322', 'R01', 10,  2);
--- insert into fmk.kalk_kalk(idfirma, idvd, brdok, datdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'BRDOK01', current_date, 2, '13322', 'R02', 20,  3);
+-- insert into public.kalk_doks(idfirma, idvd, brdok, datdok, brfaktP, pkonto) values('10', '11', 'BRDOK01', current_date, 'FAKTP01', '13322');
+-- insert into public.kalk_kalk(idfirma, idvd, brdok, datdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'BRDOK01', current_date, 1, '13322', 'R01', 10,  2);
+-- insert into public.kalk_kalk(idfirma, idvd, brdok, datdok, rbr, pkonto, idroba, mpcsapp, kolicina) values('10', '11', 'BRDOK01', current_date, 2, '13322', 'R02', 20,  3);
 
 -- step 2
 -- select * from p15.pos_doks_knjig;
@@ -462,8 +465,8 @@ CREATE TRIGGER t_kalk_doks_crud
 -- select * from p15.pos_pos_knjig;
 
 -- step 4
--- delete from fmk.kalk_kalk where brdok='BRDOK01';
--- delete from fmk.kalk_doks where brdok='BRDOK01';
+-- delete from public.kalk_kalk where brdok='BRDOK01';
+-- delete from public.kalk_doks where brdok='BRDOK01';
 
 -- step 5
 -- select * from p15.pos_doks_knjig;
@@ -530,7 +533,7 @@ CREATE OR REPLACE FUNCTION p15.pos_prijem_update_stanje(
    idpos character(2),
    idvd character(2),
    brdok character(8),
-   rbr character(3),
+   rbr integer,
    datum date,
    dat_od date,
    dat_do date,
@@ -552,7 +555,7 @@ IF ( idvd <> '02' ) AND ( idvd <> '80' ) AND ( idvd <> '89' ) AND ( idvd <> '22'
         RETURN FALSE;
 END IF;
 
-dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(rbr);
+dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(to_char(rbr,'99999'));
 dokumenti := dokumenti || dokument;
 
 IF dat_od IS NULL then
@@ -643,7 +646,7 @@ CREATE OR REPLACE FUNCTION p15.pos_izlaz_update_stanje(
    idpos character(2),
    idvd character(2),
    brdok character(8),
-   rbr character(3),
+   rbr integer,
    datum date,
    idroba varchar(10),
    kolicina numeric,
@@ -663,7 +666,7 @@ IF ( idvd <> '42' )  THEN
         RETURN FALSE;
 END IF;
 
-dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(rbr);
+dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(to_char(rbr,'99999'));
 dokumenti := dokumenti || dokument;
 
 IF (transakcija = '-') THEN -- on delete pos_pos stavka
@@ -739,7 +742,7 @@ CREATE OR REPLACE FUNCTION p15.pos_promjena_cijena_update_stanje(
    idpos character(2),
    idvd character(2),
    brdok character(8),
-   rbr character(3),
+   rbr integer,
    datum date,
    dat_od date,
    dat_do date,
@@ -761,7 +764,7 @@ IF ( idvd <> '19' ) AND ( idvd <> '29' ) AND ( idvd <> '79' ) THEN
         RETURN FALSE;
 END IF;
 
-dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(rbr);
+dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(to_char(rbr,'99999'));
 dokumenti := dokumenti || dokument;
 
 IF dat_od IS NULL then
@@ -876,23 +879,23 @@ ELSIF (TG_OP = 'INSERT') THEN
          USING NEW.idroba
          INTO robaId;
 
-      IF (NEW.idvd = '19') OR (NEW.idvd = '72') THEN
+      IF (NEW.idvd = '19') THEN
          robaCijena := NEW.ncijena;
       ELSE
          robaCijena := NEW.cijena;
       END IF;
 
-      IF NOT robaId IS NULL THEN
-         EXECUTE 'UPDATE p' || idPos || '.roba  SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5 WHERE id=$1'
-           USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena;
+      IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
+         EXECUTE 'UPDATE p' || idPos || '.roba  SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
+           USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
       ELSE
-         EXECUTE 'INSERT INTO p' || idPos || '.roba(id,barkod,mpc,idtarifa,naz) values($1,$2,$3,$4,$5)'
-           USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz;
+         EXECUTE 'INSERT INTO p' || idPos || '.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
+           USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
       END IF;
 
       RAISE INFO 'insert pos_pos_knjig prodavnica % %', idPos, NEW.idvd;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.idtarifa,NEW.kolicina, NEW.cijena, NEW.ncijena, NEW.kol2, NEW.robanaz;
+      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.idtarifa,NEW.kolicina, NEW.cijena, NEW.ncijena, NEW.kol2, NEW.robanaz, NEW.jmj;
       RETURN NEW;
 END IF;
 
@@ -903,7 +906,6 @@ $$;
 
 
 -- p15.pos_doks_knjig -> p15.pos_doks
-DROP TRIGGER IF EXISTS pos_doks_knjig_insert_update_delete on p15.pos_doks_knjig;
 DROP TRIGGER IF EXISTS pos_doks_knjig_crud on p15.pos_doks_knjig;
 CREATE TRIGGER pos_doks_knjig_insert_update_delete
       AFTER INSERT OR DELETE OR UPDATE
@@ -911,7 +913,6 @@ CREATE TRIGGER pos_doks_knjig_insert_update_delete
       FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_doks_knjig_crud();
 
 -- p15.pos_pos_knjig -> p15.pos_pos
-DROP TRIGGER IF EXISTS pos_pos_knjig_insert_update_delete on p15.pos_pos_knjig;
 DROP TRIGGER IF EXISTS pos_pos_knjig_crud on p15.pos_pos_knjig;
 CREATE TRIGGER pos_pos_knjig_crud
    AFTER INSERT OR DELETE OR UPDATE
@@ -952,7 +953,7 @@ $$
 
 ----------- TRIGERI na strani knjigovodstva POS_DOKS - KALK_DOKS ! -----------------------------------------------------
 
--- on p15.pos_doks -> fmk.kalk_doks
+-- on p15.pos_doks -> f18.kalk_doks
 ---------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.on_pos_doks_crud() RETURNS trigger
        LANGUAGE plpgsql
@@ -1022,19 +1023,19 @@ $$;
 
 
 --- fmk.rbr_to_char(45) -> ' 45'
-CREATE OR REPLACE FUNCTION fmk.rbr_to_char(num integer) RETURNS varchar
-    LANGUAGE plpgsql
-AS $$
-BEGIN
-    BEGIN
-        RETURN lpad(btrim(to_char(num, '999')),3);
-    EXCEPTION WHEN OTHERS THEN
-        RAISE NOTICE 'Invalid integer value: "%".  Returning ***.', num;
-        RETURN '***';
-    END;
-RETURN '***';
-END;
-$$;
+-- CREATE OR REPLACE FUNCTION fmk.rbr_to_char(num integer) RETURNS varchar
+--     LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+--     BEGIN
+--         RETURN lpad(btrim(to_char(num, '999')),3);
+--     EXCEPTION WHEN OTHERS THEN
+--         RAISE NOTICE 'Invalid integer value: "%".  Returning ***.', num;
+--         RETURN '***';
+--     END;
+-- RETURN '***';
+-- END;
+-- $$;
 
 
 CREATE OR REPLACE FUNCTION public.barkod_ean13_to_num(barkod varchar, dec_mjesta integer) returns numeric
@@ -1187,7 +1188,7 @@ CREATE TRIGGER kasa_pos_pos_insert_update_delete
 
 ----------- TRIGERI na strani knjigovodstva POS - KALK_KALK ! -----------------------------------------------------
 
--- on p15.pos_pos -> fmk.kalk_kalk
+-- on p15.pos_pos -> f18.kalk_kalk
 ---------------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.on_pos_pos_crud() RETURNS trigger
        LANGUAGE plpgsql
@@ -1247,7 +1248,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
          RAISE INFO 'THEN insert POS 42 => kalk_kalk % % % % %', NEW.idpos, idvdKalk, brDok, NEW.datum, pKonto;
          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
-                 ' (fmk.rbr_to_char( (row_number() over (order by idroba))::integer))::character(3) as rbr,' ||
+                 ' (row_number() over (order by idroba))::integer as rbr,' ||
                  ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina, ' ||
                  ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj' ||
                  ' FROM p' || NEW.idpos || '.pos_pos ' ||
@@ -1299,14 +1300,14 @@ END;
 $$;
 
 
--- p15.pos_doks -> fmk.kalk_doks
+-- p15.pos_doks -> f18.kalk_doks
 DROP TRIGGER IF EXISTS  pos_doks_crud on p15.pos_doks;
 CREATE TRIGGER pos_doks_crud
    AFTER INSERT OR DELETE OR UPDATE
    ON p15.pos_doks
    FOR EACH ROW EXECUTE PROCEDURE public.on_pos_doks_crud();
 
--- p15.pos_pos -> fmk.kalk_kalk
+-- p15.pos_pos -> f18.kalk_kalk
 DROP TRIGGER IF EXISTS  pos_pos_crud on p15.pos_pos;
 CREATE TRIGGER pos_pos_crud
       AFTER INSERT OR DELETE OR UPDATE
@@ -1325,7 +1326,7 @@ CREATE TRIGGER pos_pos_crud
 -- select * from p15.pos_doks where datum=current_date and idvd='42';
 
 -- step 4
--- select * from fmk.kalk_doks where brdok=TO_CHAR(current_date, 'ddmm/15') and idvd='42';
+-- select * from f18.kalk_doks where brdok=TO_CHAR(current_date, 'ddmm/15') and idvd='42';
 
 -- delete from p15.pos_pos where brdok='BRDOK01';
 
@@ -1357,34 +1358,34 @@ END $$;
 ------------------------------------------------------------------------
 -- kalk_kalk, kalk_doks cleanup datumska polja
 -----------------------------------------------------------------------
-ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS datfaktp;
-ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS datkurs;
-ALTER TABLE fmk.kalk_kalk DROP COLUMN IF EXISTS roktr;
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS datfaktp date;
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS datval date;
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS dat_od date;
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS dat_do date;
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS opis text;
+ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS datfaktp;
+ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS datkurs;
+ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS roktr;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS datfaktp date;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS datval date;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS dat_od date;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS dat_do date;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS opis text;
 
 DO $$
 DECLARE
   nCount numeric;
 BEGIN
     BEGIN
-      SELECT count(*) as count from fmk.kalk_kalk where btrim(coalesce(idzaduz2,''))<>''
+      SELECT count(*) as count from f18.kalk_kalk where btrim(coalesce(idzaduz2,''))<>''
         INTO nCount;
       IF (nCount > 1) THEN
          RAISE EXCEPTION 'kalk idzaduz2 se koristi % !?', nCount
             USING HINT = 'Vjerovatno ima veze sa pracenjem proizvodnje';
       END IF;
-      ALTER TABLE fmk.kalk_doks DROP COLUMN idzaduz;
-      ALTER TABLE fmk.kalk_doks DROP COLUMN idzaduz2;
-      ALTER TABLE fmk.kalk_doks DROP COLUMN sifra;
+      ALTER TABLE f18.kalk_doks DROP COLUMN idzaduz;
+      ALTER TABLE f18.kalk_doks DROP COLUMN idzaduz2;
+      ALTER TABLE f18.kalk_doks DROP COLUMN sifra;
 
-      ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz;
-      ALTER TABLE fmk.kalk_kalk DROP COLUMN idzaduz2;
-      ALTER TABLE fmk.kalk_kalk DROP COLUMN fcj3;
-      ALTER TABLE fmk.kalk_kalk DROP COLUMN vpcsap;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN idzaduz;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN idzaduz2;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN fcj3;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN vpcsap;
 
 	EXCEPTION WHEN OTHERS THEN
         RAISE NOTICE 'idzaduz2 garant ne postoji';
@@ -1443,9 +1444,9 @@ drop extension if exists pgcrypto;
 create extension pgcrypto;
 
 
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS  uuid uuid DEFAULT gen_random_uuid();
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS ref uuid;
-ALTER TABLE fmk.kalk_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS  uuid uuid DEFAULT gen_random_uuid();
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref uuid;
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;
 
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS uuid uuid DEFAULT gen_random_uuid();
 ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS ref uuid;
@@ -1534,7 +1535,7 @@ DECLARE
       uuid2 uuid;
       nC numeric;
       nC2 numeric;
-      cRbr varchar;
+      nRbr integer;
       cBrDokNew varchar;
       dDatumNew date;
       nStanje numeric;
@@ -1563,12 +1564,12 @@ BEGIN
       EXECUTE 'update p15.pos_doks set ref=$2 WHERE uuid=$1'
          USING uuidPos, uuid2;
 
-      FOR cRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
+      FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
       LOOP
          -- aktuelna osnovna cijena;
          nStanje := p15.pos_dostupno_artikal_za_cijenu(cIdRoba, nC, 0.00);
          EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, cRbr, cIdRoba, nStanje, nC, nC2;
+             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nC, nC2;
       END LOOP;
 
       RETURN;
@@ -1588,7 +1589,7 @@ DECLARE
       uuid2 uuid;
       nC numeric;
       nC2 numeric;
-      cRbr varchar;
+      nRbr integer;
       cBrDokNew varchar;
       dDatumNew date;
       nStanje numeric;
@@ -1617,12 +1618,12 @@ BEGIN
       EXECUTE 'update p15.pos_doks set ref_2=$2 WHERE uuid=$1'
          USING uuidPos, uuid2;
 
-      FOR cRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
+      FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
       LOOP
          -- trenutno aktuelna osnovna cijena je akcijkska
          nStanje := p15.pos_dostupno_artikal_za_cijenu(cIdRoba, nC2, 0);
          EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, cRbr, cIdRoba, nStanje, nC2, nC;
+             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nC2, nC;
       END LOOP;
 
       RETURN;
@@ -1672,8 +1673,8 @@ $$
 
 
 -- kalk podbr out
-ALTER TABLE IF EXISTS fmk.kalk_doks DROP COLUMN IF EXISTS podbr;
-ALTER TABLE IF EXISTS fmk.kalk_kalk DROP COLUMN IF EXISTS podbr;
+ALTER TABLE IF EXISTS f18.kalk_doks DROP COLUMN IF EXISTS podbr;
+ALTER TABLE IF EXISTS f18.kalk_kalk DROP COLUMN IF EXISTS podbr;
 
 CREATE SCHEMA IF NOT EXISTS f18;
 ALTER SCHEMA f18 OWNER TO admin;
@@ -1710,10 +1711,10 @@ CREATE INDEX IF NOT EXISTS kalk_doks_datdok ON f18.kalk_doks USING btree (datdok
 CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
 
 --------------------------------------------------------------------------------
--- F18 v3 legacy fmk kalk_kalk, kalk_doks updatable views
+-- F18 v3 legacy public.kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
-drop view if exists fmk.kalk_kalk;
-CREATE view fmk.kalk_kalk  AS SELECT
+drop view if exists public.kalk_kalk;
+CREATE view public.kalk_kalk  AS SELECT
      idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
      brfaktp, idpartner,
      lpad(btrim(to_char(rbr,'999')), 3) as rbr,
@@ -1737,7 +1738,7 @@ CREATE view fmk.kalk_kalk  AS SELECT
 FROM
   f18.kalk_kalk;
 
-CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
+CREATE OR REPLACE RULE public.kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
       DO INSTEAD INSERT INTO f18.kalk_kalk(
          idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
          brfaktp, idpartner,
@@ -1781,11 +1782,11 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
         NEW.error   );
 
-GRANT ALL ON fmk.kalk_kalk TO xtrole;
+GRANT ALL ON public.kalk_kalk TO xtrole;
 
-----------------------  fmk.kalk_doks ----------------------------------
-DROP VIEW if exists fmk.kalk_doks;
-CREATE view fmk.kalk_doks  AS SELECT
+----------------------  public.kalk_doks ----------------------------------
+DROP VIEW if exists public.kalk_doks;
+CREATE view public.kalk_doks  AS SELECT
 idfirma, idvd, brdok, datdok,
 brfaktp, datfaktp, idpartner, datval,
 dat_od, dat_do,
@@ -1797,7 +1798,7 @@ korisnik
 FROM
   f18.kalk_doks;
 
-CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO fmk.kalk_doks
+CREATE OR REPLACE RULE public.kalk_doks_ins AS ON INSERT TO f18.kalk_doks
       DO INSTEAD INSERT INTO f18.kalk_doks(
         idfirma, idvd, brdok, datdok,
         brfaktp, datfaktp, idpartner, datval,
@@ -1818,7 +1819,7 @@ CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO fmk.kalk_doks
         NEW.korisnik   );
 
 
-GRANT ALL ON fmk.kalk_doks TO xtrole;
+GRANT ALL ON public.kalk_doks TO xtrole;
 
 
 
@@ -1850,7 +1851,7 @@ CREATE view public.kalk_kalk  AS SELECT
 FROM
   f18.kalk_kalk;
 
-CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
+CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO f18.kalk_kalk
       DO INSTEAD INSERT INTO f18.kalk_kalk(
          idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
          brfaktp, idpartner,

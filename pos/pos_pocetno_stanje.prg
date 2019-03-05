@@ -210,7 +210,7 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
          hRec[ "idpos" ] := _id_pos
          hRec[ "idvd" ] := "16"
          hRec[ "brdok" ] := cBrDok
-         hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
+         hRec[ "rbr" ] := ++nCount
          hRec[ "idroba" ] := cIdRoba
          hRec[ "kolicina" ] := nKolicina
          hRec[ "cijena" ] := pos_get_mpc()

@@ -177,7 +177,7 @@ FUNCTION h_pos_pos_indexes()
 
    LOCAL hIndexes := hb_Hash()
 
-   hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+Rbr"
+   hIndexes[ "1" ] := "IdPos+IdVd+dtos(datum)+BrDok+TRANSFORM(Rbr,'99999')"
    hIndexes[ "2" ] := "idroba+DTOS(Datum)"
    hIndexes[ "4" ] := "dtos(datum)"
    hIndexes[ "5" ] := "IdPos+idroba+DTOS(Datum)"

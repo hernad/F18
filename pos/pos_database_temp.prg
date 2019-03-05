@@ -66,7 +66,6 @@ FUNCTION pos2_pripr()
       APPEND BLANK
 
       dbf_update_rec( hRec )
-
       SELECT pos
       SKIP
 

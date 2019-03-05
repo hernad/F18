@@ -60,7 +60,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    IF lOk
 
       SELECT _pos_pripr
-      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == ( cIdPos + "42" + DToS( danasnji_datum() ) + POS_BRDOK_PRIPREMA )
+      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == cIdPos + "42" + DToS( danasnji_datum() ) + POS_BRDOK_PRIPREMA
 
          SELECT pos
          APPEND BLANK
@@ -69,7 +69,7 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "idvd" ] := POS_IDVD_RACUN
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
-         hRec[ "rbr" ] := PadL( AllTrim( Str( ++nCount ) ), FIELD_LEN_POS_RBR )
+         hRec[ "rbr" ] := ++nCount
          //hRec[ "idradnik" ] := _pos_pripr->idradnik
          hRec[ "idroba" ] := _pos_pripr->idroba
          hRec[ "idtarifa" ] := _pos_pripr->idtarifa
