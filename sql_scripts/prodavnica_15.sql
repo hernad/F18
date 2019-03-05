@@ -1933,3 +1933,96 @@ CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
 
 
 GRANT ALL ON public.kalk_doks TO xtrole;
+
+
+
+--- MSSQL FOREIGN TABLES ----------------------------------
+
+CREATE EXTENSION tds_fdw;
+
+drop server if exists mssql1 CASCADE;
+create server mssql1 foreign data wrapper tds_fdw options (servername '192.168.124.1', port '1433',
+		database 'Sarajevo', tds_version '7.1', character_set 'UTF-8');
+CREATE USER MAPPING FOR postgres SERVER mssql1 OPTIONS (username 'sa', password 'test01Pwd');
+
+DROP FOREIGN TABLE IF EXISTS mssql1_kupac;
+CREATE FOREIGN TABLE mssql1_kupac(nazpp varchar, mjesto varchar, ulica varchar, siff integer, prod integer) SERVER mssql1
+   options (query 'SELECT nazpp,mjesto,ulica,siff,prod from [dbo].[kupac]', row_estimate_method 'showplan_all');
+
+
+CREATE OR REPLACE FUNCTION public.mssql_int_to_date(iDat integer) RETURNS date
+   LANGUAGE plpgsql
+   AS $$
+   DECLARE
+     nYear integer;
+     nMonth integer;
+     nDay integer;
+   BEGIN
+       nYear := iDat / 10^4;
+       nMonth := (iDat - nYear * 10^4) / 10^2;
+       nDay := iDat - nYear * 10^4 - nMonth * 10^2;
+       nYear := 2000 + nYear;
+       RETURN (to_char(nYear,'0999') || to_char(nMonth, '09') || to_char(nDay,'09'))::date;
+
+END;
+$$
+
+-- select * from public.sfak_by_brf(2018232);
+
+DROP FUNCTION IF EXISTS public.sfak_by_brf(bigint);
+
+CREATE OR REPLACE FUNCTION public.sfak_by_brf(brfIn bigint) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer)
+
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  cQuery text;
+  cBrf text;
+BEGIN
+
+cBrF := btrim(to_char(brfIn, '999999999'));
+cQuery := 'SELECT rb,prod,ident,kold,cijena,brf,datd,rel from [dbo].[SFAK] WHERE brf=' || cBrF;
+
+EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cBrF;
+RAISE INFO 'query: %', cQuery;
+EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cBrF || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd integer, rel integer) SERVER mssql1' ||
+        ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
+
+RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, public.mssql_int_to_date(datd), rel from mssql1_sfak_' || cBrF;
+
+EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cBrF;
+END;
+$$
+
+
+
+-- select * from public.gfak_by_brf(2018232);
+DROP FUNCTION IF EXISTS public.gfak_by_brf(bigint);
+
+CREATE OR REPLACE FUNCTION public.gfak_by_brf(brfIn bigint) RETURNS TABLE (vcij integer, siff integer, datfk date, dvo date, datk date, brf bigint, ts timestamp)
+
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  cQuery text;
+  cBrf text;
+BEGIN
+
+cBrF := btrim(to_char(brfIn, '999999999'));
+cQuery := 'SELECT vcij,siff,datfk,dvo,datk,brf,ts from [dbo].[GFAK] WHERE brf=' || cBrF;
+
+EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_gfak_' || cBrF;
+RAISE INFO 'query: %', cQuery;
+EXECUTE 'CREATE FOREIGN TABLE mssql1_gfak_' || cBrF || '(vcij integer, siff integer, datfk integer, dvo integer, datk integer, brf bigint,ts timestamp) SERVER mssql1' ||
+        ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
+
+RETURN QUERY EXECUTE 'SELECT vcij,siff,public.mssql_int_to_date(datfk),public.mssql_int_to_date(dvo),public.mssql_int_to_date(datk),brf,ts from mssql1_gfak_' || cBrF;
+
+EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_gfak_' || cBrF;
+END;
+$$
+
+
+-- select * from public.sfak_by_brf(2018232) as sfak
+--  LEFT JOIN public.gfak_by_brf(2018232) as gfak 
+--  ON sfak.brf=gfak.brf;
