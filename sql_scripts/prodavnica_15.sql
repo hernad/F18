@@ -1970,7 +1970,6 @@ $$
 -- select * from public.sfak_by_brf(2018232);
 
 DROP FUNCTION IF EXISTS public.sfak_by_brf(bigint);
-
 CREATE OR REPLACE FUNCTION public.sfak_by_brf(brfIn bigint) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer)
 
 LANGUAGE plpgsql
@@ -1997,9 +1996,10 @@ $$
 
 
 -- select * from public.gfak_by_brf(2018232);
+
 DROP FUNCTION IF EXISTS public.gfak_by_brf(bigint);
 
-CREATE OR REPLACE FUNCTION public.gfak_by_brf(brfIn bigint) RETURNS TABLE (vcij integer, siff integer, datfk date, dvo date, datk date, brf bigint, ts timestamp)
+CREATE OR REPLACE FUNCTION public.gfak_by_brf(brfIn bigint) RETURNS TABLE (vcij integer, siff integer, datfk date, dvo date, datk date, valdat date, brf bigint, ts timestamp)
 
 LANGUAGE plpgsql
 AS $$
@@ -2009,14 +2009,14 @@ DECLARE
 BEGIN
 
 cBrF := btrim(to_char(brfIn, '999999999'));
-cQuery := 'SELECT vcij,siff,datfk,dvo,datk,brf,ts from [dbo].[GFAK] WHERE brf=' || cBrF;
+cQuery := 'SELECT vcij,siff,datfk,dvo,datk,valdat,brf,ts from [dbo].[GFAK] WHERE brf=' || cBrF;
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_gfak_' || cBrF;
 RAISE INFO 'query: %', cQuery;
-EXECUTE 'CREATE FOREIGN TABLE mssql1_gfak_' || cBrF || '(vcij integer, siff integer, datfk integer, dvo integer, datk integer, brf bigint,ts timestamp) SERVER mssql1' ||
+EXECUTE 'CREATE FOREIGN TABLE mssql1_gfak_' || cBrF || '(vcij integer, siff integer, datfk integer, dvo integer, datk integer, valdat integer, brf bigint,ts timestamp) SERVER mssql1' ||
         ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
 
-RETURN QUERY EXECUTE 'SELECT vcij,siff,public.mssql_int_to_date(datfk),public.mssql_int_to_date(dvo),public.mssql_int_to_date(datk),brf,ts from mssql1_gfak_' || cBrF;
+RETURN QUERY EXECUTE 'SELECT vcij,siff,public.mssql_int_to_date(datfk),public.mssql_int_to_date(dvo),public.mssql_int_to_date(datk),public.mssql_int_to_date(valdat),brf,ts from mssql1_gfak_' || cBrF;
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_gfak_' || cBrF;
 END;
@@ -2024,5 +2024,33 @@ $$
 
 
 -- select * from public.sfak_by_brf(2018232) as sfak
---  LEFT JOIN public.gfak_by_brf(2018232) as gfak 
+--  LEFT JOIN public.gfak_by_brf(2018232) as gfak
 --  ON sfak.brf=gfak.brf;
+
+
+-- select * from public.sfak_prodavnice_by_datum('2018-10-16');
+
+DROP FUNCTION IF EXISTS public.sfak_prodavnice_by_datum(datum date);
+CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer)
+
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  cQuery text;
+  cDatum text;
+BEGIN
+
+cDatum := to_char(datum, 'yymmdd');
+-- prod < 199 => prodavnica
+cQuery := 'SELECT rb,prod,ident,kold,cijena,brf,datd,rel from [dbo].[SFAK] WHERE prod<199 AND datd=' || cDatum;
+
+EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
+RAISE INFO 'query: %', cQuery;
+EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd integer, rel integer) SERVER mssql1' ||
+        ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
+
+RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, public.mssql_int_to_date(datd), rel from mssql1_sfak_' || cDatum;
+
+EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
+END;
+$$
