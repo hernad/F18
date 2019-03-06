@@ -1671,10 +1671,7 @@ END;
 $$
 
 
-
--- kalk podbr out
-ALTER TABLE IF EXISTS f18.kalk_doks DROP COLUMN IF EXISTS podbr;
-ALTER TABLE IF EXISTS f18.kalk_kalk DROP COLUMN IF EXISTS podbr;
+---------------------------- f18.kalk ---------------------------------------------
 
 CREATE SCHEMA IF NOT EXISTS f18;
 ALTER SCHEMA f18 OWNER TO admin;
@@ -1713,8 +1710,8 @@ CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, 
 --------------------------------------------------------------------------------
 -- F18 v3 legacy public.kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
-drop view if exists public.kalk_kalk;
-CREATE view public.kalk_kalk  AS SELECT
+drop view if exists fmk.kalk_kalk;
+CREATE view fmk.kalk_kalk  AS SELECT
      idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
      brfaktp, idpartner,
      lpad(btrim(to_char(rbr,'999')), 3) as rbr,
@@ -1738,7 +1735,7 @@ CREATE view public.kalk_kalk  AS SELECT
 FROM
   f18.kalk_kalk;
 
-CREATE OR REPLACE RULE public.kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
+CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
       DO INSTEAD INSERT INTO f18.kalk_kalk(
          idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
          brfaktp, idpartner,
@@ -1782,11 +1779,11 @@ CREATE OR REPLACE RULE public.kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
         NEW.error   );
 
-GRANT ALL ON public.kalk_kalk TO xtrole;
+GRANT ALL ON fmk.kalk_kalk TO xtrole;
 
 ----------------------  public.kalk_doks ----------------------------------
-DROP VIEW if exists public.kalk_doks;
-CREATE view public.kalk_doks  AS SELECT
+DROP VIEW if exists fmk.kalk_doks;
+CREATE view fmk.kalk_doks  AS SELECT
 idfirma, idvd, brdok, datdok,
 brfaktp, datfaktp, idpartner, datval,
 dat_od, dat_do,
@@ -1798,7 +1795,7 @@ korisnik
 FROM
   f18.kalk_doks;
 
-CREATE OR REPLACE RULE public.kalk_doks_ins AS ON INSERT TO f18.kalk_doks
+CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO f18.kalk_doks
       DO INSTEAD INSERT INTO f18.kalk_doks(
         idfirma, idvd, brdok, datdok,
         brfaktp, datfaktp, idpartner, datval,
@@ -1819,12 +1816,11 @@ CREATE OR REPLACE RULE public.kalk_doks_ins AS ON INSERT TO f18.kalk_doks
         NEW.korisnik   );
 
 
-GRANT ALL ON public.kalk_doks TO xtrole;
-
+GRANT ALL ON fmk.kalk_doks TO xtrole;
 
 
 --------------------------------------------------------------------------------
--- F18 v4 legacy public kalk_kalk, kalk_doks updatable views
+-- F18 v4 public kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
 drop view if exists public.kalk_kalk;
 CREATE view public.kalk_kalk  AS SELECT
@@ -1934,6 +1930,10 @@ CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
 
 GRANT ALL ON public.kalk_doks TO xtrole;
 
+-- kalk podbr out
+ALTER TABLE IF EXISTS f18.kalk_doks DROP COLUMN IF EXISTS podbr;
+ALTER TABLE IF EXISTS f18.kalk_kalk DROP COLUMN IF EXISTS podbr;
+
 
 
 --- MSSQL FOREIGN TABLES ----------------------------------
@@ -2031,7 +2031,7 @@ $$
 -- select * from public.sfak_prodavnice_by_datum('2018-10-16');
 
 DROP FUNCTION IF EXISTS public.sfak_prodavnice_by_datum(datum date);
-CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer)
+CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer, siff integer, kp integer)
 
 LANGUAGE plpgsql
 AS $$
@@ -2041,15 +2041,22 @@ DECLARE
 BEGIN
 
 cDatum := to_char(datum, 'yymmdd');
+-- gfak.KP - magacin SA (40), BL (598), Bihac (942)
 -- prod < 199 => prodavnica
-cQuery := 'SELECT rb,prod,ident,kold,cijena,brf,datd,rel from [dbo].[SFAK] WHERE prod<199 AND datd=' || cDatum;
+-- select count(*) FROM [Sarajevo].[dbo].[SFAK] LEFT JOIN [Sarajevo].[dbo].[GFAK] ON sfak.brf=gfak.brf  where datd=181016
+-- siff=2000 => neka od prodavnica
+cQuery := 'SELECT rb,prod,ident,kold,cijena,sfak.brf,datd,rel,siff,kp from [dbo].[SFAK]' ||
+          ' LEFT JOIN [dbo].[GFAK] ON sfak.brf=gfak.brf' ||
+          ' WHERE prod>0 AND prod<199 AND siff=20000 AND datd=' || cDatum;
+
+-- select count(*) FROM [Sarajevo].[dbo].[SFAK] LEFT JOIN [Sarajevo].[dbo].[GFAK] ON sfak.brf=gfak.brf  where datd=181016
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 RAISE INFO 'query: %', cQuery;
-EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd integer, rel integer) SERVER mssql1' ||
+EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd integer, rel integer, siff integer, kp integer) SERVER mssql1' ||
         ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
 
-RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, public.mssql_int_to_date(datd), rel from mssql1_sfak_' || cDatum;
+RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, public.mssql_int_to_date(datd),rel,siff,kp from mssql1_sfak_' || cDatum;
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 END;

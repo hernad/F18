@@ -24,13 +24,11 @@ FUNCTION kalk_tkv()
    ENDIF
 
    _calc_rec := kalk_gen_fin_stanje_magacina_za_tkv( hParams )
-
    IF _calc_rec > 0
       stampaj_tkv( hParams )
    ENDIF
 
    RETURN .T.
-
 
 
 STATIC FUNCTION gethParams( hParams )
@@ -107,14 +105,14 @@ STATIC FUNCTION gethParams( hParams )
 STATIC FUNCTION stampaj_tkv( hParams )
 
    LOCAL _red_br := 0
-   LOCAL _line, _opis_knjizenja
+   LOCAL cLinija, _opis_knjizenja
    LOCAL _n_opis, _n_iznosi
    LOCAL _t_dug, _t_pot, _t_rabat
    LOCAL _a_opis := {}
    LOCAL nI
    LOCAL _tip_obrasca := hParams[ "tip_obrasca" ]
 
-   _line := _get_line()
+   cLinija := _get_line()
 
    START PRINT CRET
 
@@ -123,9 +121,9 @@ STATIC FUNCTION stampaj_tkv( hParams )
 
    tkv_zaglavlje( hParams )
 
-   ? _line
+   ? cLinija
    tkv_header()
-   ? _line
+   ? cLinija
 
    _t_dug := 0
    _t_pot := 0
@@ -200,7 +198,7 @@ STATIC FUNCTION stampaj_tkv( hParams )
 
    ENDDO
 
-   ? _line
+   ? cLinija
 
    ? "UKUPNO:"
    @ PRow(), _n_iznosi SAY Str( _t_dug, 12, 2 )
@@ -210,7 +208,7 @@ STATIC FUNCTION stampaj_tkv( hParams )
    ?U "SALDO TRGOVAČKE KNJIGE:"
    @ PRow(), _n_iznosi SAY Str( _t_dug - _t_pot, 12, 2 )
 
-   ? _line
+   ? cLinija
 
    FF
    ENDPRINT
@@ -226,22 +224,22 @@ STATIC FUNCTION stampaj_tkv( hParams )
 
 STATIC FUNCTION _get_line()
 
-   LOCAL _line
+   LOCAL cLinija
 
-   _line := ""
-   _line += Replicate( "-", 7 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 8 )
-   _line += Space( 1 )
-   _line += Replicate( "-", __LEN_OPIS )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
+   cLinija := ""
+   cLinija += Replicate( "-", 7 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 8 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", __LEN_OPIS )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
+   cLinija += Space( 1 )
+   cLinija += Replicate( "-", 12 )
 
-   RETURN _line
+   RETURN cLinija
 
 
 
