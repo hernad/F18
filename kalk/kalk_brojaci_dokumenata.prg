@@ -35,7 +35,7 @@ FUNCTION is_brojac_po_kontima()
 FUNCTION kalk_duzina_brojaca_dokumenta( nLen )
 
    IF s_nLenKalkBrojac == NIL
-      s_nLenKalkBrojac := fetch_metric( "kalk_duzina_brojaca_dokumenta", NIL, 5 )
+      s_nLenKalkBrojac := fetch_metric( "kalk_duzina_brojaca_dokumenta", NIL, 8 )
    ENDIF
 
    IF nLen <> NIL

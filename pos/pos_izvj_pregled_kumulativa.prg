@@ -58,7 +58,7 @@ FUNCTION pos_kumulativ_prometa()
    nFin := 0
    SELECT POS
 
-   DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
+   DO WHILE !Eof() .AND. POS->IdPos + POS->IdVd + DToS( POS->datum ) + POS->BrDok  == pos_doks->IdPos + pos_doks->IdVd + DToS( pos_doks->datum ) + pos_doks->BrDok
       ? cLM
       ?? IdRoba, ""
       select_o_roba( POS->IdRoba )
