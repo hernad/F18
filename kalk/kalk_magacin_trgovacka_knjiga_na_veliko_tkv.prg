@@ -32,9 +32,7 @@ FUNCTION kalk_tkv()
    RETURN .T.
 
 
-// -----------------------------------------
-// uslovi izvjestaja
-// -----------------------------------------
+
 STATIC FUNCTION gethParams( hParams )
 
    LOCAL lRet := .F.
@@ -42,11 +40,12 @@ STATIC FUNCTION gethParams( hParams )
    LOCAL cUslovKonta := fetch_metric( "kalk_tkv_konto", my_user(), Space( 200 ) )
    LOCAL _d_od := fetch_metric( "kalk_tkv_datum_od", my_user(), Date() -30 )
    LOCAL _d_do := fetch_metric( "kalk_tkv_datum_do", my_user(), Date() )
-   LOCAL _vr_dok := fetch_metric( "kalk_tkv_vrste_dok", my_user(), Space( 200 ) )
+   LOCAL cIdVd := fetch_metric( "kalk_tkv_vrste_dok", my_user(), Space( 200 ) )
    LOCAL _usluge := fetch_metric( "kalk_tkv_gledati_usluge", my_user(), "N" )
    LOCAL _tip := fetch_metric( "kalk_tkv_tip_obrasca", my_user(), "P" )
    LOCAL cViseKontaDN := "D"
    LOCAL cXlsxDN := "D"
+   LOCAL GetList := {}
 
    Box(, 15, 70 )
 
@@ -60,7 +59,7 @@ STATIC FUNCTION gethParams( hParams )
    ++ nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "     Konto (prazno-svi):" GET cUslovKonta PICT "@S35"
    ++ nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Vrste dok. (prazno-svi):" GET _vr_dok PICT "@S35"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Vrste dok. (prazno-svi):" GET cIdVd PICT "@S35"
    ++ nX
    ++ nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Gledati [N] nabavne cijene [P] prodajne cijene ?" GET _tip PICT "@!" VALID _tip $ "PN"
@@ -83,7 +82,7 @@ STATIC FUNCTION gethParams( hParams )
    hParams[ "datum_od" ] := _d_od
    hParams[ "datum_do" ] := _d_do
    hParams[ "konto" ] := cUslovKonta
-   hParams[ "vrste_dok" ] := _vr_dok
+   hParams[ "vrste_dok" ] := cIdVd
    hParams[ "gledati_usluge" ] := _usluge
    hParams[ "tip_obrasca" ] := _tip
 
@@ -98,7 +97,7 @@ STATIC FUNCTION gethParams( hParams )
    set_metric( "kalk_tkv_konto", my_user(), cUslovKonta )
    set_metric( "kalk_tkv_datum_od", my_user(), _d_od )
    set_metric( "kalk_tkv_datum_do", my_user(), _d_do )
-   set_metric( "kalk_tkv_vrste_dok", my_user(), _vr_dok )
+   set_metric( "kalk_tkv_vrste_dok", my_user(), cIdVd )
    set_metric( "kalk_tkv_gledati_usluge", my_user(), _usluge )
    set_metric( "kalk_tkv_tip_obrasca", my_user(), _tip )
 
@@ -144,9 +143,7 @@ STATIC FUNCTION stampaj_tkv( hParams )
       ENDIF
 
       ? PadL( AllTrim( Str( ++_red_br ) ), 6 ) + "."
-      // datum dokumenta
       @ PRow(), PCol() + 1 SAY field->datum
-      // generisi string za opis knjizenja...
       _opis_knjizenja := AllTrim( field->vr_dok )
       _opis_knjizenja += " "
       _opis_knjizenja += "broj: "
@@ -192,9 +189,7 @@ STATIC FUNCTION stampaj_tkv( hParams )
       ENDIF
 
       _t_pot += field->vp_pot
-
       _t_rabat += field->vp_rabat
-
 
       FOR nI := 2 TO Len( _a_opis )
          ?
@@ -249,9 +244,7 @@ STATIC FUNCTION _get_line()
    RETURN _line
 
 
-// -----------------------------------------
-// zaglavlje izvjestaja
-// -----------------------------------------
+
 STATIC FUNCTION tkv_zaglavlje( hParams )
 
    ? self_organizacija_id(), "-", AllTrim( self_organizacija_naziv() )

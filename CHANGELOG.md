@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-06
+
+- KALK TKV fix KO
+
 ## 2019-02-26
 
 - KALK IM obrazac PDF

@@ -43,9 +43,9 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    LOCAL nNvUlaz, nNvIzlaz, nVPVUlaz, nVPVIzlaz
    LOCAL nMarzaVP, nMarzaMP, _tr_prevoz, _tr_prevoz_2
    LOCAL _tr_bank, _tr_zavisni, _tr_carina, _tr_sped
-   LOCAL _br_fakt, _tip_dok, _tip_dok_naz, _id_partner
+   LOCAL cBrFaktP, cIdVd, _tip_dok_naz, cIdPartner
    LOCAL _partn_naziv, _partn_ptt, _partn_mjesto, _partn_adresa
-   LOCAL _broj_dok, _dat_dok
+   LOCAL cIdVdBrDok, dDatDok
    LOCAL cFilterKonto := ""
    LOCAL cFilterVrsteDok := ""
    LOCAL cFilterTarife := ""
@@ -161,12 +161,10 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
          SKIP
          LOOP
       ENDIF
-
       IF ( field->datdok < dDatumOd .OR. field->datdok > dDatumDo )
          SKIP
          LOOP
       ENDIF
-
 
       IF lViseKonta .AND. !Empty( cFilterKonto )
          IF !Tacno( cFilterKonto )
@@ -207,19 +205,17 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
       _id_d_firma := field->idfirma
       _d_br_dok := field->brdok
-      _br_fakt := field->brfaktp
-      _id_partner := field->idpartner
-      _dat_dok := field->datdok
-      _broj_dok := field->idvd + "-" + field->brdok
-      _tip_dok := field->idvd
+      cBrFaktP := field->brfaktp
+      cIdPartner := field->idpartner
+      dDatDok := field->datdok
+      cIdVdBrDok := field->idvd + "-" + field->brdok
+      cIdVd := field->idvd
 
       nDbfArea := Select()
 
-      SELECT tdok
-      HSEEK _tip_dok
+      select_o_tdok( cIdVd )
       _tip_dok_naz := field->naz
-
-      select_o_partner( _id_partner )
+      select_o_partner( cIdPartner )
 
       _partn_naziv := field->naz
       _partn_ptt := field->ptt
@@ -227,30 +223,25 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       _partn_adresa := field->adresa
 
       SELECT ( nDbfArea )
-
-      DO WHILE !Eof() .AND. cIdFirma + DToS( _dat_dok ) + _broj_dok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + cIdVdBrDok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. IspitajPrekid()
 
          // ispitivanje konta u varijanti jednog konta i datuma
          IF !lViseKonta .AND. ( field->datdok < dDatumOd .OR. field->datdok > dDatumDo .OR. field->mkonto <> cUslovKonto )
             SKIP
             LOOP
          ENDIF
-
          IF lViseKonta .AND. !Empty( cFilterKonto )
             IF !Tacno( cFilterKonto )
                SKIP
                LOOP
             ENDIF
          ENDIF
-
          IF !Empty( cFilterVrsteDok )
             IF !Tacno( cFilterVrsteDok )
                SKIP
                LOOP
             ENDIF
          ENDIF
-
-
          IF !Empty( cFilterTarife )
             IF !Tacno( cFilterTarife )
                SKIP
@@ -265,7 +256,6 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
          ENDIF
 
          select_o_roba( kalk->idroba )
-
          IF cGledatiUslugeDN == "N" .AND. roba->tip $ "U"
             SELECT kalk
             SKIP
@@ -276,19 +266,19 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
          nVPC := vpc_magacin_rs()
 
-         IF field->mu_i == "1" .AND. !( field->idvd $ "12#22#94" )  // ulazne kalkulacije
-            nVPVUlaz += Round(  nVpc * ( field->kolicina - field->gkolicina - field->gkolicin2 ), gZaokr )
-            nNvUlaz += Round( field->nc * ( field->kolicina - field->gkolicina - field->gkolicin2 ), gZaokr )
+         IF field->mu_i == "1" // .AND. !( field->idvd $ "12#94" )  // ulazne kalkulacije
+            nVPVUlaz += Round(  nVpc * field->kolicina, gZaokr )
+            nNvUlaz += Round( field->nc * field->kolicina, gZaokr )
 
-         ELSEIF field->mu_i == "5"  // izlazne kalkulacije
+         ELSEIF field->mu_i == "5" .OR. field->idvd == "KO" // izlazne kalkulacije
             nVPVIzlaz += Round( nVpc * field->kolicina, gZaokr )
             nRabat += Round( ( field->rabatv / 100 ) * nVPC * field->kolicina, gZaokr )
             nNvIzlaz += Round( field->nc * field->kolicina, gZaokr )
 
-         ELSEIF field->mu_i == "1" .AND. ( field->idvd $ "12#22#94" )  // povrati
-            nVPVIzlaz -= Round( nVPC * field->kolicina, gZaokr )
-            nRabat -= Round( ( field->rabatv / 100 ) * field->vpc * field->kolicina, gZaokr )
-            nNvIzlaz -= Round( field->nc * field->kolicina, gZaokr )
+            // ELSEIF field->mu_i == "1" .AND. ( field->idvd $ "12#94" )  // povrati
+            // nVPVIzlaz -= Round( nVPC * field->kolicina, gZaokr )
+            // nRabat -= Round( ( field->rabatv / 100 ) * field->vpc * field->kolicina, gZaokr )
+            // nNvIzlaz -= Round( field->nc * field->kolicina, gZaokr )
 
          ELSEIF field->mu_i == "3"  // nivelacija
             nVPVUlaz += Round( nVPC * field->kolicina, gZaokr )
@@ -307,10 +297,10 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
       ENDDO
 
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Dokument: " + _id_d_firma + "-" + _tip_dok + "-" + _d_br_dok
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Dokument: " + _id_d_firma + "-" + cIdVd + "-" + _d_br_dok
 
-      kalk_fin_stanje_add_to_r_export( _id_d_firma, _tip_dok, _d_br_dok, _dat_dok, _tip_dok_naz, _id_partner, ;
-         _partn_naziv, _partn_mjesto, _partn_ptt, _partn_adresa, _br_fakt, ;
+      kalk_fin_stanje_add_to_r_export( _id_d_firma, cIdVd, _d_br_dok, dDatDok, _tip_dok_naz, cIdPartner, ;
+         _partn_naziv, _partn_mjesto, _partn_ptt, _partn_adresa, cBrFaktP, ;
          nNvUlaz, nNvIzlaz, nNvUlaz - nNvIzlaz, ;
          nVPVUlaz, nVPVIzlaz, nVPVUlaz - nVPVIzlaz, ;
          nRabat, nMarzaVP, nMarzaMP, ;
@@ -337,7 +327,7 @@ FUNCTION vpc_magacin_rs( lKalkPriprema )
    hb_default( @lKalkPriprema, .F. )
 
    IF lKalkPriprema
-      IF kalk_pripr->IdVd $ "14#10" // u dokumentu je vpc
+      IF kalk_pripr->IdVd $ "14#10#KO" // u dokumentu je vpc
          nVPC := kalk_pripr->vpc
       ELSE
          // HACK: u dokument nije pohranjena vpc, uzeti iz robe
@@ -350,7 +340,7 @@ FUNCTION vpc_magacin_rs( lKalkPriprema )
       ENDIF
 
    ELSE
-      IF kalk->IdVd $ "14#10"
+      IF kalk->IdVd $ "14#10#KO"
          nVPC := kalk->vpc
       ELSE
          // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
@@ -400,9 +390,6 @@ STATIC FUNCTION kalk_tkv_cre_r_export()
    RETURN _dbf
 
 
-// ---------------------------------------
-// dodaj podatke u r_export tabelu
-// ---------------------------------------
 STATIC FUNCTION kalk_fin_stanje_add_to_r_export( id_firma, id_tip_dok, broj_dok, datum_dok, vrsta_dok, id_partner, ;
       part_naz, part_mjesto, part_ptt, part_adr, broj_fakture, ;
       n_v_dug, n_v_pot, n_v_saldo, ;
