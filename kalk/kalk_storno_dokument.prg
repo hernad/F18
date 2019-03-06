@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 
-FUNCTION storno_kalk_dokument()
+FUNCTION kalk_storno_dokumenat()
 
    o_kalk_edit()
    cIdFirma := self_organizacija_id()

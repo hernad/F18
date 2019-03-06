@@ -11,20 +11,24 @@
 
 #include "f18.ch"
 
-
 MEMVAR nKalkRBr
 MEMVAR GetList
 MEMVAR _datfaktp, _datdok, _idkonto, _mkonto, _idkonto2
-MEMVAR _vpc, _nc, _marza
+MEMVAR _vpc, _nc, _marza, _brfaktp, _idroba, _idtarifa, _idvd, _idpartner, _kolicina
 
 FUNCTION kalk_get_1_95_96()
 
    // lKalkIzgenerisaneStavke := .F. // izgenerisane stavke jos ne postoje
 
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
+
+   altd()
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
-      _mkonto := _idkonto
+   ENDIF
+
+   IF Empty(_mkonto)
+      _mKonto := _idkonto
    ENDIF
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
@@ -43,22 +47,20 @@ FUNCTION kalk_get_1_95_96()
       // ENDIF
       // ENDIF
 
-      @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Konto zadužuje            " GET _IdKonto VALID  Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 ) PICT "@!"
+      @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Konto zadužuje            " GET _idkonto2 VALID  Empty( _idkonto2 ) .OR. P_Konto( @_idkonto2, 21, 5 ) PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 40 SAY8 "Partner zadužuje:" GET _IdPartner  VALID Empty( _idPartner ) .OR. p_partner( @_IdPartner, 21, 5 ) PICT "@!"
 
    ELSE
-
       @  box_x_koord() + 6, box_y_koord() + 2   SAY "Dokument Broj: "; ?? _BrFaktP
       @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
       @ box_x_koord() + 8, box_y_koord() + 2 SAY "Magacinski konto razduzuje "; ?? _mkonto
-      @ box_x_koord() + 9, box_y_koord() + 2 SAY "Konto zaduzuje "; ?? _IdKonto
+      @ box_x_koord() + 9, box_y_koord() + 2 SAY "Konto zadužuje "; ?? _IdKonto
 
    ENDIF
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
 
    kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
-
    @ box_x_koord() + 11, box_y_koord() + 70 GET _IdTarifa VALID P_Tarifa( @_IdTarifa )
 
    READ

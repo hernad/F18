@@ -12,6 +12,7 @@
 
 #include "f18.ch"
 
+MEMVAR cIdFirma, cIdVd, cBrdok
 
 FUNCTION kalk_magacin_generacija_dokumenata()
 
@@ -51,7 +52,7 @@ FUNCTION kalk_inventura_magacin_im_meni()
 
 
 
-FUNCTION Iz12u97()
+FUNCTION kalk_iz_12_u_97()
 
    o_kalk_edit()
 
@@ -99,7 +100,8 @@ FUNCTION Iz12u97()
 
    DO WHILE !Eof() .AND. cIdFirma + cIdVDU + cBrDokU == IDFIRMA + IDVD + BRDOK
 
-      SELECT kalk_pripr; APPEND BLANK; Scatter()
+      SELECT kalk_pripr
+      APPEND BLANK; Scatter()
       _idfirma   := cIdFirma
       _idkonto2  := KALK->idkonto2
       _idkonto   := cKontoSklad
@@ -109,7 +111,6 @@ FUNCTION Iz12u97()
       _brfaktp   := KALK->( idkonto + brfaktp )
       _datfaktp  := dDatDok
       _idpartner := cIdPartner
-
       _fcj       := KALK->nc
       _fcj2      := KALK->nc
       _tprevoz   := "A"
@@ -121,7 +122,6 @@ FUNCTION Iz12u97()
       _rbr       := KALK->rbr
       _idtarifa  := KALK->idtarifa
       _idroba    := KALK->idroba
-
       _nc        := KALK->nc
       _vpc       := KALK->vpc
 
@@ -142,19 +142,15 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
 
    LOCAL nFaktVPC := 0, lOdvojiVisak := .F., nBrSl := 0
 
-   o_koncij()
    o_kalk_pripr()
    o_kalk_pripr2()
-   // o_kalk()
-  // o_sifk()
-  // o_sifv()
-  // o_roba()
+
 
    SELECT kalk_pripr
    GO TOP
-   PRIVATE cIdFirma := idfirma, cIdVD := idvd, cBrDok := brdok
+   PRIVATE cIdFirma := kalk_pripr->idfirma, cIdVD := kalk_pripr->idvd, cBrDok := kalk_pripr->brdok
 
-   IF !( cidvd $ "IM" )
+   IF !( cIdvd == "IM" )
       closeret
    ENDIF
    select_o_koncij( kalk_pripr->idkonto )
@@ -173,7 +169,10 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             Beep( 1 )
             IF Pitanje(, "U smecu vec postoji " + cidfirma + "-16-" + cbrdop + ", zelite li ga izbrisati?", "D" ) == "D"
                DO WHILE !Eof() .AND. idfirma + idvd + brdok == cIdFirma + "16" + cBrDop
-                  SKIP 1; nBrSl := RecNo(); SKIP -1; my_delete(); GO ( nBrSl )
+                  SKIP 1; nBrSl := RecNo()
+                  SKIP -1
+                  my_delete()
+                  GO ( nBrSl )
                ENDDO
                EXIT
             ELSE   // probaj sljedeci broj dokumenta
@@ -188,11 +187,10 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
    SELECT kalk_pripr
    GO TOP
    PRIVATE nRBr := 0, nRBr2 := 0
-   DO WHILE !Eof() .AND. cidfirma == idfirma .AND. cidvd == idvd .AND. cbrdok == brdok
+   DO WHILE !Eof() .AND. cIdfirma == kalk_pripr->idfirma .AND. cIdvd == kalk_pripr->idvd .AND. cBrdok == kalk_pripr->brdok
       scatter()
 
       select_o_roba( _idroba )
-
       IF koncij->naz <> "N1"
          kalk_vpc_po_kartici( @nFaktVPC, _idfirma, _idkonto, _idroba )
       ENDIF
@@ -221,7 +219,8 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             _rbr := ++nRbr2
 
             _brdok := cBrDop
-            _MKonto := _Idkonto;_MU_I := "1"     // ulaz
+            _MKonto := _Idkonto
+            _MU_I := "1"     // ulaz
             _PKonto := "";      _PU_I := ""
             _idvd := "16"
             _ERROR := ""
@@ -262,16 +261,10 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
 
 
 
-
-
-
-
-
-
-
 FUNCTION kalk_generisi_prijem16_iz_otpreme96()
 
    LOCAL cBrUlaz
+   LOCAL nRbr
 
    o_kalk_pripr2()
    o_kalk_pripr()
@@ -281,7 +274,7 @@ FUNCTION kalk_generisi_prijem16_iz_otpreme96()
 
    PRIVATE cIdFirma := field->idfirma, cIdVD := field->idvd, cBrDok := field->brdok
 
-   IF !( cIdvd $ "96#95" )  .OR. Empty( field->idkonto )
+   IF !( cIdvd $ "96#95" )  .OR. Empty( field->mkonto )
       closeret
    ENDIF
 
@@ -290,8 +283,9 @@ FUNCTION kalk_generisi_prijem16_iz_otpreme96()
 
    SELECT kalk_pripr
    GO TOP
-   PRIVATE nRBr := 0
-   DO WHILE !Eof() .AND. cidfirma == idfirma .AND. cidvd == idvd .AND. cbrdok == brdok
+   nRBr := 0
+
+   DO WHILE !Eof() .AND. cIdfirma == kalk_pripr->idfirma .AND. cIdvd == kalk_pripr->idvd .AND. cBrdok == kalk_pripr->brdok
       scatter()
       select_o_roba( _idroba )
 
@@ -309,10 +303,10 @@ FUNCTION kalk_generisi_prijem16_iz_otpreme96()
       _TMarza := "%"
       _TMarza := "A"
       _gkolicina := _gkolicin2 := _mpc := 0
-      select_o_koncij( kalk_pripr->idkonto2 )
 
+      select_o_koncij( kalk_pripr->mkonto )
       IF koncij->naz == "N1"  // otprema je izvrsena iz magacina koji se vodi po nc
-         select_o_koncij( kalk_pripr->idkonto )
+         select_o_koncij( kalk_pripr->mkonto )
          IF koncij->naz <> "N1"     // ulaz u magacin sa vpc
             _VPC := kalk_vpc_za_koncij()
             _marza := kalk_vpc_za_koncij() - kalk_pripr->nc
@@ -323,20 +317,19 @@ FUNCTION kalk_generisi_prijem16_iz_otpreme96()
       ELSE
          _VPC := kalk_pripr->vpc
       ENDIF
+
       SELECT kalk_pripr2
       _fcj := _fcj2 := _nc := kalk_pripr->nc
-      _rbr := Str( ++nRbr, 3 )
+      _rbr := ++nRbr
       _kolicina := kalk_pripr->kolicina
-      _BrFaktP := Trim( kalk_pripr->idkonto2 ) + "/" + kalk_pripr->brfaktp
-      _idkonto := kalk_pripr->idkonto
+      _BrFaktP := Trim( kalk_pripr->mkonto ) + "/" + kalk_pripr->brfaktp
+      _mkonto := kalk_pripr->idkonto2
       _idkonto2 := ""
       _brdok := cBrUlaz
-      _MKonto := _Idkonto
-      _MU_I := "1"     // ulaz
+      _MU_I := "1"
       _PKonto := ""
       _PU_I := ""
       _idvd := "16"
-
       _TBankTr := "X"    // izgenerisani dokument
       gather()
 

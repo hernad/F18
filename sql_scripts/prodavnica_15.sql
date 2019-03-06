@@ -1512,7 +1512,7 @@ BEGIN
      -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
      FOR uuidPos IN SELECT uuid FROM p15.pos_doks
           WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
-     LOOP
+
             RAISE INFO 'pos_doks %', uuidPos;
             PERFORM p15.nivelacija_start_create( uuidPos );
      END LOOP;
@@ -1565,7 +1565,7 @@ BEGIN
          USING uuidPos, uuid2;
 
       FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
-      LOOP
+
          -- aktuelna osnovna cijena;
          nStanje := p15.pos_dostupno_artikal_za_cijenu(cIdRoba, nC, 0.00);
          EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
@@ -1940,8 +1940,8 @@ ALTER TABLE IF EXISTS f18.kalk_kalk DROP COLUMN IF EXISTS podbr;
 
 CREATE EXTENSION tds_fdw;
 
-drop server if exists mssql1 CASCADE;
-create server mssql1 foreign data wrapper tds_fdw options (servername '192.168.124.1', port '1433',
+DROP SERVER IF EXISTS mssql1 CASCADE;
+CREATE SERVER mssql1 foreign data wrapper tds_fdw options (servername '192.168.124.1', port '1433',
 		database 'Sarajevo', tds_version '7.1', character_set 'UTF-8');
 CREATE USER MAPPING FOR postgres SERVER mssql1 OPTIONS (username 'sa', password 'test01Pwd');
 
@@ -2059,5 +2059,111 @@ EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod inte
 RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, public.mssql_int_to_date(datd),rel,siff,kp from mssql1_sfak_' || cDatum;
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
+END;
+$$
+
+
+CREATE OR REPLACE FUNCTION public.magacin_konto(nMagacin integer) RETURNS varchar
+   LANGUAGE plpgsql
+AS $$
+BEGIN
+
+RETURN CASE WHEN nMagacin=40 THEN '1320'
+     WHEN nMagacin=598 THEN '13202'
+     WHEN nMagacin=942 THEN '13203'
+     ELSE '13299'
+END;
+
+END;
+$$
+
+CREATE OR REPLACE FUNCTION public.roba_id_by_sifradob(nRobaId integer) RETURNS varchar
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+  cIdRoba varchar;
+BEGIN
+
+SELECT id from fmk.roba where lpad(btrim(sifradob),5,'0')=lpad(btrim(to_char(nRobaId,'99999')),5,'0')
+  INTO cIdRoba;
+
+RETURN COALESCE(cIdRoba, '<UNDEFINED>');
+
+END;
+$$
+
+
+CREATE OR REPLACE FUNCTION public.prodavnica_konto(nProdavnica integer) RETURNS varchar
+   LANGUAGE plpgsql
+AS $$
+BEGIN
+
+RETURN CASE WHEN nProdavnica=1 THEN '13311'
+     WHEN nProdavnica=2 THEN '13312'
+     WHEN nProdavnica=4 THEN '13314'
+     WHEN nProdavnica=5 THEN '13315'
+     WHEN nProdavnica=6 THEN '13316'
+     WHEN nProdavnica=7 THEN '13317'
+     WHEN nProdavnica=8 THEN '13318'
+     WHEN nProdavnica=9 THEN '13319'
+     WHEN nProdavnica=10 THEN '13320'
+     WHEN nProdavnica=11 THEN '13321'
+     WHEN nProdavnica=12 THEN '13322'
+     WHEN nProdavnica=13 THEN '13323'
+     WHEN nProdavnica=14 THEN '13324'
+     WHEN nProdavnica=15 THEN '13325'
+     WHEN nProdavnica=16 THEN '13326'
+     WHEN nProdavnica=17 THEN '13327'
+     WHEN nProdavnica=18 THEN '13328'
+     WHEN nProdavnica=19 THEN '13329'
+     WHEN nProdavnica=20 THEN '13330'
+     WHEN nProdavnica=21 THEN '13331'
+     WHEN nProdavnica=22 THEN '13332'
+     ELSE '13399'
+END;
+
+END;
+$$
+
+CREATE OR REPLACE FUNCTION public.prodavnica_zahtjev_prijem_magacin_create(nMagacin integer, dDatum date) RETURNS void
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   nRbr integer;
+   nProdavnica integer;
+   nRobaId integer;
+   nBrojFakture integer;
+   nKolicina numeric;
+
+   nBrojFaktureT integer;
+
+   cIdFirma: varchar;
+   cIdVd: varchar DEFAULT '21';
+   cBrDok: varchar;
+
+BEGIN
+     RAISE INFO '==== Magacin % ======', public.magacin_konto(nMagacin);
+
+     nBrojFaktureT := -1;
+
+     FOR nBrojFakture, nProdavnica, nRbr, nRobaId, nKolicina IN
+          SELECT brf, prod, rb, ident, kold from public.sfak_prodavnice_by_datum(dDatum)
+          WHERE kp=nMagacin
+          ORDER BY brf, rb
+     LOOP
+          IF ( nBrojFaktureT = -1 ) OR ( nBrojFaktureT <> nBrojFakture ) THEN
+             nBrojFaktureT := nBrojFakture;
+             RAISE INFO '---- Otpremnica % prodavnica: % ----', nBrojFakture, public.prodavnica_konto(nProdavnica);
+             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp) values();
+
+          END IF;
+
+          RAISE INFO ' stavke:  % % %',  nRbr, public.roba_id_by_sifradob(nRobaId), nKolicina;
+          INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,brfaktp,mkonto,mu_i,pkonto,pu_i,rbr,idroba,kolicina) values();
+
+            -- PERFORM p15.nivelacija_start_create( uuidPos );
+     END LOOP;
+
+     RETURN;
 END;
 $$

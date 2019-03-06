@@ -33,7 +33,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    LOCAL nUNv, nTNv
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
-   LOCAL cIdKonto, cIdKonto2
+   LOCAL cMKonto, cIdKonto2
    LOCAL cIdKontoGlavni
    LOCAL nC1, nC2, nC3
    LOCAL cIdPartner, cBrFaktP
@@ -47,7 +47,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
    // dDatFaktP := field->DatFaktP
-   cIdKonto := field->IdKonto
+   cMKonto := field->mkonto
    cIdKonto2 := field->IdKonto2
    // cIdZaduz2 := field->IdZaduz2
 
@@ -62,14 +62,13 @@ FUNCTION kalk_stampa_dok_16_95_96()
    ENDIF
 
 
-   bZagl := {|| zagl( cIdKonto, cIdKonto2, @lVpc ) }
+   bZagl := {|| zagl( cIdVd, cMKonto, cIdKonto2, @lVpc ) }
    // IF !Empty( cIdZaduz2 )
    // select_o_fakt_objekti( cIdZaduz2 )
    // ? PadL( "Rad.nalog:", 14 ), AllTrim( cIdZaduz2 ) + " - " + AllTrim( fakt_objekti->naz )
    // ENDIF
 
    Eval( bZagl )
-
    nTot6 := nTot7 := nTot8 := nTot9 := nTota := nTotb := nTotc := nTotd := 0
    nTotNv := 0
    nTotMarzaVP := 0
@@ -171,11 +170,11 @@ FUNCTION kalk_stampa_dok_16_95_96()
    RETURN .T.
 
 
-FUNCTION is_magacin_evidencija_vpc( cIdKonto )
+FUNCTION is_magacin_evidencija_vpc( cMKonto )
 
    LOCAL lVPC := .F.
 
-   select_o_koncij( cIdKonto )
+   select_o_koncij( cMKonto )
    IF koncij->region == "RS"
       lVPC := .T.
    ENDIF
@@ -183,29 +182,30 @@ FUNCTION is_magacin_evidencija_vpc( cIdKonto )
    RETURN lVpc
 
 
-STATIC FUNCTION zagl( cIdKonto, cIdkonto2, lVpc )
+STATIC FUNCTION zagl( cIdVd, cMKonto, cIdkonto2, lVpc )
 
    LOCAL cPom
 
    ?
    PushWa()
+   altd()
    IF cIdVd $ "95#96"
-      lVPC := is_magacin_evidencija_vpc( cIdKonto2 )
+      lVPC := is_magacin_evidencija_vpc( cMKonto )
       cPom := "Razdužuje:"
-      select_o_konto( cIdKonto2 )
-      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 1 ), AllTrim( cIdKonto2 ) + " - " + PadR( konto->naz, 60 )
+      select_o_konto( cMKonto )
+      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cMKonto ) + " - " + PadR( konto->naz, 60 )
 
-      IF !Empty( cIdKonto )
+      IF !Empty( cIdKonto2 )
          cPom := "Zadužuje:"
-         select_o_konto( cIdKonto )
-         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( konto->naz, 60 )
+         select_o_konto( cIdKonto2 )
+         ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto2 ) + " - " + PadR( konto->naz, 60 )
       ENDIF
 
    ELSE // 16
-      lVPC := is_magacin_evidencija_vpc( cIdKonto )
+      lVPC := is_magacin_evidencija_vpc( cMKonto )
       cPom := "Zadužuje:"
-      select_o_konto( cIdKonto )
-      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cIdKonto ) + " - " + PadR( konto->naz, 60 )
+      select_o_konto( cMKonto )
+      ? Space( s_nLijevaMargina ) + PadR( _u( cPom ), 14 ), AllTrim( cMKonto ) + " - " + PadR( konto->naz, 60 )
 
       IF !Empty( cIdKonto2 )
          cPom := "Razdužuje:"

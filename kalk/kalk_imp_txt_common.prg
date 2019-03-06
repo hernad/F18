@@ -487,3 +487,17 @@ FUNCTION kalk_pripr_auto_obrada_i_azuriranje( lStampaj )
    o_kalk_edit()
 
    RETURN .T.
+
+
+STATIC FUNCTION kalk_broj_ima_sufiks( cBrDok )
+
+      IF "/" $ cBrdok
+         RETURN .T.
+      ENDIF
+
+      IF "-" $ cBrdok
+         RETURN .T.
+      ENDIF
+
+      RETURN .F.
+      

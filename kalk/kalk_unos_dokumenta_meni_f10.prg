@@ -60,7 +60,7 @@ FUNCTION kalk_meni_f10()
 
 
    AAdd( aOpc, "E. storno dokumenta"                        )
-   AAdd( aOpcExe, {|| storno_kalk_dokument() } )
+   AAdd( aOpcExe, {|| kalk_storno_dokumenat() } )
 
    AAdd( aOpc, "F. prenesi VPC(sifr)+POREZ -> MPCSAPP(dok)" )
    AAdd( aOpcExe, {|| kalk_set_diskont_mpc() } )
@@ -72,7 +72,7 @@ FUNCTION kalk_meni_f10()
    AAdd( aOpcExe, {|| kalk_iz_vpc_sif_u_vpc_dokumenta() } )
 
    AAdd( aOpc, "I. povrat (12,11) -> u drugo skl.(96,97)" )
-   AAdd( aOpcExe, {|| Iz12u97()  } )  // 11,12 -> 96,97
+   AAdd( aOpcExe, {|| kalk_iz_12_u_97()  } )  // 11,12 -> 96,97
 
    AAdd( aOpc, "J. zaduženje prodavnice iz magacina (10->11)"  )
    AAdd( aOpcExe, {|| kalk_iz_10_u_11() } )

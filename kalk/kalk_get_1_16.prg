@@ -29,11 +29,14 @@ FUNCTION kalk_get_1_16()
    IF Empty( _TMarza )
       _TMarza := "%"
    ENDIF
+   IF Empty( _mkonto )
+      _mKonto := _idkonto
+   ENDIF
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura/Otpremnica Broj:" GET _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP  VALID {|| .T. }
-      @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje"  GET _IdKonto VALID Empty( _IdKonto ) .OR. P_Konto( @_IdKonto, 21, 5 )
+      @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje"  GET _mkonto VALID Empty( _mkonto ) .OR. P_Konto( @_mkonto, 21, 5 )
       // IF !Empty( cRNT1 )
       // @ box_x_koord() + 9, box_y_koord() + 40 SAY "Rad.nalog:"   GET _IdZaduz2  PICT "@!"
       // ENDIF
@@ -45,7 +48,7 @@ FUNCTION kalk_get_1_16()
       @  box_x_koord() + 6, box_y_koord() + 2   SAY "KUPAC: "; ?? _IdPartner
       @  box_x_koord() + 7, box_y_koord() + 2   SAY "Faktura Broj: "; ?? _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum: "; ?? _DatFaktP
-      @  box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje "; ?? _IdKonto
+      @  box_x_koord() + 9, box_y_koord() + 2 SAY8 "Magacinski konto zadužuje "; ?? _mkonto
 
    ENDIF
 
@@ -61,10 +64,10 @@ FUNCTION kalk_get_1_16()
       _idRoba := Left( _idRoba, 10 )
    ENDIF
 
-   select_o_koncij( _idkonto )
+   select_o_koncij( _mkonto )
    select_o_tarifa( _IdTarifa )
    SELECT kalk_pripr
-   _MKonto := _Idkonto
+   //_MKonto := _Idkonto
    _MU_I := "1"
    IF kalk_is_novi_dokument()
       select_o_roba( _IdRoba )
@@ -79,7 +82,7 @@ FUNCTION kalk_get_1_16()
    READ
 
    nKalkStrana := 2
-   _MKonto := _Idkonto
+   //_MKonto := _Idkonto
    _MU_I := "1"
    _PKonto := ""
    _PU_I := ""
@@ -109,15 +112,15 @@ FUNCTION kalk_get_16_1()
    READ
    ESC_RETURN K_ESC
    select_o_tarifa( _IdTarifa )
-   select_o_koncij( _idkonto )
+   select_o_koncij( _mkonto )
    SELECT kalk_pripr
 
-   _PKonto := _Idkonto
+   //_PKonto := _Idkonto
 
    PRIVATE cProracunMarzeUnaprijed := " "
    @ box_x_koord() + 13, box_y_koord() + 2   SAY8 "Količina " GET _Kolicina PICTURE pickol() VALID _Kolicina <> 0
 
-   select_o_koncij( _idkonto )
+   select_o_koncij( _mkonto )
    select_o_roba(  _IdRoba )
 
    _VPC := kalk_vpc_za_koncij()
@@ -132,13 +135,13 @@ FUNCTION kalk_get_16_1()
    _vpc := _nc
    //marza := 0
    cBeze := " "
-   @ box_x_koord() + 17, box_y_koord() + 2 GET cBeze VALID SvediM( cSvedi )
+   @ box_x_koord() + 17, box_y_koord() + 2 GET cBeze VALID kalk_16_svedi_kolicinu_cijenu( cSvedi )
 
    READ
 
    nKalkStrana := 2
    _marza := _vpc - _nc
-   _MKonto := _Idkonto
+   //_MKonto := _Idkonto
    _MU_I := "1"
    _PKonto := ""
    _PU_I := ""
@@ -152,12 +155,12 @@ FUNCTION kalk_get_16_1()
   *   Svodjenje kolicine u protustavci da bi se dobila ista vrijednost (kada su cijene u stavci i protustavci razlicite)
 */
 
-STATIC FUNCTION SvediM( cSvedi )
+STATIC FUNCTION kalk_16_svedi_kolicinu_cijenu( cSvedi )
 
    IF koncij->naz == "N1"
       _VPC := _NC
    ENDIF
-   IF csvedi == "S"
+   IF cSvedi == "S"
       IF _vpc <> 0
          _kolicina := -Round( nKalkVPV16PredhodnaStavka / _vpc, 4 )
       ELSE

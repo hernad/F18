@@ -251,6 +251,8 @@ STATIC FUNCTION kalk_generisi_fakt_dokument()
 // ----------------------------------------------------------------
 STATIC FUNCTION kalk_ostavi_samo_duple( lViseDok, aOstaju )
 
+   LOCAL nRecno
+
    SELECT kalk_pripr // izbrisi samo azurirane
 
    GO TOP
@@ -421,6 +423,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 STATIC FUNCTION kalk_provjeri_duple_dokumente( aRezim )
 
    LOCAL lViseDok := .F.
+   LOCAL cTest
 
    o_kalk_pripr()
    GO BOTTOM

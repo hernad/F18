@@ -52,7 +52,7 @@ FUNCTION kalk_header_get1( lNoviDokument )
       _TBankTr := "%"
    ENDIF
 
-   @  box_x_koord() + 1, box_y_koord() + 2 SAY "cIdFirma: "
+   @  box_x_koord() + 1, box_y_koord() + 2 SAY "Firma: "
    ?? self_organizacija_id(), "-", self_organizacija_naziv()
    @  box_x_koord() + 2, box_y_koord() + 2 SAY "KALKULACIJA: "
    @  box_x_koord() + 2, Col() SAY "Vrsta:" GET _idvd VALID P_TipDok( @_idvd, 2, 25 ) PICT "@!"
@@ -61,7 +61,8 @@ FUNCTION kalk_header_get1( lNoviDokument )
    ESC_RETURN 0
 
    IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> kalk_pripr->idfirma .OR. _idvd <> kalk_pripr->idvd )
-      _brDok := get_kalk_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
+      _brDok := kalk_unos_get_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
+      _datdok := danasnji_datum()
       SELECT kalk_pripr
    ENDIF
 
@@ -110,7 +111,7 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    AAdd( ImeKol, { "F.", {|| my_dbSelectArea( F_KALK_PRIPR ), field->idfirma   }, "idfirma"   } )
    AAdd( ImeKol, { "VD", {|| field->IdVD                      }, "IdVD"        } )
    AAdd( ImeKol, { "BrDok", {|| field->BrDok                  }, "BrDok"       } )
-   AAdd( ImeKol, { "R.Br", {|| field->Rbr                     }, "Rbr"         } )
+   AAdd( ImeKol, { "R.Br", {|| TRANSFORM(field->Rbr, "99999") }, "Rbr"         } )
    AAdd( ImeKol, { "Dat.Kalk", {|| field->DatDok              }, "DatDok"      } )
    //AAdd( ImeKol, { "Dat.Fakt", {|| field->DatFaktP            }, "DatFaktP"    } )
    AAdd( ImeKol, { "K.mag. ", {|| field->mkonto               }, "mKonto"     } )

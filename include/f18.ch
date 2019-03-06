@@ -553,7 +553,7 @@
 #define SP_I      "I"           // inventura - stanje
 #define SP_N      "N"           // nivelacija
 
-#define KALK_IDVD_MAGACIN "10#16#18#IM#14"
+#define KALK_IDVD_MAGACIN "10#16#18#IM#14#95#96"
 
 #define KALK_TRANSAKCIJA_PRODAVNICA_ULAZ              "1"
 #define KALK_TRANSAKCIJA_PRODAVNICA_IZLAZ             "5"

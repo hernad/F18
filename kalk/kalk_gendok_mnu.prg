@@ -23,7 +23,7 @@ FUNCTION kalk_mnu_generacija_dokumenta()
    AAdd( _opc, "2. prodavnica - generacija dokumenata" )
    AAdd( _opcexe, {|| kalk_prod_generacija_dokumenata() } )
    AAdd( _opc, "4. storno kalk dokumenta" )
-   AAdd( _opcexe, {|| storno_kalk_dokument() } )
+   AAdd( _opcexe, {|| kalk_storno_dokumenat() } )
 
    f18_menu( "mgend", .F., _izbor, _opc, _opcexe )
 

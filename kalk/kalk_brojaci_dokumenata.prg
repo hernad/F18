@@ -35,11 +35,11 @@ FUNCTION is_brojac_po_kontima()
 FUNCTION kalk_duzina_brojaca_dokumenta( nLen )
 
    IF s_nLenKalkBrojac == NIL
-      s_nLenKalkBrojac := fetch_metric( "kalk_duzina_brojaca_dokumenta", nil, 5 )
+      s_nLenKalkBrojac := fetch_metric( "kalk_duzina_brojaca_dokumenta", NIL, 5 )
    ENDIF
 
    IF nLen <> NIL
-      set_metric( "kalk_duzina_brojaca_dokumenta", nil, nLen )
+      set_metric( "kalk_duzina_brojaca_dokumenta", NIL, nLen )
       s_nLenKalkBrojac  := nLen
    ENDIF
 
@@ -170,7 +170,8 @@ FUNCTION kalk_fix_brdok( cBrKalk )
 
    RETURN cBrKalk
 
-FUNCTION slovo_unutar( cString )
+
+STATIC FUNCTION slovo_unutar( cString )
 
    LOCAL aMatch, pRegex := hb_regexComp( ".*[a-zA-Z].*" )
 
@@ -183,17 +184,6 @@ FUNCTION slovo_unutar( cString )
 
 
 
-FUNCTION kalk_broj_ima_sufiks( cBrDok )
-
-   IF "/" $ cBrdok
-      RETURN .T.
-   ENDIF
-
-   IF "-" $ cBrdok
-      RETURN .T.
-   ENDIF
-
-   RETURN .F.
 
 /*
     uvecava broj kalkulacije sa stepenom uvecanja nUvecaj
@@ -201,9 +191,10 @@ FUNCTION kalk_broj_ima_sufiks( cBrDok )
 
 FUNCTION kalk_get_next_kalk_doc_uvecaj( cIdFirma, cIdTipDok, nUvecaj )
 
-   LOCAL xx
+   LOCAL nX
    LOCAL i
    LOCAL lIdiDalje
+   LOCAL cResult
 
    IF nUvecaj == nil
       nUvecaj := 1
@@ -232,9 +223,8 @@ FUNCTION kalk_get_next_kalk_doc_uvecaj( cIdFirma, cIdTipDok, nUvecaj )
 
    ENDDO
 
-   xx := 1
-
-   FOR xx := 1 TO nUvecaj
+   nX := 1
+   FOR nX := 1 TO nUvecaj
       cResult := PadR( novasifra( AllTrim( cResult ) ), 5 ) + ;
          Right( cResult, 3 )
    NEXT
@@ -270,12 +260,12 @@ FUNCTION kalk_reset_broj_dokumenta( firma, tip_dokumenta, broj_dokumenta, konto 
 
    // param: kalk/10/10
    _param := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( _sufix ), "_" + _sufix, "" )
-   _broj := fetch_metric( _param, nil, _broj )
+   _broj := fetch_metric( _param, NIL, _broj )
 
    IF Val( broj_dokumenta ) == _broj
       --_broj
       // smanji globalni brojac za 1
-      set_metric( _param, nil, _broj )
+      set_metric( _param, NIL, _broj )
    ENDIF
 
    RETURN .T.
@@ -308,11 +298,9 @@ FUNCTION kalk_novi_broj_dokumenta( firma, tip_dokumenta, konto )
 
    // param: kalk/10/10
    _param := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( _sufix ), "_" + _sufix, "" )
-   _broj := fetch_metric( _param, nil, _broj )
-
+   _broj := fetch_metric( _param, NIL, _broj )
 
    find_kalk_doks_za_tip_sufix_zadnji_broj(  firma, tip_dokumenta, _sufix )    // konsultuj i kalk_doks uporedo
-
 
    GO BOTTOM
 
@@ -333,8 +321,6 @@ FUNCTION kalk_novi_broj_dokumenta( firma, tip_dokumenta, konto )
    ENDIF
 
    _broj := Max( _broj, _broj_dok ) // uzmi sta je vece, dokument broj ili globalni brojac
-
-   // uvecaj broj
    ++_broj
 
    // ovo ce napraviti string prave duzine...
@@ -342,7 +328,7 @@ FUNCTION kalk_novi_broj_dokumenta( firma, tip_dokumenta, konto )
    _ret := PadL( AllTrim( Str( _broj ) ), _len_broj, "0" ) + _sufix
 
    // upisi ga u globalni parametar
-   set_metric( _param, nil, _broj )
+   set_metric( _param, NIL, _broj )
 
    SELECT ( nDbfArea )
 
@@ -457,7 +443,7 @@ FUNCTION kalk_set_param_broj_dokumenta()
 
    // param: kalk/10/10
    _param := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( _sufix ), "_" + _sufix, "" )
-   _broj := fetch_metric( _param, nil, _broj )
+   _broj := fetch_metric( _param, NIL, _broj )
    _broj_old := _broj
 
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Zadnji broj dokumenta:" GET _broj PICT "99999999"
@@ -469,7 +455,7 @@ FUNCTION kalk_set_param_broj_dokumenta()
    IF LastKey() != K_ESC
       // snimi broj u globalni brojac
       IF _broj <> _broj_old
-         set_metric( _param, nil, _broj )
+         set_metric( _param, NIL, _broj )
       ENDIF
    ENDIF
 
@@ -478,35 +464,33 @@ FUNCTION kalk_set_param_broj_dokumenta()
 
 
 
-FUNCTION get_kalk_brdok( _idfirma, _idvd, _idkonto, _idkonto2 )
+FUNCTION kalk_unos_get_brdok( cIdFirma, cIdVd, cIdKonto1, cIdKonto2 )
 
-   LOCAL _brdok, cIdKonto, cSay
+   LOCAL cIdKontoUnos, cSay
    LOCAL GetList := {}
 
    IF is_brojac_po_kontima()
 
       Box( "#Glavni konto za brojač", 3, 70 )
-      IF _idvd $ KALK_IDVD_MAGACIN
+      IF cIdVd $ KALK_IDVD_MAGACIN
          cSay := "Magacinski konto: "
-         cIdKonto := _idKonto
+         cIdKontoUnos := cIdKonto1
       ELSE
          cSay := "Prodavnički konto: "
-         cIdKonto := _IdKonto2
+         cIdKontoUnos := cIdKonto2
       ENDIF
-      cIdKonto := Padr( cIdKonto, FIELD_LENGTH_IDKONTO)
-
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 cSay GET cIdKonto VALID P_Konto( @cIdKonto ) PICT "@!"
+      cIdKontoUnos := PadR( cIdKontoUnos, FIELD_LENGTH_IDKONTO )
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 cSay GET cIdKontoUnos VALID P_Konto( @cIdKontoUnos ) PICT "@!"
       READ
 
       BoxC()
 
-      IF _idvd $ KALK_IDVD_MAGACIN
-
-         _idKonto := cIdKonto
+      IF cIdVd $ KALK_IDVD_MAGACIN
+         cIdKonto1 := cIdKontoUnos
       ELSE
-         _IdKonto2 := cIdKonto
+         cIdKonto2 := cIdKontoUnos
       ENDIF
 
    ENDIF
 
-   RETURN kalk_get_next_broj_v5( _idfirma, _idvd, cIdKonto )
+   RETURN kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKontoUnos )
