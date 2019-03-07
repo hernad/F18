@@ -68,7 +68,6 @@ FUNCTION pos_prodavnica_param( nSet )
    RETURN nProdavnica
 
 
-
 FUNCTION pos_prodavnica( nSet )
 
    IF nSet != NIL
@@ -76,6 +75,10 @@ FUNCTION pos_prodavnica( nSet )
    ENDIF
 
    RETURN s_nPosProdavnica
+
+
+FUNCTION pos_prodavnica_str()
+   RETURN AllTrim( Str( pos_prodavnica() ) )
 
 
 FUNCTION pos_prodavnica_sql_schema()

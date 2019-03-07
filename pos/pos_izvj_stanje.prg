@@ -31,7 +31,7 @@ FUNCTION pos_stanje_artikala()
    PRIVATE cNule := "N"
 
    dDatum := danasnji_datum()
-   cIdPos := gIdPos
+   cIdPos := pos_pm()
 
    aNiz := {}
    AAdd ( aNiz, { "Artikli  (prazno-svi)", "cRoba",, "@!S30", } )

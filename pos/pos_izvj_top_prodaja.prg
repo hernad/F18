@@ -42,7 +42,7 @@ FUNCTION pos_top_narudzbe()
 
    _o_tables()
 
-   PRIVATE cIdPOS := gIdPos
+   PRIVATE cIdPOS := pos_pm()
 
    AAdd ( aNiz, { "Roba (prazno-sve)", "cRoba",, "@!S30", } )
    AAdd ( aNiz, { "Pregled po Iznosu/Kolicini/Oboje (I/K/O)", "cSta", "cSta$'IKO'", "@!", } )

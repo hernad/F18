@@ -28,7 +28,7 @@ FUNCTION pos_katops_priprz()
    LOCAL lOk := .T.
    LOCAL cIdTipDok, cBrDok
 
-   cIdPos := gIdPos
+   cIdPos := pos_pm()
    _val_otpremnica := "95"
    _val_zaduzenje := "11#12#13#80#81"
    _val_inventura := "IP"
@@ -174,7 +174,7 @@ STATIC FUNCTION get_katops_file( cBrDok, cDestinacijaDir, cFile )
    LOCAL lPrenijeti
 
    _filter := 2
-   cIdPos := AllTrim( gIdPos )
+   cIdPos := AllTrim( pos_pm() )
 
    IF !Empty( cIdPos )
       // cIdPos := cIdPos
@@ -309,155 +309,6 @@ FUNCTION pos_prenos_inv_2_kalk( cIdPos, cIdTipDk, dDatDok, cBrDok )
 
    RETURN .T.
 
-
-
-FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
-
-   LOCAL cUslovRoba := Space( 150 )
-   LOCAL cUslovArtikleUkljuciIskljuci := "U"
-   LOCAL aPom := {}
-   LOCAL i
-   LOCAL nRbr
-   LOCAL nKolicina
-   LOCAL nIznos
-   LOCAL cIdVd := "42"
-
-   // LOCAL cIdPos
-   // LOCAL dDatOd, dDatDo,
-   LOCAL cTopskaFile
-   LOCAL _tmp
-   LOCAL lAutoPrenos := .F.
-   LOCAL hRec
-   LOCAL GetList := {}
-
-   IF cIdPos <> NIL
-      lAutoPrenos := .T.
-   ELSE
-      cIdPos := gIdPos
-      // cIdVd := "42"
-      dDatumOd := Date()
-      dDatumDo := Date()
-   ENDIF
-
-   IF !lAutoPrenos
-      SET CURSOR ON
-
-      Box(, 4, 70, .F., " PRENOS REALIZACIJE POS->KALK   " )
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Prenos za period" GET dDatumOd
-      @ box_x_koord() + 2, Col() + 2 SAY "-" GET dDatumDo
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Uslov po artiklima:" GET cUslovRoba PICT "@S40"
-      @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "Artikle (U)ključi / (I)sključi iz prenosa:" GET cUslovArtikleUkljuciIskljuci PICT "@!" VALID cUslovArtikleUkljuciIskljuci $ "UI"
-
-      READ
-      ESC_BCR
-
-      BoxC()
-
-   ENDIF
-
-   gIdPos := cIdPos
-
-   cre_pom_topska_dbf()
-   seek_pos_doks_2_za_period( cIdVd, dDatumOd, dDatumDo )
-
-   EOF CRET
-
-   nRbr := 0
-   nKolicina := 0
-   nIznos := 0
-
-   IF !Empty( cUslovRoba ) .AND. Right( AllTrim( cUslovRoba ) ) <> ";"
-      cUslovRoba := AllTrim( cUslovRoba ) + ";"
-   ENDIF
-
-   DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatumDo
-
-      IF !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos
-         SKIP
-         LOOP
-      ENDIF
-
-      seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
-      DO WHILE !Eof() .AND. pos->IdPos + pos->IdVd + DToS( pos->datum ) + pos->Brdok  == pos_doks->IdPos + pos_doks->IdVd + DToS( pos_doks->datum ) + pos_doks->BrDok
-
-         IF !Empty( cUslovRoba )
-            _tmp := Parsiraj( cUslovRoba, "idroba" )
-            IF &_tmp
-
-               IF cUslovArtikleUkljuciIskljuci == "I"
-                  SKIP
-                  LOOP
-               ENDIF
-
-            ELSE
-               IF cUslovArtikleUkljuciIskljuci == "U"
-                  SKIP
-                  LOOP
-               ENDIF
-            ENDIF
-         ENDIF
-
-         select_o_roba( pos->idroba )
-
-         SELECT pom
-         SET ORDER TO TAG "1"
-         GO TOP
-         SEEK pos->idpos + pos->idroba + Str( pos->cijena, 13, 4 ) + Str( pos->ncijena, 13, 4 ) // POM
-
-         nKolicina += pos->kolicina
-         nIznos += ( pos->kolicina * pos->cijena )
-
-         IF !Found() .OR. pom->IdTarifa <> POS->IdTarifa .OR. pom->MPC <> POS->Cijena
-
-            APPEND BLANK
-            REPLACE IdPos WITH POS->IdPos, ;
-               IdRoba WITH POS->IdRoba, ;
-               Kolicina WITH POS->Kolicina, ;
-               IdTarifa WITH POS->IdTarifa, ;
-               mpc WITH POS->Cijena, ;
-               Datum WITH dDatumDo, ;
-               DatPos WITH pos->datum, ;
-               brdok WITH pos->brdok, ;
-               idvd WITH POS->IdVd, ;
-               StMPC WITH pos->ncijena, ;
-               barkod WITH roba->barkod, ;
-               robanaz WITH roba->naz
-
-            IF !Empty( pos_doks->idPartner )
-               REPLACE idpartner WITH pos_doks->idPartner
-            ENDIF
-
-            ++nRbr
-         ELSE
-
-            hRec := dbf_get_rec()
-            hRec[ "kolicina" ] := hRec[ "kolicina" ] + pos->kolicina
-            dbf_update_rec( hRec )
-
-         ENDIF
-
-         SELECT pos
-         SKIP
-
-      ENDDO
-
-      SELECT pos_doks
-      SKIP
-
-   ENDDO
-
-   SELECT pom
-   USE
-
-   my_close_all_dbf()
-
-   IF !lAutoPrenos
-      pos_kalk_prenos_report( dDatumOd, dDatumDo, nKolicina, nIznos, nRbr )
-      cTopskaFile := pos_kalk_create_topska_dbf( cIdPos, dDatumOd, dDatumDo, cIdVd )
-      MsgBeep( "Kreiran fajl " + cTopskaFile + "#broj stavki: " + AllTrim( Str( nRbr ) ) )
-   ENDIF
-
-   RETURN .T.
 
 
 

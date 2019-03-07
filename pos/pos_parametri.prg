@@ -46,28 +46,15 @@ FUNCTION pos_param_podaci_kase()
    LOCAL aNiz := {}
    LOCAL cPom := ""
    LOCAL _user := my_user()
-   PRIVATE cIdPosOld := gIdPos
-   PRIVATE cHistory := " "
-   PRIVATE aHistory := {}
-   PRIVATE cSection := "1"
 
    SET CURSOR ON
 
-   AAdd( aNiz, { "Oznaka/ID prodajnog mjesta", "gIdPos",, "@!", } )
-   AAdd( aNiz, { "Razmjena podataka, koristiti 'chk' direktorij D/N", "gUseChkDir", "gUseChkDir$'DN'", "@!", } )
-   AAdd( aNiz, { "Lokalni port za stampu racuna", "gLocPort", , , } )
-   AAdd( aNiz, { "Oznaka/ID placanja duga       ", "gDugPlac",, "@!", } )
+   AAdd( aNiz, { "Oznaka/ID prodajnog mjesta", "gPosProdajnoMjesto",, "@!", } )
 
    VarEdit( aNiz, 2, 2, 24, 78, "PARAMETRI RADA PROGRAMA - PODACI KASE", "B1" )
 
-
    IF LastKey() <> K_ESC
-
-      set_metric( "IDPos", _user, gIdPos )
-      set_metric( "KoristitiDirektorijProvjere", _user, gUseChkDir )
-      set_metric( "OznakaLokalnogPorta", _user, gLocPort )
-      set_metric( "OznakaDugPlacanja", nil, gDugPlac )
-
+      set_metric( "PM", NIL, gPosProdajnoMjesto )
    ENDIF
 
    RETURN .T.
@@ -139,9 +126,7 @@ FUNCTION pos_principi_rada_kase()
    PRIVATE _konstantni_unos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" )
    //PRIVATE _kalk_konto := fetch_metric( "pos_stanje_sa_kalk_konta", NIL, Space( 7 ) )
    PRIVATE cKalkKontoMagacin := pos_kalk_konto_magacin()
-
    PRIVATE _max_qtty := fetch_metric( "pos_maksimalna_kolicina_na_unosu", NIL, 0 )
-   PRIVATE cIdPosOld := gIdPos
 
    SET CURSOR ON
 
@@ -205,8 +190,6 @@ FUNCTION pos_param_izgled_racuna()
    LOCAL aNiz := {}
    LOCAL cPom := ""
 
-   PRIVATE cIdPosOld := gIdPos
-
    gSjecistr := PadR( GETPStr( gSjeciStr ), 20 )
    gOtvorstr := PadR( GETPStr( gOtvorStr ), 20 )
 
@@ -247,7 +230,6 @@ FUNCTION pos_param_izgled_racuna()
 FUNCTION pos_param_cijene()
 
    LOCAL aNiz := {}
-   PRIVATE cIdPosOld := gIdPos
 
    SET CURSOR ON
 

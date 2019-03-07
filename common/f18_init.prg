@@ -92,6 +92,10 @@ FUNCTION post_login()
    set_global_vars_1()
    set_global_screen_vars( .F. )
    set_global_vars_2()
+
+   IF programski_modul() == "POS"
+      pos_prodavnica( pos_prodavnica_param() )
+   ENDIF
    IF !parametri_organizacije( .F. )
       MsgBeep( "post_login error - parametri organizacije !" )
       RETURN .F.

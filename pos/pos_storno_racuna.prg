@@ -11,13 +11,13 @@
 
 #include "f18.ch"
 
-MEMVAR gIdPos
+MEMVAR gPosProdajnoMjesto
 
 FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna )
 
    LOCAL cQuery, oTable
    LOCAL nI, oRow
-   LOCAL cIdPos := gIdPos
+   LOCAL cIdPos := gPosProdajnoMjesto
    LOCAL aPosStavke
    LOCAL _rn_broj := ""
    LOCAL lOk := .F.
@@ -80,7 +80,7 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
       cTmp := ""
       cTmp += DToC( arr[ nI, 1 ] )
       cTmp += " cBrRacuna: "
-      cTmp += PadR( PadL( AllTrim( gIdPos ), 2 ) + "-" + AllTrim( arr[ nI, 2 ]  ), 10 )
+      cTmp += PadR( PadL( AllTrim( gPosProdajnoMjesto ), 2 ) + "-" + AllTrim( arr[ nI, 2 ]  ), 10 )
       cTmp += PadL( AllTrim( Str( arr[ nI, 4 ] - arr[ nI, 5 ], 12, 2 ) ), 10 )
       AAdd( aOpc, cTmp )
       AAdd( aOpcExe, {|| "" } )
@@ -160,7 +160,7 @@ FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFis
 
    cBrDokStornirati := PadL( AllTrim( cBrDokStornirati ), FIELD_LEN_POS_BRDOK )
    IF Empty( cBrojFiskalnogRacuna ) // racun nije fiskaliziran
-      seek_pos_doks( gIdPos, "42", dDatum, cBrDokStornirati )
+      seek_pos_doks( gPosProdajnoMjesto, "42", dDatum, cBrDokStornirati )
       cBrojFiskalnogRacuna := PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 )
    ENDIF
 
@@ -180,7 +180,7 @@ FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFis
    ENDIF
 
    SELECT ( nTArea )
-   pos_napravi_u_pripremi_storno_dokument( gIdPos, dDatum, cBrDokStornirati, cBrojFiskalnogRacuna )
+   pos_napravi_u_pripremi_storno_dokument( gPosProdajnoMjesto, dDatum, cBrDokStornirati, cBrojFiskalnogRacuna )
    SELECT ( nTArea )
 
    IF lSilent == .F.

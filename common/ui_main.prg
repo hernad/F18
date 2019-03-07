@@ -370,7 +370,7 @@ FUNCTION prikaz_dostupnih_opcija_crno_na_zuto( aNiz )
 
       FOR nI := 1 TO nBrRed * nBrKol
          IF Mod( nI - 1, nBrKol ) == 0
-            Eval( {||++j, nCol := 0 } )
+            Eval( {|| ++j, nCol := 0 } )
          ELSE
             nCol += nOduz
          ENDIF
@@ -869,7 +869,7 @@ FUNCTION VarEdit( aNiz, nX1, nY1, nX2, nY2, cNaslov, cBoje )
 
    PushWa()
    SET DEVICE TO SCREEN
-   box_crno_na_zuto( nX1, nY1, nX2, nY2, cNaslov, cBNaslova,, cBOkvira, cBTeksta, 2 )
+   box_crno_na_zuto( nX1, nY1, nX2, nY2, _u( cNaslov ), cBNaslova,, cBOkvira, cBTeksta, 2 )
    FOR i := 1 TO Len( aNiz )
       cPom := aNiz[ i, 2 ]
       IF aNiz[ i, 3 ] == NIL .OR. Len( aNiz[ i, 3 ] ) == 0; aNiz[ i, 3 ] := ".t."; ENDIF

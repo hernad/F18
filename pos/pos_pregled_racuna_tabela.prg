@@ -16,13 +16,11 @@ FUNCTION pos_pregled_racuna_tabela()
    LOCAL fScope := .T.
    LOCAL GetList := {}
    LOCAL cFilterDatumOdDo
-   LOCAL cTekIdPos := gIdPos
    LOCAL dDatOd, dDatDo
 
    PRIVATE dMinDatProm := CToD( "" )
 
    o_pos__pripr()
-
    dDatOd := Date()
    dDatDo := Date()
 
@@ -51,6 +49,5 @@ FUNCTION pos_pregled_racuna_tabela()
 
    my_close_all_dbf()
 
-   gIdPos := cTekIdPos
 
    RETURN .T.

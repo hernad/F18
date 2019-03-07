@@ -55,7 +55,7 @@ FUNCTION pos_porezna_faktura_traka( lSilent )
    st_pf_traka()
 
    IF !lPfTraka
-      porezna_faktura_azur_podataka_o_kupcu( gIdPos )
+      porezna_faktura_azur_podataka_o_kupcu( gPosProdajnoMjesto )
    ENDIF
 */
 
@@ -160,7 +160,7 @@ FUNCTION st_pf_traka()
    LOCAL nSetCijene
    LOCAL lStRobaId
 
-   STARTPRINTPORT CRET gLocPort, Space( 5 )
+   STARTPRINTPORT CRET "LPT1", Space( 5 )
 
    cLine := pf_traka_line( 1 )
 

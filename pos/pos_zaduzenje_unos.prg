@@ -14,7 +14,7 @@
 STATIC s_oBrowse
 STATIC s_cRobaDuzinaSifre
 
-MEMVAR gIdPos, gPosSamoProdaja, gIdRadnik
+MEMVAR gPosProdajnoMjesto, gPosSamoProdaja, gIdRadnik
 MEMVAR Kol, ImeKol, Ch
 MEMVAR _IdPos, _IdVd, _IdRadnik, _idpartner, _BrDok, _IdRoba, _BrFaktP, _Opis, _Datum, _kolicina, _cijena, _ncijena
 MEMVAR _robanaz, _idtarifa, _jmj, _barkod, _dat_od, _dat_do
@@ -54,7 +54,7 @@ FUNCTION pos_zaduzenje( cIdVd )
 
    SELECT PRIPRZ
    Scatter()
-   _IdPos := gIdPos
+   _IdPos := gPosProdajnoMjesto
    _IdVd := cIdVd
    _BrDok := POS_BRDOK_PRIPREMA
    _IdRadnik := gIdRadnik

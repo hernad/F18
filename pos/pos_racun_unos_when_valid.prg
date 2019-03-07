@@ -15,7 +15,7 @@
 
 STATIC s_nMaxKolicinaPosRacun := NIL
 
-MEMVAR gIdPos, gOcitBarKod, gPosPratiStanjePriProdaji
+MEMVAR gPosProdajnoMjesto, gOcitBarKod, gPosPratiStanjePriProdaji
 MEMVAR _cijena, _ncijena
 
 FUNCTION pos_when_racun_artikal( cIdRoba )
@@ -246,7 +246,8 @@ STATIC FUNCTION pos_cijena_nije_nula( nCijena )
       RETURN .T.
    ENDIF
 
-   IF nCijena == 0
+altd()
+   IF ROUND( nCijena, 4) == 0
       MsgBeep( "Nepravilan unos cijene, cijena mora biti <> 0 !?" )
       RETURN .F.
    ENDIF
@@ -284,6 +285,7 @@ FUNCTION pos_popust( nCijena, nNCijena )
    ENDIF
 
    RETURN nCijena - nNCijena
+
 
 FUNCTION pos_pripr_popust()
 

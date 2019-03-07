@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR Kol, ImeKol, gIdPos, gIdRadnik
+MEMVAR Kol, ImeKol, gIdRadnik
 
 FUNCTION pos_pregled_racuna( lAdmin )
 
@@ -65,11 +65,11 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    ENDIF
 
    cIdPos := Left( cBrDok, At( "-", cBrDok ) - 1 )
-   cIdPos := PadR( cIdPOS, Len( gIdPos ) )
+   cIdPos := PadR( cIdPOS, Len( pos_pm() ) )
 
    seek_pos_doks( cIdPos, "42", dDatum, cBrDok )
 
-   IF !Empty( cIdPos ) .AND. cIdPOS <> gIdPos
+   IF !Empty( cIdPos ) .AND. cIdPOS <> pos_pm()
       MsgBeep( "Račun nije napravljen na ovoj kasi!#" + "Ne možete napraviti promjenu!", 20 )
       RETURN ( .F. )
    ENDIF
@@ -92,7 +92,7 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
 
    SELECT pos_doks
 
-   cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( gIdPos )
+   cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( pos_pm() )
 
    IF qIdRoba <> NIL .AND. !Empty( qIdRoba )
       cFilter += ".and. pos_racun_sadrzi_artikal(IdPos, IdVd, datum, BrDok, " + dbf_quote( qIdRoba ) + ")"
@@ -119,7 +119,7 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
    ENDIF
 
    KEYBOARD '\'
-   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh ) }, _u( " POS RAČUNI " ), "", NIL, cFnc,, bRacunMarkiran )
+   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str(), "", NIL, cFnc,, bRacunMarkiran )
 
    SET FILTER TO
 

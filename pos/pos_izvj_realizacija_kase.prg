@@ -16,7 +16,7 @@ STATIC LEN_RAZMAK := 1
 STATIC PIC_UKUPNO := "9999999.99"
 STATIC s_oPDF
 
-MEMVAR gIdPos, dDatum0, dDatum1
+MEMVAR gPosProdajnoMjesto, dDatum0, dDatum1
 
 FUNCTION realizacija_kase
 
@@ -28,8 +28,7 @@ FUNCTION realizacija_kase
 
    PRIVATE cRadnici := Space( 60 )
    PRIVATE cVrsteP := Space( 60 )
-   PRIVATE cIdPos := gIdPos
-
+   PRIVATE cIdPos := gPosProdajnoMjesto
 
    PRIVATE aNiz
    PRIVATE cFilterIdRadnik := {}
@@ -55,7 +54,6 @@ FUNCTION realizacija_kase
    cVrijOd := "00:00"
    cVrijDo := "23:59"
 
-
    IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cVrijOd, @cVrijDo, @cFilterIdRadnik, @aUsl2, @cVrsteP, @cAPrometa, @cSifraDob, @cPartId ) == 0
       RETURN 0
    ENDIF
@@ -69,7 +67,6 @@ FUNCTION realizacija_kase
    IF f18_start_print( NIL, xPrintOpt,  "POS REALIZACIJA NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF
-
 
    bZagl := {|| pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP ) }
    Eval( bZagl )
@@ -85,17 +82,14 @@ FUNCTION realizacija_kase
    // Nenaplaceno ili Popust (zavisno od varijante)
    PRIVATE nTotal3 := 0
 
-
-      SELECT POM
-      SET ORDER TO TAG "1"
-      IF ( fPrik $ "PO" )
-         check_nova_strana( bZagl, s_oPDF )
-         pos_realizacija_po_radnicima( fPrik, @nTotal3 )
-      ENDIF
-
+   SELECT POM
+   SET ORDER TO TAG "1"
+   IF ( fPrik $ "PO" )
+      check_nova_strana( bZagl, s_oPDF )
+      pos_realizacija_po_radnicima( fPrik, @nTotal3 )
+   ENDIF
 
    check_nova_strana( bZagl, s_oPDF )
-
    pos_pdv_po_tarifama( dDatum0, dDatum1, cIdPos, NIL )
 
    f18_end_print( NIL, xPrintOpt )
@@ -109,7 +103,7 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cV
    LOCAL aNiz
 
    aNiz := {}
-   cIdPos := gIdPos
+   cIdPos := gPosProdajnoMjesto
 
    AAdd( aNiz, { "Radnici (prazno-svi)", "cRadnici",, "@!S30", } )
    AAdd( aNiz, { "Vrste plaćanja (prazno-sve)", "cVrsteP",, "@!S30", } )
@@ -153,6 +147,7 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cV
 
 STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrsteP )
 
+   ? "Podavnica:", pos_prodavnica()
    IF Empty( cIdPos )
       ? "PRODAJNO MJESTO: SVA"
    ELSE
@@ -270,11 +265,9 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
    ENDDO
 
    IF Empty( cIdPos )
-
       ? REPL ( "=", LEN_TRAKA )
       ? PadC ( "SVE KASE", 20 ) + Str ( nTotal, 20, 2 )
       ? REPL ( "=", LEN_TRAKA )
-
    ENDIF
 
    RETURN .T.

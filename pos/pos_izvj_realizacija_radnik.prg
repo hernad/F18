@@ -39,7 +39,7 @@ FUNCTION pos_realizacija_radnik
       dDatOd := dDatDo := danasnji_datum()
    ELSE
       aNiz := {}
-      cIdPos := gIdPos
+      cIdPos := pos_pm()
 
       AAdd( aNiz, { "Šifra radnika  (prazno-svi)", "cIdRadnik", "IF(!EMPTY(cIdRadnik),P_OSOB(@cIdRadnik),.t.)",, } )
       AAdd( aNiz, { "Vrsta placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
@@ -94,6 +94,7 @@ FUNCTION pos_realizacija_radnik
    xPrintOpt[ "font_size" ] := 10
 
    cNaslov := "POS "
+   cNaslov += AllTrim(Str(pos_prodavnica())) + ": "
    IF lTekuci
       IF cPrikazPazarRoba $ "PO"
          cNaslov += "PAZAR RADNIKA"
@@ -143,7 +144,6 @@ FUNCTION pos_realizacija_radnik
       bZagl := {|| zagl_radnik() }
       Eval( bZagl )
       DO WHILE !Eof()
-
          check_nova_strana( bZagl, s_oPDF )
          _IdRadnik := POM->IdRadnik
          nTotRadn := 0
@@ -169,7 +169,6 @@ FUNCTION pos_realizacija_radnik
 
             select_o_vrstep( _IdVrsteP )
             ? Space ( 5 ) + PadR ( VRSTEP->Naz, 24 ), Str ( nTotVP, 10, 2 )
-
             nTotRadn += nTotVP
             nTotRadn3 += nTotVP3
 
@@ -223,7 +222,6 @@ FUNCTION pos_realizacija_radnik
          SELECT POM
          ?U POM->IdRoba + " "
          ??U PadR ( roba->Naz, 21 )
-
          _IdRoba := POM->IdRoba
          nRobaIzn := 0
          nRobaIzn3 := 0

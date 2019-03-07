@@ -11,8 +11,6 @@
 
 #include "f18.ch"
 
-MEMVAR gIdPos
-
 FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
 
    LOCAL nBrojDokumenta
@@ -57,14 +55,14 @@ FUNCTION pos_set_param_broj_dokumenta()
    LOCAL cPosBrojacParam
    LOCAL nBrojDokumenta := 0
    LOCAL nBrojDokumentaOld
-   LOCAL _id_pos := gIdPos
-   LOCAL _tip_dok := "42"
+   LOCAL cIdPos := pos_pm()
+   LOCAL cIdTipDok := "42"
    LOCAL GetList := {}
 
    Box(, 2, 60 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:" GET _id_pos
-   @ box_x_koord() + 1, Col() + 1 SAY "-" GET _tip_dok
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:" GET cIdPos
+   @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdTipDok
    READ
 
    IF LastKey() == K_ESC
@@ -72,7 +70,7 @@ FUNCTION pos_set_param_broj_dokumenta()
       RETURN .F.
    ENDIF
 
-   cPosBrojacParam := "pos" + "/" + _id_pos + "/" + _tip_dok
+   cPosBrojacParam := "pos" + "/" + cIdPos + "/" + cIdTipDok
    nBrojDokumenta := fetch_metric( cPosBrojacParam, NIL, nBrojDokumenta )
    nBrojDokumentaOld := nBrojDokumenta
 

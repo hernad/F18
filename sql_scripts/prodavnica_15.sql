@@ -118,7 +118,6 @@ ALTER TABLE p15.metric ALTER COLUMN metric_id SET NOT NULL;
 ALTER TABLE p15.metric ALTER COLUMN metric_id SET DEFAULT nextval(('metric_metric_id_seq'::text)::regclass);
 
 
-
 CREATE OR REPLACE FUNCTION p15.fetchmetrictext(text) RETURNS text
     LANGUAGE plpgsql
     AS $$

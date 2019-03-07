@@ -15,7 +15,7 @@
 
 STATIC s_nMaxKolicinaPosRacun := NIL
 
-MEMVAR gIdPos, gOcitBarKod
+MEMVAR gPosProdajnoMjesto, gOcitBarKod
 MEMVAR _cijena, _ncijena
 
 

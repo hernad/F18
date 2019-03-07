@@ -28,7 +28,6 @@ FUNCTION pos_prijava( nX, nY )
    DO WHILE .T.
 
       SetPos ( nX + 4, nY + 15 )
-
       cKorSif := Upper( pos_get_lozinka( nSifLen ) )
 #ifdef F18_DEBUG
       ?E "pos_prijava", cKorSif
@@ -47,14 +46,12 @@ FUNCTION pos_prijava( nX, nY )
       ENDIF
 
       pos_spec_sifre( cKorSif ) // obradi specijalne sifre
-
       IF ( goModul:lTerminate )
          RETURN "X"
       ENDIF
 
       SET CURSOR OFF
       SetColor ( f18_color_normal() )
-
       IF pos_set_user( cKorSif, nSifLen, @cLevel ) == 0
          LOOP
       ELSE
@@ -83,14 +80,12 @@ FUNCTION pos_spec_sifre( cSifra )
    RETURN .T.
 
 
-
 FUNCTION pos_status_traka()
 
    LOCAL nX := f18_max_rows() - 1
    LOCAL nY := 0
 
-   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " KASA-PM:" + gIdPos
-
+   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " PROD-PM:" + pos_prodavnica_str() + " " + pos_pm()  
    @ nX - 1, nY + 1 SAY PadC ( Razrijedi ( gKorIme ), f18_max_cols() - 2 ) COLOR f18_color_invert()
 
    RETURN .T.
@@ -113,16 +108,14 @@ FUNCTION pos_set_user( cKorSif, nSifLen, cLevel )
       RETURN 1
    ELSE
       MsgBeep ( "Unijeta je nepostojeća lozinka !" )
-
       RETURN 0
    ENDIF
 
    RETURN 0
 
 
+FUNCTION pos_popust_prikaz()
 
-   FUNCTION pos_popust_prikaz()
+   // RETURN iif( gPopVar = "A", "NENAPLACENO:", "     POPUST:" )
 
-      // RETURN iif( gPopVar = "A", "NENAPLACENO:", "     POPUST:" )
-
-      RETURN  "     POPUST:"
+   RETURN  "     POPUST:"

@@ -14,7 +14,7 @@
 STATIC s_oBrowse
 
 MEMVAR Ch // browse privatna var
-MEMVAR Kol, ImeKol, gIdPos, gOcitBarKod, gIdRadnik
+MEMVAR Kol, ImeKol, gPosProdajnoMjesto, gOcitBarKod, gIdRadnik
 MEMVAR gPosPratiStanjePriProdaji
 MEMVAR _idpos, _idroba, _cijena, _ncijena, _kolicina, _iznos, _popust, _idvd, _brdok, _datum, _idradnik
 MEMVAR _robanaz, _jmj, _idtarifa
@@ -79,7 +79,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    GO TOP
 
    Scatter()
-   _idpos := gIdPos
+   _idpos := gPosProdajnoMjesto
    _idvd  := POS_IDVD_RACUN
    _brdok := cBrDok
    _datum := danasnji_datum()
@@ -95,7 +95,6 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
       DO WHILE !s_oBrowse:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
       ENDDO
-
       _idroba := Space( Len( _idroba ) )
       _kolicina := 0
       nPopust := 0
@@ -141,9 +140,9 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-      IF roba->tip <> "T"
-         _cijena := pos_get_mpc()
-      ENDIF
+      //IF roba->tip <> "T"
+        // _cijena := pos_get_mpc()
+      //ENDIF
       Gather()
 
       pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )

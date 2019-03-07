@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR gPosProdajnoMjesto
+
 CLASS TPosMod FROM TAppMod
 
    METHOD NEW
@@ -102,25 +104,22 @@ METHOD set_module_gvars()
    PUBLIC gSTRAD // status radnika
    PUBLIC gPopust := 0
    PUBLIC gPopDec := 2
-   //PUBLIC gPopZcj := "N"
+   // PUBLIC gPopZcj := "N"
    PUBLIC gPopProc := "N"
    PUBLIC gPopIzn := 0
    PUBLIC gPopIznP := 0
    PUBLIC SC_Opisi[ 5 ]      // nazivi (opisi) setova cijena
    PUBLIC gSmjena := " "   // identifikator smjene
 
-   //PUBLIC gDupliArt        // da li dopusta unos duplih artikala na racunu
+   // PUBLIC gDupliArt        // da li dopusta unos duplih artikala na racunu
    PUBLIC gDupliUpoz       // ako se dopusta, da li se radnik upozorava na duple
 
-   PUBLIC gIdPos           // id prodajnog mjesta
+   PUBLIC gPosProdajnoMjesto           // id prodajnog mjesta
    PUBLIC nFeedLines       // broj linija potrebnih da se racun otcijepi
    PUBLIC CRinitDone       // da li je uradjen init kase (na pocetku smjene)
 
    PUBLIC gDomValuta
-   PUBLIC gDugPlac
-
    PUBLIC gDisplay  // koristiti ispis na COM DISPLAY
-   PUBLIC gLocPort := "LPT1" // lokalni port za stampanje racuna
 
    PUBLIC gStamPazSmj      // da li se automatski stampa pazar smjene
    // na kasi
@@ -141,19 +140,15 @@ METHOD set_module_gvars()
    PUBLIC gDuploKum := ""
    PUBLIC gDuploSif := ""
 
-   // postavljanje globalnih varijabli
-   PUBLIC gLocPort := "LPT1"
    PUBLIC gDiskFree := "N"
-   //PUBLIC grbCjen := 2
+   // PUBLIC grbCjen := 2
    PUBLIC grbStId := "D"
 
    self:cName := "POS"
    gModul := self:cName
-
    gKorIme := ""
    gIdRadnik := ""
    gStRad := ""
-
    SC_Opisi[ 1 ] := "1"
    SC_Opisi[ 2 ] := "2"
    SC_Opisi[ 3 ] := "3"
@@ -166,17 +161,15 @@ METHOD set_module_gvars()
    PUBLIC gCijDec := 2
    PUBLIC gStariObrPor := .F.
    PUBLIC gPosPratiStanjePriProdaji := "N"
-   PUBLIC gIdPos := "1 "
+   PUBLIC gPosProdajnoMjesto := "1 "
    PUBLIC gPostDO := "N"
    PUBLIC nFeedLines := 6
    PUBLIC gStamPazSmj := "D"
    PUBLIC gStamStaPun := "D"
    PUBLIC CRinitDone := .T.
-   PUBLIC gDugPlac := "DP"
    PUBLIC gSifPath := my_home()
    PUBLIC LocSIFPATH := my_home()
 
-   PUBLIC gUseChkDir := "N"
    PUBLIC gFirNaziv := Space( 35 )
    PUBLIC gFirAdres := Space( 35 )
    PUBLIC gFirIdBroj := Space( 13 )
@@ -205,11 +198,8 @@ METHOD set_module_gvars()
    gRnPTxt2 := fetch_metric( "pos_header_txt_2", NIL, gRnPTxt2 )
    gRnPTxt3 := fetch_metric( "pos_header_txt_3", NIL, gRnPTxt3 )
    gPorFakt := fetch_metric( "StampatiPoreskeFakture", NIL, gPorFakt )
-   gIdPos := fetch_metric( "IDPos", my_user(), gIdPos )
+   gPosProdajnoMjesto := fetch_metric( "IDPos", my_user(), gPosProdajnoMjesto )
    gPostDO := fetch_metric( "ZasebneCjelineObjekta", NIL, gPostDO )
-   gUseChkDir := fetch_metric( "KoristitiDirektorijProvjere", my_user(), gUseChkDir )
-   gLocPort := fetch_metric( "OznakaLokalnogPorta", my_user(), gLocPort )
-   gDugPlac := fetch_metric( "OznakaDugPlacanja", NIL, gDugPlac )
    gRnSpecOpc := fetch_metric( "RacunSpecifOpcije", NIL, gRnSpecOpc )
    gDupliUpoz := fetch_metric( "DupliUnosUpozorenje", NIL, gDupliUpoz )
    gPosPratiStanjePriProdaji := fetch_metric( "PratiStanjeRobe", NIL, gPosPratiStanjePriProdaji )
@@ -237,13 +227,13 @@ METHOD set_module_gvars()
    gRnFuter := fetch_metric( "RacunFooter", NIL, gRnFuter )
 
    // izgled racuna
-   //grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
+   // grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
 
    grbStId := fetch_metric( "RacunStampaIDArtikla", NIL, grbStId )
    // cijene
    gPopust := fetch_metric( "Popust", NIL, gPopust )
    gPopDec := fetch_metric( "PopustDecimale", NIL, gPopDec )
-   //gPopZCj := fetch_metric( "PopustZadavanjemCijene", NIL, gPopZCj )
+   // gPopZCj := fetch_metric( "PopustZadavanjemCijene", NIL, gPopZCj )
    gPopProc := fetch_metric( "PopustProcenat", NIL, gPopProc )
    gPopIzn := fetch_metric( "PopustIznos", NIL, gPopIzn )
    gPopIznP := fetch_metric( "PopustVrijednostProcenta", NIL, gPopIznP )
@@ -262,8 +252,10 @@ METHOD set_module_gvars()
    pos_max_kolicina_kod_unosa( .T. ) // maksimalna kolicina kod unosa racuna
    fiscal_opt_active() // koristenje fiskalnih opcija
 
-altd()
-   pos_prodavnica( pos_prodavnica_param() )
    set_sql_search_path( pos_prodavnica_sql_schema() )
 
    RETURN .T.
+
+
+FUNCTION pos_pm()
+   RETURN gPosProdajnoMjesto

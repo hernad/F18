@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR ImeKol, Kol, gIdPos
+MEMVAR ImeKol, Kol
 
 
 FUNCTION p_pos_strad( cId, dx, dy )
@@ -294,7 +294,7 @@ FUNCTION pos_roba_block( cCh )
 
 FUNCTION pos_prodajno_mjesto()
 
-   RETURN gIdPos
+   RETURN pos_pm()
 
 
 

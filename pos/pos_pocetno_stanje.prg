@@ -53,13 +53,13 @@ STATIC FUNCTION _get_vars( params )
    LOCAL _x := 1
    LOCAL _box_x := 8
    LOCAL _box_y := 60
-   LOCAL _dat_od, _dat_do, _id_pos, _dat_ps
+   LOCAL _dat_od, _dat_do, cIdPos, _dat_ps
    PRIVATE GetList := {}
 
    _dat_od := CToD( "01.01." + AllTrim( Str( Year( Date() ) -1 ) ) )
    _dat_do := CToD( "31.12." + AllTrim( Str( Year( Date() ) -1 ) ) )
    _dat_ps := CToD( "01.01." + AllTrim( Str( Year( Date() ) ) ) )
-   _id_pos := gIdPos
+   cIdPos := pos_pm()
 
    Box(, _box_x, _box_y )
 
@@ -68,7 +68,7 @@ STATIC FUNCTION _get_vars( params )
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Parametri prenosa u novu godinu" COLOR "BG+/B"
 
    _x += 2
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "pos ID" GET _id_pos VALID !Empty( _id_pos )
+   @ box_x_koord() + _x, box_y_koord() + 2 SAY "pos ID" GET cIdPos VALID !Empty( cIdPos )
 
    _x += 2
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Datum prenosa od:" GET _dat_od VALID !Empty( _dat_od )
@@ -88,7 +88,7 @@ STATIC FUNCTION _get_vars( params )
    // snimi parametre
    params[ "datum_od" ] := _dat_od
    params[ "datum_do" ] := _dat_do
-   params[ "id_pos" ] := _id_pos
+   params[ "id_pos" ] := cIdPos
    params[ "datum_ps" ] := _dat_ps
 
    RETURN 1
@@ -131,7 +131,7 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
    LOCAL dDatDok := hParams[ "datum_ps" ]
    LOCAL _year_sez := Year( _date_to )
    LOCAL _year_tek := Year( dDatDok )
-   LOCAL _id_pos := hParams[ "id_pos" ]
+   LOCAL cIdPos := hParams[ "id_pos" ]
    LOCAL cQuery, oDataset, oRow
    LOCAL nCount := 0
    LOCAL hRec, cIdRoba, nKolicina, nVrijednost
@@ -157,7 +157,7 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
       "FROM " + f18_sql_schema( "pos_pos " )
 
    cQuery += " WHERE "
-   cQuery += _sql_cond_parse( "idpos", _id_pos )
+   cQuery += _sql_cond_parse( "idpos", cIdPos )
    cQuery += " AND " + _sql_date_parse( "datum", _date_from, _date_to )
    cQuery += " GROUP BY idroba "
    cQuery += " ORDER BY idroba "
@@ -172,7 +172,7 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
 
    o_roba()
 
-   cBrDok := pos_novi_broj_dokumenta( _id_pos, "16", dDatDok )
+   cBrDok := pos_novi_broj_dokumenta( cIdPos, "16", dDatDok )
 
    run_sql_query( "BEGIN" )
    IF !f18_lock_tables( { "pos_pos", "pos_doks" }, .T. )
@@ -201,9 +201,8 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
 
          SELECT pos
          APPEND BLANK
-
          hRec := dbf_get_rec()
-         hRec[ "idpos" ] := _id_pos
+         hRec[ "idpos" ] := cIdPos
          hRec[ "idvd" ] := "16"
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := ++nCount
@@ -231,13 +230,11 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
       APPEND BLANK
 
       hRec := dbf_get_rec()
-
-      hRec[ "idpos" ] := _id_pos
+      hRec[ "idpos" ] := cIdPos
       hRec[ "idvd" ] := "16"
       hRec[ "brdok" ] := cBrDok
       hRec[ "datum" ] := dDatDok
       hRec[ "idradnik" ] := "XXXX"
-
       lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
 
    ENDIF

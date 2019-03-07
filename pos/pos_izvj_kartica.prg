@@ -14,7 +14,7 @@
 STATIC s_oPDF
 
 MEMVAR m
-MEMVAR dDatum0, dDatum1, cIdRoba, cIdPos, gIdPos, cPredhodnoStanje
+MEMVAR dDatum0, dDatum1, cIdRoba, cIdPos, cPredhodnoStanje
 
 FUNCTION pos_kartica_artikla()
 
@@ -36,7 +36,7 @@ FUNCTION pos_kartica_artikla()
    nPosDuzinaBrojaDokumenta :=  FIELD_LEN_POS_BRDOK
 
    cIdRoba := Space( 10 )
-   cIdPos := gIdPos
+   cIdPos := pos_pm()
 
    dDatum0 := fetch_metric( "pos_kartica_datum_od", my_user(), dDatum0 )
    dDatum1 := fetch_metric( "pos_kartica_datum_do", my_user(), dDatum1 )
