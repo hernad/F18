@@ -34,10 +34,3 @@ FUNCTION o_pos_pos()
 //   SET ORDER TO TAG "1"
 
 //   RETURN .T.
-
-
-FUNCTION o_pos_promvp()
-
-   seek_pos_promvp( danasnji_datum() )
-
-   RETURN .T.

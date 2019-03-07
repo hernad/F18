@@ -21,6 +21,7 @@ FUNCTION pos_stampa_racun( hParams )
 
    RETURN .T.
 
+
 FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    LOCAL cPosDB

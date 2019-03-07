@@ -17,22 +17,15 @@ FUNCTION set_a_dbf_pos()
 
    set_a_dbf_pos_pos()
    set_a_dbf_pos_doks()
-   set_a_dbf_pos_promvp()
-   // set_a_dbf_pos_dokspf()
+
 
    // tabele sa strukturom sifarnika (id je primarni ključ)
    set_a_sql_sifarnik( "pos_strad", "STRAD", F_STRAD   )
    set_a_sql_sifarnik( "pos_osob", "OSOB", F_OSOB   )
    set_a_sql_sifarnik( "pos_kase", "KASE", F_KASE  )
-
    set_a_sql_sifarnik( "pos_odj", "ODJ", F_ODJ  )
 
-
-
-   //set_a_dbf_temp( "_pos_pos",   "_POS", F__POS  )
-   //set_a_dbf_temp( "_pos_posp",   "_POSP", F__POSP  )
    set_a_dbf_temp( "_pos_pripr",   "_POS_PRIPR", F__PRIPR  )
-   //set_a_dbf_temp( "pos_priprg",   "PRIPRG", F_PRIPRG  )
    set_a_dbf_temp( "pos_priprz",   "PRIPRZ", F_PRIPRZ  )
 
    set_a_dbf_temp( "pos_uredj",   "UREDJ", F_UREDJ  )
@@ -129,38 +122,6 @@ FUNCTION set_a_dbf_pos_doks()
 
 
 
-
-FUNCTION set_a_dbf_pos_promvp()
-
-   LOCAL hItem, hAlgoritam, cTabela
-
-   cTabela := "pos_promvp"
-
-   hItem := hb_Hash()
-
-   hItem[ "alias" ] := "PROMVP"
-   hItem[ "table" ] := cTabela
-   hItem[ "wa" ]    := F_PROMVP
-   hItem[ "temp" ]  := .F.
-   hItem[ "sql" ] := .T.
-   hItem[ "sif" ] := .F.
-
-   hItem[ "algoritam" ] := {}
-
-   // algoritam 1 - default
-   // -------------------------------------------------------------------------------
-   hAlgoritam := hb_Hash()
-   hAlgoritam[ "dbf_key_block" ]  := {|| DToS( field->datum ) }
-   hAlgoritam[ "dbf_key_fields" ] := { "datum" }
-   hAlgoritam[ "sql_in" ]         := "to_char(datum,'YYYYMMDD')"
-   hAlgoritam[ "dbf_tag" ]        := "1"
-   AAdd( hItem[ "algoritam" ], hAlgoritam )
-
-   hItem[ "sql_order" ] := "datum"
-
-   f18_dbfs_add( cTabela, @hItem )
-
-   RETURN .T.
 
 
 /*

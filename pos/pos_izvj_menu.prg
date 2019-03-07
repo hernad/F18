@@ -36,9 +36,6 @@ FUNCTION pos_izvjestaji()
    AAdd( aOpc, "-------------------" )
    AAdd( aOpcexe, NIL )
 
-   AAdd( aOpc, "N. pregled prometa po vrstama plaćanja" )
-   AAdd( aOpcexe, {|| pos_pregled_prometa_po_vrstama_placanja() } )
-
    IF fiscal_opt_active()
       AAdd( aOpc, "F. fiskalni izvještaji i komande" )
       AAdd( aOpcexe, {|| fiskalni_izvjestaji_komande( NIL, .T. ) } )
