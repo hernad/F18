@@ -26,8 +26,7 @@ FUNCTION pos_sifarnici()
 
    AAdd( aOpc, "5. partneri" )
    AAdd( aOpcexe, {|| p_partner() } )
-   AAdd( aOpc, "6. odjeljenja" )
-   AAdd( aOpcexe, {|| P_Odj() } )
+
    AAdd( aOpc, "7. kase (prodajna mjesta)" )
    AAdd( aOpcexe, {|| p_pos_kase() } )
 

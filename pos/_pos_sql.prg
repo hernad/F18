@@ -610,55 +610,7 @@ FUNCTION use_sql_pos_kase( cId )
    RETURN !Eof()
 
 
-// set_a_sql_sifarnik( "pos_odj", "ODJ", F_ODJ  )
 
-/*
-     pos_odj - ODJ
-*/
-
-// FUNCTION o_pos_odj()
-// RETURN o_dbf_table( F_ODJ, "odj", "ID" )
-
-
-FUNCTION o_pos_odj( cId )
-
-   SELECT ( F_ODJ )
-   use_sql_pos_odj( cId )
-   SET ORDER TO TAG "ID"
-
-   RETURN !Eof()
-
-
-FUNCTION select_o_pos_odj( cId )
-
-   SELECT ( F_ODJ )
-   IF Used()
-      IF RecCount() > 1 .AND. cId == NIL
-         RETURN .T.
-      ELSE
-         USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
-      ENDIF
-   ENDIF
-
-   RETURN o_pos_odj( cId )
-
-
-FUNCTION use_sql_pos_odj( cId )
-
-   LOCAL cSql
-   LOCAL cTable := "pos_odj"
-   LOCAL cAlias := "ODJ"
-
-   SELECT ( F_ODJ )
-   IF !use_sql_sif( cTable, .T., cAlias, cId )
-      RETURN .F.
-   ENDIF
-
-   IF cId != NIL
-      SEEK cId
-   ENDIF
-
-   RETURN !Eof()
 
 
 FUNCTION find_pos_osob_naziv( cId )

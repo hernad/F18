@@ -152,11 +152,7 @@
 #define F_STRAD     142
 #define F_OSOB      143
 #define F_KASE      144
-#define F_ODJ       145
-#define F_UREDJ     146
-#define F_RNGOST    147
-#define F_DIO       148
-#define F_MARS      149
+
 #define F_PROMVP    150
 #define F_ZAKSM     151
 #define F__POSP     152

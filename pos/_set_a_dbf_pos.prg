@@ -23,13 +23,9 @@ FUNCTION set_a_dbf_pos()
    set_a_sql_sifarnik( "pos_strad", "STRAD", F_STRAD   )
    set_a_sql_sifarnik( "pos_osob", "OSOB", F_OSOB   )
    set_a_sql_sifarnik( "pos_kase", "KASE", F_KASE  )
-   set_a_sql_sifarnik( "pos_odj", "ODJ", F_ODJ  )
 
    set_a_dbf_temp( "_pos_pripr",   "_POS_PRIPR", F__PRIPR  )
    set_a_dbf_temp( "pos_priprz",   "PRIPRZ", F_PRIPRZ  )
-
-   set_a_dbf_temp( "pos_uredj",   "UREDJ", F_UREDJ  )
-   set_a_dbf_temp( "pos_mars",   "MARS", F_MARS  )
 
    RETURN .T.
 

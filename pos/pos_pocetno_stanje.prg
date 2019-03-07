@@ -105,7 +105,6 @@ STATIC FUNCTION prebaci_se_u_bazu( db_params, database, year )
       year := Year( Date() )
    ENDIF
 
-   // 1) odjavi mi se iz tekuce sezone
    my_server_logout()
 
    IF year <> Year( Date() )

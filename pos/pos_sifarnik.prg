@@ -46,36 +46,6 @@ FUNCTION LMarg()
 
 
 
-FUNCTION P_Odj( cId, dx, dy )
-
-   PRIVATE ImeKol
-   PRIVATE Kol := {}
-
-   select_o_pos_odj()
-
-   ImeKol := { { "ID ", {|| id }, "id", {|| .T. }, {|| validacija_postoji_sifra( wId ) } }, { PadC( "Naziv", 25 ), {|| naz }, "naz" }, { "Konto u KALK", {|| IdKonto }, "IdKonto" } }
-
-   FOR i := 1 TO Len( ImeKol )
-      AAdd( Kol, i )
-   NEXT
-
-   RETURN p_sifra( F_ODJ, 1, 10, 40, "Šifarnik odjeljenja", @cId, dx, dy )
-
-
-/*
--- FUNCTION P_Dio( cId, dx, dy )
-
-   PRIVATE ImeKol
-   PRIVATE Kol := {}
-
-   ImeKol := { { "ID ", {|| id }, "id", {|| .T. }, {|| validacija_postoji_sifra( wId ) } }, { PadC( "Naziv", 25 ), {|| naz }, "naz" } }
-
-   FOR i := 1 TO Len( ImeKol )
-      AAdd( Kol, i )
-   NEXT
-
-   RETURN p_sifra( F_DIO, 1, 10, 55, "Šifrarnik dijelova objekta", @cid, dx, dy )
-*/
 
 FUNCTION p_pos_strad( cId, dx, dy )
 

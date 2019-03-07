@@ -29,7 +29,7 @@ FUNCTION realizacija_kase
    PRIVATE cRadnici := Space( 60 )
    PRIVATE cVrsteP := Space( 60 )
    PRIVATE cIdPos := gIdPos
-   PRIVATE cRD
+
 
    PRIVATE aNiz
    PRIVATE cFilterIdRadnik := {}
@@ -56,7 +56,7 @@ FUNCTION realizacija_kase
    cVrijDo := "23:59"
 
 
-   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cRD, @cVrijOd, @cVrijDo, @cFilterIdRadnik, @aUsl2, @cVrsteP, @cAPrometa, @cSifraDob, @cPartId ) == 0
+   IF pos_get_vars_izvjestaj_realizacija( @cIdPos, @dDatum0, @dDatum1, @cVrijOd, @cVrijDo, @cFilterIdRadnik, @aUsl2, @cVrsteP, @cAPrometa, @cSifraDob, @cPartId ) == 0
       RETURN 0
    ENDIF
 
@@ -85,7 +85,6 @@ FUNCTION realizacija_kase
    // Nenaplaceno ili Popust (zavisno od varijante)
    PRIVATE nTotal3 := 0
 
-   IF ( cRD $ "RB" )
 
       SELECT POM
       SET ORDER TO TAG "1"
@@ -94,12 +93,6 @@ FUNCTION realizacija_kase
          pos_realizacija_po_radnicima( fPrik, @nTotal3 )
       ENDIF
 
-   ENDIF
-
-   IF ( cRD $ "OB" )
-      check_nova_strana( bZagl, s_oPDF )
-      pos_realizacija_po_odjeljenjima( fPrik, @nTotal3 )
-   ENDIF
 
    check_nova_strana( bZagl, s_oPDF )
 
@@ -111,7 +104,7 @@ FUNCTION realizacija_kase
    RETURN .T.
 
 
-STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cRD, cVrijOd, cVrijDo, cFilterIdRadnik, aUsl2, cVrsteP, cAPrometa, cSifraDob, cPartId )
+STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cVrijOd, cVrijDo, cFilterIdRadnik, aUsl2, cVrsteP, cAPrometa, cSifraDob, cPartId )
 
    LOCAL aNiz
 
@@ -127,9 +120,7 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cR
 
    fPrik := "O"
    AAdd( aNiz, { "Prikazati Pazar/Robe/Oboje (P/R/O)?", "fPrik", "fPrik$'PRO'", "@!", } )
-   cRD := "R"
 
-   AAdd( aNiz, { "Po Radnicima/Odjeljenjima/oBoje (R/O/B)?", "cRD", "cRD$'ROB'", "@!", } )
    AAdd( aNiz, { "Prikazati pregled po vrstama plaćanja ?", "cPVrstePl", "cPVrstePl$'DN'", "@!", } )
    AAdd( aNiz, { "Vrijeme od", "cVrijOd",, "99:99", } )
    AAdd( aNiz, { "Vrijeme do", "cVrijDo", "cVrijDo>=cVrijOd", "99:99", } )
@@ -484,151 +475,6 @@ STATIC FUNCTION set_pos_zagl_realizacija()
 
    RETURN .T.
 
-
-/* pos_realizacija_po_odjeljenjima(fPrik, nTotal3)
- *     Prikaz realizacije po odjeljenjima
- */
-
-STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal3 )
-
-   IF ( fPrik $ "PO" )
-      // daj mi pazar
-      ?
-      ? PadC( "------------------------------------", LEN_TRAKA )
-      ?
-      ? "Sifra Naziv odjeljenja          IZNOS"
-      ? "----- ----------------------- ----------"
-      // 0123456789012345678901234567890123456789
-      nTotal := 0
-      nTotal3 := 0
-      SELECT POM
-      SET ORDER TO TAG "2"
-      GO TOP
-      WHILE !Eof()
-         _IdPos := pom->IdPos
-         IF Empty( cIdPos )
-            select_o_pos_kase( _IdPos )
-            ? REPL( "-", LEN_TRAKA )
-            ? Space( 1 ) + _idpos + ":", KASE->Naz
-            ? REPL( "-", LEN_TRAKA )
-            SELECT POM
-         ENDIF
-         nTotPos := 0
-         nTotPos3 := 0
-         DO WHILE ( !Eof() .AND. pom->IdPos == _IdPos )
-            nTotOdj := 0
-            nTotOdj3 := 0
-
-            SELECT POM
-            DO WHILE !Eof() .AND. pom->IdPos == _IdPos
-               nTotOdj += pom->Iznos
-               nTotOdj3 += pom->Iznos3
-               SKIP
-            ENDDO
-            ?? Transform( nTotOdj, "999,999.99" )
-            nTotPos += nTotOdj
-            nTotPos3 += nTotOdj3
-         ENDDO
-         pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
-         nTotal += nTotPos
-         nTotal3 += nTotPos3
-      ENDDO
-      IF Empty( cIdPos )
-         ? REPL( "=", LEN_TRAKA )
-         ? PadC( "SVE KASE UKUPNO", 25 ) + Transform( nTotal, "999,999,999.99" )
-         ? REPL( "=", LEN_TRAKA )
-      ENDIF
-   ENDIF
-
-   IF fPrik $ "RO" // realizacija kase, po odjeljenjima, ROBNO
-      nTotal := 0
-      SELECT POM
-      SET ORDER TO TAG "2"   // IdPos+IdRoba
-
-      GO TOP
-      DO WHILE !Eof()
-         _IdPos := POM->IdPos
-         IF Empty( cIdPos )
-            select_o_pos_kase( _IdPos )
-            ? REPL( "-", LEN_TRAKA )
-            ? Space( 1 ) + _idpos + ":", KASE->Naz
-            ? REPL( "-", LEN_TRAKA )
-            SELECT POM
-         ENDIF
-         nTotPos := 0
-         nTotPos3 := 0
-         nTotPosK := 0
-         DO WHILE !Eof() .AND. pom->IdPos == _IdPos
-
-            ? Replicate ( "-", LEN_TRAKA )
-            ? "SIFRA    NAZIV", Space ( 19 ), "(JMJ)"
-            ? Space( 10 ) + "Set c.  Kolicina    Vrijednost"
-            ? Replicate( "-", LEN_TRAKA )
-            nTotOdj := 0
-            nTotOdj3 := 0
-            nTotOdjK := 0
-            SELECT POM
-            DO WHILE !Eof() .AND. POM->IdPos == _IdPos
-               _IdRoba := POM->IdRoba
-               select_o_roba( _IdRoba )
-               ? _IdRoba, Left( ROBA->Naz, 25 ), "(" + ROBA->Jmj + ")"
-               _K2 := ""
-               SELECT POM
-               nRobaIzn := 0
-               nRobaIzn2 := 0
-               nRobaIzn3 := 0
-               nRobaKol := 0
-               nSetova := 0
-               DO WHILE !Eof() .AND. pom->idPos + pom->IdRoba == _IdPos + _IdRoba
-
-                  nKol := 0
-                  nIzn := 0
-                  nIzn3 := 0
-                  DO WHILE !Eof() .AND. pom->IdPos + pom->IdRoba ==  _IdPos + _ + _IdRoba
-                     nKol += POM->Kolicina
-                     nIzn += POM->Iznos
-                     nIzn3 += POM->Iznos3
-                     SKIP
-                  ENDDO
-                  ? Space( 10 ) + Str( nKol, 10, 3 ) + Transform( nIzn, "999,999,999.99" )
-                  nRobaIzn += nIzn
-                  nRobaKol += nKol
-                  nRobaIzn3 += nIzn3
-                  nSetova++
-                  SELECT POM
-               ENDDO
-               IF nSetova > 1
-                  ? PadL( "Ukupno roba ", 15 ), Str( nRobaKol, 10, 3 ) + Transform( nRobaIzn, "999,999,999.99" )
-               ENDIF
-               nTotOdj += nRobaIzn
-               nTotOdj3 += nRobaIzn3
-               IF !( _K2 = "X" )
-                  nTotOdjk += nRobaKol
-               ENDIF
-            ENDDO
-            ? REPL( "-", LEN_TRAKA )
-
-            ? PadC( "UKUPNO", 26 )
-
-            ?? Transform( nTotOdj, "999,999,999.99" )
-            ? REPL( "-", LEN_TRAKA )
-            ?
-            nTotPos += nTotOdj
-            nTotPosK += nTotOdjk
-         ENDDO
-
-         pos_total_kasa( _IdPos, nTotPos, nTotPos3, nTotPosk, "=" )
-         nTotal += nTotPos
-         nTotal3 += nTotPos3
-      ENDDO
-      IF Empty( cIdPos )
-         ? REPL( "*", LEN_TRAKA )
-         ? PadC( "SVE KASE UKUPNO", 25 ), Transform( nTotal, "999,999,999.99" )
-         ? REPL( "*", LEN_TRAKA )
-      ENDIF
-   ENDIF
-
-   RETURN .T.
 
 
 
