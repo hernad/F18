@@ -84,15 +84,11 @@ FUNCTION pos_napuni_drn_rn_dbf( hParams )
 
    IF !hParams[ "priprema" ]
       seek_pos_pos( cIdPos, POS_IDVD_RACUN, dDatum, cBrDok )
-      // cVrijeme := pos_doks->vrijeme
-      // cIdVrsteP := pos_doks->idvrstep
    ELSE
       SELECT _pos_pripr
       SET ORDER TO TAG "1"
       GO TOP
       SEEK cIdPos + POS_IDVD_RACUN + DToS( dDatum ) + cBrDok
-      // cVrijeme := Left( Time(), 5 )
-      // cIdVrsteP := _pos->idvrstep
    ENDIF
 
    find_pos_osob_by_naz( cIdRadnik )
