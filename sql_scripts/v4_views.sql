@@ -118,3 +118,192 @@ FROM
   f18.tarifa;
 
 GRANT ALL ON public.tarifa TO xtrole;
+
+
+-- public.koncij
+drop view if exists public.koncij;
+CREATE view public.koncij  AS
+SELECT id, shema,
+       naz, idprodmjes, region, sufiks,
+       kk1, kk2, kk3, kk4, kk5, kk6, kk7, kk8, kk9,
+       kp1, kp2, kp3, kp4, kp5, kp6, kp7, kp8, kp9, kpa, kpb, kpc, kpd,
+       ko1, ko2, ko3, ko4, ko5, ko6, ko7, ko8, ko9, koa, kob, koc, kod,
+       prod
+  FROM f18.koncij;
+
+GRANT ALL ON public.koncij TO xtrole;
+
+CREATE OR REPLACE RULE public_koncij_ins AS ON INSERT TO public.koncij
+  DO INSTEAD INSERT INTO f18.koncij(
+    id, shema,
+    naz, idprodmjes, region, sufiks,
+    kk1, kk2, kk3, kk4, kk5, kk6, kk7, kk8, kk9,
+    kp1, kp2, kp3, kp4, kp5, kp6, kp7, kp8, kp9, kpa, kpb, kpc, kpd,
+    ko1, ko2, ko3, ko4, ko5, ko6, ko7, ko8, ko9, koa, kob, koc, kod,
+    prod
+  ) VALUES (
+    NEW.id, NEW.shema,
+    NEW.naz, NEW.idprodmjes, NEW.region, NEW.sufiks,
+    NEW.kk1, NEW.kk2, NEW.kk3, NEW.kk4, NEW.kk5, NEW.kk6, NEW.kk7, NEW.kk8, NEW.kk9,
+    NEW.kp1, NEW.kp2, NEW.kp3, NEW.kp4, NEW.kp5, NEW.kp6, NEW.kp7, NEW.kp8, NEW.kp9, NEW.kpa, NEW.kpb, NEW.kpc, NEW.kpd,
+    NEW.ko1, NEW.ko2, NEW.ko3, NEW.ko4, NEW.ko5, NEW.ko6, NEW.ko7, NEW.ko8, NEW.ko9, NEW.koa, NEW.kob, NEW.koc, NEW.kod,
+    NEW.prod
+  );
+
+
+GRANT ALL ON public.koncij TO xtrole;
+
+-- public.roba
+
+drop view if exists public.roba;
+CREATE view public.roba  AS SELECT
+  *
+FROM
+  f18.roba;
+
+--- CREATE OR REPLACE RULE public_roba_ins AS ON INSERT TO public.roba
+---         DO INSTEAD INSERT INTO f18.roba(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.roba TO xtrole;
+
+-- public.partn
+
+drop view if exists public.partn;
+CREATE view public.partn  AS SELECT
+  *
+FROM
+  f18.partn;
+
+--- CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
+---         DO INSTEAD INSERT INTO f18.partn(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.partn TO xtrole;
+
+-- public.valute
+drop view if exists public.valute;
+CREATE view public.valute  AS SELECT
+  *
+FROM
+  f18.valute;
+
+--- CREATE OR REPLACE RULE public_valute_ins AS ON INSERT TO public.valute
+---         DO INSTEAD INSERT INTO f18.valute(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.valute TO xtrole;
+
+-- public.konto
+drop view if exists public.konto;
+CREATE view public.konto  AS SELECT
+  *
+FROM
+  f18.konto;
+
+--- CREATE OR REPLACE RULE public_konto_ins AS ON INSERT TO public.konto
+---         DO INSTEAD INSERT INTO f18.konto(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.konto TO xtrole;
+
+-- public.tnal
+drop view if exists public.tnal;
+CREATE view public.tnal  AS SELECT
+  *
+FROM
+  f18.tnal;
+
+--- CREATE OR REPLACE RULE public_tnal_ins AS ON INSERT TO public.tnal
+---         DO INSTEAD INSERT INTO f18.tnal(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.tnal TO xtrole;
+
+-- public.tdok
+drop view if exists public.tdok;
+CREATE view public.tdok  AS SELECT
+  *
+FROM
+  f18.tdok;
+
+--- CREATE OR REPLACE RULE public_tdok_ins AS ON INSERT TO public.tdok
+---         DO INSTEAD INSERT INTO f18.tdok(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.tdok TO xtrole;
+
+-- public.sifk
+drop view if exists public.sifk;
+CREATE view public.sifk  AS SELECT
+  *
+FROM
+  f18.sifk;
+
+--- CREATE OR REPLACE RULE public_sifk_ins AS ON INSERT TO public.sifk
+---         DO INSTEAD INSERT INTO f18.sifk(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.sifk TO xtrole;
+
+-- public.sifv
+drop view if exists public.sifv;
+CREATE view public.sifv  AS SELECT
+  *
+FROM
+  f18.sifv;
+
+--- CREATE OR REPLACE RULE public_sifv_ins AS ON INSERT TO public.sifv
+---         DO INSTEAD INSERT INTO f18.sifv(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.sifv TO xtrole;
+
+-- public.trfp
+drop view if exists public.trfp;
+CREATE view public.trfp  AS SELECT
+  *
+FROM
+  f18.trfp;
+
+--- CREATE OR REPLACE RULE public_trfp_ins AS ON INSERT TO public.trfp
+---         DO INSTEAD INSERT INTO f18.trfp(
+---            id, naz,
+---            ??
+---         ) VALUES (
+---           NEW.id, NEW.NAZ, ?? );
+---
+
+GRANT ALL ON public.trfp TO xtrole;

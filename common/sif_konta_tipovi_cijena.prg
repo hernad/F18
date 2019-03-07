@@ -11,7 +11,8 @@
 
 #include "f18.ch"
 
-
+MEMVAR Kol, ImeKol
+MEMVAR wId
 
 FUNCTION P_KonCij( cId, dx, dy )
 
@@ -33,59 +34,34 @@ FUNCTION P_KonCij( cId, dx, dy )
    ENDIF
 
    AAdd( ImeKol, { "ID", {|| dbf_get_rec()[ "id" ] }, "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) } } )
-   AAdd( ImeKol, { PadC( "Shema", 5 ), {|| PadC( shema, 5 ) }, "shema" } )
+   AAdd( ImeKol, { PadC( "Shema", 5 ), {|| PadC( koncij->shema, 5 ) }, "shema" } )
    AAdd( ImeKol, { "Tip", {|| dbf_get_rec()[ "naz" ] }, "naz" } )
-   AAdd( ImeKol, { "PM", {|| idprodmjes }, "idprodmjes" } )
+   AAdd( ImeKol, { "PM (v3)", {|| koncij->idprodmjes }, "idprodmjes" } )
+   AAdd( ImeKol, { "Prod (v4)", {|| transform(koncij->prod, '99999') }, "prod" } )
+
+   AAdd ( ImeKol, { "KK1", {|| dbf_get_rec()[ "kk1" ] }, "KK1" } )
+   AAdd ( ImeKol, { PadC( "KK2", 7 ), {|| koncij->KK2 }, "KK2", {|| .T. }, {|| Empty( wKK2 ) .OR. P_Konto( @wKK2 ) } } )
+   AAdd ( ImeKol, { PadC( "KK3", 7 ), {|| koncij->KK3 }, "KK3", {|| .T. }, {|| Empty( wKK3 ) .OR. P_Konto( @wKK3 ) } } )
+   AAdd ( ImeKol, { PadC( "KK4", 7 ), {|| koncij->KK4 }, "KK4", {|| .T. }, {|| Empty( wKK4 ) .OR. P_Konto( @wKK4 ) } } )
+   AAdd ( ImeKol, { PadC( "KK5", 7 ), {|| koncij->KK5 }, "KK5", {|| .T. }, {|| Empty( wKK5 ) .OR. P_Konto( @wKK5 ) } } )
+   AAdd ( ImeKol, { PadC( "KK6", 7 ), {|| koncij->KK6 }, "KK6", {|| .T. }, {|| Empty( wKK6 ) .OR. P_Konto( @wKK6 ) } } )
+
+   AAdd ( ImeKol, { PadC( "KP1", 7 ), {|| koncij->KP1 }, "KP1", {|| .T. }, {|| Empty( wKP1 ) .OR. P_Konto( @wKP1 ) } } )
+   AAdd ( ImeKol, { PadC( "KP2", 7 ), {|| koncij->KP2 }, "KP2", {|| .T. }, {|| Empty( wKP2 ) .OR. P_Konto( @wKP2 ) } } )
+   AAdd ( ImeKol, { PadC( "KP3", 7 ), {|| koncij->KP3 }, "KP3", {|| .T. }, {|| Empty( wKP3 ) .OR. P_Konto( @wKP3 ) } } )
+   AAdd ( ImeKol, { PadC( "KP4", 7 ), {|| koncij->KP4 }, "KP4", {|| .T. }, {|| Empty( wKP4 ) .OR. P_Konto( @wKP4 ) } } )
+   AAdd ( ImeKol, { PadC( "KP5", 7 ), {|| koncij->KP5 }, "KP5", {|| .T. }, {|| Empty( wKP5 ) .OR. P_Konto( @wKP5 ) } } )
+
+   AAdd ( ImeKol, { PadC( "KO1", 7 ), {|| koncij->KO1 }, "KO1", {|| .T. }, {|| Empty( wKO1 ) .OR. P_Konto( @wKO1 ) } } )
+   AAdd ( ImeKol, { PadC( "KO2", 7 ), {|| koncij->KO2 }, "KO2", {|| .T. }, {|| Empty( wKO2 ) .OR. P_Konto( @wKO2 ) } } )
+   AAdd ( ImeKol, { PadC( "KO3", 7 ), {|| koncij->KO3 }, "KO3", {|| .T. }, {|| Empty( wKO3 ) .OR. P_Konto( @wKO3 ) } } )
+   AAdd ( ImeKol, { PadC( "KO4", 7 ), {|| koncij->KO4 }, "KO4", {|| .T. }, {|| Empty( wKO4 ) .OR. P_Konto( @wKO4 ) } } )
+   AAdd ( ImeKol, { PadC( "KO5", 7 ), {|| koncij->KO5 }, "KO5", {|| .T. }, {|| Empty( wKO5 ) .OR. P_Konto( @wKO5 ) } } )
 
 
-   IF KONCIJ->( FieldPos( "IDRJ" ) <> 0 )
-      AAdd ( ImeKol, { "RJ", {|| idrj }, "IDRJ" } )
-      AAdd ( ImeKol, { "Sint.RJ", {|| sidrj }, "SIDRJ" } )
-      AAdd ( ImeKol, { "Banka", {|| banka }, "BANKA" } )
-   ENDIF
+   AAdd ( ImeKol, { "Region", {|| koncij->Region }, "Region", {|| .T. }, {|| .T. } } )
+   AAdd ( ImeKol, { "Sfx KALK", {|| koncij->sufiks }, "sufiks", {|| .T. }, {|| .T. } } )
 
-   IF KONCIJ->( FieldPos( "M1" ) <> 0 )
-      AAdd ( ImeKol, { "Marker", {|| m1  }, "m1", {|| .T. }, {|| .T. } } )
-      AAdd ( ImeKol, { "KALK14->FINxx", {|| fn14 }, "fn14", {|| .T. }, {|| .T. } } )
-   ENDIF
-
-   //IF KONCIJ->( FieldPos( "KK1" ) ) <> 0
-      AAdd ( ImeKol, { "KK1", {|| dbf_get_rec()[ "kk1" ] }, "KK1" } )
-      AAdd ( ImeKol, { PadC( "KK2", 7 ), {|| KK2 }, "KK2", {|| .T. }, {|| Empty( wKK2 ) .OR. P_Konto( @wKK2 ) } } )
-      AAdd ( ImeKol, { PadC( "KK3", 7 ), {|| KK3 }, "KK3", {|| .T. }, {|| Empty( wKK3 ) .OR. P_Konto( @wKK3 ) } } )
-      AAdd ( ImeKol, { PadC( "KK4", 7 ), {|| KK4 }, "KK4", {|| .T. }, {|| Empty( wKK4 ) .OR. P_Konto( @wKK4 ) } } )
-      AAdd ( ImeKol, { PadC( "KK5", 7 ), {|| KK5 }, "KK5", {|| .T. }, {|| Empty( wKK5 ) .OR. P_Konto( @wKK5 ) } } )
-      AAdd ( ImeKol, { PadC( "KK6", 7 ), {|| KK6 }, "KK6", {|| .T. }, {|| Empty( wKK6 ) .OR. P_Konto( @wKK6 ) } } )
-   //ENDIF
-
-   IF KONCIJ->( FieldPos( "KP1" ) ) <> 0
-      AAdd ( ImeKol, { PadC( "KP1", 7 ), {|| KP1 }, "KP1", {|| .T. }, {|| Empty( wKP1 ) .OR. P_Konto( @wKP1 ) } } )
-      AAdd ( ImeKol, { PadC( "KP2", 7 ), {|| KP2 }, "KP2", {|| .T. }, {|| Empty( wKP2 ) .OR. P_Konto( @wKP2 ) } } )
-      AAdd ( ImeKol, { PadC( "KP3", 7 ), {|| KP3 }, "KP3", {|| .T. }, {|| Empty( wKP3 ) .OR. P_Konto( @wKP3 ) } } )
-      AAdd ( ImeKol, { PadC( "KP4", 7 ), {|| KP4 }, "KP4", {|| .T. }, {|| Empty( wKP4 ) .OR. P_Konto( @wKP4 ) } } )
-      AAdd ( ImeKol, { PadC( "KP5", 7 ), {|| KP5 }, "KP5", {|| .T. }, {|| Empty( wKP5 ) .OR. P_Konto( @wKP5 ) } } )
-   ENDIF
-
-   IF KONCIJ->( FieldPos( "KO1" ) ) <> 0
-      AAdd ( ImeKol, { PadC( "KO1", 7 ), {|| KO1 }, "KO1", {|| .T. }, {|| Empty( wKO1 ) .OR. P_Konto( @wKO1 ) } } )
-      AAdd ( ImeKol, { PadC( "KO2", 7 ), {|| KO2 }, "KO2", {|| .T. }, {|| Empty( wKO2 ) .OR. P_Konto( @wKO2 ) } } )
-      AAdd ( ImeKol, { PadC( "KO3", 7 ), {|| KO3 }, "KO3", {|| .T. }, {|| Empty( wKO3 ) .OR. P_Konto( @wKO3 ) } } )
-      AAdd ( ImeKol, { PadC( "KO4", 7 ), {|| KO4 }, "KO4", {|| .T. }, {|| Empty( wKO4 ) .OR. P_Konto( @wKO4 ) } } )
-      AAdd ( ImeKol, { PadC( "KO5", 7 ), {|| KO5 }, "KO5", {|| .T. }, {|| Empty( wKO5 ) .OR. P_Konto( @wKO5 ) } } )
-   ENDIF
-
-   IF KONCIJ->( FieldPos( "KUMTOPS" ) ) <> 0
-      AAdd ( ImeKol, { "Kum.dir.TOPS-a", {|| KUMTOPS }, "KUMTOPS", {|| .T. }, {|| .T. } } )
-      AAdd ( ImeKol, { "Sif.dir.TOPS-a", {|| SIFTOPS }, "SIFTOPS", {|| .T. }, {|| .T. } } )
-   ENDIF
-
-
-   AAdd ( ImeKol, { "Region", {|| Region }, "Region", {|| .T. }, {|| .T. } } )
-
-
-   IF KONCIJ->( FieldPos( "SUFIKS" ) ) <> 0
-      AAdd ( ImeKol, { "Sfx KALK", {|| sufiks }, "sufiks", {|| .T. }, {|| .T. } } )
-   ENDIF
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )

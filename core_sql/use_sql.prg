@@ -157,17 +157,18 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 
 FUNCTION f18_sql_schema( cTable )
 
+   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "roba", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp" }
    IF "." $ cTable
       RETURN cTable
    ENDIF
 
-   IF cTable == "tarifa" .OR. cTable == "kalk_kalk" .OR. cTable == "kalk_doks"
+if cTable == "tarifa"
+altd()
+endif
+   IF AScan( aF18Tables, cTable ) > 0
       RETURN "public." + cTable
    ENDIF
 
-   IF cTable == "partn" .OR. cTable == "valute" //  tarifa, partn se uvijek uzimaju iz knjigovodstva
-      RETURN F18_PSQL_KNJIGOVODSTVO_SCHEMA + "." + cTable
-   ENDIF
 
    RETURN sql_primarna_schema() + "." + cTable
 

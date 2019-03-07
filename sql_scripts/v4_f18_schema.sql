@@ -87,13 +87,14 @@ CREATE TABLE IF NOT EXISTS f18.tarifa AS  TABLE fmk.tarifa;
 ALTER TABLE f18.tarifa OWNER TO admin;
 GRANT ALL ON TABLE f18.tarifa TO xtrole;
 
-alter table fmk.tarifa drop column if exists match_code;
-alter table fmk.tarifa drop column if exists ppp;
-alter table fmk.tarifa drop column if exists vpp;
-alter table fmk.tarifa drop column if exists mpp;
-alter table fmk.tarifa drop column if exists dlruc;
-alter table fmk.tarifa drop column if exists zpp;
+alter table f18.tarifa drop column if exists match_code;
+alter table f18.tarifa drop column if exists ppp;
+alter table f18.tarifa drop column if exists vpp;
+alter table f18.tarifa drop column if exists mpp;
+alter table f18.tarifa drop column if exists dlruc;
+alter table f18.tarifa drop column if exists zpp;
 
+DROP TABLE IF EXISTS fmk.tarifa;
 
 DO $$
 BEGIN
@@ -102,3 +103,65 @@ BEGIN
    EXCEPTION WHEN others THEN RAISE NOTICE 'tarifa column already renamed opp->pdv';
   END;
 END $$;
+
+--- f18.koncij  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.koncij AS  TABLE fmk.koncij;
+ALTER TABLE f18.koncij OWNER TO admin;
+GRANT ALL ON TABLE f18.koncij TO xtrole;
+DROP TABLE IF EXISTS fmk.koncij;
+alter table f18.koncij drop column if exists match_code CASCADE;
+alter table f18.koncij add column if not exists prod integer;
+
+--- f18.roba  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.roba AS  TABLE fmk.roba;
+ALTER TABLE f18.roba OWNER TO admin;
+GRANT ALL ON TABLE f18.roba TO xtrole;
+DROP TABLE IF EXISTS fmk.roba;
+
+--- f18.partn  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.partn AS  TABLE fmk.partn;
+ALTER TABLE f18.partn OWNER TO admin;
+GRANT ALL ON TABLE f18.partn TO xtrole;
+DROP TABLE IF EXISTS fmk.partn;
+
+--- f18.valute  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.valute AS  TABLE fmk.valute;
+ALTER TABLE f18.valute OWNER TO admin;
+GRANT ALL ON TABLE f18.valute TO xtrole;
+DROP TABLE IF EXISTS fmk.valute;
+
+--- f18.konto  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.konto AS  TABLE fmk.konto;
+ALTER TABLE f18.konto OWNER TO admin;
+GRANT ALL ON TABLE f18.konto TO xtrole;
+DROP TABLE IF EXISTS fmk.konto;
+
+--- f18.tnal  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.tnal AS  TABLE fmk.tnal;
+ALTER TABLE f18.tnal OWNER TO admin;
+GRANT ALL ON TABLE f18.tnal TO xtrole;
+DROP TABLE IF EXISTS fmk.tnal;
+
+--- f18.tdok  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.tdok AS  TABLE fmk.tdok;
+ALTER TABLE f18.tdok OWNER TO admin;
+GRANT ALL ON TABLE f18.tdok TO xtrole;
+DROP TABLE IF EXISTS fmk.tdok;
+
+--- f18.sifk  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.sifk AS  TABLE fmk.sifk;
+ALTER TABLE f18.sifk OWNER TO admin;
+GRANT ALL ON TABLE f18.sifk TO xtrole;
+DROP TABLE IF EXISTS fmk.sifk;
+
+--- f18.sifv  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.sifv AS  TABLE fmk.sifv;
+ALTER TABLE f18.sifv OWNER TO admin;
+GRANT ALL ON TABLE f18.sifv TO xtrole;
+DROP TABLE IF EXISTS fmk.sifv;
+
+--- f18.trfp  --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.trfp AS  TABLE fmk.trfp;
+ALTER TABLE f18.trfp OWNER TO admin;
+GRANT ALL ON TABLE f18.trfp TO xtrole;
+DROP TABLE IF EXISTS fmk.trfp;
