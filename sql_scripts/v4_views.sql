@@ -1,12 +1,12 @@
 
 --------------------------------------------------------------------------------
--- F18 v3 legacy public.kalk_kalk, kalk_doks updatable views
+-- F18 v4 public kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
-drop view if exists fmk.kalk_kalk;
-CREATE view fmk.kalk_kalk  AS SELECT
+drop view if exists public.kalk_kalk;
+CREATE view public.kalk_kalk  AS SELECT
      idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
      brfaktp, idpartner,
-     lpad(btrim(to_char(rbr,'999')), 3) as rbr,
+     rbr,
      kolicina, gkolicina, gkolicin2,
      fcj, fcj2,
      trabat,rabat,
@@ -23,19 +23,11 @@ CREATE view fmk.kalk_kalk  AS SELECT
      mpc, idtarifa,
      mpcsapp,
      mkonto,pkonto,mu_i,pu_i,
-     error,
-     date '1990-01-01' as datfaktp,
-     current_date as datkurs,
-     current_date as roktr,
-     NULL as idzaduz,
-     NULL as idzaduz2,
-     0.0 AS fcj3,
-     0.0 AS vpcsap,
-     NULL as podbr
+     error
 FROM
   f18.kalk_kalk;
 
-CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
+CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO f18.kalk_kalk
       DO INSTEAD INSERT INTO f18.kalk_kalk(
          idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
          brfaktp, idpartner,
@@ -60,7 +52,7 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
       ) VALUES (
         NEW.idfirma, NEW.idroba, NEW.idkonto, NEW.idkonto2, NEW.idvd, NEW.brdok, NEW.datdok,
         NEW.brfaktp, NEW.idpartner,
-        to_number(NEW.rbr,'999'),
+        NEW.rbr,
         NEW.kolicina, NEW.gkolicina, NEW.gkolicin2,
         NEW.fcj, NEW.fcj2,
         NEW.trabat, NEW.rabat,
@@ -77,13 +69,13 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
         NEW.mpc, NEW.idtarifa,
         NEW.mpcsapp,
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
-        NEW.error );
+        NEW.error   );
 
-GRANT ALL ON fmk.kalk_kalk TO xtrole;
+GRANT ALL ON public.kalk_kalk TO xtrole;
 
-----------------------  fmk.kalk_doks ----------------------------------
-DROP VIEW if exists fmk.kalk_doks;
-CREATE view fmk.kalk_doks  AS SELECT
+----------------------  public.kalk_doks ----------------------------------
+DROP VIEW if exists public.kalk_doks;
+CREATE view public.kalk_doks  AS SELECT
 idfirma, idvd, brdok, datdok,
 brfaktp, datfaktp, idpartner, datval,
 dat_od, dat_do,
@@ -91,15 +83,11 @@ opis,
 pkonto,mkonto,
 nv,vpv,rabat,mpv,
 obradjeno,
-korisnik,
-NULL as idzaduz,
-NULL as idzaduz2,
-NULL as sifra,
-NULL as podbr
+korisnik
 FROM
   f18.kalk_doks;
 
-CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO fmk.kalk_doks
+CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
       DO INSTEAD INSERT INTO f18.kalk_doks(
         idfirma, idvd, brdok, datdok,
         brfaktp, datfaktp, idpartner, datval,
@@ -119,28 +107,14 @@ CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO fmk.kalk_doks
         NEW.obradjeno,
         NEW.korisnik   );
 
-GRANT ALL ON fmk.kalk_doks TO xtrole;
 
+GRANT ALL ON public.kalk_doks TO xtrole;
 
-drop view if exists fmk.tarifa;
-CREATE view fmk.tarifa  AS SELECT
-  id, naz,
-  NULL AS match_code,
-  0.0::numeric(10,2) AS ppp,
-  0.0::numeric(10,2) AS vpp,
-  0.0::numeric(10,2) AS mpp,
-  0.0::numeric(10,2) AS dlruc,
-  0.0::numeric(10,2) AS zpp,
-  pdv AS opp
+----  public.tarifa
+
+drop view if exists public.tarifa;
+CREATE view public.tarifa  AS SELECT *
 FROM
   f18.tarifa;
 
-
-CREATE OR REPLACE RULE fmk_tarifa_ins AS ON INSERT TO fmk.tarifa
-        DO INSTEAD INSERT INTO f18.tarifa(
-           id, naz,
-           pdv
-        ) VALUES (
-          NEW.id, NEW.NAZ, NEW.opp );
-
-GRANT ALL ON fmk.tarifa TO xtrole;
+GRANT ALL ON public.tarifa TO xtrole;

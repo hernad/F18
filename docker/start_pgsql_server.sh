@@ -4,6 +4,12 @@
 #DOCKER_IMAGE=psql_tds_fdw
 DOCKER_IMAGE=f18_postgresql:10-1
 
+if [ -d $HOME/F18_docker/postgresql_data ] ; then
+   POSTGRESQL_DATA=$HOME/F18_docker/postgresql_data
+else
+   POSTGRESQL_DATA=$PWD/postgresql_data
+fi
+
 
 if [ -z "$PG_PASSWORD" ] ; then
    echo "set envar PG_PASSWORD"
@@ -16,8 +22,10 @@ if [ -f /etc/redhat-release ] ; then
    sudo setenforce 0
 fi
 
-if [ ! -d postgresql_data ] ; then
+if [ ! -d $POSTGRESQL_DATA ] ; then
     tar xvf postgresql_data.tgz
+else
+    echo "$POSTGRESQL_DATA postoji"
 fi
 
 
@@ -30,7 +38,7 @@ docker run \
   --env 'PG_PASSWORD=$PG_PASSWORD' \
   -v $PWD/data:/data \
   -v $PWD/scripts:/scripts \
-  -v $PWD/postgresql_data:/var/lib/postgresql \
+  -v $POSTGRESQL_DATA:/var/lib/postgresql \
   -p 5432:5432 \
   $DOCKER_IMAGE \
   -c logging_collector=on

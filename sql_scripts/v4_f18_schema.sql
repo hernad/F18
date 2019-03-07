@@ -26,6 +26,34 @@ BEGIN
 END;
 $$;
 
+
+
+DO $$
+DECLARE
+  nCount numeric;
+BEGIN
+    BEGIN
+      SELECT count(*) as count from f18.kalk_kalk where btrim(coalesce(idzaduz2,''))<>''
+        INTO nCount;
+      IF (nCount > 1) THEN
+         RAISE EXCEPTION 'kalk idzaduz2 se koristi % !?', nCount
+            USING HINT = 'Vjerovatno ima veze sa pracenjem proizvodnje';
+      END IF;
+      ALTER TABLE f18.kalk_doks DROP COLUMN idzaduz;
+      ALTER TABLE f18.kalk_doks DROP COLUMN idzaduz2;
+      ALTER TABLE f18.kalk_doks DROP COLUMN sifra;
+
+      ALTER TABLE f18.kalk_kalk DROP COLUMN idzaduz;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN idzaduz2;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN fcj3;
+      ALTER TABLE f18.kalk_kalk DROP COLUMN vpcsap;
+
+	EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'idzaduz2 garant ne postoji';
+	END;
+END;
+$$;
+
 CREATE INDEX IF NOT EXISTS kalk_kalk_datdok ON f18.kalk_kalk USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_kalk_id1 ON f18.kalk_kalk USING btree (idfirma, idvd, brdok, rbr, mkonto, pkonto);
 CREATE INDEX IF NOT EXISTS kalk_kalk_mkonto ON f18.kalk_kalk USING btree (idfirma, mkonto, idroba);
@@ -34,116 +62,6 @@ CREATE INDEX  IF NOT EXISTS kalk_kalk_pkonto ON f18.kalk_kalk USING btree (idfir
 CREATE INDEX IF NOT EXISTS kalk_doks_datdok ON f18.kalk_doks USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
 
---------------------------------------------------------------------------------
--- F18 v4 public kalk_kalk, kalk_doks updatable views
--------------------------------------------------------------------------------
-drop view if exists public.kalk_kalk;
-CREATE view public.kalk_kalk  AS SELECT
-     idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
-     brfaktp, idpartner,
-     rbr,
-     kolicina, gkolicina, gkolicin2,
-     fcj, fcj2,
-     trabat,rabat,
-     tprevoz,prevoz,
-     tprevoz2,prevoz2,
-     tbanktr,banktr,
-     tspedtr,spedtr,
-     tcardaz,cardaz,
-     tzavtr,zavtr,
-     tmarza,marza,
-     nc, vpc,
-     rabatv,
-     tmarza2, marza2,
-     mpc, idtarifa,
-     mpcsapp,
-     mkonto,pkonto,mu_i,pu_i,
-     error
-FROM
-  f18.kalk_kalk;
-
-CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO f18.kalk_kalk
-      DO INSTEAD INSERT INTO f18.kalk_kalk(
-         idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
-         brfaktp, idpartner,
-         rbr,
-         kolicina, gkolicina, gkolicin2,
-         fcj, fcj2,
-         trabat,rabat,
-         tprevoz,prevoz,
-         tprevoz2,prevoz2,
-         tbanktr,banktr,
-         tspedtr,spedtr,
-         tcardaz,cardaz,
-         tzavtr,zavtr,
-         tmarza,marza,
-         nc, vpc,
-         rabatv,
-         tmarza2, marza2,
-         mpc, idtarifa,
-         mpcsapp,
-         mkonto,pkonto,mu_i,pu_i,
-         error
-      ) VALUES (
-        NEW.idfirma, NEW.idroba, NEW.idkonto, NEW.idkonto2, NEW.idvd, NEW.brdok, NEW.datdok,
-        NEW.brfaktp, NEW.idpartner,
-        NEW.rbr,
-        NEW.kolicina, NEW.gkolicina, NEW.gkolicin2,
-        NEW.fcj, NEW.fcj2,
-        NEW.trabat, NEW.rabat,
-        NEW.tprevoz, NEW.prevoz,
-        NEW.tprevoz2, NEW.prevoz2,
-        NEW.tbanktr, NEW.banktr,
-        NEW.tspedtr, NEW.spedtr,
-        NEW.tcardaz, NEW.cardaz,
-        NEW.tzavtr, NEW.zavtr,
-        NEW.tmarza, NEW.marza,
-        NEW.nc, NEW.vpc,
-        NEW.rabatv,
-        NEW.tmarza2, NEW.marza2,
-        NEW.mpc, NEW.idtarifa,
-        NEW.mpcsapp,
-        NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
-        NEW.error   );
-
-GRANT ALL ON public.kalk_kalk TO xtrole;
-
-----------------------  public.kalk_doks ----------------------------------
-DROP VIEW if exists public.kalk_doks;
-CREATE view public.kalk_doks  AS SELECT
-idfirma, idvd, brdok, datdok,
-brfaktp, datfaktp, idpartner, datval,
-dat_od, dat_do,
-opis,
-pkonto,mkonto,
-nv,vpv,rabat,mpv,
-obradjeno,
-korisnik
-FROM
-  f18.kalk_doks;
-
-CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
-      DO INSTEAD INSERT INTO f18.kalk_doks(
-        idfirma, idvd, brdok, datdok,
-        brfaktp, datfaktp, idpartner, datval,
-        dat_od, dat_do,
-        opis,
-        pkonto,mkonto,
-        nv,vpv,rabat,mpv,
-        obradjeno,
-        korisnik
-      ) VALUES (
-        NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok,
-        NEW.brfaktp, NEW.datfaktp, NEW.idpartner, NEW.datval,
-        NEW.dat_od, NEW.dat_do,
-        NEW.opis,
-        NEW.pkonto, NEW.mkonto,
-        NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv,
-        NEW.obradjeno,
-        NEW.korisnik   );
-
-
-GRANT ALL ON public.kalk_doks TO xtrole;
 
 -- kalk podbr out
 ALTER TABLE IF EXISTS f18.kalk_doks DROP COLUMN IF EXISTS podbr;
@@ -161,3 +79,26 @@ ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS opis text;
 ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS datfaktp;
 ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS datkurs;
 ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS roktr;
+
+
+
+--- f18.tarifa --------------------------------------------------
+CREATE TABLE IF NOT EXISTS f18.tarifa AS  TABLE fmk.tarifa;
+ALTER TABLE f18.tarifa OWNER TO admin;
+GRANT ALL ON TABLE f18.tarifa TO xtrole;
+
+alter table fmk.tarifa drop column if exists match_code;
+alter table fmk.tarifa drop column if exists ppp;
+alter table fmk.tarifa drop column if exists vpp;
+alter table fmk.tarifa drop column if exists mpp;
+alter table fmk.tarifa drop column if exists dlruc;
+alter table fmk.tarifa drop column if exists zpp;
+
+
+DO $$
+BEGIN
+  BEGIN
+    alter table fmk.tarifa rename column opp TO pdv;
+   EXCEPTION WHEN others THEN RAISE NOTICE 'tarifa column already renamed opp->pdv';
+  END;
+END $$;
