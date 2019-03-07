@@ -47,8 +47,6 @@ FUNCTION pos_kartica_artikla()
 
    Box(, 11, 60 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prod.mjesto (prazno-svi) "  GET  cIdPos  VALID Empty( cIdPos ) .OR. p_pos_kase( cIdPos ) PICT "@!"
-   READ
    @ box_x_koord() + 5, box_y_koord() + 6 SAY8 "Šifra artikla (prazno-svi)" GET cIdRoba VALID Empty( cIdRoba ) .OR. P_Roba( @cIdRoba ) PICT "@!"
    @ box_x_koord() + 7, box_y_koord() + 2 SAY "za period " GET dDatum0
    @ box_x_koord() + 7, Col() + 2 SAY "do " GET dDatum1
@@ -89,7 +87,7 @@ FUNCTION pos_kartica_artikla()
    IF Empty( cIdPos )
       ? cLijevaMargina + "PROD.MJESTO: " + cIdpos + "-" + "SVE"
    ELSE
-      ? cLijevaMargina + "PROD.MJESTO: " + cIdpos + "-" + find_pos_kasa_naz( cIdPos )
+      ? cLijevaMargina + "PROD.MJESTO: " + cIdpos
    ENDIF
 
    ? cLijevaMargina + "ARTIKAL    : " + iif( Empty( cIdRoba ), "SVI", RTrim( cIdRoba ) )

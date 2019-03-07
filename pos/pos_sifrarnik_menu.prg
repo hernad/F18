@@ -24,13 +24,9 @@ FUNCTION pos_sifarnici()
    AAdd( aOpc, "3. vrste plaćanja" )
    AAdd( aOpcexe, {|| P_VrsteP() } )
 
-   AAdd( aOpc, "5. partneri" )
-   AAdd( aOpcexe, {|| p_partner() } )
-
-   AAdd( aOpc, "7. kase (prodajna mjesta)" )
-   AAdd( aOpcexe, {|| p_pos_kase() } )
-
    IF pos_admin()
+      AAdd( aOpc, "5. partneri" )
+      AAdd( aOpcexe, {|| p_partner() } )
       AAdd( aOpc, "A. statusi radnika" )
       AAdd( aOpcexe, {|| p_pos_strad() } )
       AAdd( aOpc, "B. osoblje" )

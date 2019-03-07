@@ -564,75 +564,12 @@ FUNCTION use_sql_pos_osob( cId )
    RETURN !Eof()
 
 
-// set_a_sql_sifarnik( "pos_kase", "KASE", F_KASE  )
-/*
-  pos_kase - KASE
-*/
-
-FUNCTION o_pos_kase( cId )
-
-   SELECT ( F_KASE )
-   use_sql_pos_kase( cId )
-   SET ORDER TO TAG "ID"
-
-   RETURN !Eof()
-
-
-FUNCTION select_o_pos_kase( cId )
-
-   SELECT ( F_KASE )
-   IF Used()
-      IF RecCount() > 1 .AND. cId == NIL
-         RETURN .T.
-      ELSE
-         USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
-      ENDIF
-   ENDIF
-
-   RETURN o_pos_kase( cId )
-
-
-FUNCTION use_sql_pos_kase( cId )
-
-   LOCAL cSql
-   LOCAL cTable := "pos_kase"
-   LOCAL cAlias := "KASE"
-
-   SELECT ( F_KASE )
-   IF !use_sql_sif( cTable, .T., cAlias, cId )
-      RETURN .F.
-   ENDIF
-
-   IF cId != NIL
-      SEEK cId
-   ENDIF
-
-   RETURN !Eof()
-
-
-
-
-
 FUNCTION find_pos_osob_naziv( cId )
 
    LOCAL cRet, nSelect := Select()
 
    SELECT F_OSOB
    cRet := find_field_by_id( "pos_osob", cId, "naz" )
-   SELECT ( nSelect )
-
-   RETURN cRet
-
-
-
-// set_a_dbf_sifarnik( "pos_kase", "KASE", F_KASE  )
-
-FUNCTION find_pos_kasa_naz( cIdPos )
-
-   LOCAL cRet, nSelect := Select()
-
-   SELECT F_KASE
-   cRet := find_field_by_id( "pos_kase", cIdPos, "naz" )
    SELECT ( nSelect )
 
    RETURN cRet

@@ -111,7 +111,6 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cV
    aNiz := {}
    cIdPos := gIdPos
 
-   AAdd( aNiz, { "Prod. mjesto (prazno-sve)", "cIdPos", "cidpos='X'.or.EMPTY(cIdPos) .or. p_pos_kase(@cIdPos)", "@!", } )
    AAdd( aNiz, { "Radnici (prazno-svi)", "cRadnici",, "@!S30", } )
    AAdd( aNiz, { "Vrste plaćanja (prazno-sve)", "cVrsteP",, "@!S30", } )
 
@@ -157,7 +156,7 @@ STATIC FUNCTION pos_zagl_realizacija( dDatum0, dDatum1, cIdPos, cRadnici, cVrste
    IF Empty( cIdPos )
       ? "PRODAJNO MJESTO: SVA"
    ELSE
-      ? "PRODAJNO MJESTO: " + cIdPos + "-" + find_pos_kasa_naz( cIdPos )
+      ? "PRODAJNO MJESTO: " + cIdPos
    ENDIF
 
    IF Empty( cRadnici )
@@ -235,10 +234,9 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
 
       _IdPos := pom->IdPos
       IF Empty( cIdPos )
-         select_o_pos_kase( _IdPos )
          ?
          ? Replicate( "-", LEN_TRAKA )
-         ? Space( 1 ) + _IdPos + ":", + kase->Naz
+         ? Space( 1 ) + _IdPos
          ? Replicate( "-", LEN_TRAKA )
       ENDIF
 
@@ -372,9 +370,8 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
          nTotPos3 := 0
          _IdPos := POM->IdPos
          IF Empty( cIdPos )
-            select_o_pos_kase( _IdPos )
             ? REPL ( "-", LEN_TRAKA )
-            ? Space( 1 ) + _idpos + ":", + KASE->Naz
+            ? Space( 1 ) + _idpos
             ? REPL ( "-", LEN_TRAKA )
          ENDIF
          SELECT POM

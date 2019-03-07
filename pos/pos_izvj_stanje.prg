@@ -34,7 +34,6 @@ FUNCTION pos_stanje_artikala()
    cIdPos := gIdPos
 
    aNiz := {}
-   AAdd ( aNiz, { "Prodajno mjesto (prazno-svi)", "cIdPos", "cIdpos='X'.or.empty(cIdPos).or. p_pos_kase(@cIdPos)", "@!", } )
    AAdd ( aNiz, { "Artikli  (prazno-svi)", "cRoba",, "@!S30", } )
    AAdd ( aNiz, { "Izvještaj se pravi za datum", "dDatum",,, } )
    AAdd ( aNiz, { "Štampati artikle sa stanjem 0", "cNule", "cNule$'DN'", "@!", } )
@@ -177,7 +176,7 @@ FUNCTION pos_stanje_artikala()
 
 STATIC FUNCTION pos_stanje_artikala_zagl( cIdPos, cLijevaMargina, nRobaNazivSirina )
 
-   ? cLijevaMargina + "Prodajno mjesto: " + iif ( Empty( cIdPos ), "SVE", cIdPos + " - " + find_pos_kasa_naz( cIdPos ) )
+   ? cLijevaMargina + "Prodajno mjesto: " + cIdPos
    podvuci( cLijevaMargina, nRobaNazivSirina )
    ?U cLijevaMargina + "R.br)", PadR ( "Šifra", 10 ), " ", PadR ( "Naziv artikla", nRobaNazivSirina ) + " "
    ??U "Poč.stanje ", PadC ( "Ulaz", 10 ), PadC ( "Izlaz", 10 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Ukupno", 10 )

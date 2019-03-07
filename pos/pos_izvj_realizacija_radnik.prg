@@ -41,7 +41,6 @@ FUNCTION pos_realizacija_radnik
       aNiz := {}
       cIdPos := gIdPos
 
-      AAdd( aNiz, { "Prodajno mjesto (prazno-sve)", "cIdPos", "cIdPos='X' .or. empty(cIdPos) .or. p_pos_kase(@cIdPos)", "@!", } )
       AAdd( aNiz, { "Šifra radnika  (prazno-svi)", "cIdRadnik", "IF(!EMPTY(cIdRadnik),P_OSOB(@cIdRadnik),.t.)",, } )
       AAdd( aNiz, { "Vrsta placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
       AAdd( aNiz, { "Izvještaj se pravi od datuma", "dDatOd",,, } )
@@ -117,7 +116,7 @@ FUNCTION pos_realizacija_radnik
       ? gIdRadnik, "-", AllTrim ( find_pos_osob_naziv( gIdRadnik ) ),  "   NA DAN: " + FormDat1 ( danasnji_datum() )
       ?
    ELSE
-      ?U "PROD.MJESTO: " + cidpos + "-" + IF( Empty( cIdPos ), "SVA", find_pos_kasa_naz( cIdPos ) )
+      ?U "PROD.MJESTO: " + cIdpos
       ?U "RADNIK     : " + IF( Empty( cIdRadnik ), "svi", cIdRadnik + "-" + RTrim( find_pos_osob_naziv( cIdRadnik ) ) )
       ?U "VR.PLAĆANJA: " + IF( Empty( cVrsteP ), "sve", RTrim( cVrsteP ) )
 

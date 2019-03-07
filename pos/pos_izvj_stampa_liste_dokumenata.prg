@@ -35,7 +35,6 @@ FUNCTION pos_stampa_liste_dokumenata()
    SET CURSOR ON
    Box(, 10, 77 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY " Prodajno mjesto (prazno-sva)" GET cIdPos PICT "@!" VALID Empty( cIdPos ) .OR. p_pos_kase( @cIdPos, 1, 37 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "          Radnik (prazno-svi)" GET cIdRadnik PICT "@!" VALID Empty( cIdRadnik ) .OR. P_Osob( @cIdRadnik, 2, 37 )
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Vrste dokumenata (prazno-svi)" GET cIdVd PICT "@!"
    @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "            Počevši od datuma" GET dDatOd PICT "@D" VALID dDatOd <= danasnji_datum() .AND. dDatOd <= dDatDo

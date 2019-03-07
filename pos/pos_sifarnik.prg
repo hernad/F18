@@ -13,39 +13,6 @@
 
 MEMVAR ImeKol, Kol, gIdPos
 
-FUNCTION p_pos_kase( cId, dx, dy )
-
-   PRIVATE ImeKol
-   PRIVATE Kol
-
-   select_o_pos_kase()
-
-   ImeKol := {}
-   AAdd( ImeKol, { "Sifra/ID kase", {|| id }, "id" } )
-   AAdd( ImeKol, { "Naziv kase", {|| Naz }, "Naz" } )
-   AAdd( ImeKol, { "Lokacija kumulativa", {|| pPath }, "pPath" } )
-   Kol := { 1, 2, 3 }
-
-   RETURN p_sifra( F_KASE, 1, 10, 77, "Šifanik kasa/prodajnih mjesta", @cId, dx, dy )
-
-
-
-FUNCTION Id2Naz()
-
-   LOCAL nSel := Select()
-
-   PushWA()
-   select_o_roba( sast->id2 )
-   popwa()
-
-   RETURN Left( roba->naz, 25 )
-
-
-FUNCTION LMarg()
-   RETURN "   "
-
-
-
 
 FUNCTION p_pos_strad( cId, dx, dy )
 
@@ -328,3 +295,8 @@ FUNCTION pos_roba_block( cCh )
 FUNCTION pos_prodajno_mjesto()
 
    RETURN gIdPos
+
+
+
+FUNCTION LMarg()
+    RETURN "   "

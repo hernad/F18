@@ -343,7 +343,6 @@ FUNCTION pos_kalk_prenos_realizacije( cIdPos, dDatumOd, dDatumDo ) // , cIdVd )
       SET CURSOR ON
 
       Box(, 4, 70, .F., " PRENOS REALIZACIJE POS->KALK   " )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodajno mjesto " GET cIdPos PICT "@!" VALID !Empty( cIdPos ) .OR. p_pos_kase( @cIdPos, 5, 20 )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Prenos za period" GET dDatumOd
       @ box_x_koord() + 2, Col() + 2 SAY "-" GET dDatumDo
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Uslov po artiklima:" GET cUslovRoba PICT "@S40"

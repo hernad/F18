@@ -47,7 +47,6 @@ FUNCTION pos_pdv_po_tarifama
 
    IF fSolo
 
-      AAdd ( aNiz, { "Prod.mjesto (prazno-svi)    ", "cIdPos", "cIdPos='X' .or. empty(cIdPos).or.p_pos_kase(cIdPos)", "@!", } )
       AAdd ( aNiz, { "Tarife (prazno sve)", "cTarife",, "@S10", } )
       AAdd ( aNiz, { "Izvještaj se pravi od datuma", "dDatum0",,, } )
       AAdd ( aNiz, { "                   do datuma", "dDatum1",,, } )
@@ -93,7 +92,7 @@ FUNCTION pos_pdv_po_tarifama
          IF ( Empty( cIdPos ) )
             ?? "SVA"
          ELSE
-            ?? cIdPos + "-" + AllTrim ( find_pos_kasa_naz( cIdPos ) )
+            ?? cIdPos
          ENDIF
 
 
