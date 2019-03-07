@@ -32,7 +32,7 @@ STATIC s_hRacunSumarno
 FUNCTION pos_racun_sumarno_init()
 
    s_hRacunSumarno := hb_hash()
-   
+
 
 FUNCTION pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena, nKolicina )
 
@@ -106,8 +106,8 @@ FUNCTION pos_racun_artikal_info( nLinija, cIdRoba, cMessage )
    RETURN .T.
 
 
-FUNCTION pos_racun_info( cBrRn )
+FUNCTION pos_racun_info( cBrDok )
 
-   info_bar( "pos", "POS račun broj: " + cBrRN )
+   info_bar( "pos", "POS račun broj: " + pos_pm() + "-42-" + AllTrim(cBrDok) )
 
    RETURN .T.

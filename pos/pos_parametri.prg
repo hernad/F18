@@ -19,21 +19,22 @@ FUNCTION pos_parametri()
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
 
-   AAdd( aOpc, "1. podaci kase                    " )
-   AAdd( aOpcExe, {|| pos_param_podaci_kase() } )
-   AAdd( aOpc, "2. principi rada" )
+   //AAdd( aOpc, "1. podaci kase                    " )
+   //AAdd( aOpcExe, {|| pos_param_podaci_kase() } )
+
+   AAdd( aOpc, "1. principi rada" )
    AAdd( aOpcExe, {|| pos_principi_rada_kase() } )
-   AAdd( aOpc, "3. izgled racuna" )
+   AAdd( aOpc, "2. izgled racuna" )
    AAdd( aOpcExe, {|| pos_param_izgled_racuna() } )
-   AAdd( aOpc, "4. cijene" )
+   AAdd( aOpc, "3. cijene" )
    AAdd( aOpcExe, {|| pos_param_cijene() } )
-   AAdd( aOpc, "5. podaci firme" )
+   AAdd( aOpc, "4. podaci firme" )
    AAdd( aOpcExe, {|| pos_param_firma() } )
-   AAdd( aOpc, "6. fiskalni parametri" )
+   AAdd( aOpc, "5. fiskalni parametri" )
    AAdd( aOpcExe, {|| fiskalni_parametri_za_korisnika() } )
-   AAdd( aOpc, "7. podešenja organizacije" )
+   AAdd( aOpc, "6. podešenja organizacije" )
    AAdd( aOpcExe, {|| parametri_organizacije() } )
-   AAdd( aOpc, "8. podešenja barkod-a" )
+   AAdd( aOpc, "7. podešenja barkod-a" )
    AAdd( aOpcExe, {|| label_params() } )
 
    f18_menu( "par", .F., nIzbor, aOpc, aOpcExe )
@@ -41,23 +42,23 @@ FUNCTION pos_parametri()
    RETURN .F.
 
 
-FUNCTION pos_param_podaci_kase()
-
-   LOCAL aNiz := {}
-   LOCAL cPom := ""
-   LOCAL _user := my_user()
-
-   SET CURSOR ON
-
-   AAdd( aNiz, { "Oznaka/ID prodajnog mjesta", "gPosProdajnoMjesto",, "@!", } )
-
-   VarEdit( aNiz, 2, 2, 24, 78, "PARAMETRI RADA PROGRAMA - PODACI KASE", "B1" )
-
-   IF LastKey() <> K_ESC
-      set_metric( "PM", NIL, gPosProdajnoMjesto )
-   ENDIF
-
-   RETURN .T.
+//FUNCTION pos_param_podaci_kase()
+//
+//   LOCAL aNiz := {}
+//   LOCAL cPom := ""
+//   LOCAL _user := my_user()
+//
+//   SET CURSOR ON
+//
+//   AAdd( aNiz, { "Oznaka/ID prodajnog mjesta", "gPosProdajnoMjesto",, "@!", } )
+//
+//   VarEdit( aNiz, 2, 2, 24, 78, "PARAMETRI RADA PROGRAMA - PODACI KASE", "B1" )
+//
+//   IF LastKey() <> K_ESC
+//      set_metric( "PM", NIL, gPosProdajnoMjesto )
+//   ENDIF
+//
+//   RETURN .T.
 
 
 

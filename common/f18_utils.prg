@@ -62,6 +62,7 @@ FUNCTION set_f18_params()
    hParams := hb_Hash()
    hParams[ "admin_user" ]  := "<undefined>"
    hParams[ "admin_password" ]  := "<undefined>"
+   hParams[ "pos_pm" ] := Padr("1", 2)
 
    DO WHILE nI <= PCount()
 
@@ -155,6 +156,9 @@ FUNCTION set_f18_params()
 
       CASE cTok == "--pos"
          set_f18_param( "run", "pos" )
+
+      CASE cTok == "--pos-pm"
+         set_f18_param( "pos_pm", hb_PValue(nI++) )
 
       CASE cTok == "--kalk"
          set_f18_param( "run", "kalk" )
