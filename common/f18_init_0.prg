@@ -15,8 +15,14 @@ MEMVAR gModul, goModul
 
 
 FUNCTION programski_modul()
-   RETURN gModul
 
+   LOCAL cRunParam := get_f18_param( "run" )
+
+   IF cRunParam <> "<undefined>"
+      RETURN Upper( cRunParam )
+   ENDIF
+
+   RETURN gModul
 
 
 FUNCTION start_f18_program_module( oApp, lSezone )

@@ -60,6 +60,15 @@ FUNCTION sql_primarna_schema()
    RETURN s_cPrimarnaSchema
 
 
+FUNCTION sql_schema_exists( cShema )
+
+   LOCAL cQuery, oRet
+
+   cQuery := "SELECT exists(select schema_name FROM information_schema.schemata WHERE schema_name = '" + cShema + "')"
+
+   oRet := run_sql_query( cQuery )
+
+   RETURN oRet:FieldGet( 1 )
 
 FUNCTION _sql_query( oServer, cQuery )
 
@@ -197,7 +206,7 @@ FUNCTION run_sql_query( cQry, hParams )
       ?E "QUERY:"
       ?E cQry
    ENDIF
-   
+
    FOR nI := 1 TO nRetry
 
       IF nI > 1

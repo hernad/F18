@@ -1,7 +1,61 @@
+CREATE OR REPLACE FUNCTION fmk.fetchmetrictext(text) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  _pMetricName ALIAS FOR $1;
+  _returnVal TEXT;
+BEGIN
+  SELECT metric_value::TEXT INTO _returnVal
+    FROM f18.metric WHERE metric_name = _pMetricName;
+
+  IF (FOUND) THEN
+     RETURN _returnVal;
+  ELSE
+     RETURN '!!notfound!!';
+  END IF;
+
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fmk.setmetric(text, text) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  pMetricName ALIAS FOR $1;
+  pMetricValue ALIAS FOR $2;
+  _metricid INTEGER;
+
+BEGIN
+
+  IF (pMetricValue = '!!UNSET!!'::TEXT) THEN
+     DELETE FROM f18.metric WHERE (metric_name=pMetricName);
+     RETURN TRUE;
+  END IF;
+
+  SELECT metric_id INTO _metricid FROM f18.metric WHERE (metric_name=pMetricName);
+
+  IF (FOUND) THEN
+    UPDATE f18.metric SET metric_value=pMetricValue WHERE (metric_id=_metricid);
+  ELSE
+    INSERT INTO f18.metric(metric_name, metric_value)  VALUES (pMetricName, pMetricValue);
+  END IF;
+
+  RETURN TRUE;
+
+END;
+$$;
+
+ALTER FUNCTION fmk.fetchmetrictext(text) OWNER TO admin;
+GRANT ALL ON FUNCTION fmk.fetchmetrictext TO xtrole;
+
+ALTER FUNCTION fmk.setmetric(text, text) OWNER TO admin;
+GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
+
 
 --------------------------------------------------------------------------------
 -- F18 v3 legacy public.kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
+
 drop view if exists fmk.kalk_kalk;
 CREATE view fmk.kalk_kalk  AS SELECT
      idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,

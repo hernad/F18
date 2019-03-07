@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-STATIC s_cRadnaProdavnica := "XX"
+STATIC s_nPosProdavnica := 0
 
 MEMVAR ImeKol, Kol
 
@@ -20,10 +20,10 @@ FUNCTION kalk_maloprodaja()
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
-   LOCAL bTekProdavnica := {|| "1. radna prodavnica: '" +  radna_prodavnica() + "' : " +  get_pkonto_by_prodajno_mjesto( radna_prodavnica() ) }
+   LOCAL bTekProdavnica := {|| "1. radna prodavnica: '" +  pos_prodavnica() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ) }
 
    AAdd( aOpc, bTekProdavnica )
-   AAdd( aOpcExe, {|| kalk_mp_set_radna_prodavnica() } )
+   AAdd( aOpcExe, {|| kalk_mp_set_pos_prodavnica() } )
    AAdd( aOpc,   "2. inicijalizacija" )
    AAdd( aOpcExe, {|| kalk_mp_inicijalizacija() } )
    AAdd( aOpc,   "3. cijene" )
@@ -33,13 +33,13 @@ FUNCTION kalk_maloprodaja()
    RETURN .T.
 
 
-FUNCTION kalk_mp_set_radna_prodavnica()
+FUNCTION kalk_mp_set_pos_prodavnica()
 
-   LOCAL cProdajnoMjesto := "1 "
+   LOCAL nProdajnoMjesto := 1
    LOCAL GetList := {}
 
    Box(, 3, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodajno mjesto" GET cProdajnoMjesto VALID !Empty( cProdajnoMjesto )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodajno mjesto" GET nProdajnoMjesto VALID !Empty( nProdajnoMjesto ) PICT "999"
    READ
    BoxC()
 
@@ -48,27 +48,43 @@ FUNCTION kalk_mp_set_radna_prodavnica()
    ENDIF
 
    // p15.roba
-   s_cRadnaProdavnica := cProdajnoMjesto
-   set_a_sql_sifarnik( radna_prodavnica_roba_sql_tabela(), "ROBA_PRODAVNICA", F_ROBA_PRODAVNICA )
+   s_nPosProdavnica := nProdajnoMjesto
+   set_a_sql_sifarnik( pos_prodavnica_roba_sql_tabela(), "ROBA_PRODAVNICA", F_ROBA_PRODAVNICA )
 
    RETURN .T.
 
-FUNCTION radna_prodavnica( cSet )
 
-   IF cSet != NIL
-      s_cRadnaProdavnica := cSet
+FUNCTION pos_prodavnica_param( nSet )
+
+   LOCAL nProdavnica
+
+   IF nSet <> NIL
+      f18_set_metric( "public", "pos_prod", NIL, nSet )
+      nProdavnica := nSet
+   ELSE
+      nProdavnica := f18_fetch_metric( "public", "pos_prod", NIL, 0 )
    ENDIF
 
-   RETURN PadR( s_cRadnaProdavnica, 2 )
+   RETURN nProdavnica
 
 
-FUNCTION radna_prodavnica_sql_schema()
 
-   RETURN "p" + AllTrim( s_cRadnaProdavnica )
+FUNCTION pos_prodavnica( nSet )
 
-FUNCTION radna_prodavnica_roba_sql_tabela()
+   IF nSet != NIL
+      s_nPosProdavnica := nSet
+   ENDIF
 
-   RETURN radna_prodavnica_sql_schema() + ".roba"
+   RETURN s_nPosProdavnica
+
+
+FUNCTION pos_prodavnica_sql_schema()
+
+   RETURN "p" + AllTrim( Str( s_nPosProdavnica ) )
+
+FUNCTION pos_prodavnica_roba_sql_tabela()
+
+   RETURN pos_prodavnica_sql_schema() + ".roba"
 
 
 FUNCTION dbUseArea_run_query( cQuery, nWa, cAlias )
@@ -86,9 +102,9 @@ FUNCTION dbUseArea_run_query( cQuery, nWa, cAlias )
    RETURN .T.
 
 
-FUNCTION get_pkonto_by_prodajno_mjesto( cIdProdajnoMjesto )
+FUNCTION get_pkonto_by_prodajno_mjesto( nProdavnica )
 
-   LOCAL cQuery := "select id from " + f18_sql_schema( "koncij" ) + " where idprodmjes=" + sql_quote( cIdProdajnoMjesto ) + " LIMIT 1"
+   LOCAL cQuery := "select id from " + f18_sql_schema( "koncij" ) + " where prod=" + sql_quote( nProdavnica ) + " LIMIT 1"
 
    dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
 
@@ -98,7 +114,7 @@ FUNCTION get_pkonto_by_prodajno_mjesto( cIdProdajnoMjesto )
 
 FUNCTION kalk_mp_inicijalizacija()
 
-   LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( radna_prodavnica() )
+   LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( pos_prodavnica() )
    LOCAL cQuery := "select distinct(idroba), " + f18_sql_schema( "roba" ) + ".mpc2" + ;
       " from " + f18_sql_schema( "kalk_kalk" ) + ;
       " LEFT JOIN " + f18_sql_schema( "roba" ) + " ON " + f18_sql_schema( "kalk_kalk" ) + ".idroba = roba.id" + ;
@@ -112,21 +128,21 @@ FUNCTION kalk_mp_inicijalizacija()
     where kalk_kalk.pkonto='13315  ' and roba.mpc2 <> 0
     */
 
-   IF ( radna_prodavnica() == "XX" )
+   IF ( pos_prodavnica() == 0 )
       Alert( "setovati prodavnicu!" )
       RETURN .F.
    ENDIF
 
    dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
-   Box( "#" + radna_prodavnica() + " / " + cPKonto, 1, 50 )
-   cQuery := "delete from " + radna_prodavnica_roba_sql_tabela()
+   Box( "#" + AllTrim( Str( pos_prodavnica() ) ) + " / " + cPKonto, 1, 50 )
+   cQuery := "delete from " + pos_prodavnica_roba_sql_tabela()
    dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
 
    SELECT TMP
    GO TOP
    DO WHILE !Eof()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY TMP->IDROBA
-      cQuery := "insert into " + radna_prodavnica_roba_sql_tabela() + " select * from " + f18_sql_schema( "roba" ) + " where id=" + sql_quote( TMP->idroba )
+      cQuery := "insert into " + pos_prodavnica_roba_sql_tabela() + " select * from " + f18_sql_schema( "roba" ) + " where id=" + sql_quote( TMP->idroba )
       dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
       SELECT TMP
       SKIP
@@ -153,7 +169,7 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
       cTagTraziPoSifraDob := ""
    ENDIF
 
-   IF ( radna_prodavnica() == "XX" )
+   IF ( pos_prodavnica() == 0 )
       Alert( "setovati prodavnicu!" )
       RETURN .F.
    ENDIF
@@ -237,7 +253,7 @@ FUNCTION p_roba_prodavnica( cId, dx, dy, cTagTraziPoSifraDob )
    ELSE
       cPomTag := "ID"
    ENDIF
-   xRet := p_sifra( F_ROBA_PRODAVNICA, ( cPomTag ), f18_max_rows() - 11, f18_max_cols() - 5, "Artikli prodavnica " + radna_prodavnica(), @cId, dx, dy, bRoba,,,,, { "ID" } )
+   xRet := p_sifra( F_ROBA_PRODAVNICA, ( cPomTag ), f18_max_rows() - 11, f18_max_cols() - 5, "Artikli prodavnica " + pos_prodavnica(), @cId, dx, dy, bRoba,,,,, { "ID" } )
    PopWa()
 
    RETURN xRet
@@ -261,7 +277,7 @@ FUNCTION select_o_roba_prodavnica( cId )
 
 FUNCTION o_roba_prodavnica( cId )
 
-   LOCAL cTabela := radna_prodavnica_roba_sql_tabela()
+   LOCAL cTabela := pos_prodavnica_roba_sql_tabela()
 
    SELECT ( F_ROBA_PRODAVNICA )
    IF !use_sql_sif( cTabela, .T., "ROBA_PRODAVNICA", cId  )

@@ -238,7 +238,7 @@ METHOD set_module_gvars()
 
    // izgled racuna
    //grbCjen := fetch_metric( "RacunCijenaSaPDV", NIL, grbCjen )
-   
+
    grbStId := fetch_metric( "RacunStampaIDArtikla", NIL, grbStId )
    // cijene
    gPopust := fetch_metric( "Popust", NIL, gPopust )
@@ -262,7 +262,8 @@ METHOD set_module_gvars()
    pos_max_kolicina_kod_unosa( .T. ) // maksimalna kolicina kod unosa racuna
    fiscal_opt_active() // koristenje fiskalnih opcija
 
-   radna_prodavnica( gIdPos )
-   set_sql_search_path( radna_prodavnica_sql_schema() )
+altd()
+   pos_prodavnica( pos_prodavnica_param() )
+   set_sql_search_path( pos_prodavnica_sql_schema() )
 
    RETURN .T.

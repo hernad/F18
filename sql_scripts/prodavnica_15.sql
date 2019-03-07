@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS p15;
+public.koncijCREATE SCHEMA IF NOT EXISTS p15;
 
 ALTER SCHEMA p15 OWNER TO admin;
 
@@ -100,15 +100,34 @@ GRANT ALL ON TABLE p15.pos_kase TO xtrole;
 GRANT ALL ON TABLE p15.vrstep TO xtrole;
 
 
-CREATE OR REPLACE FUNCTION fmk.fetchmetrictext(text) RETURNS text
+CREATE TABLE IF NOT EXISTS p15.metric
+(
+    metric_id integer,
+    metric_name text COLLATE pg_catalog."default",
+    metric_value text COLLATE pg_catalog."default",
+    metric_module text COLLATE pg_catalog."default"
+);
+
+
+ALTER TABLE p15.metric OWNER to admin;
+GRANT ALL ON TABLE p15.metric TO admin;
+GRANT ALL ON TABLE p15.metric TO xtrole;
+
+delete from p15.metric where metric_id IS null;
+ALTER TABLE p15.metric ALTER COLUMN metric_id SET NOT NULL;
+ALTER TABLE p15.metric ALTER COLUMN metric_id SET DEFAULT nextval(('metric_metric_id_seq'::text)::regclass);
+
+
+
+CREATE OR REPLACE FUNCTION p15.fetchmetrictext(text) RETURNS text
     LANGUAGE plpgsql
-    AS $_$
+    AS $$
 DECLARE
   _pMetricName ALIAS FOR $1;
   _returnVal TEXT;
 BEGIN
   SELECT metric_value::TEXT INTO _returnVal
-    FROM fmk.metric WHERE metric_name = _pMetricName;
+    FROM p15.metric WHERE metric_name = _pMetricName;
 
   IF (FOUND) THEN
      RETURN _returnVal;
@@ -117,12 +136,11 @@ BEGIN
   END IF;
 
 END;
-$_$;
+$$;
 
-
-CREATE OR REPLACE FUNCTION fmk.setmetric(text, text) RETURNS boolean
+CREATE OR REPLACE FUNCTION p15.setmetric(text, text) RETURNS boolean
     LANGUAGE plpgsql
-    AS $_$
+    AS $$
 DECLARE
   pMetricName ALIAS FOR $1;
   pMetricValue ALIAS FOR $2;
@@ -131,28 +149,29 @@ DECLARE
 BEGIN
 
   IF (pMetricValue = '!!UNSET!!'::TEXT) THEN
-     DELETE FROM fmk.metric WHERE (metric_name=pMetricName);
+     DELETE FROM p15.metric WHERE (metric_name=pMetricName);
      RETURN TRUE;
   END IF;
 
-  SELECT metric_id INTO _metricid FROM fmk.metric WHERE (metric_name=pMetricName);
+  SELECT metric_id INTO _metricid FROM p15.metric WHERE (metric_name=pMetricName);
 
   IF (FOUND) THEN
-    UPDATE fmk.metric SET metric_value=pMetricValue WHERE (metric_id=_metricid);
+    UPDATE p15.metric SET metric_value=pMetricValue WHERE (metric_id=_metricid);
   ELSE
-    INSERT INTO fmk.metric(metric_name, metric_value)  VALUES (pMetricName, pMetricValue);
+    INSERT INTO p15.metric(metric_name, metric_value)  VALUES (pMetricName, pMetricValue);
   END IF;
 
   RETURN TRUE;
 
 END;
-$_$;
+$$;
 
-ALTER FUNCTION fmk.fetchmetrictext(text) OWNER TO admin;
-GRANT ALL ON FUNCTION fmk.fetchmetrictext TO xtrole;
+ALTER FUNCTION p15.fetchmetrictext(text) OWNER TO admin;
+GRANT ALL ON FUNCTION p15.fetchmetrictext TO xtrole;
 
-ALTER FUNCTION fmk.setmetric(text, text) OWNER TO admin;
-GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
+ALTER FUNCTION p15.setmetric(text, text) OWNER TO admin;
+GRANT ALL ON FUNCTION p15.setmetric TO xtrole;
+
 
 -----------------------------------------------------
 -- pos_pos_knjig, pos_doks_knjig
@@ -348,9 +367,9 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
      RETURN NULL;
    END IF;
    SELECT idprodmjes INTO idPos
-          from fmk.koncij where id=NEW.PKonto;
+          from public.koncij where id=NEW.PKonto;
    SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
-          from fmk.roba where id=NEW.idroba;
+          from public.roba where id=NEW.idroba;
 ELSE
    IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
       RETURN NULL;
@@ -996,7 +1015,7 @@ ELSE
          INTO brDok;
 END IF;
 
-SELECT fmk.fetchmetrictext('org_id') INTO idFirma;
+SELECT p15.fetchmetrictext('org_id') INTO idFirma;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete kalk_doks % % % % %', idFirma, pKonto, OLD.idvd, OLD.datum, brDok;
@@ -1231,7 +1250,7 @@ ELSE
    brDok := public.kalk_brdok_iz_pos(OLD.idpos, idvdKalk, OLD.brdok, OLD.datum);
 END IF;
 
-SELECT fmk.fetchmetrictext('org_id') INTO idFirma;
+SELECT p15.fetchmetrictext('org_id') INTO idFirma;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete kalk_kalk % % % %', pKonto, idVdKalk, OLD.datum, brDok;
@@ -1764,7 +1783,7 @@ DECLARE
   cIdRoba varchar;
 BEGIN
 
-SELECT id from fmk.roba where lpad(btrim(sifradob),5,'0')=lpad(btrim(to_char(nRobaId,'99999')),5,'0')
+SELECT id from public.roba where lpad(btrim(sifradob),5,'0')=lpad(btrim(to_char(nRobaId,'99999')),5,'0')
   INTO cIdRoba;
 
 RETURN COALESCE(cIdRoba, '<UNDEFINED>');

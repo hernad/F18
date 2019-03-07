@@ -17,5 +17,5 @@ export F18_HOME=$(pwd)/data
 echo $F18_HOME
 
 
-/home/hernad/F18_knowhow/F18 2>${1}_1.log --dbf-prefix 1 -h $F18_HOST -y 5432 -ua admin -pa $F18_ADMIN_PASSWORD -u hernad -p $F18_PASSWORD -d $F18_ORG --${1}
+/home/hernad/F18_knowhow/F18 2>${1}_1.log --dbf-prefix 1 -h $F18_HOST -y 5432 -ua admin -pa $F18_ADMIN_PASSWORD -u hernad -p $F18_PASSWORD -d $F18_ORG --${1} ${4}
 

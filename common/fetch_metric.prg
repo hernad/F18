@@ -13,9 +13,18 @@
 
 THREAD STATIC s_hParametri := NIL
 THREAD STATIC s_nErrorCount := 0
-
+THREAD STATIC s_lProvjeriPrefix := .T.
 
 FUNCTION fetch_metric( cSection, cUser, xDefaultValue )
+
+   LOCAL cPrefix
+
+   cPrefix := params_prefix()
+
+   RETURN f18_fetch_metric( cPrefix, cSection, cUser, xDefaultValue )
+
+
+FUNCTION f18_fetch_metric( cPrefix, cSection, cUser, xDefaultValue )
 
    LOCAL cQuery
    LOCAL oQuery
@@ -34,6 +43,9 @@ FUNCTION fetch_metric( cSection, cUser, xDefaultValue )
       ENDIF
    ENDIF
 
+   IF s_hParametri == NIL
+      init_parameters_cache()
+   ENDIF
 
    IF hb_HHasKey( s_hParametri, cSection ) .AND. !parametar_dinamican( cSection )
 #ifdef F18_DEBUG_PARAMS
@@ -42,13 +54,11 @@ FUNCTION fetch_metric( cSection, cUser, xDefaultValue )
       RETURN s_hParametri[ cSection ]
    ENDIF
 
-   // za sada i POS drži parametre u select * from fmk.metric; (2166 rows) 
-   cQuery := "SELECT " + F18_PSQL_SCHEMA + ".fetchmetrictext(" + sql_quote( cSection )  + ")"
-
+   cQuery := "SELECT " +  cPrefix + ".fetchmetrictext(" + sql_quote( cSection )  + ")"
    oQuery := run_sql_query( cQuery )
 
    IF sql_error_in_query( oQuery, "SELECT" )
-      s_nErrorCount ++
+      s_nErrorCount++
       RETURN xDefaultValue
    ELSE
       s_nErrorCount := 0
@@ -111,9 +121,18 @@ FUNCTION parametar_dinamican( cSectionIn )
 
 FUNCTION set_metric( cSection, cUser, xValue )
 
+   LOCAL cPrefix
+
+   cPrefix := params_prefix()
+
+   RETURN f18_set_metric( cPrefix, cSection, cUser, xValue )
+
+
+FUNCTION f18_set_metric( cPrefix, cSection, cUser, xValue )
+
    LOCAL oQry
    LOCAL cQuery
-   LOCAL _val
+   LOCAL cValue
 
    IF cUser != NIL
       IF cUser == "<>"
@@ -124,19 +143,45 @@ FUNCTION set_metric( cSection, cUser, xValue )
    ENDIF
 
    SET CENTURY ON
-   _val := hb_ValToStr( xValue )
+   cValue := hb_ValToStr( xValue )
    SET CENTURY OFF
 
-   cQuery := "SELECT " + F18_PSQL_SCHEMA + ".setmetric(" + sql_quote( cSection ) + "," + sql_quote( _val ) +  ")"
+   cQuery := "SELECT " + cPrefix + ".setmetric(" + sql_quote( cSection ) + "," + sql_quote( cValue ) +  ")"
    oQry := run_sql_query( cQuery )
    IF sql_error_in_query( oQry, "SELECT" )
       RETURN .F.
    ENDIF
 
+   IF s_hParametri == NIL
+      init_parameters_cache()
+   ENDIF
    s_hParametri[ cSection ] := xValue
 
    RETURN .T.
 
+
+
+STATIC FUNCTION params_prefix()
+
+   LOCAL cPrefix, cError
+
+   IF programski_modul() == "POS"
+      cPrefix := pos_prodavnica_sql_schema()
+   ELSE
+      cPrefix := "public"
+   ENDIF
+
+IF s_lProvjeriPrefix
+   IF !sql_schema_exists( cPrefix )
+      cError := "SQL Schema " + cPrefix + " NE POSTOJI ?!"
+      ?E cError
+      Alert( cError )
+      QUIT_1
+   ENDIF
+   s_lProvjeriPrefix := .F.
+   ENDIF
+
+   RETURN cPrefix
 
 
 STATIC FUNCTION str_to_val( xValue, xDefaultValue )
@@ -210,7 +255,7 @@ FUNCTION params_in_cache()
    LOCAL cKey, nCnt := 0
 
    FOR EACH cKey IN s_hParametri:Keys
-      nCnt ++
+      nCnt++
    NEXT
 
    RETURN nCnt

@@ -21,7 +21,6 @@ FUNCTION f18_create_dir( cLocation )
    LOCAL cTmp
    LOCAL nCreate
 
-
    IF ! hb_vfDirExists( cLocation )
       nCreate := DirMake( cLocation )
       IF nCreate <> 0
@@ -39,12 +38,12 @@ FUNCTION f18_help()
    ? "F18 parametri"
    ? "parametri"
    ? "-h host"
-   //? "-y port (default: 5432)"
+   // ? "-y port (default: 5432)"
    ? "-u user"
    ? "-p password"
    ? "-d database"
-   //? "-e schema (default: public)"
-   //? "-t fmk tables path"
+   // ? "-e schema (default: public)"
+   // ? "-t fmk tables path"
    ? ""
 
    RETURN .T.
@@ -56,10 +55,11 @@ FUNCTION f18_help()
 FUNCTION set_f18_params()
 
    LOCAL nI := 1
+   LOCAL cVal, cQuery
    LOCAL cTok, hParams
    LOCAL cHostName, nPort, cDataBase, cUser, cPassWord
 
-   hParams := hb_hash()
+   hParams := hb_Hash()
    hParams[ "admin_user" ]  := "<undefined>"
    hParams[ "admin_password" ]  := "<undefined>"
 
@@ -70,7 +70,7 @@ FUNCTION set_f18_params()
       DO CASE
 
       CASE cTok == NIL
-          EXIT
+         EXIT
 
       CASE cTok == "--no-sql"
          no_sql_mode( .T. )
@@ -90,77 +90,92 @@ FUNCTION set_f18_params()
 
       CASE cTok == "-h"
          cHostName := hb_PValue( nI++ )
-         set_f18_param("host", cHostName)
+         set_f18_param( "host", cHostName )
          hParams[ "host" ] := cHostName
 
       CASE cTok == "-y"
          nPort := Val( hb_PValue( nI++ ) )
-         //cParams += Space( 1 ) + "port=" + AllTrim( Str( nPort ) )
-         set_f18_param("port", nPort)
+         // cParams += Space( 1 ) + "port=" + AllTrim( Str( nPort ) )
+         set_f18_param( "port", nPort )
          hParams[ "port" ] := nPort
 
       CASE cTok == "-d"
          cDataBase := hb_PValue( nI++ )
-         set_f18_param("database", cDatabase)
+         set_f18_param( "database", cDatabase )
          hParams[ "database" ] := cDatabase
 
       CASE cTok == "-u"
          cUser := hb_PValue( nI++ )
-         set_f18_param("user", cUser)
+         set_f18_param( "user", cUser )
          hParams[ "user" ] := cUser
 
       CASE cTok == "-ua"
          cUser := hb_PValue( nI++ )
-         set_f18_param("admin_user", cUser)
+         set_f18_param( "admin_user", cUser )
          hParams[ "admin_user" ]  := cUser
 
       CASE cTok == "-pa"
          cPassWord := hb_PValue( nI++ )
-         set_f18_param("admin_password", cPassword)
+         set_f18_param( "admin_password", cPassword )
          hParams[ "admin_password" ]  := cPassword
 
       CASE cTok == "-p"
          cPassWord := hb_PValue( nI++ )
-         set_f18_param("password", cPassword)
+         set_f18_param( "password", cPassword )
          hParams[ "password" ]  := cPassword
 
 
+         // CASE cTok == "-t"
+         // cDBFDataPath := hb_PValue( nI++ )
+         // hParams[ "dbf_path" ]  := cDBFDataPath
 
-      //CASE cTok == "-t"
-      //   cDBFDataPath := hb_PValue( nI++ )
-      //   hParams[ "dbf_path" ]  := cDBFDataPath
+         // CASE cTok == "-e"
+         // cSchema := hb_PValue( nI++ )
+         // hParams[ "schema" ] := cSchema
 
-      //CASE cTok == "-e"
-      //   cSchema := hb_PValue( nI++ )
-      //   hParams[ "schema" ] := cSchema
+      CASE cTok == "--show-postgresql-version"
+         show_postgresql_version( hParams )
+         __Quit()
 
-      case cTok == "--show-postgresql-version"
-          show_postgresql_version( hParams )
-          __Quit()
+      CASE cTok == "--set-pos"
+         f18_sql_connect( hParams )
+         cVal := hb_PValue( nI++ )
+         cQuery := "SELECT public.setmetric('pos_prod','" + cVal + "')"
+         altd()
+         dbUseArea( .T., , cQuery, "INFO" )
+         OutStd( "Parametar [pos_pod] postavljen: " + cVal )
+         __Quit()
 
-      case cTok == "--pos"
-          set_f18_param("run", "pos")
+      CASE cTok == "--get-pos"
+         AltD()
+         f18_sql_connect( hParams )
+         dbUseArea( .T., , "SELECT public.fetchmetrictext('pos_prod') AS prod", "INFO" )
+         OutStd( "Parametar [pos_pod]: " +  field->prod )
+         __Quit()
 
-      case cTok == "--kalk"
-          set_f18_param("run", "kalk")
+      CASE cTok == "--pos"
+         set_f18_param( "run", "pos" )
 
-      case cTok == "--fin"
-          set_f18_param("run", "fin")
+      CASE cTok == "--kalk"
+         set_f18_param( "run", "kalk" )
 
-      case cTok == "--fakt"
-          set_f18_param("run", "fakt")
+      CASE cTok == "--fin"
+         set_f18_param( "run", "fin" )
 
-      case cTok == "--epdv"
-          set_f18_param("run", "epdv")
+      CASE cTok == "--fakt"
+         set_f18_param( "run", "fakt" )
 
-      case cTok == "--os"
-          set_f18_param("run", "os")
+      CASE cTok == "--epdv"
+         set_f18_param( "run", "epdv" )
 
-      case cTok == "--ld"
-          set_f18_param("run", "ld")
+      CASE cTok == "--os"
+         set_f18_param( "run", "os" )
 
-      case LEFT(cTok, 7) == "--json_"
-          set_f18_param("run", SUBSTR(cTok, 3)) // json_konto, json_roba ...
+      CASE cTok == "--ld"
+         set_f18_param( "run", "ld" )
+
+      CASE Left( cTok, 7 ) == "--json_"
+         set_f18_param( "run", SubStr( cTok, 3 ) ) // json_konto, json_roba ...
 
       ENDCASE
 
@@ -263,7 +278,7 @@ IF _ok == 0 .AND. set_params
 set_metric( "vpn_support_last_status", my_user(), _status )
 ENDIF
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -271,13 +286,13 @@ ENDIF
 // stopira ili starta vpn konekciju
 // status : 0 - off, 1 - on
 // ------------------------------------------------
-STATIC FUNCTION _vpn_start_stop( status, conn_name )
+STATIC FUNCTION _vpn_start_stop( STATUS, conn_name )
 
    LOCAL cCmd
    LOCAL _err
    LOCAL _up_dn := "up"
 
-   IF status == 0
+   IF STATUS == 0
       _up_dn := "down"
    ENDIF
 
@@ -347,39 +362,37 @@ FUNCTION create_f18_dokumenti_on_desktop( s_cDesktopPath )
 
 
 
+PROCEDURE f18_sql_connect( hParams )
+
+   LOCAL oServer, pConn
+
+   oServer := TPQServer():New( hParams[ "host" ], hParams[ "database" ], hParams[ "user" ], hParams[ "password" ] )
+   pConn := oServer:pDB
+   rddSetDefault( "SQLMIX" )
+   // postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+   IF rddInfo( 1001, { "POSTGRESQL", pConn } ) == 0
+      ? "Could not connect to the server"
+      RETURN
+   ENDIF
+
+   RETURN
 
 PROCEDURE show_postgresql_version( hParams )
 
-LOCAL oServer, pConn
+   f18_sql_connect()
+   dbUseArea( .T., , "SELECT version() AS ver", "INFO" )
+   OutStd( field->ver )
 
-oServer := TPQServer():New( hParams[ "host" ], hParams[ "database" ] , hParams[ "user" ] , hParams[ "password" ] )
-
-pConn := oServer:pDB
-//? "oServer", oServer, "pConn", pConn
-
-rddSetDefault( "SQLMIX" )
-
-// postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
-IF rddInfo( 1001, { "POSTGRESQL", pConn } ) == 0
-      ? "Could not connect to the server"
-      RETURN
-ENDIF
-
-
-dbUseArea( .T., , "SELECT version() AS ver", "INFO" )
-OutStd( field->ver )
-
-RETURN
+   RETURN
 
 
 PROCEDURE run_module()
 
-   LOCAL cModul := get_f18_param("run")
+   LOCAL cModul := get_f18_param( "run" )
    LOCAL oLogin
    LOCAL aRet, hRec
 
    harbour_init()
-
    init_parameters_cache()
    set_f18_current_directory()
    set_f18_home_root()
@@ -392,59 +405,59 @@ PROCEDURE run_module()
    oLogin:connect_user_database()
 
    IF cModul == "json_konto"
-       select_o_konto()
-       aRet := {}
-       DO WHILE !EOF()
-          hRec := hb_hash()
-          hRec[ "id" ] := hb_StrToUtf8(field->id)
-          hRec[ "naz" ] := hb_StrToUtf8(field->naz)
-          AADD( aRet, hRec )
-          SKIP
-       ENDDO
-       OutErr( e"\n")
-       OutErr( e"========F18_json:======\n")
-       OutErr(hb_jsonEncode( aRet ))
-       RETURN NIL
+      select_o_konto()
+      aRet := {}
+      DO WHILE !Eof()
+         hRec := hb_Hash()
+         hRec[ "id" ] := hb_StrToUTF8( field->id )
+         hRec[ "naz" ] := hb_StrToUTF8( field->naz )
+         AAdd( aRet, hRec )
+         SKIP
+      ENDDO
+      OutErr( e"\n" )
+      OutErr( e"========F18_json:======\n" )
+      OutErr( hb_jsonEncode( aRet ) )
+      RETURN NIL
    ENDIF
 
    IF cModul == "json_roba"
-       select_o_roba()
-       aRet := {}
-       DO WHILE !EOF()
-          hRec := hb_hash()
-          hRec[ "id" ] := hb_StrToUtf8(field->id)
-          hRec[ "naz" ] := hb_StrToUtf8(field->naz)
-          AADD( aRet, hRec )
-          SKIP
-       ENDDO
-       OutErr(e"\n")
-       OutErr(e"========F18_json:======\n")
-       OutErr( hb_jsonEncode( aRet ) )
-       RETURN NIL
+      select_o_roba()
+      aRet := {}
+      DO WHILE !Eof()
+         hRec := hb_Hash()
+         hRec[ "id" ] := hb_StrToUTF8( field->id )
+         hRec[ "naz" ] := hb_StrToUTF8( field->naz )
+         AAdd( aRet, hRec )
+         SKIP
+      ENDDO
+      OutErr( e"\n" )
+      OutErr( e"========F18_json:======\n" )
+      OutErr( hb_jsonEncode( aRet ) )
+      RETURN NIL
    ENDIF
 
 
    IF cModul == "pos"
-       set_metric( "main_menu_pos", my_user(), "D")
-       RETURN MainPos( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      set_metric( "main_menu_pos", my_user(), "D" )
+      RETURN MainPos( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "fin"
-       set_metric( "main_menu_fin", my_user(), "D" )
-       RETURN MainFin( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      set_metric( "main_menu_fin", my_user(), "D" )
+      RETURN MainFin( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "kalk"
-       set_metric( "main_menu_kalk", my_user(), "D" )
-       RETURN MainKalk( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      set_metric( "main_menu_kalk", my_user(), "D" )
+      RETURN MainKalk( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "fakt"
-       set_metric( "main_menu_fakt", my_user(), "D" )
-       RETURN MainFakt( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      set_metric( "main_menu_fakt", my_user(), "D" )
+      RETURN MainFakt( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "epdv"
       set_metric( "main_menu_epdv", my_user(), "D" )
-      RETURN MainEPdv( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      RETURN MainEPdv( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "os"
       set_metric( "main_menu_os", my_user(), "D" )
-      RETURN MainOs( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      RETURN MainOs( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "ld"
       set_metric( "main_menu_ld", my_user(), "D" )
-      RETURN MainLd( my_user(), "dummy", get_f18_param("p3"),  get_f18_param("p4"),  get_f18_param("p5"),  get_f18_param("p6"),  get_f18_param("p7") )
+      RETURN MainLd( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ENDIF
 
    RETURN NIL

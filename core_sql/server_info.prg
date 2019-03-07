@@ -13,21 +13,20 @@
 FUNCTION server_show( var )
 
    LOCAL cQuery
-   LOCAL _ret
+   LOCAL oRet
 
    cQuery := "SHOW " + var
+   oRet := run_sql_query( cQuery )
 
-   _ret := run_sql_query( cQuery )
-
-   IF !is_var_objekat_tpqquery( _ret )
+   IF !is_var_objekat_tpqquery( oRet )
       RETURN -1
    ENDIF
 
-   IF _ret:Eof()
+   IF oRet:Eof()
       RETURN -1
    ENDIF
 
-   RETURN _ret:FieldGet( 1 )
+   RETURN oRet:FieldGet( 1 )
 
 
 FUNCTION server_sys_info( var )

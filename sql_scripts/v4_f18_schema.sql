@@ -1,10 +1,22 @@
----------------------------- f18.kalk ---------------------------------------------
-
+-- f18 schema
 CREATE SCHEMA IF NOT EXISTS f18;
 ALTER SCHEMA f18 OWNER TO admin;
+GRANT ALL ON SCHEMA f18 TO xtrole;
+
+-- f18.fetchmetrictext, f18.setmetric
+CREATE TABLE IF NOT EXISTS f18.metric  AS TABLE fmk.metric;
+GRANT ALL ON TABLE f18.metric TO xtrole;
+GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
+DROP TABLE IF EXISTS fmk.metric;
+
+delete from f18.metric where metric_id IS null;
+ALTER TABLE f18.metric ALTER COLUMN metric_id SET NOT NULL;
+ALTER TABLE f18.metric ALTER COLUMN metric_id SET DEFAULT nextval(('metric_metric_id_seq'::text)::regclass);
+
+---------------------------- f18.kalk ---------------------------------------------
+
 CREATE TABLE IF NOT EXISTS f18.kalk_kalk  AS TABLE fmk.kalk_kalk;
 CREATE TABLE IF NOT EXISTS f18.kalk_doks  AS TABLE fmk.kalk_doks;
-GRANT ALL ON SCHEMA f18 TO xtrole;
 GRANT ALL ON TABLE f18.kalk_kalk TO xtrole;
 GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 DROP TABLE IF EXISTS fmk.kalk_kalk;

@@ -54,3 +54,12 @@ PostgreSQL 10.4 (Ubuntu 10.4-2.pgdg18.04+1) on x86_64-pc-linux-gnu, compiled by 
 ### Run module
 
      ./F18.sh -h 127.0.0.1 -y 5432 -u user -p password -d proba_2018 --pos  ## --{pos,fin,kalk}
+
+#### set pos prodavnica 15
+
+     ./run.sh set-pos 192.168.124.1 vindija_2018 15
+
+
+#### get pos prodavnica
+
+      ./run.sh get-pos 192.168.124.1 vindija_2018   =>  Parametar [pos_pod]: 15

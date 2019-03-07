@@ -16,8 +16,6 @@ STATIC __stanje
 STATIC __vrijednost
 STATIC __dok_br
 
-
-
 FUNCTION pos_pocetno_stanje()
 
    LOCAL _params := hb_Hash()
@@ -99,24 +97,23 @@ STATIC FUNCTION _get_vars( params )
 // ----------------------------------------------------------
 // prebaci se na rad sa sezonskim podrucjem
 // ----------------------------------------------------------
-STATIC FUNCTION prebaci_se_u_bazu( db_params, database, year )
+STATIC FUNCTION prebaci_se_u_bazu( db_params, database, nYear )
 
-   IF year == NIL
-      year := Year( Date() )
+   IF nYear == NIL
+      nYear := Year( Date() )
    ENDIF
 
    my_server_logout()
 
-   IF year <> Year( Date() )
+   IF nYear <> Year( Date() )
       // 2) xxxx_2013 => xxxx_2012
-      db_params[ "database" ] := Left( database, Len( database ) - 4 ) + AllTrim( Str( year ) )
+      db_params[ "database" ] := Left( database, Len( database ) - 4 ) + AllTrim( Str( nYear ) )
    ELSE
       db_params[ "database" ] := database
    ENDIF
 
    // 3) setuj parametre
    my_server_params( db_params )
-   // 4) napravi login
    my_server_login( db_params )
    set_sql_search_path()
 
