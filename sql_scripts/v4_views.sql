@@ -81,7 +81,7 @@ CREATE view public.kalk_kalk  AS SELECT
 FROM
   f18.kalk_kalk;
 
-CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO f18.kalk_kalk
+CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
       DO INSTEAD INSERT INTO f18.kalk_kalk(
          idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
          brfaktp, idpartner,

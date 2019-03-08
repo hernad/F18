@@ -114,6 +114,11 @@ delete from p15.metric where metric_id IS null;
 ALTER TABLE p15.metric ALTER COLUMN metric_id SET NOT NULL;
 ALTER TABLE p15.metric ALTER COLUMN metric_id SET DEFAULT nextval(('p15.metric_metric_id_seq'::text)::regclass);
 
+-- select setval('p15.metric_metric_id_seq'::text, 2);
+-- select currval('p15.metric_metric_id_seq'::text);
+
+ALTER TABLE p15.metric  DROP CONSTRAINT IF EXISTS metric_id_unique;
+ALTER TABLE p15.metric  ADD CONSTRAINT metric_id_unique UNIQUE (metric_id);
 
 CREATE OR REPLACE FUNCTION p15.fetchmetrictext(text) RETURNS text
     LANGUAGE plpgsql

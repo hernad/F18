@@ -9,9 +9,17 @@ GRANT ALL ON TABLE f18.metric TO xtrole;
 GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 DROP TABLE IF EXISTS fmk.metric;
 
+CREATE SEQUENCE f18.metric_metric_id_seq;
+ALTER SEQUENCE f18.metric_metric_id_seq OWNER TO admin;
+GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO admin;
+GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO xtrole;
+
+
 delete from f18.metric where metric_id IS null;
 ALTER TABLE f18.metric ALTER COLUMN metric_id SET NOT NULL;
-ALTER TABLE f18.metric ALTER COLUMN metric_id SET DEFAULT nextval(('metric_metric_id_seq'::text)::regclass);
+ALTER TABLE f18.metric ALTER COLUMN metric_id SET DEFAULT nextval(('f18.metric_metric_id_seq'::text)::regclass);
+ALTER TABLE f18.metric  DROP CONSTRAINT IF EXISTS metric_id_unique;
+ALTER TABLE f18.metric  ADD CONSTRAINT metric_id_unique UNIQUE (metric_id);
 
 ---------------------------- f18.kalk ---------------------------------------------
 

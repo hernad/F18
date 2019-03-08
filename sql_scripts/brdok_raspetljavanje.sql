@@ -36,3 +36,12 @@ select brdok, regexp_replace(brdok, '\D', '', 'g'), to_number(btrim(regexp_repla
 
 
 select idvd,brdok from f18.kalk_doks where 	idvd || regexp_replace(brdok, '\d|\s', '', 'g') = '89/'
+
+
+-- https://blog.2ndquadrant.com/postgresql-10-identity-columns/#comment-248607
+
+
+--	 https://www.cybertec-postgresql.com/en/sequences-gains-and-pitfalls/
+ALTER TABLE f18.kalk_doks
+ADD COLUMN id bigint
+GENERATED  ALWAYS AS IDENTITY PRIMARY KEY;
