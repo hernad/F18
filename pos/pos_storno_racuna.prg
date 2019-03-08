@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR gPosProdajnoMjesto
+MEMVAR gPosProdajnoMjesto, Ch
 
 FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna )
 

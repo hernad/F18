@@ -289,7 +289,6 @@ FUNCTION h_pos_doks_indexes()
    hIndexes[ "6" ] := "dtos(datum)"
    hIndexes[ "7" ] := "IdPos+IdVD+BrDok"
    hIndexes[ "TK" ] := "IdPos+DTOS(Datum)+IdVd"
-   hIndexes[ "FISC" ] := "STR(fisc_rn,10)+idpos+idvd"
 
    RETURN hIndexes
 

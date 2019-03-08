@@ -1011,7 +1011,7 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 
    nErrorLevel := fiskalni_tremol_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno, cContinue012 ) // stampaj racun
    _f_name := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
-   IF tremol_read_out( s_hFiskalniParams, _f_name, s_hFiskalniParams[ "timeout" ] ) // da li postoji ista na izlazu ?
+   IF tremol_cekam_fajl_odgovora( s_hFiskalniParams, _f_name, s_hFiskalniParams[ "timeout" ] ) // da li postoji ista na izlazu ?
       nErrorLevel := tremol_read_error( s_hFiskalniParams, _f_name, @nFiskalniBroj ) // procitaj sada gresku
    ELSE
       nErrorLevel := -99

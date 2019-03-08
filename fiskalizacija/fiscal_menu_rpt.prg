@@ -185,7 +185,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpcExe, {|| .F. } )
 
       AAdd( aOpc, "K. kopija računa    " )
-      AAdd( aOpcExe, {|| tremol_rn_copy( s_hFiskalniDeviceParams ) } )
+      AAdd( aOpcExe, {|| tremol_stampa_kopije_racuna( s_hFiskalniDeviceParams ) } )
 
       IF !lLowLevel
 

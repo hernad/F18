@@ -248,13 +248,11 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke,
       cContinue := "0"
    ENDIF
 
-   // idemo sada na upis rn u fiskalni fajl
+
    nErrorLevel := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno, cContinue )
    IF cContinue <> "2"
-      // naziv fajla
       cFiskalniFajl := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
-      IF tremol_read_out( s_hFiskalniUredjajParams, cFiskalniFajl )
-         // procitaj poruku greske
+      IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajl )
          nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
          IF nErrorLevel == 0 .AND. !lStorno .AND. nBrojFiskalnoRacuna > 0
             pos_doks_update_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
