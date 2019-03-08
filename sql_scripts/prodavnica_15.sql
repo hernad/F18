@@ -1,5 +1,4 @@
-public.koncijCREATE SCHEMA IF NOT EXISTS p15;
-
+CREATE SCHEMA IF NOT EXISTS p15;
 ALTER SCHEMA p15 OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS  p15.roba (
@@ -60,13 +59,6 @@ CREATE TABLE IF NOT EXISTS  p15.pos_kase (
 );
 ALTER TABLE p15.pos_kase OWNER TO admin;
 
-CREATE TABLE IF NOT EXISTS p15.pos_odj (
-    id character varying(2),
-    naz character varying(25),
-    zaduzuje character(1),
-    idkonto character varying(7)
-);
-ALTER TABLE p15.pos_odj OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS p15.pos_osob (
     id character varying(4),
@@ -95,7 +87,6 @@ GRANT ALL ON TABLE p15.pos_doks TO xtrole;
 GRANT ALL ON TABLE p15.pos_pos TO xtrole;
 GRANT ALL ON TABLE p15.pos_strad TO xtrole;
 GRANT ALL ON TABLE p15.pos_osob TO xtrole;
-GRANT ALL ON TABLE p15.pos_odj TO xtrole;
 GRANT ALL ON TABLE p15.pos_kase TO xtrole;
 GRANT ALL ON TABLE p15.vrstep TO xtrole;
 
@@ -338,6 +329,7 @@ ALTER TABLE p15.roba DROP COLUMN IF EXISTS idkonto;
 
 
 DROP TABLE IF EXISTS p15.pos_dokspf;
+DROP TABLE IF EXISTS p15.pos_odj;
 
 ---------------------------------------------------------------------------------------
 -- on kalk_kalk update p15.pos_pos_knjig,
