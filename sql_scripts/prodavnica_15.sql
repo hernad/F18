@@ -100,13 +100,19 @@ CREATE TABLE IF NOT EXISTS p15.metric
 );
 
 
+CREATE SEQUENCE p15.metric_metric_id_seq;
+ALTER SEQUENCE p15.metric_metric_id_seq OWNER TO admin;
+GRANT ALL ON SEQUENCE p15.metric_metric_id_seq TO admin;
+GRANT ALL ON SEQUENCE p15.metric_metric_id_seq TO xtrole;
+
+
 ALTER TABLE p15.metric OWNER to admin;
 GRANT ALL ON TABLE p15.metric TO admin;
 GRANT ALL ON TABLE p15.metric TO xtrole;
 
 delete from p15.metric where metric_id IS null;
 ALTER TABLE p15.metric ALTER COLUMN metric_id SET NOT NULL;
-ALTER TABLE p15.metric ALTER COLUMN metric_id SET DEFAULT nextval(('metric_metric_id_seq'::text)::regclass);
+ALTER TABLE p15.metric ALTER COLUMN metric_id SET DEFAULT nextval(('p15.metric_metric_id_seq'::text)::regclass);
 
 
 CREATE OR REPLACE FUNCTION p15.fetchmetrictext(text) RETURNS text
