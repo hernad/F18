@@ -149,24 +149,31 @@ CREATE TABLE IF NOT EXISTS f18.valute AS  TABLE fmk.valute;
 ALTER TABLE f18.valute OWNER TO admin;
 GRANT ALL ON TABLE f18.valute TO xtrole;
 DROP TABLE IF EXISTS fmk.valute;
+ALTER TABLE f18.valute DROP COLUMN IF EXISTS match_code CASCADE;
 
 --- f18.konto  --------------------------------------------------
 CREATE TABLE IF NOT EXISTS f18.konto AS  TABLE fmk.konto;
 ALTER TABLE f18.konto OWNER TO admin;
 GRANT ALL ON TABLE f18.konto TO xtrole;
 DROP TABLE IF EXISTS fmk.konto;
+ALTER TABLE f18.konto DROP COLUMN IF EXISTS match_code CASCADE;
+ALTER TABLE f18.konto DROP COLUMN IF EXISTS pozbilu CASCADE;
+ALTER TABLE f18.konto DROP COLUMN IF EXISTS pozbils CASCADE;
+
 
 --- f18.tnal  --------------------------------------------------
 CREATE TABLE IF NOT EXISTS f18.tnal AS  TABLE fmk.tnal;
 ALTER TABLE f18.tnal OWNER TO admin;
 GRANT ALL ON TABLE f18.tnal TO xtrole;
 DROP TABLE IF EXISTS fmk.tnal;
+ALTER TABLE f18.tnal DROP COLUMN IF EXISTS match_code CASCADE;
 
 --- f18.tdok  --------------------------------------------------
 CREATE TABLE IF NOT EXISTS f18.tdok AS  TABLE fmk.tdok;
 ALTER TABLE f18.tdok OWNER TO admin;
 GRANT ALL ON TABLE f18.tdok TO xtrole;
 DROP TABLE IF EXISTS fmk.tdok;
+ALTER TABLE f18.tdok DROP COLUMN IF EXISTS match_code CASCADE;
 
 --- f18.sifk  --------------------------------------------------
 CREATE TABLE IF NOT EXISTS f18.sifk AS  TABLE fmk.sifk;
@@ -185,3 +192,4 @@ CREATE TABLE IF NOT EXISTS f18.trfp AS  TABLE fmk.trfp;
 ALTER TABLE f18.trfp OWNER TO admin;
 GRANT ALL ON TABLE f18.trfp TO xtrole;
 DROP TABLE IF EXISTS fmk.trfp;
+ALTER TABLE f18.trfp DROP COLUMN IF EXISTS match_code CASCADE;

@@ -1196,10 +1196,10 @@ ALTER TABLE fmk.koncij OWNER TO admin;
 
 CREATE TABLE fmk.konto (
     id character(7) NOT NULL,
-    match_code character(10),
-    naz character(57),
-    pozbilu character(3),
-    pozbils character(3)
+    -- match_code character(10),
+    naz character(57)
+    --pozbilu character(3),
+    -- pozbils character(3)
 );
 
 ALTER TABLE fmk.konto OWNER TO admin;

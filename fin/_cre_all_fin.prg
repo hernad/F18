@@ -403,9 +403,7 @@ FUNCTION cre_all_fin( ver )
    aDbf := {}
    AAdd( aDBf, { "ID", "C",   7,  0 } )
    AAdd( aDBf, { "NAZ", "C",  57,  0 } )
-   AAdd( aDBf, { "POZBILU", "C",   3,  0 } )
-   AAdd( aDBf, { "POZBILS", "C",   3,  0 } )
-
+   
    IF_NOT_FILE_DBF_CREATE
 
 
