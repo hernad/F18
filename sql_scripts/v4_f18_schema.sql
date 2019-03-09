@@ -107,6 +107,10 @@ ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS datkurs;
 ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS roktr;
 
 
+-- kalk_doks, kalk_kalk - dok_id
+ALTER TABLE f18.kalk_doks ADD COLUMN dok_id bigint
+GENERATED  ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE f18.kalk_kalk ADD COLUMN dok_id bigint;
 
 --- f18.tarifa --------------------------------------------------
 CREATE TABLE IF NOT EXISTS f18.tarifa AS  TABLE fmk.tarifa;
@@ -199,3 +203,23 @@ ALTER TABLE f18.trfp OWNER TO admin;
 GRANT ALL ON TABLE f18.trfp TO xtrole;
 DROP TABLE IF EXISTS fmk.trfp;
 ALTER TABLE f18.trfp DROP COLUMN IF EXISTS match_code CASCADE;
+
+-- select kalk_dok_id('10','11','00000100', '2018-01-09');
+CREATE OR REPLACE FUNCTION public.kalk_dok_id(cIdFirma varchar, cIdVD varchar, cBrDok varchar, dDatDok date) RETURNS bigint
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   dok_id bigint;
+BEGIN
+   EXECUTE 'SELECT dok_id FROM f18.kalk_doks WHERE idfirma=$1 AND idvd=$2 AND brdok=$3 AND datdok=$4'
+     USING cIdFirma, cIdVd, cBrDok, dDatDok
+     INTO dok_id;
+
+   IF dok_id IS NULL THEN
+      --RAISE EXCEPTION 'kalk_doks %-%-% od % NE postoji?!', cIdFirma, cIdVd, cBrDok, dDatDok;
+      RAISE INFO 'kalk_doks %-%-% od % NE postoji?!', cIdFirma, cIdVd, cBrDok, dDatDok;
+   END IF;
+
+   RETURN dok_id;
+END;
+$$

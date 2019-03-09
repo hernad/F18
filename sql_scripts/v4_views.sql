@@ -57,7 +57,7 @@ GRANT ALL ON FUNCTION public.setmetric TO xtrole;
 -- F18 v4 public kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
 drop view if exists public.kalk_kalk;
-CREATE view public.kalk_kalk  AS SELECT
+CREATE view public.kalk_kalk AS SELECT
      idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
      brfaktp, idpartner,
      rbr,
@@ -77,7 +77,8 @@ CREATE view public.kalk_kalk  AS SELECT
      mpc, idtarifa,
      mpcsapp,
      mkonto,pkonto,mu_i,pu_i,
-     error
+     error,
+     dok_id
 FROM
   f18.kalk_kalk;
 
@@ -102,7 +103,8 @@ CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
          mpc, idtarifa,
          mpcsapp,
          mkonto,pkonto,mu_i,pu_i,
-         error
+         error,
+         dok_id
       ) VALUES (
         NEW.idfirma, NEW.idroba, NEW.idkonto, NEW.idkonto2, NEW.idvd, NEW.brdok, NEW.datdok,
         NEW.brfaktp, NEW.idpartner,
@@ -123,7 +125,8 @@ CREATE OR REPLACE RULE public_kalk_kalk_ins AS ON INSERT TO public.kalk_kalk
         NEW.mpc, NEW.idtarifa,
         NEW.mpcsapp,
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
-        NEW.error   );
+        NEW.error,
+        kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok) );
 
 GRANT ALL ON public.kalk_kalk TO xtrole;
 
