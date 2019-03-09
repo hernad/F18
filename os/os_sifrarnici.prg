@@ -44,7 +44,7 @@ FUNCTION os_sifarnici()
    AAdd( aOpc, "8. partneri" )
    AAdd( aOpcExe, {|| p_partner() } )
    AAdd( aOpc, "9. valute" )
-   AAdd( aOpcExe, {|| p_valuta() } )
+   AAdd( aOpcExe, {|| P_Valute() } )
 
    _o_sif_tables()
 

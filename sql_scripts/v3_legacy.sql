@@ -270,19 +270,16 @@ GRANT ALL ON fmk.partn TO xtrole;
 
 -- fmk.valute
 drop view if exists fmk.valute;
-CREATE view fmk.valute  AS SELECT
-  *
-FROM
-  f18.valute;
+CREATE view fmk.valute  AS
+SELECT id, naz, naz2, datum, kurs1, kurs2, kurs3, tip, NULL as match_code
+	FROM f18.valute;
 
 
---- CREATE OR REPLACE RULE fmk_valute_ins AS ON INSERT TO fmk.valute
----         DO INSTEAD INSERT INTO f18.valute(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE fmk_valute_ins AS ON INSERT TO fmk.valute
+     DO INSTEAD INSERT INTO f18.valute(
+             id, naz, naz2, datum, kurs1, kurs2, kurs3, tip
+    ) VALUES (
+           NEW.id, NEW.naz, NEW.naz2, NEW.datum, NEW.kurs1, NEW.kurs2, NEW.kurs3, NEW.tip );
 
 GRANT ALL ON fmk.valute TO xtrole;
 

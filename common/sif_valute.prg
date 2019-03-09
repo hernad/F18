@@ -147,7 +147,7 @@ FUNCTION ValPomocna()
 
 
 
-FUNCTION P_Valuta( cid, dx, dy )
+FUNCTION P_Valute( cId, dx, dy )
 
    LOCAL i, lRet
    PRIVATE ImeKol
@@ -159,7 +159,6 @@ FUNCTION P_Valuta( cid, dx, dy )
    PushWA()
 
    o_valute()
-
    AAdd( ImeKol,   { "ID ",    {|| id }, "id"        } )
    AAdd( ImeKol,   { "Naziv",  {|| naz }, "naz"       } )
    AAdd( ImeKol,   { ToStrU( "Skrać." ), {|| naz2 }, "naz2"      } )

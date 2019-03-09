@@ -44,7 +44,7 @@ FUNCTION mat_sifrarnik()
    AAdd( opc, "7. osobine konta  " )
    AAdd( opcexe, {|| p_karkon() } )
    AAdd( opc, "8. valute " )
-   AAdd( opcexe, {|| p_valuta() } )
+   AAdd( opcexe, {|| P_Valute() } )
    AAdd( opc, "9. sifk - karakteristike " )
    AAdd( opcexe, {|| p_sifk() } )
 

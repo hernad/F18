@@ -40,7 +40,7 @@ FUNCTION opci_sifarnici()
 
 
    AAdd( aOpc, "5. valute" )
-   AAdd( aOpcExe, {|| P_Valuta() } )
+   AAdd( aOpcExe, {|| P_Valute() } )
 
 
    AAdd( aOpc, "6. radne jedinice" )

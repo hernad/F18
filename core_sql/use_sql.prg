@@ -256,7 +256,6 @@ FUNCTION use_sql_valute( cId )
 
    cSql := "SELECT "
    cSql += "id, "
-   cSql += "match_code::char(10),"
    cSql += "naz::char(30),"
    cSql += "naz2::char(4),"
    cSql += "(CASE WHEN datum IS NULL THEN '1960-01-01'::date ELSE datum END) AS datum,"
@@ -264,7 +263,7 @@ FUNCTION use_sql_valute( cId )
    cSql += "COALESCE(kurs2,0)::numeric(18,8) AS kurs2,"
    cSql += "COALESCE(kurs3,0)::numeric(18,8) AS kurs3,"
    cSql += "tip::char(1) "
-   cSql += " FROM " + F18_PSQL_SCHEMA_DOT + "valute ORDER BY id"
+   cSql += " FROM " + f18_sql_schema( "valute" ) + " ORDER BY id"
 
    IF cId != NIL
       cSql += " WHERE id=" + sql_quote( cId )
