@@ -109,7 +109,7 @@ ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS roktr;
 
 -- kalk_doks, kalk_kalk - dok_id
 ALTER TABLE f18.kalk_doks ADD COLUMN dok_id bigint
-GENERATED  ALWAYS AS IDENTITY PRIMARY KEY;
+GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
 ALTER TABLE f18.kalk_kalk ADD COLUMN dok_id bigint;
 
 --- f18.tarifa --------------------------------------------------
@@ -223,3 +223,22 @@ BEGIN
    RETURN dok_id;
 END;
 $$
+
+
+ALTER TABLE f18.partn ADD COLUMN partn_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE f18.konto ADD COLUMN konto_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE f18.partn ADD COLUMN partner_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+ALTER TABLE f18.roba ADD COLUMN roba_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+
+CREATE TABLE IF NOT EXISTS f18.fakt_fisk_doks (
+    dok_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ref_fakt_dok bigint,
+    broj_rn integer,
+    ref_storno_fdisk_dok bigint,
+    partner_id bigint,
+    ukupno real,
+    popust real,
+    obradjeno timestamp with time zone DEFAULT now(),
+    korisnik text DEFAULT current_user
+);
+ALTER TABLE f18.fakt_fisk_doks OWNER TO admin;
