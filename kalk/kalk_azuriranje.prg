@@ -361,7 +361,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 
          IF kalk_metoda_nc() <> " " .AND. field->error == "1"
             Beep( 2 )
-            Msg( "Utvrđena greška pri obradi dokumenta, rbr: " + TRANSFORM(field->rbr,'99999'), 6 )
+            Msg( "Utvrđena greška pri obradi dokumenta, rbr: " + Transform( field->rbr, '99999' ), 6 )
             my_close_all_dbf()
             RETURN .F.
          ENDIF
@@ -386,7 +386,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 
          IF Empty( field->mu_i ) .AND. Empty( field->pu_i )
             Beep( 2 )
-            Msg( "Stavka broj " + TRANSFORM(field->rbr, '99999') + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
+            Msg( "Stavka broj " + Transform( field->rbr, '99999' ) + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
             my_close_all_dbf()
             RETURN .F.
          ENDIF
@@ -455,7 +455,7 @@ STATIC FUNCTION kalk_provjeri_duple_dokumente( aRezim )
 
          // TODO: cleanup sumnjive stavke
          IF field->ERROR == "1"
-            error_bar( field->idfirma + "-" + field->idvd + "-" + field->brdok, " /  Rbr." + Transform(field->rbr, '99999') + " sumnjiva! " )
+            error_bar( field->idfirma + "-" + field->idvd + "-" + field->brdok, " /  Rbr." + Transform( field->rbr, '99999' ) + " sumnjiva! " )
             IF Pitanje(, "Želite li dokument ažurirati bez obzira na sumnjive stavke? (D/N)", "N" ) == "D"
                aRezim := {}
                // AAdd( aRezim, gCijene )
@@ -582,13 +582,13 @@ STATIC FUNCTION kalk_azur_sql()
             run_sql_query( "ROLLBACK" )
             BoxC()
             RETURN .F.
-         ELSE
-            run_sql_query( "COMMIT" )
+         //ELSE
+          //  run_sql_query( "COMMIT" )
          ENDIF
 
       ENDIF
 
-      run_sql_query( "BEGIN" )
+      //run_sql_query( "BEGIN" )
       SELECT kalk_pripr
       DO WHILE !Eof() .AND. Eval( bDokument, cIdFirma, cIdVd, cBrDok )
          // fill kalk_kalk
@@ -605,9 +605,9 @@ STATIC FUNCTION kalk_azur_sql()
          run_sql_query( "ROLLBACK" )
 
          // pobrisati kalk_doks stavku
-         run_sql_query( "BEGIN" )
-         sql_table_update( "kalk_doks", "del", hRecKalkDok )
-         run_sql_query( "COMMIT" )
+         //run_sql_query( "BEGIN" )
+         //sql_table_update( "kalk_doks", "del", hRecKalkDok )
+         //run_sql_query( "COMMIT" )
 
          cMessage := "kalk ažuriranje, transakcija neuspješna ?!"
          log_write( cMessage, 2 )
