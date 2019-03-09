@@ -31,9 +31,19 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     brFaktP varchar(10),
     opis varchar(100),
     dat_od date,
-    dat_do date
+    dat_do date,
+    obradjeno timestamp with time zone DEFAULT now(),
+    korisnik text DEFAULT current_user
 );
 ALTER TABLE p15.pos_doks OWNER TO admin;
+
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS obradjeno timestamp with time zone;
+ALTER TABLE p15.pos_doks ALTER COLUMN obradjeno TYPE timestamp with time zone;
+
+ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS korisnik text;
+ALTER TABLE p15.pos_doks ALTER COLUMN obradjeno SET DEFAULT now();
+ALTER TABLE p15.pos_doks ALTER COLUMN korisnik SET DEFAULT current_user;
+
 
 CREATE TABLE IF NOT EXISTS p15.pos_pos (
     idpos character varying(2),

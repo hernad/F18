@@ -74,6 +74,12 @@ BEGIN
 END;
 $$;
 
+ALTER TABLE f18.kalk_doks ALTER COLUMN obradjeno TYPE timestamp with time zone;
+ALTER TABLE f18.kalk_doks ALTER COLUMN obradjeno SET DEFAULT now();
+
+ALTER TABLE f18.kalk_doks ALTER COLUMN korisnik SET DEFAULT current_user;
+
+
 CREATE INDEX IF NOT EXISTS kalk_kalk_datdok ON f18.kalk_kalk USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_kalk_id1 ON f18.kalk_kalk USING btree (idfirma, idvd, brdok, rbr, mkonto, pkonto);
 CREATE INDEX IF NOT EXISTS kalk_kalk_mkonto ON f18.kalk_kalk USING btree (idfirma, mkonto, idroba);

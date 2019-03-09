@@ -160,18 +160,15 @@ CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO fmk.kalk_doks
         dat_od, dat_do,
         opis,
         pkonto,mkonto,
-        nv,vpv,rabat,mpv,
-        obradjeno,
-        korisnik
+        nv,vpv,rabat,mpv
       ) VALUES (
         NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok,
         NEW.brfaktp, NEW.datfaktp, NEW.idpartner, NEW.datval,
         NEW.dat_od, NEW.dat_do,
         NEW.opis,
         NEW.pkonto, NEW.mkonto,
-        NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv,
-        NEW.obradjeno,
-        NEW.korisnik   );
+        NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv
+          );
 
 GRANT ALL ON fmk.kalk_doks TO xtrole;
 
@@ -326,7 +323,6 @@ CREATE view fmk.tdok  AS SELECT
   *
 FROM
   f18.tdok;
-
 
 --- CREATE OR REPLACE RULE fmk_tdok_ins AS ON INSERT TO fmk.tdok
 ---         DO INSTEAD INSERT INTO f18.tdok(

@@ -148,31 +148,26 @@ CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
         dat_od, dat_do,
         opis,
         pkonto,mkonto,
-        nv,vpv,rabat,mpv,
-        obradjeno,
-        korisnik
+        nv,vpv,rabat,mpv
       ) VALUES (
         NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok,
         NEW.brfaktp, NEW.datfaktp, NEW.idpartner, NEW.datval,
         NEW.dat_od, NEW.dat_do,
         NEW.opis,
         NEW.pkonto, NEW.mkonto,
-        NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv,
-        NEW.obradjeno,
-        NEW.korisnik   );
+        NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv
+      );
 
 
 GRANT ALL ON public.kalk_doks TO xtrole;
 
 ----  public.tarifa
-
 drop view if exists public.tarifa;
 CREATE view public.tarifa  AS SELECT *
 FROM
   f18.tarifa;
 
 GRANT ALL ON public.tarifa TO xtrole;
-
 
 -- public.koncij
 drop view if exists public.koncij;
