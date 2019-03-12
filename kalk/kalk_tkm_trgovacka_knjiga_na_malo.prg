@@ -11,21 +11,19 @@
 
 #include "f18.ch"
 
-STATIC __LEN_OPIS := 70
-
+STATIC s_nOpis := 70
 
 FUNCTION kalk_tkm()
 
    LOCAL hParams
-   LOCAL _calc_rec := 0
+   LOCAL nCount := 0
 
    IF !get_vars( @hParams )
       RETURN .F.
    ENDIF
 
-   _calc_rec := kalk_gen_fin_stanje_prodavnice( hParams )
-
-   IF _calc_rec > 0
+   nCount := kalk_gen_fin_stanje_prodavnice( hParams )
+   IF nCount > 0
       stampaj_tkm( hParams )
    ENDIF
 
@@ -34,15 +32,16 @@ FUNCTION kalk_tkm()
 
 STATIC FUNCTION get_vars( hParams )
 
-   LOCAL _ret := .F.
+   LOCAL lRet := .F.
    LOCAL nX := 1
    LOCAL _konta := fetch_metric( "kalk_tkm_konto", my_user(), Space( 200 ) )
    LOCAL _d_od := fetch_metric( "kalk_tkm_datum_od", my_user(), Date() - 30 )
    LOCAL _d_do := fetch_metric( "kalk_tkm_datum_do", my_user(), Date() )
    LOCAL _vr_dok := fetch_metric( "kalk_tkm_vrste_dok", my_user(), Space( 200 ) )
    LOCAL _usluge := fetch_metric( "kalk_tkm_gledaj_usluge", my_user(), "N" )
-   LOCAL _vise_konta := "D"
+   LOCAL cViseKontaDN := "D"
    LOCAL cXlsxDN := "D"
+   LOCAL GetList := {}
 
    Box(, 14, 72 )
 
@@ -70,10 +69,10 @@ STATIC FUNCTION get_vars( hParams )
    BoxC()
 
    IF LastKey() == K_ESC
-      RETURN _ret
+      RETURN lRet
    ENDIF
 
-   _ret := .T.
+   lRet := .T.
 
    hParams := hb_Hash()
    hParams[ "datum_od" ] := _d_od
@@ -84,10 +83,10 @@ STATIC FUNCTION get_vars( hParams )
    hParams[ "xlsx" ] := iif( cXlsXDN == "D", .T., .F. )
 
    IF Right( AllTrim( _konta ), 1 ) != ";"
-      _vise_konta := "N"
+      cViseKontaDN := "N"
       hParams[ "konto" ] := PadR( hParams[ "konto" ], 7 )
    ENDIF
-   hParams[ "vise_konta" ] := _vise_konta
+   hParams[ "vise_konta" ] := cViseKontaDN
 
    set_metric( "kalk_tkm_konto", my_user(), _konta )
    set_metric( "kalk_tkm_datum_od", my_user(), _d_od )
@@ -95,20 +94,20 @@ STATIC FUNCTION get_vars( hParams )
    set_metric( "kalk_tkm_vrste_dok", my_user(), _vr_dok )
    set_metric( "kalk_tkm_gledati_usluge", my_user(), _usluge )
 
-   RETURN _ret
+   RETURN lRet
 
 
 
 STATIC FUNCTION stampaj_tkm( hParams )
 
    LOCAL _red_br := 0
-   LOCAL _line, _opis_knjizenja
+   LOCAL cLine, cOpisKnjizenja
    LOCAL _n_opis, _n_iznosi
-   LOCAL _t_dug, _t_pot, _t_rabat
+   LOCAL nTDug, nTPot, _t_rabat
    LOCAL _a_opis := {}
    LOCAL nI
 
-   _line := _get_line()
+   cLine := _get_line()
 
    START PRINT CRET
 
@@ -117,12 +116,12 @@ STATIC FUNCTION stampaj_tkm( hParams )
 
    tkm_zaglavlje( hParams )
 
-   ? _line
+   ? cLine
    tkm_header()
-   ? _line
+   ? cLine
 
-   _t_dug := 0
-   _t_pot := 0
+   nTDug := 0
+   nTPot := 0
    _t_rabat := 0
 
    SELECT r_export
@@ -139,28 +138,28 @@ STATIC FUNCTION stampaj_tkm( hParams )
 
       @ PRow(), PCol() + 1 SAY field->datum
 
-      _opis_knjizenja := AllTrim( field->vr_dok )
-      _opis_knjizenja += " "
-      _opis_knjizenja += "broj: "
-      _opis_knjizenja += AllTrim( field->idvd ) + "-" + AllTrim( field->brdok )
-      _opis_knjizenja += ", "
-      _opis_knjizenja += "veza: " + AllTrim( field->br_fakt )
+      cOpisKnjizenja := AllTrim( field->vr_dok )
+      cOpisKnjizenja += " "
+      cOpisKnjizenja += "broj: "
+      cOpisKnjizenja += AllTrim( field->idvd ) + "-" + AllTrim( field->brdok )
+      cOpisKnjizenja += ", "
+      cOpisKnjizenja += "veza: " + AllTrim( field->br_fakt )
 
       IF !Empty( field->opis )
-         _opis_knjizenja += ", "
-         _opis_knjizenja += AllTrim( field->opis )
+         cOpisKnjizenja += ", "
+         cOpisKnjizenja += AllTrim( field->opis )
       ENDIF
 
       IF !Empty( field->part_naz )
-         _opis_knjizenja += ", "
-         _opis_knjizenja += AllTrim( field->part_naz )
-         _opis_knjizenja += ", "
-         _opis_knjizenja += AllTrim( field->part_adr )
-         _opis_knjizenja += ", "
-         _opis_knjizenja += AllTrim( field->part_mj )
+         cOpisKnjizenja += ", "
+         cOpisKnjizenja += AllTrim( field->part_naz )
+         cOpisKnjizenja += ", "
+         cOpisKnjizenja += AllTrim( field->part_adr )
+         cOpisKnjizenja += ", "
+         cOpisKnjizenja += AllTrim( field->part_mj )
       ENDIF
 
-      _a_opis := SjeciStr( _opis_knjizenja, __LEN_OPIS )
+      _a_opis := SjeciStr( cOpisKnjizenja, s_nOpis )
 
       @ PRow(), _n_opis := PCol() + 1 SAY _a_opis[ 1 ]
 
@@ -168,8 +167,8 @@ STATIC FUNCTION stampaj_tkm( hParams )
 
       @ PRow(), PCol() + 1 SAY Str( ( field->mp_pot + field->mp_porez ), 12, 2 )
 
-      _t_dug += field->mpp_dug + ( - field->mp_rabat )
-      _t_pot += field->mp_pot + field->mp_porez
+      nTDug += field->mpp_dug + ( - field->mp_rabat )
+      nTPot += field->mp_pot + field->mp_porez
       _t_rabat += field->mp_rabat
 
       FOR nI := 2 TO Len( _a_opis )
@@ -181,16 +180,16 @@ STATIC FUNCTION stampaj_tkm( hParams )
 
    ENDDO
 
-   ? _line
+   ? cLine
 
    ? "UKUPNO:"
-   @ PRow(), _n_iznosi SAY Str( _t_dug, 12, 2 )
-   @ PRow(), PCol() + 1 SAY Str( _t_pot, 12, 2 )
+   @ PRow(), _n_iznosi SAY Str( nTDug, 12, 2 )
+   @ PRow(), PCol() + 1 SAY Str( nTPot, 12, 2 )
 
    ?U "SALDO TRGOVAČKE KNJIGE:"
-   @ PRow(), _n_iznosi SAY Str( _t_dug - _t_pot, 12, 2 )
+   @ PRow(), _n_iznosi SAY Str( nTDug - nTPot, 12, 2 )
 
-   ? _line
+   ? cLine
 
    FF
    ENDPRINT
@@ -219,7 +218,6 @@ STATIC FUNCTION tkm_zaglavlje( hParams )
    ENDIF
 
    ? "na dan", Date()
-
    ?
 
    RETURN .T.
@@ -227,57 +225,57 @@ STATIC FUNCTION tkm_zaglavlje( hParams )
 
 STATIC FUNCTION tkm_header()
 
-   LOCAL _row_1, _row_2
+   LOCAL cRow1, cRow2
 
-   _row_1 := ""
-   _row_2 := ""
+   cRow1 := ""
+   cRow2 := ""
 
-   _row_1 += PadR( "R.Br", 7 )
-   _row_2 += PadR( "", 7 )
+   cRow1 += PadR( "R.Br", 7 )
+   cRow2 += PadR( "", 7 )
 
-   _row_1 += Space( 1 )
-   _row_2 += Space( 1 )
+   cRow1 += Space( 1 )
+   cRow2 += Space( 1 )
 
-   _row_1 += PadC( "Datum", 8 )
-   _row_2 += PadC( "dokum.", 8 )
+   cRow1 += PadC( "Datum", 8 )
+   cRow2 += PadC( "dokum.", 8 )
 
-   _row_1 += Space( 1 )
-   _row_2 += Space( 1 )
+   cRow1 += Space( 1 )
+   cRow2 += Space( 1 )
 
-   _row_1 += PadR( "", __LEN_OPIS )
-   _row_2 += PadR( "Opis knjiženja", __LEN_OPIS )
+   cRow1 += PadR( "", s_nOpis )
+   cRow2 += PadR( "Opis knjiženja", s_nOpis )
 
-   _row_1 += Space( 1 )
-   _row_2 += Space( 1 )
+   cRow1 += Space( 1 )
+   cRow2 += Space( 1 )
 
-   _row_1 += PadC( "Zaduženje", 12 )
-   _row_2 += PadC( "sa PDV", 12 )
+   cRow1 += PadC( "Zaduženje", 12 )
+   cRow2 += PadC( "sa PDV", 12 )
 
-   _row_1 += Space( 1 )
-   _row_2 += Space( 1 )
+   cRow1 += Space( 1 )
+   cRow2 += Space( 1 )
 
-   _row_1 += PadC( "Razduženje", 12 )
-   _row_2 += PadC( "sa PDV", 12 )
+   cRow1 += PadC( "Razduženje", 12 )
+   cRow2 += PadC( "sa PDV", 12 )
 
-   ?U _row_1
-   ?U _row_2
+   ?U cRow1
+   ?U cRow2
 
    RETURN .T.
 
 
 STATIC FUNCTION _get_line()
 
-   LOCAL _line
+   LOCAL cLine
 
-   _line := ""
-   _line += Replicate( "-", 7 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 8 )
-   _line += Space( 1 )
-   _line += Replicate( "-", __LEN_OPIS )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 12 )
+   cLine := ""
+   cLine += Replicate( "-", 7 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 8 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", s_nOpis )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 12 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 12 )
 
-   RETURN _line
+   RETURN cLine

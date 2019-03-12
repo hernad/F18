@@ -1885,7 +1885,7 @@ BEGIN
             cIdFirma, cIdVd, cBrDok, dDatum,
             public.magacin_konto(nMagacin), public.prodavnica_konto(nProdavnica),
             cBrojFaktureT,
-            '5', '1',
+            '6', '2',
             nRbr, public.roba_id_by_sifradob(nRobaId),
             nKolicina
           );

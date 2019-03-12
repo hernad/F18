@@ -31,20 +31,21 @@ koristi TKM
 FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
    LOCAL cIdKonto := ""
-   LOCAL _datum_od := Date()
-   LOCAL _datum_do := Date()
+   LOCAL dDatOd := Date()
+   LOCAL dDatDo := Date()
    LOCAL _tarife := ""
    LOCAL _vrste_dok := ""
    LOCAL cIdFirma := self_organizacija_id()
+   LOCAL cBrDok
    LOCAL _vise_konta := .F.
    LOCAL nDbfArea, nTrec
    LOCAL _ulaz, _izlaz, _rabatv, _rabatm
    LOCAL _nv_ulaz, _nv_izlaz, _mp_ulaz, _mp_izlaz, _mp_ulaz_p, _mp_izlaz_p
    LOCAL _tr_prevoz, _tr_prevoz_2
    LOCAL _tr_bank, _tr_zavisni, _tr_carina, _tr_sped
-   LOCAL _br_fakt, _tip_dok, _tip_dok_naz, _id_partner
+   LOCAL cBrFaktP, cIdVd, _tip_dok_naz, cIdPartner
    LOCAL _partn_naziv, _partn_ptt, _partn_mjesto, _partn_adresa
-   LOCAL _broj_dok, _dat_dok
+   LOCAL _broj_dok, dDatDok
    LOCAL _usl_konto := ""
    LOCAL _usl_vrste_dok := ""
    LOCAL _usl_tarife := ""
@@ -54,6 +55,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    LOCAL _a_porezi
    LOCAL nPDV, nUPDV, _d_opis
    LOCAL hParams
+
 
    hParams := hb_Hash()
    hParams[ "idfirma" ] := cIdFirma
@@ -68,7 +70,6 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    IF hb_HHasKey( hParamsIn, "vise_konta" )
       _v_konta := hParamsIn[ "vise_konta" ]
    ENDIF
-
 
    IF hb_HHasKey( hParamsIn, "tarife" )
       _tarife := hParamsIn[ "tarife" ]
@@ -87,7 +88,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    ENDIF
 
    _cre_tmp_tbl()
-   _o_tbl()
+   //_o_tbl()
 
    IF _v_konta == "D"
       _vise_konta := .T.
@@ -130,7 +131,6 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. IspitajPrekid()
 
-
       IF _vise_konta .AND. !Empty( _usl_konto )
          IF !Tacno( _usl_konto )
             SKIP
@@ -170,47 +170,42 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
       _tr_sped := 0
       nUPDV := 0
 
-      _id_d_firma := field->idfirma
-      _d_br_dok := field->brdok
-      _br_fakt := field->brfaktp
-      _id_partner := field->idpartner
-      _dat_dok := field->datdok
+      cIdFirma := field->idfirma
+      cBrDok := field->brdok
+      cBrFaktP := field->brfaktp
+      cIdPartner := field->idpartner
+      dDatDok := field->datdok
       _broj_dok := field->idvd + "-" + field->brdok
-      _tip_dok := field->idvd
+      cIdVd := field->idvd
       _d_opis := ""
 
       IF field->idvd == "80" .AND. !Empty( field->idkonto2 )
          _d_opis := "predispozicija " + AllTrim( field->idkonto ) + " -> " + AllTrim( field->idkonto2 )
       ENDIF
 
-      SELECT tdok
-      HSEEK _tip_dok
+      select_o_tdok( cIdVd )
       _tip_dok_naz := field->naz
 
-      IF !Empty( _id_partner )
-         select_o_partner( _id_partner )
-
+      IF !Empty( cIdPartner )
+         select_o_partner( cIdPartner )
          _partn_naziv := field->naz
          _partn_ptt := field->ptt
          _partn_mjesto := field->mjesto
          _partn_adresa := field->adresa
 
       ELSE
-
          _partn_naziv := ""
          _partn_ptt := ""
          _partn_mjesto := ""
          _partn_adresa := ""
-
-         IF _tip_dok $ "41#42"
+         IF cIdVd $ "41#42"
             _partn_naziv := "prodavnica " + AllTrim( kalk->pkonto )
          ENDIF
 
       ENDIF
 
-
       SELECT KALK
-      DO WHILE !Eof() .AND. cIdFirma + DToS( _dat_dok ) + _broj_dok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + _broj_dok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. IspitajPrekid()
 
          IF _vise_konta .AND. !Empty( _usl_konto )
             IF !Tacno( _usl_konto )
@@ -297,10 +292,10 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
       ENDDO
 
 
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Dokument: " + _id_d_firma + "-" + _tip_dok + "-" + _d_br_dok
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Dokument: " + cIdFirma + "-" + cIdVd + "-" + cBrDok
 
-      insert_into_rexport( _id_d_firma, _tip_dok, _d_br_dok, _d_opis, _dat_dok, _tip_dok_naz, _id_partner, ;
-         _partn_naziv, _partn_mjesto, _partn_ptt, _partn_adresa, _br_fakt, ;
+      insert_into_rexport( cIdFirma, cIdVd, cBrDok, _d_opis, dDatDok, _tip_dok_naz, cIdPartner, ;
+         _partn_naziv, _partn_mjesto, _partn_ptt, _partn_adresa, cBrFaktP, ;
          _nv_ulaz, _nv_izlaz, _nv_ulaz - _nv_izlaz, ;
          _mp_ulaz, _mp_izlaz, _mp_ulaz - _mp_izlaz, ;
          _mp_ulaz_p, _mp_izlaz_p, _mp_ulaz_p - _mp_izlaz_p, ;
@@ -317,42 +312,42 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
 STATIC FUNCTION _cre_tmp_tbl()
 
-   LOCAL _dbf := {}
+   LOCAL aDbf := {}
 
-   AAdd( _dbf, { "idfirma", "C",  2, 0 } )
-   AAdd( _dbf, { "idvd", "C",  2, 0 } )
-   AAdd( _dbf, { "brdok", "C",  8, 0 } )
-   AAdd( _dbf, { "datum", "D",  8, 0 } )
-   AAdd( _dbf, { "vr_dok", "C", 30, 0 } )
-   AAdd( _dbf, { "idpartner", "C",  6, 0 } )
-   AAdd( _dbf, { "part_naz", "C", 100, 0 } )
-   AAdd( _dbf, { "part_mj", "C", 50, 0 } )
-   AAdd( _dbf, { "part_ptt", "C", 10, 0 } )
-   AAdd( _dbf, { "part_adr", "C", 50, 0 } )
-   AAdd( _dbf, { "br_fakt", "C", 20, 0 } )
-   AAdd( _dbf, { "opis", "C", 50, 0 } )
-   AAdd( _dbf, { "nv_dug", "N", 18, 5 } )
-   AAdd( _dbf, { "nv_pot", "N", 18, 5 } )
-   AAdd( _dbf, { "nv_saldo", "N", 18, 5 } )
-   AAdd( _dbf, { "mp_dug", "N", 18, 5 } )
-   AAdd( _dbf, { "mp_pot", "N", 18, 5 } )
-   AAdd( _dbf, { "mp_saldo", "N", 18, 5 } )
-   AAdd( _dbf, { "mpp_dug", "N", 18, 5 } )
-   AAdd( _dbf, { "mpp_pot", "N", 18, 5 } )
-   AAdd( _dbf, { "mpp_saldo", "N", 18, 5 } )
-   AAdd( _dbf, { "vp_rabat", "N", 18, 5 } )
-   AAdd( _dbf, { "mp_rabat", "N", 18, 5 } )
-   AAdd( _dbf, { "mp_porez", "N", 18, 5 } )
-   AAdd( _dbf, { "t_prevoz", "N", 18, 5 } )
-   AAdd( _dbf, { "t_prevoz2", "N", 18, 5 } )
-   AAdd( _dbf, { "t_bank", "N", 18, 5 } )
-   AAdd( _dbf, { "t_sped", "N", 18, 5 } )
-   AAdd( _dbf, { "t_cardaz", "N", 18, 5 } )
-   AAdd( _dbf, { "t_zav", "N", 18, 5 } )
+   AAdd( aDbf, { "idfirma", "C",  2, 0 } )
+   AAdd( aDbf, { "idvd", "C",  2, 0 } )
+   AAdd( aDbf, { "brdok", "C",  8, 0 } )
+   AAdd( aDbf, { "datum", "D",  8, 0 } )
+   AAdd( aDbf, { "vr_dok", "C", 30, 0 } )
+   AAdd( aDbf, { "idpartner", "C",  6, 0 } )
+   AAdd( aDbf, { "part_naz", "C", 100, 0 } )
+   AAdd( aDbf, { "part_mj", "C", 50, 0 } )
+   AAdd( aDbf, { "part_ptt", "C", 10, 0 } )
+   AAdd( aDbf, { "part_adr", "C", 50, 0 } )
+   AAdd( aDbf, { "br_fakt", "C", 20, 0 } )
+   AAdd( aDbf, { "opis", "C", 50, 0 } )
+   AAdd( aDbf, { "nv_dug", "N", 18, 5 } )
+   AAdd( aDbf, { "nv_pot", "N", 18, 5 } )
+   AAdd( aDbf, { "nv_saldo", "N", 18, 5 } )
+   AAdd( aDbf, { "mp_dug", "N", 18, 5 } )
+   AAdd( aDbf, { "mp_pot", "N", 18, 5 } )
+   AAdd( aDbf, { "mp_saldo", "N", 18, 5 } )
+   AAdd( aDbf, { "mpp_dug", "N", 18, 5 } )
+   AAdd( aDbf, { "mpp_pot", "N", 18, 5 } )
+   AAdd( aDbf, { "mpp_saldo", "N", 18, 5 } )
+   AAdd( aDbf, { "vp_rabat", "N", 18, 5 } )
+   AAdd( aDbf, { "mp_rabat", "N", 18, 5 } )
+   AAdd( aDbf, { "mp_porez", "N", 18, 5 } )
+   AAdd( aDbf, { "t_prevoz", "N", 18, 5 } )
+   AAdd( aDbf, { "t_prevoz2", "N", 18, 5 } )
+   AAdd( aDbf, { "t_bank", "N", 18, 5 } )
+   AAdd( aDbf, { "t_sped", "N", 18, 5 } )
+   AAdd( aDbf, { "t_cardaz", "N", 18, 5 } )
+   AAdd( aDbf, { "t_zav", "N", 18, 5 } )
 
-   create_dbf_r_export( _dbf )
+   create_dbf_r_export( aDbf )
 
-   RETURN _dbf
+   RETURN aDbf
 
 
 STATIC FUNCTION insert_into_rexport( id_firma, id_tip_dok, broj_dok, d_opis, datum_dok, vrsta_dok, id_partner, ;
@@ -417,7 +412,7 @@ STATIC FUNCTION _o_tbl()
    // o_kalk()
 //   o_sifk()
 //   o_sifv()
-   o_tdok()
+//   o_tdok()
   // o_roba()
 //   o_tarifa()
 //   o_koncij()
