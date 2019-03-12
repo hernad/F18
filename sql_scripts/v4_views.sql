@@ -140,7 +140,8 @@ opis,
 pkonto,mkonto,
 nv,vpv,rabat,mpv,
 obradjeno,
-korisnik
+korisnik,
+dok_id
 FROM
   f18.kalk_doks;
 
@@ -261,18 +262,15 @@ GRANT ALL ON public.valute TO xtrole;
 -- public.konto
 drop view if exists public.konto;
 CREATE view public.konto  AS SELECT
-  *
+  id, naz
 FROM
   f18.konto;
 
---- CREATE OR REPLACE RULE public_konto_ins AS ON INSERT TO public.konto
----         DO INSTEAD INSERT INTO f18.konto(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
-
+CREATE OR REPLACE RULE public_konto_ins AS ON INSERT TO public.konto
+         DO INSTEAD INSERT INTO f18.konto(
+            id, naz
+         ) VALUES (
+          NEW.id, NEW.naz );
 GRANT ALL ON public.konto TO xtrole;
 
 -- public.tnal

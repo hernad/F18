@@ -624,7 +624,6 @@ STATIC FUNCTION kalk_azur_sql()
    RETURN lOk
 
 
-
 FUNCTION kalk_dokumenti_iz_pripreme_u_matricu()
 
    LOCAL aKalkDokumenti := {}

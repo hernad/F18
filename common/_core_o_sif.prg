@@ -145,6 +145,7 @@ FUNCTION o_konto( cId )
       SEEK cId
    ENDIF
 
+altd()
    RETURN !Eof()
 
 

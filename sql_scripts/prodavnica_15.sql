@@ -365,7 +365,7 @@ CREATE OR REPLACE FUNCTION f18.on_kalk_kalk_crud() RETURNS trigger
     AS $$
 
 DECLARE
-    idPos varchar;
+    idPos varchar DEFAULT '1 ';
     cijena decimal;
     ncijena decimal;
     barkodRoba varchar DEFAULT '';
@@ -377,21 +377,21 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    IF ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '02' ) AND ( NEW.idvd <> '21' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) AND ( NEW.idvd <> '72' ) THEN
      RETURN NULL;
    END IF;
-   SELECT idprodmjes INTO idPos
-          from public.koncij where id=NEW.PKonto;
+   --SELECT idprodmjes INTO idPos
+   --        from public.koncij where id=NEW.PKonto;
    SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
           from public.roba where id=NEW.idroba;
 ELSE
    IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
       RETURN NULL;
    END IF;
-   SELECT idprodmjes INTO idPos
-          from fmk.koncij where id=OLD.PKonto;
+   --SELECT idprodmjes INTO idPos
+   --        from punlic.koncij where id=OLD.PKonto;
 END IF;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete % prodavnica %', OLD.idvd, idPos;
-      EXECUTE 'DELETE FROM p' || idPos || '.pos_pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+      EXECUTE 'DELETE FROM p15.pos_pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
          USING idpos, OLD.idvd, OLD.brdok, OLD.datdok, OLD.rbr;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
@@ -406,7 +406,7 @@ ELSIF (TG_OP = 'INSERT') THEN
         cijena := NEW.mpcsapp;
         ncijena := 0;
       END IF;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+      EXECUTE 'INSERT INTO p15.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
         USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, public.barkod_ean13_to_num(barkodRoba,3), NEW.idtarifa, robaNaz,robaJmj;
       RETURN NEW;
 END IF;
@@ -425,7 +425,7 @@ CREATE OR REPLACE FUNCTION f18.on_kalk_doks_crud() RETURNS trigger
     AS $$
 
 DECLARE
-    idPos varchar;
+    idPos varchar DEFAULT '1 ';
 BEGIN
 
 
@@ -433,19 +433,19 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
       IF ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '02' ) AND ( NEW.idvd <> '21' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) AND ( NEW.idvd <> '72' ) THEN
          RETURN NULL;
       END IF;
-      SELECT idprodmjes INTO idPos
-            from fmk.koncij where id=NEW.PKonto;
+      -- SELECT idprodmjes INTO idPos
+      --      from public.koncij where id=NEW.PKonto;
 ELSE
      IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
         RETURN NULL;
      END IF;
-      SELECT idprodmjes INTO idPos
-            from fmk.koncij where id=OLD.PKonto;
+      -- SELECT idprodmjes INTO idPos
+      --      from fmk.koncij where id=OLD.PKonto;
 END IF;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete doks prodavnica %', idPos;
-      EXECUTE 'DELETE FROM p' || idPos || '.pos_doks_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+      EXECUTE 'DELETE FROM p15.pos_doks_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
              USING idpos, OLD.idvd, OLD.brdok, OLD.datdok;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
@@ -453,7 +453,7 @@ ELSIF (TG_OP = 'UPDATE') THEN
           RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert doks prodavnica %', idPos;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_doks_knjig(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
+      EXECUTE 'INSERT INTO p15.pos_doks_knjig(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
             USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
 
       RETURN NEW;
@@ -533,22 +533,20 @@ CREATE OR REPLACE FUNCTION p15.on_pos_doks_knjig_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
-DECLARE
-    idPos varchar := '15';
 BEGIN
 
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete pos_doks_knjig prodavnica %', idPos;
-      EXECUTE 'DELETE FROM p' || idPos || '.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
-         USING idpos, OLD.idvd, OLD.brdok, OLD.datum;
+      RAISE INFO 'delete pos_doks_knjig prodavnica %', OLD.idPos;
+      EXECUTE 'DELETE FROM p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+         USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-      RAISE INFO 'update pos_doks_knjig prodavnica!? %', idPos;
+      RAISE INFO 'update pos_doks_knjig prodavnica!? %', NEW.idPos;
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
-      RAISE INFO 'insert pos_doks_knjig prodavnica %', idPos;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_doks(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
+      RAISE INFO 'insert pos_doks_knjig prodavnica %', NEW.idPos;
+      EXECUTE 'INSERT INTO p15.pos_doks(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
+        USING NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
       RETURN NEW;
 END IF;
 
@@ -890,22 +888,21 @@ CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_crud() RETURNS trigger
     AS $$
 
 DECLARE
-    idPos varchar := '15';
     robaId varchar;
     robaCijena numeric;
 BEGIN
 
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete pos_pos_knjig prodavnica % %', idPos, OLD.idvd;
-      EXECUTE 'DELETE FROM p' || idPos || '.pos_pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
-         USING idpos, OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
+      RAISE INFO 'delete pos_pos_knjig prodavnica % %', OLD.idPos, OLD.idvd;
+      EXECUTE 'DELETE FROM p15.pos_pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+         USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-      RAISE INFO 'update pos_pos_knjig prodavnica!? %', idPos;
+      RAISE INFO 'update pos_pos_knjig prodavnica!? %', NEW.idPos;
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'FIRST insert/update roba u prodavnici';
-      EXECUTE 'SELECT id from p' || idPos || '.roba WHERE id=$1'
+      EXECUTE 'SELECT id from p15.roba WHERE id=$1'
          USING NEW.idroba
          INTO robaId;
 
@@ -916,16 +913,16 @@ ELSIF (TG_OP = 'INSERT') THEN
       END IF;
 
       IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
-         EXECUTE 'UPDATE p' || idPos || '.roba  SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
+         EXECUTE 'UPDATE p15.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
            USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
       ELSE
-         EXECUTE 'INSERT INTO p' || idPos || '.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
+         EXECUTE 'INSERT INTO p15.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
            USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
       END IF;
 
-      RAISE INFO 'insert pos_pos_knjig prodavnica % %', idPos, NEW.idvd;
-      EXECUTE 'INSERT INTO p' || idPos || '.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.idtarifa,NEW.kolicina, NEW.cijena, NEW.ncijena, NEW.kol2, NEW.robanaz, NEW.jmj;
+      RAISE INFO 'insert pos_pos_knjig prodavnica % %', NEW.idPos, NEW.idvd;
+      EXECUTE 'INSERT INTO p15.pos_pos(idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+        USING NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.idtarifa,NEW.kolicina, NEW.cijena, NEW.ncijena, NEW.kol2, NEW.robanaz, NEW.jmj;
       RETURN NEW;
 END IF;
 
@@ -990,7 +987,7 @@ CREATE OR REPLACE FUNCTION public.on_pos_doks_crud() RETURNS trigger
        AS $$
 
 DECLARE
-       knjigShema varchar := 'fmk';
+       knjigShema varchar := 'public';
        pKonto varchar;
        brDok varchar;
        idFirma varchar;
@@ -1003,7 +1000,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
-          from fmk.koncij where idprodmjes=NEW.idpos;
+          from public.koncij where prod=15;
   IF ( NEW.idvd = '42') THEN
        idvdKalk := '49';
    ELSE
@@ -1016,7 +1013,7 @@ ELSE
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
-      from fmk.koncij where idprodmjes=OLD.idpos;
+      from public.koncij where prod=15;
    IF ( OLD.idvd = '42') THEN
         idvdKalk := '49';
     ELSE
@@ -1225,7 +1222,7 @@ CREATE OR REPLACE FUNCTION public.on_pos_pos_crud() RETURNS trigger
        AS $$
 
 DECLARE
-       knjigShema varchar := 'fmk';
+       knjigShema varchar := 'public';
        pKonto varchar;
        brDok varchar;
        pdvStopa numeric;
@@ -1244,7 +1241,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
       idvdKalk := NEW.idvd;
    END IF;
    SELECT id INTO pKonto
-          from fmk.koncij where idprodmjes=NEW.idpos;
+          from public.koncij where prod=15;
    brDok := public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum);
 
 ELSE
@@ -1257,7 +1254,7 @@ ELSE
       idvdKalk := OLD.idvd;
    END IF;
    SELECT id INTO pKonto
-       from fmk.koncij where idprodmjes=OLD.idpos;
+       from public.koncij where prod=15;
    brDok := public.kalk_brdok_iz_pos(OLD.idpos, idvdKalk, OLD.brdok, OLD.datum);
 END IF;
 
@@ -1741,7 +1738,7 @@ $$
 -- select * from public.sfak_prodavnice_by_datum('2018-10-16');
 
 DROP FUNCTION IF EXISTS public.sfak_prodavnice_by_datum(datum date);
-CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer, siff integer, kp integer)
+CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, vcij integer, datd date, rel integer, siff integer, kp integer)
 
 LANGUAGE plpgsql
 AS $$
@@ -1755,7 +1752,7 @@ cDatum := to_char(datum, 'yymmdd');
 -- prod < 199 => prodavnica
 -- select count(*) FROM [Sarajevo].[dbo].[SFAK] LEFT JOIN [Sarajevo].[dbo].[GFAK] ON sfak.brf=gfak.brf  where datd=181016
 -- siff=2000 => neka od prodavnica
-cQuery := 'SELECT rb,prod,ident,kold,cijena,sfak.brf,datd,rel,siff,kp from [dbo].[SFAK]' ||
+cQuery := 'SELECT rb,prod,ident,kold,cijena,sfak.brf,gfak.vcij,datd,rel,siff,kp from [dbo].[SFAK]' ||
           ' LEFT JOIN [dbo].[GFAK] ON sfak.brf=gfak.brf' ||
           ' WHERE prod>0 AND prod<199 AND siff=20000 AND datd=' || cDatum;
 
@@ -1763,10 +1760,10 @@ cQuery := 'SELECT rb,prod,ident,kold,cijena,sfak.brf,datd,rel,siff,kp from [dbo]
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 RAISE INFO 'query: %', cQuery;
-EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd integer, rel integer, siff integer, kp integer) SERVER mssql1' ||
+EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, vcij integer, datd integer, rel integer, siff integer, kp integer) SERVER mssql1' ||
         ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
 
-RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, public.mssql_int_to_date(datd),rel,siff,kp from mssql1_sfak_' || cDatum;
+RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, vcij, public.mssql_int_to_date(datd),rel,siff,kp from mssql1_sfak_' || cDatum;
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 END;
@@ -1808,6 +1805,10 @@ CREATE OR REPLACE FUNCTION public.prodavnica_konto(nProdavnica integer) RETURNS 
 AS $$
 BEGIN
 
+IF ( NOT nProdavnica IN (15) ) THEN
+    RETURN '99999';
+END IF;
+
 RETURN CASE WHEN nProdavnica=1 THEN '13311'
      WHEN nProdavnica=2 THEN '13312'
      WHEN nProdavnica=4 THEN '13314'
@@ -1843,33 +1844,51 @@ DECLARE
    nProdavnica integer;
    nRobaId integer;
    nBrojFakture integer;
+   nVrstaCijena integer;
    nKolicina numeric;
-
-   nBrojFaktureT integer;
-
-   cIdFirma: varchar;
-   cIdVd: varchar DEFAULT '21';
-   cBrDok: varchar;
+   cBrojFaktureT text;
+   cIdFirma varchar DEFAULT '10';
+   cIdVd varchar DEFAULT '21';
+   cBrDok varchar;
 
 BEGIN
      RAISE INFO '==== Magacin % ======', public.magacin_konto(nMagacin);
 
-     nBrojFaktureT := -1;
-
-     FOR nBrojFakture, nProdavnica, nRbr, nRobaId, nKolicina IN
-          SELECT brf, prod, rb, ident, kold from public.sfak_prodavnice_by_datum(dDatum)
+     cBrojFaktureT := 'XX';
+     FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina IN
+          SELECT brf, vcij, prod, rb, ident, kold from public.sfak_prodavnice_by_datum(dDatum)
           WHERE kp=nMagacin
           ORDER BY brf, rb
      LOOP
-          IF ( nBrojFaktureT = -1 ) OR ( nBrojFaktureT <> nBrojFakture ) THEN
-             nBrojFaktureT := nBrojFakture;
-             RAISE INFO '---- Otpremnica % prodavnica: % ----', nBrojFakture, public.prodavnica_konto(nProdavnica);
-             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp) values();
+         IF public.prodavnica_konto(nProdavnica) = '99999' THEN
+           RAISE INFO 'Preskacemo prodavnicu %', nProdavnica;
+           CONTINUE;
+         ELSE
+           RAISE INFO 'Obrada prodavnica %', nProdavnica;
+         END IF;
 
+          IF ( cBrojFaktureT = 'XX' ) OR ( cBrojFaktureT <> (btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'))) ) THEN
+             cBrojFaktureT := btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'));
+             cBrDok := public.kalk_novi_brdok(cIdVd);
+             RAISE INFO '---- Otpremnica % prodavnica: % ----', cBrojFaktureT, public.prodavnica_konto(nProdavnica);
+             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp)
+                 values(
+                   cIdFirma, cIdVd, cBrDok, dDatum,
+                   public.magacin_konto(nMagacin), public.prodavnica_konto(nProdavnica),
+                   cBrojFaktureT
+                 );
           END IF;
 
           RAISE INFO ' stavke:  % % %',  nRbr, public.roba_id_by_sifradob(nRobaId), nKolicina;
-          INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,brfaktp,mkonto,mu_i,pkonto,pu_i,rbr,idroba,kolicina) values();
+          INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,mu_i,pu_i,rbr,idroba,kolicina)
+          values(
+            cIdFirma, cIdVd, cBrDok, dDatum,
+            public.magacin_konto(nMagacin), public.prodavnica_konto(nProdavnica),
+            cBrojFaktureT,
+            '5', '1',
+            nRbr, public.roba_id_by_sifradob(nRobaId),
+            nKolicina
+          );
 
             -- PERFORM p15.nivelacija_start_create( uuidPos );
      END LOOP;

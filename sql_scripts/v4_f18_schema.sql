@@ -9,9 +9,18 @@ GRANT ALL ON TABLE f18.metric TO xtrole;
 GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 DROP TABLE IF EXISTS fmk.metric;
 
-CREATE SEQUENCE f18.metric_metric_id_seq;
-ALTER SEQUENCE f18.metric_metric_id_seq OWNER TO admin;
-GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO admin;
+DO $$
+DECLARE
+  iMax integer;
+BEGIN
+  select max(metric_id) from f18.metric
+    INTO iMax;
+  EXECUTE 'CREATE SEQUENCE IF NOT EXISTS f18.metric_metric_id_seq START ' || to_char(iMax+1, '999999');
+	ALTER sequence f18.metric_metric_id_seq OWNER TO admin;
+  ALTER sequence f18.metric_metric_id_seq OWNED BY f18.metric.metric_id;
+END;
+$$
+CREATE UNIQUE INDEX IF NOT EXISTS metric_metric_id ON f18.metric USING btree(metric_id);
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO xtrole;
 
 
@@ -76,9 +85,7 @@ $$;
 
 ALTER TABLE f18.kalk_doks ALTER COLUMN obradjeno TYPE timestamp with time zone;
 ALTER TABLE f18.kalk_doks ALTER COLUMN obradjeno SET DEFAULT now();
-
 ALTER TABLE f18.kalk_doks ALTER COLUMN korisnik SET DEFAULT current_user;
-
 
 CREATE INDEX IF NOT EXISTS kalk_kalk_datdok ON f18.kalk_kalk USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_kalk_id1 ON f18.kalk_kalk USING btree (idfirma, idvd, brdok, rbr, mkonto, pkonto);
@@ -87,7 +94,6 @@ CREATE INDEX  IF NOT EXISTS kalk_kalk_pkonto ON f18.kalk_kalk USING btree (idfir
 
 CREATE INDEX IF NOT EXISTS kalk_doks_datdok ON f18.kalk_doks USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
-
 
 -- kalk podbr out
 ALTER TABLE IF EXISTS f18.kalk_doks DROP COLUMN IF EXISTS podbr;
@@ -108,9 +114,8 @@ ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS roktr;
 
 
 -- kalk_doks, kalk_kalk - dok_id
-ALTER TABLE f18.kalk_doks ADD COLUMN dok_id bigint
-GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
-ALTER TABLE f18.kalk_kalk ADD COLUMN dok_id bigint;
+ALTER TABLE f18.kalk_doks ADD COLUMN dok_id uuid DEFAULT gen_random_uuid();
+ALTER TABLE f18.kalk_kalk ADD COLUMN dok_id uuid;
 
 --- f18.tarifa --------------------------------------------------
 CREATE TABLE IF NOT EXISTS f18.tarifa AS  TABLE fmk.tarifa;
@@ -205,11 +210,11 @@ DROP TABLE IF EXISTS fmk.trfp;
 ALTER TABLE f18.trfp DROP COLUMN IF EXISTS match_code CASCADE;
 
 -- select kalk_dok_id('10','11','00000100', '2018-01-09');
-CREATE OR REPLACE FUNCTION public.kalk_dok_id(cIdFirma varchar, cIdVD varchar, cBrDok varchar, dDatDok date) RETURNS bigint
+CREATE OR REPLACE FUNCTION public.kalk_dok_id(cIdFirma varchar, cIdVD varchar, cBrDok varchar, dDatDok date) RETURNS uuid
 LANGUAGE plpgsql
 AS $$
 DECLARE
-   dok_id bigint;
+   dok_id uuid;
 BEGIN
    EXECUTE 'SELECT dok_id FROM f18.kalk_doks WHERE idfirma=$1 AND idvd=$2 AND brdok=$3 AND datdok=$4'
      USING cIdFirma, cIdVd, cBrDok, dDatDok
@@ -242,3 +247,40 @@ CREATE TABLE IF NOT EXISTS f18.fakt_fisk_doks (
     korisnik text DEFAULT current_user
 );
 ALTER TABLE f18.fakt_fisk_doks OWNER TO admin;
+
+-- ALTER TABLE f18.konto ADD COLUMN IF NOT EXISTS  id_2 uuid DEFAULT gen_random_uuid();
+
+
+
+-- kalk_doks sevence za brojace dokumenata
+-- f18.kalk_brdok_seq_02, f18.kalk_brdok_seq_21, f18.kalk_brdok_seq_22
+DO $$
+DECLARE
+  cIdVd text;
+  nMaxBrDok integer;
+  cQuery text;
+BEGIN
+  FOR cIdVd IN SELECT unnest('{"02","21","72"}'::text[])
+  LOOP
+     RAISE info 'idvd=%', cIdVd;
+	 SELECT COALESCE(max(to_number(regexp_replace(brdok, '\D', '', 'g'),'9999999')),0) from f18.kalk_doks where idvd=cIdVd
+		  INTO nMaxBrDok;
+	 RAISE INFO '%', to_char(nMaxBrDok + 1, '999999999');
+	 cQuery := 'CREATE SEQUENCE IF NOT EXISTS f18.kalk_brdok_seq_' || cIdVd || ' START ' || to_char(nMaxBrDok + 1, '999999999');
+	 RAISE INFO '%', cQuery;
+	 EXECUTE cQuery;
+	 cQuery := 'ALTER SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' OWNER to admin';
+	 EXECUTE cQuery;
+	 cQuery := 'GRANT ALL ON SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' TO xtrole';
+	 EXECUTE cQuery;
+  END LOOP;
+END;
+$$
+
+CREATE OR REPLACE FUNCTION public.kalk_novi_brdok(cIdVd varchar) RETURNS varchar
+   LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN lpad(btrim(to_char(nextval('f18.kalk_brdok_seq_' || cIdVd), '99999999')), 8, '0');
+END;
+$$
