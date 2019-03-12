@@ -13,7 +13,6 @@
 
 FIELD id, naz
 
-
 FUNCTION find_partner_by_naz_or_id( cId )
 
    LOCAL cAlias := "PARTN"
@@ -145,7 +144,6 @@ FUNCTION o_konto( cId )
       SEEK cId
    ENDIF
 
-altd()
    RETURN !Eof()
 
 

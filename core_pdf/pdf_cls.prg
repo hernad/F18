@@ -304,7 +304,7 @@ METHOD MaxRow() CLASS PDFClass
       CASE 8
          RETURN Round( 65 * ::nXScale, 0 )
       CASE 7
-         RETURN Round( 80 * ::nXScale, 0 )
+         RETURN Round( 75 * ::nXScale, 0 )
       CASE 6
          RETURN Round( 82 * ::nXScale, 0 )
       CASE 5

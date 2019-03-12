@@ -162,9 +162,7 @@ STATIC FUNCTION stampaj_tkm( hParams )
       _a_opis := SjeciStr( cOpisKnjizenja, s_nOpis )
 
       @ PRow(), _n_opis := PCol() + 1 SAY _a_opis[ 1 ]
-
       @ PRow(), _n_iznosi := PCol() + 1 SAY Str( field->mpp_dug + ( - field->mp_rabat ), 12, 2 )
-
       @ PRow(), PCol() + 1 SAY Str( ( field->mp_pot + field->mp_porez ), 12, 2 )
 
       nTDug += field->mpp_dug + ( - field->mp_rabat )

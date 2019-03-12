@@ -43,9 +43,10 @@ FUNCTION update_rec_server_and_dbf( cTabela, hRecord, nAlgoritam, cTransaction )
       lLock := .F.
    ENDIF
 
-  // IF "roba_p" $ cTabela
-  //    AltD()
-  // ENDIF
+  IF cTabela == "roba_prodavnica"
+     Alert("roba_prodavnica - izmjene zabranjene!")
+     RETURN .F.
+  ENDIF
 
    // trebamo where str za hRecord rec
    set_table_values_algoritam_vars( @cTabela, @hRecord, @nAlgoritam, @cTransaction, @hDbfRec, @hAlgoritam, @cWhereString, @_alg_tag )
@@ -209,9 +210,13 @@ FUNCTION delete_rec_server_and_dbf( cTabela, hRecord, nAlgoritam, cTransaction )
    ELSE
       lLock := .F.
    ENDIF
-
    lRet := .T.
 
+   IF cTabela == "roba_prodavnica"
+      Alert("roba_prodavnica - izmjene zabranjene!")
+      RETURN .F.
+   ENDIF
+   
    set_table_values_algoritam_vars( @cTabela, @hRecord, @nAlgoritam, @cTransaction, @hDbfRec, @hAlgoritam, @cWhereString, @_alg_tag )
 
    IF Alias() <> hDbfRec[ "alias" ]
@@ -393,7 +398,6 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
    ENDIF
 
    hDbfRec := get_a_dbf_rec( cTabela )
-
    cTabela := hDbfRec[ "table" ]    // ako je alias proslijedjen kao ulazni parametar, prebaci se na dbf_table
 
    IF " _p" $ cTabela  // HACK "roba _p"
@@ -417,7 +421,6 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
    IF cTransaction == NIL  // nema zapoceta transakcija
       cTransaction := "FULL"   // pocni i zavrsi trasakciju
    ENDIF
-
 
    hAlgoritam := hDbfRec[ "algoritam" ][ nAlgoritam ]
    lSqlTable := hDbfRec[ "sql" ]

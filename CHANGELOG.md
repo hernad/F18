@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-12
+
+- TKV v2
+
 ## 2019-03-06
 
 - POS PM  --pos-pm

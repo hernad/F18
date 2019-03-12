@@ -19,7 +19,8 @@ BEGIN
 	ALTER sequence f18.metric_metric_id_seq OWNER TO admin;
   ALTER sequence f18.metric_metric_id_seq OWNED BY f18.metric.metric_id;
 END;
-$$
+$$;
+
 CREATE UNIQUE INDEX IF NOT EXISTS metric_metric_id ON f18.metric USING btree(metric_id);
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO xtrole;
 

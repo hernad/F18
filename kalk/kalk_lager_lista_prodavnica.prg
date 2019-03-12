@@ -16,7 +16,6 @@ STATIC s_cM
 STATIC s_oPDF
 STATIC PRINT_LEFT_SPACE := 0
 
-
 FUNCTION kalk_lager_lista_prodavnica()
 
    PARAMETERS lPocStanje
@@ -28,7 +27,8 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL cSrKolNula := "0"
    LOCAL _curr_user := "<>"
    LOCAL cMpcIzSif := "N"
-   LOCAL cMinK := "N"
+
+   // LOCAL cMinK := "N"
    LOCAL _istek_roka := CToD( "" )
 
    LOCAL cPrintPdfOdt := "1"
@@ -53,6 +53,24 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL cFilterIdVD
    LOCAL cFilterPartner
    LOCAL hParamsOdt
+   LOCAL nCol1, nCol0
+   LOCAL cGrupacijaK1
+   LOCAL cPrikazNuleDN := "D"
+   LOCAL nUlazKol, nIzlazKol, nPredhKol
+   LOCAL nMpvUlaz, nMpvIzlaz, nNvUlaz, nNvIzlaz
+   LOCAL nPredhMpvSaldo, nPredhNvSaldo
+   LOCAL nPom, nLen, nRbr
+   LOCAL nTULaz
+   LOCAL nTIzlaz
+   LOCAL nTPKol
+   LOCAL nTMPVU
+   LOCAL nTMPVI
+   LOCAL nTNVU
+   LOCAL nTNVI
+   LOCAL nTRabat
+   LOCAL nTPMPV
+   LOCAL nTPNV
+   LOCAL cSredCij := "N"
 
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "1330", FIELD_LENGTH_IDKONTO )
@@ -69,25 +87,24 @@ FUNCTION kalk_lager_lista_prodavnica()
       BoxC()
    ENDIF
 
-   cNula := "D"
-   cK9 := Space( 3 )
+   cPrikazNuleDN := "D"
+   // cK9 := Space( 3 )
    dDatOd := Date()
    dDatDo := Date()
 
-   PRIVATE cNula := "D"
-   PRIVATE cSredCij := "N"
+   // PRIVATE cPrikazNuleDN := "D"
+   // PRIVATE cSredCij := "N"
    PRIVATE cPrikazDob := "N"
    PRIVATE cPlVrsta := Space( 1 )
-   PRIVATE cPrikK2 := "N"
+   // PRIVATE cPrikK2 := "N"
 
    Box(, 18, 70 )
 
-   cGrupacija := Space( 4 )
-
+   cGrupacijaK1 := Space( 4 )
    IF !lPocStanje
       cIdKonto := fetch_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cIdKonto )
       cPrikazNabavneVrijednosti := fetch_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, "N" )
-      cNula := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cNula )
+      cPrikazNuleDN := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cPrikazNuleDN )
       dDatOd := fetch_metric( "kalk_lager_lista_prod_datum_od", _curr_user, dDatOd )
       dDatDo := fetch_metric( "kalk_lager_lista_prod_datum_do", _curr_user, dDatDo )
       cPrintPdfOdt := fetch_metric( "kalk_lager_lista_prod_print", _curr_user, cPrintPdfOdt )
@@ -97,7 +114,6 @@ FUNCTION kalk_lager_lista_prodavnica()
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
       ?? self_organizacija_id(), "-", self_organizacija_naziv()
-
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto   " GET cIdKonto VALID P_Konto( @cIdKonto )
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Artikli " GET cIdRobaUslov PICT "@!S50"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Tarife  " GET cIdTarifaUslov PICT "@!S50"
@@ -105,18 +121,16 @@ FUNCTION kalk_lager_lista_prodavnica()
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Vrste dokumenata  " GET cIdVdUslov PICT "@!S30"
       @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikaz Nab.vrijednosti D/N" GET cPrikazNabavneVrijednosti  VALID cPrikazNabavneVrijednosti $ "DN" PICT "@!"
       @ box_x_koord() + 7, Col() + 1 SAY8 "MPC iz šifarnika D/N" GET cMpcIzSif VALID cMpcIzSif $ "DN" PICT "@!"
-      @ box_x_koord() + 8, box_y_koord() + 2 SAY "Prikaz stavki kojima je MPV 0 D/N" GET cNula  VALID cNula $ "DN" PICT "@!"
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY "Prikaz stavki kojima je MPV 0 D/N" GET cPrikazNuleDN  VALID cPrikazNuleDN $ "DN" PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY "Datum od " GET dDatOd
       @ box_x_koord() + 9, Col() + 2 SAY "do" GET dDatDo
       @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Varijanta štampe PDF/ODT (1/2)" GET cPrintPdfOdt VALID cPrintPdfOdt $ "12" PICT "@!"
-
       IF lPocStanje
          @ box_x_koord() + 11, box_y_koord() + 2 SAY "sredi kol=0, nv<>0 (0/1/2)" GET cSrKolNula VALID cSrKolNula $ "012" PICT "@!"
       ENDIF
-
-      @ box_x_koord() + 13, box_y_koord() + 2 SAY "Odabir grupacije (prazno-svi) GET" GET cGrupacija PICT "@!"
+      @ box_x_koord() + 13, box_y_koord() + 2 SAY "Odabir grupacije k1 (prazno-svi)" GET cGrupacijaK1 PICT "@!"
       @ box_x_koord() + 14, box_y_koord() + 2 SAY "Prikaz prethodnog stanja" GET cPredhStanje PICT "@!" VALID cPredhStanje $ "DN"
-      @ box_x_koord() + 14, Col() + 2 SAY8 "Prikaz samo kritičnih zaliha (D/N/O) ?" GET cMinK PICT "@!" VALID cMink $ "DNO"
+      // @ box_x_koord() + 14, Col() + 2 SAY8 "Prikaz samo kritičnih zaliha (D/N/O) ?" GET cMinK PICT "@!" VALID cMink $ "DNO"
 
       READ
       ESC_BCR
@@ -146,7 +160,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    IF !lPocStanje
       set_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cIdKonto )
       set_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, cPrikazNabavneVrijednosti )
-      set_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cNula )
+      set_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cPrikazNuleDN )
       set_metric( "kalk_lager_lista_prod_datum_od", _curr_user, dDatOd )
       set_metric( "kalk_lager_lista_prod_datum_do", _curr_user, dDatDo )
       set_metric( "kalk_lager_lista_prod_print", _curr_user, cPrintPdfOdt )
@@ -165,19 +179,19 @@ FUNCTION kalk_lager_lista_prodavnica()
    IF lPocStanje
       o_kalk_pripr()
    ENDIF
-   lPrikK2 := .F.
-   IF cPrikK2 == "D"
-      lPrikK2 := .T.
-   ENDIF
+   // lPrikK2 := .F.
+   // IF cPrikK2 == "D"
+   // lPrikK2 := .T.
+   // ENDIF
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    find_kalk_by_pkonto_idroba( self_organizacija_id(), cIdKonto )
    MsgC()
 
-   PRIVATE lSMark := .F.
-   IF Right( Trim( cIdRobaUslov ), 1 ) = "*"
-      lSMark := .T.
-   ENDIF
+   // PRIVATE lSMark := .F.
+   // IF Right( Trim( cIdRobaUslov ), 1 ) = "*"
+   // lSMark := .T.
+   // ENDIF
 
    IF cIdRobaFilter <> ".t."
       cFilter += ".and." + cIdRobaFilter   // roba
@@ -200,7 +214,7 @@ FUNCTION kalk_lager_lista_prodavnica()
       hParamsOdt := hb_Hash()
       hParamsOdt[ "idfirma" ] := self_organizacija_id()
       hParamsOdt[ "idkonto" ] := cIdKonto
-      hParamsOdt[ "nule" ] := cNula == "D"
+      hParamsOdt[ "nule" ] := cPrikazNuleDN == "D"
       hParamsOdt[ "datum_od" ] := dDatOd
       hParamsOdt[ "datum_do" ] := dDatDo
       kalk_prodavnica_llp_odt( hParamsOdt )
@@ -260,18 +274,18 @@ FUNCTION kalk_lager_lista_prodavnica()
 
       cIdRoba := kalk->Idroba
       select_o_roba( cIdRoba )
-      nMink := roba->mink
+      // nMink := roba->mink
       SELECT KALK
-      nPKol := 0
-      nPNV := 0
-      nPMPV := 0
-      nUlaz := 0
-      nIzlaz := 0
-      nMPVU := 0
-      nMPVI := 0
-      nNVU := 0
-      nNVI := 0
-      nRabat := 0
+      nPredhKol := 0
+      nPredhNvSaldo := 0
+      nPredhMpvSaldo := 0
+      nUlazKol := 0
+      nIzlazKol := 0
+      nMpvUlaz := 0
+      nMpvIzlaz := 0
+      nNvUlaz := 0
+      nNvIzlaz := 0
+      // nRabat := 0
 
       IF roba->tip $ "TU"
          SKIP
@@ -284,23 +298,22 @@ FUNCTION kalk_lager_lista_prodavnica()
          IF cPredhStanje == "D"
             IF kalk->datdok < dDatOd
                IF kalk->pu_i == "1"
-                  kalk_sumiraj_kolicinu( kalk->kolicina, 0, @nPKol, 0, lPocStanje, lPrikK2 )
-                  nPMPV += kalk->mpcsapp * kalk->kolicina
-                  nPNV += kalk->nc * ( kalk->kolicina )
+                  kalk_sumiraj_kolicinu( kalk->kolicina, 0, @nPredhKol, 0, lPocStanje )
+                  nPredhMpvSaldo += kalk->mpcsapp * kalk->kolicina
+                  nPredhNvSaldo += kalk->nc * ( kalk->kolicina )
 
                ELSEIF kalk->pu_i == "5"
-
-                  kalk_sumiraj_kolicinu( -kalk->kolicina , 0, @nPKol, 0, lPocStanje, lPrikK2 )
-                  nPMPV -= kalk->mpcsapp * kalk->kolicina
-                  nPNV -= kalk->nc * kalk->kolicina
+                  kalk_sumiraj_kolicinu( - kalk->kolicina, 0, @nPredhKol, 0, lPocStanje )
+                  nPredhMpvSaldo -= kalk->mpcsapp * kalk->kolicina
+                  nPredhNvSaldo -= kalk->nc * kalk->kolicina
 
                ELSEIF kalk->pu_i == "3"
                   // nivelacija
-                  nPMPV += kalk->mpcsapp * kalk->kolicina
+                  nPredhMpvSaldo += kalk->mpcsapp * kalk->kolicina
                ELSEIF pu_i == "I"
-                  kalk_sumiraj_kolicinu( - ( kalk->gKolicin2 ), 0, @nPKol, 0, lPocStanje, lPrikK2 )
-                  nPMPV -= kalk->mpcsapp * kalk->gkolicin2
-                  nPNV -= kalk->nc * kalk->gkolicin2
+                  kalk_sumiraj_kolicinu( - kalk->gKolicin2, 0, @nPredhKol, 0, lPocStanje )
+                  nPredhMpvSaldo -= kalk->mpcsapp * kalk->gkolicin2
+                  nPredhNvSaldo -= kalk->nc * kalk->gkolicin2
                ENDIF
             ENDIF
          ELSE
@@ -315,8 +328,8 @@ FUNCTION kalk_lager_lista_prodavnica()
             LOOP
          ENDIF
 
-         IF !Empty( cGrupacija )
-            IF cGrupacija <> roba->k1
+         IF !Empty( cGrupacijaK1 )
+            IF cGrupacijaK1 <> roba->k1
                SKIP
                LOOP
             ENDIF
@@ -325,40 +338,40 @@ FUNCTION kalk_lager_lista_prodavnica()
          IF kalk->DatDok >= dDatOd
             // nisu predhodni podaci
             IF kalk->pu_i == "1"
-               kalk_sumiraj_kolicinu( kalk->kolicina, 0, @nUlaz, 0, lPocStanje, lPrikK2 )
+               kalk_sumiraj_kolicinu( kalk->kolicina, 0, @nUlazKol, 0, lPocStanje )
                nCol1 := PCol() + 1
-               nMPVU += kalk->mpcsapp * kalk->kolicina
-               nNVU += kalk->nc * ( kalk->kolicina )
+               nMpvUlaz += kalk->mpcsapp * kalk->kolicina
+               nNvUlaz += kalk->nc * ( kalk->kolicina )
             ELSEIF kalk->pu_i == "5"
 
                IF kalk->idvd $ "12#13"
-                  kalk_sumiraj_kolicinu( - ( kalk->kolicina ), 0, @nUlaz, 0, lPocStanje, lPrikK2 )
-                  nMPVU -= kalk->mpcsapp * kalk->kolicina
-                  nNVU -= kalk->nc * kalk->kolicina
+                  kalk_sumiraj_kolicinu( - kalk->kolicina, 0, @nUlazKol, 0, lPocStanje )
+                  nMpvUlaz -= kalk->mpcsapp * kalk->kolicina
+                  nNvUlaz -= kalk->nc * kalk->kolicina
                ELSE
-                  kalk_sumiraj_kolicinu( 0, kalk->kolicina, 0, @nIzlaz, lPocStanje, lPrikK2 )
-                  nMPVI += kalk->mpcsapp * kalk->kolicina
-                  nNVI += kalk->nc * kalk->kolicina
+                  kalk_sumiraj_kolicinu( 0, kalk->kolicina, 0, @nIzlazKol, lPocStanje )
+                  nMpvIzlaz += kalk->mpcsapp * kalk->kolicina
+                  nNvIzlaz += kalk->nc * kalk->kolicina
                ENDIF
 
             ELSEIF kalk->pu_i == "3"
                // nivelacija
-               nMPVU += kalk->mpcsapp * kalk->kolicina
+               nMpvUlaz += kalk->mpcsapp * kalk->kolicina
             ELSEIF kalk->pu_i == "I"
-               kalk_sumiraj_kolicinu( 0, kalk->gkolicin2, 0, @nIzlaz, lPocStanje, lPrikK2 )
-               nMPVI += kalk->mpcsapp * kalk->gkolicin2
-               nNVI += kalk->nc * kalk->gkolicin2
+               kalk_sumiraj_kolicinu( 0, kalk->gkolicin2, 0, @nIzlazKol, lPocStanje )
+               nMpvIzlaz += kalk->mpcsapp * kalk->gkolicin2
+               nNvIzlaz += kalk->nc * kalk->gkolicin2
             ENDIF
          ENDIF
          SKIP
       ENDDO
 
-      IF cMinK == "D" .AND. ( nUlaz - nIzlaz - nMink ) > 0
-         LOOP
-      ENDIF
+      // IF cMinK == "D" .AND. ( nUlazKol - nIzlazKol - nMink ) > 0
+      // LOOP
+      // ENDIF
 
       // ne prikazuj stavke 0
-      IF cNula == "D" .OR. Round( nMPVU - nMPVI + nPMPV, 2 ) <> 0
+      IF cPrikazNuleDN == "D" .OR. Round( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo, 2 ) <> 0
 
          check_nova_strana( bZagl, s_oPDF )
          select_o_roba(  cIdRoba )
@@ -372,17 +385,17 @@ FUNCTION kalk_lager_lista_prodavnica()
 
          nCol0 := PCol() + 1
          IF cPredhStanje == "D"
-            @ PRow(), PCol() + 1 SAY nPKol PICT kalk_pic_kolicina_bilo_gpickol()
+            @ PRow(), PCol() + 1 SAY nPredhKol PICT kalk_pic_kolicina_bilo_gpickol()
          ENDIF
 
-         @ PRow(), PCol() + 1 SAY nUlaz PICT kalk_pic_kolicina_bilo_gpickol()
-         @ PRow(), PCol() + 1 SAY nIzlaz PICT kalk_pic_kolicina_bilo_gpickol()
-         @ PRow(), PCol() + 1 SAY nUlaz - nIzlaz + nPkol PICT kalk_pic_kolicina_bilo_gpickol()
+         @ PRow(), PCol() + 1 SAY nUlazKol PICT kalk_pic_kolicina_bilo_gpickol()
+         @ PRow(), PCol() + 1 SAY nIzlazKol PICT kalk_pic_kolicina_bilo_gpickol()
+         @ PRow(), PCol() + 1 SAY nUlazKol - nIzlazKol + nPredhKol PICT kalk_pic_kolicina_bilo_gpickol()
 
          IF lPocStanje
 
             SELECT kalk_pripr
-            IF Round( nUlaz - nIzlaz, 4 ) <> 0 .AND. cSrKolNula $ "01"
+            IF Round( nUlazKol - nIzlazKol, 4 ) <> 0 .AND. cSrKolNula $ "01"
                APPEND BLANK
                REPLACE idFirma WITH cIdfirma
                REPLACE idroba WITH cIdRoba
@@ -390,19 +403,19 @@ FUNCTION kalk_lager_lista_prodavnica()
                REPLACE datdok WITH dDatDo + 1
                REPLACE idTarifa WITH roba->idtarifa
                // REPLACE datfaktp WITH dDatDo + 1
-               REPLACE kolicina WITH nUlaz - nIzlaz
+               REPLACE kolicina WITH nUlazKol - nIzlazKol
                REPLACE idvd WITH "80"
                REPLACE brdok WITH cBrDokPocStanje
-               REPLACE nc WITH ( nNVU - nNVI + nPNV ) / ( nUlaz - nIzlaz + nPKol )
-               REPLACE mpcsapp WITH ( nMPVU - nMPVI + nPMPV ) / ( nulaz - nizlaz + nPKol )
+               REPLACE nc WITH ( nNvUlaz - nNvIzlaz + nPredhNvSaldo ) / ( nUlazKol - nIzlazKol + nPredhKol )
+               REPLACE mpcsapp WITH ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ) / ( nUlazKol - nIzlazKol + nPredhKol )
                REPLACE TMarza2 WITH "A"
                IF koncij->NAZ == "N1"
                   REPLACE vpc WITH nc
                ENDIF
 
-            ELSEIF cSrKolNula $ "12" .AND. Round( nUlaz - nIzlaz, 4 ) = 0
+            ELSEIF cSrKolNula $ "12" .AND. Round( nUlazKol - nIzlazKol, 4 ) = 0
 
-               IF ( nMPVU - nMPVI + nPMPV ) <> 0
+               IF ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ) <> 0
                   // 1 stavka (minus)
                   APPEND BLANK
                   REPLACE idFirma WITH cIdfirma
@@ -436,10 +449,10 @@ FUNCTION kalk_lager_lista_prodavnica()
                   REPLACE brfaktp WITH "#KOREK"
                   REPLACE nc WITH 0
                   REPLACE mpcsapp WITH ;
-                     ( nMPVU - nMPVI + nPMPV )
+                     ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo )
                   REPLACE TMarza2 WITH "A"
                   IF koncij->NAZ == "N1"
-                     REPLACE vpc WITH nc
+                     REPLACE vpc WITH kalk_pripr->nc
                   ENDIF
                ENDIF
             ENDIF
@@ -448,21 +461,21 @@ FUNCTION kalk_lager_lista_prodavnica()
          ENDIF
 
          nCol1 := PCol() + 1
-         @ PRow(), PCol() + 1 SAY nMPVU PICT kalk_pic_iznos_bilo_gpicdem()
-         @ PRow(), PCol() + 1 SAY nMPVI PICT kalk_pic_iznos_bilo_gpicdem()
-         @ PRow(), PCol() + 1 SAY nMPVU - nMPVI + nPMPV PICT kalk_pic_iznos_bilo_gpicdem()
+         @ PRow(), PCol() + 1 SAY nMpvUlaz PICT kalk_pic_iznos_bilo_gpicdem()
+         @ PRow(), PCol() + 1 SAY nMpvIzlaz PICT kalk_pic_iznos_bilo_gpicdem()
+         @ PRow(), PCol() + 1 SAY nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo PICT kalk_pic_iznos_bilo_gpicdem()
 
          select_o_koncij( cIdKonto )
          select_o_roba( cIdRoba )
          _mpc := kalk_get_mpc_by_koncij_pravilo()
 
          SELECT kalk
-         IF Round( nUlaz - nIzlaz + nPKOL, 2 ) <> 0
-            @ PRow(), PCol() + 1 SAY ( nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ) PICT kalk_pic_cijena_bilo_gpiccdem()
+         IF Round( nUlazKol - nIzlazKol + nPredhKol, 2 ) <> 0
+            @ PRow(), PCol() + 1 SAY ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ) / ( nUlazKol - nIzlazKol + nPredhKol ) PICT kalk_pic_cijena_bilo_gpiccdem()
 
          ELSE // stanje artikla je 0
             @ PRow(), PCol() + 1 SAY 0 PICT kalk_pic_iznos_bilo_gpicdem()
-            IF Round( ( nMPVU - nMPVI + nPMPV ), 4 ) <> 0
+            IF Round( ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ), 4 ) <> 0
                ?? " ERR"
                lImaGresaka := .T.
             ENDIF
@@ -470,7 +483,7 @@ FUNCTION kalk_lager_lista_prodavnica()
          ENDIF
 
          IF cSredCij == "D"
-            @ PRow(), PCol() + 1 SAY ( nNVU - nNVI + nPNV + nMPVU - nMPVI + nPMPV ) / ( nUlaz - nIzlaz + nPKol ) / 2 PICT "9999999.99"
+            @ PRow(), PCol() + 1 SAY ( nNvUlaz - nNvIzlaz + nPredhNvSaldo + nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ) / ( nUlazKol - nIzlazKol + nPredhKol ) / 2 PICT "9999999.99"
          ENDIF
 
          IF Len( aNazRoba ) > 1 .OR. cPredhStanje == "D" .OR. cPrikazNabavneVrijednosti == "D"
@@ -482,37 +495,37 @@ FUNCTION kalk_lager_lista_prodavnica()
          ENDIF
 
          IF cPredhStanje == "D"
-            @ PRow(), PCol() + 1 SAY nPMPV PICT kalk_pic_iznos_bilo_gpicdem()
+            @ PRow(), PCol() + 1 SAY nPredhMpvSaldo PICT kalk_pic_iznos_bilo_gpicdem()
          ENDIF
 
          IF cPrikazNabavneVrijednosti == "D"
             @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_kolicina_bilo_gpickol() ) )
             @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_kolicina_bilo_gpickol() ) )
 
-            IF Round( nUlaz - nIzlaz + nPKol, 4 ) <> 0
-               @ PRow(), PCol() + 1 SAY ( nNVU - nNVI + nPNV ) / ( nUlaz - nIzlaz + nPKol ) PICT kalk_pic_iznos_bilo_gpicdem()
+            IF Round( nUlazKol - nIzlazKol + nPredhKol, 4 ) <> 0
+               @ PRow(), PCol() + 1 SAY ( nNvUlaz - nNvIzlaz + nPredhNvSaldo ) / ( nUlazKol - nIzlazKol + nPredhKol ) PICT kalk_pic_iznos_bilo_gpicdem()
             ELSE
                @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_iznos_bilo_gpicdem() ) )
             ENDIF
 
-            @ PRow(), nCol1 SAY nNVU PICT kalk_pic_iznos_bilo_gpicdem()
+            @ PRow(), nCol1 SAY nNvUlaz PICT kalk_pic_iznos_bilo_gpicdem()
             // @ prow(),pcol()+1 SAY space(len(kalk_pic_iznos_bilo_gpicdem()))
-            @ PRow(), PCol() + 1 SAY nNVI PICT kalk_pic_iznos_bilo_gpicdem()
-            @ PRow(), PCol() + 1 SAY nNVU - nNVI + nPNV PICT kalk_pic_iznos_bilo_gpicdem()
+            @ PRow(), PCol() + 1 SAY nNvIzlaz PICT kalk_pic_iznos_bilo_gpicdem()
+            @ PRow(), PCol() + 1 SAY nNvUlaz - nNvIzlaz + nPredhNvSaldo PICT kalk_pic_iznos_bilo_gpicdem()
             @ PRow(), PCol() + 1 SAY _mpc PICT kalk_pic_cijena_bilo_gpiccdem()
 
          ENDIF
 
-         nTULaz += nUlaz
-         nTIzlaz += nIzlaz
-         nTPKol += nPKol
-         nTMPVU += nMPVU
-         nTMPVI += nMPVI
-         nTNVU += nNVU
-         nTNVI += nNVI
-         nTRabat += nRabat
-         nTPMPV += nPMPV
-         nTPNV += nPNV
+         nTULaz += nUlazKol
+         nTIzlaz += nIzlazKol
+         nTPKol += nPredhKol
+         nTMPVU += nMpvUlaz
+         nTMPVI += nMpvIzlaz
+         nTNVU += nNvUlaz
+         nTNVI += nNvIzlaz
+         // nTRabat += nRabat
+         nTPMPV += nPredhMpvSaldo
+         nTPNV += nPredhNvSaldo
 
          IF roba_barkod_pri_unosu()
             ? Space( 6 ) + roba->barkod
@@ -534,11 +547,10 @@ FUNCTION kalk_lager_lista_prodavnica()
    @ PRow(), PCol() + 1 SAY nTUlaz - nTIzlaz + nTPKol PICT kalk_pic_kolicina_bilo_gpickol()
 
    nCol1 := PCol() + 1
-
    @ PRow(), PCol() + 1 SAY nTMPVU PICT kalk_pic_iznos_bilo_gpicdem()
    @ PRow(), PCol() + 1 SAY nTMPVI PICT kalk_pic_iznos_bilo_gpicdem()
    @ PRow(), PCol() + 1 SAY nTMPVU - nTMPVI + nTPMPV PICT kalk_pic_iznos_bilo_gpicdem()
-   @ PRow(), PCol() + 1 SAY nTMpv PICT kalk_pic_iznos_bilo_gpicdem()
+   @ PRow(), PCol() + 1 SAY nTMpv  PICT kalk_pic_iznos_bilo_gpicdem()
 
    IF cPrikazNabavneVrijednosti == "D"
       @ PRow() + 1, nCol0 - 1 SAY ""
@@ -579,13 +591,10 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
 
    LOCAL cTmp, nPom, cSc1, cSc2
 
-
    Preduzece()
-
    IF !Empty( hZaglParams[ "partneri_uslov" ] )
       ?U "Obuhvaćeni sljedeći partneri:", Trim( hZaglParams[ "partneri_uslov" ] )
    ENDIF
-
    select_o_konto( hZaglParams[ "konto" ] )
    ? "Prodavnica:", hZaglParams[ "konto" ], "-", konto->naz
 
@@ -646,10 +655,10 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
       cTmp += PadC( "ulaz", nPom ) + " " + PadC( "izlaz", nPom ) + "*"
       cTmp += PadC( "STANJE", nPom ) + "*"
       nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
-      cTmp += PadC( "PV.Dug.", nPom ) + "*"
-      cTmp += PadC( "PV.Pot.", nPom ) + "*"
-      cTmp += PadC( "PV", nPom ) + "*"
-      cTmp += PadC( "PC.SA PDV", nPom ) + "*"
+      cTmp += PadC( "MPV.Dug.", nPom ) + "*"
+      cTmp += PadC( "MPV.Pot.", nPom ) + "*"
+      cTmp += PadC( "MPV", nPom ) + "*"
+      cTmp += PadC( "MPC", nPom ) + "*"
       cTmp += cSC1
       ?U cTmp
 
@@ -665,26 +674,22 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
       cTmp += cSC2
 
       ?U cTmp
-
       IF hZaglParams[ "nabavna" ]
          cTmp := "     *          *" + Space( 30 ) + "*   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
          cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
          nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
-         cTmp += PadC( "SR.NAB.C", nPom ) + "*"
+         cTmp += PadC( "Ncj", nPom ) + "*"
          cTmp += PadC( "NV.Dug.", nPom ) + "*"
          cTmp += PadC( "NV.Pot", nPom ) + "*"
          cTmp += PadC( "NV", nPom ) + "*"
          cTmp += REPL( " ", nPom ) + "*"
          cTmp += cSC2
-
          ?U cTmp
-
       ENDIF
    ENDIF
 
    IF hZaglParams[ "predhodno" ]
-
       cTmp := "     *    1     *" + PadC( "2", 30 ) + "* 3 *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "4", nPom ) + "*"
@@ -701,7 +706,6 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
       ?U cTmp
 
    ELSE
-
       cTmp := "     *    1     *" + PadC( "2", 30 ) + "* 3 *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "4", nPom ) + "*"
@@ -713,7 +717,6 @@ STATIC FUNCTION kalk_zagl_lager_lista_prodavnica( hZaglParams )
       cTmp += PadC( "6 - 7", nPom ) + "*"
       cTmp += PadC( "8", nPom ) + "*"
       cTmp += cSC2
-
       ?U cTmp
 
    ENDIF
@@ -739,12 +742,11 @@ STATIC FUNCTION kalk_prodavnica_llp_odt( hParamsOdt )
    RETURN .T.
 
 
-
 STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
    LOCAL _idfirma := hParamsOdt[ "idfirma" ]
-   LOCAL _idkonto := hParamsOdt[ "idkonto" ]
-   LOCAL _idroba, _mpc, _mpcs
+   LOCAL cIdKonto := hParamsOdt[ "idkonto" ]
+   LOCAL cIdroba, _mpc, _mpcs
    LOCAL _ulaz, _izlaz, _nv_u, _nv_i, _mpv_u, _mpv_i, _rabat
    LOCAL _t_ulaz, _t_izlaz, _t_nv_u, _t_nv_i, _t_mpv_u, _t_mpv_i, _t_rabat
    LOCAL _rbr := 0
@@ -768,10 +770,10 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
    SELECT kalk
 
-   DO WHILE !Eof() .AND. _idfirma + _idkonto == kalk->idfirma + kalk->pkonto .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. _idfirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. IspitajPrekid()
 
-      _idroba := kalk->Idroba
-      select_o_roba( _idroba )
+      cIdroba := kalk->Idroba
+      select_o_roba( cIdroba )
 
       SELECT kalk
 
@@ -782,8 +784,7 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
       _mpv_u := 0
       _mpv_i := 0
       _rabat := 0
-
-      DO WHILE !Eof() .AND. _idfirma + _idkonto + _idroba == kalk->idfirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. _idfirma + cIdKonto + cIdroba == kalk->idfirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
 
          IF kalk->datdok < hParamsOdt[ "datum_od" ] .OR. kalk->datdok > hParamsOdt[ "datum_do" ]
             SKIP
@@ -825,36 +826,29 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
       IF hParamsOdt[ "nule" ] .OR. Round( _mpv_u - _mpv_i, 2 ) <> 0 // ne prikazuj stavke 0
 
-         select_o_koncij( _idkonto )
-         select_o_roba( _idroba )
-
+         select_o_koncij( cIdKonto )
+         select_o_roba( cIdroba )
          _mpcs := kalk_get_mpc_by_koncij_pravilo()
 
          SELECT kalk
 
          xml_subnode( "items", .F. )
-
          xml_node( "rbr", AllTrim( Str( ++_rbr ) ) )
-         xml_node( "id", to_xml_encoding( _idroba ) )
+         xml_node( "id", to_xml_encoding( cIdroba ) )
          xml_node( "naz", to_xml_encoding( AllTrim( roba->naz ) ) )
          xml_node( "barkod", to_xml_encoding( AllTrim( roba->barkod ) ) )
          xml_node( "tar", to_xml_encoding( AllTrim( roba->idtarifa ) ) )
          xml_node( "jmj", to_xml_encoding( AllTrim( roba->jmj ) ) )
-
          xml_node( "ulaz", Str( _ulaz, 12, 3 ) )
          xml_node( "izlaz", Str( _izlaz, 12, 3 ) )
          xml_node( "stanje", Str( _ulaz - _izlaz, 12, 3 ) )
-
          xml_node( "nvu", Str( _nv_u, 12, 3 ) )
          xml_node( "nvi", Str( _nv_i, 12, 3 ) )
          xml_node( "nv", Str( _nv_u - _nv_i, 12, 3 ) )
-
          xml_node( "mpvu", Str( _mpv_u, 12, 3 ) )
          xml_node( "mpvi", Str( _mpv_i, 12, 3 ) )
          xml_node( "mpv", Str( _mpv_u - _mpv_i, 12, 3 ) )
-
          xml_node( "rabat", Str( _rabat, 12, 3 ) )
-
          xml_node( "mpcs", Str( _mpcs, 12, 3 ) )
 
          IF Round( _ulaz - _izlaz, 3 ) <> 0

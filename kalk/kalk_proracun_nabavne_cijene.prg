@@ -417,7 +417,7 @@ FUNCTION kalk_marza_veleprodaja()
 
    LOCAL nStvarnaKolicina, nKalkMarzaVP
 
-   nStvarnaKolicina := field->Kolicina - field->GKolicina - field->GKolicin2
+   nStvarnaKolicina := field->Kolicina
    IF field->TMarza == "%" .OR. Empty( field->tmarza )
       nKalkMarzaVP := nStvarnaKolicina * field->Marza / 100 * field->NC
    ELSEIF field->TMarza == "A"

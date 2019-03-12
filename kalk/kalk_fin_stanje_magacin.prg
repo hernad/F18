@@ -13,7 +13,6 @@
 
 
 
-
 FUNCTION finansijsko_stanje_magacin()
 
    LOCAL cTipDok, cDokNaz
@@ -24,6 +23,7 @@ FUNCTION finansijsko_stanje_magacin()
    LOCAL cPartnNaz, cPartnMj, cPartnPtt
    LOCAL hParams
    LOCAL nVPC
+   LOCAL GetList := {}
 
    _o_tbl()
 
@@ -197,7 +197,7 @@ FUNCTION finansijsko_stanje_magacin()
       ntDod1 := ntDod2 := ntDod3 := ntDod4 := ntDod5 := ntDod6 := ntDod7 := ntDod8 := 0
    ENDIF
 
-   DO WHILE !Eof() .AND. cIdfirma == idfirma
+   DO WHILE !Eof() .AND. cIdfirma == kalk->idfirma
       nUlaz := 0
       nIzlaz := 0
       nVPVU := 0
@@ -209,7 +209,7 @@ FUNCTION finansijsko_stanje_magacin()
          nDod1 := nDod2 := nDod3 := nDod4 := nDod5 := nDod6 := nDod7 := nDod8 := 0
       ENDIF
 
-      IF cViseKonta == "N" .AND. mkonto <> cIdkonto
+      IF cViseKonta == "N" .AND. kalk->mkonto <> cIdkonto
          SKIP
          LOOP
       ENDIF
@@ -226,7 +226,6 @@ FUNCTION finansijsko_stanje_magacin()
       cDokNaz := field->naz
 
       select_o_partner( cIdPartner )
-
       cPartnNaz := field->naz
       cPartnPtt := field->ptt
       cPartnMj := field->mjesto
@@ -270,24 +269,28 @@ FUNCTION finansijsko_stanje_magacin()
 
          IF mu_i == "1" .AND. !( idvd $ "12#22#94" )
             nVPVU += Round( nVPC * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-            nNVU += Round( nc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
+            nNVU += Round( kalk->nc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
          ELSEIF mu_i == "5"
             nVPVI += Round( nVPC * kolicina, gZaokr )
-            nRabat += Round( rabatv / 100 * vpc * kolicina, gZaokr )
+            nRabat += Round( kalk->rabatv / 100 * vpc * kolicina, gZaokr )
             nNVI += Round( nc * kolicina, gZaokr )
          ELSEIF mu_i == "1" .AND. ( idvd $ "12#22#94" )    // povrat
-            nVPVI -= Round( nVPC * kolicina, gZaokr )
-            nRabat -= Round( rabatv / 100 * vpc * kolicina, gZaokr )
-            nNVI -= Round( nc * kolicina, gZaokr )
+            nVPVI -= Round( nVPC * kalk->kolicina, gZaokr )
+            nRabat -= Round( kalk->rabatv / 100 * vpc * kolicina, gZaokr )
+            nNVI -= Round( kalk->nc * kalk->kolicina, gZaokr )
          ELSEIF mu_i == "3"    // nivelacija
-            nVPVU += Round( nVPC * kolicina, gZaokr )
+            nVPVU += Round( nVPC * kalk->kolicina, gZaokr )
          ENDIF
 
          IF cPapir != "4"
             nDod1 += kalk_marza_veleprodaja()
             nDod2 += kalk_marza_maloprodaja()
-            nDod3 += prevoz; nDod4 += prevoz2; nDod5 += banktr
-            nDod6 += spedtr; nDod7 += cardaz; nDod8 += zavtr
+            nDod3 += prevoz
+            nDod4 += prevoz2
+            nDod5 += banktr
+            nDod6 += spedtr
+            nDod7 += cardaz
+            nDod8 += zavtr
          ENDIF
 
          SKIP 1
