@@ -416,3 +416,19 @@ BEGIN
   RETURN nKolicina;
 END;
 $$;
+
+
+
+
+
+-- ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS  uuid uuid DEFAULT gen_random_uuid();
+-- ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref uuid;
+-- ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;
+-- 
+-- ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS uuid uuid DEFAULT gen_random_uuid();
+-- ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS ref uuid;
+-- ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;
+-- 
+-- ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS uuid uuid DEFAULT gen_random_uuid();
+-- ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS ref uuid;
+-- ALTER TABLE p15.pos_doks_knjig ADD COLUMN IF NOT EXISTS ref_2 uuid;

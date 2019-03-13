@@ -1,3 +1,59 @@
+CREATE OR REPLACE FUNCTION p15.fetchmetrictext(text) RETURNS text
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  _pMetricName ALIAS FOR $1;
+  _returnVal TEXT;
+BEGIN
+  SELECT metric_value::TEXT INTO _returnVal
+    FROM p15.metric WHERE metric_name = _pMetricName;
+
+  IF (FOUND) THEN
+     RETURN _returnVal;
+  ELSE
+     RETURN '!!notfound!!';
+  END IF;
+
+END;
+$$;
+
+ALTER FUNCTION p15.fetchmetrictext(text) OWNER TO admin;
+GRANT ALL ON FUNCTION p15.fetchmetrictext TO xtrole;
+
+
+CREATE OR REPLACE FUNCTION p15.setmetric(text, text) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  pMetricName ALIAS FOR $1;
+  pMetricValue ALIAS FOR $2;
+  _metricid INTEGER;
+
+BEGIN
+
+  IF (pMetricValue = '!!UNSET!!'::TEXT) THEN
+     DELETE FROM p15.metric WHERE (metric_name=pMetricName);
+     RETURN TRUE;
+  END IF;
+
+  SELECT metric_id INTO _metricid FROM p15.metric WHERE (metric_name=pMetricName);
+
+  IF (FOUND) THEN
+    UPDATE p15.metric SET metric_value=pMetricValue WHERE (metric_id=_metricid);
+  ELSE
+    INSERT INTO p15.metric(metric_name, metric_value)  VALUES (pMetricName, pMetricValue);
+  END IF;
+
+  RETURN TRUE;
+
+END;
+$$;
+
+
+ALTER FUNCTION p15.setmetric(text, text) OWNER TO admin;
+GRANT ALL ON FUNCTION p15.setmetric TO xtrole;
+
+
 CREATE OR REPLACE FUNCTION p15.pos_novi_broj_dokumenta(cIdPos varchar, cIdVd varchar, dDatum date) RETURNS varchar
   LANGUAGE plpgsql
   AS $$
@@ -18,7 +74,6 @@ BEGIN
 
 END;
 $$
-
 
 
 CREATE OR REPLACE FUNCTION p15.pos_dostupno_artikal_za_cijenu(cIdRoba varchar, nCijena numeric, nNCijena numeric) RETURNS numeric
