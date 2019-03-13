@@ -16,6 +16,23 @@ MEMVAR glKalkBrojacPoKontima, gBrojacKalkulacija
 STATIC s_nLenKalkBrojac
 
 
+// postgresql  FUNCTION public.kalk_novi_brdok(cIdVd varchar) RETURNS varchar
+FUNCTION kalk_novi_brdok( cIdVd )
+
+   LOCAL cQuery, oRet
+
+   cQuery := "SELECT public.kalk_novi_brdok(" + sql_quote( cIdVd ) + ")"
+
+   oRet := run_sql_query( cQuery )
+
+   IF is_var_objekat_tpqquery( oRet )
+      RETURN oRet:FieldGet( 1 )
+   ENDIF
+
+   RETURN Replicate( "0", FIELD_LEN_KALK_BRDOK )
+
+
+
 FUNCTION kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKonto )
 
    LOCAL cSufiks := Space( 3 )

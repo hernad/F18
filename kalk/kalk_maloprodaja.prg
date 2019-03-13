@@ -125,7 +125,7 @@ FUNCTION get_pkonto_by_prodajno_mjesto( nProdavnica )
 
 FUNCTION kalk_mp_inicijalizacija()
 
-   LOCAL nRbr, cQuery, dDatDok := danasnji_datum()
+   LOCAL nRbr, cQuery, dDatDok := danasnji_datum(), cBrDok
    LOCAL GetList := {}
    LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( pos_prodavnica() )
 
@@ -170,6 +170,7 @@ FUNCTION kalk_mp_inicijalizacija()
 
    Box( "#" + AllTrim( Str( pos_prodavnica() ) ) + " / " + cPKonto, 1, 50 )
 
+   cBrDok := kalk_novi_brdok( "02")
    SELECT TMP
    DO WHILE !Eof()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY TMP->IDROBA
@@ -181,7 +182,7 @@ FUNCTION kalk_mp_inicijalizacija()
       select_o_roba( tmp->idroba )
       select_o_tarifa( roba->idtarifa )
 
-      IF Round( tmp2->kol_dug - tmp2->kol_pot, 4 ) == 0
+      IF Round( tmp2->kol_dug - tmp2->kol_pot, 4 ) == 0 .OR.  Round( tmp2->mpc_sa_pdv, 4 ) == 0
          SELECT TMP
          SKIP
          LOOP
@@ -190,14 +191,15 @@ FUNCTION kalk_mp_inicijalizacija()
       SELECT kalk_pripr
       APPEND BLANK
       REPLACE idfirma WITH self_organizacija_id(), ;
-         idvd WITH '02', ;
+         idvd WITH "02", ;
          datdok WITH dDatDok, ;
-         brdok WITH Replicate( "0", FIELD_LEN_KALK_BRDOK ), ;
+         brdok WITH cBrDok, ;
          rbr WITH nRbr++, ;
          idroba WITH tmp->idroba, ;
          idtarifa WITH tarifa->id, ;
          kolicina WITH tmp2->kol_dug - tmp2->kol_pot, ;
-         mpcsapp WITH tmp2->mpc_sa_pdv
+         mpcsapp WITH tmp2->mpc_sa_pdv,;
+         mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, tmp2->mpc_sa_pdv )
 
       SELECT TMP
       SKIP
