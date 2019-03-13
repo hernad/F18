@@ -19,7 +19,6 @@ MEMVAR _TMarza2, _Marza2, _idtarifa, _nc
 
 FUNCTION kalk_proracun_marzamp_11_80( cProracunMarzeUnaprijed, lSvediVPCNaNC )
 
-
    hb_default( @lSvediVPCNaNC, .T. )
    IF cProracunMarzeUnaprijed == nil
       cProracunMarzeUnaprijed := " "
@@ -29,21 +28,21 @@ FUNCTION kalk_proracun_marzamp_11_80( cProracunMarzeUnaprijed, lSvediVPCNaNC )
    ENDIF
 
    // ako je prevoz u MP rasporedjen uzmi ga u obzir
-   //IF _TPrevoz == "A"
-  //    nPrevMP := _Prevoz
-   //ELSE
-  //    nPrevMP := 0
-   //ENDIF
+   // IF _TPrevoz == "A"
+   // nPrevMP := _Prevoz
+   // ELSE
+   // nPrevMP := 0
+   // ENDIF
 
    IF _FCj == 0
       _FCj := _mpc
    ENDIF
 
    IF  _Marza2 == 0 .AND. Empty( cProracunMarzeUnaprijed )
-      nKalkMarzaMP := _MPC - _VPC //- nPrevMP
+      nKalkMarzaMP := _MPC - _VPC // - nPrevMP
       IF _TMarza2 == "%"
          IF Round( _vpc, 5 ) <> 0
-            _Marza2 := 100 * ( _MPC /_VPC  - 1 )
+            _Marza2 := 100 * ( _MPC / _VPC  - 1 )
          ELSE
             _Marza2 := 0
          ENDIF
@@ -124,7 +123,7 @@ FUNCTION kalk_marza_realizacija_prodavnica_41_42()
 
 
 
-FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
+FUNCTION kalk_mpc_sa_pdv_sa_kartice( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 
    LOCAL nOrder
 
@@ -134,22 +133,23 @@ FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 
    find_kalk_by_pkonto_idroba( cIdFirma, cPKonto, cIdRoba )
    GO BOTTOM
-   DO WHILE !Bof() .AND. idfirma + pkonto + idroba == cIdFirma + cPKonto + cIdRoba
+   // uzeti cijenu sa zadnje stavke na kartici
+   DO WHILE !Bof() .AND. kalk->idfirma + kalk->pkonto + kalk->idroba == cIdFirma + cPKonto + cIdRoba
 
-      IF dDatum <> NIL .AND. dDatum < datdok
+      IF dDatum <> NIL .AND. dDatum < kalk->datdok
          SKIP -1
          LOOP
       ENDIF
 
-      IF idvd $ "11#80#81"
-         nMPC := field->mpcsapp
+      IF kalk->idvd $ "11#80#81"
+         nMPC := kalk->mpcsapp
          EXIT
-      ELSEIF idvd == "19"
-         nMPC := fcj + mpcsapp
+      ELSEIF kalk->idvd == "19"
+         nMPC := kalk->fcj + kalk->mpcsapp
          EXIT
       ENDIF
 
-      SKIP -1 // od dna kartice ka vrhu
+      SKIP -1
    ENDDO
    PopWa()
 
@@ -163,25 +163,24 @@ FUNCTION kalk_fakticka_mpc( nMPC, cIdFirma, cPKonto, cIdRoba, dDatum )
 
 FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
 
-   LOCAL nMPCSifarnik := 0, cRule
+   LOCAL nMPCSifarnik := 0, cTipCijene
 
    IF cIdKonto != NIL
       PushWa()
       select_o_koncij( cIdKonto )
-      cRule := koncij->naz
+      cTipCijene := koncij->naz
       PopWa()
    ELSE
-      cRule := koncij->naz
+      cTipCijene := koncij->naz
    ENDIF
 
-   IF cRule == "M2"
+   IF cTipCijene == "M2"
       nMPCSifarnik := roba->mpc2
-   ELSEIF cRule == "M3"
+   ELSEIF cTipCijene == "M3"
       nMPCSifarnik := roba->mpc3
-   ELSEIF cRule == "M4" .AND. roba->( FieldPos( "mpc4" ) ) <> 0
+   ELSEIF cTipCijene == "M4" .AND. roba->( FieldPos( "mpc4" ) ) <> 0
       nMPCSifarnik := roba->mpc4
-
-   ELSEIF roba->( FieldPos( "mpc" ) ) <> 0
+   ELSE
       nMPCSifarnik := roba->mpc
    ENDIF
 
@@ -244,7 +243,7 @@ FUNCTION roba_set_mcsapp_na_osnovu_koncij_pozicije( nCijena, lUpit )
    RETURN lRet
 
 
-FUNCTION kalk_valid_kolicina_prod(nKolicinaNaStanju)
+FUNCTION kalk_valid_kolicina_prod( nKolicinaNaStanju )
 
    LOCAL nKol
 
@@ -252,7 +251,9 @@ FUNCTION kalk_valid_kolicina_prod(nKolicinaNaStanju)
       RETURN .T.
    ENDIF
 
-   IF roba->tip $ "UT"; RETURN .T. ; ENDIF
+   IF roba->tip $ "UT"
+      RETURN .T.
+   ENDIF
 
    nKol := _Kolicina
    IF _idvd == "11"
@@ -278,12 +279,12 @@ FUNCTION kalk_valid_kolicina_prod(nKolicinaNaStanju)
 
 FUNCTION kalk_marza_maloprodaja()
 
-      IF TMarza2 == "%" .OR. Empty( Tmarza2 )
-         nKalkMarzaMP := kolicina * Marza2 / 100 * VPC
-      ELSEIF TMarza2 == "A"
-         nKalkMarzaMP := Marza2 * kolicina
-      ELSEIF TMarza2 == "U"
-         nKalkMarzaMP := Marza2
-      ENDIF
+   IF TMarza2 == "%" .OR. Empty( Tmarza2 )
+      nKalkMarzaMP := kolicina * Marza2 / 100 * VPC
+   ELSEIF TMarza2 == "A"
+      nKalkMarzaMP := Marza2 * kolicina
+   ELSEIF TMarza2 == "U"
+      nKalkMarzaMP := Marza2
+   ENDIF
 
-      RETURN nKalkMarzaMP
+   RETURN nKalkMarzaMP

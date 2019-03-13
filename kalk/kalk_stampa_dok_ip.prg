@@ -31,7 +31,7 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    ENDIF
 
    IF !lKalkZaPOS
-      cSamoObraz := Pitanje(, "Prikaz samo obrasca inventure (D-da,N-ne,S-sank lista) ?",, "DNS" )
+      cSamoObraz := Pitanje(, "Prikaz samo obrasca inventure (D-da,N-ne) ?",, "DN" )
       IF cSamoObraz == "S"
          stampa_obrasca_inventure_sank_lista()
          RETURN
@@ -91,9 +91,9 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
          @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
       ENDIF
 
-      SKol := Kolicina
+      SKol := kalk_pripr->Kolicina
 
-      @ PRow() + 1, 0 SAY field->rbr PICT "XXX"
+      @ PRow() + 1, 0 SAY field->rbr PICT "999"
       @ PRow(), 4 SAY  ""
 
       ?? field->idroba, Trim( Left( roba->naz, 40 ) ), "(", roba->jmj, ")"
@@ -193,7 +193,7 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    ? m
 
    // Visak
-   kalk_pripr_rekap_tarife( .T. )
+   kalk_pripr_rekap_tarife()
 
    IF !lKalkZaPOS
       ?

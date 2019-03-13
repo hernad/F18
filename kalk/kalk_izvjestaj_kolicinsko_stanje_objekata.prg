@@ -550,7 +550,7 @@ FUNCTION kalk_scan_prodavnicki_konto( dDatOd, dDatDo, cIdKPovrata, cKartica, cVa
          SELECT kalk
 
 
-         kalk_fakticka_mpc( @nMpc, kalk->idfirma, kalk->pkonto, kalk->idroba, dDatDo - 1 ) // dan prije inventure !
+         kalk_mpc_sa_pdv_sa_kartice( @nMpc, kalk->idfirma, kalk->pkonto, kalk->idroba, dDatDo - 1 ) // dan prije inventure !
          dbSetOrder( nGGOrd )
          GO nGGo
          SELECT rekap1

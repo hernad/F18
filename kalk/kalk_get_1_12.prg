@@ -73,7 +73,7 @@ FUNCTION kalk_get_1_12()
    ENDIF
 
    IF nije_dozvoljeno_azuriranje_sumnjivih_stavki()
-      kalk_fakticka_mpc( @_Mpcsapp, _idfirma, _pkonto, _idroba )
+      kalk_mpc_sa_pdv_sa_kartice( @_Mpcsapp, _idfirma, _pkonto, _idroba )
       kalk_vpc_po_kartici( @_VPC, _idfirma, _mkonto, _idroba )
    ENDIF
 

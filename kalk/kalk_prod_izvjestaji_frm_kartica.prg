@@ -21,7 +21,7 @@ FUNCTION kalk_kartica_prodavnica_f6()
    LOCAL cIdFirma := Space( 2 )
    LOCAL cIdRoba := Space( 10 )
    LOCAL cKonto := Space( 7 )
-   PRIVATE GetList := {}
+   LOCAL GetList := {}
 
    //SELECT  roba
    //nR1 := RecNo()

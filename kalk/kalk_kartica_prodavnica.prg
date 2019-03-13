@@ -52,75 +52,79 @@ FUNCTION kalk_kartica_prodavnica()
    dDatDo := Date()
    nKalkMarzaVP := nKalkMarzaMP := 0
 
-   IF cPKonto == NIL
 
+   IF cPKonto == NIL
       cIdFirma := self_organizacija_id()
       cIdRoba := Space( 10 )
-      cPKonto := PadR( "1330", 7 )
-      cPredh := "N"
       cIdRoba := fetch_metric( "kalk_kartica_prod_id_roba", my_user(), cIdRoba )
+      cPKonto := PadR( "1330", 7 )
       cPKonto := fetch_metric( "kalk_kartica_prod_id_konto", my_user(), cPKonto )
-      dDatOd := fetch_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
-      dDatDo := fetch_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
-      cPredh := fetch_metric( "kalk_kartica_prod_prethodni_promet", my_user(), cPredh )
-
-      Box(, 11, 70 )
-
-      DO WHILE .T.
-
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
-         ?? self_organizacija_id(), "-", self_organizacija_naziv()
-
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " GET cPKonto VALID P_Konto( @cPKonto )
-         kalk_kartica_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
-         @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum od " GET dDatOd
-         @ box_x_koord() + 5, Col() + 2 SAY "do" GET dDatDo
-         @ box_x_koord() + 6, box_y_koord() + 2 SAY "sa prethodnim prometom (D/N)" GET cPredh PICT "@!" VALID cpredh $ "DN"
-         @ box_x_koord() + 7, box_y_koord() + 2 SAY "Tip dokumenta (;) :"  GET cIdVd PICT "@S20"
-         @ box_x_koord() + 9, box_y_koord() + 2 SAY "Prikaz srednje nabavne cijene ?" GET cPrikSredNc VALID cPrikSredNc $ "DN" PICT "@!"
-         @ box_x_koord() + 11, box_y_koord() + 2 SAY "Export XLSX:"  GET cExportDn PICT "@!" VALID cExportDN $ "DN"
-         READ
-         ESC_BCR
-
-         EXIT
-      ENDDO
-
-      BoxC()
-
-      IF LastKey() != K_ESC
-         set_metric( "kalk_kartica_prod_id_roba", my_user(), cIdRoba )
-         set_metric( "kalk_kartica_prod_id_konto", my_user(), cPKonto )
-         set_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
-         set_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
-         set_metric( "kalk_kartica_prod_prethodni_promet", my_user(), cPredh )
-      ENDIF
-
-      IF cExportDN == "D"
-         lExport := .T.
-         create_dbf_r_export( kalk_kartica_prodavnica_export_dbf_struct() )
-      ENDIF
-
-      IF Empty( cIdRoba )
-         IF Pitanje(, "Niste zadali šifru artikla, izlistati sve kartice (D/N) ?", "N" ) == "N"
-            my_close_all_dbf()
-            RETURN .F.
-         ELSE
-            cIdRobaTackaZarez := ""
-            lRobaTackaZarez := .T.
-         ENDIF
-
-      ELSE
-         cIdRobaTackaZarez := cIdRoba
-         lRobaTackaZarez := .F.
-      ENDIF
-
-      IF Right( Trim( cIdroba ), 1 ) == ";"
-         lRobaTackaZarez := .T.
-         cIdRobaTackaZarez := Trim( StrTran( cIdroba, ";", "" ) )
-      ENDIF
-
-
    ENDIF
+
+   cPredh := "N"
+
+
+   dDatOd := fetch_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
+   dDatDo := fetch_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
+   cPredh := fetch_metric( "kalk_kartica_prod_prethodni_promet", my_user(), cPredh )
+
+   Box(, 11, 70 )
+
+   DO WHILE .T.
+
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
+      ?? self_organizacija_id(), "-", self_organizacija_naziv()
+
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " GET cPKonto VALID P_Konto( @cPKonto )
+      kalk_kartica_get_roba_id( @cIdRoba, box_x_koord() + 3, box_y_koord() + 2, @GetList )
+      @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum od " GET dDatOd
+      @ box_x_koord() + 5, Col() + 2 SAY "do" GET dDatDo
+      @ box_x_koord() + 6, box_y_koord() + 2 SAY "sa prethodnim prometom (D/N)" GET cPredh PICT "@!" VALID cpredh $ "DN"
+      @ box_x_koord() + 7, box_y_koord() + 2 SAY "Tip dokumenta (;) :"  GET cIdVd PICT "@S20"
+      @ box_x_koord() + 9, box_y_koord() + 2 SAY "Prikaz srednje nabavne cijene ?" GET cPrikSredNc VALID cPrikSredNc $ "DN" PICT "@!"
+      @ box_x_koord() + 11, box_y_koord() + 2 SAY "Export XLSX:"  GET cExportDn PICT "@!" VALID cExportDN $ "DN"
+      READ
+      ESC_BCR
+
+      EXIT
+   ENDDO
+
+   BoxC()
+
+   IF LastKey() != K_ESC
+      set_metric( "kalk_kartica_prod_id_roba", my_user(), cIdRoba )
+      set_metric( "kalk_kartica_prod_id_konto", my_user(), cPKonto )
+      set_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
+      set_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
+      set_metric( "kalk_kartica_prod_prethodni_promet", my_user(), cPredh )
+   ENDIF
+
+   IF cExportDN == "D"
+      lExport := .T.
+      create_dbf_r_export( kalk_kartica_prodavnica_export_dbf_struct() )
+   ENDIF
+
+   IF Empty( cIdRoba )
+      IF Pitanje(, "Niste zadali šifru artikla, izlistati sve kartice (D/N) ?", "N" ) == "N"
+         my_close_all_dbf()
+         RETURN .F.
+      ELSE
+         cIdRobaTackaZarez := ""
+         lRobaTackaZarez := .T.
+      ENDIF
+
+   ELSE
+      cIdRobaTackaZarez := cIdRoba
+      lRobaTackaZarez := .F.
+   ENDIF
+
+   IF Right( Trim( cIdroba ), 1 ) == ";"
+      lRobaTackaZarez := .T.
+      cIdRobaTackaZarez := Trim( StrTran( cIdroba, ";", "" ) )
+   ENDIF
+
+
+   // ENDIF
 
    nKolicina := 0
 

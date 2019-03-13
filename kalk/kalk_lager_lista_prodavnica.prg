@@ -60,16 +60,16 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL nMpvUlaz, nMpvIzlaz, nNvUlaz, nNvIzlaz
    LOCAL nPredhMpvSaldo, nPredhNvSaldo
    LOCAL nPom, nLen, nRbr
-   LOCAL nTULaz
-   LOCAL nTIzlaz
+   LOCAL nTotalUlazKol
+   LOCAL nTotalIzlazKol
    LOCAL nTPKol
    LOCAL nTMPVU
    LOCAL nTMPVI
    LOCAL nTNVU
    LOCAL nTNVI
    LOCAL nTRabat
-   LOCAL nTPMPV
-   LOCAL nTPNV
+   LOCAL nTotalPredhMpvSaldo
+   LOCAL nTotalPredhNvSaldo
    LOCAL cSredCij := "N"
 
    cIdFirma := self_organizacija_id()
@@ -249,17 +249,16 @@ FUNCTION kalk_lager_lista_prodavnica()
 
    bZagl := {|| kalk_zagl_lager_lista_prodavnica( hZaglParams ) }
 
-   nTUlaz := 0
-   nTIzlaz := 0
+   nTotalUlazKol := 0
+   nTotalIzlazKol := 0
    nTPKol := 0
-   nTMpv := 0
    nTMPVU := 0
    nTMPVI := 0
    nTNVU := 0
    nTNVI := 0
    // predhodna vrijednost
-   nTPMPV := 0
-   nTPNV := 0
+   nTotalPredhMpvSaldo := 0
+   nTotalPredhNvSaldo := 0
    nTRabat := 0
    nCol1 := 50
    nCol0 := 50
@@ -310,7 +309,7 @@ FUNCTION kalk_lager_lista_prodavnica()
                ELSEIF kalk->pu_i == "3"
                   // nivelacija
                   nPredhMpvSaldo += kalk->mpcsapp * kalk->kolicina
-               ELSEIF pu_i == "I"
+               ELSEIF kalk->pu_i == "I"
                   kalk_sumiraj_kolicinu( - kalk->gKolicin2, 0, @nPredhKol, 0, lPocStanje )
                   nPredhMpvSaldo -= kalk->mpcsapp * kalk->gkolicin2
                   nPredhNvSaldo -= kalk->nc * kalk->gkolicin2
@@ -342,8 +341,8 @@ FUNCTION kalk_lager_lista_prodavnica()
                nCol1 := PCol() + 1
                nMpvUlaz += kalk->mpcsapp * kalk->kolicina
                nNvUlaz += kalk->nc * ( kalk->kolicina )
-            ELSEIF kalk->pu_i == "5"
 
+            ELSEIF kalk->pu_i == "5"
                IF kalk->idvd $ "12#13"
                   kalk_sumiraj_kolicinu( - kalk->kolicina, 0, @nUlazKol, 0, lPocStanje )
                   nMpvUlaz -= kalk->mpcsapp * kalk->kolicina
@@ -516,16 +515,16 @@ FUNCTION kalk_lager_lista_prodavnica()
 
          ENDIF
 
-         nTULaz += nUlazKol
-         nTIzlaz += nIzlazKol
+         nTotalUlazKol += nUlazKol
+         nTotalIzlazKol += nIzlazKol
          nTPKol += nPredhKol
          nTMPVU += nMpvUlaz
          nTMPVI += nMpvIzlaz
          nTNVU += nNvUlaz
          nTNVI += nNvIzlaz
          // nTRabat += nRabat
-         nTPMPV += nPredhMpvSaldo
-         nTPNV += nPredhNvSaldo
+         nTotalPredhMpvSaldo += nPredhMpvSaldo
+         nTotalPredhNvSaldo += nPredhNvSaldo
 
          IF roba_barkod_pri_unosu()
             ? Space( 6 ) + roba->barkod
@@ -540,29 +539,28 @@ FUNCTION kalk_lager_lista_prodavnica()
    @ PRow(), nCol0 - 1 SAY ""
 
    IF cPredhStanje == "D"
-      @ PRow(), PCol() + 1 SAY nTPMPV PICT kalk_pic_kolicina_bilo_gpickol()
+      @ PRow(), PCol() + 1 SAY nTotalPredhMpvSaldo PICT kalk_pic_kolicina_bilo_gpickol()
    ENDIF
-   @ PRow(), PCol() + 1 SAY nTUlaz PICT kalk_pic_kolicina_bilo_gpickol()
-   @ PRow(), PCol() + 1 SAY nTIzlaz PICT kalk_pic_kolicina_bilo_gpickol()
-   @ PRow(), PCol() + 1 SAY nTUlaz - nTIzlaz + nTPKol PICT kalk_pic_kolicina_bilo_gpickol()
+   @ PRow(), PCol() + 1 SAY nTotalUlazKol PICT kalk_pic_kolicina_bilo_gpickol()
+   @ PRow(), PCol() + 1 SAY nTotalIzlazKol PICT kalk_pic_kolicina_bilo_gpickol()
+   @ PRow(), PCol() + 1 SAY nTotalUlazKol - nTotalIzlazKol + nTPKol PICT kalk_pic_kolicina_bilo_gpickol()
 
    nCol1 := PCol() + 1
    @ PRow(), PCol() + 1 SAY nTMPVU PICT kalk_pic_iznos_bilo_gpicdem()
    @ PRow(), PCol() + 1 SAY nTMPVI PICT kalk_pic_iznos_bilo_gpicdem()
-   @ PRow(), PCol() + 1 SAY nTMPVU - nTMPVI + nTPMPV PICT kalk_pic_iznos_bilo_gpicdem()
-   @ PRow(), PCol() + 1 SAY nTMpv  PICT kalk_pic_iznos_bilo_gpicdem()
+   @ PRow(), PCol() + 1 SAY nTMPVU - nTMPVI + nTotalPredhMpvSaldo PICT kalk_pic_iznos_bilo_gpicdem()
 
    IF cPrikazNabavneVrijednosti == "D"
       @ PRow() + 1, nCol0 - 1 SAY ""
       IF cPredhStanje == "D"
-         @ PRow(), PCol() + 1 SAY nTPNV PICT kalk_pic_kolicina_bilo_gpickol()
+         @ PRow(), PCol() + 1 SAY nTotalPredhNvSaldo PICT kalk_pic_kolicina_bilo_gpickol()
       ENDIF
       @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_iznos_bilo_gpicdem() ) )
       @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_iznos_bilo_gpicdem() ) )
       @ PRow(), PCol() + 1 SAY Space( Len( kalk_pic_iznos_bilo_gpicdem() ) )
       @ PRow(), PCol() + 1 SAY nTNVU PICT kalk_pic_iznos_bilo_gpicdem()
       @ PRow(), PCol() + 1 SAY nTNVI PICT kalk_pic_iznos_bilo_gpicdem()
-      @ PRow(), PCol() + 1 SAY nTNVU - nTNVI + nTPNV PICT kalk_pic_iznos_bilo_gpicdem()
+      @ PRow(), PCol() + 1 SAY nTNVU - nTNVI + nTotalPredhNvSaldo PICT kalk_pic_iznos_bilo_gpicdem()
    ENDIF
 
    ?U s_cM

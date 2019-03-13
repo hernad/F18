@@ -21,7 +21,7 @@ MEMVAR gStavitiUSifarnikNovuCijenuDefault
 
 FUNCTION kalk_get_1_19_79()
 
-   LOCAL nKolicinaNaStanju
+   LOCAL nKolicinaNaStanju := 0
 
    _MKonto := ""
    _IdKonto := ""
@@ -89,7 +89,7 @@ FUNCTION kalk_get_1_19_79()
    ENDIF
 
    IF kalk_is_novi_dokument() .AND.  dozvoljeno_azuriranje_sumnjivih_stavki()
-      kalk_fakticka_mpc( @nKalkStaraCijena, _idfirma, _pkonto, _idroba )
+      kalk_mpc_sa_pdv_sa_kartice( @nKalkStaraCijena, _idfirma, _pkonto, _idroba )
    ENDIF
 
    SELECT kalk_pripr

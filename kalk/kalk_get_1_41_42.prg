@@ -79,7 +79,7 @@ FUNCTION kalk_get_1_41_42_49()
    ENDIF
 
    IF ( dozvoljeno_azuriranje_sumnjivih_stavki() .AND. ( _MpcSAPP == 0 .OR. kalk_is_novi_dokument() ) )
-      kalk_fakticka_mpc( @_MPCSAPP, _idfirma, _pkonto, _idroba )
+      kalk_mpc_sa_pdv_sa_kartice( @_MPCSAPP, _idfirma, _pkonto, _idroba )
    ENDIF
 
    IF ( roba->tip != "T" )

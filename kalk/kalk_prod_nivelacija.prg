@@ -57,7 +57,7 @@ FUNCTION kalk_nivelacija_11()
       nMPC := kalk_get_mpc_by_koncij_pravilo()
 
       IF dozvoljeno_azuriranje_sumnjivih_stavki()
-         kalk_fakticka_mpc( @nMPC, hRec[ "idfirma" ], hRec[ "pkonto" ], hRec[ "idroba" ] )
+         kalk_mpc_sa_pdv_sa_kartice( @nMPC, hRec[ "idfirma" ], hRec[ "pkonto" ], hRec[ "idroba" ] )
          SELECT kalk_pripr
       ENDIF
 
