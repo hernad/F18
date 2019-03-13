@@ -1,3 +1,45 @@
+-- pgcrypto
+
+drop function if exists digest(bytea, text);
+drop function if exists digest(text, text);
+DROP FUNCTION if exists hmac(bytea, bytea, text);
+DROP FUNCTION if exists hmac(text,text,text);
+drop function if exists crypt(text,text);
+drop function if exists gen_salt(text);
+drop function if exists gen_salt(text,integer);
+drop function if exists encrypt(bytea,bytea,text);
+drop function if exists encrypt(bytea,bytea,bytea,text);
+drop function if exists decrypt(bytea,bytea,bytea,text);
+drop function if exists decrypt(bytea,bytea,text);
+drop function if exists encrypt_iv(bytea,bytea,bytea,text);
+drop function if exists decrypt_iv(bytea,bytea,bytea,text);
+drop function if exists pgp_pub_decrypt(bytea,bytea);
+drop function if exists pgp_pub_decrypt(bytea,bytea,text);
+drop function if exists pgp_pub_decrypt(bytea,bytea,text,text);
+drop function if exists pgp_pub_decrypt_bytea(bytea,bytea);
+drop function if exists pgp_pub_decrypt_bytea(bytea,bytea,text);
+drop function if exists pgp_pub_encrypt(text,bytea);
+drop function if exists pgp_pub_encrypt(text,bytea,text);
+drop function if exists pgp_pub_encrypt(text,bytea,text,text);
+drop function if exists pgp_pub_encrypt_bytea(bytea,bytea);
+drop function if exists pgp_pub_encrypt_bytea(bytea,bytea,text);
+drop function if exists pgp_sym_decrypt(bytea,text);
+drop function if exists pgp_sym_decrypt(bytea,text,text);
+drop function if exists pgp_sym_decrypt_bytea(bytea,text);
+drop function if exists pgp_sym_decrypt_bytea(bytea,text,text);
+drop function if exists pgp_sym_encrypt(text,text);
+drop function if exists pgp_sym_encrypt(text,text,text);
+drop function if exists pgp_sym_encrypt_bytea(bytea,text);
+drop function if exists pgp_sym_encrypt_bytea(bytea,text,text);
+drop function if exists pgp_key_id(bytea);
+drop function if exists armor(bytea);
+drop function if exists dearmor(text);
+drop function if exists pgp_pub_decrypt_bytea;
+
+drop extension if exists pgcrypto;
+create extension pgcrypto;
+
+
 -- f18 schema
 CREATE SCHEMA IF NOT EXISTS f18;
 ALTER SCHEMA f18 OWNER TO admin;
