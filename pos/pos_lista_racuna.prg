@@ -79,7 +79,7 @@ FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, qIdRoba )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
-   AAdd( ImeKol, { "Fisk.rn", {|| field->fisc_rn } } )
+   AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdPos, pos_doks->datum, pos_doks->brdok ) } } )
    AAdd( ImeKol, { "Iznos", {|| Str ( pos_iznos_racuna( field->idpos, field->idvd, field->datum, field->brdok ), 13, 2 ) } } )
 
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
@@ -178,6 +178,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "S"
+      Alert("TODO pos_storno")
       pos_storno_racuna( TB, .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
       MsgBeep( "Storno račun se nalazi u pripremi !" )
       SELECT pos_doks
@@ -189,16 +190,14 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
       IF pos_doks->idvd <> "42"
          RETURN DE_CONT
       ENDIF
-      nFiscNo := pos_doks->fisc_rn
+      nFiscNo := pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdPos, pos_doks->datum, pos_doks->brdok )
       Box(, 1, 40 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFiscNo
       READ
       BoxC()
 
       IF LastKey() <> K_ESC
-         hRec := dbf_get_rec()
-         hRec[ "fisc_rn" ] := nFiscNo
-         update_rec_server_and_dbf( "pos_doks", hRec, 1, "FULL" )
+         pos_set_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdPos, pos_doks->datum, pos_doks->brdok, nFiscNo )
          RETURN DE_REFRESH
       ENDIF
 

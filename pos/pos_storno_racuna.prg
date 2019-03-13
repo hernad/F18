@@ -22,6 +22,7 @@ FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna
    LOCAL _rn_broj := ""
    LOCAL lOk := .F.
 
+   ALERT( "todo pos_storno")
    cQuery := " SELECT pd.datum, pd.brdok, pd.fisc_rn, " + ;
       " SUM( pp.kolicina * pp.cijena ) as iznos, " + ;
       " SUM( pp.kolicina * pp.ncijena ) as popust " + ;
@@ -128,6 +129,8 @@ FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFis
    LOCAL hRec
    LOCAL GetList := {}
    LOCAL cDanasnjiDN := "D"
+
+ALERT( "todo pos_storno")
 
    IF lSilent == nil
       lSilent := .F.

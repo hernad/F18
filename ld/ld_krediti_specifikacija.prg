@@ -15,19 +15,19 @@
 FUNCTION ld_kred_specifikacija()
 
    LOCAL _params := hb_Hash()
-   LOCAL _data
+   LOCAL oData
 
    IF !_get_vars( @_params )
       RETURN .F.
    ENDIF
 
-   _data := _get_data( _params )
+   oData := _get_data( _params )
 
-   IF _data:LastRec() == 0
+   IF oData:LastRec() == 0
       RETURN .F.
    ENDIF
 
-   _print_data( _data, _params )
+   _print_data( oData, _params )
 
    RETURN .T.
 
@@ -35,7 +35,7 @@ FUNCTION ld_kred_specifikacija()
 
 STATIC FUNCTION _get_data( hParams )
 
-   LOCAL _data := {}
+   LOCAL oData := {}
    LOCAL cQuery
    LOCAL _where
    LOCAL _order
@@ -83,16 +83,16 @@ STATIC FUNCTION _get_data( hParams )
       " ORDER BY " + _order
 
    MsgO( "formiranje sql upita u toku ..." )
-   _data := run_sql_query( cQuery )
+   oData := run_sql_query( cQuery )
    MsgC()
 
-   IF sql_error_in_query( _data )
+   IF sql_error_in_query( oData )
       RETURN NIL
    ENDIF
 
-   _data:GoTo( 1 )
+   oData:GoTo( 1 )
 
-   RETURN _data
+   RETURN oData
 
 
 STATIC FUNCTION _get_vars( hParams )
