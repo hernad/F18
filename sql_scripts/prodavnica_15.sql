@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS  p15.roba (
     opis text,
     -- mink numeric(12,2),
     barkod character(13),
-    fisc_plu numeric(10,0),
+    fisc_plu numeric(10,0)
 );
 ALTER TABLE p15.roba OWNER TO admin;
 
