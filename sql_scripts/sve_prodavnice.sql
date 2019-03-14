@@ -141,3 +141,41 @@ CREATE OR REPLACE RULE public_tarifa_ins AS ON INSERT TO public.tarifa
     );
 
 GRANT ALL ON public.tarifa TO xtrole;
+
+
+CREATE TABLE IF NOT EXISTS public.schema_migrations
+(
+    version integer NOT NULL,
+    CONSTRAINT schema_migrations_pkey PRIMARY KEY (version)
+);
+
+ALTER TABLE public.schema_migrations OWNER to admin;
+
+GRANT ALL ON TABLE public.schema_migrations TO admin;
+GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
+
+
+CREATE TABLE IF NOT EXISTS f18.valute
+(
+    id character(4) COLLATE pg_catalog."default",
+    naz character(30) COLLATE pg_catalog."default",
+    naz2 character(4) COLLATE pg_catalog."default",
+    datum date,
+    kurs1 numeric(18,8),
+    kurs2 numeric(18,8),
+    kurs3 numeric(18,8),
+    tip character(1) COLLATE pg_catalog."default",
+    valuta_id uuid DEFAULT gen_random_uuid()
+);
+ALTER TABLE f18.valute OWNER to admin;
+GRANT ALL ON TABLE f18.valute TO admin;
+GRANT ALL ON TABLE f18.valute TO xtrole;
+
+-- public.valute
+drop view if exists public.valute;
+CREATE view public.valute  AS SELECT
+  *
+FROM
+  f18.valute;
+
+GRANT ALL ON public.valute TO xtrole;

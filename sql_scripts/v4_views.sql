@@ -264,14 +264,6 @@ CREATE view public.valute  AS SELECT
 FROM
   f18.valute;
 
---- CREATE OR REPLACE RULE public_valute_ins AS ON INSERT TO public.valute
----         DO INSTEAD INSERT INTO f18.valute(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
-
 GRANT ALL ON public.valute TO xtrole;
 
 -- public.konto
