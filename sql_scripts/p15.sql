@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     idvrstep character(2),
     vrijeme character varying(5),
     ref_fisk_dok uuid,
-    --brdokStorn character varying(8),
-    --fisc_rn numeric(10,0),
+    ref uuid,
+    ref_2 uuid,
     ukupno numeric(15,5),
     brFaktP varchar(10),
     opis varchar(100),
@@ -36,8 +36,20 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     obradjeno timestamp with time zone DEFAULT now(),
     korisnik text DEFAULT current_user
 );
+
+comment on column p15.pos_doks.ref_fisk_dok is 'za 42 referenca na pos_fisk_doks.dok_id';
+comment on column p15.pos_doks.ref is 'za 72 referenca na pos dokument 29-start nivelacija';
+comment on column p15.pos_doks.ref_2 is 'za 72 referenca na pos dokument 29-end nivelacija';
+
 ALTER TABLE p15.pos_doks OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_doks TO xtrole;
+
+CREATE INDEX IF NOT EXISTS pos_doks_id1 ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
+CREATE INDEX IF NOT EXISTS pos_doks_id2 ON p15.pos_doks_knjig USING btree (idvd, datum);
+CREATE INDEX IF NOT EXISTS pos_doks_id3 ON p15.pos_doks_knjig USING btree (idPartner, datum);
+CREATE INDEX IF NOT EXISTS pos_doks_id6 ON p15.pos_doks_knjig USING btree (datum);
+CREATE INDEX IF NOT EXISTS pos_doks_dok_id ON p15.pos_doks_knjig USING btree( dok_id );
+CREATE INDEX IF NOT EXISTS pos_doks_ref_fisk_dok ON p15.pos_doks_knjig USING btree( ref_fisk_dok );
 
 --ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS obradjeno timestamp with time zone;
 --ALTER TABLE p15.pos_doks ALTER COLUMN obradjeno TYPE timestamp with time zone;

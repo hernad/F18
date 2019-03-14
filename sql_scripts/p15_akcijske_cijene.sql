@@ -35,16 +35,16 @@ DECLARE
       dDatumNew date;
       nStanje numeric;
 BEGIN
-
-      EXECUTE 'select idpos,idvd,brdok,datum, dat_od from p15.pos_doks where uuid = $1'
+      -- pos dokument '72' sa ovim dok_id-om
+      EXECUTE 'select idpos,idvd,brdok,datum,dat_od from p15.pos_doks where dok_id = $1'
          USING uuidPos
          INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_od;
       RAISE INFO 'nivelacija_start_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_od;
 
-      EXECUTE 'select uuid from p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND ref=$3'
+      -- pos dokument nivelacije '29' kome je referenca ovaj dok_id ne smije postojati
+      EXECUTE 'select dok_id from p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND ref=$3'
           USING cIdPos, '29', uuidPos
           INTO uuid2;
-
       IF uuid2 IS NOT NULL THEN
           RAISE EXCEPTION 'ERROR nivelacija_start dokument vec postoji: % % % %', cIdPos, '29', cBrDok, dDatum;
       END IF;
@@ -55,7 +55,7 @@ BEGIN
           RETURNING uuid into uuid2;
 
       -- referenca na '29' unutar dokumenta idvd '72'
-      EXECUTE 'update p15.pos_doks set ref=$2 WHERE uuid=$1'
+      EXECUTE 'update p15.pos_doks set ref=$2 WHERE dok_id=$1'
          USING uuidPos, uuid2;
 
       FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
@@ -89,11 +89,13 @@ DECLARE
       nStanje numeric;
 BEGIN
 
-      EXECUTE 'select idpos,idvd,brdok,datum, dat_od from p15.pos_doks where uuid = $1'
+      -- pos dokument '72'
+      EXECUTE 'select idpos,idvd,brdok,datum, dat_od from p15.pos_doks where dok_id = $1'
          USING uuidPos
          INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_do;
       RAISE INFO 'nivelacija_end_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_do;
 
+      -- pos dokument nivelacije '29' sa ref_2 na dok_id ne smije postojati
       EXECUTE 'select uuid from p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND ref_2=$3'
           USING cIdPos, '29', uuidPos
           INTO uuid2;
@@ -109,7 +111,7 @@ BEGIN
           RETURNING uuid into uuid2;
 
       -- referenca (2) na '29' unutar dokumenta idvd '72'
-      EXECUTE 'update p15.pos_doks set ref_2=$2 WHERE uuid=$1'
+      EXECUTE 'update p15.pos_doks set ref_2=$2 WHERE dok_id=$1'
          USING uuidPos, uuid2;
 
       FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
@@ -133,7 +135,7 @@ DECLARE
        uuidPos uuid;
 BEGIN
      -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
-     FOR uuidPos IN SELECT uuid FROM p15.pos_doks
+     FOR uuidPos IN SELECT dok_id FROM p15.pos_doks
           WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
      LOOP
             RAISE INFO 'pos_doks %', uuidPos;
@@ -152,7 +154,7 @@ DECLARE
        uuidPos uuid;
 BEGIN
      -- ref_2 nije popunjen => zavrsna nivelacija nije napravljena, a planirana je za danas
-     FOR uuidPos IN SELECT uuid FROM p15.pos_doks
+     FOR uuidPos IN SELECT dok_id FROM p15.pos_doks
           WHERE idvd='72' AND ref_2 IS NULL AND dat_do = current_date
      LOOP
             RAISE INFO 'pos_doks %', uuidPos;

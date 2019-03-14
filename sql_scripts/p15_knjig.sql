@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks_knjig (
   idvrstep character(2),
   vrijeme character varying(5),
   ref_fisk_dok uuid,
-  --brdokStorn character varying(8),
-  --fisc_rn numeric(10,0),
+  ref uuid,
+  ref_2 uuid,
   ukupno numeric(15,5),
   brFaktP varchar(10),
   opis varchar(100),
@@ -25,10 +25,11 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks_knjig (
 );
 
 ALTER TABLE p15.pos_doks_knjig OWNER TO admin;
-CREATE INDEX pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
-CREATE INDEX pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum);
-CREATE INDEX pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, datum);
-CREATE INDEX pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
+CREATE INDEX IF NOT EXISTS pos_doks_id1_knjig ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
+CREATE INDEX IF NOT EXISTS pos_doks_id2_knjig ON p15.pos_doks_knjig USING btree (idvd, datum);
+CREATE INDEX IF NOT EXISTS pos_doks_id3_knjig ON p15.pos_doks_knjig USING btree (idPartner, datum);
+CREATE INDEX IF NOT EXISTS pos_doks_id6_knjig ON p15.pos_doks_knjig USING btree (datum);
+CREATE INDEX IF NOT EXISTS pos_doks_knjig_dok_id ON p15.pos_doks_knjig USING btree( dok_id );
 GRANT ALL ON TABLE p15.pos_doks_knjig TO xtrole;
 
 CREATE TABLE IF NOT EXISTS p15.pos_pos_knjig (
