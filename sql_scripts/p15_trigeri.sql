@@ -117,6 +117,7 @@ END IF;
 IF (TG_OP = 'INSERT') THEN
    IF ( NEW.idvd = '02') THEN
       EXECUTE 'DELETE FROM p15.pos_stanje';
+      EXECUTE 'DELETE FROM p15.roba';
       RAISE INFO '02 - inicijalizacija p15.pos_stanje';
       RETURN NEW;
    END IF;
@@ -228,14 +229,14 @@ END;
 $$;
 
 -- p15.pos na kasi
-DROP TRIGGER IF EXISTS  kasa_pos_crud on p15.pos;
+DROP TRIGGER IF EXISTS kasa_pos_crud on p15.pos;
     CREATE TRIGGER kasa_pos_crud
         AFTER INSERT OR DELETE OR UPDATE
         ON p15.pos
         FOR EACH ROW EXECUTE PROCEDURE p15.on_kasa_pos_crud();
 
 -- p15.pos_items na kasi
-DROP TRIGGER IF EXISTS  kasa_pos_items_crud on p15.pos_items;
+DROP TRIGGER IF EXISTS kasa_pos_items_crud on p15.pos_items;
 CREATE TRIGGER kasa_pos_items_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON p15.pos_items

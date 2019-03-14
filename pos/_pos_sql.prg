@@ -207,7 +207,7 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAl
    LOCAL cFields
 
    cFields := "idpos, idvd, brdok, datum, idPartner, idradnik,"
-   cFields += "idvrstep,vrijeme,brdokStorn,fisc_rn,ukupno,brFaktP,opis,dat_od,dat_do"
+   cFields += "idvrstep,vrijeme,ukupno,brFaktP,opis,dat_od,dat_do"
 
    cSql := "SELECT " + cFields + " from " + f18_sql_schema( cTable )
    IF cIdPos != NIL .AND. !Empty( cIdPos )

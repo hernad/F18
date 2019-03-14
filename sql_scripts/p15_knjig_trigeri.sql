@@ -1,17 +1,17 @@
 ----------- TRIGERI na strani knjigovodstva POS_DOKS - KALK_DOKS ! -----------------------------------------------------
 
--- on p15.pos_doks -> f18.kalk_doks
+-- on p15.pos -> f18.kalk_doks
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_pos_doks_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_pos_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
-
 DECLARE
        knjigShema varchar := 'public';
        pKonto varchar;
        brDok varchar;
        idFirma varchar;
        idvdKalk varchar;
+       nProdavnica integer DEFAULT 15;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
@@ -26,7 +26,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    ELSE
        idvdKalk := NEW.idvd;
    END IF;
-   SELECT public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum)
+   SELECT public.kalk_brdok_iz_pos(nProdavnica, idvdKalk, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
    IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) AND ( OLD.idvd <> '29' ) THEN
@@ -39,11 +39,11 @@ ELSE
     ELSE
         idvdKalk := OLD.idvd;
     END IF;
-    SELECT public.kalk_brdok_iz_pos(OLD.idpos, idvdKalk, OLD.brdok, OLD.datum)
+    SELECT public.kalk_brdok_iz_pos(nProdavnica, idvdKalk, OLD.brdok, OLD.datum)
          INTO brDok;
 END IF;
 
-SELECT p15.fetchmetrictext('org_id') INTO idFirma;
+SELECT public.fetchmetrictext('org_id') INTO idFirma;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete kalk_doks % % % % %', idFirma, pKonto, OLD.idvd, OLD.datum, brDok;
@@ -71,9 +71,9 @@ $$;
 
 ----------- TRIGERI na strani knjigovodstva POS - KALK_KALK ! -----------------------------------------------------
 
--- on p15.pos_pos -> f18.kalk_kalk
+-- on p15.pos_items -> f18.kalk_kalk
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.on_pos_pos_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_pos_items_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
 
@@ -85,6 +85,7 @@ DECLARE
        idFirma varchar;
        idvdKalk varchar;
        pUI varchar;
+       nProdavnica integer DEFAULT 15;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
@@ -98,7 +99,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    END IF;
    SELECT id INTO pKonto
           from public.koncij where prod=15;
-   brDok := public.kalk_brdok_iz_pos(NEW.idpos, idvdKalk, NEW.brdok, NEW.datum);
+   brDok := public.kalk_brdok_iz_pos( nProdavnica, idvdKalk, NEW.brdok, NEW.datum);
 
 ELSE
    IF ( OLD.idvd <> '42' ) AND ( OLD.idvd <> '71' ) AND ( OLD.idvd <> '61' ) AND ( OLD.idvd <> '22' ) AND ( OLD.idvd <> '29' ) THEN
@@ -111,10 +112,10 @@ ELSE
    END IF;
    SELECT id INTO pKonto
        from public.koncij where prod=15;
-   brDok := public.kalk_brdok_iz_pos(OLD.idpos, idvdKalk, OLD.brdok, OLD.datum);
+   brDok := public.kalk_brdok_iz_pos(nProdavnica, idvdKalk, OLD.brdok, OLD.datum);
 END IF;
 
-SELECT p15.fetchmetrictext('org_id') INTO idFirma;
+SELECT public.fetchmetrictext('org_id') INTO idFirma;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete kalk_kalk % % % %', pKonto, idVdKalk, OLD.datum, brDok;
@@ -134,7 +135,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                  ' (row_number() over (order by idroba))::integer as rbr,' ||
                  ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina, ' ||
                  ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj' ||
-                 ' FROM p' || NEW.idpos || '.pos_pos ' ||
+                 ' FROM p15.pos_pos ' ||
                  ' LEFT JOIN public.tarifa on pos_pos.idtarifa = tarifa.id' ||
                  ' WHERE idvd=''42'' AND datum=$4 AND idpos=$5' ||
                  ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
@@ -183,16 +184,16 @@ END;
 $$;
 
 
--- p15.pos_doks -> f18.kalk_doks
-DROP TRIGGER IF EXISTS pos_doks_crud on p15.pos_doks;
-CREATE TRIGGER pos_doks_crud
+-- p15.pos -> f18.kalk_doks
+DROP TRIGGER IF EXISTS knjig_pos_crud on p15.pos;
+CREATE TRIGGER knjig_pos_crud
    AFTER INSERT OR DELETE OR UPDATE
-   ON p15.pos_doks
-   FOR EACH ROW EXECUTE PROCEDURE public.on_pos_doks_crud();
+   ON p15.pos
+   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_crud();
 
--- p15.pos_pos -> f18.kalk_kalk
-DROP TRIGGER IF EXISTS pos_pos_crud on p15.pos_pos;
-CREATE TRIGGER pos_pos_crud
+-- p15.pos_items -> f18.kalk_kalk
+DROP TRIGGER IF EXISTS knjig_pos_items_crud on p15.pos_items;
+CREATE TRIGGER knjig_pos_items_crud
       AFTER INSERT OR DELETE OR UPDATE
-      ON p15.pos_pos
-      FOR EACH ROW EXECUTE PROCEDURE public.on_pos_pos_crud();
+      ON p15.pos_items
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_items_crud();

@@ -67,12 +67,12 @@ $$;
 
 
 -- POS 42 - racuni, zbirno u KALK
--- SELECT public.kalk_brdok_iz_pos('15', '49', '4', current_date); => 150214
+-- SELECT public.kalk_brdok_iz_pos(15, '49', '4', current_date); => 150214
 -- POS 71 - dokument, zahtjev za snizenje - pojedinacno u KALK
--- SELECT public.kalk_brdok_iz_pos('15', '71', '    3', current_date); => 15021403
+-- SELECT public.kalk_brdok_iz_pos(15, '71', '    3', current_date); => 15021403
 
 CREATE OR REPLACE FUNCTION public.kalk_brdok_iz_pos(
-   idpos varchar,
+   prod integer,
    idvdKalk varchar,
    posBrdok varchar,
    datum date) RETURNS varchar
@@ -85,10 +85,10 @@ BEGIN
 
 IF ( idvdKalk = '49' ) THEN
   -- 01.02.2019, idpos=15 -> 150201
-  SELECT TO_CHAR(datum, idpos || 'mmdd' ) INTO brDok;
+  SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'mmdd' ) INTO brDok;
 ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) OR ( idvdKalk = '22' ) OR ( idvdKalk = '29' ) ) THEN
    -- 01.02.2019, brdok='      3' -> 15020103
-   SELECT TO_CHAR(datum, idpos || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
+   SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 ELSE
    RAISE EXCEPTION 'ERROR kalk_brdok_iz_pos % % % %', idPos, idvdKalk, posBrdok, datum;
 END IF;

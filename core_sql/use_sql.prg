@@ -162,6 +162,10 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
+   IF programski_modul() == "POS" .and. cTable == "roba"
+      RETURN sql_primarna_schema() + "." + cTable
+   ENDIF
+
    IF AScan( aF18Tables, cTable ) > 0
       RETURN "public." + cTable
    ENDIF
