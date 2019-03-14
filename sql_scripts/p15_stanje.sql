@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_stanje (
    dat_od date,
    dat_do date,
    idroba varchar(10),
+   roba_id uuid,
    ulazi text[],
    izlazi text[],
    kol_ulaz numeric(18,3),

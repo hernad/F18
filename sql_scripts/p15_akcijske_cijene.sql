@@ -8,7 +8,6 @@ BEGIN
      FOR uuidPos IN SELECT uuid FROM p15.pos_doks
           WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
      LOOP
-
             RAISE INFO 'pos_doks %', uuidPos;
             PERFORM p15.nivelacija_start_create( uuidPos );
      END LOOP;
@@ -52,7 +51,6 @@ BEGIN
 
       dDatumNew := dDat_od;
       cBrDokNew := p15.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
-
       insert into p15.pos_doks(idPos,idVd,brDok,datum,dat_od,ref) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos)
           RETURNING uuid into uuid2;
 

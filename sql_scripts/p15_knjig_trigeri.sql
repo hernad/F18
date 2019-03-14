@@ -184,7 +184,7 @@ $$;
 
 
 -- p15.pos_doks -> f18.kalk_doks
-DROP TRIGGER IF EXISTS  pos_doks_crud on p15.pos_doks;
+DROP TRIGGER IF EXISTS pos_doks_crud on p15.pos_doks;
 CREATE TRIGGER pos_doks_crud
    AFTER INSERT OR DELETE OR UPDATE
    ON p15.pos_doks
