@@ -143,7 +143,7 @@ AS $$
 DECLARE
    nMpc numeric;
 BEGIN
-  select CASE WHEN (kol_dug - kol_pot) <> 0 THEN ROUND( (mpv_dug-mpv_pot) / (kol_dug-kol_pot), 2) ELSE 0 END from public.kalk_prod_stanje_sa_kartice( cPKonto, cIdRoba )
+  select CASE WHEN (kol_dug - kol_pot) <> 0 THEN ROUND((mpv_dug-mpv_pot) / (kol_dug-kol_pot), 2) ELSE 0 END from public.kalk_prod_stanje_sa_kartice( cPKonto, cIdRoba )
      INTO nMpc;
   RETURN nMpc;
 END;
@@ -155,7 +155,7 @@ AS $$
 DECLARE
    nKolicina numeric;
 BEGIN
-  select  ROUND(kol_dug-kol_pot, 4) from public.kalk_prod_stanje_sa_kartice( cPKonto, cIdRoba )
+  select ROUND(kol_dug - kol_pot, 4) from public.kalk_prod_stanje_sa_kartice( cPKonto, cIdRoba )
      INTO nKolicina;
   RETURN nKolicina;
 END;

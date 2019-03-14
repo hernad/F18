@@ -18,8 +18,8 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert pos_doks_knjig prodavnica %', NEW.idPos;
-      EXECUTE 'INSERT INTO p15.pos_doks(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
-        USING NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
+      EXECUTE 'INSERT INTO p15.pos_doks(dok_id,idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+        USING NEW.dok_id, NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
       RETURN NEW;
 END IF;
 
@@ -27,6 +27,76 @@ RETURN NULL; -- result is ignored since this is an AFTER trigger
 
 END;
 $$;
+
+
+---------------------------------------------------------------------------------------
+-- TRIGER na strani prodavnice !
+-- on p15.pos_pos_knjig -> p15.pos_pos
+---------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_crud() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+
+DECLARE
+    robaId varchar;
+    robaCijena numeric;
+BEGIN
+
+IF (TG_OP = 'DELETE') THEN
+      RAISE INFO 'delete pos_pos_knjig prodavnica % %', OLD.idPos, OLD.idvd;
+      EXECUTE 'DELETE FROM p15.pos_pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+         USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
+      RETURN OLD;
+ELSIF (TG_OP = 'UPDATE') THEN
+      RAISE INFO 'update pos_pos_knjig prodavnica!? %', NEW.idPos;
+      RETURN NEW;
+ELSIF (TG_OP = 'INSERT') THEN
+      RAISE INFO 'FIRST insert/update roba u prodavnici';
+      EXECUTE 'SELECT id from p15.roba WHERE id=$1'
+         USING NEW.idroba
+         INTO robaId;
+
+      IF (NEW.idvd = '19') THEN
+         robaCijena := NEW.ncijena;
+      ELSE
+         robaCijena := NEW.cijena;
+      END IF;
+
+      IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
+         EXECUTE 'UPDATE p15.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
+           USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
+      ELSE
+         EXECUTE 'INSERT INTO p15.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
+           USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
+      END IF;
+
+      RAISE INFO 'insert pos_pos_knjig prodavnica % %', NEW.idPos, NEW.idvd;
+      EXECUTE 'INSERT INTO p15.pos_pos(dok_id,idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)'
+        USING NEW.dok_id,NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.idtarifa,NEW.kolicina, NEW.cijena, NEW.ncijena, NEW.kol2, NEW.robanaz, NEW.jmj;
+      RETURN NEW;
+END IF;
+
+RETURN NULL; -- result is ignored since this is an AFTER trigger
+
+END;
+$$;
+
+
+-- na strani kase dokumenti koji dolaze od knjigovodstva
+
+-- p15.pos_doks_knjig -> p15.pos_doks
+DROP TRIGGER IF EXISTS pos_doks_knjig_crud on p15.pos_doks_knjig;
+CREATE TRIGGER pos_doks_knjig_crud
+      AFTER INSERT OR DELETE OR UPDATE
+      ON p15.pos_doks_knjig
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_doks_knjig_crud();
+
+-- p15.pos_pos_knjig -> p15.pos_pos
+DROP TRIGGER IF EXISTS pos_pos_knjig_crud on p15.pos_pos_knjig;
+CREATE TRIGGER pos_pos_knjig_crud
+   AFTER INSERT OR DELETE OR UPDATE
+   ON p15.pos_pos_knjig
+   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_crud();
 
 
 ----------- TRIGERI na strani kase radi pracenja stanja -----------------------------------------------------
