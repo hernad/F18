@@ -2,7 +2,7 @@
 
 -- on p15.pos_doks_knjig -> p15.pos_doks
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION p15.on_pos_doks_knjig_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_pos_knjig_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -33,7 +33,7 @@ $$;
 -- TRIGER na strani prodavnice !
 -- on p15.pos_pos_knjig -> p15.pos_pos
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION p15.on_pos_pos_knjig_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_pos_items_knjig_crud() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 
@@ -85,18 +85,18 @@ $$;
 -- na strani kase dokumenti koji dolaze od knjigovodstva
 
 -- p15.pos_doks_knjig -> p15.pos_doks
-DROP TRIGGER IF EXISTS pos_doks_knjig_crud on p15.pos_doks_knjig;
+DROP TRIGGER IF EXISTS pos_doks_knjig_crud on p15.pos_knjig;
 CREATE TRIGGER pos_doks_knjig_crud
       AFTER INSERT OR DELETE OR UPDATE
-      ON p15.pos_doks_knjig
-      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_doks_knjig_crud();
+      ON p15.pos_knjig
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_knjig_crud();
 
 -- p15.pos_pos_knjig -> p15.pos_pos
-DROP TRIGGER IF EXISTS pos_pos_knjig_crud on p15.pos_pos_knjig;
-CREATE TRIGGER pos_pos_knjig_crud
+DROP TRIGGER IF EXISTS pos_items_knjig_crud on p15.pos_items_knjig;
+CREATE TRIGGER pos_items_knjig_crud
    AFTER INSERT OR DELETE OR UPDATE
-   ON p15.pos_pos_knjig
-   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_pos_knjig_crud();
+   ON p15.pos_items_knjig
+   FOR EACH ROW EXECUTE PROCEDURE p15.on_pos_items_knjig_crud();
 
 
 ----------- TRIGERI na strani kase radi pracenja stanja -----------------------------------------------------
@@ -203,8 +203,8 @@ END;
 $$;
 
 -- p15.pos_pos na kasi
-DROP TRIGGER IF EXISTS  kasa_pos_pos_crud on p15.pos_pos;
+DROP TRIGGER IF EXISTS  kasa_pos_pos_crud on p15.pos_items;
 CREATE TRIGGER kasa_pos_pos_crud
       AFTER INSERT OR DELETE OR UPDATE
-      ON p15.pos_pos
+      ON p15.pos_items
       FOR EACH ROW EXECUTE PROCEDURE p15.on_kasa_pos_pos_crud();
