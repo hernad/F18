@@ -70,3 +70,49 @@ GRANT ALL ON FUNCTION public.fetchmetrictext TO xtrole;
 
 ALTER FUNCTION public.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION public.setmetric TO xtrole;
+
+
+CREATE IF NOT EXISTS TABLE f18.partn
+(
+    partner_id uuid DEFAULT gen_random_uuid(),
+    id character(6) COLLATE pg_catalog."default",
+    naz character(250) COLLATE pg_catalog."default",
+    naz2 character(250) COLLATE pg_catalog."default",
+    ptt character(5) COLLATE pg_catalog."default",
+    mjesto character(16) COLLATE pg_catalog."default",
+    adresa character(24) COLLATE pg_catalog."default",
+    ziror character(22) COLLATE pg_catalog."default",
+    rejon character(4) COLLATE pg_catalog."default",
+    telefon character(12) COLLATE pg_catalog."default",
+    dziror character(22) COLLATE pg_catalog."default",
+    fax character(12) COLLATE pg_catalog."default",
+    mobtel character(20) COLLATE pg_catalog."default",
+    idops character(4) COLLATE pg_catalog."default",
+    _kup character(1) COLLATE pg_catalog."default",
+    _dob character(1) COLLATE pg_catalog."default",
+    _banka character(1) COLLATE pg_catalog."default",
+    _radnik character(1) COLLATE pg_catalog."default",
+    idrefer character(10) COLLATE pg_catalog."default"
+
+);
+ALTER TABLE f18.partn OWNER to admin;
+GRANT ALL ON TABLE f18.partn TO xtrole;
+
+-- public.partn
+drop view if exists public.partn;
+CREATE view public.partn  AS
+  SELECT id, naz, naz2, ptt, mjesto, adresa, ziror, rejon, telefon, dziror, fax, mobtel,
+         idops, _kup, _dob, _banka, _radnik, idrefer
+FROM
+  f18.partn;
+
+CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
+        DO INSTEAD INSERT INTO f18.partn(
+           id, naz, naz2, ptt, mjesto, adresa, ziror, rejon, telefon, dziror, fax, mobtel,
+                 idops, _kup, _dob, _banka, _radnik, idrefer
+        ) VALUES (
+           NEW.id, NEW.naz, NEW.naz2, NEW.ptt, NEW.mjesto, NEW.adresa, NEW.ziror, NEW.rejon, NEW.telefon, NEW.dziror, NEW.fax, NEW.mobtel,
+                NEW.idops, NEW._kup, NEW._dob, NEW._banka, NEW._radnik, NEW.idrefer
+        );
+
+GRANT ALL ON public.partn TO xtrole;

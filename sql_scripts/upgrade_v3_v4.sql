@@ -154,12 +154,14 @@ ALTER TABLE f18.koncij ADD COLUMN IF NOT EXISTS koncij_id uuid DEFAULT gen_rando
 SELECT public.create_table_from_then_drop( 'fmk.roba', 'f18.roba' );
 ALTER TABLE f18.roba OWNER TO admin;
 GRANT ALL ON TABLE f18.roba TO xtrole;
+ALTER TABLE f18.roba DROP COLUMN IF EXISTS match_code CASCADE;
 ALTER TABLE f18.roba ADD COLUMN IF NOT EXISTS roba_id uuid DEFAULT gen_random_uuid();
 
 --- f18.partn  --------------------------------------------------
 SELECT public.create_table_from_then_drop( 'fmk.partn', 'f18.partn' );
 ALTER TABLE f18.partn OWNER TO admin;
 GRANT ALL ON TABLE f18.partn TO xtrole;
+ALTER TABLE f18.partn DROP COLUMN IF EXISTS match_code CASCADE;
 ALTER TABLE f18.partn ADD COLUMN IF NOT EXISTS partner_id uuid DEFAULT gen_random_uuid();
 
 --- f18.valute  --------------------------------------------------

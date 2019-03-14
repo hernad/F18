@@ -227,18 +227,20 @@ GRANT ALL ON public.roba TO xtrole;
 -- public.partn
 
 drop view if exists public.partn;
-CREATE view public.partn  AS SELECT
-  *
+CREATE view public.partn  AS
+  SELECT id, naz, naz2, ptt, mjesto, adresa, ziror, rejon, telefon, dziror, fax, mobtel,
+         idops, _kup, _dob, _banka, _radnik, idrefer
 FROM
   f18.partn;
 
---- CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
----         DO INSTEAD INSERT INTO f18.partn(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
+        DO INSTEAD INSERT INTO f18.partn(
+           id, naz, naz2, ptt, mjesto, adresa, ziror, rejon, telefon, dziror, fax, mobtel,
+                 idops, _kup, _dob, _banka, _radnik, idrefer
+        ) VALUES (
+           NEW.id, NEW.naz, NEW.naz2, NEW.ptt, NEW.mjesto, NEW.adresa, NEW.ziror, NEW.rejon, NEW.telefon, NEW.dziror, NEW.fax, NEW.mobtel,
+                NEW.idops, NEW._kup, NEW._dob, NEW._banka, NEW._radnik, NEW.idrefer
+        );
 
 GRANT ALL ON public.partn TO xtrole;
 
@@ -276,34 +278,30 @@ GRANT ALL ON public.konto TO xtrole;
 -- public.tnal
 drop view if exists public.tnal;
 CREATE view public.tnal  AS SELECT
-  *
+  id, naz
 FROM
   f18.tnal;
 
---- CREATE OR REPLACE RULE public_tnal_ins AS ON INSERT TO public.tnal
----         DO INSTEAD INSERT INTO f18.tnal(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE public_tnal_ins AS ON INSERT TO public.tnal
+        DO INSTEAD INSERT INTO f18.tnal(
+           id, naz
+        ) VALUES (
+            NEW.id, NEW.NAZ );
 
 GRANT ALL ON public.tnal TO xtrole;
 
 -- public.tdok
 drop view if exists public.tdok;
 CREATE view public.tdok  AS SELECT
-  *
+  id, naz
 FROM
   f18.tdok;
 
---- CREATE OR REPLACE RULE public_tdok_ins AS ON INSERT TO public.tdok
----         DO INSTEAD INSERT INTO f18.tdok(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE public_tdok_ins AS ON INSERT TO public.tdok
+        DO INSTEAD INSERT INTO f18.tdok(
+           id, naz
+        ) VALUES (
+          NEW.id, NEW.NAZ );
 
 GRANT ALL ON public.tdok TO xtrole;
 
@@ -314,13 +312,6 @@ CREATE view public.sifk  AS SELECT
 FROM
   f18.sifk;
 
---- CREATE OR REPLACE RULE public_sifk_ins AS ON INSERT TO public.sifk
----         DO INSTEAD INSERT INTO f18.sifk(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
 
 GRANT ALL ON public.sifk TO xtrole;
 
@@ -331,29 +322,20 @@ CREATE view public.sifv  AS SELECT
 FROM
   f18.sifv;
 
---- CREATE OR REPLACE RULE public_sifv_ins AS ON INSERT TO public.sifv
----         DO INSTEAD INSERT INTO f18.sifv(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
 
 GRANT ALL ON public.sifv TO xtrole;
 
 -- public.trfp
 drop view if exists public.trfp;
 CREATE view public.trfp  AS SELECT
-  *
+  id, shema, naz, idkonto, dokument, partner, d_p, znak, idvd, idvn, idtarifa
 FROM
   f18.trfp;
 
---- CREATE OR REPLACE RULE public_trfp_ins AS ON INSERT TO public.trfp
----         DO INSTEAD INSERT INTO f18.trfp(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE public_trfp_ins AS ON INSERT TO public.trfp
+        DO INSTEAD INSERT INTO f18.trfp(
+           id, shema, naz, idkonto, dokument, partner, d_p, znak, idvd, idvn, idtarifa
+        ) VALUES (
+          NEW.id, NEW.shema, NEW.naz, NEW.idkonto, NEW.dokument, NEW.partner, NEW.d_p, NEW.znak, NEW.idvd, NEW.idvn, NEW.idtarifa );
 
 GRANT ALL ON public.trfp TO xtrole;
