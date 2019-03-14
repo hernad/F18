@@ -179,3 +179,40 @@ FROM
   f18.valute;
 
 GRANT ALL ON public.valute TO xtrole;
+
+
+CREATE TABLE IF NOT EXISTS f18.log
+(
+    id bigint NOT NULL DEFAULT nextval('fmk.log_id_seq'::regclass),
+    user_code character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    l_time timestamp without time zone DEFAULT now(),
+    msg text COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT log_pkey PRIMARY KEY (id)
+);
+
+ALTER TABLE f18.log OWNER to admin;
+GRANT ALL ON TABLE fmk.log TO admin;
+GRANT ALL ON TABLE fmk.log TO xtrole;
+
+CREATE INDEX IF NOT EXISTS log_l_time_idx
+    ON fmk.log USING btree
+    (l_time)
+    TABLESPACE pg_default;
+
+CREATE INDEX IF NOT EXISTS log_user_code_idx
+    ON fmk.log USING btree
+    (user_code COLLATE pg_catalog."default")
+    TABLESPACE pg_default;
+
+-- fmk schema
+CREATE SCHEMA IF NOT EXISTS fmk;
+ALTER SCHEMA fmk OWNER TO admin;
+GRANT ALL ON SCHEMA f18 TO xtrole;
+-- fmk.log
+drop view if exists fmk.log;
+CREATE view fmk.log  AS SELECT
+      *
+    FROM
+      f18.log;
+
+GRANT ALL ON fmk.log TO xtrole;
