@@ -51,13 +51,6 @@ CREATE INDEX IF NOT EXISTS pos_doks_id6 ON p15.pos_doks_knjig USING btree (datum
 CREATE INDEX IF NOT EXISTS pos_doks_dok_id ON p15.pos_doks_knjig USING btree( dok_id );
 CREATE INDEX IF NOT EXISTS pos_doks_ref_fisk_dok ON p15.pos_doks_knjig USING btree( ref_fisk_dok );
 
---ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS obradjeno timestamp with time zone;
---ALTER TABLE p15.pos_doks ALTER COLUMN obradjeno TYPE timestamp with time zone;
-
---ALTER TABLE p15.pos_doks ADD COLUMN IF NOT EXISTS korisnik text;
---ALTER TABLE p15.pos_doks ALTER COLUMN obradjeno SET DEFAULT now();
---ALTER TABLE p15.pos_doks ALTER COLUMN korisnik SET DEFAULT current_user;
-
 CREATE TABLE IF NOT EXISTS p15.pos_pos (
     dok_id uuid,
     idpos character varying(2),
@@ -86,12 +79,10 @@ CREATE TABLE IF NOT EXISTS  p15.roba (
     mpc numeric(18,8),
     tip character(1),
     opis text,
-    -- mink numeric(12,2),
     barkod character(13),
     fisc_plu numeric(10,0)
 );
 ALTER TABLE p15.roba OWNER TO admin;
-
 
 CREATE TABLE IF NOT EXISTS  p15.pos_kase (
     id character varying(2),
@@ -99,7 +90,6 @@ CREATE TABLE IF NOT EXISTS  p15.pos_kase (
     ppath character varying(50)
 );
 ALTER TABLE p15.pos_kase OWNER TO admin;
-
 
 CREATE TABLE IF NOT EXISTS p15.pos_osob (
     id character varying(4),
