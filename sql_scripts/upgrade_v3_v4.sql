@@ -132,7 +132,6 @@ alter table f18.tarifa drop column if exists mpp;
 alter table f18.tarifa drop column if exists dlruc;
 alter table f18.tarifa drop column if exists zpp;
 
-
 DO $$
 BEGIN
   BEGIN

@@ -20,7 +20,6 @@ ALTER TABLE p15.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
 ALTER TABLE p15.pos_pos ALTER COLUMN idroba SET NOT NULL;
 ALTER TABLE p15.pos_pos ALTER COLUMN cijena SET NOT NULL;
 
-
 CREATE OR REPLACE FUNCTION p15.pos_prijem_update_stanje(
    transakcija character(1),
    idpos character(2),

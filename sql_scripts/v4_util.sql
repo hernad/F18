@@ -198,6 +198,7 @@ BEGIN
          nKolicinaIzlaz := nKolicinaIzlaz + nKolicina2;
          nMpvIzlaz := nMpvIzlaz + nKolicina2 * nMpc;
          nNvIzlaz := nNvIzlaz + nKolicina2 * nNc;
+     ELSE
     END CASE;
     nCount := nCount + 1;
 

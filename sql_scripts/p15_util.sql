@@ -157,7 +157,7 @@ AS $$
 DECLARE
    dok_id uuid;
 BEGIN
-   EXECUTE 'SELECT dok_id FROM p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+   EXECUTE 'SELECT dok_id FROM p15.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
      USING cIdPos, cIdVd, cBrDok, dDatum
      INTO dok_id;
 

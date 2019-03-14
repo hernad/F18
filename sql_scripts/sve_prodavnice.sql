@@ -116,3 +116,28 @@ CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
         );
 
 GRANT ALL ON public.partn TO xtrole;
+
+
+CREATE IF NOT EXISTS TABLE f18.tarifa
+(
+    tarifa_id uuid DEFAULT gen_random_uuid(),
+    id character(6) COLLATE pg_catalog."default",
+    naz character(50) COLLATE pg_catalog."default",
+    pdv numeric(6,2)
+);
+
+----  public.tarifa
+drop view if exists public.tarifa;
+CREATE view public.tarifa  AS SELECT
+  id, naz, pdv
+FROM
+  f18.tarifa;
+
+CREATE OR REPLACE RULE public_tarifa_ins AS ON INSERT TO public.tarifa
+    DO INSTEAD INSERT INTO f18.tarifa(
+      id, naz, pdv
+    ) VALUES (
+      NEW.id, NEW.naz, NEW.pdv
+    );
+
+GRANT ALL ON public.tarifa TO xtrole;

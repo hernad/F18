@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS p15.metric
     metric_module text COLLATE pg_catalog."default"
 );
 
-CREATE SEQUENCE p15.metric_metric_id_seq;
+CREATE SEQUENCE IF NOT EXISTS p15.metric_metric_id_seq;
 ALTER SEQUENCE p15.metric_metric_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE p15.metric_metric_id_seq TO admin;
 GRANT ALL ON SEQUENCE p15.metric_metric_id_seq TO xtrole;

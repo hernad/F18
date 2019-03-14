@@ -167,9 +167,17 @@ GRANT ALL ON public.kalk_doks TO xtrole;
 
 ----  public.tarifa
 drop view if exists public.tarifa;
-CREATE view public.tarifa  AS SELECT *
+CREATE view public.tarifa  AS SELECT
+  id, naz, pdv
 FROM
   f18.tarifa;
+
+CREATE OR REPLACE RULE public_tarifa_ins AS ON INSERT TO public.tarifa
+    DO INSTEAD INSERT INTO f18.tarifa(
+      id, naz, pdv
+    ) VALUES (
+      NEW.id, NEW.naz, NEW.pdv
+    );
 
 GRANT ALL ON public.tarifa TO xtrole;
 
@@ -210,17 +218,22 @@ GRANT ALL ON public.koncij TO xtrole;
 
 drop view if exists public.roba;
 CREATE view public.roba  AS SELECT
-  *
+   id, sifradob, naz, jmj, idtarifa, nc, vpc, mpc, tip, carina, opis, vpc2, mpc2, mpc3, k1, k2, n1, n2, plc,
+   mink, _m1_, barkod, zanivel, zaniv2, trosk1, trosk2, trosk3, trosk4, trosk5, fisc_plu, k7, k8, k9,
+   strings, idkonto, mpc4, mpc5, mpc6, mpc7, mpc8, mpc9
 FROM
   f18.roba;
 
---- CREATE OR REPLACE RULE public_roba_ins AS ON INSERT TO public.roba
----         DO INSTEAD INSERT INTO f18.roba(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE public_roba_ins AS ON INSERT TO public.roba
+        DO INSTEAD INSERT INTO f18.roba(
+          id, sifradob, naz, jmj, idtarifa, nc, vpc, mpc, tip, carina, opis, vpc2, mpc2, mpc3, k1, k2, n1, n2, plc,
+          mink, _m1_, barkod, zanivel, zaniv2, trosk1, trosk2, trosk3, trosk4, trosk5, fisc_plu, k7, k8, k9,
+          strings, idkonto, mpc4, mpc5, mpc6, mpc7, mpc8, mpc9
+        ) VALUES (
+          NEW.id, NEW.sifradob, NEW.naz, NEW.jmj, NEW.idtarifa, NEW.nc, NEW.vpc, NEW.mpc, NEW.tip, NEW.carina, NEW.opis, NEW.vpc2, NEW.mpc2, NEW.mpc3, NEW.k1, NEW.k2, NEW.n1, NEW.n2, NEW.plc,
+          NEW.mink, NEW._m1_, NEW.barkod, NEW.zanivel, NEW.zaniv2, NEW.trosk1, NEW.trosk2, NEW.trosk3, NEW.trosk4, NEW.trosk5, NEW.fisc_plu, NEW.k7, NEW.k8, NEW.k9,
+          NEW.strings, NEW.idkonto, NEW.mpc4, NEW.mpc5, NEW.mpc6, NEW.mpc7, NEW.mpc8, NEW.mpc9
+        );
 
 GRANT ALL ON public.roba TO xtrole;
 

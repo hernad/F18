@@ -18,7 +18,7 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert pos_doks_knjig prodavnica %', NEW.idPos;
-      EXECUTE 'INSERT INTO p15.pos_doks(dok_id,idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+      EXECUTE 'INSERT INTO p15.pos(dok_id,idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
         USING NEW.dok_id, NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
       RETURN NEW;
 END IF;
@@ -71,7 +71,7 @@ ELSIF (TG_OP = 'INSERT') THEN
       END IF;
 
       RAISE INFO 'insert pos_pos_knjig prodavnica % %', NEW.idPos, NEW.idvd;
-      EXECUTE 'INSERT INTO p15.pos_pos(dok_id,idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)'
+      EXECUTE 'INSERT INTO p15.pos_items(dok_id,idpos,idvd,brdok,datum,rbr,idroba,idtarifa,kolicina,cijena,ncijena,kol2,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)'
         USING NEW.dok_id,NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr, NEW.idroba, NEW.idtarifa,NEW.kolicina, NEW.cijena, NEW.ncijena, NEW.kol2, NEW.robanaz, NEW.jmj;
       RETURN NEW;
 END IF;
@@ -101,9 +101,34 @@ CREATE TRIGGER pos_items_knjig_crud
 
 ----------- TRIGERI na strani kase radi pracenja stanja -----------------------------------------------------
 
--- on p15.pos_pos
+
+CREATE OR REPLACE FUNCTION p15.on_kasa_pos_crud() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+
+BEGIN
+
+IF (TG_OP = 'INSERT') THEN
+   IF (NEW.idvd <> '02') THEN
+      RETURN NULL;
+   END IF;
+END IF;
+
+IF (TG_OP = 'INSERT') THEN
+   IF ( NEW.idvd = '02') THEN
+      EXECUTE 'DELETE FROM p15.pos_stanje';
+      RAISE INFO '02 - inicijalizacija p15.pos_stanje';
+      RETURN NEW;
+   END IF;
+END IF;
+
+RETURN NULL;
+END;
+$$;
+
+-- on p15.pos_items
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION p15.on_kasa_pos_pos_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION p15.on_kasa_pos_items_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
 DECLARE
@@ -202,9 +227,16 @@ RETURN NULL; -- result is ignored since this is an AFTER trigger
 END;
 $$;
 
--- p15.pos_pos na kasi
-DROP TRIGGER IF EXISTS  kasa_pos_pos_crud on p15.pos_items;
-CREATE TRIGGER kasa_pos_pos_crud
+-- p15.pos na kasi
+DROP TRIGGER IF EXISTS  kasa_pos_crud on p15.pos;
+    CREATE TRIGGER kasa_pos_crud
+        AFTER INSERT OR DELETE OR UPDATE
+        ON p15.pos
+        FOR EACH ROW EXECUTE PROCEDURE p15.on_kasa_pos_crud();
+
+-- p15.pos_items na kasi
+DROP TRIGGER IF EXISTS  kasa_pos_items_crud on p15.pos_items;
+CREATE TRIGGER kasa_pos_items_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON p15.pos_items
-      FOR EACH ROW EXECUTE PROCEDURE p15.on_kasa_pos_pos_crud();
+      FOR EACH ROW EXECUTE PROCEDURE p15.on_kasa_pos_items_crud();
