@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-14
+
+- KALK 02, POS 42 - KALK 49
+
 ## 2019-03-12
 
 - TKV v2
