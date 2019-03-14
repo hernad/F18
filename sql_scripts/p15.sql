@@ -117,7 +117,6 @@ GRANT ALL ON TABLE p15.pos_osob TO xtrole;
 GRANT ALL ON TABLE p15.pos_kase TO xtrole;
 GRANT ALL ON TABLE p15.vrstep TO xtrole;
 
-
 CREATE TABLE IF NOT EXISTS p15.metric
 (
     metric_id integer,
@@ -143,42 +142,19 @@ ALTER TABLE p15.metric ALTER COLUMN metric_id SET DEFAULT nextval(('p15.metric_m
 ALTER TABLE p15.metric  DROP CONSTRAINT IF EXISTS metric_id_unique;
 ALTER TABLE p15.metric  ADD CONSTRAINT metric_id_unique UNIQUE (metric_id);
 
-
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS k1;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS k2;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS k7;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS k8;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS k9;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS n1;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS n2;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS match_code;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS nc;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS vpc;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS carina;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS vpc2;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc2;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc3;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc4;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc5;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc6;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc7;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc8;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS mpc9;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS _m1_;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS plc;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS zanivel;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS zaniv2;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk1;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk2;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk3;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk4;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS trosk5;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS strings;
--- ALTER TABLE p15.roba DROP COLUMN IF EXISTS idkonto;
-
--- DROP TABLE IF EXISTS p15.pos_dokspf;
--- DROP TABLE IF EXISTS p15.pos_odj;
-
+CREATE TABLE IF NOT EXISTS p15.pos_fisk_doks (
+    dok_id uuid DEFAULT gen_random_uuid(),
+    ref_pos_dok uuid,
+    broj_rn integer,
+    ref_storno_fisk_dok uuid,
+    partner_id uuid,
+    ukupno real,
+    popust real,
+    obradjeno timestamp with time zone DEFAULT now(),
+    korisnik text DEFAULT current_user
+);
+ALTER TABLE p15.pos_fisk_doks OWNER TO admin;
+GRANT ALL ON TABLE p15.pos_fisk_doks TO xtrole;
 
 
 -- test
