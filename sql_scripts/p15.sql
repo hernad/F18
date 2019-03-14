@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_fisk_doks (
 ALTER TABLE p15.pos_fisk_doks OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_fisk_doks TO xtrole;
 
-CREATE TABLE IF NOT EXISTS p15.pos_doks (
+CREATE TABLE IF NOT EXISTS p15.pos (
     dok_id uuid DEFAULT gen_random_uuid(),
     idpos character varying(2) NOT NULL,
     idvd character varying(2) NOT NULL,
@@ -37,21 +37,21 @@ CREATE TABLE IF NOT EXISTS p15.pos_doks (
     korisnik text DEFAULT current_user
 );
 
-comment on column p15.pos_doks.ref_fisk_dok is 'za 42 referenca na pos_fisk_doks.dok_id';
-comment on column p15.pos_doks.ref is 'za 72 referenca na pos dokument 29-start nivelacija';
-comment on column p15.pos_doks.ref_2 is 'za 72 referenca na pos dokument 29-end nivelacija';
+comment on column p15.pos.ref_fisk_dok is 'za 42 referenca na pos_fisk_doks.dok_id';
+comment on column p15.pos.ref is 'za 72 referenca na pos dokument 29-start nivelacija';
+comment on column p15.pos.ref_2 is 'za 72 referenca na pos dokument 29-end nivelacija';
 
-ALTER TABLE p15.pos_doks OWNER TO admin;
-GRANT ALL ON TABLE p15.pos_doks TO xtrole;
+ALTER TABLE p15.pos OWNER TO admin;
+GRANT ALL ON TABLE p15.pos TO xtrole;
 
-CREATE INDEX IF NOT EXISTS pos_doks_id1 ON p15.pos_doks_knjig USING btree (idpos, idvd, datum, brdok);
-CREATE INDEX IF NOT EXISTS pos_doks_id2 ON p15.pos_doks_knjig USING btree (idvd, datum);
-CREATE INDEX IF NOT EXISTS pos_doks_id3 ON p15.pos_doks_knjig USING btree (idPartner, datum);
-CREATE INDEX IF NOT EXISTS pos_doks_id6 ON p15.pos_doks_knjig USING btree (datum);
-CREATE INDEX IF NOT EXISTS pos_doks_dok_id ON p15.pos_doks_knjig USING btree( dok_id );
-CREATE INDEX IF NOT EXISTS pos_doks_ref_fisk_dok ON p15.pos_doks_knjig USING btree( ref_fisk_dok );
+CREATE INDEX IF NOT EXISTS pos_id1 ON p15.pos USING btree (idpos, idvd, datum, brdok);
+CREATE INDEX IF NOT EXISTS pos_id2 ON p15.pos USING btree (idvd, datum);
+CREATE INDEX IF NOT EXISTS pos_id3 ON p15.pos USING btree (idPartner, datum);
+CREATE INDEX IF NOT EXISTS pos_id6 ON p15.pos USING btree (datum);
+CREATE INDEX IF NOT EXISTS pos_dok_id ON p15.pos USING btree( dok_id );
+CREATE INDEX IF NOT EXISTS pos_ref_fisk_dok ON p15.pos USING btree( ref_fisk_dok );
 
-CREATE TABLE IF NOT EXISTS p15.pos_pos (
+CREATE TABLE IF NOT EXISTS p15.pos_items (
     dok_id uuid,
     idpos character varying(2),
     idvd character varying(2),
@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS p15.pos_pos (
     robanaz varchar,
     jmj varchar
 );
-ALTER TABLE p15.pos_pos OWNER TO admin;
-GRANT ALL ON TABLE p15.pos_pos TO xtrole;
+ALTER TABLE p15.pos_items OWNER TO admin;
+GRANT ALL ON TABLE p15.pos_items TO xtrole;
 
 CREATE TABLE IF NOT EXISTS  p15.roba (
     id character(10) NOT NULL,

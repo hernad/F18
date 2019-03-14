@@ -148,3 +148,24 @@ RETURN nBrojRacuna;
 
 END;
 $$;
+
+
+-- select kalk_dok_id('10','11','00000100', '2018-01-09');
+CREATE OR REPLACE FUNCTION p15.pos_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   dok_id uuid;
+BEGIN
+   EXECUTE 'SELECT dok_id FROM p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+     USING cIdFirma, cIdVd, cBrDok, dDatum
+     INTO dok_id;
+
+   IF dok_id IS NULL THEN
+      --RAISE EXCEPTION 'kalk_doks %-%-% od % NE postoji?!', cIdFirma, cIdVd, cBrDok, dDatDok;
+      RAISE INFO 'pos_doks %-%-% od % NE postoji?!', cIdPos, cIdVd, cBrDok, dDatum;
+   END IF;
+
+   RETURN dok_id;
+END;
+$$;
