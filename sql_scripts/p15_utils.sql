@@ -73,7 +73,7 @@ BEGIN
     RETURN lpad(btrim(cBrDok), 8, ' ');
 
 END;
-$$
+$$;
 
 
 CREATE OR REPLACE FUNCTION p15.pos_dostupno_artikal_za_cijenu(cIdRoba varchar, nCijena numeric, nNCijena numeric) RETURNS numeric
@@ -96,7 +96,7 @@ BEGIN
          RETURN 0;
    END IF;
 END;
-$$
+$$;
 
 
 -- harbour FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojRacuna )
@@ -147,4 +147,4 @@ END IF;
 RETURN nBrojRacuna;
 
 END;
-$$
+$$;
