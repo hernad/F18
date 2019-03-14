@@ -180,10 +180,14 @@ FROM
 
 GRANT ALL ON public.valute TO xtrole;
 
+CREATE SEQUENCE f18.log_id_seq;
+ALTER SEQUENCE f18.log_id_seq OWNER TO admin;
+GRANT ALL ON SEQUENCE f18.log_id_seq TO admin;
+GRANT ALL ON SEQUENCE f18.log_id_seq TO xtrole;
 
 CREATE TABLE IF NOT EXISTS f18.log
 (
-    id bigint NOT NULL DEFAULT nextval('fmk.log_id_seq'::regclass),
+    id bigint NOT NULL DEFAULT nextval('f18.log_id_seq'::regclass),
     user_code character varying(20) COLLATE pg_catalog."default" NOT NULL,
     l_time timestamp without time zone DEFAULT now(),
     msg text COLLATE pg_catalog."default" NOT NULL,
@@ -208,6 +212,7 @@ CREATE INDEX IF NOT EXISTS log_user_code_idx
 CREATE SCHEMA IF NOT EXISTS fmk;
 ALTER SCHEMA fmk OWNER TO admin;
 GRANT ALL ON SCHEMA f18 TO xtrole;
+
 -- fmk.log
 drop view if exists fmk.log;
 CREATE view fmk.log  AS SELECT
