@@ -126,6 +126,8 @@ FUNCTION get_pkonto_by_prodajno_mjesto( nProdavnica )
 FUNCTION kalk_mp_inicijalizacija()
 
    LOCAL nRbr, cQuery, dDatDok := danasnji_datum(), cBrDok
+   LOCAL nKolicina
+   
    LOCAL GetList := {}
    LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( pos_prodavnica() )
 
@@ -182,7 +184,8 @@ FUNCTION kalk_mp_inicijalizacija()
       select_o_roba( tmp->idroba )
       select_o_tarifa( roba->idtarifa )
 
-      IF Round( tmp2->kol_dug - tmp2->kol_pot, 4 ) == 0 .OR.  Round( tmp2->mpc_sa_pdv, 4 ) == 0
+      nKolicina := tmp2->kol_dug - tmp2->kol_pot
+      IF Round( nKolicina, 4 ) <= 0 .OR.  Round( tmp2->mpc_sa_pdv, 4 ) == 0
          SELECT TMP
          SKIP
          LOOP
@@ -194,10 +197,12 @@ FUNCTION kalk_mp_inicijalizacija()
          idvd WITH "02", ;
          datdok WITH dDatDok, ;
          brdok WITH cBrDok, ;
+         pkonto WITH cPKonto, ;
+         pu_i WITH "0",   ;
          rbr WITH nRbr++, ;
          idroba WITH tmp->idroba, ;
          idtarifa WITH tarifa->id, ;
-         kolicina WITH tmp2->kol_dug - tmp2->kol_pot, ;
+         kolicina WITH nKolicina, ;
          mpcsapp WITH tmp2->mpc_sa_pdv,;
          mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, tmp2->mpc_sa_pdv )
 

@@ -192,9 +192,9 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
    LOCAL dDok := Date()
    LOCAL nPom := 0
    LOCAL GetList := {}
-   LOCAL nMpcSaPDV
+   LOCAL nMpcSaPDV, nMpcSaPDVSifarnik, nMpcSaPDVKartica
    LOCAL cIdRoba, cIdKontoProdavnica, cBrNiv
-   LOCAL nIzlazKol, nUlazKol, nMpvIzlaz, nMpvUlaz, nPosljednjaMPCsaPDV, nRazlika, nStanjeKol
+   LOCAL nIzlazKol, nUlazKol, nMpvIzlaz, nMpvUlaz, nRazlika, nStanjeKol
    LOCAL nMPVSaldo
    LOCAL cSravnitiD
    LOCAL cUvijekSif
@@ -202,8 +202,6 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
    LOCAL lGenerisao
 
    cIdKontoProdavnica := fetch_metric( "kalk_sredi_karicu_mpc", my_user(), PadR( "1330", 7 ) )
-
-   // o_konto()
 
    cSravnitiD := "D"
    cUvijekSif := "D"
@@ -250,11 +248,11 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
          LOOP
       ENDIF
 
-      nMpcSaPDV  := kalk_get_mpc_by_koncij_pravilo( cIdKontoProdavnica )
-      nPosljednjaMPCsaPDV := nMpcSaPDV
+      nMpcSaPDVSifarnik  := kalk_get_mpc_by_koncij_pravilo( cIdKontoProdavnica )
+      // nPosljednjaMPCsaPDV := nMpcSaPDV
 
       @ 2 + box_x_koord(), 2 + box_y_koord() SAY "ID roba: " + cIdRoba
-      @ 3 + box_x_koord(), 2 + box_y_koord() SAY8 "Cijena u šifarniku " + AllTrim( Str( nMpcSaPDV ) )
+      @ 3 + box_x_koord(), 2 + box_y_koord() SAY8 "Cijena u šifarniku " + AllTrim( Str( nMpcSaPDVSifarnik ) )
       DO WHILE !Eof() .AND. self_organizacija_id() + cIdKontoProdavnica + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba
 
          IF roba->tip $ "TU"
@@ -272,33 +270,33 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
          IF kalk->pu_i == "1"
             nUlazKol += kalk->kolicina
             nMpvUlaz += kalk->mpcsapp * kalk->kolicina
-            nMpcSaPDV := kalk->mpcsapp
             IF kalk->mpcsapp <> 0
-               nPosljednjaMPCsaPDV := kalk->mpcsapp
+               nMpcSaPDVKartica := kalk->mpcsapp
             ENDIF
+
          ELSEIF pu_i == "5"  .AND. !( kalk->idvd $ "12#13#22" )
             nIzlazKol += kalk->kolicina
             nMpvIzlaz += kalk->mpcsapp * kalk->kolicina
             IF kalk->mpcsapp <> 0
-               nPosljednjaMPCsaPDV := kalk->mpcsapp
+               nMpcSaPDVKartica := kalk->mpcsapp
             ENDIF
          ELSEIF kalk->pu_i == "5"  .AND. ( kalk->idvd $ "12#13#22" )    // povrat
             nUlazKol -= kalk->kolicina
             nMpvUlaz -= kalk->mpcsapp * kalk->kolicina
             IF kalk->mpcsapp <> 0
-               nPosljednjaMPCsaPDV := kalk->mpcsapp
+               nMpcSaPDVKartica := kalk->mpcsapp
             ENDIF
          ELSEIF pu_i == "3"
             // nivelacija
             nMpvUlaz += kalk->mpcsapp * kalk->kolicina
             IF kalk->mpcsapp + kalk->fcj <> 0
-               nPosljednjaMPCsaPDV := kalk->mpcsapp + kalk->fcj
+               nMpcSaPDVKartica := kalk->mpcsapp + kalk->fcj
             ENDIF
          ELSEIF pu_i == "I"
             nIzlazKol += kalk->gkolicin2
             nMpvIzlaz += kalk->mpcsapp * kalk->gkolicin2
             IF kalk->mpcsapp <> 0
-               nPosljednjaMPCsaPDV := kalk->mpcsapp
+               nMpcSaPDVKartica := kalk->mpcsapp
             ENDIF
          ENDIF
          SKIP
@@ -308,61 +306,54 @@ FUNCTION kalk_prod_kartica_mpc_svedi_mpc_sif()
       nRazlika := 0
       // nStanjeKol := ROUND( nUlazKol - nIzlazKol, 4 )
       // nMPVSaldo := ROUND( nMpvUlaz - nMpvIzlaz, 4 )
-      nStanjeKol := ( nUlazKol - nIzlazKol )
+      nStanjeKol := nUlazKol - nIzlazKol
       nMPVSaldo := nMpvUlaz - nMpvIzlaz
 
-      SELECT kalk_pripr
 
-      // IF cUvijekSif == "D"
-      // nMpcSaPDV := nStartMPC
+      IF Round( nStanjeKol, 4 ) == 0 .AND. Round( nMPVSaldo, 4 ) == 0 // nula sve ok, preci na novu stavku
+         SELECT KALK
+         LOOP
+      ENDIF
 
-      // od ove cijene pocinjemo
-      // ENDIF
+      IF cUvijekSif == "D"
+         nMpcSaPDV := nMpcSaPDVSifarnik
+      ELSE
+         nMpcSaPDV := nMpcSaPDVKartica
+      ENDIF
 
-      IF Round( nStanjeKol, 4 ) <> 0 .OR. Round( nMPVSaldo, 4 ) <> 0
-         IF Round( nStanjeKol, 4 ) <> 0
-            IF cUvijekSif == "D" .AND. Round( nMpcSaPDV - nMPVSaldo / nStanjeKol, 4 ) <> 0
-               nRazlika := nMpcSaPDV - nMPVSaldo / nStanjeKol
-            ELSE
-               // samo ako kartica nije ok
-               IF Round( nPosljednjaMPCsaPDV - nMPVSaldo / nStanjeKol, 4 ) = 0
-                  // kartica izgleda ok
-                  nRazlika := 0
-               ELSE
-                  nRazlika := nMpcSaPDV - nMPVSaldo / nStanjeKol
-                  // nova - stara cjena
-               ENDIF
-            ENDIF
+      IF Round( nStanjeKol, 4 ) <> 0
+         IF Round( nMpcSaPDV - nMPVSaldo / nStanjeKol, 4 ) == 0
+            nRazlika := 0 // kartica ok
          ELSE
-            nRazlika := nMPVSaldo
+            nRazlika := nMpcSaPDV - nMPVSaldo / nStanjeKol
          ENDIF
+      ELSE
+         nRazlika := nMPVSaldo
+      ENDIF
 
-         IF Round( nRazlika, 4 ) <> 0
+      IF Round( nRazlika, 4 ) <> 0
+         lGenerisao := .T.
+         @ 4 + box_x_koord(), 2 + box_y_koord() SAY "Generisano stavki: " + AllTrim( Str( ++nRbr ) )
+         SELECT kalk_pripr
+         APPEND BLANK
+         REPLACE idfirma WITH self_organizacija_id(), idroba WITH cIdRoba, ;
+            datdok WITH dDok, ;
+            idtarifa WITH roba->idtarifa, ;
+            kolicina WITH nStanjeKol, ;
+            idvd WITH "19", brdok WITH cBrNiv, ;
+            rbr WITH nRbr, ;
+            pkonto WITH cIdKontoProdavnica, ;
+            pu_i WITH "3"
+         // datfaktp WITH dDok, ;
 
-            lGenerisao := .T.
-            @ 4 + box_x_koord(), 2 + box_y_koord() SAY "Generisano stavki: " + AllTrim( Str( ++nRbr ) )
-
-            APPEND BLANK
-            REPLACE idfirma WITH self_organizacija_id(), idroba WITH cIdRoba, ;
-               datdok WITH dDok, ;
-               idtarifa WITH roba->idtarifa, ;
-               kolicina WITH nStanjeKol, ;
-               idvd WITH "19", brdok WITH cBrNiv, ;
-               rbr WITH nRbr, ;
-               pkonto WITH cIdKontoProdavnica, ;
-               pu_i WITH "3"
-            // datfaktp WITH dDok, ;
-
-            IF Round( nStanjeKol, 4 ) <> 0 .AND. Abs( nMPVSaldo / nStanjeKol ) < 99999
-               REPLACE fcj WITH nMPVSaldo / nStanjeKol
-               REPLACE mpcsapp WITH nRazlika
-            ELSE
-               REPLACE kolicina WITH 1
-               REPLACE fcj WITH nRazlika + nMpcSaPDV
-               REPLACE mpcsapp WITH -nRazlika
-               REPLACE Tbanktr WITH "X"
-            ENDIF
-
+         IF Round( nStanjeKol, 4 ) <> 0 //.AND. Abs( nMPVSaldo / nStanjeKol ) < 99999
+            REPLACE fcj WITH nMPVSaldo / nStanjeKol
+            REPLACE mpcsapp WITH nRazlika
+         ELSE
+            REPLACE kolicina WITH 1
+            REPLACE fcj WITH nRazlika + nMpcSaPDV
+            REPLACE mpcsapp WITH -nRazlika
+            REPLACE Tbanktr WITH "X"
          ENDIF
 
       ENDIF
