@@ -7,6 +7,7 @@ BEGIN
      -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
      FOR uuidPos IN SELECT uuid FROM p15.pos_doks
           WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
+     LOOP
 
             RAISE INFO 'pos_doks %', uuidPos;
             PERFORM p15.nivelacija_start_create( uuidPos );
@@ -14,7 +15,7 @@ BEGIN
 
      RETURN;
 END;
-$$
+$$;
 
 
 CREATE OR REPLACE FUNCTION p15.nivelacija_start_create(uuidPos uuid) RETURNS void
@@ -60,7 +61,7 @@ BEGIN
          USING uuidPos, uuid2;
 
       FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from p15.pos_pos WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
-
+      LOOP
          -- aktuelna osnovna cijena;
          nStanje := p15.pos_dostupno_artikal_za_cijenu(cIdRoba, nC, 0.00);
          EXECUTE 'insert into p15.pos_pos(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
@@ -69,7 +70,7 @@ BEGIN
 
       RETURN;
 END;
-$$
+$$;
 
 CREATE OR REPLACE FUNCTION p15.nivelacija_end_create(uuidPos uuid) RETURNS void
        LANGUAGE plpgsql
@@ -123,7 +124,7 @@ BEGIN
 
       RETURN;
 END;
-$$
+$$;
 
 
 CREATE OR REPLACE FUNCTION p15.cron_akcijske_cijene_nivelacija_start() RETURNS void
@@ -143,7 +144,7 @@ BEGIN
 
      RETURN;
 END;
-$$
+$$;
 
 
 CREATE OR REPLACE FUNCTION p15.cron_akcijske_cijene_nivelacija_end() RETURNS void
@@ -162,4 +163,4 @@ BEGIN
 
      RETURN;
 END;
-$$
+$$;
