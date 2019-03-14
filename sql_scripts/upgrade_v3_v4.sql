@@ -32,7 +32,7 @@ ALTER TABLE f18.metric  ADD CONSTRAINT metric_id_unique UNIQUE (metric_id);
 ---------------------------- f18.kalk ---------------------------------------------
 
 SELECT public.create_table_from_then_drop( 'fmk.kalk_kalk', 'f18.kalk_kalk' );
-SELECT public.create_table_from_then_drop( 'fmk.kalk_doks', 'f18.kalk_kalk' );
+SELECT public.create_table_from_then_drop( 'fmk.kalk_doks', 'f18.kalk_doks' );
 GRANT ALL ON TABLE f18.kalk_kalk TO xtrole;
 GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 
