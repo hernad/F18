@@ -119,19 +119,19 @@ DECLARE
    fiskUUID uuid;
 BEGIN
 
-SELECT dok_id FROM p15.pos_doks
+SELECT dok_id FROM p15.pos
    WHERE idpos=cIdPos AND idvd=cIdVd AND datum=dDatDok AND brDok=cBrDok
    INTO posUUID;
 
 IF posUUID IS NULL THEN
-     RAISE EXCEPTION 'pos_doks % % % % ne postoji ?!', cIdPos, cIdVd, dDatDok, cBrDok;
+     RAISE EXCEPTION 'pos % % % % ne postoji ?!', cIdPos, cIdVd, dDatDok, cBrDok;
 END IF;
 
 -- get broj racuna
 IF nBrojRacuna IS NULL THEN
     SELECT broj_rn FROM p15.pos_fisk_doks where ref_pos_dok=posUUID
       INTO nBrojRacuna;
-    RETURN nBrojRacuna;
+    RETURN COALESCE( nBrojRacuna, 0);
 END IF;
 
 SELECT dok_id FROM p15.pos_fisk_doks
@@ -144,11 +144,10 @@ ELSE
     UPDATE p15.pos_fisk_doks set broj_rn=nBrojRacuna, obradjeno=now() WHERE ref_pos_dok=posUUID;
 END IF;
 
-RETURN nBrojRacuna;
+RETURN COALESCE( nBrojRacuna, 0);
 
 END;
 $$;
-
 
 -- select pos_dok_id('1 ','42','       1', '2018-01-09');
 CREATE OR REPLACE FUNCTION p15.pos_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid

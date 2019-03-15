@@ -54,7 +54,7 @@ FUNCTION kalk_roba_key_handler( Ch )
       PopWA()
 
    ELSEIF Ch == K_ALT_M
-      RETURN MpcIzVpc()
+      RETURN roba_set_mpc_iz_vpc()
 
    ELSEIF Upper( Chr( Ch ) ) == "S"
 

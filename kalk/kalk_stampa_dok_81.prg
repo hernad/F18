@@ -156,15 +156,15 @@ FUNCTION kalk_stampa_dok_81()
    IF  Round( ntot3 + ntot4 + ntot5 + ntot6 + ntot7, 2 ) <> 0
       ?  m
       ?  "Troskovi (analiticki):"
-      ?  c10T1, ":"
+      ?  gKalkUlazTrosak1, ":"
       @ PRow(), 30 SAY  ntot3 PICT picdem()
-      ?  c10T2, ":"
+      ?  gKalkUlazTrosak2, ":"
       @ PRow(), 30 SAY  ntot4 PICT picdem()
-      ?  c10T3, ":"
+      ?  gKalkUlazTrosak3, ":"
       @ PRow(), 30 SAY  ntot5 PICT picdem()
-      ?  c10T4, ":"
+      ?  gKalkUlazTrosak4, ":"
       @ PRow(), 30 SAY  ntot6 PICT picdem()
-      ?  c10T5, ":"
+      ?  gKalkUlazTrosak5, ":"
       @ PRow(), 30 SAY  ntot7 PICT picdem()
       ? m
       ? "Ukupno troskova:"
@@ -214,7 +214,7 @@ FUNCTION kalk_stampa_dok_81_tops( lZaTops )
       m := "--- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
       m += " -----------"
       ? m
-      ? "*R * ROBA     *  FCJ     * TRKALO   * KASA-    * " + c10T1 + " * " + c10T2 + " * " + c10T3 + " * " + c10T4 + " * " + c10T5 + " *   NC     * MARZA.   *   MPC    * MPCSaPP *"
+      ? "*R * ROBA     *  FCJ     * TRKALO   * KASA-    * " + gKalkUlazTrosak1 + " * " + gKalkUlazTrosak2 + " * " + gKalkUlazTrosak3 + " * " + gKalkUlazTrosak4 + " * " + gKalkUlazTrosak5 + " *   NC     * MARZA.   *   MPC    * MPCSaPP *"
       ? "*BR* TARIFA   *  KOLICINA* OST.KALO * SKONTO   *          *          *          *          *          *          *          *          *         *"
       ? "*  *          *          *          *          *          *          *          *          *          *          *          *          *         *"
       ? m

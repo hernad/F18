@@ -80,15 +80,15 @@ FUNCTION kalk_par_varijante_prikaza()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "   default tip za pojedini trošak:"
 
    nX += 1
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "   " + c10T1 GET gRobaTr1Tip VALID gRobaTr1Tip $ " %URA" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "   " + gKalkUlazTrosak1 GET gRobaTr1Tip VALID gRobaTr1Tip $ " %URA" PICT "@!"
 
-   @ box_x_koord() + nX, Col() + 1 SAY c10T2 GET gRobaTr2Tip VALID gRobaTr2Tip $ " %URA" PICT "@!"
+   @ box_x_koord() + nX, Col() + 1 SAY gKalkUlazTrosak2 GET gRobaTr2Tip VALID gRobaTr2Tip $ " %URA" PICT "@!"
 
-   @ box_x_koord() + nX, Col() + 1 SAY c10T3 GET gRobaTr3Tip VALID gRobaTr3Tip $ " %URA" PICT "@!"
+   @ box_x_koord() + nX, Col() + 1 SAY gKalkUlazTrosak3 GET gRobaTr3Tip VALID gRobaTr3Tip $ " %URA" PICT "@!"
 
-   @ box_x_koord() + nX, Col() + 1 SAY c10T4 GET gRobaTr4Tip VALID gRobaTr4Tip $ " %URA" PICT "@!"
+   @ box_x_koord() + nX, Col() + 1 SAY gKalkUlazTrosak4 GET gRobaTr4Tip VALID gRobaTr4Tip $ " %URA" PICT "@!"
 
-   @ box_x_koord() + nX, Col() + 1 SAY c10T5 GET gRobaTr5Tip VALID gRobaTr5Tip $ " %URA" PICT "@!"
+   @ box_x_koord() + nX, Col() + 1 SAY gKalkUlazTrosak5 GET gRobaTr5Tip VALID gRobaTr5Tip $ " %URA" PICT "@!"
    nX += 1
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Mogućnost konverzije valute pri unosu dokumenta (D/N)" GET cKonverzijaValuteDn VALID cKonverzijaValuteDn $ "DN" PICT "@!"
    nX += 2
@@ -463,20 +463,20 @@ FUNCTION kalk_troskovi_10ka()
    PRIVATE  GetList := {}
 
    Box(, 5, 76, .T., "Troskovi 10-ka" )
-   @ box_x_koord() + 1, box_y_koord() + 2  SAY "T1:" GET c10T1
-   @ box_x_koord() + 1, box_y_koord() + 40 SAY "T2:" GET c10T2
-   @ box_x_koord() + 2, box_y_koord() + 2  SAY "T3:" GET c10T3
-   @ box_x_koord() + 2, box_y_koord() + 40 SAY "T4:" GET c10T4
-   @ box_x_koord() + 3, box_y_koord() + 2  SAY "T5:" GET c10T5
+   @ box_x_koord() + 1, box_y_koord() + 2  SAY "T1:" GET gKalkUlazTrosak1
+   @ box_x_koord() + 1, box_y_koord() + 40 SAY "T2:" GET gKalkUlazTrosak2
+   @ box_x_koord() + 2, box_y_koord() + 2  SAY "T3:" GET gKalkUlazTrosak3
+   @ box_x_koord() + 2, box_y_koord() + 40 SAY "T4:" GET gKalkUlazTrosak4
+   @ box_x_koord() + 3, box_y_koord() + 2  SAY "T5:" GET gKalkUlazTrosak5
    READ
    BoxC()
 
    IF LastKey() <> K_ESC
-      set_metric( "kalk_dokument_10_trosak_1", NIL, c10T1 )
-      set_metric( "kalk_dokument_10_trosak_2", NIL, c10T2 )
-      set_metric( "kalk_dokument_10_trosak_3", NIL, c10T3 )
-      set_metric( "kalk_dokument_10_trosak_4", NIL, c10T4 )
-      set_metric( "kalk_dokument_10_trosak_5", NIL, c10T5 )
+      set_metric( "kalk_dokument_10_trosak_1", NIL, gKalkUlazTrosak1 )
+      set_metric( "kalk_dokument_10_trosak_2", NIL, gKalkUlazTrosak2 )
+      set_metric( "kalk_dokument_10_trosak_3", NIL, gKalkUlazTrosak3 )
+      set_metric( "kalk_dokument_10_trosak_4", NIL, gKalkUlazTrosak4 )
+      set_metric( "kalk_dokument_10_trosak_5", NIL, gKalkUlazTrosak5 )
    ENDIF
 
    RETURN NIL

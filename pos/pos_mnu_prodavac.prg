@@ -21,7 +21,7 @@ FUNCTION pos_main_menu_prodavac()
    AAdd( aOpcExe, {|| pos_racun_unos_ispravka() } )
 
    AAdd( aOpc, "2. pregled ažuriranih računa  " )
-   AAdd( aOpcExe, {|| pos_pregled_racuna( .F. ) } )
+   AAdd( aOpcExe, {|| pos_pregled_racuna() } )
 
    AAdd( aOpc, "R. trenutna realizacija radnika" )
    AAdd( aOpcExe, {|| pos_realizacija_radnik( .T., "P" ) } )

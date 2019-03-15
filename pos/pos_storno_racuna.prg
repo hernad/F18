@@ -122,43 +122,56 @@ STATIC FUNCTION pos_fix_broj_racuna( cBrRacuna )
    RETURN .T.
 
 
-
-FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFiskalnogRacuna )
+FUNCTION pos_storno_racuna( hParams )
+//FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFiskalnogRacuna )
 
    LOCAL nTArea := Select()
    LOCAL hRec
    LOCAL GetList := {}
-   LOCAL cDanasnjiDN := "D"
+   LOCAL dDatum := danasnji_datum()
 
-ALERT( "todo pos_storno")
 
-   IF lSilent == nil
-      lSilent := .F.
+   IF !hb_HHasKey( hParams, "datum" )
+      hParams[ "datum" ] := NIL
    ENDIF
 
-   IF cBrDokStornirati == nil
-      cBrDokStornirati := Space( FIELD_LEN_POS_BRDOK )
+   IF !hb_HHasKey( hParams, "brdok" )
+      hParams[ "brdok" ] := NIL
    ENDIF
 
-   IF dDatum == nil
-      dDatum := danasnji_datum()
+   IF !hb_HHasKey( hParams, "idpos" )
+      hParams[ "idpos" ] := pos_pm()
    ENDIF
 
-   IF cBrojFiskalnogRacuna == nil
-      cBrojFiskalnogRacuna := Space( 10 )
+
+//ALERT( "todo pos_storno")
+
+   //IF lSilent == nil
+  //    lSilent := .F.
+  // ENDIF
+
+   ///IF cBrDokStornirati == nil
+    //  cBrDokStornirati := Space( FIELD_LEN_POS_BRDOK )
+  // ENDIF
+
+   IF hParams["datum"] == nil
+      hParams["datum"] := danasnji_datum()
    ENDIF
+
+   IF hParams["datum"] == nil
+      hParams["datum"] := danasnji_datum()
+   ENDIF
+
+   //IF cBrojFiskalnogRacuna == nil
+  //    cBrojFiskalnogRacuna := Space( 10 )
+  // ENDIF
 
    Box(, 4, 55 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Račun je današnji (D/N) ?" GET cDanasnjiDN VALID cDanasnjiDN $ "DN" PICT "@!"
-   READ
+altd()
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET dDatum
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET cBrDokStornirati VALID {|| pos_lista_racuna( @dDatum, @cBrDokStornirati, .T. ), pos_fix_broj_racuna( @cBrDokStornirati ), dDatum := dDatum,  .T. }
 
-   IF cDanasnjiDN == "N"
-      dDatum := NIL
-   ENDIF
-
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET cBrDokStornirati VALID {|| pos_lista_racuna( @dDatum, @cBrDokStornirati, .T. ), pos_fix_broj_racuna( @cBrDokStornirati ), dDatum := dDatum,  .T. }
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY "od datuma:" GET dDatum
    READ
 
    cBrDokStornirati := PadL( AllTrim( cBrDokStornirati ), FIELD_LEN_POS_BRDOK )

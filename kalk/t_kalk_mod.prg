@@ -119,11 +119,11 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC gAFakt := "D"
    PUBLIC gAutoCjen := "D"
    PUBLIC gVarEv := "1"  // 1-sa cijenama   2-bez cijena
-   PUBLIC c10T1 := "PREVOZ.T"
-   PUBLIC c10T2 := "AKCIZE  "
-   PUBLIC c10T3 := "SPED.TR "
-   PUBLIC c10T4 := "CARIN.TR"
-   PUBLIC c10T5 := "ZAVIS.TR"
+   PUBLIC gKalkUlazTrosak1 := "PREVOZ.T"
+   PUBLIC gKalkUlazTrosak2 := "AKCIZE  "
+   PUBLIC gKalkUlazTrosak3 := "SPED.TR "
+   PUBLIC gKalkUlazTrosak4 := "CARIN.TR"
+   PUBLIC gKalkUlazTrosak5 := "ZAVIS.TR"
    PUBLIC cRNT1 := "        "
    PUBLIC cRNT2 := "R.SNAGA "
    PUBLIC cRNT3 := "TROSK 3 "
@@ -194,11 +194,11 @@ METHOD TKalkMod:set_module_gvars()
 
    cOdradjeno := "D"
 
-   c10T1 := fetch_metric( "kalk_dokument_10_trosak_1", nil, c10T1 )
-   c10T2 := fetch_metric( "kalk_dokument_10_trosak_2", nil, c10T2 )
-   c10T3 := fetch_metric( "kalk_dokument_10_trosak_3", nil, c10T3 )
-   c10T4 := fetch_metric( "kalk_dokument_10_trosak_4", nil, c10T4 )
-   c10T5 := fetch_metric( "kalk_dokument_10_trosak_5", nil, c10T5 )
+   gKalkUlazTrosak1 := fetch_metric( "kalk_dokument_10_trosak_1", nil, gKalkUlazTrosak1 )
+   gKalkUlazTrosak2 := fetch_metric( "kalk_dokument_10_trosak_2", nil, gKalkUlazTrosak2 )
+   gKalkUlazTrosak3 := fetch_metric( "kalk_dokument_10_trosak_3", nil, gKalkUlazTrosak3 )
+   gKalkUlazTrosak4 := fetch_metric( "kalk_dokument_10_trosak_4", nil, gKalkUlazTrosak4 )
+   gKalkUlazTrosak5 := fetch_metric( "kalk_dokument_10_trosak_5", nil, gKalkUlazTrosak5 )
 
    cRNT1 := fetch_metric( "kalk_dokument_rn_trosak_1", nil, cRNT1 )
    cRNT2 := fetch_metric( "kalk_dokument_rn_trosak_2", nil, cRNT2 )

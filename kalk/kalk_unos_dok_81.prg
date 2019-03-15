@@ -214,23 +214,23 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    IF lSaTroskovima == .T.
       // TROSKOVNIK
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Raspored troškova kalkulacije ->"
-      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY gKalkUlazTrosak1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _Prevoz PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T2 + cSPom GET _TBankTr VALID _TBankTr $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY gKalkUlazTrosak2 + cSPom GET _TBankTr VALID _TBankTr $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _BankTr PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY gKalkUlazTrosak3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _SpedTr PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY gKalkUlazTrosak4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _CarDaz PICT PicDEM
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nY SAY c10T5 + cSPom GET _TZavTr VALID _TZavTr $ "%AUR" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nY SAY gKalkUlazTrosak5 + cSPom GET _TZavTr VALID _TZavTr $ "%AUR" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _ZavTr PICT PicDEM ;
          VALID {|| kalk_when_valid_nc_ulaz(), .T. }
       nX += 2

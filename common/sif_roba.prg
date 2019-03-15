@@ -11,8 +11,14 @@
 
 #include "f18.ch"
 
-MEMVAR ImeKol, Kol
-
+MEMVAR ImeKol, Kol, Ch
+MEMVAR wId, wTip, wIdTarifa, widkonto, wBarKod, wfisc_plu, wOpis
+MEMVAR gKalkUlazTrosak1
+MEMVAR gKalkUlazTrosak2
+MEMVAR gKalkUlazTrosak3
+MEMVAR gKalkUlazTrosak4
+MEMVAR gKalkUlazTrosak5
+MEMVAR cPom, cPom2
 
 FUNCTION P_Roba_select( cId )
 
@@ -39,6 +45,7 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    LOCAL nBrowseRobaNazivLen := 40
    LOCAL nI
    LOCAL cPomTag
+   LOCAL cPrikazi
    PRIVATE ImeKol
    PRIVATE Kol
 
@@ -59,8 +66,8 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    AAdd( ImeKol, { PadC( "Naziv", nBrowseRobaNazivLen ), {|| PadR( field->naz, nBrowseRobaNazivLen ) }, "naz", {|| .T. }, {|| .T. } } )
    AAdd( ImeKol, { PadC( "JMJ", 3 ), {|| field->jmj },   "jmj"    } )
 
-   AAdd( ImeKol, { PadC( "PLU kod", 8 ),  {|| PadR( fisc_plu, 10 ) }, "fisc_plu", {|| gen_plu( @wfisc_plu ), .F. }, {|| .T. } } )
-   AAdd( ImeKol, { PadC( "S.dobav.", 13 ), {|| PadR( sifraDob, 13 ) }, "sifradob"   } )
+   AAdd( ImeKol, { PadC( "PLU kod", 8 ),  {|| PadR( feild->fisc_plu, 10 ) }, "fisc_plu", {|| gen_plu( @wfisc_plu ), .F. }, {|| .T. } } )
+   AAdd( ImeKol, { PadC( "S.dobav.", 13 ), {|| PadR( field->sifraDob, 13 ) }, "sifradob"   } )
 
    IF programski_modul() != "POS"
       AAdd( ImeKol, { PadC( "VPC", 10 ), {|| Transform( field->VPC, "999999.999" ) }, "vpc", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
@@ -86,9 +93,9 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    // " " - roba, "G" - roba gorivo, "U" - usluge, "P" - proizvod, "S" - sirovina
    AAdd( ImeKol, { "Tip", {|| " " + field->Tip + " " }, "Tip", {|| .T. }, {|| wTip $ " UPSG" }, NIL, NIL, NIL, NIL, 27 } )
    AAdd ( ImeKol, { PadC( "BARKOD", 14 ), {|| field->BARKOD }, "BarKod", {|| .T. }, {|| roba_valid_barkod( Ch, @wId, @wBarkod ) }  } )
-   AAdd ( ImeKol, { PadC( "MINK", 10 ), {|| Transform( field->MINK, "999999.99" ) }, "MINK"   } )
 
    IF programski_modul() != "POS"
+      AAdd ( ImeKol, { PadC( "MINK", 10 ), {|| Transform( field->MINK, "999999.99" ) }, "MINK"   } )
       AAdd ( ImeKol, { PadC( "K1", 4 ), {|| field->k1 }, "k1"   } )
       AAdd ( ImeKol, { PadC( "K2", 4 ), {|| field->k2 }, "k2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 35   } )
       AAdd ( ImeKol, { PadC( "N1", 12 ), {|| field->N1 }, "N1"   } )
@@ -97,17 +104,14 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
 
    // AUTOMATSKI TROSKOVI ROBE, samo za KALK
    IF programski_modul() == "KALK"   // .AND. roba->( FieldPos( "TROSK1" ) ) <> 0
-      AAdd ( ImeKol, { PadR( c10T1, 8 ), {|| trosk1 }, "trosk1", {|| .T. }, {|| .T. } } )
-      AAdd ( ImeKol, { PadR( c10T2, 8 ), {|| trosk2 }, "trosk2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 30 } )
-      AAdd ( ImeKol, { PadR( c10T3, 8 ), {|| trosk3 }, "trosk3", {|| .T. }, {|| .T. } } )
-      AAdd ( ImeKol, { PadR( c10T4, 8 ), {|| trosk4 }, "trosk4", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 30 } )
-      AAdd ( ImeKol, { PadR( c10T5, 8 ), {|| trosk5 }, "trosk5"   } )
-   ENDIF
-
-   IF programski_modul() == "KALK"
-      AAdd ( ImeKol, { PadC( "Nova cijena", 20 ), {|| Transform( zanivel, "999999.999" ) }, "zanivel", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
-      AAdd ( ImeKol, { PadC( "Nova cijena/2", 20 ), {|| Transform( zaniv2, "999999.999" ) }, "zaniv2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
-      AAdd ( ImeKol, { "Id konto", {|| idkonto }, "idkonto", {|| .T. }, {|| Empty( widkonto ) .OR. P_Konto( @widkonto ) }   } )
+      AAdd ( ImeKol, { PadR( gKalkUlazTrosak1, 8 ), {|| field->trosk1 }, "trosk1", {|| .T. }, {|| .T. } } )
+      AAdd ( ImeKol, { PadR( gKalkUlazTrosak2, 8 ), {|| field->trosk2 }, "trosk2", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 30 } )
+      AAdd ( ImeKol, { PadR( gKalkUlazTrosak3, 8 ), {|| field->trosk3 }, "trosk3", {|| .T. }, {|| .T. } } )
+      AAdd ( ImeKol, { PadR( gKalkUlazTrosak4, 8 ), {|| field->trosk4 }, "trosk4", {|| .T. }, {|| .T. }, NIL, NIL, NIL, NIL, 30 } )
+      AAdd ( ImeKol, { PadR( gKalkUlazTrosak5, 8 ), {|| field->trosk5 }, "trosk5"   } )
+      AAdd ( ImeKol, { PadC( "Nova cijena", 20 ), {|| Transform( field->zanivel, "999999.999" ) }, "zanivel", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+      AAdd ( ImeKol, { PadC( "Nova cijena/2", 20 ), {|| Transform( field->zaniv2, "999999.999" ) }, "zaniv2", NIL, NIL, NIL, kalk_pic_cijena_bilo_gpiccdem()  } )
+      AAdd ( ImeKol, { "Id konto", {|| field->idkonto }, "idkonto", {|| .T. }, {|| Empty( widkonto ) .OR. P_Konto( @widkonto ) }   } )
    ENDIF
 
 
@@ -196,7 +200,7 @@ FUNCTION roba_opis_edit( lView )
 // ------------------------------------
 // formiranje MPC na osnovu VPC
 // ------------------------------------
-FUNCTION MpcIzVpc()
+FUNCTION roba_set_mpc_iz_vpc()
 
    IF pitanje(, "Formirati MPC na osnovu VPC ? (D/N)", "N" ) == "N"
       RETURN DE_CONT
@@ -301,9 +305,9 @@ FUNCTION RobaZastCijena( cIdTarifa )
 
 FUNCTION sifre_artikli_provjera_mp_cijena()
 
-   LOCAL _check := {}
+   LOCAL nCheck := {}
    LOCAL nI, _n, _x, _mpc
-   LOCAL _line
+   LOCAL cLine
    LOCAL _decimal := 2
 
    SELECT ( F_ROBA )
@@ -329,11 +333,11 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
 
          IF Abs( _mpc ) - Abs( Val( Str( _mpc, 12, _decimal ) ) ) <> 0
 
-            _n_scan := AScan( _check, {| val | val[ 1 ] == field->id  } )
+            _n_scan := AScan( nCheck, {| val | val[ 1 ] == field->id  } )
 
             IF _n_scan == 0
                // dodaj u matricu...
-               AAdd( _check, { field->id, field->barkod, field->naz, ;
+               AAdd( nCheck, { field->id, field->barkod, field->naz, ;
                   IF( _n == 1, _mpc, 0 ), ;
                   IF( _n == 2, _mpc, 0 ), ;
                   IF( _n == 3, _mpc, 0 ), ;
@@ -345,7 +349,7 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
                   IF( _n == 9, _mpc, 0 ) } )
             ELSE
                // dodaj u postojecu matricu
-               _check[ _n_scan, 2 + _n ] := _mpc
+               nCheck[ _n_scan, 2 + _n ] := _mpc
             ENDIF
 
          ENDIF
@@ -359,7 +363,7 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
    MsgC()
 
    // nema gresaka
-   IF Len( _check ) == 0
+   IF Len( nCheck ) == 0
       my_close_all_dbf()
       RETURN
    ENDIF
@@ -371,13 +375,13 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
    P_COND2
 
    _count := 0
-   _line := _get_check_line()
+   cLine := _get_check_line()
 
-   ? _line
+   ? cLine
 
    ? "Lista artikala sa nepravilnom MPC"
 
-   ? _line
+   ? cLine
 
    ? PadR( "R.br.", 6 ), PadR( "Artikal ID", 10 ), PadR( "Barkod", 13 ), ;
       PadR( "Naziv artikla", 30 ), ;
@@ -387,23 +391,23 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
       PadC( "MPC4", 15 )
 
 
-   ? _line
+   ? cLine
 
-   FOR nI := 1 TO Len( _check )
+   FOR nI := 1 TO Len( nCheck )
 
       ? PadL( AllTrim( Str( ++_count ) ) + ".", 6 )
       // id
-      @ PRow(), PCol() + 1 SAY _check[ nI, 1 ]
+      @ PRow(), PCol() + 1 SAY nCheck[ nI, 1 ]
       // barkod
-      @ PRow(), PCol() + 1 SAY _check[ nI, 2 ]
+      @ PRow(), PCol() + 1 SAY nCheck[ nI, 2 ]
       // naziv
-      @ PRow(), PCol() + 1 SAY PadR( _check[ nI, 3 ], 30 )
+      @ PRow(), PCol() + 1 SAY PadR( nCheck[ nI, 3 ], 30 )
 
       // setovi cijena...
       FOR _x := 1 TO 9
 
          // mpc, mpc2, mpc3...
-         _cijena := _check[ nI, 3 + _x ]
+         _cijena := nCheck[ nI, 3 + _x ]
 
          IF Round( _cijena, 4 ) == 0
             _tmp := PadR( "", 15 )
@@ -416,7 +420,7 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
       NEXT
    NEXT
 
-   ? _line
+   ? cLine
 
    FF
 
@@ -424,40 +428,40 @@ FUNCTION sifre_artikli_provjera_mp_cijena()
 
    ENDPRINT
 
-   RETURN
+   RETURN .T.
 
 
 STATIC FUNCTION _get_check_line()
 
-   LOCAL _line := ""
+   LOCAL cLine := ""
 
-   _line += Replicate( "-", 6 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 10 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 13 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 30 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
-   _line += Space( 1 )
-   _line += Replicate( "-", 15 )
+   cLine += Replicate( "-", 6 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 10 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 13 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 30 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
+   cLine += Space( 1 )
+   cLine += Replicate( "-", 15 )
 
-   RETURN _line
+   RETURN cLine
 
 
 
@@ -471,7 +475,7 @@ FUNCTION rpt_dupli_barkod()
    LOCAL _data
 
    MsgO( "Formiram sql upit ..." )
-   _data := __dupli_bk_sql()
+   _data := dupli_barkodovi_sql()
    MsgC()
 
    dupli_barkodovi_report( _data )
@@ -480,38 +484,38 @@ FUNCTION rpt_dupli_barkod()
 
 
 
-STATIC FUNCTION __dupli_bk_sql()
+STATIC FUNCTION dupli_barkodovi_sql()
 
-   LOCAL cQuery, _table
+   LOCAL cQuery, oTable
 
    cQuery := "SELECT id, naz, barkod " + ;
-      "FROM " + F18_PSQL_SCHEMA + ".roba r1 " + ;
+      "FROM " + f18_sql_schema( "roba") + " r1 " + ;
       "WHERE barkod <> '' AND barkod IN ( " + ;
       "SELECT barkod " + ;
-      "FROM " + F18_PSQL_SCHEMA + ".roba r2 " + ;
+      "FROM " + f18_sql_schema( "roba") + " r2 " + ;
       "GROUP BY barkod " + ;
       "HAVING COUNT(*) > 1 " + ;
       ") " + ;
       "ORDER BY barkod"
 
-   _table := run_sql_query( cQuery )
-   IF sql_error_in_query( _table, "SELECT" )
+   oTable := run_sql_query( cQuery )
+   IF sql_error_in_query( oTable, "SELECT" )
       RETURN NIL
    ENDIF
 
-   RETURN _table
+   RETURN oTable
 
 
 // -----------------------------------------------
 // prikaz duplih barkodova iz sifrarnika
 // -----------------------------------------------
-STATIC FUNCTION dupli_barkodovi_report( DATA )
+STATIC FUNCTION dupli_barkodovi_report( oData )
 
-   LOCAL nI
+   LOCAL nI, oRow
 
-   IF ValType( DATA ) == "L" .OR. Len( DATA ) == 0
+   IF ValType( oData ) == "L" .OR. Len( oData ) == 0
       MsgBeep( "Nema podataka za prikaz !" )
-      RETURN
+      RETURN .F.
    ENDIF
 
    START PRINT CRET
@@ -523,15 +527,15 @@ STATIC FUNCTION dupli_barkodovi_report( DATA )
    ? "ID             NAZIV                                    BARKOD"
    ? "----------------------------------------------------------------------------------"
 
-   DO WHILE !data:Eof()
+   DO WHILE !oData:Eof()
 
-      _row := data:GetRow()
+      oRow := oData:GetRow()
 
-      ? _row:FieldGet( _row:FieldPos( "id" ) ), ;
-         PadR( hb_UTF8ToStr( _row:FieldGet( _row:FieldPos( "naz" ) ) ), 40 ), ;
-         _row:FieldGet( _row:FieldPos( "barkod" ) )
+      ? oRow:FieldGet( oRow:FieldPos( "id" ) ), ;
+         PadR( hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "naz" ) ) ), 40 ), ;
+         oRow:FieldGet( oRow:FieldPos( "barkod" ) )
 
-      data:Skip()
+      oData:Skip()
 
    ENDDO
 
@@ -541,7 +545,7 @@ STATIC FUNCTION dupli_barkodovi_report( DATA )
    RETURN .T.
 
 
-// --------------------------------------------------------
+/*
 // setovanje mpc cijene iz vpc
 // --------------------------------------------------------
 FUNCTION roba_setuj_mpc_iz_vpc()
@@ -660,7 +664,7 @@ FUNCTION roba_setuj_mpc_iz_vpc()
 
 
 
-STATIC FUNCTION _get_params( params )
+STATIC FUNCTION _get_params( hParams )
 
    LOCAL _ok := .F.
    LOCAL _x := 1
@@ -668,6 +672,7 @@ STATIC FUNCTION _get_params( params )
    LOCAL _zaok_5pf := "D"
    LOCAL _mpc_nula := "D"
    LOCAL _filter_id := Space( 200 )
+   LOCAL GetList := {}
 
    Box(, 10, 65 )
 
@@ -690,12 +695,13 @@ STATIC FUNCTION _get_params( params )
       RETURN _ok
    ENDIF
 
-   params := hb_Hash()
-   params[ "mpc_set" ] := _mpc_no
-   params[ "zaok_5pf" ] := _zaok_5pf
-   params[ "mpc_nula" ] := _mpc_nula
-   params[ "filter_id" ] := AllTrim( _filter_id )
+   hParams := hb_Hash()
+   hParams[ "mpc_set" ] := _mpc_no
+   hParams[ "zaok_5pf" ] := _zaok_5pf
+   hParams[ "mpc_nula" ] := _mpc_nula
+   hParams[ "filter_id" ] := AllTrim( _filter_id )
 
    _ok := .T.
 
    RETURN _ok
+*/

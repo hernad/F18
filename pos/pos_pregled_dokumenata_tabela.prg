@@ -46,7 +46,7 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    ENDIF
    AAdd( ImeKol, { "Vrsta", {|| pos_doks_2->IdVd } } )
    AAdd( ImeKol, { "Broj ", {|| pos_doks_2->brdok } } )
-   AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna( pos_doks_2->IdPos, pos_doks_2->IdPos, pos_doks_2->datum, pos_doks_2->brdok ) } } )
+   AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna( pos_doks_2->IdPos, pos_doks_2->IdVd, pos_doks_2->datum, pos_doks_2->brdok ) } } )
    AAdd( ImeKol, { "Datum", {|| pos_doks_2->datum } } )
    AAdd( ImeKol, { "VP", {|| pos_doks_2->IdVrsteP } } )
    AAdd( ImeKol, { PadC( "Iznos", 10 ), {|| pos_browse_iznos_dokumenta() } } )

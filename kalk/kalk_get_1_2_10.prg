@@ -226,23 +226,23 @@ STATIC FUNCTION kalk_get_2_10( nX, cIdPartner )
       // TROSKOVNIK
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Raspored troškova kalkulacije ->"
 
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AURT" PICTURE "@!"
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY gKalkUlazTrosak1 + cSPom GET _TPrevoz VALID _TPrevoz $ "%AURT" PICTURE "@!"
       @ box_x_koord() + nX, Col() + 2 GET _Prevoz PICT  picdem()
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T2 + cSPom  GET _TBankTr VALID _TBankTr $ "%AURT" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY gKalkUlazTrosak2 + cSPom  GET _TBankTr VALID _TBankTr $ "%AURT" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _BankTr PICT picdem()
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AURT" PICT "@!"
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY gKalkUlazTrosak3 + cSPom GET _TSpedTr VALID _TSpedTr $ "%AURT" PICT "@!"
       @ box_x_koord() + nX, Col() + 2 GET _SpedTr PICT picdem()
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AURT" PICTURE "@!"
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY gKalkUlazTrosak4 + cSPom GET _TCarDaz VALID _TCarDaz $ "%AURT" PICTURE "@!"
       @ box_x_koord() + nX, Col() + 2 GET _CarDaz PICT picdem()
 
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY c10T5 + cSPom GET _TZavTr VALID _TZavTr $ "%AURT" PICTURE "@!"
+      @ box_x_koord() + nX, box_y_koord() + nSayDeltaY + 10 SAY gKalkUlazTrosak5 + cSPom GET _TZavTr VALID _TZavTr $ "%AURT" PICTURE "@!"
       @ box_x_koord() + nX, Col() + 2 GET _ZavTr PICT picdem()
 
       nX += 2

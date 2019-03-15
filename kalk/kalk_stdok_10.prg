@@ -213,12 +213,12 @@ STATIC FUNCTION zagl()
    ? m
 
    IF gcMpcKalk10 == "D" // prikazi mpc
-      ?U Space( PRINT_LEFT_SPACE )  + "*R * ROBA     *  FCJ     * NOR.KALO * KASA-    * " + c10T1 + " * " + c10T2 + " * " + c10T3 + " * " + c10T4 + " * " + c10T5 + " *   NC     *  MARZA   * PROD.CIJ.*   PDV%   * PROD.CIJ.*"
+      ?U Space( PRINT_LEFT_SPACE )  + "*R * ROBA     *  FCJ     * NOR.KALO * KASA-    * " + gKalkUlazTrosak1 + " * " + gKalkUlazTrosak2 + " * " + gKalkUlazTrosak3 + " * " + gKalkUlazTrosak4 + " * " + gKalkUlazTrosak5 + " *   NC     *  MARZA   * PROD.CIJ.*   PDV%   * PROD.CIJ.*"
       ?U Space( PRINT_LEFT_SPACE )  + "*BR* TARIFA   *  KOLIČINA* PRE.KALO * SKONTO   *          *          *          *          *          *          *          * BEZ.PDV  *   PDV    * SA PDV   *"
       ?U Space( PRINT_LEFT_SPACE )  + "*  *          *   sum    *   sum    *  sum     *   sum    *   sum    *    sum   *   sum    *   sum    *   sum    *   sum    *   sum    *   sum    *    sum   *"
    ELSE
       // prikazi samo do neto cijene - bez pdv-a
-      ?U Space( PRINT_LEFT_SPACE )  + "*R * ROBA     *  FCJ     * NOR.KALO * KASA-    * " + c10T1 + " * " + c10T2 + " * " + c10T3 + " * " + c10T4 + " * " + c10T5 + " *   NC     *  MARZA   * PROD.CIJ.*"
+      ?U Space( PRINT_LEFT_SPACE )  + "*R * ROBA     *  FCJ     * NOR.KALO * KASA-    * " + gKalkUlazTrosak1 + " * " + gKalkUlazTrosak2 + " * " + gKalkUlazTrosak3 + " * " + gKalkUlazTrosak4 + " * " + gKalkUlazTrosak5 + " *   NC     *  MARZA   * PROD.CIJ.*"
       ?U Space( PRINT_LEFT_SPACE )  + "*BR* TARIFA   *  KOLIČINA* PRE.KALO * SKONTO   *          *          *          *          *          *          *          * BEZ.PDV  *"
       ?U Space( PRINT_LEFT_SPACE )  + "*  *          *   sum    *   sum    *  sum     *   sum    *   sum    *    sum   *   sum    *   sum    *   sum    *   sum    *   sum    *"
 
