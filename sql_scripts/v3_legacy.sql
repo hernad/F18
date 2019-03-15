@@ -53,19 +53,6 @@ GRANT ALL ON FUNCTION fmk.fetchmetrictext TO xtrole;
 ALTER FUNCTION fmk.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 
-
-CREATE OR REPLACE FUNCTION public.set_datfaktp_into_kalk_kalk(cIdFirma varchar, cIdVd varchar, cBrDok varchar, dDatFaktP date ) RETURNS void
-LANGUAGE plpgsql
-AS $$
-
-BEGIN
-   UPDATE f18.kalk_doks SET datfaktp=dDatFaktP
-      where idfirma=cIdFirma and idvd=cIdVd and brdok=cBrDok;
-
-  RETURN;
-END;
-$$;
-
 CREATE OR REPLACE FUNCTION public.get_datfaktp_from_kalk_doks(cIdFirma varchar, cIdVd varchar, cBrDok varchar ) RETURNS date
 LANGUAGE plpgsql
 AS $$
@@ -77,6 +64,92 @@ BEGIN
       INTO dDatFaktP;
 
   RETURN dDatFaktP;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.upsert_kalk_doks(
+    cIdFirma varchar, cIdVd varchar, cBrDok varchar,
+    dDatdok date, cBrfaktp varchar, dDatfaktp date, cIdpartner varchar,
+    dDatval date, dDat_od date, dDat_do date,
+    cOpis text, cPkonto varchar, cMkonto varchar,
+    nNv numeric, nVpv numeric,  nRabat numeric, nMpv numeric) RETURNS void
+
+LANGUAGE plpgsql
+AS $$
+DECLARE
+      uuidDokId uuid;
+BEGIN
+      select dok_id from f18.kalk_doks
+          where idfirma=cIdFirma and idvd=cIdVd and brdok=cBrDok
+          INTO uuidDokId;
+
+      IF uuidDokId IS NULL THEN
+         insert into f18.kalk_doks(
+           idFirma, IdVd, BrDok,
+           Datdok, Brfaktp, Datfaktp, Idpartner,
+           Datval, Dat_od, Dat_do,
+           Opis, Pkonto, Mkonto,
+           Nv, Vpv,  Rabat, Mpv
+         )
+         values (
+           cIdFirma, cIdVd, cBrDok,
+           dDatdok, cBrfaktp, dDatfaktp, cIdpartner,
+           dDatval, dDat_od, dDat_do,
+           cOpis, cPkonto, cMkonto,
+           nNv, nVpv,  nRabat, nMpv
+         );
+      ELSE
+
+        update f18.kalk_doks
+          SET idfirma=cIdFirma, idvd=cIdVd, brdok=cBrDok,
+          datdok=dDatdok, idpartner=cIdpartner,
+          datval=dDatval, dat_od=dDat_od, dat_do=dDat_do,
+          opis=cOpis,
+          nv=nNv, vpv=nVpv, rabat=nRabat, mpv=nMpv
+          WHERE dok_id = uuidDokId;
+
+        IF cBrFaktP IS NOT NULL THEN
+          update f18.kalk_doks
+            SET brfaktp=cBrfaktp
+            WHERE dok_id = uuidDokId;
+        END IF;
+        IF dDatFaktP IS NOT NULL THEN
+          update f18.kalk_doks
+            SET datfaktp=dDatfaktp
+            WHERE dok_id = uuidDokId;
+        END IF;
+        IF cPKonto IS NOT NULL THEN
+          update f18.kalk_doks
+            SET pkonto=cPkonto
+            WHERE dok_id = uuidDokId;
+        END IF;
+        IF cMKonto IS NOT NULL THEN
+          update f18.kalk_doks
+            SET mkonto=cMkonto
+            WHERE dok_id = uuidDokId;
+        END IF;
+
+      END IF;
+      RETURN;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_datfaktp_into_kalk_doks(cIdFirma varchar, cIdVd varchar, cBrDok varchar, dDatDok date, cBrFaktP varchar, dDatFaktP date ) RETURNS void
+LANGUAGE plpgsql
+AS $$
+
+BEGIN
+
+   -- ako nema kalk_doks insert, ako ima update
+   PERFORM public.upsert_kalk_doks(
+    cIdFirma, cIdVd, cBrDok,
+    dDatdok, cBrfaktp, dDatfaktp, NULL,
+    NULL, NULL, NULL,
+    NULL, NULL, NULL,
+    NULL, NULL,  NULL, NULL);
+
+  RETURN;
 END;
 $$;
 
@@ -118,7 +191,9 @@ FROM
   f18.kalk_kalk;
 
 CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
-      DO INSTEAD INSERT INTO f18.kalk_kalk(
+      DO INSTEAD (
+        SELECT public.set_datfaktp_into_kalk_doks(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datfaktp, NEW.brfaktp, NEW.datfaktp);
+        INSERT INTO f18.kalk_kalk(
          idfirma, idroba, idkonto, idkonto2, idvd, brdok, datdok,
          brfaktp, idpartner,
          rbr,
@@ -139,8 +214,7 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
          mpcsapp,
          mkonto,pkonto,mu_i,pu_i,
          error,
-         dok_id,
-         datfaktp
+         dok_id
       ) VALUES (
         NEW.idfirma, NEW.idroba, NEW.idkonto, NEW.idkonto2, NEW.idvd, NEW.brdok, NEW.datdok,
         NEW.brfaktp, NEW.idpartner,
@@ -162,8 +236,10 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
         NEW.mpcsapp,
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
         NEW.error,
-        public.kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok),
-        public.set_datfaktp_into_kalk_kalk(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datfaktp) );
+        public.kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok)
+      )
+    );
+
 
 GRANT ALL ON fmk.kalk_kalk TO xtrole;
 
@@ -186,22 +262,17 @@ FROM
   f18.kalk_doks;
 
 CREATE OR REPLACE RULE fmk_kalk_doks_ins AS ON INSERT TO fmk.kalk_doks
-      DO INSTEAD INSERT INTO f18.kalk_doks(
-        idfirma, idvd, brdok, datdok,
-        brfaktp, datfaktp, idpartner, datval,
-        dat_od, dat_do,
-        opis,
-        pkonto,mkonto,
-        nv,vpv,rabat,mpv
-      ) VALUES (
-        NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok,
-        NEW.brfaktp, NEW.datfaktp, NEW.idpartner, NEW.datval,
-        NEW.dat_od, NEW.dat_do,
-        NEW.opis,
-        NEW.pkonto, NEW.mkonto,
-        NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv
-      );
+      DO INSTEAD (
+        SELECT public.upsert_kalk_doks(
+          NEW.IdFirma, NEW.IdVd, NEW.BrDok,
+          NEW.Datdok, NEW.Brfaktp, NULL, NEW.Idpartner,
+          NULL, NULL, NULL,
+          NULL, NEW.Pkonto, NEW.Mkonto,
+          NEW.Nv, NEW.Vpv,  NEW.Rabat, NEW.Mpv);
+        UPDATE f18.kalk_kalk set dok_id=public.kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok)
+          WHERE NEW.idfirma=idfirma AND NEW.idvd=idvd AND NEW.brdok=brdok AND NEW.datdok=datdok;
 
+     );
 GRANT ALL ON fmk.kalk_doks TO xtrole;
 
 -- fmk.tarifa

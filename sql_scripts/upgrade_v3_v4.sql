@@ -141,7 +141,11 @@ ALTER TABLE f18.kalk_kalk DROP COLUMN IF EXISTS roktr;
 
 -- kalk_doks, kalk_kalk - dok_id
 ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS dok_id uuid DEFAULT gen_random_uuid();
+ALTER TABLE f18.kalk_doks ALTER COLUMN dok_id SET DEFAULT gen_random_uuid();
+
 ALTER TABLE f18.kalk_kalk ADD COLUMN IF NOT EXISTS  dok_id uuid;
+
+
 
 --- f18.tarifa --------------------------------------------------
 SELECT public.create_table_from_then_drop( 'fmk.tarifa', 'f18.tarifa' );
