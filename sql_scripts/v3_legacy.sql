@@ -113,7 +113,8 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
          mpcsapp,
          mkonto,pkonto,mu_i,pu_i,
          error,
-         dok_id
+         dok_id,
+         datfaktp
       ) VALUES (
         NEW.idfirma, NEW.idroba, NEW.idkonto, NEW.idkonto2, NEW.idvd, NEW.brdok, NEW.datdok,
         NEW.brfaktp, NEW.idpartner,
@@ -135,7 +136,8 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
         NEW.mpcsapp,
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
         NEW.error,
-        public.kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok) );
+        public.kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok),
+        public.set_datfaktp_into_kalk_kalk(NEW.idfirma, NEW.idvd, NEW.brdok) );
 
 GRANT ALL ON fmk.kalk_kalk TO xtrole;
 

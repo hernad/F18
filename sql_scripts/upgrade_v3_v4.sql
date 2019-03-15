@@ -62,7 +62,7 @@ DECLARE
 BEGIN
 
     -- check if rbr is char, ako nije STOP => exception
-   select to_numeric(rbr, '999') from f18.kalk_kalk
+   select to_number(rbr, '999') from f18.kalk_kalk LIMIT 1
       INTO nRbr;
 
    update f18.kalk_doks set datfaktp=datfaktp_from_kalk_kalk(idfirma, idvd, brdok);
