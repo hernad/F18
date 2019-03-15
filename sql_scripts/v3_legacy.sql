@@ -55,7 +55,7 @@ GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 
 
 --------------------------------------------------------------------------------
--- F18 v3 legacy public.kalk_kalk, kalk_doks updatable views
+-- F18 v3 legacy fmk.kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
 
 drop view if exists fmk.kalk_kalk;
@@ -232,40 +232,43 @@ CREATE OR REPLACE RULE fmk_koncij_ins AS ON INSERT TO fmk.koncij
 GRANT ALL ON fmk.koncij TO xtrole;
 
 -- fmk.roba
-
 drop view if exists fmk.roba;
 CREATE view fmk.roba  AS SELECT
-  *
+   id, sifradob, naz, jmj, idtarifa, nc, vpc, mpc, tip, carina, opis, vpc2, mpc2, mpc3, k1, k2, n1, n2, plc,
+   mink, _m1_, barkod, zanivel, zaniv2, trosk1, trosk2, trosk3, trosk4, trosk5, fisc_plu, k7, k8, k9,
+   strings, idkonto, mpc4, mpc5, mpc6, mpc7, mpc8, mpc9
 FROM
   f18.roba;
 
-
---- CREATE OR REPLACE RULE fmk_roba_ins AS ON INSERT TO fmk.roba
----         DO INSTEAD INSERT INTO f18.roba(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE fmk_roba_ins AS ON INSERT TO fmk.roba
+        DO INSTEAD INSERT INTO f18.roba(
+          id, sifradob, naz, jmj, idtarifa, nc, vpc, mpc, tip, carina, opis, vpc2, mpc2, mpc3, k1, k2, n1, n2, plc,
+          mink, _m1_, barkod, zanivel, zaniv2, trosk1, trosk2, trosk3, trosk4, trosk5, fisc_plu, k7, k8, k9,
+          strings, idkonto, mpc4, mpc5, mpc6, mpc7, mpc8, mpc9
+        ) VALUES (
+          NEW.id, NEW.sifradob, NEW.naz, NEW.jmj, NEW.idtarifa, NEW.nc, NEW.vpc, NEW.mpc, NEW.tip, NEW.carina, NEW.opis, NEW.vpc2, NEW.mpc2, NEW.mpc3, NEW.k1, NEW.k2, NEW.n1, NEW.n2, NEW.plc,
+          NEW.mink, NEW._m1_, NEW.barkod, NEW.zanivel, NEW.zaniv2, NEW.trosk1, NEW.trosk2, NEW.trosk3, NEW.trosk4, NEW.trosk5, NEW.fisc_plu, NEW.k7, NEW.k8, NEW.k9,
+          NEW.strings, NEW.idkonto, NEW.mpc4, NEW.mpc5, NEW.mpc6, NEW.mpc7, NEW.mpc8, NEW.mpc9
+        );
 
 GRANT ALL ON fmk.roba TO xtrole;
 
 -- fmk.partn
-
 drop view if exists fmk.partn;
-CREATE view fmk.partn  AS SELECT
-  *
+CREATE view fmk.partn  AS
+  SELECT id, naz, naz2, ptt, mjesto, adresa, ziror, rejon, telefon, dziror, fax, mobtel,
+         idops, _kup, _dob, _banka, _radnik, idrefer
 FROM
   f18.partn;
 
-
---- CREATE OR REPLACE RULE fmk_partn_ins AS ON INSERT TO fmk.partn
----         DO INSTEAD INSERT INTO f18.partn(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE fmk_partn_ins AS ON INSERT TO fmk.partn
+        DO INSTEAD INSERT INTO f18.partn(
+           id, naz, naz2, ptt, mjesto, adresa, ziror, rejon, telefon, dziror, fax, mobtel,
+                 idops, _kup, _dob, _banka, _radnik, idrefer
+        ) VALUES (
+           NEW.id, NEW.naz, NEW.naz2, NEW.ptt, NEW.mjesto, NEW.adresa, NEW.ziror, NEW.rejon, NEW.telefon, NEW.dziror, NEW.fax, NEW.mobtel,
+                NEW.idops, NEW._kup, NEW._dob, NEW._banka, NEW._radnik, NEW.idrefer
+        );
 
 GRANT ALL ON fmk.partn TO xtrole;
 
@@ -288,53 +291,44 @@ GRANT ALL ON fmk.valute TO xtrole;
 -- fmk.konto
 drop view if exists fmk.konto;
 CREATE view fmk.konto  AS SELECT
-  *
+  id, naz
 FROM
   f18.konto;
 
-
---- CREATE OR REPLACE RULE fmk_konto_ins AS ON INSERT TO fmk.konto
----         DO INSTEAD INSERT INTO f18.konto(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
-
+CREATE OR REPLACE RULE fmk_konto_ins AS ON INSERT TO fmk.konto
+         DO INSTEAD INSERT INTO f18.konto(
+            id, naz
+         ) VALUES (
+          NEW.id, NEW.naz );
 GRANT ALL ON fmk.konto TO xtrole;
 
 -- fmk.tnal
 drop view if exists fmk.tnal;
 CREATE view fmk.tnal  AS SELECT
-  *
+  id, naz
 FROM
   f18.tnal;
 
-
---- CREATE OR REPLACE RULE fmk_tnal_ins AS ON INSERT TO fmk.tnal
----         DO INSTEAD INSERT INTO f18.tnal(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE fmk_tnal_ins AS ON INSERT TO fmk.tnal
+        DO INSTEAD INSERT INTO f18.tnal(
+           id, naz
+        ) VALUES (
+            NEW.id, NEW.NAZ );
 
 GRANT ALL ON fmk.tnal TO xtrole;
 
 -- fmk.tdok
 drop view if exists fmk.tdok;
 CREATE view fmk.tdok  AS SELECT
-  *
+  id, naz
 FROM
   f18.tdok;
 
---- CREATE OR REPLACE RULE fmk_tdok_ins AS ON INSERT TO fmk.tdok
----         DO INSTEAD INSERT INTO f18.tdok(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE fmk_tdok_ins AS ON INSERT TO fmk.tdok
+        DO INSTEAD INSERT INTO f18.tdok(
+           id, naz
+        ) VALUES (
+          NEW.id, NEW.NAZ );
 
 GRANT ALL ON fmk.tdok TO xtrole;
 
