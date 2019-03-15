@@ -1,30 +1,4 @@
 
--- kalk_doks sevence za brojace dokumenata
--- f18.kalk_brdok_seq_02, f18.kalk_brdok_seq_21, f18.kalk_brdok_seq_22
-DO $$
-DECLARE
-  cIdVd text;
-  nMaxBrDok integer;
-  cQuery text;
-BEGIN
-  FOR cIdVd IN SELECT unnest('{"02","21","72"}'::text[])
-  LOOP
-     RAISE info 'idvd=%', cIdVd;
-	 SELECT COALESCE(max(to_number(regexp_replace(brdok, '\D', '', 'g'),'9999999')),0) from f18.kalk_doks where idvd=cIdVd
-		  INTO nMaxBrDok;
-	 RAISE INFO '%', to_char(nMaxBrDok + 1, '999999999');
-	 cQuery := 'CREATE SEQUENCE IF NOT EXISTS f18.kalk_brdok_seq_' || cIdVd || ' START ' || to_char(nMaxBrDok + 1, '999999999');
-	 RAISE INFO '%', cQuery;
-	 EXECUTE cQuery;
-	 cQuery := 'ALTER SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' OWNER to admin';
-	 EXECUTE cQuery;
-	 cQuery := 'GRANT ALL ON SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' TO xtrole';
-	 EXECUTE cQuery;
-  END LOOP;
-END;
-$$;
-
-
 CREATE OR REPLACE FUNCTION public.create_table_from_then_drop( cTableFrom varchar, cTable varchar) RETURNS boolean
 LANGUAGE plpgsql
 AS $$
@@ -71,11 +45,7 @@ $$;
 -- POS 71 - dokument, zahtjev za snizenje - pojedinacno u KALK
 -- SELECT public.kalk_brdok_iz_pos(15, '71', '    3', current_date); => 15021403
 
-CREATE OR REPLACE FUNCTION public.kalk_brdok_iz_pos(
-   prod integer,
-   idvdKalk varchar,
-   posBrdok varchar,
-   datum date) RETURNS varchar
+CREATE OR REPLACE FUNCTION public.kalk_brdok_iz_pos(prod integer, idvdKalk varchar, posBrdok varchar, datum date) RETURNS varchar
 
 LANGUAGE plpgsql
 AS $$

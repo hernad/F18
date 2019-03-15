@@ -300,10 +300,6 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojRac
       sql_quote( nBrojRacuna ) + ")"
 
    oRet := run_sql_query( cQuery )
-
-// IF sql_error_in_query( oRet )
-// RETURN .F.
-// ENDIF
    IF is_var_objekat_tpqquery( oRet )
       IF oRet:FieldGet( 1 ) > 0
          RETURN .T.
@@ -323,7 +319,7 @@ FUNCTION pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
          sql_quote( dDatDok ) + "," + ;
          sql_quote( cBrDok ) + ", NULL)"
 
-altd() 
+altd()
       oRet := run_sql_query( cQuery )
       IF is_var_objekat_tpqquery( oRet )
          xValue := oRet:FieldGet( 1 )

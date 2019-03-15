@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 MEMVAR Kol, ImeKol, gIdRadnik
-MEMVAR Tb
+MEMVAR Tb, Ch
 
 FUNCTION pos_pregled_racuna()
 
@@ -189,7 +189,20 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
 
    IF Upper( Chr( nCh ) ) == "S"
       Alert( "TODO pos_storno" )
-      pos_storno_racuna( TB, .T., pos_doks->brdok, pos_doks->datum, PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 ) )
+
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+
+      pos_storno_racuna( hParams )
+            Tb:goBottom()
+            Tb:refreshAll()
+            Tb:dehilite()
+            DO WHILE !Tb:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
+            ENDDO
+
+
+
       MsgBeep( "Storno račun se nalazi u pripremi !" )
       SELECT pos_doks
       RETURN DE_REFRESH
