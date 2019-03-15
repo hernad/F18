@@ -372,17 +372,14 @@ GRANT ALL ON fmk.sifv TO xtrole;
 -- fmk.trfp
 drop view if exists fmk.trfp;
 CREATE view fmk.trfp  AS SELECT
-  *
+  id, shema, naz, idkonto, dokument, partner, d_p, znak, idvd, idvn, idtarifa
 FROM
   f18.trfp;
 
-
---- CREATE OR REPLACE RULE fmk_trfp_ins AS ON INSERT TO fmk.trfp
----         DO INSTEAD INSERT INTO f18.trfp(
----            id, naz,
----            ??
----         ) VALUES (
----           NEW.id, NEW.NAZ, ?? );
----
+CREATE OR REPLACE RULE fmk_trfp_ins AS ON INSERT TO fmk.trfp
+        DO INSTEAD INSERT INTO f18.trfp(
+           id, shema, naz, idkonto, dokument, partner, d_p, znak, idvd, idvn, idtarifa
+        ) VALUES (
+          NEW.id, NEW.shema, NEW.naz, NEW.idkonto, NEW.dokument, NEW.partner, NEW.d_p, NEW.znak, NEW.idvd, NEW.idvn, NEW.idtarifa );
 
 GRANT ALL ON fmk.trfp TO xtrole;
