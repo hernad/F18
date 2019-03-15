@@ -104,12 +104,13 @@ $$;
 -- insert into p15.pos_doks(idpos, idvd, brdok, datum) values('1 ', '42', 'XX', current_date );
 
 -- SET
--- select p15.broj_fiskalnog_racuna( '1 ', '42', current_date, 'XX', 102 );
+-- select p15.broj_fiskalnog_racuna( '1 ', '42', current_date, lpad('2',8), 102 );
 -- GET
 -- select p15.broj_fiskalnog_racuna( '1 ', '42', current_date, 'XX', NULL );
 
 -- select * from p15.pos_doks;
 -- select * from p15.pos_fisk_doks;
+
 
 CREATE OR REPLACE FUNCTION p15.broj_fiskalnog_racuna( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, nBrojRacuna integer) RETURNS integer
  LANGUAGE plpgsql
@@ -124,7 +125,8 @@ SELECT dok_id FROM p15.pos
    INTO posUUID;
 
 IF posUUID IS NULL THEN
-     RAISE EXCEPTION 'pos % % % % ne postoji ?!', cIdPos, cIdVd, dDatDok, cBrDok;
+     RAISE INFO 'pos % % % % ne postoji ?!', cIdPos, cIdVd, dDatDok, cBrDok;
+     RETURN 0;
 END IF;
 
 -- get broj racuna
@@ -132,6 +134,10 @@ IF nBrojRacuna IS NULL THEN
     SELECT broj_rn FROM p15.pos_fisk_doks where ref_pos_dok=posUUID
       INTO nBrojRacuna;
     RETURN COALESCE( nBrojRacuna, 0);
+END IF;
+
+IF ( nBrojRacuna = -1 ) THEN -- insert null vrijednost za broj fiskalnog racuna
+    nBrojRacuna := NULL;
 END IF;
 
 SELECT dok_id FROM p15.pos_fisk_doks
@@ -148,6 +154,123 @@ RETURN COALESCE( nBrojRacuna, 0);
 
 END;
 $$;
+
+
+CREATE OR REPLACE FUNCTION p15.fisk_dok_id( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS text
+ LANGUAGE plpgsql
+ AS $$
+DECLARE
+   posUUID uuid;
+BEGIN
+
+SELECT pos_fisk_doks.dok_id FROM p15.pos
+   LEFT JOIN p15.pos_fisk_doks
+   ON p15.pos_fisk_doks.ref_pos_dok = p15.pos.dok_id
+   WHERE pos.idpos=cIdPos AND pos.idvd=cIdVd AND pos.datum=dDatDok AND pos.brDok=cBrDok
+   INTO posUUID;
+
+IF posUUID IS NULL THEN
+     RAISE INFO 'pos % % % % ne postoji ?!', cIdPos, cIdVd, dDatDok, cBrDok;
+     RETURN '';
+END IF;
+
+RETURN posUUID::text;
+
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION p15.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+ LANGUAGE plpgsql
+ AS $$
+DECLARE
+   uuidStorno uuid;
+BEGIN
+
+SELECT pos_fisk_doks.ref_storno_fisk_dok FROM p15.pos
+   LEFT JOIN p15.pos_fisk_doks
+   ON p15.pos_fisk_doks.ref_pos_dok = p15.pos.dok_id
+   WHERE pos.idpos=cIdPos AND pos.idvd=cIdVd AND pos.datum=dDatDok AND pos.brDok=cBrDok
+   INTO uuidStorno;
+
+IF uuidStorno IS NULL THEN
+     RETURN FALSE;
+END IF;
+
+RETURN TRUE;
+
+END;
+$$;
+
+
+-- SELECT p15.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  => 101
+
+CREATE OR REPLACE FUNCTION p15.pos_storno_broj_rn( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS integer
+ LANGUAGE plpgsql
+ AS $$
+DECLARE
+   iStornoBrojRn integer;
+BEGIN
+
+SELECT fisk2.broj_rn FROM p15.pos
+   LEFT JOIN p15.pos_fisk_doks as fisk1
+   ON fisk1.ref_pos_dok = p15.pos.dok_id
+   LEFT JOIN p15.pos_fisk_doks as fisk2
+   ON fisk1.ref_storno_fisk_dok = fisk2.dok_id
+   WHERE pos.idpos=cIdPos AND pos.idvd=cIdVd AND pos.datum=dDatDok AND pos.brDok=cBrDok
+   INTO iStornoBrojRn;
+
+IF iStornoBrojRn IS NULL THEN
+     RETURN 0;
+END IF;
+
+RETURN iStornoBrojRn;
+
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION p15.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
+ LANGUAGE plpgsql
+ AS $$
+DECLARE
+   nBrojRacuna integer;
+   nCount integer;
+BEGIN
+
+SELECT count(*) FROM p15.pos_fisk_doks
+   WHERE ref_storno_fisk_dok = uuidFiskStorniran::uuid
+   INTO nCount;
+
+IF (nCount = 0) THEN
+      RETURN 0; -- uopste nema pos_fisk_doks zapisa
+END IF;
+
+SELECT broj_rn FROM p15.pos_fisk_doks
+   WHERE ref_storno_fisk_dok = uuidFiskStorniran::uuid
+   INTO nBrojRacuna;
+
+RETURN COALESCE(nBrojRacuna, -1); -- pos_fisk_doks zapis broj_rn moze biti NULL
+
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION p15.set_ref_storno_fisk_dok( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
+ LANGUAGE plpgsql
+ AS $$
+DECLARE
+   uuidFiskNovi uuid;
+BEGIN
+
+  uuidFiskNovi := p15.fisk_dok_id( cIdPos, cIdVd, dDatDok, cBrDok);
+
+  UPDATE p15.pos_fisk_doks SET ref_storno_fisk_dok = uuidFiskStorniran::uuid
+      WHERE dok_id = uuidFiskNovi;
+
+END;
+$$;
+
 
 -- select pos_dok_id('1 ','42','       1', '2018-01-09');
 CREATE OR REPLACE FUNCTION p15.pos_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid

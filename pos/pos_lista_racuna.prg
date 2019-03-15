@@ -27,17 +27,17 @@ FUNCTION pos_pregled_racuna()
    BoxC()
 
    hParams[ "datum" ] := dDatum
+   hParams[ "browse" ] := .T.
    pos_lista_racuna( hParams )
    my_close_all_dbf()
 
    RETURN .T.
 
 
-// FUNCTION pos_lista_racuna( dDatum, cBrDok, fPrep, cPrefixFilter, cIdRobaSadrzi )
 FUNCTION pos_lista_racuna( hParams )
 
    LOCAL i
-   LOCAL cFilter
+   LOCAL cFilter := ".t."
    LOCAL cIdPos
    LOCAL bRacunMarkiran := NIL
    LOCAL cFnc
@@ -45,30 +45,42 @@ FUNCTION pos_lista_racuna( hParams )
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
 
-   IF !hb_HHasKey( hParams, "datum" )
-      hParams[ "datum" ] := NIL
-   ENDIF
-
-   IF !hb_HHasKey( hParams, "brdok" )
-      hParams[ "brdok" ] := NIL
-   ENDIF
-
    IF !hb_HHasKey( hParams, "idpos" )
       hParams[ "idpos" ] := pos_pm()
    ENDIF
-
+   IF !hb_HHasKey( hParams, "datum" )
+      hParams[ "datum" ] := NIL
+   ENDIF
+   IF !hb_HHasKey( hParams, "brdok" )
+      hParams[ "brdok" ] := NIL
+   ENDIF
    IF !hb_HHasKey( hParams, "idroba" )
       hParams[ "idroba" ] := NIL
    ENDIF
+   IF !hb_HHasKey( hParams, "browse" )
+      hParams[ "browse" ] := .F.
+   ENDIF
+   IF !hb_HHasKey( hParams, "dat_od" )
+      hParams[ "dat_od" ] := NIL
+   ENDIF
+   IF !hb_HHasKey( hParams, "dat_do" )
+      hParams[ "dat_do" ] := NIL
+   ENDIF
 
-   seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
+   IF hParams[ "brdok" ] == NIL
+      hParams[ "brdok" ] := Space( FIELD_LEN_POS_BRDOK )
+   ENDIF
+
    IF hParams[ "idpos" ] <> pos_pm()
       MsgBeep( "Račun nije napravljen na ovoj kasi!#" + "Ne možete napraviti promjenu!", 20 )
       RETURN ( .F. )
    ENDIF
 
-   // cBrDok := Right( cBrDok, Len( cBrDok ) - At( "-", cBrDok ) )
-   // cBrDok := PadL( cBrDok, FIELD_LEN_POS_BRDOK )
+   IF !Empty( hParams[ "brdok" ] )
+      hParams[ "brdok" ] := PadL( AllTrim( hParams[ "brdok" ] ),  FIELD_LEN_POS_BRDOK )
+   ENDIF
+
+   seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
@@ -82,6 +94,7 @@ FUNCTION pos_lista_racuna( hParams )
       AAdd( kol, i )
    NEXT
 
+   AltD()
    SELECT pos_doks
    cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( hParams[ "idpos" ] )
 
@@ -92,42 +105,41 @@ FUNCTION pos_lista_racuna( hParams )
    SET FILTER TO &cFilter
    GO TOP
 
+
    IF RecCount() == 1 .AND. !Empty( pos_doks->brdok )
-      // cBrDok := AllTrim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok )
-      // dDat := pos_doks->datum
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "idvd" ] := pos_doks->idvd
       hParams[ "brdok" ] := pos_doks->brdok
       hParams[ "datum" ] := pos_doks->datum
+      hParams[ "idradnik" ] := pos_doks->idradnik
       RETURN .T.
    ENDIF
 
-   // IF fPrep
-   cFnc := "<Enter>-Odabir   <P>-Pregled"
-   // fMark := .T.
-   // bRacunMarkiran := {|| pos_racun_obiljezen () }
-   // ELSE
-   // cFnc := "<Enter>-Odabir          <P>-Pregled"
-   // bRacunMarkiran := NIL
-   // ENDIF
+   IF hParams[ "browse" ]
+      cFnc := "<Enter> ili <P>-Pregled, <S> Storno"
+   ELSE
+      cFnc := "<Enter>-Odabir   <P>-Pregled"
+   ENDIF
 
    KEYBOARD '\'
-   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str(), "", NIL, cFnc,, bRacunMarkiran )
+   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh, @hParams ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str(), "", NIL, cFnc,, bRacunMarkiran )
 
    SET FILTER TO
 
-   // cBrDok := AllTrim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok )
-   // IF cBrDok = '-'
-   // cBrDok := Space( 3 + FIELD_LEN_POS_BRDOK )
-   // ENDIF
+   hParams[ "idpos" ] := pos_doks->idpos
+   hParams[ "idvd" ] := pos_doks->idvd
+   hParams[ "brdok" ] := pos_doks->brdok
+   hParams[ "datum" ] := pos_doks->datum
+   hParams[ "idradnik" ] := pos_doks->idradnik
 
-   // dDat := pos_doks->datum
    IF LastKey() == K_ESC
-      RETURN( .F. )
+      RETURN .F.
    ENDIF
 
-   RETURN( .T. )
+   RETURN .T.
 
 
-STATIC FUNCTION lista_racuna_key_handler( nCh )
+STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
 
    LOCAL nTrec
    LOCAL nTrec2
@@ -138,6 +150,20 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
 
    SELECT pos_doks
 
+   IF !hParamsInOut[ "browse" ]
+      IF nCh == K_ENTER
+         hParamsInOut[ "idpos" ] := pos_doks->idpos
+         hParamsInOut[ "datum" ] := pos_doks->datum
+         hParamsInOut[ "brdok" ] := pos_doks->brdok
+         hParamsInOut[ "idradnik" ] := pos_doks->idradnik
+         hParamsInOut[ "idvrstep" ] := pos_doks->idvrstep
+         hParamsInOut[ "vrijeme" ] := pos_doks->vrijeme
+         RETURN DE_ABORT
+      ELSE
+         RETURN DE_CONT
+      ENDIF
+   ENDIF
+
    IF Chr( nCh ) == '\'
       DO WHILE !( Tb:hitTop .OR. TB:hitBottom )
          Tb:down()
@@ -145,7 +171,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
       ENDDO
    ENDIF
 
-   IF Upper( Chr( nCh ) ) == "P"
+   IF Upper( Chr( nCh ) ) == "P" .OR. ( hParamsInOut[ "browse" ]  .AND. nCh == K_ENTER )
       pos_pregled_stavki_racuna( pos_doks->IdPos, pos_doks->idvd, pos_doks->datum, pos_doks->BrDok )
       RETURN DE_REFRESH
    ENDIF
@@ -176,12 +202,11 @@ STATIC FUNCTION lista_racuna_key_handler( nCh )
       hParams[ "brdok" ] := pos_doks->brdok
 
       pos_storno_racuna( hParams )
-            Tb:goBottom()
-            Tb:refreshAll()
-            Tb:dehilite()
-            DO WHILE !Tb:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
-            ENDDO
-
+      Tb:goBottom()
+      Tb:refreshAll()
+      Tb:dehilite()
+      DO WHILE !Tb:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
+      ENDDO
 
 
       MsgBeep( "Storno račun se nalazi u pripremi !" )

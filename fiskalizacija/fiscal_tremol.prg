@@ -58,9 +58,9 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    LOCAL _err_level := 0
    LOCAL _oper := ""
    LOCAL cCommand := ""
-   LOCAL _cust_id, _cust_name, _cust_addr, _cust_city
+   LOCAL cKupacId, cKupacIme, cKupacAdresa, cKupacGrad
    LOCAL _fiscal_no := 0
-   LOCAL cFiscTxt, _fisc_rek_txt, _fisc_cust_txt, cFiskalniFajlName
+   LOCAL cFiscTxt, cFiskRefundTxt, cFiskKupacTxt, cFiskalniFajlName
 
    tremol_delete_tmp( hFiskalniParams )  // pobrisi tmp fajlove i ostalo sto je u input direktoriju
 
@@ -81,15 +81,15 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    xml_head()
 
    cFiscTxt := 'TremolFpServer Command="Receipt"'
-   _fisc_rek_txt := ''
-   _fisc_cust_txt := ''
+   cFiskRefundTxt := ''
+   cFiskKupacTxt := ''
 
    IF cContinue == "1" // https://redmine.bring.out.ba/issues/36372
       // cFiscTxt += ' Continue="' + cContinue + '"'
    ENDIF
 
    IF lStornoRacun // ukljuci storno triger
-      _fisc_rek_txt := ' RefundReceipt="' + AllTrim( aRacunStavke[ 1, 8 ] ) + '"'
+      cFiskRefundTxt := ' RefundReceipt="' + AllTrim( aRacunStavke[ 1, 8 ] ) + '"'
    ENDIF
 
    // ukljuci kupac triger
@@ -99,21 +99,21 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
       // aKupac[3] - adresa
       // aKupac[4] - postanski broj
       // aKupac[5] - grad stanovanja
-      _cust_id := AllTrim( aRacunHeader[ 1, 1 ] )
-      _cust_name := to_xml_encoding( AllTrim( aRacunHeader[ 1, 2 ] ) )
-      _cust_addr := to_xml_encoding( AllTrim( aRacunHeader[ 1, 3 ] ) )
-      _cust_city := to_xml_encoding( AllTrim( aRacunHeader[ 1, 5 ] ) )
+      cKupacId := AllTrim( aRacunHeader[ 1, 1 ] )
+      cKupacIme := to_xml_encoding( AllTrim( aRacunHeader[ 1, 2 ] ) )
+      cKupacAdresa := to_xml_encoding( AllTrim( aRacunHeader[ 1, 3 ] ) )
+      cKupacGrad := to_xml_encoding( AllTrim( aRacunHeader[ 1, 5 ] ) )
 
-      _fisc_cust_txt += s_cRazmak1 + 'CompanyID="' + _cust_id + '"'
-      _fisc_cust_txt += s_cRazmak1 + 'CompanyName="' + _cust_name + '"'
-      _fisc_cust_txt += s_cRazmak1 + 'CompanyHQ="' + _cust_city + '"'
-      _fisc_cust_txt += s_cRazmak1 + 'CompanyAddress="' + _cust_addr + '"'
-      _fisc_cust_txt += s_cRazmak1 + 'CompanyCity="' + _cust_city + '"'
+      cFiskKupacTxt += s_cRazmak1 + 'CompanyID="' + cKupacId + '"'
+      cFiskKupacTxt += s_cRazmak1 + 'CompanyName="' + cKupacIme + '"'
+      cFiskKupacTxt += s_cRazmak1 + 'CompanyHQ="' + cKupacGrad + '"'
+      cFiskKupacTxt += s_cRazmak1 + 'CompanyAddress="' + cKupacAdresa + '"'
+      cFiskKupacTxt += s_cRazmak1 + 'CompanyCity="' + cKupacGrad + '"'
 
    ENDIF
 
    // ubaci u xml
-   xml_subnode( cFiscTxt + _fisc_rek_txt + _fisc_cust_txt )
+   xml_subnode( cFiscTxt + cFiskRefundTxt + cFiskKupacTxt )
 
    nTotalPlac := 0
 
@@ -210,7 +210,6 @@ FUNCTION tremol_delete_tmp( dev_param )
 
    AEval( Directory( _f_path + cTmp ), {| aFile | FErase( _f_path + ;
       AllTrim( aFile[ 1 ] ) ) } )
-
    Sleep( 1 )
 
    MsgC()
@@ -220,8 +219,7 @@ FUNCTION tremol_delete_tmp( dev_param )
 
 
 
-// -------------------------------------------------------------------
-// -------------------------------------------------------------------
+
 FUNCTION tremol_polog( hFiskalniParams, AUTO )
 
    LOCAL cXml

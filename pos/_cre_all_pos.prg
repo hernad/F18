@@ -70,7 +70,7 @@ FUNCTION cre_all_pos( ver )
    RETURN .T.
 
 
-FUNCTION pos_check_brdok()
+FUNCTION pos_check_dbf_fields()
 
    LOCAL aTabele, nI, cFile
 
@@ -79,9 +79,10 @@ FUNCTION pos_check_brdok()
 
    IF ( Len( _pos_pripr->brdok ) <> FIELD_LEN_POS_BRDOK ) .OR. ;
          ( FieldPos( "idpartner" ) == 0 ) .OR. ;
-         ( FieldPos( "dat_od" ) == 0 )
+         ( FieldPos( "dat_od" ) == 0 ) .OR. ;
+         ( FIELDPOS( "fisk_rn") == 0 .OR. FIELDPOS( "fisk_id") == 0 )
 
-      Alert( "Serviser F18 brdok[" + AllTrim( Str( Len( _pos_pripr->brdok ) ) ) + "] - pobrisati pos tabele pripreme!" )
+      Alert( "Serviser F18 - promjena struktura, brisanje tabela pripreme!" )
       my_close_all_dbf()
       aTabele := { "pos_priprz", "_pos_pripr" }
       FOR nI := 1 TO Len( aTabele )
@@ -116,7 +117,6 @@ FUNCTION g_pos_pripr_fields()
    AAdd( aDbf, { "CIJENA",    "N", 10, 3 } )
    AAdd( aDbf, { "NCIJENA",   "N", 10, 3 } )
 
-
    AAdd( aDbf, { "IDTARIFA",  "C",  6, 0 } )
    AAdd( aDbf, { "KOL2",      "N", 18, 3 } )
    AAdd( aDbf, { "KOLICINA",  "N", 18, 3 } )
@@ -127,11 +127,13 @@ FUNCTION g_pos_pripr_fields()
    AAdd( aDbf, { "VRIJEME",   "C",  5, 0 } )
    AAdd( aDbf, { "IDVRSTEP",  "C",  2, 0 } )
    AAdd( aDbf, { "idPartner",    "C",  FIELD_LEN_PARTNER_ID, 0 } )
-   //AAdd( aDBf, { 'brdokStorn', 'C',  FIELD_LEN_POS_BRDOK,  0 } )
+
    AAdd( aDBf, { 'OPIS', 'C',  100,  0 } )
    AAdd( aDBf, { 'DAT_OD', 'D',  8,  0 } )
    AAdd( aDBf, { 'DAT_DO', 'D',  8,  0 } )
-   //AAdd ( aDbf, { "FISC_RN",   "N", 10, 0 } )
+
+   AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
+   AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
 
    // roba
    AAdd( aDbf, { "IDROBA",    "C", 10, 0 } )

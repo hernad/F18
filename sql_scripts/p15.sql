@@ -145,7 +145,7 @@ ALTER TABLE p15.metric  DROP CONSTRAINT IF EXISTS metric_id_unique;
 ALTER TABLE p15.metric  ADD CONSTRAINT metric_id_unique UNIQUE (metric_id);
 
 CREATE TABLE IF NOT EXISTS p15.pos_fisk_doks (
-    dok_id uuid DEFAULT gen_random_uuid(),
+    dok_id uuid NOT NULL DEFAULT gen_random_uuid(),
     ref_pos_dok uuid,
     broj_rn integer,
     ref_storno_fisk_dok uuid,
@@ -157,6 +157,13 @@ CREATE TABLE IF NOT EXISTS p15.pos_fisk_doks (
 );
 ALTER TABLE p15.pos_fisk_doks OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_fisk_doks TO xtrole;
+
+-- https://stackoverflow.com/questions/8289100/create-unique-constraint-with-null-columns
+CREATE UNIQUE INDEX IF NOT EXISTS pos_fisk_doks_broj_rn ON p15.pos_fisk_doks (broj_rn)
+    WHERE broj_rn IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ref_storno_fisk_dok ON p15.pos_fisk_doks (ref_storno_fisk_dok)
+        WHERE ref_storno_fisk_dok IS NOT NULL;
 
 
 -- test

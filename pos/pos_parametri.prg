@@ -22,7 +22,7 @@ FUNCTION pos_parametri()
    //AAdd( aOpc, "1. podaci kase                    " )
    //AAdd( aOpcExe, {|| pos_param_podaci_kase() } )
 
-   AAdd( aOpc, "1. principi rada" )
+   AAdd( aOpc, "1. principi rada                  " )
    AAdd( aOpcExe, {|| pos_principi_rada_kase() } )
    AAdd( aOpc, "2. izgled racuna" )
    AAdd( aOpcExe, {|| pos_param_izgled_racuna() } )
@@ -35,7 +35,7 @@ FUNCTION pos_parametri()
    AAdd( aOpc, "6. podešenja organizacije" )
    AAdd( aOpcExe, {|| parametri_organizacije() } )
    AAdd( aOpc, "7. podešenja barkod-a" )
-   AAdd( aOpcExe, {|| label_params() } )
+   AAdd( aOpcExe, {|| label_params() } )    
 
    f18_menu( "par", .F., nIzbor, aOpc, aOpcExe )
 

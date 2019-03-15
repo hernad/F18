@@ -40,7 +40,7 @@ METHOD mMenu()
 
    pos_init()
    CLOSE ALL
-   pos_check_brdok()
+   pos_check_dbf_fields()
 
    DO WHILE ( .T. )
       box_x_koord( Fx )

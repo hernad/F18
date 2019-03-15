@@ -17,6 +17,7 @@ FUNCTION pos_pregled_racuna_tabela()
    LOCAL GetList := {}
    LOCAL cFilterDatumOdDo
    LOCAL dDatOd, dDatDo
+   LOCAL hParams := hb_hash()
 
    PRIVATE dMinDatProm := CToD( "" )
 
@@ -24,7 +25,7 @@ FUNCTION pos_pregled_racuna_tabela()
    dDatOd := Date()
    dDatDo := Date()
 
-   qIdRoba := Space( FIELD_ROBA_ID_LENGTH )
+   //qIdRoba := Space( FIELD_ROBA_ID_LENGTH )
 
    SET CURSOR ON
 
@@ -32,6 +33,7 @@ FUNCTION pos_pregled_racuna_tabela()
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datumski period:" GET dDatOd
    @ box_x_koord() + 2, Col() + 2 SAY "-" GET dDatDo
    READ
+
    BoxC()
 
    IF LastKey() == K_ESC
@@ -39,13 +41,16 @@ FUNCTION pos_pregled_racuna_tabela()
       RETURN .F.
    ENDIF
 
-   cFilterDatumOdDo := ""
+   //cFilterDatumOdDo := ""
 
-   IF !Empty( dDatOd ) .AND. !Empty( dDatDo )
-      cFilterDatumOdDo := "datum >= " + _filter_quote( dDatOD ) + " .and. datum <= " + _filter_quote( dDatDo )
-   ENDIF
+   //IF !Empty( dDatOd ) .AND. !Empty( dDatDo )
+  //    cFilterDatumOdDo := "datum >= " + _filter_quote( dDatOD ) + " .and. datum <= " + _filter_quote( dDatDo )
+   //ENDIF
+   hParams["dat_od"] := dDatOd
+   hParams["dat_do"] := dDatDo
+   hParams["browse"] := .T.
 
-   pos_lista_racuna(,,, cFilterDatumOdDo, qIdRoba )
+   pos_lista_racuna(hParams)
 
    my_close_all_dbf()
 

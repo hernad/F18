@@ -107,31 +107,11 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
 
 
 
-/*
-STATIC FUNCTION pos_fix_broj_racuna( cBrRacuna )
-
-   LOCAL aRacunTok := {}
-
-
-   IF !Empty( cBrRacuna ) .AND. ( "-" $ cBrRacuna )
-      // 42-155
-      aRacunTok := TokToNiz( cBrRacuna, "-" )
-      IF !Empty( aRacunTok[ 2 ] ) // 155
-         cBrRacuna := PadR( AllTrim( aRacunTok[ 2 ] ), FIELD_LEN_POS_BRDOK )
-      ENDIF
-   ENDIF
-
-   RETURN .T.
-*/
 
 FUNCTION pos_storno_racuna( hParams )
 
-// FUNCTION pos_storno_racuna( oBrowse, lSilent, cBrDokStornirati, dDatum, cBrojFiskalnogRacuna )
-
-   //LOCAL nTArea := Select()
-   LOCAL hRec
    LOCAL GetList := {}
-   LOCAL dDatum := danasnji_datum()
+   LOCAL nOldFiskRn, cMsg
 
    IF !hb_HHasKey( hParams, "datum" )
       hParams[ "datum" ] := NIL
@@ -149,8 +129,10 @@ FUNCTION pos_storno_racuna( hParams )
       hParams[ "datum" ] := danasnji_datum()
    ENDIF
    IF hParams[ "brdok" ] == nil
-      hParams[ "brdok" ] := SPACE( FIELD_LEN_POS_BRDOK )
+      hParams[ "brdok" ] := Space( FIELD_LEN_POS_BRDOK )
    ENDIF
+   hParams[ "browse" ] := .F.
+
    PushWA()
    Box(, 5, 55 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
@@ -159,36 +141,64 @@ FUNCTION pos_storno_racuna( hParams )
    READ
    BoxC()
 
-   altd()
+   hParams[ "idvd" ] := "42"
+   hParams[ "fisk_rn" ] := pos_get_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
+   hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
 
-   hParams["fisk_rn"] := pos_get_broj_fiskalnog_racuna( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] )
-
-   info_bar("fisk", "Broj fiskalnog računa: " +  AllTrim(Str(hParams["fisk_rn"])))
-
-
-
-   IF LastKey() == K_ESC .OR. hParams["fisk_rn"] == 0
-      MsgBeep("Broj fiskalnog računa 0?! Ne može storno!")
+   IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( hParams[ "fisk_id" ] ) ) <> 0
+      cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
+      MsgBeep( cMsg )
+      error_bar( "fisk", cMsg )
       PopWa()
       RETURN .F.
    ENDIF
 
-   pos_napravi_u_pripremi_storno_dokument( hParams )
-   PopWa()
+   info_bar( "fisk", "Broj fiskalnog računa: " +  AllTrim( Str( hParams[ "fisk_rn" ] ) ) )
+   IF LastKey() == K_ESC .OR. hParams[ "fisk_rn" ] == 0
+      MsgBeep( "Broj fiskalnog računa 0?! Ne može storno!" )
+      PopWa()
+      RETURN .F.
+   ENDIF
+
+   IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " broj fiskalng računa [" + AllTrim( Str( hParams[ "fisk_rn" ] ) ) + "] ?", "D" ) == "D"
+      altd()
+      pos_napravi_u_pripremi_storno_dokument( hParams )
+   ENDIF
 
    PopWa()
-
 
    RETURN .T.
 
 
+FUNCTION pos_dokument( hParams )
+
+   RETURN AllTrim( hParams[ "idpos" ] ) + "-" + AllTrim( hParams[ "idvd" ] ) + "-" + AllTrim( hParams[ "brdok" ] )
+
+
+//STATIC FUNCTION pos_pripr_set_fisk_rn( hParams )
+//
+//   SELECT _POS_PRIPR
+//   PushWa()
+//
+//   SET ORDER TO
+//   GO TOP
+//   DO WHILE !Eof()
+//      RREPLACE fisk_rn WITH hParams[ "fisk_rn" ]
+//      SKIP
+//   ENDDO
+//   PopWa()
+//
+//   RETURN .T.
+
 STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
 
-   LOCAL nDbfArea := Select()
    LOCAL cIdRoba, hRec
 
-   seek_pos_pos( hParams["idpos"], "42", hParams["datum"], hParams["brdok"] )
-   DO WHILE !Eof() .AND. field->idpos == hParams["idpos"] .AND. field->brdok == hParams["brdok"]  .AND. field->idvd == "42"
+   SELECT _POS_PRIPR
+   my_dbf_zap()
+
+   seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
+   DO WHILE !Eof() .AND. field->idpos == hParams[ "idpos" ] .AND. field->brdok == hParams[ "brdok" ]  .AND. field->idvd == hParams[ "idvd" ]  .AND. field->datum == hParams[ "datum" ]
 
       cIdRoba := field->idroba
       select_o_roba( cIdRoba )
@@ -201,18 +211,13 @@ STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
       APPEND BLANK
 
       hRec[ "brdok" ] :=  POS_BRDOK_PRIPREMA
-      hRec[ "kolicina" ] := ( hRec[ "kolicina" ] * -1 )
+      hRec[ "kolicina" ] := hRec[ "kolicina" ] * -1
       hRec[ "robanaz" ] := roba->naz
       hRec[ "datum" ] := danasnji_datum()
       hRec[ "idvrstep" ] := "01"
-
-      //IF Empty( cBrojFiskalnogRacuna )
-      //   // !!! ovo nije potpuna informacija bez datuma, ali u principu, račun mora biti fiskalizovan
-      //   // tako da ova se varijanta može/treba izbaciti
-      //   hRec[ "brdokstorn" ] := AllTrim( cBrDok )
-      //ELSE
-      //   hRec[ "brdokstorn" ] := AllTrim( cBrojFiskalnogRacuna )
-      //ENDIF
+      hRec[ "idradnik" ] := hParams[ "idradnik" ]
+      hRec[ "fisk_rn" ] := hParams[ "fisk_rn" ]
+      hRec[ "fisk_id" ] := hParams[ "fisk_id" ]
 
       dbf_update_rec( hRec )
       SELECT pos
@@ -222,6 +227,5 @@ STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
 
    SELECT pos
    USE
-   SELECT ( nDbfArea )
 
    RETURN .T.

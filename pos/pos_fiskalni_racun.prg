@@ -38,7 +38,7 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
    s_hFiskalniUredjajParams := hFiskalniParams
    cFiskalniDravjerIme := s_hFiskalniUredjajParams[ "drv" ]
    s_cFiskalniDrajverNaziv := cFiskalniDravjerIme
-   lStorno := pos_dok_is_storno( cIdPos, "42", dDatDok, cBrDok )
+   lStorno := pos_is_storno( cIdPos, "42", dDatDok, cBrDok )
    aItems := pos_fiscal_stavke_racuna( cIdPos, "42", dDatDok, cBrDok, lStorno, nUplaceniIznos )
    IF aItems == NIL
       RETURN 1
@@ -80,23 +80,11 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
    RETURN nErrorLevel
 
 
-STATIC FUNCTION pos_dok_is_storno( cIdPos, cIdTipDok, dDatDok, cBrDok )
-
-   LOCAL lStorno := .F.
-
-   seek_pos_doks( cIdPos, cIdTipDok, dDatDok, cBrDok )
-   IF !Empty( AllTrim( pos_doks->brdokStorn ) )
-      lStorno := .T.
-   ENDIF
-
-   RETURN lStorno
-
-
-STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lStorno, nUplaceniIznos )
+STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lStorno, nUplaceniIznos )
 
    LOCAL aItems := {}
    LOCAL nPLU
-   LOCAL cReklamiraniRacun
+   LOCAL cBrojFiskRNStorno := ""
    LOCAL nPOSRabatProcenat
    LOCAL cRobaBarkod, cIdRoba, cRobaNaziv, cJMJ
    LOCAL nRbr := 0
@@ -108,12 +96,12 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
       nUplaceniIznos := 0
    ENDIF
 
-   IF !seek_pos_doks( cIdPos, cIdTipDok, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
+   IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
       RETURN NIL
    ENDIF
    cVrstaPlacanja := pos_get_vrsta_placanja_0123( field->idvrstep )
    IF cVrstaPlacanja <> "0"
-      nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok )
+      nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
    ELSE
       nPosRacunUkupno := 0
    ENDIF
@@ -121,13 +109,15 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
       nPosRacunUkupno := nUplaceniIznos
    ENDIF
 
-   IF !seek_pos_pos( cIdPos, cIdTipDok, dDatDok, cBrDok )
+   IF !seek_pos_pos( cIdPos, cIdVd, dDatDok, cBrDok )
       RETURN NIL
    ENDIF
-   DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdTipDok  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
+   DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
 
       nPOSRabatProcenat := 0
-      cReklamiraniRacun := field->brdokStorn
+      IF lStorno
+         cBrojFiskRNStorno := AllTrim( Str( pos_storno_broj_rn( cIdPos, cIdVd, dDatDok, cBrDok ) ) )
+      ENDIF
       cIdRoba := field->idroba
 
       select_o_roba( cIdRoba )
@@ -158,7 +148,7 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
          pos->cijena, ;
          Abs( pos->kolicina ), ;
          pos->idtarifa, ;
-         cReklamiraniRacun, ;
+         cBrojFiskRNStorno, ;
          nPLU, ;
          pos->cijena, ;
          nPOSRabatProcenat, ;
@@ -185,7 +175,7 @@ STATIC FUNCTION pos_fiscal_stavke_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, lS
    RETURN aItems
 
 
-STATIC FUNCTION pos_to_fprint( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, lStorno )
+STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel
    LOCAL nBrojFiskalnoRacuna := 0
@@ -217,7 +207,7 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke,
    ENDIF
 
    IF ( nBrojFiskalnoRacuna > 0 .AND. nErrorLevel == 0 )
-      pos_set_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+      pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
       MsgO( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
       Sleep( 2 )
       MsgC()
@@ -227,7 +217,7 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke,
 
 
 
-STATIC FUNCTION pos_to_flink( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, lStorno )
+STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel := 0
 
@@ -237,7 +227,7 @@ STATIC FUNCTION pos_to_flink( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, 
    RETURN nErrorLevel
 
 
-STATIC FUNCTION pos_to_tremol( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, lStorno, cContinue )
+STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno, cContinue )
 
    LOCAL nErrorLevel := 0
    LOCAL cFiskalniFajl
@@ -255,7 +245,7 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke,
       IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajl )
          nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
          IF nErrorLevel == 0 .AND. !lStorno .AND. nBrojFiskalnoRacuna > 0
-            pos_set_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+            pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
          ENDIF
       ENDIF
@@ -267,7 +257,7 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke,
    RETURN nErrorLevel
 
 
-STATIC FUNCTION pos_to_hcp( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, lStorno, nUplaceniIznos )
+STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno, nUplaceniIznos )
 
    LOCAL nErrorLevel := 0
    LOCAL nBrojFiskalnoRacuna := 0
@@ -279,7 +269,7 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, lS
    IF nErrorLevel == 0
       nBrojFiskalnoRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
       IF nBrojFiskalnoRacuna > 0
-         pos_set_broj_fiskalnog_racuna( cIdPos, cIdTipDok, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+         pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
          MsgBeep( "Kreiran fiskalni racun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
       ENDIF
 
@@ -311,24 +301,160 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
 
 FUNCTION pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
 
-      LOCAL cQuery, oRet, xValue
+   LOCAL cQuery, oRet, nValue
 
-      cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna(" + ;
-         sql_quote( cIdPos ) + "," + ;
-         sql_quote( cIdVd ) + "," + ;
-         sql_quote( dDatDok ) + "," + ;
-         sql_quote( cBrDok ) + ", NULL)"
+   IF Empty( cIdPos )
+      RETURN 0
+   ENDIF
 
-      oRet := run_sql_query( cQuery )
-      IF is_var_objekat_tpqquery( oRet )
-         xValue := oRet:FieldGet( 1 )
-         IF xValue > 0
-            RETURN .T.
-         ENDIF
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna(" + ;
+      sql_quote( cIdPos ) + "," + ;
+      sql_quote( cIdVd ) + "," + ;
+      sql_quote( dDatDok ) + "," + ;
+      sql_quote( cBrDok ) + ", NULL)"
+
+   oRet := run_sql_query( cQuery )
+   IF is_var_objekat_tpqquery( oRet )
+
+      nValue := oRet:FieldGet( 1 )
+      IF nValue <> NIL
+         RETURN nValue
+      ELSE
+         RETURN 0
       ENDIF
+   ENDIF
 
+   RETURN 0
+
+
+FUNCTION pos_get_fiskalni_dok_id( cIdPos, cIdVd, dDatDok, cBrDok )
+
+   LOCAL cQuery, oRet, cValue
+
+   IF Empty( cIdPos )
+      RETURN 0
+   ENDIF
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_dok_id(" + ;
+      sql_quote( cIdPos ) + "," + ;
+      sql_quote( cIdVd ) + "," + ;
+      sql_quote( dDatDok ) + "," + ;
+      sql_quote( cBrDok ) + ")"
+
+   oRet := run_sql_query( cQuery )
+   IF is_var_objekat_tpqquery( oRet )
+
+      cValue := oRet:FieldGet( 1 )
+      IF cValue <> NIL
+         RETURN cValue
+      ELSE
+         RETURN ""
+      ENDIF
+   ENDIF
+
+   RETURN ""
+
+
+
+// CREATE OR REPLACE FUNCTION p15.set_ref_storno_fisk_dok( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
+
+FUNCTION pos_set_ref_storno_fisk_dok( cIdPos, cIdVd, dDatDok, cBrDok, cUUIDFiskStorniran )
+
+   LOCAL cQuery, oError
+
+   IF Empty( cIdPos )
+      RETURN 0
+   ENDIF
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".set_ref_storno_fisk_dok(" + ;
+      sql_quote( cIdPos ) + "," + ;
+      sql_quote( cIdVd ) + "," + ;
+      sql_quote( dDatDok ) + "," + ;
+      sql_quote( cBrDok ) + "," + ;
+      sql_quote( cUUIDFiskStorniran ) +  ")"
+
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
+      run_sql_query( cQuery )
+
+   RECOVER USING  oError
+      ?E oError:description
       RETURN .F.
+   END SEQUENCE
 
+   RETURN .T.
+
+/*
+ broj fiskalnog racuna koji je storno dokumenta ciji je uuid= cUUIDFiskStorniran
+
+ FUNCTION p15.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
+*/
+FUNCTION pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran )
+
+   LOCAL cQuery, oRet, nValue
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref(" + ;
+      sql_quote( cUUIDFiskStorniran ) +  ")"
+
+   oRet := run_sql_query( cQuery )
+   IF is_var_objekat_tpqquery( oRet )
+      nValue := oRet:FieldGet( 1 )
+      IF nValue <> NIL
+         RETURN nValue
+      ELSE
+         RETURN 0
+      ENDIF
+   ENDIF
+
+   RETURN 0
+
+
+// FUNCTION p15.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+
+FUNCTION pos_is_storno( cIdPos, cIdVd, dDatDok, cBrDok )
+
+   LOCAL cQuery, oRet, lValue
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_is_storno(" + ;
+      sql_quote( cIdPos ) + "," + ;
+      sql_quote( cIdVd ) + "," + ;
+      sql_quote( dDatDok ) + "," + ;
+      sql_quote( cBrDok ) + ")"
+
+   oRet := run_sql_query( cQuery )
+   IF is_var_objekat_tpqquery( oRet )
+      lValue := oRet:FieldGet( 1 )
+      IF lValue <> NIL
+         RETURN lValue
+      ELSE
+         RETURN .F.
+      ENDIF
+   ENDIF
+
+   RETURN .F.
+
+// SELECT p15.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  => 101
+
+FUNCTION pos_storno_broj_rn( cIdPos, cIdVd, dDatDok, cBrDok )
+
+   LOCAL cQuery, oRet, nValue
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_storno_broj_rn(" + ;
+      sql_quote( cIdPos ) + "," + ;
+      sql_quote( cIdVd ) + "," + ;
+      sql_quote( dDatDok ) + "," + ;
+      sql_quote( cBrDok ) + ")"
+
+   oRet := run_sql_query( cQuery )
+   IF is_var_objekat_tpqquery( oRet )
+      nValue := oRet:FieldGet( 1 )
+      IF nValue <> NIL
+         RETURN nValue
+      ELSE
+         RETURN 0
+      ENDIF
+   ENDIF
+
+   RETURN 0
 
 STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
 
@@ -358,7 +484,7 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
    RETURN cRet
 
 
-STATIC FUNCTION pos_to_tring( cIdPos, cIdTipDok, dDatDok, cBrDok, aRacunStavke, lStorno )
+STATIC FUNCTION pos_to_tring( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel := 0
 

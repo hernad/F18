@@ -20,6 +20,9 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    LOCAL lOk := .T.
    LOCAL lRet := .F.
    LOCAL hParams := hb_Hash()
+   LOCAL cUUIDFiskStorniran
+   LOCAL nOldFiskRn
+   LOCAL cMsg
 
    hParams[ "tran_name" ] := "pos_rn_azur"
 
@@ -54,14 +57,12 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    hRec[ "idvrstep" ] := iif( cNacPlac == NIL, POS_IDVRSTEP_GOTOVINSKO_PLACANJE, cNacPlac )
    hRec[ "idpartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
    hRec[ "idradnik" ] := _pos_pripr->idradnik
-   hRec[ "brdokstorn" ] := _pos_pripr->brdokStorn
+   cUUIDFiskStorniran := _pos_pripr->fisk_id
 
    lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
    IF lOk
-
       SELECT _pos_pripr
       DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == cIdPos + "42" + DToS( danasnji_datum() ) + POS_BRDOK_PRIPREMA
-
          SELECT pos
          APPEND BLANK
          hRec := dbf_get_rec()
@@ -70,7 +71,6 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          hRec[ "datum" ] := danasnji_datum()
          hRec[ "brdok" ] := cBrDok
          hRec[ "rbr" ] := ++nCount
-         //hRec[ "idradnik" ] := _pos_pripr->idradnik
          hRec[ "idroba" ] := _pos_pripr->idroba
          hRec[ "idtarifa" ] := _pos_pripr->idtarifa
          hRec[ "kolicina" ] := _pos_pripr->kolicina
@@ -82,9 +82,25 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
          ENDIF
          SELECT _pos_pripr
          SKIP
-
       ENDDO
 
+   ENDIF
+
+   IF lOk
+      IF !Empty( cUUIDFiskStorniran )
+
+         IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
+            cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
+            MsgBeep( cMsg )
+            error_bar( "fisk", cMsg )
+            lOk := .F.
+         ELSE
+            // u pos_fisk_doks ubaciti zapis koji se odnosi na ovaj racun, broj_rn = NULL
+            pos_set_broj_fiskalnog_racuna( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], - 1 )
+            pos_set_ref_storno_fisk_dok( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], cUUIDFiskStorniran )
+            info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
+         ENDIF
+      ENDIF
    ENDIF
 
    MsgC()
