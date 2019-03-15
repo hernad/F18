@@ -41,7 +41,9 @@ CREATE INDEX IF NOT EXISTS log_user_code_idx
     ON f18.log USING btree(user_code COLLATE pg_catalog."default");
 
 -- kalk_doks sevence za brojace dokumenata
+-- koristi FUNCTION public.kalk_novi_brdok(cIdVd varchar)
 -- f18.kalk_brdok_seq_02, f18.kalk_brdok_seq_21, f18.kalk_brdok_seq_22
+
 DO $$
 DECLARE
       cIdVd text;

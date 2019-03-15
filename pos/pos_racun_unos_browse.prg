@@ -28,7 +28,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    LOCAL aUnosMsg := {}
    LOCAL GetList := {}
    LOCAL cTmp
-
+   
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
 
@@ -66,7 +66,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    s_oBrowse:autolite := .F.
 
-   SetKey( K_F8, {|| pos_storno_racuna( s_oBrowse ), pos_racun_prikazi_ukupno( .T. ) } )
+   SetKey( K_F8, {|| pos_storno_racuna_f8( s_oBrowse, Ch ) } )
    SetKey( K_F9, {|| fiskalni_izvjestaji_komande( .T., .T.  ) } )
 
    @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY "UKUPNO:"
@@ -140,9 +140,9 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-      //IF roba->tip <> "T"
-        // _cijena := pos_get_mpc()
-      //ENDIF
+      // IF roba->tip <> "T"
+      // _cijena := pos_get_mpc()
+      // ENDIF
       Gather()
 
       pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )
@@ -175,6 +175,20 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    RETURN .T.
 
+
+FUNCTION pos_storno_racuna_f8( oBrowse, nCh )
+
+   LOCAL hParams := hb_Hash()
+
+   pos_storno_racuna( hParams )
+   pos_racun_prikazi_ukupno( .T. )
+   oBrowse:goBottom()
+   oBrowse:refreshAll()
+   oBrowse:dehilite()
+   DO WHILE !oBrowse:Stabilize() .AND. ( ( nCh := Inkey() ) == 0 )
+   ENDDO
+
+   RETURN .T.
 
 FUNCTION pos_set_key_handler_ispravka_racuna()
 

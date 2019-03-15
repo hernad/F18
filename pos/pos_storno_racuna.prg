@@ -150,33 +150,27 @@ FUNCTION pos_storno_racuna( hParams )
    ENDIF
 
    PushWA()
-
    Box(, 5, 55 )
-
-   AltD()
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
 
    READ
-
-   //cBrDokStornirati := PadL( AllTrim( cBrDokStornirati ), FIELD_LEN_POS_BRDOK )
-   //IF Empty( cBrojFiskalnogRacuna ) // racun nije fiskaliziran
-    //  seek_pos_doks( gPosProdajnoMjesto, "42", dDatum, cBrDokStornirati )
-      //cBrojFiskalnogRacuna := PadR( AllTrim( Str( pos_doks->fisc_rn ) ), 10 )
-   //ENDIF
-
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY8 "Broj fiskalnog računa:" GET hParams["fisk_rn"]
-   READ
-
    BoxC()
 
+   hParams["fisk_rn"] := pos_get_broj_fiskalnog_racuna( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] )
+
+   info_bar("fisk", "Broj fiskalnog računa: " +  AllTrim(Str(hParams["fisk_rn"])))
+
+
+
    IF LastKey() == K_ESC .OR. hParams["fisk_rn"] == 0
+      MsgBeep("Broj fiskalnog računa 0?! Ne može storno!")
       PopWa()
       RETURN .F.
    ENDIF
 
    pos_napravi_u_pripremi_storno_dokument( hParams )
-   SELECT ( nTArea )
+   PopWa()
 
    PopWa()
 

@@ -121,7 +121,6 @@ ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS dok_id uuid DEFAULT gen_rando
 ALTER TABLE f18.kalk_kalk ADD COLUMN IF NOT EXISTS  dok_id uuid;
 
 --- f18.tarifa --------------------------------------------------
-CREATE TABLE IF NOT EXISTS f18.tarifa AS TABLE fmk.tarifa;
 SELECT public.create_table_from_then_drop( 'fmk.tarifa', 'f18.tarifa' );
 ALTER TABLE f18.tarifa OWNER TO admin;
 GRANT ALL ON TABLE f18.tarifa TO xtrole;
@@ -136,8 +135,8 @@ alter table f18.tarifa drop column if exists zpp;
 DO $$
 BEGIN
   BEGIN
-    alter table fmk.tarifa rename column opp TO pdv;
-   EXCEPTION WHEN others THEN RAISE NOTICE 'tarifa column already renamed opp->pdv';
+    alter table f18.tarifa rename column opp TO pdv;
+    EXCEPTION WHEN others THEN RAISE NOTICE 'tarifa column already renamed opp->pdv';
   END;
 END $$;
 ALTER TABLE f18.tarifa ADD COLUMN IF NOT EXISTS tarifa_id uuid DEFAULT gen_random_uuid();

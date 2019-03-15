@@ -60,24 +60,6 @@ FUNCTION pos_lista_racuna( hParams )
    IF !hb_HHasKey( hParams, "idroba" )
       hParams[ "idroba" ] := NIL
    ENDIF
-   // IF cPrefixFilter == NIL
-   // cPrefixFilter := ".t."
-   // ENDIF
-
-   // cFilter := cPrefixFilter
-   AltD()
-   // IF fPrep == NIL
-   // fPrep := .F.
-   // ENDIF
-
-   // IF hParams["brdok"] == NIL
-   // hParams["brdok"] := Space( FIELD_LEN_POS_BRDOK )
-   // ELSE
-   // cBrDok := AllTrim( cBrDok )
-   // ENDIF
-
-   // cIdPos := Left( cBrDok, At( "-", cBrDok ) - 1 )
-   // cIdPos := PadR( cIdPOS, Len( pos_pm() ) )
 
    seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
    IF hParams[ "idpos" ] <> pos_pm()
@@ -92,7 +74,6 @@ FUNCTION pos_lista_racuna( hParams )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
    AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok ) } } )
    AAdd( ImeKol, { "Iznos", {|| Str ( pos_iznos_racuna( field->idpos, field->idvd, field->datum, field->brdok ), 13, 2 ) } } )
-
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
    AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
    AAdd( ImeKol, { "Vrijeme", {|| field->vrijeme } } )
