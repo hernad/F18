@@ -72,7 +72,7 @@ ALTER FUNCTION public.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION public.setmetric TO xtrole;
 
 
-CREATE IF NOT EXISTS TABLE f18.partn
+CREATE TABLE IF NOT EXISTS f18.partn
 (
     partner_id uuid DEFAULT gen_random_uuid(),
     id character(6) COLLATE pg_catalog."default",
@@ -118,7 +118,7 @@ CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
 GRANT ALL ON public.partn TO xtrole;
 
 
-CREATE IF NOT EXISTS TABLE f18.tarifa
+CREATE TABLE IF NOT EXISTS  f18.tarifa
 (
     tarifa_id uuid DEFAULT gen_random_uuid(),
     id character(6) COLLATE pg_catalog."default",
