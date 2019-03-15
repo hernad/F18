@@ -157,7 +157,7 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 
 FUNCTION f18_sql_schema( cTable )
 
-   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "roba", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp" }
+   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "roba", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "log" }
    IF "." $ cTable
       RETURN cTable
    ENDIF

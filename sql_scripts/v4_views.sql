@@ -349,7 +349,6 @@ GRANT ALL ON public.trfp TO xtrole;
 drop view if exists public.log;
 CREATE view public.log  AS SELECT
       *
-    FROM
-      public.log;
+    FROM f18.log;
 
 GRANT ALL ON public.log TO xtrole;

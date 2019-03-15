@@ -205,16 +205,10 @@ CREATE INDEX IF NOT EXISTS log_user_code_idx
     ON f18.log USING btree(user_code COLLATE pg_catalog."default");
 
 
--- fmk schema
-CREATE SCHEMA IF NOT EXISTS fmk;
-ALTER SCHEMA fmk OWNER TO admin;
-GRANT ALL ON SCHEMA f18 TO xtrole;
-
--- fmk.log
+-- f18.log
 drop view if exists fmk.log;
 CREATE view fmk.log  AS SELECT
       *
-    FROM
-      f18.log;
+    FROM f18.log;
 
-GRANT ALL ON fmk.log TO xtrole;
+GRANT ALL ON f18.log TO xtrole;
