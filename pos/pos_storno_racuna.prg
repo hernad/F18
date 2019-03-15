@@ -148,7 +148,9 @@ FUNCTION pos_storno_racuna( hParams )
    IF hParams[ "datum" ] == nil
       hParams[ "datum" ] := danasnji_datum()
    ENDIF
-
+   IF hParams[ "brdok" ] == nil
+      hParams[ "brdok" ] := SPACE( FIELD_LEN_POS_BRDOK )
+   ENDIF
    PushWA()
    Box(, 5, 55 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
@@ -156,6 +158,8 @@ FUNCTION pos_storno_racuna( hParams )
 
    READ
    BoxC()
+
+   altd()
 
    hParams["fisk_rn"] := pos_get_broj_fiskalnog_racuna( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] )
 

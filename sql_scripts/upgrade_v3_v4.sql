@@ -37,6 +37,8 @@ SELECT public.create_table_from_then_drop( 'fmk.kalk_doks', 'f18.kalk_doks' );
 GRANT ALL ON TABLE f18.kalk_kalk TO xtrole;
 GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 
+DELETE from f18.kalk_kalk where brdok is null or btrim(brdok)='';
+DELETE from f18.kalk_doks where brdok is null or btrim(brdok)='';
 
 DO $$
 BEGIN

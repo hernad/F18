@@ -28,7 +28,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    LOCAL aUnosMsg := {}
    LOCAL GetList := {}
    LOCAL cTmp
-   
+
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
 
@@ -66,7 +66,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    s_oBrowse:autolite := .F.
 
-   SetKey( K_F8, {|| pos_storno_racuna_f8( s_oBrowse, Ch ) } )
+   SetKey( K_F8, {|| pos_storno_racuna_f8( s_oBrowse ) } )
    SetKey( K_F9, {|| fiskalni_izvjestaji_komande( .T., .T.  ) } )
 
    @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY "UKUPNO:"
@@ -176,9 +176,10 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    RETURN .T.
 
 
-FUNCTION pos_storno_racuna_f8( oBrowse, nCh )
+FUNCTION pos_storno_racuna_f8( oBrowse )
 
    LOCAL hParams := hb_Hash()
+   LOCAL nCh
 
    pos_storno_racuna( hParams )
    pos_racun_prikazi_ukupno( .T. )
