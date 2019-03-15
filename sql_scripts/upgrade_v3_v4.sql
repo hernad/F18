@@ -40,6 +40,22 @@ GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 DELETE from f18.kalk_kalk where brdok is null or btrim(brdok)='';
 DELETE from f18.kalk_doks where brdok is null or btrim(brdok)='';
 
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS datfaktp date;
+
+CREATE OR REPLACE FUNCTION datfaktp_from_kalk_kalk(cIdFirma varchar, cIdVd varchar, cBrDok varchar ) RETURNS date
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   dDatFaktP date;
+BEGIN
+   SELECT datfaktp from f18.kalk_kalk where idfirma=cIdFirma and idvd=cIdVd and brdok=cBrDok LIMIT 1
+      INTO dDatFaktP;
+
+  RETURN dDatFaktP;
+END;
+$$;
+
+
 DO $$
 DECLARE
    nRbr numeric;
@@ -48,6 +64,8 @@ BEGIN
     -- check if rbr is char, ako nije STOP => exception
    select to_numeric(rbr, '999') from f18.kalk_kalk
       INTO nRbr;
+
+   update f18.kalk_doks set datfaktp=datfaktp_from_kalk_kalk(idfirma, idvd, brdok);
 
    alter table f18.kalk_kalk rename column rbr to c_rbr;
    alter table f18.kalk_kalk add column rbr integer;
@@ -108,7 +126,6 @@ CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, 
 ALTER TABLE IF EXISTS f18.kalk_doks DROP COLUMN IF EXISTS podbr;
 ALTER TABLE IF EXISTS f18.kalk_kalk DROP COLUMN IF EXISTS podbr;
 
-ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS datfaktp date;
 ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS datval date;
 ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS dat_od date;
 ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS dat_do date;
