@@ -195,18 +195,15 @@ CREATE TABLE IF NOT EXISTS f18.log
 );
 
 ALTER TABLE f18.log OWNER to admin;
-GRANT ALL ON TABLE fmk.log TO admin;
-GRANT ALL ON TABLE fmk.log TO xtrole;
+GRANT ALL ON TABLE f18.log TO admin;
+GRANT ALL ON TABLE f18.log TO xtrole;
 
 CREATE INDEX IF NOT EXISTS log_l_time_idx
-    ON fmk.log USING btree
-    (l_time)
-    TABLESPACE pg_default;
+    ON f18.log USING btree(l_time);
 
 CREATE INDEX IF NOT EXISTS log_user_code_idx
-    ON fmk.log USING btree
-    (user_code COLLATE pg_catalog."default")
-    TABLESPACE pg_default;
+    ON f18.log USING btree(user_code COLLATE pg_catalog."default");
+
 
 -- fmk schema
 CREATE SCHEMA IF NOT EXISTS fmk;

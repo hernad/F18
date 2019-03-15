@@ -344,3 +344,12 @@ CREATE OR REPLACE RULE public_trfp_ins AS ON INSERT TO public.trfp
           NEW.id, NEW.shema, NEW.naz, NEW.idkonto, NEW.dokument, NEW.partner, NEW.d_p, NEW.znak, NEW.idvd, NEW.idvn, NEW.idtarifa );
 
 GRANT ALL ON public.trfp TO xtrole;
+
+
+drop view if exists public.log;
+CREATE view public.log  AS SELECT
+      *
+    FROM
+      public.log;
+
+GRANT ALL ON public.log TO xtrole;

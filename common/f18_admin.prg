@@ -1006,7 +1006,7 @@ METHOD F18Admin:delete_db_data_all( cDatabaseName, nDataType )
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "fin_suban;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "fin_anal;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "fin_sint;"
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "fin_nalog;"
+   cQuery += "DELETE FROM " + f18_sql_schema("fin_nalog") + ";"
 
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "mat_suban;"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "mat_anal;"
@@ -1032,7 +1032,7 @@ METHOD F18Admin:delete_db_data_all( cDatabaseName, nDataType )
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "metric WHERE metric_name LIKE '%auto_plu%';"
    cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "metric WHERE metric_name LIKE '%lock%';"
 
-   cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "log;"
+   cQuery += "DELETE FROM " + f18_sql_schema("log") + ";"
 
 
    IF nDataType > 1 // ako je potrebno brisati sve

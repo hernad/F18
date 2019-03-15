@@ -12,22 +12,22 @@
 #include "f18.ch"
 
 
-FUNCTION f18_view_log( _params )
+FUNCTION f18_view_log( hParams )
 
-   LOCAL _data
-   LOCAL _print_to_file := .F.
+   LOCAL oData
+   LOCAL lPrintToFile := .F.
    LOCAL cLogFile
 
    IF PCount() > 0
-      _print_to_file := .T.
+      lPrintToFile := .T.
    ENDIF
 
-   IF _params == NIL .AND. !uslovi_pregleda_loga( @_params )
+   IF hParams == NIL .AND. !uslovi_pregleda_loga( @hParams )
       RETURN .F.
    ENDIF
 
-   _data := query_log_data( _params )
-   cLogFile := print_log_data( _data, _params, _print_to_file )
+   oData := query_log_data( hParams )
+   cLogFile := print_log_data( oData, hParams, lPrintToFile )
 
    RETURN cLogFile
 
@@ -36,54 +36,55 @@ FUNCTION f18_view_log( _params )
 
 STATIC FUNCTION uslovi_pregleda_loga( hParams )
 
-   LOCAL _ok := .F.
-   LOCAL _limit := 0
+   LOCAL lOk := .F.
+   LOCAL nLimit := 0
    LOCAL _datum_od := Date()
    LOCAL _datum_do := Date()
    LOCAL cUser := PadR( f18_user(), 200 )
-   LOCAL _x := 1
+   LOCAL nX := 1
    LOCAL _conds_true := Space( 600 )
    LOCAL _conds_false := Space( 600 )
-   LOCAL _f18_doc_oper := "N"
+   LOCAL cSamoOperacijeNaDokumentimaDN := "N"
+   LOCAL GetList := {}
 
    Box(, 12, 70 )
 
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "Uslovi za pregled log-a..."
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Uslovi za pregled log-a..."
 
-   ++ _x
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "Datum od" GET _datum_od
-   @ box_x_koord() + _x, Col() + 1 SAY "do" GET _datum_do
+   ++ nX
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Datum od" GET _datum_od
+   @ box_x_koord() + nX, Col() + 1 SAY "do" GET _datum_do
 
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "Korisnik (prazno svi):" GET cUser PICT "@S40"
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Korisnik (prazno svi):" GET cUser PICT "@S40"
 
-   ++ _x
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "LIKE uslovi:"
+   ++ nX
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "LIKE uslovi:"
 
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY8 "  sadrži:" GET _conds_true PICT "@S40"
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  sadrži:" GET _conds_true PICT "@S40"
 
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY8 "nesadrži:" GET _conds_false PICT "@S40"
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "nesadrži:" GET _conds_false PICT "@S40"
 
-   ++ _x
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "Pregledaj samo operacije nad dokumentima (D/N)?" GET _f18_doc_oper VALID _f18_doc_oper $ "DN" PICT "@!"
+   ++ nX
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Pregledaj samo operacije nad dokumentima (D/N)?" GET cSamoOperacijeNaDokumentimaDN VALID cSamoOperacijeNaDokumentimaDN $ "DN" PICT "@!"
 
-   ++ _x
-   @ box_x_koord() + _x, box_y_koord() + 2 SAY "Limit na broj zapisa (0-bez limita)" GET _limit PICT "999999"
+   ++ nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Limit na broj zapisa (0-bez limita)" GET nLimit PICT "999999"
 
    READ
 
    BoxC()
 
    IF LastKey() == K_ESC
-      RETURN _ok
+      RETURN lOk
    ENDIF
 
-   _ok := .T.
+   lOk := .T.
 
    IF !Empty( _conds_true )
       _conds_true := AllTrim( _conds_true ) + Space( 1 )
@@ -101,12 +102,12 @@ STATIC FUNCTION uslovi_pregleda_loga( hParams )
    hParams[ "date_from" ] := _datum_od
    hParams[ "date_to" ] := _datum_do
    hParams[ "user" ] := AllTrim( cUser )
-   hParams[ "limit" ] := _limit
+   hParams[ "limit" ] := nLimit
    hParams[ "conds_true" ] := _conds_true
    hParams[ "conds_false" ] := _conds_false
-   hParams[ "doc_oper" ] := _f18_doc_oper
+   hParams[ "doc_oper" ] := cSamoOperacijeNaDokumentimaDN
 
-   RETURN _ok
+   RETURN lOk
 
 
 STATIC FUNCTION query_log_data( hParams )
@@ -114,52 +115,52 @@ STATIC FUNCTION query_log_data( hParams )
    LOCAL cUser := ""
    LOCAL _dat_from := hParams[ "date_from" ]
    LOCAL _dat_to := hParams[ "date_to" ]
-   LOCAL _limit := hParams[ "limit" ]
+   LOCAL nLimit := hParams[ "limit" ]
    LOCAL _conds_true := hParams[ "conds_true" ]
    LOCAL _conds_false := hParams[ "conds_false" ]
    LOCAL _is_doc_oper := hParams[ "doc_oper" ] == "D"
-   LOCAL cQuery, _where
+   LOCAL cQuery, cWhere
    LOCAL _server := sql_data_conn()
-   LOCAL _data
+   LOCAL oData
 
    IF hb_HHasKey( hParams, "user" )
       cUser := hParams[ "user" ]
    ENDIF
 
-   _where := _sql_date_parse( "l_time", _dat_from, _dat_to )
+   cWhere := _sql_date_parse( "l_time", _dat_from, _dat_to )
 
    IF !Empty( cUser )
-      _where += " AND " + _sql_cond_parse( "user_code", cUser )
+      cWhere += " AND " + _sql_cond_parse( "user_code", cUser )
    ENDIF
 
    IF !Empty( _conds_true )
-      _where += " AND (" + _sql_cond_parse( "msg", _conds_true ) + ")"
+      cWhere += " AND (" + _sql_cond_parse( "msg", _conds_true ) + ")"
    ENDIF
 
    IF !Empty( _conds_false )
-      _where += " AND (" + _sql_cond_parse( "msg", _conds_false, .T. ) + ")"
+      cWhere += " AND (" + _sql_cond_parse( "msg", _conds_false, .T. ) + ")"
    ENDIF
 
    IF _is_doc_oper
-      _where += " AND ( msg LIKE '%F18_DOK_OPER%' ) "
+      cWhere += " AND ( msg LIKE '%F18_DOK_OPER%' ) "
    ENDIF
 
-   cQuery := "SELECT id, user_code, l_time, msg "
-   cQuery += "FROM " + F18_PSQL_SCHEMA_DOT + "log "
-   cQuery += "WHERE " + _where
+   cQuery := "SELECT id, user_code, l_time, msg"
+   cQuery += " FROM " + f18_sql_schema("log")
+   cQuery += " WHERE " + cWhere
    cQuery += " ORDER BY l_time DESC "
-   IF _limit > 0
-      cQuery += " LIMIT " + AllTrim( Str( _limit ) )
+   IF nLimit > 0
+      cQuery += " LIMIT " + AllTrim( Str( nLimit ) )
    ENDIF
 
    info_bar( "log_get_data", "qry:" + cQuery )
-   _data := run_sql_query( cQuery )
+   oData := run_sql_query( cQuery )
 
-   IF sql_error_in_query( _data, "SELECT" )
+   IF sql_error_in_query( oData, "SELECT" )
       RETURN NIL
    ENDIF
 
-   RETURN _data
+   RETURN oData
 
 
 STATIC FUNCTION print_log_data( data, hParams, print_to_file )
@@ -233,7 +234,7 @@ STATIC FUNCTION print_log_data( data, hParams, print_to_file )
 
 FUNCTION f18_log_delete()
 
-   LOCAL _params := hb_Hash()
+   LOCAL hParams := hb_Hash()
    LOCAL _curr_log_date := Date()
    LOCAL _last_log_date := fetch_metric( "log_last_delete_date", NIL, CToD( "" ) )
    LOCAL _delete_log_level := fetch_metric( "log_delete_level", NIL, 30 )
@@ -246,10 +247,10 @@ FUNCTION f18_log_delete()
 
    IF ( _curr_log_date - _delete_log_level ) > _last_log_date
 
-      _params[ "delete_level" ] := _delete_log_level
-      _params[ "current_date" ] := _curr_log_date
+      hParams[ "delete_level" ] := _delete_log_level
+      hParams[ "current_date" ] := _curr_log_date
 
-      IF sql_log_delete( _params )
+      IF sql_log_delete( hParams )
          set_metric( "log_last_delete_date", NIL,  _curr_log_date )
       ENDIF
 
@@ -261,23 +262,23 @@ FUNCTION f18_log_delete()
 
 STATIC FUNCTION sql_log_delete( hParams )
 
-   LOCAL _ok := .T.
-   LOCAL cQuery, _where
+   LOCAL lOk := .T.
+   LOCAL cQuery, cWhere
    LOCAL _result
    LOCAL _dok_oper := "%F18_DOK_OPER%"
    LOCAL _delete_level := hParams[ "delete_level" ]
    LOCAL _curr_date := hParams[ "current_date" ]
    LOCAL _delete_date := ( _curr_date - _delete_level )
 
-   _where := "( l_time::char(8) <= " + sql_quote( _delete_date )
-   _where += " AND msg NOT LIKE " + sql_quote( _dok_oper ) + " ) "
-   _where += " OR "
-   _where += "( EXTRACT( YEAR FROM l_time ) < EXTRACT( YEAR FROM CURRENT_DATE ) "
-   _where += " AND "
-   _where += " msg LIKE " + sql_quote( _dok_oper ) + " ) "
+   cWhere := "( l_time::char(8) <= " + sql_quote( _delete_date )
+   cWhere += " AND msg NOT LIKE " + sql_quote( _dok_oper ) + " ) "
+   cWhere += " OR "
+   cWhere += "( EXTRACT( YEAR FROM l_time ) < EXTRACT( YEAR FROM CURRENT_DATE ) "
+   cWhere += " AND "
+   cWhere += " msg LIKE " + sql_quote( _dok_oper ) + " ) "
 
-   cQuery := "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "log "
-   cQuery += "WHERE " + _where
+   cQuery := "DELETE FROM " + f18_sql_schema( "log")
+   cQuery += " WHERE " + cWhere
 
    _result := run_sql_query( cQuery )
 

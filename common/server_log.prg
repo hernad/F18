@@ -21,7 +21,7 @@ FUNCTION server_log_write( cMessage, silent )
    LOCAL _ret
    LOCAL _result
    LOCAL cQuery
-   LOCAL _tbl
+   LOCAL cTable
    LOCAL _user := f18_user()
    LOCAL hParams := hb_Hash()
 
@@ -29,11 +29,11 @@ FUNCTION server_log_write( cMessage, silent )
       silent := .F.
    ENDIF
 
-   _tbl := F18_PSQL_SCHEMA + ".log"
+   cTable := f18_sql_schema( "log" )
 
    hParams[ "log" ] := .F.
    cMessage  := ProcName( 2 ) + "(" + AllTrim( Str( ProcLine( 2 ) ) ) + ") : " + cMessage
-   cQuery := "INSERT INTO " + _tbl + "(user_code, msg) VALUES(" +  sql_quote( _user ) + "," +  sql_quote( _u( cMessage ) ) + ")"
+   cQuery := "INSERT INTO " + cTable + "(user_code, msg) VALUES(" +  sql_quote( _user ) + "," +  sql_quote( _u( cMessage ) ) + ")"
    _ret := run_sql_query( cQuery, hParams )
 
    RETURN .T.
