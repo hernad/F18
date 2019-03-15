@@ -54,6 +54,32 @@ ALTER FUNCTION fmk.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION fmk.setmetric TO xtrole;
 
 
+CREATE OR REPLACE FUNCTION public.set_datfaktp_into_kalk_kalk(cIdFirma varchar, cIdVd varchar, cBrDok varchar, dDatFaktP date ) RETURNS void
+LANGUAGE plpgsql
+AS $$
+
+BEGIN
+   UPDATE f18.kalk_doks SET datfaktp=dDatFaktP
+      where idfirma=cIdFirma and idvd=cIdVd and brdok=cBrDok;
+
+  RETURN;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_datfaktp_from_kalk_doks(cIdFirma varchar, cIdVd varchar, cBrDok varchar ) RETURNS date
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  dDatFaktP date;
+BEGIN
+   SELECT datfaktp from f18.kalk_doks
+      where idfirma=cIdFirma and idvd=cIdVd and brdok=cBrDok
+      INTO dDatFaktP;
+
+  RETURN dDatFaktP;
+END;
+$$;
+
 --------------------------------------------------------------------------------
 -- F18 v3 legacy fmk.kalk_kalk, kalk_doks updatable views
 -------------------------------------------------------------------------------
@@ -80,7 +106,7 @@ CREATE view fmk.kalk_kalk  AS SELECT
      mpcsapp,
      mkonto,pkonto,mu_i,pu_i,
      error,
-     date '1990-01-01' as datfaktp,
+     public.get_datfaktp_from_kalk_doks(idfirma, idvd, brdok) as datfaktp,
      current_date as datkurs,
      current_date as roktr,
      NULL as idzaduz,
@@ -137,7 +163,7 @@ CREATE OR REPLACE RULE fmk_kalk_kalk_ins AS ON INSERT TO fmk.kalk_kalk
         NEW.mkonto, NEW.pkonto, NEW.mu_i,NEW.pu_i,
         NEW.error,
         public.kalk_dok_id(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datdok),
-        public.set_datfaktp_into_kalk_kalk(NEW.idfirma, NEW.idvd, NEW.brdok) );
+        public.set_datfaktp_into_kalk_kalk(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.datfaktp) );
 
 GRANT ALL ON fmk.kalk_kalk TO xtrole;
 
