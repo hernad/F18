@@ -14,6 +14,7 @@
 STATIC s_oPDF
 
 MEMVAR gZaokr, gcMpcKalk10
+MEMVAR gKalkUlazTrosak1, gKalkUlazTrosak2, gKalkUlazTrosak3, gKalkUlazTrosak4, gKalkUlazTrosak5
 MEMVAR nKalkPrevoz
 MEMVAR nKalkBankTr
 MEMVAR nKalkSpedTr
@@ -197,7 +198,7 @@ STATIC FUNCTION zagl()
    zagl_organizacija( PRINT_LEFT_SPACE )
 
    select_o_partner( cIdPartner )
-   ?U  Space( PRINT_LEFT_SPACE ) + "DOBAVLJAČ:", cIdPartner, "-", Trim( field->naz ), Space( 5 ), "Faktura Br:", cBrFaktP  //, "Datum:", dDatFaktP
+   ?U  Space( PRINT_LEFT_SPACE ) + "DOBAVLJAČ:", cIdPartner, "-", Trim( field->naz ), Space( 5 ), "Faktura Br:", cBrFaktP //, "-", hParams[ "datfaktp" ]
 
    SELECT kalk_pripr
 

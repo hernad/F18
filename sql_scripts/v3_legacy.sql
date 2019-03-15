@@ -482,3 +482,53 @@ CREATE OR REPLACE RULE fmk_trfp_ins AS ON INSERT TO fmk.trfp
           NEW.id, NEW.shema, NEW.naz, NEW.idkonto, NEW.dokument, NEW.partner, NEW.d_p, NEW.znak, NEW.idvd, NEW.idvn, NEW.idtarifa );
 
 GRANT ALL ON fmk.trfp TO xtrole;
+
+
+
+CREATE OR REPLACE FUNCTION public.usercanlogin(
+	text)
+    RETURNS boolean
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE
+AS $BODY$
+DECLARE
+  pUsername ALIAS FOR $1;
+  _result TEXT;
+  _default TEXT;
+BEGIN
+  IF(pg_has_role(pUsername, 'xtrole', 'member')) THEN
+    SELECT metric_value
+      INTO _default
+      FROM f18.metric
+     WHERE metric_name = 'AllowedUserLogins';
+    IF (COALESCE(_default,'') NOT IN ('AdminOnly','ActiveOnly','Any')) THEN
+      _default := 'ActiveOnly';
+    END IF;
+
+    SELECT usrpref_value
+      INTO _result
+      FROM public.usrpref
+     WHERE usrpref_username = pUsername
+       AND usrpref_name = 'active';
+    IF (COALESCE(_result,'') NOT IN ('t','f')) THEN
+      IF(_default='Any') THEN
+        _result := 't';
+      ELSE
+        _result := 'f';
+      END IF;
+    END IF;
+
+    IF(_result = 't') THEN
+      IF(_default='AdminOnly' AND userCanCreateUsers(pUsername)!=true) THEN
+        RETURN false;
+      END IF;
+      RETURN true;
+    END IF;
+  END IF;
+  RETURN false;
+END;
+$BODY$;
+
+ALTER FUNCTION public.usercanlogin(text)
+    OWNER TO admin;
