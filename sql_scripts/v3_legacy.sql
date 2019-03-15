@@ -1,3 +1,5 @@
+-- ovo trazi F18 v3 klijenti
+
 CREATE OR REPLACE FUNCTION fmk.fetchmetrictext(text) RETURNS text
     LANGUAGE plpgsql
     AS $$

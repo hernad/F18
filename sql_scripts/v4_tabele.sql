@@ -17,11 +17,13 @@ CREATE TABLE IF NOT EXISTS f18.fakt_fisk_doks (
 ALTER TABLE f18.fakt_fisk_doks OWNER TO admin;
 GRANT ALL ON TABLE f18.fakt_fisk_doks TO xtrole;
 
-
+CREATE SEQUENCE f18.log_id_seq;
+ALTER SEQUENCE f18.log_id_seq OWNER TO admin;
+GRANT ALL ON SEQUENCE f18.log_id_seq TO xtrole;
 
 CREATE TABLE IF NOT EXISTS f18.log
 (
-    id bigint NOT NULL DEFAULT nextval('fmk.log_id_seq'::regclass),
+    id bigint NOT NULL DEFAULT nextval('f18.log_id_seq'::regclass),
     user_code character varying(20) COLLATE pg_catalog."default" NOT NULL,
     l_time timestamp without time zone DEFAULT now(),
     msg text COLLATE pg_catalog."default" NOT NULL,
@@ -33,11 +35,7 @@ GRANT ALL ON TABLE fmk.log TO admin;
 GRANT ALL ON TABLE fmk.log TO xtrole;
 
 CREATE INDEX IF NOT EXISTS log_l_time_idx
-    ON fmk.log USING btree
-    (l_time)
-    TABLESPACE pg_default;
+    ON fmk.log USING btree (l_time);
 
 CREATE INDEX IF NOT EXISTS log_user_code_idx
-    ON fmk.log USING btree
-    (user_code COLLATE pg_catalog."default")
-    TABLESPACE pg_default;
+    ON fmk.log USING btree(user_code COLLATE pg_catalog."default");
