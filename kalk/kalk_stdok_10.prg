@@ -40,6 +40,7 @@ FUNCTION kalk_stampa_dok_10()
    LOCAL nU, nU1, nU2, nU3, nU4, nU5, nU6, nU7, nU8, nU9, nUA, nUP, nUM
    LOCAL nKolicina
    LOCAL nPDV, nPDVStopa
+   LOCAL hParams := hb_hash()
 
 
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
@@ -47,8 +48,17 @@ FUNCTION kalk_stampa_dok_10()
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
 
+
    cIdKonto := field->IdKonto
    cIdKonto2 := field->IdKonto2
+
+   IF FIELDPOS("datfaktp") <> 0
+      hParams["datfaktp"] := kalk_pripr->datfaktp
+   ELSE
+      find_kalk_doks_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
+      hParams["datfaktp"] := kalk_doks->datfaktp
+      select kalk_pripr
+   ENDIF
 
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
@@ -61,7 +71,7 @@ FUNCTION kalk_stampa_dok_10()
 
    PRIVATE m
 
-   bZagl := {|| zagl() }
+   bZagl := {|| zagl(hParams) }
 
    Eval( bZagl )
    nTot := nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTotA := 0
@@ -193,12 +203,12 @@ FUNCTION kalk_stampa_dok_10()
    RETURN .T.
 
 
-STATIC FUNCTION zagl()
+STATIC FUNCTION zagl( hParams )
 
    zagl_organizacija( PRINT_LEFT_SPACE )
 
    select_o_partner( cIdPartner )
-   ?U  Space( PRINT_LEFT_SPACE ) + "DOBAVLJAČ:", cIdPartner, "-", Trim( field->naz ), Space( 5 ), "Faktura Br:", cBrFaktP //, "-", hParams[ "datfaktp" ]
+   ?U  Space( PRINT_LEFT_SPACE ) + "DOBAVLJAČ:", cIdPartner, "-", Trim( field->naz ), Space( 5 ), "Faktura Br:", cBrFaktP, "-", hParams[ "datfaktp" ]
 
    SELECT kalk_pripr
 
