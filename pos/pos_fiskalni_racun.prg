@@ -91,7 +91,7 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lSto
    LOCAL nPosRacunUkupno
    LOCAL cVrstaPlacanja
    LOCAL nLevel
-   LOCAL aStavka := Array(16)
+   LOCAL aStavka := Array( 16 )
 
    IF nUplaceniIznos == NIL
       nUplaceniIznos := 0
@@ -218,17 +218,6 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    RETURN nErrorLevel
 
 
-
-STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
-
-   LOCAL nErrorLevel := 0
-
-   // idemo sada na upis rn u fiskalni fajl
-   nErrorLevel := fiskalni_flink_racun( s_hFiskalniUredjajParams, aRacunStavke, lStorno )
-
-   RETURN nErrorLevel
-
-
 STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno, cContinue )
 
    LOCAL nErrorLevel
@@ -250,10 +239,10 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
          ENDIF
       ELSE
-         nErrorLevel := -20
+         nErrorLevel := FISK_NEMA_ODGOVORA
       ENDIF
-      // obrisi fajl da ne bi ostao kada server proradi ako je greska
-      FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl )
+
+      FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl ) // obrisi fajl da ne bi ostao kada server proradi ako je greska
 
    ENDIF
 
@@ -273,10 +262,19 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorn
       nBrojFiskalnoRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
       IF nBrojFiskalnoRacuna > 0
          pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-         MsgBeep( "Kreiran fiskalni racun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+         MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
       ENDIF
 
    ENDIF
+
+   RETURN nErrorLevel
+
+
+STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
+
+   LOCAL nErrorLevel := 0
+
+   nErrorLevel := fiskalni_flink_racun( s_hFiskalniUredjajParams, aRacunStavke, lStorno )
 
    RETURN nErrorLevel
 
