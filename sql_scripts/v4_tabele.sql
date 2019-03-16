@@ -66,3 +66,6 @@ BEGIN
       END LOOP;
 END;
 $$;
+
+ALTER TABLE f18.partn ADD PRIMARY KEY (partner_id);
+ALTER TABLE f18.partn ADD PRIMARY KEY (konto_id);
