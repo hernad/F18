@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-16
+
+- POS TREMOL fiskalne funkcije
+
 ## 2019-03-14
 
 - KALK 02, POS 42 - KALK 49

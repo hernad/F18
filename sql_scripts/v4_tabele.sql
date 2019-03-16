@@ -73,6 +73,7 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'partn primary key garant postoji';
 END;
+$$;
 
 DO $$
 BEGIN
@@ -80,6 +81,7 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'konto primary key garant postoji';
 END;
+$$;
 
 DO $$
 BEGIN
@@ -87,6 +89,7 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'tarifa primary key garant postoji';
 END;
+$$;
 
 DO $$
 BEGIN
@@ -94,3 +97,4 @@ BEGIN
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'valuta primary key garant postoji';
 END;
+$$;

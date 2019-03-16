@@ -40,11 +40,15 @@ FUNCTION cre_all_dbfs( ver )
    log_write( "START: cre_all_dbfs", 5 )
 
    cre_params_dbf()
-   fill_tbl_valute() // upisi default valute ako ne postoje
+
+   IF programski_modul() != "POS"
+      fill_tbl_valute()
+   ENDIF
+
    cre_barkod( ver )
    cre_fin_mat( ver )
 
-   ?E "cre_all_dbfs param run:", get_f18_param("run")
+   ?E "cre_all_dbfs param run:", get_f18_param( "run" )
 
    IF f18_use_module( "fin" )
       IF fetch_metric_error() > 1
@@ -244,6 +248,7 @@ FUNCTION dbf_ext_na_kraju( cIme )
 FUNCTION dbCreate2( cImeDbf, aDbf, cDbfEngine )
 
    LOCAL cImeIndex
+
    cImeDbf := f18_ime_dbf( cImeDbf )
    cImeIndex := ImeDbfCdx( cImeDbf )
 
@@ -260,13 +265,13 @@ FUNCTION dbCreate2( cImeDbf, aDbf, cDbfEngine )
 FUNCTION fill_tbl_valute()
 
    LOCAL _rec, nTmp, _id, cQuery
-   LOCAL _table := f18_sql_schema( "valute" )
+   LOCAL cTabela := f18_sql_schema( "valute" )
 
-   nTmp := table_count( _table )
+   nTmp := table_count( cTabela )
 
    IF nTmp == 0
 
-      cQuery := "INSERT INTO " + _table
+      cQuery := "INSERT INTO " + cTabela
       cQuery += " ( id, naz, naz2, datum, tip, kurs1, kurs2, kurs3 ) "
       cQuery += " VALUES( "
       cQuery += " '000', "
@@ -276,7 +281,7 @@ FUNCTION fill_tbl_valute()
       cQuery += " 'D', "
       cQuery += " 1, 1, 1 "
       cQuery += " ); "
-      cQuery += "INSERT INTO " + _table
+      cQuery += "INSERT INTO " + cTabela
       cQuery += " ( id, naz, naz2, datum, tip, kurs1, kurs2, kurs3 ) "
       cQuery += " VALUES( "
       cQuery += " '978', "

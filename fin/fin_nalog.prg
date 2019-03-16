@@ -15,11 +15,8 @@ STATIC s_nColIzn := 20
 
 MEMVAR M
 
-/*
-   Štampa ažuriranog finansijskog naloga
-*/
 
-FUNCTION fin_nalog_azurirani()
+FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
 
    LOCAL dDatNal
    LOCAL GetList := {}
@@ -27,11 +24,6 @@ FUNCTION fin_nalog_azurirani()
    PRIVATE fK1 := fk2 := fk3 := fk4 := "N", gnLOst := 0, gPotpis := "N"
 
    fin_read_params()
-
-   // o_konto()
-   // o_partner()
-   // o_tnal()
-   // o_tdok()
 
    cIdVN := Space( 2 )
    cIdFirma := self_organizacija_id()
@@ -47,7 +39,6 @@ FUNCTION fin_nalog_azurirani()
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrNal VALID fin_fix_broj_naloga( @cBrNal )
 
    READ
-
    ESC_BCR
 
    BoxC()

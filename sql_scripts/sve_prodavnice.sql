@@ -74,7 +74,7 @@ GRANT ALL ON FUNCTION public.setmetric TO xtrole;
 
 CREATE TABLE IF NOT EXISTS f18.partn
 (
-    partner_id uuid DEFAULT gen_random_uuid(),
+    partner_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(6) COLLATE pg_catalog."default",
     naz character(250) COLLATE pg_catalog."default",
     naz2 character(250) COLLATE pg_catalog."default",
@@ -118,9 +118,9 @@ CREATE OR REPLACE RULE public_partn_ins AS ON INSERT TO public.partn
 GRANT ALL ON public.partn TO xtrole;
 
 
-CREATE TABLE IF NOT EXISTS  f18.tarifa
+CREATE TABLE IF NOT EXISTS f18.tarifa
 (
-    tarifa_id uuid DEFAULT gen_random_uuid(),
+    tarifa_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(6) COLLATE pg_catalog."default",
     naz character(50) COLLATE pg_catalog."default",
     pdv numeric(6,2)
@@ -157,6 +157,7 @@ GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
 
 CREATE TABLE IF NOT EXISTS f18.valute
 (
+    valuta_id uuid DEFAULT gen_random_uuid() PRIMARY KEY;
     id character(4) COLLATE pg_catalog."default",
     naz character(30) COLLATE pg_catalog."default",
     naz2 character(4) COLLATE pg_catalog."default",
@@ -164,9 +165,9 @@ CREATE TABLE IF NOT EXISTS f18.valute
     kurs1 numeric(18,8),
     kurs2 numeric(18,8),
     kurs3 numeric(18,8),
-    tip character(1) COLLATE pg_catalog."default",
-    valuta_id uuid DEFAULT gen_random_uuid()
+    tip character(1) COLLATE pg_catalog."default"
 );
+
 ALTER TABLE f18.valute OWNER to admin;
 GRANT ALL ON TABLE f18.valute TO admin;
 GRANT ALL ON TABLE f18.valute TO xtrole;
