@@ -33,7 +33,8 @@ CREATE INDEX IF NOT EXISTS pos_knjig_dok_id ON {{ item.name }}.pos_knjig USING b
 GRANT ALL ON TABLE {{ item.name }}.pos_knjig TO xtrole;
 
 CREATE TABLE IF NOT EXISTS {{ item.name }}.pos_items_knjig (
-  dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  dok_id uuid,
   idpos character varying(2),
   idvd character varying(2),
   brdok character varying(8),
