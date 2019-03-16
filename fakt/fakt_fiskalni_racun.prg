@@ -999,7 +999,7 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 
    LOCAL nErrorLevel := 0
    LOCAL _f_name
-   LOCAL nFiskalniBroj := 0
+   LOCAL nFiskalniBroj := -1
 
    // identifikator CONTINUE
    // nesto imamo mogucnost ako racun zapne da kazemo drugi identifikator
