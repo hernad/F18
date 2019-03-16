@@ -68,7 +68,7 @@ FUNCTION pos_zakljuci_racun()
    hParam[ "idpartner" ] := Space( 6 )
    hParam[ "idvrstep" ] := "01"
    hParam[ "zakljuci" ] := "D"
-   hParam[ "nUplaceno" ] := 0
+   hParam[ "uplaceno" ] := 0
    hParam[ "idpartner" ] := _pos_pripr->idpartner
 
    IF pos_form_zakljucenje_racuna( @hParam )
@@ -84,38 +84,35 @@ FUNCTION pos_zakljuci_racun()
 STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
 
    LOCAL lOk
-   LOCAL cVrijeme
-   LOCAL cBrDok
    LOCAL cDokumentNaziv
 
    o_pos_tables()
-   cBrDok := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_IDVD_RACUN, hParams[ "datum" ] )
-   cVrijeme := PadR( Time(), 5 )
+   hParams[ "idvd" ] := POS_IDVD_RACUN
+   hParams[ "brdok" ] := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_IDVD_RACUN, hParams[ "datum" ] )
+   hParams[ "vrijeme" ] := PadR( Time(), 5 )
+   hParams[ "datum" ] := danasnji_datum()
+   hParams[ "idpartner" ] := ""
 
-   cDokumentNaziv := AllTrim( hParams[ "idpos" ] ) + "-" + hParams[ "idvd" ] + "-" + AllTrim( cBrDok ) + " " + DToC( hParams[ "datum" ] )
-   IF seek_pos_doks( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], cBrDok ) ;
-         .OR. seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], cBrDok )
+   cDokumentNaziv := pos_dokument_sa_vrijeme( hParams )
+   IF seek_pos_doks( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] ) ;
+         .OR. seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
       MsgBeep( "Dokument: " + cDokumentNaziv + " već postoji?!" )
       RETURN .F.
    ENDIF
 
-   lOk := pos_azuriraj_racun( hParams[ "idpos" ], cBrDok, cVrijeme, hParams[ "idvrstep" ], hParams[ "idpartner" ] )
+   lOk := pos_azuriraj_racun( hParams )
    IF !lOk
-      MsgBeep( "Greška sa ažuriranjem računa u kumulativ !" )
+      MsgBeep( "Greška sa ažuriranjem: " + pos_dokument( hParams ) )
       RETURN .F.
    ENDIF
 
-   pos_racun_info( cBrDok )
-
-   IF fiscal_opt_active()
-      pos_stampa_fiskalni_racun( hParams )
-   ENDIF
+   pos_racun_info( hParams )
    my_close_all_dbf()
 
    RETURN .T.
 
 
-STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
+FUNCTION pos_stampa_fiskalni_racun( hParams )
 
    LOCAL nDeviceId
    LOCAL hDeviceParams
@@ -132,20 +129,21 @@ STATIC FUNCTION pos_stampa_fiskalni_racun( hParams )
       RETURN lRet
    ENDIF
 
-   nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "nUplaceno" ] )
-   IF nError == -20
+   nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "uplaceno" ] )
+
+   IF nError == FISK_NEMA_ODGOVORA
       IF Pitanje(, "Da li je nestalo trake u fiskalnom uređaju (D/N)?", "N" ) == "N"
-         nError := 20
+         nError := FISK_NESTALO_TRAKE
       ENDIF
    ENDIF
-   IF nError > 0
-      MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun se iz tog razloga BRIŠE" )
-      pos_povrat_racuna( hParams[ "idpos" ], hParams[ "brdok" ], hParams[ "datum" ] )
+   IF nError <> 0
+      MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun će ostati u pripremi" )
+      // pos_povrat_racuna( hParams[ "idpos" ], hParams[ "brdok" ], hParams[ "datum" ] )
+      RETURN .F.
    ENDIF
 
-   lRet := .T.
-
-   RETURN lRet
+  
+   RETURN .T.
 
 
 STATIC FUNCTION ispisi_iznos_i_kusur_za_kupca( nUplaceno, nIznosRacuna, nX, nY )
@@ -171,7 +169,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    LOCAL dDatum := hParams[ "datum" ]
    LOCAL cIdVrsteP := hParams[ "idvrstep" ]
    LOCAL cIdPartner := hParams[ "idpartner" ]
-   LOCAL nUplaceno := hParams[ "nUplaceno" ]
+   LOCAL nUplaceno := hParams[ "uplaceno" ]
    LOCAL cAzuriratiDN := "D"
    LOCAL GetList := {}
 
@@ -213,7 +211,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    hParams[ "zakljuci" ] := "D"
    hParams[ "idpartner" ] := cIdPartner
    hParams[ "idvrstep" ] := cIdVrsteP
-   hParams[ "nUplaceno" ] := nUplaceno
+   hParams[ "uplaceno" ] := nUplaceno
 
    RETURN .T.
 

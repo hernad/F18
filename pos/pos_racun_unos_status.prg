@@ -106,8 +106,8 @@ FUNCTION pos_racun_artikal_info( nLinija, cIdRoba, cMessage )
    RETURN .T.
 
 
-FUNCTION pos_racun_info( cBrDok )
+FUNCTION pos_racun_info( hParams )
 
-   info_bar( "pos", "POS račun broj: " + pos_pm() + "-42-" + AllTrim(cBrDok) )
+   info_bar( "pos", "POS račun broj: " +  pos_dokument_sa_vrijeme( hParams ) )
 
    RETURN .T.

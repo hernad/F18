@@ -176,7 +176,6 @@ FUNCTION tring_rn( dev_param, items, head, storno )
       xml_node( "Adresa", to_xml_encoding( head[ 1, 3 ] ) )
       xml_node( "PostanskiBroj", head[ 1, 4 ] )
       xml_node( "Grad", to_xml_encoding( head[ 1, 5 ] ) )
-
       xml_subnode( "Kupac", .T. )
 
    ENDIF
@@ -191,7 +190,7 @@ FUNCTION tring_rn( dev_param, items, head, storno )
       _cijena := items[ nI, 5 ]
       _kolicina := items[ nI, 6 ]
       _rabat := items[ nI, 11 ]
-      _tarfa := fiscal_txt_get_tarifa( items[ nI, 7 ], dev_param[ "pdv" ], "TRING" )
+      _tarifa := fiskalni_tarifa( items[ nI, 7 ], dev_param[ "pdv" ], "TRING" )
       _grupa := ""
       _plu := AllTrim( Str( items[ nI, 9 ] ) )
 
@@ -223,9 +222,9 @@ FUNCTION tring_rn( dev_param, items, head, storno )
    // "KARTICA"
 
    IF AllTrim( items[ 1, 13 ] ) == "3" .AND. storno
-      _vr_plac := fiscal_txt_get_vr_plac( "2", "TRING" )
+      _vr_plac := fiskalni_vrsta_placanja( "2", "TRING" )
    ELSE
-      _vr_plac := fiscal_txt_get_vr_plac( "0", "TRING" )
+      _vr_plac := fiskalni_vrsta_placanja( "0", "TRING" )
    ENDIF
 
    _total_plac := 0

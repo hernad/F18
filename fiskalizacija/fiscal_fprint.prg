@@ -1183,7 +1183,7 @@ STATIC FUNCTION fisk_dodaj_artikle_za_racun( aArr, aData, lStorno, hFiskalniPara
       cTmp += cOp_add // opcija dodavanja "2"
       cTmp += cSep
 
-      cTmp += fiscal_txt_get_tarifa( aData[ i, 7 ], hFiskalniParams[ "pdv" ], "FPRINT" ) // poreska stopa
+      cTmp += fiskalni_tarifa( aData[ i, 7 ], hFiskalniParams[ "pdv" ], "FPRINT" ) // poreska stopa
       cTmp += cSep
 
       // plu kod

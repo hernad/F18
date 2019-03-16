@@ -94,7 +94,6 @@ FUNCTION pos_lista_racuna( hParams )
       AAdd( kol, i )
    NEXT
 
-   AltD()
    SELECT pos_doks
    cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( hParams[ "idpos" ] )
 
