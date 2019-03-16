@@ -16,7 +16,7 @@ ALTER TABLE p15.pos_fisk_doks OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_fisk_doks TO xtrole;
 
 CREATE TABLE IF NOT EXISTS p15.pos (
-    dok_id uuid DEFAULT gen_random_uuid(),
+    dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     idpos character varying(2) NOT NULL,
     idvd character varying(2) NOT NULL,
     brdok character varying(8) NOT NULL,
@@ -52,6 +52,7 @@ CREATE INDEX IF NOT EXISTS pos_dok_id ON p15.pos USING btree( dok_id );
 CREATE INDEX IF NOT EXISTS pos_ref_fisk_dok ON p15.pos USING btree( ref_fisk_dok );
 
 CREATE TABLE IF NOT EXISTS p15.pos_items (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     dok_id uuid,
     idpos character varying(2),
     idvd character varying(2),
@@ -71,6 +72,7 @@ ALTER TABLE p15.pos_items OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_items TO xtrole;
 
 CREATE TABLE IF NOT EXISTS  p15.roba (
+    roba_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(10) NOT NULL,
     sifradob character(20),
     naz character varying(250),
@@ -210,3 +212,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS ref_storno_fisk_dok ON p15.pos_fisk_doks (ref_
 
 
 -- TARIFE CLEANUP --
+
+
+ALTER TABLE p15.roba ADD PRIMARY KEY (roba_id);

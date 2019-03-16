@@ -486,57 +486,59 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
    LOCAL cTmp
    LOCAL nTime
    LOCAL nCount := 0
+   LOCAL cStatus
 
    IF nTimeOut == NIL
       nTimeOut := hFiskalniParams[ "timeout" ]
    ENDIF
 
-   nTime := nTimeOut
-
-   // napravi mi konstrukciju fajla koji cu gledati
-   // replace *.xml -> *.out
-   // out je fajl odgovora
    cTmp := hFiskalniParams[ "out_dir" ] + StrTran( cFajl, "xml", "out" )
 
-   Box(, 3, 60 )
+   DO WHILE .T.  // loop za izmjenu trake
 
+      nTime := nTimeOut
+      Box("#<ALT-Q> Prekid", 5, 60 )
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
+         " : " + PadR( hFiskalniParams[ "name" ], 40 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
-      " : " + PadR( hFiskalniParams[ "name" ], 40 )
+      cStatus := "CEKAM"
+      DO WHILE nTime > 0
 
-   DO WHILE nTime > 0
+         --nTime
+         IF nTime = ( nTimeOut * 0.7 ) .AND. nCount = + 0 // provjeri kada bude trecina vremena...
+            IF hFiskalniParams[ "restart_service" ] == "D" .AND. Pitanje(, "Restartovati server", "D" ) == "D"
+               tremol_restart( hFiskalniParams ) // pokreni restart proceduru
+               nTime := nTimeOut // restartuj vrijeme
+               ++nCount
+            ENDIF
 
-      --nTime
-      IF nTime = ( nTimeOut * 0.7 ) .AND. nCount = + 0 // provjeri kada bude trecina vremena...
-
-         IF hFiskalniParams[ "restart_service" ] == "D" .AND. Pitanje(, "Restartovati server", "D" ) == "D"
-            tremol_restart( hFiskalniParams ) // pokreni restart proceduru
-            nTime := nTimeOut // restartuj vrijeme
-            ++nCount
          ENDIF
 
+         IF File( cTmp ) // fajl se pojavio - izadji iz petlje !
+            cStatus := "FAJL"
+            EXIT
+         ENDIF
+
+         @ box_x_koord() + 3, box_y_koord() + 2 SAY8 PadR( "TREMOL: Čekam odgovor... " + AllTrim( Str( nTime ) ), 48 )
+         IF nTime == 0 .OR. LastKey() == K_ALT_Q
+            cStatus := "ALTQ"
+            EXIT
+         ENDIF
+         Sleep( 1 )
+
+      ENDDO
+      BoxC()
+
+      IF cStatus == "ALTQ" .OR. cStatus == "CEKAM"
+         IF Pitanje(, "Nestalo je trake? Ako vršite zamjenu odgovorite sa 'D'", " " ) == "D"
+            LOOP
+         ELSE
+            EXIT
+         ENDIF
       ENDIF
-
-      // fajl se pojavio - izadji iz petlje !
-      IF File( cTmp )
-         EXIT
-      ENDIF
-
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY8 PadR( "TREMOL: Čekam odgovor... " + AllTrim( Str( nTime ) ), 48 )
-
-      IF nTime == 0 .OR. LastKey() == K_ALT_Q
-         BoxC()
-         AltD()
-         RETURN .F.
-      ENDIF
-
-      Sleep( 1 )
-
    ENDDO
 
-   BoxC()
-
-   IF !File( cTmp )
+   IF ! cStatus == "FAJL"
       MsgBeep( "TREMOL: Ne postoji fajl odgovora (OUT) ?!" )
       RETURN .F.
    ENDIF
