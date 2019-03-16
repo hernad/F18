@@ -173,7 +173,7 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, items, head, storno, rn_total )
       _cijena := items[ nI, 5 ]
       _kolicina := items[ nI, 6 ]
       _rabat := items[ nI, 11 ]
-      _tarifa := fiscal_txt_get_tarifa( items[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
+      _tarifa := fiskalni_tarifa( items[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
       _dep := "0"
 
       _tmp := ""
@@ -227,7 +227,7 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, items, head, storno, rn_total )
    //
    // iznos = 0, ako je 0 onda sve ide tom vrstom placanja
 
-   _v_plac := fiscal_txt_get_vr_plac( items[ 1, 13 ], "HCP" )
+   _v_plac := fiskalni_vrsta_placanja( items[ 1, 13 ], "HCP" )
    _total_placanje := Abs( rn_total )
 
    IF storno
@@ -436,7 +436,7 @@ FUNCTION hcp_plu( hFiskalniParams, items )
       _art_naz := PadR( items[ nI, 4 ], 32 )
       _art_jmj := _g_jmj( items[ nI, 16 ] )
       _art_cijena := items[ nI, 5 ]
-      _art_tarifa := fiscal_txt_get_tarifa( items[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
+      _art_tarifa := fiskalni_tarifa( items[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
       _dep := "0"
       _lager := 0
 

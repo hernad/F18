@@ -12,31 +12,31 @@
 #include "f18.ch"
 
 
-FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
+FUNCTION pos_azuriraj_racun( hParams )
 
-   LOCAL cDokument := ""
+   LOCAL cDokument
    LOCAL hRec
    LOCAL nCount := 0
-   LOCAL lOk := .T.
+   LOCAL lOk
    LOCAL lRet := .F.
-   LOCAL hParams := hb_Hash()
+   LOCAL hTranParams := hb_Hash()
    LOCAL cUUIDFiskStorniran
    LOCAL nOldFiskRn
    LOCAL cMsg
 
-   hParams[ "tran_name" ] := "pos_rn_azur"
+   hTranParams[ "tran_name" ] := "pos_rn_azur"
 
    o_pos_tables()
-   IF !racun_se_moze_azurirati( cIdPos, POS_IDVD_RACUN, danasnji_datum(), cBrDok )
-      RETURN lRet
+   IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
+      RETURN .F.
    ENDIF
 
    SELECT _pos_pripr
    GO TOP
 
-   run_sql_query( "BEGIN", hParams )
+   run_sql_query( "BEGIN", hTranParams )
 
-   cDokument := AllTrim( cIdPos ) + "-" + POS_IDVD_RACUN + "-" + AllTrim( cBrDok ) + " " + DToC( danasnji_datum() )
+   cDokument := pos_dokument_sa_vrijeme( hParams)
 
    MsgO( "POS Ažuriranje " + cDokument + " u toku ..." )
 
@@ -49,27 +49,27 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
    APPEND BLANK
 
    hRec := dbf_get_rec()
-   hRec[ "idpos" ] := cIdPos
+   hRec[ "idpos" ] := hParams[ "idpos" ]
    hRec[ "idvd" ] := POS_IDVD_RACUN
    hRec[ "datum" ] := danasnji_datum()
-   hRec[ "brdok" ] := cBrDok
-   hRec[ "vrijeme" ] := cVrijeme
-   hRec[ "idvrstep" ] := iif( cNacPlac == NIL, POS_IDVRSTEP_GOTOVINSKO_PLACANJE, cNacPlac )
-   hRec[ "idpartner" ] := iif( cIdPartner == NIL, "", cIdPartner )
+   hRec[ "brdok" ] := hParams[ "brdok" ]
+   hRec[ "vrijeme" ] := hParams[ "vrijeme" ]
+   hRec[ "idvrstep" ] := hParams[ "idvrstep" ]
+   hRec[ "idpartner" ] := hParams[ "idpartner" ]
    hRec[ "idradnik" ] := _pos_pripr->idradnik
    cUUIDFiskStorniran := _pos_pripr->fisk_id
 
    lOk := update_rec_server_and_dbf( "pos_doks", hRec, 1, "CONT" )
    IF lOk
       SELECT _pos_pripr
-      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == cIdPos + "42" + DToS( danasnji_datum() ) + POS_BRDOK_PRIPREMA
+      DO WHILE !Eof() .AND. _pos_pripr->IdPos + _pos_pripr->IdVd + DToS( _pos_pripr->Datum ) + _pos_pripr->BrDok  == hParams[ "idpos" ] + "42" + DToS( danasnji_datum() ) + POS_BRDOK_PRIPREMA
          SELECT pos
          APPEND BLANK
          hRec := dbf_get_rec()
-         hRec[ "idpos" ] := cIdPos
+         hRec[ "idpos" ] := hParams[ "idpos" ]
          hRec[ "idvd" ] := POS_IDVD_RACUN
          hRec[ "datum" ] := danasnji_datum()
-         hRec[ "brdok" ] := cBrDok
+         hRec[ "brdok" ] := hParams[ "brdok" ]
          hRec[ "rbr" ] := ++nCount
          hRec[ "idroba" ] := _pos_pripr->idroba
          hRec[ "idtarifa" ] := _pos_pripr->idtarifa
@@ -105,12 +105,21 @@ FUNCTION pos_azuriraj_racun( cIdPos, cBrDok, cVrijeme, cNacPlac, cIdPartner )
 
    MsgC()
 
+
+   IF lOk
+      IF !fiscal_opt_active() .AND. Pitanje(, "Fiskalni štampač nije aktivan. Svejedno ažurirati?", " " ) == "D"
+         lOk := .F.
+      ELSE
+         lOk := pos_stampa_fiskalni_racun( hParams )
+      ENDIF
+   ENDIF
+
    IF lOk
       lRet := .T.
-      run_sql_query( "COMMIT", hParams )
+      run_sql_query( "COMMIT", hTranParams )
       log_write( "F18_DOK_OPER, ažuriran računa " + cDokument, 2 )
    ELSE
-      run_sql_query( "ROLLBACK", hParams )
+      run_sql_query( "ROLLBACK", hTranParams )
       log_write( "F18_DOK_OPER, greška sa ažuriranjem računa " + cDokument, 2 )
    ENDIF
 

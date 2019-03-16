@@ -211,3 +211,16 @@ BEGIN
   RETURN nKolicina;
 END;
 $$;
+
+
+CREATE OR REPLACE FUNCTION public.pos_prodavnica_by_pkonto(cPKonto varchar) RETURNS integer
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  nProdavnica integer;
+BEGIN
+   SELECT prod INTO nProdavnica
+       from public.koncij where id=cPKonto;
+   RETURN COALESCE( nProdavnica );
+END;
+$$;

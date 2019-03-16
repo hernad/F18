@@ -11,6 +11,15 @@
 
 #include "f18.ch"
 
+
+FUNCTION pos_dokument( hParams )
+
+   RETURN AllTrim( hParams[ "idpos" ] ) + "-" + AllTrim( hParams[ "idvd" ] ) + "-" + AllTrim( hParams[ "brdok" ] )
+
+
+FUNCTION pos_dokument_sa_vrijeme( hParams )
+   RETURN pos_dokument( hParams ) + " " + DToC( hParams[ "datum" ] )
+
 FUNCTION pos_stampa_dokumenta( hParams )
 
    IF hParams[ "idvd" ] $ POS_IDVD_NIVELACIJE_SNIZENJA

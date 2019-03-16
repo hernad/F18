@@ -161,18 +161,12 @@ FUNCTION pos_storno_racuna( hParams )
    ENDIF
 
    IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " broj fiskalng računa [" + AllTrim( Str( hParams[ "fisk_rn" ] ) ) + "] ?", "D" ) == "D"
-      altd()
       pos_napravi_u_pripremi_storno_dokument( hParams )
    ENDIF
 
    PopWa()
 
    RETURN .T.
-
-
-FUNCTION pos_dokument( hParams )
-
-   RETURN AllTrim( hParams[ "idpos" ] ) + "-" + AllTrim( hParams[ "idvd" ] ) + "-" + AllTrim( hParams[ "brdok" ] )
 
 
 //STATIC FUNCTION pos_pripr_set_fisk_rn( hParams )

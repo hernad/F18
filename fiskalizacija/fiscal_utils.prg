@@ -298,7 +298,7 @@ STATIC FUNCTION _get_auto_plu_param_name( nFiskDeviceId )
 
 
 
-FUNCTION fiscal_txt_get_tarifa( cIdTarifa, cPDVDN, cDriver )
+FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
    LOCAL _tar := "2"
    LOCAL _tmp
@@ -361,7 +361,7 @@ FUNCTION fiscal_txt_get_tarifa( cIdTarifa, cPDVDN, cDriver )
    RETURN _tar
 
 
-FUNCTION fiscal_txt_get_vr_plac( id_plac, cDriver )
+FUNCTION fiskalni_vrsta_placanja( id_plac, cDriver )
 
    LOCAL cRet := ""
 

@@ -190,7 +190,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       IF !lLowLevel
 
          AAdd( aOpc, "R. reset artikala    " )
-         AAdd( aOpcExe, {|| tremol_reset_plu( s_hFiskalniDeviceParams ) } )
+         AAdd( aOpcExe, {|| tremol_reset_plu_artikla( s_hFiskalniDeviceParams ) } )
 
       ENDIF
 

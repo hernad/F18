@@ -30,7 +30,6 @@ FUNCTION pos_when_racun_artikal( cIdRoba )
 FUNCTION pos_racun_odabir_cijene( aCijene )
 
    LOCAL aOpc := {}
-   LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
    LOCAL cCijena, nI
    LOCAL lCentury
@@ -91,7 +90,6 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
       _cijena := pos_get_mpc()
       _ncijena := 0
    ENDIF
-
 
    IF gOcitBarKod
       hb_keyPut( K_ENTER )
@@ -246,8 +244,7 @@ STATIC FUNCTION pos_cijena_nije_nula( nCijena )
       RETURN .T.
    ENDIF
 
-altd()
-   IF ROUND( nCijena, 4) == 0
+   IF Round( nCijena, 4 ) == 0
       MsgBeep( "Nepravilan unos cijene, cijena mora biti <> 0 !?" )
       RETURN .F.
    ENDIF
