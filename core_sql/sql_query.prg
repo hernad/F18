@@ -41,10 +41,9 @@ FUNCTION set_sql_search_path( cPrimarnaSchema )
    ENDIF
 
    cQuery := "SET search_path TO " + cPrimarnaSchema + ",public"
-   // altd()
+
 
    oQuery := run_sql_query( cQuery )
-
    IF sql_error_in_query( oQuery, "SET" )
       RETURN .F.
 #ifdef F18_DEBUG_SQL
@@ -54,6 +53,7 @@ FUNCTION set_sql_search_path( cPrimarnaSchema )
    ENDIF
 
    RETURN .T.
+
 
 FUNCTION sql_primarna_schema()
 
@@ -65,10 +65,10 @@ FUNCTION sql_schema_exists( cShema )
    LOCAL cQuery, oRet
 
    cQuery := "SELECT exists(select schema_name FROM information_schema.schemata WHERE schema_name = '" + cShema + "')"
-
    oRet := run_sql_query( cQuery )
 
    RETURN oRet:FieldGet( 1 )
+
 
 FUNCTION _sql_query( oServer, cQuery )
 
@@ -252,7 +252,6 @@ FUNCTION run_sql_query( cQry, hParams )
 
 
 
-
 FUNCTION is_in_main_thread_sql_transaction()
 
    LOCAL nPos
@@ -304,7 +303,6 @@ FUNCTION is_var_objekat_tipa( xVar, cClassName )
    ENDIF
 
    RETURN .F.
-
 
 
 FUNCTION sql_error_in_query( oQry, cTip, oServer )

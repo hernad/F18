@@ -273,9 +273,13 @@ FUNCTION f18_use_module( cModuleName )
       IF cModuleName == cModulRun
           RETURN .T.
       ENDIF
+
+      IF cModulRun == "pos" // pokrenut POS, use npr. FIN 
+          RETURN .F.
+      ENDIF
    ENDIF
 
-   IF cModuleName == "tops" .OR. cModuleName == "pos"
+   IF cModuleName == "tops"
       cModuleName := "pos"
    ENDIF
 

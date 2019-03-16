@@ -114,7 +114,6 @@ FUNCTION set_a_sql_fakt_rugov()
    hAlgoritam[ "sql_in" ]         := "rpad(id,10) || rpad(idroba,10) || rpad(dest,6)"
    hAlgoritam[ "dbf_tag" ]        := "ID"
    AAdd( hItem[ "algoritam" ], hAlgoritam )
-
    hItem[ "sql_order" ] := "id, idroba, dest"
 
    f18_dbfs_add( cTable, @hItem )
@@ -205,7 +204,6 @@ FUNCTION set_a_sql_fakt_gen_ug_p()
    hItem[ "wa" ]    := F_G_UG_P
    hItem[ "sql" ] := .T.
    hItem[ "temp" ]  := .F.
-
    hItem[ "algoritam" ] := {}
 
    // algoritam 1 - default
@@ -219,7 +217,6 @@ FUNCTION set_a_sql_fakt_gen_ug_p()
    hAlgoritam[ "dbf_tag" ]        := "DAT_OBR"
 
    AAdd( hItem[ "algoritam" ], hAlgoritam )
-
    hItem[ "sql_order" ] := "dat_obr, id_ugov, idpartner"
 
    f18_dbfs_add( cTable, @hItem )

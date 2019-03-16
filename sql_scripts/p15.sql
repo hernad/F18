@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS p15.pos_items (
 ALTER TABLE p15.pos_items OWNER TO admin;
 GRANT ALL ON TABLE p15.pos_items TO xtrole;
 
-CREATE TABLE IF NOT EXISTS  p15.roba (
+CREATE TABLE IF NOT EXISTS p15.roba (
     roba_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(10) NOT NULL,
     sifradob character(20),
@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS  p15.roba (
     fisc_plu numeric(10,0)
 );
 ALTER TABLE p15.roba OWNER TO admin;
+GRANT ALL ON TABLE p15.roba TO xtrole;
 
 CREATE TABLE IF NOT EXISTS  p15.pos_kase (
     id character varying(2),

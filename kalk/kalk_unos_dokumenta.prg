@@ -915,7 +915,6 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
 FUNCTION kalk_unos_1( lNoviDokument, hParams )
 
-altd()
    //PRIVATE lKalkIzgenerisaneStavke := .F.
    PRIVATE Getlist := {}
 

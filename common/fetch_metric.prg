@@ -171,14 +171,14 @@ STATIC FUNCTION params_prefix()
       cPrefix := "public"
    ENDIF
 
-IF s_lProvjeriPrefix
-   IF !sql_schema_exists( cPrefix )
-      cError := "SQL Schema " + cPrefix + " NE POSTOJI ?!"
-      ?E cError
-      Alert( cError )
-      QUIT_1
-   ENDIF
-   s_lProvjeriPrefix := .F.
+   IF s_lProvjeriPrefix
+      IF !sql_schema_exists( cPrefix )
+         cError := "SQL Schema " + cPrefix + " NE POSTOJI ?!"
+         ?E cError
+         Alert( cError )
+         QUIT_1
+      ENDIF
+      s_lProvjeriPrefix := .F.
    ENDIF
 
    RETURN cPrefix

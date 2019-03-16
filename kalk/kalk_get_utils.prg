@@ -133,7 +133,6 @@ STATIC FUNCTION kalk_set_vars_marza_maloprodaja_80_81_41_42( cIdVd, lNaprijed )
 
    ELSEIF ( _MPC == 0 ) .OR. lNaprijed
 
-altd()
       IF _TMarza2 == "%"
          nKalkMarzaMP := _VPC * _Marza2 / 100
       ELSEIF _TMarza2 == "A"

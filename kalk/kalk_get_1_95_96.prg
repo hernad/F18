@@ -22,7 +22,6 @@ FUNCTION kalk_get_1_95_96()
 
    SET KEY K_ALT_K TO kalk_kartica_magacin_pomoc_unos_14()
 
-   altd()
    IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
       _DatFaktP := _datdok
    ENDIF
@@ -121,7 +120,6 @@ FUNCTION kalk_get_1_95_96()
    ENDIF
 
 
-altd()
    SELECT kalk_pripr
    @ box_x_koord() + 14, box_y_koord() + 2  SAY "NAB.CJ   "  GET _NC  PICTURE picnc()  VALID kalk_valid_kolicina_mag( nKolicinaNaStanju )
 

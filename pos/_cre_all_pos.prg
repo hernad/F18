@@ -17,36 +17,6 @@ FUNCTION cre_all_pos( ver )
    LOCAL _alias, _table_name
    LOCAL _created
 
-   // --------------------- uredj -------
-   aDbf := {}
-   AAdd ( aDbf, { "ID", "C",  2, 0 } )
-   AAdd ( aDbf, { "NAZ", "C", 30, 0 } )
-   AAdd ( aDbf, { "PORT", "C", 10, 0 } )
-
-   _alias := "UREDJ"
-   _table_name := "uredj"
-
-   IF_NOT_FILE_DBF_CREATE
-
-   CREATE_INDEX ( "ID", "ID", _alias )
-   CREATE_INDEX ( "NAZ", "NAZ", _alias )
-
-   aDbf := {}
-   AAdd ( aDbf, { "ID",        "C",  8, 0 } )
-   AAdd ( aDbf, { "ID2",       "C",  8, 0 } )
-   AAdd ( aDbf, { "KM",        "N",  6, 1 } )
-
-   _alias := "MARS"
-   _table_name := "mars"
-
-   IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "ID", "ID", _alias )
-   CREATE_INDEX ( "2", "ID+ID2", _alias )
-
-
-   // ----------------------------------------------------------
-   // _PRIPR, PRIPRZ
-   // ----------------------------------------------------------
 
    aDbf := g_pos_pripr_fields()
 
@@ -60,10 +30,6 @@ FUNCTION cre_all_pos( ver )
    _table_name := "pos_priprz"
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX ( "1", "IdRoba+Transform(nCijena,'99999.99')+Transform(ncijena,'99999.99')", _alias )
-
-   aDbf := {}
-   AAdd ( aDbf, { "KEYCODE", "N",  4, 0 } )
-   AAdd ( aDbf, { "IDROBA",  "C", 10, 0 } )
 
    create_porezna_faktura_temp_dbfs()
 

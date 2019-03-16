@@ -140,9 +140,6 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-      // IF roba->tip <> "T"
-      // _cijena := pos_get_mpc()
-      // ENDIF
       Gather()
 
       pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )
@@ -152,12 +149,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       s_oBrowse:refreshAll()
       s_oBrowse:dehilite()
 
-      // cTmp := "STANJE ARTIKLA " + AllTrim( cIdRobaStanje ) + ": " + AllTrim( Str( nStanjeRobe, 12, 2 ) ) + " " + cJmjStanje
-
    ENDDO
 
-   SetKey( K_F6, NIL )
-   SetKey( K_F7, NIL )
    SetKey( K_F8, NIL )
    SetKey( K_F9, NIL )
 
