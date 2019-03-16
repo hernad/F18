@@ -67,7 +67,30 @@ BEGIN
 END;
 $$;
 
-ALTER TABLE f18.partn ADD PRIMARY KEY (partner_id);
-ALTER TABLE f18.konto ADD PRIMARY KEY (konto_id);
-ALTER TABLE f18.tarifa ADD PRIMARY KEY (tarifa_id);
-ALTER TABLE f18.valute ADD PRIMARY KEY (valuta_id);
+DO $$
+BEGIN
+   ALTER TABLE f18.partn ADD PRIMARY KEY (partner_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'partn primary key garant postoji';
+END;
+
+DO $$
+BEGIN
+   ALTER TABLE f18.konto ADD PRIMARY KEY (konto_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'konto primary key garant postoji';
+END;
+
+DO $$
+BEGIN
+   ALTER TABLE f18.tarifa ADD PRIMARY KEY (tarifa_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'tarifa primary key garant postoji';
+END;
+
+DO $$
+BEGIN
+   ALTER TABLE f18.valute ADD PRIMARY KEY (valuta_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'valuta primary key garant postoji';
+END;
