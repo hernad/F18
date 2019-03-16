@@ -2,7 +2,7 @@
 -- pos_pos_knjig, pos_doks_knjig
 ----------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS p15.pos_knjig (
+CREATE TABLE IF NOT EXISTS {{ item.name }}.pos_knjig (
   dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   idpos character varying(2) NOT NULL,
   idvd character varying(2) NOT NULL,
