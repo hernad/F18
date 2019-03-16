@@ -55,7 +55,6 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
    my_dbf_zap()
    USE
 
-altd()
    lViseDok := kalk_provjeri_duple_dokumente( @aRezim )
    o_kalk_za_azuriranje( .T. )
 

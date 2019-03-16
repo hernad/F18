@@ -3,6 +3,7 @@
 ## 2019-03-16
 
 - POS TREMOL fiskalne funkcije
+- roba_id uuid - blacklist
 
 ## 2019-03-14
 

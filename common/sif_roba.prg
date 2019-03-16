@@ -66,7 +66,7 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    AAdd( ImeKol, { PadC( "Naziv", nBrowseRobaNazivLen ), {|| PadR( field->naz, nBrowseRobaNazivLen ) }, "naz", {|| .T. }, {|| .T. } } )
    AAdd( ImeKol, { PadC( "JMJ", 3 ), {|| field->jmj },   "jmj"    } )
 
-   AAdd( ImeKol, { PadC( "PLU kod", 8 ),  {|| PadR( feild->fisc_plu, 10 ) }, "fisc_plu", {|| gen_plu( @wfisc_plu ), .F. }, {|| .T. } } )
+   AAdd( ImeKol, { PadC( "PLU kod", 8 ),  {|| PadR( field->fisc_plu, 10 ) }, "fisc_plu", {|| gen_plu( @wfisc_plu ), .F. }, {|| .T. } } )
    AAdd( ImeKol, { PadC( "S.dobav.", 13 ), {|| PadR( field->sifraDob, 13 ) }, "sifradob"   } )
 
    IF programski_modul() != "POS"

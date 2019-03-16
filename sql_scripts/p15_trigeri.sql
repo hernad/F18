@@ -9,15 +9,15 @@ CREATE OR REPLACE FUNCTION p15.on_pos_knjig_crud() RETURNS trigger
 BEGIN
 
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'delete pos_doks_knjig prodavnica %', OLD.idPos;
-      EXECUTE 'DELETE FROM p15.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+      RAISE INFO 'delete pos_knjig prodavnica %', OLD.idPos;
+      EXECUTE 'PROD p15 DELETE FROM p15.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
          USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
-      RAISE INFO 'update pos_doks_knjig prodavnica!? %', NEW.idPos;
+      RAISE INFO 'update pos_knjig prodavnica!? %', NEW.idPos;
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
-      RAISE INFO 'insert pos_doks_knjig prodavnica %', NEW.idPos;
+      RAISE INFO 'PROD p15 insert pos_knjig prodavnica %', NEW.idPos;
       EXECUTE 'INSERT INTO p15.pos(dok_id,idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
         USING NEW.dok_id, NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
       RETURN NEW;

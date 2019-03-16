@@ -157,7 +157,7 @@ GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
 
 CREATE TABLE IF NOT EXISTS f18.valute
 (
-    valuta_id uuid DEFAULT gen_random_uuid() PRIMARY KEY;
+    valuta_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(4) COLLATE pg_catalog."default",
     naz character(30) COLLATE pg_catalog."default",
     naz2 character(4) COLLATE pg_catalog."default",

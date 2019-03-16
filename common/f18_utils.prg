@@ -142,13 +142,11 @@ FUNCTION set_f18_params()
          f18_sql_connect( hParams )
          cVal := hb_PValue( nI++ )
          cQuery := "SELECT public.setmetric('pos_prod','" + cVal + "')"
-         altd()
          dbUseArea( .T., , cQuery, "INFO" )
          OutStd( "Parametar [pos_pod] postavljen: " + cVal )
          __Quit()
 
       CASE cTok == "--get-pos"
-         AltD()
          f18_sql_connect( hParams )
          dbUseArea( .T., , "SELECT public.fetchmetrictext('pos_prod') AS prod", "INFO" )
          OutStd( "Parametar [pos_pod]: " +  field->prod )

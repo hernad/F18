@@ -236,7 +236,6 @@ FUNCTION kalk_check_idzaduz2()
      cAlert := "Serviser F18 - kalk fix idzaduz2, datval, brisanje, restart!"
    endif
 
-altd()
    IF ( ValType( field->rbr) == "C" )
      cAlert := "Serviser F18 - kalk fix rbr char -> num, bisanje, restart!"
    endif

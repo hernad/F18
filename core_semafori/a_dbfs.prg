@@ -203,7 +203,7 @@ FUNCTION set_a_dbf_sifarnik( cTabela, cAlias, nWorkarea, hRec, lSql )
    ENDIF
 
    AAdd( hItem[ "algoritam" ], hAlgoritam )
-   hItem[ "blacklisted" ] := { "match_code" } // match_code se vise ne koristi
+   hItem[ "blacklisted" ] := { "match_code", "roba_id", "konto_id", "valuta_id", "partner_id" } // match_code se vise ne koristi, uuid polja iskljuciti
 
    f18_dbfs_add( cTabela, @hItem )
 

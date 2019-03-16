@@ -188,7 +188,6 @@ STATIC FUNCTION zagl( cIdVd, cMKonto, cIdkonto2, lVpc )
 
    ?
    PushWa()
-   altd()
    IF cIdVd $ "95#96"
       lVPC := is_magacin_evidencija_vpc( cMKonto )
       cPom := "Razdužuje:"
