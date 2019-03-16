@@ -11,10 +11,8 @@
 
 #include "f18.ch"
 
-
 FUNCTION kalk_azuriraj_sve_u_pripremi( lStampaj )
    RETURN kalk_azuriranje_dokumenta( .T., lStampaj )
-
 
 FUNCTION kalk_azuriranje_dokumenta_auto_bez_stampe()
    RETURN kalk_azuriranje_dokumenta( .T., .F. )
@@ -25,8 +23,6 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
    LOCAL aRezim := {}
    LOCAL aOstaju := {}
    LOCAL lGenerisiZavisne := .F.
-
-   // LOCAL lBrStDoks := .F.
 
    IF lAuto == NIL
       lAuto := .F.
@@ -59,6 +55,7 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
    my_dbf_zap()
    USE
 
+altd()
    lViseDok := kalk_provjeri_duple_dokumente( @aRezim )
    o_kalk_za_azuriranje( .T. )
 
@@ -98,7 +95,6 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 STATIC FUNCTION kalk_vrati_iz_pripr2()
