@@ -17,7 +17,6 @@ MEMVAR Tb, Ch
 FUNCTION pos_pregled_racuna()
 
    LOCAL dDatum := danasnji_datum()
-   LOCAL cDanasnjiRacuni := "D"
    LOCAL GetList := {}
    LOCAL hParams := hb_Hash()
 
@@ -38,7 +37,6 @@ FUNCTION pos_lista_racuna( hParams )
 
    LOCAL i
    LOCAL cFilter := ".t."
-   LOCAL cIdPos
    LOCAL bRacunMarkiran := NIL
    LOCAL cFnc
 
@@ -84,7 +82,7 @@ FUNCTION pos_lista_racuna( hParams )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
-   AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok ) } } )
+   AAdd( ImeKol, { "Fisk.rn", {|| Transform( pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok ), "9999999" ) } } )
    AAdd( ImeKol, { "Iznos", {|| Str ( pos_iznos_racuna( field->idpos, field->idvd, field->datum, field->brdok ), 13, 2 ) } } )
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
    AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
@@ -103,7 +101,6 @@ FUNCTION pos_lista_racuna( hParams )
 
    SET FILTER TO &cFilter
    GO TOP
-
 
    IF RecCount() == 1 .AND. !Empty( pos_doks->brdok )
       hParams[ "idpos" ] := pos_doks->idpos
@@ -130,7 +127,6 @@ FUNCTION pos_lista_racuna( hParams )
    hParams[ "brdok" ] := pos_doks->brdok
    hParams[ "datum" ] := pos_doks->datum
    hParams[ "idradnik" ] := pos_doks->idradnik
-
    IF LastKey() == K_ESC
       RETURN .F.
    ENDIF
@@ -225,7 +221,11 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       BoxC()
 
       IF LastKey() <> K_ESC
-         pos_set_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdPos, pos_doks->datum, pos_doks->brdok, nFiscNo )
+         IF pos_set_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdPos, pos_doks->datum, pos_doks->brdok, nFiscNo )
+            MsgBeep( "setovan broj fiskalnog računa: " + AllTrim( Str( nFiscNo ) ) )
+         ELSE
+            Alert( "Setovanje fiskalnog računa neuspješno ?!" )
+         ENDIF
          RETURN DE_REFRESH
       ENDIF
 

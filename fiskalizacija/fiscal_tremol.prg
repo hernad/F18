@@ -544,25 +544,31 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
    RETURN .T.
 
 
-FUNCTION tremol_read_error( hFiskalniParams, cFajl, nFiscNo )
+FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )
 
    LOCAL oFile, cErrorLine, aLinije, nI, cTmp
    LOCAL aErrors := {}
    LOCAL aTmp2
    LOCAL nScan
-   LOCAL nErrorLevel := 0
+   LOCAL nErrorLevel := FISK_ERROR_NEPOZNATO
    LOCAL cFiskalniFajlName
+   LOCAL lFiskalniRacun
 
    // primjer: c:\fiscal\00001.out
    cFiskalniFajlName := AllTrim( hFiskalniParams[ "out_dir" ] + StrTran( cFajl, "xml", "out" ) )
 
-   nFiscNo := 0
+   IF nBrojFiskalnoRacunaOut == NIL
+      lFiskalniRacun := .F.
+   ELSE
+      lFiskalniRacun := .T.
+   ENDIF
+
    oFile := TFileRead():New( cFiskalniFajlName )
    oFile:Open()
 
    IF oFile:Error()
       MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " + cFiskalniFajlName ) )
-      RETURN -9
+      RETURN FISK_ERROR_CITANJE_FAJLA
    ENDIF
 
    // prodji kroz svaku liniju i procitaj zapise
@@ -602,13 +608,17 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nFiscNo )
 
    oFile:Close()
 
+   // <?xml version="1.0" ?>
+   // <TremolFpServerOutput ErrorCode="0" ErrorFP="0" ErrorDescription="">
+   // <Output Total="7.40" Change="0.00" ReceiptNumber="BROJRACUNA">
+   // </TremolFpServerOutput>
+
 #ifdef __PLATFORM__LINUX
-   nScan := AScan( aErrors, {| val | "ErrorFP=0" $ val } ) // potrazimo gresku...
+   nScan := AScan( aErrors, {| cLinija | "ErrorFP=0" $ cLinija } ) // potrazimo gresku...
 #else
    nScan := AScan( aErrors, {| val | "OPOS_SUCCESS" $ val } )
 #endif
-   IF nScan > 0
-      // nema greske, komanda je uspjela; ako je rijec o racunu uzmi broj fiskalnog racuna
+   IF nScan > 0 // nema greske, komanda je uspjela; ako je rijec o racunu uzmi broj fiskalnog racuna
       nScan := AScan( aErrors, {| val | "ReceiptNumber" $ val } )
       IF nScan <> 0
          // ReceiptNumber=241412
@@ -616,39 +626,41 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nFiscNo )
          // ovo ce biti broj racuna
          cTmp := AllTrim( aTmp2[ 2 ] )
          IF !Empty( cTmp )
-            nFiscNo := Val( cTmp )
+            nBrojFiskalnoRacunaOut := Val( cTmp )
          ENDIF
 
       ENDIF
 
       FErase( cFiskalniFajlName ) // pobrisi fajl, izdaji
-      RETURN nErrorLevel
+      RETURN 0
 
+   ELSE
+      IF lFiskalniRacun
+         RETURN FISK_ERROR_NEMA_BROJA_RACUNA
+      ENDIF
    ENDIF
 
    cTmp := ""
-   nScan := AScan( aErrors, {| val | "ErrorCode" $ val } ) // imamo gresku !!! ispisi je
+   nScan := AScan( aErrors, {| cLinija | "ErrorCode" $ cLinija } ) // imamo gresku !!! ispisi je
    IF nScan <> 0
-
       // ErrorCode=241412
       aTmp2 := TokToNiz( aErrors[ nScan ], "=" )
       cTmp += "ErrorCode: " + AllTrim( aTmp2[ 2 ] )
       // ovo je ujedino i error kod
       nErrorLevel := Val( aTmp2[ 2 ] )
-
    ENDIF
 
-   cTmp := "ErrorOPOS"
-#ifdef __PLATFORM__LINUX
-   cTmp := "ErrorFP"
-#endif
+   IF is_linux()
+      cTmp := "ErrorFP"
+   ELSE
+      cTmp := "ErrorOPOS"
+   ENDIF
 
-   nScan := AScan( aErrors, {| val | cTmp $ val } )
+   nScan := AScan( aErrors, {| cLinija | cTmp $ cLinija } )
    IF nScan <> 0
       // ErrorOPOS=xxxxxxx
       aTmp2 := TokToNiz( aErrors[ nScan ], "=" )
       cTmp += " ErrorOPOS: " + AllTrim( aTmp2[ 2 ] )
-
    ENDIF
 
    nScan := AScan( aErrors, {| val | "ErrorDescription" $ val } )
@@ -659,7 +671,7 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nFiscNo )
    ENDIF
 
    IF !Empty( cTmp )
-      MsgBeep( cTmp )
+      MsgBeep( "TREMOL: " + cTmp )
    ENDIF
    FErase( cFiskalniFajlName ) // obrisi fajl out na kraju !
 

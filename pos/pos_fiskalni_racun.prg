@@ -209,10 +209,11 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    ENDIF
 
    IF ( nBrojFiskalnoRacuna > 0 .AND. nErrorLevel == 0 )
-      pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-      MsgO( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
-      Sleep( 2 )
-      MsgC()
+      IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+         MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+      ELSE
+         nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
+      ENDIF
    ENDIF
 
    RETURN nErrorLevel
@@ -235,15 +236,17 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
       IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajl )
          nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
          IF nErrorLevel == 0 .AND. !lStorno .AND. nBrojFiskalnoRacuna > 0
-            pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+            IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+               MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+            ELSE
+               nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
+            ENDIF
          ENDIF
       ELSE
          nErrorLevel := FISK_NEMA_ODGOVORA
       ENDIF
 
       FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl ) // obrisi fajl da ne bi ostao kada server proradi ako je greska
-
    ENDIF
 
    RETURN nErrorLevel
@@ -261,8 +264,11 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorn
    IF nErrorLevel == 0
       nBrojFiskalnoRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
       IF nBrojFiskalnoRacuna > 0
-         pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-         MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+         ELSE
+            nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
+         ENDIF
       ENDIF
 
    ENDIF
@@ -281,7 +287,7 @@ STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSto
 
 FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna )
 
-   LOCAL cQuery, oRet
+   LOCAL cQuery, oRet, oError, lRet := .F.
 
    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna(" + ;
       sql_quote( cIdPos ) + "," + ;
@@ -290,14 +296,20 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
       sql_quote( cBrDok ) + "," + ;
       sql_quote( nBrojFiskRacuna ) + ")"
 
-   oRet := run_sql_query( cQuery )
-   IF is_var_objekat_tpqquery( oRet )
-      IF oRet:FieldGet( 1 ) > 0
-         RETURN .T.
-      ENDIF
-   ENDIF
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
 
-   RETURN .F.
+      oRet := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oRet )
+         IF oRet:FieldGet( 1 ) <> 0
+            lRet := .T.
+         ENDIF
+      ENDIF
+
+   RECOVER USING oError
+      Alert( _u("Setovanje FISK broja " + AllTrim( Str( nBrojFiskRacuna ) ) + " neuspješno. Dupli broj?!") )
+   END SEQUENCE
+
+   RETURN lRet
 
 
 FUNCTION pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
@@ -344,7 +356,6 @@ FUNCTION pos_get_fiskalni_dok_id( cIdPos, cIdVd, dDatDok, cBrDok )
 
    oRet := run_sql_query( cQuery )
    IF is_var_objekat_tpqquery( oRet )
-
       cValue := oRet:FieldGet( 1 )
       IF cValue <> NIL
          RETURN cValue

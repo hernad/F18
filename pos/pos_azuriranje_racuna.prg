@@ -96,9 +96,10 @@ FUNCTION pos_azuriraj_racun( hParams )
             lOk := .F.
          ELSE
             // u pos_fisk_doks ubaciti zapis koji se odnosi na ovaj racun, broj_rn = NULL
-            pos_set_broj_fiskalnog_racuna( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], - 1 )
-            pos_set_ref_storno_fisk_dok( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], cUUIDFiskStorniran )
-            info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
+            IF pos_set_broj_fiskalnog_racuna( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], - 1 )
+               pos_set_ref_storno_fisk_dok( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], cUUIDFiskStorniran )
+               info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
+            ENDIF
          ENDIF
       ENDIF
    ENDIF
