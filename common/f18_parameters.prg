@@ -265,16 +265,13 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
 
 FUNCTION f18_use_module( cModuleName )
 
-   LOCAL _ret := .F.
-   LOCAL _default := "N"
+   LOCAL cDefaultDN := "N"
 
    LOCAL cModulRun := get_f18_param("run")
 
    IF cModulRun != "<undefined>"
       IF cModuleName == cModulRun
           RETURN .T.
-      ELSE
-          RETURN .F.
       ENDIF
    ENDIF
 
@@ -283,14 +280,14 @@ FUNCTION f18_use_module( cModuleName )
    ENDIF
 
    IF cModuleName $ "fin#kalk#fakt"
-      _default := "D"
+      cDefaultDN := "D"
    ENDIF
 
-   IF fetch_metric( "main_menu_" + cModuleName, my_user(), _default ) == "D"
-      _ret := .T.
+   IF fetch_metric( "main_menu_" + cModuleName, my_user(), cDefaultDN ) == "D"
+      RETURN .T.
    ENDIF
 
-   RETURN _ret
+   RETURN .F.
 
 
 

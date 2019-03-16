@@ -192,7 +192,7 @@ ALTER TABLE f18.partn OWNER TO admin;
 GRANT ALL ON TABLE f18.partn TO xtrole;
 ALTER TABLE f18.partn DROP COLUMN IF EXISTS match_code CASCADE;
 ALTER TABLE f18.partn ADD COLUMN IF NOT EXISTS partner_id uuid DEFAULT gen_random_uuid();
-ALTER TABLE f18.tarifa ALTER COLUMN partner_id SET DEFAULT gen_random_uuid();
+ALTER TABLE f18.partn ALTER COLUMN partner_id SET DEFAULT gen_random_uuid();
 
 --- f18.valute  --------------------------------------------------
 SELECT public.create_table_from_then_drop( 'fmk.valute', 'f18.valute' );
