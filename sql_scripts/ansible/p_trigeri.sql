@@ -102,6 +102,7 @@ CREATE TRIGGER pos_items_knjig_crud
 
 ALTER TABLE p15.pos_items_knjig ENABLE ALWAYS TRIGGER pos_itesm_knjig_crud;
 
+
 ----------- TRIGERI na strani kase radi pracenja stanja -----------------------------------------------------
 
 
