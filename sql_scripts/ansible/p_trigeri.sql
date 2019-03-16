@@ -100,7 +100,7 @@ CREATE TRIGGER pos_items_knjig_crud
    ON {{ item.name }}.pos_items_knjig
    FOR EACH ROW EXECUTE PROCEDURE {{ item.name }}.on_pos_items_knjig_crud();
 
-ALTER TABLE {{ item.name }}.pos_items_knjig ENABLE ALWAYS TRIGGER pos_itesm_knjig_crud;
+ALTER TABLE {{ item.name }}.pos_items_knjig ENABLE ALWAYS TRIGGER pos_items_knjig_crud;
 
 
 ----------- TRIGERI na strani kase radi pracenja stanja -----------------------------------------------------

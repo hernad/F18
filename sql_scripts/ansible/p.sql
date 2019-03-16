@@ -213,6 +213,3 @@ CREATE UNIQUE INDEX IF NOT EXISTS ref_storno_fisk_dok ON {{ item.name }}.pos_fis
 
 
 -- TARIFE CLEANUP --
-
-
-ALTER TABLE {{ item.name }}.roba ADD PRIMARY KEY (roba_id);
