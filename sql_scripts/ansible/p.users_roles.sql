@@ -6,5 +6,7 @@ CREATE ROLE xtrole NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
 GRANT ALL ON SCHEMA {{ ansible_nodename }} TO xtrole;
 ALTER ROLE admin SUPERUSER INHERIT CREATEDB CREATEROLE REPLICATION;
 
+-- admin pripada xtrole grupi
 GRANT xtrole TO admin;
-GRANT xtrole TO {{ ansible_nodename }};
+-- npr. p16 pripada xtrole grupi
+GRANT xtrole TO {{ db_user }};

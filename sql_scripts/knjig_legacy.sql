@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS fmk.pos_doks (
+    idpos character varying(2) NOT NULL,
+    idvd character varying(2) NOT NULL,
+    brdok character varying(6) NOT NULL,
+    datum date NOT NULL,
+    idPartner character varying(8),
+    idradnik character varying(4),
+    idvrstep character(2),
+    m1 character varying(1),
+    placen character(1),
+    prebacen character(1),
+    smjena character varying(1),
+    sto character varying(3),
+    vrijeme character varying(5),
+    c_1 character varying(6),
+    c_2 character varying(10),
+    c_3 character varying(50),
+    fisc_rn numeric(10,0),
+    zak_br numeric(6,0),
+    sto_br numeric(3,0),
+    funk numeric(3,0)
+);

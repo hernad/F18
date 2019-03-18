@@ -1,4 +1,3 @@
-
 drop view if exists fmk.log;
 CREATE view fmk.log  AS SELECT
       *
