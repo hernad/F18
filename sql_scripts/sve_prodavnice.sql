@@ -207,9 +207,9 @@ CREATE INDEX IF NOT EXISTS log_user_code_idx
 
 
 -- f18.log
-drop view if exists fmk.log;
-CREATE view fmk.log  AS SELECT
+drop view if exists public.log;
+CREATE view public.log  AS SELECT
       *
     FROM f18.log;
 
-GRANT ALL ON f18.log TO xtrole;
+GRANT ALL ON public.log TO xtrole;
