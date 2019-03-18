@@ -293,3 +293,4 @@ ALTER TABLE f18.valute OWNER to admin;
 GRANT ALL ON TABLE f18.valute TO admin;
 GRANT ALL ON TABLE f18.valute TO xtrole;
 
+
