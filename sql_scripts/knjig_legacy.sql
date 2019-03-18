@@ -45,3 +45,17 @@ CREATE TABLE IF NOT EXISTS fmk.f18_rules (
 );
 
 ALTER TABLE fmk.f18_rules OWNER TO admin;
+
+CREATE TABLE IF NOT EXISTS fmk.ks (
+    id character(3),
+    naz character(10),
+    datod date,
+    datdo date,
+    strev numeric(8,4),
+    stkam numeric(8,4),
+    den numeric(15,6),
+    tip character(1),
+    duz numeric(4,0)
+);
+
+ALTER TABLE fmk.ks OWNER TO admin;
