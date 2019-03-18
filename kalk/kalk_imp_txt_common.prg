@@ -437,7 +437,7 @@ FUNCTION kalk_imp_partn_exist()
       ++nCount
       @ box_x_koord() + 1, box_y_koord() + 2 SAY Str( nCount, 5 ) + " : " + kalk_imp_temp->idpartner
       IF !Found()
-         AAdd( aRet, { kalk_imp_temp->idpartner } )
+         AAdd( aRet, kalk_imp_temp->idpartner )
       ENDIF
       SELECT kalk_imp_temp
       SKIP
@@ -500,4 +500,3 @@ STATIC FUNCTION kalk_broj_ima_sufiks( cBrDok )
       ENDIF
 
       RETURN .F.
-      

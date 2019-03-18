@@ -24,9 +24,6 @@ FUNCTION kalk_razmjena_podataka()
    AAdd( aOpcExe, {|| fakt_kalk() } )
 
    IF is_kalk_tops_generacija_kalk_11_na_osnovu_pos_42()
-      //AAdd( aOpc, "3. pos -> kalk razduženje magacina na osnovu pos prodaje" )
-      //AAdd( aOpcExe, {|| kalk_razduzi_magacin_na_osnovu_pos_prodaje() } )
-
       AAdd( aOpc, "4. pos -> kalk razduženje prodavnice na osnovu pos" )
       AAdd( aOpcExe, {|| kalk_razduzi_prodavnicu_na_osnovu_pos_prodaje() } )
   else
@@ -48,6 +45,9 @@ FUNCTION kalk_razmjena_podataka()
 
    AAdd( aOpc, "K. kontiranje kalk->fin za period" )
    AAdd( aOpcExe, {|| kontiranje_vise_dokumenata_period_auto() } )
+
+   AAdd( aOpc, "V. import vindija varaždin" )
+   AAdd( aOpcexe, {|| meni_import_vindija() } )
 
    f18_menu( "rmod", .F., nIzbor, aOpc, aOpcExe )
 

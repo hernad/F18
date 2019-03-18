@@ -676,7 +676,7 @@ STATIC FUNCTION CheckBrFakt( aFakt )
 // ---------------------------------------------------------------
 STATIC FUNCTION CheckDok()
 
-   LOCAL aPomArt
+   LOCAL aPomArt, nI
 
    aPomArt  := kalk_imp_partn_exist()
 
@@ -688,13 +688,10 @@ STATIC FUNCTION CheckDok()
          ? "Lista nepostojećih artikala:"
          ? "-----------------------------------------"
          ?
-         FOR ii := 1 TO Len( aPomArt )
+         FOR nI := 1 TO Len( aPomArt )
 
             // sifra
-            ? aPomArt[ ii, 1 ]
-
-            // naziv artikla
-            ?? Space( 2 ) + "-" + Space( 1 ) + aPomArt[ ii, 2 ]
+            ? aPomArt[ nI ]
 
          NEXT
          ?
