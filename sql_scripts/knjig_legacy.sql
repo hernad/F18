@@ -59,3 +59,20 @@ CREATE TABLE IF NOT EXISTS fmk.ks (
 );
 
 ALTER TABLE fmk.ks OWNER TO admin;
+
+
+CREATE TABLE IF NOT EXISTS fmk.trfp2 (
+    id character(60),
+    match_code character(10),
+    shema character(1),
+    naz character(20),
+    idkonto character(7),
+    dokument character(1),
+    partner character(1),
+    d_p character(1),
+    znak character(1),
+    idvd character(2),
+    idvn character(2),
+    idtarifa character(6)
+);
+ALTER TABLE fmk.trfp2 OWNER TO admin;
