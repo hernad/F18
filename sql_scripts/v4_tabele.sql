@@ -78,6 +78,7 @@ $$;
 
 DO $$
 BEGIN
+   ALTER TABLE f18.konto ALTER COLUMN konto_id SET DEFAULT gen_random_uuid();
    ALTER TABLE f18.konto ADD PRIMARY KEY (konto_id);
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'konto primary key garant postoji';

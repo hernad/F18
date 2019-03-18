@@ -33,8 +33,9 @@ ALTER TABLE fmk.kalk_doks2 OWNER TO admin;
 CREATE INDEX IF NOT EXISTS kalk_doks2_id1 ON fmk.kalk_doks2 USING btree (idfirma, idvd, brdok);
 
 
-
-CREATE TABLE f18.kalk_kalk (
+CREATE TABLE  IF NOT EXISTS f18.kalk_kalk (
+    dok_id uuid,
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     idfirma character(2) NOT NULL,
     idroba character(10),
     idkonto character(7),
@@ -83,11 +84,9 @@ CREATE TABLE f18.kalk_kalk (
 
 ALTER TABLE f18.kalk_kalk OWNER TO admin;
 
-ALTER TABLE ONLY f18.kalk_kalk
-    ADD CONSTRAINT kalk_kalk_pkey PRIMARY KEY (idfirma, idvd, brdok, rbr);
 
-
-CREATE TABLE f18.kalk_doks (
+CREATE TABLE IF NOT EXISTS f18.kalk_doks (
+    dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     idfirma character(2) NOT NULL,
     idvd character(2) NOT NULL,
     brdok character varying(12) NOT NULL,
@@ -109,10 +108,6 @@ ALTER TABLE f18.kalk_doks OWNER TO admin;
 
 CREATE INDEX IF NOT EXISTS kalk_doks_datdok ON f18.kalk_doks USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
-
-
-ALTER TABLE ONLY f18.kalk_doks
-    ADD CONSTRAINT kalk_doks_pkey PRIMARY KEY (idfirma, idvd, brdok);
 
 
 CREATE TABLE IF NOT EXISTS fmk.sast (
