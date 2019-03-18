@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS f18.fakt_fisk_doks (
 ALTER TABLE f18.fakt_fisk_doks OWNER TO admin;
 GRANT ALL ON TABLE f18.fakt_fisk_doks TO xtrole;
 
-CREATE SEQUENCE f18.log_id_seq;
+CREATE SEQUENCE IF NOT EXISTS f18.log_id_seq;
 ALTER SEQUENCE f18.log_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO xtrole;
 
@@ -69,6 +69,7 @@ $$;
 
 DO $$
 BEGIN
+   ALTER TABLE f18.partn ALTER COLUMN partner_id SET DEFAULT gen_random_uuid();
    ALTER TABLE f18.partn ADD PRIMARY KEY (partner_id);
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'partn primary key garant postoji';
