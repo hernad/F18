@@ -1,8 +1,8 @@
 ----------- TRIGERI na strani knjigovodstva POS_DOKS - KALK_DOKS ! -----------------------------------------------------
 
--- on {{ item.name }}.pos -> f18.kalk_doks
+-- on {{ ansible_nodename }}.pos -> f18.kalk_doks
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION {{ item.name }}.on_pos_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.on_pos_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
 DECLARE
@@ -71,9 +71,9 @@ $$;
 
 ----------- TRIGERI na strani knjigovodstva POS - KALK_KALK ! -----------------------------------------------------
 
--- on {{ item.name }}.pos_items -> f18.kalk_kalk
+-- on {{ ansible_nodename }}.pos_items -> f18.kalk_kalk
 ---------------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION {{ item.name }}.on_pos_items_crud() RETURNS trigger
+CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.on_pos_items_crud() RETURNS trigger
        LANGUAGE plpgsql
        AS $$
 
@@ -135,7 +135,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                  ' (row_number() over (order by idroba))::integer as rbr,' ||
                  ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina, ' ||
                  ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj' ||
-                 ' FROM {{ item.name }}.pos_pos ' ||
+                 ' FROM {{ ansible_nodename }}.pos_pos ' ||
                  ' LEFT JOIN public.tarifa on pos_pos.idtarifa = tarifa.id' ||
                  ' WHERE idvd=''42'' AND datum=$4 AND idpos=$5' ||
                  ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
@@ -184,16 +184,16 @@ END;
 $$;
 
 
--- {{ item.name }}.pos -> f18.kalk_doks
-DROP TRIGGER IF EXISTS knjig_pos_crud on {{ item.name }}.pos;
+-- {{ ansible_nodename }}.pos -> f18.kalk_doks
+DROP TRIGGER IF EXISTS knjig_pos_crud on {{ ansible_nodename }}.pos;
 CREATE TRIGGER knjig_pos_crud
    AFTER INSERT OR DELETE OR UPDATE
-   ON {{ item.name }}.pos
-   FOR EACH ROW EXECUTE PROCEDURE {{ item.name }}.on_pos_crud();
+   ON {{ ansible_nodename }}.pos
+   FOR EACH ROW EXECUTE PROCEDURE {{ ansible_nodename }}.on_pos_crud();
 
--- {{ item.name }}.pos_items -> f18.kalk_kalk
-DROP TRIGGER IF EXISTS knjig_pos_items_crud on {{ item.name }}.pos_items;
+-- {{ ansible_nodename }}.pos_items -> f18.kalk_kalk
+DROP TRIGGER IF EXISTS knjig_pos_items_crud on {{ ansible_nodename }}.pos_items;
 CREATE TRIGGER knjig_pos_items_crud
       AFTER INSERT OR DELETE OR UPDATE
-      ON {{ item.name }}.pos_items
-      FOR EACH ROW EXECUTE PROCEDURE {{ item.name }}.on_pos_items_crud();
+      ON {{ ansible_nodename }}.pos_items
+      FOR EACH ROW EXECUTE PROCEDURE {{ ansible_nodename }}.on_pos_items_crud();

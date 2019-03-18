@@ -2,7 +2,7 @@
 -- pos_pos_knjig, pos_doks_knjig
 ----------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS {{ item.name }}.pos_knjig (
+CREATE TABLE IF NOT EXISTS {{ ansible_nodename }}.pos_knjig (
   dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   idpos character varying(2) NOT NULL,
   idvd character varying(2) NOT NULL,
@@ -24,15 +24,15 @@ CREATE TABLE IF NOT EXISTS {{ item.name }}.pos_knjig (
   korisnik text DEFAULT current_user
 );
 
-ALTER TABLE {{ item.name }}.pos_knjig OWNER TO admin;
-CREATE INDEX IF NOT EXISTS pos_id1_knjig ON {{ item.name }}.pos_knjig USING btree (idpos, idvd, datum, brdok);
-CREATE INDEX IF NOT EXISTS pos_id2_knjig ON {{ item.name }}.pos_knjig USING btree (idvd, datum);
-CREATE INDEX IF NOT EXISTS pos_id3_knjig ON {{ item.name }}.pos_knjig USING btree (idPartner, datum);
-CREATE INDEX IF NOT EXISTS pos_id6_knjig ON {{ item.name }}.pos_knjig USING btree (datum);
-CREATE INDEX IF NOT EXISTS pos_knjig_dok_id ON {{ item.name }}.pos_knjig USING btree( dok_id );
-GRANT ALL ON TABLE {{ item.name }}.pos_knjig TO xtrole;
+ALTER TABLE {{ ansible_nodename }}.pos_knjig OWNER TO admin;
+CREATE INDEX IF NOT EXISTS pos_id1_knjig ON {{ ansible_nodename }}.pos_knjig USING btree (idpos, idvd, datum, brdok);
+CREATE INDEX IF NOT EXISTS pos_id2_knjig ON {{ ansible_nodename }}.pos_knjig USING btree (idvd, datum);
+CREATE INDEX IF NOT EXISTS pos_id3_knjig ON {{ ansible_nodename }}.pos_knjig USING btree (idPartner, datum);
+CREATE INDEX IF NOT EXISTS pos_id6_knjig ON {{ ansible_nodename }}.pos_knjig USING btree (datum);
+CREATE INDEX IF NOT EXISTS pos_knjig_dok_id ON {{ ansible_nodename }}.pos_knjig USING btree( dok_id );
+GRANT ALL ON TABLE {{ ansible_nodename }}.pos_knjig TO xtrole;
 
-CREATE TABLE IF NOT EXISTS {{ item.name }}.pos_items_knjig (
+CREATE TABLE IF NOT EXISTS {{ ansible_nodename }}.pos_items_knjig (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   dok_id uuid,
   idpos character varying(2),
@@ -50,10 +50,10 @@ CREATE TABLE IF NOT EXISTS {{ item.name }}.pos_items_knjig (
   jmj varchar
 );
 
-ALTER TABLE {{ item.name }}.pos_items_knjig OWNER TO admin;
-CREATE INDEX pos_items_id1_knjig ON {{ item.name }}.pos_items_knjig USING btree (idpos, idvd, datum, brdok, idroba);
-CREATE INDEX pos_items_id2_knjig ON {{ item.name }}.pos_items_knjig USING btree (idroba, datum);
-CREATE INDEX pos_items_id4_knjig ON {{ item.name }}.pos_items_knjig USING btree (datum);
-CREATE INDEX pos_items_id5_knjig ON {{ item.name }}.pos_items_knjig USING btree (idpos, idroba, datum);
-CREATE INDEX pos_items_id6_knjig ON {{ item.name }}.pos_items_knjig USING btree (idroba);
-GRANT ALL ON TABLE {{ item.name }}.pos_items_knjig TO xtrole;
+ALTER TABLE {{ ansible_nodename }}.pos_items_knjig OWNER TO admin;
+CREATE INDEX pos_items_id1_knjig ON {{ ansible_nodename }}.pos_items_knjig USING btree (idpos, idvd, datum, brdok, idroba);
+CREATE INDEX pos_items_id2_knjig ON {{ ansible_nodename }}.pos_items_knjig USING btree (idroba, datum);
+CREATE INDEX pos_items_id4_knjig ON {{ ansible_nodename }}.pos_items_knjig USING btree (datum);
+CREATE INDEX pos_items_id5_knjig ON {{ ansible_nodename }}.pos_items_knjig USING btree (idpos, idroba, datum);
+CREATE INDEX pos_items_id6_knjig ON {{ ansible_nodename }}.pos_items_knjig USING btree (idroba);
+GRANT ALL ON TABLE {{ ansible_nodename }}.pos_items_knjig TO xtrole;
