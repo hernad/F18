@@ -378,6 +378,16 @@ CREATE TABLE f18.trfp (
 ALTER TABLE f18.trfp OWNER TO admin;
 
 
+CREATE TABLE IF NOT EXISTS f18.tarifa (
+    tarifa_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(6) NOT NULL,
+    naz character(50),
+    pdv numeric(6,2)
+);
+
+
+ALTER TABLE fmk.tarifa OWNER TO admin;
+
 CREATE TABLE fmk.vrstep (
     id character(2),
     naz character(20)
