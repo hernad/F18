@@ -122,9 +122,9 @@ ALTER TABLE fmk.dopr OWNER TO admin;
 GRANT ALL ON TABLE fmk.dopr TO xtrole;
 
 
-
-CREATE TABLE f18.koncij (
+CREATE TABLE IF NOT EXISTS f18.koncij (
     koncij_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    prod integer,
     id character(7),
     match_code character(10),
     shema character(1),
@@ -286,19 +286,6 @@ CREATE TABLE IF NOT EXISTS f18.roba (
 ALTER TABLE f18.roba OWNER TO admin;
 
 
-CREATE TABLE IF NOT EXISTS public.schema_migrations
-(
-    version integer NOT NULL,
-    CONSTRAINT schema_migrations_pkey PRIMARY KEY (version)
-);
-
-ALTER TABLE public.schema_migrations OWNER to admin;
-
-GRANT ALL ON TABLE public.schema_migrations TO admin;
-GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
-
-
-
 
 CREATE TABLE IF NOT EXISTS f18.partn
 (
@@ -393,4 +380,3 @@ CREATE TABLE fmk.vrstep (
     naz character(20)
 );
 ALTER TABLE fmk.vrstep OWNER TO admin;
-

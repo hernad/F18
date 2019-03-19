@@ -17,18 +17,19 @@ STATIC s_nServerVersion
 FUNCTION server_db_version( lInit )
 
    LOCAL cQuery
-   LOCAL _ret
+   LOCAL oRet
 
    hb_default( @lInit, .F. )
 
    IF lInit .OR. HB_ISNIL( s_nServerVersion )
-      cQuery := "SELECT max(version) from public.schema_migrations"
-      _ret := run_sql_query( cQuery )
-      IF sql_error_in_query( _ret, "SELECT" )
-         s_nServerVersion := -1
-      ELSE
-         s_nServerVersion := _ret:FieldGet( 1 )
-      ENDIF
+       s_nServerVersion := fetch_metric( "db_version", NIL, 1 )
+      // cQuery := "SELECT max(version) from public.schema_migrations"
+      // oRet := run_sql_query( cQuery )
+      // IF sql_error_in_query( oRet, "SELECT" )
+      //    s_nServerVersion := -1
+      // ELSE
+      //    s_nServerVersion := oRet:FieldGet( 1 )
+      // ENDIF
    ENDIF
 
    RETURN s_nServerVersion
@@ -37,32 +38,27 @@ FUNCTION server_db_version( lInit )
 
 FUNCTION check_server_db_version()
 
-   LOCAL _server_db_num, _server_db_str, _f18_required_server_str, _f18_required_server_num
-   LOCAL _msg
+   LOCAL nServerDbVersion, nKlijentRequestDbVer
+   LOCAL cMsg
 
    info_bar( "init", "check_server_db_version" )
-   _f18_required_server_num := get_version_num( server_db_ver_major(), server_db_ver_minor(), server_db_ver_patch() )
+   nKlijentRequestDbVer := server_db_ver_klijent()
 
-   _server_db_num := server_db_version()
-
-   IF _server_db_num < 0
+   nServerDbVersion := server_db_version()
+   IF nServerDbVersion < 0
       error_bar( "server_db", "server_db_version < 0")
       RETURN .F.
    ENDIF
 
-   IF ( _f18_required_server_num > _server_db_num )
+   IF ( nKlijentRequestDbVer > nServerDbVersion )
 
-      _f18_required_server_str := get_version_str( _f18_required_server_num )
-      _server_db_str := get_version_str( _server_db_num )
+      cMsg := "F18 klijent trazi verziju " + AllTrim(Str(nKlijentRequestDbVer)) + " server db je verzije: " + AllTrim(Str(nServerDbVersion))
 
-      _msg := "F18 klijent trazi verziju " + _f18_required_server_str + " server db je verzije: " + _server_db_str
+      ?E cMsg
+      error_bar( "init", "serverdb: " + AllTrim(Str(nServerDbVersion)) )
 
-      ?E _msg
-      error_bar( "init", "serverdb: " + _server_db_str )
-
-      MsgBeep( _msg )
-
-      OutMsg( 1, _msg + hb_osNewLine() )
+      MsgBeep( cMsg )
+      OutMsg( 1, cMsg + hb_osNewLine() )
       RETURN .T.
    ENDIF
 

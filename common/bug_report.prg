@@ -260,17 +260,17 @@ STATIC FUNCTION server_connection_info()
 
 STATIC FUNCTION server_db_version_info()
 
-   LOCAL _server_db_num, _server_db_str, _f18_required_server_str, _f18_required_server_num
+   LOCAL nServerDbVer, nRequiredServerDbKlijent
 
-   _f18_required_server_num := get_version_num( server_db_ver_major(), server_db_ver_minor(), server_db_ver_patch() )
+   nRequiredServerDbKlijent := server_db_ver_klijent()
 
-   _server_db_num := server_db_version()
+   nServerDbVer := server_db_version()
 
-   _f18_required_server_str := get_version_str( _f18_required_server_num )
-   _server_db_str := get_version_str( _server_db_num )
+   //_f18_required_server_str := get_version_str( nRequiredServerDbKlijent )
+   //_server_db_str := get_version_str( nServerDbVer )
 
-   OutBug( "F18 client required server db >=     :", _f18_required_server_str, "/", AllTrim( Str( _f18_required_server_num, 0 ) ) )
-   OutBug( "Actual knowhow ERP server db version :", _server_db_str, "/", AllTrim( Str( _server_db_num, 0 ) ) )
+   OutBug( "F18 client required server db >=     :", _f18_required_server_str, "/", AllTrim( Str( nRequiredServerDbKlijent, 0 ) ) )
+   OutBug( "Actual knowhow ERP server db version :", _server_db_str, "/", AllTrim( Str( nServerDbVer, 0 ) ) )
 
    RETURN .T.
 

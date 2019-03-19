@@ -143,16 +143,16 @@ CREATE OR REPLACE RULE public_tarifa_ins AS ON INSERT TO public.tarifa
 GRANT ALL ON public.tarifa TO xtrole;
 
 
-CREATE TABLE IF NOT EXISTS public.schema_migrations
-(
-    version integer NOT NULL,
-    CONSTRAINT schema_migrations_pkey PRIMARY KEY (version)
-);
-
-ALTER TABLE public.schema_migrations OWNER to admin;
-
-GRANT ALL ON TABLE public.schema_migrations TO admin;
-GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
+-- CREATE TABLE IF NOT EXISTS public.schema_migrations
+-- (
+--     version integer NOT NULL,
+--     CONSTRAINT schema_migrations_pkey PRIMARY KEY (version)
+-- );
+--
+-- ALTER TABLE public.schema_migrations OWNER to admin;
+--
+-- GRANT ALL ON TABLE public.schema_migrations TO admin;
+-- GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
 
 
 CREATE TABLE IF NOT EXISTS f18.valute

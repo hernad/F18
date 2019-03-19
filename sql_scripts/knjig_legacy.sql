@@ -1,3 +1,33 @@
+-- v3 trazi
+CREATE TABLE IF NOT EXISTS fmk.kalk_kalk_atributi (
+    idfirma character(2) NOT NULL,
+    idtipdok character(2) NOT NULL,
+    brdok character(8) NOT NULL,
+    rbr character(3) NOT NULL,
+    atribut character(50) NOT NULL,
+    value character varying
+);
+
+ALTER TABLE fmk.kalk_kalk_atributi OWNER TO admin;
+CREATE INDEX IF NOT EXISTS kalk_kalk_atributi_id1 ON fmk.kalk_kalk_atributi USING btree (idfirma, idtipdok, brdok, rbr, atribut);
+
+
+-- v3 trazi
+CREATE TABLE IF NOT EXISTS fmk.kalk_doks2 (
+    idfirma character(2),
+    idvd character(2),
+    brdok character varying(12),
+    datval date,
+    opis character varying(20),
+    k1 character(1),
+    k2 character(2),
+    k3 character(3)
+);
+
+ALTER TABLE fmk.kalk_doks2 OWNER TO admin;
+CREATE INDEX IF NOT EXISTS kalk_doks2_id1 ON fmk.kalk_doks2 USING btree (idfirma, idvd, brdok);
+
+
 CREATE TABLE IF NOT EXISTS fmk.pos_doks (
     idpos character varying(2) NOT NULL,
     idvd character varying(2) NOT NULL,
@@ -76,3 +106,14 @@ CREATE TABLE IF NOT EXISTS fmk.trfp2 (
     idtarifa character(6)
 );
 ALTER TABLE fmk.trfp2 OWNER TO admin;
+
+CREATE TABLE IF NOT EXISTS public.schema_migrations
+(
+    version integer NOT NULL,
+    CONSTRAINT schema_migrations_pkey PRIMARY KEY (version)
+);
+
+ALTER TABLE public.schema_migrations OWNER to admin;
+
+GRANT ALL ON TABLE public.schema_migrations TO admin;
+GRANT SELECT ON TABLE public.schema_migrations TO xtrole;

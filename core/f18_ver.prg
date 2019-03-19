@@ -40,16 +40,6 @@ FUNCTION f18_template_ver()
    RETURN F18_TEMPLATE_VER
 
 
-FUNCTION server_db_ver_major()
+FUNCTION server_db_ver_klijent()
 
-   RETURN SERVER_DB_VER_MAJOR
-
-
-FUNCTION server_db_ver_minor()
-
-   RETURN SERVER_DB_VER_MINOR
-
-
-FUNCTION server_db_ver_patch()
-
-   RETURN SERVER_DB_VER_PATCH
+   RETURN SERVER_DB_VER
