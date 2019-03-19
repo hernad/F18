@@ -462,7 +462,7 @@ CREATE OR REPLACE RULE fmk_sifv_ins AS ON INSERT TO fmk.sifv
         DO INSTEAD INSERT INTO f18.sifv(
            id, idsif, naz, oznaka
         ) VALUES (
-          id, idsif, naz, oznaka
+          NEW.id, NEW.idsif, NEW.naz, NEW.oznaka
         );
 
 GRANT ALL ON fmk.sifv TO xtrole;
