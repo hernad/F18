@@ -42,7 +42,7 @@ CREATE INDEX IF NOT EXISTS fin_suban_brnal
     (idfirma COLLATE pg_catalog."default", idvn COLLATE pg_catalog."default", brnal COLLATE pg_catalog."default", rbr)
     TABLESPACE pg_default;
 
-CREATE INDEX fin_suban_datdok
+CREATE INDEX IF NOT EXISTS fin_suban_datdok
     ON fmk.fin_suban USING btree
     (datdok)
     TABLESPACE pg_default;
@@ -78,11 +78,16 @@ CREATE INDEX IF NOT EXISTS fin_suban_otvrst
     TABLESPACE pg_default;
 
 
-CREATE TRIGGER IF NOT EXISTS suban_insert_upate_delete
+-- fix misspell ..upate..
+DROP TRIGGER IF EXISTS suban_insert_upate_delete on fmk.fin_suban;
+
+DROP TRIGGER IF EXISTS suban_insert_update_delete on fmk.fin_suban;
+CREATE TRIGGER suban_insert_update_delete
     AFTER INSERT OR DELETE OR UPDATE 
     ON fmk.fin_suban
     FOR EACH ROW
     EXECUTE PROCEDURE public.on_suban_insert_update_delete();
+
 
 
 CREATE TABLE IF NOT EXISTS fmk.fin_sint
@@ -108,7 +113,6 @@ CREATE INDEX IF NOT EXISTS fin_sint_id1
     ON fmk.fin_sint USING btree
     (idfirma COLLATE pg_catalog."default", idvn COLLATE pg_catalog."default", brnal COLLATE pg_catalog."default", rbr COLLATE pg_catalog."default")
     TABLESPACE pg_default;
-
 
 
 
@@ -192,7 +196,7 @@ ALTER TABLE fmk.fin_funk OWNER TO admin;
 
 
 
-CREATE TABLE fmk.fin_koniz (
+CREATE TABLE IF NOT EXISTS fmk.fin_koniz (
     id character(20) NOT NULL,
     izv character(2) NOT NULL,
     id2 character(20) NOT NULL,

@@ -6,13 +6,12 @@ CREATE TABLE IF NOT EXISTS f18.metric
     metric_module text COLLATE pg_catalog."default"
 );
 
-CREATE SEQUENCE f18.metric_metric_id_seq;
+CREATE SEQUENCE IF NOT EXISTS f18.metric_metric_id_seq;
 ALTER SEQUENCE f18.metric_metric_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO admin;
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO xtrole;
 ALTER TABLE f18.metric OWNER to admin;
 GRANT ALL ON TABLE f18.metric TO xtrole;
-
 
 
 CREATE TABLE IF NOT EXISTS f18.sifk (
@@ -172,15 +171,14 @@ CREATE TABLE IF NOT EXISTS f18.koncij (
 ALTER TABLE f18.koncij OWNER TO admin;
 
 
-CREATE TABLE f18.konto (
+CREATE TABLE IF NOT EXISTS f18.konto (
     konto_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(7) NOT NULL,
     naz character(57)
 );
 ALTER TABLE f18.konto OWNER TO admin;
 
-
-CREATE SEQUENCE f18.log_id_seq;
+CREATE SEQUENCE IF NOT EXISTS f18.log_id_seq;
 ALTER SEQUENCE f18.log_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO xtrole;
@@ -205,7 +203,6 @@ CREATE INDEX IF NOT EXISTS log_user_code_idx
     ON f18.log USING btree(user_code COLLATE pg_catalog."default");
 
 
-
 CREATE TABLE IF NOT EXISTS fmk.ops (
     id character(4),
     idj character(3),
@@ -219,7 +216,6 @@ CREATE TABLE IF NOT EXISTS fmk.ops (
 );
 
 ALTER TABLE fmk.ops OWNER TO admin;
-
 
 
 CREATE TABLE IF NOT EXISTS fmk.rj (
@@ -286,7 +282,6 @@ CREATE TABLE IF NOT EXISTS f18.roba (
 ALTER TABLE f18.roba OWNER TO admin;
 
 
-
 CREATE TABLE IF NOT EXISTS f18.partn
 (
     partner_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -332,7 +327,7 @@ GRANT ALL ON TABLE f18.valute TO admin;
 GRANT ALL ON TABLE f18.valute TO xtrole;
 
 
-CREATE TABLE f18.tnal (
+CREATE TABLE IF NOT EXISTS f18.tnal (
     tnal_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(2),
     naz character(30)
@@ -340,7 +335,7 @@ CREATE TABLE f18.tnal (
 ALTER TABLE f18.tnal OWNER TO admin;
 
 
-CREATE TABLE f18.tdok (
+CREATE TABLE IF NOT EXISTS f18.tdok (
     tdok_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(2),
     naz character(30)
@@ -348,7 +343,7 @@ CREATE TABLE f18.tdok (
 ALTER TABLE f18.tdok OWNER TO admin;
 
 
-CREATE TABLE f18.trfp (
+CREATE TABLE IF NOT EXISTS f18.trfp (
     trfp_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(60),
     shema character(1),
@@ -374,8 +369,7 @@ CREATE TABLE IF NOT EXISTS f18.tarifa (
 
 
 ALTER TABLE fmk.tarifa OWNER TO admin;
-
-CREATE TABLE fmk.vrstep (
+CREATE TABLE IF NOT EXISTS fmk.vrstep (
     id character(2),
     naz character(20)
 );

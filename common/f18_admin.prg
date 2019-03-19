@@ -73,7 +73,7 @@ METHOD F18Admin:New()
    RETURN self
 
 /*
-METHOD F18Admin:sql_cleanup()
+-- METHOD F18Admin:sql_cleanup()
 
    LOCAL cQuery, oQuery, hDbServerParams, dCleanup, aQueries, cItem
 
@@ -141,7 +141,7 @@ METHOD F18Admin:sql_cleanup()
 */
 
 /*
-METHOD F18Admin:sql_cleanup_all()
+-- METHOD F18Admin:sql_cleanup_all()
 
    LOCAL cQuery, oQuery, cQueryForDb // ovaj query radi posao na pojedinoj bazi
 
