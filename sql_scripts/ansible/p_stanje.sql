@@ -60,13 +60,13 @@ END IF;
 IF transakcija = '-' THEN -- on delete pos_pos stavka
    -- treba da se poklope sve ove stavke: idroba / cijena / ncijena / dat_do, a da zadani dat_od bude >= od analiziranog
    RAISE INFO 'in_pos_prijem_update_stanje delete = % % % % % %', dokument, idroba, cijena, ncijena, dat_od, dat_do;
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(ulazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4'
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(ulazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4'
      using dokument, idroba, cijena, ncijena
      INTO idDokument;
    RAISE INFO 'idDokument = %', idDokument;
 
    IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_ulaz=kol_ulaz - $3, ulazi=array_remove(ulazi, $2)' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz - $3, ulazi=array_remove(ulazi, $2)' ||
              ' WHERE id=$1'
            USING idDokument, dokument, kolicina;
    END IF;
@@ -81,7 +81,7 @@ END IF;
 -- (znaci nedostaju im ulazi) napunimo ulazom, LIMIT 1 - stavka sa najmanjom kolicinom
 --
 --  $4 <= current_date => dat_od otpremnice manji ili jednak danasnjem datumu, znaci da je aktuelan
-EXECUTE  'select id from p' || idPos || '.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz <> 0 AND cijena = $2 AND  ncijena = $3 AND $4 <= current_date AND dat_do = $5' ||
+EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz <> 0 AND cijena = $2 AND  ncijena = $3 AND $4 <= current_date AND dat_do = $5' ||
          ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
       using idroba, cijena, ncijena, dat_od, dat_do
       INTO idRaspolozivo;
@@ -89,23 +89,23 @@ EXECUTE  'select id from p' || idPos || '.pos_stanje where  (dat_od <= current_d
 RAISE INFO 'in_pos_prijem_update_stanje + idDokument = %', idRaspolozivo;
 
 IF NOT idRaspolozivo IS NULL then
-  EXECUTE 'update p' || idPos || '.pos_stanje set kol_ulaz=kol_ulaz + $1, ulazi = ulazi || $3' ||
+  EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz + $1, ulazi = ulazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
 
 ELSE
    -- u ovom narednom upitu cemo provjeriti postoji li ranija stavka koja moze biti i negativna
    -- koja je aktuelna
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND ncijena = $3 AND kol_ulaz - kol_izlaz <> 0'
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND ncijena = $3 AND kol_ulaz - kol_izlaz <> 0'
     using idroba, cijena, ncijena
     INTO idRaspolozivo;
 
    IF NOT idRaspolozivo IS NULL THEN
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_ulaz=kol_ulaz + $1, ulazi = ulazi || $3' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz + $1, ulazi = ulazi || $3' ||
         ' WHERE id=$2'
          USING kolicina, idRaspolozivo, dokument;
    ELSE
-      EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+      EXECUTE 'insert into {{ item_prodavnica }}.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
         ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
         USING dat_od, dat_do, idroba, dokumenti, '{}'::text[], kolicina, 0, cijena, ncijena;
    END IF;
@@ -163,13 +163,13 @@ dokumenti := dokumenti || dokument;
 
 IF (transakcija = '-') THEN -- on delete pos_pos stavka
    RAISE INFO 'pos_stanje % % % %', dokument, idroba, cijena, ncijena;
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(izlazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4'
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(izlazi) AND idroba = $2 AND cijena = $3 AND ncijena = $4'
      using dokument, idroba, cijena, ncijena
      INTO idDokument;
    RAISE INFO 'idDokument = %', idDokument;
 
    IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz - $3, izlazi=array_remove(izlazi, $2)' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz - $3, izlazi=array_remove(izlazi, $2)' ||
              ' WHERE id=$1'
            USING idDokument, dokument, kolicina;
    END IF;
@@ -179,30 +179,30 @@ END IF;
 
 -- slijedi + transakcija on insert pos_pos
 -- (dat_od <= current_date AND dat_do >= current_date ) - cijena je aktuelna
-EXECUTE  'select id from p' || idPos || '.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = $3'
+EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = $3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 
 RAISE INFO 'idDokument = %', idRaspolozivo;
 
 IF NOT idRaspolozivo IS NULL then
-  EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
+  EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
 
 ELSE -- kod izlaza se insert desava samo ako ako roba ide u minus !
 
   -- u ovom naraednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
-  EXECUTE  'select id from p' || idPos || '.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
+  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 
   IF NOT idRaspolozivo IS NULL THEN
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
           ' WHERE id=$2'
           USING kolicina, idRaspolozivo, dokument;
   ELSE -- nema 'kompatibilnih' stavki stanja (ni roba na stanju, ni prodaja u minus)
-      EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+      EXECUTE 'insert into {{ item_prodavnica }}.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
            ' VALUES($1,$2,$3,$4,$5,0,$6,$7,$8)'
            USING datum, dat_do, idroba, '{}'::text[], dokumenti, kolicina, cijena, ncijena, dat_do;
   END IF;
@@ -269,23 +269,23 @@ IF transakcija = '-' THEN -- on delete pos_pos stavka
 
    RAISE INFO 'delete = % % % % % %', dokument, idroba, cijena, ncijena, dat_od, dat_do;
    -- (1) ponistiti izlaz koji je nivelacija napravila
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(izlazi) AND idroba = $2'
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(izlazi) AND idroba = $2'
      using dokument, idroba, cijena, ncijena
      INTO idDokument;
    RAISE INFO 'pos_promjena_cijena idDokument ulaza= %', idDokument;
    IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz - $3, izlazi=array_remove(izlazi, $2)' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz - $3, izlazi=array_remove(izlazi, $2)' ||
              ' WHERE id=$1'
            USING idDokument, dokument, kolicina;
    END IF;
 
    -- (2) ponistiti ulaz koji je nivelacija napravila
-   EXECUTE  'select id from p' || idPos || '.pos_stanje where $1 = ANY(ulazi) AND idroba = $2'
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(ulazi) AND idroba = $2'
      using dokument, idroba, cijena, ncijena
      INTO idDokument;
    RAISE INFO 'pos_promjena_cijena idDokument izlaza= %', idDokument;
    IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_ulaz=kol_ulaz - $3, ulazi=array_remove(ulazi, $2)' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz - $3, ulazi=array_remove(ulazi, $2)' ||
              ' WHERE id=$1'
            USING idDokument, dokument, kolicina;
    END IF;
@@ -295,7 +295,7 @@ END IF;
 
 -- raspoloziva roba po starim cijenama, kolicina treba biti > 0
 -- ncijena=0, gledaju se samo OSNOVNE cijene
-EXECUTE  'select id from p' || idPos || '.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date )' ||
+EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date )' ||
          ' AND idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = 0 AND $3 <= current_date AND $4 <= dat_do' ||
          ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
       using idroba, cijena, dat_od, dat_do
@@ -305,7 +305,7 @@ RAISE INFO 'idDokument = % % %', idRaspolozivo, dat_od, dat_do;
 
 IF NOT idRaspolozivo IS NULL then
   -- umanjiti - 'iznijeti' zalihu po starim cijenama
-  EXECUTE 'update p' || idPos || '.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
+  EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
   -- dodati zalihu po novim cijenama
@@ -315,17 +315,17 @@ IF NOT idRaspolozivo IS NULL then
   END IF;
 
   -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
-  EXECUTE  'select id from p' || idPos || '.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
+  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 
   IF NOT idRaspolozivo IS NULL THEN
       -- ako postoji onda ovu nivelaciju dodati na tu predhodnu prodaju
-      EXECUTE 'update p' || idPos || '.pos_stanje set kol_ulaz=kol_ulaz + $1, ulazi = ulazi || $3' ||
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz + $1, ulazi = ulazi || $3' ||
           ' WHERE id=$2'
           USING kolicina, idRaspolozivo, dokument;
   ELSE -- nema 'kompatibilnih' stavki stanja (ni roba na stanju, ni prodaja u minus)
-      EXECUTE 'insert into p' || idPos || '.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+      EXECUTE 'insert into {{ item_prodavnica }}.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
              ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
           USING dat_od, dat_do, idroba, dokumenti, '{}'::text[], kolicina, 0, cijena, ncijena;
   END IF;

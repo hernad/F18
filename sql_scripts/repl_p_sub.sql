@@ -3,6 +3,9 @@ delete from f18.valute;
 delete from f18.tarifa;
 delete from f18.sifk;
 delete from f18.sifv;
+delete from {{ prod_schema }}.pos_knjig;
+delete from {{ prod_schema }}.pos_items_knjig;
+
 
 
 DROP SUBSCRIPTION IF EXISTS "{{ prod_schema }}_f18_sifre_sub";

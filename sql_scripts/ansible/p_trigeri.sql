@@ -9,7 +9,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.on_pos_knjig_crud() RETURNS tri
 BEGIN
 
 IF (TG_OP = 'DELETE') THEN
-      RAISE INFO 'PROD 15: delete pos_knjig prodavnica %', OLD.idPos;
+      RAISE INFO 'PROD {{ item_prodavnica }}: delete pos_knjig prodavnica %', OLD.idPos;
       EXECUTE 'DELETE FROM {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
          USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum;
       RETURN OLD;
@@ -156,7 +156,7 @@ END IF;
 IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
       RAISE INFO 'delete izlaz pos_pos  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       -- select {{ item_prodavnica }}.pos_izlaz_update_stanje('-', '15', '42', 'PROD91', '5', current_date, 'R01',  40, 2.5, 0);
-      EXECUTE 'SELECT p' || idPos || '.pos_izlaz_update_stanje(''-'', $1, $2, $3, $4, $5, $6, $7, $8, $9)'
+      EXECUTE 'SELECT {{ item_prodavnica }}.pos_izlaz_update_stanje(''-'', $1, $2, $3, $4, $5, $6, $7, $8, $9)'
          USING idPos, OLD.idvd, OLD.brdok, OLD.rbr, OLD.datum,  OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
          INTO lRet;
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
@@ -165,7 +165,7 @@ IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
 ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='02') OR (OLD.idvd='22') OR (OLD.idvd='80') OR (OLD.idvd='89') ) THEN
       RAISE INFO 'delete pos_prijem_update_stanje  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       -- select {{ item_prodavnica }}.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '999', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
-      EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
+      EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
                USING idPos, OLD.idvd, OLD.brdok, OLD.rbr, OLD.datum, OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
                INTO lRet;
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
@@ -173,7 +173,7 @@ ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd='02') OR (OLD.idvd='22') OR (OLD.idvd='
 
 ELSIF (TG_OP = 'DELETE') AND ( (OLD.idvd = '19') OR (OLD.idvd = '29') OR (OLD.idvd='79') ) THEN
         RAISE INFO 'delete pos_pos  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
-        EXECUTE 'SELECT p' || idPos || '.pos_promjena_cijena_update_stanje(''-'', $1,$2,$3,$4,$5,$5,NULL,$6,$7,$8,$9)'
+        EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''-'', $1,$2,$3,$4,$5,$5,NULL,$6,$7,$8,$9)'
                    USING idPos, OLD.idvd, OLD.brdok, OLD.rbr, OLD.datum, OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
                    INTO lRet;
         -- RAISE INFO 'delete  ret=%', lRet;
@@ -194,7 +194,7 @@ ELSIF (TG_OP = 'UPDATE') AND ( (NEW.idvd = '19') OR (NEW.idvd = '29') OR (NEW.id
 ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
         RAISE INFO 'insert 42 pos_pos  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD10', '999', current_date, 'R03', 10, 30, 0);
-        EXECUTE 'SELECT p' || idPos || '.pos_izlaz_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9)'
+        EXECUTE 'SELECT {{ item_prodavnica }}.pos_izlaz_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9)'
               USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum,  NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
               INTO lRet;
         RAISE INFO 'insert 42 ret=%', lRet;
@@ -203,7 +203,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
 ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '02') OR (NEW.idvd = '22') OR ( NEW.idvd = '80') OR ( NEW.idvd = '89') ) THEN
         RAISE INFO 'insert pos_prijem_update_stanje % % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.idroba, NEW.rbr;
         -- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '999', current_date, current_date, NULL,'R01', 100, 2.5, 0);
-        EXECUTE 'SELECT p' || idPos || '.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
+        EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
              INTO lRet;
              RAISE INFO 'insert ret=%', lRet;
@@ -212,14 +212,14 @@ ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '02') OR (NEW.idvd = '22') OR ( NEW.i
 ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '19') OR (NEW.idvd = '29') OR (NEW.idvd = '79') ) THEN
         RAISE INFO 'insert pos_pos % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- u pos_doks se nalazi dat_od, dat_do
-        EXECUTE 'SELECT dat_od, dat_do FROM p' || idPos || '.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+        EXECUTE 'SELECT dat_od, dat_do FROM {{ item_prodavnica }}.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
            USING idPos, NEW.idvd, NEW.brdok, NEW.datum
            INTO datOd, datDo;
         IF datOd IS NULL THEN
            RAISE EXCEPTION 'pos_doks % % % % NE postoji?!', idPos, NEW.idvd, NEW.brdok, NEW.datum;
         END IF;
 
-        EXECUTE 'SELECT p' || idPos || '.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
+        EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, datOd, datDo, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
              INTO lRet;
         RAISE INFO 'insert ret=%', lRet;
