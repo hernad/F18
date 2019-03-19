@@ -313,9 +313,18 @@ GRANT ALL ON public.tdok TO xtrole;
 -- public.sifk
 drop view if exists public.sifk;
 CREATE view public.sifk  AS SELECT
-  *
+  id, sort, naz, oznaka, veza, f_unique, izvor, uslov, duzina, f_decimal, tip, kvalid, kwhen, ubrowsu, edkolona, k1, k2, k3, k4
 FROM
   f18.sifk;
+
+
+CREATE OR REPLACE RULE public_sifk_ins AS ON INSERT TO public.sifk
+         DO INSTEAD INSERT INTO f18.sifk(
+           id, sort, naz, oznaka, veza, f_unique, izvor, uslov, duzina, f_decimal, tip, kvalid, kwhen, ubrowsu, edkolona, k1, k2, k3, k4
+
+         ) VALUES (
+           NEW.id, NEW.sort, NEW.naz, NEW.oznaka, NEW.veza, NEW.f_unique, NEW.izvor, NEW.uslov, NEW.duzina, NEW.f_decimal, NEW.tip, NEW.kvalid, NEW.kwhen, NEW.ubrowsu, NEW.edkolona, NEW.k1, NEW.k2, NEW.k3, NEW.k4
+         );
 
 
 GRANT ALL ON public.sifk TO xtrole;
@@ -323,9 +332,19 @@ GRANT ALL ON public.sifk TO xtrole;
 -- public.sifv
 drop view if exists public.sifv;
 CREATE view public.sifv  AS SELECT
-  *
+  id, idsif, naz, oznaka
 FROM
   f18.sifv;
+
+
+CREATE OR REPLACE RULE public_sifv_ins AS ON INSERT TO public.sifv
+        DO INSTEAD INSERT INTO f18.sifv(
+           id, idsif, naz, oznaka
+        ) VALUES (
+          id, idsif, naz, oznaka
+        );
+
+GRANT ALL ON public.sifv TO xtrole;
 
 
 GRANT ALL ON public.sifv TO xtrole;
