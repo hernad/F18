@@ -365,9 +365,8 @@ CREATE TABLE IF NOT EXISTS f18.tarifa (
     naz character(50),
     pdv numeric(6,2)
 );
+ALTER TABLE f18.tarifa OWNER TO admin;
 
-
-ALTER TABLE fmk.tarifa OWNER TO admin;
 CREATE TABLE IF NOT EXISTS fmk.vrstep (
     id character(2),
     naz character(20)
