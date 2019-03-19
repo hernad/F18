@@ -179,7 +179,7 @@ FROM
 
 GRANT ALL ON public.valute TO xtrole;
 
-CREATE SEQUENCE f18.log_id_seq;
+CREATE SEQUENCE IF NOT EXISTS f18.log_id_seq;
 ALTER SEQUENCE f18.log_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO xtrole;

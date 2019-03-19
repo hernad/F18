@@ -373,7 +373,6 @@ CREATE TABLE IF NOT EXISTS fmk.vrstep (
 );
 ALTER TABLE fmk.vrstep OWNER TO admin;
 
-
 -- sifk
 CREATE INDEX IF NOT EXISTS sifk_id ON f18.sifk USING btree (id, sort, naz);
 CREATE INDEX IF NOT EXISTS sifk_id2 ON f18.sifk USING btree (id, oznaka);

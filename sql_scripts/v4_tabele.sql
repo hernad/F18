@@ -116,3 +116,24 @@ EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'sifv primary key garant postoji';
 END;
 $$;
+
+DO $$
+BEGIN
+   ALTER TABLE f18.kalk_kalk ADD COLUMN IF NOT EXISTS item_id uuid DEFAULT gen_random_uuid();
+   ALTER TABLE f18.kalk_kalk ADD PRIMARY KEY (item_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'f18.kalk_kalk primary item_id garant postoji';
+END;
+$$;
+
+
+DO $$
+BEGIN
+   ALTER TABLE f18.kalk_doks ADD PRIMARY KEY (dok_id);
+   update f18.kalk_doks set dok_id=gen_random_uuid() where dok_id is null;
+   ALTER TABLE f18.kalk_doks ADD PRIMARY KEY (dok_id);
+
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'f18.kalk_doks dok_id primary key garant postoji';
+END;
+$$;

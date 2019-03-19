@@ -1,8 +1,17 @@
+DO $$
+BEGIN
+  CREATE ROLE {{ replikant }} WITH REPLICATION LOGIN PASSWORD '{{ replikant_pwd }}';
+
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'role za replikaciju postoji';
+END;
+$$;
+
 GRANT ALL ON SCHEMA f18 TO replikant;
-REVOKE ALL PRIVILEGES ON DATABASE "{{ item_prodavnica }}.{{ server_db}}" FROM replikant;
+REVOKE ALL PRIVILEGES ON DATABASE "{{ db_name }}" FROM replikant;
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM replikant;
-GRANT ALL PRIVILEGES ON DATABASE "{{ item_prodavnica }}.{{ server_db }}" TO replikant;
+GRANT ALL PRIVILEGES ON DATABASE "{{ db_name }}" TO replikant;
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA f18 TO replikant;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA {{ item_prodavnica }} TO replikant;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA {{ prod_schema }} TO replikant;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO replikant;

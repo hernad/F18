@@ -17,8 +17,8 @@ GRANT ALL ON TABLE {{ item_prodavnica }}.pos_stanje TO xtrole;
 GRANT ALL ON SEQUENCE {{ item_prodavnica }}.pos_stanje_id_seq TO xtrole;
 
 ALTER TABLE {{ item_prodavnica }}.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
-ALTER TABLE {{ item_prodavnica }}.pos_pos ALTER COLUMN idroba SET NOT NULL;
-ALTER TABLE {{ item_prodavnica }}.pos_pos ALTER COLUMN cijena SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN idroba SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN cijena SET NOT NULL;
 
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_prijem_update_stanje(
    transakcija character(1),

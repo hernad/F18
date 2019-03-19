@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS f18.metric
     metric_module text COLLATE pg_catalog."default"
 );
 
-CREATE SEQUENCE f18.metric_metric_id_seq;
+CREATE SEQUENCE IF NOT EXISTS f18.metric_metric_id_seq;
 ALTER SEQUENCE f18.metric_metric_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO admin;
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO xtrole;
@@ -172,6 +172,54 @@ ALTER TABLE f18.valute OWNER to admin;
 GRANT ALL ON TABLE f18.valute TO admin;
 GRANT ALL ON TABLE f18.valute TO xtrole;
 
+
+
+CREATE TABLE IF NOT EXISTS f18.sifk (
+    sifk_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(8),
+    sort character(2),
+    naz character(25),
+    oznaka character(4),
+    veza character(1),
+    f_unique character(1),
+    izvor character(15),
+    uslov character(200),
+    duzina numeric(2,0),
+    f_decimal numeric(1,0),
+    tip character(1),
+    kvalid character(100),
+    kwhen character(100),
+    ubrowsu character(1),
+    edkolona numeric(2,0),
+    k1 character(1),
+    k2 character(2),
+    k3 character(3),
+    k4 character(4)
+);
+ALTER TABLE f18.sifk OWNER TO admin;
+GRANT ALL ON TABLE f18.sifk TO xtrole;
+
+CREATE TABLE IF NOT EXISTS f18.sifv (
+    sifv_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(8),
+    idsif character(15),
+    naz character(200),
+    oznaka character(4)
+);
+ALTER TABLE f18.sifv OWNER TO admin;
+GRANT ALL ON TABLE f18.sifv TO xtrole;
+
+-- sifk
+CREATE INDEX IF NOT EXISTS sifk_id ON f18.sifk USING btree (id, sort, naz);
+CREATE INDEX IF NOT EXISTS sifk_id2 ON f18.sifk USING btree (id, oznaka);
+CREATE INDEX IF NOT EXISTS sifk_naz ON f18.sifk USING btree (naz);
+
+-- sifv
+CREATE INDEX IF NOT EXISTS sifv_id1 ON f18.sifv USING btree (id, oznaka, idsif, naz);
+CREATE INDEX IF NOT EXISTS sifv_id2 ON f18.sifv USING btree (id, idsif);
+CREATE INDEX IF NOT EXISTS sifv_id3 ON f18.sifv USING btree (id, oznaka, naz);
+
+
 -- public.valute
 drop view if exists public.valute;
 CREATE view public.valute  AS SELECT
@@ -181,7 +229,7 @@ FROM
 
 GRANT ALL ON public.valute TO xtrole;
 
-CREATE SEQUENCE f18.log_id_seq;
+CREATE SEQUENCE IF NOT EXISTS f18.log_id_seq;
 ALTER SEQUENCE f18.log_id_seq OWNER TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO admin;
 GRANT ALL ON SEQUENCE f18.log_id_seq TO xtrole;

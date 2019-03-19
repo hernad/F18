@@ -38,9 +38,7 @@ CREATE PUBLICATION p16_publication;
 ALTER PUBLICATION p16_publication ADD TABLE f18.valute ;
 ALTER PUBLICATION p16_publication ADD TABLE f18.partn ;
 ALTER PUBLICATION p16_publication ADD TABLE f18.tarifa ;
-ALTER PUBLICATION p16_publication ADD TABLE p16.roba ;
-ALTER PUBLICATION p16_publication ADD TABLE p16.pos;
-ALTER PUBLICATION p16_publication ADD TABLE p16.pos_items;
+
 
 DROP SUBSCRIPTION IF EXISTS "p16_subscription";
 CREATE SUBSCRIPTION "p16_subscription"  CONNECTION 'host=192.168.124.223 port=5432 user=replikant password=324GFD664 dbname=p16.vindija_2019' PUBLICATION p16_publication;
