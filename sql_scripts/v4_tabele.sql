@@ -129,7 +129,6 @@ $$;
 
 DO $$
 BEGIN
-   ALTER TABLE f18.kalk_doks ADD PRIMARY KEY (dok_id);
    update f18.kalk_doks set dok_id=gen_random_uuid() where dok_id is null;
    ALTER TABLE f18.kalk_doks ADD PRIMARY KEY (dok_id);
 
