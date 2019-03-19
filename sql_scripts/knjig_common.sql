@@ -372,3 +372,14 @@ CREATE TABLE IF NOT EXISTS fmk.vrstep (
     naz character(20)
 );
 ALTER TABLE fmk.vrstep OWNER TO admin;
+
+
+-- sifk
+CREATE INDEX sifk_id ON f18.sifk USING btree (id, sort, naz);
+CREATE INDEX sifk_id2 ON f18.sifk USING btree (id, oznaka);
+CREATE INDEX sifk_naz ON f18.sifk USING btree (naz);
+
+-- sifv indexi
+CREATE INDEX sifv_id1 ON f18.sifv USING btree (id, oznaka, idsif, naz);
+CREATE INDEX sifv_id2 ON f18.sifv USING btree (id, idsif);
+CREATE INDEX sifv_id3 ON fmk.sifv USING btree (id, oznaka, naz);
