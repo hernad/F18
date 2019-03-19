@@ -247,7 +247,6 @@ ALTER TABLE f18.trfp DROP COLUMN IF EXISTS match_code CASCADE;
 ALTER TABLE f18.trfp ADD COLUMN IF NOT EXISTS trfp_id uuid DEFAULT gen_random_uuid();
 ALTER TABLE f18.trfp ALTER COLUMN trfp_id SET DEFAULT gen_random_uuid();
 
-
 ALTER TABLE f18.sifk ADD COLUMN IF NOT EXISTS sifk_id uuid DEFAULT gen_random_uuid();
 ALTER TABLE f18.sifv ADD COLUMN IF NOT EXISTS sifv_id uuid DEFAULT gen_random_uuid();
 
