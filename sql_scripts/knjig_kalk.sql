@@ -85,7 +85,6 @@ CREATE INDEX  IF NOT EXISTS kalk_kalk_pkonto_roba ON f18.kalk_kalk USING btree (
 CREATE INDEX IF NOT EXISTS kalk_doks_datdok ON f18.kalk_doks USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
 
-
 CREATE TABLE IF NOT EXISTS fmk.sast (
     id character(10),
     match_code character(10),
