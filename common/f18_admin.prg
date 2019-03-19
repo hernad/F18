@@ -34,8 +34,8 @@ CLASS F18Admin
    METHOD update_app()
    METHOD get_os_name()
    METHOD wget_download()
-   METHOD sql_cleanup()
-   METHOD sql_cleanup_all()
+   // METHOD sql_cleanup()
+   // METHOD sql_cleanup_all()
 
    DATA create_db_result
 
@@ -72,7 +72,7 @@ METHOD F18Admin:New()
 
    RETURN self
 
-
+/*
 METHOD F18Admin:sql_cleanup()
 
    LOCAL cQuery, oQuery, hDbServerParams, dCleanup, aQueries, cItem
@@ -138,9 +138,9 @@ METHOD F18Admin:sql_cleanup()
    set_metric( "db_cleanup", NIL, Date() )
 
    RETURN self
+*/
 
-
-
+/*
 METHOD F18Admin:sql_cleanup_all()
 
    LOCAL cQuery, oQuery, cQueryForDb // ovaj query radi posao na pojedinoj bazi
@@ -160,7 +160,6 @@ METHOD F18Admin:sql_cleanup_all()
    pg_terminate_all_data_db_connections()
 
    info_bar( "admin", "db_cleanup_all START" )
-
 
    cQueryForDb := "DROP SCHEMA IF EXISTS sem CASCADE;"
    cQueryForDb += "DROP SCHEMA IF EXISTS fmk_reports CASCADE;"
@@ -250,7 +249,7 @@ METHOD F18Admin:sql_cleanup_all()
    set_sql_search_path()
 
    RETURN .T.
-
+*/
 
 METHOD F18Admin:update_app()
 

@@ -1,5 +1,10 @@
 # F18 klijent, lista promjena
 
+## 2019-03-19
+
+- out sql_cleanup, sql_cleanup_all
+- parametar `db_version`, out tabela schema_migrations
+
 ## 2019-03-16
 
 - POS TREMOL fiskalne funkcije

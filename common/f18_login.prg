@@ -766,8 +766,8 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    AAdd( aMeni, hb_UTF8ToStr( "3. otvaranje nove godine" ) )
    AAdd( aMeniExec, {|| oAdmin:razdvajanje_sezona(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "4. sql_cleanup_all" ) )
-   AAdd( aMeniExec, {|| oAdmin:sql_cleanup_all(), .T. } )
+   // AAdd( aMeni, hb_UTF8ToStr( "4. sql_cleanup_all" ) )
+   // AAdd( aMeniExec, {|| oAdmin:sql_cleanup_all(), .T. } )
 
    AAdd( aMeni, "S. promjena sezone" )
    AAdd( aMeniExec, {|| f18_promjena_sezone() } )

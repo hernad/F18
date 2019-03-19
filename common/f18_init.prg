@@ -114,7 +114,7 @@ FUNCTION post_login()
       RETURN .F.
    ENDIF
 
-   F18Admin():sql_cleanup()
+   //F18Admin():sql_cleanup()
 
    set_sql_search_path()
    server_log_enable()
