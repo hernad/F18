@@ -37,8 +37,5 @@ SELECT public.create_table_from_then_drop( 'fmk.kalk_doks', 'f18.kalk_doks' );
 GRANT ALL ON TABLE f18.kalk_kalk TO xtrole;
 GRANT ALL ON TABLE f18.kalk_doks TO xtrole;
 
-
-
-
-
-
+SELECT public.create_table_from_then_drop( 'fmk.log', 'fmk.log_v3' );
+GRANT ALL ON TABLE fmk.log_v3 TO xtrole;

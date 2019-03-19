@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS f18.kalk_doks (
 
 ALTER TABLE f18.kalk_doks OWNER TO admin;
 
-
 CREATE INDEX IF NOT EXISTS kalk_kalk_datdok ON f18.kalk_kalk USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_kalk_id1 ON f18.kalk_kalk USING btree (idfirma, idvd, brdok, rbr, mkonto, pkonto);
 CREATE INDEX IF NOT EXISTS kalk_kalk_mkonto ON f18.kalk_kalk USING btree (idfirma, mkonto, idroba);
