@@ -1,5 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS {{ ansible_nodename }}.pos_stanje (
+CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_stanje (
    id SERIAL,
    dat_od date,
    dat_do date,
@@ -12,15 +12,15 @@ CREATE TABLE IF NOT EXISTS {{ ansible_nodename }}.pos_stanje (
    cijena numeric(10,3),
    ncijena numeric(10,3)
 );
-ALTER TABLE {{ ansible_nodename }}.pos_stanje OWNER TO admin;
-GRANT ALL ON TABLE {{ ansible_nodename }}.pos_stanje TO xtrole;
-GRANT ALL ON SEQUENCE {{ ansible_nodename }}.pos_stanje_id_seq TO xtrole;
+ALTER TABLE {{ item_prodavnica }}.pos_stanje OWNER TO admin;
+GRANT ALL ON TABLE {{ item_prodavnica }}.pos_stanje TO xtrole;
+GRANT ALL ON SEQUENCE {{ item_prodavnica }}.pos_stanje_id_seq TO xtrole;
 
-ALTER TABLE {{ ansible_nodename }}.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
-ALTER TABLE {{ ansible_nodename }}.pos_pos ALTER COLUMN idroba SET NOT NULL;
-ALTER TABLE {{ ansible_nodename }}.pos_pos ALTER COLUMN cijena SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_pos ALTER COLUMN idroba SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_pos ALTER COLUMN cijena SET NOT NULL;
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_prijem_update_stanje(
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_prijem_update_stanje(
    transakcija character(1),
    idpos character(2),
    idvd character(2),
@@ -116,24 +116,24 @@ RETURN TRUE;
 END;
 $$;
 
--- delete from {{ ansible_nodename }}.pos_stanje;
+-- delete from {{ item_prodavnica }}.pos_stanje;
 --
--- select {{ ansible_nodename }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK00', '1', current_date-5, current_date-5, NULL,'R01', 40, 2.5, 0);
--- select {{ ansible_nodename }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '2', current_date, current_date, NULL,'R01', 100, 2.5, 0);
--- select {{ ansible_nodename }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', '10', current_date, current_date, NULL,'R01',  50, 2.5, 0);
--- select {{ ansible_nodename }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', '1', current_date, current_date, NULL,'R01',  20, 2.0, 0);
--- select {{ ansible_nodename }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '1', current_date, current_date, NULL,'R02',  30,   3, 0);
+-- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK00', '1', current_date-5, current_date-5, NULL,'R01', 40, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '2', current_date, current_date, NULL,'R01', 100, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', '10', current_date, current_date, NULL,'R01',  50, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK02', '1', current_date, current_date, NULL,'R01',  20, 2.0, 0);
+-- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '1', current_date, current_date, NULL,'R02',  30,   3, 0);
 
--- select * from {{ ansible_nodename }}.pos_stanje;
+-- select * from {{ item_prodavnica }}.pos_stanje;
 
--- select {{ ansible_nodename }}.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '10', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '10', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
 
--- select * from {{ ansible_nodename }}.pos_stanje;
+-- select * from {{ item_prodavnica }}.pos_stanje;
 
--- select id, ulazi from {{ ansible_nodename }}.pos_stanje where '15-11-BRDOK01-20190211' = ANY(ulazi)
+-- select id, ulazi from {{ item_prodavnica }}.pos_stanje where '15-11-BRDOK01-20190211' = ANY(ulazi)
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_izlaz_update_stanje(
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_izlaz_update_stanje(
    transakcija character(1),
    idpos character(2),
    idvd character(2),
@@ -215,20 +215,20 @@ END;
 $$;
 
 -- prodaja
--- select {{ ansible_nodename }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD01', '1', current_date, 'R01', 60, 2.5, 0);
--- select {{ ansible_nodename }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD03', '5',current_date, 'R02', 20, 3, 0);
+-- select {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD01', '1', current_date, 'R01', 60, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD03', '5',current_date, 'R02', 20, 3, 0);
 --
 -- -- robe ima, ali ce je ova transakcija otjerati u minus
--- select {{ ansible_nodename }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD90', '1', current_date, 'R01', 500, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD90', '1', current_date, 'R01', 500, 2.5, 0);
 -- -- nastavljamo sa minusom; minus se gomila na jednoj stavki
--- select {{ ansible_nodename }}.pos_izlaz_update_stanje('+', '15', '42', '1','PROD91', '1', current_date, 'R01',  40, 2.5, 0);
+-- select {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', '1','PROD91', '1', current_date, 'R01',  40, 2.5, 0);
 --
 -- -- ove robe nema na stanju
--- select {{ ansible_nodename }}.pos_izlaz_update_stanje('+', '15', '42', '1','PROD10', '1', current_date, 'R03', 10, 30, 0);
--- select {{ ansible_nodename }}.pos_izlaz_update_stanje('+', '15', '42', '1','PROD11', '15', current_date, 'R03', 20, 30, 0);
+-- select {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', '1','PROD10', '1', current_date, 'R03', 10, 30, 0);
+-- select {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', '1','PROD11', '15', current_date, 'R03', 20, 30, 0);
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_promjena_cijena_update_stanje(
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(
    transakcija character(1),
    idpos character(2),
    idvd character(2),

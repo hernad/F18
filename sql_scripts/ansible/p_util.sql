@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.fetchmetrictext(text) RETURNS text
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fetchmetrictext(text) RETURNS text
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -6,7 +6,7 @@ DECLARE
   _returnVal TEXT;
 BEGIN
   SELECT metric_value::TEXT INTO _returnVal
-    FROM {{ ansible_nodename }}.metric WHERE metric_name = _pMetricName;
+    FROM {{ item_prodavnica }}.metric WHERE metric_name = _pMetricName;
 
   IF (FOUND) THEN
      RETURN _returnVal;
@@ -17,11 +17,11 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION {{ ansible_nodename }}.fetchmetrictext(text) OWNER TO admin;
-GRANT ALL ON FUNCTION {{ ansible_nodename }}.fetchmetrictext TO xtrole;
+ALTER FUNCTION {{ item_prodavnica }}.fetchmetrictext(text) OWNER TO admin;
+GRANT ALL ON FUNCTION {{ item_prodavnica }}.fetchmetrictext TO xtrole;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.setmetric(text, text) RETURNS boolean
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.setmetric(text, text) RETURNS boolean
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -32,16 +32,16 @@ DECLARE
 BEGIN
 
   IF (pMetricValue = '!!UNSET!!'::TEXT) THEN
-     DELETE FROM {{ ansible_nodename }}.metric WHERE (metric_name=pMetricName);
+     DELETE FROM {{ item_prodavnica }}.metric WHERE (metric_name=pMetricName);
      RETURN TRUE;
   END IF;
 
-  SELECT metric_id INTO _metricid FROM {{ ansible_nodename }}.metric WHERE (metric_name=pMetricName);
+  SELECT metric_id INTO _metricid FROM {{ item_prodavnica }}.metric WHERE (metric_name=pMetricName);
 
   IF (FOUND) THEN
-    UPDATE {{ ansible_nodename }}.metric SET metric_value=pMetricValue WHERE (metric_id=_metricid);
+    UPDATE {{ item_prodavnica }}.metric SET metric_value=pMetricValue WHERE (metric_id=_metricid);
   ELSE
-    INSERT INTO {{ ansible_nodename }}.metric(metric_name, metric_value)  VALUES (pMetricName, pMetricValue);
+    INSERT INTO {{ item_prodavnica }}.metric(metric_name, metric_value)  VALUES (pMetricName, pMetricValue);
   END IF;
 
   RETURN TRUE;
@@ -50,11 +50,11 @@ END;
 $$;
 
 
-ALTER FUNCTION {{ ansible_nodename }}.setmetric(text, text) OWNER TO admin;
-GRANT ALL ON FUNCTION {{ ansible_nodename }}.setmetric TO xtrole;
+ALTER FUNCTION {{ item_prodavnica }}.setmetric(text, text) OWNER TO admin;
+GRANT ALL ON FUNCTION {{ item_prodavnica }}.setmetric TO xtrole;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_novi_broj_dokumenta(cIdPos varchar, cIdVd varchar, dDatum date) RETURNS varchar
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos varchar, cIdVd varchar, dDatum date) RETURNS varchar
   LANGUAGE plpgsql
   AS $$
 
@@ -62,7 +62,7 @@ DECLARE
    cBrDok varchar;
 BEGIN
 
-    SELECT brdok from {{ ansible_nodename }}.pos_doks where idvd=cIdVd and datum=dDatum order by brdok desc limit 1
+    SELECT brdok from {{ item_prodavnica }}.pos_doks where idvd=cIdVd and datum=dDatum order by brdok desc limit 1
            INTO cBrDok;
     IF cBrdok IS NULL THEN
         cBrDok := to_char(1, '99999999');
@@ -76,7 +76,7 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_dostupno_artikal_za_cijenu(cIdRoba varchar, nCijena numeric, nNCijena numeric) RETURNS numeric
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_dostupno_artikal_za_cijenu(cIdRoba varchar, nCijena numeric, nNCijena numeric) RETURNS numeric
        LANGUAGE plpgsql
        AS $$
 
@@ -101,18 +101,18 @@ $$;
 
 -- harbour FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojRacuna )
 -- TEST:
--- insert into {{ ansible_nodename }}.pos_doks(idpos, idvd, brdok, datum) values('1 ', '42', 'XX', current_date );
+-- insert into {{ item_prodavnica }}.pos_doks(idpos, idvd, brdok, datum) values('1 ', '42', 'XX', current_date );
 
 -- SET
--- select {{ ansible_nodename }}.broj_fiskalnog_racuna( '1 ', '42', current_date, lpad('2',8), 102 );
+-- select {{ item_prodavnica }}.broj_fiskalnog_racuna( '1 ', '42', current_date, lpad('2',8), 102 );
 -- GET
--- select {{ ansible_nodename }}.broj_fiskalnog_racuna( '1 ', '42', current_date, 'XX', NULL );
+-- select {{ item_prodavnica }}.broj_fiskalnog_racuna( '1 ', '42', current_date, 'XX', NULL );
 
--- select * from {{ ansible_nodename }}.pos_doks;
--- select * from {{ ansible_nodename }}.pos_fisk_doks;
+-- select * from {{ item_prodavnica }}.pos_doks;
+-- select * from {{ item_prodavnica }}.pos_fisk_doks;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.broj_fiskalnog_racuna( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, nBrojRacuna integer) RETURNS integer
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.broj_fiskalnog_racuna( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, nBrojRacuna integer) RETURNS integer
  LANGUAGE plpgsql
  AS $$
 DECLARE
@@ -120,7 +120,7 @@ DECLARE
    fiskUUID uuid;
 BEGIN
 
-SELECT dok_id FROM {{ ansible_nodename }}.pos
+SELECT dok_id FROM {{ item_prodavnica }}.pos
    WHERE idpos=cIdPos AND idvd=cIdVd AND datum=dDatDok AND brDok=cBrDok
    INTO posUUID;
 
@@ -131,7 +131,7 @@ END IF;
 
 -- get broj racuna
 IF nBrojRacuna IS NULL THEN
-    SELECT broj_rn FROM {{ ansible_nodename }}.pos_fisk_doks where ref_pos_dok=posUUID
+    SELECT broj_rn FROM {{ item_prodavnica }}.pos_fisk_doks where ref_pos_dok=posUUID
       INTO nBrojRacuna;
     RETURN COALESCE( nBrojRacuna, 0);
 END IF;
@@ -140,14 +140,14 @@ IF ( nBrojRacuna = -1 ) THEN -- insert null vrijednost za broj fiskalnog racuna
     nBrojRacuna := NULL;
 END IF;
 
-SELECT dok_id FROM {{ ansible_nodename }}.pos_fisk_doks
+SELECT dok_id FROM {{ item_prodavnica }}.pos_fisk_doks
    WHERE ref_pos_dok = posUUID
    INTO fiskUUID;
 
 IF fiskUUID IS NULL THEN
-    INSERT INTO {{ ansible_nodename }}.pos_fisk_doks(ref_pos_dok, broj_rn) VALUES(posUUID, nBrojRacuna);
+    INSERT INTO {{ item_prodavnica }}.pos_fisk_doks(ref_pos_dok, broj_rn) VALUES(posUUID, nBrojRacuna);
 ELSE
-    UPDATE {{ ansible_nodename }}.pos_fisk_doks set broj_rn=nBrojRacuna, obradjeno=now() WHERE ref_pos_dok=posUUID;
+    UPDATE {{ item_prodavnica }}.pos_fisk_doks set broj_rn=nBrojRacuna, obradjeno=now() WHERE ref_pos_dok=posUUID;
 END IF;
 
 RETURN COALESCE( nBrojRacuna, 0);
@@ -156,16 +156,16 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.fisk_dok_id( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS text
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fisk_dok_id( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS text
  LANGUAGE plpgsql
  AS $$
 DECLARE
    posUUID uuid;
 BEGIN
 
-SELECT pos_fisk_doks.dok_id FROM {{ ansible_nodename }}.pos
-   LEFT JOIN {{ ansible_nodename }}.pos_fisk_doks
-   ON {{ ansible_nodename }}.pos_fisk_doks.ref_pos_dok = {{ ansible_nodename }}.pos.dok_id
+SELECT pos_fisk_doks.dok_id FROM {{ item_prodavnica }}.pos
+   LEFT JOIN {{ item_prodavnica }}.pos_fisk_doks
+   ON {{ item_prodavnica }}.pos_fisk_doks.ref_pos_dok = {{ item_prodavnica }}.pos.dok_id
    WHERE pos.idpos=cIdPos AND pos.idvd=cIdVd AND pos.datum=dDatDok AND pos.brDok=cBrDok
    INTO posUUID;
 
@@ -180,16 +180,16 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
  LANGUAGE plpgsql
  AS $$
 DECLARE
    uuidStorno uuid;
 BEGIN
 
-SELECT pos_fisk_doks.ref_storno_fisk_dok FROM {{ ansible_nodename }}.pos
-   LEFT JOIN {{ ansible_nodename }}.pos_fisk_doks
-   ON {{ ansible_nodename }}.pos_fisk_doks.ref_pos_dok = {{ ansible_nodename }}.pos.dok_id
+SELECT pos_fisk_doks.ref_storno_fisk_dok FROM {{ item_prodavnica }}.pos
+   LEFT JOIN {{ item_prodavnica }}.pos_fisk_doks
+   ON {{ item_prodavnica }}.pos_fisk_doks.ref_pos_dok = {{ item_prodavnica }}.pos.dok_id
    WHERE pos.idpos=cIdPos AND pos.idvd=cIdVd AND pos.datum=dDatDok AND pos.brDok=cBrDok
    INTO uuidStorno;
 
@@ -203,19 +203,19 @@ END;
 $$;
 
 
--- SELECT {{ ansible_nodename }}.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  => 101
+-- SELECT {{ item_prodavnica }}.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  => 101
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_storno_broj_rn( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS integer
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_storno_broj_rn( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS integer
  LANGUAGE plpgsql
  AS $$
 DECLARE
    iStornoBrojRn integer;
 BEGIN
 
-SELECT fisk2.broj_rn FROM {{ ansible_nodename }}.pos
-   LEFT JOIN {{ ansible_nodename }}.pos_fisk_doks as fisk1
-   ON fisk1.ref_pos_dok = {{ ansible_nodename }}.pos.dok_id
-   LEFT JOIN {{ ansible_nodename }}.pos_fisk_doks as fisk2
+SELECT fisk2.broj_rn FROM {{ item_prodavnica }}.pos
+   LEFT JOIN {{ item_prodavnica }}.pos_fisk_doks as fisk1
+   ON fisk1.ref_pos_dok = {{ item_prodavnica }}.pos.dok_id
+   LEFT JOIN {{ item_prodavnica }}.pos_fisk_doks as fisk2
    ON fisk1.ref_storno_fisk_dok = fisk2.dok_id
    WHERE pos.idpos=cIdPos AND pos.idvd=cIdVd AND pos.datum=dDatDok AND pos.brDok=cBrDok
    INTO iStornoBrojRn;
@@ -230,7 +230,7 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
  LANGUAGE plpgsql
  AS $$
 DECLARE
@@ -238,7 +238,7 @@ DECLARE
    nCount integer;
 BEGIN
 
-SELECT count(*) FROM {{ ansible_nodename }}.pos_fisk_doks
+SELECT count(*) FROM {{ item_prodavnica }}.pos_fisk_doks
    WHERE ref_storno_fisk_dok = uuidFiskStorniran::uuid
    INTO nCount;
 
@@ -246,7 +246,7 @@ IF (nCount = 0) THEN
       RETURN 0; -- uopste nema pos_fisk_doks zapisa
 END IF;
 
-SELECT broj_rn FROM {{ ansible_nodename }}.pos_fisk_doks
+SELECT broj_rn FROM {{ item_prodavnica }}.pos_fisk_doks
    WHERE ref_storno_fisk_dok = uuidFiskStorniran::uuid
    INTO nBrojRacuna;
 
@@ -256,16 +256,16 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.set_ref_storno_fisk_dok( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.set_ref_storno_fisk_dok( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
  LANGUAGE plpgsql
  AS $$
 DECLARE
    uuidFiskNovi uuid;
 BEGIN
 
-  uuidFiskNovi := {{ ansible_nodename }}.fisk_dok_id( cIdPos, cIdVd, dDatDok, cBrDok);
+  uuidFiskNovi := {{ item_prodavnica }}.fisk_dok_id( cIdPos, cIdVd, dDatDok, cBrDok);
 
-  UPDATE {{ ansible_nodename }}.pos_fisk_doks SET ref_storno_fisk_dok = uuidFiskStorniran::uuid
+  UPDATE {{ item_prodavnica }}.pos_fisk_doks SET ref_storno_fisk_dok = uuidFiskStorniran::uuid
       WHERE dok_id = uuidFiskNovi;
 
 END;
@@ -273,13 +273,13 @@ $$;
 
 
 -- select pos_dok_id('1 ','42','       1', '2018-01-09');
-CREATE OR REPLACE FUNCTION {{ ansible_nodename }}.pos_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid
 LANGUAGE plpgsql
 AS $$
 DECLARE
    dok_id uuid;
 BEGIN
-   EXECUTE 'SELECT dok_id FROM {{ ansible_nodename }}.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+   EXECUTE 'SELECT dok_id FROM {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
      USING cIdPos, cIdVd, cBrDok, dDatum
      INTO dok_id;
 
