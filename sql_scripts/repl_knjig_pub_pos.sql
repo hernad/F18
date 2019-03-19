@@ -1,3 +1,7 @@
+GRANT ALL ON SCHEMA {{ item.name }} TO replikant;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA {{ item.name }} TO replikant;
+
+
 DO $$
 BEGIN
 

@@ -1,3 +1,10 @@
+delete from f18.partn;
+delete from f18.valute;
+delete from f18.tarifa;
+delete from f18.sifk;
+delete from f18.sifv;
+
+
 DROP SUBSCRIPTION IF EXISTS "{{ prod_schema }}_f18_sifre_sub";
 CREATE SUBSCRIPTION "{{ prod_schema }}_f18_sifre_sub"  
    CONNECTION 'host={{ knjig_server }} port=5432 user={{ replikant }} password={{ replikant_pwd }} dbname={{ knjig_server_db }}' PUBLICATION f18_sifre;
