@@ -1,0 +1,8 @@
+DROP SUBSCRIPTION IF EXISTS "{{ prod_schema }}_f18_sifre_sub";
+CREATE SUBSCRIPTION "{{ prod_schema }}_f18_sifre_sub"  
+   CONNECTION 'host={{ knjig_server }} port=5432 user={{ replikant }} password={{ replikant_pwd }} dbname={{ knjig_server_db }}' PUBLICATION f18_sifre;
+
+
+DROP SUBSCRIPTION IF EXISTS "{{ prod_schema }}_pos_knjig_sub";
+CREATE SUBSCRIPTION "{{ prod_schema }}_pos_knjig_sub"  
+   CONNECTION 'host={{ knjig_server }} port=5432 user={{ replikant }} password={{ replikant_pwd }} dbname={{ knjig_server_db }}' PUBLICATION {{ prod_schema }}_pos_knjig;
