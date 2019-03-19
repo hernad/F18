@@ -341,10 +341,8 @@ CREATE OR REPLACE RULE public_sifv_ins AS ON INSERT TO public.sifv
         DO INSTEAD INSERT INTO f18.sifv(
            id, idsif, naz, oznaka
         ) VALUES (
-          id, idsif, naz, oznaka
+          NEW.id, NEW.idsif, NEW.naz, NEW.oznaka
         );
-
-GRANT ALL ON public.sifv TO xtrole;
 
 
 GRANT ALL ON public.sifv TO xtrole;
