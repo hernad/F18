@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS pos_knjig_dok_id ON {{ ansible_nodename }}.pos_knjig 
 GRANT ALL ON TABLE {{ ansible_nodename }}.pos_knjig TO xtrole;
 
 CREATE TABLE IF NOT EXISTS {{ ansible_nodename }}.pos_items_knjig (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  item_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   dok_id uuid,
   idpos character varying(2),
   idvd character varying(2),

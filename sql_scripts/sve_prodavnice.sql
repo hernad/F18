@@ -71,7 +71,6 @@ GRANT ALL ON FUNCTION public.fetchmetrictext TO xtrole;
 ALTER FUNCTION public.setmetric(text, text) OWNER TO admin;
 GRANT ALL ON FUNCTION public.setmetric TO xtrole;
 
-
 CREATE TABLE IF NOT EXISTS f18.partn
 (
     partner_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -154,7 +153,6 @@ ALTER TABLE public.schema_migrations OWNER to admin;
 GRANT ALL ON TABLE public.schema_migrations TO admin;
 GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
 
-
 CREATE TABLE IF NOT EXISTS f18.valute
 (
     valuta_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -213,3 +211,39 @@ CREATE view public.log  AS SELECT
     FROM f18.log;
 
 GRANT ALL ON public.log TO xtrole;
+
+
+CREATE TABLE IF NOT EXISTS f18.sifk (
+    sifk_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(8),
+    sort character(2),
+    naz character(25),
+    oznaka character(4),
+    veza character(1),
+    f_unique character(1),
+    izvor character(15),
+    uslov character(200),
+    duzina numeric(2,0),
+    f_decimal numeric(1,0),
+    tip character(1),
+    kvalid character(100),
+    kwhen character(100),
+    ubrowsu character(1),
+    edkolona numeric(2,0),
+    k1 character(1),
+    k2 character(2),
+    k3 character(3),
+    k4 character(4)
+);
+ALTER TABLE f18.sifk OWNER TO admin;
+GRANT ALL ON f18.sifk TO xtrole;
+
+CREATE TABLE IF NOT EXISTS f18.sifv (
+    sifv_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(8),
+    idsif character(15),
+    naz character(200),
+    oznaka character(4)
+);
+ALTER TABLE f18.sifv OWNER TO admin;
+GRANT ALL ON f18.sifv TO xtrole;

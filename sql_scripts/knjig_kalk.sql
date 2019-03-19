@@ -1,11 +1,6 @@
-
-
-
-
-
-CREATE TABLE  IF NOT EXISTS f18.kalk_kalk (
+CREATE TABLE IF NOT EXISTS f18.kalk_kalk (
     dok_id uuid,
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    item_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     idfirma character(2) NOT NULL,
     idroba character(10),
     idkonto character(7),
@@ -53,7 +48,6 @@ CREATE TABLE  IF NOT EXISTS f18.kalk_kalk (
 );
 
 ALTER TABLE f18.kalk_kalk OWNER TO admin;
-
 
 CREATE TABLE IF NOT EXISTS f18.kalk_doks (
     dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,

@@ -248,6 +248,9 @@ ALTER TABLE f18.trfp ADD COLUMN IF NOT EXISTS trfp_id uuid DEFAULT gen_random_uu
 ALTER TABLE f18.trfp ALTER COLUMN trfp_id SET DEFAULT gen_random_uuid();
 
 
+ALTER TABLE f18.sifk ADD COLUMN IF NOT EXISTS sifk_id uuid DEFAULT gen_random_uuid();
+ALTER TABLE f18.sifv ALTER COLUMN sifv_id SET DEFAULT gen_random_uuid();
+
 -- ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS  uuid uuid DEFAULT gen_random_uuid();
 -- ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref uuid;
 -- ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref_2 uuid;

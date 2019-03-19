@@ -15,8 +15,8 @@ GRANT ALL ON TABLE f18.metric TO xtrole;
 
 
 CREATE TABLE IF NOT EXISTS f18.sifk (
+    sifk_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(8),
-    match_code character(10),
     sort character(2),
     naz character(25),
     oznaka character(4),
@@ -36,11 +36,10 @@ CREATE TABLE IF NOT EXISTS f18.sifk (
     k3 character(3),
     k4 character(4)
 );
-
-
 ALTER TABLE f18.sifk OWNER TO admin;
 
 CREATE TABLE IF NOT EXISTS f18.sifv (
+    sifv_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(8),
     idsif character(15),
     naz character(200),

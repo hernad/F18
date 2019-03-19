@@ -100,3 +100,19 @@ EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'valuta primary key garant postoji';
 END;
 $$;
+
+DO $$
+BEGIN
+   ALTER TABLE f18.sifk ADD PRIMARY KEY (sifk_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'sifk primary key garant postoji';
+END;
+$$;
+
+DO $$
+BEGIN
+   ALTER TABLE f18.sifv ADD PRIMARY KEY (sifv_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'sifv primary key garant postoji';
+END;
+$$;

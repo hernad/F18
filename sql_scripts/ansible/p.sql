@@ -52,7 +52,7 @@ CREATE INDEX IF NOT EXISTS pos_dok_id ON {{ ansible_nodename }}.pos USING btree(
 CREATE INDEX IF NOT EXISTS pos_ref_fisk_dok ON {{ ansible_nodename }}.pos USING btree( ref_fisk_dok );
 
 CREATE TABLE IF NOT EXISTS {{ ansible_nodename }}.pos_items (
-    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    item_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     dok_id uuid,
     idpos character varying(2),
     idvd character varying(2),
