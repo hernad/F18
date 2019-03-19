@@ -51,9 +51,9 @@ CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_items_knjig (
 );
 
 ALTER TABLE {{ item_prodavnica }}.pos_items_knjig OWNER TO admin;
-CREATE INDEX pos_items_id1_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idpos, idvd, datum, brdok, idroba);
-CREATE INDEX pos_items_id2_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idroba, datum);
-CREATE INDEX pos_items_id4_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (datum);
-CREATE INDEX pos_items_id5_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idpos, idroba, datum);
-CREATE INDEX pos_items_id6_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idroba);
+CREATE INDEX IF NOT EXISTS pos_items_id1_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idpos, idvd, datum, brdok, idroba);
+CREATE INDEX IF NOT EXISTS pos_items_id2_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idroba, datum);
+CREATE INDEX IF NOT EXISTS pos_items_id4_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (datum);
+CREATE INDEX IF NOT EXISTS pos_items_id5_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idpos, idroba, datum);
+CREATE INDEX IF NOT EXISTS pos_items_id6_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idroba);
 GRANT ALL ON TABLE {{ item_prodavnica }}.pos_items_knjig TO xtrole;
