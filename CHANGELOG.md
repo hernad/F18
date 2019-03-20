@@ -3,6 +3,7 @@
 ## 2019-03-20
 
 - f18.sifk, f18.sifv cleanup
+- pos_osob, vrstep - fmk schema pos out
 
 ## 2019-03-19
 
