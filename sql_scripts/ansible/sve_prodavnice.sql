@@ -264,7 +264,7 @@ CREATE view public.log  AS SELECT
       *
     FROM f18.log;
 
-GRANT ALL ON f18.log TO xtrole;
+GRANT ALL ON public.log TO xtrole;
 
 CREATE TABLE IF NOT EXISTS f18.sifk (
     sifk_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,

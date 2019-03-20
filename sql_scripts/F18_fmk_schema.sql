@@ -2162,7 +2162,6 @@ CREATE TABLE fmk.refer (
     idops character(4),
     naz character(40)
 );
-
 ALTER TABLE fmk.refer OWNER TO admin;
 
 --
