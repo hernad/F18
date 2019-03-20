@@ -334,7 +334,7 @@ FUNCTION fakt_postoji_li_rupa_u_brojacu( cIdFirma, cIdTipDok, cBrDok )
       cIdTipDokTrazi := cIdTipDok
    ENDIF
 
-   cQuery := " SELECT MAX( brdok ) FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks " + ;
+   cQuery := " SELECT MAX( brdok ) FROM " + f18_sql_schema( "fakt_doks" ) + ;
       " WHERE idfirma = " + sql_quote( cIdFirma ) + ;
       " AND idtipdok = " + sql_quote( cIdTipDokTrazi )
 
@@ -370,7 +370,7 @@ FUNCTION fakt_postoji_li_rupa_u_brojacu( cIdFirma, cIdTipDok, cBrDok )
    IF Len( _tmp  ) == 0
       RETURN 0
    ENDIF
-  
+
    _inc_error := Abs( _max_dok - Val( AllTrim( _tmp[ 1 ] ) ) )
 
    IF _inc_error > 30
@@ -396,12 +396,12 @@ FUNCTION fakt_dokument_postoji( cFirma, cTipDok, cBroj )
    cWhere += " AND idtipdok = " + sql_quote( cTipDok )
    cWhere += " AND brdok = " + sql_quote( cBroj )
 
-   IF table_count( F18_PSQL_SCHEMA_DOT + "fakt_doks", cWhere ) > 0
+   IF table_count( f18_sql_schema( "fakt_doks" ), cWhere ) > 0
       lExist := .T.
    ENDIF
 
    IF !lExist
-      IF table_count( F18_PSQL_SCHEMA_DOT + "fakt_fakt", cWhere ) > 0
+      IF table_count( f18_sql_schema( "fakt_fakt" ), cWhere ) > 0
          lExist := .T.
       ENDIF
    ENDIF

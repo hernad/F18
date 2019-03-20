@@ -52,8 +52,8 @@ FUNCTION Kurs( datum, val_iz, val_u )
       _where += " AND ( " + _sql_date_parse( "datum", NIL, datum ) + ") "
    ENDIF
 
-   cQuery := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "valute "
-   cQuery += "WHERE " + _where
+   cQuery := "SELECT * FROM " + f18_sql_schema("valute")
+   cQuery += " WHERE " + _where
    cQuery += " ORDER BY id, datum"
 
    oDataSet := run_sql_query( cQuery )
@@ -90,8 +90,8 @@ FUNCTION Kurs( datum, val_iz, val_u )
       _where += " AND ( " + _sql_date_parse( "datum", NIL, datum ) + ") "
    ENDIF
 
-   cQuery := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "valute "
-   cQuery += "WHERE " + _where
+   cQuery := "SELECT * FROM " + f18_sql_schema( "valute" )
+   cQuery += " WHERE " + _where
    cQuery += " ORDER BY id, datum"
 
    oDataSet := run_sql_query( cQuery )

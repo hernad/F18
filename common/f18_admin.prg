@@ -1048,9 +1048,9 @@ METHOD F18Admin:delete_db_data_all( cDatabaseName, nDataType )
       cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "ld_pk_data;"
       cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "ld_pk_radn;"
 
-      cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "roba;"
-      cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "partn;"
-      cQuery += "DELETE FROM " + F18_PSQL_SCHEMA_DOT + "sifv;"
+      cQuery += "DELETE FROM " + f18_sql_schema( "roba" ) + ";"
+      cQuery += "DELETE FROM " + f18_sql_schema( "partn" ) + ";"
+      cQuery += "DELETE FROM " + f18_sql_schema( "sifv" ) + ";"
 
    ENDIF
 

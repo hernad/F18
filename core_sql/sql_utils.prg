@@ -689,13 +689,13 @@ FUNCTION query_row( row, cField )
 
 FUNCTION sql_table_empty( alias )
 
-   LOCAL _a_dbf_rec := get_a_dbf_rec( alias, .T. )
+   LOCAL hRec := get_a_dbf_rec( alias, .T. )
 
-   IF _a_dbf_rec[ "temp" ]
+   IF hRec[ "temp" ]
       RETURN .T.
    ENDIF
 
-   RETURN table_count( F18_PSQL_SCHEMA_DOT + _a_dbf_rec[ "cTable" ] ) == 0
+   RETURN table_count( f18_sql_schema(hRec[ "cTable" ]) ) == 0
 
 /*
 FUNCTION sql_from_adbf( aDbf, cTable )

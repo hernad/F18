@@ -116,7 +116,7 @@ METHOD FaktDokument:set_sql_where()
 METHOD FaktDokument:exists()
 
    LOCAL _ret
-   LOCAL cQuery := "SELECT count(*)  FROM " + F18_PSQL_SCHEMA_DOT + "fakt_doks WHERE " + ::p_sql_where
+   LOCAL cQuery := "SELECT count(*)  FROM " + f18_sql_schema( "fakt_doks" ) + " WHERE " + ::p_sql_where
 
    _ret := cQuery:FieldGet( 1 )
 
@@ -149,15 +149,15 @@ METHOD FaktDokument:get_info()
       return ::p_h_info
    ENDIF
 
-   _qry_str := "SELECT sum(kolicina * cijena * (1-Rabat/100)) from " + F18_PSQL_SCHEMA_DOT + "fakt_fakt WHERE " + ::p_sql_where
+   _qry_str := "SELECT sum(kolicina * cijena * (1-Rabat/100)) from " + f18_sql_schema( "fakt_fakt" ) + " WHERE " + ::p_sql_where
    cQuery := run_sql_query( _qry_str )
    _ret[ "neto_vrijednost" ] := cQuery:FieldGet( 1 )
 
-   _qry_str := "SELECT count(*) from " + F18_PSQL_SCHEMA_DOT + "fakt_fakt WHERE " + ::p_sql_where
+   _qry_str := "SELECT count(*) from " + f18_sql_schema( "fakt_fakt" ) + " WHERE " + ::p_sql_where
    cQuery := run_sql_query( _qry_str )
    _ret[ "broj_stavki" ] := cQuery:FieldGet( 1 )
 
-   _qry_str := "SELECT DISTINCT(idroba) from " + F18_PSQL_SCHEMA_DOT + "fakt_fakt WHERE " + ::p_sql_where
+   _qry_str := "SELECT DISTINCT(idroba) from " + f18_sql_schema( "fakt_fakt" ) + " WHERE " + ::p_sql_where
    cQuery := run_sql_query( _qry_str )
 
    _ret[ "distinct_idroba" ] := {}
@@ -166,7 +166,7 @@ METHOD FaktDokument:get_info()
       cQuery:skip()
    ENDDO
 
-   _qry_str := "SELECT datdok, idpartner from " + F18_PSQL_SCHEMA_DOT + "fakt_doks WHERE " + ::p_sql_where
+   _qry_str := "SELECT datdok, idpartner from " + f18_sql_schema( "fakt_doks" ) + " WHERE " + ::p_sql_where
    cQuery := run_sql_query( _qry_str )
    _ret[ "datdok" ] := cQuery:FieldGet( 1 )
    _ret[ "idpartner" ] := cQuery:FieldGet( 2 )

@@ -481,7 +481,7 @@ FUNCTION fakt_napravi_duplikat( cIdFirma, cIdTipDok, cBrDok )
       o_fakt_pripr()
    ENDIF
 
-   cQuery := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt " + ;
+   cQuery := "SELECT * FROM " + f18_sql_schema( "fakt_fakt" ) + ;
       " WHERE idfirma = " + sql_quote( cIdFirma ) + ;
       " AND idtipdok = " + sql_quote( cIdTipDok ) + ;
       " AND brdok = " + sql_quote( cBrDok ) + ;

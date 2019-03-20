@@ -277,7 +277,7 @@ FUNCTION postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, cFiskalniModel )
       cWhere += " AND ( iznos > 0 AND fisc_rn > 0 ) "
    ENDIF
 
-   IF table_count( F18_PSQL_SCHEMA_DOT + "fakt_doks", cWhere ) > 0
+   IF table_count( f18_sql_schema( "fakt_doks" ) , cWhere ) > 0
       lRet := .T.
    ENDIF
 

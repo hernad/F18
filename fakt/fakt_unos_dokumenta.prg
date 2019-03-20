@@ -1201,7 +1201,7 @@ FUNCTION fakt_za_destinaciju( cIdPartner, cDestinacija, cIdRoba )
    LOCAL cQuery, oRez
    LOCAL cBrDok, oRow
 
-   cQuery := "SELECT brdok FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt" + ;
+   cQuery := "SELECT brdok FROM " + f18_sql_schema( "fakt_fakt" ) + ;
       " WHERE idtipdok='10' AND kolicina>0  AND txt like '%" + cDestinacija + "%' AND idpartner=" + sql_quote( cIdPartner )
 
    oRez := run_sql_query( cQuery )

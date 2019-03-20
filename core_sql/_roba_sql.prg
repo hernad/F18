@@ -374,7 +374,7 @@ FUNCTION kalk_kol_stanje_artikla_prodavnica( cIdKontoProdavnica, cIdRoba, dDatum
    cSql := "SELECT SUM( CASE WHEN pu_i = '1' THEN kolicina-gkolicina-gkolicin2 " + ;
       " WHEN pu_i = '5' THEN -kolicina " + ;
       " WHEN pu_i = 'I' THEN -gkolicin2 ELSE 0 END ) as stanje_p " + ;
-      " FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk " + ;
+      " FROM " + f18_sql_schema( "kalk_kalk" ) + ;
       " WHERE " + ;
       " idfirma = " + sql_quote( self_organizacija_id() ) + ;
       " AND pkonto = " + sql_quote( cIdKontoProdavnica ) + ;

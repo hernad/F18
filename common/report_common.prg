@@ -76,18 +76,7 @@ METHOD ReportCommon:get_company( cIdFirma )
 
    cCompany := AllTrim( tip_organizacije() ) + ": "
 
-   // IF gNW == "D"
    cCompany += self_organizacija_id() + " - " + AllTrim( self_organizacija_naziv() )
-   // ELSE
-   // IF cIdFirma == NIL
-   // cIdFirma := self_organizacija_id()
-   // ENDIF
-// _data := select_all_records_from_table( F18_PSQL_SCHEMA_DOT + "partn", { "naz", "naz2" }, { "id = " + sql_quote( cIdFirma ) } )
-   // oRow := _data:GetRow( 1 )
-   // cCompany += cIdFirma + " " + ;
-   // hb_UTF8ToStr( AllTrim( oRow:FieldGet( oRow:FieldPos( "naz" ) ) ) ) + " " + ;
-   // hb_UTF8ToStr( AllTrim( oRow:FieldGet( oRow:FieldPos( "naz2" ) ) ) )
-   // ENDIF
 
    RETURN cCompany
 

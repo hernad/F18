@@ -830,22 +830,22 @@ FUNCTION fakt_zadnji_izlazi_info( cIdPartner, cIdRoba )
 
 STATIC FUNCTION fakt_get_izlazi_10_11( cIdPartner, cIdRoba )
 
-   LOCAL cQuery, _table
+   LOCAL cQuery, cTabela
    LOCAL _data := {}
    LOCAL nI, oRow
 
-   cQuery := "SELECT idfirma, idtipdok, brdok, datdok, cijena, rabat FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt " + ;
+   cQuery := "SELECT idfirma, idtipdok, brdok, datdok, cijena, rabat FROM " + f18_sql_schema( "fakt_fakt" ) +;
       " WHERE idpartner = " + sql_quote( cIdPartner ) + ;
       " AND idroba = " + sql_quote( cIdRoba ) + ;
       " AND ( idtipdok = " + sql_quote( "10" ) + " OR idtipdok = " + sql_quote( "11" ) + " ) " + ;
       " ORDER BY datdok"
 
-   _table := run_sql_query( cQuery )
-   _table:GoTo( 1 )
+   cTabela := run_sql_query( cQuery )
+   cTabela:GoTo( 1 )
 
-   FOR nI := 1 TO _table:LastRec()
+   FOR nI := 1 TO cTabela:LastRec()
 
-      oRow := _table:GetRow( nI )
+      oRow := cTabela:GetRow( nI )
       AAdd( _data, { oRow:FieldGet( oRow:FieldPos( "idfirma" ) ), ;
          oRow:FieldGet( oRow:FieldPos( "idtipdok" ) ) + "-" + AllTrim( oRow:FieldGet( oRow:FieldPos( "brdok" ) ) ), ;
          oRow:FieldGet( oRow:FieldPos( "datdok" ) ), ;

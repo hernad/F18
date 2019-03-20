@@ -294,7 +294,7 @@ STATIC FUNCTION _grupno_sql_gen( racuni, params )
 
    // glavni upit !
    cQuery := "SELECT f.idfirma, f.idtipdok, f.brdok, MAX( f.rbr ) " + ;
-      "FROM " + F18_PSQL_SCHEMA_DOT + "fakt_fakt f "
+      "FROM " + f18_sql_schema( "fakt_fakt" ) + " f "
 
    cQuery += _where
 

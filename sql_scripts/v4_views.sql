@@ -259,10 +259,14 @@ GRANT ALL ON public.partn TO xtrole;
 
 -- public.valute
 drop view if exists public.valute;
-CREATE view public.valute  AS SELECT
-  *
-FROM
-  f18.valute;
+CREATE view public.valute  AS SELECT id, naz, naz2, datum, kurs1, kurs2, kurs3, tip FROM f18.valute;
+
+CREATE OR REPLACE RULE public_valute_ins AS ON INSERT TO public.valute
+      DO INSTEAD INSERT INTO f18.valute(
+        id, naz, naz2, datum, kurs1, kurs2, kurs3, tip
+      ) VALUES (
+        NEW.id, NEW.naz, NEW.naz2, NEW.datum, NEW.kurs1, NEW.kurs2, NEW.kurs3, NEW.tip
+      );
 
 GRANT ALL ON public.valute TO xtrole;
 

@@ -334,7 +334,7 @@ FUNCTION use_sql_pkonto()
    LOCAL cSql
    LOCAL cTable := "pkonto"
 
-   cSql := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + "pkonto ORDER BY id"
+   cSql := "SELECT * FROM " + f18_sql_schema("pkonto") + " ORDER BY id"
 
    SELECT F_PKONTO
    IF !use_sql( cTable, cSql )
@@ -470,7 +470,7 @@ FUNCTION use_sql_sifk( cDbf, cOznaka )
    ?E "USE SQL SIFK in main thread:", is_in_main_thread()
 #endif
 
-   cSql := "SELECT * from " + F18_PSQL_SCHEMA_DOT + "sifk"
+   cSql := "SELECT * from " + f18_sql_schema( "sifk" )
    IF cDbf != NIL
       cSql += " WHERE id=" + sql_quote( cDbf )
    ENDIF
@@ -532,7 +532,7 @@ FUNCTION use_sql_sifv( cDbf, cOznaka, xIdSif, xVrijednost )
       cOznaka := field->oznaka
    ENDIF
 
-   cSql := "SELECT * from " + F18_PSQL_SCHEMA_DOT + "sifv"
+   cSql := "SELECT * from " + f18_sql_schema( "sifv" )
    cSql += " WHERE id=" + sql_quote( cDbf )
 
    IF cOznaka != "*" // * - sve oznake
@@ -590,7 +590,7 @@ FUNCTION use_sql_rules()
    _alias := "FMKRULES"
    _table_name := "f18_rules"
 
-   cSql := "SELECT * FROM " + F18_PSQL_SCHEMA_DOT + _table_name
+   cSql := "SELECT * FROM " + f18_sql_schema( _table_name )
 
    SELECT F_RULES
    IF !use_sql( _alias, cSql )

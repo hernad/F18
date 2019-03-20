@@ -102,16 +102,17 @@ END;
 $$;
 
 ALTER TABLE f18.sifk DROP COLUMN IF EXISTS match_code;
+ALTER TABLE f18.sifk ADD COLUMN IF NOT EXISTS sifk_id uuid DEFAULT gen_random_uuid();
 
 DO $$
 BEGIN
-   ALTER TABLE f18.sifk ADD COLUMN IF NOT EXISTS sifk_id uuid DEFAULT gen_random_uuid();
    ALTER TABLE f18.sifk ADD PRIMARY KEY (sifk_id);
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'sifk primary key garant postoji';
 END;
 $$;
 
+ALTER TABLE f18.sifv ADD COLUMN IF NOT EXISTS sifv_id uuid DEFAULT gen_random_uuid();
 DO $$
 BEGIN
    ALTER TABLE f18.sifv ADD PRIMARY KEY (sifv_id);
@@ -119,6 +120,8 @@ EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'sifv primary key garant postoji';
 END;
 $$;
+
+
 
 DO $$
 BEGIN
