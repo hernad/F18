@@ -118,11 +118,11 @@ ALTER TABLE public.schema_migrations OWNER to admin;
 GRANT ALL ON TABLE public.schema_migrations TO admin;
 GRANT SELECT ON TABLE public.schema_migrations TO xtrole;
 
-CREATE TABLE fmk.refer (
+CREATE TABLE IF NOT EXISTS fmk.refer (
     id character(10),
     match_code character(10),
     idops character(4),
     naz character(40)
 );
 ALTER TABLE fmk.refer OWNER TO admin;
-CREATE INDEX refer_id1 ON fmk.refer USING btree (id);
+CREATE INDEX IF NOT EXISTS refer_id1 ON fmk.refer USING btree (id);

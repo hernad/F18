@@ -162,7 +162,8 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
-   IF programski_modul() == "POS" .and. cTable == "roba"
+   IF programski_modul() == "POS" .and. cTable $ "roba#vrstep"
+      altd()
       RETURN sql_primarna_schema() + "." + cTable
    ENDIF
 

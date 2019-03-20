@@ -83,12 +83,12 @@ FUNCTION pos_dokument_postoji( cIdPos, cIdvd, dDatum, cBroj )
    cWhere += " AND datum = " + sql_quote( dDatum )
    cWhere += " AND brdok = " + sql_quote( cBroj )
 
-   IF table_count( F18_PSQL_SCHEMA_DOT + "pos_doks", cWhere ) > 0
+   IF table_count( f18_sql_schema( "pos_doks" ), cWhere ) > 0
       lRet := .T.
    ENDIF
 
    IF !lRet
-      IF table_count( F18_PSQL_SCHEMA_DOT + "pos_pos", cWhere ) > 0
+      IF table_count( f18_sql_schema( "pos_pos" ), cWhere ) > 0
          lRet := .T.
       ENDIF
    ENDIF

@@ -832,14 +832,11 @@ FUNCTION fin_dokument_postoji( cIdFirma, cIdVn, cBrNal )
    cWhere += " AND idvn = " + sql_quote( cIdVn )
    cWhere += " AND brnal = " + sql_quote( cBrNal )
 
-   IF table_count( F18_PSQL_SCHEMA_DOT + "fin_nalog", cWhere ) > 0
+   IF table_count( f18_sql_schema( "fin_nalog" ), cWhere ) > 0
       lExist := .T.
    ENDIF
 
    RETURN lExist
-
-
-
 
 
 

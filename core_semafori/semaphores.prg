@@ -849,7 +849,7 @@ STATIC FUNCTION dbf_refresh_0( cTable )
    ?E cMsg1
 #endif
 
-   nCntSql := table_count( aDbfRec[ "table" ] )
+   nCntSql := table_count( f18_sql_schema( aDbfRec[ "table" ] ) )
    dbf_open_temp_and_count( aDbfRec, nCntSql, @nCntDbf, @nDeleted )
 
    cMsg1 := "dbf_refresh_0_nakon sync: " +  aDbfRec[ "alias" ] + " / " + aDbfRec[ "table" ]

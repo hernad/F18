@@ -438,8 +438,9 @@ FUNCTION select_o_vrstep( cId )
 FUNCTION use_sql_vrstep( cId )
 
    LOCAL cSql
-   LOCAL cTable := "vrstep"
+   LOCAL cTable := f18_sql_schema( "vrstep" )
 
+altd()
    SELECT ( F_VRSTEP )
    IF !use_sql_sif( cTable, .T., "VRSTEP", cId )
       RETURN .F.
@@ -548,7 +549,7 @@ FUNCTION select_o_pos_osob( cId )
 FUNCTION use_sql_pos_osob( cId )
 
    LOCAL cSql
-   LOCAL cTable := "pos_osob"
+   LOCAL cTable := f18_sql_schema( "pos_osob" )
    LOCAL cAlias := "OSOB"
 
    SELECT ( F_OSOB )

@@ -188,8 +188,6 @@ FUNCTION pos_get_osob( fNovi )
 
    // SELECT strad
    select_o_pos_strad( _status )
-
-
    select_o_pos_osob()
 
    // level tekuceg korisnika > level

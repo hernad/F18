@@ -36,6 +36,11 @@ ELSE
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
 END IF;
 
+-- u koncij nije dodijeljena prodavnica za ovaj konto - STOP!
+IF ( cProdShema IS NULL ) OR ( cProdShema = 'p0' ) THEN
+    RETURN NULL;
+END IF;
+
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete % prodavnica %', OLD.idvd, cProdShema;
       EXECUTE 'DELETE FROM '  || cProdShema || '.pos_pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
@@ -53,7 +58,7 @@ ELSIF (TG_OP = 'INSERT') THEN
         cijena := NEW.mpcsapp;
         ncijena := 0;
       END IF;
-      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_pos_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_items_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
         USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, public.barkod_ean13_to_num(barkodRoba,3), NEW.idtarifa, robaNaz,robaJmj;
       RETURN NEW;
 END IF;
@@ -87,6 +92,10 @@ ELSE
         RETURN NULL;
      END IF;
      cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
+END IF;
+
+IF ( cProdShema IS NULL ) OR ( cProdShema = 'p0' ) THEN
+    RETURN NULL;
 END IF;
 
 IF (TG_OP = 'DELETE') THEN

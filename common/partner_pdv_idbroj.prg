@@ -128,7 +128,7 @@ FUNCTION update_idbr_pdvb_from_regb()
 
 FUNCTION find_sifk_by_id_oznaka_naz_sort( cId, cOznaka, cNaz, cSort )
 
-   LOCAL cSql := "select * from fmk.sifk"
+   LOCAL cSql := "select * from " + f18_sql_schema( "sifk" )
 
    cSql += " WHERE id=" + sql_quote( PadR( cId, FIELD_LEN_SIFK_ID ) )
    cSql += " AND oznaka=" + sql_quote( PadR( cOznaka, FIELD_LEN_SIFK_OZNAKA ) )

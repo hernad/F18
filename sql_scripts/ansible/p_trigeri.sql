@@ -137,7 +137,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.on_kasa_pos_items_crud() RETURN
        LANGUAGE plpgsql
        AS $$
 DECLARE
-    idPos varchar := '15';
+    idPos varchar := '1 ';
     lRet boolean;
     datOd date;
     datDo date;
