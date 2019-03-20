@@ -86,7 +86,9 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
       _cijena := aCijene[ nOdabranaCijena, 1 ]
       _ncijena := aCijene[ nOdabranaCijena, 2 ]
    ELSE
-      Alert( "Artikla " + cIdRoba + " nema na stanju !?" )
+       IF !pos_ne_prati_stanje()
+         Alert( "Artikla " + cIdRoba + " nema na stanju !?" )
+      ENDIF
       _cijena := pos_get_mpc()
       _ncijena := 0
    ENDIF
@@ -96,6 +98,10 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
    ENDIF
 
    RETURN lOk
+
+
+static function pos_ne_prati_stanje()
+    RETURN .T.
 
 
 STATIC FUNCTION pos_racun_provjera_dupli_artikal( cIdroba )

@@ -529,6 +529,10 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
       ENDDO
       BoxC()
 
+      IF cStatus == "FAJL"
+         exit
+      ENDIF
+
       IF cStatus == "ALTQ" .OR. cStatus == "CEKAM"
          IF Pitanje(, "Nestalo je trake? Ako vršite zamjenu odgovorite sa 'D'", " " ) == "D"
             LOOP
