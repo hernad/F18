@@ -101,8 +101,11 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$;
 
+ALTER TABLE f18.sifk DROP COLUMN IF EXISTS match_code;
+
 DO $$
 BEGIN
+   ALTER TABLE f18.sifk ADD COLUMN IF NOT EXISTS sifk_id uuid DEFAULT gen_random_uuid();
    ALTER TABLE f18.sifk ADD PRIMARY KEY (sifk_id);
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'sifk primary key garant postoji';
