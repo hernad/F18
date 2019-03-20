@@ -348,8 +348,7 @@ FUNCTION find_sifra_by_naz( cTable, cIdPart, cDjoker )
 */
 FUNCTION find_field_by_id( cTable, cId, cField )
 
-   LOCAL cSqlQuery := "select " + cField + " from fmk." + cTable
-
+   LOCAL cSqlQuery := "select " + cField + " from " + f18_sql_schema( cTable)
    cSqlQuery += " WHERE id=" + sql_quote( cId )
 
    IF !use_sql( cTable, cSqlQuery )

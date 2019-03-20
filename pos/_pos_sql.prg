@@ -198,6 +198,40 @@ FUNCTION seek_pos_doks_2_za_period( cIdVd, dDatOd, dDatDo )
 FUNCTION seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo, cAlias )
    RETURN seek_pos_doks( cIdPos, cIdVd, NIL, NIL, "1", dDatOd, dDatDo, cAlias )
 
+
+FUNCTION seek_pos_doks_h( hParams  )
+
+     LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias
+
+
+      if hb_HHasKey( hParams, "idpos" )
+          cIdPos := hParams[ "idpos" ]
+      ENDIF
+      if hb_HHasKey( hParams, "idvd" )
+          cIdVd := hParams[ "idvd" ]
+      ENDIF
+      if hb_HHasKey( hParams, "datum" )
+          dDatum := hParams[ "datum" ]
+      ENDIF
+      if hb_HHasKey( hParams, "brdok" )
+          cBrdok := hParams[ "brdok" ]
+      ENDIF
+      if hb_HHasKey( hParams, "tag" )
+          cTag := hParams[ "tag" ]
+      ENDIF
+      if hb_HHasKey( hParams, "dat_od" )
+          dDatOd := hParams[ "dat_od" ]
+      ENDIF
+      if hb_HHasKey( hParams, "dat_do" )
+          dDatDo := hParams[ "dat_do" ]
+      ENDIF
+      if hb_HHasKey( hParams, "alias" )
+          cTag := hParams[ "alias" ]
+      ENDIF
+      
+      return seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
+
+
 FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
 
    LOCAL cSql

@@ -27,6 +27,7 @@ FUNCTION pos_pregled_racuna()
 
    hParams[ "datum" ] := dDatum
    hParams[ "browse" ] := .T.
+   hParams[ "idpos" ] := pos_pm()
    pos_lista_racuna( hParams )
    my_close_all_dbf()
 
@@ -45,6 +46,9 @@ FUNCTION pos_lista_racuna( hParams )
 
    IF !hb_HHasKey( hParams, "idpos" )
       hParams[ "idpos" ] := pos_pm()
+   ENDIF
+   IF !hb_HHasKey( hParams, "idvd" )
+      hParams[ "idvd" ] := POS_IDVD_RACUN
    ENDIF
    IF !hb_HHasKey( hParams, "datum" )
       hParams[ "datum" ] := NIL
@@ -78,7 +82,9 @@ FUNCTION pos_lista_racuna( hParams )
       hParams[ "brdok" ] := PadL( AllTrim( hParams[ "brdok" ] ),  FIELD_LEN_POS_BRDOK )
    ENDIF
 
-   seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
+
+   //seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
+   seek_pos_doks_h( hParams )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
@@ -93,7 +99,7 @@ FUNCTION pos_lista_racuna( hParams )
    NEXT
 
    SELECT pos_doks
-   cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( hParams[ "idpos" ] )
+   //cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( hParams[ "idpos" ] )
 
    IF hParams[ "idroba" ] <> NIL .AND. !Empty( hParams[ "idroba" ] )
       cFilter += ".and. pos_racun_sadrzi_artikal(IdPos, IdVd, datum, BrDok, " + dbf_quote( hParams[ "idroba" ] ) + ")"

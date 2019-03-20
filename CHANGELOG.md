@@ -7,6 +7,7 @@
 - fiskalni parametri
 - fiskalni loop fix
 - fiskalne funkcije belaji
+- osnovne info fix
 
 ## 2019-03-19
 

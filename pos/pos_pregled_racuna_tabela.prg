@@ -46,6 +46,10 @@ FUNCTION pos_pregled_racuna_tabela()
    //IF !Empty( dDatOd ) .AND. !Empty( dDatDo )
   //    cFilterDatumOdDo := "datum >= " + _filter_quote( dDatOD ) + " .and. datum <= " + _filter_quote( dDatDo )
    //ENDIF
+   altd()
+
+   hParams[ "idpos" ] := pos_pm()
+   hParams[ "idvd" ] := POS_IDVD_RACUN
    hParams["dat_od"] := dDatOd
    hParams["dat_do"] := dDatDo
    hParams["browse"] := .T.

@@ -112,6 +112,7 @@ FUNCTION pos_realizacija_radnik
    ENDIF
 
    IF lTekuci
+   altd()
       ? gIdRadnik, "-", AllTrim ( find_pos_osob_naziv( gIdRadnik ) ),  "   NA DAN: " + FormDat1 ( danasnji_datum() )
       ?
    ELSE
