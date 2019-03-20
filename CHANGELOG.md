@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-20
+
+- f18.sifk, f18.sifv cleanup
+
 ## 2019-03-19
 
 - out sql_cleanup, sql_cleanup_all
