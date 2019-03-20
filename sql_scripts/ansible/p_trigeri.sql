@@ -245,3 +245,6 @@ CREATE TRIGGER kasa_pos_items_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON {{ item_prodavnica }}.pos_items
       FOR EACH ROW EXECUTE PROCEDURE {{ item_prodavnica }}.on_kasa_pos_items_crud();
+
+ALTER TABLE {{ item_prodavnica }}.pos ENABLE ALWAYS TRIGGER kasa_pos_crud;
+ALTER TABLE {{ item_prodavnica }}.pos_items ENABLE ALWAYS TRIGGER kasa_pos_items_crud;
