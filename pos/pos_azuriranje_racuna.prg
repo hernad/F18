@@ -26,6 +26,7 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    hTranParams[ "tran_name" ] := "pos_rn_azur"
 
+altd()
    o_pos_tables()
    IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
       RETURN .F.
@@ -109,7 +110,7 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    IF lOk
       IF !fiscal_opt_active() .AND. Pitanje(, "Fiskalni štampač nije aktivan. Svejedno ažurirati?", " " ) == "D"
-         lOk := .F.
+         lOk := .T.
       ELSE
          lOk := pos_stampa_fiskalni_racun( hParams )
       ENDIF

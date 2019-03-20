@@ -33,7 +33,6 @@ FUNCTION pos_realizacija_radnik
 
    cPrikazPazarRoba := iif ( cPrikazPazarRoba == NIL, "P", cPrikazPazarRoba )
 
-
    IF lTekuci
       cIdRadnik := gIdRadnik
       dDatOd := dDatDo := danasnji_datum()
@@ -45,7 +44,6 @@ FUNCTION pos_realizacija_radnik
       AAdd( aNiz, { "Vrsta placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
       AAdd( aNiz, { "Izvještaj se pravi od datuma", "dDatOd",,, } )
       AAdd( aNiz, { "                   do datuma", "dDatDo",,, } )
-
 
       cPrikazPazarRoba := "O"
       AAdd( aNiz, { "Prikazi Pazar/Robe/Oboje (P/R/O)", "cPrikazPazarRoba", "cPrikazPazarRoba$'PRO'", "@!", } )

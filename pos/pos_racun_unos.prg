@@ -130,7 +130,7 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
    ENDIF
 
    nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "uplaceno" ] )
-   
+
    IF nError <> 0
       MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun će ostati u pripremi" )
       // pos_povrat_racuna( hParams[ "idpos" ], hParams[ "brdok" ], hParams[ "datum" ] )
@@ -198,7 +198,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    READ
 
    BoxC()
-
+altd()
    IF LastKey() == K_ESC .OR. cAzuriratiDN == "N"
       RETURN .F.
    ENDIF

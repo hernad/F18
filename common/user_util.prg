@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+/*
 FUNCTION f18_get_user_id()
 
    LOCAL cTmpQry
@@ -28,7 +28,11 @@ FUNCTION f18_get_user_id()
    ENDIF
 
    RETURN oTable:FieldGet( 1 )
+*/
 
+FUNCTION f18_get_user_id()
+
+      RETURN 1
 
 
 
@@ -85,7 +89,7 @@ FUNCTION f18_user_roles_info()
    RETURN _info
 
 
-
+/*
 FUNCTION GetUserName( nUser_id )
 
    LOCAL cTmpQry
@@ -101,9 +105,12 @@ FUNCTION GetUserName( nUser_id )
    ENDIF
 
    RETURN hb_UTF8ToStr( oTable:FieldGet( 1 ) )
+*/
 
+FUNCTION GETUSERNAME( nUserId )
+return f18_user()
 
-
+/*
 FUNCTION GetFullUserName( nUser_id )
 
    LOCAL cTmpQry
@@ -118,7 +125,11 @@ FUNCTION GetFullUserName( nUser_id )
    ENDIF
 
    RETURN hb_UTF8ToStr( oTable:FieldGet( 1 ) )
+*/
 
+FUNCTION GetFullUserName( nUserId )
+
+RETURN "F18USER"
 
 
 FUNCTION choose_f18_user_from_list( nOperaterId )
@@ -176,6 +187,7 @@ STATIC FUNCTION izaberi_f18_korisnika( arr )
 
 FUNCTION get_list_f18_users()
 
+/*
    LOCAL cQuery, oTable
    LOCAL _list := {}
    LOCAL oRow, nI
@@ -203,4 +215,7 @@ FUNCTION get_list_f18_users()
 
    NEXT
 
+
    RETURN _list
+*/
+   RETURN { {1, f18_user(), f18_user(), "podrska@bring.out.ba"} }

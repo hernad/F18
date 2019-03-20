@@ -384,6 +384,7 @@ FUNCTION korisnik_postavke_fiskalni_uredjaj()
       RETURN .F.
    ENDIF
 
+altd()
    set_metric( "fiscal_device_" + _dev_tmp + "_out_dir", _cUserName, AllTrim( _out_dir ) )
    set_metric( "fiscal_device_" + _dev_tmp + "_out_file", _cUserName, AllTrim( _out_file ) )
    set_metric( "fiscal_device_" + _dev_tmp + "_out_answer", _cUserName, AllTrim( _out_answer ) )
@@ -698,8 +699,8 @@ FUNCTION get_fiscal_device_params( nDeviceId, cUserName )
       _cUserName := cUserName
    ENDIF
 
+altd()
    _dev_param := "fiscal_device_" + _dev_tmp
-
    _dev_id := fetch_metric( _dev_param + "_id", NIL, 0 )
 
    IF _dev_id == 0
@@ -722,13 +723,14 @@ FUNCTION get_fiscal_device_params( nDeviceId, cUserName )
    _param[ "vp_no_customer" ] := fetch_metric( "fiscal_device_" + _dev_tmp + "_vp_no_customer", NIL, "N" )
    _param[ "restart_service" ] := fetch_metric( "fiscal_device_" + _dev_tmp + "_restart_service", NIL, "N" )
 
-#ifdef TEST
-   _out_dir := "/tmp/"
-#else
+//#ifdef TEST
+//   _out_dir := "/tmp/"
+//#else
    _out_dir := fetch_metric( "fiscal_device_" + _dev_tmp + "_out_dir", _cUserName, "" )
-#endif
+//#endif
 
    IF Empty( _out_dir )
+      Alert( "izlazni direktorij prazan !")
       RETURN NIL
    ENDIF
 

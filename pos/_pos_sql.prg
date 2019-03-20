@@ -440,7 +440,6 @@ FUNCTION use_sql_vrstep( cId )
    LOCAL cSql
    LOCAL cTable := f18_sql_schema( "vrstep" )
 
-altd()
    SELECT ( F_VRSTEP )
    IF !use_sql_sif( cTable, .T., "VRSTEP", cId )
       RETURN .F.
@@ -480,7 +479,7 @@ FUNCTION select_o_pos_strad( cId )
 
 FUNCTION use_sql_pos_strad( cId )
 
-   LOCAL cTable := "pos_strad"
+   LOCAL cTable := f18_sql_schema(  "pos_strad" )
    LOCAL cAlias := "STRAD"
 
    SELECT ( F_STRAD )
@@ -497,9 +496,10 @@ FUNCTION use_sql_pos_strad( cId )
 
 FUNCTION find_pos_osob_by_naz( cNaz )
 
-   LOCAL cTable := "pos_osob", cAlias := "OSOB"
-   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
+   LOCAL cTable := f18_sql_schema( "pos_osob" ), cAlias := "OSOB"
+   LOCAL cSqlQuery := "select * from " + cTable
 
+altd()
    cSqlQuery += " WHERE naz=" + sql_quote( cNaz )
    SELECT ( F_OSOB )
    use_sql( cTable, cSqlQuery, cAlias )
@@ -510,8 +510,8 @@ FUNCTION find_pos_osob_by_naz( cNaz )
 
 FUNCTION find_pos_osob_by_korsif( cKorSif )
 
-   LOCAL cTable := "pos_osob", cAlias := "OSOB"
-   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
+   LOCAL cTable := f18_sql_schema( "pos_osob" ), cAlias := "OSOB"
+   LOCAL cSqlQuery := "select * from " +  cTable
 
    cSqlQuery += " WHERE korsif=" + sql_quote( cKorSif )
    SELECT ( F_OSOB )
