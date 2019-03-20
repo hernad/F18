@@ -265,3 +265,64 @@ CREATE view public.log  AS SELECT
     FROM f18.log;
 
 GRANT ALL ON f18.log TO xtrole;
+
+CREATE TABLE IF NOT EXISTS f18.sifk (
+    sifk_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(8),
+    sort character(2),
+    naz character(25),
+    oznaka character(4),
+    veza character(1),
+    f_unique character(1),
+    izvor character(15),
+    uslov character(200),
+    duzina numeric(2,0),
+    f_decimal numeric(1,0),
+    tip character(1),
+    kvalid character(100),
+    kwhen character(100),
+    ubrowsu character(1),
+    edkolona numeric(2,0),
+    k1 character(1),
+    k2 character(2),
+    k3 character(3),
+    k4 character(4)
+);
+ALTER TABLE f18.sifk OWNER TO admin;
+GRANT ALL ON f18.sifk TO xtrole;
+
+CREATE TABLE IF NOT EXISTS f18.sifv (
+    sifv_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    id character(8),
+    idsif character(15),
+    naz character(200),
+    oznaka character(4)
+);
+ALTER TABLE f18.sifv OWNER TO admin;
+GRANT ALL ON f18.sifv TO xtrole;
+
+-- public.sifk
+drop view if exists public.sifk;
+CREATE view public.sifk  AS SELECT
+  id, sort, naz, oznaka, veza, f_unique, izvor, uslov, duzina, f_decimal, tip, kvalid, kwhen, ubrowsu, edkolona, k1, k2, k3, k4
+FROM
+  f18.sifk;
+
+
+CREATE OR REPLACE RULE public_sifk_ins AS ON INSERT TO public.sifk
+         DO INSTEAD INSERT INTO f18.sifk(
+           id, sort, naz, oznaka, veza, f_unique, izvor, uslov, duzina, f_decimal, tip, kvalid, kwhen, ubrowsu, edkolona, k1, k2, k3, k4
+
+         ) VALUES (
+           NEW.id, NEW.sort, NEW.naz, NEW.oznaka, NEW.veza, NEW.f_unique, NEW.izvor, NEW.uslov, NEW.duzina, NEW.f_decimal, NEW.tip, NEW.kvalid, NEW.kwhen, NEW.ubrowsu, NEW.edkolona, NEW.k1, NEW.k2, NEW.k3, NEW.k4
+         );
+
+
+GRANT ALL ON public.sifk TO xtrole;
+
+-- public.sifv
+drop view if exists public.sifv;
+CREATE view public.sifv  AS SELECT
+  id, idsif, naz, oznaka
+FROM
+  f18.sifv;
