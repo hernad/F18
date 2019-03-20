@@ -5,6 +5,7 @@
 - f18.sifk, f18.sifv cleanup
 - pos_osob, vrstep - fmk schema pos out
 - fiskalni parametri
+- fiskalni loop fix
 
 ## 2019-03-19
 
