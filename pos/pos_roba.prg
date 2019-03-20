@@ -55,7 +55,10 @@ FUNCTION pos_postoji_roba( cId, nRow, nCol, cBarkodVratiti, aGetList )
    AAdd( ImeKol, { PadC( "Naziv", 40 ), {|| PadR( roba->naz, 40 ) }, "" } )
    AAdd( ImeKol, { PadC( "JMJ", 5 ), {|| PadC( roba->jmj, 5 ) }, "" } )
    AAdd( ImeKol, { "BARKOD", {|| roba->barkod }, "" } )
-   AAdd( ImeKol, { "Cijena", {|| Transform( roba->mpc, "99999.99" ) }, "" } )
+   AAdd( ImeKol, { "Parovi Stanje-Cijena", {||  pos_stanje_artikal_str( roba->id, 40 ) }, "" } )
+   AAdd( ImeKol, { "C.Sif", {|| Transform( roba->mpc, "99999.99" ) }, "" } )
+
+
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
    NEXT

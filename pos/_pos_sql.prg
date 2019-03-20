@@ -201,35 +201,34 @@ FUNCTION seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo, cAlias )
 
 FUNCTION seek_pos_doks_h( hParams  )
 
-     LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias
+   LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias
 
+   IF hb_HHasKey( hParams, "idpos" )
+      cIdPos := hParams[ "idpos" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "idvd" )
+      cIdVd := hParams[ "idvd" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "datum" )
+      dDatum := hParams[ "datum" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "brdok" )
+      cBrdok := hParams[ "brdok" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "tag" )
+      cTag := hParams[ "tag" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "dat_od" )
+      dDatOd := hParams[ "dat_od" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "dat_do" )
+      dDatDo := hParams[ "dat_do" ]
+   ENDIF
+   IF hb_HHasKey( hParams, "alias" )
+      cTag := hParams[ "alias" ]
+   ENDIF
 
-      if hb_HHasKey( hParams, "idpos" )
-          cIdPos := hParams[ "idpos" ]
-      ENDIF
-      if hb_HHasKey( hParams, "idvd" )
-          cIdVd := hParams[ "idvd" ]
-      ENDIF
-      if hb_HHasKey( hParams, "datum" )
-          dDatum := hParams[ "datum" ]
-      ENDIF
-      if hb_HHasKey( hParams, "brdok" )
-          cBrdok := hParams[ "brdok" ]
-      ENDIF
-      if hb_HHasKey( hParams, "tag" )
-          cTag := hParams[ "tag" ]
-      ENDIF
-      if hb_HHasKey( hParams, "dat_od" )
-          dDatOd := hParams[ "dat_od" ]
-      ENDIF
-      if hb_HHasKey( hParams, "dat_do" )
-          dDatDo := hParams[ "dat_do" ]
-      ENDIF
-      if hb_HHasKey( hParams, "alias" )
-          cTag := hParams[ "alias" ]
-      ENDIF
-      
-      return seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
+   RETURN seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
 
 
 FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
@@ -325,6 +324,33 @@ FUNCTION h_pos_doks_indexes()
    hIndexes[ "TK" ] := "IdPos+DTOS(Datum)+IdVd"
 
    RETURN hIndexes
+
+
+FUNCTION pos_stanje_artikal_str( cIdRoba, nStrLen )
+
+   LOCAL nI, nCijena, nNCijena, aCijene := pos_dostupne_cijene_za_artikal( cIdRoba )
+   LOCAL nStanje, nCijenaNeto, cSlikaStanja := ""
+   LOCAL nLen := Len( aCijene )
+
+   FOR nI := 1 TO nLen
+      nCijena := aCijene[ nI, 1 ]
+      nNCijena := aCijene[ nI, 2 ]
+      // IF nNCijena <> 0
+      nCijenaNeto := nCijena - nNCijena
+      // ENDIF
+      nStanje := pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
+
+      IF !Empty( cSlikaStanja )
+         cSlikaStanja += " ; "
+      ENDIF
+      IF nLen == 1
+         cSlikaStanja +=  "St:" + Transform( nStanje, "999999.99" )  + "- Cij:" + Transform( nCijenaNeto, "999999.99" )
+      ELSE
+         cSlikaStanja += "St: " + AllTrim( Transform( nStanje, "999999.99" ) ) + "- Cij:" + AllTrim( Transform( nCijenaNeto, "999999.99" ) )
+      ENDIF
+   NEXT
+
+   return Padr(cSlikaStanja, nStrLen )
 
 
 FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
