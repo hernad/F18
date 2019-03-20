@@ -326,3 +326,6 @@ CREATE view public.sifv  AS SELECT
   id, idsif, naz, oznaka
 FROM
   f18.sifv;
+
+GRANT ALL ON public.sifv TO xtrole;
+GRANT ALL ON public.sifk TO xtrole;
