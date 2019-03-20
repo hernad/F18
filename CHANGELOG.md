@@ -6,6 +6,7 @@
 - pos_osob, vrstep - fmk schema pos out
 - fiskalni parametri
 - fiskalni loop fix
+- fiskalne funkcije belaji
 
 ## 2019-03-19
 
