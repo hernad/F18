@@ -198,7 +198,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    READ
 
    BoxC()
-altd()
+
    IF LastKey() == K_ESC .OR. cAzuriratiDN == "N"
       RETURN .F.
    ENDIF

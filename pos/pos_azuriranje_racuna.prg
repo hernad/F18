@@ -26,7 +26,6 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    hTranParams[ "tran_name" ] := "pos_rn_azur"
 
-altd()
    o_pos_tables()
    IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
       RETURN .F.

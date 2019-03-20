@@ -499,7 +499,6 @@ FUNCTION find_pos_osob_by_naz( cNaz )
    LOCAL cTable := f18_sql_schema( "pos_osob" ), cAlias := "OSOB"
    LOCAL cSqlQuery := "select * from " + cTable
 
-altd()
    cSqlQuery += " WHERE naz=" + sql_quote( cNaz )
    SELECT ( F_OSOB )
    use_sql( cTable, cSqlQuery, cAlias )
