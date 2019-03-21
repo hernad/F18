@@ -43,7 +43,7 @@ END IF;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete % prodavnica %', OLD.idvd, cProdShema;
-      EXECUTE 'DELETE FROM '  || cProdShema || '.pos_pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+      EXECUTE 'DELETE FROM '  || cProdShema || '.pos_items_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
          USING idpos, OLD.idvd, OLD.brdok, OLD.datdok, OLD.rbr;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
@@ -100,7 +100,7 @@ END IF;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete doks prodavnica %', idPos;
-      EXECUTE 'DELETE FROM ' || cProdShema || '.pos_doks_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+      EXECUTE 'DELETE FROM ' || cProdShema || '.pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
              USING idpos, OLD.idvd, OLD.brdok, OLD.datdok;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
@@ -108,7 +108,7 @@ ELSIF (TG_OP = 'UPDATE') THEN
           RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert doks prodavnica %', cProdShema;
-      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_doks_knjig(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
+      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_knjig(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
             USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
 
       RETURN NEW;

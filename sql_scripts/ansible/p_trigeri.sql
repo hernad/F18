@@ -216,7 +216,8 @@ ELSIF (TG_OP = 'INSERT') AND ( (NEW.idvd = '19') OR (NEW.idvd = '29') OR (NEW.id
            USING idPos, NEW.idvd, NEW.brdok, NEW.datum
            INTO datOd, datDo;
         IF datOd IS NULL THEN
-           RAISE EXCEPTION 'pos_doks % % % % NE postoji?!', idPos, NEW.idvd, NEW.brdok, NEW.datum;
+           RAISE INFO 'p_trigeri.sql pos_doks % % % % NE postoji?!', idPos, NEW.idvd, NEW.brdok, NEW.datum;
+           RETURN NULL;
         END IF;
 
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
