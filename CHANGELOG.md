@@ -7,6 +7,7 @@
 - kontiranje 42-ke u shemama kontiranja ima POREZ2
 - FIN nalog pdf
 - POS pracenje stanja vraceno
+- POS fix pos_osob init
 
 ## 2019-03-20
 

@@ -158,34 +158,67 @@ $$;
 CREATE OR REPLACE FUNCTION public.prodavnica_konto(nProdavnica integer) RETURNS varchar
    LANGUAGE plpgsql
 AS $$
+DECLARE
+   pKonto varchar;
 BEGIN
 
-IF ( NOT nProdavnica IN (15) ) THEN
+SELECT id INTO pKonto
+	 from public.koncij where prod=nProdavnica;
+
+IF coalesce( btrim( pKonto), '' ) ='' THEN
     RETURN '99999';
 END IF;
 
-RETURN CASE WHEN nProdavnica=1 THEN '13311'
-     WHEN nProdavnica=2 THEN '13312'
-     WHEN nProdavnica=4 THEN '13314'
-     WHEN nProdavnica=5 THEN '13315'
-     WHEN nProdavnica=6 THEN '13316'
-     WHEN nProdavnica=7 THEN '13317'
-     WHEN nProdavnica=8 THEN '13318'
-     WHEN nProdavnica=9 THEN '13319'
-     WHEN nProdavnica=10 THEN '13320'
-     WHEN nProdavnica=11 THEN '13321'
-     WHEN nProdavnica=12 THEN '13322'
-     WHEN nProdavnica=13 THEN '13323'
-     WHEN nProdavnica=14 THEN '13324'
-     WHEN nProdavnica=15 THEN '13325'
-     WHEN nProdavnica=16 THEN '13326'
-     WHEN nProdavnica=17 THEN '13327'
-     WHEN nProdavnica=18 THEN '13328'
-     WHEN nProdavnica=19 THEN '13329'
-     WHEN nProdavnica=20 THEN '13330'
-     WHEN nProdavnica=21 THEN '13331'
-     WHEN nProdavnica=22 THEN '13332'
-     ELSE '13399'
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.mpc_by_koncij(cPKonto varchar, cIdRoba varchar) RETURNS numeric
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+   cTip varchar;
+	 nMpc numeric;
+	 nMpc2 numeric;
+	 nMpc3 numeric;
+	 nMpc4 numeric;
+	 nMpc5 numeric;
+	 nMpc6 numeric;
+	 nMpc7 numeric;
+	 nMpc8 numeric;
+	 nMpc9 numeric;
+	 cIdFound varchar;
+BEGIN
+
+-- tip cijene je pohranjen u naz polje
+SELECT naz INTO cTip
+	 from public.koncij where id=cPKonto;
+
+-- nije definisan tip, treba da bude 'M1', 'M2' itd
+IF coalesce( btrim( cTip), '' ) = '' THEN
+    RETURN 0;
+END IF;
+
+SELECT Id, mpc, mpc2, mpc3, mpc4, mpc5, mpc6, mpc7, mpc8, mpc9 FROM public.roba
+   WHERE id=cIdRoba
+	 INTO cIdFound, nMpc, nMpc2, nMpc3, nMpc4, nMpc5, nMpc6, nMpc7, nMpc8, nMpc9;
+
+RAISE INFO '[%] % % %', cTip, cIdFound, nMpc, nMpc2;
+
+IF coalesce( btrim(cIdFound), '' ) = '' THEN
+     RAISE INFO 'artikla % nema ?!', cIdRoba;
+	   RETURN -1;
+END IF;
+
+RETURN CASE WHEN cTip='M1' THEN nMpc
+       WHEN cTip='M2' THEN nMpc2
+			 WHEN cTip='M3' THEN nMpc3
+			 WHEN cTip='M4' THEN nMpc4
+			 WHEN cTip='M5' THEN nMpc5
+			 WHEN cTip='M6' THEN nMpc6
+			 WHEN cTip='M7' THEN nMpc7
+			 WHEN cTip='M8' THEN nMpc8
+			 WHEN cTip='M9' THEN nMpc9
+      ELSE -3
 END;
 
 END;

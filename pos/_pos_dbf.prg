@@ -62,7 +62,7 @@ STATIC FUNCTION pos_dodaj_u_sifarnik_radnika( cId, cLozinka, cOpis, cStatus )
    hRec[ "status" ] := PadR( cStatus, Len( hRec[ "status" ] ) )
 
    APPEND BLANK
-   lOk := update_rec_server_and_dbf( f18_sql_schema( "pos_osob" ), hRec, 1, "FULL" )
+   lOk := update_rec_server_and_dbf( "pos_osob", hRec, 1, "FULL" )
 
    RETURN lOk
 
