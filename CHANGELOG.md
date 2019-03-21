@@ -5,6 +5,8 @@
 - 02 - zaduženje roba sa količinom 0
 - POS realizacija kase
 - kontiranje 42-ke u shemama kontiranja ima POREZ2
+- FIN nalog pdf
+- POS pracenje stanja vraceno
 
 ## 2019-03-20
 
