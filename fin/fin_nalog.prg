@@ -12,14 +12,18 @@
 #include "f18.ch"
 
 STATIC s_nColIzn := 20
+STATIC s_oPDF
 
 MEMVAR M
+MEMVAR cIdFirma, cIdVn, cBrNal, dDatNal
 
 
 FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
 
    LOCAL dDatNal
    LOCAL GetList := {}
+   LOCAL xPrintOpt
+
 
    PRIVATE fK1 := fk2 := fk3 := fk4 := "N", gnLOst := 0, gPotpis := "N"
 
@@ -51,14 +55,28 @@ FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
 
    find_suban_by_broj_dokumenta( cIdFirma, cIdvn, cBrnal )
 
+/*
    IF !start_print()
+      RETURN .F.
+   ENDIF
+   */
+
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "portrait"
+   xPrintOpt[ "font_size" ] := 8
+   xPrintOpt[ "opdf" ] := s_oPDF
+   fin_nalog_set_pdf( s_oPDF )
+   IF f18_start_print( NIL, xPrintOpt,  "FIN NALOG " + fin_dokument_str( cIdFirma, cIdVn, cBrNal ) + "  NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF
 
    fin_nalog_stampa_fill_psuban( "2", .T., dDatNal, NIL, NIL )
    my_close_all_dbf()
 
-   end_print()
+   f18_end_print( NIL, xPrintOpt )
+
 
    RETURN .T.
 
@@ -241,16 +259,7 @@ FUNCTION fin_gen_ptabele_stampa_nalozi( lAuto, lStampa )
 
 
 
-
-
-
-
-
-/* PrenosDNal()
- *     Ispis prenos na sljedecu stranicu
- */
-
-FUNCTION PrenosDNal()
+FUNCTION fin_stampa_prenos_na_sljedecoj_strani()
 
    ? m
    ? PadR( "UKUPNO NA STRANI " + AllTrim( Str( nStr ) ), 30 ) + ":"

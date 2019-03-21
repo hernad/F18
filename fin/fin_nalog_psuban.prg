@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
+
 /*
    Štampa (su)banalitičkog finansijski nalog
    - ako smo na fin_pripr onda puni psuban sa sadržajem fin_pripr
@@ -27,6 +29,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
    LOCAL cIdFirma, cIdVN, cBrNal
    LOCAL b2
    LOCAL nPOk
+   LOCAL bZagl
 
 #ifdef F18_DEBUG_FIN_AZUR
 
@@ -35,7 +38,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
    IF aNaloziObradjeni == NIL
       aNaloziObradjeni := {}
-   endif
+   ENDIF
 
    IF lStampa == NIL
       lStampa := .T.
@@ -47,19 +50,16 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
    lVrstePlacanja := .F.
 
-   //o_partner()
+   // o_partner()
 
    PicBHD := "@Z " + FormPicL( gPicBHD, 15 )
    PicDEM := "@Z " + FormPicL( pic_iznos_eur(), 10 )
 
    M := iif( cInd == "3", "------ -------------- --- ", "" )
    IF hParams[ "fin_tip_dokumenta" ]
-
       M +=  + "---- ------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------"
       M +=  " -- ------------- ----------- -------- -------- --------------- ---------------"
-
    ELSE
-
       M +=  "---- ------- "
       M += REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------"
       M += " ----------- -------- -------- --------------- ---------------"
@@ -83,7 +83,8 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
    b2 := {|| cIdFirma == field->IdFirma .AND. cIdVN == field->IdVN .AND. cBrNal == field->BrNal }
 
    IF cInd $ "1#2" .AND. lStampa
-      fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
+      bZagl := {|| fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal ) }
+      Eval( bZagl )
    ENDIF
 
 
@@ -98,18 +99,20 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
          oNalog:addStavka( field->datDok )
       ENDIF
 
-
       IF lStampa
 
-         IF PRow() > 61 + iif( cInd == "3", -7, 0 ) + dodatni_redovi_po_stranici()
-            IF cInd == "3"
-               PrenosDNal()
-            ELSE
-               FF
-            ENDIF
+         // IF PRow() > 61 + iif( cInd == "3", -7, 0 ) + dodatni_redovi_po_stranici()
+         IF cInd == "3" // dnevnik naloga
+            fin_stampa_prenos_na_sljedecoj_strani()
             fin_nalog_zaglavlje( dDatnal, cIdFirma, cIdVN, cBrNal )
+         ELSE
+            check_nova_strana( bZagl, s_oPDF )
+            // Eval(bZagl)
          ENDIF
-         P_NRED
+
+         // ENDIF
+         // P_NRED
+         ?
 
          IF cInd == "3"
             @ PRow(), 0 SAY Str( ++nRBrDN, 6 )
@@ -117,7 +120,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
             @ PRow(), PCol() + 1 SAY " " + Left( DToC( dDatNal ), 2 )
             @ PRow(), PCol() + 1 SAY RBr
          ELSE
-            @ PRow(), 0 SAY RBr PICT "99999"
+            @ PRow(), 1 SAY RBr PICT "9999"
          ENDIF
 
          @ PRow(), PCol() + 1 SAY IdKonto
@@ -199,7 +202,6 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
       ENDIF
 
       IF D_P == "1"
-
          IF lStampa
             @ PRow(), PCol() + 1 SAY IznosBHD PICTURE PicBHD
             @ PRow(), PCol() + 1 SAY 0 PICTURE PicBHD
@@ -294,10 +296,12 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
    IF cInd $ "1#2" .AND. lStampa
 
-      IF PRow() > 58 + dodatni_redovi_po_stranici()
-         FF
-         fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
-      ENDIF
+      // IF PRow() > 58 + dodatni_redovi_po_stranici()
+      // FF
+      // fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
+      // ENDIF
+      // Eval( bZagl )
+      check_nova_strana( bZagl, s_oPDF, .F., 5 )
 
       P_NRED
       ?? M
@@ -322,19 +326,23 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
             FF
             fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
          ENDIF
-         P_NRED
-         P_NRED
-         F12CPI
-         P_NRED
+         // P_NRED
+         // P_NRED
+         // F12CPI
+         // P_NRED
+         ?
+         ?
+         ?
          @ PRow(), 55 SAY "Obrada AOP "; ?? Replicate( "_", 20 )
-         P_NRED
+         ?
+         // P_NRED
          @ PRow(), 55 SAY "Kontirao   "; ?? Replicate( "_", 20 )
       ENDIF
-      FF
+      // FF
 
-   ELSEIF cInd == "3"
+   ELSEIF cInd == "3" // glavna knjiga
       IF PRow() > 54 + dodatni_redovi_po_stranici()
-         PrenosDNal()
+         fin_stampa_prenos_na_sljedecoj_strani()
       ENDIF
    ENDIF
 
@@ -352,19 +360,19 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
    LOCAL hParams := fin_params()
    LOCAL cTmp
 
-   //IF "DNEVNIKN" == PadR( Upper( ProcName( 1 ) ), 8 ) .OR. "DNEVNIKN" == PadR( Upper( ProcName( 2 ) ), 8 )
-  //    lDnevnik := .T.
-   //ENDIF
+   // IF "DNEVNIKN" == PadR( Upper( ProcName( 1 ) ), 8 ) .OR. "DNEVNIKN" == PadR( Upper( ProcName( 2 ) ), 8 )
+   // lDnevnik := .T.
+   // ENDIF
 
 
    ?
    IF hParams[ "fin_tip_dokumenta" ] .AND. fin_dvovalutno()
-      P_COND2
+      //P_COND2
    ELSE
-      P_COND
+      //P_COND
    ENDIF
 
-   B_ON
+   //B_ON
 
    ?? Upper( tip_organizacije() ) + ":", self_organizacija_naziv()
    ?
@@ -379,13 +387,13 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
    ?
    IF lDnevnik
       ?U "FIN:      D N E V N I K    K NJ I Ž E NJ A    Z A    " + ;
-      Upper( NazMjeseca( Month( dDatNal ) ) ) + " " + Str( Year( dDatNal ) ) + ". GODINE"
+         Upper( NazMjeseca( Month( dDatNal ) ) ) + " " + Str( Year( dDatNal ) ) + ". GODINE"
    ELSE
       ?U "FIN: NALOG ZA KNJIŽENJE BROJ :"
       @ PRow(), PCol() + 2 SAY cIdFirma + " - " + cIdVn + " - " + cBrNal
    ENDIF
 
-   B_OFF
+   //B_OFF
    IF gDatNal == "D" .AND. !lDnevnik
       @ PRow(), PCol() + 4 SAY "DATUM: "
       ?? dDatNal
@@ -398,24 +406,27 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
 
    @ PRow(), PCol() + 15 SAY "Str:" + Str( ++nStr, 4 )
 
-   P_NRED
+   //P_NRED
+   ?
 
    ?? M
 
    IF !hParams[ "fin_tip_dokumenta" ]
-      P_NRED
-
-      cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R.   * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID )
+   altd()
+      //P_NRED
+      ?
+      cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R. * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID )
       cTmp +=  "*" + "    NAZIV PARTNERA ILI      "  + "*   D  O  K  U  M  E  N  T    *         IZNOS U  " + valuta_domaca_skraceni_naziv() + "         *"
-      cTmp += iif( fin_jednovalutno(), "", "    IZNOS U " + ValPomocna() + "    *" )
+      cTmp += iif( fin_jednovalutno(), "", "    IZNOS U " + ValPomocna() + "        *" )
       ??U cTmp
-      P_NRED
+      ?
 
       cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "             " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + " "
       cTmp += "                            " + " ----------------------------- ------------------------------- "
       cTmp += iif( fin_jednovalutno(), "", "---------------------" )
       ??U cTmp
-      P_NRED
+      //P_NRED
+      ?
 
       cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR *       *" + REPL( " ", FIELD_LEN_PARTNER_ID ) + "*"
       cTmp += "    NAZIV KONTA             "  + "* BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
@@ -423,20 +434,22 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
       ??U cTmp
 
    ELSE
-      P_NRED
+      //P_NRED
+      ?
 
       cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R.   * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID ) + "*"
       cTmp += "    NAZIV PARTNERA ILI      "  + "*           D  O  K  U  M  E  N  T             *         IZNOS U  " + valuta_domaca_skraceni_naziv() + "         *"
       cTmp += iif( fin_jednovalutno(), "", "    IZNOS U " + ValPomocna() + "    *" )
       ??U cTmp
-      P_NRED
+      //P_NRED
+      ?
 
       cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "               " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + " "
       cTmp += "                            " + " ---------------------------------------------- ------------------------------- "
       cTmp += iif( fin_jednovalutno(), "", "---------------------" )
       ??U cTmp
-      P_NRED
-
+      //P_NRED
+      ?
 
       cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR   *       *" + REPL( " ", FIELD_LEN_PARTNER_ID ) + "*"
       cTmp += "    NAZIV KONTA             " + "*  TIP I NAZIV   * BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
@@ -445,7 +458,8 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
 
    ENDIF
 
-   P_NRED
+   //P_NRED
+   ?
    ?? M
 
    Select( nArr )
@@ -466,10 +480,10 @@ FUNCTION fin_gen_psuban_stavke_auto_import()
    my_close_all_dbf()
 
    o_fin_pripr()
-   //o_konto()
-   //o_partner()
-   //o_tnal()
-   //o_tdok()
+   // o_konto()
+   // o_partner()
+   // o_tnal()
+   // o_tdok()
    o_fin_psuban()
 
    SELECT PSUBAN
@@ -511,5 +525,12 @@ FUNCTION fin_gen_psuban_stavke_auto_import()
    ENDDO
 
    my_close_all_dbf()
+
+   RETURN .T.
+
+
+FUNCTION fin_nalog_set_pdf( oPDF )
+
+   s_oPDF := oPDF
 
    RETURN .T.

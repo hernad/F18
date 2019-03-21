@@ -122,7 +122,7 @@ FUNCTION fin_dnevnik_naloga()
       dDatNal  := field->DATNAL
 
       IF cMjGod != Str( Month( dDatNal ), 2, 0 ) + Str( Year( dDatNal ), 4, 0 )
-         PrenosDNal() // završi stranu
+         fin_stampa_prenos_na_sljedecoj_strani() // završi stranu
          fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal ) // stampaj zaglavlje (nova stranica)
       ENDIF
 
@@ -137,7 +137,7 @@ FUNCTION fin_dnevnik_naloga()
    ENDDO
 
    IF PRow() > 5  // znaci da je pocela nova stranica tj.odstampano je zaglavlje
-      PrenosDNal()
+      fin_stampa_prenos_na_sljedecoj_strani()
    ENDIF
 
    end_print()

@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+STATIC s_oPDF
 /*
    Generiše psuban, pa štampa sve naloge
 */
@@ -20,6 +20,7 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
 
    LOCAL oNalog, oNalozi := FinNalozi():New()
    LOCAL cIdFirma, cIdVN, cBrNal
+   LOCAL xPrintOpt
 
    LOCAL aNaloziObradjeni := {}
 
@@ -65,7 +66,7 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
             RETURN .F.
          ENDIF
       ENDIF
-
+      AltD()
       HSEEK cIdFirma + cIdVN + cBrNal // psuban
       IF Eof()
          my_close_all_dbf()
@@ -73,10 +74,23 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
       ENDIF
 
       IF lStampa
-         IF !start_print()
-            my_close_all_dbf()
+
+         AltD()
+         s_oPDF := PDFClass():New()
+         xPrintOpt := hb_Hash()
+         xPrintOpt[ "tip" ] := "PDF"
+         xPrintOpt[ "layout" ] := "portrait"
+         xPrintOpt[ "font_size" ] := 8
+         xPrintOpt[ "opdf" ] := s_oPDF
+         fin_nalog_set_pdf( s_oPDF )
+         IF f18_start_print( NIL, xPrintOpt,  "FIN NALOG " + fin_dokument_str( cIdFirma, cIdVn, cBrNal ) + "  NA DAN: " + DToC( Date() ) ) == "X"
             RETURN .F.
          ENDIF
+
+         // IF !start_print()
+         // my_close_all_dbf()
+         // RETURN .F.
+         // ENDIF
       ENDIF
 
       oNalog := FinNalog():New( cIdFirma, cIdVn, cBrNal )
@@ -89,7 +103,8 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
       IF lStampa
          PushWA()
          my_close_all_dbf()
-         end_print()
+         // end_print()
+         f18_end_print( NIL, xPrintOpt )
          fin_open_psuban_and_ostalo()
          PopWa()
       ENDIF
@@ -127,7 +142,6 @@ FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
    LOCAL nDugBHD, nDugDEM, nPotBHD, nPotDEM
    LOCAL nRbr
    LOCAL GetList := {}
-
 
    IF lStampa == NIL
       lStampa := .T.
@@ -212,3 +226,8 @@ FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
    my_close_all_dbf()
 
    RETURN .T.
+
+
+FUNCTION fin_dokument_str( cIdFirma, cIdVn, cBrNal )
+
+   RETURN cIdFirma + "-" + cIdVN + "-" + cBrnal
