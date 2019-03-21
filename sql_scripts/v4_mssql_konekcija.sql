@@ -122,7 +122,7 @@ RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, vcij, public.mssql_
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 END;
-$$
+$$;
 
 
 CREATE OR REPLACE FUNCTION public.magacin_konto(nMagacin integer) RETURNS varchar
@@ -137,37 +137,8 @@ RETURN CASE WHEN nMagacin=40 THEN '1320'
 END;
 
 END;
-$$
+$$;
 
-CREATE OR REPLACE FUNCTION public.roba_id_by_sifradob(nRobaId integer) RETURNS varchar
-   LANGUAGE plpgsql
-AS $$
-DECLARE
-  cIdRoba varchar;
-BEGIN
-
-SELECT id from public.roba where lpad(btrim(sifradob),5,'0')=lpad(btrim(to_char(nRobaId,'99999')),5,'0')
-  INTO cIdRoba;
-
-RETURN COALESCE(cIdRoba, '<UNDEFINED>');
-
-END;
-$$
-
-
-CREATE OR REPLACE FUNCTION public.prodavnica_konto(nProdavnica integer) RETURNS varchar
-   LANGUAGE plpgsql
-AS $$
-DECLARE
-   pKonto varchar;
-BEGIN
-
-SELECT id INTO pKonto
-	 from public.koncij where prod=nProdavnica;
-
-IF coalesce( btrim( pKonto), '' ) ='' THEN
-    RETURN '99999';
-END IF;
 
 
 --IF ( NOT nProdavnica IN (15) ) THEN

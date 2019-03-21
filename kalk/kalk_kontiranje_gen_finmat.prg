@@ -174,10 +174,14 @@ FUNCTION kalk_kontiranje_gen_finmat()
       cBrFaktP := BrFaktP
       dDatFaktP := DatFaktP
 
-      cIdKonto2 := IdKonto2
+      cIdKonto := field->IdKonto
+      cIdKonto2 := field->IdKonto2
 
-altd()
-      IF field->idvd $ "80#41#42"
+      IF field->idvd $ "10#14#KO#16#95#96"
+         cIdKonto := field->mKonto
+      ENDIF
+
+      IF field->idvd $ "19#80#81#41#42"
          cIdKonto := field->pKonto
       ENDIF
       IF field->idvd == "11"
@@ -202,7 +206,6 @@ altd()
 
 
          PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
-
          nFV := FCj * Kolicina
          // IF gKalo == "1"
          // nKolicina := kalk_pripr->( Kolicina - GKolicina - GKolicin2 )

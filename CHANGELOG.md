@@ -8,6 +8,7 @@
 - FIN nalog pdf
 - POS pracenje stanja vraceno
 - POS fix pos_osob init
+- KALK 21 generacija
 
 ## 2019-03-20
 

@@ -139,90 +139,6 @@ END;
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.roba_id_by_sifradob(nRobaId integer) RETURNS varchar
-   LANGUAGE plpgsql
-AS $$
-DECLARE
-  cIdRoba varchar;
-BEGIN
-
-SELECT id from public.roba where lpad(btrim(sifradob),5,'0')=lpad(btrim(to_char(nRobaId,'99999')),5,'0')
-  INTO cIdRoba;
-
-RETURN COALESCE(cIdRoba, '<UNDEFINED>');
-
-END;
-$$;
-
-
-CREATE OR REPLACE FUNCTION public.prodavnica_konto(nProdavnica integer) RETURNS varchar
-   LANGUAGE plpgsql
-AS $$
-DECLARE
-   pKonto varchar;
-BEGIN
-
-SELECT id INTO pKonto
-	 from public.koncij where prod=nProdavnica;
-
-IF coalesce( btrim( pKonto), '' ) ='' THEN
-    RETURN '99999';
-END IF;
-
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION public.mpc_by_koncij(cPKonto varchar, cIdRoba varchar) RETURNS numeric
-   LANGUAGE plpgsql
-AS $$
-DECLARE
-   cTip varchar;
-	 nMpc numeric;
-	 nMpc2 numeric;
-	 nMpc3 numeric;
-	 nMpc4 numeric;
-	 nMpc5 numeric;
-	 nMpc6 numeric;
-	 nMpc7 numeric;
-	 nMpc8 numeric;
-	 nMpc9 numeric;
-	 cIdFound varchar;
-BEGIN
-
--- tip cijene je pohranjen u naz polje
-SELECT naz INTO cTip
-	 from public.koncij where id=cPKonto;
-
--- nije definisan tip, treba da bude 'M1', 'M2' itd
-IF coalesce( btrim( cTip), '' ) = '' THEN
-    RETURN 0;
-END IF;
-
-SELECT Id, mpc, mpc2, mpc3, mpc4, mpc5, mpc6, mpc7, mpc8, mpc9 FROM public.roba
-   WHERE id=cIdRoba
-	 INTO cIdFound, nMpc, nMpc2, nMpc3, nMpc4, nMpc5, nMpc6, nMpc7, nMpc8, nMpc9;
-
-RAISE INFO '[%] % % %', cTip, cIdFound, nMpc, nMpc2;
-
-IF coalesce( btrim(cIdFound), '' ) = '' THEN
-     RAISE INFO 'artikla % nema ?!', cIdRoba;
-	   RETURN -1;
-END IF;
-
-RETURN CASE WHEN cTip='M1' THEN nMpc
-       WHEN cTip='M2' THEN nMpc2
-			 WHEN cTip='M3' THEN nMpc3
-			 WHEN cTip='M4' THEN nMpc4
-			 WHEN cTip='M5' THEN nMpc5
-			 WHEN cTip='M6' THEN nMpc6
-			 WHEN cTip='M7' THEN nMpc7
-			 WHEN cTip='M8' THEN nMpc8
-			 WHEN cTip='M9' THEN nMpc9
-      ELSE -3
-END;
-
-END;
-$$;
 
 CREATE OR REPLACE FUNCTION public.prodavnica_zahtjev_prijem_magacin_create(nMagacin integer, dDatum date) RETURNS void
        LANGUAGE plpgsql
@@ -238,25 +154,42 @@ DECLARE
    cIdFirma varchar DEFAULT '10';
    cIdVd varchar DEFAULT '21';
    cBrDok varchar;
+	 cPKonto varchar;
+	 cIdRoba varchar;
+	 cIdTarifa varchar;
+	 lFakturaPostoji boolean;
 
 BEGIN
      RAISE INFO '==== Magacin % ======', public.magacin_konto(nMagacin);
 
      cBrojFaktureT := 'XX';
+		 lFakturaPostoji := False;
      FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina IN
           SELECT brf, vcij, prod, rb, ident, kold from public.sfak_prodavnice_by_datum(dDatum)
           WHERE kp=nMagacin
           ORDER BY brf, rb
      LOOP
-         IF public.prodavnica_konto(nProdavnica) = '99999' THEN
-           RAISE INFO 'Preskacemo prodavnicu %', nProdavnica;
-           CONTINUE;
-         ELSE
-           RAISE INFO 'Obrada prodavnica %', nProdavnica;
-         END IF;
 
-          IF ( cBrojFaktureT = 'XX' ) OR ( cBrojFaktureT <> (btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'))) ) THEN
+		     cPKonto := public.prodavnica_konto(nProdavnica);
+		     cIdRoba := public.roba_id_by_sifradob(nRobaId);
+		     cIdTarifa := public.idtarifa_by_idroba(cIdRoba);
+
+         IF ( public.prodavnica_konto(nProdavnica) = '99999' ) THEN
+             RAISE INFO 'Preskacemo prodavnicu: %', nProdavnica;
+             CONTINUE;
+          ELSE
+             RAISE INFO 'Obrada prodavnica %', nProdavnica;
+          END IF;
+
+
+
+					IF ( cBrojFaktureT = 'XX' ) OR ( cBrojFaktureT <> (btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'))) ) THEN
              cBrojFaktureT := btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'));
+						 lFakturaPostoji := public.kalk_pkonto_brfaktp_exists( cPKonto, cBrojFaktureT);
+						 IF lFakturaPostoji THEN
+		           RAISE INFO 'Preskacemo prodavnicu: % jer postoji faktura %', nProdavnica, cBrojFaktureT;
+		           CONTINUE;
+		         END IF;
              cBrDok := public.kalk_novi_brdok(cIdVd);
              RAISE INFO '---- Otpremnica % prodavnica: % ----', cBrojFaktureT, public.prodavnica_konto(nProdavnica);
              INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp)
@@ -267,15 +200,19 @@ BEGIN
                  );
           END IF;
 
-          RAISE INFO ' stavke:  % % %',  nRbr, public.roba_id_by_sifradob(nRobaId), nKolicina;
-          INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,mu_i,pu_i,rbr,idroba,kolicina)
+          IF lFakturaPostoji THEN
+					   CONTINUE;
+					END IF;					
+          RAISE INFO ' stavke:  % % [%] %  mpc_koncij_sif: %',  cPKonto, nRbr, cIdRoba, nKolicina, public.mpc_by_koncij(cPKonto, cIdRoba);
+          INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,mu_i,pu_i,rbr,idroba,idtarifa,kolicina,mpcsapp)
           values(
             cIdFirma, cIdVd, cBrDok, dDatum,
-            public.magacin_konto(nMagacin), public.prodavnica_konto(nProdavnica),
+            public.magacin_konto(nMagacin), cPKonto,
             cBrojFaktureT,
             '6', '2',
-            nRbr, public.roba_id_by_sifradob(nRobaId),
-            nKolicina
+            nRbr, cIdRoba, cIdTarifa,
+            nKolicina,
+						public.mpc_by_koncij(cPKonto, cIdRoba)
           );
 
             -- PERFORM p15.nivelacija_start_create( uuidPos );

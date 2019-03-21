@@ -120,7 +120,25 @@ END;
 $$;
 
 
--- f18.kalk_kalk -> p15.pos_pos_knjig -> ...
+CREATE OR REPLACE FUNCTION f18.before_kalk_doks_delete() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+   IF ( OLD.idvd = '49' ) and ( current_user <> 'postgres' ) THEN
+       RAISE EXCEPTION '49 nije dozvoljeno brisanje osim triger funkcijama';
+   END IF;
+
+   RETURN OLD;
+END;
+$$;
+
+
+DROP TRIGGER IF EXISTS t_kalk_disable_delete on f18.kalk_doks;
+CREATE TRIGGER t_kalk_disable_delete
+   BEFORE DELETE ON f18.kalk_doks
+   FOR EACH ROW EXECUTE PROCEDURE f18.before_kalk_doks_delete();
+
+-- f18.kalk_kalk -> p15.pos_items_knjig -> ...
 
 DROP TRIGGER IF EXISTS t_kalk_crud on f18.kalk_kalk;
 CREATE TRIGGER t_kalk_crud
@@ -128,7 +146,7 @@ CREATE TRIGGER t_kalk_crud
    ON f18.kalk_kalk
    FOR EACH ROW EXECUTE PROCEDURE f18.on_kalk_kalk_crud();
 
--- f18.kalk_doks -> p15.pos_doks_knjig -> ...
+-- f18.kalk_doks -> p15.pos_knjig -> ...
 
 DROP TRIGGER IF EXISTS t_kalk_doks_crud on f18.kalk_doks;
 CREATE TRIGGER t_kalk_doks_crud
