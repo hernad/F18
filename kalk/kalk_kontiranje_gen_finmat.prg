@@ -173,8 +173,18 @@ FUNCTION kalk_kontiranje_gen_finmat()
       cIdPartner := IdPartner
       cBrFaktP := BrFaktP
       dDatFaktP := DatFaktP
-      cIdKonto := IdKonto
+
       cIdKonto2 := IdKonto2
+
+altd()
+      IF field->idvd $ "80#41#42"
+         cIdKonto := field->pKonto
+      ENDIF
+      IF field->idvd == "11"
+         cIdKonto := field->mKonto
+         cIdKonto2 := field->pkonto
+      ENDIF
+
 
       // select_o_konto( cIdKonto )
       select_o_konto( cIdKonto2 )
@@ -207,8 +217,8 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
          APPEND BLANK
          REPLACE IdFirma   WITH kalk_PRIPR->IdFirma, ;
-            IdKonto   WITH kalk_PRIPR->IdKonto, ;
-            IdKonto2  WITH kalk_pripr->IdKonto2, ;
+            IdKonto   WITH cIdKonto, ;
+            IdKonto2  WITH cIdKonto2, ;
             IdTarifa  WITH kalk_pripr->IdTarifa, ;
             IdPartner WITH kalk_pripr->IdPartner, ;
             BrFaktP   WITH kalk_pripr->BrFaktP, ;

@@ -274,6 +274,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
             cStavka := hRecTrfp[ "id" ]
 
             SELECT finmat
+            POREZ2 := 0 // finmat je imao polje porez2 koristeno za ppu
             nIznosKontiratiDEM := &cStavka
 
             SELECT trfp

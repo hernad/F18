@@ -34,14 +34,16 @@ FUNCTION kalk_get_1_41_42_49()
       _pkonto := _idkonto2
    ENDIF
 
-   IF kalk_is_novi_dokument()
-      _DatFaktP := _datdok
-   ENDIF
+
+   //IF kalk_is_novi_dokument()
+
+   //ENDIF
    IF _idvd == "41"
       @  box_x_koord() + 6,  box_y_koord() + 2 SAY "KUPAC:" GET _IdPartner PICT "@!" VALID Empty( _IdPartner ) .OR. p_partner( @_IdPartner, 5, 30 )
       @  box_x_koord() + 7,  box_y_koord() + 2 SAY "Faktura Broj:" GET _BrFaktP
       @  box_x_koord() + 7, Col() + 2 SAY "Datum:" GET _DatFaktP
    ELSE
+      _DatFaktP := _datdok
       _idpartner := ""
       _brfaktP := ""
    ENDIF
