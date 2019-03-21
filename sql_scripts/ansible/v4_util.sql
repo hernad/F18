@@ -39,7 +39,6 @@ BEGIN
 END;
 $$;
 
-
 -- POS 42 - racuni, zbirno u KALK
 -- SELECT public.kalk_brdok_iz_pos(15, '49', '4', current_date); => 150214
 -- POS 71 - dokument, zahtjev za snizenje - pojedinacno u KALK
@@ -63,7 +62,7 @@ ELSE
    RAISE EXCEPTION 'ERROR kalk_brdok_iz_pos % % % %', idPos, idvdKalk, posBrdok, datum;
 END IF;
 
-RETURN brDok;
+RETURN rpad(brDok, 8);
 
 END;
 $$;

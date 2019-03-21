@@ -143,7 +143,6 @@ FUNCTION pos_storno_racuna( hParams )
    hParams[ "fisk_rn" ] := pos_get_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
    hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
 
-altd()
    IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( hParams[ "fisk_id" ] ) ) <> 0
       cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
       MsgBeep( cMsg )

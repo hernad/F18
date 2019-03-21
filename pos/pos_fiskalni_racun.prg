@@ -40,7 +40,7 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
    cFiskalniDravjerIme := s_hFiskalniUredjajParams[ "drv" ]
    s_cFiskalniDrajverNaziv := cFiskalniDravjerIme
 
-   AltD()
+
    // lStorno := pos_is_storno( cIdPos, "42", dDatDok, cBrDok )
    nStorno := pos_racun_u_pripremi_broj_storno_rn()
    lStorno := nStorno > 0

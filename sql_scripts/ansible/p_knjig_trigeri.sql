@@ -1,4 +1,4 @@
------------ TRIGERI na strani knjigovodstva POS_DOKS - KALK_DOKS ! -----------------------------------------------------
+----------- TRIGERI na strani knjigovodstva POS - KALK_DOKS ! -----------------------------------------------------
 
 -- on {{ item_prodavnica }}.pos -> f18.kalk_doks
 ---------------------------------------------------------------------------------------
@@ -11,8 +11,12 @@ DECLARE
        brDok varchar;
        idFirma varchar;
        idvdKalk varchar;
-       nProdavnica integer DEFAULT 15;
+       nProdavnica integer;
 BEGIN
+
+-- select to_number(substring('p16',2),'9999')::integer
+-- =>  16
+nProdavnica := to_number(substring('{{ item_prodavnica }}',2),'9999')::integer;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    --  42 - prodaja, 71-zahtjev snizenje, 61-zahtjev narudzba, 22 -pos potvrda prijema magacin, 29 - pos nivelacija
@@ -20,7 +24,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
-          from public.koncij where prod=15;
+          from public.koncij where prod=nProdavnica;
   IF ( NEW.idvd = '42') THEN
        idvdKalk := '49';
    ELSE
@@ -33,7 +37,7 @@ ELSE
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
-      from public.koncij where prod=15;
+      from public.koncij where prod=nProdavnica;
    IF ( OLD.idvd = '42') THEN
         idvdKalk := '49';
     ELSE
@@ -85,8 +89,12 @@ DECLARE
        idFirma varchar;
        idvdKalk varchar;
        pUI varchar;
-       nProdavnica integer DEFAULT 15;
+       nProdavnica integer;
 BEGIN
+
+-- select to_number(substring('p16',2),'9999')::integer
+-- =>  16
+nProdavnica := to_number(substring('{{ item_prodavnica }}',2),'9999')::integer;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    IF ( NEW.idvd <> '42' ) AND ( NEW.idvd <> '71' ) AND ( NEW.idvd <> '61' ) AND ( NEW.idvd <> '22' ) AND ( NEW.idvd <> '29' ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba, 22-pos potvrda prijema magacin
@@ -98,7 +106,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
       idvdKalk := NEW.idvd;
    END IF;
    SELECT id INTO pKonto
-          from public.koncij where prod=15;
+          from public.koncij where prod=nProdavnica;
    brDok := public.kalk_brdok_iz_pos( nProdavnica, idvdKalk, NEW.brdok, NEW.datum);
 
 ELSE
@@ -111,7 +119,7 @@ ELSE
       idvdKalk := OLD.idvd;
    END IF;
    SELECT id INTO pKonto
-       from public.koncij where prod=15;
+       from public.koncij where prod=nProdavnica;
    brDok := public.kalk_brdok_iz_pos(nProdavnica, idvdKalk, OLD.brdok, OLD.datum);
 END IF;
 
@@ -130,13 +138,13 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_kalk WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING pKonto, idvdKalk, NEW.datum, brDok;
          RAISE INFO 'THEN insert POS 42 => kalk_kalk % % % % %', NEW.idpos, idvdKalk, brDok, NEW.datum, pKonto;
-         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj) ' ||
+         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj, pu_i, mu_i) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
                  ' (row_number() over (order by idroba))::integer as rbr,' ||
                  ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina, ' ||
-                 ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj' ||
-                 ' FROM {{ item_prodavnica }}.pos_pos ' ||
-                 ' LEFT JOIN public.tarifa on pos_pos.idtarifa = tarifa.id' ||
+                 ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj,''9'','''' ' ||
+                 ' FROM {{ item_prodavnica }}.pos_items ' ||
+                 ' LEFT JOIN public.tarifa on pos_items.idtarifa = tarifa.id' ||
                  ' WHERE idvd=''42'' AND datum=$4 AND idpos=$5' ||
                  ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
                  ' ORDER BY idroba)'
@@ -197,3 +205,7 @@ CREATE TRIGGER knjig_pos_items_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON {{ item_prodavnica }}.pos_items
       FOR EACH ROW EXECUTE PROCEDURE {{ item_prodavnica }}.on_pos_items_crud();
+
+
+ALTER TABLE {{ item_prodavnica }}.pos ENABLE ALWAYS TRIGGER knjig_pos_crud;
+ALTER TABLE {{ item_prodavnica }}.pos_items ENABLE ALWAYS TRIGGER knjig_pos_items_crud;

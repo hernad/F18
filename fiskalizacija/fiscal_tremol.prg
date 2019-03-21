@@ -515,7 +515,6 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
          ENDIF
 
          IF File( cTmp ) // fajl se pojavio - izadji iz petlje !
-            altd()
             cStatus := "FAJL"
             EXIT
          ENDIF
@@ -531,7 +530,6 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
       BoxC()
 
       IF cStatus == "FAJL"
-         altd()
          exit
       ENDIF
 
