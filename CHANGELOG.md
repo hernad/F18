@@ -3,6 +3,7 @@
 ## 2019-03-21
 
 - 02 - zaduženje roba sa količinom 0
+- POS realizacija kase
 
 ## 2019-03-20
 
