@@ -54,7 +54,7 @@ BEGIN
 
 IF ( idvdKalk = '49' ) THEN
   -- 01.02.2019, idpos=15 -> 150201
-  SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'mmdd' ) INTO brDok;
+  SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'yymmdd' ) INTO brDok;
 ELSIF ( ( idvdKalk = '71' ) OR ( idvdKalk = '61' ) OR ( idvdKalk = '22' ) OR ( idvdKalk = '29' ) ) THEN
    -- 01.02.2019, brdok='      3' -> 15020103
    SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
@@ -62,7 +62,7 @@ ELSE
    RAISE EXCEPTION 'ERROR kalk_brdok_iz_pos % % % %', idPos, idvdKalk, posBrdok, datum;
 END IF;
 
-RETURN rpad(brDok, 8);
+RETURN rpad(brDok, 8, '0');
 
 END;
 $$;

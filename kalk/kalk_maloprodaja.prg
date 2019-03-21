@@ -162,8 +162,8 @@ FUNCTION kalk_mp_inicijalizacija()
 
    dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
 
-   cQuery := "delete from " + pos_prodavnica_roba_sql_tabela()
-   dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
+   //cQuery := "delete from " + pos_prodavnica_roba_sql_tabela()
+   //dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
 
    SELECT TMP
    GO TOP

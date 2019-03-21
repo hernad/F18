@@ -138,11 +138,11 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_kalk WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING pKonto, idvdKalk, NEW.datum, brDok;
          RAISE INFO 'THEN insert POS 42 => kalk_kalk % % % % %', NEW.idpos, idvdKalk, brDok, NEW.datum, pKonto;
-         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj, pu_i, mu_i) ' ||
+         EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj, pu_i, mu_i, tmarza2) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
                  ' (row_number() over (order by idroba))::integer as rbr,' ||
                  ' $3 as brdok, $4 as datdok,$6 as pkonto, idroba, idtarifa, cijena as mpcsapp, sum(kolicina) as kolicina, ' ||
-                 ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj,''9'','''' ' ||
+                 ' cijena/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj,''9'','''',''A'' ' ||
                  ' FROM {{ item_prodavnica }}.pos_items ' ||
                  ' LEFT JOIN public.tarifa on pos_items.idtarifa = tarifa.id' ||
                  ' WHERE idvd=''42'' AND datum=$4 AND idpos=$5' ||
