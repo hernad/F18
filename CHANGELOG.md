@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-21
+
+- 02 - zaduženje roba sa količinom 0
+
 ## 2019-03-20
 
 - f18.sifk, f18.sifv cleanup

@@ -21,13 +21,14 @@ FUNCTION kalk_maloprodaja()
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
-   LOCAL bTekProdavnica := {|| "1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ) }
+   LOCAL bTekProdavnica := {|| Padr("1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ), 40) }
 
    AAdd( aOpc, bTekProdavnica )
    AAdd( aOpcExe, {|| kalk_mp_set_pos_prodavnica() } )
+
    AAdd( aOpc,   "2. inicijalizacija" )
    AAdd( aOpcExe, {|| kalk_mp_inicijalizacija() } )
-   AAdd( aOpc,   "3. cijene" )
+   AAdd( aOpc,   "3. šifre robe u prodavnici" )
    AAdd( aOpcExe, {|| p_roba_prodavnica() } )
    f18_menu( "mp", .F.,  nIzbor, aOpc, aOpcExe )
 
@@ -127,7 +128,10 @@ FUNCTION kalk_mp_inicijalizacija()
 
    LOCAL nRbr, cQuery, dDatDok := danasnji_datum(), cBrDok
    LOCAL nKolicina
-   
+   LOCAL cNulaDN := "D"
+   LOCAL lPreskoci0
+   LOCAL nMpc
+
    LOCAL GetList := {}
    LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( pos_prodavnica() )
 
@@ -137,6 +141,8 @@ FUNCTION kalk_mp_inicijalizacija()
 
    Box(, 3, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Datum dokumente" GET dDatDok
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Šifre sa stanjem 0 D/N" GET cNulaDN valid cNulaDN $ "DN" pict "@!"
+
    READ
    BoxC()
    IF LastKey() == K_ESC
@@ -185,7 +191,19 @@ FUNCTION kalk_mp_inicijalizacija()
       select_o_tarifa( roba->idtarifa )
 
       nKolicina := tmp2->kol_dug - tmp2->kol_pot
-      IF Round( nKolicina, 4 ) <= 0 .OR.  Round( tmp2->mpc_sa_pdv, 4 ) == 0
+      nMpC := tmp2->mpc_sa_pdv
+
+      lPreskoci0 := .F.
+      IF Round( nKolicina, 4 ) <= 0
+         IF cNulaDN == "D"
+            lPreskoci0 := .F.
+            nMpc := kalk_get_mpc_by_koncij_pravilo( cPKonto )
+         ELSE
+            lPreskoci0 := .T.
+         ENDIF
+     ENDIF
+
+      IF lPreskoci0 .OR. Round( nMpc, 4 ) == 0
          SELECT TMP
          SKIP
          LOOP
@@ -203,8 +221,8 @@ FUNCTION kalk_mp_inicijalizacija()
          idroba WITH tmp->idroba, ;
          idtarifa WITH tarifa->id, ;
          kolicina WITH nKolicina, ;
-         mpcsapp WITH tmp2->mpc_sa_pdv,;
-         mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, tmp2->mpc_sa_pdv )
+         mpcsapp WITH nMpc,;
+         mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, nMpc )
 
       SELECT TMP
       SKIP
