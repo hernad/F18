@@ -86,7 +86,7 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
       _cijena := aCijene[ nOdabranaCijena, 1 ]
       _ncijena := aCijene[ nOdabranaCijena, 2 ]
    ELSE
-       IF !pos_ne_prati_stanje()
+      IF !pos_ignorisi_stanje()
          Alert( "Artikla " + cIdRoba + " nema na stanju !?" )
       ENDIF
       _cijena := pos_get_mpc()
@@ -100,8 +100,12 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
    RETURN lOk
 
 
-static function pos_ne_prati_stanje()
-    RETURN .T.
+// ovo je stavljeno kao privremeni workaround kada p15.pos_stanje nije bilo u funkciji
+STATIC FUNCTION pos_ignorisi_stanje()
+
+   // gPosPratiStanjePriProdaji == "N"
+
+   RETURN .F.
 
 
 STATIC FUNCTION pos_racun_provjera_dupli_artikal( cIdroba )
@@ -182,7 +186,7 @@ STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina, nCijena, nNCijena )
       RETURN .F.
    ENDIF
 
-   IF gPosPratiStanjePriProdaji == "N" .OR. roba->tip $ "TU"
+   IF pos_ignorisi_stanje() .OR. roba->tip $ "TU"
       RETURN .T.
    ENDIF
    nStanjeRobe := pos_dostupno_artikal_za_cijenu( cIdroba, nCijena, nNCijena )
