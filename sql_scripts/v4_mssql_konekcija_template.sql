@@ -182,7 +182,6 @@ BEGIN
           END IF;
 
 
-
 					IF ( cBrojFaktureT = 'XX' ) OR ( cBrojFaktureT <> (btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'))) ) THEN
              cBrojFaktureT := btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'));
 						 lFakturaPostoji := public.kalk_pkonto_brfaktp_exists( cPKonto, cBrojFaktureT);
@@ -202,7 +201,7 @@ BEGIN
 
           IF lFakturaPostoji THEN
 					   CONTINUE;
-					END IF;					
+					END IF;
           RAISE INFO ' stavke:  % % [%] %  mpc_koncij_sif: %',  cPKonto, nRbr, cIdRoba, nKolicina, public.mpc_by_koncij(cPKonto, cIdRoba);
           INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,mu_i,pu_i,rbr,idroba,idtarifa,kolicina,mpcsapp)
           values(

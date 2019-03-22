@@ -26,6 +26,7 @@ FUNCTION pos_main_menu_upravnik()
    AAdd( aOpcexe, {|| pos_menu_dokumenti() } )
    AAdd( aOpc, "R. robno-materijalno poslovanje" )
    AAdd( aOpcexe, {|| pos_menu_dokumenti() } )
+
    AAdd( aOpc, "--------------" )
    AAdd( aOpcexe, NIL )
    AAdd( aOpc, "S. šifarnici" )
@@ -46,11 +47,17 @@ FUNCTION pos_menu_dokumenti()
    LOCAL aOpcexe := {}
 
    nIzbor := 1
-   AAdd( aOpc, "1. ulaz u prodavnicu direktno od dobavljača   " )
+
+   AAdd( aOpc, "1. prijem u prodavnicu iz magacina [21->22]    " )
+   AAdd( aOpcexe, {|| pos_21_to_22_unos() } )
+
+   AAdd( aOpc, "2. ulaz u prodavnicu direktno od dobavljača" )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_DOBAVLJAC_PRODAVNICA ) } )
-   AAdd( aOpc, "2. zahtjev za sniženje dijela zalihe     " )
+
+   AAdd( aOpc, "3. zahtjev za sniženje dijela zalihe     " )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_SNIZENJE ) } )
-   AAdd( aOpc, "3. zahtjev za nabavku - narudžbe    " )
+
+   AAdd( aOpc, "4. zahtjev za nabavku - narudžbe    " )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_NABAVKA ) } )
    /*
    AAdd( aOpc, "I. inventura" )
