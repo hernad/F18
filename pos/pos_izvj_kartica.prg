@@ -61,10 +61,10 @@ FUNCTION pos_kartica_artikla()
    set_metric( "pos_kartica_prikaz_partnera", my_user(), "N" )
    BoxC()
 
-
+   // 21-ce ne gledati
    cQuery := "select * from "  + f18_sql_schema( "pos_items" ) + ;
       " left join " + f18_sql_schema( "pos" ) + " on pos_items.idpos=pos.idpos and pos_items.idvd=pos.idvd and pos_items.brdok=pos.brdok and pos_items.datum=pos.datum" + ;
-      " WHERE pos.datum<=" + sql_quote( dDatum1 )
+      " WHERE pos.idvd <> '21' AND pos.datum<=" + sql_quote( dDatum1 )
    IF !Empty( cIdRoba )
       cQuery += " AND rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
    ENDIF
@@ -250,7 +250,6 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nStanjeKolicina, nVrijednos
 
    ELSEIF POS->IdVd == POS_IDVD_RACUN
       nIzlaz += POS->Kolicina
-
       nVrijednost -= POS->Kolicina * POS->Cijena
       nStanjeKolicina -= POS->Kolicina
 

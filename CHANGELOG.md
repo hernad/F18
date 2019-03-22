@@ -4,6 +4,7 @@
 
 - POS 22 workflow
 - POS stanje i kartice
+- FIX pos stanje
 
 ## 2019-03-21
 

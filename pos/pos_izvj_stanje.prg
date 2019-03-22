@@ -30,6 +30,7 @@ FUNCTION pos_stanje_artikala()
    LOCAL cIdPos
    LOCAL nUlaz, nIzlaz
    LOCAL nUkVrijednost
+   LOCAL lInicijalizacija
 
    // PRIVATE cIdPos
    PRIVATE dDatum
@@ -56,10 +57,10 @@ FUNCTION pos_stanje_artikala()
       ENDIF
    ENDDO
 
-
+   // 21-ce ne gledati
    cQuery := "select * from "  + f18_sql_schema( "pos_items" ) + ;
       " left join " + f18_sql_schema( "pos" ) + " on pos_items.idpos=pos.idpos and pos_items.idvd=pos.idvd and pos_items.brdok=pos.brdok and pos_items.datum=pos.datum" + ;
-      " WHERE pos.datum<=" + sql_quote( dDatum ) + ;
+      " WHERE pos.idvd <> '21' AND pos.datum<=" + sql_quote( dDatum ) + ;
       " order by idroba, pos.datum, pos.obradjeno  "
 
    SELECT F_POS
@@ -90,9 +91,7 @@ FUNCTION pos_stanje_artikala()
 
    Eval( bZagl )
 
-
    nUkVrijednost := 0
-
    DO WHILE !Eof()
 
       cIdRoba := pos->idroba
@@ -102,9 +101,10 @@ FUNCTION pos_stanje_artikala()
       nUlaz := 0
       nIzlaz := 0
 
+      lInicijalizacija := .F.
+
       // 1) promet prije zadanog datuma
       DO WHILE !Eof() .AND. pos->idRoba == cIdRoba .AND. pos->datum < dDatum
-
          pos_stanje_proracun( @nPUlaz, @nPizlaz, @nVrijednost )
          SELECT POS
          SKIP
@@ -112,10 +112,15 @@ FUNCTION pos_stanje_artikala()
 
       // 2) stanje na tekuci dan
       DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum == dDatum
-         pos_stanje_proracun( @nUlaz, @nIzlaz, @nVrijednost )
+         pos_stanje_proracun( @nUlaz, @nIzlaz, @nVrijednost, @lInicijalizacija )
          SELECT POS
          SKIP
       ENDDO
+
+      IF lInicijalizacija // u tekucem danu bila inicijalizacija, predhodni promet se ne gleda
+         nPUlaz := 0
+         nPIzlaz := 0
+      ENDIF
 
       nStanjeKolicina := ( nPUlaz - nPIzlaz ) + nUlaz - nIzlaz
 
@@ -168,12 +173,13 @@ FUNCTION pos_stanje_artikala()
    RETURN .T.
 
 
-STATIC FUNCTION pos_stanje_proracun( nUlaz, nIzlaz, nVrijednost )
+STATIC FUNCTION pos_stanje_proracun( nUlaz, nIzlaz, nVrijednost, lInicijalizacija )
 
    IF pos->idvd == POS_IDVD_POCETNO_STANJE_PRODAVNICA
       nUlaz := POS->Kolicina
       nVrijednost := POS->Kolicina * POS->Cijena
       nIzlaz := 0
+      lInicijalizacija := .T.
 
    ELSEIF POS->idvd $ POS_IDVD_ULAZI
       nUlaz += POS->Kolicina
@@ -184,7 +190,7 @@ STATIC FUNCTION pos_stanje_proracun( nUlaz, nIzlaz, nVrijednost )
 
    ELSEIF POS->IdVd == POS_IDVD_RACUN
       nIzlaz += POS->Kolicina
-      nVrijednost += POS->Kolicina * POS->Cijena
+      nVrijednost -= POS->Kolicina * POS->Cijena
 
    ENDIF
 
