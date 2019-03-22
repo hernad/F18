@@ -33,6 +33,7 @@ FUNCTION pos_21_to_22_unos()
    LOCAL cBrFaktP := Space( 10 )
    LOCAL GetList := {}
    LOCAL cPreuzimaSeDN := "D"
+   LOCAL nRet, cMsg
 
    Box(, 5, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj otpremice iz magacina: " GET cBrFaktP
@@ -42,11 +43,28 @@ FUNCTION pos_21_to_22_unos()
    BoxC()
 
    IF LastKey() == K_ESC
-      RETURN -200
+      RETURN .F.
    ENDIF
 
-   RETURN pos_21_to_22( Trim( cBrFaktP ),  gIdRadnik, cPreuzimaSeDN == "D" )
+   cBrFaktP := Trim( cBrFaktP )
+   nRet := pos_21_to_22( cBrFaktP,  gIdRadnik, cPreuzimaSeDN == "D" )
 
+   IF nRet >= 0
+      // 0 - uspjesno, 10 - uspjesno za lPreuzimaSe false
+      IF nRet == 0
+         cMsg := "Roba po fakturi [" + cBrFaktP + "] na stanju :)"
+      ELSE
+         cMsg := "Prijem po fakturi [" + cBrFaktP + "] na ODBIJEN !"
+      ENDIF
+      MsgBeep( cMsg )
+   ELSE
+      Alert( _u( "Neuspješno izvršenje operacije [" + cBrFaktP +  "] ?! STATUS: " + AllTrim( Str( nRet ) )  ) )
+      IF nRet == -2
+         MsgBeep( "Već postoji dokument 22 sa brojem otpremnice [" + cBrFaktP + "]" )
+      ENDIF
+   ENDIF
+
+   RETURN .T.
 
 
 
@@ -60,7 +78,6 @@ FUNCTION pos_21_to_22( cBrFaktP, cIdRadnik, lPreuzimaSe )
    ELSE
       cLPreuzimaSe := "False"
    ENDIF
-
    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_21_to_22(" + ;
       sql_quote( cBrFaktP ) + "," + ;
       sql_quote( cIdRadnik ) + "," + ;
@@ -76,21 +93,5 @@ FUNCTION pos_21_to_22( cBrFaktP, cIdRadnik, lPreuzimaSe )
    RECOVER USING oError
       Alert( _u( "SQL neuspješno izvršenje 21->22 [" + cBrFaktP + "] ?" ) )
    END SEQUENCE
-
-
-   IF nRet >= 0
-      // 0 - uspjesno, 10 - uspjesno za lPreuzimaSe false
-      IF nRet == 0
-         cMsg := "Roba po fakturi [" + cBrFaktP + "] na stanju :)"
-      ELSE
-         cMsg := "Prijem po fakturi [" + cBrFaktP + "] na ODBIJEN !"
-         MsgBeep( cMsg )
-      ENDIF
-   ELSE
-      Alert( _u( "Neuspješno izvršenje operacije [" + cBrFaktP +  "] ?! STATUS: " + AllTrim( Str( nRet ) )  ) )
-      IF nRet == -2
-         MsgBeep( "Već postoji dokument 22 sa brojem otpremnice [" + cBrFaktP + "]" )
-      ENDIF
-   ENDIF
 
    RETURN nRet

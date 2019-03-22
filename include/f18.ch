@@ -561,7 +561,12 @@
 #define KALK_TRANSAKCIJA_PRODAVNICA_SNIZENJE_PROCENAT "%"
 #define KALK_TRANSAKCIJA_PRODAVNICA_SNIZENJE_AKCIJA   "A"
 
-#define POS_IDVD_ULAZI "P0#11#80#19#71#79"
+// 21 je dokument ulaza
+#define POS_IDVD_DOKUMENTI_ULAZI "02#21#22#80#19#71#79"
+
+// 21 NIJE dokument koji se računa kao ulaz robe
+#define POS_IDVD_ULAZI "02#22#80#19#71#79"
+
 #define POS_IDVD_NIVELACIJE_SNIZENJA "19#71#79"
 
 // pravi KALK

@@ -160,7 +160,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          RETURN DE_CONT
 
 
-      CASE pos_doks_2->IdVd $ POS_IDVD_ULAZI
+      CASE pos_doks_2->IdVd $ POS_IDVD_DOKUMENTI_ULAZI
 
          PushWa()
          hParams := hb_Hash()

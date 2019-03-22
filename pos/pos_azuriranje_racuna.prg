@@ -108,8 +108,12 @@ FUNCTION pos_azuriraj_racun( hParams )
 
 
    IF lOk
-      IF !fiscal_opt_active() .AND. Pitanje(, "Fiskalni štampač nije aktivan. Svejedno ažurirati?", " " ) == "D"
-         lOk := .T.
+      IF !fiscal_opt_active()
+         IF Pitanje(, "Fiskalni štampač nije aktivan. Svejedno ažurirati?", " " ) == "D"
+           lOk := .T.
+         ELSE
+           lOk := .F.
+         ENDIF
       ELSE
          lOk := pos_stampa_fiskalni_racun( hParams )
       ENDIF

@@ -9,6 +9,8 @@
 - POS pracenje stanja vraceno
 - POS fix pos_osob init
 - KALK 21 generacija
+- POS 22 workflow
+
 
 ## 2019-03-20
 

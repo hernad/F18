@@ -50,9 +50,9 @@ BEGIN
      END IF;
 
      IF lPreuzimaSe THEN
-        cOpis := 'PRIJEM: ' || cIdRadnik;
+        cOpis := 'PRIJEM: Radnik ' || cIdRadnik;
      ELSE
-        cOpis := 'ODBIJENO: ' || cIdRadnik;
+        cOpis := 'ODBIJENO: Radnik ' || cIdRadnik;
      END IF;
 
 
@@ -87,9 +87,7 @@ CREATE OR REPLACE FUNCTION p2.pos_delete_by_idvd_brfakt( cIdVd varchar, cBrFaktP
        LANGUAGE plpgsql
        AS $$
 DECLARE
-
     rec_dok RECORD;
-
 BEGIN
 
      IF btrim(cBrFaktP) = '' THEN
@@ -108,5 +106,35 @@ BEGIN
      DELETE from p2.pos_items WHERE idpos=rec_dok.idpos and idvd=rec_dok.idvd and brdok=rec_dok.brdok and datum=rec_dok.datum;
 
      RETURN 0;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION p2.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba varchar) RETURNS numeric
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   nCijenaMem numeric;
+   dDatOd date;
+   dDatDo date;
+BEGIN
+
+   -- ako robe ima na stanju, ako se radi o stavkama bez popusta (ncijena=0)
+   -- LIMIT 1 jer se ocekuje da ovih zapisa moze biti samo 1
+   -- ista roba moze biti na stanju samo po jednoj osnovnoj cijeni
+   SELECT cijena dat_od, dat_do FROM p2.pos_stanje
+      WHERE rtrim(idroba)=rtrim(cIdRoba)
+      AND kol_ulaz-kol_izlaz > 0
+      AND dat_od<=current_date AND dat_do>=current_date
+      AND ncijena=0  LIMIT 1
+      INTO nCijenaMem, dDatOd, dDatDo;
+
+    IF nCijenaMem IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
+    RETURN nCijenaMem;
+
 END;
 $$;

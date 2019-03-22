@@ -297,7 +297,6 @@ $$;
 -- =========================== 21, 22 ===============================================================================
 
 
-
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_postoji_dokument_by_brfaktp( cIdVd varchar, cBrFaktP varchar) RETURNS boolean
 LANGUAGE plpgsql
 AS $$
@@ -313,6 +312,39 @@ BEGIN
    END IF;
 
    RETURN True;
+END;
+$$;
+
+
+
+-- p2.pos_dostupna_osnovna_cijena_za_artikal( 'K12330') => 0 ako nema na stanju pos; odnosno cijenu koja je trenutno vazeca u pos
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba varchar) RETURNS numeric
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   nCijenaMem numeric;
+   dDatOd date;
+   dDatDo date;
+BEGIN
+
+   -- ako robe ima na stanju, ako se radi o stavkama bez popusta (ncijena=0)
+   -- LIMIT 1 jer se ocekuje da ovih zapisa moze biti samo 1
+   -- ista roba moze biti na stanju samo po jednoj osnovnoj cijeni
+   SELECT cijena dat_od, dat_do FROM {{ item_prodavnica }}.pos_stanje
+      WHERE rtrim(idroba)=rtrim(cIdRoba)
+      AND kol_ulaz-kol_izlaz > 0
+      AND dat_od<=current_date AND dat_do>=current_date
+      AND ncijena=0  LIMIT 1
+      INTO nCijenaMem, dDatOd, dDatDo;
+
+    IF nCijenaMem IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
+    RETURN nCijenaMem;
+
 END;
 $$;
 
@@ -332,6 +364,7 @@ DECLARE
     rec_dok RECORD;
     rec RECORD;
     cOpis varchar;
+    nPosCijena numeric;
 
 BEGIN
 
@@ -349,9 +382,9 @@ BEGIN
      END IF;
 
      IF lPreuzimaSe THEN
-        cOpis := 'PRIJEM: ' || cIdRadnik;
+        cOpis := 'PRIJEM RADNIK: ' || cIdRadnik;
      ELSE
-        cOpis := 'ODBIJENO: ' || cIdRadnik;
+        cOpis := 'ODBIJENO RADNIK: ' || cIdRadnik;
      END IF;
 
 
@@ -364,8 +397,13 @@ BEGIN
             SELECT * from {{ item_prodavnica }}.pos_items
             WHERE idpos=rec_dok.idpos and idvd=rec_dok.idvd and brdok=rec_dok.brdok and datum=rec_dok.datum
         LOOP
+
+            nPosCijena := p2.pos_dostupna_osnovna_cijena_za_artikal( rec.idroba );
+            IF (nPosCijena = 0) THEN  -- ove robe nema na stanju, prihvati cijenu koju je donio dokument 21 iz knjigovodstva
+               nPosCijena := rec.cijena;
+            END IF;
             INSERT INTO {{ item_prodavnica }}.pos_items(idpos, idvd, brdok, datum, rbr, kolicina, idroba, idtarifa, cijena, ncijena, kol2, robanaz, jmj)
-              VALUES(rec.idpos, '22', rec.brdok, rec.datum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, rec.cijena, rec.ncijena, rec.kol2, rec.robanaz, rec.jmj);
+              VALUES(rec.idpos, '22', rec.brdok, rec.datum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
 
         END LOOP;
      ELSE
