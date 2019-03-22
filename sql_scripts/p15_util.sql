@@ -291,3 +291,43 @@ BEGIN
    RETURN dok_id;
 END;
 $$;
+
+
+
+
+
+
+
+CREATE OR REPLACE FUNCTION p15.pos_21_22( cBrFaktP varchar) RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+
+    rec_dok RECORD;
+    rec RECORD;
+
+BEGIN
+
+     select * from p15.pos_doks where brfaktp=cBrFaktP;
+        INTO rec_dok;
+
+     IF rec_dok.dok_id is null THEN
+         RETURN -1;
+     END IF;
+
+     INSERT INTO p15.pos(idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do)
+         VALUES(rec_dok.idpos, '22', rec_dok.brdok, rec_dok.datum, rec_dok.brfaktp, rec_dok.opis, rec_dok.dat_od, rec_dok.dat_do)
+
+     FOR rec IN
+          SELECT * from p15.pos_items
+          WHERE idpos=cIdPos and idvd=cIdVd and brdok=cBrDok;
+     LOOP
+         INSERT INTO p15.pos_items(idpos, idvd, brdok, datum, kolicina, idroba, idtarifa, cijena, ncijena)
+            VALUES(rec.idpos, '22', rec.brdok, rec.datum, rec.kolicina, rec.idroba, rec.idtarifa, rec.cijena, rec.ncijena);
+
+            -- PERFORM p15.nivelacija_start_create( uuidPos );
+     END LOOP;
+
+     RETURN;
+END;
+$$;
