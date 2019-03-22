@@ -1,5 +1,10 @@
 # F18 klijent, lista promjena
 
+## 2019-03-22
+
+- POS 22 workflow
+- POS stanje i kartice
+
 ## 2019-03-21
 
 - 02 - zaduženje roba sa količinom 0
@@ -9,7 +14,6 @@
 - POS pracenje stanja vraceno
 - POS fix pos_osob init
 - KALK 21 generacija
-- POS 22 workflow
 
 
 ## 2019-03-20
