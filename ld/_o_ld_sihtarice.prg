@@ -64,7 +64,7 @@ FUNCTION o_radsat( cId )
 
    SELECT ( F_RADSAT )
 
-   cSql := "select * from fmk.radsat"
+   cSql := "select * from " + f18_sql_schema( "radsat" )
 
 // my_use ( "radsat" )
    use_sql( "radsat", cSql, cAlias )
@@ -103,8 +103,7 @@ FUNCTION o_radsiht( nGodina, nMjesec, cIdRadn )
 
    SELECT ( F_RADSIHT )
 
-   cSql := "select * from fmk." + cTable
-
+   cSql := "select * from " + f18_sql_schema( cTable )
 
    IF nGodina != NIL
       IF lWhere

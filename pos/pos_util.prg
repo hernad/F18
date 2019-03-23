@@ -22,7 +22,7 @@ FUNCTION pos_dokument_sa_vrijeme( hParams )
 
 FUNCTION pos_stampa_dokumenta( hParams )
 
-   IF hParams[ "idvd" ] $ POS_IDVD_NIVELACIJE_SNIZENJA
+   IF hParams[ "idvd" ] $ POS_IDVD_DOKUMENTI_NIVELACIJE_SNIZENJA
       pos_stampa_nivelacija( hParams )
    ELSE
       pos_stampa_zaduzenja( hParams )

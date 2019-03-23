@@ -51,14 +51,15 @@ FUNCTION pos_menu_dokumenti()
    AAdd( aOpc, "1. prijem u prodavnicu iz magacina [21->22]    " )
    AAdd( aOpcexe, {|| pos_21_to_22_unos() } )
 
-   AAdd( aOpc, "2. ulaz u prodavnicu direktno od dobavljača" )
-   AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_DOBAVLJAC_PRODAVNICA ) } )
-
-   AAdd( aOpc, "3. zahtjev za sniženje dijela zalihe     " )
+   AAdd( aOpc, "2. zahtjev za sniženje dijela zalihe     " )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_SNIZENJE ) } )
 
-   AAdd( aOpc, "4. zahtjev za nabavku - narudžbe    " )
+   AAdd( aOpc, "3. zahtjev za nabavku - narudžbe    " )
    AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_ZAHTJEV_NABAVKA ) } )
+
+   AAdd( aOpc, "4. ulaz u prodavnicu direktno od dobavljača" )
+   AAdd( aOpcexe, {|| pos_zaduzenje( POS_IDVD_DOBAVLJAC_PRODAVNICA ) } )
+
    /*
    AAdd( aOpc, "I. inventura" )
    AAdd( aOpcexe, {|| pos_inventura_nivelacija( .T. ) } )

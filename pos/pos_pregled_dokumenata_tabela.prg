@@ -160,7 +160,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          RETURN DE_CONT
 
 
-      CASE pos_doks_2->IdVd $ POS_IDVD_DOKUMENTI_ULAZI
+      CASE pos_doks_2->IdVd $ POS_IDVD_DOKUMENTI_ULAZI_NIVELACIJE
 
          PushWa()
          hParams := hb_Hash()
@@ -329,8 +329,9 @@ STATIC FUNCTION pos_racun_browse_kolone( aImeKol, aKol )
    AAdd( aImeKol, { "Naziv", {|| Left( field->robanaz, 30 ) } } )
    AAdd( aImeKol, { _u( "Količina" ), {|| Str( field->kolicina, 7, 3 ) } } )
    AAdd( aImeKol, { "Cijena", {|| Str( field->cijena, 7, 2 ) } } )
-   AAdd( aImeKol, { "Popust", {|| Str( field->ncijena, 7, 2 ) } } )
-   AAdd( aImeKol, { "Ukupno", {|| Str( ( field->kolicina * field->cijena ) - ( field->kolicina * field->ncijena ), 11, 2 ) } } )
+   AAdd( aImeKol, { "Popust%", {|| Str( pos_popust_procenat( field->cijena, field->ncijena ), 7, 2 ) } } )
+   AAdd( aImeKol, { "N.Cijena", {|| Str( field->ncijena, 7, 2 ) } } )
+   AAdd( aImeKol, { "Ukupno", {|| Str( field->kolicina * ( field->cijena - pos_popust( field->cijena, field->ncijena ) ), 11, 2 ) } } )
    AAdd( aImeKol, { "Tarifa", {|| pos->idtarifa } } )
 
    FOR i := 1 TO Len( aImeKol )
@@ -365,7 +366,7 @@ STATIC FUNCTION pos_browse_iznos_dokumenta()
          IF pos->kol2 <> 0
             nIznos += pos->kol2 * pos->cijena
          ENDIF
-      CASE pos_doks_2->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
+      CASE pos_doks_2->IdVd $ POS_IDVD_DOKUMENTI_NIVELACIJE_SNIZENJA
          nIznos += pos->kolicina * ( pos->ncijena - pos->cijena )
       OTHERWISE
          nIznos += pos->kolicina * pos->cijena

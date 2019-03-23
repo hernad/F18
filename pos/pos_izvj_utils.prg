@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
+FUNCTION pos_kasa_pripremi_pom_za_realkase( cIdVd, cDobId )
 
    // cIdVD - Id vrsta dokumenta
    // Opis: priprema pomoce baze POM.DBF za realizaciju
@@ -55,10 +55,12 @@ FUNCTION pos_kasa_pripremi_pom_za_izvjestaj( cIdVd, cDobId )
             REPLACE IdRoba WITH pos->IdRoba
             REPLACE Kolicina WITH pos->Kolicina
             REPLACE Iznos WITH pos->Kolicina * POS->Cijena
-            REPLACE Iznos2 WITH pos->nCijena
+            REPLACE popust with pos->kolicina * pos_popust( pos->cijena, pos->ncijena )
+
          ELSE
             REPLACE Kolicina WITH Kolicina + POS->Kolicina
             REPLACE Iznos WITH Iznos + POS->Kolicina * POS->Cijena
+            REPLACE popust WITH popust + POS->Kolicina * pos_popust( POS->Cijena, pos->ncijena )
          ENDIF
 
          SELECT pos

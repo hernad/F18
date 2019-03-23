@@ -210,7 +210,7 @@ CREATE INDEX dest_id1
 FUNCTION o_ugov( cUgovId, cIdPartner, nArea, cAlias )
 
    LOCAL cTable := "fakt_ugov"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    IF nArea == NIL
       nArea := F_UGOV
@@ -244,7 +244,7 @@ FUNCTION o_ugov( cUgovId, cIdPartner, nArea, cAlias )
 FUNCTION o_ugov_partner( cIdPartner )
 
    LOCAL cTable := "fakt_ugov", cAlias := "UGOV"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    cSql += " WHERE idpartner=" + sql_quote( cIdPartner )
 
@@ -261,7 +261,7 @@ FUNCTION o_ugov_partner( cIdPartner )
 FUNCTION o_aktivni_ugovori()
 
    LOCAL cTable := "fakt_ugov", cAlias := "UGOV"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    cSql += " WHERE aktivan='D'"
 
@@ -282,7 +282,7 @@ FUNCTION o_aktivni_ugovori()
 FUNCTION o_rugov( cIdUgov, cIdRoba, cDest )
 
    LOCAL cTable := "fakt_rugov", cAlias := "RUGOV"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    IF cIdUgov != NIL
       cSql += " WHERE id=" + sql_quote( cIdUgov )
@@ -309,7 +309,7 @@ FUNCTION o_rugov( cIdUgov, cIdRoba, cDest )
 FUNCTION o_rugov_roba( cIdRoba )
 
    LOCAL cTable := "fakt_rugov", cAlias := "RUGOV"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    cSql += " WHERE idroba=" + sql_quote( cIdRoba )
 
@@ -327,7 +327,7 @@ FUNCTION o_rugov_roba( cIdRoba )
 FUNCTION o_gen_ug( dDatObr, dDatGen )
 
    LOCAL cTable := "fakt_gen_ug", cAlias := "GEN_UG"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    IF dDatObr != NIL
       cSql += " WHERE dat_obr=" + sql_quote( dDatObr )
@@ -353,7 +353,7 @@ FUNCTION get_zadnje_fakturisanje_po_ugovoru()
 
    LOCAL nTArea := Select(), dGen, cTable := "fakt_gen_ug", cAlias := "POM"
 
-   LOCAL cSql := "select max(dat_gen) AS MAX_DAT_GEN from fmk." + cTable
+   LOCAL cSql := "select max(dat_gen) AS MAX_DAT_GEN from " + f18_sql_schema( cTable )
 
    SELECT F_POM
    use_sql( "GEN_UG", cSql, cAlias )
@@ -382,7 +382,7 @@ FUNCTION o_gen_ug_zadnji()
 FUNCTION o_gen_ug_p( dDatObr, cUgovId, cIdPartner )
 
    LOCAL cTable := "fakt_gen_ug_p", cAlias := "GEN_UG_P"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
 // SEEK DToS( dPObr ) + cUgovId + ugov->IdPartner
 
@@ -436,7 +436,7 @@ FUNCTION find_zadnja_destinacija()
 
    LOCAL cMaxId
    LOCAL cTable := "dest", cAlias := "POM"
-   LOCAL cSql := "select max(id) as max_id from fmk." + cTable
+   LOCAL cSql := "select max(id) as max_id from " + f18_sql_schema( cTable )
 
    SELECT F_POM
    use_sql( cTable, cSql, cAlias )
@@ -450,7 +450,7 @@ FUNCTION find_zadnja_destinacija()
 FUNCTION o_dest_partner( cIdPartner )
 
    LOCAL cTable := "dest", cAlias := "DEST"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    cSql += " WHERE idpartner=" + sql_quote( cIdPartner )
 
@@ -467,11 +467,10 @@ FUNCTION o_dest_partner( cIdPartner )
 FUNCTION find_dest_by_iddest_idpartn( cIdDestinacija, cIdPartner )
 
    LOCAL cTable := "dest", cAlias := "DEST"
-   LOCAL cSql := "select * from fmk." + cTable
+   LOCAL cSql := "select * from " + f18_sql_schema( cTable )
 
    cSql += " WHERE idpartner=" + sql_quote( cIdPartner )
    cSql += " AND id=" + sql_quote( cIdDestinacija )
-
 
    SELECT F_DEST
    use_sql( cTable, cSql, cAlias )

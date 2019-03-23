@@ -43,7 +43,7 @@ FUNCTION find_os_sii_by_naz_or_id( cId )
       cTable := "sii_sii"
    ENDIF
 
-   cSqlQuery := "select * from fmk." + cTable
+   cSqlQuery := "select * from " + f18_sql_schema( cTable )
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )
    cSqlQuery += " WHERE id ilike " + cIdSql
@@ -113,7 +113,7 @@ FUNCTION find_amort_by_id( cId )
 
    LOCAL cAlias := "AMORT"
    LOCAL cTable := "os_amort"
-   LOCAL cSqlQuery := "select * from fmk." + cTable
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
    LOCAL cIdSql
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )
@@ -156,7 +156,7 @@ FUNCTION find_reval_by_id( cId )
 
    LOCAL cAlias := "REVAL"
    LOCAL cTable := "os_reval"
-   LOCAL cSqlQuery := "select * from fmk." + cTable
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
    LOCAL cIdSql
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )

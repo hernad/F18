@@ -103,16 +103,15 @@ FUNCTION pos_pdv_po_tarifama
 
       ELSE // fsolo
          ?
-         IF cNaplaceno == "3"
-            ?U PadC( "**** OBRAČUN ZA NAPLAĆENI IZNOS ****", LEN_TRAKA )
-         ENDIF
-         ? PadC ( "REKAPITULACIJA POREZA PO TARIFAMA", LEN_TRAKA )
+         // IF cNaplaceno == "3"
+         // ?U PadC( "**** OBRAČUN ZA NAPLAĆENI IZNOS ****", LEN_TRAKA )
+         // ENDIF
+         ? PadC ( "REKAPITULACIJA PDV PO TARIFAMA", LEN_TRAKA )
 
       ENDIF // fsolo
 
 
       seek_pos_pos( cIdPos )
-
       PRIVATE cFilter := ".t."
 
       IF !( cFilterTarifa == ".t." )
@@ -125,12 +124,11 @@ FUNCTION pos_pdv_po_tarifama
 
 
       m := Replicate( "-", 12 ) + " " + Replicate( "-", 12 ) + " " + Replicate( "-", 12 )
-
       nTotOsn := 0
       nTotPDV := 0
 
       // matrica je lok var : aTarife:={}
-      aTarife := pos_pdv_napuni_pom( POS_IDVD_RACUN, dDatum0, aTarife, cNaplaceno )
+      aTarife := pos_pdv_napuni_pom( POS_IDVD_RACUN, dDatum0, aTarife ) // , cNaplaceno )
 
       ASort ( aTarife,,, {| x, y | x[ 1 ] < y[ 1 ] } )
 
@@ -147,7 +145,7 @@ FUNCTION pos_pdv_po_tarifama
 
          // ispisi opis i na realizaciji kao na racunu
          ? aTarife[ nCnt ][ 1 ], "(" + Str( nPDV ) + "%)"
-altd()
+         AltD()
          ? Str( aTarife[ nCnt ][ 2 ], 12, 2 ), Str( aTarife[ nCnt ][ 3 ], 12, 2 ), Str( Round( aTarife[ nCnt ][ 4 ], 2 ), 12, 2 )
          nTotOsn += Round( aTarife[ nCnt ][ 4 ], 2 ) - Round( aTarife[ nCnt ][ 3 ], 2 )
          nTotPDV += Round( aTarife[ nCnt ][ 3 ], 2 )
@@ -187,36 +185,28 @@ altd()
 
 
 
-STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife, cNaplaceno )
+STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife ) // , cNaplaceno )
 
-   IF cNaplaceno == nil
-      cNaplaceno := "1"
-   ENDIF
+   LOCAL nIzn, nOsn, nPDV, nPoz
 
+   // IF cNaplaceno == nil
+   // cNaplaceno := "1"
+   // ENDIF
 
    seek_pos_doks_2( cIdVd, dDatum0 )
    DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatum1
 
-      IF ( !pos_admin() .AND. pos_doks->idpos = "X" ) .OR. ( pos_doks->IdPos = "X" .AND. AllTrim( cIdPos ) <> "X" ) .OR. ( !Empty( cIdPos ) .AND. cIdPos <> pos_doks->IdPos )
-         SKIP
-         LOOP
-      ENDIF
-
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
       DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
 
+         select_o_roba( pos->idroba )
          select_o_tarifa( POS->IdTarifa )
 
-         IF cNaplaceno == "1"
-            nIzn := pos->( Cijena * Kolicina )
-
-         ELSE  // cnaplaceno="3"
-
-            select_o_roba( pos->idroba )
-            nIzn := pos->( Cijena * kolicina )
-
-
-         ENDIF
+         // IF cNaplaceno == "1"
+         nIzn := pos->kolicina * ( pos->Cijena  - pos_popust( pos->cijena, pos->ncijena ) )
+         // ELSE  // cnaplaceno="3"
+         // nIzn := pos->( Cijena * kolicina )
+         // ENDIF
 
          SELECT POS
 

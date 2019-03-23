@@ -130,13 +130,11 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
    ENDIF
 
    nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "uplaceno" ] )
-
    IF nError <> 0
       MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun će ostati u pripremi" )
       // pos_povrat_racuna( hParams[ "idpos" ], hParams[ "brdok" ], hParams[ "datum" ] )
       RETURN .F.
    ENDIF
-
 
    RETURN .T.
 
@@ -177,7 +175,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    // VR - virman
    // CK - cek
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "ZAKLJUČENJE RAČUNA" COLOR "BG+/B"
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Način plaćanja (01/KT/VR...):" GET cIdVrsteP PICT "@!" VALID p_vrstep( @cIdVrsteP )
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Način plaćanja (01/KT):" GET cIdVrsteP PICT "@!" VALID p_vrstep( @cIdVrsteP )
 
    READ
 
@@ -233,7 +231,7 @@ STATIC FUNCTION koliko_treba_povrata_kupcu()
    GO TOP
    DO WHILE !Eof() .AND. AllTrim( _pos_pripr->brdok ) == POS_BRDOK_PRIPREMA
       nIznos += _pos_pripr->kolicina * _pos_pripr->cijena
-      nPopust += _pos_pripr->kolicina * _pos_pripr->ncijena
+      nPopust += _pos_pripr->kolicina * pos_popust( _pos_pripr->cijena, _pos_pripr->ncijena )
       SKIP
    ENDDO
 

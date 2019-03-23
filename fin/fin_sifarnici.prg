@@ -312,7 +312,7 @@ FUNCTION P_TRFP3( cId, dx, dy )
 
 FUNCTION is_konto_ima_u_prometu( cKonto )
 
-   LOCAL cSql := "select count(*) as cnt from fmk.fin_anal where idkonto=" + sql_quote( cKonto )
+   LOCAL cSql := "select count(*) as cnt from " + f18_sql_schema( "fin_anal" ) + " where idkonto=" + sql_quote( cKonto )
    LOCAL lRet
 
    PushWa()

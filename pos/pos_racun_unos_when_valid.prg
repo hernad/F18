@@ -262,22 +262,26 @@ STATIC FUNCTION pos_cijena_nije_nula( nCijena )
    RETURN .T.
 
 
-FUNCTION pos_racun_prikazi_ukupno( lRekalkulisati )
+FUNCTION pos_racun_prikazi_ukupno()
 
-   LOCAL aRet
+   LOCAL aRet, nIznos, nPopust
 
-   IF lRekalkulisati == NIL
-      lRekalkulisati := .F.
-   ENDIF
-   IF lRekalkulisati
-      aRet := pos_racun_tekuci_saldo()
-      pos_racun_iznos( aRet[ 1 ] )
-      pos_racun_popust( aRet[ 2 ] )
-   ENDIF
+   // IF lRekalkulisati == NIL
+   // lRekalkulisati := .F.
+   // ENDIF
+   // IF lRekalkulisati
+   aRet := pos_racun_tekuci_saldo()
+   nIznos := aRet[ 1 ]
+   nPopust := aRet[ 2 ]
+   // pos_racun_iznos( aRet[ 1 ] )
+   // pos_racun_popust( aRet[ 2 ] )
+   // ENDIF
 
-   @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
-   pos_racun_prikaz_ukupno( box_x_koord() + 2 )
-   ispis_veliki_brojevi_iznos( pos_racun_iznos_neto(), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
+   // @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
+   pos_racun_prikaz_ukupno( box_x_koord() + 2, nIznos, nPopust )
+   // ispis_veliki_brojevi_iznos( pos_racun_iznos_neto(), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
+
+   ispis_veliki_brojevi_iznos( nIznos - nPopust, box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
 
    SELECT _pos_pripr
    GO TOP
@@ -294,16 +298,20 @@ FUNCTION pos_popust( nCijena, nNCijena )
    RETURN nCijena - nNCijena
 
 
-FUNCTION pos_pripr_popust()
+FUNCTION pos_popust_procenat( nCijena, nNCijena )
 
-   IF Round( _pos_pripr->ncijena, 4 ) == 0
+   IF Round( nCijena, 4 ) == 0
+      RETURN 999999
+   ENDIF
+
+   IF Round( nNcijena, 4 ) == 0
       RETURN 0
    ENDIF
 
-   RETURN _pos_pripr->cijena - _pos_pripr->ncijena
+   RETURN ( nCijena - nNCijena ) / nCijena * 100
 
 
-FUNCTION pos_pripr_cijena_sa_popustom()
+FUNCTION pos_pripr_neto_cijena()
 
    IF Round( _pos_pripr->ncijena, 4 ) == 0
       RETURN _pos_pripr->cijena
@@ -321,8 +329,8 @@ FUNCTION pos_racun_tekuci_saldo()
    SELECT _pos_pripr
    GO TOP
    DO WHILE !Eof()
-      nIznos += _pos_pripr->kolicina *  _pos_pripr->cijena
-      nPopust += _pos_pripr->kolicina * pos_pripr_popust()
+      nIznos += _pos_pripr->kolicina * _pos_pripr->cijena
+      nPopust += _pos_pripr->kolicina * pos_popust( _pos_pripr->cijena, _pos_pripr->ncijena )
       SKIP
    ENDDO
    PopWa()

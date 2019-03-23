@@ -13,6 +13,7 @@
 
 STATIC s_oPDF
 
+MEMVAR _idradnik
 MEMVAR gIdRadnik, lTekuci, cPrikazPazarRoba, cIdRadnik, cVrsteP, cFilterVrstePlacanja, cIdPos, dDatOd, dDatDo
 
 FUNCTION pos_realizacija_radnik
@@ -68,8 +69,8 @@ FUNCTION pos_realizacija_radnik
    AAdd ( aDbf, { "IdRoba", "C", 10, 0 } )
    AAdd ( aDbf, { "Kolicina", "N", 15, 3 } )
    AAdd ( aDbf, { "Iznos",    "N", 20, 5 } )
-   AAdd ( aDbf, { "Iznos2",   "N", 20, 5 } )
-   AAdd ( aDbf, { "Iznos3",   "N", 20, 5 } )
+
+   AAdd ( aDbf, { "popust",   "N", 20, 5 } )
 
    pos_cre_pom_dbf( aDbf )
 
@@ -79,8 +80,8 @@ FUNCTION pos_realizacija_radnik
    ENDIF
 
    my_use_temp( "POM", my_home() + "pom", .F., .T. )
-   INDEX ON ( idradnik + idvrstep + idroba ) TAG "1"
-   INDEX ON ( idroba ) TAG "2"
+   INDEX ON ( pom->idradnik + pom->idvrstep + pom->idroba ) TAG "1"
+   INDEX ON ( pom->idroba ) TAG "2"
 
    SET ORDER TO TAG "1"
 
@@ -125,7 +126,7 @@ FUNCTION pos_realizacija_radnik
       ?U "-----", Replicate ( "-", 30 )
    ENDIF
 
-   pos_radnik_izvuci ( POS_IDVD_RACUN )
+   pos_real_radnik_generacija_pom ( POS_IDVD_RACUN )
 
    SELECT pos_doks
    SET ORDER TO TAG "2"       // "DOKSi2", "IdVd+DTOS (Datum)"
@@ -161,7 +162,7 @@ FUNCTION pos_realizacija_radnik
             nTotVP3 := 0
             DO WHILE !Eof() .AND. POM->( IdRadnik + IdVrsteP ) == ( _IdRadnik + _IdVrsteP )
                nTotVP += POM->Iznos
-               nTotVP3 += pom->iznos3
+               nTotVP3 += pom->popust
                SKIP
             ENDDO
 
@@ -178,7 +179,7 @@ FUNCTION pos_realizacija_radnik
 
          IF nTotRadn3 <> 0
             ? PadL ( pos_popust_prikaz(), 29 ), Str ( nTotRadn3, 10, 2 )
-            ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotRadn - nTotRadn3 + nTotRadn2, 10, 2 )
+            ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotRadn - nTotRadn3, 10, 2 )
          ENDIF
          ? Replicate ( "-", 40 )
 
@@ -192,7 +193,7 @@ FUNCTION pos_realizacija_radnik
          ? PadC ( "SVI RADNICI UKUPNO:", 25 ), Str ( nTotal, 14, 2 )
          IF nTotal3 <> 0
             ? PadL ( pos_popust_prikaz(), 29 ), Str ( nTotal3, 10, 2 )
-            ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotal - nTotal3 + nTotal2, 10, 2 )
+            ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotal - nTotal3, 10, 2 )
          ENDIF
          ? Replicate ( "=", 40 )
       ENDIF
@@ -231,7 +232,7 @@ FUNCTION pos_realizacija_radnik
             DO WHILE !Eof() .AND. POM->IdRoba == _IdRoba
                nKol += POM->Kolicina
                nIzn += POM->Iznos
-               nIzn3 += POM->Iznos3
+               nIzn3 += POM->popust
                SELECT POM
                SKIP
             ENDDO
@@ -292,7 +293,9 @@ FUNCTION pos_close_dbfs_real_radnici()
    RETURN .T.
 
 
-FUNCTION pos_radnik_izvuci( cIdVd )
+FUNCTION pos_real_radnik_generacija_pom( cIdVd )
+
+   LOCAL nPopust
 
    seek_pos_doks_2( cIdVd, dDatOd )
    DO WHILE ! Eof() .AND. IdVd == cIdVd .AND. pos_doks->Datum <= dDatDo
@@ -305,21 +308,25 @@ FUNCTION pos_radnik_izvuci( cIdVd )
       _IdVrsteP := pos_doks->IdVrsteP
       _IdRadnik := pos_doks->IdRadnik
 
-
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
       DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
 
          select_o_roba( pos->idroba )
-
          SELECT POM
          GO TOP
          HSEEK _IdRadnik + _IdVrsteP + POS->IdRoba
 
+         nPopust := pos_popust( pos->cijena, pos->ncijena )
          IF !Found()
             APPEND BLANK
-            REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, Kolicina WITH POS->KOlicina, Iznos WITH POS->Kolicina * POS->Cijena
+            REPLACE IdRadnik WITH _IdRadnik, IdVrsteP WITH _IdVrsteP, IdRoba WITH POS->IdRoba, Kolicina WITH POS->KOlicina, ;
+                    Iznos WITH POS->Kolicina * POS->Cijena, ;
+                    popust WITH pos->kolicina * nPopust
+
          ELSE
-            REPLACE Kolicina WITH Kolicina + POS->Kolicina, Iznos WITH Iznos + POS->Kolicina * POS->Cijena
+            REPLACE Kolicina WITH pom->Kolicina + POS->Kolicina, ;
+                    Iznos WITH pom->Iznos + POS->Kolicina * pos->cijena, ;
+                    popust WITH pom->popust + POS->kolicina * nPopust
          ENDIF
          SELECT POS
          SKIP

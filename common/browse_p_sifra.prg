@@ -300,7 +300,7 @@ FUNCTION p_sifra_da_li_vec_postoji_sifra( cId, cIdBK, cUslovSrch, cNazSrch ) // 
 
 FUNCTION find_sifra_by_naz( cTable, cIdPart, cDjoker )
 
-   LOCAL cSqlQuery := "select * from fmk."
+   LOCAL cSqlQuery := "select * from "
    LOCAL cIdSql
    LOCAL cField
 
@@ -308,7 +308,7 @@ FUNCTION find_sifra_by_naz( cTable, cIdPart, cDjoker )
       cTable := "fakt_ftxt"
    ENDIF
 
-   cSqlQuery += cTable
+   cSqlQuery += f18_sql_schema( cTable )
    cIdSql := sql_quote( Upper( AllTrim( cIdPart ) ) + "%" )
 
 

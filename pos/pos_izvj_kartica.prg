@@ -199,6 +199,8 @@ FUNCTION pos_kartica_artikla()
 
 FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nStanjeKolicina, nVrijednost, lPrint )
 
+   LOCAL nPopust, nCijenaNeto
+
    IF pos->idvd == POS_IDVD_POCETNO_STANJE_PRODAVNICA
       nUlaz := POS->Kolicina
       nVrijednost := POS->Kolicina * POS->Cijena
@@ -231,8 +233,8 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nStanjeKolicina, nVrijednos
       ENDIF
 
 
-   ELSEIF POS->IdVd == POS_IDVD_GENERISANA_NIVELACIJA .OR. pos->idvd == POS_IDVD_NIVELACIJA
-      nVrijednost += POS->Kolicina * POS->Cijena
+   ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
+      nVrijednost += POS->Kolicina * ( POS->Cijena - POS->Cijena )
 
       IF lPrint
          ?
@@ -242,7 +244,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nStanjeKolicina, nVrijednos
          ?? " S:", Str ( POS->Cijena, 7, 2 ), "N:", Str( POS->Ncijena, 7, 2 )
          @ PRow() + 1, s_nKol2 + 1 SAY PadR( "Niv.Kol:", 10 ) + " "
          ?? Str( pos->kolicina, 10, 3 ) + " "
-         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
          nVrijednost += pos->kolicina * ( pos->ncijena - pos->cijena )
          ?? Str ( pos->ncijena - pos->cijena, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
@@ -250,17 +252,28 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nStanjeKolicina, nVrijednos
 
    ELSEIF POS->IdVd == POS_IDVD_RACUN
       nIzlaz += POS->Kolicina
-      nVrijednost -= POS->Kolicina * POS->Cijena
+      IF pos->ncijena <> 0
+         nPopust := Round( ( pos->cijena - pos->ncijena ) / pos->cijena * 100, 2 )
+         nCijenaNeto := pos->ncijena
+      ELSE
+         nCijenaNeto := pos->cijena
+         nPopust := 0
+      ENDIF
+      nVrijednost -= POS->Kolicina * nCijenaNeto
       nStanjeKolicina -= POS->Kolicina
 
       IF lPrint
          ?
          ?? DToC( pos->datum ) + " "
          ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), FIELD_LEN_POS_BRDOK ), ""
-         ?? Space ( 10 )
+         IF nPopust <> 0
+            ?? "P:" + Str( nPopust, 5, 2 ) + "%" + Space( 3 )
+         ELSE
+            ?? Space( 11 )
+         END IF
          ?? Str ( pos->kolicina, 10, 3 ) + " "
          ?? Str ( nStanjeKolicina, 10, 2 ) + " "
-         ?? Str ( pos->cijena, 10, 2 ) + " "
+         ?? Str ( nCijenaNeto, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
 

@@ -130,7 +130,7 @@ PROCEDURE update_fin_nalog_count()
    LOCAL oQry
 
    IF my_database() != "?undefined?" .AND. my_login():lOrganizacijaSpojena
-      oQry := run_sql_query( "SELECT count(*) from fmk.fin_nalog" )
+    --  oQry := run_sql_query( "SELECT count(*) from fmk.fin_nalog" )
       IF sql_error_in_query( oQry, "SELECT" )
          MsgBeep( "ERR fin_nalog ne postoji?! " + my_database() )
          QUIT

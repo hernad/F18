@@ -12,7 +12,7 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
-STATIC s_nIznosRacuna, s_nPopust
+// STATIC s_nIznosRacuna, s_nPopust
 STATIC s_hRacunSumarno
 
 
@@ -55,19 +55,20 @@ FUNCTION pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena, nKolicina )
 
    RETURN s_hRacunSumarno[ cKey ]
 
-
-FUNCTION pos_racun_iznos_neto()
+/*
+-- FUNCTION pos_racun_iznos_neto()
 
    RETURN s_nIznosRacuna - s_nPopust
 
 
-FUNCTION pos_racun_iznos( nIznos )
+-- FUNCTION pos_racun_iznos( nIznos )
 
    IF nIznos != NIL
       s_nIznosRacuna := nIznos
    ENDIF
 
    RETURN s_nIznosRacuna
+
 
 
 FUNCTION pos_racun_popust( nIznos )
@@ -77,15 +78,17 @@ FUNCTION pos_racun_popust( nIznos )
    ENDIF
 
    RETURN s_nPopust
+*/
 
-FUNCTION pos_racun_prikaz_ukupno( nRow )
 
-   @ box_x_koord() + nRow + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY s_nIznosRacuna PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY s_nPopust PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + nRow + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY s_nIznosRacuna - s_nPopust PICT "99999.99" COLOR f18_color_invert()
+FUNCTION pos_racun_prikaz_ukupno( nRow, nIznosRacuna, nPopust )
+
+   @ box_x_koord() + nRow + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY nIznosRacuna PICT "99999.99" COLOR f18_color_invert()
+   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY nPopust PICT "99999.99" COLOR f18_color_invert()
+   @ box_x_koord() + nRow + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY nIznosRacuna - nPopust PICT "99999.99" COLOR f18_color_invert()
 
    RETURN .T.
-
+*/
 
 FUNCTION pos_racun_artikal_info( nLinija, cIdRoba, cMessage )
 

@@ -16,7 +16,7 @@ FIELD id, naz
 FUNCTION find_partner_by_naz_or_id( cId )
 
    LOCAL cAlias := "PARTN"
-   LOCAL cSqlQuery := "select * from fmk.partn"
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( "partn" )
    LOCAL cIdSql
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )
@@ -46,8 +46,8 @@ FUNCTION find_partner_max_numeric_id()
       // where zadovoljava: '0001  ', '000100', NE zadovoljava 'A05  '
       // ako imaju sifre '1   ', '9    '  pravice probleme, pa prvo trazimo max integer
       LOCAL cSqlQueryInt := "select max(id::integer) MAXID_INT  from fmk.partn where id ~ '^\d+\s*'"
-      LOCAL nMaxId := 0
-      LOCAL cMaxId := ""
+      LOCAL nMaxId
+      LOCAL cMaxId
 
       PushWa()
       SELECT F_POM
@@ -107,7 +107,7 @@ FUNCTION select_o_partner( cId )
 FUNCTION find_konto_by_naz_or_id( cId )
 
    LOCAL cAlias := "KONTO"
-   LOCAL cSqlQuery := "select * from fmk.konto"
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( "konto" )
    LOCAL cIdSql
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )
@@ -159,8 +159,6 @@ FUNCTION select_o_konto( cId )
    ENDIF
 
    RETURN o_konto( cId )
-
-
 
 
 FUNCTION o_vrste_placanja()
@@ -237,8 +235,6 @@ FUNCTION select_o_tdok( cId )
    ENDIF
 
    RETURN o_tdok( cId )
-
-
 
 
 FUNCTION o_tnal( cId )
@@ -345,7 +341,6 @@ FUNCTION select_o_ops( cId )
 
 FUNCTION use_sql_opstine( cId )
 
-   LOCAL cSql
    LOCAL cTable := "ops"
 
    SELECT ( F_OPS )
@@ -386,7 +381,6 @@ FUNCTION select_o_rj( cId )
 
 FUNCTION use_sql_rj( cId )
 
-   LOCAL cSql
    LOCAL cTable := "rj"
 
    SELECT ( F_RJ )
@@ -405,7 +399,7 @@ FUNCTION find_rj_by_id( cId )
 
    LOCAL cAlias := "RJ"
    LOCAL cTable := "rj"
-   LOCAL cSqlQuery := "select * from fmk." + cTable
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
    LOCAL cIdSql
 
    cIdSql := sql_quote( "%" + Upper( AllTrim( cId ) ) + "%" )

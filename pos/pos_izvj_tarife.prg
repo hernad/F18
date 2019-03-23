@@ -15,14 +15,17 @@ FUNCTION pos_rekapitulacija_tarifa( aTarife )
 
    LOCAL nArr
    LOCAL cLine
+   LOCAL nCnt
+   LOCAL nTotOsn
+   LOCAL nTotPDV
+
+   LOCAL nPDV := 0
 
    ?
-   ? "REKAPITULACIJA POREZA PO TARIFAMA"
+   ? "REKAPITULACIJA PDV PO TARIFAMA"
 
    nTotOsn := 0
-   nTotPPP := 0
-   nTotPPU := 0
-   nTotPP := 0
+   nTotPDV := 0
    nPDV := 0
 
    cLine := Replicate( "-", 12 )
@@ -34,14 +37,12 @@ FUNCTION pos_rekapitulacija_tarifa( aTarife )
    ASort ( aTarife,,, {| x, y| x[ 1 ] < y[ 1 ] } )
 
    ? cLine
-
    ? "Tarifa (Stopa %)"
    ? PadC( "PV bez PDV", 12 ), PadC( "PDV", 12 ), PadC( "PV sa PDV", 12 )
 
    ? cLine
 
    nArr := Select()
-
    FOR nCnt := 1 TO Len( aTarife )
 
       select_o_tarifa( aTarife[ nCnt ][ 1 ] )
@@ -50,14 +51,14 @@ FUNCTION pos_rekapitulacija_tarifa( aTarife )
       ? aTarife[ nCnt ][ 1 ], "(" + Str( nPDV ) + "%)"
       ? Str( aTarife[ nCnt ][ 2 ], 12, 2 ), Str ( aTarife[ nCnt ][ 3 ], 12, 2 ), Str( Round( aTarife[ nCnt ][ 2 ], 2 ) + Round( aTarife[ nCnt ][ 3 ], 2 ), 12, 2 )
       nTotOsn += Round( aTarife[ nCnt ][ 2 ], 2 )
-      nTotPPP += Round( aTarife[ nCnt ][ 3 ], 2 )
+      nTotPDV += Round( aTarife[ nCnt ][ 3 ], 2 )
    NEXT
 
    SELECT ( nArr )
 
    ? cLine
    ? "UKUPNO"
-   ? Str( nTotOsn, 12, 2 ), Str( nTotPPP, 12, 2 ), Str( nTotOsn + nTotPPP, 12, 2 )
+   ? Str( nTotOsn, 12, 2 ), Str( nTotPDV, 12, 2 ), Str( nTotOsn + nTotPDV, 12, 2 )
    ? cLine
    ?
 
@@ -65,7 +66,7 @@ FUNCTION pos_rekapitulacija_tarifa( aTarife )
 
 
 
-FUNCTION pos_setuj_tarife( cIdRoba, nIzn, aTarife, nPPP, nPPU, nOsn, nPP )
+FUNCTION pos_setuj_tarife( cIdRoba, nIzn, aTarife, nPDV, nPPU, nOsn, nPP )
 
    nArr := Select()
 
@@ -75,19 +76,14 @@ FUNCTION pos_setuj_tarife( cIdRoba, nIzn, aTarife, nPPP, nPPU, nOsn, nPP )
    SELECT ( nArr )
 
    nOsn := nIzn / ( 1 + tarifa->pdv / 100 )
-   nPPP := nOsn * tarifa->pdv / 100
-   nPP := 0
-   nPPU := 0
-
+   nPDV := nOsn * tarifa->pdv / 100
    nPoz := AScan ( aTarife, {| x| x[ 1 ] == roba->IdTarifa } )
 
    IF nPoz == 0
-      AAdd ( aTarife, { roba->IdTarifa, nOsn, nPPP, nPPU, nPP } )
+      AAdd ( aTarife, { roba->IdTarifa, nOsn, nPDV } )
    ELSE
       aTarife[nPoz ][ 2 ] += nOsn
-      aTarife[nPoz ][ 3 ] += nPPP
-      aTarife[nPoz ][ 4 ] += nPPU
-      aTarife[nPoz ][ 5 ] += nPP
+      aTarife[nPoz ][ 3 ] += nPDV
    ENDIF
 
    RETURN NIL

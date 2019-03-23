@@ -72,8 +72,8 @@ FUNCTION pos_ispravi_stavku_racuna()
             _cijena := pos_get_mpc()
          ENDIF
          _idtarifa := roba->idtarifa
-         pos_racun_iznos( pos_racun_iznos() + _cijena * _kolicina - _pos_pripr->cijena * _pos_pripr->kolicina )
-         pos_racun_popust( pos_racun_popust() + _ncijena * _kolicina - _pos_pripr->ncijena * _pos_pripr->kolicina )
+         //pos_racun_iznos( pos_racun_iznos() + _cijena * _kolicina - _pos_pripr->cijena * _pos_pripr->kolicina )
+         //pos_racun_popust( pos_racun_popust() + _ncijena * _kolicina - _pos_pripr->ncijena * _pos_pripr->kolicina )
 
          my_rlock()
          Gather()
@@ -88,7 +88,7 @@ FUNCTION pos_ispravi_stavku_racuna()
    ENDIF
    BoxC()
 
-   pos_racun_prikazi_ukupno( .F. )
+   pos_racun_prikazi_ukupno()
    pos_racun_browse_objekat():refreshCurrent()
    DO WHILE !pos_racun_browse_objekat():stable
       pos_racun_browse_objekat():Stabilize()
@@ -108,11 +108,11 @@ FUNCTION pos_brisi_stavku_racuna()
    ENDIF
 
    Beep ( 2 )
-   pos_racun_iznos( pos_racun_iznos() - _pos_pripr->cijena * _pos_pripr->kolicina )
-   pos_racun_popust( pos_racun_popust() - _pos_pripr->ncijena * _pos_pripr->kolicina )
+   //pos_racun_iznos( pos_racun_iznos() - _pos_pripr->cijena * _pos_pripr->kolicina )
+   //pos_racun_popust( pos_racun_popust() - _pos_pripr->ncijena * _pos_pripr->kolicina )
    pos_racun_sumarno_stavka( _pos_pripr->idroba, _pos_pripr->cijena, _pos_pripr->ncijena, 0 )
    my_delete()
-   pos_racun_prikazi_ukupno( .F. )
+   pos_racun_prikazi_ukupno()
 
    pos_racun_browse_objekat():refreshAll()
    DO WHILE !pos_racun_browse_objekat():stable

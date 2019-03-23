@@ -73,7 +73,8 @@ FUNCTION fin_brisanje_markera_otvorenih_stavki()
    IF Pitanje(, "Jeste li sigurni ?!", "N" ) == "N"
       RETURN .F.
    ENDIF
-   cSql := "update fmk.fin_suban set otvst=' ' where otvst='9'; select count(*) from fmk.fin_suban where otvst='9'"
+   cSql := "update " + f18_sql_schema( "fin_suban" ) + " set otvst=' ' where otvst='9';"
+   cSql += "select count(*) from " + f18_sql_schema( "fin_suban" ) + " where otvst='9'"
    MsgO( "Brisanje markera... molimo sačekajte trenutak ..." )
    lRet := use_sql( "del_ostav", cSql )
    MsgC()
@@ -104,10 +105,10 @@ FUNCTION param_otvorene_stavke_kupci_konto_like( cSet )
 
    brisanje markera za stavke nalog koji se vraca u pripremu
 
-   UPDATE fmk.fin_suban set otvst=' '
-    FROM
-   ( select idfirma,idkonto,idpartner,brdok from fmk.fin_suban where idfirma='10' and idvn='61' and brnal='00000001' and otvst='9' ) as SUBQ
-    WHERE fmk.fin_suban.idfirma=SUBQ.idfirma and fmk.fin_suban.idpartner=SUBQ.idpartner and fmk.fin_suban.brdok=SUBQ.brdok
+  -- UPDATE fmk.fin_suban set otvst=' '
+  --  FROM
+  -- ( select idfirma,idkonto,idpartner,brdok from fmk.fin_suban where idfirma='10' and idvn='61' and brnal='00000001' and otvst='9' ) as SUBQ
+  --  WHERE fmk.fin_suban.idfirma=SUBQ.idfirma and fmk.fin_suban.idpartner=SUBQ.idpartner and fmk.fin_suban.brdok=SUBQ.brdok
 
    */
 
@@ -121,14 +122,14 @@ FUNCTION fin_brisanje_markera_otvorenih_stavki_vezanih_za_nalog( cIdFirma, cIdVn
    ENDIF
 
    MsgO( "Brisanje markera otvorenih stavki " + cKupciLike )
-   cSql := "UPDATE fmk.fin_suban set otvst=' ' FROM "
-   cSql += "( select idfirma,idkonto,idpartner,brdok from fmk.fin_suban WHERE "
+   cSql := "UPDATE " + f18_sql_schema( "fin_suban" ) + " set otvst=' ' FROM "
+   cSql += "( select idfirma,idkonto,idpartner,brdok from  " + f18_sql_schema( "fin_suban" ) + " WHERE "
    cSql += "idfirma=" + sql_quote( cIdFirma )
    cSql += "AND idvn=" + sql_quote( cIdVn )
    cSql += "AND brnal=" + sql_quote( cBrNal )
    cSql += "AND idkonto like " + sql_quote( cKupciLike )
    cSql += ") AS SUBQ "
-   cSql += "WHERE fmk.fin_suban.idfirma=SUBQ.idfirma and fmk.fin_suban.idpartner=SUBQ.idpartner and fmk.fin_suban.brdok=SUBQ.brdok"
+   cSql += "WHERE " + f18_sql_schema( "fin_suban" ) + ".idfirma=SUBQ.idfirma and " + f18_sql_schema( "fin_suban" ) + ".idpartner=SUBQ.idpartner and " + f18_sql_schema( "fin_suban" ) + ".brdok=SUBQ.brdok"
 
    run_sql_query( cSql )
    MsgC()

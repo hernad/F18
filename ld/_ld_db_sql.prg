@@ -119,7 +119,7 @@ FUNCTION ld_max_godina()
 
    LOCAL cSql
 
-   cSql := "select max(godina) as godina from fmk.ld_ld"
+   cSql := "select max(godina) as godina from " + f18_sql_schema( "ld_ld" )
    use_sql( "ld_ld", cSql, "LD" )
 
    RETURN .T.
@@ -129,7 +129,7 @@ FUNCTION ld_min_godina()
 
    LOCAL cSql
 
-   cSql := "select min(godina) as godina from fmk.ld_ld"
+   cSql := "select min(godina) as godina from " + f18_sql_schema( "ld_ld" )
    use_sql( "ld_ld", cSql, "LD" )
 
    RETURN .T.
@@ -257,7 +257,7 @@ FUNCTION o_radkr( lRec1, lSamoOtvoreni )
    hb_default( @lRec1, .T. )
    hb_default( @lSamoOtvoreni, .F. )
 
-   cSql := "select * from fmk.ld_radkr"
+   cSql := "select * from " + f18_sql_schema( "ld_radkr" )
 
    IF lSamoOtvoreni
       cSql += " WHERE round(iznos-placeno,2)<>0"

@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-#define POS_ROBA_DUZINA_SIFRE 13  // citanje barkoda
 
 STATIC s_nMaxKolicinaPosRacun := NIL
 
@@ -19,14 +18,61 @@ MEMVAR gPosProdajnoMjesto, gOcitBarKod
 MEMVAR _cijena, _ncijena
 
 
-//FUNCTION pos_when_71_ncijena( nNovaCijena, nCijena, nNCijena )
+FUNCTION pos_zaduzenje_valid_kolicina( nKol )
+
+   IF LastKey() = K_UP
+      RETURN .T.
+   ENDIF
+   IF nKol = 0
+      MsgBeep( "Količina mora biti različita od nule!#Ponovite unos!", 20 )
+      RETURN ( .F. )
+   ENDIF
+
+   RETURN ( .T. )
+
+
+FUNCTION pos_zaduzenje_roba_when( cIdRoba )
+
+   pos_set_key_handler_ispravka_zaduzenja()
+   cIdroba := PadR( cIdRoba, POS_ROBA_DUZINA_SIFRE )
+
+   RETURN .T.
+
+FUNCTION pos_zaduzenje_roba_valid( cIdRoba, nX, nY )
+
+   LOCAL lOk
+   lOk := pos_postoji_roba( @cIdroba, nX, nY )
+   cIdroba := PadR( cIdroba, POS_ROBA_DUZINA_SIFRE )
+
+   RETURN lOk .AND. pos_zaduzenje_provjeri_duple_stavke( cIdroba )
+
+
+
+// FUNCTION pos_when_71_ncijena( nNovaCijena, nCijena, nNCijena )
 //
-//   nNovaCijena := nCijena - nNCijena
+// nNovaCijena := nCijena - nNCijena
 //
-//   RETURN .T.
+// RETURN .T.
 //
-//FUNCTION pos_valid_71_ncijena( nNovaCijena, nCijena, nNCijena )
+// FUNCTION pos_valid_71_ncijena( nNovaCijena, nCijena, nNCijena )
 //
-//   nNcijena := nCijena - nNovaCijena
+// nNcijena := nCijena - nNovaCijena
 //
-//   RETURN .T.
+// RETURN .T.
+
+FUNCTION pos_zaduzenje_when_dat_od( cIdVd, dDatOd, dDatDo )
+
+   LOCAL lSet := .F.
+
+   IF Empty( dDatOd ) .AND. cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
+      dDatOd := danasnji_datum()
+      lSet := .T.
+   ENDIF
+
+   IF Empty( dDatDo ) .AND. cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
+      IF lSet
+         dDatDo := danasnji_datum() + 7
+      ENDIF
+   ENDIF
+
+   RETURN .T.

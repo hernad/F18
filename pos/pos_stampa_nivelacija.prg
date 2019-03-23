@@ -34,10 +34,10 @@ FUNCTION pos_stampa_nivelacija( hParams )
    // cBrFaktP := hParams["brfaktp"]
 
    cNaslov := pos_dokument_naziv( cIdVd )
-   cNaslov += " " + cIdPos + "-" + cIdVd + "-" + AllTrim( cBrDok ) + " od " + DToC( dDatum ) + "   NA DAN " + DToC( danasnji_datum() )
+   cNaslov += " " + AllTrim( cIdPos ) + "-" + AllTrim( cIdVd ) + "-" + AllTrim( cBrDok ) + " od " + DToC( dDatum ) + "   NA DAN " + DToC( danasnji_datum() )
    PushWA()
    IF !hParams[ "priprema" ]
-      IF !seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"], "1", "PRIPRZ" )
+      IF !seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ], "1", "PRIPRZ" )
          RETURN .F.
       ENDIF
    ENDIF
@@ -64,7 +64,7 @@ FUNCTION pos_stampa_nivelacija( hParams )
       select_o_roba( cIdRoba )
       SELECT PRIPRZ
       nCnt++
-      ? TRANSFORM(nCnt, "999"), cIdRoba
+      ? Transform( nCnt, "99999" ), cIdRoba
       ?? PadR( roba->naz, s_cRobaNazDuzina ) + " "
       ?? Transform( PRIPRZ->kolicina, s_cPicKolicina ) + " "
       ?? Transform( PRIPRZ->cijena, s_cPicCijena ) + " "

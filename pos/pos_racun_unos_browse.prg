@@ -45,8 +45,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    AAdd( ImeKol, { _u( "Količina" ), {|| Str( _pos_pripr->kolicina, 8, 3 ) } } )
    AAdd( ImeKol, { "Cijena", {|| Str( _pos_pripr->cijena, 8, 2 ) } } )
    AAdd( ImeKol, { "Ukupno", {|| Str( _pos_pripr->kolicina * _pos_pripr->cijena, 10, 2 ) } } )
-   AAdd( ImeKol, { "Popust", {|| Str( pos_pripr_popust(), 8, 2 ) } } )
-   AAdd( ImeKol, { "Ukupno NETO", {|| Str( _pos_pripr->kolicina * pos_pripr_cijena_sa_popustom(), 10, 2 ) } } )
+   AAdd( ImeKol, { "Popust", {|| Str( pos_popust(_pos_pripr->cijena, _pos_pripr->ncijena), 8, 2 ) } } )
+   AAdd( ImeKol, { "Ukupno NETO", {|| Str( _pos_pripr->kolicina * pos_pripr_neto_cijena(), 10, 2 ) } } )
    AAdd( ImeKol, { "Tarifa", {|| _pos_pripr->idtarifa } } )
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )
@@ -71,8 +71,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY "UKUPNO:"
    @ box_x_koord() + 4, box_y_koord() + ( nMaxCols - 30 ) SAY "POPUST:"
-   @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY " TOTAL:"
-   pos_racun_prikazi_ukupno( .T. )
+   @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY "  NETO:"
+   pos_racun_prikazi_ukupno()
 
    SELECT _pos_pripr
    SET ORDER TO
@@ -88,7 +88,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    DO WHILE .T.
 
       SET CONFIRM ON
-      pos_racun_prikazi_ukupno( .F. )
+      pos_racun_prikazi_ukupno()
       DO WHILE !s_oBrowse:stable
          s_oBrowse:Stabilize()
       ENDDO
@@ -142,8 +142,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _idtarifa := roba->idtarifa
       Gather()
 
-      pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )
-      pos_racun_popust( pos_racun_popust() + _pos_pripr->ncijena * _pos_pripr->kolicina )
+      //pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )
+      //pos_racun_popust( pos_racun_popust() + _pos_pripr->ncijena * _pos_pripr->kolicina )
 
       s_oBrowse:goBottom()
       s_oBrowse:refreshAll()
@@ -175,7 +175,7 @@ FUNCTION pos_storno_racuna_f8( oBrowse )
    LOCAL nCh
 
    pos_storno_racuna( hParams )
-   pos_racun_prikazi_ukupno( .T. )
+   pos_racun_prikazi_ukupno()
    oBrowse:goBottom()
    oBrowse:refreshAll()
    oBrowse:dehilite()

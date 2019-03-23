@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 STATIC s_oBrowse
-STATIC s_cRobaDuzinaSifre
 
 MEMVAR gPosProdajnoMjesto, gPosSamoProdaja, gIdRadnik
 MEMVAR Kol, ImeKol, Ch
@@ -44,14 +43,13 @@ FUNCTION pos_zaduzenje( cIdVd )
    AAdd( ImeKol,  { "Cijena",   {|| priprz->Cijena },      "cijena"    } )
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
       AAdd( ImeKol,  { _u( "Sniženje" ),   {|| priprz->cijena - priprz->ncijena }, "ncijena"    } )
+      AAdd( ImeKol,  { _u( "Nova Cij" ),   {|| priprz->ncijena }, "" } )
    ENDIF
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
    NEXT
 
-   s_cRobaDuzinaSifre := "13"
    o_pos_tables()
-
    SELECT PRIPRZ
    Scatter()
    _IdPos := gPosProdajnoMjesto
@@ -71,7 +69,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "    Opis:" GET _Opis PICTURE "@S50"
    @ box_x_koord() + 6, box_y_koord() + 2 SAY " Datum dok:" GET _Datum PICT "@D" VALID _Datum <= Date()
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
-      @ Row(), Col() + 2 SAY "Datumski interval od:" GET _dat_od
+      @ Row(), Col() + 2 SAY "Datumski interval od:" GET _dat_od WHEN pos_zaduzenje_when_dat_od( cIdVd, @_dat_od, @_dat_do )
       @ Row(), Col() + 2 SAY "do:" GET _dat_do VALID Empty( _dat_do ) .OR. _dat_do >= _dat_od
    ENDIF
    READ
@@ -100,15 +98,14 @@ FUNCTION pos_zaduzenje( cIdVd )
       ENDDO
 
       _idroba := Space ( Len ( _idroba ) )
-      _Kolicina := 0
+      _kolicina := 0
       _cijena := 0
       _ncijena := 0
 
-
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space( 50 )
-      @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + s_cRobaDuzinaSifre ;
-         WHEN {|| pos_set_key_handler_ispravka_zaduzenja(), _idroba := PadR( _idroba, Val( s_cRobaDuzinaSifre ) ), .T. } ;
-         VALID pos_valid_roba_zaduzenje( @_IdRoba, 2, 35 )
+      @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + AllTrim(Str(POS_ROBA_DUZINA_SIFRE)) ;
+         WHEN pos_zaduzenje_roba_when( @_idroba ) ;
+         VALID pos_zaduzenje_roba_valid( @_idroba, 2, 35 )
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _Kolicina PICT "999999.999" ;
          WHEN{|| ShowGets(), .T. } VALID pos_zaduzenje_valid_kolicina( _Kolicina )
 
@@ -127,17 +124,15 @@ FUNCTION pos_zaduzenje( cIdVd )
          EXIT
       ENDIF
 
-      // StUSif()
+altd()
+      select_o_roba( _idRoba )
       SELECT PRIPRZ
       APPEND BLANK
-      select_o_roba( _idRoba )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
       _cijena := iif( Empty( _cijena ), pos_get_mpc(), _cijena )
       _barkod := roba->barkod
-
-      SELECT priprz
       my_rlock()
       Gather()
       my_unlock()
@@ -172,29 +167,18 @@ FUNCTION pos_zaduzenje( cIdVd )
       Beep( 4 )
       pos_stampa_dokumenta( hParams )
       o_pos_tables()
-      IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + hParams[ "idpos" ] + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] ) + " ažurirati (D/N) ?", " " ) == "D"
+      IF lAzuriratiBezStampeSilent .OR. Pitanje(, "Želite li " + AllTrim( hParams[ "idpos" ] ) + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] ) + " ažurirati (D/N) ?", " " ) == "D"
          hParams[ "brdok" ] := pos_novi_broj_dokumenta( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ] )
          hParams[ "opis" ] := hb_UTF8ToStr( hParams[ "opis" ] )
          pos_azuriraj_zaduzenje( hParams )
       ENDIF
    ENDIF
-
    my_close_all_dbf()
 
    RETURN .T.
 
 
-STATIC FUNCTION pos_valid_roba_zaduzenje( cIdRoba, nX, nY )
-
-   LOCAL lOk
-
-   lOk := pos_postoji_roba( @cIdroba, nX, nY )
-   cIdroba := PadR( cIdroba, Val( s_cRobaDuzinaSifre ) )
-
-   RETURN lOk .AND. pos_zaduzenje_provjeri_duple_stavke( cIdroba )
-
-
-STATIC FUNCTION pos_set_key_handler_ispravka_zaduzenja()
+FUNCTION pos_set_key_handler_ispravka_zaduzenja()
 
    SetKey( Asc( "*" ), NIL )
    SetKey( Asc( "*" ), {|| pos_ispravi_zaduzenje() } )
@@ -207,19 +191,6 @@ FUNCTION pos_unset_key_handler_ispravka_zaduzenja()
    SetKey( Asc( "*" ), NIL )
 
    RETURN .F.
-
-
-FUNCTION pos_zaduzenje_valid_kolicina( nKol )
-
-   IF LastKey() = K_UP
-      RETURN .T.
-   ENDIF
-   IF nKol = 0
-      MsgBeep( "Količina mora biti različita od nule!#Ponovite unos!", 20 )
-      RETURN ( .F. )
-   ENDIF
-
-   RETURN ( .T. )
 
 
 FUNCTION pos_zaduzenje_provjeri_duple_stavke( cSif )
@@ -304,7 +275,9 @@ FUNCTION pos_ispravi_stavku_zaduzenja()
    cIdRobaPredhodna := _IdRoba := PRIPRZ->idroba
    _Kolicina := PRIPRZ->Kolicina
    Box(, 3, 80 )
-   @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "Artikal:" GET _idroba PICTURE "@K" VALID pos_valid_roba_zaduzenje( @_IdRoba, 1, 30 )
+   @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "Artikal:" GET _idroba PICTURE "@K" ;
+        WHEN pos_zaduzenje_roba_when( @_idroba ) ;
+        VALID pos_zaduzenje_roba_valid( @_idroba, 1, 30 )
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "Količina:" GET _Kolicina VALID pos_zaduzenje_valid_kolicina ( _Kolicina )
    READ
 

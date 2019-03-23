@@ -185,8 +185,8 @@ STATIC FUNCTION pos_stanje_proracun( nUlaz, nIzlaz, nVrijednost, lInicijalizacij
       nUlaz += POS->Kolicina
       nVrijednost += POS->Kolicina * POS->Cijena
 
-   ELSEIF POS->IdVd == POS_IDVD_GENERISANA_NIVELACIJA .OR. pos->idvd == POS_IDVD_NIVELACIJA
-      nVrijednost += POS->Kolicina * POS->Cijena
+   ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
+      nVrijednost += POS->Kolicina * ( POS->Cijena - POS->Cijena ) 
 
    ELSEIF POS->IdVd == POS_IDVD_RACUN
       nIzlaz += POS->Kolicina

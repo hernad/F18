@@ -218,7 +218,7 @@ FUNCTION ld_tip_primanja_se_koristi( cTip )
 
    cSql := "id = " + sql_quote( cTip )
 
-   IF table_count( "fmk.tippr", cSql ) > 0
+   IF table_count( f18_sql_schema( "tippr" ), cSql ) > 0
       lRet := .T.
    ENDIF
 

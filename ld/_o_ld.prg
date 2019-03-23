@@ -167,7 +167,7 @@ FUNCTION find_radn_by_naz_or_id( cId )
 
    LOCAL cAlias := "RADN"
    LOCAL cTable := "ld_radn"
-   LOCAL cSqlQuery := "select * from fmk." + cTable
+   LOCAL cSqlQuery := "select * from " + f18_sql_schema( cTable )
 
    LOCAL cIdSql
 

@@ -95,7 +95,7 @@ FUNCTION sastavnica_copy()
 
 FUNCTION sastavnice_delete_empty_id()
 
-   LOCAL cSql := "delete from fmk.sast where ( id is null or trim(id) = '') or ( id2 is null or trim(id2) = '') "
+   LOCAL cSql := "delete from " + f18_sql_schema( "sast" ) + " where ( id is null or trim(id) = '') or ( id2 is null or trim(id2) = '') "
    LOCAL oRet
 
    oRet := run_sql_query( cSql )

@@ -49,7 +49,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
 
    cNazDok := pos_dokument_naziv( hParams[ "idvd" ] ) + " " + AllTrim( hParams[ "idpos" ] ) + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] )
    cNazDok += " od: " + FormDat1 ( hParams[ "datum" ] )
-
+altd()
    IF f18_start_print( NIL, xPrintOpt,  cNazDok + " Štampa na dan: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF

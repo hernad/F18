@@ -75,7 +75,7 @@ FUNCTION realizacija_kase
 
    SELECT pos_doks
    pos_set_filter_pos_doks( @cFilter, cFilterIdRadnik, aUsl2, cVrijOd, cVrijDo, cPartId )
-   pos_kasa_pripremi_pom_za_izvjestaj( "42", cSifraDob )
+   pos_kasa_pripremi_pom_za_realkase( "42", cSifraDob )
 
    PRIVATE nTotal := 0
 
@@ -209,7 +209,7 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
    LOCAL nTotPos3
    LOCAL nTotVP
    LOCAL nTotVP2
-   LOCAL nTotVP3
+   LOCAL nTotVrstePlacanjaPopust
 
    ?
    ? PadC( "REKAPITULACIJA PO VRSTAMA PLACANJA", LEN_TRAKA )
@@ -241,20 +241,19 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
       DO WHILE !Eof() .AND. pom->IdPos == _IdPos
          nTotVP := 0
          nTotVP2 := 0
-         nTotVP3 := 0
+         nTotVrstePlacanjaPopust := 0
          _IdVrsteP := pom->IdVrsteP
          select_o_vrstep( _IdVrsteP )
          ? Space( 5 ) + vrstep->Naz
          SELECT pom
          DO WHILE !Eof() .AND. pom->( IdPos + IdVrsteP ) == ( _IdPos + _IdVrsteP )
             nTotVP += pom->Iznos
-            nTotVP2 += pom->Iznos2
-            nTotVP3 += pom->Iznos3
+            nTotVrstePlacanjaPopust += pom->popust
             SKIP
          ENDDO
          ?? Str( nTotVP, 14, 2 )
          nTotPos += nTotVP
-         nTotPos3 += nTotVP3
+         nTotPos3 += nTotVrstePlacanjaPopust
       ENDDO
 
       pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
@@ -301,19 +300,19 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
          ? Replicate( "-", 5 ), Replicate( "-", 34 )
          DO WHILE !Eof() .AND. pom->( IdPos + IdRadnik ) == ( _IdPos + _IdRadnik )
             nTotVP := 0
-            nTotVP3 := 0
+            nTotVrstePlacanjaPopust := 0
             _IdVrsteP := pom->IdVrsteP
             select_o_vrstep( _IdVrsteP )
             SELECT pom
             ? Space( 6 ) + PadR( vrstep->Naz, 20 )
             DO WHILE !Eof() .AND. pom->( IdPos + IdRadnik + IdVrsteP ) == ( _IdPos + _IdRadnik + _IdVrsteP )
                nTotVP += pom->Iznos
-               nTotVP3 += pom->Iznos3
+               nTotVrstePlacanjaPopust += pom->popust
                SKIP
             ENDDO
             ?? Str( nTotVP, 14, 2 )
             nTotRadn += nTotVP
-            nTotRadn3 += nTotVP3
+            nTotRadn3 += nTotVrstePlacanjaPopust
          ENDDO // radnik
          ? Space( 6 ) + Replicate( "-", 34 )
          ? Space( 6 ) + PadL( "UKUPNO", 20 ) + Str( nTotRadn, 14, 2 )
@@ -331,7 +330,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
 
       IF nTotPos3 <> 0
          ? PadL( pos_popust_prikaz(), 20 ) + Str( nTotPos3, 20, 2 )
-         ? PadL( "UKUPNO NAPLATA:", 20 ) + Str( nTotPos - nTotPos3 + nTotPos2, 20, 2 )
+         ? PadL( "UKUPNO NAPLATA:", 20 ) + Str( nTotPos - nTotPos3, 20, 2 )
       ENDIF
       ? Replicate( "-", 40 )
       nTotal += nTotPos
@@ -392,7 +391,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
             DO WHILE !Eof() .AND. POM->IdPos + POM->IdRoba == _IdPos + _IdRoba
                nRobaKol += POM->Kolicina
                nRobaIzn += POM->Iznos
-               nRobaIzn3 += POM->Iznos3
+               nRobaIzn3 += POM->popust
 
                SKIP
             ENDDO
@@ -460,7 +459,6 @@ STATIC FUNCTION set_pos_zagl_realizacija()
    cHead := cStr1 + PadL( "vrijednost", LEN_TRAKA - Len( cStr1 ) )
 
    ? cHead
-
    ? cLinija
 
    RETURN .T.
@@ -475,7 +473,7 @@ STATIC FUNCTION pos_total_kasa( cIdPos, nTotPos, nTotPos3, nTotPosk, cPodvuci )
 
    IF nTotPos3 <> 0
       ? PadL( pos_popust_prikaz(), 25 ) + Str( nTotPos3, 15, 2 )
-      ? PadL( "UKUPNO NAPLATA:", 25 ) + Str( nTotPos - nTotPos3 + nTotPos2, 15, 2 )
+      ? PadL( "UKUPNO NAPLATA:", 25 ) + Str( nTotPos - nTotPos3, 15, 2 )
    ENDIF
    ? REPL( cPodvuci, LEN_TRAKA )
    ?
@@ -493,8 +491,7 @@ STATIC FUNCTION pos_realizacija_tbl_cre_pom()
    AAdd( aDbf, { "IdRoba", "C", 10, 0 } )
    AAdd( aDbf, { "Kolicina", "N", 12, 3 } )
    AAdd( aDbf, { "Iznos", "N", 20, 5 } )
-   AAdd( aDbf, { "Iznos2", "N", 20, 5 } )
-   AAdd( aDbf, { "Iznos3", "N", 20, 5 } )
+   AAdd( aDbf, { "popust", "N", 20, 5 } )
 
    pos_cre_pom_dbf( aDbf )
 

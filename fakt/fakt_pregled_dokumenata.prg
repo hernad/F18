@@ -456,12 +456,12 @@ FUNCTION fakt_dokument_sadrzi_robu()
 
    LOCAL lRet := .F., cQuery
 
-   cQuery := "SELECT count(fakt_fakt.idroba) AS CNT FROM fmk.fakt_fakt"
+   cQuery := "SELECT count(fakt_fakt.idroba) AS CNT FROM " + f18_sql_schema( "fakt_fakt" )
    cQuery += " LEFT JOIN " + f18_sql_schema( "roba") + " ON fakt_fakt.idroba = roba.id"
    cQuery += " WHERE roba.tip <> 'U'"
-   cQuery += " AND fmk.fakt_fakt.idfirma=" + sql_quote( fakt_doks_pregled->idfirma )
-   cQuery += " AND fmk.fakt_fakt.idtipdok=" + sql_quote( fakt_doks_pregled->idtipdok )
-   cQuery += " AND fmk.fakt_fakt.brdok=" + sql_quote( fakt_doks_pregled->brdok )
+   cQuery += " AND " + f18_sql_schema( "fakt_fakt" ) + ".idfirma=" + sql_quote( fakt_doks_pregled->idfirma )
+   cQuery += " AND " + f18_sql_schema( "fakt_fakt" ) + ".idtipdok=" + sql_quote( fakt_doks_pregled->idtipdok )
+   cQuery += " AND " + f18_sql_schema( "fakt_fakt" ) + ".brdok=" + sql_quote( fakt_doks_pregled->brdok )
 
    SELECT F_FAKT
    use_sql( "fakt_cnt", cQuery )

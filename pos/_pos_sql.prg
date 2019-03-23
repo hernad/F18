@@ -335,9 +335,11 @@ FUNCTION pos_stanje_artikal_str( cIdRoba, nStrLen )
    FOR nI := 1 TO nLen
       nCijena := aCijene[ nI, 1 ]
       nNCijena := aCijene[ nI, 2 ]
-      // IF nNCijena <> 0
-      nCijenaNeto := nCijena - nNCijena
-      // ENDIF
+      IF nNCijena <> 0
+         nCijenaNeto := nNCijena
+      ELSE
+         nCijenaNeto := nCijena
+      ENDIF
       nStanje := pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
 
       IF !Empty( cSlikaStanja )

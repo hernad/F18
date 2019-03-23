@@ -24,7 +24,6 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
    LOCAL hAzur
 
    cDokument := AllTrim( hParams["idpos"] ) + "-" + hParams["idvd"] + "-" + AllTrim( hParams["brdok"] ) + " " + DToC( hParams["datum"] )
-
    IF seek_pos_doks( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] ) ;
       .OR.  seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"] )
       MsgBeep( "Dokument: " + cDokument + " već postoji?!" )
@@ -35,9 +34,8 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
 
    SELECT PRIPRZ
    GO TOP
-   set_global_memvars_from_dbf()
 
-   hRec := get_hash_record_from_global_vars()
+   hRec := dbf_get_rec()
    hRec[ "idpos" ] := hParams["idpos"]
    hRec[ "brdok" ] := hParams["brdok"]
    hRec[ "idvd" ] := hParams["idvd"]
@@ -50,14 +48,20 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
    nUkupno := 0
    DO WHILE !Eof()
 
-      SELECT pos
-      APPEND BLANK
-
+      hRec := dbf_get_rec()
+      hRec[ "idpos" ] := hParams["idpos"]
+      hRec[ "brdok" ] := hParams["brdok"]
+      hRec[ "idvd" ] := hParams["idvd"]
+      hRec[ "datum" ] := hParams["datum"]
+    
       hRec["rbr"] := ++nCount
       hRec["idroba"] := priprz->idroba
       hRec["cijena"] := priprz->cijena
       hRec["kolicina"] := priprz->kolicina
       nUkupno += priprz->cijena * priprz->kolicina
+
+      SELECT pos
+      APPEND BLANK
 
       lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
       IF !lOk
