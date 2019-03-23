@@ -240,9 +240,13 @@ FUNCTION kalk_kontiranje_gen_finmat()
             Marza     WITH Round( nKalkMarzaVP * kalk_pripr->Kolicina, nZaokruzenje ), ;           // marza se ostvaruje nad stvarnom kolicinom
             VPV       WITH Round( kalk_PRIPR->VPC * kalk_pripr->Kolicina, nZaokruzenje )        // vpv se formira nad stvarnom kolicinom
 
-         nPom := kalk_pripr->( RabatV / 100 * VPC * Kolicina )
-         nPom := Round( nPom, nZaokruzenje )
-         REPLACE RABATV  WITH nPom
+         IF kalk_pripr->idvd == '42'
+            REPLACE RABATV with kalk_pripr->RABATV * kalk_pripr->kolicina
+         ELSE
+            nPom := kalk_pripr->( RabatV / 100 * VPC * Kolicina )
+            nPom := Round( nPom, nZaokruzenje )
+            REPLACE RABATV  WITH nPom
+         ENDIF
 
          nPom := nKalkMarzaMP * kalk_pripr->Kolicina
          nPom := Round( nPom, nZaokruzenje )

@@ -241,7 +241,33 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.pos_popust( nCijena numeric, nNCijena numeric) RETURNS numeric
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  nProdavnica integer;
+BEGIN
+   IF round( nNCijena, 4) = 0 THEN
+      RETURN 0;
+   END IF;
 
+   RETURN nCijena - nNCijena;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.pos_neto_cijena( nCijena numeric, nNCijena numeric) RETURNS numeric
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  nProdavnica integer;
+BEGIN
+   IF round( nNCijena, 4) = 0 THEN
+      RETURN nCijena;
+   END IF;
+
+   RETURN nNCijena;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.prodavnica_konto(nProdavnica integer) RETURNS varchar
    LANGUAGE plpgsql
