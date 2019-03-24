@@ -18,8 +18,8 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'PROD {{ item_prodavnica }}: insert pos_knjig prodavnica %', NEW.idPos;
-      EXECUTE 'INSERT INTO {{ item_prodavnica }}.pos(dok_id,idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-        USING NEW.dok_id, NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
+      EXECUTE 'INSERT INTO {{ item_prodavnica }}.pos(dok_id,idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis,idpartner) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'
+        USING NEW.dok_id, NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis, NEW.idpartner;
       RETURN NEW;
 END IF;
 

@@ -36,10 +36,16 @@ FUNCTION kalk_get_1_11()
    IF Empty( _pkonto )
       _PKonto := _Idkonto2
    ENDIF
-
-   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
-      _DatFaktP := _datdok
+   IF Empty( _datfaktp )
+      _datfaktp := _datdok
    ENDIF
+   IF Empty( _tmarza2 )
+     _tmarza2 := "A"
+   ENDIF
+
+   //IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
+  //    _DatFaktP := _datdok
+   //ENDIF
 
    IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
       _IdPartner := ""

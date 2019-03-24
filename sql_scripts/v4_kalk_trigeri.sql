@@ -1,8 +1,9 @@
 
 ---------------------------------------------------------------------------------------
 -- on kalk_kalk update p15.pos_pos_knjig,
--- idvd = 19 - nivelacija prodavnica,
+-- idvd =
 --        02 - pocetno stanje prodavnica
+--        19 - nivelacija prodavnica
 --        21 - zahtjev za prijem robe iz magacina
 --        80 - prijem prodavnica
 --        79 - odobreno snizenje
@@ -23,14 +24,14 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '02' ) AND ( NEW.idvd <> '21' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) AND ( NEW.idvd <> '72' ) THEN
+   IF ( NOT NEW.idvd IN ('02','19','21', '72', '79', '80') ) THEN
      RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
    SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
           from public.roba where id=NEW.idroba;
 ELSE
-   IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
+   IF ( NOT OLD.idvd IN ('02', '19', '21', '72', '79', '80') ) THEN
       RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -79,16 +80,17 @@ CREATE OR REPLACE FUNCTION f18.on_kalk_doks_crud() RETURNS trigger
 DECLARE
     idPos varchar DEFAULT '1 ';
     cProdShema varchar;
+    cIdPartner varchar;
 BEGIN
 
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-      IF ( NEW.idvd <> '19' ) AND ( NEW.idvd <> '02' ) AND ( NEW.idvd <> '21' ) AND ( NEW.idvd <> '80' ) AND ( NEW.idvd <> '79' ) AND ( NEW.idvd <> '72' ) THEN
+      IF ( NOT NEW.idvd IN ('02','19','21', '72', '79', '80') ) THEN
          RETURN NULL;
       END IF;
       cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
 ELSE
-     IF ( OLD.idvd <> '19' ) AND ( OLD.idvd <> '02' ) AND ( OLD.idvd <> '21' ) AND ( OLD.idvd <> '80' ) AND ( OLD.idvd <> '79' ) AND ( OLD.idvd <> '72' ) THEN
+     IF ( NOT OLD.idvd IN ('02','19','21', '72', '79', '80') ) THEN
         RETURN NULL;
      END IF;
      cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -108,8 +110,14 @@ ELSIF (TG_OP = 'UPDATE') THEN
           RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert doks prodavnica %', cProdShema;
-      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_knjig(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis) VALUES($1,$2,$3,$4,$5,$6,$7,$8)'
-            USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis;
+      IF NEW.idvd = '21' THEN
+        -- zahtjev za prijem magacin, u polje partnera pohraniti info o magacinskom kontu
+        cIdPartner := rpad(NEW.mkonto, 6);
+      ELSE
+        cIdPartner := '';
+      END IF;
+      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_knjig(idpos,idvd,brdok,datum,brFaktP,dat_od,dat_do,opis,idpartner) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+            USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.brFaktP, NEW.dat_od, NEW.dat_do, NEW.opis, cIdPartner;
 
       RETURN NEW;
 END IF;

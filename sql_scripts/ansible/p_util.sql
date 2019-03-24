@@ -264,7 +264,6 @@ DECLARE
 BEGIN
 
   uuidFiskNovi := {{ item_prodavnica }}.fisk_dok_id( cIdPos, cIdVd, dDatDok, cBrDok);
-
   UPDATE {{ item_prodavnica }}.pos_fisk_doks SET ref_storno_fisk_dok = uuidFiskStorniran::uuid
       WHERE dok_id = uuidFiskNovi;
 
@@ -388,8 +387,8 @@ BEGIN
      END IF;
 
 
-     INSERT INTO {{ item_prodavnica }}.pos(ref, idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do)
-         VALUES(rec_dok.dok_id, rec_dok.idpos, '22', rec_dok.brdok, rec_dok.datum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do);
+     INSERT INTO {{ item_prodavnica }}.pos(ref, idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do, idpartner)
+         VALUES(rec_dok.dok_id, rec_dok.idpos, '22', rec_dok.brdok, rec_dok.datum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do, rec_dok.idpartner);
 
      IF lPreuzimaSe THEN
         -- ako se roba preuzima stavke se pune

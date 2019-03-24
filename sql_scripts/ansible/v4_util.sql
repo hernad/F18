@@ -130,7 +130,6 @@ END;
 $$;
 
 
-
 -- select * from kalk_prod_stanje_sa_kartice('13325', '003189');
 
 CREATE OR REPLACE FUNCTION public.kalk_prod_stanje_sa_kartice( cPKonto varchar, cIdRoba varchar ) RETURNS table( count integer, nv_dug numeric, nv_pot numeric, mpv_dug numeric, mpv_pot numeric, kol_dug numeric, kol_pot numeric, mpc_sa_pdv numeric )
@@ -232,7 +231,6 @@ RETURN COALESCE(cIdRoba, '<UNDEFINED>');
 
 END;
 $$;
-
 
 
 CREATE OR REPLACE FUNCTION public.pos_prodavnica_by_pkonto(cPKonto varchar) RETURNS integer
