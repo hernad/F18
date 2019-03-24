@@ -377,3 +377,142 @@ BEGIN
 
 END;
 $$;
+
+
+
+-- select public.kalk_from_idvd_to_idvd('10', '49', '42', '00000015');
+-- na osnovu 10-49-0000015 formira se 10-42-0000015
+
+CREATE OR REPLACE FUNCTION public.kalk_from_idvd_to_idvd( cIdFirma varchar, cIdVdFrom varchar, cIdVdTo varchar, cBrDok varchar) RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+
+    rec_dok RECORD;
+    dokId uuid;
+    rec RECORD;
+
+BEGIN
+     select * from public.kalk_doks where cIdFirma=idfirma and cIdVdFrom=idvd and cBrDok=brdok
+        INTO rec_dok;
+
+     IF rec_dok.dok_id is NULL  THEN
+         RAISE INFO 'NE POSTOJI dokument: % % % !?', cIdFirma, cIdVdFrom, cBrDok;
+         RETURN -1;
+     END IF;
+
+     select dok_id from f18.kalk_doks where cIdFirma=idfirma and cIdVdTo=idvd and cBrDok=brdok
+        INTO dokId;
+     IF NOT dokId IS NULL THEN
+         RAISE INFO 'VEC POSTOJI: % % % ?', cIdFirma, cIdVdTo, cBrDok;
+         RETURN -2;
+     END IF;
+
+     INSERT INTO public.kalk_doks(
+              idfirma, idvd, brdok, datdok, dat_od, dat_do,
+              brfaktp, datfaktp, idpartner, pkonto, mkonto,
+              nv, vpv, rabat, mpv, datval )
+         VALUES(rec_dok.idfirma, cIdVdTo, cBrDok, rec_dok.datdok, rec_dok.dat_od, rec_dok.dat_do,
+             rec_dok.brfaktp, rec_dok.datfaktp, rec_dok.idpartner, rec_dok.pkonto, rec_dok.mkonto,
+             rec_dok.nv, rec_dok.vpv, rec_dok.rabat, rec_dok.mpv, rec_dok.datval );
+
+     FOR rec IN
+        SELECT * from public.kalk_kalk
+        WHERE cIdFirma=idfirma and cIdVdFrom=idvd and cBrDok=brdok
+     LOOP
+        INSERT INTO public.kalk_kalk(idfirma, idvd, brdok, datdok,
+          idroba, idkonto, idkonto2, brfaktp, idpartner,
+          rbr, kolicina, gkolicina, gkolicin2,
+          trabat, rabat, tprevoz, prevoz, tprevoz2, prevoz2, tbanktr, banktr, tspedtr, spedtr, tcardaz, cardaz, tzavtr, zavtr,
+          fcj, fcj2, nc, tmarza, marza, vpc, rabatv,
+          tmarza2, marza2, mpc, idtarifa, mpcsapp,
+          mkonto, pkonto, mu_i, pu_i, error
+        )
+        VALUES(rec.idfirma, cIdVdTo, cBrDok, rec.datdok,
+          rec.idroba, rec.idkonto, rec.idkonto2, rec.brfaktp, rec.idpartner,
+          rec.rbr, rec.kolicina, rec.gkolicina, rec.gkolicin2,
+          rec.trabat, rec.rabat, rec.tprevoz, rec.prevoz, rec.tprevoz2, rec.prevoz2, rec.tbanktr, rec.banktr, rec.tspedtr, rec.spedtr, rec.tcardaz, rec.cardaz, rec.tzavtr, rec.zavtr,
+          rec.fcj, rec.fcj2, rec.nc, rec.tmarza, rec.marza, rec.vpc, rec.rabatv,
+          rec.tmarza2, rec.marza2, rec.mpc, rec.idtarifa, rec.mpcsapp,
+          rec.mkonto, rec.pkonto, rec.mu_i, rec.pu_i, rec.error
+        );
+     END LOOP;
+
+     RETURN 0;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.kalk_49_to_42( nProdavnica integer, dDatum date) RETURNS varchar
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cIdFirma varchar;
+   cBrDok varchar;
+   nRet integer;
+BEGIN
+    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+    SELECT public.kalk_brdok_iz_pos(nProdavnica, '49', lpad('1',8), dDatum)
+       INTO cBrDok;
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '49', '42', cBrDok )
+       INTO nRet;
+    IF ( nRet = 0 ) THEN
+       RETURN cBrDok;
+    END IF;
+    RETURN btrim(to_char(nRet,'9999'));
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.kalk_22_to_11( cBrDok varchar ) RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cIdFirma varchar;
+   nRet integer;
+BEGIN
+    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '22', '11', cBrDok )
+       INTO nRet;
+    RETURN nRet;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.kalk_71_to_79_dokumenti( nProdavnica integer, dDatum date )
+       RETURNS TABLE (brdok varchar, prodavnica varchar, mjesec varchar, dan varchar, broj varchar )
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cIdFirma varchar;
+   cBrDok varchar;
+   nRet integer;
+BEGIN
+    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+
+    -- kalk_doks 71 koje nemaju svoje 79-ke
+    -- brdok 02032301 -> prodavnica 02, mjesec 03, dan 23, dokument 01
+    RETURN QUERY SELECT brdok, substr(brdok, 1, 2) as prodavnica, substr(brdok, 3, 2) as mjesec, substr(brdok, 5, 2) as dan, substr(brdok,7,2) as broj
+        FROM public.kalk_doks doks71
+        LEFT JOIN public.kalk_doks doks79
+        ON doks71.idfirma=doks79.idfirma AND doks71.brdok=doks79.brdok AND doks71.idvd='71' AND doks79.idvd='79'
+        WHERE doks71.idfirma=cIdFirma AND doks71.idvd='71' AND doks71.datdok=dDatum
+              AND doks79.brdok IS NULL
+        ORDER BY doks71.brdok;
+
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.kalk_71_to_79( cBrDok varchar ) RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cIdFirma varchar;
+   cBrDok varchar;
+   nRet integer;
+BEGIN
+    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '71', '79', cBrDok )
+       INTO nRet;
+    RETURN nRet;
+END;
+$$;

@@ -359,14 +359,13 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_21_to_22( cBrFaktP varchar,
        LANGUAGE plpgsql
        AS $$
 DECLARE
-
     rec_dok RECORD;
     rec RECORD;
     cOpis varchar;
     nPosCijena numeric;
-
+    dDatum date;
 BEGIN
-
+     dDatum := current_date;
      select * from {{ item_prodavnica }}.pos where brfaktp=cBrFaktP and idvd='21'
         INTO rec_dok;
 
@@ -388,7 +387,7 @@ BEGIN
 
 
      INSERT INTO {{ item_prodavnica }}.pos(ref, idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do, idpartner)
-         VALUES(rec_dok.dok_id, rec_dok.idpos, '22', rec_dok.brdok, rec_dok.datum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do, rec_dok.idpartner);
+         VALUES(rec_dok.dok_id, rec_dok.idpos, '22', rec_dok.brdok, dDatum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do, rec_dok.idpartner);
 
      IF lPreuzimaSe THEN
         -- ako se roba preuzima stavke se pune
@@ -402,7 +401,7 @@ BEGIN
                nPosCijena := rec.cijena;
             END IF;
             INSERT INTO {{ item_prodavnica }}.pos_items(idpos, idvd, brdok, datum, rbr, kolicina, idroba, idtarifa, cijena, ncijena, kol2, robanaz, jmj)
-              VALUES(rec.idpos, '22', rec.brdok, rec.datum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
+              VALUES(rec.idpos, '22', rec.brdok, dDatum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
 
         END LOOP;
      ELSE

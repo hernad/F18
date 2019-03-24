@@ -21,15 +21,22 @@ FUNCTION kalk_maloprodaja()
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
-   LOCAL bTekProdavnica := {|| Padr("1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ), 40) }
+   LOCAL bTekProdavnica := {|| PadR( "1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ), 42 ) }
 
    AAdd( aOpc, bTekProdavnica )
    AAdd( aOpcExe, {|| kalk_mp_set_pos_prodavnica() } )
 
    AAdd( aOpc,   "2. inicijalizacija" )
    AAdd( aOpcExe, {|| kalk_mp_inicijalizacija() } )
-   AAdd( aOpc,   "3. šifre robe u prodavnici" )
-   AAdd( aOpcExe, {|| p_roba_prodavnica() } )
+
+   AAdd( aOpc,  "3. POS realizacija [49]->[42]" )
+   AAdd( aOpcExe, {|| kalk_49_to_42_unos() } )
+
+   AAdd( aOpc,  "3. POS zaduženje iz magacina [22]->[11]" )
+   AAdd( aOpcExe, {|| kalk_22_to_11_unos() } )
+
+   // AAdd( aOpc,   "3. šifre robe u prodavnici" )
+   // AAdd( aOpcExe, {|| p_roba_prodavnica() } )
    f18_menu( "mp", .F.,  nIzbor, aOpc, aOpcExe )
 
    RETURN .T.
@@ -130,7 +137,7 @@ FUNCTION kalk_mp_inicijalizacija()
    LOCAL nKolicina
    LOCAL cNulaDN := "D"
    LOCAL lPreskoci0
-   LOCAL nMpc
+   LOCAL nMpc, cSigurno := Space( 4 )
 
    LOCAL GetList := {}
    LOCAL cPKonto := get_pkonto_by_prodajno_mjesto( pos_prodavnica() )
@@ -139,9 +146,12 @@ FUNCTION kalk_mp_inicijalizacija()
       RETURN .F.
    ENDIF
 
+   Alert( _u( "Hint sigurnosni kod: Slično ko jedan avion + godina bitna za Bosnu" ) )
    Box(, 3, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Datum dokumente" GET dDatDok
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Šifre sa stanjem 0 D/N" GET cNulaDN valid cNulaDN $ "DN" pict "@!"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Sigurnosni kod operacije:" GET cSigurno PICT "@!" ;
+      VALID {|| cSigurno == 'MI95' }
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Datum dokumente" GET dDatDok
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Šifre sa stanjem 0 D/N" GET cNulaDN VALID cNulaDN $ "DN" PICT "@!"
 
    READ
    BoxC()
@@ -162,8 +172,8 @@ FUNCTION kalk_mp_inicijalizacija()
 
    dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
 
-   //cQuery := "delete from " + pos_prodavnica_roba_sql_tabela()
-   //dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
+   // cQuery := "delete from " + pos_prodavnica_roba_sql_tabela()
+   // dbUseArea_run_query( cQuery, F_TMP_2, "TMP2" )
 
    SELECT TMP
    GO TOP
@@ -178,7 +188,7 @@ FUNCTION kalk_mp_inicijalizacija()
 
    Box( "#" + AllTrim( Str( pos_prodavnica() ) ) + " / " + cPKonto, 1, 50 )
 
-   cBrDok := kalk_novi_brdok( "02")
+   cBrDok := kalk_novi_brdok( "02" )
    SELECT TMP
    DO WHILE !Eof()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY TMP->IDROBA
@@ -201,7 +211,7 @@ FUNCTION kalk_mp_inicijalizacija()
          ELSE
             lPreskoci0 := .T.
          ENDIF
-     ENDIF
+      ENDIF
 
       IF lPreskoci0 .OR. Round( nMpc, 4 ) == 0
          SELECT TMP
@@ -221,7 +231,7 @@ FUNCTION kalk_mp_inicijalizacija()
          idroba WITH tmp->idroba, ;
          idtarifa WITH tarifa->id, ;
          kolicina WITH nKolicina, ;
-         mpcsapp WITH nMpc,;
+         mpcsapp WITH nMpc, ;
          mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, nMpc )
 
       SELECT TMP

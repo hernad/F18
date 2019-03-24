@@ -12,7 +12,6 @@
 
 #include "f18.ch"
 
-
 FUNCTION kalk_povrat_dokumenta()
 
    LOCAL lBrisiKumulativ
@@ -25,7 +24,6 @@ FUNCTION kalk_povrat_dokumenta()
    LOCAL lOk := .T.
    LOCAL hParams
    LOCAL GetList := {}
-
 
    o_kalk_pripr()
    cIdFirma := self_organizacija_id()
@@ -43,7 +41,7 @@ FUNCTION kalk_povrat_dokumenta()
    BoxC()
 
    IF cBrDok = "."
-      //kalk_povrat_prema_kriteriju()
+      // kalk_povrat_prema_kriteriju()
       my_close_all_dbf()
       RETURN .F.
    ENDIF
@@ -60,26 +58,75 @@ FUNCTION kalk_povrat_dokumenta()
    ENDIF
 
    lBrisiKumulativ := Pitanje(, "Izbrisati dokument iz kumulativne tabele (D/N) ?", "D" ) == "D"
-
    kalk_kopiraj_dokument_u_tabelu_pripreme( cIdFirma, cIdVd, cBrDok )
    IF lBrisiKumulativ
 
       run_sql_query( "BEGIN" )
-      //IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
-      //   run_sql_query( "COMMIT" )
-      //   MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju povrata." )
-      //   RETURN .F.
-      //ENDIF
+      // IF !f18_lock_tables( { "kalk_doks", "kalk_kalk" }, .T. )
+      // run_sql_query( "COMMIT" )
+      // MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju povrata." )
+      // RETURN .F.
+      // ENDIF
 
       o_kalk_za_azuriranje()
-
       MsgO( "Brisanje KALK dokumenata iz kumulativa ..." )
       find_kalk_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
 
       IF Found()
          hRecDelete := dbf_get_rec()
       ENDIF
+      IF lOk
+         lOk := brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
+      ENDIF
+      IF lOk
+         lOk := brisi_dokument_iz_tabele_doks( cIdFirma, cIdVd, cBrDok )
+      ENDIF
+      MsgC()
 
+      IF lOk
+         hParams := hb_Hash()
+         // hParams[ "unlock" ] :=  { "kalk_doks", "kalk_kalk" }
+         run_sql_query( "COMMIT", hParams )
+         log_write( "F18_DOK_OPER: KALK DOK_POV: " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ), 2 )
+      ELSE
+         run_sql_query( "ROLLBACK" )
+         MsgBeep( "Operacija povrata dokumenta u pripremu neuspješna !" )
+      ENDIF
+
+   ENDIF
+
+   my_close_all_dbf()
+
+   RETURN .T.
+
+
+FUNCTION kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, cIdVd, cBrDok )
+
+   LOCAL lBrisiKumulativ
+   LOCAL hRec
+   LOCAL hRecDelete
+   LOCAL nTrec
+   LOCAL lOk := .T.
+   LOCAL hParams
+   LOCAL GetList := {}
+
+   o_kalk_pripr()
+   IF !kalk_dokument_postoji( cIdFirma, cIdVd, cBrDok )
+      MsgBeep( "Traženi dokument ne postoji na serveru !"  )
+      my_close_all_dbf()
+      RETURN .F.
+   ENDIF
+
+   lBrisiKumulativ := .T.
+   kalk_kopiraj_dokument_u_tabelu_pripreme( cIdFirma, cIdVd, cBrDok )
+   IF lBrisiKumulativ
+
+      run_sql_query( "BEGIN" )
+      o_kalk_za_azuriranje()
+      find_kalk_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
+      IF Found()
+         hRecDelete := dbf_get_rec()
+      ENDIF
       IF lOk
          lOk := brisi_dokument_iz_tabele_kalk( cIdFirma, cIdVd, cBrDok )
       ENDIF
@@ -87,11 +134,8 @@ FUNCTION kalk_povrat_dokumenta()
          lOk := brisi_dokument_iz_tabele_doks( cIdFirma, cIdVd, cBrDok )
       ENDIF
 
-      MsgC()
-
       IF lOk
          hParams := hb_Hash()
-         //hParams[ "unlock" ] :=  { "kalk_doks", "kalk_kalk" }
          run_sql_query( "COMMIT", hParams )
          log_write( "F18_DOK_OPER: KALK DOK_POV: " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ), 2 )
       ELSE
@@ -160,16 +204,16 @@ STATIC FUNCTION kalk_kopiraj_dokument_u_tabelu_pripreme( cFirma, cIdVd, cBroj )
       SELECT kalk
       hRec := dbf_get_rec()
       SELECT kalk_pripr
-         APPEND ncnl
-         hRec[ "error" ] := ""
-         hRec[ "opis"  ] := kalk_doks->opis
-         hRec[ "dat_od"  ] := kalk_doks->dat_od
-         hRec[ "dat_do"  ] := kalk_doks->dat_do
-         hRec[ "datval"  ] := kalk_doks->datval
-         hRec[ "opis"  ] := kalk_doks->opis
-         hRec[ "datfaktp" ] := kalk_doks->datfaktp
-         hRec[ "brfaktp" ] := kalk_doks->brfaktp
-         dbf_update_rec( hRec )
+      APPEND ncnl
+      hRec[ "error" ] := ""
+      hRec[ "opis"  ] := kalk_doks->opis
+      hRec[ "dat_od"  ] := kalk_doks->dat_od
+      hRec[ "dat_do"  ] := kalk_doks->dat_do
+      hRec[ "datval"  ] := kalk_doks->datval
+      hRec[ "opis"  ] := kalk_doks->opis
+      hRec[ "datfaktp" ] := kalk_doks->datfaktp
+      hRec[ "brfaktp" ] := kalk_doks->brfaktp
+      dbf_update_rec( hRec )
       SELECT kalk
       SKIP
 
