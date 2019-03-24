@@ -3,6 +3,7 @@
 ## 2019-03-24
 
 - KALK maloprodaja konverzije 
+- fix build
 
 ## 2019-03-22
 
