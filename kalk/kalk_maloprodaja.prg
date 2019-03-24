@@ -24,16 +24,20 @@ FUNCTION kalk_maloprodaja()
    LOCAL bTekProdavnica := {|| PadR( "1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ), 42 ) }
 
    AAdd( aOpc, bTekProdavnica )
+   
    AAdd( aOpcExe, {|| kalk_mp_set_pos_prodavnica() } )
 
    AAdd( aOpc,   "2. inicijalizacija" )
    AAdd( aOpcExe, {|| kalk_mp_inicijalizacija() } )
 
-   AAdd( aOpc,  "3. POS realizacija [49]->[42]" )
+   AAdd( aOpc,  "3. pos realizacija [49]->[42]" )
    AAdd( aOpcExe, {|| kalk_49_to_42_unos() } )
 
-   AAdd( aOpc,  "3. POS zaduženje iz magacina [22]->[11]" )
+   AAdd( aOpc,  "4. pos zaduženje iz magacina [22]->[11]" )
    AAdd( aOpcExe, {|| kalk_22_to_11_unos() } )
+
+   AAdd( aOpc,  "5. obrada zahtjeva za sniženje [71]->[79]" )
+   AAdd( aOpcExe, {|| kalk_71_to_79_unos() } )
 
    // AAdd( aOpc,   "3. šifre robe u prodavnici" )
    // AAdd( aOpcExe, {|| p_roba_prodavnica() } )

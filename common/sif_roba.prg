@@ -528,9 +528,7 @@ STATIC FUNCTION dupli_barkodovi_report( oData )
    ? "----------------------------------------------------------------------------------"
 
    DO WHILE !oData:Eof()
-
       oRow := oData:GetRow()
-
       ? oRow:FieldGet( oRow:FieldPos( "id" ) ), ;
          PadR( hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "naz" ) ) ), 40 ), ;
          oRow:FieldGet( oRow:FieldPos( "barkod" ) )

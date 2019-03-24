@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-24
+
+- KALK maloprodaja konverzije 
+
 ## 2019-03-22
 
 - POS 22 workflow

@@ -478,8 +478,9 @@ BEGIN
 END;
 $$;
 
+
 CREATE OR REPLACE FUNCTION public.kalk_71_to_79_dokumenti( nProdavnica integer, dDatum date )
-       RETURNS TABLE (brdok varchar, prodavnica varchar, mjesec varchar, dan varchar, broj varchar )
+       RETURNS TABLE (brdok varchar, prod text, mjesec text, dan text, broj text )
        LANGUAGE plpgsql
        AS $$
 DECLARE
@@ -491,7 +492,8 @@ BEGIN
 
     -- kalk_doks 71 koje nemaju svoje 79-ke
     -- brdok 02032301 -> prodavnica 02, mjesec 03, dan 23, dokument 01
-    RETURN QUERY SELECT brdok, substr(brdok, 1, 2) as prodavnica, substr(brdok, 3, 2) as mjesec, substr(brdok, 5, 2) as dan, substr(brdok,7,2) as broj
+    RETURN QUERY SELECT doks71.brdok, substr(doks71.brdok,1,2) as prod,
+        substr(doks71.brdok,3,2) as mjesec, substr(doks71.brdok,5,2) as dan, substr(doks71.brdok,7,2) as broj
         FROM public.kalk_doks doks71
         LEFT JOIN public.kalk_doks doks79
         ON doks71.idfirma=doks79.idfirma AND doks71.brdok=doks79.brdok AND doks71.idvd='71' AND doks79.idvd='79'
@@ -502,12 +504,12 @@ BEGIN
 END;
 $$;
 
+
 CREATE OR REPLACE FUNCTION public.kalk_71_to_79( cBrDok varchar ) RETURNS integer
        LANGUAGE plpgsql
        AS $$
 DECLARE
    cIdFirma varchar;
-   cBrDok varchar;
    nRet integer;
 BEGIN
     SELECT public.fetchmetrictext('org_id') INTO cIdFirma;

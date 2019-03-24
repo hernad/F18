@@ -262,6 +262,7 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
    LOCAL nGornja
    LOCAL nVisina
    LOCAL cMeniItem
+   LOCAL cPrvaTriSlova
 
    // LOCAL nCtrlKeyVal := 0
    LOCAL nChar
@@ -355,7 +356,12 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
       CASE IsAlpha( Chr( nChar ) ) .OR. IsDigit( Chr( nChar ) )
          FOR nI := 1 TO nLen
             IF IsDigit( Chr( nChar ) ) // cifra
-               IF Chr( nChar ) $ Left( aItems[ nI ], 3 ) // provjera postojanja
+               IF ValType( aItems[ nI ] ) == "C"
+                  cPrvaTriSlova := Left( aItems[ nI ], 3 )
+               ELSE
+                  cPrvaTriSlova := Left( Eval( aItems[ nI ] ), 3 )
+               ENDIF
+               IF Chr( nChar ) $  cPrvaTriSlova
                   nItemNo := nI  // broja u stavki samo u prva 3 karaktera
                   lExitFromMeni := .T.
                ENDIF
