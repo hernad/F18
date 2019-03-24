@@ -22,6 +22,10 @@ FUNCTION pos_dokument_sa_vrijeme( hParams )
 
 FUNCTION pos_stampa_dokumenta( hParams )
 
+   IF !hb_HHasKey( hParams, "priprema" )
+      hParams[ "priprema" ] := .F.
+   ENDIF
+
    IF hParams[ "idvd" ] $ POS_IDVD_DOKUMENTI_NIVELACIJE_SNIZENJA
       pos_stampa_nivelacija( hParams )
    ELSE

@@ -51,11 +51,9 @@ FUNCTION kalk_kontiranje_gen_finmat()
       lAuto := .F.
    ENDIF
 
-
    fprvi := .T. // prvi prolaz
 
    // DO WHILE .T.
-
    _predispozicija := .F.
 
    kalk_open_tabele_za_kontiranje()
@@ -94,7 +92,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
    IF fStara
 
       IF !lViseKalk
-
          Box( "", 1, 50 )
          SET CURSOR ON
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument broj:"
@@ -109,7 +106,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
       IF fStara
          kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
       ENDIF
-
       HSEEK cIdFirma + cIdVd + cBrDok // kalk_pripr
 
    ELSE
@@ -130,7 +126,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
    ENDIF
 
    IF fStara .AND. lAuto == .F.
-
       // - info o izabranom dokumentu -
       Box( "#DOKUMENT " + cIdFirma + "-" + cIdVd + "-" + cBrDok, 9, 77 )
 
@@ -153,7 +148,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
       @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Automatski uravnoteži dokument? (D/N)" GET cAutoRav VALID cAutoRav $ "DN" PICT "@!"
       @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Želite li kontirati dokument? (D/N)" GET cDalje VALID cDalje $ "DN" PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Automatski broj fin.naloga? (D/N)" GET cFinAutoBrojDN VALID cFinAutoBrojDN $ "DN" PICT "@!"
-
       READ
 
       BoxC()
@@ -197,16 +191,9 @@ FUNCTION kalk_kontiranje_gen_finmat()
       // cIdd := idpartner + brfaktp + idkonto + idkonto2
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
 
-         IF cIdVd == "97"
-            IF field->tbanktr == "X"
-               SKIP
-               LOOP
-            ENDIF
-         ENDIF
-
 
          PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
-         nFV := FCj * Kolicina
+         nFV := kalk_pripr->FCj * kalk_pripr->Kolicina
          // IF gKalo == "1"
          // nKolicina := kalk_pripr->( Kolicina - GKolicina - GKolicin2 )
          // ELSE

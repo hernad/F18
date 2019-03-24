@@ -221,14 +221,14 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
 
    // o_roba()
    o_finmat()
-   o_trfp2()
-   o_koncij()
-   o_valute()
+   //o_trfp2()
+   //o_koncij()
+   //o_valute()
 
    lAFin := .T.
    IF lafin
       Beep( 1 )
-      lafin := Pitanje(, "Formirati FIN nalog?", "D" ) == "D"
+      lafin := Pitanje(, "FAKT: Formirati FIN nalog?", "D" ) == "D"
    ENDIF
 
    cBrNalF := ""
@@ -286,7 +286,6 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
          DO WHILE !Empty( cBrNalF ) .AND. idvd == cIDVD  .AND. shema = " " .AND. !Eof()
 
             cStavka := Id
-
             SELECT finmat
             nIz := &cStavka // evaluacija fakt->fin formule
 
@@ -305,7 +304,6 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
                ENDIF
 
                nIz := round7( nIz, Right( TRFP2->naz, 2 ) )
-
                // DEM - pomocna valuta
                nIz2 := nIz * Kurs( dDatNal, "D", "P" )
 

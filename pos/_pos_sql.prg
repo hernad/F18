@@ -199,7 +199,33 @@ FUNCTION seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo, cAlias )
    RETURN seek_pos_doks( cIdPos, cIdVd, NIL, NIL, "1", dDatOd, dDatDo, cAlias )
 
 
+FUNCTION find_pos_doks_by_idvd_brfaktp( hParams )
+
+   LOCAL lRet
+
+   lRet := seek_pos_doks_h( hParams )
+   IF lRet
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "idvd" ] := pos_doks->idvd
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+      hParams[ "idpartner" ] := pos_doks->idpartner
+      hParams[ "opis" ] := pos_doks->opis
+      hParams[ "dat_od" ] := pos_doks->dat_od
+      hParams[ "dat_do" ] := pos_doks->dat_do
+      hParams[ "idradnik" ] := pos_doks->idradnik
+   ENDIF
+
+   RETURN lRet
+
+
 FUNCTION seek_pos_doks_h( hParams  )
+
+   LOCAL cSql
+   LOCAL cTable := "pos_doks"
+   LOCAL hIndexes, cKey
+   LOCAL lWhere := .F.
+   LOCAL cFields
 
    LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias
 
@@ -225,19 +251,8 @@ FUNCTION seek_pos_doks_h( hParams  )
       dDatDo := hParams[ "dat_do" ]
    ENDIF
    IF hb_HHasKey( hParams, "alias" )
-      cTag := hParams[ "alias" ]
+      cAlias := hParams[ "alias" ]
    ENDIF
-
-   RETURN seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
-
-
-FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
-
-   LOCAL cSql
-   LOCAL cTable := "pos_doks"
-   LOCAL hIndexes, cKey
-   LOCAL lWhere := .F.
-   LOCAL cFields
 
    cFields := "idpos, idvd, brdok, datum, idPartner, idradnik,"
    cFields += "idvrstep,vrijeme,ukupno,brFaktP,opis,dat_od,dat_do"
@@ -289,11 +304,22 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAl
       ENDIF
       cSql += "brdok=" + sql_quote( cBrDok )
    ENDIF
+
    IF cAlias == NIL
       cAlias := "POS_DOKS"
       SELECT F_POS_DOKS
    ELSE
       SELECT F_POS_DOKS_2
+   ENDIF
+
+   IF hb_HHasKey( hParams, "brfaktp" ) .AND. hParams[ "brfaktp" ] != NIL .AND. !Empty( hParams[ "brfaktp" ] )
+      IF lWhere
+         cSql += " AND "
+      ELSE
+         cSql += " WHERE "
+         lWhere := .T.
+      ENDIF
+      cSql += "brfaktp=" + sql_quote( hParams[ "brfaktp" ] )
    ENDIF
 
    use_sql( cTable, cSql, cAlias )
@@ -310,6 +336,23 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAl
    GO TOP
 
    RETURN !Eof()
+
+
+FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias )
+
+   LOCAL hParams := hb_Hash()
+
+   hParams[ "idpos" ] := cIdPos
+   hParams[ "idvd" ] := cIdVd
+   hParams[ "datum" ] := dDatum
+   hParams[ "brdok" ] := cBrDok
+   hParams[ "tag" ] := cTag
+   hParams[ "dat_od" ] := dDAtOd
+   hParams[ "dat_do" ] := dDatDo
+   hParams[ "alias" ] := cAlias
+
+   RETURN seek_pos_doks_h( hParams )
+
 
 
 FUNCTION h_pos_doks_indexes()
@@ -352,7 +395,7 @@ FUNCTION pos_stanje_artikal_str( cIdRoba, nStrLen )
       ENDIF
    NEXT
 
-   return Padr(cSlikaStanja, nStrLen )
+   RETURN PadR( cSlikaStanja, nStrLen )
 
 
 FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )

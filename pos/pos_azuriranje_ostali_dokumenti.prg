@@ -53,7 +53,7 @@ FUNCTION pos_azuriraj_zaduzenje( hParams )
       hRec[ "brdok" ] := hParams["brdok"]
       hRec[ "idvd" ] := hParams["idvd"]
       hRec[ "datum" ] := hParams["datum"]
-    
+
       hRec["rbr"] := ++nCount
       hRec["idroba"] := priprz->idroba
       hRec["cijena"] := priprz->cijena
@@ -148,7 +148,6 @@ FUNCTION pos_azuriraj_inventura_nivelacija()
    hRec[ "idvrstep" ] := priprz->idvrstep
    hRec[ "idpartner" ] := priprz->idPartner
    hRec[ "idradnik" ] := priprz->idradnik
-   hRec[ "brdokstorn" ] := priprz->brdokStorn
    hRec[ "dat_od" ] := priprz->dat_od
    hRec[ "dat_do" ] := priprz->dat_do
 

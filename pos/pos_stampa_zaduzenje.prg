@@ -24,7 +24,6 @@ FUNCTION pos_stampa_zaduzenja( hParams )
    LOCAL cRobaNaStanju := "N"
    LOCAL cLine
    LOCAL cLine2
-   LOCAL nDbfArea := Select()
    LOCAL xPrintOpt, bZagl
    LOCAL aLines
    LOCAL nFinZad
@@ -34,8 +33,10 @@ FUNCTION pos_stampa_zaduzenja( hParams )
    nRobaNazivSirina := 40
    cLM := ""
 
+   PushWa()
    IF !hParams[ "priprema" ]
-      IF !seek_pos_pos( hParams["idpos"], hParams["idvd"], hParams["datum"], hParams["brdok"], "1", "PRIPRZ" )
+      IF !seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ], "1", "PRIPRZ" )
+         PopWa()
          RETURN .F.
       ENDIF
    ENDIF
@@ -49,13 +50,15 @@ FUNCTION pos_stampa_zaduzenja( hParams )
 
    cNazDok := pos_dokument_naziv( hParams[ "idvd" ] ) + " " + AllTrim( hParams[ "idpos" ] ) + "-" + hParams[ "idvd" ] + "-" + AllTrim( hParams[ "brdok" ] )
    cNazDok += " od: " + FormDat1 ( hParams[ "datum" ] )
-altd()
+
    IF f18_start_print( NIL, xPrintOpt,  cNazDok + " Štampa na dan: " + DToC( Date() ) ) == "X"
+      PopWa()
       RETURN .F.
    ENDIF
 
    select_o_partner( hParams[ "idpartner" ] )
    ? "Partner:", hParams[ "idpartner" ], AllTrim( partn->naz )
+
    ?? "  Broj fakture:", hParams[ "brfaktp" ]
    ?  "Opis:", _u( hParams[ "opis" ] )
 
@@ -108,7 +111,9 @@ altd()
 
    f18_end_print( NIL, xPrintOpt )
 
-   SELECT ( nDbfArea )
+   SELECT PRIPRZ
+   USE
+   PopWa()
 
    RETURN .T.
 

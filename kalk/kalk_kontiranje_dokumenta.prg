@@ -63,25 +63,25 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       o_finmat()
    ENDIF
 
-   SELECT F_TRFP
-   USE
-   o_trfp()
+   //SELECT F_TRFP
+   //USE
+   //o_trfp()
 
-   SELECT F_KONCIJ
-   IF !Used()
-      o_koncij()
-   ENDIF
+   //SELECT F_KONCIJ
+   //IF !Used()
+    //  o_koncij()
+   //ENDIF
 
-   IF FieldPos( "IDRJ" ) <> 0
-      lPoRj := .T.
-   ELSE
-      lPoRj := .F.
-   ENDIF
+   //IF FieldPos( "IDRJ" ) <> 0
+  //  lPoRj := .T.
+   //ELSE
+    //  lPoRj := .F.
+   //ENDIF
 
-   SELECT F_VALUTE
-   IF !Used()
-      o_valute()
-   ENDIF
+   //SELECT F_VALUTE
+   //IF !Used()
+    //  o_valute()
+   //ENDIF
 
    IF lAutomatskiSetBrojNaloga == NIL
       lAutomatskiSetBrojNaloga := .F.
@@ -96,17 +96,18 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       ENDIF
    ENDIF
 
-
    lAFin := ( gAFin == "D" )
 
    IF lAFin
+      IF finmat->idvd $ "49#71#79#21#22"
+          RETURN .F.
+      ENDIF
       Beep( 1 )
       IF !lAGen
-         lAfin := Pitanje(, "Formirati FIN nalog?", "D" ) == "D"
+         lAfin := Pitanje(, "KALK: Formirati FIN nalog?", "D" ) == "D"
       ELSE
          lAfin := .T.
       ENDIF
-
    ENDIF
 
    IF !lAFin
@@ -296,15 +297,15 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
             IF nIznosKontiratiDEM <> 0
 
-               IF lPoRj // ako je iznos elementa <> 0, dodaj stavku u fpripr
-                  IF TRFP->porj = "D"
-                     cIdRj := KONCIJ->idrj
-                  ELSEIF TRFP->porj = "S"
-                     cIdRj := KONCIJ->sidrj
-                  ELSE
-                     cIdRj := ""
-                  ENDIF
-               ENDIF
+               //IF lPoRj // ako je iznos elementa <> 0, dodaj stavku u fpripr
+              //    IF TRFP->porj = "D"
+              //       cIdRj := KONCIJ->idrj
+              //    ELSEIF TRFP->porj = "S"
+              //       cIdRj := KONCIJ->sidrj
+              //    ELSE
+              //       cIdRj := ""
+              //    ENDIF
+               //ENDIF
 
                SELECT fin_pripr
 
@@ -469,8 +470,8 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   DO WHILE !Eof() .AND. finmat->idfirma + cIdvn + cBrNalF == IdFirma + idvn + BrNal
                      IF IdKonto == cIdKonto .AND. IdPartner == cIdPartner .AND. ;
                            hRecTrfp[ "d_p" ] == d_p  .AND. idtipdok == finmat->idvd .AND. ;
-                           PadR( brdok, 10 ) == PadR( cBrDok, 10 ) .AND. datdok == dDatDok .AND. ;
-                           iif( lPoRj, Trim( idrj ) == Trim( cIdRj ), .T. )
+                           PadR( brdok, 10 ) == PadR( cBrDok, 10 ) .AND. datdok == dDatDok //.AND. ;
+                           //iif( lPoRj, Trim( idrj ) == Trim( cIdRj ), .T. )
                         // provjeriti da li se vec nalazi stavka koju dodajemo
                         fExist := .T.
                         EXIT
@@ -536,9 +537,9 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   REPLACE IdRJ WITH cRj2, opis WITH StrTran( hRecTrfp[ "naz" ], "#RJ2#", "" )
                ENDIF
 
-               IF lPoRj
-                  REPLACE IdRJ WITH cIdRj
-               ENDIF
+               //IF lPoRj
+                //  REPLACE IdRJ WITH cIdRj
+               //ENDIF
 
                IF !fExist
                   REPLACE Rbr  WITH nRbr // fin_pripr

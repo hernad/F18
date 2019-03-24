@@ -32,12 +32,16 @@ FUNCTION pos_21_to_22_unos()
 
    LOCAL cBrFaktP := Space( 10 )
    LOCAL GetList := {}
+   LOCAL cPregledDN := "D"
    LOCAL cPreuzimaSeDN := "D"
    LOCAL nRet, cMsg
 
    Box(, 5, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj otpremice iz magacina: " GET cBrFaktP
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Potvrda (D) Odbijanje prijema (N): " GET cPreuzimaSeDN ;
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj otpremnice iz magacina: " GET cBrFaktP
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "pregled dokumenta prije potvrde: " GET cPregledDN PICT "@!" ;
+      VALID pos_21_pregled_valid( @cPregledDN, cBrFaktP )
+
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Potvrda (D) Odbijanje prijema (N): " GET cPreuzimaSeDN ;
       VALID cPreuzimaSeDN $ "DN" PICT "@!"
    READ
    BoxC()
@@ -66,6 +70,26 @@ FUNCTION pos_21_to_22_unos()
 
    RETURN .T.
 
+
+STATIC FUNCTION pos_21_pregled_valid( cPregledDN, cBrFaktP )
+
+   LOCAL hParams := hb_Hash()
+
+   hParams[ "idvd" ] := '21'
+   hParams[ "brfaktp" ] := AllTrim(cBrFaktP)
+
+   IF !( cPregledDN $ "DN" )
+      RETURN .F.
+   ENDIF
+
+   IF !find_pos_doks_by_idvd_brfaktp( @hParams )
+      Alert( 'Dokument 21 sa brojem optremnice [' + cBrFaktP + "] ne postoji ?!" )
+      RETURN .T.
+   ENDIF
+
+   pos_stampa_dokumenta( hParams )
+
+   RETURN .T.
 
 
 FUNCTION pos_21_to_22( cBrFaktP, cIdRadnik, lPreuzimaSe )

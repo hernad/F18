@@ -124,8 +124,8 @@ CREATE OR REPLACE FUNCTION f18.before_kalk_doks_delete() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-   IF ( OLD.idvd = '49' ) and ( current_user <> 'postgres' ) THEN
-       RAISE EXCEPTION '49 nije dozvoljeno brisanje osim triger funkcijama';
+   IF ( OLD.idvd IN ('49', '71', '22') ) and ( current_user <> 'postgres' ) THEN
+       RAISE EXCEPTION '49, 71, 22 nije dozvoljeno brisanje osim triger funkcijama';
    END IF;
 
    RETURN OLD;
