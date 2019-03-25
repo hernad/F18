@@ -75,11 +75,12 @@ CREATE TABLE IF NOT EXISTS f18.kalk_doks (
 ALTER TABLE f18.kalk_doks OWNER TO admin;
 
 CREATE INDEX IF NOT EXISTS kalk_kalk_datdok ON f18.kalk_kalk USING btree (datdok);
-CREATE INDEX IF NOT EXISTS kalk_kalk_id1 ON f18.kalk_kalk USING btree (idfirma, idvd, brdok, rbr, mkonto, pkonto);
+DROP INDEX IF EXISTS kalk_kalk_id1;
+CREATE UNIQUE INDEX IF NOT EXISTS kalk_kalk_rbr ON f18.kalk_kalk USING btree (idfirma, idvd, brdok, rbr);
 CREATE INDEX IF NOT EXISTS kalk_kalk_mkonto ON f18.kalk_kalk USING btree (idfirma, mkonto, idroba);
 CREATE INDEX IF NOT EXISTS kalk_kalk_mkonto_roba ON f18.kalk_kalk USING btree (mkonto, idroba);
-CREATE INDEX  IF NOT EXISTS kalk_kalk_pkonto ON f18.kalk_kalk USING btree (idfirma, pkonto, idroba);
 CREATE INDEX  IF NOT EXISTS kalk_kalk_pkonto_roba ON f18.kalk_kalk USING btree (pkonto, idroba);
+CREATE INDEX  IF NOT EXISTS kalk_kalk_pkonto ON f18.kalk_kalk USING btree (idfirma, pkonto, idroba);
 
 CREATE INDEX IF NOT EXISTS kalk_doks_datdok ON f18.kalk_doks USING btree (datdok);
 CREATE INDEX IF NOT EXISTS kalk_doks_id1 ON f18.kalk_doks USING btree (idfirma, idvd, brdok, mkonto, pkonto);
