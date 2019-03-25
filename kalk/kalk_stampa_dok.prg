@@ -140,10 +140,10 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       ELSEIF ( cIdvd $ "19#71#79#72" )
          kalk_stampa_dok_19_79()
 
-      ELSEIF ( cIdvd $ "02#80" )
+      ELSEIF ( cIdvd $ "02#80#61" )
          kalk_stampa_dok_80()
 
-      ELSEIF ( cIdvd == "81" )
+      ELSEIF ( cIdvd $ "81#89" )
          kalk_stampa_dok_81()
 
       ELSEIF ( cIdvd == "IM" )
@@ -233,8 +233,8 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
          kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
       ELSEIF ( cIdVd == "80" )
          kalk_stampa_dok_80( .T. )
-      ELSEIF ( cIdVd == "81" )
-         kalk_stampa_dok_81_tops( .T. )
+      //ELSEIF ( cIdVd == "81" )
+      //   kalk_stampa_dok_81_tops( .T. )
       ELSEIF ( cIdVd == "IP" )
          kalk_stampa_dok_ip( .T. )
       ELSEIF ( cIdVd $ "19#71#79" )
@@ -320,4 +320,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02"  // implementirano za ove dokumente
+   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61"

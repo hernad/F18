@@ -20,6 +20,7 @@ ALTER TABLE {{ item_prodavnica }}.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
 ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN idroba SET NOT NULL;
 ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN cijena SET NOT NULL;
 
+CREATE INDEX IF NOT EXISTS pos_stanje_idroba ON {{ item_prodavnica }}.pos_stanje USING btree (idroba, cijena, ncijena);
 
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_prijem_update_stanje(
    transakcija character(1),

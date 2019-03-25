@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+STATIC s_nKalkStaraCijena := 0
+
 MEMVAR GetList
 MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena, nKalkRbr
 MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
@@ -95,7 +97,9 @@ FUNCTION kalk_get_1_19_79()
    SELECT kalk_pripr
    nKalkNovaCijena := nKalkStaraCijena + _MPCSaPP
    @ box_x_koord() + 16, box_y_koord() + 2  SAY "STARA CIJENA (MPCSaPDV):"
-   @ box_x_koord() + 16, box_y_koord() + 50 GET nKalkStaraCijena    PICT "999999.9999"
+   @ box_x_koord() + 16, box_y_koord() + 50 GET nKalkStaraCijena    PICT "999999.9999" ;
+      WHEN kalk_when_stara_cijena_19_72_79( @nKalkStaraCijena ) ;
+      VALID kalk_valid_start_cijena_19_72_78(  @nKalkStaraCijena )
    @ box_x_koord() + 17, box_y_koord() + 2  SAY "NOVA CIJENA  (MPCSaPDV):"
    @ box_x_koord() + 17, box_y_koord() + 50 GET nKalkNovaCijena     PICT "999999.9999"
 
@@ -139,6 +143,25 @@ STATIC FUNCTION kalk_when_kolicina_19_72_79()
    IF _idvd == POS_IDVD_AKCIJSKE_CIJENE
       _kolicina := 0
       RETURN .F.
+   ENDIF
+
+   RETURN .T.
+
+
+STATIC FUNCTION kalk_when_stara_cijena_19_72_79( nKalkStaraCijena )
+
+   s_nKalkStaraCijena := nKalkStaraCijena
+
+   RETURN .T.
+
+STATIC FUNCTION kalk_valid_start_cijena_19_72_78(  nKalkStaraCijena )
+
+   IF !kalk_is_novi_dokument() .AND. nKalkStaraCijena <> s_nKalkStaraCijena
+      IF Pitanje(, "Želite promjenu stare cijene ?! Sigurno ?", "N" ) == "D"
+         RETURN .T.
+      ELSE
+         nKalkStaraCijena := s_nKalkStaraCijena
+      ENDIF
    ENDIF
 
    RETURN .T.

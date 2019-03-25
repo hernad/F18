@@ -4,6 +4,7 @@
 
 - POS kada ima vise cijena, prikazati stanje
 - POS 89 -> KALK 81 workflow
+- KALK 81, 89 stampa PDF
 
 ## 2019-03-24
 

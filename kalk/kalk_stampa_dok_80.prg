@@ -57,6 +57,8 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
 
    IF cIdVd == "02"
       cNaslov := "POS POČETNO STANJE"
+   ELSEIF cIdVd == "61"
+      cNaslov := "POS Zahtjev za narudžbu robe"
    ELSE
       cNaslov := "PRIJEM PRODAVNICA"
    ENDIF
