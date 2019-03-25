@@ -81,10 +81,9 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_dostupno_artikal_za_cijenu(
        AS $$
 
 DECLARE
-   idPos varchar DEFAULT '15';
    nStanje numeric;
 BEGIN
-   EXECUTE 'SELECT kol_ulaz-kol_izlaz as stanje FROM p' || idPos || '.pos_stanje' ||
+   EXECUTE 'SELECT kol_ulaz-kol_izlaz as stanje FROM {{ item_prodavnica }}.pos_stanje' ||
            ' WHERE rtrim(idroba)=$1  AND cijena=$2 AND ncijena=$3 AND current_date>=dat_od AND current_date<=dat_do' ||
            ' AND kol_ulaz - kol_izlaz <> 0'
            USING trim(cIdroba), nCijena, nNCijena
