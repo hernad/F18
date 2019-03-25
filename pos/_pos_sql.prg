@@ -354,7 +354,6 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAl
    RETURN seek_pos_doks_h( hParams )
 
 
-
 FUNCTION h_pos_doks_indexes()
 
    LOCAL hIndexes := hb_Hash()
@@ -422,6 +421,10 @@ FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
    RETURN nStanje
 
 
+/*
+   => aCijene
+      aCijenaItem [1] - cijena, [2] - ncijena, [3] - dat_od, [4] - dat_do, [5] - stanje
+*/
 FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
 
    LOCAL cQuery, oTable
@@ -429,7 +432,7 @@ FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
    LOCAL nStanje
    LOCAL aCijene := {}
 
-   cQuery := "SELECT cijena, ncijena, dat_od, dat_do FROM " + f18_sql_schema( "pos_stanje" )
+   cQuery := "SELECT cijena, ncijena, dat_od, dat_do, kol_ulaz-kol_izlaz as stanje FROM " + f18_sql_schema( "pos_stanje" )
    cQuery += " WHERE rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
    cQuery += " AND kol_ulaz-kol_izlaz>0"
    cQuery += " AND dat_od<=current_date AND dat_do>=current_date"
@@ -439,7 +442,7 @@ FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
    use_sql( "POM", cQuery, "POM" )
    oTable := run_sql_query( cQuery )
    DO WHILE !Eof()
-      AAdd( aCijene, { pom->cijena, pom->ncijena, pom->dat_od, pom->dat_do } )
+      AAdd( aCijene, { pom->cijena, pom->ncijena, pom->dat_od, pom->dat_do, pom->stanje } )
       SKIP
    ENDDO
    USE

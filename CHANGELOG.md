@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-25
+
+- POS kada ima vise cijena, prikazati stanje
+
 ## 2019-03-24
 
 - KALK maloprodaja konverzije 

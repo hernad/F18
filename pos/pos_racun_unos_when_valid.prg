@@ -11,8 +11,6 @@
 
 #include "f18.ch"
 
-#define POS_ROBA_DUZINA_SIFRE 13  // citanje barkoda
-
 STATIC s_nMaxKolicinaPosRacun := NIL
 
 MEMVAR gPosProdajnoMjesto, gOcitBarKod, gPosPratiStanjePriProdaji
@@ -35,7 +33,7 @@ FUNCTION pos_racun_odabir_cijene( aCijene )
    LOCAL lCentury
    LOCAL nCijena, nNCijena, nPopust, nPopustProc
 
-   lCentury := __SetCentury( .T. )
+   lCentury := __SetCentury( .F. )
    FOR nI := 1 TO Len( aCijene )
       nCijena := aCijene[ nI, 1 ]
       nNCijena := aCijene[ nI, 2 ]
@@ -46,13 +44,14 @@ FUNCTION pos_racun_odabir_cijene( aCijene )
          nPopust := 0
          nPopustProc := 0
       ENDIF
-
       IF nPopust == 0
          cCijena := PadR( Transform( nCijena, "999999.99" ), 30 )
       ELSE
-         cCijena := PadR( Transform( nCijena, "999999.99" ) + " - " + Transform( nPopustProc, "99.99%" ) + " = " + Transform( nCijena - nPopust, "99999.99" ), 30 )
+         cCijena := PadR( Transform( nCijena, "999999.99" ) + "-" + Transform( nPopustProc, "99.99%" ) + "=" + Transform( nCijena - nPopust, "99999.99" ), 30 )
       ENDIF
+      // datum od - do
       cCijena += " [" + DToC( aCijene[ nI, 3 ] ) + " - " + DToC( aCijene[ nI, 4 ] ) + "] "
+      cCijena += " St: " + Str( aCijene[ nI, 5], 8, 2 ) + " "
       AAdd( aOpc, cCijena )
    NEXT
    __SetCentury( lCentury )
@@ -253,7 +252,6 @@ STATIC FUNCTION pos_cijena_nije_nula( nCijena )
    IF LastKey() == K_UP
       RETURN .T.
    ENDIF
-
    IF Round( nCijena, 4 ) == 0
       MsgBeep( "Nepravilan unos cijene, cijena mora biti <> 0 !?" )
       RETURN .F.
@@ -280,7 +278,6 @@ FUNCTION pos_racun_prikazi_ukupno()
    // @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
    pos_racun_prikaz_ukupno( box_x_koord() + 2, nIznos, nPopust )
    // ispis_veliki_brojevi_iznos( pos_racun_iznos_neto(), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
-
    ispis_veliki_brojevi_iznos( nIznos - nPopust, box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
 
    SELECT _pos_pripr
