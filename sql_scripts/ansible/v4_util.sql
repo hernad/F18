@@ -493,7 +493,7 @@ BEGIN
 
     -- kalk_doks 71 koje nemaju svoje 79-ke
     -- brdok 02032301 -> prodavnica 02, mjesec 03, dan 23, dokument 01
-    RETURN QUERY SELECT doks71.brdok, substr(doks71.brdok,1,2) as prod,
+    RETURN QUERY SELECT doks71.brdok::varchar, substr(doks71.brdok,1,2) as prod,
         substr(doks71.brdok,3,2) as mjesec, substr(doks71.brdok,5,2) as dan, substr(doks71.brdok,7,2) as broj
         FROM public.kalk_doks doks71
         LEFT JOIN public.kalk_doks doks79
