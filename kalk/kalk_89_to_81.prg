@@ -18,9 +18,7 @@ FUNCTION kalk_89_to_81_unos()
    LOCAL GetList := {}
    LOCAL nRet
 
-   AltD()
    cBrDok := kalk_89_odabir_brdok_iz_liste()
-
    IF Empty( cBrDok )
       MsgBeep( "Nema dokumenata prema zadatom kriteriju ?" )
       cBrDok := Space( FIELD_LEN_KALK_BRDOK )
@@ -148,16 +146,18 @@ STATIC FUNCTION kalk_pripr_set_idpartner()
 
    LOCAL cIdPartner
 
-   SELECT kalk_pripr
    PushWa()
+   SELECT F_KALK_PRIPR
+   use
+   o_kalk_pripr()
    GO TOP
-   cIdPartner := kalk_doks_idpartner_by_brdok( kalk_pripr->IdFirma, kalk_pripr->IdVd, kalk_pripr->BrDok )
-altd()
+   cIdPartner := kalk_doks_idpartner_by_brdok( kalk_pripr->IdFirma, "89", kalk_pripr->BrDok )
    SET ORDER TO
    DO WHILE !Eof()
       rreplace idpartner WITH cIdPartner
       SKIP
    ENDDO
+   USE
    PopWa()
 
    RETURN .T.

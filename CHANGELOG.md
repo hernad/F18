@@ -3,6 +3,7 @@
 ## 2019-03-25
 
 - POS kada ima vise cijena, prikazati stanje
+- POS 89 -> KALK 81 workflow
 
 ## 2019-03-24
 
