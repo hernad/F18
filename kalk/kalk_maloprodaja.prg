@@ -21,10 +21,10 @@ FUNCTION kalk_maloprodaja()
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
-   LOCAL bTekProdavnica := {|| PadR( "1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ), 42 ) }
+   LOCAL bTekProdavnica := {|| PadR( "1. radna prodavnica: '" +  pos_prodavnica_str() + "' : " +  get_pkonto_by_prodajno_mjesto( pos_prodavnica() ), 46 ) }
 
    AAdd( aOpc, bTekProdavnica )
-   
+
    AAdd( aOpcExe, {|| kalk_mp_set_pos_prodavnica() } )
 
    AAdd( aOpc,   "2. inicijalizacija" )
@@ -38,6 +38,9 @@ FUNCTION kalk_maloprodaja()
 
    AAdd( aOpc,  "5. obrada zahtjeva za sniženje [71]->[79]" )
    AAdd( aOpcExe, {|| kalk_71_to_79_unos() } )
+
+   AAdd( aOpc,  "6. pos direktni ulaz od dobavljača [89]->[81]" )
+   AAdd( aOpcExe, {|| kalk_89_to_81_unos() } )
 
    // AAdd( aOpc,   "3. šifre robe u prodavnici" )
    // AAdd( aOpcExe, {|| p_roba_prodavnica() } )

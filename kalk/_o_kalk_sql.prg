@@ -866,3 +866,30 @@ STATIC FUNCTION sql_kalk_doks_order( hParams )
    ENDIF
 
    RETURN cOrder
+
+
+
+// FUNCTION public.kalk_idpartner_by_brdok( cIdFirma varchar, cIdVd varchar, cBrDok varchar ) RETURNS varchar
+
+
+FUNCTION kalk_doks_idpartner_by_brdok( cIdFirma, cIdVd, cBrDok )
+
+   LOCAL cQuery, oQry, oError, cRet := ""
+
+   cQuery := "SELECT public.kalk_idpartner_by_brdok(" + ;
+      sql_quote( cIdFirma ) + "," +;
+      sql_quote( cIdVd ) + "," +;
+      sql_quote( cBrDok ) + ")"
+
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
+
+      oQry := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oQry )
+         cRet := oQry:FieldGet( 1 )
+      ENDIF
+
+   RECOVER USING oError
+      Alert( _u( "SQL neuspješno kalk_idpartner_by_brdok ?" ) )
+   END SEQUENCE
+
+   RETURN cRet

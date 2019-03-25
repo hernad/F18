@@ -19,9 +19,14 @@ BEGIN
 -- =>  16
 nProdavnica := to_number(substring('{{ item_prodavnica }}',2),'9999')::integer;
 
-IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   --  42 - prodaja, 71-zahtjev snizenje, 61-zahtjev narudzba, 22 -pos potvrda prijema magacin, 29 - pos nivelacija
-   IF ( NOT NEW.idvd IN ( '42', '71','61','22','29' ) ) THEN
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN -- POS -> KALK
+   --  42 - prodaja
+   -- 71 - zahtjev snizenje
+   -- 61 - zahtjev narudzba
+   -- 22 -pos potvrda prijema magacin
+   -- 29 - pos nivelacija
+   -- 89 - direktni prijem u prodavnicu od dobavljaca
+   IF ( NOT NEW.idvd IN ('42','71','61','22','29','89') ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -34,7 +39,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    SELECT public.kalk_brdok_iz_pos(nProdavnica, idvdKalk, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
-   IF ( NOT OLD.idvd IN ( '42', '71','61','22','29' ) ) THEN
+   IF ( NOT OLD.idvd IN ('42','71','61','22','29','89') ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -105,8 +110,8 @@ BEGIN
 -- =>  16
 nProdavnica := to_number(substring('{{ item_prodavnica }}',2),'9999')::integer;
 
-IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NOT NEW.idvd IN ( '42','71','61','22','29' ) ) THEN -- samo 42-prodaja, 71-zahtjev za snizenje, 61-zahtjev narudzba, 22-pos potvrda prijema magacin
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN  -- POS -> KALK
+   IF ( NOT NEW.idvd IN ('42','71','61','22','29','89') ) THEN
       RETURN NULL;
    END IF;
    IF ( NEW.idvd = '42') THEN
@@ -121,7 +126,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
         FROM public.kalk_doks where idvd=idvdKalk and brdok=cBrDok and datdok=NEW.datum LIMIT 1;
 
 ELSE
-   IF ( NOT OLD.idvd IN ( '42','71','61','22','29' ) ) THEN
+   IF ( NOT OLD.idvd IN ('42','71','61','22','29','89') ) THEN
       RETURN NULL;
    END IF;
    IF ( OLD.idvd = '42') THEN
@@ -162,7 +167,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
               USING idFirma, idvdKalk, cBrDok, NEW.datum, NEW.idpos, cPKonto;
          RETURN NEW;
 
-  ELSIF (TG_OP = 'INSERT') AND  ( NEW.idvd IN ('61','22') ) THEN
+  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('61','22','89') ) THEN
 
           EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                USING NEW.idtarifa
@@ -177,7 +182,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                 RETURN NEW;
 
   -- 71 - zahtjev snizenje, 29 - pos nivelacija generisana na osnovu akcijskih cijena
-  ELSIF (TG_OP = 'INSERT') AND (( NEW.idvd = '71' ) OR ( NEW.idvd = '29' )) THEN
+  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('71', '29') ) THEN
 
          IF (NEW.idvd = '29') THEN
              pUI := '3';

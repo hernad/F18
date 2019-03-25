@@ -23,15 +23,15 @@ DECLARE
     cProdShema varchar;
 BEGIN
 
-IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NOT NEW.idvd IN ('02','19','21', '72', '79', '80') ) THEN
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
+   IF ( NOT NEW.idvd IN ('02','19','21','72','79','80') ) THEN
      RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
    SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
           from public.roba where id=NEW.idroba;
 ELSE
-   IF ( NOT OLD.idvd IN ('02', '19', '21', '72', '79', '80') ) THEN
+   IF ( NOT OLD.idvd IN ('02','19','21','72','79','80') ) THEN
       RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -52,7 +52,7 @@ ELSIF (TG_OP = 'UPDATE') THEN
       RETURN NEW;
 ELSIF (TG_OP = 'INSERT') THEN
       RAISE INFO 'insert % prodavnica % % %', NEW.idvd, cProdShema, NEW.idroba, public.barkod_ean13_to_num(barkodRoba,3);
-      IF ( NEW.idvd = '19' ) OR ( NEW.idvd = '79' ) OR ( NEW.idvd = '72' ) THEN
+      IF ( NEW.idvd IN ('19','72','79') ) THEN
         cijena := NEW.fcj;  -- stara cijena
         ncijena := NEW.mpcsapp + NEW.fcj; -- nova cijena
       ELSE
@@ -83,14 +83,13 @@ DECLARE
     cIdPartner varchar;
 BEGIN
 
-
-IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-      IF ( NOT NEW.idvd IN ('02','19','21', '72', '79', '80') ) THEN
+IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
+      IF ( NOT NEW.idvd IN ('02','19','21','72','79','80') ) THEN
          RETURN NULL;
       END IF;
       cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
 ELSE
-     IF ( NOT OLD.idvd IN ('02','19','21', '72', '79', '80') ) THEN
+     IF ( NOT OLD.idvd IN ('02','19','21','72','79','80') ) THEN
         RETURN NULL;
      END IF;
      cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -132,7 +131,7 @@ CREATE OR REPLACE FUNCTION f18.before_kalk_doks_delete() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-   IF ( OLD.idvd IN ('49', '71', '22') ) and ( current_user <> 'postgres' ) THEN
+   IF ( OLD.idvd IN ('49','71','22') ) and ( current_user <> 'postgres' ) THEN
        RAISE EXCEPTION '49, 71, 22 nije dozvoljeno brisanje osim triger funkcijama';
    END IF;
 

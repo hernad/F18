@@ -15,7 +15,7 @@ STATIC s_cKonverzijaValuteDN := "N"
 
 MEMVAR nKalkRBr
 MEMVAR GetList
-MEMVAR _idroba, _kolicina, _pkonto, _idkonto2, _brfaktp, _datfaktp
+MEMVAR _idpartner, _tmarza2, _idtarifa, _idvd, _idroba, _kolicina, _pkonto, _idkonto2, _brfaktp, _datdok, _datfaktp
 
 FUNCTION kalk_unos_dok_81( hParams )
 
@@ -27,9 +27,9 @@ FUNCTION kalk_unos_dok_81( hParams )
    // LOCAL _opis := Space( 300 )
    LOCAL _krabat := NIL
 
-   IF hb_HHasKey( hParams, "opis" )
-      _use_opis := .T.
-   ENDIF
+   //IF hb_HHasKey( hParams, "opis" )
+    //  _use_opis := .T.
+   //ENDIF
 
    // IF _use_opis
    // IF !kalk_is_novi_dokument()
@@ -41,12 +41,18 @@ FUNCTION kalk_unos_dok_81( hParams )
       _pkonto := _idkonto2
       _idkonto2 := ""
    ENDIF
+   IF Empty( _tmarza2 )
+      _tmarza2 := "%"
+   ENDIF
 
    s_cKonverzijaValuteDN := "N"
 
-   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
+   IF Empty( _datfaktp )
       _datfaktp := _datdok
    ENDIF
+   //IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
+  //    _datfaktp := _datdok
+   //ENDIF
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
@@ -243,20 +249,20 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
 
    // MARZA
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "MARZA:" GET _TMarza2 VALID _Tmarza2 $ "%AU" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "MARŽA:" GET _TMarza2 VALID _Tmarza2 $ "%AU" PICT "@!"
    @ box_x_koord() + nX, box_y_koord() + nY GET _marza2 PICT PicDEM VALID {|| _vpc := _nc, .T. }
    @ box_x_koord() + nX, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"
 
    // PRODAJNA CIJENA
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC BEZ PDV:"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "MPC bez PDV:"
    @ box_x_koord() + nX, box_y_koord() + nY GET _mpc PICT PicDEM WHEN kalk_when_mpc_bez_pdv_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ) ) ;
       VALID kalk_valid_mpc_bez_pdv_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ) )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV (%):"
    @ box_x_koord() + nX, Col() + 2 SAY pdv_procenat_by_tarifa( _idtarifa ) * 100 PICTURE "99.99"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "PC SA PDV:"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "MPC sa PDV:"
    @ box_x_koord() + nX, box_y_koord() + nY GET _mpcsapp PICT PicDEM ;
       WHEN {|| cProracunMarzeUnaprijed := " ", _Marza2 := 0, .T. } VALID kalk_valid_mpc_sa_pdv_41_42_81( _idvd, .F., .T. )
 

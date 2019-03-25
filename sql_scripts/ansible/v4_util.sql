@@ -58,10 +58,11 @@ IF ( idvdKalk = '49' ) THEN
 ELSIF ( idvdKalk = '22' ) THEN
     -- 22 - POS prijem iz magacin, uzima brdok od 21 koji se generise u KALK, tako da je to jedinstven broj
     brDok := posBrdok;
-ELSIF ( idvdKalk IN ('29', '61', '71') ) THEN
+ELSIF ( idvdKalk IN ('29','61','71','89') ) THEN
    -- 61 - zahtjev za nabavku robe od strane pos-a
    -- 71 - zahtjev za snizenje se formira u pos
    -- 29 - nivelacija se generise u pos
+   -- 89 - direktni prijem od dobavljaca
    -- 01.02.2019, brdok='      3' -> 15020103
    SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 ELSE
@@ -516,5 +517,61 @@ BEGIN
     SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '71', '79', cBrDok )
        INTO nRet;
     RETURN nRet;
+END;
+$$;
+
+
+
+CREATE OR REPLACE FUNCTION public.kalk_89_to_81_dokumenti( nProdavnica integer, dDatum date )
+       RETURNS TABLE (brdok varchar, prod text, mjesec text, dan text, broj text )
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cIdFirma varchar;
+   cBrDok varchar;
+   nRet integer;
+BEGIN
+    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+
+    -- kalk_doks 89 koje nemaju svoje 81-ke
+    -- brdok 02032301 -> prodavnica 02, mjesec 03, dan 23, dokument 01
+    RETURN QUERY SELECT doks89.brdok, substr(doks89.brdok,1,2) as prod,
+        substr(doks89.brdok,3,2) as mjesec, substr(doks89.brdok,5,2) as dan, substr(doks89.brdok,7,2) as broj
+        FROM public.kalk_doks doks89
+        LEFT JOIN public.kalk_doks doks81
+        ON doks89.idfirma=doks81.idfirma AND doks89.brdok=doks81.brdok AND doks89.idvd='89' AND doks81.idvd='81'
+        WHERE doks89.idfirma=cIdFirma AND doks89.idvd='89' AND doks89.datdok=dDatum
+              AND doks81.brdok IS NULL
+        ORDER BY doks89.brdok;
+
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.kalk_89_to_81( cBrDok varchar ) RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cIdFirma varchar;
+   nRet integer;
+BEGIN
+    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '89', '81', cBrDok )
+       INTO nRet;
+    RETURN nRet;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.kalk_idpartner_by_brdok( cIdFirma varchar, cIdVd varchar, cBrDok varchar ) RETURNS varchar
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   cIdPartner varchar;
+BEGIN
+    SELECT idpartner from public.kalk_doks WHERE cIdFirma=idfirma and cIdVd=idvd and cBrDok=brDok
+       INTO cIdPartner;
+
+    RETURN coalesce(cIdPartner, '');
 END;
 $$;

@@ -124,7 +124,6 @@ FUNCTION pos_zaduzenje( cIdVd )
          EXIT
       ENDIF
 
-altd()
       select_o_roba( _idRoba )
       SELECT PRIPRZ
       APPEND BLANK
