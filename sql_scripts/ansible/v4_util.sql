@@ -535,7 +535,7 @@ BEGIN
 
     -- kalk_doks 89 koje nemaju svoje 81-ke
     -- brdok 02032301 -> prodavnica 02, mjesec 03, dan 23, dokument 01
-    RETURN QUERY SELECT doks89.brdok, substr(doks89.brdok,1,2) as prod,
+    RETURN QUERY SELECT doks89.brdok::varchar, substr(doks89.brdok,1,2) as prod,
         substr(doks89.brdok,3,2) as mjesec, substr(doks89.brdok,5,2) as dan, substr(doks89.brdok,7,2) as broj
         FROM public.kalk_doks doks89
         LEFT JOIN public.kalk_doks doks81
