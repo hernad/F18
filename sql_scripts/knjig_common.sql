@@ -6,12 +6,22 @@ CREATE TABLE IF NOT EXISTS f18.metric
     metric_module text COLLATE pg_catalog."default"
 );
 
-CREATE SEQUENCE IF NOT EXISTS f18.metric_metric_id_seq;
+DO $$
+BEGIN
+CREATE SEQUENCE f18.metric_metric_id_seq;
 ALTER SEQUENCE f18.metric_metric_id_seq OWNER TO admin;
-GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO admin;
 GRANT ALL ON SEQUENCE f18.metric_metric_id_seq TO xtrole;
 ALTER TABLE f18.metric OWNER to admin;
 GRANT ALL ON TABLE f18.metric TO xtrole;
+delete from f18.metric where metric_id IS null;
+ALTER TABLE f18.metric ALTER COLUMN metric_id SET NOT NULL;
+ALTER TABLE f18.metric ALTER COLUMN metric_id SET DEFAULT nextval(('f18.metric_metric_id_seq'::text)::regclass);
+ALTER TABLE f18.metric DROP CONSTRAINT IF EXISTS metric_id_unique;
+ALTER TABLE f18.metric ADD CONSTRAINT metric_id_unique UNIQUE (metric_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'sequence f18.metric_metric_id_seq postoji';
+END;
+$$;
 
 
 CREATE TABLE IF NOT EXISTS f18.sifk (

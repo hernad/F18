@@ -447,5 +447,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.run_cron() RETURNS void
   LANGUAGE plpgsql
   AS $$
 BEGIN
-   perform {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
+   PERFORM {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
+   RETURN;
 END;
+$$;
