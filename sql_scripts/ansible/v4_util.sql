@@ -674,3 +674,11 @@ BEGIN
     RETURN coalesce(cIdPartner, '');
 END;
 $$;
+
+
+CREATE OR REPLACE FUNCTION public.run_cron() RETURNS void
+  LANGUAGE plpgsql
+  AS $$
+BEGIN
+   perform public.setmetric('run_cron_time', now()::text);
+END;

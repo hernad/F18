@@ -59,11 +59,9 @@ DECLARE
 BEGIN
 
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '99', dDatum);
-
       insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od)
            values(cIdPos, '99', cBrDokNew, dDatum, dDatum)
            RETURNING dok_id into uuidPos;
-
       nRbr := 1;
       FOR cIdRoba, nStanje, nCij, nNCij IN SELECT
            p.idroba, p.stanje, p.cijena, p.ncijena from {{ item_prodavnica }}.pos_artikli_istekao_popust( dDatum ) p
@@ -73,7 +71,6 @@ BEGIN
              using uuidPos, cIdPos, '99', cBrDokNew, dDatum, nRbr, cIdRoba, nStanje, nCij, nNCij;
          nRbr := nRbr + 1;
       END LOOP;
-
       RETURN;
 END;
 $$;
