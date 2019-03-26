@@ -39,6 +39,50 @@ BEGIN
 END;
 $$;
 
+
+CREATE OR REPLACE FUNCTION public.kalk_novi_brdok_11(cPKonto varchar) RETURNS varchar
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+   cSufix varchar;
+   cBrDok varchar;
+   nBrDok integer;
+BEGIN
+
+   SELECT btrim(coalesce(sufiks,'')) from koncij where trim(id)=cPKonto
+       INTO cSufix;
+
+   IF cSufix = '' THEN
+    -- hb _o_kalk_sql.prg: FUNCTION find_kalk_doks_za_tip_zadnji_broj( cIdFirma, cIdvd )
+     select coalesce(brdok,'') from kalk_doks where idvd='11' AND not (left(brdok,1)='G' OR brdok similar to '%(-|/)%')
+       order by brdok desc limit 1
+        into cBrDok;
+	 cBrDok := coalesce(cBrDok, '0');
+     nBrDok := to_number(cBrDok, '09999999')::integer;
+     cBrDok := btrim( to_char(nBrDok + 1, '09999999') );
+   ELSE
+     -- hb _o_kalk_sql.prg: FUNCTION find_kalk_doks_za_tip_sufix_zadnji_broj( cIdFirma, cIdVd, cBrDokSfx )
+     -- replace(brdok, cSufix, ''): 000010/T => 000010
+     select replace(coalesce(brdok,''), cSufix, '') from kalk_doks where pkonto=cPKonto and idvd='11'
+        order by replace(brdok, cSufix, '') desc limit 1
+        into cBrDok;
+	 cBrDok := coalesce(cBrDok, '0');
+     nBrDok := to_number(cBrDok, '09999999')::integer;
+     cBrDok := btrim( to_char(nBrDok + 1, '09999999') );
+     cBrDok := cBrDok || cSufix;
+   END IF;
+
+   RETURN right(cBrDok, 8);
+END;
+$$;
+
+-- hParams[ "order_by" ] := "idfirma,idvd,brdok"
+-- hParams[ "indeks" ] := .F.  // ne trositi vrijeme na kreiranje indeksa
+-- hParams[ "desc" ] := .T.
+-- hParams[ "limit" ] := 1
+-- hParams[ "where_ext" ] := " AND not (left(brdok,1)='G' OR brdok similar to '%(-|/)%')" // NOT: G00000001, 00020-BL, 00020/BL
+
+
 -- POS 42 - racuni, zbirno u KALK
 -- SELECT public.kalk_brdok_iz_pos(15, '49', '4', current_date); => 150214
 -- POS 71 - dokument, zahtjev za snizenje - pojedinacno u KALK
@@ -384,7 +428,9 @@ $$;
 -- select public.kalk_from_idvd_to_idvd('10', '49', '42', '00000015');
 -- na osnovu 10-49-0000015 formira se 10-42-0000015
 
-CREATE OR REPLACE FUNCTION public.kalk_from_idvd_to_idvd( cIdFirma varchar, cIdVdFrom varchar, cIdVdTo varchar, cBrDok varchar) RETURNS integer
+DROP FUNCTION IF EXISTS public.kalk_from_idvd_to_idvd( cIdFirma varchar, cIdVdFrom varchar, cIdVdTo varchar, cBrDok varchar );
+
+CREATE OR REPLACE FUNCTION public.kalk_from_idvd_to_idvd( cIdFirma varchar, cIdVdFrom varchar, cIdVdTo varchar, cBrDok varchar, cBrDokNew varchar) RETURNS integer
        LANGUAGE plpgsql
        AS $$
 DECLARE
@@ -394,7 +440,7 @@ DECLARE
     rec RECORD;
 
 BEGIN
-     select * from public.kalk_doks where cIdFirma=idfirma and cIdVdFrom=idvd and cBrDok=brdok
+     select * from f18.kalk_doks where cIdFirma=idfirma and cIdVdFrom=idvd and cBrDok=brdok
         INTO rec_dok;
 
      IF rec_dok.dok_id is NULL  THEN
@@ -402,20 +448,21 @@ BEGIN
          RETURN -1;
      END IF;
 
-     select dok_id from f18.kalk_doks where cIdFirma=idfirma and cIdVdTo=idvd and cBrDok=brdok
+     select dok_id from f18.kalk_doks where cIdFirma=idfirma and cIdVdTo=idvd and cBrDokNew=brdok
         INTO dokId;
      IF NOT dokId IS NULL THEN
-         RAISE INFO 'VEC POSTOJI: % % % ?', cIdFirma, cIdVdTo, cBrDok;
+         RAISE INFO 'VEC POSTOJI: % % % ?', cIdFirma, cIdVdTo, cBrDokNew;
          RETURN -2;
      END IF;
 
-     INSERT INTO public.kalk_doks(
+     -- ref sadrzi referencu na dok_id izvornog dokumenta
+     INSERT INTO f18.kalk_doks(
               idfirma, idvd, brdok, datdok, dat_od, dat_do,
               brfaktp, datfaktp, idpartner, pkonto, mkonto,
-              nv, vpv, rabat, mpv, datval )
-         VALUES(rec_dok.idfirma, cIdVdTo, cBrDok, rec_dok.datdok, rec_dok.dat_od, rec_dok.dat_do,
+              nv, vpv, rabat, mpv, datval, ref )
+         VALUES(rec_dok.idfirma, cIdVdTo, cBrDokNew, rec_dok.datdok, rec_dok.dat_od, rec_dok.dat_do,
              rec_dok.brfaktp, rec_dok.datfaktp, rec_dok.idpartner, rec_dok.pkonto, rec_dok.mkonto,
-             rec_dok.nv, rec_dok.vpv, rec_dok.rabat, rec_dok.mpv, rec_dok.datval );
+             rec_dok.nv, rec_dok.vpv, rec_dok.rabat, rec_dok.mpv, rec_dok.datval, rec_dok.dok_id );
 
      FOR rec IN
         SELECT * from public.kalk_kalk
@@ -429,7 +476,7 @@ BEGIN
           tmarza2, marza2, mpc, idtarifa, mpcsapp,
           mkonto, pkonto, mu_i, pu_i, error
         )
-        VALUES(rec.idfirma, cIdVdTo, cBrDok, rec.datdok,
+        VALUES(rec.idfirma, cIdVdTo, cBrDokNew, rec.datdok,
           rec.idroba, rec.idkonto, rec.idkonto2, rec.brfaktp, rec.idpartner,
           rec.rbr, rec.kolicina, rec.gkolicina, rec.gkolicin2,
           rec.trabat, rec.rabat, rec.tprevoz, rec.prevoz, rec.tprevoz2, rec.prevoz2, rec.tbanktr, rec.banktr, rec.tspedtr, rec.spedtr, rec.tcardaz, rec.cardaz, rec.tzavtr, rec.zavtr,
@@ -455,7 +502,7 @@ BEGIN
     SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
     SELECT public.kalk_brdok_iz_pos(nProdavnica, '49', lpad('1',8), dDatum)
        INTO cBrDok;
-    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '49', '42', cBrDok )
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '49', '42', cBrDok, cBrDok )
        INTO nRet;
     IF ( nRet = 0 ) THEN
        RETURN cBrDok;
@@ -464,18 +511,70 @@ BEGIN
 END;
 $$;
 
+DROP FUNCTION IF EXISTS public.kalk_22_neobradjeni_dokumenti;
 
-CREATE OR REPLACE FUNCTION public.kalk_22_to_11( cBrDok varchar ) RETURNS integer
+CREATE OR REPLACE FUNCTION public.kalk_22_neobradjeni_dokumenti() RETURNS TABLE( pkonto varchar, brdok varchar, datdok date, brfaktp varchar )
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  cIdFirma varchar;
+  nRet integer;
+BEGIN
+
+    RETURN QUERY select k22.pkonto::varchar, k22.brdok::varchar, k22.datdok::date, k22.brfaktp::varchar from f18.kalk_doks k22
+        left join f18.kalk_doks k11
+        on k11.ref=k22.dok_id
+        where k22.idvd='22' and k11.pkonto IS null;
+
+END;
+$$;
+
+DROP FUNCTION IF EXISTS public.kalk_22_to_11( cPKonto varchar, cBrDok varchar );
+
+CREATE OR REPLACE FUNCTION public.kalk_22_to_11( cPKonto varchar, cBrDok varchar ) RETURNS varchar
        LANGUAGE plpgsql
        AS $$
 DECLARE
    cIdFirma varchar;
    nRet integer;
+   cBrDokNew varchar;
 BEGIN
     SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
-    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '22', '11', cBrDok )
+    cBrDokNew := public.kalk_novi_brdok_11( cPKonto );
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '22', '11', cBrDok, cBrDokNew )
        INTO nRet;
-    RETURN nRet;
+
+    IF ( nRet = 0 ) THEN
+       RETURN cBrDokNew;
+    ELSE
+       RETURN btrim(to_char(nRet, '9999'));
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_kalk_ref_by_brfaktp( cIdFirma varchar, cIdVd varchar, cBrdok varchar, cBrFaktP varchar)
+   RETURNS integer
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+  uuidDokId uuid;
+BEGIN
+  IF cIdVd <> '11' THEN
+     RETURN -1;
+  END IF;
+
+  -- trazimo 22 dokument na koji se referenciramo
+  SELECT dok_id FROM f18.kalk_doks where idvd='22' and brfaktp=cBrFaktP
+    INTO uuidDokId;
+
+  IF uuidDokId IS NULL THEN
+     RETURN -2;
+  END IF;
+
+  UPDATE f18.kalk_doks SET ref=uuidDokId
+      WHERE idfirma=cIdFirma and idvd=cIdVd and brdok=cBrDok;
+  RETURN 0;
+
 END;
 $$;
 
@@ -514,7 +613,7 @@ DECLARE
    nRet integer;
 BEGIN
     SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
-    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '71', '79', cBrDok )
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '71', '79', cBrDok, cBrDok )
        INTO nRet;
     RETURN nRet;
 END;
@@ -556,7 +655,7 @@ DECLARE
    nRet integer;
 BEGIN
     SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
-    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '89', '81', cBrDok )
+    SELECT public.kalk_from_idvd_to_idvd( cIdFirma, '89', '81', cBrDok, cBrDok )
        INTO nRet;
     RETURN nRet;
 END;

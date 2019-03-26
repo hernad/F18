@@ -41,33 +41,33 @@ FUNCTION find_partner_by_naz_or_id( cId )
 
 FUNCTION find_partner_max_numeric_id()
 
-      LOCAL cAlias := "PARTN_MAX"
+   LOCAL cAlias := "PARTN_MAX"
 
-      // where zadovoljava: '0001  ', '000100', NE zadovoljava 'A05  '
-      // ako imaju sifre '1   ', '9    '  pravice probleme, pa prvo trazimo max integer
-      LOCAL cSqlQueryInt := "select max(id::integer) MAXID_INT  from fmk.partn where id ~ '^\d+\s*'"
-      LOCAL nMaxId
-      LOCAL cMaxId
+   // where zadovoljava: '0001  ', '000100', NE zadovoljava 'A05  '
+   // ako imaju sifre '1   ', '9    '  pravice probleme, pa prvo trazimo max integer
+   LOCAL cSqlQueryInt := "select max(id::integer) MAXID_INT  from fmk.partn where id ~ '^\d+\s*'"
+   LOCAL nMaxId
+   LOCAL cMaxId
 
-      PushWa()
-      SELECT F_POM
-      IF !use_sql( "pom", cSqlQueryInt, cAlias )  // prvo trazimo najveci integer
-         PopWa()
-         RETURN ""
-      ENDIF
-      nMaxId := field->MAXID_INT
-
-      // kada nadjenmo najveci integer, lociramo polje id koje odgovara tom integeru
-      IF !use_sql( "pom", "select id AS MAXID from fmk.partn WHERE id ~ '^\d+\s*' and id::integer = " + Str( nMaxId ), cAlias )
-         PopWa()
-         RETURN ""
-      ENDIF
-
-      cMaxId := field->MAXID
-      USE
+   PushWa()
+   SELECT F_POM
+   IF !use_sql( "pom", cSqlQueryInt, cAlias )  // prvo trazimo najveci integer
       PopWa()
+      RETURN ""
+   ENDIF
+   nMaxId := field->MAXID_INT
 
-      RETURN cMaxId
+   // kada nadjenmo najveci integer, lociramo polje id koje odgovara tom integeru
+   IF !use_sql( "pom", "select id AS MAXID from fmk.partn WHERE id ~ '^\d+\s*' and id::integer = " + Str( nMaxId ), cAlias )
+      PopWa()
+      RETURN ""
+   ENDIF
+
+   cMaxId := field->MAXID
+   USE
+   PopWa()
+
+   RETURN cMaxId
 
 
 FUNCTION o_partner( cId )
@@ -420,14 +420,32 @@ FUNCTION find_rj_by_id( cId )
    RETURN !Eof()
 
 
-
-FUNCTION o_trfp()
+FUNCTION select_o_trfp( cId )
 
    SELECT ( F_TRFP )
-   use_sql_trfp()
+   IF Used()
+      IF RecCount() > 1 .AND. cId == NIL
+         RETURN .T.
+      ELSE
+         USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
+      ENDIF
+   ENDIF
+
+   RETURN o_trfp( cId )
+
+
+FUNCTION o_trfp( cId )
+
+   LOCAL cTabela := "trfp"
+
+   SELECT ( F_TRFP )
+   IF !use_sql_sif  ( cTabela, .T., "TRFP", cId  )
+      error_bar( "o_sql", "open sql " + cTabela )
+      RETURN .F.
+   ENDIF
    SET ORDER TO TAG "ID"
 
-   RETURN .T.
+   RETURN !Eof()
 
 
 FUNCTION o_trfp2()

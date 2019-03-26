@@ -101,7 +101,6 @@ STATIC FUNCTION kalk_sljedeci_brdok( cTipKalk, cIdFirma, cSufiks )
       nLenGlavni := 8 - nLenSufiks // duzina sifre se mora prilagoditi sufiksu
    ENDIF
 
-
    IF is_brojac_po_kontima() .AND. !Empty( cSufiks ) // samo trazi ako ima sufiks npr '/T '
       find_kalk_doks_za_tip_sufix_zadnji_broj( cIdFirma, cTipKalk, cSufiks )
    ELSE // ako je sufiks prazan, onda se samo gleda tip
@@ -109,7 +108,6 @@ STATIC FUNCTION kalk_sljedeci_brdok( cTipKalk, cIdFirma, cSufiks )
    ENDIF
 
    GO BOTTOM
-
    IF cTipKalk <> field->idVD .OR. ( is_brojac_po_kontima() .AND. Right( field->brDok, nLenSufiks ) <> cSufiks )
       cBrKalk := Space( kalk_duzina_brojaca_dokumenta() ) + cSufiks
    ELSE
@@ -141,7 +139,6 @@ STATIC FUNCTION kalk_sljedeci_brdok( cTipKalk, cIdFirma, cSufiks )
 FUNCTION kalk_set_brkalk_za_idvd( cIdVd, cBrKalk )
 
    IF gBrojacKalkulacija == "D"
-
       find_kalk_doks_za_tip_zadnji_broj( self_organizacija_id(), cIdVd )
       GO BOTTOM
       IF field->idvd <> cIdVd
@@ -249,59 +246,54 @@ FUNCTION kalk_get_next_kalk_doc_uvecaj( cIdFirma, cIdTipDok, nUvecaj )
    RETURN cResult
 
 
-
 FUNCTION kalk_prazan_broj_dokumenta()
    RETURN PadR( "0", kalk_duzina_brojaca_dokumenta(), "0" )
 
 
 
-
-
-
-// ------------------------------------------------------------
+/*
 // resetuje brojac dokumenta ako smo pobrisali dokument
 // ------------------------------------------------------------
 FUNCTION kalk_reset_broj_dokumenta( firma, tip_dokumenta, broj_dokumenta, konto )
 
-   LOCAL _param
-   LOCAL _broj := 0
-   LOCAL _sufix := ""
+   LOCAL cParam
+   LOCAL nBroj := 0
+   LOCAL cSufix := ""
 
    IF konto == NIL
       konto := ""
    ENDIF
 
    IF is_brojac_po_kontima()
-      _sufix := kalk_sufiks_brdok( konto )
+      cSufix := kalk_sufiks_brdok( konto )
    ENDIF
 
    // param: kalk/10/10
-   _param := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( _sufix ), "_" + _sufix, "" )
-   _broj := fetch_metric( _param, NIL, _broj )
+   cParam := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( cSufix ), "_" + cSufix, "" )
+   nBroj := fetch_metric( cParam, NIL, nBroj )
 
-   IF Val( broj_dokumenta ) == _broj
-      --_broj
+   IF Val( broj_dokumenta ) == nBroj
+      --nBroj
       // smanji globalni brojac za 1
-      set_metric( _param, NIL, _broj )
+      set_metric( cParam, NIL, nBroj )
    ENDIF
 
    RETURN .T.
+*/
 
-
-// ------------------------------------------------------------------
+/*
 // kalk, uzimanje novog broja za kalk dokument
 // ------------------------------------------------------------------
 FUNCTION kalk_novi_broj_dokumenta( firma, tip_dokumenta, konto )
 
-   LOCAL _broj := 0
-   LOCAL _broj_dok := 0
-   LOCAL _len_broj := 5
-   LOCAL _len_brdok, _len_sufix
-   LOCAL _param
-   LOCAL _tmp, _rest
-   LOCAL _ret := ""
+   LOCAL nBroj := 0
+   LOCAL nBrDok
+   //LOCAL _len_broj := 5
+   LOCAL nLenBrDok, nLenSufix
+   LOCAL cParam
+   LOCAL cRet := ""
    LOCAL nDbfArea := Select()
-   LOCAL _sufix := ""
+   LOCAL cSufix := ""
 
    // ova funkcija se brine i za sufiks
    IF konto == NIL
@@ -310,47 +302,45 @@ FUNCTION kalk_novi_broj_dokumenta( firma, tip_dokumenta, konto )
 
 
    IF is_brojac_po_kontima()
-      _sufix := kalk_sufiks_brdok( konto )
+      cSufix := kalk_sufiks_brdok( konto )
    ENDIF
 
    // param: kalk/10/10
-   _param := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( _sufix ), "_" + _sufix, "" )
-   _broj := fetch_metric( _param, NIL, _broj )
-
-   find_kalk_doks_za_tip_sufix_zadnji_broj(  firma, tip_dokumenta, _sufix )    // konsultuj i kalk_doks uporedo
+   cParam := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( cSufix ), "_" + cSufix, "" )
+   nBroj := fetch_metric( cParam, NIL, nBroj )
+   find_kalk_doks_za_tip_sufix_zadnji_broj(  firma, tip_dokumenta, cSufix )    // konsultuj i kalk_doks uporedo
 
    GO BOTTOM
 
    IF field->idfirma == firma .AND. field->idvd == tip_dokumenta .AND. ;
-         iif( glKalkBrojacPoKontima, Right( AllTrim( field->brdok ), Len( _sufix ) ) == _sufix, .T. )
+         iif( glKalkBrojacPoKontima, Right( AllTrim( field->brdok ), Len( cSufix ) ) == cSufix, .T. )
 
-      IF glKalkBrojacPoKontima .AND. ( _sufix $ field->brdok )
-         _len_brdok := Len( AllTrim( field->brdok ) )
-         _len_sufix := Len( _sufix )
+      IF glKalkBrojacPoKontima .AND. ( cSufix $ field->brdok )
+         nLenBrDok := Len( AllTrim( field->brdok ) )
+         nLenSufix := Len( cSufix )
          // odrezi sufiks ako postoji
-         _broj_dok := Val( Left( AllTrim( field->brdok ), _len_brdok - _len_sufix ) )
+         nBrDok := Val( Left( AllTrim( field->brdok ), nLenBrDok - nLenSufix ) )
       ELSE
-         _broj_dok := Val( field->brdok )
+         nBrDok := Val( field->brdok )
       ENDIF
 
    ELSE
-      _broj_dok := 0
+      nBrDok := 0
    ENDIF
 
-   _broj := Max( _broj, _broj_dok ) // uzmi sta je vece, dokument broj ili globalni brojac
-   ++_broj
+   nBroj := Max( nBroj, nBrDok ) // uzmi sta je vece, dokument broj ili globalni brojac
+   ++nBroj
 
    // ovo ce napraviti string prave duzine...
    // dodaj i sufiks na kraju ako treba
-   _ret := PadL( AllTrim( Str( _broj ) ), _len_broj, "0" ) + _sufix
+   cRet := PadL( AllTrim( Str( nBroj ) ), 5, "0" ) + cSufix
 
    // upisi ga u globalni parametar
-   set_metric( _param, NIL, _broj )
-
+   set_metric( cParam, NIL, nBroj )
    SELECT ( nDbfArea )
 
-   RETURN _ret
-
+   RETURN cRet
+*/
 
 
 /*
@@ -376,8 +366,8 @@ FUNCTION kalk_set_broj_dokumenta()
 
    LOCAL _broj_dokumenta
    LOCAL nTrec, hRec
-   LOCAL _firma, _td, _null_brdok
-   LOCAL _konto := ""
+   LOCAL cIdFirma, _td, _null_brdok
+   LOCAL cIdKonto := ""
 
    PushWA()
 
@@ -392,12 +382,12 @@ FUNCTION kalk_set_broj_dokumenta()
       RETURN .F.
    ENDIF
 
-   _firma := field->idfirma
+   cIdFirma := field->idfirma
    _td := field->idvd
-   _konto := field->idkonto
+   cIdKonto := field->idkonto
 
 
-   _broj_dokumenta := kalk_novi_broj_dokumenta( _firma, _td, _konto ) // odrediti novi broj dokumenta
+   _broj_dokumenta := kalk_novi_broj_dokumenta( cIdFirma, _td, cIdKonto ) // odrediti novi broj dokumenta
 
    SELECT kalk_pripr
    SET ORDER TO TAG "1"
@@ -409,7 +399,7 @@ FUNCTION kalk_set_broj_dokumenta()
       nTrec := RecNo()
       SKIP -1
 
-      IF field->idfirma == _firma .AND. field->idvd == _td .AND. field->brdok == _null_brdok
+      IF field->idfirma == cIdFirma .AND. field->idvd == _td .AND. field->brdok == _null_brdok
          hRec := dbf_get_rec()
          hRec[ "brdok" ] := _broj_dokumenta
          dbf_update_rec( hRec )
@@ -424,29 +414,25 @@ FUNCTION kalk_set_broj_dokumenta()
    RETURN .T.
 */
 
+/*
+-- FUNCTION kalk_set_param_broj_dokumenta()
 
-// ------------------------------------------------------------
-// setovanje parametra brojaca na admin meniju
-// ------------------------------------------------------------
-FUNCTION kalk_set_param_broj_dokumenta()
-
-   LOCAL _param
-   LOCAL _broj := 0
-   LOCAL _broj_old
-   LOCAL _firma := self_organizacija_id()
-   LOCAL _tip_dok := "10"
-   LOCAL _sufix := ""
-   LOCAL _konto := PadR( "1330", 7 )
+   LOCAL cParam
+   LOCAL nBroj := 0
+   //LOCAL _broj_old
+   LOCAL cIdFirma := self_organizacija_id()
+   LOCAL cIdVd := "10"
+   LOCAL cSufix := ""
+   LOCAL cIdKonto := PadR( "1330", 7 )
+   LOCAL GetList := {}
 
    Box(, 2, 60 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:" GET _firma
-   @ box_x_koord() + 1, Col() + 1 SAY "-" GET _tip_dok
-
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument:" GET cIdFirma
+   @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVd
    IF glKalkBrojacPoKontima
-      @ box_x_koord() + 1, Col() + 1 SAY " konto:" GET _konto
+      @ box_x_koord() + 1, Col() + 1 SAY " konto:" GET cIdKonto
    ENDIF
-
    READ
 
    IF LastKey() == K_ESC
@@ -455,15 +441,15 @@ FUNCTION kalk_set_param_broj_dokumenta()
    ENDIF
 
    IF glKalkBrojacPoKontima
-      _sufix := kalk_sufiks_brdok( _konto )
+      cSufix := kalk_sufiks_brdok( cIdKonto )
    ENDIF
 
    // param: kalk/10/10
-   _param := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( _sufix ), "_" + _sufix, "" )
-   _broj := fetch_metric( _param, NIL, _broj )
-   _broj_old := _broj
+   cParam := "kalk" + "/" + firma + "/" + tip_dokumenta + iif( !Empty( cSufix ), "_" + cSufix, "" )
+   nBroj := fetch_metric( cParam, NIL, nBroj )
+   //_broj_old := nBroj
 
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Zadnji broj dokumenta:" GET _broj PICT "99999999"
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Zadnji broj dokumenta:" GET nBroj PICT "99999999"
 
    READ
 
@@ -471,13 +457,13 @@ FUNCTION kalk_set_param_broj_dokumenta()
 
    IF LastKey() != K_ESC
       // snimi broj u globalni brojac
-      IF _broj <> _broj_old
-         set_metric( _param, NIL, _broj )
+      IF nBroj <> _broj_old
+         set_metric( cParam, NIL, nBroj )
       ENDIF
    ENDIF
 
    RETURN .T.
-
+*/
 
 
 

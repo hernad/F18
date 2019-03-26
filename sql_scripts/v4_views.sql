@@ -146,7 +146,8 @@ FROM
   f18.kalk_doks;
 
 CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
-      DO INSTEAD INSERT INTO f18.kalk_doks(
+      DO INSTEAD (
+        INSERT INTO f18.kalk_doks(
         idfirma, idvd, brdok, datdok,
         brfaktp, datfaktp, idpartner, datval,
         dat_od, dat_do,
@@ -160,6 +161,8 @@ CREATE OR REPLACE RULE public_kalk_doks_ins AS ON INSERT TO public.kalk_doks
         NEW.opis,
         NEW.pkonto, NEW.mkonto,
         NEW.nv, NEW.vpv, NEW.rabat, NEW.mpv
+      );
+      select public.set_kalk_ref_by_brfaktp(NEW.idfirma, NEW.idvd, NEW.brdok, NEW.brfaktp)
       );
 
 

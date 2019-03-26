@@ -148,7 +148,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       select_o_koncij( finmat->idkonto )
    ENDIF
 
-   SELECT trfp
+   select_o_trfp()
    SEEK finmat->IdVD + koncij->shema
 
    cIdVN := field->IdVN

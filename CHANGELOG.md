@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-26
+
+- FIX KALK 22-11
+
 ## 2019-03-25
 
 - POS kada ima vise cijena, prikazati stanje

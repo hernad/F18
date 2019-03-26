@@ -57,8 +57,7 @@ FUNCTION find_kalk_doks_za_tip_sufix_zadnji_broj( cIdFirma, cIdVd, cBrDokSfx )
    ENDIF
 
    hParams[ "brdok_sfx" ] := cBrDokSfx  // 000010/T => /T
-   // hParams[ "order_by" ] := "SUBSTR(brdok,6),LEFT(brdok,5)" // ako ima brojeva dokumenata sortiraj po sufixu
-   hParams[ "order_by" ] := "SUBSTR(brdok," + AllTrim( Str( 8 -nLenSufiks + 1 ) ) + "),LEFT(brdok," + AllTrim( Str( 8 -nLenSufiks ) ) + ")" // ako ima brojeva dokumenata sortiraj po sufixu
+   hParams[ "order_by" ] := "SUBSTR(brdok," + AllTrim( Str( 8 - nLenSufiks + 1 ) ) + "),LEFT(brdok," + AllTrim( Str( 8 -nLenSufiks ) ) + ")" // ako ima brojeva dokumenata sortiraj po sufixu
    hParams[ "indeks" ] := .F.
    hParams[ "desc" ] := .T.
    hParams[ "limit" ] := 1

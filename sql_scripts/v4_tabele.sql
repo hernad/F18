@@ -142,3 +142,6 @@ EXCEPTION WHEN OTHERS THEN
    RAISE INFO 'f18.kalk_doks dok_id primary key garant postoji';
 END;
 $$;
+
+
+ALTER TABLE f18.kalk_doks ADD COLUMN IF NOT EXISTS ref uuid;
