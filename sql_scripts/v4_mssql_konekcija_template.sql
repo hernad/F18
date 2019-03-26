@@ -140,12 +140,30 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION public.prodavnica_zahtjev_prijem_magacin_create(nMagacin integer, dDatum date) RETURNS void
-       LANGUAGE plpgsql
-       AS $$
+-- select * from  public.prodavnica_zahtjev_prijem_magacin_create(40, current_date);
+
+DROP TYPE IF EXISTS prod_magacin_type CASCADE;
+CREATE TYPE prod_magacin_type AS
+(
+	  insert character(1),
+    prod integer,
+		mkonto varchar,
+		pkonto varchar,
+		brfaktp varchar,
+		brdok varchar,
+		datum date
+);
+
+DROP FUNCTION IF EXISTS public.prodavnica_zahtjev_prijem_magacin_create(nMagacin integer, dDatum date);
+
+CREATE OR REPLACE FUNCTION public.prodavnica_zahtjev_prijem_magacin_create(nMagacin integer, dDatum date)
+    RETURNS table( insert character(1), prod integer, mkonto varchar, pkonto varchar, brfaktp varchar, brdok varchar, datum date )
+    LANGUAGE plpgsql
+AS $$
 DECLARE
    nRbr integer;
    nProdavnica integer;
+	 nPredhodnaProd integer;
    nRobaId integer;
    nBrojFakture integer;
    nVrstaCijena integer;
@@ -159,13 +177,17 @@ DECLARE
 	 cIdTarifa varchar;
 	 lFakturaPostoji boolean;
 
+	 rptItem prod_magacin_type;
+	 aRpt prod_magacin_type[] DEFAULT '{}';
 BEGIN
      RAISE INFO '==== Magacin % ======', public.magacin_konto(nMagacin);
 
      cBrojFaktureT := 'XX';
 		 lFakturaPostoji := False;
+		 nProdavnica := -1;
+		 nPredhodnaProd := -1;
      FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina IN
-          SELECT brf, vcij, prod, rb, ident, kold from public.sfak_prodavnice_by_datum(dDatum)
+          SELECT sfak.brf, sfak.vcij, sfak.prod, sfak.rb, sfak.ident, sfak.kold from public.sfak_prodavnice_by_datum(dDatum) sfak
           WHERE kp=nMagacin
           ORDER BY brf, rb
      LOOP
@@ -174,27 +196,60 @@ BEGIN
 		     cIdRoba := public.roba_id_by_sifradob(nRobaId);
 		     cIdTarifa := public.idtarifa_by_idroba(cIdRoba);
 
-         IF ( public.prodavnica_konto(nProdavnica) = '99999' ) THEN
-             RAISE INFO 'Preskacemo prodavnicu: %', nProdavnica;
+          IF ( public.prodavnica_konto(nProdavnica) = '99999' ) THEN
+					   IF nPredhodnaProd <> nProdavnica THEN
+					     rptItem := (
+						     'S',
+						     nProdavnica,
+						     public.magacin_konto(nMagacin),
+						     '',
+						      btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9')),
+						     '',
+						     dDatum
+					      );
+					      aRpt := array_append(aRpt, rptItem);
+								nPredhodnaProd := nProdavnica;
+								RAISE INFO 'Preskacemo prodavnicu: %', nProdavnica;
+						 END IF;
              CONTINUE;
           ELSE
              RAISE INFO 'Obrada prodavnica %', nProdavnica;
           END IF;
 
-
 					IF ( cBrojFaktureT = 'XX' ) OR ( cBrojFaktureT <> (btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'))) ) THEN
              cBrojFaktureT := btrim(to_char(nBrojFakture, '9999999999')) || btrim(to_char(nVrstaCijena, '9'));
-						 lFakturaPostoji := public.kalk_pkonto_brfaktp_exists( cPKonto, cBrojFaktureT);
+						 lFakturaPostoji := public.kalk_pkonto_brfaktp_kalk_21_exists( cPKonto, cBrojFaktureT);
 						 IF lFakturaPostoji THEN
 		           RAISE INFO 'Preskacemo prodavnicu: % jer postoji faktura %', nProdavnica, cBrojFaktureT;
+							 rptItem := (
+								  '0',
+							    nProdavnica,
+							 		public.magacin_konto(nMagacin),
+							 		public.prodavnica_konto(nProdavnica),
+							 		cBrojFaktureT,
+							 		'',
+							 		dDatum
+							 );
+							 aRpt := array_append(aRpt, rptItem);
 		           CONTINUE;
 		         END IF;
              cBrDok := public.kalk_novi_brdok(cIdVd);
              RAISE INFO '---- Otpremnica % prodavnica: % ----', cBrojFaktureT, public.prodavnica_konto(nProdavnica);
+						 rptItem := (
+							  '1',
+						    nProdavnica,
+						 		public.magacin_konto(nMagacin),
+						 		public.prodavnica_konto(nProdavnica),
+						 		cBrojFaktureT,
+						 		cBrDok,
+						 		dDatum
+						 );
+						 aRpt := array_append(aRpt, rptItem);
              INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp)
                  values(
                    cIdFirma, cIdVd, cBrDok, dDatum,
-                   public.magacin_konto(nMagacin), public.prodavnica_konto(nProdavnica),
+                   public.magacin_konto(nMagacin),
+									 public.prodavnica_konto(nProdavnica),
                    cBrojFaktureT
                  );
           END IF;
@@ -214,9 +269,28 @@ BEGIN
 						public.mpc_by_koncij(cPKonto, cIdRoba)
           );
 
-            -- PERFORM p15.nivelacija_start_create( uuidPos );
      END LOOP;
 
-     RETURN;
+     RETURN QUERY SELECT * FROM unnest( aRpt );
 END;
 $$;
+
+
+--
+-- CREATE OR REPLACE FUNCTION p2.test_array_to_table_3()
+--   RETURNS table(brdok varchar, cnt integer)
+--   LANGUAGE plpgsql
+--    AS
+--   $$
+--  DECLARE
+--    aItem  test_type;
+--    aBrDoks test_type[] DEFAULT '{}';
+--    BEGIN
+--    aItem := ('hello', 1);
+--    aBrDoks := array_append(aBrDoks, aItem);
+--    aItem := ('world', '2');
+--    aBrDoks := array_append(aBrDoks, aItem);
+--
+--    RETURN QUERY SELECT * FROM unnest( aBrDoks );
+-- END;
+-- $$;

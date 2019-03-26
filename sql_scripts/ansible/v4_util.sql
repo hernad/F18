@@ -406,14 +406,16 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION public.kalk_pkonto_brfaktp_exists( cPKonto varchar,  cBrFaktP varchar) RETURNS boolean
+DROP FUNCTION IF EXISTS public.kalk_pkonto_brfaktp_exists( cPKonto varchar,  cBrFaktP varchar);
+
+CREATE OR REPLACE FUNCTION public.kalk_pkonto_brfaktp_kalk_21_exists( cPKonto varchar,  cBrFaktP varchar) RETURNS boolean
    LANGUAGE plpgsql
 AS $$
 DECLARE
    dokId uuid;
    lExist boolean;
 BEGIN
-   select dok_id FROM f18.kalk_doks where pkonto=cPKonto AND brfaktp=cBrFaktP
+   select dok_id FROM f18.kalk_doks where pkonto=cPKonto AND brfaktp=cBrFaktP AND idvd='21'
       INTO dokId;
    IF (dokId IS NULL) THEN
       RETURN False;
@@ -679,8 +681,23 @@ $$;
 CREATE OR REPLACE FUNCTION public.run_cron() RETURNS void
   LANGUAGE plpgsql
   AS $$
+DECLARE
+  cJSon text;
 BEGIN
    PERFORM public.setmetric('run_cron_time', now()::text);
+
+   SET SESSION AUTHORIZATION admin;
+   select json_agg(t)::text from
+   (
+     select * from (
+   	   select * from  public.prodavnica_zahtjev_prijem_magacin_create(40, current_date)
+     ) s1
+   ) t INTO cJSon;
+
+   insert into public.log(user_code, msg) values(current_user, 'CRON_ZPROPMAG: ' || cJson);
+   -- brisanje logova od prije tri dana
+   delete from log where ( date(l_time) <= (current_date-3) ) and msg like 'CRON_ZPROPMAG:%';
+
    RETURN;
 END;
 $$;

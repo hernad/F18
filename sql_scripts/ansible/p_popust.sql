@@ -74,3 +74,77 @@ BEGIN
       RETURN;
 END;
 $$;
+
+
+
+-- CREATE OR REPLACE FUNCTION p2.test_table() returns table(brdok varchar)
+-- LANGUAGE plpgsql
+-- AS $$
+-- DECLARE
+-- BEGIN
+--   RETURN QUERY select '00001'::varchar as brdok
+--          UNION select '00002'::varchar as brdok;
+--
+-- END;
+-- $$;
+
+
+
+-- select * from p2.test_array_to_table('{01,02}'::varchar[]);
+--
+-- CREATE OR REPLACE FUNCTION p2.test_array_to_table( aBrDoks varchar[] )
+--   RETURNS table(brdok varchar)
+--   LANGUAGE plpgsql
+--   AS
+-- $$
+-- BEGIN
+--   RETURN QUERY SELECT * FROM unnest( aBrDoks ) as brdok;
+-- END;
+-- $$;
+
+
+-- select * from p2.test_array_to_table_2();
+--
+-- CREATE OR REPLACE FUNCTION p2.test_array_to_table_2()
+--   RETURNS table(brdok varchar)
+--   LANGUAGE plpgsql
+--   AS
+-- $$
+-- DECLARE
+--   aBrDoks varchar[] DEFAULT '{}';
+-- BEGIN
+--
+--   aBrDoks := array_append(aBrDoks, 'hello');
+--   aBrDoks := array_append(aBrDoks, 'world');
+--
+--   RETURN QUERY SELECT * FROM unnest( aBrDoks ) as brdok;
+-- END;
+-- $$;
+
+
+
+-- DROP TYPE IF EXISTS test_type CASCADE;
+--
+-- CREATE TYPE test_type AS
+-- (
+--        brdok VARCHAR,
+--        cnt integer
+-- );
+--
+-- CREATE OR REPLACE FUNCTION p2.test_array_to_table_3()
+--   RETURNS table(brdok varchar, cnt integer)
+--   LANGUAGE plpgsql
+--    AS
+--   $$
+--  DECLARE
+--    aItem  test_type;
+--    aBrDoks test_type[] DEFAULT '{}';
+--    BEGIN
+--    aItem := ('hello', 1);
+--    aBrDoks := array_append(aBrDoks, aItem);
+--    aItem := ('world', '2');
+--    aBrDoks := array_append(aBrDoks, aItem);
+--
+--    RETURN QUERY SELECT * FROM unnest( aBrDoks );
+-- END;
+-- $$;
