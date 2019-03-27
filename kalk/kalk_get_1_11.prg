@@ -49,7 +49,8 @@ FUNCTION kalk_get_1_11()
 
    IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
       _IdPartner := ""
-      @  box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj:" GET _BrFaktP
+      @  box_x_koord() + 6, box_y_koord() + 2   SAY "Otpremnica - Broj:" GET _BrFaktP ;
+         VALID kalk_11_valid_brfaktp( _idvd, _pkonto, _brfaktp )
       @  box_x_koord() + 6, Col() + 2 SAY "Datum:" GET _DatFaktP
       @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Prodavnički Konto zadužuje" GET _pkonto VALID  P_Konto( @_pkonto, 8, 40 ) PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2   SAY8 "Magacinski konto razdužuje"  GET _mkonto VALID Empty( _mkonto ) .OR. P_Konto( @_mkonto, 9, 40 )
@@ -174,6 +175,16 @@ FUNCTION kalk_get_1_11()
    // kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()
+
+STATIC FUNCTION kalk_11_valid_brfaktp( cIdVd, cPKonto, cBrFaktP )
+
+   LOCAL lPostoji := kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd, cPKonto, cBrFaktP )
+
+   IF lPostoji
+      MsgBeep("Već postoji ažuriran dokument " + cIdVd + " sa otpremnicom: " + cBrFaktP )
+   ENDIF
+
+   RETURN lPostoji
 
 
 STATIC FUNCTION kalk_11_when_fcj( cIdVd, nFcj, cError )

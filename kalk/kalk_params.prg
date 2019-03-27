@@ -188,9 +188,9 @@ FUNCTION kalk_par_razno()
    LOCAL nStandardnaStopaMarza  := standardna_stopa_marze()
    LOCAL GetList := {}
 
-   IF glKalkBrojacPoKontima
-      cKalkBrojacDN := "D"
-   ENDIF
+   //IF glKalkBrojacPoKontima
+    //  cKalkBrojacDN := "D"
+   //ENDIF
 
    IF roba_barkod_pri_unosu()
       cUnosBarKodDN := "D"
@@ -198,10 +198,10 @@ FUNCTION kalk_par_razno()
 
    Box(, 20, 75, .F., "RAZNO" )
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Brojač kalkulacija D/N     " GET gBrojacKalkulacija PICT "@!" VALID gBrojacKalkulacija $ "DN"
+   //@ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Brojač kalkulacija D/N     " GET gBrojacKalkulacija PICT "@!" VALID gBrojacKalkulacija $ "DN"
    @ box_x_koord() + nX, Col() + 2 SAY8 "dužina brojača:" GET nLenBrKalk PICT "9" VALID ( nLenBrKalk > 0 .AND. nLenBrKalk < 10 )
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Brojac kalkulacija po kontima (D/N)" GET cKalkBrojacDN VALID cKalkBrojacDN $ "DN" PICT "@!"
+   //++nX
+   //@ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Broja kalkulacija po kontima (D/N)" GET cKalkBrojacDN VALID cKalkBrojacDN $ "DN" PICT "@!"
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Koristiti BARKOD pri unosu kalkulacija (D/N)" GET cUnosBarKodDN VALID cUnosBarKodDN $ "DN" PICT "@!"
    ++nX
@@ -240,15 +240,15 @@ FUNCTION kalk_par_razno()
    BoxC()
 
    IF LastKey() <> K_ESC
-      IF cKalkBrojacDN == "D"
-         glKalkBrojacPoKontima := .T.
-      ELSE
-         glKalkBrojacPoKontima := .F.
-      ENDIF
+      //IF cKalkBrojacDN == "D"
+      //   glKalkBrojacPoKontima := .T.
+      //ELSE
+      //   glKalkBrojacPoKontima := .F.
+      //ENDIF
 
       roba_barkod_pri_unosu( cUnosBarKodDN == "D" )
-      set_metric( "kalk_brojac_kalkulacija", NIL, gBrojacKalkulacija )
-      set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glKalkBrojacPoKontima )
+      //set_metric( "kalk_brojac_kalkulacija", NIL, gBrojacKalkulacija )
+      //set_metric( "kalk_brojac_dokumenta_po_kontima", NIL, glKalkBrojacPoKontima )
       set_metric( "kalk_potpis_na_kraju_naloga", NIL, gPotpis )
       set_metric( "kalk_djoker_f1_kod_kontiranja", NIL, gFunKon1 )
       set_metric( "kalk_djoker_f2_kod_kontiranja", NIL, gFunKon2 )

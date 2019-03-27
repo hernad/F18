@@ -816,13 +816,11 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
          RETURN DE_CONT
       ENDIF
 
-
       IF Empty( ImeKol[ oBrowse:colPos, 3 ] )
          RETURN DE_CONT
       ENDIF
 
       cKolona := ImeKol[ oBrowse:ColPos, 3 ]
-
       IF ValType( &cKolona ) $ "CD"
 
          Box("<CENTAR>", 3, 60, .F. )

@@ -50,8 +50,6 @@ FUNCTION ui_calc_xy( nVisina, nSirina )
       lCentrirati := .T.
    ENDIF
 
-   altd()
-
    // Odredi x koordinatu
    IF !lCentrirati .AND. (( f18_max_rows() - 2 - nX ) >=  ( nVisina + 2 ))
       box_x_koord( nX + 1 )

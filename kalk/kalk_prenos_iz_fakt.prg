@@ -74,12 +74,12 @@ FUNCTION fakt_kalk_prenos_10_14()
    cIdKonto := fetch_metric( "kalk_fakt_prenos_10_14_konto_1", my_user(), PadR( "1200", 7 ) )
    cIdKonto2 := fetch_metric( "kalk_fakt_prenos_10_14_konto_2", my_user(), PadR( "1310", 7 ) )
 
-   IF glKalkBrojacPoKontima
+   //IF glKalkBrojacPoKontima
       Box( "#FAKT->KALK", 3, 70 )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Konto razdužuje" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
       READ
       BoxC()
-   ENDIF
+   //ENDIF
    cBrKalk :=  kalk_get_next_broj_v5( cIdFirma, "14", cIdKonto2 )
 
    Box(, 15, 60 )
@@ -291,14 +291,14 @@ FUNCTION fakt_kalk_prenos( cIndik )
    cIdKonto2 := fetch_metric( "kalk_fakt_prenos_otpr_konto_2", my_user(), cIdKonto2 )
    //cIdZaduz2 := Space( 6 )
 
-   IF glKalkBrojacPoKontima
+   //IF glKalkBrojacPoKontima
 
       Box( "#FAKT->KALK", 3, 70 )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto zaduzuje" GET cIdKonto PICT "@!" VALID P_Konto( @cIdKonto )
       READ
       BoxC()
 
-   ENDIF
+   //ENDIF
 
    cBrKalk := kalk_get_next_broj_v5( cIdFirma, cTipKalk, cIdKonto )
 

@@ -892,3 +892,22 @@ FUNCTION kalk_doks_idpartner_by_brdok( cIdFirma, cIdVd, cBrDok )
    END SEQUENCE
 
    RETURN cRet
+
+
+// FUNCTION public.kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd varchar, cPKonto varchar,  cBrFaktP varchar) RETURNS boolean
+
+FUNCTION kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd, cPKonto, cBrFaktP )
+
+   LOCAL cQuery, oRet
+
+   cQuery := "SELECT public.kalk_pkonto_idvd_brfaktp_kalk_exists(" + ;
+      sql_quote( cIdVd ) + "," + ;
+      sql_quote( cPKonto ) + "," + ;
+      sql_quote( cBrFaktP ) + ")"
+   oRet := run_sql_query( cQuery )
+
+   IF is_var_objekat_tpqquery( oRet )
+      RETURN oRet:FieldGet( 1 )
+   ENDIF
+
+   RETURN .F.

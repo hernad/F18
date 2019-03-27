@@ -35,10 +35,45 @@ CREATE OR REPLACE FUNCTION public.kalk_novi_brdok(cIdVd varchar) RETURNS varchar
    LANGUAGE plpgsql
 AS $$
 BEGIN
-  RETURN lpad(btrim(to_char(nextval('f18.kalk_brdok_seq_' || cIdVd), '99999999')), 8, '0');
+   -- RETURN lpad(btrim(to_char(nextval('f18.kalk_brdok_seq_' || cIdVd), '99999999')), 8, '0');
+   RETURN public.kalk_novi_brdok_konto(cIdVd, '9999999');
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.kalk_novi_brdok_konto(cIdVd varchar, cIdKonto varchar) RETURNS varchar
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+   cSufix varchar;
+   cBrDok varchar;
+   nBrDok integer;
+BEGIN
+   cIdKonto := trim( cIdKonto );
+   SELECT btrim(sufiks) from koncij where trim(id)=cIdKonto
+       INTO cSufix;
+
+   IF coalesce(cSufix,'') = '' THEN
+    -- hb _o_kalk_sql.prg: FUNCTION find_kalk_doks_za_tip_zadnji_broj( cIdFirma, cIdvd )
+     select coalesce(brdok,'') from kalk_doks where idvd=cIdVd AND not (left(brdok,1)='G' OR brdok similar to '%(-|/)%')
+       order by brdok desc limit 1
+        into cBrDok;
+	   cBrDok := coalesce(cBrDok, '0');
+     nBrDok := to_number(cBrDok, '09999999')::integer;
+     cBrDok := lpad( btrim( to_char(nBrDok + 1, '09999999') ), 8, '0');
+   ELSE
+     -- hb _o_kalk_sql.prg: FUNCTION find_kalk_doks_za_tip_sufix_zadnji_broj( cIdFirma, cIdVd, cBrDokSfx )
+     -- replace(brdok, cSufix, ''): 000010/T => 000010
+     select replace(coalesce(brdok,''), cSufix, '') from kalk_doks where trim(pkonto)=cIdKonto and idvd=cIdVd
+        order by replace(brdok, cSufix, '') desc limit 1
+        into cBrDok;
+	   cBrDok := coalesce(cBrDok, '0');
+     nBrDok := to_number(cBrDok, '09999999')::integer;
+     cBrDok := btrim( to_char(nBrDok + 1, '09999999') );
+     cBrDok := cBrDok || cSufix;
+   END IF;
+   RETURN right(cBrDok, 8);
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.kalk_novi_brdok_11(cPKonto varchar) RETURNS varchar
    LANGUAGE plpgsql
@@ -48,31 +83,7 @@ DECLARE
    cBrDok varchar;
    nBrDok integer;
 BEGIN
-
-   SELECT btrim(coalesce(sufiks,'')) from koncij where trim(id)=cPKonto
-       INTO cSufix;
-
-   IF cSufix = '' THEN
-    -- hb _o_kalk_sql.prg: FUNCTION find_kalk_doks_za_tip_zadnji_broj( cIdFirma, cIdvd )
-     select coalesce(brdok,'') from kalk_doks where idvd='11' AND not (left(brdok,1)='G' OR brdok similar to '%(-|/)%')
-       order by brdok desc limit 1
-        into cBrDok;
-	 cBrDok := coalesce(cBrDok, '0');
-     nBrDok := to_number(cBrDok, '09999999')::integer;
-     cBrDok := btrim( to_char(nBrDok + 1, '09999999') );
-   ELSE
-     -- hb _o_kalk_sql.prg: FUNCTION find_kalk_doks_za_tip_sufix_zadnji_broj( cIdFirma, cIdVd, cBrDokSfx )
-     -- replace(brdok, cSufix, ''): 000010/T => 000010
-     select replace(coalesce(brdok,''), cSufix, '') from kalk_doks where pkonto=cPKonto and idvd='11'
-        order by replace(brdok, cSufix, '') desc limit 1
-        into cBrDok;
-	 cBrDok := coalesce(cBrDok, '0');
-     nBrDok := to_number(cBrDok, '09999999')::integer;
-     cBrDok := btrim( to_char(nBrDok + 1, '09999999') );
-     cBrDok := cBrDok || cSufix;
-   END IF;
-
-   RETURN right(cBrDok, 8);
+   RETURN public.kalk_novi_brdok_konto('11', cPKonto);
 END;
 $$;
 
@@ -406,16 +417,14 @@ END;
 $$;
 
 
-DROP FUNCTION IF EXISTS public.kalk_pkonto_brfaktp_exists( cPKonto varchar,  cBrFaktP varchar);
-
-CREATE OR REPLACE FUNCTION public.kalk_pkonto_brfaktp_kalk_21_exists( cPKonto varchar,  cBrFaktP varchar) RETURNS boolean
+CREATE OR REPLACE FUNCTION public.kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd varchar, cPKonto varchar,  cBrFaktP varchar) RETURNS boolean
    LANGUAGE plpgsql
 AS $$
 DECLARE
    dokId uuid;
    lExist boolean;
 BEGIN
-   select dok_id FROM f18.kalk_doks where pkonto=cPKonto AND brfaktp=cBrFaktP AND idvd='21'
+   select dok_id FROM f18.kalk_doks where pkonto=cPKonto AND brfaktp=cBrFaktP AND idvd=cIdVd
       INTO dokId;
    IF (dokId IS NULL) THEN
       RETURN False;
@@ -425,6 +434,14 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION public.kalk_pkonto_brfaktp_kalk_21_exists( cPKonto varchar,  cBrFaktP varchar) RETURNS boolean
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+BEGIN
+    RETURN public.kalk_pkonto_idvd_brfaktp_kalk_exists( '21', cPKonto,  cBrFaktP);
+END;
+$$;
 
 
 -- select public.kalk_from_idvd_to_idvd('10', '49', '42', '00000015');

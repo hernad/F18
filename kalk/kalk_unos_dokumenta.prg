@@ -25,7 +25,7 @@ MEMVAR _TBankTr
 MEMVAR PicDEM, PicProc, PicCDem, PicKol, gPICPROC, nKalkStrana
 MEMVAR ImeKol, Kol
 MEMVAR picv
-MEMVAR gBrojacKalkulacija
+//MEMVAR gBrojacKalkulacija
 MEMVAR Ch
 MEMVAR opc, Izbor, h
 
@@ -60,7 +60,7 @@ FUNCTION kalk_header_get1( lNoviDokument )
 
    ESC_RETURN 0
 
-   IF lNoviDokument .AND. gBrojacKalkulacija == "D" .AND. ( _idfirma <> kalk_pripr->idfirma .OR. _idvd <> kalk_pripr->idvd )
+   IF lNoviDokument /*.AND. gBrojacKalkulacija == "D"*/ .AND. ( _idfirma <> kalk_pripr->idfirma .OR. _idvd <> kalk_pripr->idvd )
       _brDok := kalk_unos_get_brdok( _idfirma, _idvd, @_idkonto, @_idkonto2 )
       _datdok := danasnji_datum()
       SELECT kalk_pripr

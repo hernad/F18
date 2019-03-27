@@ -40,32 +40,33 @@ CREATE INDEX IF NOT EXISTS log_l_time_idx
 CREATE INDEX IF NOT EXISTS log_user_code_idx
     ON f18.log USING btree(user_code COLLATE pg_catalog."default");
 
--- kalk_doks sevence za brojace dokumenata
--- koristi FUNCTION public.kalk_novi_brdok(cIdVd varchar)
--- f18.kalk_brdok_seq_02, f18.kalk_brdok_seq_21, f18.kalk_brdok_seq_22
-
-DO $$
-DECLARE
-      cIdVd text;
-      nMaxBrDok integer;
-      cQuery text;
-BEGIN
-      FOR cIdVd IN SELECT unnest('{"02","21","72"}'::text[])
-      LOOP
-         RAISE info 'idvd=%', cIdVd;
-    	 SELECT COALESCE(max(to_number(regexp_replace(brdok, '\D', '', 'g'),'9999999')),0) from f18.kalk_doks where idvd=cIdVd
-    		  INTO nMaxBrDok;
-    	 RAISE INFO '%', to_char(nMaxBrDok + 1, '999999999');
-    	 cQuery := 'CREATE SEQUENCE IF NOT EXISTS f18.kalk_brdok_seq_' || cIdVd || ' START ' || to_char(nMaxBrDok + 1, '999999999');
-    	 RAISE INFO '%', cQuery;
-    	 EXECUTE cQuery;
-    	 cQuery := 'ALTER SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' OWNER to admin';
-    	 EXECUTE cQuery;
-    	 cQuery := 'GRANT ALL ON SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' TO xtrole';
-    	 EXECUTE cQuery;
-      END LOOP;
-END;
-$$;
+-- izbacujemo koristenje sekvenci za brojace, gledamo direktno u kalk_doks kao i F18 klijent
+-- -- kalk_doks sevence za brojace dokumenata
+-- -- koristi FUNCTION public.kalk_novi_brdok(cIdVd varchar)
+-- -- f18.kalk_brdok_seq_02, f18.kalk_brdok_seq_21, f18.kalk_brdok_seq_22
+--
+-- DO $$
+-- DECLARE
+--       cIdVd text;
+--       nMaxBrDok integer;
+--       cQuery text;
+-- BEGIN
+--       FOR cIdVd IN SELECT unnest('{"02","21","72"}'::text[])
+--       LOOP
+--          RAISE info 'idvd=%', cIdVd;
+--     	 SELECT COALESCE(max(to_number(regexp_replace(brdok, '\D', '', 'g'),'9999999')),0) from f18.kalk_doks where idvd=cIdVd
+--     		  INTO nMaxBrDok;
+--     	 RAISE INFO '%', to_char(nMaxBrDok + 1, '999999999');
+--     	 cQuery := 'CREATE SEQUENCE IF NOT EXISTS f18.kalk_brdok_seq_' || cIdVd || ' START ' || to_char(nMaxBrDok + 1, '999999999');
+--     	 RAISE INFO '%', cQuery;
+--     	 EXECUTE cQuery;
+--     	 cQuery := 'ALTER SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' OWNER to admin';
+--     	 EXECUTE cQuery;
+--     	 cQuery := 'GRANT ALL ON SEQUENCE f18.kalk_brdok_seq_' || cIdVd || ' TO xtrole';
+--     	 EXECUTE cQuery;
+--       END LOOP;
+-- END;
+-- $$;
 
 DO $$
 BEGIN

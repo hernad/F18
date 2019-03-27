@@ -111,7 +111,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC gDirMaK := ""
    PUBLIC gDirFakt := ""
    PUBLIC gDirFaKK := ""
-   PUBLIC gBrojacKalkulacija := "D"
+   //PUBLIC gBrojacKalkulacija := "D"
    //PUBLIC gRokTr := "N"
    PUBLIC gVarVP := "1"
    PUBLIC gAFin := "D"
@@ -183,7 +183,7 @@ METHOD TKalkMod:set_module_gvars()
    //FIELD_LENGTH_IDKONTO := Len( mkonto )
 
    PUBLIC glZabraniVisakIP
-   PUBLIC glKalkBrojacPoKontima := .F.
+   //PUBLIC glKalkBrojacPoKontima := .F.
    //PUBLIC gcSLObrazac
    //PUBLIC ZAOKRUZENJE := 2
 
@@ -209,7 +209,7 @@ METHOD TKalkMod:set_module_gvars()
    gAFin := fetch_metric( "kalk_kontiranje_fin", f18_user(), gAFin )
    gAMat := fetch_metric( "kalk_kontiranje_mat", f18_user(), gAMat )
    gAFakt := fetch_metric( "kalk_kontiranje_fakt", f18_user(), gAFakt )
-   gBrojacKalkulacija := fetch_metric( "kalk_brojac_kalkulacija", nil, gBrojacKalkulacija )
+   //gBrojacKalkulacija := fetch_metric( "kalk_brojac_kalkulacija", nil, gBrojacKalkulacija )
 
    gCijene := fetch_metric( "kalk_azuriranje_sumnjivih_dokumenata", nil, gCijene )
    gSetForm := fetch_metric( "kalk_set_formula", nil, gSetForm )
@@ -251,7 +251,7 @@ METHOD TKalkMod:set_module_gvars()
    lPrikPRUC := fetch_metric( "kalk_prikazi_kolone_pruc", nil, lPrikPRUC )
 
    glZabraniVisakIP := fetch_metric( "kalk_zabrani_visak_kod_ip", nil, glZabraniVisakIP )
-   glKalkBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glKalkBrojacPoKontima )
+   //glKalkBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glKalkBrojacPoKontima )
 
    info_bar( ::cName, ::cName + " - kalk set gvars end" )
    info_bar( "KALK", "params in cache: " + AllTrim( Str( params_in_cache() ) ) )
