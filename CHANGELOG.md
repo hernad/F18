@@ -6,6 +6,7 @@
 -  kalk brojaci PSQL/SP
 -  kalk 11, 21 - kontrola postojanja brfaktp
 -  pos roba, partn readonly
+-  cleanup - zabrana CTRL_F9
 
 ## 2019-03-26
 

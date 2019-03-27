@@ -83,7 +83,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
     //  o_valute()
    //ENDIF
 
-altd()
    IF lAutomatskiSetBrojNaloga == NIL
       lAutomatskiSetBrojNaloga := .F.
    ENDIF

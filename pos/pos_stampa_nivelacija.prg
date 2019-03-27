@@ -40,9 +40,10 @@ FUNCTION pos_stampa_nivelacija( hParams )
       IF !seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ], "1", "PRIPRZ" )
          RETURN .F.
       ENDIF
+      seek_pos_doks( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
    ENDIF
 
-   bZagl := {|| zagl() }
+   bZagl := {|| zagl( "sve", hParams ) }
    nUkupno := 0
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
@@ -76,11 +77,11 @@ FUNCTION pos_stampa_nivelacija( hParams )
       SKIP
    ENDDO
    check_nova_strana( bZagl, s_oPDF, .F., 3 )
-   zagl( "-" )
+   zagl( "-", hParams )
    ?U "  UKUPNO DOKUMENT:"
 
    @ PRow(), nCol SAY Transform( nUkupno, s_cPicIznos )
-   zagl( "-" )
+   zagl( "-", hParams )
 
    PopWa()
    f18_end_print( NIL, xPrintOpt )
@@ -88,14 +89,15 @@ FUNCTION pos_stampa_nivelacija( hParams )
    RETURN .T.
 
 
-STATIC FUNCTION zagl( cSamoLinija )
+STATIC FUNCTION zagl( cSamoLinija, hParams )
 
    LOCAL cLinija := "", cKolone := ""
    LOCAL nLen
 
-   IF cSamoLinija == NIL
-      cSamoLinija := "sve"
-   ENDIF
+   // IF cSamoLinija == NIL
+   // cSamoLinija := "sve"
+   // ENDIF
+
 
    nLen := FIELD_LEN_POS_RBR
    cLinija += Replicate( "-", nLen )
@@ -130,10 +132,13 @@ STATIC FUNCTION zagl( cSamoLinija )
    cKolone += " " + PadC( "Razlika", nLen )
 
    IF cSamoLinija == "-"
-      ?U cLinija
-      RETURN .T.
+     ?U cLinija
+     RETURN .T.
    ENDIF
 
+   IF !hParams[ "priprema" ]
+      ? "Period ", pos_doks->dat_od, "-", pos_doks->dat_do
+   ENDIF
    ?U cLinija
    ?U cKolone
    ?U cLinija

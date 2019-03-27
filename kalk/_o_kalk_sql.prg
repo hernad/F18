@@ -701,7 +701,6 @@ FUNCTION kalk_mkonto_pkonto( cTip, cIdFirma, cIdKonto, cIdRoba, cX )
       hParams[ 'idroba'  ]  := cIdRoba  + ";"
    ENDIF
    hParams[ 'order_by' ] := iif( cTip == "M", "mkonto", "pkonto" )
-
    use_sql_kalk( hParams )
 
    IF lKraj
