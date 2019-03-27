@@ -170,7 +170,7 @@ FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
       fin_gen_panal_psint( cIdFirma, cIdVn, cBrNal, dDatNal )
 
       IF lStampa
-         Box(, 2, 58 )
+         Box("<CENTAR>", 2, 58 )
          @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Štampanje analitike/sintetike za nalog " + cIdfirma + "-" + cIdvn + "-" + cBrnal + " ?"  GET cDN PICT "@!" VALID cDN $ "DN"
          READ
          BoxC()

@@ -458,7 +458,7 @@ STATIC FUNCTION tb_editabilna_kolona( oTb, aImeKol )
 STATIC FUNCTION f18_browse_inkey()
 
 if is_electron_host()
-   return HB_INKEY_ALL 
+   return HB_INKEY_ALL
 else
    return HB_INKEY_EXT
 endif
@@ -825,7 +825,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF ValType( &cKolona ) $ "CD"
 
-         Box(, 3, 60, .F. )
+         Box("<CENTAR>", 3, 60, .F. )
 
          SET CURSOR ON
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uzmi podatke posljednje pretrage ?" GET cLastSearchDN VALID cLastSearchDN $ "DN" PICT "@!"

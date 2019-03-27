@@ -34,7 +34,6 @@ FUNCTION Pitanje( cId, cPitanje, cOdgDefault, cMogOdg, cHeader )
 
    PRIVATE GetList := {}
 
-
    cPom := Set( _SET_DEVICE )
    SET DEVICE TO SCREEN
 
@@ -51,7 +50,7 @@ FUNCTION Pitanje( cId, cPitanje, cOdgDefault, cMogOdg, cHeader )
    Set( _SET_CONFIRM, .F. )
 #endif
 
-   Box( , 3, Len( cPitanje ) + 6, .F. )
+   Box( "<CENTAR>", 3, Len( cPitanje ) + 6, .F. )
 
    IF ValType( cId ) == "C"
       @ box_x_koord() + 0, box_y_koord() + 2 SAY cId

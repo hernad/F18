@@ -107,7 +107,7 @@ FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
 FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, nMaxVR )
 
    LOCAL nLength
-   LOCAL nN1
+   LOCAL nVisina
    LOCAL cOldColor
    LOCAL cLocalColor
    LOCAL cLocalInvertedColor
@@ -135,7 +135,7 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
       lFiksneKoordinate := .T.
    ENDIF
 
-   nN1 := iif( Len( aItems ) > nMaxVR, nMaxVR, Len( aItems ) )
+   nVisina := iif( Len( aItems ) > nMaxVR, nMaxVR, Len( aItems ) )
 
    IF ValType( aItems[ 1 ] ) == "B"
       cMeniItem := Eval( aItems[ 1 ] )
@@ -159,14 +159,13 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
          box_x_koord( aFixKoo[ 1 ] )
          box_y_koord(  aFixKoo[ 2 ] )
       ELSE
-
-         Calc_xy( nN1, nLength ) // odredi koordinate menija
+         ui_calc_xy( nVisina, nLength ) // odredi koordinate menija
       ENDIF
 
       StackPush( aMenuStack, { cMeniId, ;
          box_x_koord(), ;
          box_y_koord(), ;
-         SaveScreen( box_x_koord(), box_y_koord(), box_x_koord() + nN1 + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 ) ), ;
+         SaveScreen( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 ) ), ;
          nItemNo, ;
          cHelpT;
          } )
@@ -186,7 +185,7 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
 
    SetColor( cLocalColor )
 
-   nItemNo := meni_0_inkey(  box_x_koord() + 1, box_y_koord() + 2, box_x_koord() + nN1 + 1, box_y_koord() + nLength + 1, aItems, nItemNo, .T., lFiksneKoordinate )
+   nItemNo := meni_0_inkey(  box_x_koord() + 1, box_y_koord() + 2, box_x_koord() + nVisina + 1, box_y_koord() + nLength + 1, aItems, nItemNo, .T., lFiksneKoordinate )
 
 
    nTItemNo := nItemNo // nTItemNo := RetItem( nItemNo )
@@ -196,7 +195,7 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
    box_y_koord( aMenu[ 3 ] )
    aMenu[ 5 ] := nTItemNo
 
-   @ box_x_koord(), box_y_koord() TO box_x_koord() + nN1 + 1, box_y_koord() + nLength + 3
+   @ box_x_koord(), box_y_koord() TO box_x_koord() + nVisina + 1, box_y_koord() + nLength + 3
 
    IF nTItemNo <> 0 // Ako nije pritisnuto ESC, <-, ->, oznaci izabranu opciju
       IF ValType( aItems[ nTItemNo ] ) == "B"
@@ -212,10 +211,10 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
    nChar := LastKey()
 
    IF nChar == K_ESC .OR. nTItemNo == 0 .OR. nTItemNo == nPovratak  // Ako je ESC meni treba odmah izbrisati (nItemNo=0),  skini meni sa steka
-      @ box_x_koord(), box_y_koord() CLEAR TO box_x_koord() + nN1 + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 )
+      @ box_x_koord(), box_y_koord() CLEAR TO box_x_koord() + nVisina + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 )
       aMenu := StackPop( aMenuStack )
 
-      RestScreen( box_x_koord(), box_y_koord(), box_x_koord() + nN1 + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 ), aMenu[ 4 ] )
+      RestScreen( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 ), aMenu[ 4 ] )
    END IF
 
    SetColor( cOldColor )
