@@ -420,33 +420,27 @@ FUNCTION find_rj_by_id( cId )
    RETURN !Eof()
 
 
-FUNCTION select_o_trfp( cId )
+FUNCTION select_o_trfp()
 
    SELECT ( F_TRFP )
    IF Used()
-      IF RecCount() > 1 .AND. cId == NIL
+      IF RecCount() > 1
          RETURN .T.
       ELSE
          USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
       ENDIF
    ENDIF
 
-   RETURN o_trfp( cId )
+   RETURN o_trfp()
 
 
-FUNCTION o_trfp( cId )
-
-   LOCAL cTabela := "trfp"
+FUNCTION o_trfp()
 
    SELECT ( F_TRFP )
-   IF !use_sql_sif  ( cTabela, .T., "TRFP", cId  )
-      error_bar( "o_sql", "open sql " + cTabela )
-      RETURN .F.
-   ENDIF
+   use_sql_trfp()
    SET ORDER TO TAG "ID"
 
-   RETURN !Eof()
-
+   RETURN .T.
 
 FUNCTION o_trfp2()
 

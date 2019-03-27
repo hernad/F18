@@ -14,7 +14,7 @@
 MEMVAR nKalkRBr
 MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena
 MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
-MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
+MEMVAR _MU_I, _PU_I, _VPC, _IdPartner, _error
 MEMVAR _TBankTr, _Marza2, _TMarza2, _Prevoz, _TPrevoz, _TMarza, _Marza
 MEMVAR _BrFaktP
 
@@ -40,12 +40,12 @@ FUNCTION kalk_get_1_11()
       _datfaktp := _datdok
    ENDIF
    IF Empty( _tmarza2 )
-     _tmarza2 := "A"
+      _tmarza2 := "A"
    ENDIF
 
-   //IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
-  //    _DatFaktP := _datdok
-   //ENDIF
+   // IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
+   // _DatFaktP := _datdok
+   // ENDIF
 
    IF nKalkRbr == 1  .OR. !kalk_is_novi_dokument()
       _IdPartner := ""
@@ -123,9 +123,13 @@ FUNCTION kalk_get_1_11()
    _vpc := _fcj
    @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "       NABAVNA CIJENA (NC):"
    IF _kolicina > 0
-      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE picnc() VALID {|| lRet := kalk_valid_kolicina_mag( nKolicinaNaStanju ), _vpc := _fcj, lRet }
+      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE picnc() ;
+         WHEN kalk_11_when_fcj( _idvd, @_fcj, @_error ) ;
+         VALID kalk_11_valid_fcj( _idvd, @nKolicinaNaStanju, @_vpc, @_fcj )
    ELSE
-      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE picdem() VALID {|| lRet := kalk_valid_kolicina_prod( nKolicinaNaStanju ), _vpc := _fcj, lRet }
+      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE picdem() ;
+         WHEN kalk_11_when_fcj( _idvd, @_fcj, @_error ) ;
+         VALID kalk_11_valid_fcj( _idvd, @nKolicinaNaStanju, @_vpc, @_fcj )
    ENDIF
 
    select_o_koncij( _pkonto )
@@ -156,11 +160,41 @@ FUNCTION kalk_get_1_11()
    SELECT kalk_pripr
 
    _IdKonto := _MKonto // izlaz iz magacina
-   _MU_I := "5"
    _IdKonto2 := _PKonto  // ulaz u prodavnicu
-   _PU_I := "1"
+
+   IF _idvd == '21'
+      _MU_I := "6"
+      _PU_I := "2"
+   ELSE
+      _MU_I := "5"
+      _PU_I := "1"
+   ENDIF
 
    nKalkStrana := 2
    // kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 
    RETURN LastKey()
+
+
+STATIC FUNCTION kalk_11_when_fcj( cIdVd, nFcj, cError )
+
+   IF cIdVd == "21" // količinsko zaduženje
+      nFcj := 0.00000001
+      cError := "0"
+   ENDIF
+
+   RETURN .T.
+
+STATIC FUNCTION kalk_11_valid_fcj( cIdVd, nKolicinaNaStanju, nVpc, nFcj )
+
+   LOCAL lRet
+
+   IF cIdVd == "21" // količinsko zaduženje
+      lRet := .T.
+      nFcj := 0.00000001
+   ELSE
+      lRet := kalk_valid_kolicina_prod( @nKolicinaNaStanju )
+      nVpc := nFcj
+   ENDIF
+
+   RETURN lRet

@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-27
+
+-  revert select_o_trfp use via use_sql_trfp()
+
 ## 2019-03-26
 
 - FIX KALK 22-11
@@ -12,7 +16,7 @@
 
 ## 2019-03-24
 
-- KALK maloprodaja konverzije 
+- KALK maloprodaja konverzije
 - fix build
 
 ## 2019-03-22
