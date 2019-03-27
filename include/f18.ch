@@ -432,8 +432,8 @@
 
 #command KRESI <x> NA <len> =>  <x>:=left(<x>,<len>)
 
-// Force reread/redisplay of all data rows
-#define DE_REF      12
+
+#define BROWSE_DE_STOP_STANDARDNE_OPERACIJE  10
 
 #command DEL2                                                            ;
       => (nArr)->(DbDelete2())                                            ;

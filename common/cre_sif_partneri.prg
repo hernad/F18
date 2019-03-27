@@ -145,7 +145,7 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
    SELECT PARTN
    sifk_fill_ImeKol( "PARTN", @ImeKol, @Kol )
 
-   lRet := p_sifra( F_PARTN, 1, f18_max_rows() - 15, f18_max_cols() - 15, "Lista Partnera", @cId, dx, dy, {| Ch| partn_k_handler( Ch ) },,,,, { "ID" } )
+   lRet := p_sifra( F_PARTN, 1, f18_max_rows() - 15, f18_max_cols() - 15, "Lista Partnera", @cId, dx, dy, {| nCh| partn_k_handler( nCh ) },,,,, { "ID" } )
 
    PopWa()
 
@@ -153,11 +153,17 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
 
 
 
-STATIC FUNCTION partn_k_handler( Ch )
+STATIC FUNCTION partn_k_handler( nCh )
 
    LOCAL cSif := PARTN->id, cSif2 := ""
+   LOCAL nPosRet := pos_sifre_readonly( nCh )
 
-   IF Ch == K_CTRL_T .AND. gSKSif == "D"
+altd()
+   IF nPosRet <> 0
+       RETURN nPosRet
+   ENDIF
+
+   IF nCh == K_CTRL_T .AND. gSKSif == "D"
 
       PushWA()
       SET ORDER TO TAG "ID"

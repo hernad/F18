@@ -603,7 +603,7 @@ STATIC FUNCTION my_browse_p_sifra_key_handler( Ch, nWa, cNaslov, bBlok, aZabrane
          IF nRet == 5
             RETURN DE_ABORT
 
-         ELSEIF nRet == 6
+         ELSEIF nRet == BROWSE_DE_STOP_STANDARDNE_OPERACIJE
             RETURN DE_CONT
 
          ELSEIF nRet == 7

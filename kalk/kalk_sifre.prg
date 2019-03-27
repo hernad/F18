@@ -14,28 +14,27 @@
 
 FUNCTION kalk_sifrarnik()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
-   LOCAL _izbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
+   LOCAL nIzbor := 1
 
    PRIVATE PicDem
 
    PicDem := kalk_pic_iznos_bilo_gpicdem()
    my_close_all_dbf()
 
-   AAdd( _opc, "1. opći šifarnici                  " )
-   AAdd( _opcexe, {|| opci_sifarnici() } )
-   AAdd( _opc, "2. robno-materijalno poslovanje" )
-   AAdd( _opcexe, {|| sif_roba_tarife_koncij_sast() } )
-   AAdd( _opc, "3. magacinski i prodajni objekti" )
-   AAdd( _opcexe, {|| P_Objekti() } )
+   AAdd( aOpc, "1. opći šifarnici                  " )
+   AAdd( aOpcExe, {|| opci_sifarnici() } )
+   AAdd( aOpc, "2. robno-materijalno poslovanje" )
+   AAdd( aOpcExe, {|| sif_roba_tarife_koncij_sast() } )
+   AAdd( aOpc, "3. magacinski i prodajni objekti" )
+   AAdd( aOpcExe, {|| P_Objekti() } )
 
-   f18_menu( "msif", .F., _izbor, _opc, _opcexe )
+   f18_menu( "msif", .F., nIzbor, aOpc, aOpcExe )
 
    my_close_all_dbf()
 
    RETURN .F.
-
 
 
 
@@ -58,11 +57,11 @@ FUNCTION kalk_roba_key_handler( Ch )
 
    ELSEIF Upper( Chr( Ch ) ) == "S"
 
-      //TB:Stabilize()
-      //PushWA()
+      // TB:Stabilize()
+      // PushWA()
       sif_roba_kalk_stanje_magacin_key_handler_s( roba->id )
-      //PopWa()
-      //SELECT ROBA
+      // PopWa()
+      // SELECT ROBA
       RETURN DE_CONT
 
    ELSEIF Upper( Chr( Ch ) ) == "D"

@@ -184,7 +184,7 @@ STATIC FUNCTION kalk_11_valid_brfaktp( cIdVd, cPKonto, cBrFaktP )
       MsgBeep("Već postoji ažuriran dokument " + cIdVd + " sa otpremnicom: " + cBrFaktP )
    ENDIF
 
-   RETURN lPostoji
+   RETURN !lPostoji
 
 
 STATIC FUNCTION kalk_11_when_fcj( cIdVd, nFcj, cError )

@@ -276,11 +276,17 @@ FUNCTION P_Barkod( cBK )
    RETURN .T.
 */
 
-FUNCTION pos_roba_block( cCh )
+FUNCTION pos_roba_block( nCh )
+
+   LOCAL nPosRet := pos_sifre_readonly( nCh )
+
+   IF nPosRet <> 0
+      RETURN nPosRet
+   ENDIF
 
    DO CASE
 
-   CASE Upper( Chr( cCh ) ) == "P"
+   CASE Upper( Chr( nCh ) ) == "P"
       IF gen_all_plu()
          RETURN DE_REFRESH
       ENDIF
@@ -290,6 +296,20 @@ FUNCTION pos_roba_block( cCh )
    RETURN DE_CONT
 
 
+FUNCTION pos_sifre_readonly( nCh )
+
+   IF programski_modul() != "POS"
+      RETURN 0
+   ENDIF
+
+   IF ( nCh == K_ALT_R .OR. nCh == K_ALT_S .OR. nCh == K_CTRL_T .OR. nCh == K_ENTER .OR. nCh == K_F2 .OR. nCh == K_F4 .OR. nCh == K_CTRL_N ) .AND. programski_modul() == "POS"
+      Alert( _u( "Šifre se mogu mijenjati samo u knjigovodstvu!" ) )
+      RETURN BROWSE_DE_STOP_STANDARDNE_OPERACIJE
+   ENDIF
+
+   RETURN 0
+
+
 FUNCTION pos_prodajno_mjesto()
 
    RETURN pos_pm()
@@ -297,4 +317,4 @@ FUNCTION pos_prodajno_mjesto()
 
 
 FUNCTION LMarg()
-    RETURN "   "
+   RETURN "   "

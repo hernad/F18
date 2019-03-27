@@ -5,6 +5,7 @@
 -  revert select_o_trfp use via use_sql_trfp()
 -  kalk brojaci PSQL/SP
 -  kalk 11, 21 - kontrola postojanja brfaktp
+-  pos roba, partn readonly
 
 ## 2019-03-26
 
