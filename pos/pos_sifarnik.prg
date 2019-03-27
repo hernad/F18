@@ -302,7 +302,7 @@ FUNCTION pos_sifre_readonly( nCh )
       RETURN 0
    ENDIF
 
-   IF ( nCh == K_ALT_R .OR. nCh == K_ALT_S .OR. nCh == K_CTRL_T .OR. nCh == K_ENTER .OR. nCh == K_F2 .OR. nCh == K_F4 .OR. nCh == K_CTRL_N ) .AND. programski_modul() == "POS"
+   IF ( nCh == K_CTRL_F9 .OR. nCh == K_ALT_R .OR. nCh == K_ALT_S .OR. nCh == K_CTRL_T .OR. nCh == K_ENTER .OR. nCh == K_F2 .OR. nCh == K_F4 .OR. nCh == K_CTRL_N ) .AND. programski_modul() == "POS"
       Alert( _u( "Šifre se mogu mijenjati samo u knjigovodstvu!" ) )
       RETURN BROWSE_DE_STOP_STANDARDNE_OPERACIJE
    ENDIF

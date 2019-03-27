@@ -180,8 +180,13 @@ STATIC FUNCTION kalk_11_valid_brfaktp( cIdVd, cPKonto, cBrFaktP )
 
    LOCAL lPostoji := kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd, cPKonto, cBrFaktP )
 
+   IF Empty( cBrFaktP )
+      Alert( _u( 'Broj otpremnice obavezan !' ) )
+      RETURN .F.
+   ENDIF
+
    IF lPostoji
-      MsgBeep("Već postoji ažuriran dokument " + cIdVd + " sa otpremnicom: " + cBrFaktP )
+      MsgBeep( "Već postoji ažuriran dokument " + cIdVd + " sa otpremnicom: " + cBrFaktP )
    ENDIF
 
    RETURN !lPostoji

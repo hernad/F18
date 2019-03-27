@@ -158,7 +158,6 @@ STATIC FUNCTION partn_k_handler( nCh )
    LOCAL cSif := PARTN->id, cSif2 := ""
    LOCAL nPosRet := pos_sifre_readonly( nCh )
 
-altd()
    IF nPosRet <> 0
        RETURN nPosRet
    ENDIF
