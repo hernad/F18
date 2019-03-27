@@ -906,7 +906,6 @@ FUNCTION kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd, cPKonto, cBrFaktP )
       sql_quote( cBrFaktP ) + ")"
    oRet := run_sql_query( cQuery )
 
-altd()
    IF is_var_objekat_tpqquery( oRet )
       RETURN oRet:FieldGet( 1 )
    ENDIF
