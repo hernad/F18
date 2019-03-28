@@ -90,7 +90,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
    ENDIF
 
    IF fStara
-
       IF !lViseKalk
          Box( "", 1, 50 )
          SET CURSOR ON
@@ -149,7 +148,6 @@ FUNCTION kalk_kontiranje_gen_finmat()
       @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Želite li kontirati dokument? (D/N)" GET cDalje VALID cDalje $ "DN" PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Automatski broj fin.naloga? (D/N)" GET cFinAutoBrojDN VALID cFinAutoBrojDN $ "DN" PICT "@!"
       READ
-
       BoxC()
 
       IF LastKey() == K_ESC .OR. cDalje <> "D"
@@ -160,29 +158,29 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
    nStr := 0
    nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTota := nTotb := nTotC := 0
-
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdvd == field->idvd
 
       cBrDok := BrDok
       cIdPartner := IdPartner
       cBrFaktP := BrFaktP
       dDatFaktP := DatFaktP
-
       cIdKonto := field->IdKonto
       cIdKonto2 := field->IdKonto2
 
-      IF field->idvd $ "10#14#KO#16#95#96"
-         cIdKonto := field->mKonto
-      ENDIF
+      cIdKonto := finmat_idkonto( kalk_pripr->idvd, kalk_pripr->mkonto, kalk_pripr->pkonto, kalk_pripr->idkonto, kalk_pripr->idkonto2 )
+      cIdKonto2 := finmat_idkonto2( kalk_pripr->idvd, kalk_pripr->mkonto, kalk_pripr->pkonto, kalk_pripr->idkonto, kalk_pripr->idkonto2 )
 
-      IF field->idvd $ "19#80#81#41#42"
-         cIdKonto := field->pKonto
-      ENDIF
-      IF field->idvd == "11"
-         cIdKonto := field->mKonto
-         cIdKonto2 := field->pkonto
-      ENDIF
+      // IF field->idvd $ "10#14#KO#16#95#96"
+      // cIdKonto := field->mKonto
+      // ENDIF
 
+      // IF field->idvd $ "19#80#81#41#42"
+      // cIdKonto := field->pKonto
+      // ENDIF
+      // IF field->idvd == "11"
+      // cIdKonto := field->mKonto
+      // cIdKonto2 := field->pkonto
+      // ENDIF
 
       // select_o_konto( cIdKonto )
       select_o_konto( cIdKonto2 )
@@ -223,14 +221,14 @@ FUNCTION kalk_kontiranje_gen_finmat()
             BankTr    WITH Round( kalk_PRIPR->( nKalkBankTr * nKolicina ), nZaokruzenje ), ;
             SpedTr    WITH Round( kalk_PRIPR->( nKalkSpedTr * nKolicina ), nZaokruzenje ), ;
             ZavTr     WITH Round( kalk_PRIPR->( nKalkZavTr * nKolicina ), nZaokruzenje ), ;
-            NV        WITH Round( kalk_PRIPR->( NC * Kolicina ), nZaokruzenje ), ;
+            NV        WITH Round( kalk_PRIPR->NC * kalk_PRIPR->Kolicina, nZaokruzenje ), ;
             Marza     WITH Round( nKalkMarzaVP * kalk_pripr->Kolicina, nZaokruzenje ), ;           // marza se ostvaruje nad stvarnom kolicinom
             VPV       WITH Round( kalk_PRIPR->VPC * kalk_pripr->Kolicina, nZaokruzenje )        // vpv se formira nad stvarnom kolicinom
 
          IF kalk_pripr->idvd == '42'
-            REPLACE RABATV with kalk_pripr->RABATV * kalk_pripr->kolicina
+            REPLACE RABATV WITH kalk_pripr->RABATV * kalk_pripr->kolicina
          ELSE
-            nPom := kalk_pripr->( RabatV / 100 * VPC * Kolicina )
+            nPom := kalk_pripr->RabatV / 100 * kalk_pripr->VPC * kalk_pripr->Kolicina
             nPom := Round( nPom, nZaokruzenje )
             REPLACE RABATV  WITH nPom
          ENDIF
@@ -260,17 +258,17 @@ FUNCTION kalk_kontiranje_gen_finmat()
          // nPom := Round( nPom, nZaokruzenje )
          // REPLACE Porezv WITH nPom
 
-         REPLACE idroba    WITH kalk_pripr->idroba
-         REPLACE  Kolicina  WITH kalk_pripr->( Kolicina - GKolicina - GKolicin2 )
+         REPLACE idroba  WITH kalk_pripr->idroba
+         REPLACE  Kolicina  WITH kalk_pripr->Kolicina
 
          IF !( kalk_pripr->IdVD $ "IM#IP" )
-            REPLACE   FV        WITH Round( nFV, nZaokruzenje ), ;
-               Rabat     WITH Round( kalk_pripr->( nFV * Rabat / 100 ), nZaokruzenje )
+            REPLACE FV WITH Round( nFV, nZaokruzenje ), ;
+               Rabat WITH Round( nFV * kalk_pripr->Rabat / 100, nZaokruzenje )
          ENDIF
 
          IF field->idvd == "IP"
             REPLACE  GKV2  WITH Round( kalk_pripr->( ( Gkolicina - Kolicina ) * MPcSAPP ), nZaokruzenje ), ;
-               GKol2 WITH kalk_pripr->( Gkolicina - Kolicina )
+               GKol2 WITH kalk_pripr->Gkolicina - kalk_pripr->Kolicina
          ENDIF
 
          IF field->idvd == "14"
@@ -325,3 +323,44 @@ FUNCTION kalk_kontiranje_gen_finmat()
    ENDIF
 
    RETURN .T.
+
+
+
+FUNCTION finmat_idkonto( cIdVd, cMkonto, cPkonto, cIdKonto, cIdKonto2 )
+
+   LOCAL cRet
+
+   cRet := cIdKonto
+
+   IF cIdVd $ "10#11#14#KO#16#95#96"
+      cRet := field->mKonto
+   ENDIF
+
+   IF field->idvd $ "19#80#81#41#42"
+      cRet := field->pKonto
+   ENDIF
+
+   RETURN cRet
+
+
+FUNCTION finmat_idkonto2( cIdvd, cMkonto, cPkonto, cIdKonto, cIdKonto2 )
+
+   LOCAL cRet
+
+   IF field->idvd == "11"
+      cRet := cPkonto
+   ELSE
+      cRet := cIdKonto2
+   ENDIF
+
+   RETURN cRet
+
+
+FUNCTION finmat_glavni_konto( cIdVd )
+
+   // IF cIdVd $ "14#95#96"
+   IF cIdVd == "11"
+     return finmat->IdKonto2  // prodavnica
+   ENDIF
+
+   RETURN finmat->idkonto

@@ -73,8 +73,6 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
       ENDIF
 
       IF lStampa
-
-         AltD()
          s_oPDF := PDFClass():New()
          xPrintOpt := hb_Hash()
          xPrintOpt[ "tip" ] := "PDF"
@@ -98,7 +96,6 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
       fin_nalog_stampa_fill_psuban( "1", lStampa, dDatNal, @oNalog, aNaloziObradjeni )
 
       oNalozi:addNalog( oNalog )
-
       IF lStampa
          PushWA()
          my_close_all_dbf()
@@ -110,7 +107,6 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
 
 
       IF AScan( aNaloziObradjeni, cIdFirma + cIdVN + cBrNal ) == 0
-
          AAdd( aNaloziObradjeni, cIdFirma + cIdVN + cBrNal ) // lista naloga koji su otisli
          IF lAuto
             @ box_x_koord() + 2, box_y_koord() + 2 SAY "Formirana sintetika i analitika za nalog:" + cIdFirma + "-" + cIdVN + "-" + cBrNal
@@ -124,13 +120,11 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
    ENDIF
 
    my_close_all_dbf()
-
    IF !oNalozi:valid()
       oNalozi:showErrors()
    ENDIF
 
    RETURN .T.
-
 
 
 FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
@@ -145,7 +139,6 @@ FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
    IF lStampa == NIL
       lStampa := .T.
    ENDIF
-
    IF !fin_open_lock_panal( .T. )
       RETURN .F.
    ENDIF

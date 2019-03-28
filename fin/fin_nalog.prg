@@ -24,9 +24,7 @@ FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
    LOCAL GetList := {}
    LOCAL xPrintOpt
 
-
    PRIVATE fK1 := fk2 := fk3 := fk4 := "N", gnLOst := 0, gPotpis := "N"
-
    fin_read_params()
 
    cIdVN := Space( 2 )
@@ -36,12 +34,10 @@ FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
    Box( "", 2, 35 )
 
    SET CURSOR ON
-
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nalog:"
    @ box_x_koord() + 1, Col() + 1 SAY cIdFirma
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVN PICT "@!"
    @ box_x_koord() + 1, Col() + 1 SAY "-" GET cBrNal VALID fin_fix_broj_naloga( @cBrNal )
-
    READ
    ESC_BCR
 
@@ -74,7 +70,6 @@ FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
 
    fin_nalog_stampa_fill_psuban( "2", .T., dDatNal, NIL, NIL )
    my_close_all_dbf()
-
    f18_end_print( NIL, xPrintOpt )
 
 

@@ -16,6 +16,7 @@ FUNCTION fakt_fin_prenos()
    LOCAL nNV := 0, nFV := 0
    LOCAL nTot1, nTot2, nTot3, nTot4, nTot5, nTot6, nTot7, nTot8, nTot9, nTota, nTotb
    LOCAL cIdRjFakt
+   LOCAL GetList := {}
 
    o_params()
    PRIVATE cSection := "(", cHistory := " "; aHistory := {}
@@ -23,25 +24,18 @@ FUNCTION fakt_fin_prenos()
    // lNCPoSast := ( my_get_from_ini( "FAKTFIN", "NCPoSastavnici", "N", KUMPATH ) == "D" )
    // cKonSir   := PadR( my_get_from_ini( "FAKTFIN", "KontoSirovinaIzSastavnice", "1010", KUMPATH ), 7 )
    cKonSir := "1010"
-
    gFaktKum := ""
-
    gDzokerF1 := ""
-
    cOdradjeno := "D"
 
    Rpar( "a1", @gFaktKum )
    Rpar( "a2", @gDzokerF1 )
-
-
    gDzokerF1 := Trim( gDzokerF1 )
 
    IF Empty( gFaktKum ) .OR. cOdradjeno = "N"
       gFaktKum := Trim( StrTran( cDirRad, "FIN", "FAKT" ) ) + SLASH
       Wpar( "a1", @gFaktKum )
    ENDIF
-
-
    cIdRjFakt := "10"
    cIdFakt := "10"
    dDAtOd := Date()
@@ -53,21 +47,18 @@ FUNCTION fakt_fin_prenos()
    Box(, 10, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "RJ u fakt:" GET cIdRjFakt
    @ box_x_koord() + 1, Col() + 2 SAY "postaviti IdRj u FIN ?" GET cSetIdRj PICT "@!" VALID ( cSetIdRj $ "DN" )
-
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Vrsta dokumenta u fakt:" GET cIdFakt
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Dokumenti u periodu:" GET dDAtOd
    @ box_x_koord() + 3, Col() + 2 SAY "do" GET dDatDo
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "Broj dokumenta" GET qqDok
-
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY "Podesiti parametre prenosa" GET cSetPAr VALID csetpar $ "DN" PICT "@!"
+   @ box_x_koord() + 6, box_y_koord() + 2 SAY "Podesiti parametre prenosa" GET cSetPAr VALID cSetpar $ "DN" PICT "@!"
    READ
+   
    IF cSetPar == "D"
       gFaktKum := PadR( gFaktKum, 35 )
-
       gDzokerF1 := PadR( gDzokerF1, 80 )
       @ box_x_koord() + 8, box_y_koord() + 2 SAY "FAKT Kumulativ" GET gFaktKum  PICT "@S25"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY "Dzoker F1(formula)" GET gDzokerF1  PICT "@S25"
-
       READ
       gFaktKum := Trim( gFaktKum )
 
@@ -255,7 +246,7 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
    Box( "brn?", 5, 55 )
    // dDatNal:=datdok
    SET CURSOR ON
-   @ box_x_koord() + 1, box_y_koord() + 2  SAY "Broj naloga u FIN  " + finmat->idfirma + " - " + cidvn + " -" GET cBrNalF
+   @ box_x_koord() + 1, box_y_koord() + 2  SAY "Broj naloga u FIN  " + finmat->idfirma + " - " + cIdvn + " -" GET cBrNalF
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "(ako je broj naloga prazan - ne vrsi se kontiranje)"
    READ
    ESC_BCR

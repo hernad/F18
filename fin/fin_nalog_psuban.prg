@@ -412,7 +412,6 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
    ?? M
 
    IF !hParams[ "fin_tip_dokumenta" ]
-   altd()
       //P_NRED
       ?
       cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R. * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID )

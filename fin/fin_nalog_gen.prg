@@ -20,7 +20,6 @@ FUNCTION fin_gen_panal_psint( cIdFirma, cIdVn, cBrNal, dDatNal )
    nStr := 0
    nD1 := nD2 := nP1 := nP2 := 0
 
-
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdVN == IdVN .AND. cBrNal == BrNal
 
       cIdkonto := idkonto
@@ -81,7 +80,6 @@ FUNCTION fin_gen_panal_psint( cIdFirma, cIdVn, cBrNal, dDatNal )
                EXIT
             ENDIF
          ENDIF
-
          SKIP
       ENDDO
 
@@ -93,7 +91,6 @@ FUNCTION fin_gen_panal_psint( cIdFirma, cIdVn, cBrNal, dDatNal )
       REPLACE IdFirma WITH cIdFirma, IdKonto WITH Left( cIdKonto, 3 ), IdVN WITH cIdVN, BrNal WITH cBrNal, DatNal WITH iif( gDatNal == "D", dDatNal,  Max( psuban->datdok, datnal ) ), ;
          DugBHD WITH DugBHD + nDugBHD, PotBHD WITH PotBHD + nPotBHD, ;
          DugDEM WITH DugDEM + nDugDEM, PotDEM WITH PotDEM + nPotDEM
-
       nD1 += nDugBHD; nD2 += nDugDEM; nP1 += nPotBHD; nP2 += nPotDEM
 
       SELECT PSUBAN
@@ -254,8 +251,6 @@ STATIC FUNCTION lock_fin_priprema( lZap )
 
 
 
-
-
 FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
 
    o_fin_panal()
@@ -294,7 +289,6 @@ FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
 
    DO WHILE !Eof()
       // svi nalozi
-
       nStr := 0
       nD1 := 0
       nD2 := 0
@@ -308,7 +302,6 @@ FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
       DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdVN == IdVN  .AND. cBrNal == BrNal
 
          cIdkonto := idkonto
-
          nDugBHD := 0
          nDugDEM := 0
          nPotBHD := 0
@@ -326,10 +319,7 @@ FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
          SEEK cIdFirma + cIdVn + cBrNal + cIdKonto
 
          fNasao := .F.
-
-         DO WHILE !Eof() .AND. cIdFirma == IdFirma ;
-               .AND. cIdVN == IdVN .AND. cBrNal == BrNal ;
-               .AND. IdKonto == cIdKonto
+         DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdVN == IdVN .AND. cBrNal == BrNal .AND. IdKonto == cIdKonto
 
             IF gDatNal == "N"
                IF Month( psuban->datdok ) == Month( datnal )
@@ -351,7 +341,6 @@ FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
          ENDIF
 
          my_rlock()
-
          REPLACE IdFirma WITH cIdFirma
          REPLACE IdKonto WITH cIdKonto
          REPLACE IdVN WITH cIdVN
@@ -363,9 +352,8 @@ FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
          REPLACE PotDEM WITH PotDEM + nPotDEM
          my_unlock()
 
-
          SELECT PSINT
-         SEEK cidfirma + cidvn + cbrnal + Left( cidkonto, 3 )
+         SEEK cIdfirma + cIdvn + cBrnal + Left( cIdkonto, 3 )
          fNasao := .F.
 
          DO WHILE !Eof() .AND. cIdFirma == IdFirma ;
@@ -411,7 +399,6 @@ FUNCTION fin_gen_sint_stavke_auto_import() // lAuto )
       APPEND BLANK
 
       my_rlock()
-
       REPLACE IdFirma WITH cIdFirma, IdVN WITH cIdVN, BrNal WITH cBrNal, ;
          DatNal WITH iif( gDatNal == "D", dDatNal, Date() ), ;
          DugBHD WITH nD1, PotBHD WITH nP1, ;

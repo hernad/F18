@@ -4,6 +4,7 @@
 
 -  ažuriranje KALK-FIN sa što manje pitanja
 -  ažuriranje KALK-FIN fin priprema brisanje
+-  fix kontiranje 11
 
 ## 2019-03-27
 

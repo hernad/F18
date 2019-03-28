@@ -80,7 +80,6 @@ FUNCTION pos_postoji_roba( cId, nRow, nCol, cBarkodVratiti, aGetList )
       cId := s_cPredhodniIdRoba
       lSveJeOk := .F.
    ELSE
-
       @ box_x_koord() + nRow, box_y_koord() + nCol SAY PadR( AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 50 )
       //IF nTezina <> 0
       //   _kolicina := nTezina
