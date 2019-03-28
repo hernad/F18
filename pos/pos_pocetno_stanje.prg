@@ -208,10 +208,9 @@ STATIC FUNCTION pocetno_stanje_sql( hParams )
          hRec[ "rbr" ] := ++nCount
          hRec[ "idroba" ] := cIdRoba
          hRec[ "kolicina" ] := nKolicina
-         hRec[ "cijena" ] := pos_get_mpc()
+         hRec[ "cijena" ] := pos_get_mpc( roba->id )
          hRec[ "datum" ] := dDatDok
          hRec[ "idtarifa" ] := roba->idtarifa
-
          lOk := update_rec_server_and_dbf( "pos_pos", hRec, 1, "CONT" )
 
       ENDIF

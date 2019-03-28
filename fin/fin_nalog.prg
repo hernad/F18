@@ -201,8 +201,7 @@ FUNCTION fin_nalog_fix_greska_zaokruzenja_fin_pripr( cIdFirma, cIdVn, cBrNal, lA
       lRet := .T.
    ELSE
 
-      IF  ( lAuto .OR. ( Pitanje(, "Želite li uravnotežiti nalog (D/N) ?", cUravnotezitiDN ) == "D" ) )
-
+      //IF  ( lAuto .OR. ( Pitanje(, "Želite li uravnotežiti nalog (D/N) ?", cUravnotezitiDN ) == "D" ) )
          hRec[ "opis" ] := "GRESKA ZAOKRUZ."
          hRec[ "brdok" ] := ""
          hRec[ "d_p" ] := "2"
@@ -212,13 +211,12 @@ FUNCTION fin_nalog_fix_greska_zaokruzenja_fin_pripr( cIdFirma, cIdVn, cBrNal, lA
          hRec[ "idpartner" ] := ""
          hRec[ "iznosbhd" ] := nDuguje - nPotrazuje
          hRec[ "iznosdem" ] := Round( konverzija_km_dem( hRec[ "datdok" ], hRec[ "iznosbhd" ] ), 2 )
-
          APPEND BLANK
          dbf_update_rec( hRec )
          lRet := .T.
-      ELSE
-         lRet := .F.
-      ENDIF
+      //ELSE
+      //   lRet := .F.
+      //ENDIF
 
    ENDIF
 

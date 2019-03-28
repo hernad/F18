@@ -88,7 +88,7 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
       IF !pos_ignorisi_stanje()
          Alert( "Artikla " + cIdRoba + " nema na stanju !?" )
       ENDIF
-      _cijena := pos_get_mpc()
+      _cijena := pos_get_mpc( roba->id )
       _ncijena := 0
    ENDIF
 

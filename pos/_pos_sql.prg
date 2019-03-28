@@ -421,15 +421,37 @@ FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
    RETURN nStanje
 
 
+   FUNCTION pos_dostupno_artikal( cIdRoba )
+
+      LOCAL cQuery, oTable
+      LOCAL nI, oRow
+      LOCAL nStanje
+
+      // select sum(kol_ulaz-kol_izlaz), idroba from p2.pos_stanje where kol_ulaz-kol_izlaz<>0
+      //  group by idroba, kol_ulaz, kol_izlaz;
+
+      cQuery := "SELECT sum(kol_ulaz-kol_izlaz) as stanje FROM " + f18_sql_schema( "pos_stanje" )
+      cQuery += " WHERE trim(idroba)=" + sql_quote( Trim( cIdRoba ) )
+      cQuery += " AND kol_ulaz-kol_izlaz <> 0"
+      cQuery += " GROUP BY idroba"
+
+      oTable := run_sql_query( cQuery )
+      oRow := oTable:GetRow( 1 )
+      nStanje := oRow:FieldGet( oRow:FieldPos( "stanje" ) )
+
+      IF ValType( nStanje ) == "L"
+         nStanje := 0
+      ENDIF
+
+      RETURN nStanje
+
 /*
    => aCijene
       aCijenaItem [1] - cijena, [2] - ncijena, [3] - dat_od, [4] - dat_do, [5] - stanje
 */
 FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
 
-   LOCAL cQuery, oTable
-   LOCAL nI, oRow
-   LOCAL nStanje
+   LOCAL cQuery
    LOCAL aCijene := {}
 
    cQuery := "SELECT cijena, ncijena, dat_od, dat_do, kol_ulaz-kol_izlaz as stanje FROM " + f18_sql_schema( "pos_stanje" )
@@ -440,7 +462,7 @@ FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
    PushWa()
    SELECT F_POM
    use_sql( "POM", cQuery, "POM" )
-   oTable := run_sql_query( cQuery )
+   run_sql_query( cQuery )
    DO WHILE !Eof()
       AAdd( aCijene, { pom->cijena, pom->ncijena, pom->dat_od, pom->dat_do, pom->stanje } )
       SKIP
@@ -449,6 +471,7 @@ FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
    PopWa()
 
    RETURN aCijene
+
 
 FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
 
@@ -482,16 +505,14 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
    RETURN nTotal
 
 
-FUNCTION pos_get_mpc()
+FUNCTION pos_get_mpc( cIdRoba )
 
    LOCAL nCijena := 0
    LOCAL cField
    LOCAL oData, cQry
 
-   cField := pos_get_mpc_field()
-
-   cQry := "SELECT " + cField + " FROM " + f18_sql_schema( "roba" )
-   cQry += " WHERE id = " + sql_quote( roba->id )
+   cQry := "SELECT mpc FROM " + f18_sql_schema( "roba" )
+   cQry += " WHERE id=" + sql_quote( cIdRoba )
 
    oData := run_sql_query( cQry )
    IF !is_var_objekat_tpqquery( oData )
@@ -503,21 +524,6 @@ FUNCTION pos_get_mpc()
    ENDIF
 
    RETURN nCijena
-
-
-STATIC FUNCTION pos_get_mpc_field()
-
-   LOCAL cField := "mpc"
-
-   /*
-   LOCAL cSet := AllTrim( gSetMPCijena )
-
-   IF cSet <> "1"
-      cField := cField + cSet
-   ENDIF
-   */
-
-   RETURN cField
 
 
 FUNCTION o_vrstep( cId )
@@ -612,7 +618,6 @@ FUNCTION find_pos_osob_by_naz( cNaz )
    use_sql( cTable, cSqlQuery, cAlias )
 
    RETURN !Eof()
-
 
 
 FUNCTION find_pos_osob_by_korsif( cKorSif )

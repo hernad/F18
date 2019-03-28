@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-28
+
+-  ažuriranje KALK-FIN sa što manje pitanja
+
 ## 2019-03-27
 
 -  revert select_o_trfp use via use_sql_trfp()

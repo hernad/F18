@@ -168,7 +168,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
          ELSE
             cBrNalF := fin_prazan_broj_naloga()
          ENDIF
-
       ELSE
          cBrNalF := cNalog // ako je zadat broj naloga taj i uzmi
       ENDIF
@@ -204,7 +203,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
          ?? dDatNal
 
          IF lAFin .OR. lAMat
-            Inkey( 0 )
+            Inkey( 3 )
          ENDIF
 
       ELSE

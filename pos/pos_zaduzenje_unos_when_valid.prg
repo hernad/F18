@@ -23,13 +23,40 @@ FUNCTION pos_zaduzenje_valid_kolicina( nKol )
    IF LastKey() = K_UP
       RETURN .T.
    ENDIF
-   IF nKol = 0
+   IF nKol == 0
       MsgBeep( "Količina mora biti različita od nule!#Ponovite unos!", 20 )
-      RETURN ( .F. )
+      RETURN .F.
    ENDIF
 
-   RETURN ( .T. )
+   RETURN .T.
 
+
+FUNCTION pos_inventura_when_knjizna( cIdRoba, nKnjiznaKolicina, nPopisanaKolicina )
+
+  nKnjiznaKolicina := pos_dostupno_artikal( cIdRoba )
+  nPopisanaKolicina := -99999
+  ShowGets()
+
+RETURN .F.
+
+FUNCTION pos_inventura_when_kolicina_kol2( cIdroba, nKnjiznaKolicina, nPopisanaKolicina )
+
+   //IF LastKey() == K_UP
+   //    RETURN .T.
+   //ENDIF
+   IF nPopisanaKolicina == -99999
+      nPopisanaKolicina := nKnjiznaKolicina
+   END IF
+
+   RETURN .T.
+
+FUNCTION pos_inventura_valid_kolicina_kol2( cIdRoba, nKnjiznaKolicina, nPopisanaKolicina )
+
+   //IF LastKey() == K_UP
+   //    RETURN .T.
+   //ENDIF
+
+   RETURN .T.
 
 FUNCTION pos_zaduzenje_roba_when( cIdRoba )
 
@@ -41,6 +68,7 @@ FUNCTION pos_zaduzenje_roba_when( cIdRoba )
 FUNCTION pos_zaduzenje_roba_valid( cIdRoba, nX, nY )
 
    LOCAL lOk
+
    lOk := pos_postoji_roba( @cIdroba, nX, nY )
    cIdroba := PadR( cIdroba, POS_ROBA_DUZINA_SIFRE )
 

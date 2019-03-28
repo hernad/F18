@@ -69,7 +69,7 @@ FUNCTION pos_ispravi_stavku_racuna()
          _robanaz := roba->naz
          _jmj := roba->jmj
          IF !( roba->tip == "T" )
-            _cijena := pos_get_mpc()
+            _cijena := pos_get_mpc( roba->id )
          ENDIF
          _idtarifa := roba->idtarifa
          //pos_racun_iznos( pos_racun_iznos() + _cijena * _kolicina - _pos_pripr->cijena * _pos_pripr->kolicina )

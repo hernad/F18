@@ -16,7 +16,7 @@ STATIC s_oBrowse
 MEMVAR gPosProdajnoMjesto, gPosSamoProdaja, gIdRadnik
 MEMVAR Kol, ImeKol, Ch
 MEMVAR _IdPos, _IdVd, _IdRadnik, _idpartner, _BrDok, _IdRoba, _BrFaktP, _Opis, _Datum, _kolicina, _cijena, _ncijena
-MEMVAR _robanaz, _idtarifa, _jmj, _barkod, _dat_od, _dat_do
+MEMVAR _robanaz, _idtarifa, _jmj, _barkod, _dat_od, _dat_do, _kol2
 
 FUNCTION pos_zaduzenje( cIdVd )
 
@@ -103,19 +103,30 @@ FUNCTION pos_zaduzenje( cIdVd )
       _ncijena := 0
 
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space( 50 )
-      @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + AllTrim(Str(POS_ROBA_DUZINA_SIFRE)) ;
+      @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT "@!S" + AllTrim( Str( POS_ROBA_DUZINA_SIFRE ) ) ;
          WHEN pos_zaduzenje_roba_when( @_idroba ) ;
          VALID pos_zaduzenje_roba_valid( @_idroba, 2, 35 )
-      @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _Kolicina PICT "999999.999" ;
-         WHEN{|| ShowGets(), .T. } VALID pos_zaduzenje_valid_kolicina( _Kolicina )
+
+      IF _idvd <> POS_IDVD_INVENTURA
+         @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _Kolicina PICT "999999.999" ;
+            WHEN {|| ShowGets(), .T. } ;
+            VALID pos_zaduzenje_valid_kolicina( _Kolicina )
+      ELSE
+         @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "knjižna:" GET _Kolicina PICT "999999.999" ;
+            WHEN pos_inventura_when_knjizna( _idroba, @_Kolicina, @_kol2 )
+
+         @ box_x_koord() + 4, Col() + 2 SAY8 "popisana količina:" GET _Kol2 PICT "999999.999" ;
+            WHEN pos_inventura_when_kolicina_kol2( _idroba, @_Kolicina, @_Kol2 ) ;
+            VALID pos_inventura_valid_kolicina_kol2( _idroba, @_Kolicina, @_Kol2 )
+      ENDIF
 
       IF cIdvd == POS_IDVD_ZAHTJEV_SNIZENJE
-         @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" ;
+         @ box_x_koord() + 4, Col() + 2 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" ;
             WHEN {|| .F. } VALID {|| .T. }
          @  Row(), Col() + 2 SAY "Nova cijena:" GET _ncijena  PICT "99999.999" ;
-            VALID { || _ncijena <> 0 }
+            VALID {|| _ncijena <> 0 }
       ELSE
-         @ box_x_koord() + 4, box_y_koord() + 35 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" ;
+         @ box_x_koord() + 4, Col() + 2 SAY "MPC SA PDV:" GET _cijena  PICT "99999.999" ;
             WHEN {|| .F. } VALID {|| .T. }
       ENDIF
       READ
@@ -130,7 +141,7 @@ FUNCTION pos_zaduzenje( cIdVd )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-      _cijena := iif( Empty( _cijena ), pos_get_mpc(), _cijena )
+      _cijena := iif( Empty( _cijena ), pos_get_mpc( roba->id ), _cijena )
       _barkod := roba->barkod
       my_rlock()
       Gather()
@@ -224,13 +235,13 @@ FUNCTION pos_ispravi_zaduzenje()
    cGetId := _idroba
    nGetKol := _Kolicina
    cColor := SetColor()
-   prikaz_dostupnih_opcija_crno_na_zuto( { _u("<B>-Briši stavku"), "<Esc>-Kraj ispravke" } )
+   prikaz_dostupnih_opcija_crno_na_zuto( { _u( "<B>-Briši stavku" ), "<Esc>-Kraj ispravke" } )
    SetColor( cColor )
 
    s_oBrowse:autolite := .T.
    s_oBrowse:configure()
-   //aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) }, {| Ch | Ch == K_ENTER } }
-   //aProcs := { {|| pos_brisi_stavku_zaduzenja() }, {|| pos_ispravi_stavku_zaduzenja() } }
+   // aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) }, {| Ch | Ch == K_ENTER } }
+   // aProcs := { {|| pos_brisi_stavku_zaduzenja() }, {|| pos_ispravi_stavku_zaduzenja() } }
    aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) } }
    aProcs := { {|| pos_brisi_stavku_zaduzenja() } }
    ShowBrowse( s_oBrowse, aConds, aProcs )
@@ -275,8 +286,8 @@ FUNCTION pos_ispravi_stavku_zaduzenja()
    _Kolicina := PRIPRZ->Kolicina
    Box(, 3, 80 )
    @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "Artikal:" GET _idroba PICTURE "@K" ;
-        WHEN pos_zaduzenje_roba_when( @_idroba ) ;
-        VALID pos_zaduzenje_roba_valid( @_idroba, 1, 30 )
+      WHEN pos_zaduzenje_roba_when( @_idroba ) ;
+      VALID pos_zaduzenje_roba_valid( @_idroba, 1, 30 )
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 "Količina:" GET _Kolicina VALID pos_zaduzenje_valid_kolicina ( _Kolicina )
    READ
 

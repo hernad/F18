@@ -57,21 +57,17 @@ GRANT ALL ON FUNCTION {{ item_prodavnica }}.setmetric TO xtrole;
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos varchar, cIdVd varchar, dDatum date) RETURNS varchar
   LANGUAGE plpgsql
   AS $$
-
 DECLARE
    cBrDok varchar;
 BEGIN
-
-    SELECT brdok from {{ item_prodavnica }}.pos_doks where idvd=cIdVd and datum=dDatum order by brdok desc limit 1
+    SELECT brdok from {{ item_prodavnica }}.pos where idvd=cIdVd and datum=dDatum order by brdok desc limit 1
            INTO cBrDok;
     IF cBrdok IS NULL THEN
         cBrDok := to_char(1, '99999999');
     ELSE
         cBrDok := to_char( to_number(cBrDok, '09999999') + 1, '99999999');
     END IF;
-
     RETURN lpad(btrim(cBrDok), 8, ' ');
-
 END;
 $$;
 
@@ -363,6 +359,8 @@ DECLARE
     cOpis varchar;
     nPosCijena numeric;
     dDatum date;
+    lPovratKalo boolean;
+    cBrDokKalo varchar;
 BEGIN
      dDatum := current_date;
      select * from {{ item_prodavnica }}.pos where brfaktp=cBrFaktP and idvd='21'
@@ -378,17 +376,26 @@ BEGIN
          RETURN -2;
      END IF;
 
-     IF lPreuzimaSe THEN
-        cOpis := 'PRIJEM RADNIK: ' || cIdRadnik;
+     cOpis := btrim( coalesce( rec_dok.opis, '' ) );
+     IF cOpis = '780' THEN --
+       lPovratKalo := True;
      ELSE
-        cOpis := 'ODBIJENO RADNIK: ' || cIdRadnik;
+       lPovratKalo := False;
      END IF;
-
+     IF lPreuzimaSe THEN
+        cOpis := cOpis || ': PRIJEM RADNIK: ' || cIdRadnik;
+     ELSE
+        cOpis := cOpis || ': ODBIJENO RADNIK: ' || cIdRadnik;
+     END IF;
 
      INSERT INTO {{ item_prodavnica }}.pos(ref, idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do, idpartner)
          VALUES(rec_dok.dok_id, rec_dok.idpos, '22', rec_dok.brdok, dDatum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do, rec_dok.idpartner);
 
      IF lPreuzimaSe THEN
+
+        IF lPovratKalo THEN -- radi se o povratu neispravne robe u magacin
+           cBrDokKalo := {{ item_prodavnica }}.pos_novi_broj_dokumenta(rec_dok.idpos, rec_dok.brdok, dDatum);
+        END IF;
         -- ako se roba preuzima stavke se pune
         FOR rec IN
             SELECT * from {{ item_prodavnica }}.pos_items
@@ -402,6 +409,10 @@ BEGIN
             INSERT INTO {{ item_prodavnica }}.pos_items(idpos, idvd, brdok, datum, rbr, kolicina, idroba, idtarifa, cijena, ncijena, kol2, robanaz, jmj)
               VALUES(rec.idpos, '22', rec.brdok, dDatum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
 
+            IF lPovratKalo THEN -- stavke povrata neispravne robe u magacin
+              INSERT INTO {{ item_prodavnica }}.pos_items(idpos, idvd, brdok, datum, rbr, kolicina, idroba, idtarifa, cijena, ncijena, kol2, robanaz, jmj)
+                  VALUES(rec.idpos, '99', rec.brdok, dDatum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
+            END IF;
         END LOOP;
      ELSE
         --ako se ne prihvata items se ne pune
@@ -412,6 +423,7 @@ BEGIN
      RETURN 0;
 END;
 $$;
+
 
 
 -- servisna funkcija prvenstveno

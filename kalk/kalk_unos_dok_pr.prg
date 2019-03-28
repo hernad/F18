@@ -17,6 +17,7 @@ MEMVAR _TMarza, _IdKonto, _IdKonto2, _IdTarifa, _IDRoba, _Kolicina, _DatFaktP, _
 MEMVAR _MKonto, _MU_I, _Error
 MEMVAR PicDEM, PicKol
 MEMVAR cRNT2, cRNT3, cRNT4, cRNT5
+MEMVAR GetList
 
 FUNCTION kalk_unos_dok_pr()
 
@@ -153,7 +154,6 @@ FUNCTION kalk_unos_dok_pr()
    RETURN LastKey()
 
 
-
 FUNCTION kalk_get_pr_2()
 
    LOCAL cSPom := " (%,A,U,R) "
@@ -250,8 +250,6 @@ FUNCTION kalk_pripr_pobrisi_sirovine( cIdFirma, cIdVd, cBrDok, nKalkRbr, bDokume
    RETURN .T.
 
 
-
-
 FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
 
    LOCAL nRbr100
@@ -304,12 +302,10 @@ FUNCTION kalk_pripr_napuni_sirovine_za( nKalkRbr, _idroba, _kolicina )
       info_bar( _idkonto2 + "/" + sast->id2, NIL )
 
       IF _kolicina >= 0 .OR. Round( _NC, 3 ) == 0 .AND. !( roba->tip $ "UT" )
-
          SELECT roba
          hRec := dbf_get_rec()
          hRec[ "nc" ] := _nc
          update_rec_server_and_dbf( Alias(), hRec, 1, "FULL" ) // nafiluj sifarnik robe sa nc sirovina, robe
-
       ENDIF
 
       SELECT kalk_pripr // nc sirovine, gkolicina se puni sa kolicinom na stanju

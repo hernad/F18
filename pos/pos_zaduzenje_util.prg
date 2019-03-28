@@ -41,6 +41,12 @@ FUNCTION pos_dokument_naziv( cIdVd )
 
    CASE cIdVD == POS_IDVD_OTPREMNICA_MAGACIN_PRIJEM
       RETURN "POS prijem iz magacina"
+
+   CASE cIdVD == POS_IDVD_PRIJEM_KALO
+      RETURN "POS evidencija kalo"
+
+   CASE cIdVD == POS_IDVD_INVENTURA
+         RETURN "POS inventura"
    ENDCASE
 
    RETURN "<undefined>"

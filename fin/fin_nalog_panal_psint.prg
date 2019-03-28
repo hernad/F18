@@ -62,11 +62,10 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
       cBrNal := field->BrNal
 
       IF !lAuto
-         IF !box_fin_nalog( @cIdFirma, @cIdVn, @cBrNal, @dDatNal )
-            RETURN .F.
-         ENDIF
+         //IF !box_fin_nalog( @cIdFirma, @cIdVn, @cBrNal, @dDatNal )
+        //    RETURN .F.
+         //ENDIF
       ENDIF
-      AltD()
       HSEEK cIdFirma + cIdVN + cBrNal // psuban
       IF Eof()
          my_close_all_dbf()
@@ -136,7 +135,7 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
 
 FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
 
-   LOCAL A, cDN := "N"
+   LOCAL A  //, cDN := "N"
    LOCAL nStr, nD1, nD2, nP1, nP2
    LOCAL cIdFirma, cIDVn, cBrNal
    LOCAL nDugBHD, nDugDEM, nPotBHD, nPotDEM
@@ -169,21 +168,21 @@ FUNCTION fin_gen_sint_stavke( lStampa, dDatNal )
 
       fin_gen_panal_psint( cIdFirma, cIdVn, cBrNal, dDatNal )
 
-      IF lStampa
-         Box("<CENTAR>", 2, 58 )
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Štampanje analitike/sintetike za nalog " + cIdfirma + "-" + cIdvn + "-" + cBrnal + " ?"  GET cDN PICT "@!" VALID cDN $ "DN"
-         READ
-         BoxC()
-      ENDIF
+      //IF lStampa
+      //   Box("<CENTAR>", 2, 58 )
+      //   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Štampanje analitike/sintetike za nalog " + cIdfirma + "-" + cIdvn + "-" + cBrnal + " ?"  GET cDN PICT "@!" VALID cDN $ "DN"
+      //   READ
+      //   BoxC()
+      //ENDIF
 
       SELECT PSUBAN
       PushWA()
 
-      IF cDN == "D"
-         SELECT PANAL
-         SEEK cIdfirma + cIdvn + cBrnal
-         fin_sinteticki_nalog_stampa( .F. )
-      ENDIF
+      //IF cDN == "D"
+      //   SELECT PANAL
+      //   SEEK cIdfirma + cIdvn + cBrnal
+      //   fin_sinteticki_nalog_stampa( .F. )
+      //ENDIF
 
       my_close_all_dbf()
       fin_open_lock_panal( .F. )

@@ -25,7 +25,7 @@ MEMVAR _TBankTr
 MEMVAR PicDEM, PicProc, PicCDem, PicKol, gPICPROC, nKalkStrana
 MEMVAR ImeKol, Kol
 MEMVAR picv
-//MEMVAR gBrojacKalkulacija
+// MEMVAR gBrojacKalkulacija
 MEMVAR Ch
 MEMVAR opc, Izbor, h
 
@@ -36,12 +36,12 @@ MEMVAR nKalkRBr, _rbr
 MEMVAR nKalkVPV16PredhodnaStavka, nKalkMpvSaPDV80PredhodnaStavka, nKalkNVPredhodnaStavka
 MEMVAR _ERROR
 
-
 STATIC cENTER := Chr( K_ENTER ) + Chr( K_ENTER ) + Chr( K_ENTER )
 
 FUNCTION kalk_header_get1( lNoviDokument )
 
    LOCAL GetList := {}
+
    // LOCAL cOpisDokumenta := SPACE(100)
 
    IF lNoviDokument
@@ -92,7 +92,8 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    LOCAL nI
    LOCAL cOpcijaRed, nWidth
    LOCAL cSeparator := hb_UTF8ToStrBox( BROWSE_COL_SEP )
-   //LOCAL cPicKol := "999999.999"
+
+   // LOCAL cPicKol := "999999.999"
    LOCAL bPodvuci := {|| iif( field->ERROR == "1", .T., .F. ) }
 
    hb_default( @lAsistentObrada, .F. )
@@ -111,9 +112,9 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    AAdd( ImeKol, { "F.", {|| my_dbSelectArea( F_KALK_PRIPR ), field->idfirma   }, "idfirma"   } )
    AAdd( ImeKol, { "VD", {|| field->IdVD                      }, "IdVD"        } )
    AAdd( ImeKol, { "BrDok", {|| field->BrDok                  }, "BrDok"       } )
-   AAdd( ImeKol, { "R.Br", {|| TRANSFORM(field->Rbr, "99999") }, "Rbr"         } )
+   AAdd( ImeKol, { "R.Br", {|| Transform( field->Rbr, "99999" ) }, "Rbr"         } )
    AAdd( ImeKol, { "Dat.Kalk", {|| field->DatDok              }, "DatDok"      } )
-   //AAdd( ImeKol, { "Dat.Fakt", {|| field->DatFaktP            }, "DatFaktP"    } )
+   // AAdd( ImeKol, { "Dat.Fakt", {|| field->DatFaktP            }, "DatFaktP"    } )
    AAdd( ImeKol, { "K.mag. ", {|| field->mkonto               }, "mKonto"     } )
    AAdd( ImeKol, { "K.prod.", {|| field->pkonto               }, "pKonto"    } )
    AAdd( ImeKol, { "IdRoba", {|| field->IdRoba                }, "IdRoba"      } )
@@ -130,6 +131,7 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    AAdd( ImeKol, { "Br.Fakt", {|| field->brfaktp }, "brfaktp"     } )
    AAdd( ImeKol, { "Partner", {|| field->idpartner }, "idpartner"   } )
    AAdd( ImeKol, { "E", {|| field->error },  "error"       } )
+   AAdd( ImeKol, { "Opis", {|| Left( field->opis, 80 ) },  "opis"       } )
 
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
@@ -159,6 +161,7 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    cOpcijaRed := _upadr( "<c+F8> Rasp.troškova", nWidth ) + cSeparator
    cOpcijaRed += _upadr( "<A> Asistent", nWidth ) + cSeparator
    cOpcijaRed += _upadr( "<F10> Dodatne opc.", nWidth ) + cSeparator
+   cOpcijaRed += _upadr( "<O> Opis dokumenta", nWidth ) + cSeparator
 
    @ box_x_koord() + nMaxRow, box_y_koord() + 2 SAY8 cOpcijaRed
 
@@ -209,6 +212,9 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
    CASE Upper( Chr( Ch ) ) == "C" // Asistent Continue
       RETURN DE_CONT
 
+   CASE Upper( Chr( Ch ) ) == "O" // opis
+      kalk_pripr_opis()
+      RETURN DE_REFRESH
    CASE Ch == K_ALT_K
       RETURN kalk_kontiraj_alt_k()
 
@@ -260,7 +266,7 @@ FUNCTION kalk_pripr_key_handler( lAsistentObrada )
    CASE Ch == K_CTRL_T
       IF Pitanje(, "Želite izbrisati ovu stavku (D/N) ?", "D" ) == "D"
          cLogInfo := kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + kalk_pripr->brdok
-         cStavka := AllTrim(Transform(kalk_pripr->rbr, '99999'))
+         cStavka := AllTrim( Transform( kalk_pripr->rbr, '99999' ) )
          // cArtikal := kalk_pripr->idroba
          // nKolicina := kalk_pripr->kolicina
          // nNc := kalk_pripr->nc
@@ -348,7 +354,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    LOCAL nTrec
 
    hOldDokument := hb_Hash()
-   //_opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
+   // _opis := fetch_metric( "kalk_dodatni_opis_kod_unosa_dokumenta", NIL, "N" ) == "D"
 
    IF RecCount() == 0
       Msg( "Ako želite započeti unos novog dokumenta: <Ctrl-N>" )
@@ -429,7 +435,7 @@ FUNCTION kalk_ispravka_postojeca_stavka()
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
-         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + TRANSFORM(field->rbr, '99999')
+         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + Transform( field->rbr, '99999' )
             IF Left( kalk_pripr->idkonto2, 3 ) == "XXX"
                Scatter()
                _tbanktr := ""
@@ -469,7 +475,6 @@ FUNCTION kalk_ispravka_postojeca_stavka()
    ENDIF
 
    RETURN DE_CONT
-
 
 
 STATIC FUNCTION kalk_kontiraj_alt_k()
@@ -589,7 +594,7 @@ FUNCTION kalk_unos_nova_stavka()
          _kolicina := - kalk_pripr->kolicina
 
          nKalkRbr := _rbr + 1
-         //_Rbr := rbr_u_char( nKalkRbr )
+         // _Rbr := rbr_u_char( nKalkRbr )
 
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
 
@@ -720,7 +725,7 @@ FUNCTION kalk_edit_sve_stavke( lAsistentObrada, lStartPocetak )
          Box( "", BOX_HEIGHT, BOX_WIDTH, .F., "Protustavka" )
          SEEK _idfirma + _idvd + _brdok + _rbr
          _tbanktr := "X"
-         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + TRANSFORM(field->rbr, '99999')
+         DO WHILE !Eof() .AND. _idfirma + _idvd + _brdok + _rbr == field->idfirma + field->idvd + field->brdok + Transform( field->rbr, '99999' )
             IF Left( field->idkonto2, 3 ) == "XXX"
                Scatter()
                _tbanktr := ""
@@ -915,7 +920,7 @@ FUNCTION kalk_edit_stavka( lNoviDokument, hParams )
 
 FUNCTION kalk_unos_1( lNoviDokument, hParams )
 
-   //PRIVATE lKalkIzgenerisaneStavke := .F.
+   // PRIVATE lKalkIzgenerisaneStavke := .F.
    PRIVATE Getlist := {}
 
    IF kalk_header_get1( lNoviDokument ) == 0
@@ -1070,7 +1075,8 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
    LOCAL cIdFirmaNew := new_dok[ "idfirma" ]
    LOCAL cBrDokNew := new_dok[ "brdok" ]
    LOCAL cIdVdNew := new_dok[ "idvd" ]
-   //LOCAL lViseKonta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" ) == "D"
+
+   // LOCAL lViseKonta := fetch_metric( "kalk_dokument_vise_konta", NIL, "N" ) == "D"
 
    SELECT kalk_pripr
    GO TOP
@@ -1096,10 +1102,10 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
       hRec[ "idvd" ] := hRecTekuci[ "idvd" ]
       hRec[ "brdok" ] := hRecTekuci[ "brdok" ]
       hRec[ "datdok" ] := hRecTekuci[ "datdok" ]
-      //IF !lViseKonta
+      // IF !lViseKonta
       hRec[ "idpartner" ] := hRecTekuci[ "idpartner" ]
-      //ENDIF
-      IF !( hRec[ "idvd" ] $ "16#80" )  //.AND. !lViseKonta
+      // ENDIF
+      IF !( hRec[ "idvd" ] $ "16#80" )  // .AND. !lViseKonta
          hRec[ "idkonto" ] := hRecTekuci[ "idkonto" ]
          hRec[ "idkonto2" ] := hRecTekuci[ "idkonto2" ]
          hRec[ "pkonto" ] := hRecTekuci[ "pkonto" ]
@@ -1292,11 +1298,11 @@ FUNCTION kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok )
 
       IF field->idvd $ "11#41#42#RN#19"
          IF field->fcj == 0
-            cOk += AllTrim( Transform(field->rbr, '99999') ) + ";"
+            cOk += AllTrim( Transform( field->rbr, '99999' ) ) + ";"
          ENDIF
       ELSEIF field->idvd $ "10#16#96#94#95#14#80#81#"
          IF field->nc == 0
-            cOk += AllTrim( Transform(field->rbr, '99999') ) + ";"
+            cOk += AllTrim( Transform( field->rbr, '99999' ) ) + ";"
          ENDIF
       ENDIF
       SKIP
@@ -1315,5 +1321,36 @@ FUNCTION o_kalk_edit()
    SELECT kalk_pripr
    SET ORDER TO TAG "1"
    GO TOP
+
+   RETURN .T.
+
+FUNCTION kalk_pripr_opis()
+
+   LOCAL cOpis, nSirina
+
+   SELECT kalk_pripr
+   PushWa()
+   GO TOP
+   cOpis := kalk_pripr->opis
+
+   nSirina := f18_max_cols() - 6
+   Box( "<CENTAR>", 2, nSirina )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Opis:"
+   @ box_x_koord() + 2, box_y_koord() + 2 GET  cOpis PICTURE "@S" + Alltrim(Str(nSirina - 3))
+   READ
+   BoxC()
+
+   IF LastKey() == K_ESC
+      PopwA()
+      RETURN .F.
+   ENDIF
+
+   SELECT kalk_pripr
+   SET ORDER TO
+   DO WHILE !Eof()
+      rreplace opis WITH cOpis
+      SKIP
+   ENDDO
+   PopWa()
 
    RETURN .T.

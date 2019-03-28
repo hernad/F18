@@ -176,6 +176,7 @@ DECLARE
 	 cIdRoba varchar;
 	 cIdTarifa varchar;
 	 lFakturaPostoji boolean;
+	 nVS integer;
 
 	 rptItem prod_magacin_type;
 	 aRpt prod_magacin_type[] DEFAULT '{}';
@@ -186,16 +187,14 @@ BEGIN
 		 lFakturaPostoji := False;
 		 nProdavnica := -1;
 		 nPredhodnaProd := -1;
-     FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina IN
-          SELECT sfak.brf, sfak.vcij, sfak.prod, sfak.rb, sfak.ident, sfak.kold from public.sfak_prodavnice_by_datum(dDatum) sfak
+     FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina, nVS IN
+          SELECT sfak.brf, sfak.vcij, sfak.prod, sfak.rb, sfak.ident, sfak.kold, sfak.vs from public.sfak_prodavnice_by_datum(dDatum) sfak
           WHERE kp=nMagacin
           ORDER BY brf, rb
      LOOP
-
 		     cPKonto := public.prodavnica_konto(nProdavnica);
 		     cIdRoba := public.roba_id_by_sifradob(nRobaId);
 		     cIdTarifa := public.idtarifa_by_idroba(cIdRoba);
-
           IF ( public.prodavnica_konto(nProdavnica) = '99999' ) THEN
 					   IF nPredhodnaProd <> nProdavnica THEN
 					     rptItem := (
@@ -226,7 +225,7 @@ BEGIN
 							    nProdavnica,
 							 		public.magacin_konto(nMagacin),
 							 		public.prodavnica_konto(nProdavnica),
-							 		cBrojFaktureT,
+							 		cBrojFaktureT || '-' || to_char(nVS, '9999'),
 							 		'',
 							 		dDatum
 							 );
@@ -240,24 +239,25 @@ BEGIN
 						    nProdavnica,
 						 		public.magacin_konto(nMagacin),
 						 		public.prodavnica_konto(nProdavnica),
-						 		cBrojFaktureT,
+						 		cBrojFaktureT || '-' || to_char(nVS, '9999'),
 						 		cBrDok,
 						 		dDatum
 						 );
 						 aRpt := array_append(aRpt, rptItem);
-             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp)
+             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,opis)
                  values(
                    cIdFirma, cIdVd, cBrDok, dDatum,
                    public.magacin_konto(nMagacin),
 									 public.prodavnica_konto(nProdavnica),
-                   cBrojFaktureT
+                   cBrojFaktureT,
+									 btrim(to_char(nVS, '9999'))
                  );
           END IF;
 
           IF lFakturaPostoji THEN
 					   CONTINUE;
 					END IF;
-          RAISE INFO ' stavke:  % % [%] %  mpc_koncij_sif: %',  cPKonto, nRbr, cIdRoba, nKolicina, public.mpc_by_koncij(cPKonto, cIdRoba);
+          RAISE INFO ' stavke: % % [%] %  mpc_koncij_sif: %',  cPKonto, nRbr, cIdRoba, nKolicina, public.mpc_by_koncij(cPKonto, cIdRoba);
           INSERT INTO public.kalk_kalk(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,mu_i,pu_i,rbr,idroba,idtarifa,kolicina,mpcsapp)
           values(
             cIdFirma, cIdVd, cBrDok, dDatum,

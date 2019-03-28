@@ -16,7 +16,6 @@ FUNCTION cre_all_kalk( ver )
    kreiraj_kalk_bazirane_tabele( ver )
    kreiraj_ostale_kalk_tabele( ver )
 
-
    RETURN .T.
 
 /*

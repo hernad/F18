@@ -26,6 +26,8 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
    LOCAL lOk := .T.
    LOCAL hParams := hb_Hash()
    LOCAL cOdgovorDupliNalog := "N"
+   LOCAL lAutomatskiIzbrisatiPostojeci := .T.
+   LOCAL cMsg
 
    IF ( lAutomatikaAzuriranja == NIL )
       lAutomatikaAzuriranja := .F.
@@ -33,7 +35,7 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
 
    o_fin_za_azuriranje()
 
-   IF fin_pripr->( RecCount() == 0 ) .OR. ( !lAutomatikaAzuriranja .AND. Pitanje(, "Izvršiti ažuriranje fin naloga ? (D/N)?", "D" ) == "N" )
+   IF fin_pripr->( RecCount() == 0 ) //.OR. ( !lAutomatikaAzuriranja .AND. Pitanje(, "Izvršiti ažuriranje fin naloga ? (D/N)?", "D" ) == "N" )
       RETURN .F.
    ENDIF
 
@@ -64,9 +66,11 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
       cIdVn := aNalozi[ nI, 2 ]
       cBrNal := aNalozi[ nI, 3 ]
       IF fin_dokument_postoji( cIdFirma, cIdVn, cBrNal )
-         IF Pitanje( , "Izbrisati postojeći FIN nalog: "  + cIdFirma + "-" + cIdVn + "-" + cBrNal + " ?", cOdgovorDupliNalog ) == "D"
+         IF lAutomatskiIzbrisatiPostojeci .OR. Pitanje( , "Izbrisati postojeći FIN nalog: "  + cIdFirma + "-" + cIdVn + "-" + cBrNal + " ?", cOdgovorDupliNalog ) == "D"
             IF fin_nalog_brisi_iz_kumulativa( cIdFirma, cIdVn, cBrNal )
-               log_write( "F18_DOK_OPER: brisanje duplog fin naloga: " + cIdFirma + "-" + cIdVn + "-" + cBrNal, 2 )
+               cMsg :=  "Brisanje duplog fin naloga: " + cIdFirma + "-" + cIdVn + "-" + cBrNal
+               MsgBeep( cMsg )
+               log_write( "F18_DOK_OPER: " + cMsg, 2 )
             ELSE
                MsgBeep( "Greška sa brisanjem FIN naloga " + cIdFirma + "-" + cIdVn + "-" + cBrNal + "!#Poništavam operaciju." )
             ENDIF
@@ -83,21 +87,17 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
       cBrNal := aNalozi[ nI, 3 ]
 
       IF fin_dokument_postoji( cIdFirma, cIdVn, cBrNal )
-
          MsgBeep( "Nalog " + cIdFirma + "-" + cIdVn + "-" + AllTrim( cBrNal ) + " već postoji ažuriran !" )
          automatska_obrada_error( .T. )
-
          IF !lViseNalogaUPripremi
             run_sql_query( "ROLLBACK" )
             RETURN .F.
          ELSE
             LOOP
          ENDIF
-
       ENDIF
 
       IF !fin_azur_sql( oServer, cIdFirma, cIdVn, cBrNal )
-
          run_sql_query( "ROLLBACK" )
          log_write( "F18_DOK_OPER: greška kod ažuriranja fin naloga: " + cIdFirma + "-" + cIdVn + "-" + cBrNal, 2 )
          MsgBeep( "Problem sa ažuriranjem naloga na SQL server !" )
@@ -113,7 +113,6 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
 
    SELECT fin_pripr
    my_dbf_pack()
-
    fin_brisi_p_tabele( .T. )
 
    RETURN .T.

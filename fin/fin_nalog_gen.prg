@@ -110,7 +110,7 @@ FUNCTION fin_gen_panal_psint( cIdFirma, cIdVn, cBrNal, dDatNal )
    RETURN .T.
 
 
-
+/*
 FUNCTION box_fin_nalog( cIdFirma, cIdVn, cBrNal, dDatNal )
 
    LOCAL GetList := {}
@@ -144,7 +144,7 @@ FUNCTION box_fin_nalog( cIdFirma, cIdVn, cBrNal, dDatNal )
    ENDIF
 
    RETURN .T.
-
+*/
 
 /*
    otvori psuban i ostale potrebne ostale tabele
