@@ -133,7 +133,10 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       select_o_fin_pripr()
       SET ORDER TO TAG "1"
       GO TOP
-
+      //IF reccount2()
+      //  MsgBeep("FIN priprema izbrisana !")
+      //ENDIF
+      my_dbf_zap()
       o_nalog()
       SET ORDER TO TAG "1"
 

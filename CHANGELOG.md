@@ -3,6 +3,7 @@
 ## 2019-03-28
 
 -  ažuriranje KALK-FIN sa što manje pitanja
+-  ažuriranje KALK-FIN fin priprema brisanje
 
 ## 2019-03-27
 
