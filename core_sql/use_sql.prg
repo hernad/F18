@@ -438,6 +438,7 @@ STATIC FUNCTION _use_sql_trfp( cTable, nWa, cShema, cIdVd )
 
    INDEX ON ( field->idvd + field->shema + field->idkonto + field->id + field->idtarifa + field->idvn + field->naz )  TAG ID TO ( cTable )
    SET ORDER TO TAG "ID"
+   GO TOP
 
    RETURN .T.
 

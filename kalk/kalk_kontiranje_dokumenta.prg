@@ -171,6 +171,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    use_sql_trfp( koncij->shema, finmat->IdVD )
    //SEEK finmat->IdVD + koncij->shema
 
+altd()
    cIdVnTrFP := trfp->IdVN
    // uzmi vrstu naloga koja ce se uzeti u odnosu na prvu kalkulaciju
    // koja se kontira

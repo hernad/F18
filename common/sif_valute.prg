@@ -12,6 +12,9 @@
 
 #include "f18.ch"
 
+MEMVAR Kol, ImeKol
+MEMVAR wTip
+
 /* Kurs(dDat,cValIz,cValU)
  *   param: dDat - datum na koji se trazi omjer
  *   param: cValIz - valuta iz koje se vrsi preracun iznosa
@@ -23,37 +26,38 @@
  *
  *  return f-ja vraca protuvrijednost jedinice valute cValIz u valuti cValU
  */
-FUNCTION Kurs( datum, val_iz, val_u )
+FUNCTION Kurs( dDatum, cValIz, cValU )
 
-   LOCAL oDataSet, cQuery, _tmp_1, _tmp_2, oRow
+   LOCAL oDataSet, cQuery, nTmp1, nTmp2, oRow
+   LOCAL cId, cWhere
 
-   _tmp_1 := 1
-   _tmp_2 := 1
+   nTmp1 := 1
+   nTmp2 := 1
 
-   IF val_iz == NIL
-      val_iz := "P"
+   IF cValIz == NIL
+      cValIz := "P"
    ENDIF
 
-   IF val_u == NIL
-      IF val_iz == "P"
-         val_u := "D"
+   IF cValU == NIL
+      IF cValIz == "P"
+         cValU := "D"
       ELSE
-         val_u := "P"
+         cValU := "P"
       ENDIF
    ENDIF
 
-   IF ( val_iz == "P" .OR. val_iz == "D" )
-      _where := " tip = " + sql_quote( val_iz )
+   IF ( cValIz == "P" .OR. cValIz == "D" )
+      cWhere := " tip = " + sql_quote( cValIz )
    ELSE
-      _where := " id = " + sql_quote( val_iz )
+      cWhere := " id = " + sql_quote( cValIz )
    ENDIF
 
-   IF !Empty( datum )
-      _where += " AND ( " + _sql_date_parse( "datum", NIL, datum ) + ") "
+   IF !Empty( dDatum )
+      cWhere += " AND ( " + _sql_date_parse( "datum", NIL, dDatum ) + ") "
    ENDIF
 
    cQuery := "SELECT * FROM " + f18_sql_schema("valute")
-   cQuery += " WHERE " + _where
+   cQuery += " WHERE " + cWhere
    cQuery += " ORDER BY id, datum"
 
    oDataSet := run_sql_query( cQuery )
@@ -61,17 +65,17 @@ FUNCTION Kurs( datum, val_iz, val_u )
    oRow := oDataSet:GetRow( 1 )
 
    IF oDataSet:LastRec() == 0
-      Msg( "Nepostojeća valuta iz koje se pretvara iznos:## '" + val_iz + "' !" )
-      _tmp_1 := 1
-   ELSEIF !Empty( datum ) .AND. ( DToS( datum ) < DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
-      Msg( "Nepostojeći kurs valute iz koje se pretvara iznos:## '" + val_iz + "'. Provjeriti datum !" )
-      _tmp_1 := 1
+      Msg( "Nepostojeća valuta iz koje se pretvara iznos:## '" + cValIz + "' !" )
+      nTmp1 := 1
+   ELSEIF !Empty( dDatum ) .AND. ( DToS( dDatum ) < DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
+      Msg( "Nepostojeći kurs valute iz koje se pretvara iznos:## '" + cValIz + "'. Provjeriti datum !" )
+      nTmp1 := 1
    ELSE
-      _id := hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "id" ) ) )
-      DO WHILE !oDataSet:Eof() .AND. _id == hb_UTF8ToStr( oDataSet:FieldGet( oDataSet:FieldPos( "id" ) ) )
+      cId := hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "id" ) ) )
+      DO WHILE !oDataSet:Eof() .AND. cId == hb_UTF8ToStr( oDataSet:FieldGet( oDataSet:FieldPos( "id" ) ) )
          oRow := oDataSet:GetRow()
-         _tmp_1 := oRow:FieldGet( oRow:FieldPos( "kurs1" ) )
-         IF !Empty( datum ) .AND. ( DToS( datum ) >= DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
+         nTmp1 := oRow:FieldGet( oRow:FieldPos( "kurs1" ) )
+         IF !Empty( dDatum ) .AND. ( DToS( dDatum ) >= DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
             oDataSet:Skip()
          ELSE
             EXIT
@@ -80,18 +84,18 @@ FUNCTION Kurs( datum, val_iz, val_u )
    ENDIF
 
    // valuta u
-   IF ( val_u == "P" .OR. val_u == "D" )
-      _where := " tip = " + sql_quote( val_u )
+   IF ( cValU == "P" .OR. cValU == "D" )
+      cWhere := " tip = " + sql_quote( cValU )
    ELSE
-      _where := " id = " + sql_quote( val_u )
+      cWhere := " id = " + sql_quote( cValU )
    ENDIF
 
-   IF !Empty( datum )
-      _where += " AND ( " + _sql_date_parse( "datum", NIL, datum ) + ") "
+   IF !Empty( dDatum )
+      cWhere += " AND ( " + _sql_date_parse( "datum", NIL, dDatum ) + ") "
    ENDIF
 
    cQuery := "SELECT * FROM " + f18_sql_schema( "valute" )
-   cQuery += " WHERE " + _where
+   cQuery += " WHERE " + cWhere
    cQuery += " ORDER BY id, datum"
 
    oDataSet := run_sql_query( cQuery )
@@ -99,19 +103,19 @@ FUNCTION Kurs( datum, val_iz, val_u )
    oRow := oDataSet:GetRow( 1 )
 
    IF oDataSet:LastRec() == 0
-      Msg( "Nepostojeća valuta u koju se pretvara iznos:## '" + val_u + "' !" )
-      _tmp_1 := 1
-      _tmp_2 := 1
-   ELSEIF !Empty( datum ) .AND. ( DToS( datum ) < DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
-      Msg( "Nepostojeći kurs valute u koju se pretvara iznos:## '" + val_u + "'. Provjeriti datum !" )
-      _tmp_1 := 1
-      _tmp_2 := 1
+      Msg( "Nepostojeća valuta u koju se pretvara iznos:## '" + cValU + "' !" )
+      nTmp1 := 1
+      nTmp2 := 1
+   ELSEIF !Empty( dDatum ) .AND. ( DToS( dDatum ) < DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
+      Msg( "Nepostojeći kurs valute u koju se pretvara iznos:## '" + cValU + "'. Provjeriti datum !" )
+      nTmp1 := 1
+      nTmp2 := 1
    ELSE
-      _id := hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "id" ) ) )
-      DO WHILE !oDataSet:Eof() .AND. _id == hb_UTF8ToStr( oDataSet:FieldGet( oDataSet:FieldPos( "id" ) ) )
+      cId := hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "id" ) ) )
+      DO WHILE !oDataSet:Eof() .AND. cId == hb_UTF8ToStr( oDataSet:FieldGet( oDataSet:FieldPos( "id" ) ) )
          oRow := oDataSet:GetRow()
-         _tmp_2 := oRow:FieldGet( oRow:FieldPos( "kurs1" ) )
-         IF !Empty( datum ) .AND. ( DToS( datum ) >= DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
+         nTmp2 := oRow:FieldGet( oRow:FieldPos( "kurs1" ) )
+         IF !Empty( dDatum ) .AND. ( DToS( dDatum ) >= DToS( oRow:FieldGet( oRow:FieldPos( "datum" ) ) ) )
             oDataSet:Skip()
          ELSE
             EXIT
@@ -119,7 +123,7 @@ FUNCTION Kurs( datum, val_iz, val_u )
       ENDDO
    ENDIF
 
-   RETURN ( _tmp_2 / _tmp_1 )
+   RETURN ( nTmp2 / nTmp1 )
 
 
 
@@ -140,10 +144,10 @@ FUNCTION valuta_domaca_skraceni_naziv()
 
 FUNCTION ValPomocna()
 
-   LOCAL _ret
-   _ret := hb_UTF8ToStr( sql_get_field_za_uslov( F18_PSQL_SCHEMA + ".valute", "naz2", { { "tip", "P" } } ) )
+   LOCAL cRet
+   cRet := hb_UTF8ToStr( sql_get_field_za_uslov( F18_PSQL_SCHEMA + ".valute", "naz2", { { "tip", "P" } } ) )
 
-   RETURN _ret
+   RETURN cRet
 
 
 
@@ -159,14 +163,14 @@ FUNCTION P_Valute( cId, dx, dy )
    PushWA()
 
    o_valute()
-   AAdd( ImeKol,   { "ID ",    {|| id }, "id"        } )
-   AAdd( ImeKol,   { "Naziv",  {|| naz }, "naz"       } )
-   AAdd( ImeKol,   { ToStrU( "Skrać." ), {|| naz2 }, "naz2"      } )
-   AAdd( ImeKol,   { "Datum",  {|| datum }, "datum"     } )
-   AAdd( ImeKol,   { "Kurs",   {|| kurs1 }, "kurs1", NIL, NIL, NIL, "9999.99999999"   } )
-   AAdd( ImeKol,   { "Tip(D/P/O)", {|| tip }, "tip", ;
+   AAdd( ImeKol,   { "ID ",    {|| valute->id }, "id"        } )
+   AAdd( ImeKol,   { "Naziv",  {|| valute->naz }, "naz"       } )
+   AAdd( ImeKol,   { ToStrU( "Skrać." ), {|| valute->naz2 }, "naz2"      } )
+   AAdd( ImeKol,   { "Datum",  {|| valute->datum }, "datum"     } )
+   AAdd( ImeKol,   { "Kurs",   {|| valute->kurs1 }, "kurs1", NIL, NIL, NIL, "9999.99999999"   } )
+   AAdd( ImeKol,   { "Tip(D/P/O)", {|| valute->tip }, "tip", ;
       {|| .T. }, ;
-      {|| wtip $ "DPO" } } )
+      {|| wTip $ "DPO" } } )
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )

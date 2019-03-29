@@ -2,7 +2,7 @@
 
 ## 2019-03-29
 
--  KALK kontiranje grande cleanup
+-  KALK kontiranje grande na kvadrat cleanup
 
 ## 2019-03-28
 
