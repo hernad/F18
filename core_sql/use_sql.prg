@@ -393,15 +393,15 @@ FUNCTION use_sql_tarifa( lMakeIndex )
 /*
    use_sql_trfp() => otvori šifarnik šema kontiranja kalk->fin sa uslovima
 */
-FUNCTION use_sql_trfp( cShema, cDok )
-   RETURN _use_sql_trfp( "trfp", F_TRFP, cShema, cDok )
+FUNCTION use_sql_trfp( cShema, cIdVd )
+   RETURN _use_sql_trfp( "trfp", F_TRFP, cShema, cIdVd )
 
 
 /*
    use_sql_trfp2() => otvori šifarnik šema kontiranja fakt->fin sa uslovima
 */
-FUNCTION use_sql_trfp2( cShema, cDok )
-   RETURN _use_sql_trfp( "trfp2", F_TRFP2, cShema, cDok )
+FUNCTION use_sql_trfp2( cShema, cIdVd )
+   RETURN _use_sql_trfp( "trfp2", F_TRFP2, cShema, cIdvd )
 
 
 
@@ -409,22 +409,20 @@ FUNCTION use_sql_trfp2( cShema, cDok )
    use_sql_trfp() => otvori šifarnik šema kontiranja sa uslovima
 */
 
-STATIC FUNCTION _use_sql_trfp( cTable, nWa, cShema, cDok )
+STATIC FUNCTION _use_sql_trfp( cTable, nWa, cShema, cIdVd )
 
    LOCAL cSql
    LOCAL cWhere := ""
 
    cSql := "SELECT * FROM " + f18_sql_schema( cTable )
-
    IF cShema <> NIL
-      cWhere += " shema = " + sql_quote( cShema )
+      cWhere += " shema=" + sql_quote( cShema )
    ENDIF
-
-   IF cDok <> NIL .AND. !Empty( cDok )
+   IF cIdvd <> NIL .AND. !Empty( cIdVd )
       IF !Empty( cWhere )
          cWhere += " AND "
       ENDIF
-      cWhere += " idvd = " + sql_quote( cDok )
+      cWhere += " idvd=" + sql_quote( cIdVd )
    ENDIF
 
    IF !Empty( cWhere )
@@ -439,7 +437,6 @@ STATIC FUNCTION _use_sql_trfp( cTable, nWa, cShema, cDok )
    ENDIF
 
    INDEX ON ( field->idvd + field->shema + field->idkonto + field->id + field->idtarifa + field->idvn + field->naz )  TAG ID TO ( cTable )
-
    SET ORDER TO TAG "ID"
 
    RETURN .T.

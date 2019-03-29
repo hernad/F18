@@ -19,13 +19,11 @@ MEMVAR nKalkZavTr
 MEMVAR nKalkMarzaVP, nKalkMarzaMP
 
 /*
- *   param: fstara - .f. znaci poziv iz tabele pripreme, .t. radi se o azuriranoj kalkulaciji pa se prvo getuje broj dokumenta (cIdFirma,cIdVD,cBrdok)
- *     Pravi rekapitulaciju kalkulacija a ako je ulazni parametar fstara==.t. poziva se i kontiranje dokumenta
+ *   param: lAzuriraniDokument - .f. znaci poziv iz tabele pripreme, .t. radi se o azuriranoj kalkulaciji pa se prvo getuje broj dokumenta (cIdFirma,cIdVD,cBrdok)
+ *     Pravi rekapitulaciju kalkulacija a ako je ulazni parametar lAzuriraniDokument==.t. poziva se i kontiranje dokumenta
  */
 
-FUNCTION kalk_kontiranje_gen_finmat()
-
-   PARAMETERS fStara, cIdFirma, cIdVd, cBrDok, lAuto
+FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok, lAuto )
 
    LOCAL nPom
    LOCAL lPrviProlaz
@@ -34,31 +32,32 @@ FUNCTION kalk_kontiranje_gen_finmat()
    LOCAL nCol1 := 0, nCol2 := 0, nCol3 := 0
    LOCAL cFinAutoBrojDN := "N"
    LOCAL GetList := {}
+   LOCAL cDalje, cAutoRav, cPom
+   LOCAL nStr, cIdPartner, cBrFaktP, dDatFaktP, cIdKonto, cIdKonto2
+   LOCAL nFV
 
    // LOCAL nZaokruzenje := gZaokr
    LOCAL nZaokruzenje := 12
    LOCAL nKolicina
 
-   // kontira se vise kalkulacija
-   LOCAL lViseKalk := .F.
-   LOCAL _predispozicija := .F.
+   LOCAL lKontiranjeViseKalk := .F.
+   LOCAL lKalk80Predispozicija := .F.
 
-   IF PCount() == 0
-      fStara := .F.
+   IF lAzuriraniDokument == NIL
+      lAzuriraniDokument := .F.
    ENDIF
 
-   IF lAuto == nil
+   IF lAuto == NIL
       lAuto := .F.
    ENDIF
 
    lPrviProlaz := .T.
 
    // DO WHILE .T.
-   _predispozicija := .F.
+   lKalk80Predispozicija := .F.
 
    kalk_open_tabele_za_kontiranje()
-
-   IF fStara
+   IF lAzuriraniDokument
       kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
    ELSE
       select_o_kalk_pripr()
@@ -73,24 +72,21 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
    IF lPrviProlaz
       IF cIdFirma == NIL // nisu prosljedjeni parametri
-
-         cIdFirma := IdFirma
-         cIdVD := IdVD
-         cBrdok := brdok
+         cIdFirma := kalk_pripr->IdFirma
+         cIdVD := kalk_pripr->IdVD
+         cBrdok := kalk_pripr->brdok
          IF Empty( cIdFirma )
             cIdFirma := self_organizacija_id()
          ENDIF
-         lViseKalk := .F.
-
+         lKontiranjeViseKalk := .F.
       ELSE
-         lViseKalk := .T. // parametri su prosljedjeni RekapK funkciji
+         lKontiranjeViseKalk := .T. // parametri su prosljedjeni RekapK funkciji
       ENDIF
       lPrviProlaz := .F.
-
    ENDIF
 
-   IF fStara
-      IF !lViseKalk
+   IF lAzuriraniDokument
+      IF !lKontiranjeViseKalk
          Box( "", 1, 50 )
          SET CURSOR ON
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument broj:"
@@ -102,29 +98,28 @@ FUNCTION kalk_kontiranje_gen_finmat()
          BoxC()
       ENDIF
 
-      IF fStara
+      IF lAzuriraniDokument
          kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
       ENDIF
       HSEEK cIdFirma + cIdVd + cBrDok // kalk_pripr
 
    ELSE
       GO TOP
-      cIdFirma := IdFirma
-      cIdVD := IdVD
-      cBrdok := brdok
+      cIdFirma := kalk_pripr->IdFirma
+      cIdVD := kalk_pripr->IdVD
+      cBrdok := kalk_pripr->brdok
    ENDIF
 
 
-   IF field->idvd == "80" .AND. !Empty( field->idkonto2 ) // potrebno je ispitati da li je predispozicija !
-      _predispozicija := .T.
+   IF kalk_pripr->idvd == "80" .AND. !Empty( kalk_pripr->idkonto2 ) // potrebno je ispitati da li je predispozicija !
+      lKalk80Predispozicija := .T.
    ENDIF
-
 
    IF Eof()
       RETURN .F.
    ENDIF
 
-   IF fStara .AND. lAuto == .F.
+   IF lAzuriraniDokument .AND. lAuto == .F.
       // - info o izabranom dokumentu -
       Box( "#DOKUMENT " + cIdFirma + "-" + cIdVd + "-" + cBrDok, 9, 77 )
 
@@ -133,17 +128,17 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
       select_o_partner( KALK_PRIPR->IDPARTNER )
       select_o_konto( KALK_PRIPR->MKONTO )
-      cPom := naz
+      cPom := kalk_pripr->naz
       select_o_konto( KALK_PRIPR->PKONTO )
       SELECT kalk_pripr
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "DATUM------------>"             COLOR "W+/B"
-      @ box_x_koord() + 2, Col() + 1 SAY DToC( DATDOK )                   COLOR "N/W"
+      @ box_x_koord() + 2, Col() + 1 SAY DToC( KALK_PRIPR->DATDOK )                   COLOR "N/W"
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "PARTNER---------->"             COLOR "W+/B"
-      @ box_x_koord() + 3, Col() + 1 SAY IDPARTNER + "-" + PadR( partn->naz, 20 ) COLOR "N/W"
+      @ box_x_koord() + 3, Col() + 1 SAY kalk_pripr->IDPARTNER + "-" + PadR( partn->naz, 20 ) COLOR "N/W"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "KONTO MAGACINA--->"             COLOR "W+/B"
-      @ box_x_koord() + 4, Col() + 1 SAY MKONTO + "-" + PadR( cPom, 49 )       COLOR "N/W"
+      @ box_x_koord() + 4, Col() + 1 SAY KALK_PRIPR->MKONTO + "-" + PadR( cPom, 49 )       COLOR "N/W"
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "KONTO PRODAVNICE->"             COLOR "W+/B"
-      @ box_x_koord() + 5, Col() + 1 SAY PKONTO + "-" + PadR( KONTO->naz, 49 ) COLOR "N/W"
+      @ box_x_koord() + 5, Col() + 1 SAY KALK_PRIPR->PKONTO + "-" + PadR( KONTO->naz, 49 ) COLOR "N/W"
       @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Automatski uravnoteži dokument? (D/N)" GET cAutoRav VALID cAutoRav $ "DN" PICT "@!"
       @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Želite li kontirati dokument? (D/N)" GET cDalje VALID cDalje $ "DN" PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Automatski broj fin.naloga? (D/N)" GET cFinAutoBrojDN VALID cFinAutoBrojDN $ "DN" PICT "@!"
@@ -156,16 +151,15 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
    ENDIF
 
+
    nStr := 0
    nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTota := nTotb := nTotC := 0
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdvd == field->idvd
 
-      cBrDok := BrDok
-      cIdPartner := IdPartner
-      cBrFaktP := BrFaktP
-      dDatFaktP := DatFaktP
-      cIdKonto := field->IdKonto
-      cIdKonto2 := field->IdKonto2
+      cBrDok := kalk_pripr->BrDok
+      cIdPartner := kalk_pripr->IdPartner
+      cBrFaktP := kalk_pripr->BrFaktP
+      dDatFaktP := kalk_pripr->DatFaktP
 
       cIdKonto := finmat_idkonto( kalk_pripr->idvd, kalk_pripr->mkonto, kalk_pripr->pkonto, kalk_pripr->idkonto, kalk_pripr->idkonto2 )
       cIdKonto2 := finmat_idkonto2( kalk_pripr->idvd, kalk_pripr->mkonto, kalk_pripr->pkonto, kalk_pripr->idkonto, kalk_pripr->idkonto2 )
@@ -187,7 +181,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
       SELECT KALK_PRIPR
 
       // cIdd := idpartner + brfaktp + idkonto + idkonto2
-      DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+      DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
 
          PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
@@ -286,7 +280,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
             ENDIF
          ENDIF
 
-         IF _predispozicija // napuni marker da se radi o predispoziciji
+         IF lKalk80Predispozicija // napuni marker da se radi o predispoziciji
             REPLACE k1 WITH "P"
          ENDIF
 
@@ -294,7 +288,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
          SKIP
       ENDDO // brdok
 
-      IF fStara
+      IF lAzuriraniDokument
          EXIT
       ENDIF
 
@@ -302,14 +296,14 @@ FUNCTION kalk_kontiranje_gen_finmat()
    ENDDO // idfirma,idvd
 
 
-   IF fStara .AND. lAuto == .F.
+   IF lAzuriraniDokument .AND. lAuto == .F.
 
-      IF !lViseKalk
+      IF !lKontiranjeViseKalk
          my_close_all_dbf()
       ENDIF
 
       // ovo ispod kontiranje se koristi kada se kontira azurirani dokument
-      kalk_kontiranje_fin_naloga( .F., NIL, lViseKalk, NIL, cFinAutoBrojDN == "D" )  // kontiranje dokumenta
+      kalk_kontiranje_fin_naloga( .F., NIL, lKontiranjeViseKalk, NIL, cFinAutoBrojDN == "D" )  // kontiranje dokumenta
       IF cAutoRav == "D" // automatska ravnoteza naloga
          kontrola_zbira_naloga_u_pripremi( .T. )
       ENDIF
@@ -317,7 +311,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
    ENDIF
 
 
-   IF !lViseKalk
+   IF !lKontiranjeViseKalk
       my_close_all_dbf()
       RETURN .F.
    ENDIF
@@ -360,7 +354,7 @@ FUNCTION finmat_glavni_konto( cIdVd )
 
    // IF cIdVd $ "14#95#96"
    IF cIdVd == "11"
-     return finmat->IdKonto2  // prodavnica
+      RETURN finmat->IdKonto2  // prodavnica
    ENDIF
 
    RETURN finmat->idkonto

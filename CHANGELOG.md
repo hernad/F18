@@ -2,7 +2,7 @@
 
 ## 2019-03-29
 
--  KALK kontiranje cleanup/2
+-  KALK kontiranje grande cleanup
 
 ## 2019-03-28
 
