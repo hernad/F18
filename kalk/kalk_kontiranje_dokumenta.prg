@@ -249,7 +249,6 @@ altd()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY  koncij->shema + " : KALK: " + finmat->brdok + "-" + "/" + AllTrim( finmat->brfaktp )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY  "    -> FINMAT -> FIN " + cIdVnTrFP + " - " + cBrNalogFin
 
-
    DO WHILE !Eof()
 
       cIDVD := finmat->IdVD
@@ -335,12 +334,12 @@ altd()
                   dDatFaktP := finmat->DatFaktP
                ENDIF
 
-               IF gBaznaV == "P"
-                  nIznosKontiratiKM :=  nIznosKontiratiDEM * Kurs( dDatFaktP, "P", "D" )
-               ELSE
+               //IF gBaznaV == "P"
+                //  nIznosKontiratiKM :=  nIznosKontiratiDEM * Kurs( dDatFaktP, "P", "D" )
+               //ELSE
                   nIznosKontiratiKM := nIznosKontiratiDEM
                   nIznosKontiratiDEM := nIznosKontiratiKM * Kurs( dDatFaktP, "D", "P" )
-               ENDIF
+               //ENDIF
 
                IF "IDKONTO" == PadR( hRecTrfp[ "idkonto" ], 7 )
                   cIdKonto := finmat->idkonto

@@ -187,11 +187,11 @@ FUNCTION P_Valute( cId, dx, dy )
 
 FUNCTION ValSekund()
 
-   IF gBaznaV == "D"
+   //IF gBaznaV == "D"
       RETURN ValPomocna()
-   ELSE
-      RETURN valuta_domaca_skraceni_naziv()
-   ENDIF
+   //ELSE
+    //  RETURN valuta_domaca_skraceni_naziv()
+   //ENDIF
 
 
 
@@ -261,26 +261,18 @@ FUNCTION ImaUSifVal( cKratica )
 // -------------------------------------
 FUNCTION UBaznuValutu( dDatdok )
 
-   LOCAL  cIz
-
-   IF gBaznaV == "P"
-      cIz := "D"
-   ELSE
-      cIz := "P"
-   ENDIF
-
-   RETURN Kurs( dDatdok, cIz, gBaznaV )
+   RETURN Kurs( dDatdok, "P", "D" )
 
 
 
 
 FUNCTION ValBazna()
 
-   IF gBaznaV == "P"
-      RETURN ValPomocna()
-   ELSE
+   //IF gBaznaV == "P"
+    //  RETURN ValPomocna()
+   //ELSE
       RETURN valuta_domaca_skraceni_naziv()
-   ENDIF
+   //ENDIF
 
 
 /*

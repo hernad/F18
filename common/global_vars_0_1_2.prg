@@ -212,7 +212,7 @@ FUNCTION set_global_vars_2()
 
    PUBLIC gOznVal := "KM"
 
-   PUBLIC gBaznaV := "D"
+   //PUBLIC gBaznaV := "D"
    PUBLIC gZaokr := 2
    PUBLIC gTabela := 0
    PUBLIC gPDV := "D"

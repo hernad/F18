@@ -89,7 +89,7 @@ FUNCTION parametri_organizacije( lSetParams )
    PUBLIC gMjStr := fetch_metric( "org_mjesto", nil, gMjStr )
 
    PUBLIC gTabela := fetch_metric( "tip_tabele", nil, gTabela )
-   PUBLIC gBaznaV := fetch_metric( "bazna_valuta", nil, gBaznaV )
+  //PUBLIC gBaznaV := fetch_metric( "bazna_valuta", nil, gBaznaV )
    PUBLIC gPDV := fetch_metric( "pdv_global", nil, gPDV )
 
 
@@ -114,9 +114,9 @@ FUNCTION parametri_organizacije( lSetParams )
       @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "Tip subjekta/organizacije:", _left ) GET cTipOrganizacije PICT "@S10"
       @ box_x_koord() + nX, Col() + 1 SAY "U sistemu pdv-a (D/N) ?" GET gPDV VALID gPDV $ "DN" PICT "@!"
 
-      ++nX
-      ++nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "Bazna valuta (D/P):", _left ) GET gBaznaV PICT "@!" VALID gBaznaV $ "DPO"
+      //++nX
+      //++nX
+      //@ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "Bazna valuta (D/P):", _left ) GET gBaznaV PICT "@!" VALID gBaznaV $ "DPO"
 
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PadL( "Zaokruženje:", _left ) GET gZaokr
@@ -136,7 +136,7 @@ FUNCTION parametri_organizacije( lSetParams )
          set_metric( "zaokruzenje", nil, gZaokr )
          tip_organizacije( cTipOrganizacije )
 
-         set_metric( "bazna_valuta", nil, gBaznaV )
+         //set_metric( "bazna_valuta", nil, gBaznaV )
          set_metric( "pdv_global", nil, gPDV )
          set_metric( "org_mjesto", nil, gMjStr )
       ENDIF

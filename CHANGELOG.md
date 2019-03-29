@@ -3,6 +3,7 @@
 ## 2019-03-29
 
 -  KALK kontiranje grande na kvadrat cleanup
+-  gBaznaValuta out
 
 ## 2019-03-28
 
