@@ -4,6 +4,7 @@
 
 -  KALK kontiranje grande na kvadrat cleanup
 -  gBaznaValuta out
+-  kurs() kraju generacije fin_pripr
 
 ## 2019-03-28
 

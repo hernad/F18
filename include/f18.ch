@@ -590,7 +590,6 @@
 #define POS_IDVD_IZLAZI_NIVELACIJE_INVENTURE "42#19#IP"
 #define POS_IDVD_RACUN               "42"
 #define POS_IDVD_NIVELACIJA          "19"
-#define POS_IDVD_INVENTURA           "IP"       // inventura
 
 
 #define FISK_NEMA_ODGOVORA -20

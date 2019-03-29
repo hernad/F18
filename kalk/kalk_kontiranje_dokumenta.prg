@@ -44,7 +44,8 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL cGlavniKonto
    LOCAL lPostoji
    LOCAL nCnt
-   //LOCAL lVrsteP := hParamsFakt[ "fakt_vrste_placanja" ]
+
+   // LOCAL lVrsteP := hParamsFakt[ "fakt_vrste_placanja" ]
    LOCAL cBrNalogFin, cBrNalogMat
    LOCAL cIdVnTrFP
    LOCAL GetList := {}
@@ -54,12 +55,14 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL cIdKonto, cKonto1, cKonto2, cKonto3
    LOCAL nIznosKontiratiKM, nIznosKontiratiDEM
    LOCAL dDatDok, cIdPartner
-   LOCAL cPartner1, cPartner2, cPartner3, cPartner4 , cPartner5
+   LOCAL cPartner1, cPartner2, cPartner3, cPartner4, cPartner5
    LOCAL cBrFakt1, cBrFakt2, cBrFakt3, cBrFakt4, cBrFakt5
    LOCAL dDatFakt1, dDatFakt2, dDatFakt3, dDatFakt4, dDatFakt5
    LOCAL cRj1, cRj2
    LOCAL nLen
-   //LOCAL cIdVrsteP
+   LOCAL nStranaValutaIznos
+
+   // LOCAL cIdVrsteP
 
    cRj1 := ""
    cRj2 := ""
@@ -167,11 +170,11 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    cGlavniKonto := finmat_glavni_konto( finmat->idvd )
    select_o_koncij( cGlavniKonto )
 
-   //select_o_trfp()
+   // select_o_trfp()
    use_sql_trfp( koncij->shema, finmat->IdVD )
-   //SEEK finmat->IdVD + koncij->shema
+   // SEEK finmat->IdVD + koncij->shema
 
-altd()
+   AltD()
    cIdVnTrFP := trfp->IdVN
    // uzmi vrstu naloga koja ce se uzeti u odnosu na prvu kalkulaciju
    // koja se kontira
@@ -266,7 +269,7 @@ altd()
       ENDIF
 
       PRIVATE dDatVal := CToD( "" )  // inicijalizuj datum valute
-      //cIdVrsteP := "  "
+      // cIdVrsteP := "  "
 
       DO WHILE cIdVD == finmat->IdVD .AND. cBrDok == finmat->BrDok .AND. !Eof()
 
@@ -281,8 +284,8 @@ altd()
 
          SELECT trfp
          GO TOP
-         //SEEK cIdVD + koncij->shema
-         DO WHILE !Eof() .AND. !Empty( cBrNalogFin ) //.AND. trfp->idvd == cIdVD  .AND. trfp->shema == koncij->shema
+         // SEEK cIdVD + koncij->shema
+         DO WHILE !Eof() .AND. !Empty( cBrNalogFin ) // .AND. trfp->idvd == cIdVD  .AND. trfp->shema == koncij->shema
 
             lDatFakt := .F.
             hRecTrfp := dbf_get_rec()
@@ -293,7 +296,7 @@ altd()
             // evo sta se kontira
             nIznosKontiratiDEM := &cStavka
 
-            //SELECT trfp
+            // SELECT trfp
             IF !Empty( hRecTrfp[ "idtarifa" ] ) .AND. hRecTrfp[ "idtarifa" ] <> finmat->idtarifa
                // ako u sifarniku parametara postoji tarifa prenosi po tarifama
                nIznosKontiratiDEM := 0
@@ -334,12 +337,12 @@ altd()
                   dDatFaktP := finmat->DatFaktP
                ENDIF
 
-               //IF gBaznaV == "P"
-                //  nIznosKontiratiKM :=  nIznosKontiratiDEM * Kurs( dDatFaktP, "P", "D" )
-               //ELSE
-                  nIznosKontiratiKM := nIznosKontiratiDEM
-                  nIznosKontiratiDEM := nIznosKontiratiKM * Kurs( dDatFaktP, "D", "P" )
-               //ENDIF
+               // IF gBaznaV == "P"
+               // nIznosKontiratiKM :=  nIznosKontiratiDEM * Kurs( dDatFaktP, "P", "D" )
+               // ELSE
+               nIznosKontiratiKM := nIznosKontiratiDEM
+               // nIznosKontiratiDEM := nIznosKontiratiKM * Kurs( dDatFaktP, "D", "P" )
+               // ENDIF
 
                IF "IDKONTO" == PadR( hRecTrfp[ "idkonto" ], 7 )
                   cIdKonto := finmat->idkonto
@@ -508,7 +511,7 @@ altd()
                   APPEND BLANK
                ENDIF
 
-               REPLACE iznosDEM WITH fin_pripr->iznosDEM + nIznosKontiratiDEM
+               // REPLACE iznosDEM WITH fin_pripr->iznosDEM + nIznosKontiratiDEM
                REPLACE iznosBHD WITH fin_pripr->iznosBHD + nIznosKontiratiKM
                REPLACE idKonto  WITH cIdKonto
                REPLACE IdPartner  WITH cIdPartner
@@ -529,9 +532,9 @@ altd()
                IF "#V#" $  hRecTrfp[ "naz" ]  // stavi datum valutiranja
                   REPLACE datval WITH dDatVal
                   REPLACE opis WITH StrTran( hRecTrfp[ "naz" ], "#V#", "" )
-                  //IF lVrsteP
-                  //   REPLACE k4 WITH cIdVrsteP
-                  //ENDIF
+                  // IF lVrsteP
+                  // REPLACE k4 WITH cIdVrsteP
+                  // ENDIF
                ENDIF
 
                // kontiraj radnu jedinicu
@@ -566,7 +569,7 @@ altd()
 
    SELECT finmat
    SKIP -1
-   altd()
+   AltD()
    BoxC()
 
    IF lAFin .OR. lAFin2
@@ -574,7 +577,7 @@ altd()
       GO TOP
       SEEK finmat->idfirma + cIdVnTrFP + cBrNalogFin
       my_flock()
-      IF Found()
+      //IF Found()
          DO WHILE !Eof() .AND. fin_pripr->IDFIRMA + fin_pripr->IDVN + fin_pripr->BRNAL == finmat->idfirma + cIdVnTrFP + cBrNalogFin
             cPom := Right( fin_pripr->opis, 1 )
             // na desnu stranu opisa stavim npr "ZADUZ MAGACIN          0"
@@ -584,15 +587,15 @@ altd()
                REPLACE opis WITH Left( Trim( fin_pripr->opis ), nLen - 1 )
                IF cPom = "5"  // zaokruzenje na 0.5 DEM
                   REPLACE iznosbhd WITH round2( fin_pripr->iznosbhd, 2 )
-                  REPLACE iznosdem WITH round2( fin_pripr->iznosdem, 2 )
                ELSE
                   REPLACE iznosbhd WITH Round( fin_pripr->iznosbhd, Min( Val( cPom ), 2 ) )
-                  REPLACE iznosdem WITH Round( fin_pripr->iznosdem, Min( Val( cPom ), 2 ) )
                ENDIF
             ENDIF
+            nStranaValutaIznos := fin_pripr->iznosbhd * Kurs( dDatFaktP, "D", "P" )
+            REPLACE iznosdem WITH round2( nStranaValutaIznos, 2 )
             SKIP
          ENDDO
-      ENDIF
+      //ENDIF
       my_unlock()
    ENDIF
 
@@ -848,11 +851,11 @@ FUNCTION IspitajRezim()
 FUNCTION kalk_open_tabele_za_kontiranje()
 
    o_finmat()
-   //o_konto()
-   //o_partner()
-   //o_tdok()
+   // o_konto()
+   // o_partner()
+   // o_tdok()
    // o_roba()
-   //o_tarifa()
+   // o_tarifa()
 
    RETURN .T.
 
