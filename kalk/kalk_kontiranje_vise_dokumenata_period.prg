@@ -56,13 +56,12 @@ FUNCTION kontiranje_vise_dokumenata_period_auto()
 
 
 
-STATIC FUNCTION kalk_kontiranje_dokumenata( lAutomatskiSetBrojNaloga, dDatOd, dDatDo, ;
-   cIdVD, cId_mkto, cId_pkto )
+STATIC FUNCTION kalk_kontiranje_dokumenata( lAutomatskiSetBrojNaloga, dDatOd, dDatDo, cIdVD, cId_mkto, cId_pkto )
 
    LOCAL nCount := 0
    LOCAL nTNRec
    LOCAL cBrFinNalog := NIL
-   LOCAL cD_firma, cD_tipd, cD_brdok
+   LOCAL cIdFirmaTekuci, cIdVdTekuci, cBrdokTekuci
    LOCAL lError := .F.
 
    hb_default( @lAutomatskiSetBrojNaloga, .T. )
@@ -96,14 +95,14 @@ STATIC FUNCTION kalk_kontiranje_dokumenata( lAutomatskiSetBrojNaloga, dDatOd, dD
       ENDIF
 
       nTNRec := RecNo()
-      cD_firma := field->idfirma
-      cD_tipd := field->idvd
-      cD_brdok := field->brdok
+      cIdFirmaTekuci := field->idfirma
+      cIdVdTekuci := field->idvd
+      cBrdokTekuci := field->brdok
 
-      kalk_kontiranje_gen_finmat( .T., cD_firma, cD_tipd, cD_brdok, .T. )  // napuni FINMAT
+      kalk_kontiranje_gen_finmat( .T., cIdFirmaTekuci, cIdVdTekuci, cBrdokTekuci, .T. )  // napuni FINMAT
 
       // IF is_kalk_fin_isti_broj()
-      // cBrFinNalog := cD_brdok
+      // cBrFinNalog := cBrdokTekuci
       // ENDIF
 
       IF !kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, .T., .T., NIL, lAutomatskiSetBrojNaloga ) // kontiraj
@@ -121,7 +120,7 @@ STATIC FUNCTION kalk_kontiranje_dokumenata( lAutomatskiSetBrojNaloga, dDatOd, dD
    ENDDO
 
    IF lError
-      MsgBeep( "Generacija fin dokumenta za KALK( " + cD_firma + " - " + cD_tipd + " - " + cD_brdok + " ) neuspješna !? STOP!" )
+      MsgBeep( "Generacija fin dokumenta za KALK( " + cIdFirmaTekuci + " - " + cIdVdTekuci + " - " + cBrdokTekuci + " ) neuspješna !? STOP!" )
    ENDIF
 
    IF nCount > 0

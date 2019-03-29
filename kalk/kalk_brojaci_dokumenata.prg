@@ -47,7 +47,6 @@ FUNCTION kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKonto )
    // ENDIF
 
    // RETURN kalk_sljedeci_brdok( cIdVd, cIdFirma, cSufiks )
-altd()
    RETURN kalk_novi_brdok_konto( cIdVd, cIdKonto )
 
 

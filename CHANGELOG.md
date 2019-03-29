@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-03-29
+
+-  KALK kontiranje cleanup/2
+
 ## 2019-03-28
 
 -  ažuriranje KALK-FIN sa što manje pitanja

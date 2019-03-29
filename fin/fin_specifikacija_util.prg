@@ -247,10 +247,10 @@ FUNCTION prikaz_k1_k4_rj( lK )
 
    LOCAL lProsao := .F.
    LOCAL nArr := Select()
-   LOCAL _fakt_params := fakt_params()
+   LOCAL hParamsFakt := fakt_params()
    LOCAL _fin_params := fin_params()
 
-   LOCAL lVrsteP := _fakt_params[ "fakt_vrste_placanja" ]
+   LOCAL lVrsteP := hParamsFakt[ "fakt_vrste_placanja" ]
 
    IF lK == NIL
       lK := .T.

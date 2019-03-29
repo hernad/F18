@@ -28,7 +28,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
    PARAMETERS fStara, cIdFirma, cIdVd, cBrDok, lAuto
 
    LOCAL nPom
-   LOCAL fPrvi
+   LOCAL lPrviProlaz
    LOCAL n1 := 0, n2 := 0, n3 := 0, n4 := 0, n5 := 0, n6 := 0, n7 := 0, n8 := 0, n9 := 0, na := 0, nb := 0
    LOCAL nTot1 := 0, nTot2 := 0, nTot3 := 0, nTot4 := 0, nTot5 := 0, nTot6 := 0, nTot7 := 0, nTot8 := 0, nTot9 := 0, nTota := 0, nTotb := 0, nTotC := 0
    LOCAL nCol1 := 0, nCol2 := 0, nCol3 := 0
@@ -51,7 +51,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
       lAuto := .F.
    ENDIF
 
-   fprvi := .T. // prvi prolaz
+   lPrviProlaz := .T.
 
    // DO WHILE .T.
    _predispozicija := .F.
@@ -71,7 +71,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
 
    SET ORDER TO TAG "1" // idfirma+ idvd + brdok+rbr
 
-   IF fPrvi
+   IF lPrviProlaz
       IF cIdFirma == NIL // nisu prosljedjeni parametri
 
          cIdFirma := IdFirma
@@ -85,7 +85,7 @@ FUNCTION kalk_kontiranje_gen_finmat()
       ELSE
          lViseKalk := .T. // parametri su prosljedjeni RekapK funkciji
       ENDIF
-      fPrvi := .F.
+      lPrviProlaz := .F.
 
    ENDIF
 
