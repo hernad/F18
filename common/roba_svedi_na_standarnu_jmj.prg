@@ -78,7 +78,6 @@ FUNCTION svedi_na_jedinicu_mjere( nKol, cIdRoba, cJMJ )
    cSvedi := get_sifk_sifv( "ROBA", "SJMJ", cIdRoba, .F. )
 
    IF !Empty( cSvedi )
-
       nPozicija := At( "_", cSvedi ) // slijedi preracunavanje 0.1_KG
       IF nPozicija > 0
          cPom   := AllTrim( SubStr( cSvedi, nPozicija + 1 ) )
@@ -94,12 +93,10 @@ FUNCTION svedi_na_jedinicu_mjere( nKol, cIdRoba, cJMJ )
       ENDIF
 
    ELSE
-
       cJmjRoba := find_roba_jmj( cIdRoba )
       IF cJmjRoba == "KOM" // nema definisano svodjenje na jednicu mjere
          error_bar( "sjmj_" + AllTrim( cIdRoba ), cIdRoba + " nema definisanu težinu !?" )
       ENDIF
-
       nVrati := nKol // artikal je vec u osnovnoj JMJ
    ENDIF
 

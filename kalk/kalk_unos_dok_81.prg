@@ -14,22 +14,30 @@
 STATIC s_cKonverzijaValuteDN := "N"
 
 MEMVAR nKalkRBr
-MEMVAR GetList
-MEMVAR _idpartner, _tmarza2, _idtarifa, _idvd, _idroba, _kolicina, _pkonto, _idkonto2, _brfaktp, _datdok, _datfaktp
+MEMVAR _idfirma, _idpartner, _idtarifa, _idvd, _idroba, _kolicina, _pkonto, _idkonto2, _brfaktp, _datdok, _datfaktp
+MEMVAR Pickol, PicDEM, PicCDEM
+MEMVAR _mpc, _mpcsapp, _marza2,  _tmarza, _TMarza2
+MEMVAR _fcj2, _fcj, _nc, _rabat, _vpc
+MEMVAR gKalkUlazTrosak1, gKalkUlazTrosak2, gKalkUlazTrosak3, gKalkUlazTrosak4, gKalkUlazTrosak5
+MEMVAR _mkonto, _pu_i, _mu_i
+MEMVAR _tprevoz, _tbanktr, _tspedtr, _tcardaz, _tzavtr, _prevoz, _banktr, _spedtr, _cardaz, _zavtr
+MEMVAR nKalkStrana
+
 
 FUNCTION kalk_unos_dok_81( hParams )
 
    LOCAL nX := 5
    LOCAL nKoordX := 0
    LOCAL nY := 40
+   LOCAL GetList := {}
 
    // LOCAL _use_opis := .F.
    // LOCAL _opis := Space( 300 )
    LOCAL _krabat := NIL
 
-   //IF hb_HHasKey( hParams, "opis" )
-    //  _use_opis := .T.
-   //ENDIF
+   // IF hb_HHasKey( hParams, "opis" )
+   // _use_opis := .T.
+   // ENDIF
 
    // IF _use_opis
    // IF !kalk_is_novi_dokument()
@@ -50,9 +58,9 @@ FUNCTION kalk_unos_dok_81( hParams )
    IF Empty( _datfaktp )
       _datfaktp := _datdok
    ENDIF
-   //IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
-  //    _datfaktp := _datdok
-   //ENDIF
+   // IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
+   // _datfaktp := _datdok
+   // ENDIF
 
    IF nKalkRbr == 1 .OR. !kalk_is_novi_dokument()
 
@@ -65,7 +73,6 @@ FUNCTION kalk_unos_dok_81( hParams )
 
       ++nX
       nKoordX := box_x_koord() + nX
-
       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto zadužuje:" GET _pkonto VALID {|| P_Konto( @_pkonto ), ispisi_naziv_konto( nKoordX, 40, 30 ) } PICT "@!"
       READ
 
@@ -133,7 +140,7 @@ FUNCTION kalk_unos_dok_81( hParams )
       @ box_x_koord() + nX, Col() + 1 SAY "EUR->" GET s_cKonverzijaValuteDN VALID kalk_ulaz_preracun_fakturne_cijene( s_cKonverzijaValuteDN ) PICT "@!"
    ENDIF
 
-   @ box_x_koord() + nX, box_y_koord() + nY GET _fcj PICT PicDEM VALID {|| SetKey( K_ALT_T, {|| NIL } ), _fcj > 0 } WHEN valid_kolicina()
+   @ box_x_koord() + nX, box_y_koord() + nY GET _fcj PICT PicDEM VALID {|| SetKey( K_ALT_T, {|| NIL } ), _fcj > 0 } WHEN kalk_81_valid_fcj()
    @ box_x_koord() + nX, Col() + 1 SAY "*** <ALT+T> unos ukupne FV"
 
    ++nX
@@ -151,34 +158,32 @@ FUNCTION kalk_unos_dok_81( hParams )
 
 
 
-// ---------------------------------------------
-// unos ukupne fakturne vrijednosti
-// ---------------------------------------------
-STATIC FUNCTION _fv_ukupno()
+STATIC FUNCTION kalk_81_fv_ukupno_alt_t()
 
-   LOCAL _uk_fv := 0
-   LOCAL _ok := .T.
-   PRIVATE GetList := {}
+   LOCAL nUkFV := 0
+   LOCAL lOk := .T.
+   LOCAL GetList := {}
 
    Box(, 1, 50 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Ukupna FV:" GET _uk_fv PICT PicDem
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Ukupna FV:" GET nUkFV PICT PicDem
    READ
    BoxC()
 
-   IF LastKey() == K_ESC .OR. Round( _uk_fv, 2 ) == 0
-      RETURN _ok
+   IF LastKey() == K_ESC .OR. Round( nUkFV, 2 ) == 0
+      RETURN lOk
    ENDIF
-   _fcj := ( _uk_fv / _kolicina )
+   _fcj := ( nUkFV / _kolicina )
 
-   RETURN _ok
+   RETURN lOk
 
 
-STATIC FUNCTION valid_kolicina()
+STATIC FUNCTION kalk_81_valid_fcj()
 
-   SetKey( K_ALT_T, {|| _fv_ukupno() } )
+   LOCAL nKolicinaNaStanju, nKolZn, nC1, nC2
+
+   SetKey( K_ALT_T, {|| kalk_81_fv_ukupno_alt_t() } )
 
    IF _kolicina < 0
-
       nKolicinaNaStanju := 0
       nKolZN := 0
       nC1 := nC2 := 0
@@ -204,8 +209,8 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    LOCAL nY := 40
    LOCAL nKoordX
    LOCAL lSaTroskovima := .T.
-   PRIVATE getlist := {}
-   PRIVATE cProracunMarzeUnaprijed := " "
+   LOCAL Getlist := {}
+   LOCAL cProracunMarzeUnaprijed := " "
 
    nX += 2
    IF Empty( _TPrevoz )
@@ -216,6 +221,7 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
    IF Empty( _TSpedTr ); _TSpedtr := "%"; ENDIF
    IF Empty( _TZavTr );  _TZavTr := "%" ; ENDIF
    IF Empty( _TMarza );  _TMarza := "%" ; ENDIF
+
 
    IF lSaTroskovima == .T.
       // TROSKOVNIK
@@ -243,20 +249,19 @@ STATIC FUNCTION obracun_kalkulacija_tip_81_pdv( nX )
 
    ENDIF
 
-   // NC
+
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "NABAVNA CIJENA:"
    @ box_x_koord() + nX, box_y_koord() + nY GET _nc PICT PicDEM
 
-   // MARZA
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "MARŽA:" GET _TMarza2 VALID _Tmarza2 $ "%AU" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "MARŽA:" GET _TMarza2 VALID _tmarza2 $ "%AU" PICT "@!"
    @ box_x_koord() + nX, box_y_koord() + nY GET _marza2 PICT PicDEM VALID {|| _vpc := _nc, .T. }
    @ box_x_koord() + nX, Col() + 1 GET cProracunMarzeUnaprijed PICT "@!"
 
-   // PRODAJNA CIJENA
+
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "MPC bez PDV:"
-   @ box_x_koord() + nX, box_y_koord() + nY GET _mpc PICT PicDEM WHEN kalk_when_mpc_bez_pdv_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ) ) ;
+   @ box_x_koord() + nX, box_y_koord() + nY GET _mpc PICT PicDEM WHEN kalk_when_mpc_bez_pdv_80_81_41_42( _idvd, cProracunMarzeUnaprijed == "F"  ) ;
       VALID kalk_valid_mpc_bez_pdv_80_81_41_42( "81", ( cProracunMarzeUnaprijed == "F" ) )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV (%):"

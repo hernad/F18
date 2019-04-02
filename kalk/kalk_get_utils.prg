@@ -113,8 +113,10 @@ FUNCTION kalk_valid_mpc_bez_pdv_80_81_41_42( cIdVd, lNaprijed )
 
 STATIC FUNCTION kalk_set_vars_marza_maloprodaja_80_81_41_42( cIdVd, lNaprijed )
 
-   _fcj := _nc
-   _vpc := _nc
+   IF cIdVd <> "81"
+      _fcj := _nc
+      _vpc := _nc
+   ENDIF
 
    IF  ( _Marza2 == 0 ) .AND. !lNaprijed
       nKalkMarzaMP := _MPC - _VPC
