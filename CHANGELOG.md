@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-04-02
+
+-  KALK 81 fix
+
 ## 2019-03-29
 
 -  KALK kontiranje grande na kvadrat cleanup
