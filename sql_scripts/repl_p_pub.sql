@@ -19,6 +19,14 @@ END;
 $$;
 
 
+DO $$
+BEGIN
+   ALTER PUBLICATION {{ prod_schema }}_pos ADD TABLE {{ prod_schema }}.roba;
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'tabela roba vec ubacene u publikaciju {{ prod_schema }}_pos';
+END;
+$$;
+
 
 
 
