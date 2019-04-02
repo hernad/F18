@@ -60,7 +60,8 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos 
 DECLARE
    cBrDok varchar;
 BEGIN
-    SELECT brdok from {{ item_prodavnica }}.pos where idvd=cIdVd and datum=dDatum order by brdok desc limit 1
+    -- left(brdok,1)=' ' => ignorisati KALK dokumente kao npr 0000002, 02040201
+    SELECT brdok from {{ item_prodavnica }}.pos where left(brdok,1)=' ' and idvd=cIdVd and datum=dDatum order by brdok desc limit 1
            INTO cBrDok;
     IF cBrdok IS NULL THEN
         cBrDok := to_char(1, '99999999');
@@ -461,8 +462,18 @@ $$;
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.run_cron() RETURNS void
   LANGUAGE plpgsql
   AS $$
+DECLARE
+   nCount99 integer;
+   nCount79 integer;
 BEGIN
-   PERFORM {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
+   -- PERFORM {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
+    SELECT {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_99(current_date)
+      INTO nCount99;
+
+    SELECT  {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(current_date)
+      INTO nCount79;
+
+    RAISE INFO 'run_cron gen_99 %, gen_79 storno %', nCount99, nCount79;
    RETURN;
 END;
 $$;

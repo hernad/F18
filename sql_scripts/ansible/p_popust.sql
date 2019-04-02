@@ -43,7 +43,7 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_99( dDatum date ) RETURNS void
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_99( dDatum date ) RETURNS integer
        LANGUAGE plpgsql
        AS $$
 DECLARE
@@ -65,12 +65,12 @@ BEGIN
       FOR cIdRoba, nStanje, nCij, nNCij IN SELECT
            p.idroba, p.stanje, p.cijena, p.ncijena from {{ item_prodavnica }}.pos_artikli_istekao_popust( dDatum ) p
       LOOP
-         -- trenutno aktuelna osnovna cijena je akcijkska
-         EXECUTE 'insert into {{ item_prodavnica }}.pos_items(dok_id,idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-             using uuidPos, cIdPos, '99', cBrDokNew, dDatum, nRbr, cIdRoba, nStanje, nCij, nNCij;
+         -- neispravna roba se iznosi po osnovnoj cijeni na skladiste kala; skladiste kala je unutar prodavnice
+         EXECUTE 'insert into {{ item_prodavnica }}.pos_items(dok_id,idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'
+             using uuidPos, cIdPos, '99', cBrDokNew, dDatum, nRbr, cIdRoba, nStanje, nCij, 0;
          nRbr := nRbr + 1;
       END LOOP;
-      RETURN;
+      RETURN nRbr-1;
 END;
 $$;
 
@@ -79,6 +79,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_
        LANGUAGE plpgsql
        AS $$
 DECLARE
+   cIdPos varchar DEFAULT '1 ';
    cBrDokNew varchar;
    cIdRoba varchar;
    dDatOd date;
@@ -95,7 +96,7 @@ BEGIN
 
 
    nCount := 0;
-   FOR cIdRoba, nCij, nNCij, nStanje, dDatOd, dDatDo IN SELECT pos_stanje.idroba, pos_stanje.cijena, pos_stanje.ncijena, kol_ulaz-kol_izlaz as stanje, dat_od, dat_do
+   FOR cIdRoba, nCij, nNCij, nStanje, dDatOd, dDatDo IN SELECT pos_stanje.idroba, pos_stanje.cijena, pos_stanje.ncijena, kol_ulaz-kol_izlaz as stanje, dat_od, coalesce(dat_do,'3999-01-01')
            FROM {{ item_prodavnica }}.pos_stanje
            WHERE kol_ulaz-kol_izlaz>0 AND pos_stanje.ncijena<>0 AND dat_do<dDatum
            ORDER BY dat_od, dat_do
@@ -104,6 +105,7 @@ BEGIN
                dDatOdDokument := dDatOd;
                dDatDoDokument := dDatDo;
                cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '79', dDatum);
+               RAISE INFO 'storno 79: % % %', cBrDokNew, dDatOdDokument, dDatDoDokument;
                nRbr := 1;
                insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,dat_do,opis)
                     values(cIdPos, '79', cBrDokNew, dDatum, dDatOdDokument, dDatDoDokument, 'GEN: istekao_popust_gen_79_storno')
@@ -111,7 +113,7 @@ BEGIN
             END IF;
 
             -- storno 79 => 'ugasiti' snizenje
-            EXECUTE 'insert into {{ item_prodavnica }}.pos_items(dok_id,idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+            EXECUTE 'insert into {{ item_prodavnica }}.pos_items(dok_id,idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'
                 using uuidPos, cIdPos, '79', cBrDokNew, dDatum, nRbr, cIdRoba, -nStanje, nCij, nNCij;
             nRbr := nRbr + 1;
             nCount := nCount + 1;

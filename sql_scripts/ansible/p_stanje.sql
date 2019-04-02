@@ -83,7 +83,10 @@ END IF;
 -- (znaci nedostaju im ulazi) napunimo ulazom, LIMIT 1 - stavka sa najmanjom kolicinom
 --
 --  $4 <= current_date => dat_od otpremnice manji ili jednak danasnjem datumu, znaci da je aktuelan
-EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND kol_ulaz - kol_izlaz <> 0 AND cijena = $2 AND  ncijena = $3 AND $4 <= current_date AND dat_do = $5' ||
+-- ... OR (dat_od=$4 AND dat_do=$5) znaci da se moze retroaktivno poslati dokument kome je dat_od i dat_do odgovara nekoj transakciji
+--                                  koju zelimo modifikovati
+EXECUTE 'select id from {{ item_prodavnica }}.pos_stanje where ((dat_od <= current_date AND dat_do >= current_date AND $4<=current_date AND dat_do=$5 ) OR (dat_od=$4 AND dat_do=$5)) ' ||
+         'AND idroba = $1 AND kol_ulaz - kol_izlaz <> 0 AND cijena=$2 AND ncijena=$3' ||
          ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
       using idroba, cijena, ncijena, dat_od, dat_do
       INTO idRaspolozivo;
@@ -251,6 +254,7 @@ DECLARE
    dokument text;
    idDokument bigint;
    idRaspolozivo bigint;
+   lStorno boolean;
 BEGIN
 
 IF ( NOT idvd IN ('19','29','79') ) THEN
@@ -268,7 +272,6 @@ IF dat_do IS NULL then
 END IF;
 
 IF transakcija = '-' THEN -- on delete pos_pos stavka
-
    RAISE INFO 'delete = % % % % % %', dokument, idroba, cijena, ncijena, dat_od, dat_do;
    -- (1) ponistiti izlaz koji je nivelacija napravila
    EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(izlazi) AND idroba = $2'
@@ -295,21 +298,42 @@ IF transakcija = '-' THEN -- on delete pos_pos stavka
    RETURN TRUE;
 END IF;
 
+IF kolicina < 0 THEN
+   lStorno := True;
+ELSE
+   lStorno := False;
+END IF;
 -- raspoloziva roba po starim cijenama, kolicina treba biti > 0
--- ncijena=0, gledaju se samo OSNOVNE cijene
-EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where  (dat_od <= current_date AND dat_do >= current_date )' ||
-         ' AND idroba = $1 AND kol_ulaz - kol_izlaz > 0 AND cijena = $2 AND  ncijena = 0 AND $3 <= current_date AND $4 <= dat_do' ||
+-- A) ncijena=0, gledaju se samo OSNOVNE cijene
+-- ILI
+-- B) dat_od, dat_do, cijena, ncijena identicni (dat_od=$3 AND dat_do=$4 AND cijena=$2 AND ncijena=$5)
+--    konkretno se koristi za storno 79 stavki: p2.pos_artikli_istekao_popust_gen_79_storno( current_date );
+EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje WHERE ' ||
+         '(' ||
+         '(ncijena=0 AND dat_od <= current_date AND dat_do >= current_date AND $3<=current_date AND $4<=dat_do AND cijena=$2)' ||
+         ' OR ' ||
+         '(dat_od=$3 AND dat_do=$4 AND cijena=$2 AND ncijena=$5)' ||
+         ')' ||
+         ' AND idroba=$1 AND kol_ulaz - kol_izlaz > 0' ||
          ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
-      using idroba, cijena, dat_od, dat_do
+      using idroba, cijena, dat_od, dat_do, ncijena
       INTO idRaspolozivo;
 
 RAISE INFO 'idDokument = % % %', idRaspolozivo, dat_od, dat_do;
 
 IF NOT idRaspolozivo IS NULL then
   -- umanjiti - 'iznijeti' zalihu po starim cijenama
-  EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi = izlazi || $3' ||
+  IF lStorno THEN
+     EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz+$1,ulazi=ulazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
+     RETURN TRUE;
+  ELSE
+    EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi=izlazi || $3' ||
+       ' WHERE id=$2'
+        USING kolicina, idRaspolozivo, dokument;
+  END IF;
+
   -- dodati zalihu po novim cijenama
   IF ( idvd IN ('19','29') ) THEN
       cijena := ncijena; -- nivelacija - nova cijena postaje osnovna
