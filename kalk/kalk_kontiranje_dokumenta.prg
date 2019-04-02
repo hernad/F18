@@ -44,7 +44,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL cGlavniKonto
    LOCAL lPostoji
    LOCAL nCnt
-
    // LOCAL lVrsteP := hParamsFakt[ "fakt_vrste_placanja" ]
    LOCAL cBrNalogFin, cBrNalogMat
    LOCAL cIdVnTrFP
@@ -61,12 +60,12 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL cRj1, cRj2
    LOCAL nLen
    LOCAL nStranaValutaIznos
+   LOCAL nKursPomocna
 
    // LOCAL cIdVrsteP
 
    cRj1 := ""
    cRj2 := ""
-
    IF ( lAGen == NIL )
       lAGen := .F.
    ENDIF
@@ -79,7 +78,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    IF ( lAutoBrojac == NIL )
       lAutoBrojac := .T.
    ENDIF
-
 
    SELECT F_FINMAT
    IF !Used()
@@ -138,7 +136,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
    lAFin2 := !lAutomatskiSetBrojNaloga
    lAMat := ( lAutomatskiSetBrojNaloga .AND. gAMat == "D" )
-
    IF lAMat .AND. f18_use_module( "mat" )
       Beep( 1 )
       lAMat := Pitanje(, "Formirati MAT nalog?", "D" ) == "D"
@@ -150,7 +147,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    cBrNalogMat := ""
 
    IF lAFin .OR. lAFin2
-
       select_o_fin_pripr()
       SET ORDER TO TAG "1"
       GO TOP
@@ -165,8 +161,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
    SELECT finmat
    GO TOP
-
-
    cGlavniKonto := finmat_glavni_konto( finmat->idvd )
    select_o_koncij( cGlavniKonto )
 
@@ -174,7 +168,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    use_sql_trfp( koncij->shema, finmat->IdVD )
    // SEEK finmat->IdVD + koncij->shema
 
-   AltD()
    cIdVnTrFP := trfp->IdVN
    // uzmi vrstu naloga koja ce se uzeti u odnosu na prvu kalkulaciju
    // koja se kontira
@@ -195,7 +188,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       ENDIF
 
    ENDIF
-
    SELECT finmat
    GO TOP
 
@@ -569,7 +561,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
    SELECT finmat
    SKIP -1
-   AltD()
    BoxC()
 
    IF lAFin .OR. lAFin2
@@ -578,6 +569,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       SEEK finmat->idfirma + cIdVnTrFP + cBrNalogFin
       my_flock()
       //IF Found()
+      nKursPomocna := Kurs( dDatFaktP, "D", "P" )
          DO WHILE !Eof() .AND. fin_pripr->IDFIRMA + fin_pripr->IDVN + fin_pripr->BRNAL == finmat->idfirma + cIdVnTrFP + cBrNalogFin
             cPom := Right( fin_pripr->opis, 1 )
             // na desnu stranu opisa stavim npr "ZADUZ MAGACIN          0"
@@ -591,7 +583,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   REPLACE iznosbhd WITH Round( fin_pripr->iznosbhd, Min( Val( cPom ), 2 ) )
                ENDIF
             ENDIF
-            nStranaValutaIznos := fin_pripr->iznosbhd * Kurs( dDatFaktP, "D", "P" )
+            nStranaValutaIznos := fin_pripr->iznosbhd * nKursPomocna
             REPLACE iznosdem WITH round2( nStranaValutaIznos, 2 )
             SKIP
          ENDDO

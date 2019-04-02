@@ -149,7 +149,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       ELSEIF ( cIdvd == "IM" )
          kalk_stampa_dok_im()
 
-      ELSEIF ( cIdvd == "IP" )
+      ELSEIF ( cIdvd $ "IP#90" )
          kalk_stampa_dok_ip()
 
       ELSEIF ( cIdvd == "RN" )
@@ -235,8 +235,8 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
          kalk_stampa_dok_80( .T. )
       //ELSEIF ( cIdVd == "81" )
       //   kalk_stampa_dok_81_tops( .T. )
-      ELSEIF ( cIdVd == "IP" )
-         kalk_stampa_dok_ip( .T. )
+      //ELSEIF ( cIdVd == "IP" )
+      //   kalk_stampa_dok_ip( .T. )
       ELSEIF ( cIdVd $ "19#71#79" )
          kalk_stampa_dok_19_79()
       ENDIF
@@ -320,4 +320,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61"
+   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61#90#IP"

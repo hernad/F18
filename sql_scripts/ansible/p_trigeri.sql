@@ -141,14 +141,32 @@ DECLARE
     lRet boolean;
     datOd date;
     datDo date;
+    nVisak numeric;
+    nManjak numeric;
+    nKolicina numeric;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NOT NEW.idvd IN ('42','02','22','80','89','29','19','79') ) THEN   -- 42, 11, 80, 19, 79, 89
+   IF ( NOT NEW.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN   -- 42, 11, 80, 19, 79, 89
       RETURN NULL;
    END IF;
+   IF ( NEW.idvd = '90' ) THEN
+      IF ( NEW.kolicina - NEW.kol2 ) > 0 THEN  -- popisana - knjizna
+         nVisak := NEW.kolicina - NEW.kol2;
+         nManjak := 0;
+         nKolicina := nVisak;
+      ELSE
+         nManjak := NEW.kol2 - NEW.kolicina;
+         nVisak := 0;
+         nKolicina := nManjak;
+      END IF;
+   ELSE
+      nVisak := 0;
+      nManjak := 0;
+      nKolicina := NEW.kolicina;
+   END IF;
 ELSE
-   IF ( NOT OLD.idvd IN ('42','02','22','80','89','29','19','79') ) THEN
+   IF ( NOT OLD.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN
       RETURN NULL;
    END IF;
 END IF;
@@ -162,7 +180,7 @@ IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
       RETURN OLD;
 
-ELSIF (TG_OP = 'DELETE') AND ( OLD.idvd IN ('02','22','80','89') ) THEN
+ELSIF (TG_OP = 'DELETE') AND ( OLD.idvd IN ('02','22','80','89','90') ) THEN
       RAISE INFO 'delete pos_prijem_update_stanje  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       -- select {{ item_prodavnica }}.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '999', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
       EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
@@ -183,7 +201,7 @@ ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd = '42' ) THEN
        RAISE INFO 'update 42 pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr ;
        RETURN NEW;
 
-ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd IN ('02','22','80','89') ) THEN
+ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd IN ('02','22','80','89','90') ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
@@ -191,25 +209,28 @@ ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd IN ('19','29','79' ) ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' OR  NEW.idvd = '99' OR ( NEW.idvd = '90' AND nManjak > 0)  ) THEN
+        -- 42 - prodaja
+        -- 99 - kalo
+        -- 90 nManjak - izlaz
         RAISE INFO 'insert 42 pos_pos  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- {{ item_prodavnica }}.pos_izlaz_update_stanje('+', '15', '42', 'PROD10', '999', current_date, 'R03', 10, 30, 0);
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_izlaz_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9)'
-              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum,  NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
+              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum,  NEW.idroba, nKolicina, NEW.cijena, NEW.ncijena
               INTO lRet;
         RAISE INFO 'insert 42 ret=%', lRet;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd = '90' AND nVisak > 0) ) THEN
         RAISE INFO 'insert pos_prijem_update_stanje % % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.idroba, NEW.rbr;
         -- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '999', current_date, current_date, NULL,'R01', 100, 2.5, 0);
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
-             USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
+             USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, NEW.idroba, nKolicina, NEW.cijena, NEW.ncijena
              INTO lRet;
              RAISE INFO 'insert ret=%', lRet;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79' ) ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
         RAISE INFO 'insert pos_pos % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- u pos_doks se nalazi dat_od, dat_do
         EXECUTE 'SELECT dat_od, dat_do FROM {{ item_prodavnica }}.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'

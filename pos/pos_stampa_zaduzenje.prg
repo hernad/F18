@@ -62,7 +62,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
    ?? "  Broj fakture:", hParams[ "brfaktp" ]
    ?  "Opis:", _u( hParams[ "opis" ] )
 
-   aLines := get_pos_linija_podvuci( nRobaNazivSirina, cPicKol, cPicIzn )
+   aLines := get_pos_linija_podvuci( hParams[ "idvd" ], nRobaNazivSirina, cPicKol, cPicIzn )
    cLine := aLines[ 1 ]
    cLine2 := aLines[ 2 ]
 
@@ -82,13 +82,24 @@ FUNCTION pos_stampa_zaduzenja( hParams )
       ?  cLM + PRIPRZ->IdRoba + " "
       ?? PadR( AllTrim( roba->Naz ), nRobaNazivSirina - 1 ) + "  "
       ?? roba->Jmj + " "
-      ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
+      IF hParams[ "idvd" ] == "90"
+         ?? TRANS( PRIPRZ->kol2, cPicKol ) + " "
+         ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
+         ?? TRANS( PRIPRZ->Kolicina - PRIPRZ->Kol2, cPicKol ) + " "
+      ELSE
+         ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
+      ENDIF
       ?? TRANS( PRIPRZ->Cijena, cPicIzn ) + " "
       nCol := PCol() - 1
-      ?? TRANS( PRIPRZ->Kolicina * PRIPRZ->cijena, cPicIzn )
-
-      nFinZad += PRIPRZ->Kolicina * PRIPRZ->Cijena
-      pos_setuj_tarife( PRIPRZ->IdRoba, PRIPRZ->Kolicina * PRIPRZ->Cijena, @aTarife )
+      IF hParams[ "idvd" ] == "90"
+         ?? TRANS( ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->cijena, cPicIzn )
+         nFinZad += ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->Cijena
+         pos_setuj_tarife( PRIPRZ->IdRoba, ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->Cijena, @aTarife )
+      ELSE
+         ?? TRANS( PRIPRZ->Kolicina * PRIPRZ->cijena, cPicIzn )
+         nFinZad += PRIPRZ->Kolicina * PRIPRZ->Cijena
+         pos_setuj_tarife( PRIPRZ->IdRoba, PRIPRZ->Kolicina * PRIPRZ->Cijena, @aTarife )
+      ENDIF
       SKIP
    ENDDO
 
@@ -118,7 +129,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
    RETURN .T.
 
 
-STATIC FUNCTION get_pos_linija_podvuci( nRobaNazivSirina, cPicKol, cPicIzn )
+STATIC FUNCTION get_pos_linija_podvuci( cIdVd, nRobaNazivSirina, cPicKol, cPicIzn )
 
    LOCAL cLine, cLine2
 
@@ -131,8 +142,19 @@ STATIC FUNCTION get_pos_linija_podvuci( nRobaNazivSirina, cPicKol, cPicIzn )
    cLine  += " " + PadR( "JMJ", 3 )
    cLine2 += " " + Replicate( "-", 3 )
 
-   cLine  += " " + PadC( "Količina", Len( cPicKol ) )
-   cLine2 += " " + Replicate( "-", Len( cPicKol ) )
+   IF cIdVd == "90"
+      cLine  += " " + PadC( "Knjiž.k", Len( cPicKol ) )
+      cLine2 += " " + Replicate( "-", Len( cPicKol ) )
+
+      cLine  += " " + PadC( "Pop.kol", Len( cPicKol ) )
+      cLine2 += " " + Replicate( "-", Len( cPicKol ) )
+
+      cLine  += " " + PadC( "Pop-Knj", Len( cPicKol ) )
+      cLine2 += " " + Replicate( "-", Len( cPicKol ) )
+   ELSE
+      cLine  += " " + PadC( "Količina", Len( cPicKol ) )
+      cLine2 += " " + Replicate( "-", Len( cPicKol ) )
+   ENDIF
 
    cLine  += "  " + PadC( "Cijena", Len( cPicIzn ) )
    cLine2 += " " + Replicate( "-", Len( cPicIzn ) )

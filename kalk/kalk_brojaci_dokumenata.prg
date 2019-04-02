@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-//MEMVAR //glKalkBrojacPoKontima  //, gBrojacKalkulacija
+// MEMVAR //glKalkBrojacPoKontima  //, gBrojacKalkulacija
 
 STATIC s_nLenKalkBrojac
 
@@ -47,12 +47,13 @@ FUNCTION kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKonto )
    // ENDIF
 
    // RETURN kalk_sljedeci_brdok( cIdVd, cIdFirma, cSufiks )
+
    RETURN kalk_novi_brdok_konto( cIdVd, cIdKonto )
 
 
-//FUNCTION is_brojac_po_kontima()
+// FUNCTION is_brojac_po_kontima()
 
-//   RETURN glKalkBrojacPoKontima
+// RETURN glKalkBrojacPoKontima
 
 
 FUNCTION kalk_duzina_brojaca_dokumenta( nLen )
@@ -144,17 +145,17 @@ STATIC FUNCTION kalk_sljedeci_brdok( cTipKalk, cIdFirma, cSufiks )
 
 FUNCTION kalk_set_brkalk_za_idvd( cIdVd, cBrKalk )
 
-   //IF gBrojacKalkulacija == "D"
-      find_kalk_doks_za_tip_zadnji_broj( self_organizacija_id(), cIdVd )
-      GO BOTTOM
-      IF field->idvd <> cIdVd
-         cBrKalk := Space( 8 )
-      ELSE
-         cBrKalk := field->brdok
-      ENDIF
-      kalk_fix_brdok_add_1( @cBrKalk )
+   // IF gBrojacKalkulacija == "D"
+   find_kalk_doks_za_tip_zadnji_broj( self_organizacija_id(), cIdVd )
+   GO BOTTOM
+   IF field->idvd <> cIdVd
+      cBrKalk := Space( 8 )
+   ELSE
+      cBrKalk := field->brdok
+   ENDIF
+   kalk_fix_brdok_add_1( @cBrKalk )
 
-   //ENDIF
+   // ENDIF
 
    RETURN cBrKalk
 
@@ -164,9 +165,9 @@ FUNCTION kalk_fix_brdok_add_1( cBrKalk )
    LOCAL nLenGlavni := kalk_duzina_brojaca_dokumenta()
    LOCAL nLenSufiks := 8 - nLenGlavni
 
-   //IF gBrojacKalkulacija == "D"
-      cBrKalk := UBrojDok( Val( Left( cBrKalk, nLenGlavni ) ) + 1, nLenGlavni, Right( cBrKalk, nLenSufiks ) )
-   //ENDIF
+   // IF gBrojacKalkulacija == "D"
+   cBrKalk := UBrojDok( Val( Left( cBrKalk, nLenGlavni ) ) + 1, nLenGlavni, Right( cBrKalk, nLenSufiks ) )
+   // ENDIF
 
    RETURN cBrKalk
 
@@ -184,9 +185,9 @@ FUNCTION kalk_fix_brdok( cBrKalk )
       RETURN StrTran( cBrKalk, "#", " " )
    ENDIF
 
-   //IF gBrojacKalkulacija == "D"
-      cBrKalk := UBrojDok( Val( Left( cBrKalk, nLenGlavni ) ), nLenGlavni, Right( cBrKalk, nLenSufiks ) )
-   //ENDIF
+   // IF gBrojacKalkulacija == "D"
+   cBrKalk := UBrojDok( Val( Left( cBrKalk, nLenGlavni ) ), nLenGlavni, Right( cBrKalk, nLenSufiks ) )
+   // ENDIF
 
    RETURN cBrKalk
 
@@ -478,27 +479,34 @@ FUNCTION kalk_unos_get_brdok( cIdFirma, cIdVd, cIdKonto1, cIdKonto2 )
    LOCAL cIdKontoUnos, cSay
    LOCAL GetList := {}
 
-   //IF is_brojac_po_kontima()
+   // IF is_brojac_po_kontima()
 
-      Box( "#Glavni konto za brojač", 3, 70 )
-      IF cIdVd $ KALK_IDVD_MAGACIN
-         cSay := "Magacinski konto: "
+   Box( "#Glavni konto za brojač", 3, 70 )
+   IF cIdVd $ KALK_IDVD_MAGACIN
+      cSay := "Magacinski konto: "
+      cIdKontoUnos := cIdKonto1
+   ELSE
+      cSay := "Prodavnički konto: "
+      IF cIdVd == "IP"
          cIdKontoUnos := cIdKonto1
       ELSE
-         cSay := "Prodavnički konto: "
          cIdKontoUnos := cIdKonto2
       ENDIF
-      cIdKontoUnos := PadR( cIdKontoUnos, FIELD_LENGTH_IDKONTO )
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 cSay GET cIdKontoUnos VALID P_Konto( @cIdKontoUnos ) PICT "@!"
-      READ
+   ENDIF
+   cIdKontoUnos := PadR( cIdKontoUnos, FIELD_LENGTH_IDKONTO )
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 cSay GET cIdKontoUnos VALID P_Konto( @cIdKontoUnos ) PICT "@!"
+   READ
 
-      BoxC()
-      IF cIdVd $ KALK_IDVD_MAGACIN
+   BoxC()
+   IF cIdVd $ KALK_IDVD_MAGACIN
+      cIdKonto1 := cIdKontoUnos
+   ELSE
+      IF cIdVd == "IP"
          cIdKonto1 := cIdKontoUnos
-      ELSE
-         cIdKonto2 := cIdKontoUnos
       ENDIF
+      cIdKonto2 := cIdKontoUnos
+   ENDIF
 
-   //ENDIF
+   // ENDIF
 
    RETURN kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKontoUnos )

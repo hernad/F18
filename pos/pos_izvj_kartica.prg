@@ -204,7 +204,6 @@ FUNCTION pos_kartica_artikla()
       ?? Str( nVrijednost, 10, 2 ) + " "
       ? m
       ?
-
    ENDDO
 
    f18_end_print( NIL, xPrintOpt )
@@ -217,12 +216,14 @@ FUNCTION pos_kartica_artikla()
 FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVrijednost, lPrint )
 
    LOCAL nPopust, nCijenaNeto
+   LOCAL lVisak
 
    IF pos->idvd == POS_IDVD_POCETNO_STANJE_PRODAVNICA
       nUlaz := POS->Kolicina
       nVrijednost := POS->Kolicina * POS->Cijena
       nIzlaz := 0
       nStanjeKolicina := POS->Kolicina
+      nKalo := 0
       IF lPrint
          ?
          ?? DToC( pos->datum ) + " "
@@ -247,8 +248,42 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
 
+
+   ELSEIF POS->IdVd == POS_IDVD_INVENTURA
+      IF pos->kolicina - pos->kol2 > 0 // popisana - knjizna
+         // visak
+         lVisak := .T.
+
+         nVrijednost += ( pos->kolicina - pos->kol2 ) * POS->Cijena
+         nStanjeKolicina += pos->kolicina - pos->kol2
+         nUlaz += pos->kolicina - pos->kol2
+      ELSE
+         // manjak
+         lVisak := .F.
+         nVrijednost -= ( pos->kol2 - pos->kolicina ) * POS->Cijena
+         nStanjeKolicina -= pos->kol2 - pos->kolicina
+         nIzlaz += pos->kol2 - pos->kolicina
+      ENDIF
+      IF lPrint
+         ?
+         ?? DToC( pos->datum ) + " "
+         ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), FIELD_LEN_POS_BRDOK )
+         s_nKol2 := PCol()
+         IF lVisak
+            ?? Str( pos->kolicina - pos->kol2, 10, 3 ) + " "
+            ?? PadC( "<- visak", 12 )
+         ELSE
+            ?? PadC( "manjak ->", 12 )
+            ?? Str( pos->kol2 - pos->kolicina, 10, 3 ) + " "
+         ENDIF
+
+         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( pos->cijena, 10, 2 ) + " "
+         ?? Str ( nVrijednost, 10, 2 )
+      ENDIF
+
    ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
-      nVrijednost += POS->Kolicina * ( POS->Cijena - POS->Cijena )
+      nVrijednost += POS->Kolicina * ( POS->ncijena - POS->cijena )
       IF lPrint
          ?
          ?? DToC( pos->datum ) + " "
@@ -258,14 +293,13 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          @ PRow() + 1, s_nKol2 + 1 SAY PadR( "Niv.Kol:", 10 ) + " "
          ?? Str( pos->kolicina, 10, 3 ) + " "
          ?? Str ( nStanjeKolicina, 10, 2 ) + " "
-         nVrijednost += pos->kolicina * ( pos->ncijena - pos->cijena )
          ?? Str ( pos->ncijena - pos->cijena, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
 
    ELSEIF POS->IdVd == POS_IDVD_PRIJEM_KALO
       nKalo += POS->Kolicina
-      nVrijednost -= 0 //vrijednost se ne mijenja POS->Kolicina * pos->cijena
+      nVrijednost -= 0 // vrijednost se ne mijenja POS->Kolicina * pos->cijena
       IF lPrint
          ?
          ?? DToC( pos->datum ) + " "

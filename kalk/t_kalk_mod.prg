@@ -182,7 +182,7 @@ METHOD TKalkMod:set_module_gvars()
 
    //FIELD_LENGTH_IDKONTO := Len( mkonto )
 
-   PUBLIC glZabraniVisakIP
+   //PUBLIC glZabraniVisakIP
    //PUBLIC glKalkBrojacPoKontima := .F.
    //PUBLIC gcSLObrazac
    //PUBLIC ZAOKRUZENJE := 2
@@ -250,7 +250,7 @@ METHOD TKalkMod:set_module_gvars()
 
    lPrikPRUC := fetch_metric( "kalk_prikazi_kolone_pruc", nil, lPrikPRUC )
 
-   glZabraniVisakIP := fetch_metric( "kalk_zabrani_visak_kod_ip", nil, glZabraniVisakIP )
+  //glZabraniVisakIP := fetch_metric( "kalk_zabrani_visak_kod_ip", nil, glZabraniVisakIP )
    //glKalkBrojacPoKontima := fetch_metric( "kalk_brojac_dokumenta_po_kontima", nil, glKalkBrojacPoKontima )
 
    info_bar( ::cName, ::cName + " - kalk set gvars end" )

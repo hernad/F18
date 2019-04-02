@@ -26,7 +26,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN -- POS -> KALK
    -- 22 -pos potvrda prijema magacin
    -- 29 - pos nivelacija
    -- 89 - direktni prijem u prodavnicu od dobavljaca
-   IF ( NOT NEW.idvd IN ('42','71','61','22','29','89') ) THEN
+   IF ( NOT NEW.idvd IN ('42','71','61','22','29','89','90','99') ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -39,7 +39,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN -- POS -> KALK
    SELECT public.kalk_brdok_iz_pos(nProdavnica, idvdKalk, NEW.brdok, NEW.datum)
           INTO brDok;
 ELSE
-   IF ( NOT OLD.idvd IN ('42','71','61','22','29','89') ) THEN
+   IF ( NOT OLD.idvd IN ('42','71','61','22','29','89','90','99') ) THEN
       RETURN NULL;
    END IF;
    SELECT id INTO pKonto
@@ -103,6 +103,8 @@ DECLARE
        idvdKalk varchar;
        pUI varchar;
        nProdavnica integer;
+       nKolicina numeric;
+       nKnjiznaKolicina numeric;
 
 BEGIN
 
@@ -111,7 +113,7 @@ BEGIN
 nProdavnica := to_number(substring('{{ item_prodavnica }}',2),'9999')::integer;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN  -- POS -> KALK
-   IF ( NOT NEW.idvd IN ('42','71','61','22','29','89') ) THEN
+   IF ( NOT NEW.idvd IN ('42','71','61','22','29','89','90','99') ) THEN
       RETURN NULL;
    END IF;
    IF ( NEW.idvd = '42') THEN
@@ -126,7 +128,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN  -- POS -> KALK
         FROM public.kalk_doks where idvd=idvdKalk and brdok=cBrDok and datdok=NEW.datum LIMIT 1;
 
 ELSE
-   IF ( NOT OLD.idvd IN ('42','71','61','22','29','89') ) THEN
+   IF ( NOT OLD.idvd IN ('42','71','61','22','29','89','90','99') ) THEN
       RETURN NULL;
    END IF;
    IF ( OLD.idvd = '42') THEN
@@ -167,18 +169,28 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
               USING idFirma, idvdKalk, cBrDok, NEW.datum, NEW.idpos, cPKonto;
          RETURN NEW;
 
-  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('61','22','89') ) THEN
+  ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('61','22','89','90','99') ) THEN
 
+          pUI := 'P';
+          IF ( NEW.idvd = '90' ) THEN
+             pUI := 'I';
+             nKolicina := NEW.kolicina;
+             nKnjiznaKolicina := NEW.kol2;
+          ELSE
+             nKolicina := NEW.kolicina;
+             nKnjiznaKolicina := 0;
+          END IF;
           EXECUTE 'SELECT pdv from public.tarifa where id=$1'
                USING NEW.idtarifa
                INTO pdvStopa;
           RAISE INFO 'THEN insert kalk_kalk % % % % % %', NEW.idpos, idvdKalk, cPKonto, cMKonto, cBrDok, NEW.datum;
           -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
           -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
-          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, mkonto) ' ||
-               'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $12/100), $11, $13)'
+          -- kalk 90: fcj = knjizna vrijednost = nKnjiznaKolicina * NEW.cijena = $15 * $9
+          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, mkonto, pu_i, gkolicina, gkolicin2, fcj ) ' ||
+               'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $12/100), $11, $13, $14, $15, $15-$10, $15 * $9)'
                 USING idFirma, idvdKalk, NEW.rbr, cBrDok, NEW.datum, cPKonto, NEW.idroba, NEW.idtarifa,
-                NEW.cijena, NEW.kolicina, 0, pdvStopa, cMKonto;
+                NEW.cijena, nKolicina, 0, pdvStopa, cMKonto, pUI, nKnjiznaKolicina;
                 RETURN NEW;
 
   -- 71 - zahtjev snizenje, 29 - pos nivelacija generisana na osnovu akcijskih cijena

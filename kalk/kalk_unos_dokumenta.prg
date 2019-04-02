@@ -970,7 +970,7 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ELSEIF _idvd == "IM"
       RETURN kalk_get_1_im()
 
-   ELSEIF _idvd == "IP"
+   ELSEIF _idvd $ "90#IP"
       RETURN kalk_get_1_ip()
 
    ELSEIF _idvd == "RN"

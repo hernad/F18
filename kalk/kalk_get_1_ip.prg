@@ -11,49 +11,56 @@
 
 #include "f18.ch"
 
-MEMVAR nKalkRBr, nKalkStrana, GetList
+MEMVAR nKalkRBr, nKalkStrana, GetList, PicKol, PicDem
+MEMVAR _idvd, _datfaktp, _datdok, _pkonto, _idkonto, _idkonto2, _idtarifa, _idroba, _mpcsapp, _kolicina, _gkolicina, _gkolicin2, _nc
+MEMVAR _idfirma, _mkonto, _mu_i, _pu_i, _brdok
+MEMVAR _fcj, _rbr, _error
 
 FUNCTION kalk_get_1_ip()
 
-   LOCAL nFaktVPC
    LOCAL nX := 8
-   LOCAL _pos_x, _pos_y
-   LOCAL _left := 25
+   LOCAL nLeft := 25
+   LOCAL cTmp
 
+   IF nKalkRbr == 1 .AND. kalk_is_novi_dokument()
+      _DatFaktP := _datdok
+      _pkonto := _idkonto
+      _idkonto := ""
+      _idkonto2 := ""
+      _mkonto := ""
+      _mu_i := ""
+   ENDIF
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto koji zadužuje" GET _IdKonto  VALID P_Konto( @_IdKonto, nX, 35 ) PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto koji zadužuje" GET _pkonto  VALID P_Konto( @_pkonto, nX, 35 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
 
    nX += 2
-   _pos_x := box_x_koord() + nX
 
    kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _IdVd, kalk_is_novi_dokument(), box_x_koord() + nX, box_y_koord() + 2 )
    @ box_x_koord() + nX, box_y_koord() + ( f18_max_cols() - 20 ) SAY "Tarifa:" GET _idtarifa VALID P_Tarifa( @_idtarifa )
    READ
    ESC_RETURN K_ESC
 
-   //IF roba_barkod_pri_unosu()
-  //    _idroba := Left( _idroba, 10 )
-   //ENDIF
+   // IF roba_barkod_pri_unosu()
+   // _idroba := Left( _idroba, 10 )
+   // ENDIF
    select_o_tarifa( _idtarifa )
    select_o_roba( _idroba )
-   _mpcsapp := kalk_get_mpc_by_koncij_pravilo( _IdKonto )
+   _mpcsapp := kalk_get_mpc_by_koncij_pravilo( _pkonto )
 
    SELECT kalk_pripr
 
    nX += 2
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PadL( "KNJIŽNA KOLICINA:", nLeft ) GET _gkolicina PICT PicKol  ;
+      WHEN kalk_ip_when_knjizna_kolicina( _idFirma, _PKonto, _BrDok, _IdRoba, _DatDok, _Nc, _GKolicina )
+   @ box_x_koord() + nX, Col() + 2 SAY8 "POPISANA KOLIČINA:" GET _kolicina VALID kalk_ip_valid_popisana_kolicina() PICT PicKol
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PadL( "KNJIŽNA KOLICINA:", _left ) GET _gkolicina PICT PicKol  ;
-      WHEN {|| kalk_ip_when_knjizna_kolicina() }
-   @ box_x_koord() + nX, Col() + 2 SAY8 "POPISANA KOLIČINA:" GET _kolicina VALID VKol() PICT PicKol
-
-   _tmp := "P.CIJENA (SA PDV):"
-
+   cTmp := "P.CIJENA (SA PDV):"
    nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "NABAVNA CIJENA:", _left ) GET _nc PICT picdem
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "NABAVNA CIJENA:", nLeft ) GET _nc PICT picdem
    nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( _tmp, _left ) GET _mpcsapp PICT picdem
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( cTmp, nLeft ) GET _mpcsapp PICT picdem
 
    READ
 
@@ -63,9 +70,7 @@ FUNCTION kalk_get_1_ip()
    // _fcj3 - knjizna nabavna vrijednost
 
    _gkolicin2 := _gkolicina - _kolicina // ovo je kolicina izlaza koja nije proknjizena
-   _mkonto := ""
-   _pkonto := _idkonto
-   _mu_i := ""
+   // _pkonto := _idkonto
    _pu_i := "I" // inventura
    nKalkStrana := 3
 
@@ -74,19 +79,19 @@ FUNCTION kalk_get_1_ip()
 
 FUNCTION kalk_generisi_ip()
 
-   LOCAL cIdFirma, cIdKonto, cIdRoba, dDatDok, cNulirati
+   LOCAL cIdFirma, cPKonto, cIdRoba, dDatDok, cNulirati
    LOCAL nRbr
    LOCAL GetList := {}
-
+   LOCAL cBrDok
 
    Box(, 4, 50 )
 
    cIdFirma := self_organizacija_id()
-   cIdkonto := PadR( "1330", 7 )
+   cPKonto := PadR( "1330", 7 )
    dDatDok := Date()
    cNulirati := "N"
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodavnica:" GET  cIdkonto VALID P_Konto( @cIdkonto )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodavnica:" GET  cPKonto VALID P_Konto( @cPKonto )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum     :  " GET  dDatDok
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Nulirati lager (D/N)" GET cNulirati VALID cNulirati $ "DN" PICT "@!"
 
@@ -96,23 +101,19 @@ FUNCTION kalk_generisi_ip()
    BoxC()
 
    o_kalk_pripr()
-
-   PRIVATE cBrDok := kalk_get_next_broj_v5( cIdFirma, "IP", NIL )
+   cBrDok := kalk_get_next_broj_v5( cIdFirma, "IP", NIL )
 
    nRbr := 1
-
    SET ORDER TO TAG "4"
 
    MsgO( "Generacija dokumenta IP - " + cBrdok )
 
-   select_o_koncij( cIdkonto )
+   select_o_koncij( cPKonto )
 
-   find_kalk_by_pkonto_idroba( cIdFirma, cIdKonto )
-   DO WHILE !Eof() .AND. cIdfirma + cIdkonto == field->idfirma + field->pkonto
-
+   find_kalk_by_pkonto_idroba( cIdFirma, cPKonto )
+   DO WHILE !Eof() .AND. cIdfirma + cPKonto == field->idfirma + field->pkonto
       cIdRoba := kalk->idroba
-      kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, cNulirati, .F., @nRbr )
-
+      kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, cNulirati, .F., @nRbr )
    ENDDO
 
    MsgC()
@@ -122,20 +123,11 @@ FUNCTION kalk_generisi_ip()
    RETURN .T.
 
 
-FUNCTION kalk_ip_when_knjizna_kolicina()
+FUNCTION kalk_ip_when_knjizna_kolicina( cIdFirma, cPKonto, cBrDok, cIdRoba, dDatDok, nNc, nGKolicina )
 
-   LOCAL cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, cNulirati
-
-   cIdFirma := _idfirma
-   cBrdok := _brdok
-   cIdKonto := _idKonto
-   cIdRoba := _idroba
-   dDatDok := _datdok
-   cNulirati := "N"
-
-   IF  Round( _nc, 2 ) == 0 .AND. Round( _gkolicina, 2 ) == 0 // jos nisu setovane mpc niti knjizna kolicina
-      find_kalk_by_pkonto_idroba( cIdFirma, cIdKonto, cIdRoba )
-      kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, cNulirati, .T., @nKalkRbr )
+   IF  Round( nNc, 4 ) == 0 .AND. Round( nGkolicina, 4 ) == 0 // jos nisu setovane mpc niti knjizna kolicina
+      find_kalk_by_pkonto_idroba( cIdFirma, cPKonto, cIdRoba )
+      kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, "N", .T., @nKalkRbr )
       SELECT kalk_pripr
    ENDIF
 
@@ -146,7 +138,7 @@ FUNCTION kalk_ip_when_knjizna_kolicina()
    RETURN .F. // bez ispravke popisane kolicine
 
 
-FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, cNulirati, lRucniUnosIP, nRbr )
+FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, cNulirati, lRucniUnosIP, nRbr )
 
    LOCAL nUlaz := 0
    LOCAL nIzlaz := 0
@@ -154,7 +146,6 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, 
    LOCAL nMPVI := 0
    LOCAL nNVU := 0
    LOCAL nNVI := 0
-   LOCAL nRabat := 0
 
    select_o_roba( cIdroba )
 
@@ -164,38 +155,37 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, 
 
    SELECT kalk
 
-   DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba
+   DO WHILE !Eof() .AND. cIdfirma + cPKonto + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba
 
-      IF dDatdok < kalk->datdok  // preskoci
+      IF dDatdok < kalk->datdok
          SKIP
          LOOP
       ENDIF
-
       IF roba->tip $ "UT"
          SKIP
          LOOP
       ENDIF
 
-      IF pu_i == "1"
+      IF kalk->pu_i == "1"
          nUlaz += field->kolicina - field->GKolicina - field->GKolicin2
          nMPVU += field->mpcsapp * field->kolicina
          nNVU += field->nc * field->kolicina
 
-      ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
+      ELSEIF kalk->pu_i == "5"  .AND. !( kalk->idvd $ "12#13#22" )
          nIzlaz += field->kolicina
          nMPVI += field->mpcsapp * field->kolicina
          nNVI += field->nc * field->kolicina
 
-      ELSEIF pu_i == "5"  .AND. ( idvd $ "12#13#22" )
+      ELSEIF kalk->pu_i == "5"  .AND. ( kalk->idvd $ "12#13#22" )
          // povrat
          nUlaz -= field->kolicina
          nMPVU -= field->mpcsapp * field->kolicina
          nNvu -= field->nc * field->kolicina
 
-      ELSEIF pu_i == "3"    // nivelacija
+      ELSEIF kalk->pu_i == "3"    // nivelacija
          nMPVU += field->mpcsapp * field->kolicina
 
-      ELSEIF pu_i == "I"
+      ELSEIF kalk->pu_i == "I"
          nIzlaz += field->gkolicin2
          nMPVI += field->mpcsapp * field->gkolicin2
          nNVI += field->nc * field->gkolicin2
@@ -223,15 +213,13 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cIdKonto, cIdRoba, dDatDok, 
       scatter()
       APPEND ncnl
       _idfirma := cIdfirma
-      _idkonto := cIdkonto
-      _pkonto := cIdkonto
+      //_idkonto := cPKonto
+      _pkonto := cPKonto
       _pu_i := "I"
       _idroba := cIdroba
       _idtarifa := roba->idtarifa
       _idvd := "IP"
       _brdok := cBrdok
-
-      //_rbr := rbr_u_char( nRbr++ )
       _rbr := nRbr++
       _kolicina := _gkolicina := nUlaz - nIzlaz
       IF cNulirati == "D"
@@ -271,20 +259,21 @@ FUNCTION gen_ip_razlika()
    LOCAL nMPVI
    LOCAL nNVU
    LOCAL nNVI
-   LOCAL nRabat
-   LOCAL _cnt := 0
+   LOCAL nCount := 0
    LOCAL GetList := {}
    LOCAL nRbr
+   LOCAL cBrDok, dDatDok, cIdVd, cOldBrDok
+   LOCAL cIdFirma, cPKonto, cIdRoba
 
    Box(, 4, 50 )
 
    cIdFirma := self_organizacija_id()
-   cIdkonto := PadR( "1330", 7 )
+   cPKonto := PadR( "1330", 7 )
    dDatDok := Date()
    cOldBrDok := Space( 8 )
    cIdVd := "IP"
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodavnica:" GET cIdKonto VALID P_Konto( @cIdKonto )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Prodavnica:" GET cPKonto VALID P_Konto( @cPKonto )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum do  :" GET dDatDok
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Dokument " + cIdFirma + "-" + cIdVd GET cOldBrDok
 
@@ -310,9 +299,7 @@ FUNCTION gen_ip_razlika()
 
    o_kalk_pripr()
    o_kalk_pript()
-
-   // sljedeci broj kalkulacije IP
-   PRIVATE cBrDok := kalk_get_next_broj_v5( cIdFirma, "IP", NIL )
+   cBrDok := kalk_get_next_broj_v5( cIdFirma, "IP", NIL )
 
    nRbr := 0
 
@@ -320,17 +307,14 @@ FUNCTION gen_ip_razlika()
    // SET ORDER TO TAG "4"
 
    Box( , 3, 60 )
-
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "generacija IP-" + AllTrim( cBrDok ) + " u toku..."
 
-   select_o_koncij( cIdKonto )
-   find_kalk_by_pkonto_idroba( cIdFirma, cIdKonto )
+   select_o_koncij( cPKonto )
+   find_kalk_by_pkonto_idroba( cIdFirma, cPKonto )
    GO TOP
-
-   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == idfirma + pkonto
+   DO WHILE !Eof() .AND. cIdFirma + cPKonto == kalk->idfirma + kalk->pkonto
 
       cIdRoba := field->idroba
-
       SELECT pript
       SET ORDER TO TAG "2"
       HSEEK cIdFirma + "IP" + cOldBrDok + cIdRoba
@@ -348,20 +332,17 @@ FUNCTION gen_ip_razlika()
       nMPVI := 0
       nNVU := 0
       nNVI := 0
-      nRabat := 0
 
       select_o_roba( cIdRoba )
-      select_o_koncij( cIdKonto )
-
+      select_o_koncij( cPKonto )
       SELECT kalk
 
-      DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == idFirma + pkonto + idroba
+      DO WHILE !Eof() .AND. cIdfirma + cPKonto + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba
 
          IF dDatdok < field->datdok
             SKIP
             LOOP
          ENDIF
-
          IF roba->tip $ "UT"
             SKIP
             LOOP
@@ -396,22 +377,20 @@ FUNCTION gen_ip_razlika()
       IF ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nMpvu - nMpvi, 4 ) <> 0 )
 
          select_o_roba(  cIdRoba )
-
          SELECT kalk_pripr
          APPEND BLANK
-
          hRec := dbf_get_rec()
          hRec[ "idfirma" ] := cIdfirma
-         hRec[ "idkonto" ] := cIdkonto
+         hRec[ "idkonto" ] := cPKonto
          hRec[ "mkonto" ] := ""
-         hRec[ "pkonto" ] := cIdkonto
+         hRec[ "pkonto" ] := cPKonto
          hRec[ "mu_i" ] := ""
          hRec[ "pu_i" ] := "I"
          hRec[ "idroba" ] := cIdroba
          hRec[ "idtarifa" ] := roba->idtarifa
          hRec[ "idvd" ] := "IP"
          hRec[ "brdok" ] := cBrdok
-         //hRec[ "rbr" ] := rbr_u_char( ++nRbr )
+         // hRec[ "rbr" ] := rbr_u_char( ++nRbr )
          hRec[ "rbr" ] := ++nRbr
 
          // kolicinu odmah setuj na 0
@@ -419,7 +398,7 @@ FUNCTION gen_ip_razlika()
          // popisana kolicina je trenutno stanje
          hRec[ "gkolicina" ] := nUlaz - nIzlaz
          hRec[ "datdok" ] := dDatDok
-         //hRec[ "datfaktp" ] := dDatdok
+         // hRec[ "datfaktp" ] := dDatdok
          hRec[ "error" ] := ""
          hRec[ "fcj" ] := nMpvu - nMpvi
 
@@ -432,8 +411,7 @@ FUNCTION gen_ip_razlika()
          ENDIF
 
          dbf_update_rec( hRec )
-
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj stavki: " + PadR( AllTrim( Str( ++_cnt, 12, 0 ) ), 20 )
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY "Broj stavki: " + PadR( AllTrim( Str( ++nCount, 12, 0 ) ), 20 )
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "    Artikal: " + PadR( AllTrim( cIdroba ), 20 )
 
          SELECT kalk
@@ -455,15 +433,15 @@ FUNCTION gen_ip_razlika()
    RETURN .T.
 
 
-STATIC FUNCTION VKol()
+STATIC FUNCTION kalk_ip_valid_popisana_kolicina()
 
    LOCAL lMoze := .T.
 
-   IF ( glZabraniVisakIP )
-      IF ( _kolicina > _gkolicina )
-         MsgBeep( "Nije dozvoljeno evidentiranje viska na ovaj nacin!" )
-         lMoze := .F.
-      ENDIF
-   ENDIF
+   // IF ( glZabraniVisakIP )
+   // IF ( _kolicina > _gkolicina )
+   // MsgBeep( "Nije dozvoljeno evidentiranje viska na ovaj nacin!" )
+   // lMoze := .F.
+   // ENDIF
+   // ENDIF
 
    RETURN lMoze

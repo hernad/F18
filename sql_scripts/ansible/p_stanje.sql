@@ -45,7 +45,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( idvd <> '02' ) AND ( idvd <> '80' ) AND ( idvd <> '89' ) AND ( idvd <> '22' ) THEN
+IF ( NOT idvd IN ('02','80','89','22','90') ) THEN
         RETURN FALSE;
 END IF;
 
@@ -156,7 +156,7 @@ DECLARE
    dat_do date DEFAULT '3999-01-01';
 BEGIN
 
-IF ( idvd <> '42' )  THEN
+IF ( NOT idvd IN ('42','90','99') )  THEN -- 42 prodaja, 90 (kada je manjak), 99 - kalo stanje za prodaju umanjeno
         RETURN FALSE;
 END IF;
 
@@ -253,7 +253,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( idvd <> '19' ) AND ( idvd <> '29' ) AND ( idvd <> '79' ) THEN
+IF ( NOT idvd IN ('19','29','79') ) THEN
         RETURN FALSE;
 END IF;
 
@@ -311,7 +311,7 @@ IF NOT idRaspolozivo IS NULL then
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
   -- dodati zalihu po novim cijenama
-  IF ( idvd = '19' ) OR ( idvd = '29' ) THEN
+  IF ( idvd IN ('19','29') ) THEN
       cijena := ncijena; -- nivelacija - nova cijena postaje osnovna
       ncijena := 0;
   END IF;

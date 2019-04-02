@@ -31,7 +31,7 @@ FUNCTION pos_zaduzenje_valid_kolicina( nKol )
    RETURN .T.
 
 
-FUNCTION pos_inventura_when_knjizna( cIdRoba, nKnjiznaKolicina, nPopisanaKolicina )
+FUNCTION pos_inventura_when_knjizna_kolicina( cIdRoba, nKnjiznaKolicina, nPopisanaKolicina )
 
   nKnjiznaKolicina := pos_dostupno_artikal( cIdRoba )
   nPopisanaKolicina := -99999
@@ -39,7 +39,7 @@ FUNCTION pos_inventura_when_knjizna( cIdRoba, nKnjiznaKolicina, nPopisanaKolicin
 
 RETURN .F.
 
-FUNCTION pos_inventura_when_kolicina_kol2( cIdroba, nKnjiznaKolicina, nPopisanaKolicina )
+FUNCTION pos_inventura_when_popisana_kolicina( cIdroba, nKnjiznaKolicina, nPopisanaKolicina )
 
    //IF LastKey() == K_UP
    //    RETURN .T.
@@ -47,6 +47,7 @@ FUNCTION pos_inventura_when_kolicina_kol2( cIdroba, nKnjiznaKolicina, nPopisanaK
    IF nPopisanaKolicina == -99999
       nPopisanaKolicina := nKnjiznaKolicina
    END IF
+   ShowGets()
 
    RETURN .T.
 

@@ -11,57 +11,92 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
 
-FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
+MEMVAR m
+MEMVAR PicKol, PicDem, PicCdem
 
-   LOCAL nCol1 := nCol2 := 0
+FUNCTION kalk_stampa_dok_ip()
+
+   LOCAL nCol1 := 0
+   LOCAL nCol2 := 0
+   LOCAL nC1
    LOCAL nPom := 0
+   LOCAL cSamoObraz
+   LOCAL cIdFirma, cIdVd, cBrDok
+   LOCAL cNaslov
+   LOCAL xPrintOpt, bZagl
+   LOCAL cPKonto
+   LOCAL nTot4
+   LOCAL nTot5
+   LOCAL nTot6
+   LOCAL nTot7
+   LOCAL nTot8
+   LOCAL nTot9
+   LOCAL nTota
+   LOCAL nTotb
+   LOCAL nTotc
+   LOCAL nTotd
+   LOCAL nTotKol
+   LOCAL nTotGKol
+   LOCAL nTotVisak
+   LOCAL nTotManjak
+   LOCAL nPosKol
+   LOCAL nU4
+
+   // LOCAL cIdPartner, cBrFaktp
 
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
-   nStr := 0
-   cIdPartner := IdPartner
-   cBrFaktP := BrFaktP
-   //dDatFaktP := DatFaktP
-   cIdKonto := IdKonto
-   cIdKonto2 := IdKonto2
+   // nStr := 0
+   // cIdPartner := kalk_pripr->IdPartner
+   // cBrFaktP := kalk_pripr->BrFaktP
+   // dDatFaktP := DatFaktP
+   cPKonto := kalk_pripr->pkonto
+   // cIdKonto2 := IdKonto2
 
-   IF lKalkZaPOS == NIL
-      lKalkZaPOS := .F.
-   ENDIF
+   cIdFirma := kalk_pripr->idfirma
+   cIdVd := kalk_pripr->idvd
+   cBrDok := kalk_pripr->brdok
 
-   IF !lKalkZaPOS
-      cSamoObraz := Pitanje(, "Prikaz samo obrasca inventure (D-da,N-ne) ?",, "DN" )
-      IF cSamoObraz == "S"
-         stampa_obrasca_inventure_sank_lista()
-         RETURN
-      ENDIF
+   IF cIdVd == "90"
+      cNaslov := "POS inventura prodavnica"
    ELSE
-      cSamoObraz := "N"
+      cNaslov := "KALK inventura prodavnica"
    ENDIF
 
-   P_10CPI
-   select_o_konto( cIdkonto )
+   cSamoObraz := Pitanje(, "Prikaz samo obrasca inventure (D-da, N-ne) ?",, "DN" )
+
+   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " , Datum:" + DToC( kalk_pripr->DatDok )
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+      RETURN .F.
+   ENDIF
+
+
+   // P_10CPI
+   select_o_konto( cPKonto )
    SELECT kalk_pripr
 
-   ?? "INVENTURA PRODAVNICA ", cIdkonto, "-", AllTrim( konto->naz )
-   IspisNaDan( 10 )
 
-   P_COND
-   ?
-   ? "DOKUMENT BR. :", cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), "Datum:", DatDok
-   ?
-   @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
+   // ?? "INVENTURA PRODAVNICA ", cPKonto, "-", AllTrim( konto->naz )
+   // IspisNaDan( 10 )
+
+   // P_COND
+   // ?
+   // ? "DOKUMENT BR. :", cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), "Datum:", kalk_pripr->DatDok
+   // ?
+   // @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
 
    SELECT kalk_pripr
 
    m := "--- --------------------------------------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
 
-   ? m
-   ? "*R * ROBA                                  *  Popisana*  Knjizna *  Knjizna * Popisana *  Razlika * Cijena  *  +VISAK  * -MANJAK  *"
-   ? "*BR* TARIFA                                *  Kolicina*  Kolicina*vrijednost*vrijednost*  (kol)   *         *          *          *"
-   ? m
-
+   bZagl := {|| zagl_ip() }
    nTot4 := 0
    nTot5 := 0
    nTot6 := 0
@@ -77,21 +112,16 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    nTotVisak := 0
    nTotManjak := 0
 
-   //PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
+   Eval( bZagl )
+   // PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
       kalk_set_vars_troskovi_marzavp_marzamp()
       select_o_roba(  kalk_pripr->IdRoba )
       select_o_tarifa( kalk_pripr->IdTarifa )
 
       SELECT kalk_pripr
-
-      IF ( PRow() - dodatni_redovi_po_stranici() ) > 59
-         FF
-         @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-      ENDIF
-
-      SKol := kalk_pripr->Kolicina
+      check_nova_strana( bZagl, s_oPDF )
 
       @ PRow() + 1, 0 SAY field->rbr PICT "999"
       @ PRow(), 4 SAY  ""
@@ -153,20 +183,26 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    ENDDO
 
 
-   IF PRow() -dodatni_redovi_po_stranici() > 58
-      FF
-      @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-   ENDIF
+   // IF PRow() - dodatni_redovi_po_stranici() > 58
+   // FF
+   // @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
+   // ENDIF
+
 
    IF cSamoObraz == "D"
+      check_nova_strana( bZagl, s_oPDF, .F., 5 )
       ? m
       ?
       ?
-      ? Space( 80 ), "Clanovi komisije: 1. ___________________"
+      ?U Space( 80 ), "Članovi komisije: 1. ___________________"
       ? Space( 80 ), "                  2. ___________________"
       ? Space( 80 ), "                  3. ___________________"
+
+      f18_end_print( NIL, xPrintOpt )
       RETURN .T.
    ENDIF
+
+   check_nova_strana( bZagl, s_oPDF, .F., 12 )
 
    ? m
    @ PRow() + 1, 0 SAY PadR( "Ukupno:", 43 )
@@ -178,125 +214,41 @@ FUNCTION kalk_stampa_dok_ip( lKalkZaPOS )
    @ PRow(), PCol() + 1 SAY 0 PICT picdem
    @ PRow(), PCol() + 1 SAY nTotVisak PICT picdem
    @ PRow(), PCol() + 1 SAY nTotManjak PICT picdem
-
    ? m
-
    ? "Rekapitulacija:"
    ? "---------------"
-   ? "  popisana kolicina:", Str( nTotKol, 18, 2 )
-   ? "popisana vrijednost:", Str( nTotC, 18, 2 )
-   ? "   knjizna kolicina:", Str( nTotGKol, 18, 2 )
-   ? " knjizna vrijednost:", Str( nTotB, 18, 2 )
-   ? "          + (visak):", Str( nTotVisak, 18, 2 )
-   ? "         - (manjak):", Str( nTotManjak, 18, 2 )
-
+   ?U "  popisana količina:", Str( nTotKol, 18, 2 )
+   ?U "popisana vrijednost:", Str( nTotC, 18, 2 )
+   ?U "   knjižna količina:", Str( nTotGKol, 18, 2 )
+   ?U " knjižna vrijednost:", Str( nTotB, 18, 2 )
+   ?U "          + (višak):", Str( nTotVisak, 18, 2 )
+   ?U "         - (manjak):", Str( nTotManjak, 18, 2 )
    ? m
 
    // Visak
-   kalk_pripr_rekap_tarife()
+   kalk_pripr_rekap_tarife( {|| check_nova_strana( bZagl, s_oPDF, .F., 9 ) }  )
 
-   IF !lKalkZaPOS
-      ?
-      ?
-      ? "Napomena: Ovaj dokument ima sljedeci efekat na karticama:"
-      ? "     1 - izlaz za kolicinu manjka"
-      ? "     2 - storno izlaza za kolicinu viska"
-      ?
-   ENDIF
+   // IF !lKalkZaPOS
+   ?
+   ?
+   ?U "Napomena: Ovaj dokument ima sljedeći efekat na karticama:"
+   ?U "     1 - izlaz za količinu manjka"
+   ?U "     2 - storno izlaza za količinu viška"
+   ?
+   // ENDIF
+
+   f18_end_print( NIL, xPrintOpt )
 
    RETURN .T.
 
 
 
 
-/* stampa_obrasca_inventure_sank_lista
- *     Stampa forme obrasca sank liste
- */
-
-FUNCTION stampa_obrasca_inventure_sank_lista()
-
-   LOCAL nCol1 := nCol2 := 0, npom := 0
-
-   PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
-
-   nStr := 0
-   cIdPartner := IdPartner
-   cBrFaktP := BrFaktP
-   //dDatFaktP := DatFaktP
-   cIdKonto := IdKonto
-   cIdKonto2 := IdKonto2
-
-
-   P_10CPI
-   select_o_konto( cIdkonto )
-   SELECT kalk_pripr
-   ?? "INVENTURA PRODAVNICA ", cidkonto, "-", konto->naz
-   P_COND
-   ?
-   ? "DOKUMENT BR. :", cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), "Datum:", DatDok
-   ?
-   @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-
-   SELECT kalk_pripr
-
-   m := "--- -------------------------------------------- ------ ---------- ---------- ---------- --------- ----------- -----------"
-   ? m
-   ? "*R *                                            *      *  Pocetne * Primljena*  Zavrsna * Prodajna * Cijena  *   Iznos  *"
-   ? "*BR*               R O B A                      *Tarifa*  zalihe  *  kolicina*  zaliha  * kolicina *         */realizac.*"
-   ? m
-   nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTota := ntotb := ntotc := nTotd := 0
-
-   PRIVATE cIdd := idpartner + brfaktp + idkonto + idkonto2
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND.  cBrDok == BrDok .AND. cIdVD == IdVD
-
-/*
-      IF idpartner + brfaktp + idkonto + idkonto2 <> cidd
-         Beep( 2 )
-         Msg( "Unutar kalkulacije se pojavilo vise dokumenata !", 6 )
-      ENDIF
-*/
-      kalk_set_vars_troskovi_marzavp_marzamp()
-
-      select_o_roba( kalk_pripr->IdRoba )
-      select_o_tarifa( kalk_pripr->IdTarifa )
-      SELECT kalk_pripr
-
-      IF PRow() -dodatni_redovi_po_stranici() > 59
-         FF
-         @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-      ENDIF
-
-      SKol := Kolicina
-
-      @ PRow() + 1, 0 SAY  Rbr PICTURE "XXX"
-      @ PRow(), 4 SAY  ""
-      ?? idroba, Left( ROBA->naz, 40 - 13 ), "(" + ROBA->jmj + ")"
-      nPosKol := 1
-      @ PRow(), PCol() + 1 SAY IdTarifa
-      //IF gcSLObrazac == "2"
-         @ PRow(), PCol() + nPosKol SAY Kolicina  PICTURE PicKol
-      //ELSE
-      //   @ PRow(), PCol() + nPosKol SAY GKolicina  PICTURE PicKol
-      //ENDIF
-      @ PRow(), PCol() + 1 SAY 0  PICTURE Replicate( "_", Len( PicKol ) )
-      @ PRow(), PCol() + 1 SAY 0  PICTURE Replicate( "_", Len( PicKol ) )
-      @ PRow(), PCol() + 1 SAY 0  PICTURE Replicate( "_", Len( PicKol ) )
-      @ PRow(), PCol() + 1 SAY MPCSAPP             PICTURE PicCDEM
-      nTotb += fcj
-      ntotc += kolicina * mpcsapp
-      nTot4 +=  ( nU4 := MPCSAPP * Kolicina - fcj )
-
-      @ PRow(), PCol() + 1 SAY nU4  PICT Replicate( "_", Len( PicDEM ) )
-      SKIP
-
-   ENDDO
-
-
-   IF PRow() - dodatni_redovi_po_stranici() > 58
-      FF
-      @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
-   ENDIF
+STATIC FUNCTION zagl_ip()
 
    ? m
+   ?U "*R * ROBA                                  *  Popisana*  Knjižna *  Knjižna * Popisana *  Razlika * Cijena  *  +VIŠAK  * -MANJAK  *"
+   ?U "*BR* TARIFA                                *  količina*  količina*vrijednost*vrijednost*  (kol)   *         *          *          *"
+   ? m
 
-   RETURN
+   RETURN .T.

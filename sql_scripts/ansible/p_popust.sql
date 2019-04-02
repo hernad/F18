@@ -57,7 +57,6 @@ DECLARE
      uuidPos uuid;
 
 BEGIN
-
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '99', dDatum);
       insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od)
            values(cIdPos, '99', cBrDokNew, dDatum, dDatum)
@@ -76,6 +75,52 @@ END;
 $$;
 
 
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(dDatum date) RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   cBrDokNew varchar;
+   cIdRoba varchar;
+   dDatOd date;
+   dDatDo date;
+   nCij numeric;
+   nNCij numeric;
+   nStanje numeric;
+   dDatOdDokument date;
+   dDatDoDokument date;
+   nRbr integer;
+   uuidPos uuid;
+   nCount integer;
+BEGIN
+
+
+   nCount := 0;
+   FOR cIdRoba, nCij, nNCij, nStanje, dDatOd, dDatDo IN SELECT pos_stanje.idroba, pos_stanje.cijena, pos_stanje.ncijena, kol_ulaz-kol_izlaz as stanje, dat_od, dat_do
+           FROM {{ item_prodavnica }}.pos_stanje
+           WHERE kol_ulaz-kol_izlaz>0 AND pos_stanje.ncijena<>0 AND dat_do<dDatum
+           ORDER BY dat_od, dat_do
+   LOOP
+            IF dDatOdDokument IS NULL OR ( dDatOdDokument <> dDatOd OR dDatDoDokument <> dDatDo ) THEN
+               dDatOdDokument := dDatOd;
+               dDatDoDokument := dDatDo;
+               cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '79', dDatum);
+               nRbr := 1;
+               insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,dat_do,opis)
+                    values(cIdPos, '79', cBrDokNew, dDatum, dDatOdDokument, dDatDoDokument, 'GEN: istekao_popust_gen_79_storno')
+                    RETURNING dok_id into uuidPos;
+            END IF;
+
+            -- storno 79 => 'ugasiti' snizenje
+            EXECUTE 'insert into {{ item_prodavnica }}.pos_items(dok_id,idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+                using uuidPos, cIdPos, '79', cBrDokNew, dDatum, nRbr, cIdRoba, -nStanje, nCij, nNCij;
+            nRbr := nRbr + 1;
+            nCount := nCount + 1;
+   END LOOP;
+
+   RETURN nCount;
+
+END;
+$$;
 
 -- CREATE OR REPLACE FUNCTION p2.test_table() returns table(brdok varchar)
 -- LANGUAGE plpgsql

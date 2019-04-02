@@ -113,11 +113,13 @@ IF ( idvdKalk = '49' ) THEN
 ELSIF ( idvdKalk = '22' ) THEN
     -- 22 - POS prijem iz magacin, uzima brdok od 21 koji se generise u KALK, tako da je to jedinstven broj
     brDok := posBrdok;
-ELSIF ( idvdKalk IN ('29','61','71','89') ) THEN
+ELSIF ( idvdKalk IN ('29','61','71','89','90','99') ) THEN
    -- 61 - zahtjev za nabavku robe od strane pos-a
    -- 71 - zahtjev za snizenje se formira u pos
    -- 29 - nivelacija se generise u pos
    -- 89 - direktni prijem od dobavljaca
+   -- 90 - inventura
+   -- 99 - evidencija kalo
    -- 01.02.2019, brdok='      3' -> 15020103
    SELECT TO_CHAR(datum, btrim(to_char(prod, '09')) || 'mmdd' ) || lpad(btrim(posBrdok), 2, '0') INTO brDok;
 ELSE

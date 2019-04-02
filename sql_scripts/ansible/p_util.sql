@@ -377,8 +377,9 @@ BEGIN
      END IF;
 
      cOpis := btrim( coalesce( rec_dok.opis, '' ) );
-     IF cOpis = '780' THEN --
+     IF cOpis = '780' THEN -- povratnica neispravne robe
        lPovratKalo := True;
+       cOpis := cOpis || ' - POVRAT ROBE U MAGACIN ';
      ELSE
        lPovratKalo := False;
      END IF;
@@ -391,11 +392,13 @@ BEGIN
      INSERT INTO {{ item_prodavnica }}.pos(ref, idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do, idpartner)
          VALUES(rec_dok.dok_id, rec_dok.idpos, '22', rec_dok.brdok, dDatum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do, rec_dok.idpartner);
 
-     IF lPreuzimaSe THEN
+      IF lPovratKalo THEN -- radi se o povratu neispravne robe u magacin
+        cBrDokKalo := {{ item_prodavnica }}.pos_novi_broj_dokumenta(rec_dok.idpos, '99', dDatum);
+        INSERT INTO {{ item_prodavnica }}.pos(ref, idpos, idvd, brdok, datum, brfaktp, opis, dat_od, dat_do, idpartner)
+                VALUES(rec_dok.dok_id, rec_dok.idpos, '99', cBrDokKalo, dDatum, rec_dok.brfaktp, cOpis, rec_dok.dat_od, rec_dok.dat_do, rec_dok.idpartner);
+      END IF;
 
-        IF lPovratKalo THEN -- radi se o povratu neispravne robe u magacin
-           cBrDokKalo := {{ item_prodavnica }}.pos_novi_broj_dokumenta(rec_dok.idpos, rec_dok.brdok, dDatum);
-        END IF;
+     IF lPreuzimaSe THEN
         -- ako se roba preuzima stavke se pune
         FOR rec IN
             SELECT * from {{ item_prodavnica }}.pos_items
@@ -411,7 +414,7 @@ BEGIN
 
             IF lPovratKalo THEN -- stavke povrata neispravne robe u magacin
               INSERT INTO {{ item_prodavnica }}.pos_items(idpos, idvd, brdok, datum, rbr, kolicina, idroba, idtarifa, cijena, ncijena, kol2, robanaz, jmj)
-                  VALUES(rec.idpos, '99', rec.brdok, dDatum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
+                  VALUES(rec_dok.idpos, '99', cBrDokKalo, dDatum, rec.rbr, rec.kolicina, rec.idroba, rec.idtarifa, nPosCijena, 0, rec.kol2, rec.robanaz, rec.jmj);
             END IF;
         END LOOP;
      ELSE

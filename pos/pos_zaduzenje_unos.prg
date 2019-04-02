@@ -39,12 +39,20 @@ FUNCTION pos_zaduzenje( cIdVd )
    ENDIF
    AAdd( ImeKol, { "Naziv",    {|| priprz->RobaNaz  },   "robaNaz" } )
    AAdd( ImeKol,  { "JMJ",      {|| priprz->JMJ },         "jmj"       } )
+
+   IF cIdVd !=  POS_IDVD_INVENTURA
    AAdd( ImeKol, { _u( "Količina" ), {|| priprz->kolicina   }, "kolicina"  } )
+   else
+   AAdd( ImeKol,  { _u( "Knjižna kol" ),   {|| priprz->cijena - priprz->ncijena }, "ncijena"    } )
+   AAdd( ImeKol,  { _u( "Popisana" ),   {|| priprz->ncijena }, "" } )
+   ENDIF
    AAdd( ImeKol,  { "Cijena",   {|| priprz->Cijena },      "cijena"    } )
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
       AAdd( ImeKol,  { _u( "Sniženje" ),   {|| priprz->cijena - priprz->ncijena }, "ncijena"    } )
       AAdd( ImeKol,  { _u( "Nova Cij" ),   {|| priprz->ncijena }, "" } )
    ENDIF
+
+
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
    NEXT
@@ -112,12 +120,12 @@ FUNCTION pos_zaduzenje( cIdVd )
             WHEN {|| ShowGets(), .T. } ;
             VALID pos_zaduzenje_valid_kolicina( _Kolicina )
       ELSE
-         @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "knjižna:" GET _Kolicina PICT "999999.999" ;
-            WHEN pos_inventura_when_knjizna( _idroba, @_Kolicina, @_kol2 )
+         @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "knjižna:" GET _kol2 PICT "999999.999" ;
+            WHEN pos_inventura_when_knjizna_kolicina( _idroba, @_kol2, @_kolicina )
 
-         @ box_x_koord() + 4, Col() + 2 SAY8 "popisana količina:" GET _Kol2 PICT "999999.999" ;
-            WHEN pos_inventura_when_kolicina_kol2( _idroba, @_Kolicina, @_Kol2 ) ;
-            VALID pos_inventura_valid_kolicina_kol2( _idroba, @_Kolicina, @_Kol2 )
+         @ box_x_koord() + 4, Col() + 2 SAY8 "popisana količina:" GET _kolicina PICT "999999.999" ;
+            WHEN pos_inventura_when_popisana_kolicina( _idroba, @_Kol2, @_kolicina ) ;
+            VALID pos_inventura_valid_kolicina_kol2( _idroba, @_Kol2, @_kolicina )
       ENDIF
 
       IF cIdvd == POS_IDVD_ZAHTJEV_SNIZENJE
