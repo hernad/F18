@@ -233,17 +233,25 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd =
 ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
         RAISE INFO 'insert pos_pos % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- u pos_doks se nalazi dat_od, dat_do
-        EXECUTE 'SELECT dat_od, dat_do FROM {{ item_prodavnica }}.pos_doks WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+        EXECUTE 'SELECT dat_od, dat_do FROM {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
            USING idPos, NEW.idvd, NEW.brdok, NEW.datum
            INTO datOd, datDo;
         IF datOd IS NULL THEN
-           RAISE INFO 'p_trigeri.sql pos_doks % % % % NE postoji?!', idPos, NEW.idvd, NEW.brdok, NEW.datum;
+           RAISE EXCEPTION 'p_trigeri.sql pos % % % % NE postoji?!', idPos, NEW.idvd, NEW.brdok, NEW.datum;
            RETURN NULL;
         END IF;
 
-        EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
-             USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, datOd, datDo, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
-             INTO lRet;
+        IF (NEW.kolicina > 0) THEN
+           EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
+               USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, datOd, datDo, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
+               INTO lRet;
+        ELSIF (NEW.kolicina = 0) THEN
+             RAISE INFO 'kolicina 0 nista se nema raditi';
+        ELSE
+           EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_storno_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
+              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, datOd, datDo, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
+              INTO lRet;
+        END IF;
         RAISE INFO 'insert ret=%', lRet;
         RETURN NEW;
 

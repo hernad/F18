@@ -85,9 +85,9 @@ END IF;
 --  $4 <= current_date => dat_od otpremnice manji ili jednak danasnjem datumu, znaci da je aktuelan
 -- ... OR (dat_od=$4 AND dat_do=$5) znaci da se moze retroaktivno poslati dokument kome je dat_od i dat_do odgovara nekoj transakciji
 --                                  koju zelimo modifikovati
-EXECUTE 'select id from {{ item_prodavnica }}.pos_stanje where ((dat_od <= current_date AND dat_do >= current_date AND $4<=current_date AND dat_do=$5 ) OR (dat_od=$4 AND dat_do=$5)) ' ||
-         'AND idroba = $1 AND kol_ulaz - kol_izlaz <> 0 AND cijena=$2 AND ncijena=$3' ||
-         ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
+EXECUTE 'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date AND $4<=current_date AND dat_do=$5 )' ||
+         ' AND idroba = $1 AND kol_ulaz-kol_izlaz <> 0 AND cijena=$2 AND ncijena=$3' ||
+         ' ORDER BY kol_ulaz-kol_izlaz LIMIT 1'
       using idroba, cijena, ncijena, dat_od, dat_do
       INTO idRaspolozivo;
 
@@ -198,7 +198,7 @@ IF NOT idRaspolozivo IS NULL then
 ELSE -- kod izlaza se insert desava samo ako ako roba ide u minus !
 
   -- u ovom naraednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
-  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
+  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date ) AND idroba=$1 AND cijena = $2 AND  ncijena = $3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 
@@ -254,11 +254,10 @@ DECLARE
    dokument text;
    idDokument bigint;
    idRaspolozivo bigint;
-   lStorno boolean;
    cMsg text;
 BEGIN
 
-IF ( NOT idvd IN ('19','29','79') ) THEN
+IF ( NOT idvd IN ('19','29','79') ) THEN -- knjig nivelacija, pos nivelacija, snizenje
         RETURN FALSE;
 END IF;
 
@@ -299,37 +298,23 @@ IF transakcija = '-' THEN -- on delete pos_pos stavka
    RETURN TRUE;
 END IF;
 
-IF kolicina < 0 THEN
-   lStorno := True;
-ELSE
-   lStorno := False;
-END IF;
 -- raspoloziva roba po starim cijenama, kolicina treba biti > 0
--- A) ncijena=0, gledaju se samo DOSADASNJE OSNOVNE cijene
+-- ncijena=0, gledaju se samo DOSADASNJE OSNOVNE cijene
 
 EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje WHERE ' ||
          '(ncijena=0 AND dat_od<=current_date AND dat_do>=current_date AND $3<=current_date AND $4<=dat_do AND cijena=$2)' ||
          ' AND idroba=$1 AND kol_ulaz-kol_izlaz>0' ||
          ' ORDER BY kol_ulaz-kol_izlaz LIMIT 1'
-      using idroba, cijena, dat_od, dat_do, ncijena
+      using idroba, cijena, dat_od, dat_do
       INTO idRaspolozivo;
 
 RAISE INFO 'idDokument = % % %', idRaspolozivo, dat_od, dat_do;
 
 IF NOT idRaspolozivo IS NULL then
-
-  IF lStorno THEN
-     -- u slucaju storna locirali smo stavku po snizenoj cijeni
-     EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz+$1,ulazi=ulazi || $3' ||
-       ' WHERE id=$2'
-        USING kolicina, idRaspolozivo, dokument;
-     RETURN TRUE;
-  ELSE
     -- umanjiti - 'iznijeti' zalihu po starim cijenama
     EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz+$1,izlazi=izlazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
-  END IF;
 
   -- dodati zalihu po novim cijenama
   IF ( idvd IN ('19','29') ) THEN
@@ -359,6 +344,123 @@ ELSE
   cMsg := format('%s-%s %s kol: %s cij: %s ncij: %s dat_od: %s dat_do: %s', idvd, brdok, idroba, kolicina, cijena, ncijena, dat_od, dat_do);
   PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_PROMJENA_CIJENA', cMsg);
   RAISE INFO 'ERROR_PROMJENA_CIJENA: nema dostupne zalihe za promjenu cijena % % % %', idvd, brdok, dat_od, dat_do;
+END IF;
+
+RETURN TRUE;
+
+END;
+$$;
+
+
+-- storno promjena cijena
+-- parametar kolicina je uvijek < 0
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_promjena_cijena_storno_update_stanje(
+   transakcija character(1),
+   idpos character(2),
+   idvd character(2),
+   brdok character(8),
+   rbr integer,
+   datum date,
+   dat_od date,
+   dat_do date,
+   idroba varchar(10),
+   kolicina numeric,
+   cijena numeric,
+   ncijena numeric) RETURNS boolean
+
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   dokumenti text[] DEFAULT '{}';
+   dokument text;
+   idDokument bigint;
+   idRaspolozivo bigint;
+   cMsg text;
+BEGIN
+
+IF ( NOT idvd IN ('19','29','79') ) THEN -- knjig nivelacija, pos nivelacija, snizenje
+        RETURN FALSE;
+END IF;
+
+dokument := (btrim(idpos) || '-' || idvd || '-' || btrim(brdok) || '-' || to_char(datum, 'yyyymmdd'))::text || '-' || btrim(to_char(rbr,'99999'));
+dokumenti := dokumenti || dokument;
+
+IF dat_od IS NULL then
+  dat_do := '1999-01-01';
+END IF;
+IF dat_do IS NULL then
+  dat_do := '3999-01-01';
+END IF;
+
+IF transakcija = '-' THEN -- on delete pos_pos stavka
+   RAISE INFO 'delete = % % % % % %', dokument, idroba, cijena, ncijena, dat_od, dat_do;
+   -- (1) ponistiti izlaz koji je nivelacija napravila
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(izlazi) AND idroba = $2'
+     using dokument, idroba, cijena, ncijena
+     INTO idDokument;
+   RAISE INFO 'pos_promjena_cijena idDokument ulaza= %', idDokument;
+   IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz - $3, izlazi=array_remove(izlazi, $2)' ||
+             ' WHERE id=$1'
+           USING idDokument, dokument, kolicina;
+   END IF;
+
+   -- (2) ponistiti ulaz koji je nivelacija napravila
+   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where $1 = ANY(ulazi) AND idroba = $2'
+     using dokument, idroba, cijena, ncijena
+     INTO idDokument;
+   RAISE INFO 'pos_promjena_cijena idDokument izlaza= %', idDokument;
+   IF NOT idDokument IS NULL then -- brisanje efekte dokumenta za ovaj artikal i ove cijene
+      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz - $3, ulazi=array_remove(ulazi, $2)' ||
+             ' WHERE id=$1'
+           USING idDokument, dokument, kolicina;
+   END IF;
+   RETURN TRUE;
+END IF;
+
+
+EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje WHERE ' ||
+         '(dat_od=$3 AND dat_do=$4 AND cijena=$2 AND ncijena=$5)' ||
+         ' AND idroba=$1 AND kol_ulaz-kol_izlaz>0' ||
+         ' ORDER BY kol_ulaz-kol_izlaz LIMIT 1'
+      using idroba, cijena, dat_od, dat_do, ncijena
+      INTO idRaspolozivo;
+
+RAISE INFO 'stornirati idDokument = % % %', idRaspolozivo, dat_od, dat_do;
+
+IF NOT idRaspolozivo IS NULL then
+     -- u slucaju storna locirali smo stavku po snizenoj cijeni
+     -- storniramo ulaz
+     EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz+$1,ulazi=ulazi || $3' ||
+       ' WHERE id=$2'
+        USING kolicina, idRaspolozivo, dokument;
+
+     -- stornirati izlaz zalihe po starim cijenama
+     -- u ovom narednom upitu cemo traziti stare cijene
+     EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where dat_do>=$3 AND idroba=$1 AND cijena=$2 AND ncijena=0'
+      using idroba, cijena, dat_do
+      INTO idRaspolozivo;
+
+     -- zaduziti kao ulaz po staroj cijeni za iznos -kolicina (sto je > 0)
+     kolicina := -kolicina;
+
+     IF NOT idRaspolozivo IS NULL THEN
+        -- ako postoji onda povecati ulaz
+        RAISE INFO 'povecati ulaz za % po staroj cijeni %', kolicina, cijena;
+        EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz+$1, ulazi=ulazi || $3' ||
+          ' WHERE id=$2'
+          USING kolicina, idRaspolozivo, dokument;
+     ELSE -- nema 'kompatibilnih' stavki stanja (ni roba na stanju, ni prodaja u minus)
+        EXECUTE 'insert into {{ item_prodavnica }}.pos_stanje(dat_od,dat_do,idroba,ulazi,izlazi,kol_ulaz,kol_izlaz,cijena,ncijena)' ||
+             ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)'
+          USING dat_od, dat_do, idroba, dokumenti,'{}'::text[], kolicina,0,cijena,0;
+     END IF;
+
+ELSE
+  -- nema dostupne zalihe za storno promjenu ?!
+  cMsg := format('%s-%s %s kol: %s cij: %s ncij: %s dat_od: %s dat_do: %s', idvd, brdok, idroba, kolicina, cijena, ncijena, dat_od, dat_do);
+  PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_STORNO_PROMJENA_CIJENA', cMsg);
+  RAISE INFO 'ERROR_STORNO_PROMJENA_CIJENA: nema dostupne zalihe za promjenu cijena storno % % % %', idvd, brdok, dat_od, dat_do;
 END IF;
 
 RETURN TRUE;

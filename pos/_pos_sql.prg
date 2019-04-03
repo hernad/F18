@@ -421,29 +421,48 @@ FUNCTION pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena )
    RETURN nStanje
 
 
-   FUNCTION pos_dostupno_artikal( cIdRoba )
+FUNCTION pos_dostupno_artikal( cIdRoba )
 
-      LOCAL cQuery, oTable
-      LOCAL nI, oRow
-      LOCAL nStanje
+   LOCAL cQuery, oRet, oError, nRet := 0
 
-      // select sum(kol_ulaz-kol_izlaz), idroba from p2.pos_stanje where kol_ulaz-kol_izlaz<>0
-      //  group by idroba, kol_ulaz, kol_izlaz;
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_dostupno_artikal(" + ;
+      sql_quote( cIdRoba ) + ")"
 
-      cQuery := "SELECT sum(kol_ulaz-kol_izlaz) as stanje FROM " + f18_sql_schema( "pos_stanje" )
-      cQuery += " WHERE trim(idroba)=" + sql_quote( Trim( cIdRoba ) )
-      cQuery += " AND kol_ulaz-kol_izlaz <> 0"
-      cQuery += " GROUP BY idroba"
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
 
-      oTable := run_sql_query( cQuery )
-      oRow := oTable:GetRow( 1 )
-      nStanje := oRow:FieldGet( oRow:FieldPos( "stanje" ) )
-
-      IF ValType( nStanje ) == "L"
-         nStanje := 0
+      oRet := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oRet )
+         nRet := oRet:FieldGet( 1 )
       ENDIF
 
-      RETURN nStanje
+   RECOVER USING oError
+      Alert( _u( "pos_dostupno artikal error ?!" ) )
+   END SEQUENCE
+
+   RETURN nRet
+
+
+FUNCTION pos_dostupno_artikal_sa_kalo( cIdRoba )
+
+   LOCAL cQuery, oRet, oError, nRet := 0
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_dostupno_artikal_sa_kalo(" + ;
+      sql_quote( cIdRoba ) + ")"
+
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
+
+      oRet := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oRet )
+         nRet := oRet:FieldGet( 1 )
+      ENDIF
+
+   RECOVER USING oError
+      Alert( _u( "pos_dostupno_artikal_sa_kalo error ?!" ) )
+   END SEQUENCE
+
+   RETURN nRet
+
+
 
 /*
    => aCijene

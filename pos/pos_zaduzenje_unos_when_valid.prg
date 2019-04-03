@@ -33,7 +33,7 @@ FUNCTION pos_zaduzenje_valid_kolicina( nKol )
 
 FUNCTION pos_inventura_when_knjizna_kolicina( cIdRoba, nKnjiznaKolicina, nPopisanaKolicina )
 
-  nKnjiznaKolicina := pos_dostupno_artikal( cIdRoba )
+  nKnjiznaKolicina := pos_dostupno_artikal_sa_kalo( cIdRoba )
   nPopisanaKolicina := -99999
   ShowGets()
 
