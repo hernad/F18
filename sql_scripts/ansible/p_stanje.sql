@@ -255,6 +255,7 @@ DECLARE
    idDokument bigint;
    idRaspolozivo bigint;
    lStorno boolean;
+   cMsg text;
 BEGIN
 
 IF ( NOT idvd IN ('19','29','79') ) THEN
@@ -355,6 +356,8 @@ IF NOT idRaspolozivo IS NULL then
 
 ELSE
   -- nema dostupne zalihe za promjenu ?!
+  cMsg := format('%s-%s %s kol: %s cij: %s ncij: %s dat_od: %s dat_do: %s', idvd, brdok, idroba, kolicina, cijena, ncijena, dat_od, dat_do);
+  PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_PROMJENA_CIJENA', cMsg);
   RAISE INFO 'ERROR_PROMJENA_CIJENA: nema dostupne zalihe za promjenu cijena % % % %', idvd, brdok, dat_od, dat_do;
 END IF;
 

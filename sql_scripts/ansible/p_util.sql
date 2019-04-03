@@ -1,3 +1,14 @@
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.logiraj( cUser varchar, cPrefix varchar, cMsg text) RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+   insert into public.log(user_code, msg) values(cUser, cPrefix || ': ' || cMsg);
+   RETURN;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fetchmetrictext(text) RETURNS text
     LANGUAGE plpgsql
     AS $$
