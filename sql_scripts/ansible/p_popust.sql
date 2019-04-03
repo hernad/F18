@@ -58,19 +58,22 @@ DECLARE
 
 BEGIN
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '99', dDatum);
-      insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od)
-           values(cIdPos, '99', cBrDokNew, dDatum, dDatum)
-           RETURNING dok_id into uuidPos;
-      nRbr := 1;
+      nRbr := 0;
       FOR cIdRoba, nStanje, nCij, nNCij IN SELECT
            p.idroba, p.stanje, p.cijena, p.ncijena from {{ item_prodavnica }}.pos_artikli_istekao_popust( dDatum ) p
       LOOP
+         nRbr := nRbr + 1;
+         IF (nRbr = 1) THEN
+            insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od)
+               values(cIdPos, '99', cBrDokNew, dDatum, dDatum)
+               RETURNING dok_id into uuidPos;
+         END IF;
          -- neispravna roba se iznosi po osnovnoj cijeni na skladiste kala; skladiste kala je unutar prodavnice
          EXECUTE 'insert into {{ item_prodavnica }}.pos_items(dok_id,idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'
              using uuidPos, cIdPos, '99', cBrDokNew, dDatum, nRbr, cIdRoba, nStanje, nCij, 0;
-         nRbr := nRbr + 1;
+
       END LOOP;
-      RETURN nRbr-1;
+      RETURN nRbr;
 END;
 $$;
 
@@ -93,7 +96,6 @@ DECLARE
    uuidPos uuid;
    nCount integer;
 BEGIN
-
 
    nCount := 0;
    FOR cIdRoba, nCij, nNCij, nStanje, dDatOd, dDatDo IN SELECT pos_stanje.idroba, pos_stanje.cijena, pos_stanje.ncijena, kol_ulaz-kol_izlaz as stanje, dat_od, coalesce(dat_do,'3999-01-01')
@@ -118,7 +120,6 @@ BEGIN
             nRbr := nRbr + 1;
             nCount := nCount + 1;
    END LOOP;
-
    RETURN nCount;
 
 END;

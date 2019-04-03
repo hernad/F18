@@ -406,7 +406,7 @@ BEGIN
             WHERE idpos=rec_dok.idpos and idvd=rec_dok.idvd and brdok=rec_dok.brdok and datum=rec_dok.datum
         LOOP
 
-            nPosCijena := p2.pos_dostupna_osnovna_cijena_za_artikal( rec.idroba );
+            nPosCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( rec.idroba );
             IF (nPosCijena = 0) THEN  -- ove robe nema na stanju, prihvati cijenu koju je donio dokument 21 iz knjigovodstva
                nPosCijena := rec.cijena;
             END IF;
