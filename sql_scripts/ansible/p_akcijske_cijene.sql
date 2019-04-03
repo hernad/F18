@@ -36,7 +36,7 @@ DECLARE
       nStanje numeric;
 BEGIN
       -- pos dokument '72' sa ovim dok_id-om
-      EXECUTE 'select idpos,idvd,brdok,datum,dat_od from {{ item_prodavnica }}.pos where dok_id = $1'
+      EXECUTE 'select idpos,idvd,brdok,datum,dat_od from {{ item_prodavnica }}.pos where dok_id=$1'
          USING uuidPos
          INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_od;
       RAISE INFO 'nivelacija_start_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_od;
@@ -106,7 +106,6 @@ BEGIN
 
       dDatumNew := dDat_do;
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
-
       insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,ref) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos)
           RETURNING dok_id into uuid2;
 
@@ -121,7 +120,6 @@ BEGIN
          EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
              using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nC2, nC;
       END LOOP;
-
       RETURN;
 END;
 $$;
@@ -157,8 +155,8 @@ BEGIN
      FOR uuidPos IN SELECT dok_id FROM {{ item_prodavnica }}.pos
           WHERE idvd='72' AND ref_2 IS NULL AND dat_do = current_date
      LOOP
-            RAISE INFO 'pos_doks %', uuidPos;
-            PERFORM {{ item_prodavnica }}.nivelacija_end_create( uuidPos );
+          RAISE INFO 'pos_doks %', uuidPos;
+          PERFORM {{ item_prodavnica }}.nivelacija_end_create( uuidPos );
      END LOOP;
 
      RETURN;

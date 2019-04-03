@@ -304,32 +304,34 @@ ELSE
    lStorno := False;
 END IF;
 -- raspoloziva roba po starim cijenama, kolicina treba biti > 0
--- A) ncijena=0, gledaju se samo OSNOVNE cijene
+-- A) ncijena=0, gledaju se samo DOSADASNJE OSNOVNE cijene
 -- ILI
 -- B) dat_od, dat_do, cijena, ncijena identicni (dat_od=$3 AND dat_do=$4 AND cijena=$2 AND ncijena=$5)
 --    konkretno se koristi za storno 79 stavki: p2.pos_artikli_istekao_popust_gen_79_storno( current_date );
 EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje WHERE ' ||
          '(' ||
-         '(ncijena=0 AND dat_od <= current_date AND dat_do >= current_date AND $3<=current_date AND $4<=dat_do AND cijena=$2)' ||
+         '(ncijena=0 AND dat_od<=current_date AND dat_do>=current_date AND $3<=current_date AND $4<=dat_do AND cijena=$2)' ||
          ' OR ' ||
          '(dat_od=$3 AND dat_do=$4 AND cijena=$2 AND ncijena=$5)' ||
          ')' ||
-         ' AND idroba=$1 AND kol_ulaz - kol_izlaz > 0' ||
-         ' ORDER BY kol_ulaz - kol_izlaz LIMIT 1'
+         ' AND idroba=$1 AND kol_ulaz-kol_izlaz>0' ||
+         ' ORDER BY kol_ulaz-kol_izlaz LIMIT 1'
       using idroba, cijena, dat_od, dat_do, ncijena
       INTO idRaspolozivo;
 
 RAISE INFO 'idDokument = % % %', idRaspolozivo, dat_od, dat_do;
 
 IF NOT idRaspolozivo IS NULL then
-  -- umanjiti - 'iznijeti' zalihu po starim cijenama
+
   IF lStorno THEN
+     -- u slucaju storna locirali smo stavku po snizenoj cijeni
      EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz+$1,ulazi=ulazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
      RETURN TRUE;
   ELSE
-    EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz + $1, izlazi=izlazi || $3' ||
+    -- umanjiti - 'iznijeti' zalihu po starim cijenama
+    EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz+$1,izlazi=izlazi || $3' ||
        ' WHERE id=$2'
         USING kolicina, idRaspolozivo, dokument;
   END IF;
@@ -340,8 +342,8 @@ IF NOT idRaspolozivo IS NULL then
       ncijena := 0;
   END IF;
 
-  -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
-  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od <= current_date AND dat_do >= current_date ) AND idroba = $1 AND cijena = $2 AND  ncijena = $3'
+  -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu po novim cijenama
+  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date) AND idroba=$1 AND cijena=$2 AND ncijena=$3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 

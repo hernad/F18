@@ -467,13 +467,14 @@ DECLARE
    nCount79 integer;
 BEGIN
    -- PERFORM {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
-    SELECT {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_99(current_date)
-      INTO nCount99;
 
-    SELECT  {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(current_date)
-      INTO nCount79;
+  --  SELECT {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_99(current_date)
+  --    INTO nCount99;
 
-    RAISE INFO 'run_cron gen_99 %, gen_79 storno %', nCount99, nCount79;
+  --  SELECT  {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(current_date)
+  --    INTO nCount79;
+
+  --  RAISE INFO 'run_cron gen_99 %, gen_79 storno %', nCount99, nCount79;
    RETURN;
 END;
 $$;
