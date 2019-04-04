@@ -137,7 +137,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       ELSEIF ( cIdvd == "18" )
          kalk_stampa_dok_18()
 
-      ELSEIF ( cIdvd $ "19#71#79#72" )
+      ELSEIF ( cIdvd $ "19#29#71#79#72" )
          kalk_stampa_dok_19_79()
 
       ELSEIF ( cIdvd $ "02#80#61" )
@@ -229,17 +229,17 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       cIdFirma := kalk_pripr->IdFirma
       cBrDok := kalk_pripr->BrDok
       cIdVD := kalk_pripr->IdVD
-      IF ( cIdVd $ "11#12" )
-         kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
-      ELSEIF ( cIdVd == "80" )
-         kalk_stampa_dok_80( .T. )
+      //IF ( cIdVd $ "11#12" )
+      //   kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
+      //ELSEIF ( cIdVd == "80" )
+      //   kalk_stampa_dok_80( .T. )
       //ELSEIF ( cIdVd == "81" )
       //   kalk_stampa_dok_81_tops( .T. )
       //ELSEIF ( cIdVd == "IP" )
       //   kalk_stampa_dok_ip( .T. )
-      ELSEIF ( cIdVd $ "19#71#79" )
-         kalk_stampa_dok_19_79()
-      ENDIF
+      //ELSEIF ( cIdVd $ "19#71#79" )
+      //   kalk_stampa_dok_19_79()
+      //ENDIF
       my_close_all_dbf()
       IF !pdf_kalk_dokument( cIdVd )
          FF
@@ -260,13 +260,13 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       cIdFirma := kalk_pripr->IdFirma
       cBrDok := kalk_pripr->BrDok
       cIdVD := kalk_pripr->IdVD
-      IF ( cIdVd $ "11#12" )
-         kalk_stampa_dok_11( .T. )
-      ELSEIF ( cIdVd == "10" )
-         kalk_stampa_dok_10()
-      ELSEIF ( cIdVd == "81" )
-         kalk_stampa_dok_81( .T. )
-      ENDIF
+      //IF ( cIdVd $ "11#12" )
+      //   kalk_stampa_dok_11( .T. )
+      //ELSEIF ( cIdVd == "10" )
+      //   kalk_stampa_dok_10()
+      //ELSEIF ( cIdVd == "81" )
+      //   kalk_stampa_dok_81( .T. )
+      //ENDIF
       my_close_all_dbf()
       FF
       ENDPRINT
@@ -320,4 +320,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61#90#IP"
+   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61#90#IP#29"

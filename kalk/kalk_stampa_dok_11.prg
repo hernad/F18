@@ -14,10 +14,10 @@
 STATIC s_oPDF
 STATIC s_nRobaNazivSirina := 34
 
-MEMVAR cPKonto, cMKonto, cIdPartner, cBrFaktP  // ,dDatFaktP
+MEMVAR cIdPartner, cBrFaktP  // ,dDatFaktP
 MEMVAR cIdFirma, cIdVd, cBrDok
 
-FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
+FUNCTION kalk_stampa_dok_11()
 
    LOCAL nCol0 := 0
    LOCAL nCol1 := 0
@@ -29,6 +29,7 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    LOCAL cLinija
    LOCAL nTot1, nTot1b, nTot2, nTotVPV, nTotMarzaVP, nTotMarzaMP, nTot5, nTot6, nTot7
    LOCAL nTot4c
+   LOCAL cPKonto, cMKonto
 
    PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
@@ -37,10 +38,6 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    // dDatFaktP := kalk_pripr->DatFaktP
    cPKonto := kalk_pripr->pkonto
    cMKonto := kalk_pripr->mkonto
-
-   IF lKalkZaPOS == NIL
-      lKalkZaPOS := .F.
-   ENDIF
 
    IF cIdVd == "21"
       cNaslov := "POS Zahtjev za prijem iz magacina"
@@ -68,7 +65,7 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    lVPC := is_magacin_evidencija_vpc( kalk_pripr->mkonto )
 
    SELECT kalk_pripr
-   bZagl := {|| zagl_11( cLinija ) }
+   bZagl := {|| zagl_11( cPKonto, cMKonto, cLinija ) }
    Eval( bZagl )
 
    select_o_koncij( kalk_pripr->pkonto )
@@ -166,7 +163,7 @@ FUNCTION kalk_stampa_dok_11( lKalkZaPOS )
    RETURN .T.
 
 
-STATIC FUNCTION zagl_11( cLine )
+STATIC FUNCTION zagl_11( cPKonto, cMKonto, cLine )
 
 /*
    IF cIdvd == "11"

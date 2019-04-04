@@ -55,6 +55,8 @@ FUNCTION pos_stampa_nivelacija( hParams )
       RETURN .F.
    ENDIF
 
+   ?  "Opis:", _u( hParams[ "opis" ] )
+
    Eval( bZagl )
    SELECT PRIPRZ
    nCnt := 0

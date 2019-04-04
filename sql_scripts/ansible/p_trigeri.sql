@@ -12,6 +12,7 @@ IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'PROD {{ item_prodavnica }}: delete pos_knjig prodavnica %', OLD.idPos;
       EXECUTE 'DELETE FROM {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
          USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum;
+
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
       RAISE INFO 'update pos_knjig prodavnica!? %', NEW.idPos;
@@ -44,8 +45,9 @@ BEGIN
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete pos_pos_knjig prodavnica % %', OLD.idPos, OLD.idvd;
-      EXECUTE 'DELETE FROM {{ item_prodavnica }}.pos_pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+      EXECUTE 'DELETE FROM {{ item_prodavnica }}.pos_items WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
          USING OLD.idpos, OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
+
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
       RAISE INFO 'update pos_pos_knjig prodavnica!? %', NEW.idPos;
@@ -110,6 +112,8 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.on_kasa_pos_crud() RETURNS trig
 LANGUAGE plpgsql
 AS $$
 
+DECLARE
+   dokId uuid;
 BEGIN
 
 IF (TG_OP = 'INSERT') THEN
@@ -125,6 +129,85 @@ IF (TG_OP = 'INSERT') THEN
       RAISE INFO '02 - inicijalizacija {{ item_prodavnica }}.pos_stanje';
       RETURN NEW;
    END IF;
+END IF;
+
+IF (TG_OP = 'DELETE') THEN
+  -- brisanje izgenerisanih storno 99, 79
+  IF ( OLD.idvd = '72' ) THEN
+      RAISE INFO 'brisem zahtjev 72 % %', OLD.brdok, OLD.dok_id;
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='29' AND ref=OLD.dok_id
+        RETURNING dok_id
+        INTO dokId;
+
+      IF NOT dokId IS NULL THEN
+         DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+      RAISE INFO '29-ref %', dokId;
+
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='29' AND ref_2=OLD.dok_id
+        RETURNING dok_id
+        INTO dokId;
+      IF NOT dokId IS NULL THEN
+           DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+      RAISE INFO '29-ref_2 %', dokId;
+
+      -- izgenerisano pri start/end 79 nivelacija
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='79' AND ref=OLD.dok_id and datum=OLD.dat_od
+        RETURNING dok_id
+        INTO dokId;
+      IF NOT dokId IS NULL THEN
+          DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+      RAISE INFO '79 dat_od %', dokId;
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='79' AND ref=OLD.dok_id and datum=OLD.dat_do
+        RETURNING dok_id
+        INTO dokId;
+      IF NOT dokId IS NULL THEN
+         DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+      RAISE INFO '79 dat_do %', dokId;
+
+      -- izgenerisano pri start/end 99 nivelacija
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='99' AND ref=OLD.dok_id and datum=OLD.dat_od
+        RETURNING dok_id
+        INTO dokId;
+      IF NOT dokId IS NULL THEN
+         DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+
+      RAISE INFO '99 dat_od %', dokId;
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='99' AND ref=OLD.dok_id and datum=OLD.dat_do
+        RETURNING dok_id
+        INTO dokId;
+      IF NOT dokId IS NULL THEN
+          DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+      RAISE INFO '99 dat_do %', dokId;
+
+  END IF;
+
+  -- brisanje izgenerisanih 99 plus
+  IF ( OLD.idvd = '99' ) THEN
+      RAISE INFO 'brisem izgenerisane 99 % %', OLD.brdok, OLD.dok_id;
+      DELETE FROM {{ item_prodavnica }}.pos where idvd='99' AND ref=OLD.dok_id and datum=OLD.datum
+        RETURNING dok_id
+        INTO dokId;
+      IF NOT dokId IS NULL THEN
+         DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+      END IF;
+  END IF;
+  -- brisanje izgenerisanih 79 plus
+  IF ( OLD.idvd = '79' ) THEN
+     RAISE INFO 'brisem izgenerisane 79 % %', OLD.brdok, OLD.dok_id;
+     DELETE FROM {{ item_prodavnica }}.pos where idvd='79' AND ref=OLD.dok_id and datum=OLD.datum
+       RETURNING dok_id
+       INTO dokId;
+     IF NOT dokId IS NULL THEN
+        DELETE FROM {{ item_prodavnica }}.pos_items where dok_id=dokId;
+     END IF;
+  END IF;
+  RETURN OLD;
 END IF;
 
 RETURN NULL;
@@ -231,7 +314,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd =
         RETURN NEW;
 
 ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
-        RAISE INFO 'insert pos_pos % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
+        RAISE INFO 'insert pos % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         -- u pos_doks se nalazi dat_od, dat_do
         EXECUTE 'SELECT dat_od, dat_do FROM {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
            USING idPos, NEW.idvd, NEW.brdok, NEW.datum
@@ -239,6 +322,11 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
         IF datOd IS NULL THEN
            RAISE EXCEPTION 'p_trigeri.sql pos % % % % NE postoji?!', idPos, NEW.idvd, NEW.brdok, NEW.datum;
            RETURN NULL;
+        END IF;
+
+        IF (NEW.idvd = '29' AND NEW.kolicina >= 0) THEN -- promjena cijene u sif roba
+           UPDATE {{ item_prodavnica }}.roba SET mpc=NEW.ncijena
+             WHERE id=NEW.idroba;
         END IF;
 
         IF (NEW.kolicina > 0) THEN

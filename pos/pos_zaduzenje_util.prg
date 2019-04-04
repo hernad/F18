@@ -46,7 +46,13 @@ FUNCTION pos_dokument_naziv( cIdVd )
       RETURN "POS evidencija kalo"
 
    CASE cIdVD == POS_IDVD_INVENTURA
-         RETURN "POS inventura"
+      RETURN "POS inventura"
+
+   CASE cIdVD == POS_IDVD_AKCIJSKE_CIJENE
+      RETURN "Zahtjev za nivelaciju"
+
+   CASE cIdVD == POS_IDVD_POS_NIVELACIJA
+      RETURN "POS nivelacija cijena"
    ENDCASE
 
    RETURN "<undefined>"

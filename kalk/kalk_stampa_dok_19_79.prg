@@ -50,10 +50,12 @@ FUNCTION kalk_stampa_dok_19_79()
 
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
       cNaslov := "ZAHTJEV ZA SNIŽENJE"
+   ELSEIF cIdVd == POS_IDVD_POS_NIVELACIJA
+      cNaslov := "POS Nivelacija"
    ELSEIF cIdVd == POS_IDVD_ODOBRENO_SNIZENJE
       cNaslov := "ODOBRENO SNIŽENJE"
    ELSEIF cIdVd == POS_IDVD_AKCIJSKE_CIJENE
-         cNaslov := "Akcijske cijene"
+      cNaslov := "Akcijske cijene"
    ELSE
       cNaslov := "NIVELACIJA"
    ENDIF
@@ -248,7 +250,7 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
          ?
       ENDIF
       ?
-      ?? TRANSFORM(kalk_pripr->rbr, '999') + " " + kalk_pripr->idroba + " " + PadR( Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 )
+      ?? Transform( kalk_pripr->rbr, '999' ) + " " + kalk_pripr->idroba + " " + PadR( Trim( Left( ROBA->naz, 40 ) ) + " (" + ROBA->jmj + ")", 40 )
       @ PRow(), PCol() + 1 SAY kalk_pripr->FCJ                  PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP + kalk_pripr->FCJ          PICTURE piccdem()
       @ PRow(), PCol() + 1 SAY kalk_pripr->MPCSAPP              PICTURE piccdem()

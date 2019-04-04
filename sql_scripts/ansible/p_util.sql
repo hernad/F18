@@ -352,7 +352,24 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_knjig_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   dok_id uuid;
+BEGIN
+   EXECUTE 'SELECT dok_id FROM {{ item_prodavnica }}.pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
+     USING cIdPos, cIdVd, cBrDok, dDatum
+     INTO dok_id;
 
+   IF dok_id IS NULL THEN
+      --RAISE EXCEPTION 'kalk_doks %-%-% od % NE postoji?!', cIdFirma, cIdVd, cBrDok, dDatDok;
+      RAISE INFO 'pos_doks %-%-% od % NE postoji?!', cIdPos, cIdVd, cBrDok, dDatum;
+   END IF;
+
+   RETURN dok_id;
+END;
+$$;
 
 -- =========================== 21, 22 ===============================================================================
 
@@ -384,6 +401,7 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
    nCijenaMem numeric;
+   nCijenaSif numeric;
    dDatOd date;
    dDatDo date;
 BEGIN
@@ -399,7 +417,13 @@ BEGIN
       INTO nCijenaMem, dDatOd, dDatDo;
 
     IF nCijenaMem IS NULL THEN
-        RETURN 0;
+        SELECT mpc from {{ item_prodavnica }}.roba WHERE rtrim(id)=rtrim(cIdRoba)
+           INTO nCijenaSif;
+        IF nCijenaSif IS NULL THEN -- cijene nema ni u p2.pos_stanje ni u p2.roba
+           RETURN 0;
+        ELSE
+           RETURN nCijenaSif;
+        END IF;
     END IF;
 
     RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
@@ -503,6 +527,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_delete_by_idvd_brfakt( cIdV
        AS $$
 DECLARE
     rec_dok RECORD;
+    rec RECORD;
 BEGIN
 
      IF btrim(cBrFaktP) = '' THEN
@@ -523,6 +548,8 @@ BEGIN
      RETURN 0;
 END;
 $$;
+
+
 
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.run_cron() RETURNS void
   LANGUAGE plpgsql

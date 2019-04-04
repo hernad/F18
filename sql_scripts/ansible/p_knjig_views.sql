@@ -18,8 +18,8 @@ CREATE OR REPLACE RULE {{ item_prodavnica }}_pos_doks_knjig_ins AS ON INSERT TO 
         NEW.idradnik, NEW.idvrstep, NEW.vrijeme, NEW.ukupno, NEW.brfaktp, NEW.opis, NEW.dat_od, NEW.dat_do
       );
       UPDATE {{ item_prodavnica }}.pos_items_knjig
-         SET dok_id={{ item_prodavnica }}.pos_dok_id(NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum)
-         WHERE  idpos=NEW.idpos AND idvd=NEW.idvd AND  brdok=NEW.brdok AND  datum=NEW.datum
+         SET dok_id={{ item_prodavnica }}.pos_knjig_dok_id(NEW.idpos, NEW.idvd, NEW.brdok, NEW.datum)
+         WHERE idpos=NEW.idpos AND idvd=NEW.idvd AND brdok=NEW.brdok AND  datum=NEW.datum
      );
 
 GRANT ALL ON {{ item_prodavnica }}.pos_doks_knjig TO xtrole;

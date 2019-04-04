@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-04-04
+
+-  KALK 11 stdok prevrne prodavnica-magacin
+
 ## 2019-04-02
 
 -  KALK 81 fix

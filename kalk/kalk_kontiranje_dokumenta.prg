@@ -119,7 +119,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
    lAFin := ( gAFin == "D" )
    IF lAFin
-      IF finmat->idvd $ "49#71#79#21#22"
+      IF finmat->idvd $ "49#71#79#21#22#72#29#02"
          RETURN .F.
       ENDIF
       Beep( 1 )

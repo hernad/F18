@@ -23,6 +23,15 @@ DECLARE
     cProdShema varchar;
 BEGIN
 
+-- IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
+--       PERFORM public.kalk_kontiranje(
+--         NEW.idvd, NEW.brdok, NEW.pkonto, NEW.mkonto,
+--         NEW.idroba, NEW.idtarifa,
+--         NEW.rbr, NEW.kolicina, NEW.nc, NEW.mpc, NEW.mpcsapp,
+--         NEW.datdok, NEW.brfaktp
+--       );
+-- END IF;
+
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
    IF ( NOT NEW.idvd IN ('02','19','21','72','79','80') ) THEN
      RETURN NULL;
@@ -44,7 +53,7 @@ END IF;
 
 IF (TG_OP = 'DELETE') THEN
       RAISE INFO 'delete % prodavnica %', OLD.idvd, cProdShema;
-      EXECUTE 'DELETE FROM '  || cProdShema || '.pos_items_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
+      EXECUTE 'DELETE FROM ' || cProdShema || '.pos_items_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4 AND rbr=$5'
          USING idpos, OLD.idvd, OLD.brdok, OLD.datdok, OLD.rbr;
       RETURN OLD;
 ELSIF (TG_OP = 'UPDATE') THEN
@@ -59,7 +68,9 @@ ELSIF (TG_OP = 'INSERT') THEN
         cijena := NEW.mpcsapp;
         ncijena := 0;
       END IF;
-      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_items_knjig(idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+
+      EXECUTE 'INSERT INTO ' || cProdShema || '.pos_items_knjig(dok_id,idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj)' ||
+              ' VALUES(' || cProdShema || '.pos_knjig_dok_id($1,$2,$3,$4),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
         USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, public.barkod_ean13_to_num(barkodRoba,3), NEW.idtarifa, robaNaz,robaJmj;
       RETURN NEW;
 END IF;
@@ -131,8 +142,8 @@ CREATE OR REPLACE FUNCTION f18.before_kalk_doks_delete() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-   IF ( OLD.idvd IN ('49','71','22') ) and ( current_user <> 'postgres' ) THEN
-       RAISE EXCEPTION '49, 71, 22 nije dozvoljeno brisanje osim triger funkcijama';
+   IF ( OLD.idvd IN ('49','71','22', '29') ) and ( current_user <> 'postgres' ) THEN
+       RAISE EXCEPTION '29, 49, 71, 22 nije dozvoljeno brisanje osim triger funkcijama';
    END IF;
 
    RETURN OLD;
