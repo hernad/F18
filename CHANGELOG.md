@@ -4,6 +4,7 @@
 
 -  KALK 11 fix gkolicin2 22->11 BUG
 -  KALK KARTICA PROD popust
+-  lager lista prodavnica ERRC, ERR0, ERRK
 
 ## 2019-04-04
 
