@@ -1,20 +1,4 @@
-CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start() RETURNS void
-       LANGUAGE plpgsql
-       AS $$
-DECLARE
-       uuidPos uuid;
-BEGIN
-     -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
-     FOR uuidPos IN SELECT uuid FROM {{ item_prodavnica }}.pos
-          WHERE idvd='72' AND ref IS NULL AND dat_od=current_date
-     LOOP
-          RAISE INFO 'pos %', uuidPos;
-          PERFORM {{ item_prodavnica }}.nivelacija_start_create( uuidPos );
-     END LOOP;
 
-     RETURN;
-END;
-$$;
 
 
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_broj_stavki(uuidPos uuid) RETURNS integer
