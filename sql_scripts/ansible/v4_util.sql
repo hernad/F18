@@ -807,9 +807,6 @@ BEGIN
          WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
    END IF;
 
-   IF (nRbr = nRows) THEN
-      RAISE INFO 'ZADNJI RED % !', nRows;
-   END IF;
 
    FOR rec_trfp IN SELECT * FROM public.trfp WHERE shema=cShema AND idvd=cIdVd
    LOOP
@@ -892,6 +889,84 @@ BEGIN
 
    END LOOP;
 
+   IF (nRbr = nRows) THEN
+      RAISE INFO 'ZADNJI RED % - gen_anal_sint % !', nRows, public.kalk_gen_anal_sint(cIdFirma, cIdVn, cBrNal);
+   END IF;
+
    RETURN 0;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.kalk_gen_anal_sint( cIdFirma varchar, cIdVN varchar, cBrNal varchar) RETURNS integer
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    rec_suban RECORD;
+    rec_anal RECORD;
+    rec_sint RECORD;
+    nMaxRBR integer;
+    dDatNal date;
+    nIznosDug numeric;
+    nIznosPot numeric;
+BEGIN
+    FOR rec_suban IN SELECT * FROM fmk.fin_suban
+        where idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
+        ORDER BY rbr
+    LOOP
+
+        SELECT max(datdok) from fmk.fin_suban
+           WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and trim(idkonto)=trim(rec_suban.idkonto)
+        INTO dDatNal;
+        dDatNal := coalesce( dDatNal, current_date );
+        IF rec_suban.d_p = '1' THEN
+          nIznosDug := rec_suban.iznosbhd;
+          nIznosPot := 0;
+        ELSE
+          nIznosDug := 0;
+          nIznosPot := rec_suba.iznosbhd;
+        END IF;
+
+        -- analitika
+        SELECT * from fmk.fin_anal
+           WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and trim(idkonto)=trim(rec_suban.idkonto)
+        INTO rec_anal;
+        IF rec_anal IS NULL THEN
+            SELECT max(to_number(rbr, '9999')) FROM fmk.fin_anal
+              WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
+            INTO nMaxRbr;
+            nMaxRbr := coalesce( nMaxRbr, 0);
+            INSERT INTO fmk.fin_anal(idfirma,idvn,brnal,idkonto,dugbhd,potbhd,dugdem,potdem,datnal,rbr)
+               values(cIdFirma, cIdVn, cBrNal, rec_suban.idkonto, nIznosDug, nIznosPot, public.km_to_euro(nIznosDug),public.km_to_euro(nIznosPot), dDatNal, to_char(nMaxRbr+1,'9999'));
+        ELSE
+           UPDATE fmk.fin_anal
+              SET dugbhd=dugbhd + nIznosDug, pobhd=potbhd + nIznosPot, dugdem=dugdem + public.km_to_euro(nIznosDug), potdem=potdem + public.km_to_euro(nIznosPot)
+              WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal AND trim(idkonto)=trim(rec_suban.idkonto);
+
+        END IF;
+
+        -- sitnetika
+        SELECT max(datdok) from fmk.fin_suban
+           WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and left(idkonto,3)=left(rec_suban.idkonto,3)
+        INTO dDatNal;
+        SELECT * from fmk.fin_sint
+           WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and left(idkonto,3)=left(rec_suban.idkonto,3)
+        INTO rec_sint;
+        IF rec_sint IS NULL THEN
+            SELECT max(to_number(rbr, '9999')) FROM fmk.fin_anal
+              WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
+            INTO nMaxRbr;
+            nMaxRbr := coalesce( nMaxRbr, 0);
+            INSERT INTO fmk.fin_sint(idfirma,idvn,brnal,idkonto,dugbhd,potbhd,dugdem,potdem,datnal,rbr)
+               values(cIdFirma, cIdVn, cBrNal, left(rec_suban.idkonto,3), nIznosDug, nIznosPot, public.km_to_euro(nIznosDug),public.km_to_euro(nIznosPot), dDatNal, to_char(nMaxRbr+1,'9999'));
+        ELSE
+           UPDATE fmk.fin_sint
+              SET dugbhd=dugbhd + nIznosDug, pobhd=potbhd + nIznosPot, dugdem=dugdem + public.km_to_euro(nIznosDug), potdem=potdem + public.km_to_euro(nIznosPot)
+              WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal AND left(idkonto,3)=left(rec_suban.idkonto,3);
+
+        END IF;
+    END LOOP;
+
+    RETURN 0;
 END;
 $$;

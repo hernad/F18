@@ -352,24 +352,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_knjig_dok_id(cIdPos varchar, cIdVD varchar, cBrDok varchar, dDatum date) RETURNS uuid
-LANGUAGE plpgsql
-AS $$
-DECLARE
-   dok_id uuid;
-BEGIN
-   EXECUTE 'SELECT dok_id FROM {{ item_prodavnica }}.pos_knjig WHERE idpos=$1 AND idvd=$2 AND brdok=$3 AND datum=$4'
-     USING cIdPos, cIdVd, cBrDok, dDatum
-     INTO dok_id;
 
-   IF dok_id IS NULL THEN
-      --RAISE EXCEPTION 'kalk_doks %-%-% od % NE postoji?!', cIdFirma, cIdVd, cBrDok, dDatDok;
-      RAISE INFO 'pos_doks %-%-% od % NE postoji?!', cIdPos, cIdVd, cBrDok, dDatum;
-   END IF;
-
-   RETURN dok_id;
-END;
-$$;
 
 -- =========================== 21, 22 ===============================================================================
 
