@@ -281,9 +281,6 @@ $$;
 
 
 
-DROP FUNCTION IF EXISTS {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start() CASCADE;
-DROP FUNCTION IF EXISTS {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end() CASCADE;
-
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start() RETURNS integer
        LANGUAGE plpgsql
        AS $$
