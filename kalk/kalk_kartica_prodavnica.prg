@@ -15,6 +15,8 @@ STATIC s_cLine
 STATIC s_cTxt1
 MEMVAR cIdFirma, cIdRoba, cPKonto
 MEMVAR nKalkMarzaVP, nKalkMarzaMP
+MEMVAR PicCDEM, PicProc, PicDEM, PicKol, gPicProc
+
 STATIC s_oPDF
 
 FUNCTION kalk_kartica_prodavnica()
@@ -23,8 +25,6 @@ FUNCTION kalk_kartica_prodavnica()
 
    LOCAL cLine
    LOCAL cTxt1
-   LOCAL cTxt2
-   LOCAL cTxt3
    LOCAL nNc, nSredNc, nOdstupanje, cTransakcija
    LOCAL cPrikSredNc := "N"
    LOCAL cIdvd := Space( 100 )
@@ -39,6 +39,12 @@ FUNCTION kalk_kartica_prodavnica()
    LOCAL dDatOd, dDatDo
    LOCAL xPrintOpt, bZagl, cNaslov
    LOCAL lPrviProlaz
+   LOCAL cPredh
+   LOCAL nKolicina
+   LOCAL cFilt
+   LOCAL nPopust
+   LOCAL nColDok
+   LOCAL nColFCJ2
 
    PRIVATE PicCDEM := kalk_prosiri_pic_cjena_za_2()
    PRIVATE PicProc := gPicProc
@@ -52,7 +58,6 @@ FUNCTION kalk_kartica_prodavnica()
    dDatDo := Date()
    nKalkMarzaVP := nKalkMarzaMP := 0
 
-
    IF cPKonto == NIL
       cIdFirma := self_organizacija_id()
       cIdRoba := Space( 10 )
@@ -60,9 +65,6 @@ FUNCTION kalk_kartica_prodavnica()
       cPKonto := PadR( "1330", 7 )
       cPKonto := fetch_metric( "kalk_kartica_prod_id_konto", my_user(), cPKonto )
    ENDIF
-
-   cPredh := "N"
-
 
    dDatOd := fetch_metric( "kalk_kartica_prod_datum_od", my_user(), dDatOd )
    dDatDo := fetch_metric( "kalk_kartica_prod_datum_do", my_user(), dDatDo )
@@ -139,7 +141,7 @@ FUNCTION kalk_kartica_prodavnica()
 
    MsgC()
 
-   PRIVATE cFilt := ".t."
+   cFilt := ".t."
 
    IF !( cFilt == ".t." )
       SET FILTER TO &cFilt
@@ -157,15 +159,12 @@ FUNCTION kalk_kartica_prodavnica()
    xPrintOpt[ "opdf" ] := s_oPDF
 
    ?
-   nLen := 1
-
    set_zagl( @cLine, @cTxt1 )
    s_cLine := cLine
    s_cTxt1 := cTxt1
 
-   nTStrana := 0
 
-   bZagl := {|| zagl( cPKonto, dDatOd, dDatDo ) }
+   bZagl := {|| zagl( cPKonto ) }
 
    nCol1 := 10
    nCol2 := 20
@@ -199,8 +198,8 @@ FUNCTION kalk_kartica_prodavnica()
       nCol2 := 10
       nUlaz := nIzlaz := 0
       nNV := nMPV := 0
+      nPopust := 0
       lPrviProlaz := .T.
-      nRabat := 0
       nColDok := 9
       nColFCJ2 := 68
 
@@ -241,7 +240,7 @@ FUNCTION kalk_kartica_prodavnica()
          check_nova_strana( bZagl, s_oPDF )
          IF field->pu_i == "1"
 
-            nUlaz += field->kolicina - field->GKolicina - kalk->gkolicin2
+            nUlaz += field->kolicina
             IF field->datdok >= dDatod
                ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa, field->idpartner
                nCol1 := PCol() + 1
@@ -261,13 +260,15 @@ FUNCTION kalk_kartica_prodavnica()
 
             // nMPVP += kalk->mpcsapp * field->kolicina
             nMPVDug += kalk->mpcsapp * field->kolicina
-            nNV += field->nc * field->kolicina
+            nNV += kalk->nc * kalk->kolicina
+            nPopust += 0
             nMPV := nMPVDug - nMPVPot
 
             IF field->datdok >= dDatOd
                nCol2 := PCol() + 1
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvDug )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
+               @ PRow(), PCol() + 1 SAY kalk_say_iznos( nPopust )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
             ENDIF
 
@@ -296,11 +297,14 @@ FUNCTION kalk_kartica_prodavnica()
             nMPVPot += kalk->mpcsapp * kalk->kolicina
             nNV -= kalk->nc * kalk->kolicina
             nMPV := nMPVDug - nMPVPot
+            nPopust += mpc_sa_pdv_by_tarifa( kalk->idtarifa, kalk->rabatv) * kalk->kolicina
+
 
             IF field->datdok >= dDatOd
                nCol2 := PCol() + 1
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvDug )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
+                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nPopust )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
             ENDIF
 
@@ -322,24 +326,25 @@ FUNCTION kalk_kartica_prodavnica()
 
             // nMPVP -= kalk->mpcsapp * kalk->gkolicin2
             nMPVPot += kalk->mpcsapp * kalk->gkolicin2
-            nNV -= field->nc * kalk->gkolicin2
+            nNV -= kalk->nc * kalk->gkolicin2
             nMPV := nMPVDug - nMPVPot
 
             IF field->datdok >= dDatod
                nCol2 := PCol() + 1
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvDug )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
+                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nPopust )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
 
             ENDIF
 
-         ELSEIF field->pu_i == "5" .AND. ( field->idvd $ "12#13" )
+         ELSEIF kalk->pu_i == "5" .AND. ( kalk->idvd $ "12#13" )
 
-            nUlaz -= field->kolicina
+            nUlaz -= kalk->kolicina
             IF field->datdok >= dDatod
                ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa, field->idpartner
                nCol1 := PCol() + 1
-               @ PRow(), PCol() + 1 SAY say_kolicina( - ( field->kolicina ) )
+               @ PRow(), PCol() + 1 SAY say_kolicina( - kalk->kolicina )
                @ PRow(), PCol() + 1 SAY say_kolicina( 0 )
                @ PRow(), PCol() + 1 SAY say_kolicina( nUlaz - nIzlaz )
                nNc := field->nc
@@ -354,13 +359,15 @@ FUNCTION kalk_kartica_prodavnica()
 
             // nMPVP -= kalk->mpcsapp * field->kolicina
             nMPVPot += kalk->mpcsapp * field->kolicina
-            nNV -= field->nc * field->kolicina
+            nNV -= kalk->nc * field->kolicina
             nMPV := nMPVDug - nMPVPot
+            nPopust += mpc_sa_pdv_by_tarifa( kalk->idtarifa, kalk->rabatv) * kalk->kolicina
 
             IF field->datdok >= dDatod
                nCol2 := PCol() + 1
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvDug )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
+                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nPopust )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
             ENDIF
 
@@ -369,11 +376,11 @@ FUNCTION kalk_kartica_prodavnica()
             IF field->datdok >= dDatod
                ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa, field->idpartner
                nCol1 := PCol() + 1
-               @ PRow(), PCol() + 1 SAY say_kolicina( field->kolicina )
+               @ PRow(), PCol() + 1 SAY say_kolicina( kalk->kolicina )
                @ PRow(), PCol() + 1 SAY say_kolicina( "[NIV]" )
                @ PRow(), PCol() + 1 SAY say_kolicina( "St-Nova:" )
-               @ PRow(), PCol() + 1 SAY say_cijena( field->fcj )
-               @ PRow(), PCol() + 1 SAY say_cijena( field->fcj + kalk->mpcsapp )
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->fcj )
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->fcj + kalk->mpcsapp )
             ENDIF
 
             nMPVDug += kalk->mpcsapp * field->kolicina // razlika nova-stara cijena
@@ -383,6 +390,7 @@ FUNCTION kalk_kartica_prodavnica()
                nCol2 := PCol() + 1
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvDug )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
+               @ PRow(), PCol() + 1 SAY kalk_say_iznos( nPopust )
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
             ENDIF
 
@@ -449,6 +457,7 @@ FUNCTION kalk_kartica_prodavnica()
       ENDIF
       @ PRow(), nCol2 SAY kalk_say_iznos( nMpvDug )
       @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpvPot )
+      @ PRow(), PCol() + 1 SAY kalk_say_iznos( nPopust )
       @ PRow(), PCol() + 1 SAY kalk_say_iznos( nMpv )
       ? s_cLine
       ?
@@ -471,7 +480,7 @@ FUNCTION kalk_kartica_prodavnica()
    RETURN .T.
 
 
-STATIC FUNCTION zagl( cPKonto, dDatOd, dDatDo )
+STATIC FUNCTION zagl( cPKonto )
 
    Preduzece()
    // IspisNaDan( 10 )
@@ -509,7 +518,8 @@ STATIC FUNCTION set_zagl( cLine, cTxt1 )
    AAdd( aKProd, { nPom, PadC( "MPC", nPom ) } )
    AAdd( aKProd, { nPom, PadC( "MPV.Dug", nPom ) } )
    AAdd( aKProd, { nPom, PadC( "MPV.Pot", nPom ) } )
-   AAdd( aKProd, { nPom, PadC( "MPV", nPom ) } )
+   AAdd( aKProd, { nPom, PadC( "Pop.SaPDV", nPom ) } )
+   AAdd( aKProd, { nPom, PadC( "MPVsaPDV", nPom ) } )
 
    cLine := SetRptLineAndText( aKProd, 0 )
    cTxt1 := SetRptLineAndText( aKProd, 1, "*" )

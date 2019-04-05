@@ -210,8 +210,7 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
       nUPopustBezPDV := 0
       select_o_tarifa( cIdtarifa )
       SELECT kalk_pripr
-      DO WHILE !Eof() .AND. cIdfirma + cIdVd + cBrDok == kalk_pripr->idFirma + kalk_pripr->idVd + kalk_pripr->brDok ;
-            .AND. kalk_pripr->idTarifa == cIdTarifa
+      DO WHILE !Eof() .AND. cIdfirma + cIdVd + cBrDok == kalk_pripr->idFirma + kalk_pripr->idVd + kalk_pripr->brDok .AND. kalk_pripr->idTarifa == cIdTarifa
          select_o_roba( kalk_pripr->idroba )
          SELECT kalk_pripr
          nUMpvNeto += kalk_pripr->mpc * kalk_pripr->kolicina
@@ -228,7 +227,7 @@ FUNCTION kalk_stdok_41_rekap_pdv( cIdFirma, cIdVd, cBrDok, bZagl )
 
       check_nova_strana( bZagl, s_oPDF, .F., 3 )
       ? cIdtarifa
-      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) PICT picproc()
+      @ PRow(), PCol() + 1 SAY pdv_procenat_by_tarifa( cIdTarifa ) * 100 PICT picproc()
       nCol1 := PCol()
       @ PRow(), nCol1 + 1 SAY nUMpvNeto + nUPopustBezPDV PICT picdem()
       @ PRow(), PCol() + 1 SAY nUPopustBezPDV PICT picdem()

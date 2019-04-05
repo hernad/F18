@@ -3,6 +3,7 @@
 ## 2019-04-05
 
 -  KALK 11 fix gkolicin2 22->11 BUG
+-  KALK KARTICA PROD popust
 
 ## 2019-04-04
 
