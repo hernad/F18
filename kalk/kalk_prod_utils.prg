@@ -178,8 +178,18 @@ FUNCTION kalk_get_mpc_by_koncij_pravilo( cIdKonto )
       nMPCSifarnik := roba->mpc2
    ELSEIF cTipCijene == "M3"
       nMPCSifarnik := roba->mpc3
-   ELSEIF cTipCijene == "M4" .AND. roba->( FieldPos( "mpc4" ) ) <> 0
+   ELSEIF cTipCijene == "M4"
       nMPCSifarnik := roba->mpc4
+   ELSEIF cTipCijene == "M5"
+      nMPCSifarnik := roba->mpc5
+   ELSEIF cTipCijene == "M6"
+      nMPCSifarnik := roba->mpc6
+   ELSEIF cTipCijene == "M7"
+      nMPCSifarnik := roba->mpc7
+   ELSEIF cTipCijene == "M8"
+      nMPCSifarnik := roba->mpc8
+   ELSEIF cTipCijene == "M9"
+      nMPCSifarnik := roba->mpc9
    ELSE
       nMPCSifarnik := roba->mpc
    ENDIF

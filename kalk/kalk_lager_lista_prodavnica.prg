@@ -25,11 +25,11 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL cPicCDEm := kalk_prosiri_pic_cjena_za_2()
    LOCAL cPicDem := kalk_pic_iznos_bilo_gpicdem()
    LOCAL cSrKolNula := "0"
-   LOCAL _curr_user := "<>"
+   LOCAL cUser := "<>"
    LOCAL cMpcIzSif := "N"
 
    // LOCAL cMinK := "N"
-   LOCAL _istek_roka := CToD( "" )
+   // LOCAL _istek_roka := CToD( "" )
 
    LOCAL cPrintPdfOdt := "1"
    LOCAL cIdFirma, dDatOd, dDatDo, lPocStanje
@@ -74,6 +74,8 @@ FUNCTION kalk_lager_lista_prodavnica()
    LOCAL nMpcSifarnik, nMpcSaKartice
    LOCAL nCr
    LOCAL nKolicina
+   LOCAL nCol2 := 60
+   LOCAL lDrugiRed
 
    cIdFirma := self_organizacija_id()
    cIdKonto := PadR( "1330", FIELD_LENGTH_IDKONTO )
@@ -97,20 +99,20 @@ FUNCTION kalk_lager_lista_prodavnica()
 
    // PRIVATE cPrikazNuleDN := "D"
    // PRIVATE cSredCij := "N"
-   PRIVATE cPrikazDob := "N"
-   PRIVATE cPlVrsta := Space( 1 )
+   // PRIVATE cPrikazDob := "N"
+   // PRIVATE cPlVrsta := Space( 1 )
    // PRIVATE cPrikK2 := "N"
 
    Box(, 18, 70 )
 
    cGrupacijaK1 := Space( 4 )
    IF !lPocStanje
-      cIdKonto := fetch_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cIdKonto )
-      cPrikazNabavneVrijednosti := fetch_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, "N" )
-      cPrikazNuleDN := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cPrikazNuleDN )
-      dDatOd := fetch_metric( "kalk_lager_lista_prod_datum_od", _curr_user, dDatOd )
-      dDatDo := fetch_metric( "kalk_lager_lista_prod_datum_do", _curr_user, dDatDo )
-      cPrintPdfOdt := fetch_metric( "kalk_lager_lista_prod_print", _curr_user, cPrintPdfOdt )
+      cIdKonto := fetch_metric( "kalk_lager_lista_prod_id_konto", cUser, cIdKonto )
+      cPrikazNabavneVrijednosti := fetch_metric( "kalk_lager_lista_prod_po_nabavnoj", cUser, "N" )
+      cPrikazNuleDN := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", cUser, cPrikazNuleDN )
+      dDatOd := fetch_metric( "kalk_lager_lista_prod_datum_od", cUser, dDatOd )
+      dDatDo := fetch_metric( "kalk_lager_lista_prod_datum_do", cUser, dDatDo )
+      cPrintPdfOdt := fetch_metric( "kalk_lager_lista_prod_print", cUser, cPrintPdfOdt )
    ENDIF
 
    DO WHILE .T.
@@ -161,12 +163,12 @@ FUNCTION kalk_lager_lista_prodavnica()
    BoxC()
 
    IF !lPocStanje
-      set_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cIdKonto )
-      set_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, cPrikazNabavneVrijednosti )
-      set_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, cPrikazNuleDN )
-      set_metric( "kalk_lager_lista_prod_datum_od", _curr_user, dDatOd )
-      set_metric( "kalk_lager_lista_prod_datum_do", _curr_user, dDatDo )
-      set_metric( "kalk_lager_lista_prod_print", _curr_user, cPrintPdfOdt )
+      set_metric( "kalk_lager_lista_prod_id_konto", cUser, cIdKonto )
+      set_metric( "kalk_lager_lista_prod_po_nabavnoj", cUser, cPrikazNabavneVrijednosti )
+      set_metric( "kalk_lager_lista_prod_prikaz_nula", cUser, cPrikazNuleDN )
+      set_metric( "kalk_lager_lista_prod_datum_od", cUser, dDatOd )
+      set_metric( "kalk_lager_lista_prod_datum_do", cUser, dDatDo )
+      set_metric( "kalk_lager_lista_prod_print", cUser, cPrintPdfOdt )
    ENDIF
 
    my_close_all_dbf()
@@ -175,7 +177,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "portrait"
-   xPrintOpt[ "font_size" ] := 7
+   xPrintOpt[ "font_size" ] := 8
    xPrintOpt[ "opdf" ] := s_oPDF
    legacy_ptxt( .F. )
 
@@ -469,22 +471,27 @@ FUNCTION kalk_lager_lista_prodavnica()
 
          select_o_koncij( cIdKonto )
          select_o_roba( cIdRoba )
-         nMpcSifarnik := kalk_get_mpc_by_koncij_pravilo()
 
+         nMpcSifarnik := kalk_get_mpc_by_koncij_pravilo()
          SELECT kalk
          nMpcSaKartice := 0
          nKolicina := nUlazKol - nIzlazKol + nPredhKol
          IF Round( nUlazKol - nIzlazKol + nPredhKol, 2 ) <> 0
             nMpcSaKartice := ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ) / nKolicina
-            @ PRow(), PCol() + 1 SAY nMpcSaKartice PICT kalk_pic_cijena_bilo_gpiccdem()
+            nCol2 := PCol() + 1
+            @ PRow(), nCol2 SAY nMpcSaKartice PICT kalk_pic_cijena_bilo_gpiccdem()
             IF Round( nKolicina, 4 ) < 0
                ?? " ERRK"
                lImaGresaka := .T.
+            ELSEIF Round( nMpcSaKartice, 2 ) <> Round( nMpcSifarnik, 2 )
+               ?? " ERRC"
+               lImaGresaka := .T.
             ENDIF
          ELSE // stanje artikla je 0
-            @ PRow(), PCol() + 1 SAY nMpcSaKartice PICT kalk_pic_iznos_bilo_gpicdem()
+            nCol2 := PCol() + 1
+            @ PRow(), nCol2 SAY nMpcSaKartice PICT kalk_pic_iznos_bilo_gpicdem()
             IF Round( ( nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ), 4 ) <> 0
-               ?? " ERR"
+               ?? " ERR0"
                lImaGresaka := .T.
             ENDIF
 
@@ -494,13 +501,14 @@ FUNCTION kalk_lager_lista_prodavnica()
             @ PRow(), PCol() + 1 SAY ( nNvUlaz - nNvIzlaz + nPredhNvSaldo + nMpvUlaz - nMpvIzlaz + nPredhMpvSaldo ) / nKolicina / 2 PICT "9999999.99"
          ENDIF
 
-         // drugi red
-         IF Len( aNazRoba ) > 1 .OR. cPredhStanje == "D" .OR. cPrikazNabavneVrijednosti == "D"
+         lDrugiRed := .F.
+         IF Len( aNazRoba ) > 1 .OR. cPredhStanje == "D" .OR. cPrikazNabavneVrijednosti == "D" .OR. Len( aNazRoba ) > 1
             @ PRow() + 1, 0 SAY ""
             IF Len( aNazRoba ) > 1
                @ PRow(), nCR  SAY aNazRoba[ 2 ]
             ENDIF
             @ PRow(), nCol0 - 1 SAY ""
+            lDrugiRed := .T.
          ENDIF
 
          IF cPredhStanje == "D"
@@ -524,7 +532,10 @@ FUNCTION kalk_lager_lista_prodavnica()
             IF Round( nMpcSifarnik, 4 ) <> Round( nMpcSaKartice, 4 )
                @ PRow(), PCol() + 1 SAY nMpcSifarnik PICT kalk_pic_cijena_bilo_gpiccdem()
             ENDIF
-
+         ELSE
+            IF Round( nMpcSifarnik, 4 ) <> Round( nMpcSaKartice, 4 )
+               @ PRow() + iif( lDrugiRed, 0, 1 ), nCol2 SAY nMpcSifarnik PICT kalk_pic_cijena_bilo_gpiccdem()
+            ENDIF
          ENDIF
 
          nTotalUlazKol += nUlazKol

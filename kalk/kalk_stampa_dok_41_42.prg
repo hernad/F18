@@ -66,6 +66,7 @@ FUNCTION kalk_stampa_dok_41_42_49()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 9
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF
@@ -275,7 +276,7 @@ STATIC FUNCTION kalk_naslov_41_42()
    ? cLine
 
    ?U "*R * ROBA     *" + PadC( "Barkod", 13 ) + "*" + PadC( "Naziv", s_nRobaNazivSirina + 5 ) + ;
-      "* Količina *  NAB.CJ  *  MARZA  * MPC bPDV *  Popust   * MPV NETO *   PDV %  *  MPC/MPV * MPC/MPV *"
+      "* Količina *  NAB.CJ  *  MARŽA  * MPC bPDV *  Popust   * MPV NETO *   PDV %  *  MPC/MPV * MPC/MPV *"
 
    ?U "*BR*          *" + PadC( "      ", 13 ) + "*" + PadC( "     ", s_nRobaNazivSirina + 5 ) + ;
       "*          *   U MP    * (bruto) * MPV bPDV * (bez PDV) *(bez PDV)*   PDV    *   NETO   * SA PDV  *"

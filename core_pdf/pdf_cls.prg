@@ -296,13 +296,17 @@ METHOD MaxRow() CLASS PDFClass
    LOCAL nPageHeight, nMaxRow
 
    IF ::nType == PDF_TXT_PORTRAIT
+      IF ::nFontSize == 8.5
+         RETURN Round( 62 * ::nXScale, 0 )
+      ENDIF
+
       SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN Round( 60 * ::nXScale, 0 )
+         RETURN Round( 53 * ::nXScale, 0 )
       CASE 9
-         RETURN Round( 63 * ::nXScale, 0 )
+         RETURN Round( 60 * ::nXScale, 0 )
       CASE 8
-         RETURN Round( 65 * ::nXScale, 0 )
+         RETURN Round( 64 * ::nXScale, 0 )
       CASE 7
          RETURN Round( 75 * ::nXScale, 0 )
       CASE 6
@@ -325,9 +329,9 @@ METHOD MaxRow() CLASS PDFClass
 
       SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN Round( 35 * ::nXScale, 0 )
+         RETURN Round( 33 * ::nXScale, 0 )
       CASE 9
-         RETURN Round( 40 * ::nXScale, 0 )
+         RETURN Round( 38 * ::nXScale, 0 )
       CASE 8
          RETURN Round( 45 * ::nXScale, 0 )
       CASE 7
