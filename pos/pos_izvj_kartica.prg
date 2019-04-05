@@ -68,7 +68,7 @@ FUNCTION pos_kartica_artikla()
    IF !Empty( cIdRoba )
       cQuery += " AND rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
    ENDIF
-   cQuery += " order by idroba, pos.datum, pos.obradjeno  "
+   cQuery += " order by idroba, pos.datum, pos.obradjeno, pos.idvd, pos.brdok  "
 
    // IF Empty( cIdRoba )
    // seek_pos_pos_2( NIL )

@@ -18,7 +18,7 @@ MEMVAR nKalkStrana, nKalkStaraCijena, nKalkNovaCijena, nKalkRbr
 MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pkonto, _mpcsapp, _mpc, _nc, _fcj, _idroba, _idtarifa, _datdok
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner
 MEMVAR _TBankTr, _GKolicina, _GKolicin2, _Marza2, _TMarza2
-MEMVAR _dat_od, _dat_do
+MEMVAR _dat_od, _dat_do, _error
 MEMVAR gStavitiUSifarnikNovuCijenuDefault
 
 FUNCTION kalk_get_1_19_79()
@@ -134,6 +134,9 @@ FUNCTION kalk_get_1_19_79()
    _TMarza2 := "A"
    _MKonto := ""
    _MU_I := ""
+   IF _idvd == POS_IDVD_AKCIJSKE_CIJENE
+      _error := "0"
+   ENDIF
 
    RETURN LastKey()
 

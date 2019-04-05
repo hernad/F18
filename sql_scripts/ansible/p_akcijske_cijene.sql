@@ -16,8 +16,21 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS {{ item_prodavnica }}.nivelacija_start_create(uuidPos uuid);
 
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_broj_stavki(uuidPos uuid) RETURNS integer
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   nRows integer;
+BEGIN
+    SELECT count(item_id) FROM {{ item_prodavnica }}.pos_items WHERE dok_id=uuidPos
+       INTO nRows;
+    nRows := coalesce(nRows, 0);
+    RETURN nRows;
+END;
+$$;
+
+DROP FUNCTION IF EXISTS {{ item_prodavnica }}.nivelacija_start_create(uuidPos uuid);
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.nivelacija_start_create(uuidPos uuid) RETURNS integer
        LANGUAGE plpgsql
        AS $$
@@ -39,6 +52,8 @@ DECLARE
       rec_roba RECORD;
       nRows integer;
       cOpis varchar;
+      nOsnovnaCijena numeric;
+      cMsg varchar;
 BEGIN
       -- pos dokument '72' sa ovim dok_id-om
       EXECUTE 'select idpos,idvd,brdok,datum,dat_od from {{ item_prodavnica }}.pos where dok_id=$1'
@@ -46,9 +61,7 @@ BEGIN
          INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_od;
       RAISE INFO 'nivelacija_start_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_od;
 
-      SELECT count(item_id) FROM {{ item_prodavnica }}.pos_items WHERE dok_id=uuidPos
-         INTO nRows;
-      nRows := coalesce(nRows, 0);
+      nRows :=  {{ item_prodavnica }}.pos_broj_stavki(uuidPos);
       cOpis := 'ROWS:[' || btrim(to_char(nRows, '9999')) || ']';
 
       -- pos dokument nivelacije '29' kome je referenca ovaj dok_id ne smije postojati
@@ -74,12 +87,22 @@ BEGIN
       LOOP
          -- aktuelna osnovna cijena;
          nStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba);
+         IF nStanje > 0 THEN -- osnovna cijena za artikal u pos
+            nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal(cIdRoba);
+            IF nOsnovnaCijena <> nC THEN
+               cMsg := format('stara cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', nC, nOsnovnaCijena);
+               PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_START', cMsg);
+               RAISE INFO '%', cMsg;
+            END IF;
+         ELSE  -- na stanju nema artikla, koristi se stara cijena u zahtjevu za nivelaciju
+            nOsnovnaCijena := nC;
+         END IF;
          SELECT * FROM {{ item_prodavnica }}.roba
             WHERE id=cIdRoba
             INTO rec_roba;
 
          EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nC, nC2, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nC2, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
          nCount := nCount + 1;
       END LOOP;
 
@@ -107,6 +130,10 @@ DECLARE
       dDatumNew date;
       nStanje numeric;
       nCount integer;
+      nRows integer;
+      cOpis varchar;
+      nOsnovnaCijena numeric;
+      cMsg varchar;
 BEGIN
 
       -- pos dokument '72'
@@ -114,6 +141,9 @@ BEGIN
          USING uuidPos
          INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_do;
       RAISE INFO 'nivelacija_end_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_do;
+
+      nRows :=  {{ item_prodavnica }}.pos_broj_stavki(uuidPos);
+      cOpis := 'ROWS:[' || btrim(to_char(nRows, '9999')) || ']';
 
       -- pos dokument nivelacije '29' sa ref_2 na dok_id ne smije postojati
       EXECUTE 'select uuid from {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND ref_2=$3'
@@ -126,7 +156,7 @@ BEGIN
 
       dDatumNew := dDat_do;
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
-      insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,ref) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos)
+      insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,ref,opis) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos,cOpis)
           RETURNING dok_id into uuid2;
 
       -- referenca (2) na '29' unutar dokumenta idvd '72'
@@ -139,6 +169,16 @@ BEGIN
       LOOP
          -- trenutno aktuelna osnovna cijena je akcijska
          nStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba);
+         IF nStanje > 0 THEN -- osnovna cijena za artikal u pos
+            nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal(cIdRoba);
+            IF nOsnovnaCijena <> nC2 THEN
+               cMsg := format('nova cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', nC, nOsnovnaCijena);
+               PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_END', cMsg);
+               RAISE INFO '%', cMsg;
+            END IF;
+         ELSE  -- na stanju nema artikla, koristi se stara cijena u zahtjevu za nivelaciju
+            nOsnovnaCijena := nC2;
+         END IF;
          EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
              using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nC2, nC;
          nCount := nCount + 1;

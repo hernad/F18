@@ -184,14 +184,23 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                USING NEW.idtarifa
                INTO pdvStopa;
           RAISE INFO 'THEN insert kalk_kalk % % % % % %', NEW.idpos, idvdKalk, cPKonto, cMKonto, cBrDok, NEW.datum;
-          -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
-          -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
-          -- kalk 90: fcj = knjizna vrijednost = nKnjiznaKolicina * NEW.cijena = $15 * $9
-          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, mkonto, pu_i, gkolicina, gkolicin2, fcj ) ' ||
-               'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $12/100), $11, $13, $14, $15, $15-$10, $15 * $9)'
+
+          IF NEW.idvd='90' THEN -- popis u prodavnici
+            -- pos.cijena = 10, pos.ncijena = 1 => neto_cijena = 10-1 = 9
+             -- kalk: fcj = stara cijena = 10 = pos.cijena, mpcsapp - razlika u cijeni = 9 - 10 = -1 = - pos.ncijena
+             -- kalk 90: fcj = knjizna vrijednost = nKnjiznaKolicina * NEW.cijena = $15 * $9
+             EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, mkonto, pu_i, gkolicina, gkolicin2, fcj ) ' ||
+                 'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $12/100), $11, $13, $14, $15, $15-$10, $15 * $9)'
+                  USING idFirma, idvdKalk, NEW.rbr, cBrDok, NEW.datum, cPKonto, NEW.idroba, NEW.idtarifa,
+                  NEW.cijena, nKolicina, 0, pdvStopa, cMKonto, pUI, nKnjiznaKolicina;
+             RETURN NEW;
+           ELSE
+             EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, mkonto, pu_i, gkolicina, gkolicin2, fcj ) ' ||
+                'values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $9/(1 + $12/100), $11, $13, $14, 0, 0, 0)'
                 USING idFirma, idvdKalk, NEW.rbr, cBrDok, NEW.datum, cPKonto, NEW.idroba, NEW.idtarifa,
-                NEW.cijena, nKolicina, 0, pdvStopa, cMKonto, pUI, nKnjiznaKolicina;
-                RETURN NEW;
+                NEW.cijena, nKolicina, 0, pdvStopa, cMKonto, pUI;
+             RETURN NEW;
+           END IF;
 
   -- 71 - zahtjev snizenje, 29 - pos nivelacija generisana na osnovu akcijskih cijena
   ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('71', '29') ) THEN

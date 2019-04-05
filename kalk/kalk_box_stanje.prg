@@ -66,7 +66,7 @@ FUNCTION sif_roba_kalk_stanje_magacin_key_handler_s( cIdRoba )
             nPos := Len ( aStanje )
          ENDIF
          IF mu_i == "1" .AND. !( idvd $ "12#22#94" )
-            nUlaz  := kolicina - gkolicina - gkolicin2
+    --        nUlaz  := kolicina - gkolicina - gkolicin2
          ELSEIF mu_i == "5"
             nIzlaz := kolicina
          ELSEIF mu_i == "1" .AND. ( idvd $ "12#22#94" )    // povrat
@@ -82,7 +82,7 @@ FUNCTION sif_roba_kalk_stanje_magacin_key_handler_s( cIdRoba )
             nPos := Len ( aStanje )
          ENDIF
          IF pu_i == "1"
-            nUlaz  := kolicina - GKolicina - GKolicin2
+      --      nUlaz  := kolicina - GKolicina - GKolicin2
          ELSEIF pu_i == "5"  .AND. !( idvd $ "12#13#22" )
             nIzlaz := kolicina
          ELSEIF pu_i == "I"

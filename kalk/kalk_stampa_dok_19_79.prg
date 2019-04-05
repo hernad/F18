@@ -55,7 +55,7 @@ FUNCTION kalk_stampa_dok_19_79()
    ELSEIF cIdVd == POS_IDVD_ODOBRENO_SNIZENJE
       cNaslov := "ODOBRENO SNIŽENJE"
    ELSEIF cIdVd == POS_IDVD_AKCIJSKE_CIJENE
-      cNaslov := "Akcijske cijene"
+      cNaslov := "Zahtjev za nivelaciju"
    ELSE
       cNaslov := "NIVELACIJA"
    ENDIF

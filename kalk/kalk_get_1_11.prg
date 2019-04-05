@@ -17,6 +17,7 @@ MEMVAR _IdFirma, _DatFaktP, _IdKonto, _IdKonto2, _kolicina, _idvd, _mkonto, _pko
 MEMVAR _MU_I, _PU_I, _VPC, _IdPartner, _error
 MEMVAR _TBankTr, _Marza2, _TMarza2, _Prevoz, _TPrevoz, _TMarza, _Marza
 MEMVAR _BrFaktP
+MEMVAR _gkolicin2, _gkolicina
 
 FUNCTION kalk_get_1_11()
 
@@ -162,6 +163,8 @@ FUNCTION kalk_get_1_11()
 
    _IdKonto := _MKonto // izlaz iz magacina
    _IdKonto2 := _PKonto  // ulaz u prodavnicu
+   _gkolicin2 := 0
+   _gkolicina := 0
 
    IF _idvd == '21'
       _MU_I := "6"
