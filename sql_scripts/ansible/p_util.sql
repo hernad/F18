@@ -533,13 +533,15 @@ END;
 $$;
 
 
-
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.run_cron() RETURNS void
   LANGUAGE plpgsql
   AS $$
 DECLARE
    nCount99 integer;
    nCount79 integer;
+   nNivStart integer;
+   nNivEnd integer;
+
 BEGIN
    -- PERFORM {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
 
@@ -549,7 +551,13 @@ BEGIN
   SELECT  {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(current_date)
       INTO nCount79;
 
-   RAISE INFO 'run_cron gen_99 %, gen_79 storno %', nCount99, nCount79;
+   SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start()
+       INTO nNivStart;
+
+   SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end()
+      INTO nNivEnd;
+
+   RAISE INFO 'run_cron gen_99 %, gen_79 storno %, niv_start: %, niv_end: %', nCount99, nCount79, nNivStart, nNivEnd;
    RETURN;
 END;
 $$;

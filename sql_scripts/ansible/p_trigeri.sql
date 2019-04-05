@@ -61,6 +61,8 @@ ELSIF (TG_OP = 'INSERT') THEN
       IF (NEW.idvd = '19') THEN
          robaCijena := NEW.ncijena;
       ELSE
+         -- kada je '72' i radi se o novom artiklu, u sifarnik se stavi stara cijena sa ovog dokumenta
+         -- to je dobro, jer kada se bude generisala '29'-ka ocekivace se ta cijena kao stara cijena
          robaCijena := NEW.cijena;
       END IF;
 

@@ -30,7 +30,7 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS {{ item_prodavnica }}.nivelacija_start_create(uuidPos uuid);
+
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.nivelacija_start_create(uuidPos uuid) RETURNS integer
        LANGUAGE plpgsql
        AS $$
@@ -111,7 +111,7 @@ END;
 $$;
 
 
-DROP FUNCTION IF EXISTS {{ item_prodavnica }}.nivelacija_end_create(uuidPos uuid);
+
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.nivelacija_end_create(uuidPos uuid) RETURNS integer
        LANGUAGE plpgsql
        AS $$
@@ -146,7 +146,7 @@ BEGIN
       cOpis := 'ROWS:[' || btrim(to_char(nRows, '9999')) || ']';
 
       -- pos dokument nivelacije '29' sa ref_2 na dok_id ne smije postojati
-      EXECUTE 'select uuid from {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND ref_2=$3'
+      EXECUTE 'select dok_id from {{ item_prodavnica }}.pos WHERE idpos=$1 AND idvd=$2 AND ref_2=$3'
           USING cIdPos, '29', uuidPos
           INTO uuid2;
 
@@ -180,7 +180,7 @@ BEGIN
             nOsnovnaCijena := nC2;
          END IF;
          EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nC2, nC;
+             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nC;
          nCount := nCount + 1;
       END LOOP;
 
@@ -280,16 +280,22 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start() RETURNS void
+
+DROP FUNCTION IF EXISTS {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start() CASCADE;
+DROP FUNCTION IF EXISTS {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end() CASCADE;
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start() RETURNS integer
        LANGUAGE plpgsql
        AS $$
 
 DECLARE
        uuid72 uuid;
+       nCount integer;
 BEGIN
+     nCount := 0;
      -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
      FOR uuid72 IN SELECT dok_id FROM {{ item_prodavnica }}.pos
-          WHERE idvd='72' AND ref IS NULL AND dat_od = current_date
+          WHERE idvd='72' AND ref IS NULL AND dat_od<=current_date -- tekuci datum je jednak ili veci od dat_od
      LOOP
             RAISE INFO 'nivelacija_start 72: %', uuid72;
 
@@ -303,28 +309,41 @@ BEGIN
             PERFORM {{ item_prodavnica }}.pos_artikli_vratiti_popust_gen_79(current_date, uuid72);
             -- + 99 po novim cijenama
             PERFORM {{ item_prodavnica }}.pos_artikli_zbog_72_gen_99_plus(current_date, uuid72);
-
+            nCount := nCount + 1;
      END LOOP;
 
-     RETURN;
+     RETURN nCount;
 END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end() RETURNS void
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end() RETURNS integer
        LANGUAGE plpgsql
        AS $$
 DECLARE
-       uuidPos uuid;
+       uuid72 uuid;
+       nCount integer;
 BEGIN
+     nCount := 0;
      -- ref_2 nije popunjen => zavrsna nivelacija nije napravljena, a planirana je za danas
-     FOR uuidPos IN SELECT dok_id FROM {{ item_prodavnica }}.pos
-          WHERE idvd='72' AND ref_2 IS NULL AND dat_do = current_date
+     FOR uuid72 IN SELECT dok_id FROM {{ item_prodavnica }}.pos
+          WHERE idvd='72' AND ( ref_2 IS NULL ) AND ( dat_do IS NOT NULL ) AND dat_do<current_date -- dat_do=15.05 => 16.05 ujutro end nivelacija
      LOOP
-          RAISE INFO 'pos %', uuidPos;
-          PERFORM {{ item_prodavnica }}.nivelacija_end_create( uuidPos );
+          RAISE INFO 'nivelacija_end %', uuid72;
+
+          -- storno 79
+          PERFORM {{ item_prodavnica }}.pos_artikli_prekid_popust_zbog_72_gen_79_storno(current_date, uuid72);
+          PERFORM {{ item_prodavnica }}.pos_artikli_zbog_72_gen_99_storno(current_date, uuid72);
+
+          PERFORM {{ item_prodavnica }}.nivelacija_end_create( uuid72 );
+
+          -- + 79 po novim cijenama
+          PERFORM {{ item_prodavnica }}.pos_artikli_vratiti_popust_gen_79(current_date, uuid72);
+          -- + 99 po novim cijenama
+          PERFORM {{ item_prodavnica }}.pos_artikli_zbog_72_gen_99_plus(current_date, uuid72);
+          nCount := nCount + 1;
      END LOOP;
 
-     RETURN;
+     RETURN nCount;
 END;
 $$;

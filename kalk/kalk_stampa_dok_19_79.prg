@@ -77,6 +77,7 @@ FUNCTION kalk_stampa_dok_19_79()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 9
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF
@@ -140,14 +141,14 @@ FUNCTION kalk_stampa_dok_19_79()
       IF Round( field->FCJ, 4 ) == 0
          @ PRow(), PCol() + 1 SAY 9999999  PICTURE picproc() // error fcj=0
       ELSE
-         @ PRow(), PCol() + 1 SAY (  field->MPCSAPP / field->FCJ ) * 100  PICTURE picproc()
+         @ PRow(), PCol() + 1 SAY ( field->MPCSAPP / field->FCJ ) * 100  PICTURE picproc()
       ENDIF
       @ PRow(), PCol() + 1 SAY Space( Len( piccdem() ) )
       SKIP
 
    ENDDO
 
-   check_nova_strana( bZagl, s_oPDF, .F., 10 )
+   check_nova_strana( bZagl, s_oPDF, .F., 4 )
    ? s_cLinija
    @ PRow() + 1, 0        SAY "Ukupno:"
    @ PRow(), nC0          SAY  nTot3         PICTURE        picdem()
@@ -157,6 +158,7 @@ FUNCTION kalk_stampa_dok_19_79()
    @ PRow(), PCol() + 1   SAY  nTot5         PICTURE        picdem()
    ? s_cLinija
    ?
+   check_nova_strana( bZagl, s_oPDF, .F., 10 )
    kalk_pripr_rekap_tarife( {|| check_nova_strana( bZagl, s_oPDF, .F., 5 ) } )
    kalk_clanovi_komisije()
 
