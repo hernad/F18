@@ -134,10 +134,10 @@ DECLARE
    nKalo numeric;
 BEGIN
 
-   select max(obradjeno) from p2.pos where idvd='02'
+   select max(obradjeno) from {{ item_prodavnica }}.pos where idvd='02'
      INTO nStartTime;
 
-   SELECT sum(kolicina) from p2.pos_items i left join p2.pos d
+   SELECT sum(kolicina) from {{ item_prodavnica }}.pos_items i left join {{ item_prodavnica }}.pos d
      on i.idpos=d.idpos and i.idvd=d.idvd and i.brdok=d.brdok and i.datum=d.datum
     where idroba=cIdRoba AND d.idvd='99' AND d.obradjeno > nStartTime
     INTO nKalo;
