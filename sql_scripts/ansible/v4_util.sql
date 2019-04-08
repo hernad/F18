@@ -774,6 +774,7 @@ DECLARE
    aArray text[];
    nRows integer;
 BEGIN
+
    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
    cIdFirma := trim( cIdFirma );
    cBrNal := cBrDok;
@@ -815,6 +816,7 @@ BEGIN
 
 
    FOR rec_trfp IN SELECT * FROM public.trfp WHERE shema=cShema AND idvd=cIdVd
+       AND btrim(id)<>'ZAOKRUZENJE'
    LOOP
 
       cDP := rec_trfp.d_p;
@@ -903,6 +905,127 @@ BEGIN
 END;
 $$;
 
+
+CREATE OR REPLACE FUNCTION public.kalk_kontiranje_stavka_zaokruzenje(
+  cIdVd varchar, cBrDok varchar, cPKonto varchar, cMKonto varchar,
+) RETURNS integer
+   LANGUAGE plpgsql
+AS $$
+DECLARE
+   cIdFirma varchar;
+   cBrNal varchar;
+   cIdVn varchar;
+   cDP varchar;
+   cShema varchar;
+   rec_trfp RECORD;
+BEGIN
+
+   SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
+   cIdFirma := trim( cIdFirma );
+   cBrNal := cBrDok;
+
+   SELECT * from koncij where trim(id)=public.kalk_glavni_konto( cIdVd, cPKonto, cMKonto )
+       INTO rec_koncij;
+
+   IF rec_koncij IS NULL THEN
+      RAISE EXCEPTION '% konto % shema ne postoji?!', cIdVd, public.kalk_glavni_konto( cIdVd, cPKonto, cMKonto );
+   END IF;
+
+   cShema := rec_koncij.shema;
+   SELECT idvn FROM public.trfp WHERE shema=cShema AND idvd=cIdVd
+     INTO cIdVn;
+
+
+   FOR rec_trfp IN SELECT * FROM public.trfp WHERE shema=cShema AND idvd=cIdVd
+       AND btrim(id)='ZAOKRUZENJE'
+       LIMIT 1
+   LOOP
+
+      cDP := rec_trfp.d_p;
+      IF rec_trfp.idkonto='PKONTO' THEN
+         cIdKonto := cPKonto;
+      ELSE
+         cIdKonto := cMKonto;
+      END IF;
+      nMPVSaPDV := nMpcSaPDV * nKolicina;
+      nMPV := nMPC * nKolicina;
+      nPDV := (nMpcSaPDV - nMPC) * nKolicina;
+      nNV := nNC * nKolicina;
+      nRUCMP := nMPV - nNV;
+      IF rec_trfp.idkonto='PKONTO' THEN
+         cIdKonto := cPKonto;
+      ELSIF rec_trfp.idkonto='MKONTO' THEN
+         cIdKonto := cMKonto;
+      ELSE
+         cIdKonto := rec_trfp.idkonto;
+         cIdKonto := replace( cIdKonto, 'A1', right(trim(cPKonto),1) );
+         cIdKonto := replace( cIdKonto, 'A2', right(trim(cPKonto),2) );
+         cIdKonto := replace( cIdKonto, 'B1', right(trim(cMKonto),1) );
+         cIdKonto := replace( cIdKonto, 'B2', right(trim(cMKonto),2) );
+      END IF;
+
+      cIdKonto := rpad(trim(cIdKonto),7);
+      CASE trim(rec_trfp.id)
+       WHEN 'MPVSAPDV' THEN
+           nIznos := nMPVSaPDV;
+           RAISE INFO '% Kontiranje: MPVSAPDV %', cIdKonto, nIznos;
+       WHEN 'MPV' THEN
+           nIznos := nMPV;
+           RAISE INFO '% Kontiranje: MPV %', cIdKonto, nIznos;
+       WHEN 'PDV' THEN
+           nIznos := nPDV;
+           RAISE INFO '% Kontiranje: PDV %', cIdkonto, nIznos;
+       WHEN 'NV' THEN
+          nIznos := nNV;
+          RAISE INFO '% Kontiranje: NV %', cIdKonto, nIznos;
+       ELSE
+          nIznos := 0;
+      END CASE;
+
+      IF (rec_trfp.znak = '-') THEN
+         nIznos := -nIznos;
+      END IF;
+
+      SELECT * from fmk.fin_nalog
+          where idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
+          INTO rec_nalog;
+      IF rec_nalog IS NULL THEN
+        INSERT INTO fmk.fin_nalog(idfirma, idvn, brnal, korisnik, datnal)
+                  values(cIdFirma, cIdVn, cBrNal, current_user::text, dDatDok);
+      ELSE
+        UPDATE fmk.fin_nalog set datnal=dDatDok, obradjeno=now(), korisnik=current_user::text
+          where idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal;
+      END IF;
+
+      RAISE INFO 'fin_suban seek %-%-% [%]', cIdFirma, cIdVn, cBrNal, cIdKonto;
+      SELECT * from fmk.fin_suban
+          WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and trim(idkonto)=trim(cIdKonto)
+          INTO rec_suban;
+
+      IF rec_suban IS NULL THEN
+           SELECT max(rbr) FROM fmk.fin_suban
+              WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
+              INTO nMaxRbr;
+           nMaxRbr := coalesce( nMaxRbr, 0);
+           INSERT INTO fmk.fin_suban(idfirma,idvn,brnal,idkonto,opis,d_p,iznosbhd,iznosdem,datdok,brdok,rbr)
+              values(cIdFirma, cIdVn, cBrNal, cIdKonto, rec_trfp.naz, cDP, nIznos, public.km_to_euro(nIznos), dDatDok, cBrFaktP, nMaxRbr+1);
+           RAISE INFO 'Kontiranje INSERT %-%-% [%] %', cIdFirma, cIdVn, cBrNal, cIdKonto, nIznos;
+      ELSE
+           UPDATE fmk.fin_suban
+             SET iznosbhd=rec_suban.iznosbhd+nIznos, iznosdem=rec_suban.iznosdem+public.km_to_euro(nIznos)
+             WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal AND trim(idkonto)=trim(cIdKonto);
+           RAISE INFO 'Kontiranje UPDATE [%] % + % = %', cIdKonto, rec_suban.iznosbhd, nIznos, rec_suban.iznosbhd + nIznos;
+      END IF;
+
+   END LOOP;
+
+   IF (nRbr = nRows) THEN
+      RAISE INFO 'ZADNJI RED % - gen_anal_sint % !', nRows, public.kalk_gen_anal_sint(cIdFirma, cIdVn, cBrNal);
+   END IF;
+
+   RETURN 0;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.kalk_gen_anal_sint( cIdFirma varchar, cIdVN varchar, cBrNal varchar) RETURNS integer
 LANGUAGE plpgsql

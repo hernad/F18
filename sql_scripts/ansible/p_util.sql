@@ -396,7 +396,7 @@ BEGIN
       WHERE rtrim(idroba)=rtrim(cIdRoba)
       AND kol_ulaz-kol_izlaz > 0
       AND dat_od<=current_date AND dat_do>=current_date
-      AND ncijena=0  LIMIT 1
+      AND ncijena=0 LIMIT 1
       INTO nCijenaMem, dDatOd, dDatDo;
 
     IF nCijenaMem IS NULL THEN

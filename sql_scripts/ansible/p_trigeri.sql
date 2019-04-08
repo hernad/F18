@@ -67,9 +67,12 @@ ELSIF (TG_OP = 'INSERT') THEN
       END IF;
 
       IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
-         EXECUTE 'UPDATE {{ item_prodavnica }}.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
-           USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
+         IF NEW.idvd <> '21' THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba
+            EXECUTE 'UPDATE {{ item_prodavnica }}.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
+               USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
+         END IF;
       ELSE
+         -- ako artikla uopste nema, onda i 21-ca moze setovati sifru u prodavnica.roba
          EXECUTE 'INSERT INTO {{ item_prodavnica }}.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
            USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
       END IF;
