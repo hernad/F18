@@ -743,7 +743,9 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.kalk_kontiranje(
+DROP FUNCTION IF EXISTS public.kalk_kontiranje;
+
+CREATE OR REPLACE FUNCTION public.kalk_kontiranje_stavka(
   cIdVd varchar, cBrDok varchar, cPKonto varchar, cMKonto varchar,
   cIdRoba varchar, cIdTarifa varchar,
   nRbr integer, nKolicina numeric, nNC numeric, nMPC numeric, nMPCSAPDV numeric,
@@ -800,10 +802,14 @@ BEGIN
      INTO cIdVn;
 
    IF (nRbr = 1) THEN -- prva stavka kalk dokumenta
-      RAISE INFO 'KALK RBR=1 => fin_suban, fin_nalog delete %-%-%', cIdFirma, cIdVn, cBrNal;
+      RAISE INFO 'KALK RBR=1 => fin_suban, fin_nalog, fin_sint, fin_anal delete %-%-%', cIdFirma, cIdVn, cBrNal;
       DELETE FROM fmk.fin_nalog
          WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
       DELETE FROM fmk.fin_suban
+         WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
+      DELETE FROM fmk.fin_anal
+         WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
+      DELETE FROM fmk.fin_sint
          WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
    END IF;
 
@@ -909,7 +915,10 @@ DECLARE
     dDatNal date;
     nIznosDug numeric;
     nIznosPot numeric;
+    cRbr varchar;
+    nCount integer;
 BEGIN
+    nCount := 0;
     FOR rec_suban IN SELECT * FROM fmk.fin_suban
         where idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
         ORDER BY rbr
@@ -924,7 +933,7 @@ BEGIN
           nIznosPot := 0;
         ELSE
           nIznosDug := 0;
-          nIznosPot := rec_suba.iznosbhd;
+          nIznosPot := rec_suban.iznosbhd;
         END IF;
 
         -- analitika
@@ -936,11 +945,14 @@ BEGIN
               WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
             INTO nMaxRbr;
             nMaxRbr := coalesce( nMaxRbr, 0);
+            cRbr := lpad(btrim(to_char(nMaxRbr+1,'9999')), 4, ' ');
+            RAISE INFO 'anal INSERT % % dug=% pot=%', cRbr, trim(rec_suban.idkonto), nIznosDug, nIznosPot;
             INSERT INTO fmk.fin_anal(idfirma,idvn,brnal,idkonto,dugbhd,potbhd,dugdem,potdem,datnal,rbr)
-               values(cIdFirma, cIdVn, cBrNal, rec_suban.idkonto, nIznosDug, nIznosPot, public.km_to_euro(nIznosDug),public.km_to_euro(nIznosPot), dDatNal, to_char(nMaxRbr+1,'9999'));
+               values(cIdFirma, cIdVn, cBrNal, trim(rec_suban.idkonto), nIznosDug, nIznosPot, public.km_to_euro(nIznosDug),public.km_to_euro(nIznosPot), dDatNal, cRbr);
         ELSE
+           RAISE INFO 'anal UPDATE % dug=% pot=%', trim(rec_suban.idkonto), nIznosDug, nIznosPot;
            UPDATE fmk.fin_anal
-              SET dugbhd=dugbhd + nIznosDug, pobhd=potbhd + nIznosPot, dugdem=dugdem + public.km_to_euro(nIznosDug), potdem=potdem + public.km_to_euro(nIznosPot)
+              SET dugbhd=rec_anal.dugbhd + nIznosDug, potbhd=rec_anal.potbhd + nIznosPot, dugdem=rec_anal.dugdem + public.km_to_euro(nIznosDug), potdem=rec_anal.potdem + public.km_to_euro(nIznosPot)
               WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal AND trim(idkonto)=trim(rec_suban.idkonto);
 
         END IF;
@@ -953,20 +965,50 @@ BEGIN
            WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and left(idkonto,3)=left(rec_suban.idkonto,3)
         INTO rec_sint;
         IF rec_sint IS NULL THEN
-            SELECT max(to_number(rbr, '9999')) FROM fmk.fin_anal
+            SELECT max(to_number(rbr, '9999')) FROM fmk.fin_sint
               WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
             INTO nMaxRbr;
             nMaxRbr := coalesce( nMaxRbr, 0);
+            cRbr := lpad(btrim(to_char(nMaxRbr+1,'9999')), 4, ' ');
+            RAISE INFO 'sint INSERT % % dug=% pot=%', cRbr, left(rec_suban.idkonto,3), nIznosDug, nIznosPot;
             INSERT INTO fmk.fin_sint(idfirma,idvn,brnal,idkonto,dugbhd,potbhd,dugdem,potdem,datnal,rbr)
-               values(cIdFirma, cIdVn, cBrNal, left(rec_suban.idkonto,3), nIznosDug, nIznosPot, public.km_to_euro(nIznosDug),public.km_to_euro(nIznosPot), dDatNal, to_char(nMaxRbr+1,'9999'));
+               values(cIdFirma, cIdVn, cBrNal, left(rec_suban.idkonto,3), nIznosDug, nIznosPot, public.km_to_euro(nIznosDug),public.km_to_euro(nIznosPot), dDatNal, cRbr);
         ELSE
+           RAISE INFO 'sint UPDATE % dug=% pot=%', left(rec_suban.idkonto,3), nIznosDug, nIznosPot;
            UPDATE fmk.fin_sint
-              SET dugbhd=dugbhd + nIznosDug, pobhd=potbhd + nIznosPot, dugdem=dugdem + public.km_to_euro(nIznosDug), potdem=potdem + public.km_to_euro(nIznosPot)
+              SET dugbhd=rec_sint.dugbhd + nIznosDug, potbhd=rec_sint.potbhd + nIznosPot, dugdem=rec_sint.dugdem + public.km_to_euro(nIznosDug), potdem=rec_sint.potdem + public.km_to_euro(nIznosPot)
               WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal AND left(idkonto,3)=left(rec_suban.idkonto,3);
 
         END IF;
+
+        nCount := nCount + 1;
     END LOOP;
 
-    RETURN 0;
+    RETURN nCount;
+END;
+$$;
+
+-- DROP FUNCTION IF EXISTS public.kalk_kontiranje(character varying,character varying,character varying);
+
+CREATE OR REPLACE FUNCTION public.kalk_kontiranje( cIdFirma varchar, cIdVD varchar, cBrDok varchar) RETURNS integer
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    rec_kalk RECORD;
+    nCount integer;
+BEGIN
+   nCount := 0;
+   FOR rec_kalk IN select * from kalk_kalk
+      WHERE idfirma=cIdFirma AND idvd=cIdVD AND brdok=cBrDok
+   LOOP
+       PERFORM public.kalk_kontiranje_stavka(
+         rec_kalk.idvd, rec_kalk.brdok, rec_kalk.pkonto, rec_kalk.mkonto,
+         rec_kalk.idroba, rec_kalk.idtarifa,
+         rec_kalk.rbr, rec_kalk.kolicina, rec_kalk.nc, rec_kalk.mpc, rec_kalk.mpcsapp,
+         rec_kalk.datdok, rec_kalk.brfaktp
+       );
+       nCount := nCount + 1;
+  END LOOP;
+  RETURN nCount;
 END;
 $$;
