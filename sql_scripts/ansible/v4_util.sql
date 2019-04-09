@@ -898,6 +898,7 @@ BEGIN
    END LOOP;
 
    IF (nRbr = nRows) THEN
+      -- ako je potrebno prvo zatvoriti zaokruzenje
       PERFORM public.kalk_kontiranje_stavka_zaokruzenje( cIdVd, cBrDok, cPKonto, cMKonto );
       RAISE INFO 'ZADNJI RED % - gen_anal_sint % !', nRows, public.fin_gen_anal_sint(cIdFirma, cIdVn, cBrNal);
    END IF;

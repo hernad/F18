@@ -23,14 +23,14 @@ DECLARE
     cProdShema varchar;
 BEGIN
 
---IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
---      PERFORM public.kalk_kontiranje(
---        NEW.idvd, NEW.brdok, NEW.pkonto, NEW.mkonto,
---        NEW.idroba, NEW.idtarifa,
---        NEW.rbr, NEW.kolicina, NEW.nc, NEW.mpc, NEW.mpcsapp,
---        NEW.datdok, NEW.brfaktp
---      );
---END IF;
+IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
+      PERFORM public.kalk_kontiranje_stavka(
+        NEW.idvd, NEW.brdok, NEW.pkonto, NEW.mkonto,
+        NEW.idroba, NEW.idtarifa,
+        NEW.rbr, NEW.kolicina, NEW.nc, NEW.mpc, NEW.mpcsapp,
+        NEW.datdok, NEW.brfaktp
+      );
+END IF;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
    IF ( NOT NEW.idvd IN ('02','19','21','72','79','80') ) THEN
