@@ -463,7 +463,7 @@ FUNCTION CentrTxt( tekst, lin )
 
 FUNCTION box_crno_na_zuto( v1, h1, v2, h2, cNaslov, cBojaN, cOkvir, cBojaO, cBojaT, nKursor )
 
-   LOCAL _device := Set( _SET_DEVICE )
+   LOCAL cOutputDevice := Set( _SET_DEVICE )
 
    SET DEVICE TO SCREEN
 
@@ -489,7 +489,7 @@ FUNCTION box_crno_na_zuto( v1, h1, v2, h2, cNaslov, cBojaN, cOkvir, cBojaO, cBoj
       @ v1, ( h2 + h1 + -1 - Len( cNaslov ) ) / 2 SAY " " + cNaslov + " " COLOR cBojaN
    ENDIF
 
-   Set( _SET_DEVICE, _device )
+   Set( _SET_DEVICE, cOutputDevice )
 
    RETURN .T.
 
@@ -498,14 +498,14 @@ FUNCTION box_crno_na_zuto( v1, h1, v2, h2, cNaslov, cBojaN, cOkvir, cBojaO, cBoj
 FUNCTION box_crno_na_zuto_end()
 
    LOCAL aStack := StackPop( s_aProzorFunkcijeStek )
-   LOCAL _device := Set( _SET_DEVICE )
+   LOCAL cOutputDevice := Set( _SET_DEVICE )
 
    SET DEVICE TO SCREEN
    RestScreen( aStack[ 3 ], aStack[ 4 ], aStack[ 5 ], aStack[ 6 ], aStack[ 7 ] )
    SetColor( aStack[ 8 ] )
    SetCursor( aStack[ 9 ] )
    @ aStack[ 1 ], aStack[ 2 ] SAY ""
-   Set( _SET_DEVICE, _device )
+   Set( _SET_DEVICE, cOutputDevice )
 
    RETURN .T.
 

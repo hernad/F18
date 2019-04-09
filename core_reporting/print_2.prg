@@ -19,6 +19,7 @@ THREAD STATIC s_xPrintOpt
 THREAD STATIC s_cColor
 
 STATIC s_nDodatniRedoviPoStranici
+STATIC s_lConsole, s_cDevice, s_cPrinterFile, s_lPrinter
 
 
 FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
@@ -67,14 +68,14 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    MsgO( "Priprema " + iif( cOpt == "PDF", "PDF", "tekst" ) + " izvještaja ..." )
 
    LOG_CALL_STACK cLogMsg
+
    SetPRC( 0, 0 )
-   SET CONSOLE OFF
 
-   SET PRINTER OFF
-   SET DEVICE TO PRINTER
-
-   SET PRINTER TO ( cFileName )
-   SET PRINTER ON
+   s_lConsole := Set( _SET_CONSOLE, .F. )
+   // SET PRINTER OFF
+   s_cDevice := Set( _SET_DEVICE, "PRINTER" )
+   s_cPrinterFile := Set( _SET_PRINTFILE, cFileName )
+   s_lPrinter := Set( _SET_PRINTER, .T. )
 
    IF cOpt != "PDF"
       GpIni( cDocumentName )
@@ -134,12 +135,17 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    LOCAL nRet
    LOCAL cCommand := ""
    LOCAL cKom
-   LOCAL _port
+   LOCAL cPrinterPort
    LOCAL cOpt
    LOCAL oPDF
 
+   IF cOpt == "PDF"
+      // hb_cdpSelect( "SLWIN" )
+      oPDF:End()
+   ENDIF
+
    hb_cdpSelect( "SL852" )
-   hb_SetTermCP( "SLISO" )
+   // hb_SetTermCP( "SLISO" )
 
    IF xPrintOpt == NIL  // poziv bez parametara
       xPrintOpt := s_xPrintOpt
@@ -160,19 +166,24 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       ENDIF
    ENDIF
 
-   _port := get_printer_port( cOpt )
+   cPrinterPort := get_printer_port( cOpt )
    cFileName := txt_print_file_name( cFileName )
 
-   SET DEVICE TO SCREEN
-   SET PRINTER OFF
-   SET PRINTER TO
-   SET CONSOLE ON
+   // SET DEVICE TO SCREEN
+   // SET PRINTER OFF
+   // SET PRINTER TO
+   // SET CONSOLE ON
+   Set( _SET_CONSOLE, s_lConsole )
+   Set( _SET_DEVICE, s_cDevice )
+   Set( _SET_PRINTFILE, s_cPrinterFile )
+   Set( _SET_PRINTER, s_lPrinter  )
 
    MsgC()
 
-   f18_tone( 440, 2 )
-   f18_tone( 440, 2 )
 
+
+   f18_tone( 440, 2 )
+   f18_tone( 440, 2 )
 
 
    DO CASE
@@ -181,21 +192,16 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       // priprema za email
 
    CASE cOpt == "P"
-
       txt_izvjestaj_podrska_email( cFileName )
 
    CASE cOpt $ "E#F#G" // direct print
-
       IF is_windows()
-         direct_print_windows( cFileName, _port )
+         direct_print_windows( cFileName, cPrinterPort )
       ELSE
-         direct_print_unix( cFileName, _port )
+         direct_print_unix( cFileName, cPrinterPort )
       ENDIF
 
    CASE cOpt == "PDF"
-
-      hb_cdpSelect( "SLWIN" )
-      oPDF:End()
 
       oPDF := PDFClass():New()
       IF xPrintOpt[ "layout" ] == "portrait"
@@ -215,8 +221,7 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       oPDF:End()
 
       hb_cdpSelect( "SL852" )
-      hb_SetTermCP( "SLISO" )
-
+      // hb_SetTermCP( "SLISO" )
       oPDF:View()
 
    CASE cOpt == "R"
@@ -229,7 +234,6 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    OTHERWISE
 
       nRet := f18_editor( cFileName )
-
       IF nRet <> 0
          MsgBeep ( "f18_editor (" + cFileName + ") ERROR ?!" )
       ENDIF
@@ -287,48 +291,48 @@ FUNCTION end_print( xPrintOpt )
 
 STATIC FUNCTION get_printer_port( xPrintOpt )
 
-   LOCAL _port := "1"
+   LOCAL cPrinterPort := "1"
 
    DO CASE
    CASE xPrintOpt == "E"
-      _port := "1"
+      cPrinterPort := "1"
    CASE xPrintOpt == "F"
-      _port := "2"
+      cPrinterPort := "2"
    CASE xPrintOpt == "G"
-      _port := "3"
+      cPrinterPort := "3"
    ENDCASE
 
-   RETURN _port
+   RETURN cPrinterPort
 
 
 STATIC FUNCTION direct_print_unix( cFileName, cPrinterPortNumber )
 
    LOCAL cCommand
    LOCAL _printer := "epson"
-   LOCAL _printer_name
-   LOCAL _err
+   LOCAL cPrinterName
+   LOCAL nError
 
    IF cPrinterPortNumber == NIL
       cPrinterPortNumber := "1"
    ENDIF
 
-   _printer_name := _printer + "_" + cPrinterPortNumber
+   cPrinterName := _printer + "_" + cPrinterPortNumber
 
-   cCommand := "lpq -P " + _printer_name + " | grep " + _printer_name
+   cCommand := "lpq -P " + cPrinterName + " | grep " + cPrinterName
 
-   _err := f18_run( cCommand )
-   IF _err <> 0
-      MsgBeep( "Printer " + _printer_name + " nije podešen !" )
+   nError := f18_run( cCommand )
+   IF nError <> 0
+      MsgBeep( "Printer " + cPrinterName + " nije podešen !" )
       RETURN .F.
    ENDIF
 
    cCommand := "lpr -P "
-   cCommand += _printer_name + " "
+   cCommand += cPrinterName + " "
    cCommand += cFileName
 
-   _err := f18_run( cCommand )
+   nError := f18_run( cCommand )
 
-   IF _err <> 0
+   IF nError <> 0
       MsgBeep( "Greška sa direktnom štampom !" )
    ENDIF
 
@@ -338,7 +342,7 @@ STATIC FUNCTION direct_print_unix( cFileName, cPrinterPortNumber )
 STATIC FUNCTION direct_print_windows( cFileName, cPrinterPortNumber )
 
    LOCAL cCommand
-   LOCAL _err
+   LOCAL nError
 
    IF cPrinterPortNumber == NIL
       cPrinterPortNumber := "1"
@@ -347,9 +351,9 @@ STATIC FUNCTION direct_print_windows( cFileName, cPrinterPortNumber )
    cFileName := file_path_quote( cFileName )
 
    cCommand := "copy " + cFileName + " LPT" + cPrinterPortNumber
-   _err := hb_run( cCommand ) // ovaj antikvitet koriste knjigovodstveni servisi
+   nError := hb_run( cCommand ) // ovaj antikvitet koriste knjigovodstveni servisi
 
-   IF _err <> 0
+   IF nError <> 0
       MsgBeep( "Greška sa direktnom štampom !?##" + cCommand )
    ENDIF
 

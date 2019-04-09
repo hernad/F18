@@ -27,6 +27,10 @@ CREATE CLASS PDFClass
    VAR    cEmbeddedFontName
    VAR    nXScale           INIT 1
    VAR    nYScale           INIT 1
+   VAR    lConsole
+   VAR    cPrinter
+   VAR    cDevice
+
    METHOD AddPage()
    METHOD RowToPDFRow( nRow )
    METHOD ColToPDFCol( nCol )
@@ -64,8 +68,9 @@ METHOD BEGIN() CLASS PDFClass
       IF Empty( ::cFileName )
          ::cFileName := MyTempFile( "LST" )
       ENDIF
-      SET PRINTER TO ( ::cFileName )
-      SET DEVICE TO PRINT
+      ::cPrinter := Set( _SET_PRINTER, ::cFileName )
+      ::cDevice := Set( _SET_DEVICE, "PRINTER" )
+      ::lConsole := Set( _SET_CONSOLE )
    ELSE
       IF Empty( ::cFileName )
          ::cFileName := MyTempFile( "PDF" )
@@ -90,9 +95,9 @@ METHOD BEGIN() CLASS PDFClass
 METHOD END() CLASS PDFClass
 
    IF ::nType == PDF_TXT_PORTRAIT .OR. ::nType == PDF_TXT_LANDSCAPE
-      SET DEVICE TO SCREEN
-      SET PRINTER TO
-
+      Set( _SET_PRINTER, ::cPrinter )
+      Set( _SET_DEVICE, ::cDevice )
+      Set( _SET_CONSOLE, ::lConsole )
    ELSE
       IF File( ::cFileName )
          FErase( ::cFileName )
@@ -435,14 +440,14 @@ METHOD PrnToPdf( cInputFile ) CLASS PDFClass
          DO WHILE At( hb_eol(), cTxtPage ) != 0
             cTxtLine := SubStr( cTxtPage, 1, At( hb_eol(), cTxtPage ) - 1 )
             cTxtPage := SubStr( cTxtPage, At( hb_eol(), cTxtPage ) + 1 )
-            nLineLength := LEN(cTxtLine)
-            //::DrawText( nRow, 0, Replicate( " ", ::nLeftSpace + nLineLength ), cPicture, nFontSize, cFontName, nAngle, aNRGB  )
-            //IF nRow % 2 == 0
-               //aTmp := NIL
-            //ELSE
-               //aTmp := aNRGB
-               //::DrawRectangle( nRow, 0,  HPDF_Page_GetWidth( ::oPage ), ::nFontSize, 0, NIL, aNRGB)
-            //ENDIF
+            nLineLength := Len( cTxtLine )
+            // ::DrawText( nRow, 0, Replicate( " ", ::nLeftSpace + nLineLength ), cPicture, nFontSize, cFontName, nAngle, aNRGB  )
+            // IF nRow % 2 == 0
+            // aTmp := NIL
+            // ELSE
+            // aTmp := aNRGB
+            // ::DrawRectangle( nRow, 0,  HPDF_Page_GetWidth( ::oPage ), ::nFontSize, 0, NIL, aNRGB)
+            // ENDIF
             ::DrawText( nRow++, 0, Space( ::nLeftSpace ) + cTxtLine, cPicture, nFontSize, cFontName, nAngle, NIL )
          ENDDO
       ENDIF

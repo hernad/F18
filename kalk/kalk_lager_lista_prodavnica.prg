@@ -765,12 +765,13 @@ STATIC FUNCTION kalk_prodavnica_llp_odt( hParamsOdt )
 
 STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
-   LOCAL _idfirma := hParamsOdt[ "idfirma" ]
+   LOCAL cIdFirma := hParamsOdt[ "idfirma" ]
    LOCAL cIdKonto := hParamsOdt[ "idkonto" ]
-   LOCAL cIdroba, nMpc, _mpcs
-   LOCAL _ulaz, _izlaz, _nv_u, _nv_i, _mpv_u, _mpv_i, _rabat
+   LOCAL cIdroba, nMpc, nMpcSif
+   LOCAL nUlaz, nIzlaz, _nv_u, _nv_i, _mpv_u, _mpv_i, _rabat
    LOCAL _t_ulaz, _t_izlaz, _t_nv_u, _t_nv_i, _t_mpv_u, _t_mpv_i, _t_rabat
    LOCAL _rbr := 0
+   LOCAL nNC
 
    select_o_konto( hParamsOdt[ "idkonto" ] )
    _t_ulaz := _t_izlaz := _t_nv_u := _t_nv_i := 0
@@ -791,21 +792,21 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
    SELECT kalk
 
-   DO WHILE !Eof() .AND. _idfirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. IspitajPrekid()
 
       cIdroba := kalk->Idroba
       select_o_roba( cIdroba )
 
       SELECT kalk
 
-      _ulaz := 0
-      _izlaz := 0
+      nUlaz := 0
+      nIzlaz := 0
       _nv_u := 0
       _nv_i := 0
       _mpv_u := 0
       _mpv_i := 0
       _rabat := 0
-      DO WHILE !Eof() .AND. _idfirma + cIdKonto + cIdroba == kalk->idfirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + cIdKonto + cIdroba == kalk->idfirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
 
          IF kalk->datdok < hParamsOdt[ "datum_od" ] .OR. kalk->datdok > hParamsOdt[ "datum_do" ]
             SKIP
@@ -815,17 +816,17 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
          IF kalk->datdok >= hParamsOdt[ "datum_od" ]
             // nisu predhodni podaci
             IF kalk->pu_i == "1"
-               kalk_sumiraj_kolicinu( kalk->kolicina, 0, @_ulaz, 0, .F., .F. )
+               kalk_sumiraj_kolicinu( kalk->kolicina, 0, @nUlaz, 0, .F., .F. )
                _mpv_u += kalk->mpcsapp * kalk->kolicina
                _nv_u += kalk->nc * ( kalk->kolicina )
 
             ELSEIF kalk->pu_i == "5"
                IF kalk->idvd $ "12#13"
-                  kalk_sumiraj_kolicinu( - ( kalk->kolicina ), 0, @_ulaz, 0, .F., .F. )
+                  kalk_sumiraj_kolicinu( - ( kalk->kolicina ), 0, @nUlaz, 0, .F., .F. )
                   _mpv_u -= kalk->mpcsapp * kalk->kolicina
                   _nv_u -= kalk->nc * kalk->kolicina
                ELSE
-                  kalk_sumiraj_kolicinu( 0, kalk->kolicina, 0, @_izlaz, .F., .F. )
+                  kalk_sumiraj_kolicinu( 0, kalk->kolicina, 0, @nIzlaz, .F., .F. )
                   _mpv_i += kalk->mpcsapp * kalk->kolicina
                   _nv_i += kalk->nc * kalk->kolicina
                ENDIF
@@ -834,7 +835,7 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
                // nivelacija
                _mpv_u += kalk->mpcsapp * kalk->kolicina
             ELSEIF kalk->pu_i == "I"
-               kalk_sumiraj_kolicinu( 0, kalk->gkolicin2, 0, @_izlaz, .F., .F. )
+               kalk_sumiraj_kolicinu( 0, kalk->gkolicin2, 0, @nIzlaz, .F., .F. )
                _mpv_i += kalk->mpcsapp * kalk->gkolicin2
                _nv_i += kalk->nc * kalk->gkolicin2
             ENDIF
@@ -849,7 +850,7 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
          select_o_koncij( cIdKonto )
          select_o_roba( cIdroba )
-         _mpcs := kalk_get_mpc_by_koncij_pravilo()
+         nMpcSif := kalk_get_mpc_by_koncij_pravilo()
 
          SELECT kalk
 
@@ -860,9 +861,9 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
          xml_node( "barkod", to_xml_encoding( AllTrim( roba->barkod ) ) )
          xml_node( "tar", to_xml_encoding( AllTrim( roba->idtarifa ) ) )
          xml_node( "jmj", to_xml_encoding( AllTrim( roba->jmj ) ) )
-         xml_node( "ulaz", Str( _ulaz, 12, 3 ) )
-         xml_node( "izlaz", Str( _izlaz, 12, 3 ) )
-         xml_node( "stanje", Str( _ulaz - _izlaz, 12, 3 ) )
+         xml_node( "ulaz", Str( nUlaz, 12, 3 ) )
+         xml_node( "izlaz", Str( nIzlaz, 12, 3 ) )
+         xml_node( "stanje", Str( nUlaz - nIzlaz, 12, 3 ) )
          xml_node( "nvu", Str( _nv_u, 12, 3 ) )
          xml_node( "nvi", Str( _nv_i, 12, 3 ) )
          xml_node( "nv", Str( _nv_u - _nv_i, 12, 3 ) )
@@ -870,27 +871,27 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
          xml_node( "mpvi", Str( _mpv_i, 12, 3 ) )
          xml_node( "mpv", Str( _mpv_u - _mpv_i, 12, 3 ) )
          xml_node( "rabat", Str( _rabat, 12, 3 ) )
-         xml_node( "mpcs", Str( _mpcs, 12, 3 ) )
+         xml_node( "mpcs", Str( nMpcSif, 12, 3 ) )
 
-         IF Round( _ulaz - _izlaz, 3 ) <> 0
-            nMpc := Round( ( _mpv_u - _mpv_i ) / ( _ulaz - _izlaz ), 3 )
-            _nc := Round( ( _nv_u - _nv_i ) / ( _ulaz - _izlaz ), 3 )
+         IF Round( nUlaz - nIzlaz, 3 ) <> 0
+            nMpc := Round( ( _mpv_u - _mpv_i ) / ( nUlaz - nIzlaz ), 3 )
+            nNC := Round( ( _nv_u - _nv_i ) / ( nUlaz - nIzlaz ), 3 )
          ELSE
             nMpc := 0
-            _nc := 0
+            nNC := 0
          ENDIF
 
          xml_node( "mpc", Str( Round( nMpc, 3 ), 12, 3 ) )
-         xml_node( "nc", Str( Round( _nc, 3 ), 12, 3 ) )
+         xml_node( "nc", Str( Round( nNC, 3 ), 12, 3 ) )
 
-         IF ( _mpcs <> nMpc )
+         IF ( nMpcSif <> nMpc )
             xml_node( "err", "ERR" )
          ELSE
             xml_node( "err", "" )
          ENDIF
 
-         _t_ulaz += _ulaz
-         _t_izlaz += _izlaz
+         _t_ulaz += nUlaz
+         _t_izlaz += nIzlaz
          _t_mpv_u += _mpv_u
          _t_mpv_i += _mpv_i
          _t_nv_u += _nv_u
