@@ -885,8 +885,8 @@ BEGIN
               WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
               INTO nMaxRbr;
            nMaxRbr := coalesce( nMaxRbr, 0);
-           INSERT INTO fmk.fin_suban(idfirma,idvn,brnal,idkonto,opis,d_p,iznosbhd,iznosdem,datdok,brdok,rbr)
-              values(cIdFirma, cIdVn, cBrNal, cIdKonto, rec_trfp.naz, cDP, nIznos, public.km_to_euro(nIznos), dDatDok, cBrFaktP, nMaxRbr+1);
+           INSERT INTO fmk.fin_suban(idfirma,idvn,brnal,idkonto,opis,d_p,iznosbhd,iznosdem,idpartner,datdok,brdok,rbr)
+              values(cIdFirma, cIdVn, cBrNal, cIdKonto, rec_trfp.naz, cDP, nIznos, public.km_to_euro(nIznos),'',dDatDok, cBrFaktP, nMaxRbr+1);
            RAISE INFO 'Kontiranje INSERT %-%-% [%] %', cIdFirma, cIdVn, cBrNal, cIdKonto, nIznos;
       ELSE
            UPDATE fmk.fin_suban
