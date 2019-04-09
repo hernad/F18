@@ -1,5 +1,10 @@
 # F18 klijent, lista promjena
 
+
+## 2019-04-09
+
+-  POS 21 - bez cijena
+
 ## 2019-04-05
 
 -  KALK 11 fix gkolicin2 22->11 BUG

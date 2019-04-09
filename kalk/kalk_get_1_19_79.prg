@@ -74,8 +74,8 @@ FUNCTION kalk_get_1_19_79()
    IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE .OR. _idvd == POS_IDVD_AKCIJSKE_CIJENE
       @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "Važi za period:" GET _dat_od WHEN {|| _dat_od := iif( Empty( _dat_od ), Date(), _dat_od ), .T. }
       @ Row(), Col() + 2  SAY8 "do" GET _dat_do ;
-         WHEN {|| _dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ), .T. } ;
-         VALID {|| Empty( _dat_do ) .OR. _dat_do >= _dat_od }
+         WHEN {|| /*_dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ),*/ .T. } ;
+         VALID {|| ( Empty( _dat_do ) .AND. _idvd == POS_IDVD_AKCIJSKE_CIJENE ) .OR. _dat_do >= _dat_od }
    ELSE
       _dat_od := _datdok
       _dat_do := CToD( "" )
@@ -134,7 +134,7 @@ FUNCTION kalk_get_1_19_79()
    _TMarza2 := "A"
    _MKonto := ""
    _MU_I := ""
-   IF _idvd == POS_IDVD_AKCIJSKE_CIJENE
+   IF _idvd == POS_IDVD_AKCIJSKE_CIJENE .OR. _idvd == POS_IDVD_ODOBRENO_SNIZENJE
       _error := "0"
    ENDIF
 

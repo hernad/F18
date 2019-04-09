@@ -62,6 +62,9 @@ FUNCTION pos_stampa_zaduzenja( hParams )
    ?? "  Broj fakture:", hParams[ "brfaktp" ]
    ?  "Opis:", _u( hParams[ "opis" ] )
 
+   IF hParams[ "idvd" ] == POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+      ? "Ovaj dokument predstavlja osnovu za formiranje dokumenta 22. Cijene i iznosi su vidljivi na 22-" + AllTrim( hParams[ "brdok" ] )
+   ENDIF
    aLines := get_pos_linija_podvuci( hParams[ "idvd" ], nRobaNazivSirina, cPicKol, cPicIzn )
    cLine := aLines[ 1 ]
    cLine2 := aLines[ 2 ]
@@ -82,16 +85,24 @@ FUNCTION pos_stampa_zaduzenja( hParams )
       ?  cLM + PRIPRZ->IdRoba + " "
       ?? PadR( AllTrim( roba->Naz ), nRobaNazivSirina - 1 ) + "  "
       ?? roba->Jmj + " "
-      IF hParams[ "idvd" ] == "90"
+      IF hParams[ "idvd" ] == POS_IDVD_INVENTURA
          ?? TRANS( PRIPRZ->kol2, cPicKol ) + " "
          ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
          ?? TRANS( PRIPRZ->Kolicina - PRIPRZ->Kol2, cPicKol ) + " "
       ELSE
          ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
       ENDIF
-      ?? TRANS( PRIPRZ->Cijena, cPicIzn ) + " "
+      IF hParams[ "idvd" ] == POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+         ?? Space( Len( cPicIzn ) ) + " "
+      ELSE
+         ?? TRANS( PRIPRZ->Cijena, cPicIzn ) + " "
+      ENDIF
       nCol := PCol() - 1
-      IF hParams[ "idvd" ] == "90"
+      IF hParams[ "idvd" ] == POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+         ?? Space( Len( cPicIzn ) )
+         nFinZad += 0
+
+      ELSEIF hParams[ "idvd" ] == POS_IDVD_INVENTURA
          ?? TRANS( ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->cijena, cPicIzn )
          nFinZad += ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->Cijena
          pos_setuj_tarife( PRIPRZ->IdRoba, ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->Cijena, @aTarife )
@@ -105,12 +116,14 @@ FUNCTION pos_stampa_zaduzenja( hParams )
 
    ?U cLine2
 
-   ?U cLM
-   ?? "    UKUPNO:"
-   @ PRow(), nCol SAY TRANS( nFinZad, cPicIzn )
-   ?U cLine2
-   ?
+   IF hParams[ "idvd" ] <> POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+      ?U cLM
+      ?? "    UKUPNO:"
+      @ PRow(), nCol SAY TRANS( nFinZad, cPicIzn )
+      ?U cLine2
+   ENDIF
 
+   ?
    check_nova_strana( bZagl, s_oPDF, .F., 5 )
    pos_rekapitulacija_tarifa( aTarife )
 
