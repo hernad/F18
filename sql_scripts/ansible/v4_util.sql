@@ -778,6 +778,9 @@ BEGIN
    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
    cIdFirma := trim( cIdFirma );
    cBrNal := cBrDok;
+   cBrFaktP := coalesce(cBrFaktP, '');
+   cPKonto := coalesce(cPKonto, '');
+   cMKonto := coalesce(cMKonto, '');
 
    SELECT * from koncij where trim(id)=public.kalk_glavni_konto( cIdVd, cPKonto, cMKonto )
        INTO rec_koncij;
