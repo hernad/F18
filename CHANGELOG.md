@@ -4,7 +4,7 @@
 ## 2019-04-09
 
 -  POS 21 - bez cijena
--  cleanup pdf print
+-  cleanup pdf print /2
 
 ## 2019-04-05
 
