@@ -48,6 +48,7 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    AAdd( ImeKol, { "Broj ", {|| pos_doks_2->brdok } } )
    AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna_str( pos_doks_2->IdPos, pos_doks_2->IdVd, pos_doks_2->datum, pos_doks_2->brdok ) } } )
    AAdd( ImeKol, { "Datum", {|| pos_doks_2->datum } } )
+   AAdd( ImeKol, { "Vrijeme", {|| pos_doks_2->vrijeme } } )
    AAdd( ImeKol, { "VP", {|| pos_doks_2->IdVrsteP } } )
    AAdd( ImeKol, { PadC( "Iznos", 10 ), {|| pos_browse_iznos_dokumenta() } } )
    AAdd( ImeKol, { "Radnik", {|| pos_doks_2->IdRadnik } } )
@@ -66,7 +67,7 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    ENDIF
 
    my_browse( "pos_doks", f18_max_rows() - 10, f18_max_cols() - 15, ;  // params cImeBoxa, xw, yw
-      {|| pos_stampa_dokumenta_key_handler( dDatOd, dDatDo ) }, _u( "  ŠTAMPA AŽURIRANOG DOKUMENTA  " ), "POS", ; // bUserF, cMessTop, cMessBot
+      {|| pos_stampa_dokumenta_key_handler( dDatOd, dDatDo ) }, _u( "PREGLED AŽURIRANIH DOKUMENTA  " ), "POS", ; // bUserF, cMessTop, cMessBot
       .F., aOpc ) // lInvert, aMessage
 
    CLOSE ALL

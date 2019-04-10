@@ -561,3 +561,23 @@ BEGIN
    RETURN;
 END;
 $$;
+
+DROP FUNCTION IF EXISTS {{ item_prodavnica }}.pos_21_neobradjeni_dokumenti();
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_21_neobradjeni_dokumenti() RETURNS TABLE(brdok varchar, datum date, brfaktp varchar, storno boolean, opis varchar )
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  cIdFirma varchar;
+  nRet integer;
+BEGIN
+
+    RETURN QUERY select p21.brdok::varchar, p21.datum::date, p21.brfaktp::varchar, (items.kolicina<0) as storno, p21.opis from {{ item_prodavnica }}.pos p21
+        left join {{ item_prodavnica }}.pos p22
+        on p22.ref=p21.dok_id
+        left join {{ item_prodavnica }}.pos_items items
+        on p21.dok_id = items.dok_id and items.rbr = 1
+        where p21.idvd='21' and p22.brfaktp IS null;
+
+END;
+$$;

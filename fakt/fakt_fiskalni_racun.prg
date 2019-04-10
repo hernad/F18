@@ -42,9 +42,9 @@ FUNCTION param_racun_na_email( read_par )
 FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDeviceParams )
 
    LOCAL nErrorLevel := 0
-   LOCAL _dev_drv
+   LOCAL cFiskalniDrajver
    LOCAL nStorno := 0
-   LOCAL aRacunStavkeData, _partn_data
+   LOCAL aRacunStavkeData, aPartnerData
    LOCAL _cont := "1"
    LOCAL lRacunBezgBezPartnera
 
@@ -65,12 +65,12 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
    ENDIF
 
    s_hFiskalniParams := hDeviceParams
-   _dev_drv := AllTrim( hDeviceParams[ "drv" ] )
+   cFiskalniDrajver := AllTrim( hDeviceParams[ "drv" ] )
    lRacunBezgBezPartnera := ( hDeviceParams[ "vp_no_customer" ] == "D" )
 
-   __DRV_CURRENT := _dev_drv
+   __DRV_CURRENT := cFiskalniDrajver
 
-   IF postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, _dev_drv )
+   IF postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, cFiskalniDrajver )
       MsgBeep( "Za dokument " + cIdFirma + "-" + cIdTipDok + "-" + AllTrim( cBrDok ) + " već postoji izdat fiskalni račun !" )
       RETURN nErrorLevel
    ENDIF
@@ -88,12 +88,12 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
       ENDIF
    ENDIF
 
-   _partn_data := fakt_fiscal_podaci_partnera( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), lRacunBezgBezPartnera )
-   IF ValType( _partn_data ) == "L"
+   aPartnerData := fakt_fiscal_podaci_partnera( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), lRacunBezgBezPartnera )
+   IF ValType( aPartnerData ) == "L"
       RETURN 1
    ENDIF
 
-   aRacunStavkeData := fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), _partn_data )
+   aRacunStavkeData := fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), aPartnerData )
 
    IF ValType( aRacunStavkeData ) == "L"  .OR. aRacunStavkeData == NIL
       RETURN 1
@@ -101,45 +101,38 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
 
    DO CASE
 
-   CASE _dev_drv == "TEST"
+   CASE cFiskalniDrajver == "TEST"
       nErrorLevel := 0
 
-   CASE _dev_drv == s_cFiskalniDrajverFPRINT
-      nErrorLevel := fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
+   CASE cFiskalniDrajver == s_cFiskalniDrajverFPRINT
+      nErrorLevel := fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, aPartnerData, ( nStorno == 1 ) )
 
-   CASE _dev_drv == s_cFiskalniDrajverTremol
-      _cont := "1"
-      nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ), _cont )
+   CASE cFiskalniDrajver == s_cFiskalniDrajverTremol
 
-   CASE _dev_drv == s_cFiskalniDrajverHCP
-      nErrorLevel := fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
+      nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, aPartnerData, ( nStorno == 1 ) )
 
-   CASE _dev_drv == s_cFiskalniDrajverFLINK
-      nErrorLevel := fakt_to_flink( s_hFiskalniParams, cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
+   CASE cFiskalniDrajver == s_cFiskalniDrajverHCP
+      nErrorLevel := fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, aPartnerData, ( nStorno == 1 ) )
 
-   CASE _dev_drv == s_cFiskalniDrajverTRING
-      nErrorLevel := fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
+   CASE cFiskalniDrajver == s_cFiskalniDrajverFLINK
+      nErrorLevel := fakt_to_flink( s_hFiskalniParams, cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, aPartnerData, ( nStorno == 1 ) )
+
+   CASE cFiskalniDrajver == s_cFiskalniDrajverTRING
+      nErrorLevel := fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, aPartnerData, ( nStorno == 1 ) )
 
    ENDCASE
 
    DirChange( my_home() )
 
-   log_write( "fiskalni racun " + _dev_drv + " za dokument: " + ;
+   log_write_file( "FISK_RN: " + cFiskalniDrajver + " za dokument: " + ;
       AllTrim( cIdFirma ) + "-" + AllTrim( cIdTipDok ) + "-" + AllTrim( cBrDok ) + ;
       " err level: " + AllTrim( Str( nErrorLevel ) ) + ;
-      " partner: " + iif( _partn_data <> NIL, AllTrim( _partn_data[ 1, 1 ] ) + ;
-      " - " + AllTrim( _partn_data[ 1, 2 ] ), "NIL" ), 3 )
+      " partner: " + iif( aPartnerData <> NIL, AllTrim( aPartnerData[ 1, 1 ] ) + ;
+      " - " + AllTrim( aPartnerData[ 1, 2 ] ), "NIL" ), 2 )
 
    IF nErrorLevel > 0
-      IF _dev_drv == s_cFiskalniDrajverTremol
-         _cont := "2"
-         nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ), _cont )
-
-         IF nErrorLevel > 0
-            MsgBeep( "Problem sa štampanjem na fiskalni uređaj !" )
-         ENDIF
-
-      ENDIF
+      log_write_file( "FISK_RN_ERROR:" + AllTrim( Str( nErrorLevel ) ) )
+      MsgBeep( "Problem sa štampanjem na fiskalni uređaj !" )
    ENDIF
 
    RETURN nErrorLevel
@@ -277,7 +270,7 @@ FUNCTION postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, cFiskalniModel )
       cWhere += " AND ( iznos > 0 AND fisc_rn > 0 ) "
    ENDIF
 
-   IF table_count( f18_sql_schema( "fakt_doks" ) , cWhere ) > 0
+   IF table_count( f18_sql_schema( "fakt_doks" ), cWhere ) > 0
       lRet := .T.
    ENDIF
 
@@ -314,8 +307,8 @@ STATIC FUNCTION fakt_is_storno_dok( cIdFirma, cIdTipDok, cBrDok )
 STATIC FUNCTION fakt_fiscal_o_tables()
 
    // o_tarifa()
-   //o_fakt_doks_dbf()
-   //o_fakt_dbf()
+   // o_fakt_doks_dbf()
+   // o_fakt_dbf()
    // o_roba()
    // o_sifk()
    // o_sifv()
@@ -995,29 +988,27 @@ STATIC FUNCTION _get_partner_for_email( cIdFirma, cIdTipDok, cBrDok )
    izdavanje fiskalnog isjecka na TREMOL uredjaj
 */
 
-STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno, cContinue012 )
+STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno )
 
    LOCAL nErrorLevel := 0
-   LOCAL _f_name
+   LOCAL cFiskalniIme
    LOCAL nFiskalniBroj := -1
+   LOCAL nTremolCeka := -1
 
-   // identifikator CONTINUE
-   // nesto imamo mogucnost ako racun zapne da kazemo drugi identifikator
-   // pa on navodno nastavi
-   IF cContinue012 == NIL
-      cContinue012 := "0"
-   ENDIF
-
-
-   nErrorLevel := fiskalni_tremol_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno, cContinue012 ) // stampaj racun
-   _f_name := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
-   IF tremol_cekam_fajl_odgovora( s_hFiskalniParams, _f_name, s_hFiskalniParams[ "timeout" ] ) // da li postoji ista na izlazu ?
-      nErrorLevel := tremol_read_error( s_hFiskalniParams, _f_name, @nFiskalniBroj ) // procitaj sada gresku
+   nErrorLevel := fiskalni_tremol_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno ) // stampaj racun
+   cFiskalniIme := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
+   nTremolCeka := tremol_cekam_fajl_odgovora( s_hFiskalniParams, cFiskalniIme, s_hFiskalniParams[ "timeout" ] )
+   IF nTremolCeka == 0
+      nErrorLevel := tremol_read_error( s_hFiskalniParams, cFiskalniIme, @nFiskalniBroj )
+   ELSEIF nTremolCeka > 0
+      log_write_file( "prodavac manuelno naveo broj racuna " + AllTrim( Str( nTremolCeka ) ), 2 )
+      nErrorLevel := 0
+      nFiskalniBroj := nTremolCeka
    ELSE
       nErrorLevel := -99
    ENDIF
 
-   IF nErrorLevel == 0 .AND. !lStorno .AND. cContinue012 <> "2" // vrati broj fiskalnog racuna
+   IF nErrorLevel == 0 .AND. !lStorno // vrati broj fiskalnog racuna
       IF nFiskalniBroj > 0
          IF !s_lFiskalniSilentPrint
             MsgBeep( "Kreiran fiskalni račun br: " + AllTrim( Str( nFiskalniBroj ) ) )
@@ -1025,7 +1016,7 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
          fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj ) // ubaci broj fiskalnog racuna u fakturu
 
       ENDIF
-      FErase( s_hFiskalniParams[ "out_dir" ] + _f_name )
+      FErase( s_hFiskalniParams[ "out_dir" ] + cFiskalniIme )
    ENDIF
 
    RETURN nErrorLevel

@@ -14,7 +14,7 @@
 STATIC s_cRazmak1 := " "
 STATIC s_cZahtjevNula := "0"
 
-FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lStornoRacun, cContinue )
+FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lStornoRacun )
 
    LOCAL cFiskalniRacunBroj, cVrstaPlacanja, nTotalPlac, cXml, nI
    LOCAL nKolicina, nCijena, nPopust
@@ -22,14 +22,10 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    LOCAL lKupacNaRacunu := .F.
    LOCAL cCommand := ""
    LOCAL cKupacId, cKupacIme, cKupacAdresa, cKupacGrad
-   LOCAL _fiscal_no := 0
    LOCAL cFiscTxt, cFiskRefundTxt, cFiskKupacTxt, cFiskalniFajlName
+   LOCAL cOutput
 
    tremol_delete_tmp( hFiskalniParams )  // pobrisi tmp fajlove i ostalo sto je u input direktoriju
-
-   IF cContinue == nil
-      cContinue := "0"
-   ENDIF
 
    IF aRacunHeader <> NIL .AND. Len( aRacunHeader ) > 0  // ima podataka kupca
       lKupacNaRacunu := .T.
@@ -40,15 +36,11 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    cXml := hFiskalniParams[ "out_dir" ] + cFiskalniFajlName // putanja do izlaznog xml fajla
 
    create_xml( cXml )
-   xml_head()
+   cOutput := xml_head()
 
    cFiscTxt := 'TremolFpServer Command="Receipt"'
    cFiskRefundTxt := ''
    cFiskKupacTxt := ''
-
-   IF cContinue == "1" // https://redmine.bring.out.ba/issues/36372
-      // cFiscTxt += ' Continue="' + cContinue + '"'
-   ENDIF
 
    IF lStornoRacun // ukljuci storno triger
       cFiskRefundTxt := ' RefundReceipt="' + AllTrim( aRacunStavke[ 1, FISK_INDEX_FISK_RACUN_STORNIRATI ] ) + '"'
@@ -56,7 +48,6 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
 
    // ukljuci kupac triger
    IF lKupacNaRacunu
-
       cKupacId := AllTrim( aRacunHeader[ 1, FISK_HEADER_INDEX_KUPAC_ID ] )
       cKupacIme := to_xml_encoding( AllTrim( aRacunHeader[ 1, FISK_HEADER_INDEX_KUPAC_NAZIV ] ) )
       cKupacAdresa := to_xml_encoding( AllTrim( aRacunHeader[ 1, FISK_HEADER_INDEX_KUPAC_ADRESA ] ) )
@@ -66,15 +57,12 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
       cFiskKupacTxt += s_cRazmak1 + 'CompanyHQ="' + cKupacGrad + '"'
       cFiskKupacTxt += s_cRazmak1 + 'CompanyAddress="' + cKupacAdresa + '"'
       cFiskKupacTxt += s_cRazmak1 + 'CompanyCity="' + cKupacGrad + '"'
-
    ENDIF
 
-   // ubaci u xml
-   xml_subnode( cFiscTxt + cFiskRefundTxt + cFiskKupacTxt )
+   cOutput += xml_subnode( cFiscTxt + cFiskRefundTxt + cFiskKupacTxt )
 
    nTotalPlac := 0
    FOR nI := 1 TO Len( aRacunStavke )
-
       cArtikalPLU := aRacunStavke[ nI, FISK_INDEX_PLU ]
       cArtikalBarkod := aRacunStavke[ nI, FISK_INDEX_BARKOD ]
       cArtikalId := aRacunStavke[ nI, FISK_INDEX_IDROBA ]
@@ -95,8 +83,7 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
       IF nPopust > 0
          cTmp += s_cRazmak1 + 'Discount="' + AllTrim( Str( nPopust, 12, 2 ) ) + '%"'
       ENDIF
-      xml_single_node( "Item", cTmp )
-
+      cOutput += xml_single_node( "Item", cTmp )
    NEXT
 
    // vrste placanja, oznaka:
@@ -106,7 +93,7 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    // "KARTICA"
 
    cVrstaPlacanja := fiskalni_vrsta_placanja( aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ], "TREMOL" )
-   nTotalPlac := aRacunStavke[ 1, 14 ]
+   nTotalPlac := aRacunStavke[ 1, FISK_INDEX_TOTAL ]
 
    IF aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ] <> "0" .AND. !lStornoRacun
       cTmp := 'Type="' + cVrstaPlacanja + '"'
@@ -116,12 +103,13 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
 
    // dodatna linija, broj veznog racuna u POS
    cTmp := 'Message="Vezni racun: ' + AllTrim( cFiskalniRacunBroj ) + '"'
-   xml_single_node( "AdditionalLine", cTmp )
-   xml_subnode( "TremolFpServer", .T. )
+   cOutput += xml_single_node( "AdditionalLine", cTmp )
+   cOutput += xml_subnode( "TremolFpServer", .T. )
    close_xml()
 
-   RETURN 0
+   log_write_file( "FISC_RN:" + cOutput, 2 )
 
+   RETURN 0
 
 
 FUNCTION tremol_restart( hFiskalniParams )
@@ -146,9 +134,7 @@ FUNCTION tremol_restart( hFiskalniParams )
 
    RETURN nErrorLevel
 
-// ----------------------------------------------
-// brise fajlove iz ulaznog direktorija
-// ----------------------------------------------
+
 FUNCTION tremol_delete_tmp( hFiskParams )
 
    LOCAL cTmp
@@ -166,7 +152,6 @@ FUNCTION tremol_delete_tmp( hFiskParams )
    MsgC()
 
    RETURN .T.
-
 
 
 
@@ -487,6 +472,10 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
    LOCAL nTime
    LOCAL nCount := 0
    LOCAL cStatus
+   LOCAL cMsg
+   LOCAL cDN := " "
+   LOCAL GetList := ""
+   LOCAL nBroj
 
    IF nTimeOut == NIL
       nTimeOut := hFiskalniParams[ "timeout" ]
@@ -497,7 +486,7 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
    DO WHILE .T.  // loop za izmjenu trake
 
       nTime := nTimeOut
-      Box("#<ALT-Q> Prekid", 5, 60 )
+      Box( "#<ALT-Q> Prekid", 5, 60 )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
          " : " + PadR( hFiskalniParams[ "name" ], 40 )
 
@@ -520,8 +509,15 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
          ENDIF
 
          @ box_x_koord() + 3, box_y_koord() + 2 SAY8 PadR( "TREMOL: Čekam odgovor... " + AllTrim( Str( nTime ) ), 48 )
-         IF nTime == 0 .OR. LastKey() == K_ALT_Q
+         IF nTime == 0
+            cStatus := "TIMEOUT"
+            log_write_file("FISK_RN_ERROR: TIMEOUT isteklo", 2)
+            EXIT
+         ENDIF
+
+         IF LastKey() == K_ALT_Q
             cStatus := "ALTQ"
+            log_write_file("FISK_RN_ERROR: ALTQ - prekid", 2)
             EXIT
          ENDIF
          Sleep( 1 )
@@ -530,24 +526,50 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
       BoxC()
 
       IF cStatus == "FAJL"
-         exit
-      ENDIF
-
-      IF cStatus == "ALTQ" .OR. cStatus == "CEKAM"
+         EXIT
+      ELSE
          IF Pitanje(, "Nestalo je trake? Ako vršite zamjenu odgovorite sa 'D'", " " ) == "D"
+            log_write_file("FISK_RN_ERROR: nestalo trake = D - ceka se zamjena", 2)
             LOOP
          ELSE
+            log_write_file("FISK_RN_ERROR: nije nestalo trake", 2)
             EXIT
          ENDIF
       ENDIF
+
    ENDDO
 
-   IF ! cStatus == "FAJL"
-      MsgBeep( "TREMOL: Ne postoji fajl odgovora (OUT) ?!" )
-      RETURN .F.
+   IF cStatus != "FAJL"
+      cMsg := "TREMOL: Ne postoji fajl odgovora (OUT) ?!"
+      MsgBeep( cMsg )
+      log_write_file("FISK_RN_ERROR: " + cMsg, 2)
+
+      Box("#FISK_RN", 3, 60)
+          @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Da li je fiskalni račun ipak odštampan kupcu (D/N) ?" GET cDN PICT "@!" VALID cDN $ "DN"
+          READ
+          IF LastKey() == K_ESC .OR. cDN == "N"
+             BoxC()
+             log_write_file( "FISK_RN_ERROR fisk rn nije odstaman", 2)
+             RETURN -1
+          ENDIF
+          @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Broj fiskalnog računa ?" GET nBroj VALID nBroj > 0
+          READ
+          IF LastKey() == K_ESC
+             BoxC()
+             log_write_file( "FISK_RN_ERROR set broj fisk rn - ESC", 2)
+             RETURN -2
+          ENDIF
+      BoxC()
+
+      Alert("Vaši odgovori su zabilježeni !")
+      cMsg := "FISK_RN_ERROR: fiskalni račun " + AllTrim( Str( nBroj ) ) + " je ipak odštampan kupcu!"
+      log_write_file( cMsg, 2)
+      log_write( cMsg, 2)
+      RETURN nBroj
+
    ENDIF
 
-   RETURN .T.
+   RETURN 0
 
 
 FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )

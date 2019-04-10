@@ -72,6 +72,9 @@ FUNCTION pos_menu_dokumenti()
    AAdd( aOpcexe, {|| pos_inventura_nivelacija( .F. ) } )
    */
 
+   AAdd( aOpc, "P. pregled neobrađenih zahtjeva za prijem [21]" )
+   AAdd( aOpcexe, {|| pos_21_neobradjeni_lista() } )
+
    f18_menu( "pos6", .F., nIzbor, aOpc, aOpcexe )
 
    RETURN .T.

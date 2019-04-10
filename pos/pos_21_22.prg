@@ -76,7 +76,7 @@ STATIC FUNCTION pos_21_pregled_valid( cPregledDN, cBrFaktP )
    LOCAL hParams := hb_Hash()
 
    hParams[ "idvd" ] := '21'
-   hParams[ "brfaktp" ] := AllTrim(cBrFaktP)
+   hParams[ "brfaktp" ] := AllTrim( cBrFaktP )
 
    IF !( cPregledDN $ "DN" )
       RETURN .F.
@@ -119,3 +119,51 @@ FUNCTION pos_21_to_22( cBrFaktP, cIdRadnik, lPreuzimaSe )
    END SEQUENCE
 
    RETURN nRet
+
+
+
+FUNCTION pos_21_neobradjeni_lista()
+
+   LOCAL aLista, nI
+   LOCAL aMeni := {}
+   LOCAL nIzbor := 1
+   LOCAL nRet
+
+   aLista := pos_21_get_lista()
+   IF Len( aLista ) == 0
+      RETURN  ""
+   ENDIF
+
+   FOR nI := 1 TO Len( aLista )
+      AAdd( aMeni, PadR( iif( aLista[ nI ][ "storno" ], "POVRAT", "PRIJEM" ) + ": " + DToC( aLista[ nI ][ "datum" ] ) + " /" + aLista[ nI ][ "brdok" ] + " - " + aLista[ nI ][ "brfaktp" ], 40 ) )
+   NEXT
+
+   nRet := meni_fiksna_lokacija( box_x_koord() + 5, box_y_koord() + 10, aMeni, nIzbor )
+   IF nRet == 0
+      RETURN ""
+   ENDIF
+
+   RETURN aLista[ nRet ][ "brfaktp" ]
+
+
+FUNCTION pos_21_get_lista()
+
+   LOCAL cQuery, oData, oRow, oError, hRec, aLista := {}
+
+   cQuery := "SELECT * FROM  " + pos_prodavnica_sql_schema() + ".pos_21_neobradjeni_dokumenti()";
+
+      oData := run_sql_query( cQuery )
+
+   DO WHILE !oData:Eof()
+      oRow := oData:GetRow()
+      hRec := hb_Hash()
+      hRec[ "brdok" ] := oRow:FieldGet( oRow:FieldPos( "brdok" ) )
+      hRec[ "datum" ] := oRow:FieldGet( oRow:FieldPos( "datum" ) )
+      hRec[ "brfaktp" ] := oRow:FieldGet( oRow:FieldPos( "brfaktp" ) )
+      hRec[ "storno" ] := oRow:FieldGet( oRow:FieldPos( "storno" ) )
+
+      AAdd( aLista, hRec )
+      oData:skip()
+   ENDDO()
+
+   RETURN aLista

@@ -19,16 +19,15 @@ STATIC s_cF18HomeRoot := NIL // za sve threadove identican cHomeRootDir
 STATIC s_cF18HomeBackup := NIL // svi threadovi ista backup lokacija
 STATIC s_cF18CurrentDirectory := NIL
 STATIC s_lEshell := .F.
+STATIC s_aLog
 
 THREAD STATIC s_cF18Home := NIL // svaki thread ima svoj my home ovisno o tekucoj bazi
 
 STATIC s_cRunOnStartParam
 
 
-THREAD STATIC s_nF18FileHandle := NIL
-
-STATIC __test_mode := .F.
-STATIC __no_sql_mode := .F.
+STATIC s_lTestMode := .F.
+STATIC s_lNoSQLMode := .F.
 
 STATIC s_nMaxRows := 0
 STATIC s_nMaxCols := 0
@@ -114,7 +113,7 @@ FUNCTION post_login()
       RETURN .F.
    ENDIF
 
-   //F18Admin():sql_cleanup()
+   // F18Admin():sql_cleanup()
 
    set_sql_search_path()
    server_log_enable()
@@ -671,27 +670,26 @@ FUNCTION dummy_error_handler()
 FUNCTION test_mode( tm )
 
    IF tm != nil
-      __test_mode := tm
+      s_lTestMode := tm
    ENDIF
 
-   RETURN __test_mode
+   RETURN s_lTestMode
 
 
 FUNCTION no_sql_mode( val )
 
    IF val != nil
-      __no_sql_mode := val
+      s_lNoSQLMode := val
    ENDIF
 
-   RETURN __no_sql_mode
-
+   RETURN s_lNoSQLMode
 
 
 
 
 FUNCTION log_write( cMsg, nLevel, lSilent )
 
-   LOCAL _msg_time
+   LOCAL cMsgTime
 
    IF nLevel == NIL
 #ifdef F18_DEBUG
@@ -709,25 +707,59 @@ FUNCTION log_write( cMsg, nLevel, lSilent )
       RETURN .T.
    ENDIF
 
-   _msg_time := DToC( Date() )
-   _msg_time += ", "
-   _msg_time += PadR( Time(), 8 )
-   _msg_time += ": "
+   cMsgTime := DToC( Date() )
+   cMsgTime += ", "
+   cMsgTime += PadR( Time(), 8 )
+   cMsgTime += ": "
 
-   // time ide samo u fajl, ne na server
-   // ovdje ima neki problem #30139 iskljucujem dok ne skontamo
-   // baca mi ove poruke u outf.txt
-   // FWRITE( s_nF18FileHandle, _msg_time + cMsg + hb_eol() )
-   ?E _msg_time + cMsg
+   ?E cMsgTime, cMsg
 
    IF server_log()
       server_log_write( cMsg, lSilent )
    ENDIF
 
-   ?E _msg_time, cMsg
-
    RETURN .T.
 
+
+
+FUNCTION log_write_file( cMsg, nLevel, lSilent )
+
+   LOCAL cMsgTime
+   LOCAL cLogFile := my_home_root() + SLASH + "F18_" + DTOS( danasnji_datum() ) + ".log"
+   LOCAL nHandle
+
+   IF nLevel == NIL
+#ifdef F18_DEBUG
+      nLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
+#else
+      nLevel := F18_DEFAULT_LOG_LEVEL
+#endif
+   ENDIF
+
+   IF lSilent == NIL
+      lSilent := .F.
+   ENDIF
+
+   IF nLevel > log_level()
+      RETURN .T.
+   ENDIF
+
+   IF !File( cLogFile )
+      nHandle := hb_vfOpen( cLogFile, FO_CREAT + FO_TRUNC + FO_WRITE )
+   ELSE
+      nHandle := hb_vfOpen( cLogFile, FO_WRITE )
+      hb_vfSeek( nHandle, 0, FS_END )
+   ENDIF
+
+   cMsgTime := PadR( Time(), 8 )
+   cMsgTime += ": "
+
+   hb_vfWrite( nHandle, cMsgTime + cMsg + hb_eol() )
+   hb_vfClose( nHandle )
+
+   ?E cMsgTime + cMsg
+
+   RETURN .T.
 
 FUNCTION server_log()
    RETURN s_psqlServer_log
@@ -747,14 +779,6 @@ FUNCTION server_log_enable()
 
 
 
-FUNCTION log_create()
-
-   IF ( s_nF18FileHandle := FCreate( F18_LOG_FILE ) ) == -1
-      error_bar( "log", "Cannot create log file: " + F18_LOG_FILE )
-      RETURN .F.
-   ENDIF
-
-   RETURN .T.
 
 
 FUNCTION log_close()

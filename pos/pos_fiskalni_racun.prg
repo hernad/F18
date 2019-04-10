@@ -40,7 +40,6 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
    cFiskalniDravjerIme := s_hFiskalniUredjajParams[ "drv" ]
    s_cFiskalniDrajverNaziv := cFiskalniDravjerIme
 
-
    // lStorno := pos_is_storno( cIdPos, "42", dDatDok, cBrDok )
    nStorno := pos_racun_u_pripremi_broj_storno_rn()
    lStorno := nStorno > 0
@@ -68,19 +67,12 @@ FUNCTION pos_fiskalni_racun( cIdPos, dDatDok, cBrDok, hFiskalniParams, nUplaceni
       nErrorLevel := pos_to_hcp( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno, nUplaceniIznos )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverTremol
-      nErrorLevel := pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno, NIL )
+      nErrorLevel := pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    ENDCASE
 
    IF nErrorLevel > 0
-      IF cFiskalniDravjerIme == s_cFiskalniDrajverTremol
-         nErrorLevel := pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno, "2" )
-         IF nErrorLevel > 0
-            MsgBeep( "Problem sa štampanjem na fiskalni uređaj !" )
-         ENDIF
-      ELSE
-         MsgBeep( "Problem sa štampanjem na fiskalni uređaj !" )
-      ENDIF
+      MsgBeep( "Problem sa štampanjem na fiskalni uređaj ?!" )
    ENDIF
 
    RETURN nErrorLevel
@@ -213,8 +205,11 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    IF nErrorLevel = -9
       IF Pitanje(, "Da li je nestalo trake ?", "N" ) == "D"
          IF Pitanje(, "Zamjenite traku i pritisnite 'D'", "D" ) == "D"
+            log_write_file("FISK_RN: nestalo trake - nastaviti sa cekanjem odgovora", 2)
             nErrorLevel := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnoRacuna )
          ENDIF
+      ELSE
+         log_write_file("FISK_RN: nije nestalo trake", 2)
       ENDIF
    ENDIF
 
@@ -243,37 +238,35 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    RETURN nErrorLevel
 
 
-STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno, cContinue )
+STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel
    LOCAL cFiskalniFajl
    LOCAL nBrojFiskalnoRacuna := 0
    LOCAL aRacunHeader := NIL
 
-   IF cContinue == NIL
-      cContinue := "0"
-   ENDIF
+   nErrorLevel := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno )
 
-   nErrorLevel := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno, cContinue )
-   IF cContinue <> "2"
-      cFiskalniFajl := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
-      IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajl )
-         nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
-         IF nErrorLevel == 0 .AND. nBrojFiskalnoRacuna > 0
-            IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-               MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
-            ELSE
-               nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
-            ENDIF
+   cFiskalniFajl := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
+   IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajl )
+      nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
+      IF nErrorLevel == 0 .AND. nBrojFiskalnoRacuna > 0
+         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
+            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
          ELSE
             nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
          ENDIF
       ELSE
-         nErrorLevel := FISK_NEMA_ODGOVORA
+         nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
       ENDIF
-
-      FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl ) // obrisi fajl da ne bi ostao kada server proradi ako je greska
+   ELSE
+      nErrorLevel := FISK_NEMA_ODGOVORA
    ENDIF
+
+   log_write_file( "FISK_RN: TREMOL " +  AllTrim( cIdPos ) + "-" + AllTrim( cIdVd ) + "-" + AllTrim( cBrDok ) + ;
+      " err level: " + AllTrim( Str( nErrorLevel ) ), 2 )
+
+   FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl ) // obrisi fajl da ne bi ostao kada server proradi ako je greska
 
    RETURN nErrorLevel
 

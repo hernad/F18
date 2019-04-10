@@ -56,7 +56,6 @@ FUNCTION xml_node( cName, cData, lWrite )
    // cName = "position"
    // cData = "x26"
    // => <position>x26</position>
-
    cTmp := _bracket( cName, .F. )
    cTmp += AllTrim( cData )
    cTmp += _bracket( cName, .T. )
@@ -85,7 +84,7 @@ FUNCTION xml_single_node( cName, cData, lWrite )
    ENDIF
 
 
-   cTmp := _sbracket( cName + " " + cData )
+   cTmp := xml_single_string_bracket( cName + " " + cData )
 
    IF lWrite == .T.
       ?? cTmp
@@ -103,7 +102,6 @@ FUNCTION xml_subnode_end( cName, lWrite )
    RETURN xml_subnode( cName, .T., lWrite )
 
 
-
 FUNCTION xml_subnode( cName, lEscape, lWrite )
 
    LOCAL cTmp
@@ -116,7 +114,6 @@ FUNCTION xml_subnode( cName, lEscape, lWrite )
    // cName = "position"
    // => <position> (lEscape = .f.)
    // => </position> (lEscape = .t.)
-
    cTmp := _bracket( cName, lEscape )
 
    IF lWrite == .T.
@@ -127,15 +124,11 @@ FUNCTION xml_subnode( cName, lEscape, lWrite )
    RETURN cTmp
 
 
-// --------------------------------------------
-// stavi single string u zagrade (single node)
-// --------------------------------------------
-STATIC FUNCTION _sbracket( cStr )
+STATIC FUNCTION xml_single_string_bracket( cStr )
 
    LOCAL cRet
 
    cRet := "<"
-
    cRet += cStr
    cRet += " /"
    cRet += ">"
@@ -143,9 +136,6 @@ STATIC FUNCTION _sbracket( cStr )
    RETURN cRet
 
 
-// --------------------------------------------
-// stavi string u zagrade
-// --------------------------------------------
 STATIC FUNCTION _bracket( cStr, lEsc )
 
    LOCAL cRet

@@ -13,7 +13,7 @@
 #include "f18.ch"
 #include "hbthread.ch"
 
-THREAD STATIC _log_db_handle := NIL
+THREAD STATIC s_nLogHandle := NIL
 THREAD STATIC _db_thread_id := NIL
 
 FUNCTION db_thread_id()
@@ -53,9 +53,10 @@ FUNCTION _db_thread_fn()
    LOCAL _area, _alias
    LOCAL _arr
    LOCAL _used
+   LOCAL oErr
 
-   IF ( _log_db_handle :=  FCreate( "F18_2.log" ) ) == -1
-      ? "Cannot create log file: F18_2.log"
+   IF ( s_nLogHandle :=  FCreate( "F18_background.log" ) ) == -1
+      ? "Cannot create log file: F18_background.log"
       QUIT_1
    ENDIF
 
@@ -78,21 +79,17 @@ FUNCTION _db_thread_fn()
                my_use( _alias )
                USE
             ENDIF
-         recover using _err
-            log_write_db( "belaj: " + to_str( _alias ) + " :" +  to_str( _err:cargo[ 1 ] ) + " / " + to_str( _err:cargo[ 3 ] ) )
-            log_write_db( "     : " + to_str( _alias ) + " :" +  to_str( _err:cargo[ 2 ] ) + " / " + to_str( _err:cargo[ 4 ] ) )
+         recover using oErr
+            log_write_db( "belaj: " + to_str( _alias ) + " :" +  to_str( oErr:cargo[ 1 ] ) + " / " + to_str( oErr:cargo[ 3 ] ) )
+            log_write_db( "     : " + to_str( _alias ) + " :" +  to_str( oErr:cargo[ 2 ] ) + " / " + to_str( oErr:cargo[ 4 ] ) )
          END SEQUENCE
       NEXT
-
-      // hb_dbDetach( , {|| _result})
-      // endif
-      // ? "thread_db end"
 
       hb_idleSleep( 5 )
 
    ENDDO
 
-   RETURN
+   RETURN .T.
 
 
 STATIC FUNCTION refresh_partn()
@@ -102,6 +99,6 @@ STATIC FUNCTION refresh_partn()
 
 FUNCTION log_write_db( cMsg )
 
-   FWrite( _log_db_handle, cMsg + hb_eol() )
+   FWrite( s_nLogHandle, cMsg + hb_eol() )
 
    RETURN .T.

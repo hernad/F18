@@ -131,8 +131,8 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
 
    nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "uplaceno" ] )
    IF nError <> 0
+      log_write_file( "FISK_RN_ERROR:" + AllTrim( Str( nError ) ) )
       MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun će ostati u pripremi" )
-      // pos_povrat_racuna( hParams[ "idpos" ], hParams[ "brdok" ], hParams[ "datum" ] )
       RETURN .F.
    ENDIF
 

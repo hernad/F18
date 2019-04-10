@@ -180,8 +180,6 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
 
    MsgC()
 
-
-
    f18_tone( 440, 2 )
    f18_tone( 440, 2 )
 

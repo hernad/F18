@@ -93,7 +93,7 @@ $$;
 -- select * from public.sfak_prodavnice_by_datum('2018-10-16');
 
 DROP FUNCTION IF EXISTS public.sfak_prodavnice_by_datum;
-CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, vcij integer, datd date, rel integer, siff integer, kp integer, vs integer)
+CREATE OR REPLACE FUNCTION public.sfak_prodavnice_by_datum(datum date) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, vcij integer, datd date, rel integer, siff integer, kp integer, vs integer, datfk date)
 
 LANGUAGE plpgsql
 AS $$
@@ -107,18 +107,18 @@ cDatum := to_char(datum, 'yymmdd');
 -- prod < 199 => prodavnica
 -- select count(*) FROM [Sarajevo].[dbo].[SFAK] LEFT JOIN [Sarajevo].[dbo].[GFAK] ON sfak.brf=gfak.brf  where datd=181016
 -- siff=2000 => neka od prodavnica
-cQuery := 'SELECT rb,prod,ident,kold,cijena,sfak.brf,gfak.vcij,datd,rel,siff,kp,vs from [dbo].[SFAK]' ||
+cQuery := 'SELECT rb,prod,ident,kold,cijena,sfak.brf,gfak.vcij,datd,rel,siff,kp,vs,datfk from [dbo].[SFAK]' ||
           ' LEFT JOIN [dbo].[GFAK] ON sfak.brf=gfak.brf' ||
-          ' WHERE prod>0 AND prod<199 AND siff=20000 AND datd=' || cDatum;
+          ' WHERE prod>0 AND prod<199 AND siff=20000 AND datfk=' || cDatum;
 
 -- select count(*) FROM [Sarajevo].[dbo].[SFAK] LEFT JOIN [Sarajevo].[dbo].[GFAK] ON sfak.brf=gfak.brf  where datd=181016
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 RAISE INFO 'query: %', cQuery;
-EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, vcij integer, datd integer, rel integer, siff integer, kp integer, vs integer) SERVER mssql1' ||
+EXECUTE 'CREATE FOREIGN TABLE mssql1_sfak_' || cDatum || '(rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, vcij integer, datd integer, rel integer, siff integer, kp integer, vs integer, datfk integer) SERVER mssql1' ||
         ' options (query '''|| cQuery ||''', row_estimate_method ''execute'')';
 
-RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, vcij, public.mssql_int_to_date(datd),rel,siff,kp,vs from mssql1_sfak_' || cDatum;
+RETURN QUERY EXECUTE 'SELECT rb,prod,ident,kold,cijena, brf, vcij, public.mssql_int_to_date(datd),rel,siff,kp,vs,public.mssql_int_to_date(datfk) from mssql1_sfak_' || cDatum;
 
 EXECUTE 'DROP FOREIGN TABLE IF EXISTS mssql1_sfak_' || cDatum;
 END;
