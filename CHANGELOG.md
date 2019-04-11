@@ -1,6 +1,10 @@
 # F18 klijent, lista promjena
 
 
+## 2019-04-11
+
+-  POS fiskalni handliranje vanrednih situacija
+
 ## 2019-04-09
 
 -  POS 21 - bez cijena
