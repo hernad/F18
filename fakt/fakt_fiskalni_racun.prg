@@ -213,13 +213,10 @@ STATIC FUNCTION fakt_reklamirani_racun_preduslovi( cIdFirma, cIdTipDok, cBrDok, 
    ENDIF
 
    nDepozit := Abs( fakt_izracunaj_ukupnu_vrijednost_racuna( cIdFirma, cIdTipDok, cBrDok ) )
-
    nDepozit := Round( nDepozit + 1, 0 )
 
    fprint_delete_answer( hFiskalniDevParams )
-
    fprint_unos_pologa( hFiskalniDevParams, nDepozit, .T. )
-
    nErr := fprint_read_error( hFiskalniDevParams, 0 )
 
    IF nErr <> 0
@@ -998,12 +995,16 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
    nErrorLevel := fiskalni_tremol_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno ) // stampaj racun
    cFiskalniIme := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
    nTremolCeka := tremol_cekam_fajl_odgovora( s_hFiskalniParams, cFiskalniIme, s_hFiskalniParams[ "timeout" ] )
-   IF nTremolCeka == 0
-      nErrorLevel := tremol_read_error( s_hFiskalniParams, cFiskalniIme, @nBrojFiskalnogRacuna )
-   ELSEIF nTremolCeka > 0
-      log_write_file( "prodavac manuelno naveo broj racuna " + AllTrim( Str( nTremolCeka ) ), 2 )
-      nErrorLevel := 0
-      nBrojFiskalnogRacuna := nTremolCeka
+
+
+   IF nTremolCeka >= 0
+      IF nTremolCeka > 0
+         log_write_file( "FISK_RN: prodavac manuelno naveo broj racuna " + AllTrim( Str( nTremolCeka ) ), 2 )
+         nErrorLevel := 0
+         nBrojFiskalnogRacuna := nTremolCeka
+      ELSE
+         nErrorLevel := tremol_read_output( s_hFiskalniParams, cFiskalniIme, @nBrojFiskalnogRacuna )
+      ENDIF
    ELSE
       nErrorLevel := -99
    ENDIF

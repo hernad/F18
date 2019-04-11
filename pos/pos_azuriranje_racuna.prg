@@ -25,7 +25,6 @@ FUNCTION pos_azuriraj_racun( hParams )
    LOCAL cMsg
 
    hTranParams[ "tran_name" ] := "pos_rn_azur"
-
    o_pos_tables()
    IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
       RETURN .F.
@@ -104,7 +103,6 @@ FUNCTION pos_azuriraj_racun( hParams )
    ENDIF
 
    MsgC()
-
 
    IF lOk
       IF !fiscal_opt_active()

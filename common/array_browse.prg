@@ -327,7 +327,7 @@ FUNCTION AComp( aArray, bComp, nStart, nStop )
 
    AEval(                                                               ;
       aArray,                                                       ;
-      {| x| value := IF( Eval( bComp, x, value ), x, value ) },         ;
+      {| x| value := IIF( Eval( bComp, x, value ), x, value ) },         ;
       nStart,                                                       ;
       nStop                                                         ;
       )

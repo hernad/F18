@@ -177,7 +177,6 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       RETURN DE_REFRESH
    ENDIF
 
-
    IF Upper( Chr( nCh ) ) == "F"
       hParams[ "idpos" ] := pos_doks->idpos
       hParams[ "datum" ] := pos_doks->datum
@@ -208,7 +207,6 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       Tb:dehilite()
       DO WHILE !Tb:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
       ENDDO
-
 
       MsgBeep( "Storno račun se nalazi u pripremi !" )
       SELECT pos_doks

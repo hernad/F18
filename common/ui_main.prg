@@ -100,7 +100,7 @@ FUNCTION Msg( uText, sec, xPos )
    LOCAL cText
 
    cText := Unicode():New( uText, .T. ):getCpString()
-
+altd()
 
    SET DEVICE TO SCREEN
 
@@ -137,7 +137,6 @@ FUNCTION Msg( uText, sec, xPos )
       SaveScreen( msg_x1, msg_y1, msg_x2, msg_y2 ) } )
 
    @ msg_x1, msg_y1 CLEAR TO msg_x2, msg_y2
-
    @ msg_x1 + 1, msg_y1 + 2 TO msg_x2 - 1, msg_y2 - 2 DOUBLE
 
    FOR nCnt := 1 TO nBrRed
@@ -923,8 +922,6 @@ FUNCTION MsgBeep( cMsg, lClearTypeahead )
 
    hb_default( @lClearTypeahead, .T. )
 
-
-
 #ifndef TEST
    IF lClearTypeahead
       Beep( 2 )
@@ -946,7 +943,6 @@ INKEY_MOVE          Mouse motion events are allowed
 */
 
    _set := Set( _SET_EVENTMASK, INKEY_KEYBOARD )
-   // poruke koje su duze od 70 znakova
    IF Len( cMsg ) > f18_max_cols() - 11 .AND.  ( At( cMsg, "#" ) == 0 )
       cMsg := SubStr( cMsg, 1, f18_max_cols() - 11 ) + "#" + SubStr( cMsg, f18_max_cols() - 10, f18_max_cols() - 11 ) + "#..."
    ENDIF

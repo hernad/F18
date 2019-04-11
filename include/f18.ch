@@ -174,7 +174,6 @@
 // CDX end
 
 
-
 #define SEMAPHORE_LOCK_RETRY_IDLE_TIME 1
 #define SEMAPHORE_LOCK_RETRY_NUM 100
 #define SEMAPHORE_LOCK_TIME 10
@@ -331,8 +330,6 @@
                                   ;    my_close_all_dbf()             ;
                                   ;    return .F.                     ;
                                   ;endif
-
-
 
 
 
@@ -598,6 +595,7 @@
 #define FISK_ERROR_NEPOZNATO -100
 #define FISK_ERROR_NEMA_BROJA_RACUNA -99
 #define FISK_ERROR_SET_BROJ_RACUNA  -101
+#define FISK_ERROR_GET_BROJ_RACUNA  -102
 
 #define FISK_INDEX_BRDOK 1
 #define FISK_INDEX_RBR 2

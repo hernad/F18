@@ -13,10 +13,7 @@
 
 FUNCTION pos_racun_unos_ispravka()
 
-   // LOCAL lStalnoUnos := fetch_metric( "pos_konstantni_unos_racuna", my_user(), "N" ) == "D"
-
    DO WHILE .T.
-
       // SetKXLat( "'", "-" )
       o_pos_tables()
       SELECT _pos_pripr
@@ -42,7 +39,6 @@ FUNCTION pos_racun_unos_ispravka()
       ELSE
          EXIT
       ENDIF
-
    ENDDO
 
    RETURN .T.
@@ -50,8 +46,9 @@ FUNCTION pos_racun_unos_ispravka()
 
 FUNCTION pos_zakljuci_racun()
 
-   LOCAL lRet
+   LOCAL lRet := .T.
    LOCAL hParam := hb_Hash()
+   LOCAL cDokumentNaziv
 
    o_pos__pripr()
    my_dbf_pack()
@@ -68,75 +65,37 @@ FUNCTION pos_zakljuci_racun()
    hParam[ "idpartner" ] := Space( 6 )
    hParam[ "idvrstep" ] := "01"
    hParam[ "zakljuci" ] := "D"
-   hParam[ "uplaceno" ] := 0
    hParam[ "idpartner" ] := _pos_pripr->idpartner
 
    IF pos_form_zakljucenje_racuna( @hParam )
-      lRet := azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParam )
+
+      o_pos_tables()
+      hParam[ "idvd" ] := POS_IDVD_RACUN
+      hParam[ "brdok" ] := pos_novi_broj_dokumenta( hParam[ "idpos" ], POS_IDVD_RACUN, hParam[ "datum" ] )
+      hParam[ "vrijeme" ] := PadR( Time(), 5 )
+      hParam[ "datum" ] := danasnji_datum()
+      hParam[ "idpartner" ] := ""
+
+      cDokumentNaziv := pos_dokument_sa_vrijeme( hParam )
+      IF seek_pos_doks( hParam[ "idpos" ], hParam[ "idvd" ], hParam[ "datum" ], hParam[ "brdok" ] ) ;
+            .OR. seek_pos_pos( hParam[ "idpos" ], hParam[ "idvd" ], hParam[ "datum" ], hParam[ "brdok" ] )
+         MsgBeep( "Dokument: " + cDokumentNaziv + " već postoji?!" )
+         RETURN .F.
+      ENDIF
+
+      IF !pos_azuriraj_racun( hParam )
+         MsgBeep( "Greška sa ažuriranjem: " + pos_dokument( hParam ) )
+         RETURN .F.
+      ENDIF
+
+      pos_racun_info( hParam )
+      my_close_all_dbf()
    ELSE
       lRet := .F.
    ENDIF
    my_close_all_dbf()
 
    RETURN lRet
-
-
-STATIC FUNCTION azuriraj_stavke_racuna_i_napravi_fiskalni_racun( hParams )
-
-   LOCAL lOk
-   LOCAL cDokumentNaziv
-
-   o_pos_tables()
-   hParams[ "idvd" ] := POS_IDVD_RACUN
-   hParams[ "brdok" ] := pos_novi_broj_dokumenta( hParams[ "idpos" ], POS_IDVD_RACUN, hParams[ "datum" ] )
-   hParams[ "vrijeme" ] := PadR( Time(), 5 )
-   hParams[ "datum" ] := danasnji_datum()
-   hParams[ "idpartner" ] := ""
-
-   cDokumentNaziv := pos_dokument_sa_vrijeme( hParams )
-   IF seek_pos_doks( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] ) ;
-         .OR. seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
-      MsgBeep( "Dokument: " + cDokumentNaziv + " već postoji?!" )
-      RETURN .F.
-   ENDIF
-
-   lOk := pos_azuriraj_racun( hParams )
-   IF !lOk
-      MsgBeep( "Greška sa ažuriranjem: " + pos_dokument( hParams ) )
-      RETURN .F.
-   ENDIF
-
-   pos_racun_info( hParams )
-   my_close_all_dbf()
-
-   RETURN .T.
-
-
-FUNCTION pos_stampa_fiskalni_racun( hParams )
-
-   LOCAL nDeviceId
-   LOCAL hDeviceParams
-   LOCAL lRet := .F.
-   LOCAL nError
-
-   nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
-   IF nDeviceId > 0
-      hDeviceParams := get_fiscal_device_params( nDeviceId, my_user() )
-      IF hDeviceParams == NIL
-         RETURN lRet
-      ENDIF
-   ELSE
-      RETURN lRet
-   ENDIF
-
-   nError := pos_fiskalni_racun( hParams[ "idpos" ], hParams[ "datum" ], hParams[ "brdok" ], hDeviceParams, hParams[ "uplaceno" ] )
-   IF nError <> 0
-      log_write_file( "FISK_RN_ERROR:" + AllTrim( Str( nError ) ) )
-      MsgBeep( "Greška pri štampi fiskalog računa " + hParams[ "brdok" ] + " !?##Račun će ostati u pripremi" )
-      RETURN .F.
-   ENDIF
-
-   RETURN .T.
 
 
 STATIC FUNCTION ispisi_iznos_i_kusur_za_kupca( nUplaceno, nIznosRacuna, nX, nY )
@@ -162,14 +121,15 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    LOCAL dDatum := hParams[ "datum" ]
    LOCAL cIdVrsteP := hParams[ "idvrstep" ]
    LOCAL cIdPartner := hParams[ "idpartner" ]
-   LOCAL nUplaceno := hParams[ "uplaceno" ]
+   LOCAL nUplaceno := 0
    LOCAL cAzuriratiDN := "D"
    LOCAL GetList := {}
+   LOCAL cFiskalniIzdatDN := " "
+   LOCAL nFiskalniBroj := 0
 
-   Box(, 8, 67 )
+   Box(, 10, 67 )
 
    SET CURSOR ON
-
    // 01 - gotovina
    // KT - kartica
    // VR - virman
@@ -192,7 +152,16 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    @ nX := box_x_koord() + 5, nY := box_y_koord() + 2 SAY8 "Primljeni novac:" GET nUplaceno PICT "9999999.99" ;
       VALID {|| pos_valid_primljeni_novac( nUplaceno, nX, nY ) }
 
-   @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Ažurirati POS račun (D/N) ?" GET cAzuriratiDN PICT "@!" VALID cAzuriratiDN $ "DN"
+   SELECT _pos_pripr
+   GO TOP
+   IF !Empty(_pos_pripr->opis)
+      @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Zahtjev za štampu na fiskalni printer je već ranije upućen. Da li"
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "je kupac dobio fiskalni račun D/N ?" GET cFiskalniIzdatDN  PICT "@!" VALID cFiskalniIzdatDN $ "DN"
+      @ box_x_koord() + 8, col() + 2 SAY8 "Broj fiskalnog: " GET nFiskalniBroj ;
+         WHEN { || IIF(cFiskalniIzdatDN == "D", .T., .F.) } VALID nFiskalniBroj > 0
+   ENDIF
+
+   @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Ažurirati POS račun (D/N) ?" GET cAzuriratiDN PICT "@!" VALID cAzuriratiDN $ "DN"
    READ
 
    BoxC()
@@ -205,6 +174,8 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
    hParams[ "idpartner" ] := cIdPartner
    hParams[ "idvrstep" ] := cIdVrsteP
    hParams[ "uplaceno" ] := nUplaceno
+   hParams[ "fiskalni_izdat" ] := (cFiskalniIzdatDN == "D")
+   hParams[ "fiskalni_broj" ] := nFiskalniBroj
 
    RETURN .T.
 

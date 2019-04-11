@@ -45,7 +45,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    AAdd( ImeKol, { _u( "Količina" ), {|| Str( _pos_pripr->kolicina, 8, 3 ) } } )
    AAdd( ImeKol, { "Cijena", {|| Str( _pos_pripr->cijena, 8, 2 ) } } )
    AAdd( ImeKol, { "Ukupno", {|| Str( _pos_pripr->kolicina * _pos_pripr->cijena, 10, 2 ) } } )
-   AAdd( ImeKol, { "Popust", {|| Str( pos_popust(_pos_pripr->cijena, _pos_pripr->ncijena), 8, 2 ) } } )
+   AAdd( ImeKol, { "Popust", {|| Str( pos_popust( _pos_pripr->cijena, _pos_pripr->ncijena ), 8, 2 ) } } )
    AAdd( ImeKol, { "Ukupno NETO", {|| Str( _pos_pripr->kolicina * pos_pripr_neto_cijena(), 10, 2 ) } } )
    AAdd( ImeKol, { "Tarifa", {|| _pos_pripr->idtarifa } } )
    FOR i := 1 TO Len( ImeKol )
@@ -77,6 +77,10 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    SELECT _pos_pripr
    SET ORDER TO
    GO TOP
+   IF _pos_pripr->idvd = POS_IDVD_RACUN .AND. !Empty( _pos_pripr->opis )
+      Alert( _u( "Predhodno ažuriranje nije bilo uspješno, da li je fiskalni račun izdat?" ) )
+      MsgBeep("Ako je fiskalni račun izdat, zaključite račun")
+   ENDIF
 
    Scatter()
    _idpos := gPosProdajnoMjesto
@@ -121,7 +125,6 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       READ
 
       @ box_x_koord() + 4, box_y_koord() + 25 SAY Space ( 11 )
-
       IF LastKey() == K_ESC
          IF valid_dodaj_taksu_za_gorivo()
             EXIT
@@ -142,8 +145,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       _idtarifa := roba->idtarifa
       Gather()
 
-      //pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )
-      //pos_racun_popust( pos_racun_popust() + _pos_pripr->ncijena * _pos_pripr->kolicina )
+      // pos_racun_iznos( pos_racun_iznos() + _pos_pripr->cijena * _pos_pripr->kolicina )
+      // pos_racun_popust( pos_racun_popust() + _pos_pripr->ncijena * _pos_pripr->kolicina )
 
       s_oBrowse:goBottom()
       s_oBrowse:refreshAll()

@@ -14,7 +14,7 @@
 STATIC s_cRazmak1 := " "
 STATIC s_cZahtjevNula := "0"
 
-FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lStornoRacun )
+FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lStornoRacun, bOutputHandler )
 
    LOCAL cFiskalniRacunBroj, cVrstaPlacanja, nTotalPlac, cXml, nI
    LOCAL nKolicina, nCijena, nPopust
@@ -107,6 +107,9 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    cOutput += xml_subnode( "TremolFpServer", .T. )
    close_xml()
 
+   IF bOutputHandler <> NIL
+      EVAL( bOutputHandler, cOutput )
+   ENDIF
    log_write_file( "FISC_RN:" + cOutput, 2 )
 
    RETURN 0
@@ -245,8 +248,8 @@ FUNCTION tremol_reset_plu_artikla( hFiskalniParams )
 
    close_xml()
 
-   IF tremol_cekam_fajl_odgovora( hFiskalniParams, cFiskalniFajlName )
-      nErrorLevel := tremol_read_error( hFiskalniParams, cFiskalniFajlName )
+   IF tremol_cekam_fajl_odgovora( hFiskalniParams, cFiskalniFajlName ) >= 0
+      nErrorLevel := tremol_read_output( hFiskalniParams, cFiskalniFajlName )
    ENDIF
 
    RETURN nErrorLevel
@@ -267,11 +270,10 @@ FUNCTION tremol_komanda( hFiskalniParams, cmd )
    create_xml( cXml )
    xml_head()
    xml_subnode( "TremolFpServer " + cmd )
-
    close_xml()
 
-   IF tremol_cekam_fajl_odgovora( hFiskalniParams, cFiskalniFajlName )
-      nErrorLevel := tremol_read_error( hFiskalniParams, cFiskalniFajlName )
+   IF tremol_cekam_fajl_odgovora( hFiskalniParams, cFiskalniFajlName ) >= 0
+      nErrorLevel := tremol_read_output( hFiskalniParams, cFiskalniFajlName )
    ELSE
       nErrorLevel := FISK_NEMA_ODGOVORA
    ENDIF
@@ -465,7 +467,6 @@ FUNCTION tremol_stampa_kopije_racuna( hFiskalniParams )
    RETURN nErrorLevel
 
 
-
 FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
 
    LOCAL cOutFile
@@ -474,7 +475,7 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
    LOCAL cStatus
    LOCAL cMsg
    LOCAL cDN := " "
-   LOCAL GetList := ""
+   LOCAL GetList := {}
    LOCAL nBroj
 
    IF nTimeOut == NIL
@@ -506,7 +507,6 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
             cStatus := "FAJL"
             EXIT
          ENDIF
-
          @ box_x_koord() + 3, box_y_koord() + 2 SAY8 PadR( "TREMOL: Čekam odgovor... " + AllTrim( Str( nTime ) ), 48 )
          IF nTime == 0
             cStatus := "TIMEOUT"
@@ -542,6 +542,7 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
       cMsg := "TREMOL: Ne postoji fajl odgovora (OUT) ?!"
       MsgBeep( cMsg )
       log_write_file( "FISK_RN_ERROR: " + cMsg, 2 )
+      nBroj := 0
 
       Box( "#FISK_RN", 3, 60 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Da li je fiskalni račun ipak odštampan kupcu (D/N) ?" GET cDN PICT "@!" VALID cDN $ "DN"
@@ -560,7 +561,8 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
       ENDIF
       BoxC()
 
-      Alert( "Vaši odgovori su zabilježeni !" )
+      Alert( _u( "Vaša operacija je zabilježena. Obavijestite kontrolora!" ) )
+      AltD()
       cMsg := "FISK_RN_ERROR: fiskalni račun " + AllTrim( Str( nBroj ) ) + " je ipak odštampan kupcu!"
       log_write_file( cMsg, 2 )
       log_write( cMsg, 2 )
@@ -571,7 +573,7 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
    RETURN 0
 
 
-FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )
+FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTotal )
 
    LOCAL oFile, cLinija, aLinije, nI, cBrojRacuna, cErrorCode
    LOCAL cErrorReport
@@ -581,6 +583,9 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )
    LOCAL nErrorLevel := FISK_ERROR_NEPOZNATO
    LOCAL cFiskalniFajlName
    LOCAL lFiskalniRacun
+   LOCAL cKeyValuePar
+   LOCAL cSuccessCode, lSuccess
+   LOCAL cTotal
 
    // primjer: c:\fiscal\00001.out
    cFiskalniFajlName := AllTrim( hFiskalniParams[ "out_dir" ] + StrTran( cFajl, "xml", "out" ) )
@@ -616,7 +621,6 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )
          cLinija := StrTran( cLinija, Chr( 9 ), " " )
       ENDIF
 
-      // dobijamo npr:
       // ErrorCode=0 ErrorOPOS=OPOS_SUCCESS ErrorDescription=Uspjesno kreiran
       // Output Change=0.00 ReceiptNumber=00552 Total=51.20
       aLinije := TokToNiz( cLinija, Space( 1 ) )
@@ -634,33 +638,45 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )
    // <TremolFpServerOutput ErrorCode="0" ErrorFP="0" ErrorDescription="">
    // <Output Total="7.40" Change="0.00" ReceiptNumber="BROJRACUNA">
    // </TremolFpServerOutput>
-   
-   IF is_windows()
-      nScan := AScan( aParoviKeyValue, {| cKeyValuePar | "OPOS_SUCCESS" $ cKeyValuePar } )
-   ELSE
-      nScan := AScan( aParoviKeyValue, {| cKeyValuePar | "ErrorFP=0" $ cKeyValuePar } )
-   ENDIF
-   IF nScan > 0
-      // nema greske, komanda je uspjela; ako je rijec o racunu uzmi broj fiskalnog racuna
-      nScan := AScan( aParoviKeyValue, {| cKeyValuePar | "ReceiptNumber" $ cKeyValuePar } )
-      IF nScan <> 0
-         // ReceiptNumber=241412
-         aTokens := TokToNiz( aParoviKeyValue[ nScan ], "=" )
-         cBrojRacuna := AllTrim( aTokens[ 2 ] )
-         IF !Empty( cBrojRacuna )
-            nBrojFiskalnoRacunaOut := Val( cBrojRacuna )
+
+   IF lFiskalniRacun
+      nTotal := -99999
+      lSuccess := .F.
+      FOR EACH cKeyValuePar in aParoviKeyValue
+         IF is_windows()
+            cSuccessCode := "OPOS_SUCCESS"
+         ELSE
+            cSuccessCode := "ErrorFP=0"
          ENDIF
-      ENDIF
-      fiskalni_brisi_odgovor(cFiskalniFajlName)
-      RETURN 0
-   ELSE
-      IF lFiskalniRacun
-         fiskalni_brisi_odgovor(cFiskalniFajlName)
+         IF cSuccessCode $ cKeyValuePar
+            lSuccess := .T.
+         ENDIF
+         // ReceiptNumber=241412
+         IF "ReceiptNumber" $ cKeyValuePar
+            aTokens := TokToNiz( cKeyValuePar, "=" )
+            cBrojRacuna := AllTrim( aTokens[ 2 ] )
+            IF !Empty( cBrojRacuna )
+               nBrojFiskalnoRacunaOut := Val( cBrojRacuna )
+            ENDIF
+         ENDIF
+         // OutputTotal="7.40"
+         IF "OutputTotal" $ cKeyValuePar
+            aTokens := TokToNiz( cKeyValuePar, "=" )
+            cTotal := AllTrim( aTokens[ 2 ] )
+            IF !Empty( cBrojRacuna )
+               nTotal := Val( cTotal )
+            ENDIF
+         ENDIF
+      NEXT
+      fiskalni_brisi_odgovor( cFiskalniFajlName )
+      IF lSuccess
+         RETURN 0
+      ELSE
          RETURN FISK_ERROR_NEMA_BROJA_RACUNA
       ENDIF
    ENDIF
 
-   // kraj sto se tice fiskalnog racuna
+   // ---- kraj sto se tice fiskalnog racuna ------------------------------------------
    // slijedi dio koji se odnosi na ostale fiskalne komande
    cErrorReport := ""
    nScan := AScan( aParoviKeyValue, {| cLinija | "ErrorCode" $ cLinija } ) // imamo gresku !!! ispisi je
@@ -683,7 +699,6 @@ FUNCTION tremol_read_error( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut )
       aTokens := TokToNiz( aParoviKeyValue[ nScan ], "=" )
       cErrorReport += " ErrorOPOS: " + AllTrim( aTokens[ 2 ] )
    ENDIF
-
    nScan := AScan( aParoviKeyValue, {| val | "ErrorDescription" $ val } )
    IF nScan <> 0
       // ErrorDescription=xxxxxxx
@@ -726,4 +741,3 @@ STATIC FUNCTION tremol_fix_xml_date( dDate )
    xRet += cTmp
 
    RETURN xRet
- xRet
