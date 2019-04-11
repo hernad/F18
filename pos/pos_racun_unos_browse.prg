@@ -78,8 +78,8 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    SET ORDER TO
    GO TOP
    IF _pos_pripr->idvd = POS_IDVD_RACUN .AND. !Empty( _pos_pripr->opis )
-      Alert( _u( "Predhodno ažuriranje nije bilo uspješno, da li je fiskalni račun izdat?" ) )
-      MsgBeep("Ako je fiskalni račun izdat, zaključite račun")
+      Alert( _u( "Predhodno ažuriranje nije bilo uspješno, da li je fiskalni račun izdan?" ) )
+      MsgBeep("Ako je fiskalni račun izdan, zaključite račun")
    ENDIF
 
    Scatter()

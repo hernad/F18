@@ -71,7 +71,7 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
    __DRV_CURRENT := cFiskalniDrajver
 
    IF postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, cFiskalniDrajver )
-      MsgBeep( "Za dokument " + cIdFirma + "-" + cIdTipDok + "-" + AllTrim( cBrDok ) + " već postoji izdat fiskalni račun !" )
+      MsgBeep( "Za dokument " + cIdFirma + "-" + cIdTipDok + "-" + AllTrim( cBrDok ) + " već postoji izdan fiskalni račun !" )
       RETURN nErrorLevel
    ENDIF
 
