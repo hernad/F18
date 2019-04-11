@@ -23,7 +23,7 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    LOCAL cCommand := ""
    LOCAL cKupacId, cKupacIme, cKupacAdresa, cKupacGrad
    LOCAL cFiscTxt, cFiskRefundTxt, cFiskKupacTxt, cFiskalniFajlName
-   LOCAL cOutput
+   LOCAL cOutput := ""
 
    tremol_delete_tmp( hFiskalniParams )  // pobrisi tmp fajlove i ostalo sto je u input direktoriju
 
@@ -36,7 +36,7 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    cXml := hFiskalniParams[ "out_dir" ] + cFiskalniFajlName // putanja do izlaznog xml fajla
 
    create_xml( cXml )
-   cOutput := xml_head()
+   xml_head()
 
    cFiscTxt := 'TremolFpServer Command="Receipt"'
    cFiskRefundTxt := ''
@@ -108,7 +108,7 @@ FUNCTION fiskalni_tremol_racun( hFiskalniParams, aRacunStavke, aRacunHeader, lSt
    close_xml()
 
    IF bOutputHandler <> NIL
-      EVAL( bOutputHandler, cOutput )
+      Eval( bOutputHandler, cOutput )
    ENDIF
    log_write_file( "FISC_RN:" + cOutput, 2 )
 
@@ -141,23 +141,27 @@ FUNCTION tremol_restart( hFiskalniParams )
 FUNCTION tremol_delete_tmp( hFiskParams )
 
    LOCAL cTmp
-   LOCAL _f_path
+   LOCAL cFilePath
 
    MsgO( "brisem tmp fajlove..." )
 
-   _f_path := hFiskParams[ "out_dir" ]
+   cFilePath := hFiskParams[ "out_dir" ]
    cTmp := "*.*"
 
-   AEval( Directory( _f_path + cTmp ), {| aFile | FErase( _f_path + ;
-      AllTrim( aFile[ 1 ] ) ) } )
+   AEval( Directory( cFilePath + cTmp ), {| aFile | tremol_delete_file( cFilePath + AllTrim( aFile[ 1 ] ) ) } )
    Sleep( 1 )
 
    MsgC()
 
    RETURN .T.
 
+STATIC FUNCTION tremol_delete_file( cFile )
 
+   log_write_file( "FISK_RN: INIT_DEL: " + cFile, 2 )
+   log_write_file( "FISK_RN: CONTENT: " + file_to_str( cFile ), 2 )
+   FErase( cFile )
 
+   RETURN .T.
 
 FUNCTION tremol_polog( hFiskalniParams, AUTO )
 
