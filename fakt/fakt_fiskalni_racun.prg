@@ -852,7 +852,7 @@ STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 
    LOCAL _path := s_hFiskalniParams[ "out_dir" ]
    LOCAL _filename := s_hFiskalniParams[ "out_file" ]
-   LOCAL nFiskalniBroj := 0
+   LOCAL nBrojFiskalnogRacuna := 0
    LOCAL _total := aRacunData[ 1, 14 ]
    LOCAL _partn_naz
    LOCAL nErrorLevel
@@ -861,12 +861,12 @@ STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 
    fiskalni_fprint_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno )
 
-   nErrorLevel := fprint_read_error( s_hFiskalniParams, @nFiskalniBroj, lStorno )
+   nErrorLevel := fprint_read_error( s_hFiskalniParams, @nBrojFiskalnogRacuna, lStorno )
 
    IF nErrorLevel == -9
       IF Pitanje(, "Da li je nestalo trake (D/N) ?", "N" ) == "D"
          IF Pitanje(, "Ubacite traku i pritisnite 'D'", " " ) == "D"
-            nErrorLevel := fprint_read_error( s_hFiskalniParams, @nFiskalniBroj, lStorno )
+            nErrorLevel := fprint_read_error( s_hFiskalniParams, @nBrojFiskalnogRacuna, lStorno )
          ENDIF
       ENDIF
    ENDIF
@@ -879,7 +879,7 @@ STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
       ENDIF
    ENDIF
 
-   IF nFiskalniBroj <= 0
+   IF nBrojFiskalnogRacuna <= 0
       nErrorLevel := 1
    ENDIF
 
@@ -891,13 +891,13 @@ STATIC FUNCTION fakt_to_fprint( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 
    IF !Empty( param_racun_na_email() ) .AND. cIdTipDok $ "#11#"
       _partn_naz := _get_partner_for_email( cIdFirma, cIdTipDok, cBrDok )
-      fakt_fisk_send_email( nFiskalniBroj, cIdTipDok + "-" + AllTrim( cBrDok ), _partn_naz, NIL, _total )
+      fakt_fisk_send_email( nBrojFiskalnogRacuna, cIdTipDok + "-" + AllTrim( cBrDok ), _partn_naz, NIL, _total )
    ENDIF
 
-   fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj, lStorno )
+   fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nBrojFiskalnogRacuna, lStorno )
 
    IF !s_lFiskalniSilentPrint
-      MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nFiskalniBroj ) ) )
+      MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
    ENDIF
 
    RETURN nErrorLevel
@@ -992,28 +992,28 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 
    LOCAL nErrorLevel := 0
    LOCAL cFiskalniIme
-   LOCAL nFiskalniBroj := -1
+   LOCAL nBrojFiskalnogRacuna := -1
    LOCAL nTremolCeka := -1
 
    nErrorLevel := fiskalni_tremol_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno ) // stampaj racun
    cFiskalniIme := AllTrim( fiscal_out_filename( s_hFiskalniParams[ "out_file" ], cBrDok ) )
    nTremolCeka := tremol_cekam_fajl_odgovora( s_hFiskalniParams, cFiskalniIme, s_hFiskalniParams[ "timeout" ] )
    IF nTremolCeka == 0
-      nErrorLevel := tremol_read_error( s_hFiskalniParams, cFiskalniIme, @nFiskalniBroj )
+      nErrorLevel := tremol_read_error( s_hFiskalniParams, cFiskalniIme, @nBrojFiskalnogRacuna )
    ELSEIF nTremolCeka > 0
       log_write_file( "prodavac manuelno naveo broj racuna " + AllTrim( Str( nTremolCeka ) ), 2 )
       nErrorLevel := 0
-      nFiskalniBroj := nTremolCeka
+      nBrojFiskalnogRacuna := nTremolCeka
    ELSE
       nErrorLevel := -99
    ENDIF
 
    IF nErrorLevel == 0 .AND. !lStorno // vrati broj fiskalnog racuna
-      IF nFiskalniBroj > 0
+      IF nBrojFiskalnogRacuna > 0
          IF !s_lFiskalniSilentPrint
-            MsgBeep( "Kreiran fiskalni račun br: " + AllTrim( Str( nFiskalniBroj ) ) )
+            MsgBeep( "Kreiran fiskalni račun br: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
          ENDIF
-         fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj ) // ubaci broj fiskalnog racuna u fakturu
+         fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nBrojFiskalnogRacuna ) // ubaci broj fiskalnog racuna u fakturu
 
       ENDIF
       FErase( s_hFiskalniParams[ "out_dir" ] + cFiskalniIme )
@@ -1025,14 +1025,14 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunH
 STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHeader, lStorno )
 
    LOCAL nErrorLevel := 0
-   LOCAL nFiskalniBroj := 0
+   LOCAL nBrojFiskalnogRacuna := 0
 
    nErrorLevel := fiskalni_hcp_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno, aRacunData[ 1, 14 ] )
    IF nErrorLevel = 0
 
-      nFiskalniBroj := fiskalni_hcp_get_broj_racuna( s_hFiskalniParams, lStorno )
-      IF nFiskalniBroj > 0
-         fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj, lStorno )
+      nBrojFiskalnogRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniParams, lStorno )
+      IF nBrojFiskalnogRacuna > 0
+         fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nBrojFiskalnogRacuna, lStorno )
 
       ENDIF
 
@@ -1143,7 +1143,7 @@ STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHe
 
    LOCAL nErrorLevel := 0
    LOCAL _trig := 1
-   LOCAL nFiskalniBroj := 0
+   LOCAL nBrojFiskalnogRacuna := 0
 
    IF lStorno
       _trig := 2
@@ -1156,9 +1156,9 @@ STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHe
    tring_rn( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno )
 
    // procitaj gresku
-   nErrorLevel := tring_read_error( s_hFiskalniParams, @nFiskalniBroj, _trig )
+   nErrorLevel := tring_read_error( s_hFiskalniParams, @nBrojFiskalnogRacuna, _trig )
 
-   IF nFiskalniBroj <= 0
+   IF nBrojFiskalnogRacuna <= 0
       nErrorLevel := 1
    ENDIF
 
@@ -1172,8 +1172,8 @@ STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, aRacunHe
    ELSE
       tring_delete_answer( s_hFiskalniParams, _trig )
       // ubaci broj fiskalnog racuna u fakturu
-      fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj )
-      MsgBeep( "Kreiran fiskalni racun broj: " + AllTrim( Str( nFiskalniBroj ) ) )
+      fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nBrojFiskalnogRacuna )
+      MsgBeep( "Kreiran fiskalni racun broj: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
    ENDIF
 
    RETURN nErrorLevel

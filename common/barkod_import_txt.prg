@@ -38,8 +38,9 @@ FUNCTION bterm_txt_to_tbl( cTxtFile )
 
    LOCAL cDelimiter := ";"
    LOCAL aDbf := {}
-   LOCAL _o_file
+   LOCAL oFile
    LOCAL cTmp
+   LOCAL cVar, aRow, nTmp
 
    cTxtFile := AllTrim( cTxtFile )
 
@@ -48,8 +49,6 @@ FUNCTION bterm_txt_to_tbl( cTxtFile )
 
    // polja tabele TEMP.DBF
    get_term_tbl_struct( @aDbf )
-
-   // kreiraj tabelu
    cre_temp_tbl( aDbf, .T. )
 
    IF !File( my_home() + my_dbf_prefix() + "temp.dbf" )
@@ -66,31 +65,27 @@ FUNCTION bterm_txt_to_tbl( cTxtFile )
 
    // zatim iscitaj fajl i ubaci podatke u tabelu
 
-   _o_file := TFileRead():New( cTxtFile )
-   _o_file:Open()
+   oFile := TFileRead():New( cTxtFile )
+   oFile:Open()
 
-   IF _o_file:Error()
-      MsgBeep( _o_file:ErrorMsg( "Problem sa otvaranjem fajla: " ) )
+   IF oFile:Error()
+      MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " ) )
       RETURN .F.
    ENDIF
 
    // prodji kroz svaku liniju i insertuj zapise u temp.dbf
 
-   WHILE _o_file:MoreToRead()
+   DO WHILE oFile:MoreToRead()
 
-      // uzmi u cText liniju fajla
-      cVar := hb_StrToUTF8( _o_file:ReadLine() )
-
+      cVar := hb_StrToUTF8( oFile:ReadLine() )
       IF Empty( cVar )
          LOOP
       ENDIF
 
       aRow := csvrow2arr( cVar, cDelimiter )
-
       // struktura podataka u txt-u je
       // [1] - barkod
       // [2] - kolicina
-
       // pa uzimamo samo sta nam treba
       cTmp := PadR( AllTrim( aRow[ 1 ] ), 13 )
       nTmp := Val ( AllTrim( aRow[ 2 ] ) )
@@ -122,10 +117,9 @@ FUNCTION bterm_txt_to_tbl( cTxtFile )
 
    ENDDO
 
-   _o_file:Close()
+   oFile:Close()
 
    SELECT temp
-
    MsgBeep( "Import txt => temp - OK" )
 
    RETURN .T.

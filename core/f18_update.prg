@@ -37,22 +37,18 @@ FUNCTION download_version( cUrl, lForceRefresh )
 
    oFile := TFileRead():New( cFileName )
    oFile:Open()
-
    IF oFile:Error()
       BoxC()
       MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " + cFileName ) )
       RETURN ""
    ENDIF
-
    cRead := oFile:ReadLine()
-
    oFile:Close()
    FErase( cFileName )
 
    BoxC()
 
    aMatch := hb_regex( pRegex, cRead )
-
    IF Len( aMatch ) < 4 // aMatch[1]="2.3.500" aMatch[2]="2", aMatch[3]="3", aMatch[4]="500"
       MsgBeep( "VERSION format error (" + cRead + ")"  )
       RETURN ""

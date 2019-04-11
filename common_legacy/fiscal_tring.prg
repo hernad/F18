@@ -109,7 +109,7 @@ FUNCTION tring_rn( dev_param, items, head, storno )
    LOCAL _err_level := 0
    LOCAL _reklamni_racun
    LOCAL _trig
-   LOCAL _f_name := dev_param[ "out_file" ]
+   LOCAL cFileName := dev_param[ "out_file" ]
    LOCAL _f_path := dev_param[ "out_dir" ]
 
    // stampanje racuna
@@ -136,14 +136,14 @@ FUNCTION tring_rn( dev_param, items, head, storno )
 
    // putanja do izlaznog xml fajla
    IF storno
-      _f_name := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_rrac )
+      cFileName := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_rrac )
       _trig := 2
    ELSE
-      _f_name := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_rac )
+      cFileName := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_rac )
    ENDIF
 
    // c:\tring\xml\sfr.001
-   _xml := _f_path + _f_name
+   _xml := _f_path + cFileName
 
    // brisi answer
    tring_delete_answer( dev_param, _trig )
@@ -260,7 +260,7 @@ FUNCTION tring_rn( dev_param, items, head, storno )
 // ----------------------------------------------
 FUNCTION tring_polog( dev_param )
 
-   LOCAL _f_name
+   LOCAL cFileName
    LOCAL _xml
    LOCAL _zahtjev_broj := "0"
    LOCAL _zahtjev_vrsta := "7"
@@ -277,12 +277,12 @@ FUNCTION tring_polog( dev_param )
       RETURN
    ENDIF
 
-   _f_name := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_p_in )
+   cFileName := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_p_in )
 
    IF _cash < 0
       // ovo je povrat
       _zahtjev_vrsta := "8"
-      _f_name := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_p_out )
+      cFileName := fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _tr_p_out )
       _trig := 7
    ENDIF
 
@@ -290,7 +290,7 @@ FUNCTION tring_polog( dev_param )
    tring_delete_answer( dev_param, _trig )
 
    // c:\tring\xml\unosnovca.001
-   _xml := dev_param[ "out_dir" ] + _f_name
+   _xml := dev_param[ "out_dir" ] + cFileName
 
    // otvori xml
    create_xml( _xml )
@@ -749,19 +749,19 @@ STATIC FUNCTION fprint_formatiranje_datuma( dDate, cPattern )
 // ------------------------------------------
 FUNCTION tring_read_error( dev_param, fisc_no, trig )
 
-   LOCAL _err := 0
+   LOCAL nErr := 0
    LOCAL _trig := trg_trig( trig )
-   LOCAL _f_name
+   LOCAL cFileName
    LOCAL nI, _time
-   LOCAL _err_data, _scan, _err_txt
+   LOCAL _err_data, _scan, cErrorTxt
    LOCAL _ok
-   LOCAL _o_file
-   LOCAL _fisc_txt
+   LOCAL oFile
+   LOCAL cFiskalniTxt
 
    _time := dev_param[ "timeout" ]
 
    // primjer: c:\tring\xml\odgovori\sfr.001
-   _f_name := dev_param[ "out_dir" ] + ;
+   cFileName := dev_param[ "out_dir" ] + ;
       _d_answer + ;
       SLASH + ;
       fiscal_out_filename( dev_param[ "out_file" ], __zahtjev_nula, _trig )
@@ -776,8 +776,7 @@ FUNCTION tring_read_error( dev_param, fisc_no, trig )
    DO WHILE _time > 0
 
       -- _time
-
-      IF File( _f_name )
+      IF File( cFileName )
          // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
@@ -790,47 +789,47 @@ FUNCTION tring_read_error( dev_param, fisc_no, trig )
 
    BoxC()
 
-   IF !File( _f_name )
-      MsgBeep( "Fajl " + _f_name + " ne postoji !" )
+   IF !File( cFileName )
+      MsgBeep( "Fajl " + cFileName + " ne postoji !" )
       fisc_no := 0
-      _err := -9
-      RETURN _err
+      nErr := -9
+      RETURN nErr
    ENDIF
 
    fisc_no := 0
 
-   _o_file := TFileRead():New( _f_name )
-   _o_file:Open()
+   oFile := TFileRead():New( cFileName )
+   oFile:Open()
 
-   IF _o_file:Error()
-      MsgBeep( _o_file:ErrorMsg( "Problem sa otvaranjem fajla: " + _f_name ) )
+   IF oFile:Error()
+      MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " + cFileName ) )
       RETURN -9
    ENDIF
 
-   _fisc_txt := ""
+   cFiskalniTxt := ""
    _ok := .F.
 
    // prodji kroz svaku liniju i procitaj zapise
-   WHILE _o_file:MoreToRead()
+   WHILE oFile:MoreToRead()
 
       // uzmi u cErr liniju fajla
-      _err_txt := hb_StrToUTF8( _o_file:ReadLine() )
+      cErrorTxt := hb_StrToUTF8( oFile:ReadLine() )
 
       // ovo je dodavanje artikla
-      IF ( "<?xml" $ _err_txt ) .OR. ;
-            ( "<KasaOdgovor" $ _err_txt ) .OR. ;
-            ( "</KasaOdgovor" $ _err_txt ) .OR. ;
-            ( "<Odgovor" $ _err_txt ) .OR. ;
-            ( "</Odgovor" $ _err_txt )
+      IF ( "<?xml" $ cErrorTxt ) .OR. ;
+            ( "<KasaOdgovor" $ cErrorTxt ) .OR. ;
+            ( "</KasaOdgovor" $ cErrorTxt ) .OR. ;
+            ( "<Odgovor" $ cErrorTxt ) .OR. ;
+            ( "</Odgovor" $ cErrorTxt )
          // preskoci
          LOOP
       ENDIF
 
-      AAdd( _err_data, _err_txt )
+      AAdd( _err_data, cErrorTxt )
 
    ENDDO
 
-   _o_file:Close()
+   oFile:Close()
 
    // sad imam matricu sa linijama
    // aErr_data[1, "<Naziv>OK</Naziv>"]
@@ -848,8 +847,8 @@ FUNCTION tring_read_error( dev_param, fisc_no, trig )
 
    IF _ok == .F.
       // nije ispravna komanda
-      _err := 1
-      RETURN _err
+      nErr := 1
+      RETURN nErr
    ENDIF
 
    // sada cemo potraziti broj fiskalnog racuna
@@ -863,7 +862,7 @@ FUNCTION tring_read_error( dev_param, fisc_no, trig )
       fisc_no := fisc_get_broj_fiskalnog_racuna( _err_data[ _scan + 1 ] )
    ENDIF
 
-   RETURN _err
+   RETURN nErr
 
 
 

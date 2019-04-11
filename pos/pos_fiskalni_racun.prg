@@ -196,29 +196,29 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
 STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel
-   LOCAL nBrojFiskalnoRacuna := 0
+   LOCAL nBrojFiskalnogRacuna := 0
 
    fprint_delete_answer( s_hFiskalniUredjajParams )
    fiskalni_fprint_racun( s_hFiskalniUredjajParams, aRacunStavke, NIL, lStorno )
 
-   nErrorLevel := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnoRacuna )
+   nErrorLevel := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnogRacuna )
    IF nErrorLevel = -9
       IF Pitanje(, "Da li je nestalo trake ?", "N" ) == "D"
          IF Pitanje(, "Zamjenite traku i pritisnite 'D'", "D" ) == "D"
-            log_write_file("FISK_RN: nestalo trake - nastaviti sa cekanjem odgovora", 2)
-            nErrorLevel := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnoRacuna )
+            log_write_file( "FISK_RN: nestalo trake - nastaviti sa cekanjem odgovora", 2 )
+            nErrorLevel := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnogRacuna )
          ENDIF
       ELSE
-         log_write_file("FISK_RN: nije nestalo trake", 2)
+         log_write_file( "FISK_RN: nije nestalo trake", 2 )
       ENDIF
    ENDIF
 
-   IF nBrojFiskalnoRacuna <= 0
+   IF nBrojFiskalnogRacuna <= 0
       nErrorLevel := 1
    ENDIF
 
    IF nErrorLevel <> 0
-      IF pos_da_li_je_racun_fiskalizovan( @nBrojFiskalnoRacuna )
+      IF pos_da_li_je_racun_fiskalizovan( @nBrojFiskalnogRacuna )
          nErrorLevel := 0
       ELSE
          fprint_delete_out( s_hFiskalniUredjajParams )
@@ -227,9 +227,9 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
 
    ENDIF
 
-   IF ( nBrojFiskalnoRacuna > 0 .AND. nErrorLevel == 0 )
-      IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-         MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+   IF ( nBrojFiskalnogRacuna > 0 .AND. nErrorLevel == 0 )
+      IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
+         MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
       ELSE
          nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
       ENDIF
@@ -241,18 +241,18 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
 STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel
-   LOCAL cFiskalniFajl
-   LOCAL nBrojFiskalnoRacuna := 0
+   LOCAL cFiskalniFajlOdgovor
+   LOCAL nBrojFiskalnogRacuna := 0
    LOCAL aRacunHeader := NIL
+   LOCAL cFileWithPath
 
    nErrorLevel := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno )
-
-   cFiskalniFajl := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
-   IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajl )
-      nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajl, @nBrojFiskalnoRacuna )
-      IF nErrorLevel == 0 .AND. nBrojFiskalnoRacuna > 0
-         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+   cFiskalniFajlOdgovor := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
+   IF tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajlOdgovor )
+      nErrorLevel := tremol_read_error( s_hFiskalniUredjajParams, cFiskalniFajlOdgovor, @nBrojFiskalnogRacuna )
+      IF nErrorLevel == 0 .AND. nBrojFiskalnogRacuna > 0
+         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
+            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
          ELSE
             nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
          ENDIF
@@ -266,25 +266,23 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    log_write_file( "FISK_RN: TREMOL " +  AllTrim( cIdPos ) + "-" + AllTrim( cIdVd ) + "-" + AllTrim( cBrDok ) + ;
       " err level: " + AllTrim( Str( nErrorLevel ) ), 2 )
 
-   FErase( s_hFiskalniUredjajParams[ "out_dir" ] + cFiskalniFajl ) // obrisi fajl da ne bi ostao kada server proradi ako je greska
-
    RETURN nErrorLevel
 
 
 STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno, nUplaceniIznos )
 
    LOCAL nErrorLevel := 0
-   LOCAL nBrojFiskalnoRacuna := 0
+   LOCAL nBrojFiskalnogRacuna := 0
 
    IF nUplaceniIznos == NIL
       nUplaceniIznos := 0
    ENDIF
    nErrorLevel := fiskalni_hcp_racun( s_hFiskalniUredjajParams, aRacunStavke, NIL, lStorno, nUplaceniIznos )
    IF nErrorLevel == 0
-      nBrojFiskalnoRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
-      IF nBrojFiskalnoRacuna > 0
-         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnoRacuna )
-            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnoRacuna ) ) )
+      nBrojFiskalnogRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
+      IF nBrojFiskalnogRacuna > 0
+         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
+            MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
          ELSE
             nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
          ENDIF

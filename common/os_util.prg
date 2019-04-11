@@ -74,9 +74,6 @@ FUNCTION AddBS( cPath )
 
 
 
-
-
-
 /* file ChangeEXT(cImeF,cExt, cExtNew, fBezAdd)
  *    Promjeni ekstenziju
  *
@@ -144,7 +141,6 @@ FUNCTION IsDirectory( cDir1 )
 
 
 
-
 FUNCTION brisi_stare_fajlove( cDir, cFilesMatch, nDana )
 
    LOCAL cFile, nCnt, nCntNew
@@ -179,6 +175,27 @@ FUNCTION brisi_stare_fajlove( cDir, cFilesMatch, nDana )
 
 FUNCTION ToUnix( cFileName )
    RETURN cFileName
+
+
+FUNCTION file_to_str( cFileName )
+
+   LOCAL oFile, cSadrzaj
+
+   cFileName := AllTrim( cFileName )
+   oFile := TFileRead():New( cFileName )
+   oFile:Open()
+   IF oFile:Error()
+      RETURN "READ_ERROR ?!"
+   ENDIF
+
+   cSadrzaj := ""
+   DO WHILE oFile:MoreToRead()
+      cSadrzaj += oFile:ReadLine()
+   ENDDO
+
+   oFile:Close()
+
+   RETURN cSadrzaj
 
 
 #pragma BEGINDUMP
@@ -258,7 +275,6 @@ HB_FUNC( __RUN_SYSTEM )
 }
 
 #pragma ENDDUMP
-
 
 
 #ifdef __PLATFORM__WINDOWS
@@ -366,77 +382,77 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
 
 #ifdef __PLATFORM__WINDOWS
 
-      IF Left( cCommand, 4 ) == "copy"
-         RETURN hb_run( cCommand )
-      ENDIF
-
-      IF ValType( hOutput ) == "H"
-         nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr )
-         hOutput[ "stdout" ] := cStdOut
-         hOutput[ "stderr" ] := cStdErr
-      ELSE
-         IF LEFT( cCommand, 4 ) != "cmd " .AND. LEFT( cCommand, 5 ) != "start"
-            cCommand := "cmd /c " + cCommand
-            IF lAsync
-               cCommand := "start " + cCommand
-            ENDIF
-         ENDIF
-          ?E "win32_run:", cCommand
-          nRet := __WIN32_SYSTEM( cCommand )
-          ?E "win32_run exit:", nRet
-      ENDIF
-
-      RETURN nRet
-#endif
-
-   IF lAsync
-      nRet := __run_system( cCommand + "&" ) // .AND. ( is_linux() .OR. is_mac()
-   ELSE
-// cCommand := get_run_cmd_with_prefix( cCommand, lAsync )
-      nRet := hb_processRun( cCommand , NIL, @cStdOut, @cStdErr, lAsync )
-   ENDIF
-
-   ?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
-
-   IF nRet == 0
-      info_bar( "run1", cCommand  + " : " + cStdOut + " : " + cStdErr )
-   ELSE
-      error_bar( "run1", cCommand  + " " + " : " + cStdOut + " : " + cStdErr )
-      cPrefixCmd := get_run_prefix_cmd( cCommand )
-
-// #ifdef __PLATFORM__UNIX
-      IF lAsync
-         nRet := __run_system( cPrefixCmd + cCommand + "&" )
-      ELSE
-         nRet := hb_processRun( cPrefixCmd + cCommand , NIL, @cStdOut, @cStdErr )
-      ENDIF
-// # else
-// nRet := hb_processRun( cPrefixCmd + cCommand, NIL, @cStdOut, @cStdErr, lAsync )
-// #endif
-      ?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
-
-
-      IF nRet == 0
-         info_bar( "run2", cPrefixCmd + cCommand + " : " + cStdOut + " : " + cStdErr )
-      ELSE
-         error_bar( "run2", cPrefixCmd + cCommand  + " : " + cStdOut + " : " + cStdErr )
-
-         nRet := __run_system( cCommand )  // npr. copy komanda trazi system run a ne hbprocess run
-         ?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
-         IF nRet <> 0
-            error_bar( "run3", cCommand + " : " + cStdOut + " : " + cStdErr )
-            cMsg := "ERR run cmd: " + cCommand + " : " + cStdOut + " : " + cStdErr
-            log_write( cMsg, 2 )
-         ENDIF
-
-      ENDIF
-
+   IF Left( cCommand, 4 ) == "copy"
+      RETURN hb_run( cCommand )
    ENDIF
 
    IF ValType( hOutput ) == "H"
-      hOutput[ "stdout" ] := cStdOut // hash matrica
+      nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr )
+      hOutput[ "stdout" ] := cStdOut
       hOutput[ "stderr" ] := cStdErr
+   ELSE
+      IF Left( cCommand, 4 ) != "cmd " .AND. Left( cCommand, 5 ) != "start"
+         cCommand := "cmd /c " + cCommand
+         IF lAsync
+            cCommand := "start " + cCommand
+         ENDIF
+      ENDIF
+      ?E "win32_run:", cCommand
+      nRet := __WIN32_SYSTEM( cCommand )
+      ?E "win32_run exit:", nRet
    ENDIF
+
+   RETURN nRet
+#endif
+
+IF lAsync
+nRet := __run_system( cCommand + "&" ) // .AND. ( is_linux() .OR. is_mac()
+ELSE
+// cCommand := get_run_cmd_with_prefix( cCommand, lAsync )
+nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr, lAsync )
+ENDIF
+
+?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
+
+IF nRet == 0
+info_bar( "run1", cCommand  + " : " + cStdOut + " : " + cStdErr )
+ELSE
+error_bar( "run1", cCommand  + " " + " : " + cStdOut + " : " + cStdErr )
+cPrefixCmd := get_run_prefix_cmd( cCommand )
+
+// #ifdef __PLATFORM__UNIX
+IF lAsync
+nRet := __run_system( cPrefixCmd + cCommand + "&" )
+ELSE
+nRet := hb_processRun( cPrefixCmd + cCommand, NIL, @cStdOut, @cStdErr )
+ENDIF
+// # else
+// nRet := hb_processRun( cPrefixCmd + cCommand, NIL, @cStdOut, @cStdErr, lAsync )
+// #endif
+?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
+
+
+IF nRet == 0
+info_bar( "run2", cPrefixCmd + cCommand + " : " + cStdOut + " : " + cStdErr )
+ELSE
+error_bar( "run2", cPrefixCmd + cCommand  + " : " + cStdOut + " : " + cStdErr )
+
+nRet := __run_system( cCommand )  // npr. copy komanda trazi system run a ne hbprocess run
+?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
+IF nRet <> 0
+error_bar( "run3", cCommand + " : " + cStdOut + " : " + cStdErr )
+cMsg := "ERR run cmd: " + cCommand + " : " + cStdOut + " : " + cStdErr
+log_write( cMsg, 2 )
+ENDIF
+
+ENDIF
+
+ENDIF
+
+IF ValType( hOutput ) == "H"
+hOutput[ "stdout" ] := cStdOut // hash matrica
+hOutput[ "stderr" ] := cStdErr
+ENDIF
 
    RETURN nRet
 

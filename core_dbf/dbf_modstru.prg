@@ -13,21 +13,21 @@
 
 // modifikacija struktura dbf tabele
 
-FUNCTION modstru_form_file( chs_file )
+FUNCTION modstru_form_file( cFajlCHS )
 
    LOCAL oFile
-   LOCAL _ret := {}
+   LOCAL aRet := {}
 
-   oFile := TFileRead():New( chs_file )
+   oFile := TFileRead():New( cFajlCHS )
    oFile:Open()
 
    DO WHILE oFile:MoreToRead()
-      AAdd( _ret, oFile:ReadLine() )
+      AAdd( aRet, oFile:ReadLine() )
    ENDDO
 
    oFile:Close()
 
-   RETURN modstru( _ret )
+   RETURN modstru( aRet )
 
 
 /*

@@ -1236,17 +1236,17 @@ STATIC FUNCTION fisk_dodaj_artikle_za_racun( aArr, aData, lStorno, hFiskalniPara
 
 FUNCTION fprint_delete_answer( hFiskalniParams )
 
-   LOCAL _f_name
+   LOCAL cFileName
 
-   _f_name := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_answer" ]
+   cFileName := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_answer" ]
 
    IF Empty( hFiskalniParams[ "out_answer" ] )
-      _f_name := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_file" ]
+      cFileName := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_file" ]
    ENDIF
 
    // ako postoji fajl obrisi ga
-   IF File( _f_name )
-      IF FErase( _f_name ) = -1
+   IF File( cFileName )
+      IF FErase( cFileName ) = -1
          MsgBeep( "Greška sa brisanjem fajla odgovora !" )
       ENDIF
    ENDIF
@@ -1274,16 +1274,16 @@ FUNCTION fprint_delete_out( file_path )
 //
 // nFisc_no - broj fiskalnog isjecka
 // ------------------------------------------------
-FUNCTION fprint_read_error( hFiskalniParams, fiscal_no, lStorno, time_out )
+FUNCTION fprint_read_error( hFiskalniParams, nBrojFiskalnog, lStorno, time_out )
 
    LOCAL nErrLevel := 0
-   LOCAL _f_name
+   LOCAL cFileName
    LOCAL nI
-   LOCAL _err_tmp
-   LOCAL _err_line
+   LOCAL cErrorMsg
+   LOCAL cErrorLinija
    LOCAL _time
    LOCAL _serial := hFiskalniParams[ "serial" ]
-   LOCAL _o_file, _msg, _tmp
+   LOCAL oFile, _msg, cTmp
    LOCAL cFiskalniTxt
 
    IF lStorno == NIL
@@ -1298,16 +1298,16 @@ FUNCTION fprint_read_error( hFiskalniParams, fiscal_no, lStorno, time_out )
       MsgO( "TEST: emulacija štampe na fiskalni uređaj u toku..." )
       Sleep( 4 )
       MsgC()
-      fiscal_no := 100
+      nBrojFiskalnog := 100
       RETURN nErrLevel
    ENDIF
 
    _time := time_out
 
-   _f_name := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_answer" ]
+   cFileName := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_answer" ]
 
    IF Empty( AllTrim( hFiskalniParams[ "out_answer" ] ) )
-      _f_name := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_file" ]
+      cFileName := hFiskalniParams[ "out_dir" ] + ANSW_DIR + SLASH + hFiskalniParams[ "out_file" ]
    ENDIF
 
    Box( , 3, 60 )
@@ -1324,7 +1324,7 @@ FUNCTION fprint_read_error( hFiskalniParams, fiscal_no, lStorno, time_out )
 #ifdef TEST
       IF .T.
 #else
-      IF File( _f_name )
+      IF File( cFileName )
 #endif
          log_write( "FISC: fajl odgovora se pojavio", 7 )
          EXIT
@@ -1333,7 +1333,7 @@ FUNCTION fprint_read_error( hFiskalniParams, fiscal_no, lStorno, time_out )
       IF _time == 0 .OR. LastKey() == K_ALT_Q
          log_write( "FISC ERR: timeout !", 2 )
          BoxC()
-         fiscal_no := 0
+         nBrojFiskalnog := 0
          RETURN -9
       ENDIF
 
@@ -1342,71 +1342,61 @@ FUNCTION fprint_read_error( hFiskalniParams, fiscal_no, lStorno, time_out )
    BoxC()
 
 #ifndef TEST
-   IF !File( _f_name )
-      MsgBeep( "Fajl " + _f_name + " ne postoji !" )
-      fiscal_no := 0
+   IF !File( cFileName )
+      MsgBeep( "Fajl " + cFileName + " ne postoji !" )
+      nBrojFiskalnog := 0
       nErrLevel := -9
       RETURN nErrLevel
    ENDIF
 #endif
 
-   fiscal_no := 0
+   nBrojFiskalnog := 0
    cFiskalniTxt := ""
 
-   _f_name := AllTrim( _f_name )
-
-   _o_file := TFileRead():New( _f_name )
-   _o_file:Open()
-
-   IF _o_file:Error()
-      _err_tmp := "FISC ERR: " + _o_file:ErrorMsg( "Problem sa otvaranjem fajla: " )
-      log_write( _err_tmp, 2 )
-      MsgBeep( _err_tmp )
+   cFileName := AllTrim( cFileName )
+   oFile := TFileRead():New( cFileName )
+   oFile:Open()
+   IF oFile:Error()
+      cErrorMsg := "FISC ERR: " + oFile:ErrorMsg( "Problem sa otvaranjem fajla: " )
+      log_write( cErrorMsg, 2 )
+      MsgBeep( cErrorMsg )
       nErrLevel := -9
       RETURN nErrLevel
    ENDIF
 
-   _tmp := ""
+   cTmp := ""
+   WHILE oFile:MoreToRead()
 
-   WHILE _o_file:MoreToRead()
-
-      _err_line := hb_StrToUTF8( _o_file:ReadLine() )
-      _tmp += _err_line + " ## "
-
-      IF ( "107,1," + _serial ) $ _err_line
+      cErrorLinija := hb_StrToUTF8( oFile:ReadLine() )
+      cTmp += cErrorLinija + " ## "
+      IF ( "107,1," + _serial ) $ cErrorLinija
          LOOP
       ENDIF
 
       // ovu liniju zapamti, sadrzi fiskalni racun broj
       // komanda 56, zatvaranje racuna
-      IF ( "56,1," + _serial ) $ _err_line
-         cFiskalniTxt := _err_line
+      IF ( "56,1," + _serial ) $ cErrorLinija
+         cFiskalniTxt := cErrorLinija
       ENDIF
 
-      IF "Er;" $ _err_line
-
-         _o_file:Close()
-
-         _err_tmp := "FISC ERR:" + AllTrim( _err_line )
-         log_write( _err_tmp, 2 )
-         MsgBeep( _err_tmp )
-
-         nErrLevel := nivo_greske_na_osnovu_odgovora( _err_line )
-
+      IF "Er;" $ cErrorLinija
+         oFile:Close()
+         cErrorMsg := "FISC ERR:" + AllTrim( cErrorLinija )
+         log_write( cErrorMsg, 2 )
+         MsgBeep( cErrorMsg )
+         nErrLevel := nivo_greske_na_osnovu_odgovora( cErrorLinija )
          RETURN nErrLevel
-
       ENDIF
 
    ENDDO
 
-   _o_file:Close()
-
-   log_write( "FISC ANSWER fajl sadržaj: " + _tmp, 3 )
+   oFile:Close()
+   log_write_file( "FISC ANSWER fajl sadržaj: " + cTmp, 3 )
 
    IF Empty( cFiskalniTxt )
-      log_write( "ERR FISC nema komande 56,1," + _serial + " - broj fiskalnog računa, možda vam nije dobar serijski broj !", 1 )
+      log_write_file( "ERR FISC nema komande 56,1," + _serial + " - broj fiskalnog računa, možda vam nije dobar serijski broj !", 1 )
    ELSE
-      fiscal_no := fisc_get_broj_fiskalnog_racuna( cFiskalniTxt, lStorno )
+      nBrojFiskalnog := fisc_get_broj_fiskalnog_racuna( cFiskalniTxt, lStorno )
    ENDIF
 
    RETURN nErrLevel

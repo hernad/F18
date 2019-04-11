@@ -208,27 +208,27 @@ FUNCTION OutBug( ... )
 
 STATIC FUNCTION server_info()
 
-   LOCAL _key
+   LOCAL cKey
    LOCAL hServerVars := { "server_version", "TimeZone" }
-   LOCAL _sys_info
+   LOCAL hSysInfo
 
    OutBug()
    OutBug( "/---------- BEGIN PostgreSQL vars --------/" )
    OutBug()
-   FOR EACH _key in hServerVars
-      OutBug( PadR( _key, 25 ) + ":",  server_show( _key ) )
+   FOR EACH cKey in hServerVars
+      OutBug( PadR( cKey, 25 ) + ":",  server_show( cKey ) )
    NEXT
    OutBug()
 
    OutBug( "/----------  END PostgreSQL vars --------/" )
    OutBug()
-   _sys_info := server_sys_info()
+   hSysInfo := server_sys_info()
 
-   IF _sys_info != NIL
+   IF hSysInfo != NIL
       OutBug()
       OutBug( "/-------- BEGIN PostgreSQL sys info --------/" )
-      FOR EACH _key in _sys_info:Keys
-         OutBug( PadR( _key, 25 ) + ":",  _sys_info[ _key ] )
+      FOR EACH cKey in hSysInfo:Keys
+         OutBug( PadR( cKey, 25 ) + ":",  hSysInfo[ cKey ] )
       NEXT
       OutBug()
       OutBug( "/-------  END PostgreSQL sys info --------/" )
