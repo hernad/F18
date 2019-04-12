@@ -442,6 +442,50 @@ FUNCTION pos_dostupno_artikal( cIdRoba )
    RETURN nRet
 
 
+
+FUNCTION pos_dostupna_osnovna_cijena_za_artikal( cIdRoba )
+
+   LOCAL cQuery, oRet, oError, nRet := 0
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_dostupna_osnovna_cijena_za_artikal(" + ;
+      sql_quote( cIdRoba ) + ")"
+
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
+
+      oRet := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oRet )
+         nRet := oRet:FieldGet( 1 )
+      ENDIF
+
+   RECOVER USING oError
+      Alert( _u( "pos_dostupna_osnovna_cijena_za_artikal error ?!" ) )
+   END SEQUENCE
+
+   RETURN nRet
+
+
+
+FUNCTION pos_kalo( cIdRoba )
+
+   LOCAL cQuery, oRet, oError, nRet := 0
+
+   cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_kalo(" + ;
+      sql_quote( cIdRoba ) + ")"
+
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
+
+      oRet := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oRet )
+         nRet := oRet:FieldGet( 1 )
+      ENDIF
+
+   RECOVER USING oError
+      Alert( _u( "pos_kalo artikal error ?!" ) )
+   END SEQUENCE
+
+   RETURN nRet
+
+
 FUNCTION pos_dostupno_artikal_sa_kalo( cIdRoba )
 
    LOCAL cQuery, oRet, oError, nRet := 0

@@ -137,6 +137,16 @@ FUNCTION get_pkonto_by_prodajno_mjesto( nProdavnica )
    RETURN TMP->id
 
 
+FUNCTION set_prodavnica_by_pkonto( cPKonto )
+
+      LOCAL cQuery := "select prod from " + f18_sql_schema( "koncij" ) + " where trim(id)=" + sql_quote( Trim(cPKonto) ) + " LIMIT 1"
+      LOCAL nProdavnica
+      dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
+      nProdavnica := TMP->prod
+      USE
+      pos_prodavnica( nProdavnica )
+      RETURN nProdavnica
+
 
 FUNCTION kalk_mp_inicijalizacija()
 

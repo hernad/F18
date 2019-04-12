@@ -122,16 +122,23 @@ FUNCTION kalk_get_1_11()
    select_o_koncij( _mkonto )
    SELECT kalk_pripr
 
-   _vpc := _fcj
-   @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "       NABAVNA CIJENA (NC):"
-   IF _kolicina > 0
-      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE picnc() ;
-         WHEN kalk_11_when_fcj( _idvd, @_fcj, @_error ) ;
-         VALID kalk_11_valid_fcj( _idvd, @nKolicinaNaStanju, @_vpc, @_fcj )
+   IF _idvd == POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+      set_prodavnica_by_pkonto( _pkonto )
+      @ box_x_koord() + 14, box_y_koord() + 2 SAY "POS osnovna cijena: " + Transform( pos_dostupna_osnovna_cijena_za_artikal( _idroba ), piccdem() )
    ELSE
-      @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE picdem() ;
-         WHEN kalk_11_when_fcj( _idvd, @_fcj, @_error ) ;
-         VALID kalk_11_valid_fcj( _idvd, @nKolicinaNaStanju, @_vpc, @_fcj )
+      _vpc := _fcj
+      @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "       NABAVNA CIJENA (NC):"
+      IF _kolicina > 0
+         // izlaz magacin, ulaz prodavnica
+         @ box_x_koord() + 14, box_y_koord() + 50  GET _FCj   PICTURE picnc() ;
+            WHEN kalk_11_when_fcj( _idvd, @_fcj, @_error ) ;
+            VALID kalk_11_valid_fcj( _idvd, @nKolicinaNaStanju, @_vpc, @_fcj )
+      ELSE
+         // storno izlaza magacin
+         @ box_x_koord() + 14, box_y_koord() + 50  GET _FCJ   PICTURE picdem() ;
+            WHEN kalk_11_when_fcj( _idvd, @_fcj, @_error ) ;
+            VALID kalk_11_valid_fcj( _idvd, @nKolicinaNaStanju, @_vpc, @_fcj )
+      ENDIF
    ENDIF
 
    select_o_koncij( _pkonto )

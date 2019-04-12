@@ -44,6 +44,7 @@ FUNCTION kalk_get_1_19_79()
    @ box_x_koord() + 8, box_y_koord() + 2   SAY8 "Konto koji zadužuje" GET _PKonto VALID  P_Konto( @_PKonto, 8, 30 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
+   set_prodavnica_by_pkonto( _pkonto )
 
    @ box_x_koord() + 10, box_y_koord() + 66 SAY "Tarif.br->"
    kalk_unos_get_roba_id( @GetList, @_idRoba, @_idTarifa, _idVd, kalk_is_novi_dokument(), box_x_koord() + 11, box_y_koord() + 2 )
@@ -68,14 +69,14 @@ FUNCTION kalk_get_1_19_79()
       MsgC()
    ENDIF
 
-   @ box_x_koord() + 12, box_y_koord() + 23  SAY8 "stanje: " + Transform( nKolicinaNaStanju, pickol() )
+   @ box_x_koord() + 12, box_y_koord() + 23  SAY8 "knjig stanje: " + Transform( nKolicinaNaStanju, pickol() )
    @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE pickol() WHEN kalk_when_kolicina_19_72_79()
 
    IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE .OR. _idvd == POS_IDVD_AKCIJSKE_CIJENE
       @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "Važi za period:" GET _dat_od WHEN {|| _dat_od := iif( Empty( _dat_od ), Date(), _dat_od ), .T. }
       @ Row(), Col() + 2  SAY8 "do" GET _dat_do ;
          WHEN {|| /*_dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ),*/ .T. } ;
-         VALID {|| ( Empty( _dat_do ) .AND. _idvd == POS_IDVD_AKCIJSKE_CIJENE ) .OR. _dat_do >= _dat_od }
+      VALID {|| ( Empty( _dat_do ) .AND. _idvd == POS_IDVD_AKCIJSKE_CIJENE ) .OR. _dat_do >= _dat_od }
    ELSE
       _dat_od := _datdok
       _dat_do := CToD( "" )
@@ -90,18 +91,19 @@ FUNCTION kalk_get_1_19_79()
       nKalkStaraCijena := _fcj
    ENDIF
 
-   IF kalk_is_novi_dokument() .AND.  dozvoljeno_azuriranje_sumnjivih_stavki()
+   IF kalk_is_novi_dokument() .AND. dozvoljeno_azuriranje_sumnjivih_stavki()
       kalk_mpc_sa_pdv_sa_kartice( @nKalkStaraCijena, _idfirma, _pkonto, _idroba )
    ENDIF
 
    SELECT kalk_pripr
    nKalkNovaCijena := nKalkStaraCijena + _MPCSaPP
    @ box_x_koord() + 16, box_y_koord() + 2  SAY "STARA CIJENA (MPCSaPDV):"
-   @ box_x_koord() + 16, box_y_koord() + 50 GET nKalkStaraCijena    PICT "999999.9999" ;
+   @ box_x_koord() + 16, box_y_koord() + 50 GET nKalkStaraCijena  PICT "999999.9999" ;
       WHEN kalk_when_stara_cijena_19_72_79( @nKalkStaraCijena ) ;
       VALID kalk_valid_start_cijena_19_72_78(  @nKalkStaraCijena )
    @ box_x_koord() + 17, box_y_koord() + 2  SAY "NOVA CIJENA  (MPCSaPDV):"
-   @ box_x_koord() + 17, box_y_koord() + 50 GET nKalkNovaCijena     PICT "999999.9999"
+   @ box_x_koord() + 17, box_y_koord() + 50 GET nKalkNovaCijena  PICT "999999.9999" ;
+      WHEN kalk_when_nova_cijena_79( GetList, _idroba, 12, 49, nKalkStaraCijena )
 
    kalk_say_pdv_a_porezi_var( 19 )
    READ
@@ -166,5 +168,17 @@ STATIC FUNCTION kalk_valid_start_cijena_19_72_78(  nKalkStaraCijena )
          nKalkStaraCijena := s_nKalkStaraCijena
       ENDIF
    ENDIF
+
+   RETURN .T.
+
+STATIC FUNCTION kalk_when_nova_cijena_79( GetList, cIdRoba, nShowXPosStanje, nShowYPosStanje, nKalkStaraCijena )
+
+   LOCAL nStanje, nKalo
+
+   nStanje := pos_dostupno_artikal_za_cijenu( cIdroba, nKalkStaraCijena, 0 )
+   nKalo := pos_kalo( cIdroba )
+
+   @ box_x_koord() + nShowXPosStanje, box_y_koord() + nShowYPosStanje  SAY8 " ; POS stanje-kalo=dostupno:"
+   @ Row(), Col() + 1  SAY AllTrim( Transform( nStanje, pickol() ) ) + " - " + AllTrim( Transform( nKalo, pickol() ) ) + " = " + AllTrim( Transform( nStanje - nKalo, pickol() ) )
 
    RETURN .T.

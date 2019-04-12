@@ -157,13 +157,17 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 
 FUNCTION f18_sql_schema( cTable )
 
-   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "roba", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "log" }
+   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "log" }
    IF "." $ cTable
       RETURN cTable
    ENDIF
 
-   IF programski_modul() == "POS" .and. cTable $ "pos#pos_items#roba#vrstep#pos_osob#pos_strad"
-      RETURN sql_primarna_schema() + "." + cTable
+   IF cTable $ "pos#pos_items#vrstep#pos_osob#pos_strad#pos_stanje#pos_fisk_doks"
+      IF programski_modul() == "POS"
+         RETURN sql_primarna_schema() + "." + cTable
+      ELSE
+         RETURN pos_prodavnica_sql_schema() + "." + cTable
+      ENDIF
    ENDIF
 
    IF AScan( aF18Tables, cTable ) > 0

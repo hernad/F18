@@ -150,9 +150,8 @@ FUNCTION pos_21_get_lista()
 
    LOCAL cQuery, oData, oRow, oError, hRec, aLista := {}
 
-   cQuery := "SELECT * FROM  " + pos_prodavnica_sql_schema() + ".pos_21_neobradjeni_dokumenti()";
-
-      oData := run_sql_query( cQuery )
+   cQuery := "SELECT * FROM  " + pos_prodavnica_sql_schema() + ".pos_21_neobradjeni_dokumenti()"
+   oData := run_sql_query( cQuery )
 
    DO WHILE !oData:Eof()
       oRow := oData:GetRow()

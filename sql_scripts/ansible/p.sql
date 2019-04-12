@@ -213,3 +213,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS ref_storno_fisk_dok ON {{ item_prodavnica }}.p
 
 
 -- TARIFE CLEANUP --
+
+
+CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_stanje (
+   id SERIAL,
+   dat_od date,
+   dat_do date,
+   idroba varchar(10),
+   roba_id uuid,
+   ulazi text[],
+   izlazi text[],
+   kol_ulaz numeric(18,3),
+   kol_izlaz numeric(18,3),
+   cijena numeric(10,3),
+   ncijena numeric(10,3)
+);
+ALTER TABLE {{ item_prodavnica }}.pos_stanje OWNER TO admin;
+GRANT ALL ON TABLE {{ item_prodavnica }}.pos_stanje TO xtrole;
+GRANT ALL ON SEQUENCE {{ item_prodavnica }}.pos_stanje_id_seq TO xtrole;
+
+ALTER TABLE {{ item_prodavnica }}.pos_stanje ALTER COLUMN dat_od SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN idroba SET NOT NULL;
+ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN cijena SET NOT NULL;
+
+CREATE INDEX IF NOT EXISTS pos_stanje_idroba ON {{ item_prodavnica }}.pos_stanje USING btree (idroba, cijena, ncijena);

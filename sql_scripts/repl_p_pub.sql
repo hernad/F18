@@ -27,6 +27,11 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$;
 
-
-
-
+DO $$
+BEGIN
+   ALTER PUBLICATION {{ prod_schema }}_pos ADD TABLE {{ prod_schema }}.pos_stanje;
+   ALTER PUBLICATION {{ prod_schema }}_pos ADD TABLE {{ prod_schema }}.pos_fisk_doks;
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'tabele pos_stanje i pos_fisk_doks vec ubacene u publikaciju {{ prod_schema }}_pos';
+END;
+$$;
