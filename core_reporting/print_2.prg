@@ -169,10 +169,10 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    // SET CONSOLE ON
    Set( _SET_CONSOLE, s_lConsole )
    Set( _SET_DEVICE, s_cDevice )
-   IF ValType(s_cPrinterFile) == "C"
+   Set( _SET_PRINTER, s_lPrinter  )
+   IF ValType(s_cPrinterFile) == "C" .AND. s_lPrinter
       Set( _SET_PRINTFILE, s_cPrinterFile )
    ENDIF
-   Set( _SET_PRINTER, s_lPrinter  )
 
    MsgC()
 
