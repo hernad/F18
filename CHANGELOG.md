@@ -4,6 +4,7 @@
 ## 2019-04-15
 
 -  bug email fix
+-  windows print fix
 
 ## 2019-04-11
 

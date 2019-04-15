@@ -602,7 +602,6 @@ FUNCTION set_f18_home_root()
    ENDIF
 
    cHome := hb_DirSepAdd( cHome )
-
    f18_create_dir( cHome )
    my_home_root( cHome )
 

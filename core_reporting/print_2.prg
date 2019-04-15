@@ -12,7 +12,7 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
-MEMVAR GetList, gModul
+MEMVAR /*GetList,*/ gModul
 
 THREAD STATIC s_cF18Txt
 THREAD STATIC s_xPrintOpt
@@ -30,7 +30,6 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    LOCAL lBezParametara := .F.
 
    cFileName := set_print_file_name( cFileName )
-
    IF ( cDocumentName == NIL )
       cDocumentName :=  gModul + '_' + DToC( Date() )
    ENDIF
@@ -48,7 +47,6 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    ENDIF
 
    set_ptxt_sekvence()
-
    IF !( cOpt == "PDF" .OR. cOpt == "D" .OR. cOpt $ "EFG" .OR. cOpt == "0" ) // pdf, direktna stampa, interni editor, bez dijaloga
       cOpt := print_dialog_box( cOpt )
       IF cOpt == "X"
@@ -57,8 +55,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    ENDIF
 
    set_print_codes( cOpt )
-
-   PRIVATE GetList := {}
+   //PRIVATE GetList := {}
 
 #ifdef F18_DEBUG_PRINT
    LOG_CALL_STACK cLogMsg
@@ -68,9 +65,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    MsgO( "Priprema " + iif( cOpt == "PDF", "PDF", "tekst" ) + " izvještaja ..." )
 
    LOG_CALL_STACK cLogMsg
-
    SetPRC( 0, 0 )
-
    s_lConsole := Set( _SET_CONSOLE, .F. )
    // SET PRINTER OFF
    s_cDevice := Set( _SET_DEVICE, "PRINTER" )
@@ -80,7 +75,6 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    IF cOpt != "PDF"
       GpIni( cDocumentName )
    ELSE
-
       download_template_ubuntu_mono_ttf()
       hb_cdpSelect( "SLWIN" )
       oPDF := xPrintOpt[ "opdf" ]
@@ -175,7 +169,9 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    // SET CONSOLE ON
    Set( _SET_CONSOLE, s_lConsole )
    Set( _SET_DEVICE, s_cDevice )
-   Set( _SET_PRINTFILE, s_cPrinterFile )
+   IF ValType(s_cPrinterFile) == "C"
+      Set( _SET_PRINTFILE, s_cPrinterFile )
+   ENDIF
    Set( _SET_PRINTER, s_lPrinter  )
 
    MsgC()
@@ -711,7 +707,7 @@ FUNCTION All_GetPstr()
 FUNCTION SetGParams( cs, ch, cid, cvar, cval )
 
    LOCAL cPosebno := "N"
-   PRIVATE GetList := {}
+   //LOCAL GetList := {}
 
    PushWA()
 
