@@ -312,21 +312,21 @@ STATIC FUNCTION _vpn_start_stop( STATUS, conn_name )
 
 
 
-FUNCTION f18_copy_to_desktop( file_path, file_name, output_file )
+FUNCTION f18_copy_to_desktop( cFilePath, cFileName, cOutputFile )
 
-   LOCAL _desktop_path
+   LOCAL cDesktopPath
 
-   create_f18_dokumenti_on_desktop( @_desktop_path )
+   create_f18_dokumenti_on_desktop( @cDesktopPath )
 
-   IF output_file == NIL
-      output_file := ""
+   IF cOutputFile == NIL
+      cOutputFile := ""
    ENDIF
 
-   IF Empty( output_file )
-      output_file := file_name
+   IF Empty( cOutputFile )
+      cOutputFile := cFileName
    ENDIF
 
-   FileCopy( file_path + file_name, _desktop_path + output_file )
+   FileCopy( cFilePath + cFileName, cDesktopPath + cOutputFile )
 
    RETURN .T.
 
@@ -419,7 +419,7 @@ PROCEDURE run_module()
       OutErr( e"\n" )
       OutErr( e"========F18_json:======\n" )
       OutErr( hb_jsonEncode( aRet ) )
-      RETURN NIL
+      RETURN
    ENDIF
 
    IF cModul == "json_roba"
@@ -435,31 +435,31 @@ PROCEDURE run_module()
       OutErr( e"\n" )
       OutErr( e"========F18_json:======\n" )
       OutErr( hb_jsonEncode( aRet ) )
-      RETURN NIL
+      RETURN
    ENDIF
 
 
    IF cModul == "pos"
       set_metric( "main_menu_pos", my_user(), "D" )
-      RETURN MainPos( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainPos( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "fin"
       set_metric( "main_menu_fin", my_user(), "D" )
-      RETURN MainFin( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainFin( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "kalk"
       set_metric( "main_menu_kalk", my_user(), "D" )
-      RETURN MainKalk( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainKalk( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "fakt"
       set_metric( "main_menu_fakt", my_user(), "D" )
-      RETURN MainFakt( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainFakt( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "epdv"
       set_metric( "main_menu_epdv", my_user(), "D" )
-      RETURN MainEPdv( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainEPdv( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "os"
       set_metric( "main_menu_os", my_user(), "D" )
-      RETURN MainOs( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainOs( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "ld"
       set_metric( "main_menu_ld", my_user(), "D" )
-      RETURN MainLd( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
+      MainLd( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ENDIF
 
-   RETURN NIL
+   RETURN

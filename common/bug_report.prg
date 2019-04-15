@@ -21,6 +21,7 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
    LOCAL bErr
    LOCAL nI
 
+
    IF oError:GenCode == 45 .AND. oError:SubCode == 1302
    /*
    Verzija programa: 1.7.770 13.03.2016 8.5.0
@@ -49,7 +50,6 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
    */
 
       bErr := ErrorBlock( {| oError | Break( oError ) } )
-
       LOG_CALL_STACK cLogMsg
       ?E "ERR Object destructor failure/Reference to freed block 45/1302", cLogMsg
 
@@ -81,9 +81,10 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
       SET DEVICE TO PRINTER
       SET PRINTER to ( cOutFile )
       SET PRINTER ON
-      P_12CPI
+      //P_12CPI
 
    ENDIF
+
 
    OutBug()
    OutBug( "F18 bug report (v6.0) :", Date(), Time() )
@@ -135,12 +136,12 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
    OutBug( "---", Replicate( "-", 80 ) )
    OutBug()
 
-
    IF hb_HHasKey( my_server_params(), "host" ) .AND. !no_sql_mode()
       server_connection_info()
-      server_db_version_info()
-      server_info()
+      //server_db_version_info()
+       server_info()
    ENDIF
+
 
    IF Used()
       current_dbf_info()
@@ -174,14 +175,15 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
       SET PRINTER OFF
       SET PRINTER TO
       SET CONSOLE ON
-      IF lShowErrorReport
-         cCmd := "f18_editor " + cOutFile
-         f18_run( cCmd )
-      ENDIF
-      log_write( cLogMsg, 1 )
-#ifndef F18_DEBUG
-      send_email( oError, lNotify )
-#endif
+      //IF lShowErrorReport
+      //   cCmd := "f18_editor " + cOutFile
+      //   f18_run( cCmd )
+      //ENDIF
+
+      log_write_file( cLogMsg, 1 )
+//#ifndef F18_DEBUG
+      bug_send_email( oError, lNotify )
+//#endif
    ENDIF
 
    IF lQuitApp
@@ -191,7 +193,6 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
    ErrorBlock( bErr )
 
    RETURN .T.
-
 
 
 FUNCTION OutBug( ... )
@@ -238,11 +239,9 @@ STATIC FUNCTION server_info()
    RETURN .T.
 
 
-
 STATIC FUNCTION server_connection_info()
 
    LOCAL hParams := my_server_params()
-
    IF !hb_HHasKey( hParams, "host" )
       RETURN .F.
    ENDIF
@@ -257,45 +256,40 @@ STATIC FUNCTION server_connection_info()
    RETURN .T.
 
 
-
 STATIC FUNCTION server_db_version_info()
 
    LOCAL nServerDbVer, nRequiredServerDbKlijent
 
    nRequiredServerDbKlijent := server_db_ver_klijent()
-
    nServerDbVer := server_db_version()
 
    //_f18_required_server_str := get_version_str( nRequiredServerDbKlijent )
    //_server_db_str := get_version_str( nServerDbVer )
 
-   OutBug( "F18 client required server db >=     :", _f18_required_server_str, "/", AllTrim( Str( nRequiredServerDbKlijent, 0 ) ) )
-   OutBug( "Actual knowhow ERP server db version :", _server_db_str, "/", AllTrim( Str( nServerDbVer, 0 ) ) )
+   //OutBug( "F18 client required server db >=     :", _f18_required_server_str, "/", AllTrim( Str( nRequiredServerDbKlijent, 0 ) ) )
+   //OutBug( "Actual knowhow ERP server db version :", _server_db_str, "/", AllTrim( Str( nServerDbVer, 0 ) ) )
 
    RETURN .T.
-
 
 
 
 STATIC FUNCTION current_dbf_info()
 
-   LOCAL _struct, nI
+   LOCAL aDbfStruct, nI
 
    OutBug( "Trenutno radno podrucje:", Alias(), ", record:", RecNo(), "/", RecCount() )
 
-   _struct := dbStruct()
+   aDbfStruct := dbStruct()
 
    OutBug( Replicate( "-", 60 ) )
    OutBug( "Record content:" )
    OutBug( Replicate( "-", 60 ) )
-   FOR nI := 1 TO Len( _struct )
-      OutBug( Str( nI, 3 ), PadR( _struct[ nI, 1 ], 15 ), _struct[ nI, 2 ], _struct[ nI, 3 ], _struct[ nI, 4 ], Eval( FieldBlock( _struct[ nI, 1 ] ) ) )
+   FOR nI := 1 TO Len( aDbfStruct )
+      OutBug( Str( nI, 3 ), PadR( aDbfStruct[ nI, 1 ], 15 ), aDbfStruct[ nI, 2 ], aDbfStruct[ nI, 3 ], aDbfStruct[ nI, 4 ], Eval( FieldBlock( aDbfStruct[ nI, 1 ] ) ) )
    NEXT
    OutBug( Replicate( "-", 60 ) )
 
    RETURN .T.
-
-
 
 
 FUNCTION RaiseError( cErrMsg )
@@ -308,31 +302,29 @@ FUNCTION RaiseError( cErrMsg )
    oErr:subSystem   := "F18"
    oErr:SubCode     := 1000
    oErr:Description := cErrMsg
-
    Eval( ErrorBlock(), oErr )
 
    RETURN .T.
 
 
 
-
-STATIC FUNCTION send_email( oError, lNotify )
+STATIC FUNCTION bug_send_email( oError, lNotify )
 
    LOCAL hParamsEmail
    LOCAL cBody, cSubject
    LOCAL cAttachment
-   LOCAL _answ := fetch_metric( "bug_report_email", my_user(), "A" )
+   LOCAL cAnswer := fetch_metric( "bug_report_email", my_user(), "A" )
    LOCAL cDatabase
    LOCAL aAttach
+
 
    IF lNotify == NIL
       lNotify := .F.
    ENDIF
-
    DO CASE
-   CASE _answ $ "D#N#A"
-      IF _answ $ "DN"
-         IF Pitanje(, "Poslati poruku greške email-om podrški bring.out-a (D/N) ?", _answ ) == "N"
+   CASE cAnswer $ "D#N#A"
+      IF cAnswer $ "DN"
+         IF Pitanje(, "Poslati poruku greške email-om podrški bring.out-a (D/N) ?", cAnswer ) == "N"
             RETURN .F.
          ENDIF
       ENDIF
@@ -362,67 +354,62 @@ STATIC FUNCTION send_email( oError, lNotify )
    ENDIF
 
    cBody := "U prilogu zip fajl sa sadrzajem trenutne greske i log fajlom servera"
-
-   hParamsEmail := email_hash_za_podrska_bring_out( cSubject, cBody )
-
+   hParamsEmail := email_podrska_bring_out( cSubject, cBody )
    cAttachment := send_email_attachment()
 
-   IF ValType( cAttachment ) == "L"
-      RETURN .F.
+   IF Empty( cAttachment )
+      aAttach := {}
+   ELSE
+      aAttach := { cAttachment }
    ENDIF
-
-   aAttach := { cAttachment }
-
    info_bar( "err-sync", "Slanje greške podršci bring.out ..." )
 
-   f18_email_send( hParamsEmail, aAttach )
-
-
+   ?E pp(hParamsEmail)
+   f18_send_email( hParamsEmail, aAttach )
    FErase( cAttachment )
 
+   Alert(_u('Poruka o programskoj greški poslana podršci bring.out'))
    RETURN .T.
 
 
 
 STATIC FUNCTION send_email_attachment()
 
-   LOCAL _a_files := {}
-   LOCAL _path := my_home_root()
-   LOCAL _server := my_server_params()
-   LOCAL _filename, nErr
-   LOCAL _log_file, _log_params
-   LOCAL _error_file := "error.txt"
+   LOCAL aFiles := {}
+   LOCAL cPath := my_home_root()
+   LOCAL hServer := my_server_params()
+   LOCAL cFileName, nErr
+   LOCAL cLogFile, hLogParams
+   LOCAL cErrorFile := "error.txt"
 
-   _filename := AllTrim( _server[ "database" ] )
-   _filename += "_" + AllTrim( f18_user() )
-   _filename += "_" + DToS( Date() )
-   _filename += "_" + StrTran( Time(), ":", "" )
-   _filename += ".zip"
+   cFileName := AllTrim( hServer[ "database" ] )
+   cFileName += "_" + AllTrim( f18_user() )
+   cFileName += "_" + DToS( Date() )
+   cFileName += "_" + StrTran( Time(), ":", "" )
+   cFileName += ".zip"
 
-   _log_params := hb_Hash()
-   _log_params[ "date_from" ] := Date()
-   _log_params[ "date_to" ] := Date()
-   _log_params[ "limit" ] := 1000
-   _log_params[ "conds_true" ] := ""
-   _log_params[ "conds_false" ] := ""
-   _log_params[ "doc_oper" ] := "N"
-   _log_file := f18_view_log( _log_params )
+   hLogParams := hb_Hash()
+   hLogParams[ "date_from" ] := Date()
+   hLogParams[ "date_to" ] := Date()
+   hLogParams[ "limit" ] := 1000
+   hLogParams[ "conds_true" ] := ""
+   hLogParams[ "conds_false" ] := ""
+   hLogParams[ "doc_oper" ] := "N"
+   cLogFile := f18_view_log( hLogParams )
 
-   AAdd( _a_files, _error_file )
-   AAdd( _a_files, _log_file )
+   AAdd( aFiles, cErrorFile )
+   AAdd( aFiles, cLogFile )
+   AADD( aFiles, danasnji_log_file() )
 
-   DirChange( _path )
-
-   nErr := zip_files( _path, _filename, _a_files )
+   DirChange( cPath )
+   nErr := zip_files( cPath, cFileName, aFiles )
 
    DirChange( my_home() )
-
    IF nErr <> 0
-      RETURN .F.
+      RETURN ""
    ENDIF
 
-   RETURN ( _path + _filename )
-
+   RETURN ( cPath + cFileName )
 
 
 

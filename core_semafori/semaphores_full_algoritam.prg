@@ -27,7 +27,7 @@ FUNCTION full_synchro( cDbfTable, nStepSize, cInfo )
    LOCAL _sql_order
    LOCAL _opened
    LOCAL _sql_fetch_time, _dbf_write_time
-   LOCAL _msg
+   LOCAL cMsg
    LOCAL lRet := .T.
    LOCAL hParams := hb_Hash()
 
@@ -79,11 +79,11 @@ WARNING:  there is already a transaction in progress
 
    IF _sql_fields == NIL
       run_sql_query( "ROLLBACK", hParams )
-      _msg := "sql_fields za " + _sql_table + " nije setovan ... sinhro nije moguć"
-      ?E "full_synchro: " + _msg
+      cMsg := "sql_fields za " + _sql_table + " nije setovan ... sinhro nije moguć"
+      ?E "full_synchro: " + cMsg
       unset_a_dbf_rec_chk0( aDbfRec[ "table" ] )
-      ?E _msg
-      RaiseError( _msg )
+      ?E cMsg
+      RaiseError( cMsg )
    ENDIF
 
    info_bar( "fsync:" + cDbfTable, "START: " + cDbfTable  + " : " + cInfo + " sql_cnt:" + AllTrim( Str( nCountSql, 10, 0 ) ) )

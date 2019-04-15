@@ -122,7 +122,6 @@ FUNCTION pos_storno_racuna( hParams )
    IF !hb_HHasKey( hParams, "idpos" )
       hParams[ "idpos" ] := pos_pm()
    ENDIF
-
    IF hParams[ "datum" ] == nil
       hParams[ "datum" ] := danasnji_datum()
    ENDIF
@@ -135,9 +134,13 @@ FUNCTION pos_storno_racuna( hParams )
    Box(, 5, 55 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
-
    READ
    BoxC()
+   //IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
+  //    PopWa()
+  //    RETURN .F.
+   //ENDIF
+
 
    hParams[ "idvd" ] := "42"
    hParams[ "fisk_rn" ] := pos_get_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
@@ -167,20 +170,20 @@ FUNCTION pos_storno_racuna( hParams )
    RETURN .T.
 
 
-//STATIC FUNCTION pos_pripr_set_fisk_rn( hParams )
+// STATIC FUNCTION pos_pripr_set_fisk_rn( hParams )
 //
-//   SELECT _POS_PRIPR
-//   PushWa()
+// SELECT _POS_PRIPR
+// PushWa()
 //
-//   SET ORDER TO
-//   GO TOP
-//   DO WHILE !Eof()
-//      RREPLACE fisk_rn WITH hParams[ "fisk_rn" ]
-//      SKIP
-//   ENDDO
-//   PopWa()
+// SET ORDER TO
+// GO TOP
+// DO WHILE !Eof()
+// RREPLACE fisk_rn WITH hParams[ "fisk_rn" ]
+// SKIP
+// ENDDO
+// PopWa()
 //
-//   RETURN .T.
+// RETURN .T.
 
 STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
 

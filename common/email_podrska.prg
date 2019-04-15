@@ -14,26 +14,22 @@
 /*
    Opis: šalje izvještaj na email podrške
 */
-FUNCTION txt_izvjestaj_podrska_email( file_name )
+FUNCTION txt_izvjestaj_podrska_email( cFileName )
 
-   LOCAL _attach, _body, _subject, _mail_params
+   LOCAL aFiles, cBody, cSubject, hMailParams
 
    // Uzorak TXT izvještaja, F18 1.7.21, rg_2013/bjasko, 02.04.04, 15:00:07
-   _subject := "Uzorak TXT izvještaja, F18 "
-   _subject += f18_ver()
-   _subject += ", " + my_server_params()[ "database" ] + "/" + AllTrim( f18_user() )
-   _subject += ", " + DToC( Date() ) + " " + PadR( Time(), 8 )
+   cSubject := "Uzorak TXT izvještaja, F18 "
+   cSubject += f18_ver()
+   cSubject += ", " + my_server_params()[ "database" ] + "/" + AllTrim( f18_user() )
+   cSubject += ", " + DToC( Date() ) + " " + PadR( Time(), 8 )
 
-   _body := "U prilogu primjer TXT izvještaja"
+   cBody := "U prilogu primjer TXT izvještaja"
+   hMailParams := email_podrska_bring_out( cSubject, cBody )
 
-   _mail_params := email_hash_za_podrska_bring_out( _subject, _body )
-
-   _attach := { file_name }
-
+   aFiles := { cFileName }
    MsgO( "Slanje email-a u toku ..." )
-
-   f18_email_send( _mail_params, _attach )
-
+   f18_send_email( hMailParams, aFiles )
    MsgC()
 
    RETURN .T.

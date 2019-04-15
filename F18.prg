@@ -55,7 +55,6 @@ FUNCTION Main(...)
    //set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    set_f18_params(...)
 
-
    IF to_run_f18_module()
       run_module()
    ELSE
@@ -202,6 +201,7 @@ STATIC FUNCTION init_f18_params(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
    LOCAL nI := 2
    LOCAL xParam
    LOCAL nCount := 0
+   LOCAL hParams
 
    hParams := hb_Hash()
    hParams[ "p1" ] := NIL
@@ -420,7 +420,3 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
    AAdd( aMeniExec, {|| diag_info() } )
 
    RETURN .T.
-
-
-FUNCTION hb_SendMail( ... )
-   RETURN tip_MailSend( ... )

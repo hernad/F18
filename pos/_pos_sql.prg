@@ -442,7 +442,6 @@ FUNCTION pos_dostupno_artikal( cIdRoba )
    RETURN nRet
 
 
-
 FUNCTION pos_dostupna_osnovna_cijena_za_artikal( cIdRoba )
 
    LOCAL cQuery, oRet, oError, nRet := 0

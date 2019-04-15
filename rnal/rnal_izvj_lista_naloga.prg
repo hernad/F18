@@ -473,7 +473,7 @@ FUNCTION lst_vrok_tek_dan()
       _body := _subject
       _attach := { my_home() + "outf.txt" }
       _mail_params := f18_email_prepare( _subject, _body )
-      f18_email_send( _mail_params, _attach )
+      f18_send_email( _mail_params, _attach )
    ENDIF
 
    RETURN .T.

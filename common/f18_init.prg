@@ -721,11 +721,13 @@ FUNCTION log_write( cMsg, nLevel, lSilent )
    RETURN .T.
 
 
+FUNCTION danasnji_log_file()
+   RETURN my_home_root() + "F18_" + DToS( danasnji_datum() ) + ".log"
 
 FUNCTION log_write_file( cMsg, nLevel, lSilent )
 
    LOCAL cMsgTime
-   LOCAL cLogFile := my_home_root() + SLASH + "F18_" + DTOS( danasnji_datum() ) + ".log"
+   LOCAL cLogFile := danasnji_log_file()
    LOCAL nHandle
 
    IF nLevel == NIL

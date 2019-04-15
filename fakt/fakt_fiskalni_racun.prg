@@ -1203,7 +1203,7 @@ FUNCTION fisc_isjecak( cFirma, cTipDok, cBrDok )
 STATIC FUNCTION fakt_fisk_send_email( fisc_rn, fakt_dok, kupac, eml_file, u_total )
 
    LOCAL _subject, _body
-   LOCAL _mail_param
+   LOCAL hMailParams
    LOCAL _to := AllTrim( param_racun_na_email() )
 
    _subject := "Racun: "
@@ -1215,8 +1215,7 @@ STATIC FUNCTION fakt_fisk_send_email( fisc_rn, fakt_dok, kupac, eml_file, u_tota
 
    _body := "podaci kupca i racuna"
 
-   _mail_param := f18_email_prepare( _subject, _body, NIL, _to )
-
-   f18_email_send( _mail_param, NIL )
+   hMailParams := f18_email_prepare( _subject, _body, NIL, _to )
+   f18_send_email( hMailParams, NIL )
 
    RETURN NIL

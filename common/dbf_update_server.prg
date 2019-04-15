@@ -216,7 +216,7 @@ FUNCTION delete_rec_server_and_dbf( cTabela, hRecord, nAlgoritam, cTransaction )
       Alert("roba_prodavnica - izmjene zabranjene!")
       RETURN .F.
    ENDIF
-   
+
    set_table_values_algoritam_vars( @cTabela, @hRecord, @nAlgoritam, @cTransaction, @hDbfRec, @hAlgoritam, @cWhereString, @_alg_tag )
 
    IF Alias() <> hDbfRec[ "alias" ]
@@ -384,7 +384,7 @@ FUNCTION delete_all_dbf_and_server( cTabela )
 // --------------------------------------------------------------------------------------------------------------
 // inicijalizacija varijabli koje koriste update and delete_from_server_and_dbf  funkcije
 // ---------------------------------------------------------------------------------------------------------------
-STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, cTransaction, hDbfRec, hAlgoritam, where_str, alg_tag )
+STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, cTransaction, hDbfRec, hAlgoritam, cWhereStr, alg_tag )
 
    LOCAL cKey
    LOCAL nCount := 0
@@ -471,8 +471,8 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
 
    NEXT
 
-   BEGIN SEQUENCE WITH {| err | err:cargo := { "var",  "hRecord", hRecord }, GlobalErrorHandler( err ) }
-      where_str := sql_where_from_dbf_key_fields( hAlgoritam[ "dbf_key_fields" ], hRecord, lSqlTable )
+   BEGIN SEQUENCE WITH {| oErr | err:cargo := { "var",  "hRecord", hRecord }, GlobalErrorHandler( oErr ) }
+      cWhereStr := sql_where_from_dbf_key_fields( hAlgoritam[ "dbf_key_fields" ], hRecord, lSqlTable )
    END SEQUENCE
 
    IF nAlgoritam > 1 .OR. _use_tag == .T.

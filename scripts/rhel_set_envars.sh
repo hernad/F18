@@ -1,11 +1,13 @@
 #!/bin/bash
 
+
 export LX_RHEL=1
 
 . scripts/linux.sh
 
 . scripts/set_envars.sh
 
+HB_DBG_PATH="$(pwd)"
 for m in $MODULES
 do
     HB_DBG_PATH="$HB_DBG_PATH:$(pwd)/$m"

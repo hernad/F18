@@ -390,11 +390,11 @@ STATIC FUNCTION odt_na_email_podrska( cErrorTxt )
 
    DirChange( my_home() )
 
-   hMailParams := email_hash_za_podrska_bring_out( cSubject, cBody )
+   hMailParams := email_podrska_bring_out( cSubject, cBody )
 
    MsgO( "Slanje email-a u toku ..." )
 
-   f18_email_send( hMailParams, aAttachment )
+   f18_send_email( hMailParams, aAttachment )
 
    FErase( my_home() + cZipFile )
 

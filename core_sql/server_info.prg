@@ -32,23 +32,23 @@ FUNCTION server_show( var )
 FUNCTION server_sys_info( var )
 
    LOCAL cQuery
-   LOCAL _ret_sql
-   LOCAL _ret := hb_Hash()
+   LOCAL oRet
+   LOCAL hRet := hb_Hash()
    LOCAL hParams := hb_hash()
 
-   cQuery := "select inet_client_addr(), inet_client_port(),  inet_server_addr(), inet_server_port(), user"
+   cQuery := "select inet_client_addr(), inet_client_port(), inet_server_addr(), inet_server_port(), current_user"
 
    hParams[ "log" ] := .F.
-   _ret_sql := run_sql_query( cQuery, hParams )
+   oRet := run_sql_query( cQuery, hParams )
 
-   IF sql_error_in_query( _ret_sql )
+   IF sql_error_in_query( oRet )
       RETURN NIL
    ENDIF
 
-   _ret[ "client_addr" ] := _ret_sql:FieldGet( 1 )
-   _ret[ "client_port" ] := _ret_sql:FieldGet( 2 )
-   _ret[ "server_addr" ] := _ret_sql:FieldGet( 3 )
-   _ret[ "server_port" ] := _ret_sql:FieldGet( 4 )
-   _ret[ "user" ]        := _ret_sql:FieldGet( 5 )
+   hRet[ "client_addr" ] := oRet:FieldGet( 1 )
+   hRet[ "client_port" ] := oRet:FieldGet( 2 )
+   hRet[ "server_addr" ] := oRet:FieldGet( 3 )
+   hRet[ "server_port" ] := oRet:FieldGet( 4 )
+   hRet[ "user" ]        := oRet:FieldGet( 5 )
 
-   RETURN _ret
+   RETURN hRet
