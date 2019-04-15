@@ -136,10 +136,10 @@ FUNCTION pos_storno_racuna( hParams )
    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
    READ
    BoxC()
-   //IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
-  //    PopWa()
-  //    RETURN .F.
-   //ENDIF
+   IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
+      PopWa()
+      RETURN .F.
+   ENDIF
 
 
    hParams[ "idvd" ] := "42"
