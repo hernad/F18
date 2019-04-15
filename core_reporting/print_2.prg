@@ -170,10 +170,11 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    Set( _SET_CONSOLE, s_lConsole )
    Set( _SET_DEVICE, s_cDevice )
    IF is_windows()
+      // ne kontam zasto je redoslijed bitan, ali ako ne idem ovako ubrlja se ekran
+      Set( _SET_PRINTER, s_lPrinter  )
       IF ValType( s_cPrinterFile ) == "C" .AND. s_lPrinter
          Set( _SET_PRINTFILE, s_cPrinterFile )
       ENDIF
-      Set( _SET_PRINTER, s_lPrinter  )
    ELSE
       Set( _SET_PRINTFILE, s_cPrinterFile )
       Set( _SET_PRINTER, s_lPrinter  )
