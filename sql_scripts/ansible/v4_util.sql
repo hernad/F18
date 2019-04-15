@@ -706,15 +706,39 @@ BEGIN
    PERFORM public.setmetric('run_cron_time', now()::text);
 
    SET SESSION AUTHORIZATION admin;
-   select json_agg(t)::text from
-   (
-     select * from (
-   	   select * from  public.prodavnica_zahtjev_prijem_magacin_create(40, current_date)
-     ) s1
-   ) t INTO cJSon;
 
-   cJSON := coalesce(cJSON, '?ERROR?');
-   insert into public.log(user_code, msg) values(current_user, 'CRON_ZPROPMAG: ' || cJson);
+    -- 40 sarajevo
+    select json_agg(t)::text from
+     (
+       select * from (
+   	     select * from  public.prodavnica_zahtjev_prijem_magacin_create( '1', 40, current_date)
+        ) s1
+      ) t INTO cJSon;
+     cJSON := coalesce(cJSON, '?ERROR?');
+     insert into public.log(user_code, msg) values(current_user, 'CRON_ZPROPMAG: Srv[SA] ' || cJson);
+
+
+      -- 942 Bihac
+      select json_agg(t)::text from
+      (
+          select * from (
+      	     select * from  public.prodavnica_zahtjev_prijem_magacin_create( '2', 942, current_date)
+           ) s1
+      ) t INTO cJSon;
+      cJSON := coalesce(cJSON, '?ERROR?');
+      insert into public.log(user_code, msg) values(current_user, 'CRON_ZPROPMAG: Srv[BIH] ' || cJson);
+
+      -- 598 BL
+        select json_agg(t)::text from
+        (
+            select * from (
+        	     select * from  public.prodavnica_zahtjev_prijem_magacin_create( '3', 598, current_date)
+             ) s1
+        ) t INTO cJSon;
+        cJSON := coalesce(cJSON, '?ERROR?');
+        insert into public.log(user_code, msg) values(current_user, 'CRON_ZPROPMAG: Srv[BL] ' || cJson);
+
+
    -- brisanje logova od prije tri dana
    delete from log where ( date(l_time) <= (current_date-3) ) and msg like 'CRON_ZPROPMAG:%';
 

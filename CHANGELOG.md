@@ -6,6 +6,7 @@
 -  pos storno fix
 -  bug email fix
 -  windows print fix /2
+-  linux print fix
 
 ## 2019-04-11
 

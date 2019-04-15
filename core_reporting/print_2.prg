@@ -55,7 +55,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    ENDIF
 
    set_print_codes( cOpt )
-   //PRIVATE GetList := {}
+   // PRIVATE GetList := {}
 
 #ifdef F18_DEBUG_PRINT
    LOG_CALL_STACK cLogMsg
@@ -169,9 +169,14 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    // SET CONSOLE ON
    Set( _SET_CONSOLE, s_lConsole )
    Set( _SET_DEVICE, s_cDevice )
-   Set( _SET_PRINTER, s_lPrinter  )
-   IF ValType(s_cPrinterFile) == "C" .AND. s_lPrinter
+   IF is_windows()
+      IF ValType( s_cPrinterFile ) == "C" .AND. s_lPrinter
+         Set( _SET_PRINTFILE, s_cPrinterFile )
+      ENDIF
+      Set( _SET_PRINTER, s_lPrinter  )
+   ELSE
       Set( _SET_PRINTFILE, s_cPrinterFile )
+      Set( _SET_PRINTER, s_lPrinter  )
    ENDIF
 
    MsgC()
@@ -707,7 +712,8 @@ FUNCTION All_GetPstr()
 FUNCTION SetGParams( cs, ch, cid, cvar, cval )
 
    LOCAL cPosebno := "N"
-   //LOCAL GetList := {}
+
+   // LOCAL GetList := {}
 
    PushWA()
 
