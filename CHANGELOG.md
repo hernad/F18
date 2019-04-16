@@ -5,7 +5,7 @@
 
 -  tremol cmd fix
 -  kalk kontiranje azuriranog fix
--  debug eShell PDF print
+-  debug eShell PDF print /3
 
 ## 2019-04-15
 
