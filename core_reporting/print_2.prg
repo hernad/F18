@@ -317,7 +317,6 @@ STATIC FUNCTION direct_print_unix( cFileName, cPrinterPortNumber )
    ENDIF
 
    cPrinterName := _printer + "_" + cPrinterPortNumber
-
    cCommand := "lpq -P " + cPrinterName + " | grep " + cPrinterName
 
    nError := f18_run( cCommand )
@@ -329,7 +328,6 @@ STATIC FUNCTION direct_print_unix( cFileName, cPrinterPortNumber )
    cCommand := "lpr -P "
    cCommand += cPrinterName + " "
    cCommand += cFileName
-
    nError := f18_run( cCommand )
 
    IF nError <> 0
@@ -349,7 +347,6 @@ STATIC FUNCTION direct_print_windows( cFileName, cPrinterPortNumber )
    ENDIF
 
    cFileName := file_path_quote( cFileName )
-
    cCommand := "copy " + cFileName + " LPT" + cPrinterPortNumber
    nError := hb_run( cCommand ) // ovaj antikvitet koriste knjigovodstveni servisi
 
@@ -392,8 +389,6 @@ STATIC FUNCTION set_print_file_name( cFileName )
    s_cF18Txt := cFileName
 
    RETURN cFileName
-
-
 
 
 FUNCTION GpIni( cDocumentName )

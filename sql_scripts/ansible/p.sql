@@ -15,6 +15,15 @@ CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_fisk_doks (
 ALTER TABLE {{ item_prodavnica }}.pos_fisk_doks OWNER TO admin;
 GRANT ALL ON TABLE {{ item_prodavnica }}.pos_fisk_doks TO xtrole;
 
+
+DO $$
+BEGIN
+   ALTER TABLE {{ item_prodavnica }}.pos_fisk_doks ADD PRIMARY KEY (dok_id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'pos_fisk_doks primary key garant postoji';
+END;
+$$;
+
 CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos (
     dok_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     idpos character varying(2) NOT NULL,
@@ -237,3 +246,12 @@ ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN idroba SET NOT NULL;
 ALTER TABLE {{ item_prodavnica }}.pos_items ALTER COLUMN cijena SET NOT NULL;
 
 CREATE INDEX IF NOT EXISTS pos_stanje_idroba ON {{ item_prodavnica }}.pos_stanje USING btree (idroba, cijena, ncijena);
+
+
+DO $$
+BEGIN
+   ALTER TABLE {{ item_prodavnica }}.pos_stanje ADD PRIMARY KEY (id);
+EXCEPTION WHEN OTHERS THEN
+   RAISE INFO 'pos_stanje primary key garant postoji';
+END;
+$$;
