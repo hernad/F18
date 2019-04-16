@@ -33,7 +33,8 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
    LOCAL cFinAutoBrojDN := "N"
    LOCAL GetList := {}
    LOCAL cDalje, cAutoRav, cPom
-   LOCAL nStr, cIdPartner, cBrFaktP, dDatFaktP, cIdKonto, cIdKonto2
+   LOCAL cIdPartner, cBrFaktP, dDatFaktP, cIdKonto, cIdKonto2
+   LOCAL nCount
    LOCAL nFV
 
    // LOCAL nZaokruzenje := gZaokr
@@ -51,8 +52,8 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
       lAuto := .F.
    ENDIF
 
-   lPrviProlaz := .T.
 
+   lPrviProlaz := .T.
    // DO WHILE .T.
    lKalk80Predispozicija := .F.
 
@@ -67,7 +68,6 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
    my_dbf_zap()
 
    SELECT KALK_PRIPR
-
    SET ORDER TO TAG "1" // idfirma+ idvd + brdok+rbr
 
    IF lPrviProlaz
@@ -104,14 +104,12 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
          HSEEK cIdFirma + cIdVd + cBrDok
       ENDIF
 
-
    ELSE
       GO TOP
       cIdFirma := kalk_pripr->IdFirma
       cIdVD := kalk_pripr->IdVD
       cBrdok := kalk_pripr->brdok
    ENDIF
-
 
    IF kalk_pripr->idvd == "80" .AND. !Empty( kalk_pripr->idkonto2 ) // potrebno je ispitati da li je predispozicija !
       lKalk80Predispozicija := .T.
@@ -153,10 +151,10 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
 
    ENDIF
 
-
-   nStr := 0
+   Box("#->FINMAT", 3, 40)
+   nCount := 0
    nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := nTot8 := nTot9 := nTota := nTotb := nTotC := 0
-   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdvd == field->idvd
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->idfirma .AND. cIdvd == kalk_pripr->idvd
 
       cBrDok := kalk_pripr->BrDok
       cIdPartner := kalk_pripr->IdPartner
@@ -188,7 +186,6 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
       // cIdd := idpartner + brfaktp + idkonto + idkonto2
       DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD
 
-
          PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
          nFV := kalk_pripr->FCj * kalk_pripr->Kolicina
          // IF gKalo == "1"
@@ -196,12 +193,12 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
          // ELSE
          nKolicina := kalk_pripr->Kolicina
          // ENDIF
-         select_o_roba( KALK_PRIPR->IdRoba )
-         select_o_tarifa( KALK_PRIPR->idtarifa )
+         //select_o_roba( KALK_PRIPR->IdRoba )
+         //select_o_tarifa( KALK_PRIPR->idtarifa )
          SELECT KALK_PRIPR
          kalk_set_vars_troskovi_marzavp_marzamp()
-         SELECT finmat
 
+         SELECT finmat
          APPEND BLANK
          REPLACE IdFirma   WITH kalk_PRIPR->IdFirma, ;
             IdKonto   WITH cIdKonto, ;
@@ -250,15 +247,9 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
 
          nPom := kalk_pripr->MPCSaPP * kalk_pripr->Kolicina
          nPom := Round( nPom, nZaokruzenje )
-         REPLACE MPVSaPP WITH nPom
-
-         // porezv je aIPor[2] koji se ne koristi
-         // nPom := kalk_pripr->( aIPor[ 2 ] * ( Kolicina - GKolicina - GKolicin2 ) )
-         // nPom := Round( nPom, nZaokruzenje )
-         // REPLACE Porezv WITH nPom
-
-         REPLACE idroba  WITH kalk_pripr->idroba
-         REPLACE  Kolicina  WITH kalk_pripr->Kolicina
+         REPLACE MPVSaPP WITH nPom, ;
+             idroba  WITH kalk_pripr->idroba, ;
+             Kolicina  WITH kalk_pripr->Kolicina
 
          IF !( kalk_pripr->IdVD $ "IM#IP" )
             REPLACE FV WITH Round( nFV, nZaokruzenje ), ;
@@ -266,12 +257,12 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
          ENDIF
 
          IF field->idvd == "IP"
-            REPLACE  GKV2  WITH Round( kalk_pripr->( ( Gkolicina - Kolicina ) * MPcSAPP ), nZaokruzenje ), ;
+            REPLACE  GKV2  WITH Round( ( kalk_pripr->Gkolicina - kalk_pripr->Kolicina ) * kalk_pripr->MPcSAPP , nZaokruzenje ), ;
                GKol2 WITH kalk_pripr->Gkolicina - kalk_pripr->Kolicina
          ENDIF
 
          IF field->idvd == "14"
-            REPLACE  MPVSaPP   WITH  kalk_pripr->VPC * ( 1 - kalk_pripr->RabatV / 100 ) * kalk_pripr->Kolicina
+            REPLACE  MPVSaPP  WITH  kalk_pripr->VPC * ( 1 - kalk_pripr->RabatV / 100 ) * kalk_pripr->Kolicina
          ENDIF
 
          IF kalk_pripr->IDVD $ "18#19"
@@ -280,9 +271,6 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
 
          IF ( kalk_pripr->IdVD $ "41#42" )
             REPLACE Rabat WITH kalk_pripr->RabatV * kalk_pripr->kolicina // popust maloprodaje se smjesta ovdje
-            IF AllTrim( self_organizacija_naziv() ) == "TEST FIRMA"
-               MsgBeep( "Popust MP = finmat->rabat " + Str( Rabat, 10, 2 ) )
-            ENDIF
          ENDIF
 
          IF lKalk80Predispozicija // napuni marker da se radi o predispoziciji
@@ -291,14 +279,17 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
 
          SELECT kalk_pripr
          SKIP
+
+         nCount ++
+         @ box_x_koord() + 1, box_y_koord() + 2 SAY Transform(nCount, "9999")
       ENDDO // brdok
 
       IF lAzuriraniDokument
          EXIT
       ENDIF
 
-
    ENDDO // idfirma,idvd
+   BoxC()
 
 
    IF lAzuriraniDokument .AND. lAuto == .F.
@@ -306,7 +297,6 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
       IF !lKontiranjeViseKalk
          my_close_all_dbf()
       ENDIF
-
       // ovo ispod kontiranje se koristi kada se kontira azurirani dokument
       kalk_kontiranje_fin_naloga( .F., NIL, lKontiranjeViseKalk, NIL, cFinAutoBrojDN == "D" )  // kontiranje dokumenta
       IF cAutoRav == "D" // automatska ravnoteza naloga

@@ -62,7 +62,6 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
    ENDIF
 
    FOR nI := 1 TO Len( aNalozi ) // brisanje duplih naloga
-      altd()
       cIdFirma := aNalozi[ nI, 1 ]
       cIdVn := aNalozi[ nI, 2 ]
       cBrNal := aNalozi[ nI, 3 ]

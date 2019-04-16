@@ -162,7 +162,8 @@ FUNCTION print_lista_2( aKol, bZaRed, nOdvoji, nCrtice, bUslov, lA4papir, cNaslo
          xPom := Str( nStr, 3 ) + ". strana"
          QOut( cLM + PadC( xPom, nDReda - nOdvoji ) )
       ENDIF
-      gPFF(); SetPRC( 0, 0 )
+      gPFF()
+      SetPRC( 0, 0 )
       IF !( bZagl == nil )
          Eval( bZagl )
       ENDIF
@@ -468,7 +469,8 @@ FUNCTION print_lista_2( aKol, bZaRed, nOdvoji, nCrtice, bUslov, lA4papir, cNaslo
             xPom := Str( nStr, 3 ) + ". strana"
             QOut( cLM + PadC( xPom, nDReda - nOdvoji ) )
          ENDIF
-         gPFF(); SetPRC( 0, 0 )
+         gPFF()
+         SetPRC( 0, 0 )
          IF !( bZagl == nil )
             Eval( bZagl )
          ENDIF
@@ -572,7 +574,8 @@ FUNCTION NaSljedStranu( lMozeL, lPrenos, cLM2, cOk, aPom, nKol, nStr, cLM, nDRed
       AEval( aPom, {| x| ++i, ;
          QQOut( Replicate( cOk[ 2 ], x[ 2 ] ) + IF( i < nKol, IF( !x[ 3 ] .AND. !aPom[ i + 1, 3 ], cOk[ 2 ], cOk[ 10 ] ), cOk[ 11 ] ) ) } )
    ENDIF
-   gPFF(); SetPRC( 0, 0 )
+   gPFF()
+   SetPRC( 0, 0 )
    IF !( bZagl == nil )
       Eval( bZagl )
    ENDIF

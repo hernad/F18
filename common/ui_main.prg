@@ -100,10 +100,8 @@ FUNCTION Msg( uText, sec, xPos )
    LOCAL cText
 
    cText := Unicode():New( uText, .T. ):getCpString()
-altd()
 
    SET DEVICE TO SCREEN
-
    DO WHILE ( nHashPos := At ( "#", cText ) ) > 0
       AAdd ( aText, Left ( cText, nHashPos - 1 ) )
       cText := SubStr ( cText, nHashPos + 1 )
@@ -297,7 +295,6 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
    ENDIF
 
    cColor := iif ( lInvert, f18_color_invert(), f18_color_normal() )
-
    SetColor( cColor )
    Scroll( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 2 )
    @ box_x_koord(), box_y_koord() TO box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 2 DOUBLE
@@ -331,12 +328,14 @@ FUNCTION BoxC()
    Scroll( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2 )
    RestScreen( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2, aBoxPar[ 5 ] )
 
-   @ AboxPar[ 7 ], aBoxPar[ 8 ] SAY ""
+   @ aBoxPar[ 7 ], aBoxPar[ 8 ] SAY ""
 
    SetCursor( iif( aBoxPar[ 9 ] == 0, 0, iif( ReadInsert(), 2, 1 ) ) )
    SetColor( aBoxPar[ 10 ] )
 
-   IF ValType( aBoxPar[ 6 ] ) == "N"; box_crno_na_zuto_end(); ENDIF
+   IF ValType( aBoxPar[ 6 ] ) == "N"
+     box_crno_na_zuto_end()
+   ENDIF
 
    IF !StackIsEmpty( aBoxStack )
       aBoxPar := StackTop( aBoxStack )

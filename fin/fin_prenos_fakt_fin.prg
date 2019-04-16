@@ -53,7 +53,7 @@ FUNCTION fakt_fin_prenos()
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "Broj dokumenta" GET qqDok
    @ box_x_koord() + 6, box_y_koord() + 2 SAY "Podesiti parametre prenosa" GET cSetPAr VALID cSetpar $ "DN" PICT "@!"
    READ
-   
+
    IF cSetPar == "D"
       gFaktKum := PadR( gFaktKum, 35 )
       gDzokerF1 := PadR( gDzokerF1, 80 )
@@ -208,7 +208,8 @@ FUNCTION fakt_porez_11( nFV, nRabat )
 
 FUNCTION fin_kontiranje_naloga( dDatNal )
 
-   LOCAL cidfirma, cidvd, cbrdok, lafin, lafin2
+   LOCAL cIdfirma, cIdvd, cBrdok, lAfin, lAfin2
+   LOCAL GetList := {}
 
    // o_roba()
    o_finmat()

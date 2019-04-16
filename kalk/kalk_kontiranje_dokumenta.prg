@@ -84,26 +84,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       o_finmat()
    ENDIF
 
-   // SELECT F_TRFP
-   // USE
-   // o_trfp()
-
-   // SELECT F_KONCIJ
-   // IF !Used()
-   // o_koncij()
-   // ENDIF
-
-   // IF FieldPos( "IDRJ" ) <> 0
-   // lPoRj := .T.
-   // ELSE
-   // lPoRj := .F.
-   // ENDIF
-
-   // SELECT F_VALUTE
-   // IF !Used()
-   // o_valute()
-   // ENDIF
-
    IF lAutomatskiSetBrojNaloga == NIL
       lAutomatskiSetBrojNaloga := .F.
    ENDIF
@@ -122,12 +102,12 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       IF finmat->idvd $ "49#71#79#21#22#72#29#02"
          RETURN .F.
       ENDIF
-      Beep( 1 )
-      IF !lAGen
-         lAfin := Pitanje(, "KALK: Formirati FIN nalog?", "D" ) == "D"
-      ELSE
+      //Beep( 1 )
+      //IF !lAGen
+         //lAfin := Pitanje(, "KALK: Formirati FIN nalog?", "D" ) == "D"
+      //ELSE
          lAfin := .T.
-      ENDIF
+      //ENDIF
    ENDIF
 
    IF !lAFin
@@ -211,10 +191,10 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
          ENDIF
 
          @ box_x_koord() + 4, box_y_koord() + 2 SAY "Datum naloga: "
-
          ?? dDatNal
+
          IF lAFin .OR. lAMat
-            Inkey( 3 )
+            Inkey( 2 )
          ENDIF
 
       ELSE
@@ -241,7 +221,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    SELECT finmat
    nCnt := 0
    Box( "<CENTAR>", 5, 70 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY  koncij->shema + " : KALK: " + finmat->brdok + "-" + "/" + AllTrim( finmat->brfaktp )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY  koncij->shema + " : KALK: " + finmat->brdok + "-" + " BRF: " + AllTrim( finmat->brfaktp )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY  "    -> FINMAT -> FIN " + cIdVnTrFP + " - " + cBrNalogFin
 
    DO WHILE !Eof()
@@ -731,9 +711,6 @@ FUNCTION RJ( nBroj, cDef, cTekst )
    RETURN 0
 
 
-
-
-
 FUNCTION kalk_datval()
    RETURN datval()
 
@@ -749,12 +726,10 @@ FUNCTION kalk_datval()
 FUNCTION DatVal()
 
    LOCAL nUvecati := 15
-
    // LOCAL hRec
    LOCAL nRokPartner
 
    PRIVATE GetList := {}
-
 
    PushWA()
    IF find_kalk_doks_by_broj_dokumenta( finmat->idfirma, finmat->idvd, finmat->brdok )
@@ -764,7 +739,6 @@ FUNCTION DatVal()
    ENDIF
 
    dDatVal := fix_dat_var( dDatVal, .T. )
-
    IF Empty( dDatVal )
       // IF kalk_imp_autom() // osloni se na rok placanja
       nRokPartner := get_partn_sifk_sifv( "ROKP", finmat->idpartner, .T. )
@@ -774,7 +748,6 @@ FUNCTION DatVal()
       IF !Empty( fix_dat_var( finmat->datFaktP, .T. ) )
          dDatVal := finmat->datFaktP + nUvecati
       ENDIF
-
    ENDIF
 
    PopWa()
@@ -787,12 +760,12 @@ FUNCTION kalk_set_doks_total_fields( nNv, nVpv, nMpv, nRabat )
    IF field->mu_i = "1"
       nNV += field->nc * ( field->kolicina - field->gkolicina - field->gkolicin2 )
       nVPV += field->vpc * ( field->kolicina - field->gkolicina - field->gkolicin2 )
-   ELSEIF mu_i = "P"
+   ELSEIF field->mu_i = "P"
       nNV += field->nc * ( field->kolicina - field->gkolicina - field->gkolicin2 )
       nVPV += field->vpc * ( field->kolicina - field->gkolicina - field->gkolicin2 )
-   ELSEIF mu_i = "3"
+   ELSEIF field->mu_i = "3"
       nVPV += field->vpc * ( field->kolicina - field->gkolicina - field->gkolicin2 )
-   ELSEIF mu_i == "5"
+   ELSEIF field->mu_i == "5"
       nNV -= field->nc * ( field->kolicina )
       nVPV -= field->vpc * ( field->kolicina )
       nRabat += field->vpc * ( field->rabatv / 100 ) * field->kolicina
@@ -816,7 +789,7 @@ FUNCTION kalk_set_doks_total_fields( nNv, nVpv, nMpv, nRabat )
    ELSEIF field->pu_i == "I"
       nMPV -= field->mpcsapp * field->gkolicin2
       nNV -= field->nc * field->gkolicin2
-   ELSEIF pu_i == "3"
+   ELSEIF field->pu_i == "3"
       nMPV += field->mpcsapp * field->kolicina
    ENDIF
 

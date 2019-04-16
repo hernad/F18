@@ -35,14 +35,12 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
    ENDIF
 
    pConn := sql_data_conn():pDB
-
    IF HB_ISNIL( pConn )
       error_bar( "PSQL", "SQLMIX pDB NIL?! " + cTable )
       RETURN .F.
    ENDIF
 
    rddSetDefault( "SQLMIX" )
-
    IF rddInfo( 1001, { "POSTGRESQL", pConn } ) == 0  // #define RDDI_CONNECT          1001
       LOG_CALL_STACK cLogMsg
       ?E "Unable connect to the PSQLserver", cLogMsg
@@ -51,11 +49,9 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
    ENDIF
 
    cQuery := "SELECT * FROM " + f18_sql_schema( cTable )
-
    IF cId != NIL
       cQuery += " WHERE id=" + sql_quote( cId ) // select from fmk.partn where id='BRING01'
    ENDIF
-
 
    BEGIN SEQUENCE WITH {| err | Break( err ) }
 
@@ -74,7 +70,6 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
       IF cTable == "os_os" .OR. cTable == "sii_sii"
 
          index_os_sii( cAlias )
-
          SET ORDER TO TAG "1"
 
       ELSEIF cTable == "os_promj" .OR. cTable == "sii_promj"
@@ -118,7 +113,6 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
          INDEX ON  id + IdOps + IdKan + IdN0 + Racun TAG "ID" TO  ( cAlias )
          INDEX ON  Naz + IdOps TAG "NAZ" TO  ( cAlias )
          SET ORDER TO TAG "ID"
-
 
       ELSEIF cTable == "roba"
          INDEX ON ID TAG "ID" TO ( cAlias )
