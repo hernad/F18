@@ -33,11 +33,10 @@ FUNCTION PDF_open_dokument( cFile )
       @ 0, 0 SAY ""
       OutStd( "[vscode#pdf.view]" + cFile + "[vscode#end]" )
       OutStd( "" )
-      Inkey( 0.2 )
+      Inkey( 0.1 )
       RESTORE SCREEN FROM cScr
       SetPRC( nRow, nCol )
       @ nRow, nCol SAY ""
-      // Alert("View PDF:" + cFile)
       RETURN .T.
    ENDIF
 

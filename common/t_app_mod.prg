@@ -239,15 +239,17 @@ PROCEDURE k_f1()
 
 PROCEDURE k_f12()
 
-   LOCAL cEkran := SaveScreen( 0, 0, Row(), Col() )
+   LOCAL cEkran
 
    // IF is_windows()
    // Run("mode con: cols=120 lines=40")
    // ELSE
    // Run("stty cols 120 rows 40")
    // ENDIF
-   info_bar( "tty", "refresh" )
-
-   RestScreen( 0, 0, Row(), Col(), cEkran )
+   info_bar( "tty", "refresh/0" )
+   cEkran := SaveScreen( 0, 0, MaxRow(), MaxCol() )
+   info_bar( "tty", "refresh/1" )
+   RestScreen( 0, 0, MaxRow(), MaxCol(), cEkran )
+   info_bar( "tty", "refresh/2" )
 
    RETURN
