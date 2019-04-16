@@ -260,11 +260,12 @@ FUNCTION tremol_reset_plu_artikla( hFiskalniParams )
 
 
 
-FUNCTION tremol_komanda( hFiskalniParams, cmd )
+FUNCTION tremol_komanda( hFiskalniParams, cKomanda )
 
    LOCAL cXml
    LOCAL nErrorLevel
    LOCAL cFiskalniFajlName
+   LOCAL cOutput
 
    cFiskalniFajlName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula )
 
@@ -273,8 +274,10 @@ FUNCTION tremol_komanda( hFiskalniParams, cmd )
 
    create_xml( cXml )
    xml_head()
-   xml_subnode( "TremolFpServer " + cmd )
+   cOutput := xml_subnode( "TremolFpServer " + cKomanda )
    close_xml()
+
+   log_write_file( "FISC_CMD: " + cOutput, 2 )
 
    IF tremol_cekam_fajl_odgovora( hFiskalniParams, cFiskalniFajlName ) >= 0
       nErrorLevel := tremol_read_output( hFiskalniParams, cFiskalniFajlName )
@@ -340,6 +343,7 @@ FUNCTION tremol_z_rpt( hFiskParams )
    LOCAL nErrorLevel
    LOCAL cParamDate, cParamTime
    LOCAL _rpt_type := "Z"
+   LOCAL dLastDatum, cLastTime
 
    IF Pitanje(, "Štampati dnevni izvjestaj", "D" ) == "N"
       RETURN .F.
@@ -349,11 +353,11 @@ FUNCTION tremol_z_rpt( hFiskParams )
    cParamTime := "zadnji_" + _rpt_type + "_izvjestaj_vrijeme"
 
    // iscitaj zadnje formirane izvjestaje...
-   _last_date := fetch_metric( cParamDate, NIL, CToD( "" ) )
-   _last_time := PadR( fetch_metric( cParamTime, NIL, "" ), 5 )
+   dLastDatum := fetch_metric( cParamDate, NIL, CToD( "" ) )
+   cLastTime := PadR( fetch_metric( cParamTime, NIL, "" ), 5 )
 
-   IF Date() == _last_date
-      MsgBeep( "Zadnji dnevni izvjestaj radjen " + DToC( _last_date ) + " u " + _last_time )
+   IF Date() == dLastDatum
+      MsgBeep( "Zadnji dnevni izvjestaj radjen " + DToC( dLastDatum ) + " u " + cLastTime )
    ENDIF
 
    cCommand := 'Command="Report" Type="DailyZ" /'
@@ -590,6 +594,7 @@ FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTo
    LOCAL cKeyValuePar
    LOCAL cSuccessCode, lSuccess
    LOCAL cTotal
+   LOCAL cOutLinije
 
    // primjer: c:\fiscal\00001.out
    cFiskalniFajlName := AllTrim( hFiskalniParams[ "out_dir" ] + StrTran( cFajl, "xml", "out" ) )
@@ -609,6 +614,7 @@ FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTo
    // prodji kroz svaku liniju i procitaj zapise
    // 1 liniju preskoci zato sto ona sadrzi
    // <?xml version="1.0"...>
+   cOutLinije := ""
    DO WHILE oFile:MoreToRead()
       cLinija := hb_StrToUTF8( oFile:ReadLine()  )
       cLinija := StrTran( cLinija, '<?xml version="1.0" ?>', "" ) // skloni "<" i ">"
@@ -627,6 +633,7 @@ FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTo
 
       // ErrorCode=0 ErrorOPOS=OPOS_SUCCESS ErrorDescription=Uspjesno kreiran
       // Output Change=0.00 ReceiptNumber=00552 Total=51.20
+      cOutLinije += cLinija
       aLinije := TokToNiz( cLinija, Space( 1 ) )
 
       // aLinija[1] = "ErrorCode=0"
@@ -637,6 +644,7 @@ FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTo
 
    ENDDO
    oFile:Close()
+   log_write_file( "FISC_OUT: " + cOutLinije, 2 )
 
    // <?xml version="1.0" ?>
    // <TremolFpServerOutput ErrorCode="0" ErrorFP="0" ErrorDescription="">
@@ -687,9 +695,13 @@ FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTo
    IF nScan <> 0
       // ErrorCode=241412
       aTokens := TokToNiz( aParoviKeyValue[ nScan ], "=" )
-      cErrorReport += "ErrorCode: " + AllTrim( aTokens[ 2 ] )
-      // ovo je ujedino i error kod
-      nErrorLevel := Val( aTokens[ 2 ] )
+      IF Len( aTokens ) == 2
+         cErrorReport += "ErrorCode: " + AllTrim( aTokens[ 2 ] )
+         // ovo je ujedino i error kod
+         nErrorLevel := Val( aTokens[ 2 ] )
+      ELSE
+         nErrorLevel := FISK_ERROR_PARSIRAJ
+      ENDIF
    ENDIF
 
    IF is_linux()
@@ -701,20 +713,23 @@ FUNCTION tremol_read_output( hFiskalniParams, cFajl, nBrojFiskalnoRacunaOut, nTo
    IF nScan <> 0
       // ErrorOPOS=xxxxxxx
       aTokens := TokToNiz( aParoviKeyValue[ nScan ], "=" )
-      cErrorReport += " ErrorOPOS: " + AllTrim( aTokens[ 2 ] )
+      IF Len( aTokens ) == 2
+         cErrorReport += " ErrorOPOS: " + AllTrim( aTokens[ 2 ] )
+      ENDIF
    ENDIF
-   nScan := AScan( aParoviKeyValue, {| val | "ErrorDescription" $ val } )
+   nScan := AScan( aParoviKeyValue, {| cLinija | "ErrorDescription" $ cLinija } )
    IF nScan <> 0
       // ErrorDescription=xxxxxxx
       aTokens := TokToNiz( aParoviKeyValue[ nScan ], "=" )
-      cErrorReport += " Description: " + AllTrim( aTokens[ 2 ] )
+      IF Len( aTokens ) == 2
+         cErrorReport += " Description: " + AllTrim( aTokens[ 2 ] )
+      ENDIF
    ENDIF
 
    IF !Empty( cErrorReport )
       log_write_file( "FISK_RN_ERROR: " + cErrorReport, 2 )
       Alert( "FISK_RN_ERROR: " + cErrorReport )
    ENDIF
-
    fiskalni_brisi_odgovor( cFiskalniFajlName )
 
    RETURN nErrorLevel

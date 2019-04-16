@@ -75,7 +75,7 @@ FUNCTION realizacija_kase
 
    SELECT pos_doks
    pos_set_filter_pos_doks( @cFilter, cFilterIdRadnik, cFilterIdVrsteP, cVrijOd, cVrijDo, cPartId )
-   pos_kasa_pripremi_pom_za_realkase( "42", dDatum0, dDatum1 )
+   pos_kasa_pripremi_pom_za_realkase( cIdPos, "42", dDatum0, dDatum1 )
 
    PRIVATE nTotal := 0
 

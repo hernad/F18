@@ -244,11 +244,11 @@ FUNCTION KaKaProd( nUlaz, nIzlaz, nMPV, nNV )
 
 FUNCTION kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
 
-   LOCAL nArea := SELECT()
+   //LOCAL nArea := SELECT()
 
    PushWa()
-   select_o_roba( ( nArea )->IdRoba )
-   select_o_tarifa( ( nArea )->IdTarifa )
+   select_o_roba( kalk_pripr->IdRoba )
+   select_o_tarifa( kalk_pripr->IdTarifa )
    PopWa()
 
    RETURN .T.

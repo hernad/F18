@@ -36,7 +36,6 @@ FUNCTION find_kalk_doks_by_tip_datum( cIdFirma, cIdVd, dDatOd, dDatDo )
    hParams[ "order_by" ] := "idfirma, idvd, brdok, datdok" // ako ima vise brojeva dokumenata sortiraj po njima
    hParams[ "indeks" ] := .F. // ne trositi vrijeme na kreiranje indeksa
 
-
    use_sql_kalk_doks( hParams )
    GO TOP
 
@@ -411,8 +410,6 @@ FUNCTION kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
    LOCAL hParams
 
    hParams := hb_Hash()
-   hParams[ "alias" ] := "kalk_pripr"
-   hParams[ "indeks" ] := .T.
 
    IF cIdFirma != NIL .AND. cIdVd != NIL .AND. cBrDok != NIL
       hParams[ "idfirma" ] := cIdFirma
@@ -420,6 +417,13 @@ FUNCTION kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
       hParams[ "brdok" ] := cBrDok
    ENDIF
 
+
+   hParams[ "indeks" ] := .F.
+   use_sql_kalk_doks( hParams )
+
+   SELECT F_KALK_PRIPR
+   hParams[ "alias" ] := "kalk_pripr"
+   hParams[ "indeks" ] := .T.
    RETURN use_sql_kalk( hParams )
 
 

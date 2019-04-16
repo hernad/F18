@@ -115,7 +115,6 @@ FUNCTION xml_subnode( cName, lEscape, lWrite )
    // => <position> (lEscape = .f.)
    // => </position> (lEscape = .t.)
    cTmp := _bracket( cName, lEscape )
-
    IF lWrite == .T.
       ?? cTmp
       ?

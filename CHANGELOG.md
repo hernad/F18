@@ -1,6 +1,11 @@
 # F18 klijent, lista promjena
 
 
+## 2019-04-16
+
+-  tremol cmd fix
+-  kalk kontiranje azuriranog fix
+
 ## 2019-04-15
 
 -  pos storno fix

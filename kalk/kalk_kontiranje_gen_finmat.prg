@@ -100,8 +100,10 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
 
       IF lAzuriraniDokument
          kalk_otvori_kumulativ_kao_pripremu( cIdFirma, cIdVd, cBrDok )
+      ELSE
+         HSEEK cIdFirma + cIdVd + cBrDok
       ENDIF
-      HSEEK cIdFirma + cIdVd + cBrDok // kalk_pripr
+
 
    ELSE
       GO TOP
@@ -128,7 +130,7 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
 
       select_o_partner( KALK_PRIPR->IDPARTNER )
       select_o_konto( KALK_PRIPR->MKONTO )
-      cPom := kalk_pripr->naz
+      cPom := konto->naz
       select_o_konto( KALK_PRIPR->PKONTO )
       SELECT kalk_pripr
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "DATUM------------>"             COLOR "W+/B"
@@ -159,8 +161,11 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
       cBrDok := kalk_pripr->BrDok
       cIdPartner := kalk_pripr->IdPartner
       cBrFaktP := kalk_pripr->BrFaktP
-      dDatFaktP := kalk_pripr->DatFaktP
-
+      IF lAzuriraniDokument
+         dDatFaktP := kalk_doks->DatFaktP
+      ELSE
+         dDatFaktP := kalk_pripr->DatFaktP
+      ENDIF
       cIdKonto := finmat_idkonto( kalk_pripr->idvd, kalk_pripr->mkonto, kalk_pripr->pkonto, kalk_pripr->idkonto, kalk_pripr->idkonto2 )
       cIdKonto2 := finmat_idkonto2( kalk_pripr->idvd, kalk_pripr->mkonto, kalk_pripr->pkonto, kalk_pripr->idkonto, kalk_pripr->idkonto2 )
 
@@ -204,7 +209,7 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
             IdTarifa  WITH kalk_pripr->IdTarifa, ;
             IdPartner WITH kalk_pripr->IdPartner, ;
             BrFaktP   WITH kalk_pripr->BrFaktP, ;
-            DatFaktP  WITH kalk_pripr->DatFaktP, ;
+            DatFaktP  WITH dDatFaktP, ;
             IdVD      WITH kalk_pripr->IdVD, ;
             BrDok     WITH kalk_pripr->BrDok, ;
             DatDok    WITH kalk_pripr->DatDok, ;

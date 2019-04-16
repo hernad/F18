@@ -11,38 +11,26 @@
 
 #include "f18.ch"
 
-FUNCTION pos_kasa_pripremi_pom_za_realkase( cIdVd, cDobId )
+FUNCTION pos_kasa_pripremi_pom_za_realkase( cIdPos, cIdVd, dDatOd, dDatDo )
 
    // cIdVD - Id vrsta dokumenta
    // Opis: priprema pomoce baze POM.DBF za realizaciju
 
-   IF ( cDobId == NIL )
-      cDobId := ""
-   ENDIF
 
    MsgO( "formiranje pomoćne tabele za izvještaj..." )
 
-   seek_pos_doks_2( cIdVd, dDatum0 )
-   DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatum1
+   //seek_pos_doks_2( cIdVd, dDatOd )
+   seek_pos_doks_2_za_period( cIdVd, dDatOd, dDatDo )
+   DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatDo
 
       IF ( !Empty( cIdPos ) .AND. pos_doks->IdPos <> cIdPos )
          SKIP
          LOOP
       ENDIF
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
-      DO WHILE !Eof() .AND. pos->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
+      DO WHILE !Eof() .AND. pos->IdPos + pos->IdVd + DToS( pos->datum ) + pos->BrDok  == pos_doks->IdPos + pos_doks->IdVd + DToS( pos_doks->datum ) + pos_doks->BrDok
 
          select_o_roba( pos->IdRoba )
-         IF roba->( FieldPos( "sifdob" ) ) <> 0
-            IF !Empty( cDobId )
-               IF roba->sifdob <> cDobId
-                  SELECT pos
-                  SKIP
-                  LOOP
-               ENDIF
-            ENDIF
-         ENDIF
-
          SELECT pom
          GO TOP
          SEEK pos_doks->IdPos + pos_doks->IdRadnik + pos_doks->IdVrsteP + pos->IdRoba
