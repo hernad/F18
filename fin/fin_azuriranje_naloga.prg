@@ -69,7 +69,7 @@ FUNCTION fin_azuriranje_naloga( lAutomatikaAzuriranja )
          IF lAutomatskiIzbrisatiPostojeci .OR. Pitanje( , "Izbrisati postojeći FIN nalog: "  + cIdFirma + "-" + cIdVn + "-" + cBrNal + " ?", cOdgovorDupliNalog ) == "D"
             IF fin_nalog_brisi_iz_kumulativa( cIdFirma, cIdVn, cBrNal )
                cMsg :=  "Brisanje duplog fin naloga: " + cIdFirma + "-" + cIdVn + "-" + cBrNal
-               MsgBeep( cMsg )
+               Msg( cMsg, 4 )
                log_write( "F18_DOK_OPER: " + cMsg, 2 )
             ELSE
                MsgBeep( "Greška sa brisanjem FIN naloga " + cIdFirma + "-" + cIdVn + "-" + cBrNal + "!#Poništavam operaciju." )

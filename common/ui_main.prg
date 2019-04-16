@@ -51,7 +51,7 @@ FUNCTION ui_calc_xy( nVisina, nSirina )
    ENDIF
 
    // Odredi x koordinatu
-   IF !lCentrirati .AND. (( f18_max_rows() - 2 - nX ) >=  ( nVisina + 2 ))
+   IF !lCentrirati .AND. ( ( f18_max_rows() - 2 - nX ) >=  ( nVisina + 2 ) )
       box_x_koord( nX + 1 )
       IF nSirina + nY + 3 <= f18_max_cols() - 4
          box_y_koord( nY + 3 )
@@ -92,9 +92,9 @@ FUNCTION range( nVal, nMin, nMax )
 *   note Maksimalna duzina jednog reda je 72 slova
 */
 
-FUNCTION Msg( uText, sec, xPos )
+FUNCTION Msg( uText, nSec, xPos )
 
-   LOCAL l, msg_x1, msg_x2, msg_y1, msg_y2, cPom := Set( _SET_DEVICE )
+   LOCAL nLinija, msg_x1, msg_x2, msg_y1, msg_y2, cPom := Set( _SET_DEVICE )
 
    LOCAL nLen, nHashPos, aText := {}, nCnt, nBrRed := 0
    LOCAL cText
@@ -113,14 +113,14 @@ FUNCTION Msg( uText, sec, xPos )
       nBrRed++
    ENDIF
 
-   l := 0
+   nLinija := 0
    FOR nCnt := 1 TO Len ( aText )
-      IF Len ( aText[ nCnt ] ) > l
-         l := Len ( aText[ nCnt ] )
+      IF Len ( aText[ nCnt ] ) > nLinija
+         nLinija := Len ( aText[ nCnt ] )
       ENDIF
    NEXT
 
-   // l:=Len(Text)
+   // nLinija:=Len(Text)
    IF xPos == NIL
       msg_x1 := 8 - Int ( nBrRed / 2 )
       msg_x2 := 13 + nBrRed - Int ( nBrRed / 2 )             // nBrRed >= 1
@@ -129,18 +129,18 @@ FUNCTION Msg( uText, sec, xPos )
       msg_x2 := xPos + 5 + nBrRed
    ENDIF
 
-   msg_y1 := ( f18_max_cols() - l - 7 ) / 2
+   msg_y1 := ( f18_max_cols() - nLinija - 7 ) / 2
    msg_y2 := f18_max_cols() - msg_y1
-   StackPush( aMsgStack, { iif( SetCursor() == 0, 0, iif( ReadInsert(), 2, 1 ) ), SetColor( f18_color_invert()  ), l, ;
+   StackPush( aMsgStack, { iif( SetCursor() == 0, 0, iif( ReadInsert(), 2, 1 ) ), SetColor( f18_color_invert()  ), nLinija, ;
       SaveScreen( msg_x1, msg_y1, msg_x2, msg_y2 ) } )
 
    @ msg_x1, msg_y1 CLEAR TO msg_x2, msg_y2
    @ msg_x1 + 1, msg_y1 + 2 TO msg_x2 - 1, msg_y2 - 2 DOUBLE
 
    FOR nCnt := 1 TO nBrRed
-      @ msg_x1 + 2 + nCnt, msg_y1 + 4 SAY PadC ( aText[ nCnt ], l )
+      @ msg_x1 + 2 + nCnt, msg_y1 + 4 SAY PadC ( aText[ nCnt ], nLinija )
    NEXT
-   Inkey( Sec )
+   Inkey( nSec )
 
    MsgC( msg_x1, msg_y1, msg_x2, msg_y2 )
    Set( _SET_DEVICE, cPom )
@@ -148,7 +148,7 @@ FUNCTION Msg( uText, sec, xPos )
    RETURN .T.
 
 
-FUNCTION MsgO( cText, sec, lUtf )
+FUNCTION MsgO( cText, nSec, lUtf )
 
    LOCAL nLen
    LOCAL msg_x1
@@ -334,7 +334,7 @@ FUNCTION BoxC()
    SetColor( aBoxPar[ 10 ] )
 
    IF ValType( aBoxPar[ 6 ] ) == "N"
-     box_crno_na_zuto_end()
+      box_crno_na_zuto_end()
    ENDIF
 
    IF !StackIsEmpty( aBoxStack )
@@ -374,7 +374,7 @@ FUNCTION prikaz_dostupnih_opcija_crno_na_zuto( aNiz )
 
       FOR nI := 1 TO nBrRed * nBrKol
          IF Mod( nI - 1, nBrKol ) == 0
-            Eval( {||++j, nCol := 0 } )
+            Eval( {|| ++j, nCol := 0 } )
          ELSE
             nCol += nOduz
          ENDIF

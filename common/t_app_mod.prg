@@ -124,6 +124,7 @@ METHOD gProc( nKey, nKeyHandlerRetEvent )
 
    LOCAL lPushWa
    LOCAL nI
+
    pq_receive()
 
    DO CASE
@@ -195,8 +196,10 @@ METHOD quit( lVratiseURP )
 
 
 METHOD gparams()
-    my_login():administratorske_opcije(10, 10)
-RETURN .T.
+
+   my_login():administratorske_opcije( 10, 10 )
+
+   RETURN .T.
 
 
 
@@ -225,9 +228,9 @@ METHOD setTGVars()
 PROCEDURE k_f1()
 
    IF is_windows()
-     // Run("mode con: cols=120 lines=40")
+      // Run("mode con: cols=120 lines=40")
    ELSE
-     // Run("stty cols 120 rows 40")
+      // Run("stty cols 120 rows 40")
    ENDIF
    // info_bar( "tty", "120 x 40" )
 
@@ -236,11 +239,15 @@ PROCEDURE k_f1()
 
 PROCEDURE k_f12()
 
-   IF is_windows()
-     // Run("mode con: cols=120 lines=40")
-   ELSE
-     // Run("stty cols 120 rows 40")
-   ENDIF
-   // info_bar( "tty", "F12: 120 x 40" )
+   LOCAL cEkran := SaveScreen( 0, 0, Row(), Col() )
 
-    RETURN
+   // IF is_windows()
+   // Run("mode con: cols=120 lines=40")
+   // ELSE
+   // Run("stty cols 120 rows 40")
+   // ENDIF
+   info_bar( "tty", "refresh" )
+
+   RestScreen( 0, 0, Row(), Col(), cEkran )
+
+   RETURN
