@@ -32,49 +32,11 @@ FUNCTION fiskalni_flink_racun( hFiskalniParams, aRacunData, lStorno )
    cFName := flink_name( hFiskalniParams[ "out_file" ] )
    cFPath := flink_path( hFiskalniParams[ "out_dir" ] )
 
-altd()
-
    flink_delete_ulazni_dir()
    flink_error_delete( cFPath, cFName )
 
-// RETURN nErr
-
-// --------------------------------------------------------
-// fiskalni racun pos (FLINK)
-// cFPath - putanja do fajla
-// cFName - naziv fajla
-// aData - podaci racuna
-// lStorno - da li se stampa storno ili ne (.T. ili .F. )
-// --------------------------------------------------------
-// FUNCTION fiskalni_flink_racun( cFPath, cFName, aData, lStorno, cError )
-
-// LOCAL cSep := ";"
-// LOCAL aPosData := {}
-// LOCAL aStruct := {}
-// LOCAL nErr := 0
-// LOCAL cDatum, cTime
-//
-// IF lStorno == nil
-// lStorno := .F.
-// ENDIF
-// IF cError == nil
-// cError := "N"
-// ENDIF
-
-   // pobrisi temp fajlove
-   // cFName := flink_filepos( aData[ 1, 1 ] ) // naziv fajla
-   // izbrisi fajl greske odmah na pocetku ako postoji
-   // uzmi strukturu tabele za pos racun
-   // aStruct := fiskalni_get_struct_za_gen_fajlova( F_POS_RN )
-   // iscitaj pos matricu
-
-
    aFlinkStruct := fiskalni_get_struct_za_gen_fajlova( F_POS_RN ) // uzmi strukturu tabele za pos racun
-   // aFlinkArray := fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniParams )
-   // aPosData := flink_pos_rn_matrica( aData, lStorno )
-
-   aFLinkArray := flink_pos_rn_matrica( aRacunData, lStorno )
-
+   aFLinkArray := flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
 
    cDatum := DToC( Date() )
    cTime := Time()
@@ -166,10 +128,6 @@ STATIC FUNCTION flink_filepos( cBrRn )
    RETURN cRet
 
 
-
-// ----------------------------------------------
-// brise fajlove iz ulaznog direktorija
-// ----------------------------------------------
 STATIC FUNCTION flink_delete_ulazni_dir()
 
    LOCAL cTmp, cFilePath
@@ -270,7 +228,7 @@ STATIC FUNCTION flink_pos_artikal( aData )
 
 
 
-STATIC FUNCTION flink_pos_rn_matrica( aRacunData, lStorno )
+STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
 
    LOCAL aArr := {}
    LOCAL cTmp := ""
@@ -290,13 +248,11 @@ STATIC FUNCTION flink_pos_rn_matrica( aRacunData, lStorno )
    // prakticno broj racuna
    // cLogic := ALLTRIM( aRacunData[1, 1] )
 
-   AltD()
    // broj racuna
    cRnBroj := AllTrim( aRacunData[ 1, FISK_INDEX_BRDOK ] )
 
    // logic je uvijek "1"
    cLogic := "1"
-
    IF lStorno == .T.
       cRek_rn := AllTrim( aRacunData[ 1, FISK_INDEX_FISK_RACUN_STORNIRATI ] )
       cTmp := "K"
@@ -315,7 +271,6 @@ STATIC FUNCTION flink_pos_rn_matrica( aRacunData, lStorno )
    ENDIF
 
    FOR i := 1 TO Len( aRacunData )
-      cPoreznaStopa := aRacunData[ i, FISK_INDEX_TARIFA ]
       cTmp := "S"
       cTmp += cLogSep
       cTmp += cLogic
@@ -341,11 +296,8 @@ STATIC FUNCTION flink_pos_rn_matrica( aRacunData, lStorno )
       cTmp += "1"
       cTmp += cSep
       // poreska grupa artikala 1 - 4
-      IF cPoreznaStopa == "E"
-         cTmp += "2"
-      ELSE
-         cTmp += "1"
-      ENDIF
+      cTmp += cPoreznaStopa := fiskalni_tarifa( aRacunData[ i, FISK_INDEX_TARIFA ], hFiskalniParams[ "pdv" ], "FLINK" )
+      
       cTmp += cSep
       // -0 ???
       cTmp += "-0"

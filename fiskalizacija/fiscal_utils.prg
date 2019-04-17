@@ -289,10 +289,10 @@ FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
 // -----------------------------------------------------------------
 STATIC FUNCTION _get_auto_plu_param_name( nFiskDeviceId )
 
-   LOCAL _tmp := "auto_plu"
+   LOCAL cTmp := "auto_plu"
    LOCAL cRet
 
-   cRet := _tmp + "_dev_" + AllTrim( Str( nFiskDeviceId ) )
+   cRet := cTmp + "_dev_" + AllTrim( Str( nFiskDeviceId ) )
 
    RETURN cRet
 
@@ -300,56 +300,57 @@ STATIC FUNCTION _get_auto_plu_param_name( nFiskDeviceId )
 
 FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
-   LOCAL _tar := "2"
-   LOCAL _tmp
+   LOCAL cIdTarifaFiskalni := "2"
+   LOCAL cTmp
 
 
-   _tmp := Left( Upper( AllTrim( cIdTarifa ) ), 4 ) // PDV17 -> PDV1 ili PDV7NP -> PDV7 ili PDV0IZ -> PDV0 ili PDVM
+   cTmp := Left( Upper( AllTrim( cIdTarifa ) ), 4 ) // PDV17 -> PDV1 ili PDV7NP -> PDV7 ili PDV0IZ -> PDV0 ili PDVM
 
+altd()
    DO CASE
 
-   CASE ( _tmp == "PDV1" .OR. _tmp == "PDV7" ) .AND. cPDVDN == "D"
+   CASE ( cTmp == "PDV1" .OR. cTmp == "PDV7" ) .AND. cPDVDN == "D"  // pdv17
 
       IF cDriver == "TRING" // PDV je tarifna skupina "E"
-         _tar := "E"
-      ELSEIF cDriver == "FPRINT"
-         _tar := "2"
+         cIdTarifaFiskalni := "E"
+      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+         cIdTarifaFiskalni := "2"
       ELSEIF cDriver == "HCP"
-         _tar := "1"
+         cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "TREMOL"
-         _tar := "2"
+         cIdTarifaFiskalni := "2"
       ENDIF
 
-   CASE _tmp == "PDV0" .AND. cPDVDN == "D"
+   CASE cTmp == "PDV0" .AND. cPDVDN == "D"
 
       IF cDriver == "TRING" // bez PDV-a je tarifna skupina "K"
-         _tar := "K"
-      ELSEIF cDriver == "FPRINT"
-         _tar := "4"
+         cIdTarifaFiskalni := "K"
+      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+         cIdTarifaFiskalni := "4"
       ELSEIF cDriver == "HCP"
-         _tar := "3"
+         cIdTarifaFiskalni := "3"
       ELSEIF cDriver == "TREMOL"
-         _tar := "1"
+         cIdTarifaFiskalni := "1"
       ENDIF
 
-   CASE _tmp == "PDVM"
+   CASE cTmp == "PDVM"
 
       IF cDriver == "FPRINT"
-         _tar := "5"
+         cIdTarifaFiskalni := "5"
       ELSEIF cDriver == "TRING"
-         _tar := "M"
+         cIdTarifaFiskalni := "M"
       ENDIF
 
    CASE cPDVDN == "N"
 
       IF cDriver == "TRING" // ne-pdv obveznik, skupina "A"
-         _tar := "A"
-      ELSEIF cDriver == "FPRINT"
-         _tar := "1"
+         cIdTarifaFiskalni := "A"
+      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+         cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "HCP"
-         _tar := "0"
+         cIdTarifaFiskalni := "0"
       ELSEIF cDriver == "TREMOL"
-         _tar := "3"
+         cIdTarifaFiskalni := "3"
       ENDIF
 
    OTHERWISE
@@ -358,7 +359,7 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
    ENDCASE
 
-   RETURN _tar
+   RETURN cIdTarifaFiskalni
 
 
 FUNCTION fiskalni_vrsta_placanja( id_plac, cDriver )

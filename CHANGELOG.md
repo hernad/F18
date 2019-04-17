@@ -3,7 +3,7 @@
 
 ## 2019-04-17
 
--  flink pos
+-  flink pos, fiskalni_tarifa
 
 ## 2019-04-16
 
