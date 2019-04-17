@@ -267,6 +267,7 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
    LOCAL cRnBroj
    LOCAL nTotal := 0
    LOCAL cPoreznaStopa
+   LOCAL cVrstaPlacanja
 
    // ocekuje se matrica formata
    // aRacunData { brrn, rbr, idroba, nazroba, cijena, kolicina, porstopa, rek_rn, plu, cVrPlacanja, nTotal }
@@ -350,12 +351,10 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
    cTmp += "1"
    cTmp += cSep
    cTmp += "pos rn: " + cRnBroj
-
    AAdd( aArr, { cTmp } )
 
-
-   // vrsta placanja
-   IF aRacunData[ 1, FISK_INDEX_VRSTA_PLACANJA ] <> "0"
+   cVrstaPlacanja := fiskalni_vrsta_placanja( aRacunData[ 1, FISK_INDEX_VRSTA_PLACANJA ], "FLINK" )
+   IF cVrstaPlacanja <> "0"
       nTotal := aRacunData[ 1, FISK_INDEX_TOTAL ]
       // zatvaranje racuna
       cTmp := "T"
@@ -368,7 +367,7 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
       cTmp += cLogSep
       cTmp += Replicate( "_", 2 )
       cTmp += cSep
-      cTmp += aRacunData[ 1, FISK_INDEX_VRSTA_PLACANJA ]
+      cTmp += cVrstaPlacanja
       cTmp += cSep
       cTmp += AllTrim( Str( nTotal, 12, 2 ) )
       cTmp += cSep
