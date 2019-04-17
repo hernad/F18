@@ -4,6 +4,7 @@
 ## 2019-04-17
 
 -  flink pos, fiskalni_tarifa, dnevni izvjestaj
+-  bintray ne kontam
 
 ## 2019-04-16
 
