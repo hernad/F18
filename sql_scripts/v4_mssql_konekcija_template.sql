@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION public.mssql_int_to_date(iDat integer) RETURNS date
 END;
 $$;
 
--- select * from public.sfak_by_brf(2018232);
+-- select * from public.sfak_by_brf('1', 2018232);
 
 DROP FUNCTION IF EXISTS public.sfak_by_brf;
 CREATE OR REPLACE FUNCTION public.sfak_by_brf(cServer character(1), brfIn bigint) RETURNS TABLE (rb integer, prod integer, ident integer, kold numeric, cijena numeric, brf bigint, datd date, rel integer, vs integer)
