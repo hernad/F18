@@ -11,9 +11,25 @@
 
 #include "f18.ch"
 
+STATIC  s_hFiskalniUredjajParams
 STATIC s_cPath, s_cFlinkPath2, s_cName
 
 THREAD STATIC F_POS_RN := "POS_RN" // pos komande
+
+
+STATIC FUNCTION flink_init()
+
+   LOCAL nDeviceId
+
+   IF s_hFiskalniUredjajParams != NIL
+      RETURN .T.
+   ENDIF
+   nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+   IF nDeviceId > 0
+      s_hFiskalniUredjajParams := get_fiscal_device_params( nDeviceId, my_user() )
+   ENDIF
+
+   RETURN .T.
 
 
 FUNCTION fiskalni_flink_racun( hFiskalniParams, aRacunData, lStorno )
@@ -53,7 +69,7 @@ FUNCTION fiskalni_flink_racun( hFiskalniParams, aRacunData, lStorno )
 
    RETURN nErr
 
-
+/*
 FUNCTION flink_pos_error( cFPath, cFName, cDate, cTime )
 
    LOCAL nErr := 0
@@ -110,7 +126,7 @@ FUNCTION flink_pos_error( cFPath, cFName, cDate, cTime )
    NEXT
 
    RETURN nErr
-
+*/
 
 STATIC FUNCTION flink_error_delete( cFPath, cFName )
 
@@ -167,9 +183,7 @@ FUNCTION fc_pos_art( cFPath, cFName, aData )
    RETURN .T.
 */
 
-// ------------------------------------------------------
-// vraca popunjenu matricu za upis artikla u memoriju
-// ------------------------------------------------------
+
 STATIC FUNCTION flink_pos_artikal( aData )
 
    LOCAL aArr := {}
@@ -297,7 +311,7 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
       cTmp += cSep
       // poreska grupa artikala 1 - 4
       cTmp += cPoreznaStopa := fiskalni_tarifa( aRacunData[ i, FISK_INDEX_TARIFA ], hFiskalniParams[ "pdv" ], "FLINK" )
-      
+
       cTmp += cSep
       // -0 ???
       cTmp += "-0"
@@ -346,7 +360,6 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
       cTmp += AllTrim( Str( nTotal, 12, 2 ) )
       cTmp += cSep
       AAdd( aArr, { cTmp } )
-
    ENDIF
 
    // zatvaranje racuna
@@ -365,8 +378,9 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
    RETURN aArr
 
 
-FUNCTION flink_polog( cFPath, cFName, nPolog )
+FUNCTION flink_polog( nPolog )
 
+   LOCAL cFPath, cFName
    LOCAL cSep := ";"
    LOCAL aPolog := {}
    LOCAL aStruct := {}
@@ -376,8 +390,12 @@ FUNCTION flink_polog( cFPath, cFName, nPolog )
       nPolog := 0
    ENDIF
 
+   flink_init()
+   cFName := flink_name( s_hFiskalniUredjajParams[ "out_file" ] )
+   cFPath := flink_path( s_hFiskalniUredjajParams[ "out_dir" ] )
+
    // ako je polog 0, pozovi formu za unos
-   IF nPolog = 0
+   IF nPolog == 0
       Box(, 1, 60 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Zadužujem kasu za:" GET nPolog PICT "999999.99"
       READ
@@ -406,11 +424,16 @@ FUNCTION flink_polog( cFPath, cFName, nPolog )
 
 
 
-FUNCTION flink_reset_racuna( cFPath, cFName )
+FUNCTION flink_reset_racuna()
 
    LOCAL cSep := ";"
    LOCAL aReset := {}
    LOCAL aStruct := {}
+   LOCAL cFPath, cFName
+
+   flink_init()
+   cFName := flink_name( s_hFiskalniUredjajParams[ "out_file" ] )
+   cFPath := flink_path( s_hFiskalniUredjajParams[ "out_dir" ] )
 
    flink_delete_ulazni_dir()
    cFName := flink_filepos( "0" )
@@ -424,13 +447,18 @@ FUNCTION flink_reset_racuna( cFPath, cFName )
 
 
 
-FUNCTION flink_dnevni_izvjestaj( cFPath, cFName )
+FUNCTION flink_dnevni_izvjestaj()
 
    LOCAL cSep := ";"
    LOCAL aRpt := {}
    LOCAL aStruct := {}
    LOCAL cRpt := "Z"
    LOCAL GetList := {}
+   LOCAL cFPath, cFName
+
+   flink_init()
+   cFName := flink_name( s_hFiskalniUredjajParams[ "out_file" ] )
+   cFPath := flink_path( s_hFiskalniUredjajParams[ "out_dir" ] )
 
    Box(, 6, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Dnevni izvještaji:"

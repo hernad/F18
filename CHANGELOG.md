@@ -3,7 +3,7 @@
 
 ## 2019-04-17
 
--  flink pos, fiskalni_tarifa
+-  flink pos, fiskalni_tarifa, dnevni izvjestaj
 
 ## 2019-04-16
 

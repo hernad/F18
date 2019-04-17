@@ -59,16 +59,16 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpcExe, {|| NIL } )
 
       AAdd( aOpc, "1. dnevni izvještaj  (Z-rep / X-rep)          " )
-      AAdd( aOpcExe, {|| flink_dnevni_izvjestaj( AllTrim( flink_path() ), AllTrim( flink_name() ) ) } )
+      AAdd( aOpcExe, {|| flink_dnevni_izvjestaj() } )
 
       AAdd( aOpc, "------ ostale komande --------------------" )
       AAdd( aOpcExe, {|| NIL } )
 
       AAdd( aOpc, "5. unos depozita u uređaj       " )
-      AAdd( aOpcExe, {|| flink_polog( AllTrim( flink_path() ), AllTrim( flink_name() ) ) } )
+      AAdd( aOpcExe, {|| flink_polog() } )
 
       AAdd( aOpc, "6. poništi otvoren racun      " )
-      AAdd( aOpcExe, {|| flink_reset_racuna( AllTrim( flink_path() ), AllTrim( flink_name() ) ) } )
+      AAdd( aOpcExe, {|| flink_reset_racuna() } )
 
    CASE cFiskalniDrajver == "FPRINT"
 
