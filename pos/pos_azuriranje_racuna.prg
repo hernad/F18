@@ -86,7 +86,7 @@ FUNCTION pos_azuriraj_racun( hParams )
    ENDIF
 
    IF lOk
-      IF !Empty( cUUIDFiskStorniran )
+      IF !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
          IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
             cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
             MsgBeep( cMsg )

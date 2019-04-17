@@ -466,6 +466,10 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran )
 
    LOCAL cQuery, oRet, nValue
 
+   IF is_flink_fiskalni()
+      RETURN 0
+   ENDIF
+
    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref(" + ;
       sql_quote( cUUIDFiskStorniran ) +  ")"
 

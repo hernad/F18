@@ -144,26 +144,36 @@ FUNCTION pos_storno_racuna( hParams )
 
    hParams[ "idvd" ] := "42"
    hParams[ "fisk_rn" ] := pos_get_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
-   hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
 
-   IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( hParams[ "fisk_id" ] ) ) <> 0
-      cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
-      MsgBeep( cMsg )
-      error_bar( "fisk", cMsg )
-      PopWa()
-      RETURN .F.
+   IF is_flink_fiskalni() // hParams[ "fisk_rn" ] == 0
+      hParams[ "fisk_rn" ] := 999
+      hParams[ "fisk_id" ] := "BRDOK-" + hParams[ "idpos" ] + "-" + hParams[ "idvd" ] + DTOS(hParams[ "datum" ]) + "-" + hParams[ "brdok" ]
+      IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + "?", "D" ) == "D"
+         pos_napravi_u_pripremi_storno_dokument( hParams )
+      ENDIF
+   ELSE
+      hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
+      IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( hParams[ "fisk_id" ] ) ) <> 0
+         cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
+         MsgBeep( cMsg )
+         error_bar( "fisk", cMsg )
+         PopWa()
+         RETURN .F.
+      ENDIF
+
+      info_bar( "fisk", "Broj fiskalnog računa: " +  AllTrim( Str( hParams[ "fisk_rn" ] ) ) )
+      IF LastKey() == K_ESC .OR. hParams[ "fisk_rn" ] == 0
+         MsgBeep( "Broj fiskalnog računa 0?! Ne može storno!" )
+         PopWa()
+         RETURN .F.
+      ENDIF
+
+      IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " broj fiskalng računa [" + AllTrim( Str( hParams[ "fisk_rn" ] ) ) + "] ?", "D" ) == "D"
+         pos_napravi_u_pripremi_storno_dokument( hParams )
+      ENDIF
    ENDIF
 
-   info_bar( "fisk", "Broj fiskalnog računa: " +  AllTrim( Str( hParams[ "fisk_rn" ] ) ) )
-   IF LastKey() == K_ESC .OR. hParams[ "fisk_rn" ] == 0
-      MsgBeep( "Broj fiskalnog računa 0?! Ne može storno!" )
-      PopWa()
-      RETURN .F.
-   ENDIF
 
-   IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " broj fiskalng računa [" + AllTrim( Str( hParams[ "fisk_rn" ] ) ) + "] ?", "D" ) == "D"
-      pos_napravi_u_pripremi_storno_dokument( hParams )
-   ENDIF
 
    PopWa()
 

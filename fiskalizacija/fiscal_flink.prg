@@ -17,6 +17,19 @@ STATIC s_cPath, s_cFlinkPath2, s_cName
 THREAD STATIC F_POS_RN := "POS_RN" // pos komande
 
 
+FUNCTION is_flink_fiskalni()
+
+   LOCAL nDeviceId
+
+   IF s_hFiskalniUredjajParams == NIL
+      nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+      IF nDeviceId > 0
+         s_hFiskalniUredjajParams := get_fiscal_device_params( nDeviceId, my_user() )
+      ENDIF
+   ENDIF
+
+   RETURN s_hFiskalniUredjajParams[ "drv" ] == "FLINK"
+
 STATIC FUNCTION flink_init()
 
    LOCAL nDeviceId
