@@ -120,13 +120,13 @@ FUNCTION flink_racun_veleprodaja( cFPath, aItems, aTxt, aPla_data, aSem_data )
    // cFPath := my_home()
 
    // uzmi strukturu tabele za f_v_racun.txt
-   aS_rn_txt := _g_f_struct( F_RN_TXT )
+   aS_rn_txt := fiskalni_get_struct_za_gen_fajlova( F_RN_TXT )
    // uzmi strukturu tabele za f_v_racun.mem
-   aS_rn_mem := _g_f_struct( F_RN_MEM )
+   aS_rn_mem := fiskalni_get_struct_za_gen_fajlova( F_RN_MEM )
    // uzmi strukturu tabele za f_v_racun.pla
-   aS_rn_pla := _g_f_struct( F_RN_PLA )
+   aS_rn_pla := fiskalni_get_struct_za_gen_fajlova( F_RN_PLA )
    // uzmi strukturu tabele za semafor
-   aS_semafor := _g_f_struct( F_SEMAFOR )
+   aS_semafor := fiskalni_get_struct_za_gen_fajlova( F_SEMAFOR )
 
 
    // broj racuna
@@ -135,22 +135,22 @@ FUNCTION flink_racun_veleprodaja( cFPath, aItems, aTxt, aPla_data, aSem_data )
    cPom := f_filename( _F_VRN_TXT, nInvoice )
 
    // upisi aItems prema aVRnTxt u my_home() + "F_V_RACUN.TXT"
-   fiscal_array_to_file( cFPath, cPom, aS_rn_txt, aItems )
+   fiskalni_array_to_fajl( cFPath, cPom, aS_rn_txt, aItems )
 
    IF Len( aTxt ) <> 0
 
       cPom := f_filename( _F_VRN_MEM, nInvoice )
       // upisi zatim stavke u fajl "F_V_RACUN.MEM"
-      fiscal_array_to_file( cFPath, cPom, aS_rn_mem, aTxt )
+      fiskalni_array_to_fajl( cFPath, cPom, aS_rn_mem, aTxt )
    ENDIF
 
    cPom := f_filename( _F_VRN_PLA, nInvoice )
    // upisi zatim stavke u fajl "F_V_RACUN.PLA"
-   fiscal_array_to_file( cFPath, cPom, aS_rn_pla, aPla_Data )
+   fiskalni_array_to_fajl( cFPath, cPom, aS_rn_pla, aPla_Data )
 
    cPom := f_filename( _F_SEMAFOR, nInvoice )
 
-   fiscal_array_to_file( cFPath, cPom, aS_semafor, aSem_Data ) // upisi i semafor "F_SEMAFOR.TXT"
+   fiskalni_array_to_fajl( cFPath, cPom, aS_semafor, aSem_Data ) // upisi i semafor "F_SEMAFOR.TXT"
 
    RETURN .T.
 
@@ -159,38 +159,37 @@ FUNCTION flink_racun_veleprodaja( cFPath, aItems, aTxt, aPla_data, aSem_data )
 FUNCTION flink_racun_maloprodaja( cFPath, aItems, aTxt, aPla_data, aSem_data )
 
    // cFPath := my_home()
+   LOCAL cPom
 
    // uzmi strukturu tabele za f_v_racun.txt
-   aS_rn_txt := _g_f_struct( F_RN_TXT )
+   aS_rn_txt := fiskalni_get_struct_za_gen_fajlova( F_RN_TXT )
    // uzmi strukturu tabele za f_v_racun.mem
-   aS_rn_mem := _g_f_struct( F_RN_MEM )
+   aS_rn_mem := fiskalni_get_struct_za_gen_fajlova( F_RN_MEM )
    // uzmi strukturu tabele za f_v_racun.pla
-   aS_rn_pla := _g_f_struct( F_RN_PLA )
+   aS_rn_pla := fiskalni_get_struct_za_gen_fajlova( F_RN_PLA )
    // uzmi strukturu tabele za semafor
-   aS_semafor := _g_f_struct( F_SEMAFOR )
+   aS_semafor := fiskalni_get_struct_za_gen_fajlova( F_SEMAFOR )
 
    // broj racuna
    nInvoice := aItems[ 1, 1 ]
 
-
    cPom := f_filename( _F_MRN_TXT, nInvoice )
    // upisi aItems prema aVRnTxt u my_home() + "F_V_RACUN.TXT"
-   fiscal_array_to_file( cFPath, cPom, aS_rn_txt, aItems )
+   fiskalni_array_to_fajl( cFPath, cPom, aS_rn_txt, aItems )
 
    IF Len( aTxt ) <> 0
-
       cPom := f_filename( _F_MRN_MEM, nInvoice )
       // upisi zatim stavke u fajl "F_V_RACUN.MEM"
-      fiscal_array_to_file( cFPath, cPom, aS_rn_mem, aTxt )
+      fiskalni_array_to_fajl( cFPath, cPom, aS_rn_mem, aTxt )
    ENDIF
 
    cPom := f_filename( _F_MRN_PLA, nInvoice )
    // upisi zatim stavke u fajl "F_V_RACUN.PLA"
-   fiscal_array_to_file( cFPath, cPom, aS_rn_pla, aPla_Data )
+   fiskalni_array_to_fajl( cFPath, cPom, aS_rn_pla, aPla_Data )
 
    cPom := f_filename( _F_SEMAFOR, nInvoice )
    // upisi i semafor "F_SEMAFOR.TXT"
-   fiscal_array_to_file( cFPath, cPom, aS_semafor, aSem_Data )
+   fiskalni_array_to_fajl( cFPath, cPom, aS_semafor, aSem_Data )
 
    RETURN .T.
 
@@ -208,36 +207,38 @@ STATIC FUNCTION f_filename( cPattern, nInvoice )
 
 
 
-
+/*
 
 // ---------------------------------
 // inicijalizacija tabela sifrarnika
 // ---------------------------------
 FUNCTION fisc_init( cFPath, aPor, aRoba, aRobGr, aPartn, aObj, aOper )
 
-   aS_por := _g_f_struct( F_FPOR )
-   aS_roba := _g_f_struct( F_FROBA )
-   aS_robgr := _g_f_struct( F_FROBGR )
-   aS_partn := _g_f_struct( F_FPART )
-   aS_obj := _g_f_struct( F_FOBJ )
-   aS_oper := _g_f_struct( F_FOPER )
+   aS_por := fiskalni_get_struct_za_gen_fajlova( F_FPOR )
+   aS_roba := fiskalni_get_struct_za_gen_fajlova( F_FROBA )
+   aS_robgr := fiskalni_get_struct_za_gen_fajlova( F_FROBGR )
+   aS_partn := fiskalni_get_struct_za_gen_fajlova( F_FPART )
+   aS_obj := fiskalni_get_struct_za_gen_fajlova( F_FOBJ )
+   aS_oper := fiskalni_get_struct_za_gen_fajlova( F_FOPER )
 
    // upisi poreze
-   fiscal_array_to_file( cFPath, _F_FPOR, aS_por, aPor )
+   fiskalni_array_to_fajl( cFPath, _F_FPOR, aS_por, aPor )
 
    // upisi robu
-   fiscal_array_to_file( cFPath, _F_FROBA, aS_roba, aRoba )
+   fiskalni_array_to_fajl( cFPath, _F_FROBA, aS_roba, aRoba )
 
    // upisi grupe robe
-   fiscal_array_to_file( cFPath, _F_FROBGR, aS_robgr, aRobGr )
+   fiskalni_array_to_fajl( cFPath, _F_FROBGR, aS_robgr, aRobGr )
 
    // upisi partnere
-   fiscal_array_to_file( cFPath, _F_FPART, aS_partn, aPartn )
+   fiskalni_array_to_fajl( cFPath, _F_FPART, aS_partn, aPartn )
 
    // upisi objekte
-   fiscal_array_to_file( cFPath, _F_FOBJ, aS_obj, aObj )
+   fiskalni_array_to_fajl( cFPath, _F_FOBJ, aS_obj, aObj )
 
    // upisi operatere
-   fiscal_array_to_file( cFPath, _F_FOPER, aS_oper, aOper )
+   fiskalni_array_to_fajl( cFPath, _F_FOPER, aS_oper, aOper )
 
    RETURN .T.
+
+*/

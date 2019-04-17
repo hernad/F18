@@ -1,6 +1,10 @@
 # F18 klijent, lista promjena
 
 
+## 2019-04-17
+
+-  flink pos
+
 ## 2019-04-16
 
 -  tremol cmd fix

@@ -18,6 +18,7 @@
 FUNCTION _txt_copy( cFile, cDest )
 
    LOCAL cScreen
+   LOCAL cKLin
 
    SAVE SCREEN TO cScreen
 
@@ -29,14 +30,9 @@ FUNCTION _txt_copy( cFile, cDest )
    RETURN .T.
 
 
-// -------------------------------------------------
-// vraca strukturu za generisanje fajlova
-// -------------------------------------------------
-FUNCTION _g_f_struct( cFileName )
+FUNCTION fiskalni_get_struct_za_gen_fajlova( cFileName )
 
    LOCAL aRet := {}
-
-   // iza opisa u komentarima su date pozicije u txt fajlu
 
    DO CASE
 
@@ -196,14 +192,14 @@ FUNCTION _g_f_struct( cFileName )
 
 
 
-
-FUNCTION fiscal_array_to_file( cFilePath, cFileName, aStruct, aData, cSeparator, lTrim, lLastSep )
+FUNCTION fiskalni_array_to_fajl( cFilePath, cFileName, aStruct, aData, cSeparator, lTrim, lLastSep )
 
    LOCAL i
    LOCAL ii
    LOCAL cLine := ""
    LOCAL nCount := 0
    LOCAL cNumFill := "0"
+   LOCAL cPrintFile
 
    IF cSeparator == nil
       cSeparator := ""
@@ -217,9 +213,10 @@ FUNCTION fiscal_array_to_file( cFilePath, cFileName, aStruct, aData, cSeparator,
       lLastSep := .T.
    ENDIF
 
-   cFile := AllTrim( cFilePath ) + AllTrim( cFileName )
+altd()
+   cPrintFile := AllTrim( cFilePath ) + AllTrim( cFileName )
 
-   SET PRINTER to ( cFile )
+   SET PRINTER to ( cPrintFile )
    SET PRINTER ON
    SET CONSOLE OFF
 
@@ -307,9 +304,9 @@ FUNCTION _dbf_to_file( cFilePath, cFileName, aStruct, cDBF, ;
       lLastSep := .T.
    ENDIF
 
-   cFile := AllTrim( cFilePath ) + AllTrim( cFileName )
+   cPrintFile := AllTrim( cFilePath ) + AllTrim( cFileName )
 
-   SET PRINTER to ( cFile )
+   SET PRINTER to ( cPrintFile )
    SET PRINTER ON
    SET CONSOLE OFF
 

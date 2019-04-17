@@ -345,7 +345,7 @@ FUNCTION korisnik_postavke_fiskalni_uredjaj()
    cDevTmp := PadL( AllTrim( Str( nDeviceId ) ), 2, "0" )
    cFiskalDrajver := AllTrim( fetch_metric( "fiscal_device_" + cDevTmp + "_drv", NIL, "" ) )
 
-   cOutDir := PadR( fetch_metric( "fiscal_device_" + cDevTmp + "cOutDir", cUserName, out_dir_op_sys( cFiskalDrajver ) ), 300 )
+   cOutDir := PadR( fetch_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, out_dir_op_sys( cFiskalDrajver ) ), 300 )
    cOutFile := PadR( fetch_metric( "fiscal_device_" + cDevTmp + "_out_file", cUserName, out_file_op_sys( cFiskalDrajver ) ), 50 )
    cOutAnswer := PadR( fetch_metric( "fiscal_device_" + cDevTmp + "_out_answer", cUserName, "" ), 50 )
 
@@ -355,7 +355,7 @@ FUNCTION korisnik_postavke_fiskalni_uredjaj()
    cPrintFiskalniDN := fetch_metric( "fiscal_device_" + cDevTmp + "_print_fiscal", cUserName, "D" )
    cOperaterTipovi := PadR( fetch_metric( "fiscal_device_" + cDevTmp + "_op_docs", cUserName, "" ), 100 )
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Direktorij izlaznih fajlova:" GET cOutDir PICT "@S50" VALID _valid_fiscal_path( cOutDir )
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Direktorij izlaznih fajlova:" GET cOutDir PICT "@S50" VALID fiskalni_out_dir_valid( cOutDir )
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "       Naziv izlaznog fajla:" GET cOutFile PICT "@S20" VALID !Empty( cOutFile )
    ++nX
@@ -378,7 +378,9 @@ FUNCTION korisnik_postavke_fiskalni_uredjaj()
       RETURN .F.
    ENDIF
 
+altd()
    set_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, AllTrim( cOutDir ) )
+
    set_metric( "fiscal_device_" + cDevTmp + "_out_file", cUserName, AllTrim( cOutFile ) )
    set_metric( "fiscal_device_" + cDevTmp + "_out_answer", cUserName, AllTrim( cOutAnswer ) )
    set_metric( "fiscal_device_" + cDevTmp + "_op_id", cUserName, AllTrim( cOperaterId ) )
@@ -443,10 +445,7 @@ STATIC FUNCTION out_file_op_sys( dev_type )
 
 
 
-// -------------------------------------------------------
-// validacija path-a izlaznih fajlova
-// -------------------------------------------------------
-STATIC FUNCTION _valid_fiscal_path( cFiscalPath, lCreateDir )
+STATIC FUNCTION fiskalni_out_dir_valid( cFiscalPath, lCreateDir )
 
    LOCAL _ok := .T.
    LOCAL nMakeDir
@@ -456,7 +455,6 @@ STATIC FUNCTION _valid_fiscal_path( cFiscalPath, lCreateDir )
    ENDIF
 
    cFiscalPath := AllTrim( cFiscalPath )
-
    IF Empty( cFiscalPath )
       MsgBeep( "Izlazni direktorij za fiskalne fajlove ne smije biti prazan ?!!!" )
       _ok := .F.
@@ -744,7 +742,7 @@ STATIC FUNCTION post_check( hParams )
 
    LOCAL lRet := .T.
 
-   lRet := _valid_fiscal_path( hParams[ "out_dir" ], .F. )
+   lRet := fiskalni_out_dir_valid( hParams[ "out_dir" ], .F. )
 
    IF !lRet
       MsgBeep( "Izlazni direktorij " + AllTrim( hParams[ "out_dir" ] ) + " nije ispravan !!!#Prekidam operaciju!" )
