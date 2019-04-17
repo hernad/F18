@@ -182,8 +182,8 @@ FUNCTION gen_all_plu( lSilent )
          ENDIF
       ENDIF
 
-      ++ nCnt
-      ++ nP_PLU
+      ++nCnt
+      ++nP_PLU
 
       _rec := dbf_get_rec()
       _rec[ "fisc_plu" ] := nP_PLU
@@ -226,7 +226,7 @@ FUNCTION fiskalni_get_last_plu( nFiskDeviceId )
    LOCAL nFiskPLU := 0
    LOCAL _param_name := _get_auto_plu_param_name( nFiskDeviceId )
 
-   nFiskPLU := fetch_metric( _param_name, nil, nFiskPLU )
+   nFiskPLU := fetch_metric( _param_name, NIL, nFiskPLU )
 
    RETURN nFiskPLU
 
@@ -254,13 +254,13 @@ FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
       // uzmi inicijalni plu iz parametara
       nFiskPLU := hFiskalniParams[ "plu_init" ]
    ELSE
-      nFiskPLU := fetch_metric( _param_name, nil, nFiskPLU )
+      nFiskPLU := fetch_metric( _param_name, NIL, nFiskPLU )
       // prvi put pokrecemo opciju, uzmi init vrijednost !
       IF nFiskPLU == 0
          nFiskPLU := hFiskalniParams[ "plu_init" ]
       ENDIF
       // uvecaj za 1
-      ++ nFiskPLU
+      ++nFiskPLU
    ENDIF
 
    IF lResetPLU .AND. !lSilentMode
@@ -272,7 +272,7 @@ FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
    ENDIF
 
    // upisi u sql/db
-   set_metric( _param_name, nil, nFiskPLU )
+   set_metric( _param_name, NIL, nFiskPLU )
 
    IF lResetPLU = .T. .AND. !lSilentMode
       MsgBeep( "Setovan početni PLU na: " + AllTrim( Str( nFiskPLU ) ) )
@@ -303,10 +303,9 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
    LOCAL cIdTarifaFiskalni := "2"
    LOCAL cTmp
 
-
    cTmp := Left( Upper( AllTrim( cIdTarifa ) ), 4 ) // PDV17 -> PDV1 ili PDV7NP -> PDV7 ili PDV0IZ -> PDV0 ili PDVM
 
-altd()
+   AltD()
    DO CASE
 
    CASE ( cTmp == "PDV1" .OR. cTmp == "PDV7" ) .AND. cPDVDN == "D"  // pdv17
@@ -362,48 +361,54 @@ altd()
    RETURN cIdTarifaFiskalni
 
 
-FUNCTION fiskalni_vrsta_placanja( id_plac, cDriver )
+FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
 
    LOCAL cRet := ""
 
    DO CASE
 
-   CASE id_plac == "0"
+   CASE cIdVrsteP == "0"  // gotovina
 
       IF cDriver == "TRING"
          cRet := "Gotovina"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := cIdVrsteP
       ELSEIF cDriver == "TREMOL"
          cRet := "Gotovina"
       ENDIF
 
-   CASE id_plac == "1"
+   CASE cIdVrsteP == "1"  // cek
 
       IF cDriver == "TRING"
          cRet := "Cek"
+      ELSEIF cDriver == "FLINK"
+         cRet := "2"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := cIdVrsteP
       ELSEIF cDriver == "TREMOL"
          cRet := "Cek"
       ENDIF
 
-   CASE id_plac == "2"
+   CASE cIdVrsteP == "2" // kartica
 
       IF cDriver == "TRING"
          cRet := "Virman"
+      ELSEIF cDriver == "FLINK"
+         cRet := "1"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := cIdVrsteP
       ELSEIF cDriver == "TREMOL"
          cRet := "Kartica"
       ENDIF
 
-   CASE id_plac == "3"
+   CASE cIdVrsteP == "3"  // virman
 
       IF cDriver == "TRING"
          cRet := "Kartica"
+      ELSEIF cDriver == "FLINK"
+         cRet := "3"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := cIdVrsteP
       ELSEIF cDriver == "TREMOL"
          cRet := "Virman"
       ENDIF
@@ -458,7 +463,7 @@ FUNCTION provjeri_kolicine_i_cijene_fiskalnog_racuna( aRacunStavke, lStorno, nLe
             aRacunStavke[ nI, 4 ] := _naziv
 
             lImaGreska := .F.
-            ++ _fix
+            ++_fix
 
          ENDIF
 

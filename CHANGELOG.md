@@ -5,6 +5,7 @@
 
 -  flink pos, fiskalni_tarifa, dnevni izvjestaj
 -  bintray ne kontam/3
+-  flink kartica
 
 ## 2019-04-16
 
