@@ -33,13 +33,11 @@ FUNCTION start_f18_program_module( oApp, lSezone )
    gModul   := oApp:cName
    goModul  := oApp
 
-
    IF oApp:lTerminate
       RETURN .T.
    ENDIF
 
    oApp:set_module_gvars()
-
    open_main_window()
    pripremi_naslovni_ekran( oApp )
    crtaj_naslovni_ekran()

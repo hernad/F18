@@ -83,9 +83,12 @@ FUNCTION post_login()
    set_sql_search_path()
    server_log_enable()
 
+   IF is_in_eshell()
+      eshell_cmd( "f18.klijent", "start" )
+   ENDIF
    // ~/.F18/empty38/
    set_f18_home( cDatabase )
-   info_bar( "init", "home baze: " + my_home() )
+   //info_bar( "init", "home baze: " + my_home() )
    hb_gtInfo( HB_GTI_WINTITLE, "[ " + my_server_params()[ "user" ] + " ][ " + cDatabase + " ]" )
    set_a_dbfs()
    set_global_vars_1()

@@ -22,7 +22,6 @@ FUNCTION harbour_init()
    SET DATE TO GERMAN
 
    f18_init_threads()
-
    Set( _SET_OSCODEPAGE, hb_cdpOS() )
 
 // ? SET( _SET_OSCODEPAGE )
@@ -30,11 +29,9 @@ FUNCTION harbour_init()
    hb_cdpSelect( "SL852" )
    // hb_SetTermCP( "SLISO" )
 
-
    SET DELETED ON
 
    SetCancel( .F. )
-
    Set( _SET_EVENTMASK, INKEY_ALL )
    MSetCursor( .T. )
 
@@ -47,7 +44,6 @@ FUNCTION harbour_init()
    CLEAR TYPEAHEAD
 
    SetKey( K_F12, {|| k_f12() } )
-
    SetColor( f18_color_normal() )
 
    IF !is_electron_host()

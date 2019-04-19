@@ -215,7 +215,6 @@ FUNCTION create_gparams()
    AAdd( aDbf, { "Tip", "C", 1, 0 } ) // tip varijable
    AAdd( aDbf, { "Fv", "C", 15, 0 }  ) // sadrzaj
 
-
    cImeDBf := f18_ime_dbf( "gparams" )
 
    IF !File( cImeDbf )

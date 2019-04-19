@@ -64,6 +64,10 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
 
    MsgO( "Priprema " + iif( cOpt == "PDF", "PDF", "tekst" ) + " izvještaja ..." )
 
+   IF cOpt == "PDF"
+      download_template_ubuntu_mono_ttf()
+   ENDIF
+
    LOG_CALL_STACK cLogMsg
    SetPRC( 0, 0 )
    s_lConsole := Set( _SET_CONSOLE, .F. )
@@ -75,7 +79,6 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    IF cOpt != "PDF"
       GpIni( cDocumentName )
    ELSE
-      download_template_ubuntu_mono_ttf()
       hb_cdpSelect( "SLWIN" )
       oPDF := xPrintOpt[ "opdf" ]
       oPDF:cFileName := txt_print_file_name()

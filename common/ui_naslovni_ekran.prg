@@ -14,6 +14,7 @@
 
 // nOldCursor koriste browse funkcije
 MEMVAR gNaslov, h, nOldCursor
+MEMVAR GetList
 
 FUNCTION pripremi_naslovni_ekran( oApp )
 
@@ -44,7 +45,6 @@ FUNCTION crtaj_naslovni_ekran()
    cColorNormal := f18_color_normal( .T. )
    SetColor( cColorNormal )
 
-
    CLEAR
 
    // start zaglavlje
@@ -52,7 +52,6 @@ FUNCTION crtaj_naslovni_ekran()
    @ 0, Col() + 2 SAY Date() COLOR f18_color_invert()
 
    @ nMaxRows - 1, nMaxCols - 16  SAY f18_harbour()
-
    DispBox( 2, 0, 4, nMaxCols - 1, B_DOUBLE + BOX_CHAR_BACKGROUND_HEAD, cColorNormal )
 
    @ 3, 1 SAY PadC( gNaslov, nMaxCols - 8 ) COLOR cColorNormal

@@ -227,12 +227,12 @@ FUNCTION MsgC( msg_x1, msg_y1, msg_x2, msg_y2 )
 FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
 
    LOCAL nX1, nY1, nX2, nY2
-   LOCAL cColor, cPom, cNaslovBoxa
+   LOCAL cColor, cSetDevice, cNaslovBoxa
    LOCAL _m_x, _m_y
 
    // , nXVisina
 
-   cPom := Set( _SET_DEVICE )
+   cSetDevice := Set( _SET_DEVICE )
    cNaslovBoxa := ""
 
    IF cBoxId <> NIL .AND. Left( cBoxId, 1 ) == "#"
@@ -253,28 +253,20 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
 
    // stvori prostor za prikaz
    IF ValType( aOpcijeIliCPoruka ) == "A"
-
       cBoxId := prikaz_dostupnih_opcija_crno_na_zuto( aOpcijeIliCPoruka )
       IF box_x_koord() + nVisina > f18_max_rows() - 3 - cBoxId
-
          box_x_koord(  f18_max_rows() - 4 - cBoxId - nVisina )
          IF box_x_koord() < 1
             nVisina := f18_max_rows() - 5 - cBoxId
             box_x_koord( 1 )
          ENDIF
-
       ENDIF
-
    ENDIF
 
    IF  aOpcijeIliCPoruka == NIL
       aOpcijeIliCPoruka := ""
    ENDIF
 
-   // m_x := _m_x
-   // m_y := _m_y
-
-   // nVisina := nXVisina
 
    StackPush( aBoxStack, ;
       {  box_x_koord(), ;
@@ -303,7 +295,7 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
       @ box_x_koord(), box_y_koord() + 2 SAY8 cNaslovBoxa COLOR "GR+/B"
    ENDIF
 
-   Set( _SET_DEVICE, cPom )
+   Set( _SET_DEVICE, cSetDevice )
 
    RETURN .T.
 
@@ -311,25 +303,22 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
 
 FUNCTION BoxC()
 
-   LOCAL aBoxPar[ 11 ], cPom
+   LOCAL aBoxPar[ 11 ], cSetDevice
+   LOCAL nVisina, nSirina
 
-   cPom := Set( _SET_DEVICE )
+   cSetDevice := Set( _SET_DEVICE )
    SET DEVICE TO SCREEN
 
    aBoxPar := StackPop( aBoxStack )
-
    box_x_koord( aBoxPar[ 1 ] )
    box_y_koord( aBoxPar[ 2 ] )
-
    nVisina := aBoxPar[ 3 ]
    nSirina := aBoxPar[ 4 ]
-
 
    Scroll( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2 )
    RestScreen( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2, aBoxPar[ 5 ] )
 
    @ aBoxPar[ 7 ], aBoxPar[ 8 ] SAY ""
-
    SetCursor( iif( aBoxPar[ 9 ] == 0, 0, iif( ReadInsert(), 2, 1 ) ) )
    SetColor( aBoxPar[ 10 ] )
 
@@ -345,7 +334,7 @@ FUNCTION BoxC()
       nSirina := aBoxPar[ 4 ]
    ENDIF
 
-   Set( _SET_DEVICE, cPom )
+   Set( _SET_DEVICE, cSetDevice )
 
    RETURN .T.
 

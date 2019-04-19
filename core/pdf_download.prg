@@ -22,22 +22,11 @@ STATIC s_cSHA256sum := "7c983e88a4f3ee60035db62957aaf2380714b2be264a8fae852fda08
 
 FUNCTION PDF_open_dokument( cFile )
 
-   LOCAL cCmd, nRet, cScr, nRow, nCol
+   LOCAL cCmd, nRet
 
    IF is_in_eshell()
-      nRow := Row()
-      nCol := Col()
-      SAVE SCREEN TO cScr
-      CLEAR SCREEN
-      SetPRC( 0, 0 )
-      @ 0, 0 SAY ""
-      OutStd( "[vscode#pdf.view]" + cFile + "[vscode#end]" )
-      OutStd( "" )
-      Inkey( 0.2 )
-      RESTORE SCREEN FROM cScr
-      SetPRC( nRow, nCol )
-      @ nRow, nCol SAY ""
-      RETURN .T.
+      eshell_cmd( "pdf.view", cFile )
+      RETURN 0
    ENDIF
 
    IF is_windows()
@@ -48,6 +37,7 @@ FUNCTION PDF_open_dokument( cFile )
    ENDIF
 
    RETURN nRet
+
 
 
 FUNCTION PDF_cmd()

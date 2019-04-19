@@ -211,7 +211,6 @@ METHOD setTGVars()
 
    info_bar( ::cName, ::cName + " set_tg_vars start " )
 
-
    IF ( ::oDesktop != NIL )
       ::oDesktop := nil
    ENDIF
@@ -221,6 +220,7 @@ METHOD setTGVars()
    ::oDesktop := TDesktopNew()
 
    info_bar( ::cName, ::cName + " set_tg_vars end" )
+
 
    RETURN .T.
 
@@ -239,17 +239,14 @@ PROCEDURE k_f1()
 
 PROCEDURE k_f12()
 
-   LOCAL cEkran
+   LOCAL cScr, nI, cColor
 
-   // IF is_windows()
-   // Run("mode con: cols=120 lines=40")
-   // ELSE
-   // Run("stty cols 120 rows 40")
-   // ENDIF
-   info_bar( "tty", "refresh/0" )
-   cEkran := SaveScreen( 0, 0, MaxRow(), MaxCol() )
-   info_bar( "tty", "refresh/1" )
-   RestScreen( 0, 0, MaxRow(), MaxCol(), cEkran )
-   info_bar( "tty", "refresh/2" )
+   //Beep(4)
+   //info_bar( "tty", "refresh/0" )
+   cColor := SetColor()
+   SAVE SCREEN TO cScr
+   setColor(cColor)
+   RESTORE SCREEN FROM cScr
+
 
    RETURN
