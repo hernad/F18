@@ -3,7 +3,7 @@
 ## 2019-04-24
 
 -  pos realizacija popust
--  eShell cmd 0.4 inkey /2
+-  eShell cmd 0.4 inkey /3
 
 ## 2019-04-17
 
