@@ -83,9 +83,6 @@ FUNCTION post_login()
    set_sql_search_path()
    server_log_enable()
 
-   IF is_in_eshell()
-      eshell_cmd( "f18.klijent", "start" )
-   ENDIF
    // ~/.F18/empty38/
    set_f18_home( cDatabase )
    //info_bar( "init", "home baze: " + my_home() )
@@ -94,7 +91,10 @@ FUNCTION post_login()
    set_global_vars_1()
    set_global_screen_vars( .F. )
    set_global_vars_2()
-
+   IF is_in_eshell()
+      eshell_cmd( "f18.klijent", "start" )
+   ENDIF
+   
    IF programski_modul() == "POS"
       pos_prodavnica( pos_prodavnica_param() )
    ENDIF
