@@ -1,5 +1,8 @@
 # F18 klijent, lista promjena
 
+## 2019-04-24
+
+-  pos realizacija popust
 
 ## 2019-04-17
 

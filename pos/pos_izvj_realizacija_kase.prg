@@ -18,6 +18,7 @@ STATIC s_oPDF
 
 MEMVAR gPosProdajnoMjesto, dDatum0, dDatum1, plPrikazPRO
 MEMVAR cUslovRadnici, cUslovVrsteP
+MEMVAR cPrikazPoVrstamaPlacanja
 
 FUNCTION realizacija_kase
 
@@ -49,7 +50,7 @@ FUNCTION realizacija_kase
    o_pos_tables()
    o_pom_table()
 
-   cPVrstePl := "N"
+   cPrikazPoVrstamaPlacanja := "N"
    cAPrometa := "N"
    cVrijOd := "00:00"
    cVrijDo := "23:59"
@@ -112,7 +113,7 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cV
    plPrikazPRO := "O"
    AAdd( aNiz, { "Prikazati Pazar/Robe/Oboje (P/R/O)?", "plPrikazPRO", "plPrikazPRO$'PRO'", "@!", } )
 
-   AAdd( aNiz, { "Prikazati pregled po vrstama plaćanja ?", "cPVrstePl", "cPVrstePl$'DN'", "@!", } )
+   AAdd( aNiz, { "Prikazati pregled po vrstama plaćanja ?", "cPrikazPoVrstamaPlacanja", "cPrikazPoVrstamaPlacanja$'DN'", "@!", } )
    AAdd( aNiz, { "Vrijeme od", "cVrijOd",, "99:99", } )
    AAdd( aNiz, { "Vrijeme do", "cVrijDo", "cVrijDo>=cVrijOd", "99:99", } )
    AAdd( aNiz, { "Partner (prazno-svi)", "cPartId", ".t.",, } )
@@ -311,7 +312,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima( bZagl )
             select_o_vrstep( cIdVrsteP )
             SELECT pom
             ? Space( 6 ) + PadR( vrstep->Naz, 20 )
-            DO WHILE !Eof() .AND. pom->( IdPos + IdRadnik + IdVrsteP ) == ( cIdPos + cIdRadnik + cIdVrsteP )
+            DO WHILE !Eof() .AND. pom->IdPos + pom->IdRadnik + pom->IdVrsteP == cIdPos + cIdRadnik + cIdVrsteP
                nTotVrstaPlacanja += pom->Iznos
                nTotVrstaPlacanjaPopust += pom->popust
                SKIP
@@ -350,7 +351,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima( bZagl )
    ENDIF
 
    // idemo skupno sa vrstama placanja
-   IF cPVrstePl == "D"
+   IF cPrikazPoVrstamaPlacanja == "D"
       pos_realizacija_po_vrstama_placanja( bZagl )
    ENDIF
 
