@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-STATIC LEN_TRAKA := 40
+STATIC LEN_TRAKA := 80
 STATIC LEN_RAZMAK := 1
 STATIC PIC_UKUPNO := "9999999.99"
 STATIC s_oPDF
@@ -78,18 +78,16 @@ FUNCTION realizacija_kase
    pos_kasa_pripremi_pom_za_realkase( cIdPos, "42", dDatum0, dDatum1 )
 
    PRIVATE nTotal := 0
-
-   // Nenaplaceno ili Popust (zavisno od varijante)
    PRIVATE nTotal3 := 0
 
    SELECT POM
    SET ORDER TO TAG "1"
    IF ( plPrikazPRO $ "PO" )
       check_nova_strana( bZagl, s_oPDF )
-      pos_realizacija_po_radnicima( plPrikazPRO, @nTotal3 )
+      pos_realizacija_po_radnicima( bZagl )
    ENDIF
 
-   check_nova_strana( bZagl, s_oPDF )
+   check_nova_strana( bZagl, s_oPDF, .F., 6 )
    pos_pdv_po_tarifama( dDatum0, dDatum1, cIdPos, NIL )
 
    f18_end_print( NIL, xPrintOpt )
@@ -197,7 +195,7 @@ STATIC FUNCTION pos_set_filter_pos_doks( cFilter, cFilterIdRadnik, cFilterIdVrst
 
 
 
-FUNCTION pos_realizacija_po_vrstama_placanja()
+FUNCTION pos_realizacija_po_vrstama_placanja( bZagl )
 
    // Rekapitulacija vrsta placanja
 
@@ -205,16 +203,16 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
    LOCAL nTotal3
    LOCAL nTotPos
    LOCAL nTotPos3
-   LOCAL nTotVP
+   LOCAL nTotVrstaPlacanja
    LOCAL nTotVP2
-   LOCAL nTotVrstePlacanjaPopust
+   LOCAL nTotVrstaPlacanjaPopust
 
    ?
-   ? PadC( "REKAPITULACIJA PO VRSTAMA PLACANJA", LEN_TRAKA )
+   ?U PadC( "REKAPITULACIJA PO VRSTAMA PLAĆANJA", LEN_TRAKA )
    ? PadC( "------------------------------------", LEN_TRAKA )
    ?
-   ? Space( 5 ) + PadR( "Naziv vrste p.", 20 ), PadC( "Iznos", 14 )
-   ? Space( 5 ) + Replicate( "-", 20 ), Replicate( "-", 14 )
+   ?U Space( 5 ) + PadR( "Vrsta plaćanja", 20 ), "     Bruto     -    Popust   =    NETO"
+   ? Space( 5 ) + Replicate( "-", 20 ), Replicate( "-", 14 ), Replicate( "-", 14 ), Replicate( "-", 14 )
 
    nTotal := 0
    nTotal3 := 0
@@ -224,37 +222,39 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
    GO TOP
 
    DO WHILE !Eof()
-
-      _IdPos := pom->IdPos
+      cIdPos := pom->IdPos
       IF Empty( cIdPos )
          ?
-         ? Replicate( "-", LEN_TRAKA )
-         ? Space( 1 ) + _IdPos
-         ? Replicate( "-", LEN_TRAKA )
+         ? Replicate( "-", LEN_TRAKA ), Replicate( "-", 14 ), Replicate( "-", 14 )
+         ? Space( 1 ) + cIdPos + "    Bruto   -  Popust   =  Neto"
+         ? Replicate( "-", LEN_TRAKA ), Replicate( "-", 14 ), Replicate( "-", 14 )
       ENDIF
 
       nTotPos := 0
       nTotPos3 := 0
 
-      DO WHILE !Eof() .AND. pom->IdPos == _IdPos
-         nTotVP := 0
+      DO WHILE !Eof() .AND. pom->IdPos == cIdPos
+         check_nova_strana( bZagl, s_oPDF )
+         nTotVrstaPlacanja := 0
          nTotVP2 := 0
-         nTotVrstePlacanjaPopust := 0
-         _IdVrsteP := pom->IdVrsteP
-         select_o_vrstep( _IdVrsteP )
+         nTotVrstaPlacanjaPopust := 0
+         cIdVrsteP := pom->IdVrsteP
+         select_o_vrstep( cIdVrsteP )
+         check_nova_strana( bZagl, s_oPDF )
          ? Space( 5 ) + vrstep->Naz
          SELECT pom
-         DO WHILE !Eof() .AND. pom->( IdPos + IdVrsteP ) == ( _IdPos + _IdVrsteP )
-            nTotVP += pom->Iznos
-            nTotVrstePlacanjaPopust += pom->popust
+         DO WHILE !Eof() .AND. pom->( IdPos + IdVrsteP ) == ( cIdPos + cIdVrsteP )
+            nTotVrstaPlacanja += pom->Iznos
+            nTotVrstaPlacanjaPopust += pom->popust
             SKIP
          ENDDO
-         ?? Str( nTotVP, 14, 2 )
-         nTotPos += nTotVP
-         nTotPos3 += nTotVrstePlacanjaPopust
+         ?? Str( nTotVrstaPlacanja, 14, 2 ), Str( nTotVrstaPlacanjaPopust, 14, 2 ), Str( nTotVrstaPlacanja - nTotVrstaPlacanjaPopust, 14, 2 )
+         nTotPos += nTotVrstaPlacanja
+         nTotPos3 += nTotVrstaPlacanjaPopust
       ENDDO
 
-      pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
+      check_nova_strana( bZagl, s_oPDF, .F., 5 )
+      pos_total_kasa( cIdPos, nTotPos, nTotPos3, 0, "-" )
 
       nTotal += nTotPos
       nTotal3 += nTotPos3
@@ -272,10 +272,17 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
 
 
 
-STATIC FUNCTION pos_realizacija_po_radnicima()
+STATIC FUNCTION pos_realizacija_po_radnicima( bZagl )
+
+   LOCAL nTotal, nTotal3
+   LOCAL nTotPos, nTotPos3
+   LOCAL cIdPos, cIdRadnik
+   LOCAL nTotRadn, nTotRadn3
+   LOCAL nTotVrstaPlacanja, nTotVrstaPlacanjaPopust
+   LOCAL cIdVrsteP
 
    ?
-   ? "SIFRA PREZIME I IME RADNIKA"
+   ?U "ŠIFRA PREZIME I IME RADNIKA"
    ? "-----", Replicate( "-", 34 )
 
    nTotal := 0
@@ -287,30 +294,32 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
    DO WHILE !Eof()
       nTotPos := 0
       nTotPos3 := 0
-      _IdPos := pom->IdPos
-      DO WHILE !Eof() .AND. pom->IdPos == _IdPos
+      cIdPos := pom->IdPos
+      DO WHILE !Eof() .AND. pom->IdPos == cIdPos
          nTotRadn := 0
          nTotRadn3 := 0
-         _IdRadnik := pom->IdRadnik
-         find_pos_osob_by_naz( _IdRadnik )
+         cIdRadnik := pom->IdRadnik
+         find_pos_osob_by_naz( cIdRadnik )
          SELECT pom
-         ? IdRadnik + "  " + PadR( osob->Naz, 34 )
-         ? Replicate( "-", 5 ), Replicate( "-", 34 )
-         DO WHILE !Eof() .AND. pom->( IdPos + IdRadnik ) == ( _IdPos + _IdRadnik )
-            nTotVP := 0
-            nTotVrstePlacanjaPopust := 0
-            _IdVrsteP := pom->IdVrsteP
-            select_o_vrstep( _IdVrsteP )
+         ? cIdRadnik + "  " + PadR( osob->Naz, 25 ) + "   Bruto        Popust       Neto"
+
+         ? Replicate( "-", 5 ), Replicate( "-", 34 ), Replicate( "-", 14 ), Replicate( "-", 14 )
+         DO WHILE !Eof() .AND. pom->IdPos + pom->IdRadnik == cIdPos + cIdRadnik
+            nTotVrstaPlacanja := 0
+            nTotVrstaPlacanjaPopust := 0
+            cIdVrsteP := pom->IdVrsteP
+            select_o_vrstep( cIdVrsteP )
             SELECT pom
             ? Space( 6 ) + PadR( vrstep->Naz, 20 )
-            DO WHILE !Eof() .AND. pom->( IdPos + IdRadnik + IdVrsteP ) == ( _IdPos + _IdRadnik + _IdVrsteP )
-               nTotVP += pom->Iznos
-               nTotVrstePlacanjaPopust += pom->popust
+            DO WHILE !Eof() .AND. pom->( IdPos + IdRadnik + IdVrsteP ) == ( cIdPos + cIdRadnik + cIdVrsteP )
+               nTotVrstaPlacanja += pom->Iznos
+               nTotVrstaPlacanjaPopust += pom->popust
                SKIP
             ENDDO
-            ?? Str( nTotVP, 14, 2 )
-            nTotRadn += nTotVP
-            nTotRadn3 += nTotVrstePlacanjaPopust
+            ?? Str( nTotVrstaPlacanja, 14, 2 ), Str( nTotVrstaPlacanjaPopust, 14, 2 ),  Str( nTotVrstaPlacanja - nTotVrstaPlacanjaPopust, 14, 2 )
+
+            nTotRadn += nTotVrstaPlacanja
+            nTotRadn3 += nTotVrstaPlacanjaPopust
          ENDDO // radnik
          ? Space( 6 ) + Replicate( "-", 34 )
          ? Space( 6 ) + PadL( "UKUPNO", 20 ) + Str( nTotRadn, 14, 2 )
@@ -324,7 +333,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
          nTotPos3 += nTotRadn3
       ENDDO  // kasa
       ? Replicate( "-", 40 )
-      ? PadC( "UKUPNO KASA " + _IdPos, 20 ) + Str( nTotPos, 20, 2 )
+      ? PadC( "UKUPNO KASA " + cIdPos, 20 ) + Str( nTotPos, 20, 2 )
 
       IF nTotPos3 <> 0
          ? PadL( pos_popust_prikaz(), 20 ) + Str( nTotPos3, 20, 2 )
@@ -342,7 +351,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
 
    // idemo skupno sa vrstama placanja
    IF cPVrstePl == "D"
-      pos_realizacija_po_vrstama_placanja()
+      pos_realizacija_po_vrstama_placanja( bZagl )
    ENDIF
 
    IF plPrikazPRO $ "RO"
@@ -358,15 +367,15 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
       DO WHILE !Eof()
          nTotPos := 0
          nTotPos3 := 0
-         _IdPos := POM->IdPos
+         cIdPos := POM->IdPos
          IF Empty( cIdPos )
             ? REPL ( "-", LEN_TRAKA )
-            ? Space( 1 ) + _idpos
+            ? Space( 1 ) + cIdPos
             ? REPL ( "-", LEN_TRAKA )
          ENDIF
          SELECT POM
 
-         DO WHILE !Eof() .AND. pom->idPos == _IdPos
+         DO WHILE !Eof() .AND. pom->idPos == cIdPos
             select_o_roba( pom->idRoba )
 
             cStr1 := ""
@@ -386,7 +395,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
 
 
             nRobaIzn3 := 0
-            DO WHILE !Eof() .AND. POM->IdPos + POM->IdRoba == _IdPos + _IdRoba
+            DO WHILE !Eof() .AND. POM->IdPos + POM->IdRoba == cIdPos + _IdRoba
                nRobaKol += POM->Kolicina
                nRobaIzn += POM->Iznos
                nRobaIzn3 += POM->popust
@@ -420,7 +429,7 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
             nTotPos3 += nRobaIzn3
          ENDDO
 
-         pos_total_kasa( _IdPos, nTotPos, nTotPos3, 0, "-" )
+         pos_total_kasa( cIdPos, nTotPos, nTotPos3, 0, "-" )
          nTotal += nTotPos
          nTotal3 += nTotPos3
       ENDDO
@@ -467,7 +476,7 @@ STATIC FUNCTION set_pos_zagl_realizacija()
 STATIC FUNCTION pos_total_kasa( cIdPos, nTotPos, nTotPos3, nTotPosk, cPodvuci )
 
    ? REPL( cPodvuci, LEN_TRAKA )
-   ? PadC( "UKUPNO KASA " + _idpos, 25 ), Transform( nTotPos, "999,999,999.99" )
+   ? PadC( "UKUPNO KASA " + cIdPos, 25 ), Transform( nTotPos, "999,999,999.99" )
 
    IF nTotPos3 <> 0
       ? PadL( pos_popust_prikaz(), 25 ) + Str( nTotPos3, 15, 2 )

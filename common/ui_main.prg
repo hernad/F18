@@ -857,29 +857,48 @@ FUNCTION FormPicL( cPic, nDuz )
 
 FUNCTION VarEdit( aNiz, nX1, nY1, nX2, nY2, cNaslov, cBoje )
 
-   LOCAL GetList := {}, cBsstara := ShemaBoja( cBoje ), pom1, pom3, pom4, pom5, nP := 0
+   LOCAL GetList := {}
+   LOCAL cBsstara := ShemaBoja( cBoje )
+   LOCAL nP := 0
    LOCAL cPomUI := Set( _SET_DEVICE )
+   LOCAL cPom
+   LOCAL cPom1 := 0
+   LOCAL cPom3 := 0
+   LOCAL cPom4 := 0
+   LOCAL cPom5 := 0
+   LOCAL i, nLen
+
 
    PushWa()
    SET DEVICE TO SCREEN
    box_crno_na_zuto( nX1, nY1, nX2, nY2, _u( cNaslov ), cBNaslova,, cBOkvira, cBTeksta, 2 )
    FOR i := 1 TO Len( aNiz )
       cPom := aNiz[ i, 2 ]
-      IF aNiz[ i, 3 ] == NIL .OR. Len( aNiz[ i, 3 ] ) == 0; aNiz[ i, 3 ] := ".t."; ENDIF
-      IF aNiz[ i, 4 ] == NIL .OR. Len( aNiz[ i, 4 ] ) == 0; aNiz[ i, 4 ] := ""; ENDIF
-      IF aNiz[ i, 5 ] == NIL .OR. Len( aNiz[ i, 5 ] ) == 0; aNiz[ i, 5 ] := ".t."; ENDIF
+      IF aNiz[ i, 3 ] == NIL .OR. Len( aNiz[ i, 3 ] ) == 0
+         aNiz[ i, 3 ] := ".t."
+      ENDIF
+      IF aNiz[ i, 4 ] == NIL .OR. Len( aNiz[ i, 4 ] ) == 0
+         aNiz[ i, 4 ] := ""
+      ENDIF
+      IF aNiz[ i, 5 ] == NIL .OR. Len( aNiz[ i, 5 ] ) == 0
+         aNiz[ i, 5 ] := ".t."
+      ENDIF
 
       IF "##" $ aNiz[ i, 3 ]
          nP := At( "##", aNiz[ i, 3 ] )
-         pom3 := "ValGeta(" + Left( aNiz[ i, 3 ], nP - 1 ) + ",'" + SubStr( aNiz[ i, 3 ], nP + 2 ) + "')"
+         cPom3 := "ValGeta(" + Left( aNiz[ i, 3 ], nP - 1 ) + ",'" + SubStr( aNiz[ i, 3 ], nP + 2 ) + "')"
       ELSE
-         pom3 := aNiz[ i, 3 ]
+         cPom3 := aNiz[ i, 3 ]
       ENDIF
 
-      pom1 := aNiz[ i, 1 ]; pom4 := aNiz[ i, 4 ]; pom5 := aNiz[ i, 5 ]
-      @ nX1 + 1 + i, nY1 + 2 SAY8 PadR( pom1, nY2 - nY1 - 4 - iif( "S" $ pom4, DuzMaske( pom4 ), iif( Empty( pom4 ), LENx( &( cPom ) ), Len( Transform( &cPom, pom4 ) ) ) ), "." ) GET &cPom WHEN &pom5 VALID &pom3 PICT pom4
+      cPom1 := aNiz[ i, 1 ]
+      cPom4 := aNiz[ i, 4 ]
+      cPom5 := aNiz[ i, 5 ]
+      nLen := nY2 - nY1 - 4 - iif( "S" $ cPom4, DuzMaske( cPom4 ), iif( Empty( cPom4 ), LENx( &( cPom ) ), Len( Transform( &cPom, cPom4 ) ) ) )
+
+      @ nX1 + 1 + i, nY1 + 2 SAY PadR( _u(cPom1), nLen, "." ) GET &cPom WHEN &cPom5 VALID &cPom3 PICT cPom4
    NEXT
-   PRIVATE MGetList := GetList
+   //PRIVATE MGetList := GetList
    READ
    box_crno_na_zuto_end()
    ShemaBoja( cBsstara )

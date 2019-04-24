@@ -13,7 +13,7 @@
 
 MEMVAR m
 
-STATIC LEN_TRAKA := 40
+STATIC LEN_TRAKA := 80
 
 FUNCTION pos_pdv_po_tarifama
 
