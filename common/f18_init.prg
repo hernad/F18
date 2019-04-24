@@ -92,7 +92,6 @@ FUNCTION post_login()
    set_global_screen_vars( .F. )
    set_global_vars_2()
    IF is_in_eshell()
-      CLEAR SCREEN
       eshell_cmd( "f18.klijent", "start" )
    ENDIF
 

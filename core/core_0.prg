@@ -14,6 +14,7 @@
 
 FUNCTION harbour_init()
 
+   CLEAR SCREEN
    rddSetDefault( RDDENGINE )
    Set( _SET_AUTOPEN, .F.  )
 
