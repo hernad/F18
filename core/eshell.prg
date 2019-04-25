@@ -14,7 +14,7 @@ FUNCTION eshell_cmd( cCmd, cFile )
    OutStd( "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
    OutStd( "" )
    IF is_windows()
-      Inkey( 0.2 )
+      Inkey( 0.1 )
    ENDIF
    RESTORE SCREEN FROM cScr
    SetPRC( nRow, nCol )

@@ -2,7 +2,7 @@
 
 ## 2019-04-25
 
--  eShell inkey pravi problem, ali windows trazi inkey
+-  eShell inkey pravi problem, ali windows trazi inkey 0.1
 
 ## 2019-04-24
 
