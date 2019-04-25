@@ -13,7 +13,6 @@ FUNCTION eshell_cmd( cCmd, cFile )
    @ 0, 0 SAY ""
    OutStd( "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
    OutStd( "" )
-   Inkey( 0.5 )
    RESTORE SCREEN FROM cScr
    SetPRC( nRow, nCol )
    @ nRow, nCol SAY ""

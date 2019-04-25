@@ -86,7 +86,7 @@ METHOD showSezona( cSezona )
 
 METHOD showMainScreen( lClear )
 
-   LOCAL _ver_pos := 3
+   LOCAL nXPos := 3
 
    IF lClear == NIL
       lClear := .F.
@@ -105,10 +105,10 @@ METHOD showMainScreen( lClear )
       DispBox( 5, 0, f18_max_rows() - 1, f18_max_cols() - 1, B_DOUBLE + BOX_CHAR_BACKGROUND, f18_color_invert()  )
    ENDIF
 
-   @ _ver_pos, 1 SAY PadC( gNaslov + ' Ver.' + f18_ver(), f18_max_cols() - 8 ) COLOR f18_color_normal()
+   @ nXPos, 1 SAY PadC( gNaslov + ' Ver.' + f18_ver(), f18_max_cols() - 8 ) COLOR f18_color_normal()
 
    f18_ispisi_status_log_levela()
-   f18_ispisi_status_podrucja( _ver_pos )
+   f18_ispisi_status_podrucja( nXPos )
    f18_ispisi_status_modula()
 
    RETURN .T.
