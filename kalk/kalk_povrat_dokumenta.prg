@@ -102,7 +102,6 @@ FUNCTION kalk_povrat_dokumenta()
 
 FUNCTION kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, cIdVd, cBrDok, lBrisiKumulativ )
 
-   LOCAL lBrisiKumulativ
    LOCAL hRec
    LOCAL hRecDelete
    LOCAL nTrec
