@@ -64,10 +64,7 @@ FUNCTION modstru( a_commands )
          kopi( _path, _ime_dbf, _curr_stru, _new_stru, @_brisi_dbf, @_rename_dbf, @_stru_changed )
 
          _lin := SubStr( _lin, 2, Len( Trim( _lin ) ) -1 )
-
          _ime_dbf := AllTrim( _lin )
-
-
          _full_name := _path + _ime_dbf + "." + DBFEXT
          IF File( _full_name )
             SELECT 1

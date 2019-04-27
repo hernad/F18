@@ -100,7 +100,7 @@ FUNCTION kalk_povrat_dokumenta()
    RETURN .T.
 
 
-FUNCTION kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, cIdVd, cBrDok )
+FUNCTION kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, cIdVd, cBrDok, lBrisiKumulativ )
 
    LOCAL lBrisiKumulativ
    LOCAL hRec
@@ -110,6 +110,10 @@ FUNCTION kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, cIdVd, cBrDok )
    LOCAL hParams
    LOCAL GetList := {}
 
+   IF lBrisiKumulativ == NIL
+     lBrisiKumulativ := .T.
+   ENDIF
+
    o_kalk_pripr()
    IF !kalk_dokument_postoji( cIdFirma, cIdVd, cBrDok )
       MsgBeep( "Traženi dokument ne postoji na serveru !"  )
@@ -117,7 +121,6 @@ FUNCTION kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, cIdVd, cBrDok )
       RETURN .F.
    ENDIF
 
-   lBrisiKumulativ := .T.
    kalk_kopiraj_dokument_u_tabelu_pripreme( cIdFirma, cIdVd, cBrDok )
    IF lBrisiKumulativ
 

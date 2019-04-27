@@ -36,18 +36,19 @@ FUNCTION kalk_71_to_79_unos()
    ENDIF
 
    // cBrDok := PadL(AllTrim( cBrDok ), FIELD_LEN_KALK_BRDOK, '0')
-   nRet := kalk_71_to_79( cBrDok )
+   // nRet := kalk_71_to_79( cBrDok )
 
-   IF nRet == 0
-      IF kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, '79', cBrDok )
+   //IF nRet == 0
+      IF kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, '71', cBrDok, .F. )
+         kalk_pripr_71_79()
          MsgBeep( "U pripremi se nalazi dokument 79-" + cBrDok )
          kalk_pripr_obrada(.F.)
       ELSE
          MsgBeep( "79-" + cBrDok + "povrat u pripremu neuspješan?!" )
       ENDIF
-   ELSE
-      Alert( _u( "Neuspješno izvršenje operacije 71->79 Status:" + AllTrim( Str( nRet ) ) + " ?!" ) )
-   ENDIF
+   //ELSE
+   //   Alert( _u( "Neuspješno izvršenje operacije 71->79 Status:" + AllTrim( Str( nRet ) ) + " ?!" ) )
+   //ENDIF
 
    RETURN .T.
 
@@ -140,3 +141,19 @@ FUNCTION kalk_71_to_79( cBrDok )
    END SEQUENCE
 
    RETURN nRet
+
+
+STATIC FUNCTION kalk_pripr_71_79()
+
+  select_o_kalk_pripr()
+  PushWa()
+  SET ORDER TO 0
+  DO WHILE !EOF()
+     IF kalk_pripr->idvd == "71"
+        rreplace idvd with '79'
+     ENDIF
+     SKIP
+  ENDDO
+  PopWa()
+
+RETURN .T.

@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-04-27
+
+-  KALK 71-79
+
 ## 2019-04-25
 
 -  eShell inkey pravi problem, ali windows trazi inkey 0.1
