@@ -79,7 +79,7 @@ STATIC FUNCTION check_prog_download()
    lDownload :=  !File( s_cDirF18Util + s_cUtilName + SLASH + s_cProg )
    IF !lDownload
       cMySum := sha256sum( s_cDirF18Util + s_cUtilName + SLASH + s_cProg )
-      IF ( cMySum !=  s_cSHA256sum )
+      IF ( cMySum != s_cSHA256sum )
          MsgBeep( "f18_edit sha256sum " + s_cDirF18Util + s_cUtilName + SLASH + s_cProg + "## local:" + cMySum + "## remote:" + s_cSHA256sum )
          lDownload := .T.
          cDownloadRazlog := "SUM"

@@ -11,7 +11,6 @@
 
 #include "f18_color.ch"
 
-
 FUNCTION f18_color_normal( lMijenjajOnSezona )
 
    hb_default( @lMijenjajOnSezona, .F. )
