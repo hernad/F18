@@ -37,7 +37,7 @@ FUNCTION check_yarg_download()
    LOCAL cZip
    LOCAL cVersion := F18_UTIL_VER
    LOCAL cMySum
-   LOCAL lDownload := .F.
+   LOCAL lDownload
    LOCAL cDownloadRazlog := "FILE"
    LOCAL cYargCmd
 
@@ -58,7 +58,7 @@ FUNCTION check_yarg_download()
    ENDIF
 
    cYargCmd := s_cDirF18Util + s_cUtilName + SLASH + s_cProg
-   lDownload :=  !File( cYargCmd )
+   lDownload := !File( cYargCmd )
    IF !lDownload
       cMySum := sha256sum( cYargCmd )
       IF ( cMySum !=  s_cSHA256sum )
