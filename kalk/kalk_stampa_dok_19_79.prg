@@ -36,7 +36,7 @@ FUNCTION kalk_stampa_dok_19_79()
    LOCAL bZagl, xPrintOpt
    LOCAL nMpcSaPDVNovaCijena, nMpcSaPDVStaraCijena, nMpcBezPDVNovaCijena, nMpcBezPDVStaraCijena
    LOCAL nPDVNovaCijena, nPDVStaraCijena
-   LOCAL nTot1, nTot2, nTot3, nTot4, nTot5, nTot6, nTot7
+   LOCAL nTot1, nTot2, nTot3, nTotPDV, nTotMPVsaPDV, nTot6, nTot7
    LOCAL nU3, nU4, nU5
    LOCAL nC0, nC1, nC2, nC3
    LOCAL dDatOd, dDatDo, cOpis
@@ -90,7 +90,7 @@ FUNCTION kalk_stampa_dok_19_79()
    s_cLinija := "--- ---------- " + Replicate( "-", 40 ) + " ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
 
    bZagl := {|| zagl( dDatOd, dDatDo, cOpis ) }
-   nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
+   nTot1 := nTot2 := nTot3 := nTotPDV := nTotMPVsaPDV := nTot6 := nTot7 := 0
 
    Eval( bZagl )
    DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND.  cBrDok == kalk_pripr->BrDok .AND. cIdVd == kalk_pripr->IdVd
@@ -110,8 +110,8 @@ FUNCTION kalk_stampa_dok_19_79()
       nPDVNovaCijena := nMpcSaPDVNovaCijena - nMpcBezPDVNovaCijena
       nPDVStaraCijena := nMpcSaPDVStaraCijena - nMpcBezPDVStaraCijena
 
-      nTot4 +=  ( nU4 := ( nPDVNovaCijena + nPDVStaraCijena ) * kalk_pripr->Kolicina )
-      nTot5 +=  ( nU5 := kalk_pripr->MPcSaPP * kalk_pripr->Kolicina )
+      nTotPDV +=  ( nU4 := ( nPDVNovaCijena - nPDVStaraCijena ) * kalk_pripr->Kolicina )
+      nTotMPVsaPDV +=  ( nU5 := kalk_pripr->MPcSaPP * kalk_pripr->Kolicina )
 
       check_nova_strana( bZagl, s_oPDF )
       // 1. red
@@ -154,8 +154,8 @@ FUNCTION kalk_stampa_dok_19_79()
    @ PRow(), nC0          SAY  nTot3         PICTURE        picdem()
    @ PRow(), PCol() + 1   SAY  Space( Len( picdem() ) )
    @ PRow(), PCol() + 1   SAY  Space( Len( picdem() ) )
-   @ PRow(), PCol() + 1   SAY  nTot4         PICTURE        picdem()
-   @ PRow(), PCol() + 1   SAY  nTot5         PICTURE        picdem()
+   @ PRow(), PCol() + 1   SAY  nTotPDV         PICTURE        picdem()
+   @ PRow(), PCol() + 1   SAY  nTotMPVsaPDV         PICTURE        picdem()
    ? s_cLinija
    ?
    check_nova_strana( bZagl, s_oPDF, .F., 10 )
@@ -235,7 +235,7 @@ FUNCTION kalk_obrazac_promjene_cijena_19()
    cIdVd := kalk_pripr->Idvd
    cBrDok := kalk_pripr->brdok
 
-   nTot1 := nTot2 := nTot3 := nTot4 := nTot5 := nTot6 := nTot7 := 0
+   nTot1 := nTot2 := nTot3 := nTotPDV := nTotMPVsaPDV := nTot6 := nTot7 := 0
 
    s_cLinija := "--- --------------------------------------------------- ---------- ---------- ---------- ------------- -------------"
 

@@ -171,3 +171,8 @@ CREATE TRIGGER t_kalk_doks_crud
       AFTER INSERT OR DELETE OR UPDATE
       ON f18.kalk_doks
       FOR EACH ROW EXECUTE PROCEDURE f18.on_kalk_doks_crud();
+
+
+ALTER TABLE f18.kalk_doks ENABLE ALWAYS TRIGGER t_kalk_disable_delete;
+ALTER TABLE f18.kalk_kalk ENABLE ALWAYS TRIGGER t_kalk_crud;
+ALTER TABLE f18.kalk_doks ENABLE ALWAYS TRIGGER t_kalk_doks_crud;

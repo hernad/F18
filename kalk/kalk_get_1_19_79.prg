@@ -178,7 +178,7 @@ STATIC FUNCTION kalk_when_nova_cijena_79( GetList, cIdRoba, nShowXPosStanje, nSh
    nStanje := pos_dostupno_artikal_za_cijenu( cIdroba, nKalkStaraCijena, 0 )
    nKalo := pos_kalo( cIdroba )
 
-   @ box_x_koord() + nShowXPosStanje, box_y_koord() + nShowYPosStanje  SAY8 " ; POS stanje-kalo=dostupno:"
+   @ box_x_koord() + nShowXPosStanje, box_y_koord() + nShowYPosStanje  SAY8 "; POS st-kalo Cij(" + AllTrim( Transform( nKalkStaraCijena,  piccdem() ) ) + ") = "
    @ Row(), Col() + 1  SAY AllTrim( Transform( nStanje, pickol() ) ) + " - " + AllTrim( Transform( nKalo, pickol() ) ) + " = " + AllTrim( Transform( nStanje - nKalo, pickol() ) )
 
    RETURN .T.
