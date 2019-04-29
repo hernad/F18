@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-04-29
+
+-  KALK, POS haos retroaktivno - dan za harakiri
+
 ## 2019-04-27
 
 -  KALK 71-79 /2
