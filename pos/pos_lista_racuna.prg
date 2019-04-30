@@ -173,7 +173,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
    ENDIF
 
    IF Upper( Chr( nCh ) ) == "P" .OR. ( hParamsInOut[ "browse" ]  .AND. nCh == K_ENTER )
-      pos_pregled_stavki_racuna( pos_doks->IdPos, pos_doks->idvd, pos_doks->datum, pos_doks->BrDok )
+      pos_pregled_stavki_dokumenta( pos_doks->IdPos, pos_doks->idvd, pos_doks->datum, pos_doks->BrDok )
       RETURN DE_REFRESH
    ENDIF
 

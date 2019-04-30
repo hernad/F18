@@ -156,7 +156,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          hParams[ "samo_napuni_rn_dbf" ] := .F.
          hParams[ "priprema" ] := .F.
          // pos_stampa_racun( hParams )
-         pos_pregled_stavki_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
+         pos_pregled_stavki_dokumenta( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
          PopWa()
          RETURN DE_CONT
 
@@ -264,17 +264,21 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
 
 
 
-FUNCTION pos_pregled_stavki_racuna( cIdPos, cIdVd, dDatum, cBrDok )
+FUNCTION pos_pregled_stavki_dokumenta( cIdPos, cIdVd, dDatum, cBrDok, cOpis )
 
    LOCAL oBrowse
    LOCAL cPrevCol
    LOCAL hRec
    LOCAL nMaxRow := f18_max_rows() - 15
    LOCAL nMaxCol := f18_max_cols() - 35
+   LOCAL cStr, cHeader
 
    PRIVATE ImeKol
    PRIVATE Kol
 
+   IF Empty( cBrDok )
+      RETURN .F.
+   ENDIF
    PushWa()
    SELECT F__PRIPR
    IF !Used()
@@ -301,10 +305,21 @@ FUNCTION pos_pregled_stavki_racuna( cIdPos, cIdVd, dDatum, cBrDok )
 
    SELECT _pos_pripr
    GO TOP
-   pos_racun_browse_kolone( @ImeKol, @Kol )
+   pos_dokument_browse_kolone( cIDVd, @ImeKol, @Kol )
    Box(, nMaxRow, nMaxCol )
 
-   @ box_x_koord() + 1, box_y_koord() + 19 SAY8 PadC ( "Pregled računa " + Trim( cIdPos ) + "-" + LTrim ( cBrDok ), 30 ) COLOR f18_color_invert()
+   IF cIdVd == POS_IDVD_RACUN
+      cStr := "Pregled računa "
+   ELSE
+      cStr := "Pregled dokumenta [" + cIdVd + "] "
+   ENDIF
+
+   cHeader := cStr + Trim( cIdPos ) + "-" + LTrim ( cBrDok )
+   IF cOpis <> NIL
+     cHeader += cOpis
+   ENDIF
+
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 PadC ( cHeader, nMaxCol - 4 ) COLOR f18_color_invert()
    oBrowse := pos_form_browse( box_x_koord() + 2, box_y_koord() + 1, box_x_koord() + nMaxRow, box_y_koord() + nMaxCol, ImeKol, Kol, ;
       { hb_UTF8ToStrBox( BROWSE_PODVUCI_2 ), ;
       hb_UTF8ToStrBox( BROWSE_PODVUCI ), ;
@@ -320,7 +335,7 @@ FUNCTION pos_pregled_stavki_racuna( cIdPos, cIdVd, dDatum, cBrDok )
 
 
 
-STATIC FUNCTION pos_racun_browse_kolone( aImeKol, aKol )
+STATIC FUNCTION pos_dokument_browse_kolone( cIdVd, aImeKol, aKol )
 
    LOCAL i
 
@@ -329,10 +344,12 @@ STATIC FUNCTION pos_racun_browse_kolone( aImeKol, aKol )
    AAdd( aImeKol, { _u( "Šifra" ), {|| field->idroba } } )
    AAdd( aImeKol, { "Naziv", {|| Left( field->robanaz, 30 ) } } )
    AAdd( aImeKol, { _u( "Količina" ), {|| Str( field->kolicina, 7, 3 ) } } )
-   AAdd( aImeKol, { "Cijena", {|| Str( field->cijena, 7, 2 ) } } )
-   AAdd( aImeKol, { "Popust%", {|| Str( pos_popust_procenat( field->cijena, field->ncijena ), 7, 2 ) } } )
-   AAdd( aImeKol, { "N.Cijena", {|| Str( field->ncijena, 7, 2 ) } } )
-   AAdd( aImeKol, { "Ukupno", {|| Str( field->kolicina * ( field->cijena - pos_popust( field->cijena, field->ncijena ) ), 11, 2 ) } } )
+   IF cIdVd <> POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+      AAdd( aImeKol, { "Cijena", {|| Str( field->cijena, 7, 2 ) } } )
+      AAdd( aImeKol, { "Popust%", {|| Str( pos_popust_procenat( field->cijena, field->ncijena ), 7, 2 ) } } )
+      AAdd( aImeKol, { "N.Cijena", {|| Str( field->ncijena, 7, 2 ) } } )
+      AAdd( aImeKol, { "Ukupno", {|| Str( field->kolicina * ( field->cijena - pos_popust( field->cijena, field->ncijena ) ), 11, 2 ) } } )
+   ENDIF
    AAdd( aImeKol, { "Tarifa", {|| pos->idtarifa } } )
 
    FOR i := 1 TO Len( aImeKol )

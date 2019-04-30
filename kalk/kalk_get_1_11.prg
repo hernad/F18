@@ -98,10 +98,12 @@ FUNCTION kalk_get_1_11()
    IF _TBankTr <> "X"
       IF !Empty( kalk_metoda_nc() )
          nNcPosljednjegUlaza := nNcSrednja := 0
-         IF _kolicina > 0
-            kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, @nNcPosljednjegUlaza, @nNcSrednja )
-         ELSE
-            kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolicinaNaStanju, @nKolZN, @nNcPosljednjegUlaza, @nNcSrednja )
+         IF _idvd <> POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+            IF _kolicina > 0
+               kalk_get_nabavna_mag( _datdok, _idfirma, _idroba, _mkonto, @nKolicinaNaStanju, @nKolZN, @nNcPosljednjegUlaza, @nNcSrednja )
+            ELSE
+               kalk_get_nabavna_prod( _idfirma, _idroba, _pkonto, @nKolicinaNaStanju, @nKolZN, @nNcPosljednjegUlaza, @nNcSrednja )
+            ENDIF
          ENDIF
          // IF kalk_metoda_nc() $ "13"
          // _fcj := nNcPosljednjegUlaza
@@ -180,7 +182,9 @@ FUNCTION kalk_get_1_11()
       _MU_I := "5"
       _PU_I := "1"
    ENDIF
-
+   IF _idvd == POS_IDVD_OTPREMNICA_MAGACIN_ZAHTJEV
+      _error := "0"
+   ENDIF
    nKalkStrana := 2
    // kalk_puni_polja_za_izgenerisane_stavke( lKalkIzgenerisaneStavke )
 

@@ -37,7 +37,7 @@ FUNCTION pos_21_to_22_unos()
    LOCAL nRet, cMsg
 
    Box(, 5, 60 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj otpremnice iz magacina: " GET cBrFaktP
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj otpremnice iz magacina: " GET cBrFaktP VALID !Empty( cBrFaktP )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "pregled dokumenta prije potvrde: " GET cPregledDN PICT "@!" ;
       VALID pos_21_pregled_valid( @cPregledDN, cBrFaktP )
 
@@ -87,7 +87,12 @@ STATIC FUNCTION pos_21_pregled_valid( cPregledDN, cBrFaktP )
       RETURN .T.
    ENDIF
 
-   pos_stampa_dokumenta( hParams )
+   // pos_stampa_dokumenta( hParams )
+
+   PushWa()
+   hParams[ "priprema" ] := .F.
+   pos_pregled_stavki_dokumenta( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ], " OTP:" + hParams[ "brfaktp"] )
+   PopWa()
 
    RETURN .T.
 
