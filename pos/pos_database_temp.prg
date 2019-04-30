@@ -84,7 +84,7 @@ FUNCTION pos_vrati_dokument_iz_pripr( cIdVd, cIdRadnik )
    DO CASE
    CASE cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
       cSta := "zaduzenja"
-   CASE cIdVd == POS_IDVD_NIVELACIJA
+   CASE cIdVd == POS_IDVD_KALK_NIVELACIJA
       cSta := "nivelacije"
    CASE cIdVd == POS_IDVD_INVENTURA
       cSta := "inventure"

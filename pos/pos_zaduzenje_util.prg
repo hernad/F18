@@ -21,9 +21,6 @@ FUNCTION pos_dokument_naziv( cIdVd )
    CASE cIdVd == POS_IDVD_PRIJEM_PRODAVNICA
       RETURN "Prijem prodavnica"
 
-   CASE cIdVd == POS_IDVD_NIVELACIJA
-      RETURN "Nivelacija"
-
    CASE cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
       RETURN "Ulaz od dobavljača"
 
@@ -48,8 +45,11 @@ FUNCTION pos_dokument_naziv( cIdVd )
    CASE cIdVD == POS_IDVD_INVENTURA
       RETURN "POS inventura"
 
-   CASE cIdVD == POS_IDVD_AKCIJSKE_CIJENE
+   CASE cIdVD == POS_IDVD_ZAHTJEV_NIVELACIJA
       RETURN "Zahtjev za nivelaciju"
+
+   CASE cIdVd == POS_IDVD_KALK_NIVELACIJA
+      RETURN "KALK Nivelacija"
 
    CASE cIdVD == POS_IDVD_POS_NIVELACIJA
       RETURN "POS nivelacija cijena"

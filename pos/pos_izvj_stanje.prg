@@ -83,7 +83,7 @@ FUNCTION pos_stanje_artikala()
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "opdf" ] := s_oPDF
    xPrintOpt[ "font_size" ] := 10
-   IF f18_start_print( NIL, xPrintOpt,  "POS REALIZACIJA PO ARTIKLIMA NA DAN: " + DToC( Date() ) ) == "X"
+   IF f18_start_print( NIL, xPrintOpt,  "POS STANJE [" +  pos_prodavnica_str() + "/" + AllTrim(cIdPos) + "] NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF
 
@@ -185,8 +185,8 @@ STATIC FUNCTION pos_stanje_proracun( nUlaz, nIzlaz, nVrijednost, lInicijalizacij
       nUlaz += POS->Kolicina
       nVrijednost += POS->Kolicina * POS->Cijena
 
-   ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
-      nVrijednost += POS->Kolicina * ( POS->Cijena - POS->Cijena ) 
+   ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE
+      nVrijednost += POS->Kolicina * ( POS->Cijena - POS->Cijena )
 
    ELSEIF POS->IdVd == POS_IDVD_RACUN
       nIzlaz += POS->Kolicina

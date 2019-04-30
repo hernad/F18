@@ -180,7 +180,7 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          // CASE pos_doks->IdVd == POS_IDVD_INVENTURA
          // pos_prepis_inventura_nivelacija( .T. )
 
-         // CASE pos_doks_2->IdVd == POS_IDVD_NIVELACIJA  .OR. pos_doks_2->IdVd == POS_IDVD_ZAHTJEV_SNIZENJE .OR. pos_doks_2->IdVd == POS_IDVD_ODOBRENO_SNIZENJE
+         // CASE pos_doks_2->IdVd == POS_IDVD_KALK_NIVELACIJA  .OR. pos_doks_2->IdVd == POS_IDVD_ZAHTJEV_SNIZENJE .OR. pos_doks_2->IdVd == POS_IDVD_ODOBRENO_SNIZENJE
 
          // hParams[ "idpos" ] := pos_doks->idpos
          // hParams[ "idvd" ] := pos_doks->idvd

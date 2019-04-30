@@ -29,7 +29,7 @@ FUNCTION kalk_get_1_19_79()
    _IdKonto := ""
    IF _IdVd == POS_IDVD_ODOBRENO_SNIZENJE
       _PU_I = KALK_TRANSAKCIJA_PRODAVNICA_SNIZENJE_PROCENAT
-   ELSEIF _IdVd == POS_IDVD_AKCIJSKE_CIJENE
+   ELSEIF _IdVd == POS_IDVD_ZAHTJEV_NIVELACIJA
       _PU_I = KALK_TRANSAKCIJA_PRODAVNICA_SNIZENJE_AKCIJA
    ELSE
       _PU_I := KALK_TRANSAKCIJA_PRODAVNICA_NIVELACIJA
@@ -72,11 +72,11 @@ FUNCTION kalk_get_1_19_79()
    @ box_x_koord() + 12, box_y_koord() + 23  SAY8 "knjig stanje: " + Transform( nKolicinaNaStanju, pickol() )
    @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE pickol() WHEN kalk_when_kolicina_19_72_79()
 
-   IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE .OR. _idvd == POS_IDVD_AKCIJSKE_CIJENE
+   IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE .OR. _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA
       @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "Važi za period:" GET _dat_od WHEN {|| _dat_od := iif( Empty( _dat_od ), Date(), _dat_od ), .T. }
       @ Row(), Col() + 2  SAY8 "do" GET _dat_do ;
          WHEN {|| /*_dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ),*/ .T. } ;
-      VALID {|| ( Empty( _dat_do ) .AND. _idvd == POS_IDVD_AKCIJSKE_CIJENE ) .OR. _dat_do >= _dat_od }
+      VALID {|| ( Empty( _dat_do ) .AND. _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA ) .OR. _dat_do >= _dat_od }
    ELSE
       _dat_od := _datdok
       _dat_do := CToD( "" )
@@ -114,7 +114,7 @@ FUNCTION kalk_get_1_19_79()
    _fcj := nKalkStaraCijena
    _mpc := mpc_bez_pdv_by_tarifa( _idtarifa, nKalkNovaCijena - nKalkStaraCijena )
 
-   IF _idvd == POS_IDVD_NIVELACIJA
+   IF _idvd == POS_IDVD_KALK_NIVELACIJA
       IF Round( nKolicinaNaStanju - _kolicina, 4 ) == 0
          IF Pitanje(, "Staviti u šifarnik novu cijenu", gStavitiUSifarnikNovuCijenuDefault ) == "D"
             select_o_koncij( _pkonto )
@@ -136,7 +136,7 @@ FUNCTION kalk_get_1_19_79()
    _TMarza2 := "A"
    _MKonto := ""
    _MU_I := ""
-   IF _idvd == POS_IDVD_AKCIJSKE_CIJENE .OR. _idvd == POS_IDVD_ODOBRENO_SNIZENJE
+   IF _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA .OR. _idvd == POS_IDVD_ODOBRENO_SNIZENJE
       _error := "0"
    ENDIF
 
@@ -145,7 +145,7 @@ FUNCTION kalk_get_1_19_79()
 
 STATIC FUNCTION kalk_when_kolicina_19_72_79()
 
-   IF _idvd == POS_IDVD_AKCIJSKE_CIJENE
+   IF _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA
       _kolicina := 0
       RETURN .F.
    ENDIF

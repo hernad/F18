@@ -69,7 +69,7 @@ IN - inventura (kolicina-kol2)
 
 Nivelacija: ncijena-cijena (nova cijena, stara cijena)
 
-#define POS_IDVD_NIVELACIJA       "NI"       // nivelacija
+#define POS_IDVD_KALK_NIVELACIJA       "NI"       // nivelacija
 
       DO CASE
       CASE pos_doks->idvd == "IN"
@@ -78,7 +78,7 @@ Nivelacija: ncijena-cijena (nova cijena, stara cijena)
          IF pos->kol2 <> 0
             nIznos += pos->kol2 * pos->cijena
          ENDIF
-      CASE pos_doks->IdVd == POS_IDVD_NIVELACIJA
+      CASE pos_doks->IdVd == POS_IDVD_KALK_NIVELACIJA
          nIznos += pos->kolicina * ( pos->ncijena - pos->cijena )
       OTHERWISE
          nIznos += pos->kolicina * pos->cijena

@@ -62,7 +62,7 @@ FUNCTION pos_kartica_artikla()
    BoxC()
 
    // 21-ce ne gledati
-   cQuery := "select *, date(pos.obradjeno) as datum_obrade, to_char(pos.obradjeno, 'HH24:MI') as vrij_obrade from "  + f18_sql_schema( "pos_items" ) + ;
+   cQuery := "select *, date(pos.obradjeno) as datum_obrade, to_char(pos.obradjeno, 'HH24:MI') as vrij_obrade, pos.dat_od, pos.dat_do from "  + f18_sql_schema( "pos_items" ) + ;
       " left join " + f18_sql_schema( "pos" ) + " on pos_items.idpos=pos.idpos and pos_items.idvd=pos.idvd and pos_items.brdok=pos.brdok and pos_items.datum=pos.datum" + ;
       " WHERE pos.idvd <> '21' AND pos.datum<=" + sql_quote( dDatum1 )
    IF !Empty( cIdRoba )
@@ -92,7 +92,7 @@ FUNCTION pos_kartica_artikla()
    xPrintOpt[ "layout" ] := "portrait"
    xPrintOpt[ "opdf" ] := s_oPDF
    xPrintOpt[ "font_size" ] := 9
-   IF f18_start_print( NIL, xPrintOpt,  "POS [" + cIdPos + "] KARTICE ARTIKALA NA DAN: " + DToC( Date() ) ) == "X"
+   IF f18_start_print( NIL, xPrintOpt,  "POS [" +  pos_prodavnica_str() + "/" + AllTrim(cIdPos) + "] KARTICE ARTIKALA NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF
 
@@ -186,7 +186,7 @@ FUNCTION pos_kartica_artikla()
       IF Round( nKalo, 4 ) <> 0
          ? m
          ? cLijevaMargina
-         ?? PadL( "Od toga KALO:", 21 + 6)
+         ?? PadL( "Od toga KALO:", 21 + 6 )
          ?? Space( 10 ) + " "
          ?? Space( 10 ) + " "
          ?? Str( nKalo, 10, 2 )
@@ -295,15 +295,18 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
 
-   ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE_SNIZENJA
+   ELSEIF ( POS->IdVd $ POS_IDVD_NIVELACIJE ) .OR. ( POS->IdVd $ POS_IDVD_ZAHTJEVI_NIVELACIJE_SNIZENJA )
 
-      IF pos->idvd <> POS_IDVD_ODOBRENO_SNIZENJE
-         cStr1 := "N:"
-         cStr2 := "Niv.Kol:"
-         nVrijednost += POS->Kolicina * ( POS->ncijena - POS->cijena )
-      ELSE
+      IF pos->idvd == POS_IDVD_ODOBRENO_SNIZENJE
          cStr1 := "P:"  // sa popustom
          cStr2 := "Sniž.Kol:"
+      ELSE
+         cStr1 := "N:"
+         cStr2 := "Niv.Kol:"
+      ENDIF
+
+      IF POS->IdVd $ POS_IDVD_NIVELACIJE
+         nVrijednost += POS->Kolicina * ( POS->ncijena - POS->cijena )
       ENDIF
 
       IF lPrint
@@ -312,10 +315,22 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), FIELD_LEN_POS_BRDOK )
          s_nKol2 := PCol()
          ?? " S:", Str ( POS->Cijena, 7, 2 ), cStr1, Str( POS->Ncijena, 7, 2 )
-         @ PRow() + 1, s_nKol2 + 1 SAY PadR( _u( cStr2 ), 10 ) + " "
-         ?? Str( pos->kolicina, 10, 3 ) + " "
+         IF pos->idvd == POS_IDVD_ZAHTJEV_NIVELACIJA
+            ?? " datum od:", pos->dat_od
+            IF !Empty( pos->dat_do )
+              ?? " do:", pos->dat_do
+            ELSE
+              ??U " do daljnjeg"
+            ENDIF
+         ENDIF
+         IF pos->idvd <> POS_IDVD_ZAHTJEV_NIVELACIJA
+           @ PRow() + 1, s_nKol2 + 1 SAY PadR( _u( cStr2 ), 10 ) + " "
+           ?? Str( pos->kolicina, 10, 3 ) + " "
+         ELSE
+           @ PRow() + 1, s_nKol2 + 1 SAY PadR( "ZAHTJEV NIV", 21 ) + " "
+         ENDIF
          ?? Str ( nStanjeKolicina, 10, 2 ) + " "
-         IF pos->idvd == POS_IDVD_ODOBRENO_SNIZENJE
+         IF pos->idvd $ POS_IDVD_ZAHTJEVI_NIVELACIJE_SNIZENJA
             ?? Space( 10 ) + " "
          ELSE
             ?? Str ( pos->ncijena - pos->cijena, 10, 2 ) + " "
@@ -351,7 +366,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
       ENDIF
       nVrijednost -= POS->Kolicina * nCijenaBruto
       nStanjeKolicina -= POS->Kolicina
-      nPopustVrijednost += POS->Kolicina * ( nCijenaBruto - nCijenaNeto)
+      nPopustVrijednost += POS->Kolicina * ( nCijenaBruto - nCijenaNeto )
       IF lPrint
          ?
          ?? DToC( pos->datum ) + " " + pos->vrij_obrade + " "
@@ -369,9 +384,8 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
    ENDIF
 
    IF pos->datum_obrade <> pos->datum
-     ? ">>> Datum obrade: ", pos->datum_obrade
+      ? ">>> Datum obrade: ", pos->datum_obrade
    ENDIF
-
 
    RETURN .T.
 
