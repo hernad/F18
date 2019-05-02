@@ -143,7 +143,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
    IF ( OLD.idvd IN ('49','71', '72', '22', '29', '79') ) and ( current_user <> 'postgres' ) THEN
-       RAISE EXCEPTION '29, 49, 71, 72, 22, 79 nije dozvoljeno brisanje osim triger funkcijama';
+       RAISE EXCEPTION '29, 49, 71, 72, 22, 79 nije dozvoljeno brisanje % - % - %', OLD.idvd, OLD.brdok, OLD.datdok;
    END IF;
 
    RETURN OLD;
