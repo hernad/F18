@@ -36,7 +36,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
    LOCAL cNaljepniceDN := "N"
    LOCAL GetList := {}
    LOCAL lDokumentZaPOS, lDokumentZaFakt
-   LOCAL lCloseAllNaKraju := .T.
+   LOCAL lCloseAllNaKraju := .T., lStampaJedanDokument := .F.
    PRIVATE cIdfirma, cIdvd, cBrdok
 
 
@@ -62,6 +62,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
          cIdVd := hParams[ "idvd" ]
          cBrDok := hParams[ "brdok" ]
          lCloseAllNaKraju := .F.
+         lStampaJedanDokument := .T.
       ENDIF
       open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok )
    ELSE
@@ -198,9 +199,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       ENDIF
 
       // ------------------- kraj stampe jedne kalkulacije
-      IF ! lAzuriraniDokument
-         kalk_open_tables_unos( lAzuriraniDokument )
-      ENDIF
+      kalk_open_tables_unos( lAzuriraniDokument )
       PopWa()
 
       IF ( cIdvd $ "80#11#81#IP#19" )
@@ -224,6 +223,10 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
             o_kalk_edit()
             EXIT // podrazumjevamo da je u pripremi jedan dokument
          ENDIF
+      ENDIF
+
+      IF lStampaJedanDokument
+         EXIT
       ENDIF
 
    ENDDO  // vrti kroz kalkulacije
