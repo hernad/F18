@@ -56,7 +56,8 @@ BEGIN
           RAISE EXCEPTION 'ERROR nivelacija_start dokument vec postoji: % % % %', cIdPos, '29', cBrDok, dDatum;
       END IF;
 
-      dDatumNew := dDat_od;
+      --dDatumNew := dDat_od;
+      dDatumNew := current_date;
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
       insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,ref,opis) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos,cOpis)
           RETURNING dok_id into uuid2;
@@ -121,7 +122,7 @@ DECLARE
 BEGIN
 
       -- pos dokument '72'
-      EXECUTE 'select idpos,idvd,brdok,datum, dat_od from {{ item_prodavnica }}.pos where dok_id = $1'
+      EXECUTE 'select idpos,idvd,brdok,datum,dat_do from {{ item_prodavnica }}.pos where dok_id = $1'
          USING uuidPos
          INTO cIdPos, cIdVd, cBrDok, dDatum, dDat_do;
       RAISE INFO 'nivelacija_end_create %-%-%-% ; dat_od: %', cIdPos, cIdvd, cBrDok, dDatum, dDat_do;
@@ -138,7 +139,7 @@ BEGIN
           RAISE EXCEPTION 'ERROR nivelacija_end dokument vec postoji: % % % %', cIdPos, '29', cBrDok, dDatum;
       END IF;
 
-      dDatumNew := dDat_do;
+      dDatumNew := current_date;
       cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatumNew);
       insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,ref,opis) values(cIdPos,'29',cBrDokNew,dDatumNew,dDatumNew,uuidPos,cOpis)
           RETURNING dok_id into uuid2;
