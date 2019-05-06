@@ -45,7 +45,7 @@ FUNCTION o_kalk_tabele_izvj()
 
    RETURN .T.
 
-
+/*
 FUNCTION Gen9999()
 
    IF !( gRadnoPodr == "9999" )
@@ -58,7 +58,9 @@ FUNCTION Gen9999()
    Box( "#Generacija zbirne baze dokumenata", 5, 75 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Od sezone:" GET nG0 VALID nG0 > 0 .AND. nG1 >= nG0 PICT "9999"
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "do sezone:" GET nG1 VALID nG1 > 0 .AND. nG1 >= nG0 PICT "9999"
-   READ; ESC_BCR
+   READ
+   ESC_BCR
+
    BoxC()
 
    // spaja se sve izuzev dokumenata 16 i 80 na dan 01.01.XX gdje XX oznacava
@@ -68,6 +70,7 @@ FUNCTION Gen9999()
    my_close_all_dbf()
 
    RETURN .T.
+*/
 
 
 /* KalkNaF(cidroba,nKolicinaNaStanju)
@@ -476,7 +479,7 @@ FUNCTION get_mu_i( cIdVd )
 
    RETURN cRet
 
-
+/*
 // ------------------------------------------------------------
 // da li je dokument u procesu
 // provjerava na osnovu polja PU_I ili MU_I
@@ -507,6 +510,7 @@ FUNCTION dok_u_procesu( cFirma, cIdVd, cBrDok )
    SELECT ( nTArea )
 
    RETURN lRet
+*/
 
 // -----------------------------------------------------
 // izvjestaj o dokumentima stavljenim na stanje

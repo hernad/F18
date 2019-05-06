@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-05-06
+
+-  KALK browse dokumenti
+
 ## 2019-04-30
 
 -  POS nova kartica, pregled 21

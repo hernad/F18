@@ -769,7 +769,11 @@ FUNCTION use_sql_kalk_doks( hParams )
    ?E cSql
 #endif
 
-   SELECT ( F_KALK_DOKS )
+   IF hb_HHasKey( hParams, "wa" )
+      SELECT ( hParams[ "wa" ] )
+   ELSE
+      SELECT ( F_KALK_DOKS )
+   ENDIF
    use_sql( cTable, cSql )
 
    IF is_sql_rdd_treba_indeks( hParams )
@@ -806,6 +810,13 @@ STATIC FUNCTION sql_kalk_doks_where( hParams )
          cWhere += " AND "
       ENDIF
       cWhere += "brdok = " + sql_quote( hParams[ "brdok" ] )
+   ENDIF
+
+   IF hb_HHasKey( hParams, "idpartner" )
+      IF !Empty( cWhere )
+         cWhere += " AND "
+      ENDIF
+      cWhere += "idpartner = " + sql_quote( hParams[ "idpartner" ] )
    ENDIF
 
    IF hb_HHasKey( hParams, "broj_fakture" )

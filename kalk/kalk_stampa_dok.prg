@@ -24,18 +24,19 @@ FUNCTION kalk_stampa_svih_dokumenata_u_pripremi()
 FUNCTION kalk_stampa_dokumenta_priprema( lBezPitanjaDok )
    RETURN kalk_stampa_dokumenta( .F., lBezPitanjaDok )
 
-FUNCTION kalk_stampa_azuriranog_dokumenta_na_osnovu_doks()
-   RETURN kalk_stampa_dokumenta( .T., .T. )
+FUNCTION kalk_stampa_azuriranog_dokumenta_by_hparams( hParams )
+   RETURN kalk_stampa_dokumenta( .T., .T., hParams )
 
 FUNCTION kalk_stampa_azuriranog_dokumenta()
    RETURN kalk_stampa_dokumenta( .T., .F. )
 
-FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
+FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
 
    LOCAL cOk
    LOCAL cNaljepniceDN := "N"
    LOCAL GetList := {}
    LOCAL lDokumentZaPOS, lDokumentZaFakt
+   LOCAL lCloseAllNaKraju := .T.
    PRIVATE cIdfirma, cIdvd, cBrdok
 
 
@@ -56,9 +57,12 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
    ENDIF
 
    IF lAzuriraniDokument .AND. lBezPitanjaBrDok
-      cIdFirma := kalk_doks->IdFirma
-      cIdVd := kalk_doks->IdVd
-      cBrDok := kalk_doks->BrDok
+      IF hParams <> NIL
+         cIdFirma := hParams[ "idfirma" ]
+         cIdVd := hParams[ "idvd" ]
+         cBrDok := hParams[ "brdok" ]
+         lCloseAllNaKraju := .F.
+      ENDIF
       open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok )
    ELSE
       my_close_all_dbf()
@@ -105,9 +109,9 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       ENDIF
 
       HSEEK cIdFirma + cIdVD + cBrDok
-      //IF !Empty( cOk := kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok ) ) // provjeri da li kalkulacija ima sve cijene ?
-      //   MsgBeep( "Unutar kalkulacije nedostaju pojedine cijene bitne za obračun!##Stavke: " + cOk )
-      //ENDIF
+      // IF !Empty( cOk := kalkulacija_ima_sve_cijene( cIdFirma, cIdVd, cBrDok ) ) // provjeri da li kalkulacija ima sve cijene ?
+      // MsgBeep( "Unutar kalkulacije nedostaju pojedine cijene bitne za obračun!##Stavke: " + cOk )
+      // ENDIF
 
       EOF CRET
       IF !pdf_kalk_dokument( cIdVd )
@@ -184,21 +188,26 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       */
 
       PushWA()
-      my_close_all_dbf()
+
+      IF lCloseAllNaKraju
+         my_close_all_dbf()
+      ENDIF
 
       IF !pdf_kalk_dokument( cIdVd )
          ENDPRINT
       ENDIF
 
       // ------------------- kraj stampe jedne kalkulacije
-      kalk_open_tables_unos( lAzuriraniDokument )
+      IF ! lAzuriraniDokument
+         kalk_open_tables_unos( lAzuriraniDokument )
+      ENDIF
       PopWa()
 
       IF ( cIdvd $ "80#11#81#IP#19" )
          lDokumentZaPOS := .T.
       ENDIF
 
-      IF ( cIdvd $ "10#11#81" )
+      IF ( cIdVd $ "10#11#81" )
          lDokumentZaFakt := .T.
       ENDIF
 
@@ -229,18 +238,20 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       cIdFirma := kalk_pripr->IdFirma
       cBrDok := kalk_pripr->BrDok
       cIdVD := kalk_pripr->IdVD
-      //IF ( cIdVd $ "11#12" )
-      //   kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
-      //ELSEIF ( cIdVd == "80" )
-      //   kalk_stampa_dok_80( .T. )
-      //ELSEIF ( cIdVd == "81" )
-      //   kalk_stampa_dok_81_tops( .T. )
-      //ELSEIF ( cIdVd == "IP" )
-      //   kalk_stampa_dok_ip( .T. )
-      //ELSEIF ( cIdVd $ "19#71#79" )
-      //   kalk_stampa_dok_19_79()
-      //ENDIF
-      my_close_all_dbf()
+      // IF ( cIdVd $ "11#12" )
+      // kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
+      // ELSEIF ( cIdVd == "80" )
+      // kalk_stampa_dok_80( .T. )
+      // ELSEIF ( cIdVd == "81" )
+      // kalk_stampa_dok_81_tops( .T. )
+      // ELSEIF ( cIdVd == "IP" )
+      // kalk_stampa_dok_ip( .T. )
+      // ELSEIF ( cIdVd $ "19#71#79" )
+      // kalk_stampa_dok_19_79()
+      // ENDIF
+      IF lCloseAllNaKraju
+         my_close_all_dbf()
+      ENDIF
       IF !pdf_kalk_dokument( cIdVd )
          FF
          ENDPRINT
@@ -260,20 +271,24 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok )
       cIdFirma := kalk_pripr->IdFirma
       cBrDok := kalk_pripr->BrDok
       cIdVD := kalk_pripr->IdVD
-      //IF ( cIdVd $ "11#12" )
-      //   kalk_stampa_dok_11( .T. )
-      //ELSEIF ( cIdVd == "10" )
-      //   kalk_stampa_dok_10()
-      //ELSEIF ( cIdVd == "81" )
-      //   kalk_stampa_dok_81( .T. )
-      //ENDIF
-      my_close_all_dbf()
+      // IF ( cIdVd $ "11#12" )
+      // kalk_stampa_dok_11( .T. )
+      // ELSEIF ( cIdVd == "10" )
+      // kalk_stampa_dok_10()
+      // ELSEIF ( cIdVd == "81" )
+      // kalk_stampa_dok_81( .T. )
+      // ENDIF
+      IF lCloseAllNaKraju
+         my_close_all_dbf()
+      ENDIF
       FF
       ENDPRINT
 
    ENDIF
 
-   my_close_all_dbf()
+   IF lCloseAllNaKraju
+      my_close_all_dbf()
+   ENDIF
 
    RETURN NIL
 

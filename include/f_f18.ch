@@ -103,13 +103,11 @@
 #define F_KALK_KARTICA  108
 #define F_KALK_IMP_TEMP 109
 
-
 // modul FAKT (wa 110-130)
 #define F_FAKT_PRIPR     110
 
 #define F_FAKT_DOKS     111
 #define F_FAKT_DOKS2    112
-
 
 #define F_FAKT      113
 #define F_FAKT_FTXT      114
