@@ -196,8 +196,18 @@ FUNCTION seek_pos_doks_2_za_period( cIdVd, dDatOd, dDatDo )
 
 
 FUNCTION seek_pos_doks_za_period( cIdPos, cIdVd, dDatOd, dDatDo, cAlias )
-   RETURN seek_pos_doks( cIdPos, cIdVd, NIL, NIL, "1", dDatOd, dDatDo, cAlias )
 
+   LOCAL hParams := hb_Hash()
+
+   hParams[ "idpos" ] := cIdPos
+   hParams[ "idvd" ] := cIdVd
+   hParams[ "tag" ] := "1"
+   hParams[ "dat_od" ] := dDAtOd
+   hParams[ "dat_do" ] := dDatDo
+   hParams[ "alias" ] := cAlias
+   hParams[ "datum_vrij_obrade" ] := .T.
+
+   RETURN seek_pos_doks_h( hParams )
 
 FUNCTION find_pos_doks_by_idvd_brfaktp( hParams )
 
@@ -255,7 +265,11 @@ FUNCTION seek_pos_doks_h( hParams  )
    ENDIF
 
    cFields := "idpos, idvd, brdok, datum, idPartner, idradnik,"
-   cFields += "idvrstep,vrijeme,ukupno,brFaktP,opis,dat_od,dat_do,date(obradjeno) as datum_obrade, to_char(obradjeno, 'HH24:MI') as vrij_obrade"
+   cFields += "idvrstep,vrijeme,ukupno,brFaktP,opis,dat_od,dat_do"
+
+   IF hb_HHasKey( hParams, "datum_vrij_obrade" ) .AND. hParams[ "datum_vrij_obrade" ]
+      cFields += ",date(obradjeno) as datum_obrade, to_char(obradjeno, 'HH24:MI') as vrij_obrade"
+   ENDIF
 
    cSql := "SELECT " + cFields + " from " + f18_sql_schema( cTable )
    IF cIdPos != NIL .AND. !Empty( cIdPos )

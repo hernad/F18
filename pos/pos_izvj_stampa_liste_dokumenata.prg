@@ -108,4 +108,6 @@ FUNCTION pos_stampa_liste_dokumenata()
 
    ENDPRINT
 
+   my_close_all_dbf()
+
    RETURN .T.

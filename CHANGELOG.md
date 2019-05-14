@@ -3,6 +3,7 @@
 ## 2019-05-14
 
 -  KALK 11-ke off promjene cijena, generacija nivelacija
+-  POS FIX bug datum_obrade
 
 ## 2019-05-06
 
