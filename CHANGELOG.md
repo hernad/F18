@@ -4,6 +4,7 @@
 
 -  KALK 11-ke off promjene cijena, generacija nivelacija
 -  POS FIX bug datum_obrade
+-  pos_set_naziv_domaca_valuta
 
 ## 2019-05-06
 

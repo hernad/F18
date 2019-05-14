@@ -247,7 +247,7 @@ METHOD set_module_gvars()
 
    CLOSE ALL
 
-   SetNazDVal() // set valuta
+   pos_set_naziv_domaca_valuta() // set valuta
    param_tezinski_barkod( .T. ) // setuj parametar tezinski_barkod
    pos_max_kolicina_kod_unosa( .T. ) // maksimalna kolicina kod unosa racuna
    fiscal_opt_active() // koristenje fiskalnih opcija

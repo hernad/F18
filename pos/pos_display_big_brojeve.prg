@@ -73,7 +73,7 @@ FUNCTION DecID( cId, cPadCh )
 
 
 
-FUNCTION SetNazDVal()
+FUNCTION pos_set_naziv_domaca_valuta()
 
    // LOCAL lOpened
 
