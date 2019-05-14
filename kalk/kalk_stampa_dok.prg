@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 MEMVAR cIdfirma, cIdvd, cBrdok
-MEMVAR gTops, gFakt
+MEMVAR gFakt
 MEMVAR __print_opt
 MEMVAR  PicCDEM, PicProc, PicDEM, PicKol, gPicPROC, gPicNC
 
@@ -118,9 +118,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       IF !pdf_kalk_dokument( cIdVd )
          START PRINT CRET
          ?
-      ENDIF
-
-      IF !pdf_kalk_dokument( cIdVd )
          Preduzece()
       ENDIF
 
@@ -231,6 +228,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
 
    ENDDO  // vrti kroz kalkulacije
 
+/*
    IF ( lDokumentZaPOS .AND. !lAzuriraniDokument .AND. gTops != "0 " )
       IF !pdf_kalk_dokument( cIdVd )
          START PRINT CRET
@@ -263,6 +261,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       kalk_generisi_tops_dokumente()
 
    ENDIF
+*/
 
    IF ( lDokumentZaFakt .AND. !lAzuriraniDokument .AND. gFakt != "0 " )
 

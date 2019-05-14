@@ -73,10 +73,12 @@ FUNCTION kalk_get_1_19_79()
    @ box_x_koord() + 12, box_y_koord() + 2  SAY8 "Količina " GET _Kolicina PICTURE pickol() WHEN kalk_when_kolicina_19_72_79()
 
    IF _idvd == POS_IDVD_ODOBRENO_SNIZENJE .OR. _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA
-      @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "Važi za period:" GET _dat_od WHEN {|| _dat_od := iif( Empty( _dat_od ), Date(), _dat_od ), .T. }
+      @ box_x_koord() + 14, box_y_koord() + 2  SAY8 "Važi za period:" GET _dat_od ;
+         WHEN  kalk_when_dat_od_do_19_72_79( _idvd, @_dat_od, @_dat_do ) ;
+         VALID  kalk_valid_dat_od_do_19_72_79( _idvd, @_dat_od, @_dat_do )
       @ Row(), Col() + 2  SAY8 "do" GET _dat_do ;
-         WHEN {|| /*_dat_do := iif( Empty( _dat_do ), _dat_od + 7, _dat_do ),*/ .T. } ;
-      VALID {|| ( Empty( _dat_do ) .AND. _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA ) .OR. _dat_do >= _dat_od }
+         WHEN  kalk_when_dat_od_do_19_72_79( _idvd, @_dat_od, @_dat_do ) ;
+         VALID  kalk_valid_dat_od_do_19_72_79( _idvd, @_dat_od, @_dat_do )
    ELSE
       _dat_od := _datdok
       _dat_do := CToD( "" )
@@ -100,7 +102,7 @@ FUNCTION kalk_get_1_19_79()
    @ box_x_koord() + 16, box_y_koord() + 2  SAY "STARA CIJENA (MPCSaPDV):"
    @ box_x_koord() + 16, box_y_koord() + 50 GET nKalkStaraCijena  PICT "999999.9999" ;
       WHEN kalk_when_stara_cijena_19_72_79( @nKalkStaraCijena ) ;
-      VALID kalk_valid_start_cijena_19_72_78(  @nKalkStaraCijena )
+      VALID kalk_valid_start_cijena_19_72_79(  @nKalkStaraCijena )
    @ box_x_koord() + 17, box_y_koord() + 2  SAY "NOVA CIJENA  (MPCSaPDV):"
    @ box_x_koord() + 17, box_y_koord() + 50 GET nKalkNovaCijena  PICT "999999.9999" ;
       WHEN kalk_when_nova_cijena_79( GetList, _idroba, 12, 49, nKalkStaraCijena )
@@ -143,6 +145,36 @@ FUNCTION kalk_get_1_19_79()
    RETURN LastKey()
 
 
+
+STATIC FUNCTION kalk_when_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
+
+   IF Empty( dDatOd )
+      dDatOd := danasnji_datum()
+   ENDIF
+
+
+   RETURN .T.
+
+
+STATIC FUNCTION kalk_valid_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
+
+
+   IF dDatOd < danasnji_datum()
+      Alert( _u( "datum OD mora biti >= današnji datum !" ) )
+      RETURN .F.
+   ENDIF
+
+   IF cIdVd == POS_IDVD_ZAHTJEV_NIVELACIJA
+      IF Empty( dDatDo ) // nivelacija do daljnjeg - bez ogranicenja
+         RETURN .T.
+      ELSEIF dDatDo >= dDatDo
+         RETURN .T.
+      ENDIF
+   ENDIF
+
+   RETURN .F.
+
+
 STATIC FUNCTION kalk_when_kolicina_19_72_79()
 
    IF _idvd == POS_IDVD_ZAHTJEV_NIVELACIJA
@@ -159,7 +191,8 @@ STATIC FUNCTION kalk_when_stara_cijena_19_72_79( nKalkStaraCijena )
 
    RETURN .T.
 
-STATIC FUNCTION kalk_valid_start_cijena_19_72_78(  nKalkStaraCijena )
+
+STATIC FUNCTION kalk_valid_start_cijena_19_72_79(  nKalkStaraCijena )
 
    IF !kalk_is_novi_dokument() .AND. nKalkStaraCijena <> s_nKalkStaraCijena
       IF Pitanje(, "Želite promjenu stare cijene ?! Sigurno ?", "N" ) == "D"
@@ -170,6 +203,7 @@ STATIC FUNCTION kalk_valid_start_cijena_19_72_78(  nKalkStaraCijena )
    ENDIF
 
    RETURN .T.
+
 
 STATIC FUNCTION kalk_when_nova_cijena_79( GetList, cIdRoba, nShowXPosStanje, nShowYPosStanje, nKalkStaraCijena )
 

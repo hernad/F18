@@ -47,11 +47,12 @@ FUNCTION kalk_stampa_dok_11()
       cNaslov := "OTPREMNICA PRODAVNICA"
    ENDIF
 
-   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( kalk_pripr->DatDok )
+   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok  + ", Datum dokumenta:" + DToC( kalk_pripr->DatDok )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "font_size" ] := 9
    xPrintOpt[ "opdf" ] := s_oPDF
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.

@@ -68,7 +68,7 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
 
    lGenerisiZavisne := kalk_check_generisati_zavisne_dokumente( lAuto )
    IF lGenerisiZavisne
-      kalk_nivelacija_11()
+      //kalk_nivelacija_11()
       kalk_generisi_prijem16_iz_otpreme96()
       kalk_13_to_11()
       kalk_generisi_95_za_manjak_16_za_visak()

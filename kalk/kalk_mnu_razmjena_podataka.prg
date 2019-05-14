@@ -32,8 +32,8 @@ FUNCTION kalk_razmjena_podataka()
    ENDIF
 
 
-   AAdd( aOpc, "5. kalk -> pos" )
-   AAdd( aOpcExe, {|| kalk_tops_meni() } )
+   //AAdd( aOpc, "5. kalk -> pos" )
+   //AAdd( aOpcExe, {|| kalk_tops_meni() } )
 
    AAdd( aOpc, "6. import csv fajl " )
    AAdd( aOpcExe, {|| meni_import_csv() } )

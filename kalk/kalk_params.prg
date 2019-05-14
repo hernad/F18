@@ -411,7 +411,7 @@ FUNCTION kalk_par_zavisni_dokumenti()
    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Automatika formiranja FAKT dokum D/N" GET gAFakt PICT "@!" VALID gAFakt $ "DN"
 
    @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "Generisati 16-ku nakon 96  D/N (1/2) ?" GET gGen16  VALID gGen16 $ "12"
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY8 "Nakon štampe zaduženja prodavnice prenos u TOPS 0-ne/1 /2 " GET gTops  VALID gTops $ "0 /1 /2 /3 /99" PICT "@!"
+   //@ box_x_koord() + 5, box_y_koord() + 2 SAY8 "Nakon štampe zaduženja prodavnice prenos u TOPS 0-ne/1 /2 " GET gTops  VALID gTops $ "0 /1 /2 /3 /99" PICT "@!"
    @ box_x_koord() + 6, box_y_koord() + 2 SAY8 "Nakon štampe zaduženja prenos u FAKT 0-ne/1 /2 " GET gFakt  VALID gFakt $ "0 /1 /2 /3 /99" PICT "@!"
 
    @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "KALK-FIN identičan broj (D/N): " GET cKalkFinIstiBroj VALID cKalkFinIstiBroj $ "DN" PICT "@!"
@@ -431,7 +431,7 @@ FUNCTION kalk_par_zavisni_dokumenti()
       set_metric( "kalk_kontiranje_mat", f18_user(), gAMat )
       set_metric( "kalk_kontiranje_fakt", f18_user(), gAFakt )
       set_metric( "kalk_generisi_16_nakon_96", f18_user(), gGen16 )
-      set_metric( "kalk_prenos_pos", f18_user(), gTops )
+      //set_metric( "kalk_prenos_pos", f18_user(), gTops )
       set_metric( "kalk_prenos_fakt", f18_user(), gFakt )
       kalk_destinacija_topska( cTopsDest )
       kalk_tops_generacija_kalk_11_na_osnovu_pos_42( cKalkTopsAutoRazduzenjeDN )

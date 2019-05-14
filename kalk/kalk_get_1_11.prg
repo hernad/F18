@@ -167,7 +167,7 @@ FUNCTION kalk_get_1_11()
    ESC_RETURN K_ESC
 
    select_o_koncij( _pkonto )
-   roba_set_mcsapp_na_osnovu_koncij_pozicije( _mpcsapp, .T. )       // .t. znaci sa upitom
+   // 11-ka ne mijenja šifrarnik, zato isključeno roba_set_mcsapp_na_osnovu_koncij_pozicije( _mpcsapp, .T. )       // .t. znaci sa upitom
    SELECT kalk_pripr
 
    _IdKonto := _MKonto // izlaz iz magacina

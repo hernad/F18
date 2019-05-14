@@ -179,11 +179,12 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
          Set( _SET_PRINTFILE, s_cPrinterFile )
       ENDIF
    ELSE
-      Set( _SET_PRINTFILE, s_cPrinterFile )
       Set( _SET_PRINTER, s_lPrinter  )
+      Set( _SET_PRINTFILE, s_cPrinterFile )
    ENDIF
 
    MsgC()
+
 
    f18_tone( 440, 2 )
    f18_tone( 440, 2 )
@@ -241,7 +242,6 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
          MsgBeep ( "f18_editor (" + cFileName + ") ERROR ?!" )
       ENDIF
    END CASE
-
 
    my_use_refresh_start()
 

@@ -12,7 +12,7 @@
 
 #include "f18.ch"
 
-
+/*
 FUNCTION kalk_nivelacija_11()
 
    LOCAL _sufix, hRec
@@ -134,3 +134,4 @@ FUNCTION kalk_nivelacija_11()
    my_close_all_dbf()
 
    RETURN .T.
+*/

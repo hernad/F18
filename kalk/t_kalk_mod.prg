@@ -130,7 +130,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC cRNT4 := "TROSK 4 "
    PUBLIC cRNT5 := "TROSK 5 "
 
-   PUBLIC gTops := "0 "
+   //PUBLIC gTops := "0 "
    // Koristim TOPS - 0 - ne prenosi se podaci,"1 " - prod mjes 1
    PUBLIC gFakt := "0 "
    // Koristim FAKT - 0 - ne prenosi se podaci,"1 " - prod mjes 1
@@ -234,7 +234,7 @@ METHOD TKalkMod:set_module_gvars()
    g80VRT := fetch_metric( "kalk_dokument_80_rekap_po_tar", nil, g80VRT )
    gVarVP := fetch_metric( "kalk_dokument_14_varijanta_poreza", nil, gVarVP )
    gVar13u11 := fetch_metric( "kalk_varijanta_fakt_13_kalk_11_cijena", nil, gVar13u11 )
-   gTops := fetch_metric( "kalk_prenos_pos", f18_user(), gTops )
+   //gTops := fetch_metric( "kalk_prenos_pos", f18_user(), gTops )
    gFakt := fetch_metric( "kalk_prenos_fakt", f18_user(), gFakt )
    gcMpcKalk10 := fetch_metric( "kalk_pomoc_sa_mpc", nil, gcMpcKalk10 )
    gKolicFakt := fetch_metric( "kalk_kolicina_kod_nivelacije_fakt", nil, gKolicFakt )

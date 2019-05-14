@@ -255,7 +255,7 @@ FUNCTION seek_pos_doks_h( hParams  )
    ENDIF
 
    cFields := "idpos, idvd, brdok, datum, idPartner, idradnik,"
-   cFields += "idvrstep,vrijeme,ukupno,brFaktP,opis,dat_od,dat_do"
+   cFields += "idvrstep,vrijeme,ukupno,brFaktP,opis,dat_od,dat_do,date(obradjeno) as datum_obrade, to_char(obradjeno, 'HH24:MI') as vrij_obrade"
 
    cSql := "SELECT " + cFields + " from " + f18_sql_schema( cTable )
    IF cIdPos != NIL .AND. !Empty( cIdPos )

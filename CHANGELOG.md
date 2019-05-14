@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-05-14
+
+-  KALK 11-ke off promjene cijena, generacija nivelacija
+
 ## 2019-05-06
 
 -  KALK browse dokumenti /2

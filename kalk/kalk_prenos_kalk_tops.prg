@@ -14,6 +14,7 @@
 STATIC s_cKalkDestinacijaTopska := NIL
 STATIC s_cTxtPrint
 
+/*
 FUNCTION kalk_tops_meni()
 
    LOCAL cIDFirma := self_organizacija_id()
@@ -144,7 +145,7 @@ FUNCTION kalk_generisi_tops_dokumente( cIdFirma, cIdVd, cBrDok )
       ENDIF
 
       IF Empty( koncij->idprodmjes )
-         REPLACE field->idpos WITH gTops
+    --     REPLACE field->idpos WITH gTops
       ENDIF
 
       nTotal += ( field->kolicina * field->mpc ) // saberi total
@@ -168,6 +169,7 @@ FUNCTION kalk_generisi_tops_dokumente( cIdFirma, cIdVd, cBrDok )
 
    RETURN .T.
 
+*/
 
 STATIC FUNCTION kalk_tops_print_report( cIdFirma, cIdVd, cBrDok, nBrojStavki, nSaldo,  cStavke, cPm, cPKonto )
 
