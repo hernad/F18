@@ -172,6 +172,15 @@ STATIC FUNCTION kalk_valid_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
       ENDIF
    ENDIF
 
+   IF cIdVd == POS_IDVD_ODOBRENO_SNIZENJE
+      IF Empty( dDatDo )
+         dDatDo := dDatOd + 5
+         RETURN .T.
+      ELSEIF dDatDo >= dDatDo
+         RETURN .T.
+      ENDIF
+   ENDIF
+   
    RETURN .F.
 
 

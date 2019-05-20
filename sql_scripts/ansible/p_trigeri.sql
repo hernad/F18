@@ -67,14 +67,16 @@ ELSIF (TG_OP = 'INSERT') THEN
       END IF;
 
       IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
-         IF NEW.idvd <> '21' THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba
+         IF NOT NEW.idvd IN ('21', '79') THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba ; 79 radi sa postojecom robom
             EXECUTE 'UPDATE {{ item_prodavnica }}.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
                USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
          END IF;
       ELSE
-         -- ako artikla uopste nema, onda i 21-ca moze setovati sifru u prodavnica.roba
-         EXECUTE 'INSERT INTO {{ item_prodavnica }}.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
-           USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
+         -- ako artikla uopste nema, onda i 21-ca moze setovati sifru u prodavnica.roba; ali ovo ne bi trebalo da se desava !
+         IF NOT NEW.idvd = '79' THEN
+           EXECUTE 'INSERT INTO {{ item_prodavnica }}.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
+              USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
+         END IF;
       END IF;
 
       RAISE INFO 'insert pos_pos_knjig prodavnica % %', NEW.idPos, NEW.idvd;
@@ -232,6 +234,7 @@ DECLARE
     nVisak numeric;
     nManjak numeric;
     nKolicina numeric;
+    nKolPromCijena numeric;
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
@@ -281,7 +284,7 @@ ELSIF (TG_OP = 'DELETE') AND ( OLD.idvd IN ('19','29','79' ) ) THEN
         RAISE INFO 'delete pos_pos  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''-'', $1,$2,$3,$4,$5,$5,NULL,$6,$7,$8,$9)'
                    USING idPos, OLD.idvd, OLD.brdok, OLD.rbr, OLD.datum, OLD.idroba, OLD.kolicina, OLD.cijena, OLD.ncijena
-                   INTO lRet;
+                   INTO nKolPromCijena;
         -- RAISE INFO 'delete  ret=%', lRet;
         RETURN OLD;
 
@@ -337,7 +340,10 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
         IF (NEW.kolicina > 0) THEN
            EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
                USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, datOd, datDo, NEW.idroba, NEW.kolicina, NEW.cijena, NEW.ncijena
-               INTO lRet;
+               INTO nKolPromCijena;
+           IF NEW.idvd = '79' AND nKolPromCijena >= 0 THEN -- odobreno snizenje realizovano
+               NEW.kol2 := nKolPromCijena;
+           END IF;
         ELSIF (NEW.kolicina = 0) THEN
              RAISE INFO 'kolicina 0 nista se nema raditi';
         ELSE
@@ -362,10 +368,11 @@ DROP TRIGGER IF EXISTS kasa_pos_crud on {{ item_prodavnica }}.pos;
         ON {{ item_prodavnica }}.pos
         FOR EACH ROW EXECUTE PROCEDURE {{ item_prodavnica }}.on_kasa_pos_crud();
 
+-- on_kasa_pos_items_crud se desava BEFORE insert
 -- {{ item_prodavnica }}.pos_items na kasi
 DROP TRIGGER IF EXISTS kasa_pos_items_crud on {{ item_prodavnica }}.pos_items;
 CREATE TRIGGER kasa_pos_items_crud
-      AFTER INSERT OR DELETE OR UPDATE
+      BEFORE INSERT OR DELETE OR UPDATE
       ON {{ item_prodavnica }}.pos_items
       FOR EACH ROW EXECUTE PROCEDURE {{ item_prodavnica }}.on_kasa_pos_items_crud();
 

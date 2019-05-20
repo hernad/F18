@@ -92,7 +92,7 @@ FUNCTION pos_kartica_artikla()
    xPrintOpt[ "layout" ] := "portrait"
    xPrintOpt[ "opdf" ] := s_oPDF
    xPrintOpt[ "font_size" ] := 9
-   IF f18_start_print( NIL, xPrintOpt,  "POS [" +  pos_prodavnica_str() + "/" + AllTrim(cIdPos) + "] KARTICE ARTIKALA NA DAN: " + DToC( Date() ) ) == "X"
+   IF f18_start_print( NIL, xPrintOpt,  "POS [" +  pos_prodavnica_str() + "/" + AllTrim( cIdPos ) + "] KARTICE ARTIKALA NA DAN: " + DToC( Date() ) ) == "X"
       RETURN .F.
    ENDIF
 
@@ -299,7 +299,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
 
       IF pos->idvd == POS_IDVD_ODOBRENO_SNIZENJE
          cStr1 := "P:"  // sa popustom
-         cStr2 := "Sniž.Kol:"
+         cStr2 := "Zahtj.Kol:"
       ELSE
          cStr1 := "N:"
          cStr2 := "Niv.Kol:"
@@ -315,19 +315,30 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? POS->IdVd + "-" + PadR ( AllTrim( POS->BrDok ), FIELD_LEN_POS_BRDOK )
          s_nKol2 := PCol()
          ?? " S:", Str ( POS->Cijena, 7, 2 ), cStr1, Str( POS->Ncijena, 7, 2 )
-         IF pos->idvd == POS_IDVD_ZAHTJEV_NIVELACIJA
+         IF pos->idvd == POS_IDVD_ZAHTJEV_NIVELACIJA .OR. pos->idvd == POS_IDVD_ODOBRENO_SNIZENJE
             ?? " datum od:", pos->dat_od
             IF !Empty( pos->dat_do )
-              ?? " do:", pos->dat_do
+               ?? " do:", pos->dat_do
             ELSE
-              ??U " do daljnjeg"
+               ??U " do daljnjeg"
             ENDIF
          ENDIF
          IF pos->idvd <> POS_IDVD_ZAHTJEV_NIVELACIJA
-           @ PRow() + 1, s_nKol2 + 1 SAY PadR( _u( cStr2 ), 10 ) + " "
-           ?? Str( pos->kolicina, 10, 3 ) + " "
+            @ PRow() + 1, s_nKol2 + 1 SAY PadR( _u( cStr2 ), 10 ) + " "
+            ?? Str( pos->kolicina, 10, 3 ) + " "
+
+            IF pos->idvd == POS_IDVD_ODOBRENO_SNIZENJE
+               IF ( pos->kolicina > 0 ) .AND. ( pos->kolicina <> pos->kol2 )
+                  @ PRow() + 1, s_nKol2 - 5 SAY PadR( _u( "PRIHVAĆENA KOL:" ), 16 ) + " "
+                  IF pos->kol2 == -99999.999
+                     ?? PadC( "XXX", 10 )
+                  ELSE
+                     ?? Str( pos->kol2, 10, 3 ) + " "
+                  ENDIF
+               ENDIF
+            ENDIF
          ELSE
-           @ PRow() + 1, s_nKol2 + 1 SAY PadR( "ZAHTJEV NIV", 21 ) + " "
+            @ PRow() + 1, s_nKol2 + 1 SAY PadR( "ZAHTJEV NIV", 21 ) + " "
          ENDIF
          ?? Str ( nStanjeKolicina, 10, 2 ) + " "
          IF pos->idvd $ POS_IDVD_ZAHTJEVI_NIVELACIJE_SNIZENJA

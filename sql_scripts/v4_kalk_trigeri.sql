@@ -21,6 +21,7 @@ DECLARE
     robaNaz varchar;
     robaJmj varchar;
     cProdShema varchar;
+    nKol2 decimal;
 BEGIN
 
 IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
@@ -69,9 +70,15 @@ ELSIF (TG_OP = 'INSERT') THEN
         ncijena := 0;
       END IF;
 
+      -- kol2 sadrzi embediran barkod, osim za 79
+      IF NEW.idvd = '79' THEN
+         nKol2 := -99999.999;
+      ELSE
+         nKol2 := public.barkod_ean13_to_num(barkodRoba,3);
+      END IF;
       EXECUTE 'INSERT INTO ' || cProdShema || '.pos_items_knjig(dok_id,idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj)' ||
               ' VALUES(' || cProdShema || '.pos_knjig_dok_id($1,$2,$3,$4),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
-        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, public.barkod_ean13_to_num(barkodRoba,3), NEW.idtarifa, robaNaz,robaJmj;
+        USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, nKol2, NEW.idtarifa, robaNaz,robaJmj;
       RETURN NEW;
 END IF;
 

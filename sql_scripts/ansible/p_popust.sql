@@ -338,3 +338,51 @@ $$;
 --    RETURN QUERY SELECT * FROM unnest( aBrDoks );
 -- END;
 -- $$;
+
+
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_popust_naknadna_obrada() RETURNS integer
+LANGUAGE plpgsql
+AS $$
+DECLARE
+   nCount integer;
+   rec RECORD;
+   rec_dok RECORD;
+   nKolPromCijena decimal;
+BEGIN
+
+nCount := 0;
+
+FOR rec IN
+        SELECT * FROM {{ item_prodavnica }}.pos_items
+            WHERE idvd='79' and kolicina > 0 and kol2 = -99999.999
+LOOP
+     --SELECT {{ item_prodavnica }}.pos_79_storno_to_79( uuid79 )
+      --  INTO nRet;
+     -- RAISE INFO 'pos_79_storno_to_79 % %', uuid79, nRet;
+     select * from {{ item_prodavnica }}.pos where dok_id=rec.dok_id
+        INTO rec_dok;
+
+     IF rec_dok.dat_od <= current_date THEN
+         EXECUTE 'SELECT {{ item_prodavnica }}.pos_promjena_cijena_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)'
+           USING rec.idPos, rec.idvd, rec.brdok, rec.rbr, rec.datum, rec_dok.dat_od, rec_dok.dat_do, rec.idroba, rec.kolicina, rec.cijena, rec.ncijena
+            INTO nKolPromCijena;
+
+       IF nKolPromCijena < 0 THEN -- ako je bilo gresaka onda je odobrena kolicina 0
+           nKolPromCijena := 0;
+       END IF;
+
+       EXECUTE 'UPDATE {{ item_prodavnica }}.pos_items set kol2=$2 WHERE item_id=$1'
+             USING rec.item_id, nKolPromCijena;
+
+        nCount := nCount + 1;
+      END IF;
+
+
+END LOOP;
+
+RETURN nCount;
+
+END;
+$$;

@@ -541,6 +541,7 @@ DECLARE
    nCount79 integer;
    nNivStart integer;
    nNivEnd integer;
+   nPopustNaknadno integer;
 
 BEGIN
    -- PERFORM {{ item_prodavnica }}.setmetric('run_cron_time', now()::text);
@@ -557,7 +558,10 @@ BEGIN
    SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end()
       INTO nNivEnd;
 
-   RAISE INFO 'run_cron gen_99 %, gen_79 storno %, niv_start: %, niv_end: %', nCount99, nCount79, nNivStart, nNivEnd;
+   SELECT {{ item_prodavnica }}.pos_popust_naknadna_obrada()
+      INTO nPopustNaknadno;
+
+   RAISE INFO 'run_cron gen_99 %, gen_79 storno %, niv_start: %, niv_end: %, popust_naknadno %', nCount99, nCount79, nNivStart, nNivEnd, nPopustNaknadno;
    RETURN;
 END;
 $$;
