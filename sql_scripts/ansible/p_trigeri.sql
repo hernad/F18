@@ -258,7 +258,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    END IF;
 ELSE
    IF ( NOT OLD.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN
-      RETURN NEW;
+        RETURN OLD;
    END IF;
 END IF;
 
@@ -356,7 +356,12 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
 
 END IF;
 
-RETURN NEW;
+
+IF (TG_OP = 'DELETE') THEN
+  RETURN OLD;
+ELSE
+  RETURN NEW;
+END IF;
 
 END;
 $$;

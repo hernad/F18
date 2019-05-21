@@ -49,15 +49,17 @@ FUNCTION kalk_22_to_11_unos()
 
 FUNCTION kalk_pripr_set_datdok_datfaktp( dDatDok, dDatFaktP )
 
-   SELECT kalk_pripr
+
    PushWa()
 
+   select_o_kalk_pripr()
    SET ORDER TO TAG 0
    GO TOP
    DO WHILE !Eof()
       rreplace datdok WITH dDatDok, datfaktp WITH dDatFaktP
       SKIP
    ENDDO
+   my_close_all_dbf()
    PopWa()
 
    RETURN .T.
@@ -93,7 +95,7 @@ FUNCTION kalk_21_get_datfaktp( cBrFaktP )
 
    LOCAL cQuery, oRet, oError, dRet := CToD( "" )
 
-   cQuery := "SELECT public.kalk_doks datfaktp where idvd='21' and brfaktp=" + ;
+   cQuery := "SELECT datfaktp FROM public.kalk_doks WHERE idvd='21' and brfaktp=" + ;
       sql_quote( cBrFaktP )
 
    BEGIN SEQUENCE WITH {| err | Break( err ) }
