@@ -67,7 +67,7 @@ $$;
 
 
 
--- select * from public.gfak_by_brf(2018232);
+-- select * from public.gfak_by_brf('1', 2018232);
 
 DROP FUNCTION IF EXISTS public.gfak_by_brf(bigint);
 
@@ -99,7 +99,8 @@ $$;
 --  LEFT JOIN public.gfak_by_brf(2018232) as gfak
 --  ON sfak.brf=gfak.brf;
 
-
+-- datum - gleda se datfk iz varazdin app - datum fakturisanja
+-- pored toga postoji i datd - datum dokumenta
 -- select * from public.sfak_prodavnice_by_datum('1', '2018-10-16');
 
 DROP FUNCTION IF EXISTS public.sfak_prodavnice_by_datum;
@@ -187,6 +188,7 @@ DECLARE
 	 cIdTarifa varchar;
 	 lFakturaPostoji boolean;
 	 nVS integer;
+	 dDatFaktP date;
 
 	 rptItem prod_magacin_type;
 	 aRpt prod_magacin_type[] DEFAULT '{}';
@@ -197,8 +199,8 @@ BEGIN
 		 lFakturaPostoji := False;
 		 nProdavnica := -1;
 		 nPredhodnaProd := -1;
-     FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina, nVS IN
-          SELECT sfak.brf, sfak.vcij, sfak.prod, sfak.rb, sfak.ident, sfak.kold, sfak.vs from public.sfak_prodavnice_by_datum(cServer, dDatum) sfak
+     FOR nBrojFakture, nVrstaCijena, nProdavnica, nRbr, nRobaId, nKolicina, nVS, dDatFaktP IN
+          SELECT sfak.brf, sfak.vcij, sfak.prod, sfak.rb, sfak.ident, sfak.kold, sfak.vs, sfak.datd from public.sfak_prodavnice_by_datum(cServer, dDatum) sfak
           WHERE kp=nMagacin
           ORDER BY brf, rb
      LOOP
@@ -254,13 +256,14 @@ BEGIN
 						 		dDatum
 						 );
 						 aRpt := array_append(aRpt, rptItem);
-             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,opis)
+             INSERT INTO public.kalk_doks(idfirma,idvd,brdok,datdok,mkonto,pkonto,brfaktp,opis,datfaktp)
                  values(
                    cIdFirma, cIdVd, cBrDok, dDatum,
                    public.magacin_konto(nMagacin),
 									 public.prodavnica_konto(nProdavnica),
                    cBrojFaktureT,
-									 btrim(to_char(nVS, '9999'))
+									 btrim(to_char(nVS, '9999')),
+									 dDatFaktP
                  );
           END IF;
 

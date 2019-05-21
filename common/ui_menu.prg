@@ -80,12 +80,19 @@ FUNCTION f18_menu_sa_priv_vars_opc_opcexe_izbor( cIzp, lMain )
 FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
 
    LOCAL nOpcija := 0, nYm := 0
+   LOCAL nX2
 
    nOpcija := Len( aNiz )
    AEval( aNiz, {| x | iif( Len( x ) > nYm, nYm := Len( x ), ) } )
 
-   box_crno_na_zuto( nX1, nY1, nX1 + nOpcija + 1, nY1 + nYm + 1,,,,,, 0 )
-   nIzb := meni_0_inkey( nX1 + 1, nY1 + 1, nX1 + nOpcija + 1, nY1 + nYm, aNiz, nIzb )
+   nX2 := nX1 + nOpcija + 1
+
+   IF nX2 > f18_max_rows() - 2
+      nX2 := f18_max_rows() - 2
+   ENDIF
+
+   box_crno_na_zuto( nX1, nY1, nX2, nY1 + nYm + 1,,,,,, 0 )
+   nIzb := meni_0_inkey( nX1 + 1, nY1 + 1, nX2, nY1 + nYm, aNiz, nIzb )
    box_crno_na_zuto_end()
 
    RETURN nIzb

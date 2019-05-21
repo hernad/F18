@@ -275,15 +275,34 @@ END;
 $$;
 
 
+CREATE OR REPLACE FUNCTION public.logiraj( cUser varchar, cPrefix varchar, cMsg text) RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+
+   insert into public.log(user_code, msg) values(cUser, cPrefix || ': ' || cMsg);
+   RETURN;
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.roba_id_by_sifradob(nRobaId integer) RETURNS varchar
    LANGUAGE plpgsql
 AS $$
 DECLARE
   cIdRoba varchar;
+  cMsg varchar;
+  cSifraDob varchar;
 BEGIN
 
 SELECT id from public.roba where lpad(btrim(sifradob),5,'0')=lpad(btrim(to_char(nRobaId,'99999')),5,'0')
   INTO cIdRoba;
+
+IF cIdRoba IS NULL THEN
+   cSifraDob := lpad(btrim(to_char(nRobaId,'99999')),5,'0');
+   cMsg := format('sifradob = %s', cSifraDob) ;
+   PERFORM public.logiraj( current_user::varchar, 'ERROR_SIFRADOB', cMsg);
+   RAISE INFO 'sifradob =? %', cSifraDob;
+END IF;
 
 RETURN COALESCE(cIdRoba, '<<UNDEF>>');
 

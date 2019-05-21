@@ -239,7 +239,7 @@ BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    IF ( NOT NEW.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN   -- 42, 11, 80, 19, 79, 89
-      RETURN NULL;
+      RETURN NEW;
    END IF;
    IF ( NEW.idvd = '90' ) THEN
       IF ( NEW.kolicina - NEW.kol2 ) > 0 THEN  -- popisana - knjizna
@@ -258,7 +258,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
    END IF;
 ELSE
    IF ( NOT OLD.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN
-      RETURN NULL;
+      RETURN NEW;
    END IF;
 END IF;
 
@@ -356,7 +356,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
 
 END IF;
 
-RETURN NULL; -- result is ignored since this is an AFTER trigger
+RETURN NEW;
 
 END;
 $$;

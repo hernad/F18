@@ -14,7 +14,7 @@
 STATIC s_oPDF
 STATIC s_nRobaNazivSirina := 34
 
-MEMVAR cIdPartner, cBrFaktP  // ,dDatFaktP
+MEMVAR cIdPartner, cBrFaktP, dDatFaktP
 MEMVAR cIdFirma, cIdVd, cBrDok
 
 FUNCTION kalk_stampa_dok_11()
@@ -33,9 +33,19 @@ FUNCTION kalk_stampa_dok_11()
 
    PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
+   SELECT kalk_pripr
+
    cIdPartner := kalk_pripr->IdPartner
    cBrFaktP := kalk_pripr->BrFaktP
-   // dDatFaktP := kalk_pripr->DatFaktP
+
+   IF FieldPos( "DATFAKTP" ) == 0
+      find_kalk_doks_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
+      dDatFaktP := kalk_doks->datfaktp
+      SELECT kalk_pripr
+   ELSE
+      dDatFaktP := kalk_pripr->DatFaktP
+   ENDIF
+
    cPKonto := kalk_pripr->pkonto
    cMKonto := kalk_pripr->mkonto
 
@@ -58,7 +68,7 @@ FUNCTION kalk_stampa_dok_11()
       RETURN .F.
    ENDIF
 
-   SELECT kalk_pripr
+
 
    cLinija := "--- ---------- " + Replicate( "-", s_nRobaNazivSirina + 5 ) + " ---------- ---------- " + "---------- ---------- " +  "---------- ---------- "  + "---------- ---------- ---------- --------- -----------"
 
@@ -66,7 +76,7 @@ FUNCTION kalk_stampa_dok_11()
    lVPC := is_magacin_evidencija_vpc( kalk_pripr->mkonto )
 
    SELECT kalk_pripr
-   bZagl := {|| zagl_11( cPKonto, cMKonto, cLinija ) }
+   bZagl := {|| zagl_11( cPKonto, cMKonto, cBrFaktP, dDatFaktP, cLinija ) }
    Eval( bZagl )
 
    select_o_koncij( kalk_pripr->pkonto )
@@ -164,7 +174,7 @@ FUNCTION kalk_stampa_dok_11()
    RETURN .T.
 
 
-STATIC FUNCTION zagl_11( cPKonto, cMKonto, cLine )
+STATIC FUNCTION zagl_11( cPKonto, cMKonto, cBrFaktP, dDatFaktP, cLine )
 
 /*
    IF cIdvd == "11"
@@ -177,7 +187,7 @@ STATIC FUNCTION zagl_11( cPKonto, cMKonto, cLine )
 */
 
    select_o_partner( cIdPartner )
-   ? "OTPREMNICA Broj:", cBrFaktP  // , "Datum:", dDatFaktP
+   ? "OTPREMNICA Broj:", cBrFaktP, "Datum:", dDatFaktP
 
    // IF cIdvd == "11"
    select_o_konto( cPKonto )
