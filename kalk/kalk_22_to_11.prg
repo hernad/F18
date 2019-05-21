@@ -143,7 +143,7 @@ FUNCTION kalk_22_get_lista()
 
    LOCAL cQuery, oData, oRow, oError, hRec, aLista := {}
 
-   cQuery := "SELECT * FROM public.kalk_22_neobradjeni_dokumenti() order by pkonto, datdok";
+   cQuery := "SELECT * FROM public.kalk_22_neobradjeni_dokumenti() order by datdok";
 
       oData := run_sql_query( cQuery )
    DO WHILE !oData:Eof()
