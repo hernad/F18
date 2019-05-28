@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-05-28
+
+-  pos priprema - validacija cijena prije zakljucenja racuna 
+
 ## 2019-05-20
 
 -  POS obrada 79 dat_od > tekuci datum: SELECT p2.pos_popust_naknadna_obrada()
