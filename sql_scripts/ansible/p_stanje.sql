@@ -464,3 +464,103 @@ RETURN TRUE;
 
 END;
 $$;
+
+
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fix_pos_stanje() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar DEFAULT '1 ';
+      nCount integer;
+      rec_stanje RECORD;
+      rec_roba RECORD;
+      cIdRoba varchar;
+      nOsnovnaCijena numeric;
+      nStanje numeric;
+      cBrDokNew varchar;
+      dDatum date;
+      nRbr integer;
+      uuidPos uuid;
+      nStaraCijena numeric;
+      nNovaCijena numeric;
+      nDostupnaKolicina numeric;
+      cMsg varchar;
+      lInsertovano boolean;
+BEGIN
+
+      nCount := 0;
+      -- proci kroz stavke dokumenta '72'
+      cIdRoba := 'X#X';
+      cBrDokNew := NULL;
+      dDatum := current_date;
+      nRbr := 1;
+      lInsertovano := FALSE;
+
+
+      FOR rec_stanje IN SELECT * from {{ item_prodavnica }}.pos_stanje ORDER BY idroba
+      LOOP
+         IF cIdRoba <> rec_stanje.idroba THEN
+           IF cIdRoba <> 'X#X' AND lInsertovano THEN
+              -- uvijek na kraju zadati stavku sa kolicinom 0 i aktuelnom osnovnom cijenom da se ne bi promijenila osnovna cijena
+              nStanje := 0;
+              EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+                using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nOsnovnaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+
+           END IF;
+           cIdRoba := rec_stanje.idroba;
+           nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
+           nDostupnaKolicina := {{ item_prodavnica }}.pos_dostupno_artikal_za_cijenu(cIdRoba, nOsnovnaCijena, 0);
+           lInsertovano := FALSE;
+           IF nOsnovnaCijena = 0 THEN
+              CONTINUE;
+           END IF;
+         END IF;
+
+         nStanje := rec_stanje.kol_ulaz - rec_stanje.kol_izlaz;
+         IF nStanje <> 0 AND rec_stanje.cijena <> nOsnovnaCijena AND rec_stanje.ncijena = 0 THEN
+            -- stavka koja je bila osnovna cijena je 'ziva' a nije po aktuelnoj osnovnoj cijeni
+
+            IF nStanje > 0 THEN
+               nStaraCijena := rec_stanje.cijena;
+               nNovaCijena := nOsnovnaCijena;
+            ELSE
+               nStaraCijena := nOsnovnaCijena;
+               nNovaCijena := rec_stanje.cijena;
+               nStanje := - nStanje;
+               IF nDostupnaKolicina - nStanje > 0 THEN
+                 nDostupnaKolicina := nDostupnaKolicina - nStanje;
+               ELSE
+                  cMsg := format('%s : cij: %s stanje: %s', cIdRoba, rec_stanje.cijena, -nStanje);
+                  PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_FIX_POS_STANJE', cMsg);
+                  RAISE INFO 'preskacemo % % % nema dovoljno osnovne kolicine', cIdRoba, rec_stanje.cijena, -nStanje;
+                  CONTINUE;
+               END IF;
+            END IF;
+
+            IF cBrDokNew IS NULL THEN
+               cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatum);
+               insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,opis)
+                    values(cIdPos, '29', cBrDokNew, dDatum, dDatum, 'GEN: fix pos_stanje')
+                    RETURNING dok_id into uuidPos;
+            END IF;
+
+            SELECT * FROM {{ item_prodavnica }}.roba
+               WHERE id=cIdRoba
+               INTO rec_roba;
+
+            EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+                 using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nStaraCijena, nNovaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+             lInsertovano := TRUE;
+             nRbr := nRbr + 1;
+             nCount := nCount + 1;
+
+         END IF;
+
+
+      END LOOP;
+
+      RETURN nCount;
+END;
+$$;
