@@ -402,9 +402,9 @@ FUNCTION pos_stanje_artikal_str( cIdRoba, nStrLen )
          cSlikaStanja += " ; "
       ENDIF
       IF nLen == 1
-         cSlikaStanja +=  "St:" + Transform( nStanje, "999999.99" )  + "- Cij:" + Transform( nCijenaNeto, "999999.99" )
+         cSlikaStanja +=  "St:" + Transform( nStanje, "99999.999" )  + "- Cij:" + Transform( nCijenaNeto, "999999.99" )
       ELSE
-         cSlikaStanja += "St: " + AllTrim( Transform( nStanje, "999999.99" ) ) + "- Cij:" + AllTrim( Transform( nCijenaNeto, "999999.99" ) )
+         cSlikaStanja += "St: " + AllTrim( Transform( nStanje, "99999.999" ) ) + "- Cij:" + AllTrim( Transform( nCijenaNeto, "999999.99" ) )
       ENDIF
    NEXT
 

@@ -38,6 +38,7 @@ DECLARE
       cOpis varchar;
       nOsnovnaCijena numeric;
       cMsg varchar;
+      cIdTarifa varchar;
 BEGIN
       -- pos dokument '72' sa ovim dok_id-om
       EXECUTE 'select idpos,idvd,brdok,datum,dat_od from {{ item_prodavnica }}.pos where dok_id=$1'
@@ -68,26 +69,39 @@ BEGIN
 
       nCount := 0;
       -- proci kroz stavke dokumenta '72'
-      FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from {{ item_prodavnica }}.pos_items WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
+      FOR nRbr, cIdRoba, nC, nC2, cIdTarifa IN SELECT rbr,idRoba,cijena,ncijena,idtarifa from {{ item_prodavnica }}.pos_items WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
       LOOP
          -- aktuelna osnovna cijena;
          nStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba);
          IF nStanje > 0 THEN -- osnovna cijena za artikal u pos
             nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal(cIdRoba);
             IF nOsnovnaCijena <> nC THEN
-               cMsg := format('stara cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', nC, nOsnovnaCijena);
+               cMsg := format(' %s : stara cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', cIdRoba, nC, nOsnovnaCijena);
                PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_START', cMsg);
                RAISE INFO '%', cMsg;
             END IF;
+         ELSIF nStanje < 0 THEN
+            cMsg := format('%s: stanje negativno %s !? stara cijena %s ostaje na snazi', cIdRoba, nStanje, nC);
+            PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_START_STANJE', cMsg);
+            --CONTINUE;
+            --negativno stanje, ostaviti staru cijenu!
+            nOsnovnaCijena := nC;
+            nC2 := nC;
          ELSE  -- na stanju nema artikla, koristi se stara cijena u zahtjevu za nivelaciju
             nOsnovnaCijena := nC;
+            nStanje := 0; -- ako je stanje negativno, napraviti nultu nivelaciju
          END IF;
          SELECT * FROM {{ item_prodavnica }}.roba
             WHERE id=cIdRoba
             INTO rec_roba;
 
+         -- IF rec_roba.idtarifa IS NULL THEN
+         -- bilo je slucajeva da se ovo desi (idtarifa u roba nedefinisana - uzrok mi je nepoznat)
+         -- zato cemo koristiti idtarifa iz 72-ke
+         -- END IF;
+
          EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nC2, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nC2, rec_roba.naz, cIdTarifa, rec_roba.jmj;
          nCount := nCount + 1;
       END LOOP;
 
@@ -115,10 +129,12 @@ DECLARE
       dDatumNew date;
       nStanje numeric;
       nCount integer;
+      rec_roba RECORD;
       nRows integer;
       cOpis varchar;
       nOsnovnaCijena numeric;
       cMsg varchar;
+      cIdTarifa varchar;
 BEGIN
 
       -- pos dokument '72'
@@ -150,22 +166,34 @@ BEGIN
 
       nCount := 0;
       -- prolazak kroz stavke dokumenta '72'
-      FOR nRbr, cIdRoba, nC, nC2 IN SELECT rbr,idRoba,cijena,ncijena from {{ item_prodavnica }}.pos_items WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
+      FOR nRbr, cIdRoba, nC, nC2, cIdTarifa IN SELECT rbr,idRoba,cijena,ncijena,idtarifa from {{ item_prodavnica }}.pos_items WHERE idpos=cIdPos AND idvd=cIdVd AND brdok=cBrDok AND datum=dDatum
       LOOP
          -- trenutno aktuelna osnovna cijena je akcijska
          nStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba);
          IF nStanje > 0 THEN -- osnovna cijena za artikal u pos
             nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal(cIdRoba);
             IF nOsnovnaCijena <> nC2 THEN
-               cMsg := format('nova cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', nC, nOsnovnaCijena);
+               cMsg := format('%s : nova cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', cIdRoba, nC, nOsnovnaCijena);
                PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_END', cMsg);
                RAISE INFO '%', cMsg;
             END IF;
-         ELSE  -- na stanju nema artikla, koristi se stara cijena u zahtjevu za nivelaciju
+         ELSIF nStanje < 0 THEN
+             cMsg := format('%s: stanje negativno %s !? stara cijena %s ostaje na snazi', cIdRoba, nStanje, nC);
+             PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_END_STANJE', cMsg);
+             --CONTINUE;
+             --negativno stanje, ostaviti staru cijenu!
+             nOsnovnaCijena := nC;
+             -- nC := nC;
+         ELSE  -- na stanju nema artikla, koristi se nova cijena u zahtjevu za nivelaciju
             nOsnovnaCijena := nC2;
          END IF;
-         EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena) values($1,$2,$3,$4,$5,$6,$7,$8,$9)'
-             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nC;
+
+         SELECT * FROM {{ item_prodavnica }}.roba
+            WHERE id=cIdRoba
+            INTO rec_roba;
+
+         EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)'
+             using cIdPos, '29', cBrDokNew, dDatumNew, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nC, rec_roba.naz, cIdTarifa, rec_roba.jmj;
          nCount := nCount + 1;
       END LOOP;
 

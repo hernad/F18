@@ -50,12 +50,17 @@ FUNCTION pos_zakljuci_racun()
    LOCAL hParam := hb_Hash()
    LOCAL cDokumentNaziv
 
+   IF !pos_provjera_priprema()
+      RETURN .F.
+   ENDIF
+
    o_pos__pripr()
    my_dbf_pack()
    IF _pos_pripr->( RecCount2() ) == 0
       my_close_all_dbf()
       RETURN .F.
    ENDIF
+
 
    GO TOP
    hParam[ "idpos" ] := _pos_pripr->idpos

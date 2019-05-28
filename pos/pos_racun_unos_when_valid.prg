@@ -51,7 +51,7 @@ FUNCTION pos_racun_odabir_cijene( aCijene )
       ENDIF
       // datum od - do
       cCijena += " [" + DToC( aCijene[ nI, 3 ] ) + " - " + DToC( aCijene[ nI, 4 ] ) + "] "
-      cCijena += " St: " + Str( aCijene[ nI, 5], 8, 2 ) + " "
+      cCijena += " St: " + Str( aCijene[ nI, 5 ], 8, 3 ) + " "
       AAdd( aOpc, cCijena )
    NEXT
    __SetCentury( lCentury )
@@ -333,3 +333,38 @@ FUNCTION pos_racun_tekuci_saldo()
    PopWa()
 
    RETURN { nIznos, nPopust }
+
+
+FUNCTION pos_provjera_priprema()
+
+   LOCAL cIdRoba, nSt, nCij, nNCij, nStanjeRobe, nOsnovnaCijena
+
+   my_close_all_dbf()
+   o_pos__pripr()
+   SET ORDER TO TAG 1
+   GO TOP
+   DO WHILE !Eof()
+      cIdRoba := _pos_pripr->idroba
+
+      nSt := 0
+      nCij := _pos_pripr->cijena
+      nNCij := _pos_pripr->ncijena
+      // "1", "IdRoba+Transform(cijena,'99999.99')+Transform(ncijena,'99999.99')"
+
+      DO WHILE !Eof() .AND. cIdRoba == _pos_pripr->idroba .AND. nCij == _pos_pripr->cijena .AND. nNCij == _pos_pripr->ncijena
+         nSt += _pos_pripr->kolicina
+         SKIP
+      ENDDO
+      nStanjeRobe := pos_dostupno_artikal_za_cijenu( cIdroba, nCij, nNCij )
+      nOsnovnaCijena := pos_dostupna_osnovna_cijena_za_artikal( cIdRoba )
+
+      IF nOsnovnaCijena <> nCij .AND. nNCij == 0
+         Alert( _u( cIdRoba + ": kol [ " + AllTrim( Str( nSt, 8, 3 ) ) + "] NEDOSTUPNA CIJENA: " + AllTrim( Str( nCij, 8, 2 ) )) )
+         my_close_all_dbf()
+         RETURN .F.
+      ENDIF
+   ENDDO
+
+   my_close_all_dbf()
+
+   RETURN .T.

@@ -944,8 +944,8 @@ BEGIN
               WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
               INTO nMaxRbr;
            nMaxRbr := coalesce( nMaxRbr, 0);
-           INSERT INTO fmk.fin_suban(idfirma,idvn,brnal,idkonto,opis,d_p,iznosbhd,iznosdem,idpartner,datdok,brdok,rbr)
-              values(cIdFirma, cIdVn, cBrNal, cIdKonto, rec_trfp.naz, cDP, nIznos, public.km_to_euro(nIznos),'',dDatDok, cBrFaktP, nMaxRbr+1);
+           INSERT INTO fmk.fin_suban(idfirma,idvn,brnal,idkonto,opis,d_p,iznosbhd,iznosdem,idpartner,datdok,brdok,rbr,k1,k2,k3,k4,m1,m2,idrj,funk,fond,otvst,idtipdok)
+              values(cIdFirma, cIdVn, cBrNal, cIdKonto, rec_trfp.naz, cDP, nIznos, public.km_to_euro(nIznos),rpad('',6),dDatDok, cBrFaktP, nMaxRbr+1,'','','','','','','','','', ' ',cIdVn);
            RAISE INFO 'Kontiranje INSERT %-%-% [%] %', cIdFirma, cIdVn, cBrNal, cIdKonto, nIznos;
       ELSE
            UPDATE fmk.fin_suban
@@ -956,7 +956,7 @@ BEGIN
 
    END LOOP;
 
-   IF (nRbr = nRows) THEN
+   IF (nRbr >= nRows) THEN
       -- ako je potrebno prvo zatvoriti zaokruzenje
       PERFORM public.kalk_kontiranje_stavka_zaokruzenje( cIdVd, cBrDok, cPKonto, cMKonto );
       RAISE INFO 'ZADNJI RED % - gen_anal_sint % !', nRows, public.fin_gen_anal_sint(cIdFirma, cIdVn, cBrNal);
@@ -1089,8 +1089,18 @@ DECLARE
     nIznosPot numeric;
     cRbr varchar;
     nCount integer;
+    nIznosDugNalog numeric;
+    nIznosPotNalog numeric;
 BEGIN
     nCount := 0;
+    nIznosDugNalog := 0;
+    nIznosPotNalog := 0;
+
+    DELETE FROM fmk.fin_anal
+       WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
+    DELETE FROM fmk.fin_sint
+       WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
+       
     FOR rec_suban IN SELECT * FROM fmk.fin_suban
         where idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
         ORDER BY rbr
@@ -1107,6 +1117,9 @@ BEGIN
           nIznosDug := 0;
           nIznosPot := rec_suban.iznosbhd;
         END IF;
+
+        nIznosDugNalog := nIznosDugNalog + nIznosDug;
+        nIznosPotNalog := nIznosPotNalog + nIznosPot;
 
         -- analitika
         SELECT * from fmk.fin_anal
@@ -1156,6 +1169,9 @@ BEGIN
         nCount := nCount + 1;
     END LOOP;
 
+    UPDATE fmk.fin_nalog set dugbhd=nIznosDugNalog, potbhd=nIznosPotNalog, dugdem=public.km_to_euro(nIznosDugNalog), potdem=public.km_to_euro(nIznosPotNalog)
+        WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal;
+
     RETURN nCount;
 END;
 $$;
@@ -1195,6 +1211,7 @@ BEGIN
    nCount := 0;
    FOR rec_kalk IN select * from kalk_kalk
       WHERE idfirma=cIdFirma AND idvd=cIdVD AND brdok=cBrDok
+      ORDER BY rbr
    LOOP
        PERFORM public.kalk_kontiranje_stavka(
          rec_kalk.idvd, rec_kalk.brdok, rec_kalk.pkonto, rec_kalk.mkonto,

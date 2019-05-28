@@ -23,7 +23,7 @@ FUNCTION cre_all_pos( ver )
    _alias := "_POS_PRIPR"
    _table_name := "_pos_pripr"
    IF_NOT_FILE_DBF_CREATE
-   CREATE_INDEX ( "1", "IdRoba+Transform(nCijena,'99999.99')+Transform(ncijena,'99999.99')", _alias )
+   CREATE_INDEX ( "1", "IdRoba+Transform(cijena,'99999.99')+Transform(ncijena,'99999.99')", _alias )
    CREATE_INDEX ( "2", "IdPos+IdVd+dtos(datum)+BrDok", _alias )
 
    _alias := "PRIPRZ"

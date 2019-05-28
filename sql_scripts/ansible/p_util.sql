@@ -392,11 +392,16 @@ BEGIN
    -- ako robe ima na stanju, ako se radi o stavkama bez popusta (ncijena=0)
    -- LIMIT 1 jer se ocekuje da ovih zapisa moze biti samo 1
    -- ista roba moze biti na stanju samo po jednoj osnovnoj cijeni
+
+   -- order by id DESC obezbjedjuje da u slucaju nekonzistentnog stanja u kome postoji
+   -- vise osnovnih cijena sa stanjem > 0, da se uzme ona najmladja - najkasnije napravljena stavka iz pos_stanje
    SELECT cijena dat_od, dat_do FROM {{ item_prodavnica }}.pos_stanje
       WHERE rtrim(idroba)=rtrim(cIdRoba)
       AND kol_ulaz-kol_izlaz > 0
       AND dat_od<=current_date AND dat_do>=current_date
-      AND ncijena=0 LIMIT 1
+      AND ncijena=0
+      ORDER BY id DESC
+      LIMIT 1
       INTO nCijenaMem, dDatOd, dDatDo;
 
     IF nCijenaMem IS NULL THEN

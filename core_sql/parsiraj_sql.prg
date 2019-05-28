@@ -54,7 +54,6 @@ FUNCTION parsiraj_sql( cFieldName, xConditionParam, lNot )
 
    aConditions := TOKTONIZ( xConditionParam, ";" )
 
-
    IF Len( xConditionParam ) == 0 // "ako se proslijedi prazan string ''", ali ako se proslijedi '      ' to je validan partner u suban kartici
       lPrazno := .T.
    ENDIF
