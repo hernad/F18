@@ -169,19 +169,19 @@ FUNCTION pos_kartica_artikla()
 
       // zadani interval
       DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum >= dDatum0 .AND. POS->Datum <= dDatum1
-         check_nova_strana( bZagl, s_oPDF )
+         check_nova_strana( bZagl, s_oPDF, .F., 2 )
          pos_stanje_proracun_kartica( @nUlazKolicina, @nIzlazKolicina, @nKalo, @nStanjeKolicina, @nVrijednost, @nPopust, .T. )
          SKIP
       ENDDO
 
 
-      check_nova_strana( bZagl, s_oPDF, .F., 3 )
+      check_nova_strana( bZagl, s_oPDF, .F., 4 )
       ? m
       ? cLijevaMargina
       ?? PadL( "UKUPNO:", 21 + 6 )
       ?? Str( nUlazKolicina, 10, 2 ) + " "
       ?? Str( nIzlazKolicina, 10, 2 ) + " "
-      ?? Str( nStanjeKolicina, 10, 2 ) + " "
+      ?? Str( nStanjeKolicina, 10, 3 ) + " "
 
       IF Round( nKalo, 4 ) <> 0
          ? m
@@ -189,13 +189,13 @@ FUNCTION pos_kartica_artikla()
          ?? PadL( "Od toga KALO:", 21 + 6 )
          ?? Space( 10 ) + " "
          ?? Space( 10 ) + " "
-         ?? Str( nKalo, 10, 2 )
+         ?? Str( nKalo, 10, 3 )
          ? m
 
          ? cLijevaMargina
          ??U PadL( "Raspoloživo za prodaju:", 33 + 6 )
          ?? Space( 10 ) + " "
-         ?? Str( nStanjeKolicina - nKalo, 10, 2 ) + " "
+         ?? Str( nStanjeKolicina - nKalo, 10, 3 ) + " "
       ENDIF
 
 
@@ -243,7 +243,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? DToC( pos->datum ) + " " + pos->vrij_obrade + " "
          ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), FIELD_LEN_POS_BRDOK ), ""
          ?? Str ( POS->Kolicina, 10, 3 ), Space ( 10 ), ""
-         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          ?? Str ( pos->cijena, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
@@ -257,7 +257,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? DToC( pos->datum ) + " " + pos->vrij_obrade + " "
          ?? POS->IdVd + "-" + PadR( AllTrim( POS->BrDok ), FIELD_LEN_POS_BRDOK ), ""
          ?? Str ( POS->Kolicina, 10, 3 ), Space ( 10 ), ""
-         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          ?? Str ( pos->cijena, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
@@ -290,7 +290,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
             ?? Str( pos->kol2 - pos->kolicina, 10, 3 ) + " "
          ENDIF
 
-         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          ?? Str ( pos->cijena, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
@@ -340,7 +340,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ELSE
             @ PRow() + 1, s_nKol2 + 1 SAY PadR( "ZAHTJEV NIV", 21 ) + " "
          ENDIF
-         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          IF pos->idvd $ POS_IDVD_ZAHTJEVI_NIVELACIJE_SNIZENJA
             ?? Space( 10 ) + " "
          ELSE
@@ -359,7 +359,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
 
          ?? Space( 11 )
          ?? Str ( pos->kolicina, 10, 3 ) + " "
-         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          ?? Str ( pos->cijena, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF
@@ -388,7 +388,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
             ?? Space( 11 )
          END IF
          ?? Str ( pos->kolicina, 10, 3 ) + " "
-         ?? Str ( nStanjeKolicina, 10, 2 ) + " "
+         ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          ?? Str ( nCijenaBruto, 10, 2 ) + " "
          ?? Str ( nVrijednost, 10, 2 )
       ENDIF

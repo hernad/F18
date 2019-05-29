@@ -1,8 +1,12 @@
 # F18 klijent, lista promjena
 
+## 2019-05-29
+
+- pos kartica - kolicina 3 decimale
+
 ## 2019-05-28
 
--  pos priprema - validacija cijena prije zakljucenja racuna 
+-  pos priprema - validacija cijena prije zakljucenja racuna
 
 ## 2019-05-20
 
