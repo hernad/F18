@@ -12,10 +12,11 @@
 #include "f18.ch"
 
 STATIC __import_dbf_path
-STATIC __export_dbf_path
+STATIC s_cExportDbfPath
 STATIC __import_zip_name
 STATIC __export_zip_name
 
+FIELD id
 
 FUNCTION kalk_udaljena_razmjena_podataka()
 
@@ -24,7 +25,7 @@ FUNCTION kalk_udaljena_razmjena_podataka()
    LOCAL _izbor := 1
 
    __import_dbf_path := my_home() + "export_dbf" + SLASH
-   __export_dbf_path := my_home() + "export_dbf" + SLASH
+   s_cExportDbfPath := my_home() + "export_dbf" + SLASH
    __import_zip_name := "kalk_exp.zip"
    __export_zip_name := "kalk_exp.zip"
 
@@ -55,7 +56,7 @@ STATIC FUNCTION kalk_export_start()
    ENDIF
 
    // pobrisi u folderu tmp fajlove ako postoje
-   delete_exp_files( __export_dbf_path, "kalk" ) // pobrisi u folderu tmp fajlove ako postoje
+   delete_exp_files( s_cExportDbfPath, "kalk" ) // pobrisi u folderu tmp fajlove ako postoje
 
    _exported_rec := kalk_export( _vars, @_a_data )  // exportuj podatake
 
@@ -65,16 +66,16 @@ STATIC FUNCTION kalk_export_start()
    // arhiviraj podatke
    IF _exported_rec > 0
 
-      _error := udaljenja_razmjena_compress_files( "kalk", __export_dbf_path ) // kompresuj ih u zip fajl za prenos
+      _error := udaljenja_razmjena_compress_files( "kalk", s_cExportDbfPath ) // kompresuj ih u zip fajl za prenos
 
       // sve u redu
       IF _error == 0
 
          // pobrisi fajlove razmjene
-         delete_exp_files( __export_dbf_path, "kalk" )
+         delete_exp_files( s_cExportDbfPath, "kalk" )
 
          // otvori folder sa exportovanim podacima
-         open_folder( __export_dbf_path )
+         open_folder( s_cExportDbfPath )
 
       ENDIF
 
@@ -181,9 +182,10 @@ STATIC FUNCTION _vars_export( hParams )
    LOCAL cExportSifarnika := fetch_metric( "kalk_export_sifrarnik", my_user(), "D" )
    LOCAL _exp_path := fetch_metric( "kalk_export_path", my_user(), PadR( "", 300 ) )
    LOCAL nX := 1
+   LOCAL GetList := {}
 
    IF Empty( AllTrim( _exp_path ) )
-      _exp_path := PadR( __export_dbf_path, 300 )
+      _exp_path := PadR( s_cExportDbfPath, 300 )
    ENDIF
 
    Box(, 15, 70 )
@@ -199,7 +201,7 @@ STATIC FUNCTION _vars_export( hParams )
    @ box_x_koord() + nX, Col() + 1 SAY "do" GET _dat_do
 
    nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Uzeti u obzir sljedeca konta:" GET _konta PICT "@S30"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Uzeti u obzir sljedeća konta:" GET _konta PICT "@S30"
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Eksportovati šifarnike (D/N/F) ?" GET cExportSifarnika PICT "@!" VALID cExportSifarnika $ "DNF"
@@ -224,7 +226,7 @@ STATIC FUNCTION _vars_export( hParams )
       set_metric( "kalk_export_path", my_user(), _exp_path )
 
       // export path, set static var
-      __export_dbf_path := AllTrim( _exp_path )
+      s_cExportDbfPath := AllTrim( _exp_path )
 
       hParams[ "datum_od" ] := _dat_od
       hParams[ "datum_do" ] := _dat_do
@@ -331,7 +333,7 @@ STATIC FUNCTION kalk_export( hParams, a_details )
    LOCAL _ret := 0
    LOCAL cIdFirma, cIdVd, cBrDok
    LOCAL aDoksRec
-   LOCAL _cnt := 0
+   LOCAL nCnt := 0
    LOCAL _dat_od, _dat_do, _konta, _vrste_dok, cExportSif
    LOCAL cUslMagacinKonto, cUslProdKonto
    LOCAL _id_partn, _p_konto, _m_konto
@@ -345,8 +347,8 @@ STATIC FUNCTION kalk_export( hParams, a_details )
    _vrste_dok := AllTrim( hParams[ "vrste_dok" ] )
    cExportSif := AllTrim( hParams[ "export_sif" ] )
 
-   _cre_exp_tbls( __export_dbf_path ) // kreiraj tabele exporta
-   kalk_o_exp_tabele( __export_dbf_path ) // otvori export tabele za pisanje podataka
+   _cre_exp_tbls( s_cExportDbfPath ) // kreiraj tabele exporta
+   kalk_o_exp_tabele( s_cExportDbfPath ) // otvori export tabele za pisanje podataka
 
    kalk_o_tabele()
 
@@ -354,9 +356,7 @@ STATIC FUNCTION kalk_export( hParams, a_details )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "... export kalk dokumenata u toku"
 
-
    find_kalk_doks_by_tip_datum( self_organizacija_id(), NIL, _dat_od, _dat_do )
-
 
    DO WHILE !Eof()
 
@@ -367,12 +367,10 @@ STATIC FUNCTION kalk_export( hParams, a_details )
       _p_konto := field->pkonto
       _m_konto := field->mkonto
 
-
       IF !Empty( _konta ) // lista konta
 
          cUslMagacinKonto := Parsiraj( AllTrim( _konta ), "mkonto" )
          cUslProdKonto := Parsiraj( AllTrim( _konta ), "pkonto" )
-
          IF !( &cUslMagacinKonto )
             IF !( &cUslProdKonto )
                SKIP
@@ -408,8 +406,8 @@ STATIC FUNCTION kalk_export( hParams, a_details )
       APPEND BLANK
       dbf_update_rec( aDoksRec )
 
-      ++ _cnt
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY PadR(  PadL( AllTrim( Str( _cnt ) ), 6 ) + ". " + "dokument: " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ), 50 )
+      ++ nCnt
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY PadR(  PadL( AllTrim( Str( nCnt ) ), 6 ) + ". " + "dokument: " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ), 50 )
 
       // dodaj zapis i u tabelu e_kalk
       find_kalk_by_broj_dokumenta( cIdFirma, cIdVd, cBrDok )
@@ -489,14 +487,14 @@ STATIC FUNCTION kalk_export( hParams, a_details )
    IF cExportSif == "F" // full export sifarnika robe
 
       o_roba()
-      _cnt := 0
+      nCnt := 0
       DO WHILE !Eof()
          hRec := dbf_get_rec()
          SELECT e_roba
          SET ORDER TO TAG "ID"
          APPEND BLANK
          dbf_update_rec( hRec )
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY PadR(  PadL( AllTrim( Str( ++_cnt ) ), 6 ) + ". " + "roba: " + hRec[ "id" ] , 50 )
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY PadR(  PadL( AllTrim( Str( ++nCnt ) ), 6 ) + ". " + "roba: " + hRec[ "id" ] , 50 )
          razmjena_fill_sifk_sifv( "ROBA", hRec[ "id" ] ) // napuni i sifk, sifv parametre
 
          SELECT ROBA
@@ -504,26 +502,24 @@ STATIC FUNCTION kalk_export( hParams, a_details )
       ENDDO
 
       o_partner()
-      _cnt := 0
       DO WHILE !Eof()
          hRec := dbf_get_rec()
          SELECT e_partn
          SET ORDER TO TAG "ID"
          APPEND BLANK
          dbf_update_rec( hRec )
-         @ box_x_koord() + 2, box_y_koord() + 2 SAY PadR(  PadL( AllTrim( Str( ++_cnt ) ), 6 ) + ". " + "partn: " + hRec[ "id" ] , 50 )
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY PadR(  PadL( AllTrim( Str( ++nCnt ) ), 6 ) + ". " + "partn: " + hRec[ "id" ] , 50 )
          razmjena_fill_sifk_sifv( "PARTN", hRec[ "id" ] ) // napuni i sifk, sifv parametre
          SELECT PARTN
          SKIP
       ENDDO
 
-
    ENDIF
 
    BoxC()
 
-   IF ( _cnt > 0 )
-      _ret := _cnt
+   IF ( nCnt > 0 )
+      _ret := nCnt
    ENDIF
 
    RETURN _ret
@@ -536,7 +532,7 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
    LOCAL _ret := 0
    LOCAL cIdFirma, cIdVd, cBrDok
    LOCAL aDoksRec
-   LOCAL _cnt := 0
+   LOCAL nCnt := 0
    LOCAL _dat_od, _dat_do, _konta, _vrste_dok, _zamjeniti_dok, lZamijenitiSifre, _iz_fmk
    LOCAL cUslMagacinKonto, cUslProdKonto
    LOCAL _roba_id, _partn_id, _konto_id
@@ -595,7 +591,7 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
       IF !f18_lock_tables( { "kalk_kalk", "kalk_doks" }, .T. )
          run_sql_query( "ROLLBACK" )
          MsgBeep( "Ne mogu zaključati tabele !#Prekidam operaciju." )
-         RETURN _cnt
+         RETURN nCnt
       ENDIF
 
    ENDIF
@@ -708,8 +704,8 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
          ENDIF
       ENDIF
 
-      ++ _cnt
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( PadL( AllTrim( Str( _cnt ) ), 5 ) + ". dokument: " + cIdFirma + "-" + cIdVd + "-" + cBrDok, 60 )
+      ++ nCnt
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( PadL( AllTrim( Str( nCnt ) ), 5 ) + ". dokument: " + cIdFirma + "-" + cIdVd + "-" + cBrDok, 60 )
 
       SELECT e_kalk
       SET ORDER TO TAG "1"
@@ -762,7 +758,7 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
    ENDDO
 
 
-   IF _cnt >= 0 .AND. lOk
+   IF nCnt >= 0 .AND. lOk
 
       @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "", 69 )
       update_table_roba( lZamijenitiSifre )
@@ -798,8 +794,8 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
 
    BoxC()
 
-   IF _cnt > 0
-      _ret := _cnt
+   IF nCnt > 0
+      _ret := nCnt
    ENDIF
 
    RETURN _ret

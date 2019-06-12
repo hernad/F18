@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-05-12
+
+- KALK export/import
+
 ## 2019-05-29
 
 - pos kartica - kolicina 3 decimale
