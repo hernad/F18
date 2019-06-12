@@ -89,39 +89,40 @@ FUNCTION sql_quote_u( xVar )
 
 FUNCTION sql_where_from_dbf_key_fields( aDbfKeyFields, hRecord, lSqlTable )
 
-   LOCAL _ret, _pos, _item, _key
+   LOCAL cRet, _pos, xItem, cKey
 
    // npr aDbfKeyFields := {{"godina", 4}, "idrj", {"mjesec", 2}, "obr", "idradn" }
-   _ret := ""
-   FOR EACH _item in aDbfKeyFields
+   cRet := ""
+   FOR EACH xItem in aDbfKeyFields
 
-      IF !Empty( _ret )
-         _ret += " AND "
+      IF !Empty( cRet )
+         cRet += " AND "
       ENDIF
 
-      IF ValType( _item ) == "A"
+      IF ValType( xItem ) == "A"
          // numeric
-         _key := Lower( _item[ 1 ] )
-         check_hash_key( hRecord, _key )
-         _ret += _item[ 1 ] + "=" + Str( hRecord[ _key ], _item[ 2 ] )
+         cKey := Lower( xItem[ 1 ] )
+         check_hash_key( hRecord, cKey )
+         altd()
+         cRet += xItem[ 1 ] + "=" + Str( hRecord[ cKey ], xItem[ 2 ] )
 
-      ELSEIF ValType( _item ) == "C"
-         _key := Lower( _item )
-         check_hash_key( hRecord, _key )
+      ELSEIF ValType( xItem ) == "C"
+         cKey := Lower( xItem )
+         check_hash_key( hRecord, cKey )
          //IF lSqlTable
-          //  _ret += _item + "=" + sql_quote_u( hRecord[ _key ] )
+          //  cRet += xItem + "=" + sql_quote_u( hRecord[ cKey ] )
          //ELSE
-            _ret += _item + "=" + sql_quote( hRecord[ _key ] )
+            cRet += xItem + "=" + sql_quote( hRecord[ cKey ] )
          //ENDIF
 
       ELSE
-         MsgBeep( ProcName( 1 ) + "valtype _item ?!" )
+         MsgBeep( ProcName( 1 ) + "valtype xItem ?!" )
          QUIT_1
       ENDIF
 
    NEXT
 
-   RETURN _ret
+   RETURN cRet
 
 
 
@@ -130,7 +131,7 @@ FUNCTION sql_where_from_dbf_key_fields( aDbfKeyFields, hRecord, lSqlTable )
 // -----------------------------------------------------
 FUNCTION _sql_date_parse( cField, date1, date2 )
 
-   LOCAL _ret := ""
+   LOCAL cRet := ""
 
    // datdok BETWEEN '2012-02-01' AND '2012-05-01'
 
@@ -146,39 +147,39 @@ FUNCTION _sql_date_parse( cField, date1, date2 )
 
       // oba su prazna
       IF DToC( date1 ) == DToC( CToD( "" ) ) .AND. DToC( date2 ) == DToC( CToD( "" ) )
-         _ret := "TRUE"
+         cRet := "TRUE"
          // samo prvi je prazan
       ELSEIF DToC( date1 ) == DToC( CToD( "" ) )
-         _ret := cField + " <= " + sql_quote( date2 )
+         cRet := cField + " <= " + sql_quote( date2 )
          // drugi je prazan
       ELSEIF DToC( date2 ) == DToC( CToD( "" ) )
-         _ret := cField + " >= " + sql_quote( date1 )
+         cRet := cField + " >= " + sql_quote( date1 )
          // imamo dva regularna datuma
       ELSE
          // ako su razliciti datumi
          IF DToC( date1 ) <> DToC( date2 )
-            _ret := cField + " BETWEEN " + sql_quote( date1 ) + " AND " + sql_quote( date2 )
+            cRet := cField + " BETWEEN " + sql_quote( date1 ) + " AND " + sql_quote( date2 )
             // ako su identicni, samo nam jedan treba u LIKE klauzuli
          ELSE
-            _ret := cField + "::char(20) LIKE " + sql_quote( _sql_date_str( date1 ) + "%" )
+            cRet := cField + "::char(20) LIKE " + sql_quote( _sql_date_str( date1 ) + "%" )
          ENDIF
       ENDIF
 
       // imamo samo jedan uslov, cField ili nista
    ELSEIF PCount() <= 1
-      _ret := "TRUE"
+      cRet := "TRUE"
 
       // samo jedan datumski uslov
    ELSE
-      _ret := cField + "::char(20) LIKE " + sql_quote( _sql_date_str( date1 ) + "%" )
+      cRet := cField + "::char(20) LIKE " + sql_quote( _sql_date_str( date1 ) + "%" )
    ENDIF
 
-   RETURN _ret
+   RETURN cRet
 
 
 FUNCTION _sql_cond_parse( cField, aConditions, not )
 
-   LOCAL _ret := ""
+   LOCAL cRet := ""
    LOCAL cond_arr := TokToNiz( aConditions, ";" )
    LOCAL nI, _cond
 
@@ -192,35 +193,35 @@ FUNCTION _sql_cond_parse( cField, aConditions, not )
          LOOP
       ENDIF
 
-      _ret += "  OR " + cField
+      cRet += "  OR " + cField
 
       IF Len( cond_arr ) > 1
          IF not
-            _ret += " NOT "
+            cRet += " NOT "
          ENDIF
-         _ret += " LIKE " + sql_quote( AllTrim( _cond ) + "%" )
+         cRet += " LIKE " + sql_quote( AllTrim( _cond ) + "%" )
       ELSE
          IF not
-            _ret += " <> "
+            cRet += " <> "
          ELSE
-            _ret += " = "
+            cRet += " = "
          ENDIF
-         _ret += sql_quote( _cond )
+         cRet += sql_quote( _cond )
       ENDIF
 
    NEXT
 
-   _ret := Right( _ret, Len( _ret ) - 5 )
+   cRet := Right( cRet, Len( cRet ) - 5 )
 
-   IF " OR " $ _ret
-      _ret := " ( " + _ret + " ) "
+   IF " OR " $ cRet
+      cRet := " ( " + cRet + " ) "
    ENDIF
 
-   IF Empty( _ret )
-      _ret := " TRUE "
+   IF Empty( cRet )
+      cRet := " TRUE "
    ENDIF
 
-   RETURN _ret
+   RETURN cRet
 
 
 /*
@@ -446,26 +447,26 @@ FUNCTION sql_update_table_from_hash( cTable, op, hash, where_fields )
 // --------------------------------------------------------------------
 STATIC FUNCTION _create_insertcQuery_from_hash( cTable, hash )
 
-   LOCAL cQuery, _key
+   LOCAL cQuery, cKey
 
    cQuery := "WITH tmp AS ( "
    cQuery += "INSERT INTO " + cTable
    cQuery += " ( "
 
-   FOR EACH _key in hash:keys
-      cQuery += _key + ","
+   FOR EACH cKey in hash:keys
+      cQuery += cKey + ","
    NEXT
 
    cQuery := PadR( cQuery, Len( cQuery ) - 1 )
 
    cQuery += " ) VALUES ( "
 
-   FOR EACH _key in hash:keys
+   FOR EACH cKey in hash:keys
 
-      IF ValType( hash[ _key ] ) == "N"
-         cQuery += Str( hash[ _key ] )
+      IF ValType( hash[ cKey ] ) == "N"
+         cQuery += Str( hash[ cKey ] )
       ELSE
-         cQuery += sql_quote( hash[ _key ] )
+         cQuery += sql_quote( hash[ cKey ] )
       ENDIF
 
       cQuery += ","
@@ -478,8 +479,8 @@ STATIC FUNCTION _create_insertcQuery_from_hash( cTable, hash )
 
    cQuery += " RETURNING "
 
-   FOR EACH _key in hash:keys
-      cQuery += _key + ","
+   FOR EACH cKey in hash:keys
+      cQuery += cKey + ","
    NEXT
 
    cQuery := PadR( cQuery, Len( cQuery ) - 1 )
@@ -604,7 +605,7 @@ FUNCTION _get_hash_from_sql_table( cTable )
 // --------------------------------------------------------------------
 STATIC FUNCTION _create_updatecQuery_from_hash( cTable, hash, where_key_fields )
 
-   LOCAL cQuery, _key
+   LOCAL cQuery, cKey
    LOCAL nI
 
    cQuery := "WITH tmp AS ( "
@@ -612,11 +613,11 @@ STATIC FUNCTION _create_updatecQuery_from_hash( cTable, hash, where_key_fields )
    cQuery += "UPDATE " + cTable
    cQuery += " SET "
 
-   FOR EACH _key in hash:keys
-      IF ValType( hash[ _key ] ) == "N"
-         cQuery += _key + " = " + Str( hash[ _key ] )
+   FOR EACH cKey in hash:keys
+      IF ValType( hash[ cKey ] ) == "N"
+         cQuery += cKey + " = " + Str( hash[ cKey ] )
       ELSE
-         cQuery += _key + " = " + sql_quote( hash[ _key ] )
+         cQuery += cKey + " = " + sql_quote( hash[ cKey ] )
       ENDIF
 
       cQuery += ","
@@ -642,8 +643,8 @@ STATIC FUNCTION _create_updatecQuery_from_hash( cTable, hash, where_key_fields )
 
    cQuery += " RETURNING "
 
-   FOR EACH _key in hash:keys
-      cQuery += _key + ","
+   FOR EACH cKey in hash:keys
+      cQuery += cKey + ","
    NEXT
 
    cQuery := PadR( cQuery, Len( cQuery ) - 1 )
@@ -670,17 +671,17 @@ FUNCTION _set_sql_record_to_hash( cTable, id )
 
 FUNCTION query_row( row, cField )
 
-   LOCAL _ret := NIL
+   LOCAL cRet := NIL
    LOCAL _type
 
    _type := row:FieldType( cField )
-   _ret := row:FieldGet( row:FieldPos( cField ) )
+   cRet := row:FieldGet( row:FieldPos( cField ) )
 
    IF _type $ "C"
-      _ret := hb_UTF8ToStr( _ret )
+      cRet := hb_UTF8ToStr( cRet )
    ENDIF
 
-   RETURN _ret
+   RETURN cRet
 
 
 /*

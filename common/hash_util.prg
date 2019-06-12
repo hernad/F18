@@ -13,13 +13,13 @@
 
 FUNCTION check_hash_key( rec, key )
 
-   LOCAL _msg
+   LOCAL cMsg
 
    IF !hb_HHasKey( rec, key )
-      _msg := RECI_GDJE_SAM + " record ne sadrzi key:" + key + " rec=" + pp( rec )
-      Alert( _msg )
-      log_write( _msg, 7 )
-      RaiseError( _msg )
+      cMsg := RECI_GDJE_SAM + " record ne sadrzi key:" + key + " rec=" + pp( rec )
+      Alert( cMsg )
+      log_write( cMsg, 7 )
+      RaiseError( cMsg )
       QUIT_1
    ENDIF
 

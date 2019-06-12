@@ -43,10 +43,10 @@ FUNCTION update_rec_server_and_dbf( cTabela, hRecord, nAlgoritam, cTransaction )
       lLock := .F.
    ENDIF
 
-  IF cTabela == "roba_prodavnica"
-     Alert("roba_prodavnica - izmjene zabranjene!")
-     RETURN .F.
-  ENDIF
+   IF cTabela == "roba_prodavnica"
+      Alert( "roba_prodavnica - izmjene zabranjene!" )
+      RETURN .F.
+   ENDIF
 
    // trebamo where str za hRecord rec
    set_table_values_algoritam_vars( @cTabela, @hRecord, @nAlgoritam, @cTransaction, @hDbfRec, @hAlgoritam, @cWhereString, @_alg_tag )
@@ -213,7 +213,7 @@ FUNCTION delete_rec_server_and_dbf( cTabela, hRecord, nAlgoritam, cTransaction )
    lRet := .T.
 
    IF cTabela == "roba_prodavnica"
-      Alert("roba_prodavnica - izmjene zabranjene!")
+      Alert( "roba_prodavnica - izmjene zabranjene!" )
       RETURN .F.
    ENDIF
 
@@ -388,10 +388,11 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
 
    LOCAL cKey
    LOCAL nCount := 0
-   LOCAL _use_tag := .F.
+   LOCAL lUseTag := .F.
    LOCAL cAlias
    LOCAL lSqlTable, uValue
    LOCAL cMsg
+   LOCAL oErr
 
    IF cTabela == NIL
       cTabela := Alias()
@@ -461,7 +462,7 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
             // ako je # onda obavezno setuj tag
             IF nCount == 1
                IF PadR( hRecord[ cKey ], 1 ) == "#"
-                  _use_tag := .T.
+                  lUseTag := .T.
                ENDIF
             ENDIF
 
@@ -471,11 +472,16 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
 
    NEXT
 
-   BEGIN SEQUENCE WITH {| oErr | err:cargo := { "var",  "hRecord", hRecord }, GlobalErrorHandler( oErr ) }
+   //BEGIN SEQUENCE WITH {| oErr | err:cargo := { "var",  "hRecord", hRecord }, Break( oErr ) }
+   BEGIN SEQUENCE WITH {| oErr | Break( oErr ) }
       cWhereStr := sql_where_from_dbf_key_fields( hAlgoritam[ "dbf_key_fields" ], hRecord, lSqlTable )
+
+   RECOVER using oErr
+      altd()
+      Alert( "DBF:" + alias() + " " + oErr:description )
    END SEQUENCE
 
-   IF nAlgoritam > 1 .OR. _use_tag == .T.
+   IF nAlgoritam > 1 .OR. lUseTag == .T.
       alg_tag := "#" + AllTrim( Str( nAlgoritam ) )
    ENDIF
 

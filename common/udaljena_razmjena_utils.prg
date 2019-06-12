@@ -300,9 +300,7 @@ FUNCTION update_table_roba( lZamijenitiSifre )
    DO WHILE !Eof()
 
       hRec := dbf_get_rec()
-
       update_rec_roba_struct( @hRec )
-
 
       _sif_exist := .T.
       IF ! select_o_roba( hRec[ "id" ] )
@@ -314,7 +312,6 @@ FUNCTION update_table_roba( lZamijenitiSifre )
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "import roba id: " + hRec[ "id" ] + " : " + PadR( hRec[ "naz" ], 20 )
 
          SELECT roba
-
          IF !_sif_exist
             APPEND BLANK
          ENDIF
@@ -695,6 +692,7 @@ STATIC FUNCTION _file_list( cDbfPath, cProgModul )
 
       AAdd( aFiles, cDbfPath + "e_kalk.dbf" )
       AAdd( aFiles, cDbfPath + "e_doks.dbf" )
+      AAdd( aFiles, cDbfPath + "e_doks.fpt" )
       AAdd( aFiles, cDbfPath + "e_roba.dbf" )
       AAdd( aFiles, cDbfPath + "e_roba.fpt" )
       AAdd( aFiles, cDbfPath + "e_partn.dbf" )

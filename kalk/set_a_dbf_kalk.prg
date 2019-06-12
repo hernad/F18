@@ -57,13 +57,13 @@ FUNCTION set_a_dbf_kalk()
 
 FUNCTION set_a_sql_kalk_kalk()
 
-   LOCAL hItem, hAlg, _tbl
+   LOCAL hItem, hAlg, cTable
 
-   _tbl := "kalk_kalk"
+   cTable := "kalk_kalk"
    hItem := hb_Hash()
 
    hItem[ "alias" ] := "KALK"
-   hItem[ "table" ] := _tbl
+   hItem[ "table" ] := cTable
    hItem[ "wa" ]    := F_KALK
    hItem[ "temp" ]  := .F.
    hItem[ "sif" ] := .F.
@@ -94,19 +94,19 @@ FUNCTION set_a_sql_kalk_kalk()
 
    hItem[ "sql_order" ] := "idfirma, idvd, brdok, rbr"
 
-   f18_dbfs_add( _tbl, @hItem )
+   f18_dbfs_add( cTable, @hItem )
 
    RETURN .T.
 
 
 FUNCTION set_a_sql_kalk_doks( table, alias, wa )
 
-   LOCAL hItem, hAlg, _tbl
+   LOCAL hItem, hAlg, cTable
 
-   _tbl := table
+   cTable := table
    hItem := hb_Hash()
    hItem[ "alias" ] := alias
-   hItem[ "table" ] := _tbl
+   hItem[ "table" ] := cTable
    hItem[ "wa" ]    := wa
    hItem[ "temp" ]  := .F.
    hItem[ "sif" ] := .F.
@@ -127,20 +127,20 @@ FUNCTION set_a_sql_kalk_doks( table, alias, wa )
    hItem[ "blacklisted" ] := { "obradjeno", "korisnik" } // polja obradjen i korisnik su autogenerisana na serverskoj strani
 
 
-   f18_dbfs_add( _tbl, @hItem )
+   f18_dbfs_add( cTable, @hItem )
 
    RETURN .T.
 
 
 FUNCTION set_a_sql_trfp( table, alias, wa )
 
-   LOCAL hItem, hAlg, _tbl
+   LOCAL hItem, hAlg, cTable
 
-   _tbl := table
+   cTable := table
 
    hItem := hb_Hash()
    hItem[ "alias" ] := alias
-   hItem[ "table" ] := _tbl
+   hItem[ "table" ] := cTable
    hItem[ "wa" ]    := wa
    hItem[ "temp" ]  := .F.
    hItem[ "sql" ] := .T.
@@ -159,6 +159,6 @@ FUNCTION set_a_sql_trfp( table, alias, wa )
 
    hItem[ "sql_order" ] := "idvd, shema, idkonto, id, idtarifa"
 
-   f18_dbfs_add( _tbl, @hItem )
+   f18_dbfs_add( cTable, @hItem )
 
    RETURN .T.
