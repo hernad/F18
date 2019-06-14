@@ -564,7 +564,7 @@ BEGIN
     RETURN QUERY select k22.pkonto::varchar, k22.brdok::varchar, k22.datdok::date, k22.brfaktp::varchar from f18.kalk_doks k22
         left join f18.kalk_doks k11
         on k11.ref=k22.dok_id
-        where k22.idvd='22' and k11.pkonto IS null;
+        where k22.idvd='22' and k11.pkonto IS null and k22.opis not like '%ODBIJENO%';
 
 END;
 $$;
@@ -1100,7 +1100,7 @@ BEGIN
        WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
     DELETE FROM fmk.fin_sint
        WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
-       
+
     FOR rec_suban IN SELECT * FROM fmk.fin_suban
         where idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal
         ORDER BY rbr
