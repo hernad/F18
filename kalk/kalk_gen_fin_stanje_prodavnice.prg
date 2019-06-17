@@ -50,7 +50,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    LOCAL _usl_vrste_dok := ""
    LOCAL _usl_tarife := ""
    LOCAL _v_konta := "N"
-   LOCAL _gledati_usluge := "N"
+   LOCAL cGledatiUslugeDN := "N"
    LOCAL _cnt := 0
    LOCAL _a_porezi
    LOCAL nPDV, nUPDV, _d_opis
@@ -80,7 +80,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
    ENDIF
 
    IF hb_HHasKey( hParamsIn, "gledati_usluge" )
-      _gledati_usluge := hParamsIn[ "gledati_usluge" ]
+      cGledatiUslugeDN := hParamsIn[ "gledati_usluge" ]
    ENDIF
 
    IF hb_HHasKey( hParamsIn, "konto" )
@@ -230,7 +230,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
          select_o_roba( kalk->idroba )
 
-         IF ( _gledati_usluge == "N" .AND. roba->tip $ "U" )
+         IF ( cGledatiUslugeDN == "N" .AND. roba->tip $ "U" )
             SELECT kalk
             SKIP
             LOOP

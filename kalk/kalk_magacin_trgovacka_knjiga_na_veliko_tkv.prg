@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+MEMVAR __print_opt, gZaokr
+
 STATIC s_nOpisDuzina := 70
 
 
@@ -35,15 +37,15 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    LOCAL cUslovKonto := ""
    LOCAL dDatumOd := Date()
    LOCAL dDatumDo := Date()
-   LOCAL _tarife := ""
-   LOCAL _vrste_dok := ""
+   LOCAL cUslovTarife := ""
+   LOCAL cUslovIdVD := ""
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL lViseKonta := .F.
-   LOCAL nDbfArea, nTrec
-   LOCAL _ulaz, _izlaz, nVPVRabat
+   LOCAL nDbfArea
+   LOCAL nVPVRabat
    LOCAL nNvUlaz, nNvIzlaz, nVPVUlaz, nVPVIzlaz
-   LOCAL nMarzaVP, nMarzaMP, _tr_prevoz, _tr_prevoz_2
-   LOCAL _tr_bank, _tr_zavisni, _tr_carina, _tr_sped
+   LOCAL nMarzaVP, nMarzaMP, nPrevozTr, nPrevoz2Tr
+   LOCAL nBankTr, nZavisniTr, nCarinTr, nSpedTr
    LOCAL cBrFaktP, cIdVd, cTipDokumentaNaziv, cIdPartner
    LOCAL cPartnerNaziv, cPartnerPTT, cPartnerMjesto, cPartnerAdresa
    LOCAL cIdVdBrDok, dDatDok
@@ -76,10 +78,10 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       dDatumDo := hParams[ "datum_do" ]
    ENDIF
    IF hb_HHasKey( hParams, "tarife" )
-      _tarife := hParams[ "tarife" ]
+      cUslovTarife := hParams[ "tarife" ]
    ENDIF
    IF hb_HHasKey( hParams, "vrste_dok" )
-      _vrste_dok := hParams[ "vrste_dok" ]
+      cUslovIdVD := hParams[ "vrste_dok" ]
    ENDIF
    IF hb_HHasKey( hParams, "gledati_usluge" )
       cGledatiUslugeDN := hParams[ "gledati_usluge" ]
@@ -95,12 +97,12 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       cFilterKonto := Parsiraj( cUslovKonto, "mkonto" )
    ENDIF
 
-   IF !Empty( _tarife )
-      cFilterTarife := Parsiraj( _tarife, "idtarifa" )
+   IF !Empty( cUslovTarife )
+      cFilterTarife := Parsiraj( cUslovTarife, "idtarifa" )
    ENDIF
 
-   IF !Empty( _vrste_dok )
-      cFilterVrsteDok := Parsiraj( _vrste_dok, "idvd" )
+   IF !Empty( cUslovIdVD )
+      cFilterVrsteDok := Parsiraj( cUslovIdVD, "idvd" )
    ENDIF
 
 
@@ -112,7 +114,6 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
          cUslovKonto := Trim( cUslovKonto )
       ENDIF
    ENDIF
-
 
 
    hKalkParams := hb_Hash()
@@ -177,8 +178,6 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
          ENDIF
       ENDIF
 
-      _ulaz := 0
-      _izlaz := 0
       nVPVUlaz := 0
       nVPVIzlaz := 0
       nNvUlaz := 0
@@ -186,12 +185,12 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       nVPVRabat := 0
       nMarzaVP := 0
       nMarzaMP := 0
-      _tr_bank := 0
-      _tr_zavisni := 0
-      _tr_carina := 0
-      _tr_prevoz := 0
-      _tr_prevoz_2 := 0
-      _tr_sped := 0
+      nBankTr := 0
+      nZavisniTr := 0
+      nCarinTr := 0
+      nPrevozTr := 0
+      nPrevoz2Tr := 0
+      nSpedTr := 0
       nRealizacija := 0
       nRealizacijaNv := 0
 
@@ -239,7 +238,6 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
             ENDIF
          ENDIF
 
-
          IF kalk->idvd == "IM" // inventura magacin ne treba
             SKIP
             LOOP
@@ -272,12 +270,12 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
          nMarzaVP += kalk_marza_veleprodaja()
          nMarzaMP += kalk_marza_maloprodaja()
-         _tr_prevoz += field->prevoz
-         _tr_prevoz_2 += field->prevoz2
-         _tr_bank += field->banktr
-         _tr_sped += field->spedtr
-         _tr_carina += field->cardaz
-         _tr_zavisni += field->zavtr
+         nPrevozTr += field->prevoz
+         nPrevoz2Tr += field->prevoz2
+         nBankTr += field->banktr
+         nSpedTr += field->spedtr
+         nCarinTr += field->cardaz
+         nZavisniTr += field->zavtr
 
          SKIP 1
 

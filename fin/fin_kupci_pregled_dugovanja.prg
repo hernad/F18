@@ -22,6 +22,7 @@ FUNCTION fin_kupci_pregled_dugovanja()
    LOCAL dDatOd := CToD( "01.01." + AllTrim( Str( Year( Date() ) ) ) )
    LOCAL dDatDo := Date()
    LOCAL cAvans := "N"
+   LOCAL GetList := {}
 
    Box(, 5, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2  SAY "Datum od " GET dDatOd
@@ -38,7 +39,7 @@ FUNCTION fin_kupci_pregled_dugovanja()
    ENDIF
 
    download_template( "kupci_pregled_dugovanja.xlsx", "cec90f10beff71ca9ac3f487b7d1734dca727b1953c3bb8d3683313a25b35e27" )
-   
+
    oReport := YargReport():New( "kupci_pregled_dugovanja", "xlsx", "Header#BandSql1" )
    cSql := "select * from sp_dugovanja("
    cSql += sql_quote( dDatOd ) + ","
