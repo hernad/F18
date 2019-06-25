@@ -68,7 +68,7 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
 
    lGenerisiZavisne := kalk_check_generisati_zavisne_dokumente( lAuto )
    IF lGenerisiZavisne
-      //kalk_nivelacija_11()
+      // kalk_nivelacija_11()
       kalk_generisi_prijem16_iz_otpreme96()
       kalk_13_to_11()
       kalk_generisi_95_za_manjak_16_za_visak()
@@ -295,11 +295,16 @@ STATIC FUNCTION kalk_provjera_cijena()
    LOCAL cIdFirma
    LOCAL cIdVd
    LOCAL cBrDok
+   LOCAL cRbr
 
    o_kalk_pripr()
+
+   IF !Empty( kalk_pripr->pkonto )
+      set_prodavnica_by_pkonto( kalk_pripr->pkonto )
+   ENDIF
+
    SELECT kalk_pripr
    GO TOP
-
    DO WHILE !Eof()
 
       cIdFirma := field->idfirma
@@ -307,12 +312,40 @@ STATIC FUNCTION kalk_provjera_cijena()
       cBrDok := field->brdok
 
       DO WHILE !Eof() .AND. cIdfirma == field->idfirma .AND. cIdvd == field->idvd .AND. cBrdok == field->brdok
-         IF field->idvd == "11" .AND. field->vpc == 0
+
+         cRbr := "Rbr " + AllTrim( Transform( kalk_pripr->rbr, '9999' ) )
+
+         IF field->idvd == "11" .AND. Round( field->vpc, 4 ) == 0
             Beep( 1 )
-            Msg( 'VPC = 0, pozovite "savjetnika" sa <Alt-H>!' )
+            Msg( cRbr + ') VPC = 0, pozovite "savjetnika" sa <Alt-H>!' )
             my_close_all_dbf()
             RETURN .F.
          ENDIF
+
+         IF field->idvd == "IP" .AND. Round( field->mpcsapp, 4 ) == 0
+            Beep( 1 )
+            Msg( cRbr + ') MpcSaPDV = 0 ?! STOP' )
+            my_close_all_dbf()
+            RETURN .F.
+         ENDIF
+
+         IF kalk_pripr->idvd == "IP" .AND. Round( field->kolicina, 4 ) < 0
+            Beep( 1 )
+            Msg( cRbr + ') Popisana KOL < 0 ?! STOP' )
+            my_close_all_dbf()
+            RETURN .F.
+         ENDIF
+
+         IF kalk_pripr->idvd == "IP" .AND. Round( field->kolicina, 4 ) > 0
+            // popisana kolicina > 0
+            IF pos_dostupno_artikal_za_cijenu( kalk_pripr->Idroba, kalk_pripr->mpcsapp, 0 ) <= 0
+               Beep( 1 )
+               Msg( cRbr + ') Cijena ' +  Transform( kalk_pripr->mpcsapp, '99999.999' ) + ' navedena u POS## za artikal ' + kalk_pripr->idroba + ' nije dostupna ? STOP!' )
+               my_close_all_dbf()
+               RETURN .F.
+            ENDIF
+         ENDIF
+
          SKIP
       ENDDO
 
@@ -577,13 +610,13 @@ STATIC FUNCTION kalk_azur_sql()
             run_sql_query( "ROLLBACK" )
             BoxC()
             RETURN .F.
-         //ELSE
-          //  run_sql_query( "COMMIT" )
+            // ELSE
+            // run_sql_query( "COMMIT" )
          ENDIF
 
       ENDIF
 
-      //run_sql_query( "BEGIN" )
+      // run_sql_query( "BEGIN" )
       SELECT kalk_pripr
       DO WHILE !Eof() .AND. Eval( bDokument, cIdFirma, cIdVd, cBrDok )
          // fill kalk_kalk
@@ -600,9 +633,9 @@ STATIC FUNCTION kalk_azur_sql()
          run_sql_query( "ROLLBACK" )
 
          // pobrisati kalk_doks stavku
-         //run_sql_query( "BEGIN" )
-         //sql_table_update( "kalk_doks", "del", hRecKalkDok )
-         //run_sql_query( "COMMIT" )
+         // run_sql_query( "BEGIN" )
+         // sql_table_update( "kalk_doks", "del", hRecKalkDok )
+         // run_sql_query( "COMMIT" )
 
          cMessage := "kalk ažuriranje, transakcija neuspješna ?!"
          log_write( cMessage, 2 )
