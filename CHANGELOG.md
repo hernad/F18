@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-06-25
+
+- KALK IP -> POS
+
 ## 2019-05-12
 
 - KALK export/import
