@@ -80,7 +80,8 @@ FUNCTION open_r_export_table( cExportDbf )
    IF Right( cPath, 1 ) == SLASH // c:\temp\ => c:\temp, bez ovoga soffice --outdir zaglavi !
       cPath := Left( cPath, Len( cPath ) - 1 )
    ENDIF
-   f18_run( LO_convert_xlsx_cmd() + " " + file_path_quote( cExportDbf ) + " " + file_path_quote( cPath ) ) // libreoffice --convert-to xlsx:"Calc MS Excel 2007 XML" --infilter=dBase:25 r_export.dbf
+
+   f18_run( LO_convert_xlsx_cmd(file_path_quote( cExportDbf ), file_path_quote( cPath )) + " " + file_path_quote( cExportDbf ) + " " + file_path_quote( cPath ) ) // libreoffice --convert-to xlsx:"Calc MS Excel 2007 XML" --infilter=dBase:25 r_export.dbf
    Msgc()
    cXlsx := StrTran( cExportDbf, ".dbf", ".xlsx" )
 

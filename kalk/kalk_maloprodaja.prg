@@ -249,6 +249,8 @@ FUNCTION kalk_mp_inicijalizacija()
          idtarifa WITH tarifa->id, ;
          kolicina WITH nKolicina, ;
          mpcsapp WITH nMpc, ;
+         tmarza with "%", ;
+         tmarza2 with "%", ;
          mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, nMpc )
 
       SELECT TMP

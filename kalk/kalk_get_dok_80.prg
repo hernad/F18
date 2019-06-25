@@ -19,7 +19,7 @@ MEMVAR _idfirma, _kolicina, _nc, _idroba, _pkonto, _pu_i, _mkonto, _mu_i, _datfa
 MEMVAR _idtarifa, _idvd, _idkonto2, _brfaktp, _mpcsapp
 MEMVAR _Vpc, _Mpc, _TMarza2, _Marza2, _TCarDaz, _CarDaz, _dat_od, _dat_do
 
-FUNCTION kalk_get1_80()
+FUNCTION kalk_get1_80_02()
 
    LOCAL nX := 5
    LOCAL nXCurrent := 0
@@ -117,7 +117,11 @@ FUNCTION kalk_get1_80()
    select_o_koncij( _pkonto )
    roba_set_mcsapp_na_osnovu_koncij_pozicije( _MpcSapp, .T. )
    SELECT kalk_pripr
-   _PU_I := "1"
+   IF _IdVd == POS_IDVD_POCETNO_STANJE_PRODAVNICA
+      _PU_I := "0"
+   ELSE
+      _PU_I := "1"
+   ENDIF
    _MKonto := ""
    _MU_I := ""
    nKalkStrana := 3

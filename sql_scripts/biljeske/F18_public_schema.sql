@@ -506,7 +506,7 @@ ALTER FUNCTION public.convert_to_integer(v_input text) OWNER TO admin;
 -- Name: sp_dugovanja(date, date, character varying, character varying); Type: FUNCTION; Schema: public; Owner: admin
 --
 
-CREATE FUNCTION public.sp_dugovanja(date, date, character varying, character varying) RETURNS SETOF public.t_dugovanje
+CREATE OR REPLACE FUNCTION public.sp_dugovanja(date, date, character varying, character varying) RETURNS SETOF public.t_dugovanje
     LANGUAGE sql
     AS $_$
 SELECT idkonto::varchar as konto_id, partn.naz::varchar as partner_naz, refer.naz::varchar as referent_naz, idpartner::varchar as partner_id,
@@ -534,7 +534,7 @@ ALTER FUNCTION public.sp_dugovanja(date, date, character varying, character vary
 -- Name: sp_duguje_stanje(character varying, character varying); Type: FUNCTION; Schema: public; Owner: admin
 --
 
-CREATE FUNCTION public.sp_duguje_stanje(param_konto character varying, param_partner character varying, OUT dospjelo double precision, OUT nedospjelo double precision, OUT valuta date) RETURNS record
+CREATE OR REPLACE FUNCTION public.sp_duguje_stanje(param_konto character varying, param_partner character varying, OUT dospjelo double precision, OUT nedospjelo double precision, OUT valuta date) RETURNS record
     LANGUAGE plpgsql
     AS $$
 

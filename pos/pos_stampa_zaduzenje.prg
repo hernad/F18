@@ -85,7 +85,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
       ?  cLM + PRIPRZ->IdRoba + " "
       ?? PadR( AllTrim( roba->Naz ), nRobaNazivSirina - 1 ) + "  "
       ?? roba->Jmj + " "
-      IF hParams[ "idvd" ] == POS_IDVD_INVENTURA
+      IF hParams[ "idvd" ] == POS_IDVD_INVENTURA .OR. hParams[ "idvd" ] == "IP"
          ?? TRANS( PRIPRZ->kol2, cPicKol ) + " "
          ?? TRANS( PRIPRZ->Kolicina, cPicKol ) + " "
          ?? TRANS( PRIPRZ->Kolicina - PRIPRZ->Kol2, cPicKol ) + " "
@@ -102,7 +102,7 @@ FUNCTION pos_stampa_zaduzenja( hParams )
          ?? Space( Len( cPicIzn ) )
          nFinZad += 0
 
-      ELSEIF hParams[ "idvd" ] == POS_IDVD_INVENTURA
+      ELSEIF hParams[ "idvd" ] == POS_IDVD_INVENTURA .OR. hParams[ "idvd" ] == "IP"
          ?? TRANS( ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->cijena, cPicIzn )
          nFinZad += ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->Cijena
          pos_setuj_tarife( PRIPRZ->IdRoba, ( PRIPRZ->Kolicina - PRIPRZ->Kol2 ) * PRIPRZ->Cijena, @aTarife )
@@ -155,7 +155,7 @@ STATIC FUNCTION get_pos_linija_podvuci( cIdVd, nRobaNazivSirina, cPicKol, cPicIz
    cLine  += " " + PadR( "JMJ", 3 )
    cLine2 += " " + Replicate( "-", 3 )
 
-   IF cIdVd == "90"
+   IF cIdVd == POS_IDVD_INVENTURA .OR. cIdVd == "IP"
       cLine  += " " + PadC( "Knjiž.k", Len( cPicKol ) )
       cLine2 += " " + Replicate( "-", Len( cPicKol ) )
 

@@ -585,6 +585,7 @@ FUNCTION get_run_prefix_cmd( cCommand, lAsync )
       ENDIF
    ENDIF
 
+
    RETURN cPrefix
 
 

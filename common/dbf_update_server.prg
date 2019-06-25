@@ -477,7 +477,7 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
       cWhereStr := sql_where_from_dbf_key_fields( hAlgoritam[ "dbf_key_fields" ], hRecord, lSqlTable )
 
    RECOVER using oErr
-      altd()
+
       Alert( "DBF:" + alias() + " " + oErr:description )
    END SEQUENCE
 

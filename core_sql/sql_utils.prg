@@ -103,7 +103,6 @@ FUNCTION sql_where_from_dbf_key_fields( aDbfKeyFields, hRecord, lSqlTable )
          // numeric
          cKey := Lower( xItem[ 1 ] )
          check_hash_key( hRecord, cKey )
-         altd()
          cRet += xItem[ 1 ] + "=" + Str( hRecord[ cKey ], xItem[ 2 ] )
 
       ELSEIF ValType( xItem ) == "C"

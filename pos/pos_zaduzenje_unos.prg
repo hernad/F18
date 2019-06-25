@@ -34,17 +34,18 @@ FUNCTION pos_zaduzenje( cIdVd )
 
    ImeKol := {}
    AAdd( ImeKol, { _u( "Šifra" ),    {|| priprz->idroba },      "idroba" } )
-   IF cIdVd != POS_IDVD_ZAHTJEV_SNIZENJE
+   IF cIdVd != POS_IDVD_ZAHTJEV_SNIZENJE .AND. cIdVd != POS_IDVD_INVENTURA
       AAdd( ImeKol, { "Partner", {|| priprz->idPartner }, "idPartner" } )
    ENDIF
    AAdd( ImeKol, { "Naziv",    {|| priprz->RobaNaz  },   "robaNaz" } )
    AAdd( ImeKol,  { "JMJ",      {|| priprz->JMJ },         "jmj"       } )
 
    IF cIdVd !=  POS_IDVD_INVENTURA
-   AAdd( ImeKol, { _u( "Količina" ), {|| priprz->kolicina   }, "kolicina"  } )
-   else
-   AAdd( ImeKol,  { _u( "Knjižna kol" ),   {|| priprz->cijena - priprz->ncijena }, "ncijena"    } )
-   AAdd( ImeKol,  { _u( "Popisana" ),   {|| priprz->ncijena }, "" } )
+      AAdd( ImeKol, { _u( "Količina" ), {|| priprz->kolicina   }, "kolicina"  } )
+   ELSE
+      AAdd( ImeKol,  { _u( "Popis.kol" ),   {|| Transform( priprz->kolicina, "9999.999" ) }, "" } )
+      AAdd( ImeKol,  { _u( "Knjiž.kol" ),   {|| Transform( priprz->kol2, "9999.999" ) }, ""    } )
+      AAdd( ImeKol,  { _u( "Razlika" ),   {|| Transform( priprz->kolicina - priprz->kol2, "9999.999" ) }, "" } )
    ENDIF
    AAdd( ImeKol,  { "Cijena",   {|| priprz->Cijena },      "cijena"    } )
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
@@ -57,8 +58,15 @@ FUNCTION pos_zaduzenje( cIdVd )
       AAdd( Kol, nI )
    NEXT
 
+
    o_pos_tables()
    SELECT PRIPRZ
+
+   IF cIdVd == POS_IDVD_INVENTURA .AND. RecCount2() == 0
+      IF Pitanje(, "Generacija stavki za inventurisanje ?", "N" ) == "D"
+         pos_pripr_gen_stavke_inventura()
+      ENDIF
+   ENDIF
    Scatter()
    _IdPos := gPosProdajnoMjesto
    _IdVd := cIdVd
@@ -196,6 +204,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    RETURN .T.
 
 
+
 FUNCTION pos_set_key_handler_ispravka_zaduzenja()
 
    SetKey( Asc( "*" ), NIL )
@@ -237,21 +246,27 @@ FUNCTION pos_ispravi_zaduzenje()
    LOCAL aConds
    LOCAL aProcs
    LOCAL cColor
+   LOCAL aOpcije := { _u( "<B>-Briši stavku" ), "<Esc>-Kraj ispravke" }
 
    pos_unset_key_handler_ispravka_zaduzenja()
 
    cGetId := _idroba
-   nGetKol := _Kolicina
+   nGetKol := _kolicina
    cColor := SetColor()
-   prikaz_dostupnih_opcija_crno_na_zuto( { _u( "<B>-Briši stavku" ), "<Esc>-Kraj ispravke" } )
+
+   IF priprz->idvd == POS_IDVD_INVENTURA
+      AAdd( aOpcije, "<0-9> Popisana kol" )
+   ENDIF
+
+   prikaz_dostupnih_opcija_crno_na_zuto( aOpcije )
    SetColor( cColor )
 
    s_oBrowse:autolite := .T.
    s_oBrowse:configure()
    // aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) }, {| Ch | Ch == K_ENTER } }
    // aProcs := { {|| pos_brisi_stavku_zaduzenja() }, {|| pos_ispravi_stavku_zaduzenja() } }
-   aConds := { {| Ch | Ch == Asc ( "b" ) .OR. Ch == Asc ( "B" ) } }
-   aProcs := { {|| pos_brisi_stavku_zaduzenja() } }
+   aConds := { {| nCh | nCh == Asc ( "b" ) .OR. nCh == Asc ( "B" ) }, {| nCh | nCh - Asc( "0" ) >= 0 .AND. nCh - Asc( "0" ) < 10  } }
+   aProcs := { {|| pos_brisi_stavku_zaduzenja() }, {|| pos_zaduzenje_unos_cifra( Chr( LastKey() ) ) } }
    ShowBrowse( s_oBrowse, aConds, aProcs )
    s_oBrowse:autolite := .F.
    s_oBrowse:dehilite()
@@ -280,6 +295,53 @@ FUNCTION pos_brisi_stavku_zaduzenja()
    RETURN ( DE_CONT )
 
 
+FUNCTION pos_zaduzenje_unos_cifra( cCifra )
+
+   LOCAL GetList := {}, nPopisana, nBoxWidth :=  Max( f18_max_cols() - 12, 70 )
+   LOCAL nCnt := 0
+
+   SELECT PRIPRZ
+   IF RecCount2() == 0
+      MsgBeep( "Zaduženje nema nijednu stavku!", 20 )
+      RETURN ( DE_CONT )
+   ENDIF
+   Beep( 2 )
+
+   SELECT PRIPRZ
+
+   IF priprz->idvd == POS_IDVD_INVENTURA
+
+      DO WHILE .T.
+         Box(, 4, nBoxWidth )
+         IF nCnt == 0
+            keyboard( cCifra )
+         ENDIF
+         nPopisana := priprz->kolicina
+         @ box_x_koord() + 1, box_y_koord() + 2 SAY8 Left( priprz->idroba + "-" + Trim( priprz->robanaz ), nBoxWidth - 2 )
+         @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Knjižna količina " + Transform( priprz->kol2, "99999.999" ) + " (" + priprz->jmj + ")"
+         @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Popisana količina:" GET nPopisana PICT "99999.999"
+         READ
+         BoxC()
+         IF LastKey() != K_ESC
+            RREPLACE kolicina WITH nPopisana
+            SKIP
+            IF Eof()
+               SKIP -1
+               EXIT
+            ENDIF
+            nCnt++
+         ELSE
+            EXIT
+         ENDIF
+      ENDDO
+      s_oBrowse:refreshAll()
+   ENDIF
+   // Alert( cCifra )
+
+   RETURN ( DE_CONT )
+
+
+/*
 FUNCTION pos_ispravi_stavku_zaduzenja()
 
    LOCAL cIdRobaPredhodna
@@ -312,3 +374,72 @@ FUNCTION pos_ispravi_stavku_zaduzenja()
    s_oBrowse:refreshCurrent()
 
    RETURN ( DE_CONT )
+*/
+
+
+
+
+FUNCTION pos_pripr_gen_stavke_inventura()
+
+   LOCAL cIdRoba, nKnjiznaKolicina, nCnt := 0
+
+   select_o_roba()
+   GO TOP
+   DO WHILE !Eof()
+      cIdRoba := roba->id
+      IF ! pos_postoji_promet( cIdRoba )
+         SELECT ROBA
+         SKIP
+         LOOP
+      ENDIF
+      nKnjiznaKolicina := pos_dostupno_artikal_sa_kalo( cIdRoba )
+      SELECT PRIPRZ
+      APPEND BLANK
+      rreplace ;
+         idPos WITH gPosProdajnoMjesto, ;
+         brDok WITH POS_BRDOK_PRIPREMA, ;
+         idRadnik WITH gIdRadnik, ;
+         datum WITH danasnji_datum(), ;
+         idvd WITH POS_IDVD_INVENTURA, ;
+         cijena WITH pos_get_mpc( cIdRoba ), ;
+         idroba WITH cIdRoba, ;
+         jmj WITH roba->jmj, ;
+         robanaz WITH roba->naz, ;
+         idtarifa WITH roba->idtarifa, ;
+         kolicina WITH nKnjiznaKolicina, ;
+         kol2 WITH nKnjiznaKolicina
+      SELECT ROBA
+      SKIP
+      nCnt++
+   ENDDO
+
+   MsgBeep( "Generisano " + AllTrim( Str( nCnt ) ) + " stavki" )
+   SELECT PRIPRZ
+
+   RETURN .T.
+
+
+FUNCTION pos_postoji_promet( cIdRoba )
+
+   LOCAL cQuery, lRet
+
+   cQuery := "select count(*) as cnt FROM "  + f18_sql_schema( "pos_items" )
+   cQuery += " WHERE idvd <> '21' AND rtrim(idroba)=" + sql_quote( Trim( cIdRoba ) )
+
+   // IF Empty( cIdRoba )
+   // seek_pos_pos_2( NIL )
+   // ELSE
+   // seek_pos_pos_2( cIdRoba )
+   // IF pos->idroba <> cIdRoba
+   // MsgBeep( "Ne postoje traženi podaci !" )
+   // RETURN .F.
+   // ENDIF
+   // ENDIF
+   SELECT F_POM
+
+   USE
+   dbUseArea_run_query( cQuery, F_POM, "POM" )
+   lRet := pom->cnt > 0
+   USE
+
+   RETURN lRet

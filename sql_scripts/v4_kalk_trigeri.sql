@@ -34,14 +34,14 @@ IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
 END IF;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
-   IF ( NOT NEW.idvd IN ('02','19','21','72','79','80') ) THEN
+   IF ( NOT NEW.idvd IN ('02','19','21','72','79','80', 'IP') ) THEN
      RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
    SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
           from public.roba where id=NEW.idroba;
 ELSE
-   IF ( NOT OLD.idvd IN ('02','19','21','72','79','80') ) THEN
+   IF ( NOT OLD.idvd IN ('02','19','21','72','79','80','IP') ) THEN
       RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -76,6 +76,11 @@ ELSIF (TG_OP = 'INSERT') THEN
       ELSE
          nKol2 := public.barkod_ean13_to_num(barkodRoba,3);
       END IF;
+
+      IF NEW.idvd = 'IP' THEN
+         nKol2 := NEW.gkolicina;
+      END IF;
+
       EXECUTE 'INSERT INTO ' || cProdShema || '.pos_items_knjig(dok_id,idpos,idvd,brdok,datum,rbr,idroba,kolicina,cijena,ncijena,kol2,idtarifa,robanaz,jmj)' ||
               ' VALUES(' || cProdShema || '.pos_knjig_dok_id($1,$2,$3,$4),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
         USING idpos, NEW.idvd, NEW.brdok, NEW.datdok, NEW.rbr, NEW.idroba, NEW.kolicina, cijena, ncijena, nKol2, NEW.idtarifa, robaNaz,robaJmj;
@@ -102,12 +107,12 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
-      IF ( NOT NEW.idvd IN ('02','19','21','72','79','80') ) THEN
+      IF ( NOT NEW.idvd IN ('02','19','21','72','79','80','IP') ) THEN
          RETURN NULL;
       END IF;
       cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
 ELSE
-     IF ( NOT OLD.idvd IN ('02','19','21','72','79','80') ) THEN
+     IF ( NOT OLD.idvd IN ('02','19','21','72','79','80','IP') ) THEN
         RETURN NULL;
      END IF;
      cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));

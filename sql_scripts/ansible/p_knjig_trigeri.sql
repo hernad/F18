@@ -20,7 +20,7 @@ BEGIN
 nProdavnica := to_number(substring('{{ item_prodavnica }}',2),'9999')::integer;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN -- POS -> KALK
-   --  42 - prodaja
+   -- 42 - prodaja
    -- 71 - zahtjev snizenje
    -- 61 - zahtjev narudzba
    -- 22 -pos potvrda prijema magacin

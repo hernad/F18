@@ -25,7 +25,7 @@ FUNCTION pos_kartica_artikla()
    LOCAL cLijevaMargina := ""
    LOCAL GetList := {}
    LOCAL cIdRobaT
-   LOCAL nPredhodnoStanjeUlaz, nPredhodnoStanjeIzlaz, nPredodnoStanjeKalo, nPredhodniPopust
+   LOCAL nPredhodnoStanjeUlaz, nPredhodnoStanjeIzlaz, nPredhodnoStanjeKalo, nPredhodniPopust
    LOCAL nPredhodnoStanjeKolicina, nStanjeKolicina
    LOCAL nUlazKolicina, nIzlazKolicina, nKalo
    LOCAL cQuery
@@ -121,7 +121,7 @@ FUNCTION pos_kartica_artikla()
 
       nPredhodnoStanjeUlaz := 0
       nPredhodnoStanjeIzlaz := 0
-      nPredodnoStanjeKalo := 0
+      nPredhodnoStanjeKalo := 0
       nPredhodnaVrijednost := 0
       nPredhodniPopust := 0
       nStanjeKolicina := 0
@@ -143,7 +143,7 @@ FUNCTION pos_kartica_artikla()
             SKIP
             LOOP
          ENDIF
-         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
+         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
          SKIP
       ENDDO
 
@@ -163,7 +163,7 @@ FUNCTION pos_kartica_artikla()
 
       nUlazKolicina := nPredhodnoStanjeUlaz
       nIzlazKolicina := nPredhodnoStanjeIzlaz
-      nKalo := nPredodnoStanjeKalo
+      nKalo := nPredhodnoStanjeKalo
       nVrijednost := nPredhodnaVrijednost
       nPopust := nPredhodniPopust
 
@@ -263,7 +263,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
       ENDIF
 
 
-   ELSEIF POS->IdVd == POS_IDVD_INVENTURA
+   ELSEIF POS->IdVd == POS_IDVD_INVENTURA .OR. POS->IdVd == 'IP'
       IF pos->kolicina - pos->kol2 > 0 // popisana - knjizna
          // visak
          lVisak := .T.
@@ -394,7 +394,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
       ENDIF
    ENDIF
 
-   IF pos->datum_obrade <> pos->datum
+   IF lPrint .AND. pos->datum_obrade <> pos->datum
       ? ">>> Datum obrade: ", pos->datum_obrade
    ENDIF
 

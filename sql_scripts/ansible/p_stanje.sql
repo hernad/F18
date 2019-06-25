@@ -22,7 +22,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( NOT idvd IN ('02','80','89','22','90') ) THEN
+IF ( NOT idvd IN ('02','80','89','22','90','IP') ) THEN
         RETURN FALSE;
 END IF;
 
@@ -136,7 +136,7 @@ DECLARE
    dat_do date DEFAULT '3999-01-01';
 BEGIN
 
-IF ( NOT idvd IN ('42','90','99') )  THEN -- 42 prodaja, 90 (kada je manjak), 99 - kalo stanje za prodaju umanjeno
+IF ( NOT idvd IN ('42','90', 'IP', '99') )  THEN -- 42 prodaja, 90 (kada je manjak), 99 - kalo stanje za prodaju umanjeno
         RETURN FALSE;
 END IF;
 
@@ -174,7 +174,7 @@ IF NOT idRaspolozivo IS NULL then
 
 ELSE -- kod izlaza se insert desava samo ako ako roba ide u minus !
 
-  -- u ovom naraednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
+  -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu
   EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date ) AND idroba=$1 AND cijena = $2 AND  ncijena = $3'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;

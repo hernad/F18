@@ -70,7 +70,9 @@ FUNCTION pos_zaduzenje_roba_valid( cIdRoba, nX, nY )
 
    LOCAL lOk
 
+   pos_unset_key_handler_ispravka_zaduzenja()
    lOk := pos_postoji_roba( @cIdroba, nX, nY )
+   pos_set_key_handler_ispravka_zaduzenja()
    cIdroba := PadR( cIdroba, POS_ROBA_DUZINA_SIFRE )
 
    RETURN lOk .AND. pos_zaduzenje_provjeri_duple_stavke( cIdroba )

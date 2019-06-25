@@ -145,7 +145,6 @@ FUNCTION pos_pdv_po_tarifama
 
          // ispisi opis i na realizaciji kao na racunu
          ? aTarife[ nCnt ][ 1 ], "(" + Str( nPDV ) + "%)"
-         AltD()
          ? Str( aTarife[ nCnt ][ 2 ], 12, 2 ), Str( aTarife[ nCnt ][ 3 ], 12, 2 ), Str( Round( aTarife[ nCnt ][ 4 ], 2 ), 12, 2 )
          nTotOsn += Round( aTarife[ nCnt ][ 4 ], 2 ) - Round( aTarife[ nCnt ][ 3 ], 2 )
          nTotPDV += Round( aTarife[ nCnt ][ 3 ], 2 )

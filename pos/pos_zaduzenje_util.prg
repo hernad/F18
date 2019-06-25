@@ -45,6 +45,9 @@ FUNCTION pos_dokument_naziv( cIdVd )
    CASE cIdVD == POS_IDVD_INVENTURA
       RETURN "POS inventura"
 
+   CASE cIdVD == "IP"
+         RETURN "KALK inventura"
+
    CASE cIdVD == POS_IDVD_ZAHTJEV_NIVELACIJA
       RETURN "Zahtjev za nivelaciju"
 

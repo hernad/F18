@@ -190,10 +190,10 @@ FUNCTION set_parametre_f18_aplikacije( lUpravoSetovani )
       @ nPosX + nX, nPosY SAY "KALK PR:" GET cLegacyKalkPr PICT "!@" VALID cLegacyKalkPr $ "DN"
       @ nPosX + nX, Col() + 2 SAY "PTXT:" GET cLegacyPTxt PICT "!@" VALID cLegacyPTxt $ "DN"
       @ nPosX + nX, Col() + 2 SAY "F18 LO (D/N/0):" GET cDownloadF18LO PICT "!@" VALID cDownloadF18LO $ "DN0"
-      @ nPosX + nX, Col() + 2 SAY "F18 updates (D/N):" GET cCheckUpdates PICT "!@" VALID cCheckUpdates $ "DN"
-      @ nPosX + nX, Col() + 2 SAY "F18 verzija:" GET cF18Verzija VALID AllTrim( cF18Verzija ) $ "3#4#5#6"
-      @ nPosX + nX, Col() + 2 SAY "-" GET cF18Varijanta VALID AllTrim( cF18Varijanta ) $ "std#vindi#pos#rnal"
-      @ nPosX + nX, Col() + 2 SAY "/" GET cF18VerzijaKanal PICT "!@" VALID AllTrim( cF18VerzijaKanal ) $ "SEX"
+      //@ nPosX + nX, Col() + 2 SAY "F18 updates (D/N):" GET cCheckUpdates PICT "!@" VALID cCheckUpdates $ "DN"
+      //@ nPosX + nX, Col() + 2 SAY "F18 verzija:" GET cF18Verzija VALID AllTrim( cF18Verzija ) $ "3#4#5#6"
+      //@ nPosX + nX, Col() + 2 SAY "-" GET cF18Varijanta VALID AllTrim( cF18Varijanta ) $ "std#vindi#pos#rnal"
+      //@ nPosX + nX, Col() + 2 SAY "/" GET cF18VerzijaKanal PICT "!@" VALID AllTrim( cF18VerzijaKanal ) $ "SEX"
 
       READ
 
@@ -274,7 +274,7 @@ FUNCTION f18_use_module( cModuleName )
           RETURN .T.
       ENDIF
 
-      IF cModulRun == "pos" // pokrenut POS, use npr. FIN 
+      IF cModulRun == "pos" // pokrenut POS, use npr. FIN
           RETURN .F.
       ENDIF
    ENDIF

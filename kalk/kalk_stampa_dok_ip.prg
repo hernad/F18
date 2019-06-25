@@ -67,30 +67,22 @@ FUNCTION kalk_stampa_dok_ip()
 
    cSamoObraz := Pitanje(, "Prikaz samo obrasca inventure (D-da, N-ne) ?",, "DN" )
 
-   cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " , Datum:" + DToC( kalk_pripr->DatDok )
+   cNaslov += " " + cPKonto  + " " + cIdFirma + "-" + cIdVD + "-" + cBrDok  + " Dat.dok: " + DToC( kalk_pripr->DatDok )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "font_size" ] := 9
    xPrintOpt[ "opdf" ] := s_oPDF
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF
 
 
-   // P_10CPI
    select_o_konto( cPKonto )
    SELECT kalk_pripr
 
-
-   // ?? "INVENTURA PRODAVNICA ", cPKonto, "-", AllTrim( konto->naz )
-   // IspisNaDan( 10 )
-
-   // P_COND
-   // ?
-   // ? "DOKUMENT BR. :", cIdFirma + "-" + cIdVD + "-" + cBrDok, Space( 2 ), "Datum:", kalk_pripr->DatDok
-   // ?
-   // @ PRow(), 125 SAY "Str:" + Str( ++nStr, 3 )
+   ? "PRODAVNICA:", cPKonto, "-", AllTrim( konto->naz )
 
    SELECT kalk_pripr
 
@@ -202,7 +194,7 @@ FUNCTION kalk_stampa_dok_ip()
       RETURN .T.
    ENDIF
 
-   check_nova_strana( bZagl, s_oPDF, .F., 12 )
+   check_nova_strana( bZagl, s_oPDF, .F., 13 )
 
    ? m
    @ PRow() + 1, 0 SAY PadR( "Ukupno:", 43 )

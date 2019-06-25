@@ -67,13 +67,13 @@ ELSIF (TG_OP = 'INSERT') THEN
       END IF;
 
       IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
-         IF NOT NEW.idvd IN ('21', '79') THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba ; 79 radi samo sa postojecom robom
+         IF NOT NEW.idvd IN ('21', '79', 'IP') THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba ; 79 radi samo sa postojecom robom
             EXECUTE 'UPDATE {{ item_prodavnica }}.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
                USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
          END IF;
       ELSE
          -- ako artikla uopste nema, onda i 21-ca moze setovati sifru u prodavnica.roba; ali ovo ne bi trebalo da se desava !
-         IF NOT NEW.idvd = '79' THEN
+         IF NOT NEW.idvd IN ('79', 'IP') THEN
            EXECUTE 'INSERT INTO {{ item_prodavnica }}.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
               USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
          END IF;
@@ -238,10 +238,10 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
-   IF ( NOT NEW.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN   -- 42, 11, 80, 19, 79, 89
+   IF ( NOT NEW.idvd IN ('42','02','22','80','89','29','19','79','90', 'IP', '99') ) THEN   -- 42, 11, 80, 19, 79, 89
       RETURN NEW;
    END IF;
-   IF ( NEW.idvd = '90' ) THEN
+   IF ( NEW.idvd IN ('90', 'IP') ) THEN
       IF ( NEW.kolicina - NEW.kol2 ) > 0 THEN  -- popisana - knjizna
          nVisak := NEW.kolicina - NEW.kol2;
          nManjak := 0;
@@ -257,7 +257,7 @@ IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN
       nKolicina := NEW.kolicina;
    END IF;
 ELSE
-   IF ( NOT OLD.idvd IN ('42','02','22','80','89','29','19','79','90','99') ) THEN
+   IF ( NOT OLD.idvd IN ('42','02','22','80','89','29','19','79','90','IP','99') ) THEN
         RETURN OLD;
    END IF;
 END IF;
@@ -271,7 +271,7 @@ IF (TG_OP = 'DELETE') AND ( OLD.idvd = '42' ) THEN
       RAISE INFO 'delete % ret=%', OLD.idvd, lRet;
       RETURN OLD;
 
-ELSIF (TG_OP = 'DELETE') AND ( OLD.idvd IN ('02','22','80','89','90') ) THEN
+ELSIF (TG_OP = 'DELETE') AND ( OLD.idvd IN ('02','22','80','89','90','IP') ) THEN
       RAISE INFO 'delete pos_prijem_update_stanje  % % % %', OLD.idvd, OLD.brdok, OLD.datum, OLD.rbr;
       -- select {{ item_prodavnica }}.pos_prijem_update_stanje('-','15', '11', 'BRDOK02', '999', current_date, current_date, NULL, 'R01',  50, 2.5, 0);
       EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''-'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
@@ -292,7 +292,7 @@ ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd = '42' ) THEN
        RAISE INFO 'update 42 pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr ;
        RETURN NEW;
 
-ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd IN ('02','22','80','89','90') ) THEN
+ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd IN ('02','22','80','89','90', 'IP') ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
@@ -300,7 +300,7 @@ ELSIF (TG_OP = 'UPDATE') AND ( NEW.idvd IN ('19','29','79' ) ) THEN
         RAISE INFO 'update pos_pos?!  % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.rbr;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' OR  NEW.idvd = '99' OR ( NEW.idvd = '90' AND nManjak > 0)  ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' OR  NEW.idvd = '99' OR ( NEW.idvd IN ('90', 'IP') AND nManjak > 0)  ) THEN
         -- 42 - prodaja
         -- 99 - kalo
         -- 90 nManjak - izlaz
@@ -312,7 +312,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' OR  NEW.idvd = '99' OR ( NEW.idvd
         RAISE INFO 'insert 42 ret=%', lRet;
         RETURN NEW;
 
-ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd = '90' AND nVisak > 0) ) THEN
+ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd IN ('90', 'IP') AND nVisak > 0) ) THEN
         RAISE INFO 'insert pos_prijem_update_stanje % % % % %', NEW.idvd, NEW.brdok, NEW.datum, NEW.idroba, NEW.rbr;
         -- select {{ item_prodavnica }}.pos_prijem_update_stanje('+','15', '11', 'BRDOK01', '999', current_date, current_date, NULL,'R01', 100, 2.5, 0);
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'

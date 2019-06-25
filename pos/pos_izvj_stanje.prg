@@ -26,17 +26,22 @@ FUNCTION pos_stanje_artikala()
    LOCAL nRbr
    LOCAL aNiz
    LOCAL cFilterRoba, cQuery
-   LOCAL nPUlaz, nPIzlaz
    LOCAL cIdPos
    LOCAL nUlaz, nIzlaz
    LOCAL nUkVrijednost
-   LOCAL lInicijalizacija
+
+   // LOCAL lInicijalizacija
+   LOCAL nKalo
+   LOCAL nPopust
+   LOCAL nPredhodnoStanjeKalo
+   LOCAL nPredhodnaVrijednost
+   LOCAL nPredhodniPopust
+   LOCAL nPredhodnoStanjeUlaz, nPredhodnoStanjeIzlaz
 
    // PRIVATE cIdPos
    PRIVATE dDatum
    PRIVATE cRobaUslov := Space( 60 )
    PRIVATE cNule := "N"
-
 
    dDatum := danasnji_datum()
    cIdPos := pos_pm()
@@ -58,14 +63,17 @@ FUNCTION pos_stanje_artikala()
    ENDDO
 
    // 21-ce ne gledati
-   cQuery := "select * from "  + f18_sql_schema( "pos_items" ) + ;
+   cQuery := "select *,date(pos.obradjeno) as datum_obrade, to_char(pos.obradjeno, 'HH24:MI') as vrij_obrade FROM "  + f18_sql_schema( "pos_items" ) + ;
       " left join " + f18_sql_schema( "pos" ) + " on pos_items.idpos=pos.idpos and pos_items.idvd=pos.idvd and pos_items.brdok=pos.brdok and pos_items.datum=pos.datum" + ;
       " WHERE pos.idvd <> '21' AND pos.datum<=" + sql_quote( dDatum ) + ;
-      " order by idroba, pos.datum, pos.obradjeno  "
+      " ORDER BY idroba, pos.datum, pos.obradjeno, pos.idvd, pos.brdok"
 
+   MsgO("Preuzimanje podataka sa servera za datum " + DToC(dDatum) + " ...")
    SELECT F_POS
    USE
    dbUseArea_run_query( cQuery, F_POS, "POS" )
+   MsgC()
+
 
    // seek_pos_pos_2()
    IF !( cFilterRoba == ".t." )
@@ -83,7 +91,7 @@ FUNCTION pos_stanje_artikala()
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "opdf" ] := s_oPDF
    xPrintOpt[ "font_size" ] := 10
-   IF f18_start_print( NIL, xPrintOpt,  "POS STANJE [" +  pos_prodavnica_str() + "/" + AllTrim(cIdPos) + "] NA DAN: " + DToC( Date() ) ) == "X"
+   IF f18_start_print( NIL, xPrintOpt,  "POS STANJE [" +  pos_prodavnica_str() + "/" + AllTrim( cIdPos ) + "] NA DAN: " + DToC( dDatum ) ) == "X"
       RETURN .F.
    ENDIF
 
@@ -96,33 +104,47 @@ FUNCTION pos_stanje_artikala()
 
       cIdRoba := pos->idroba
       nVrijednost := 0
-      nPUlaz := 0
-      nPIzlaz := 0
+      nPredhodnoStanjeUlaz := 0
+      nPredhodnoStanjeIzlaz := 0
       nUlaz := 0
       nIzlaz := 0
+      nKalo := 0
+      nPopust := 0
+      nStanjeKolicina := 0
+      nPredhodnoStanjeKalo := 0
+      nPredhodnaVrijednost := 0
+      nPredhodniPopust := 0
 
-      lInicijalizacija := .F.
+      // lInicijalizacija := .F.
 
       // 1) promet prije zadanog datuma
       DO WHILE !Eof() .AND. pos->idRoba == cIdRoba .AND. pos->datum < dDatum
-         pos_stanje_proracun( @nPUlaz, @nPizlaz, @nVrijednost )
+         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
          SELECT POS
          SKIP
       ENDDO
+
+      // nUlaz := nPredhodnoStanjeUlaz
+      // nIzlaz := nPredhodnoStanjeIzlaz
+      nKalo := nPredhodnoStanjeKalo
+      nVrijednost := nPredhodnaVrijednost
+      nPopust := nPredhodniPopust
 
       // 2) stanje na tekuci dan
       DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum == dDatum
-         pos_stanje_proracun( @nUlaz, @nIzlaz, @nVrijednost, @lInicijalizacija )
+         // pos_stanje_proracun( @nUlaz, @nIzlaz, @nVrijednost, @lInicijalizacija )
+         pos_stanje_proracun_kartica( @nUlaz, @nIzlaz, @nKalo, @nStanjeKolicina, @nVrijednost, @nPopust, .F. )
+
          SELECT POS
          SKIP
       ENDDO
 
-      IF lInicijalizacija // u tekucem danu bila inicijalizacija, predhodni promet se ne gleda
-         nPUlaz := 0
-         nPIzlaz := 0
-      ENDIF
+      // IF lInicijalizacija // u tekucem danu bila inicijalizacija, predhodni promet se ne gleda
+      // nPUlaz := 0
+      // nPIzlaz := 0
+      // ENDIF
 
-      nStanjeKolicina := ( nPUlaz - nPIzlaz ) + nUlaz - nIzlaz
+      // nStanjeKolicina := ( nPUlaz - nPIzlaz ) + nUlaz - nIzlaz
 
       check_nova_strana( bZagl, s_oPDF )
       IF Round( nStanjeKolicina, 4 ) <> 0 .OR. Round( nVrijednost, 4 ) <> 0  .OR. cNule == "D"
@@ -132,29 +154,37 @@ FUNCTION pos_stanje_artikala()
          ?? cIdRoba, PadR( roba->naz, nRobaNazivSirina ) + " "
 
          SELECT POS
-         ?? Str ( nPUlaz - nPIzlaz, 10, 2 ) + " "
+         ?? Str ( nPredhodnoStanjeUlaz - nPredhodnoStanjeIzlaz, 10, 3 ) + " "
          IF Round ( nUlaz, 4 ) <> 0
-            ?? Str( nUlaz, 10, 2 )
+            ?? Str( nUlaz, 10, 3 )
          ELSE
             ?? Space ( 10 )
          ENDIF
          ?? " "
          IF Round ( nIzlaz, 4 ) <> 0
-            ?? Str( nIzlaz, 10, 2 )
+            ?? Str( nIzlaz, 10, 3 )
          ELSE
             ?? Space ( 10 )
          ENDIF
          ?? " "
-         ?? Str ( nStanjeKolicina, 10, 2 )
+         ?? Str ( nStanjeKolicina, 10, 3 )
+
          ?? " "
          IF nStanjeKolicina <> 0
-            ?? Str( nVrijednost / nStanjeKolicina, 10, 2 )
+            // cijena
+            ?? Str( nVrijednost / nStanjeKolicina, 10, 3 )
          ELSE
             Space( 10 )
          ENDIF
+
          ?? " "
          ?? Str( nVrijednost, 10, 2 )
 
+         ?? " "
+         ?? Str( nKalo, 10, 3 )
+
+         ?? " "
+         ?? Str( nStanjeKolicina - nKalo, 10, 3 )
       ENDIF
       nUkVrijednost += nVrijednost
 
@@ -173,28 +203,6 @@ FUNCTION pos_stanje_artikala()
    RETURN .T.
 
 
-STATIC FUNCTION pos_stanje_proracun( nUlaz, nIzlaz, nVrijednost, lInicijalizacija )
-
-   IF pos->idvd == POS_IDVD_POCETNO_STANJE_PRODAVNICA
-      nUlaz := POS->Kolicina
-      nVrijednost := POS->Kolicina * POS->Cijena
-      nIzlaz := 0
-      lInicijalizacija := .T.
-
-   ELSEIF POS->idvd $ POS_IDVD_ULAZI
-      nUlaz += POS->Kolicina
-      nVrijednost += POS->Kolicina * POS->Cijena
-
-   ELSEIF POS->IdVd $ POS_IDVD_NIVELACIJE
-      nVrijednost += POS->Kolicina * ( POS->Cijena - POS->Cijena )
-
-   ELSEIF POS->IdVd == POS_IDVD_RACUN
-      nIzlaz += POS->Kolicina
-      nVrijednost -= POS->Kolicina * POS->Cijena
-
-   ENDIF
-
-   RETURN .T.
 
 
 STATIC FUNCTION pos_stanje_artikala_zagl( cIdPos, cLijevaMargina, nRobaNazivSirina )
@@ -202,7 +210,7 @@ STATIC FUNCTION pos_stanje_artikala_zagl( cIdPos, cLijevaMargina, nRobaNazivSiri
    ? cLijevaMargina + "Prodajno mjesto: " + cIdPos
    podvuci( cLijevaMargina, nRobaNazivSirina )
    ?U cLijevaMargina + "R.br)", PadR ( "Šifra", 10 ), " ", PadR ( "Naziv artikla", nRobaNazivSirina ) + " "
-   ??U "Poč.stanje ", PadC ( "Ulaz", 10 ), PadC ( "Izlaz", 10 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Ukupno", 10 )
+   ??U "Poč.stanje ", PadC ( "Ulaz", 10 ), PadC ( "Izlaz", 10 ), PadC ( "Stanje", 10 ), PadC( "Cijena", 10 ), PadC( "Vrijednost", 10 ), PadC ( "Kalo", 10 ), PadC ( "Kol.za Prod", 10 )
    podvuci( cLijevaMargina, nRobaNazivSirina )
 
    RETURN .T.
@@ -212,7 +220,7 @@ STATIC FUNCTION podvuci( cLijevaMargina, nRobaNazivSirina )
    LOCAL nI
 
    ? cLijevaMargina  + REPL( "-", 5 ), REPL ( "-", 10 ), REPL ( "-", nRobaNazivSirina )
-   FOR nI := 1 TO 6
+   FOR nI := 1 TO 8
       ?? " " + REPL ( "-", 10 )
    NEXT
 

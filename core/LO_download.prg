@@ -69,7 +69,11 @@ FUNCTION LO_open_dokument( cFile )
 
 
    IF lUseLibreofficeSystem
-      RETURN f18_open_mime_document( cFile )
+      IF is_linux()
+         RETURN f18_run( "soffice --norestore --nologo " + file_path_quote( cFile ), NIL, lAsync)
+      ELSE
+         RETURN f18_open_mime_document( cFile )
+      ENDIF
    ENDIF
 
    cCmd := LO_cmd()
@@ -88,7 +92,18 @@ FUNCTION LO_cmd()
    RETURN s_cDirF18Util + s_cUtilName + SLASH + s_cProg
 
 
-FUNCTION LO_convert_xlsx_cmd()
+FUNCTION LO_convert_xlsx_cmd( cFile, cOutDir )
+
+    LOCAL cCmd
+
+    IF is_linux()
+        cCmd := "soffice --norestore --nologo"
+        cCmd += ' --convert-to xlsx:"Calc MS Excel 2007 XML"'
+        cCmd += ' --infilter=dBase:25'
+        cCmd += ' --outdir ' + cOutDir
+        cCmd += ' ' + cFile
+        RETURN cCmd
+   ENDIF
 
    check_LO_download()
 
