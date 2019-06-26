@@ -296,6 +296,7 @@ STATIC FUNCTION kalk_provjera_cijena()
    LOCAL cIdVd
    LOCAL cBrDok
    LOCAL cRbr
+   LOCAL nOsnovnaCijena
 
    o_kalk_pripr()
 
@@ -336,11 +337,12 @@ STATIC FUNCTION kalk_provjera_cijena()
             RETURN .F.
          ENDIF
 
-         IF kalk_pripr->idvd == "IP" .AND. Round( field->kolicina, 4 ) > 0
+         IF kalk_pripr->idvd == "IP"
             // popisana kolicina > 0
-            IF pos_dostupno_artikal_za_cijenu( kalk_pripr->Idroba, kalk_pripr->mpcsapp, 0 ) <= 0
+            nOsnovnaCijena := pos_dostupna_osnovna_cijena_za_artikal( kalk_pripr->Idroba )
+            IF nOsnovnaCijena <> kalk_pripr->mpcsapp
                Beep( 1 )
-               Msg( cRbr + ') Cijena ' +  Transform( kalk_pripr->mpcsapp, '99999.999' ) + ' navedena u POS## za artikal ' + kalk_pripr->idroba + ' nije dostupna ? STOP!' )
+               Msg( cRbr + ') Cijena ' +  Alltrim( Transform( kalk_pripr->mpcsapp, '99999.999' ) ) + ' nije osnovna cijena POS [ ' + Alltrim( Transform( nOsnovnaCijena, '99999.999' ) ) + ' ]## za artikal ' + kalk_pripr->idroba + ' ?! STOP!' )
                my_close_all_dbf()
                RETURN .F.
             ENDIF
