@@ -3,7 +3,7 @@
 ## 2019-06-26
 
 - KALK IP - pos dostupna osnovna cijena
-- RS FLINK popust
+- RS FLINK popust - nCijenaNeto
 
 ## 2019-06-25
 

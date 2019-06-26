@@ -268,6 +268,7 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
    LOCAL nTotal := 0
    LOCAL cPoreznaStopa
    LOCAL cVrstaPlacanja
+   LOCAL nCijenaNeto
 
    // ocekuje se matrica formata
    // aRacunData { brrn, rbr, idroba, nazroba, cijena, kolicina, porstopa, rek_rn, plu, cVrPlacanja, nTotal }
@@ -314,7 +315,8 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
       cTmp += AllTrim( aRacunData[ i, FISK_INDEX_ROBANAZIV ] ) // [artikl]
       cTmp += cSep
       // cjena 0-99999.99
-      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_CIJENA ], 12, 2 ) ) // [cijena]
+      nCijenaNeto := aRacunData[ i, FISK_INDEX_CIJENA ] * (1 - aRacunData[ i, FISK_INDEX_POPUST ] / 100)
+      cTmp += AllTrim( Str( nCijenaNeto, 12, 2 ) ) // [cijena]
       cTmp += cSep
       // kolicina 0-99999.99
       cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_KOLICINA ], 12, 2 ) ) // [količina]
@@ -329,8 +331,10 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
       cTmp += cSep
       cTmp += AllTrim( aRacunData[ i, FISK_INDEX_IDROBA ] ) // [Kod (PLU)]
       cTmp += cSep
-      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_POPUST ], 12, 2 ) ) // [iznos rabata%]
-      cTmp += cSep
+
+      // ovo ne radi na fiskalnom p17
+      //cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_POPUST ], 12, 2 ) ) // [iznos rabata%]
+      //cTmp += cSep
       AAdd( aArr, { cTmp } )
 
    NEXT
