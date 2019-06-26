@@ -298,6 +298,8 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
 
    ENDIF
 
+   // S,[logički broj],______,_,__;[artikl];[cijena];[količina];[odjeljenje];[grupa artikla];[poreska grupa];0;[Kod (PLU)];[iznos rabata%];[Rezervisano];[mjera];
+
    FOR i := 1 TO Len( aRacunData )
       cTmp := "S"
       cTmp += cLogSep
@@ -309,33 +311,34 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
       cTmp += cLogSep
       cTmp += Replicate( "_", 2 )
       cTmp += cSep
-      cTmp += AllTrim( aRacunData[ i, FISK_INDEX_ROBANAZIV ] )
+      cTmp += AllTrim( aRacunData[ i, FISK_INDEX_ROBANAZIV ] ) // [artikl]
       cTmp += cSep
       // cjena 0-99999.99
-      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_CIJENA ], 12, 2 ) )
+      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_CIJENA ], 12, 2 ) ) // [cijena]
       cTmp += cSep
       // kolicina 0-99999.99
-      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_KOLICINA ], 12, 2 ) )
+      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_KOLICINA ], 12, 2 ) ) // [količina]
       cTmp += cSep
-      // stand od 1-9
-      cTmp += PadR( "1", 1 )
+      cTmp += PadR( "1", 1 ) // [odjeljenje]
       cTmp += cSep
-      // grupa artikla 1-99
-      cTmp += "1"
+      cTmp += "1" // [grupa artikla]
       cTmp += cSep
-      // poreska grupa artikala 1 - 4
-      cTmp += cPoreznaStopa := fiskalni_tarifa( aRacunData[ i, FISK_INDEX_TARIFA ], hFiskalniParams[ "pdv" ], "FLINK" )
-
+      cTmp += cPoreznaStopa := fiskalni_tarifa( aRacunData[ i, FISK_INDEX_TARIFA ], hFiskalniParams[ "pdv" ], "FLINK" ) // [poreska grupa]
       cTmp += cSep
-      // -0 ???
-      cTmp += "-0"
+      cTmp += "0"
       cTmp += cSep
-      // kod PLU
-      cTmp += AllTrim( aRacunData[ i, FISK_INDEX_IDROBA ] )
+      cTmp += AllTrim( aRacunData[ i, FISK_INDEX_IDROBA ] ) // [Kod (PLU)]
+      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_POPUST ], 12, 2 ) ) // [iznos rabata%]
       cTmp += cSep
       AAdd( aArr, { cTmp } )
 
    NEXT
+
+   // Q - Programiraj podnožje
+   // Q,[logički broj],______,_,__;[broj linije];[tekst]
+   // Programira podnožje gdje broj linije počinje od 1. Maksimum zavisi od tehničkih
+   // karakteristika uređaja. Maksimalan broj linija je 11.
 
    // podnozje
    cTmp := "Q"
@@ -354,9 +357,14 @@ STATIC FUNCTION flink_pos_rn_matrica( hFiskalniParams, aRacunData, lStorno )
    AAdd( aArr, { cTmp } )
 
    cVrstaPlacanja := fiskalni_vrsta_placanja( aRacunData[ 1, FISK_INDEX_VRSTA_PLACANJA ], "FLINK" )
+
+   // PayType.0=U Gotovini Način plaćanja
+   // PayType.1=Kartica Način plaćanja
+   // PayType.2=Cek Način plaćanja
+   // PayType.3=Virman Način plaćanja
+
    IF cVrstaPlacanja <> "0"
       nTotal := aRacunData[ 1, FISK_INDEX_TOTAL ]
-      // zatvaranje racuna
       cTmp := "T"
       cTmp += cLogSep
       cTmp += cLogic

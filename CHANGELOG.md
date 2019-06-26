@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-06-26
+
+- RS FLINK popust
+
 ## 2019-06-25
 
 - KALK IP -> POS
