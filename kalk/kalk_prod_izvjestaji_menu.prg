@@ -24,8 +24,10 @@ FUNCTION kalk_izvjestaji_prodavnice_menu()
    AAdd( aOpcExe, {|| kalk_lager_lista_prodavnica() } )
    AAdd( aOpc, "3. finansijsko stanje prodavnice" )
    AAdd( aOpcExe, {|| kalk_finansijsko_stanje_prodavnice() } )
+
    AAdd( aOpc, "4. trgovačka knjiga na malo" )
    AAdd( aOpcExe, {|| kalk_tkm() } )
+
    AAdd( aOpc, "5. pregled asortimana za dobavljača" )
    AAdd( aOpcExe, {|| asortiman_dobavljac_mp() } )
 
@@ -44,7 +46,6 @@ FUNCTION kalk_izvjestaji_prodavnice_menu()
    f18_menu( "izp", .F., nIzbor, aOpc, aOpcExe )
 
    RETURN NIL
-
 
 
 

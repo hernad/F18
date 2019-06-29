@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+MEMVAR dDatIspl
 
 FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
 
@@ -176,7 +177,7 @@ FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
    hRec := hb_Hash()
 
    download_template_ld_obr_2002()
-   oReport := YargReport():New( "ld_obr_2002", "xlsx" )
+   oReport := YargReport():New( "ld_obr_2002", "xlsx", "Band1" )
 
 
    hRec[ "naziv" ] := cFirmNaz
@@ -315,7 +316,6 @@ FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
 
       select_o_dopr()
       GO TOP
-
       DO WHILE !Eof()
 
          IF DOPR->poopst == "1"
@@ -404,7 +404,6 @@ FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
    hRec[ "opcina_2" ] := ops->naz
 
    hRec[ "br_zaposlenih" ] := AllTrim( Str( nURadnika, 6, 0 ) )
-
 
    nPom := nBrutoOsnova
    nUUNR := nPom

@@ -22,7 +22,7 @@ CREATE CLASS YargReport
 
    VAR cReportOutput
    VAR aRecords // { { 'id':1, 'naz':'dva' }, { 'id':2, 'naz':'tri' } }
-   VAR aSql  // { "select * from fmk.fin_suban",  "select + from fmk.partn where id=${BandSql1.idpartner}"}
+   VAR aSql  // { "select * from fmk.fin_suban",  "select * from fmk.partn where id=${BandSql1.idpartner}"}
    VAR cBands   // primjer: "Band1", "Header#Band1"
 
    METHOD New( cName, cType, cBands )
@@ -212,11 +212,8 @@ METHOD YargReport:create_yarg_xml()
       ?? "]"
 
       xml_subnode_end( "script" )
-
       xml_subnode_end( "query" )
-
       xml_subnode_end( "queries" )
-
       xml_subnode_end( "band" ) // band1
    ENDIF
 
@@ -238,6 +235,27 @@ METHOD YargReport:create_yarg_xml()
 
       xml_subnode_end( "band" ) // band1
 
+   ENDIF
+
+   IF "Header2#" $ ::cBands
+      xml_subnode_start( 'band name="Header2" orientation="H"' )
+      xml_subnode_end( "band" )
+   ENDIF
+
+   IF "BandSql2" $ ::cBands
+
+      xml_subnode_start( 'band name="Sql2" orientation="H"' )
+      xml_subnode_start( "queries" )
+
+      xml_subnode_start( 'query name="Sql2" type="sql"' )
+      xml_subnode_start( "script" )
+      ??  to_xml_encoding( ::aSql[ 2 ] )
+      ?
+      ?E ::aSql[ 2 ]
+      xml_subnode_end( "script" )
+      xml_subnode_end( "query" )
+      xml_subnode_end( "queries" )
+      xml_subnode_end( "band" ) // BandSql2
 
    ENDIF
 

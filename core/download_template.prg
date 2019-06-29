@@ -18,7 +18,6 @@ STATIC s_cUrl
 STATIC s_hTemplates
 
 
-
 FUNCTION download_template_ubuntu_mono_ttf()
 
    RETURN download_template( "ubuntu-mono.ttf", "b35dd9d2131d5d83a9b87fe9ad22c6288fa3d17688d43302c14da29812417d63" )

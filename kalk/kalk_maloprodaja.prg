@@ -44,6 +44,7 @@ FUNCTION kalk_maloprodaja()
 
    // AAdd( aOpc,   "3. šifre robe u prodavnici" )
    // AAdd( aOpcExe, {|| p_roba_prodavnica() } )
+
    f18_menu( "mp", .F.,  nIzbor, aOpc, aOpcExe )
 
    RETURN .T.
@@ -363,6 +364,7 @@ FUNCTION o_roba_prodavnica( cId )
    ENDIF
 
    RETURN !Eof()
+
 
 FUNCTION mp_pic_cijena()
 

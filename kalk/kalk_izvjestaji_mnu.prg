@@ -9,9 +9,7 @@
  * By using this software, you agree to be bound by its terms.
  */
 
-
 #include "f18.ch"
-
 
 
 FUNCTION kalk_meni_izvjestaji()
@@ -25,7 +23,10 @@ FUNCTION kalk_meni_izvjestaji()
    AAdd( _opc, "2. izvještaji prodavnica" )
    AAdd( _opcexe, {|| kalk_izvjestaji_prodavnice_menu() } )
 
-   AAdd( _opc, "3. izvještaji magacin+prodavnica" )
+   AAdd( _opc, "3. izvještaji prodavnice zbirno" )
+   AAdd( _opcexe, {|| kalk_izvjestaji_prod_zbir_menu() } )
+
+   AAdd( _opc, "4. izvještaji magacin+prodavnica" )
    AAdd( _opcexe, {|| kalk_izvjestaji_mag_i_pro() } )
 
    //AAdd( _opc, "4. proizvoljni izvještaji" )
@@ -38,7 +39,6 @@ FUNCTION kalk_meni_izvjestaji()
    //my_close_all_dbf()
 
    RETURN .T.
-
 
 
 

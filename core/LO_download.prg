@@ -41,8 +41,6 @@ FUNCTION LO_open_dokument( cFile )
       lFirstRun := .T. // prvi put postavlja pitanje
    ENDIF
 
-
-
    IF s_cDownloadF18LO == "0" // ne pitaj korisnika da li da ucitava F18 LO koristiti system LibreOffic3
       lUseLibreofficeSystem := .T.
    ELSEIF s_cDownloadF18LO == "N" // pitati korisnika
