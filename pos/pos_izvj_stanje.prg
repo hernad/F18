@@ -37,6 +37,7 @@ FUNCTION pos_stanje_artikala()
    LOCAL nPredhodnaVrijednost
    LOCAL nPredhodniPopust
    LOCAL nPredhodnoStanjeUlaz, nPredhodnoStanjeIzlaz
+   LOCAL nPredhodnaRealizacija, nRealizacija
 
    // PRIVATE cIdPos
    PRIVATE dDatum
@@ -114,12 +115,13 @@ FUNCTION pos_stanje_artikala()
       nPredhodnoStanjeKalo := 0
       nPredhodnaVrijednost := 0
       nPredhodniPopust := 0
+      nPredhodnaRealizacija := 0
 
       // lInicijalizacija := .F.
 
       // 1) promet prije zadanog datuma
       DO WHILE !Eof() .AND. pos->idRoba == cIdRoba .AND. pos->datum < dDatum
-         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
+         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaRealizacija, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
          SELECT POS
          SKIP
       ENDDO
@@ -128,12 +130,13 @@ FUNCTION pos_stanje_artikala()
       // nIzlaz := nPredhodnoStanjeIzlaz
       nKalo := nPredhodnoStanjeKalo
       nVrijednost := nPredhodnaVrijednost
+      nRealizacija := nPredhodnaRealizacija
       nPopust := nPredhodniPopust
 
       // 2) stanje na tekuci dan
       DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum == dDatum
          // pos_stanje_proracun( @nUlaz, @nIzlaz, @nVrijednost, @lInicijalizacija )
-         pos_stanje_proracun_kartica( @nUlaz, @nIzlaz, @nKalo, @nStanjeKolicina, @nVrijednost, @nPopust, .F. )
+         pos_stanje_proracun_kartica( @nUlaz, @nIzlaz, @nKalo, @nStanjeKolicina, @nVrijednost, @nRealizacija, @nPopust, .F. )
 
          SELECT POS
          SKIP

@@ -128,7 +128,7 @@ FUNCTION pos_pdv_po_tarifama
       nTotPDV := 0
 
       // matrica je lok var : aTarife:={}
-      aTarife := pos_pdv_napuni_pom( POS_IDVD_RACUN, dDatum0, aTarife ) // , cNaplaceno )
+      aTarife := pos_pdv_napuni_pom( POS_IDVD_RACUN, dDatum0, dDatum1, aTarife )
 
       ASort ( aTarife,,, {| x, y | x[ 1 ] < y[ 1 ] } )
 
@@ -184,7 +184,7 @@ FUNCTION pos_pdv_po_tarifama
 
 
 
-STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife ) // , cNaplaceno )
+STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, dDatum1, aTarife )
 
    LOCAL nIzn, nOsn, nPDV, nPoz
 
@@ -192,11 +192,12 @@ STATIC FUNCTION pos_pdv_napuni_pom( cIdVd, dDatum0, aTarife ) // , cNaplaceno )
    // cNaplaceno := "1"
    // ENDIF
 
-   seek_pos_doks_2( cIdVd, dDatum0 )
+   seek_pos_doks_2_za_period( cIdVd, dDatum0, dDatum1 )
+
    DO WHILE !Eof() .AND. pos_doks->IdVd == cIdVd .AND. pos_doks->Datum <= dDatum1
 
       seek_pos_pos( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->BrDok )
-      DO WHILE !Eof() .AND. POS->( IdPos + IdVd + DToS( datum ) + BrDok ) == pos_doks->( IdPos + IdVd + DToS( datum ) + BrDok )
+      DO WHILE !Eof() .AND. POS->IdPos + POS->IdVd + DToS( POS->datum ) + POS->BrDok  == pos_doks->IdPos + pos_doks->IdVd + DToS( pos_doks->datum ) + pos_doks->BrDok
 
          select_o_roba( pos->idroba )
          select_o_tarifa( POS->IdTarifa )

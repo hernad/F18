@@ -54,7 +54,6 @@ ALTER FUNCTION public.zatvori_otvst(text, text, text) OWNER TO admin;
 
 
 
-
 DO $$ BEGIN
  CREATE TYPE public.t_dugovanje AS (
    konto_id character varying,

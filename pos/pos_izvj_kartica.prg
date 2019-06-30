@@ -28,6 +28,7 @@ FUNCTION pos_kartica_artikla()
    LOCAL nPredhodnoStanjeUlaz, nPredhodnoStanjeIzlaz, nPredhodnoStanjeKalo, nPredhodniPopust
    LOCAL nPredhodnoStanjeKolicina, nStanjeKolicina
    LOCAL nUlazKolicina, nIzlazKolicina, nKalo
+   LOCAL nPredhodnaRealizacija, nRealizacija
    LOCAL cQuery
 
    PRIVATE dDatum0 := danasnji_datum()
@@ -123,6 +124,7 @@ FUNCTION pos_kartica_artikla()
       nPredhodnoStanjeIzlaz := 0
       nPredhodnoStanjeKalo := 0
       nPredhodnaVrijednost := 0
+      nPredhodnaRealizacija := 0
       nPredhodniPopust := 0
       nStanjeKolicina := 0
 
@@ -143,7 +145,7 @@ FUNCTION pos_kartica_artikla()
             SKIP
             LOOP
          ENDIF
-         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
+         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodnaRealizacija, @nPredhodniPopust, .F. )
          SKIP
       ENDDO
 
@@ -165,12 +167,13 @@ FUNCTION pos_kartica_artikla()
       nIzlazKolicina := nPredhodnoStanjeIzlaz
       nKalo := nPredhodnoStanjeKalo
       nVrijednost := nPredhodnaVrijednost
+      nRealizacija := nPredhodnaRealizacija
       nPopust := nPredhodniPopust
 
       // zadani interval
       DO WHILE !Eof() .AND. POS->IdRoba == cIdRobaT .AND. POS->Datum >= dDatum0 .AND. POS->Datum <= dDatum1
          check_nova_strana( bZagl, s_oPDF, .F., 2 )
-         pos_stanje_proracun_kartica( @nUlazKolicina, @nIzlazKolicina, @nKalo, @nStanjeKolicina, @nVrijednost, @nPopust, .T. )
+         pos_stanje_proracun_kartica( @nUlazKolicina, @nIzlazKolicina, @nKalo, @nStanjeKolicina, @nVrijednost, @nRealizacija, @nPopust, .T. )
          SKIP
       ENDDO
 
@@ -208,10 +211,18 @@ FUNCTION pos_kartica_artikla()
       ?? Str( nVrijednost, 10, 2 )
       ? m
 
+
+      ? cLijevaMargina
+      ?? PadL( "REALIZACIJA:", 65 + 6 )
+      ?? Str( nRealizacija, 10, 2 )
+      ? m
+
       IF Round( nPopust, 4 ) <> 0
          ? cLijevaMargina
-         ?? PadL( "Od toga iznos prodaje sa POPUSTOM:", 65 + 6 )
+         ?? PadL( "Od toga dati POPUST:", 65 + 6 )
          ?? Str( nPopust, 10, 2 )
+         ? PadL( "NETO REALIZACIJA:", 65 + 6 )
+         ?? Str( nRealizacija - nPopust, 10, 2 )
          ? m
       ENDIF
 
@@ -225,7 +236,7 @@ FUNCTION pos_kartica_artikla()
 
 
 
-FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVrijednost, nPopustVrijednost, lPrint )
+FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVrijednost, nRealizacijaVrijednost, nPopustVrijednost, lPrint )
 
    LOCAL nCijenaNeto, nCijenaBruto
    LOCAL lVisak
@@ -234,10 +245,12 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
 
    IF pos->idvd == POS_IDVD_POCETNO_STANJE_PRODAVNICA
       nUlaz := POS->Kolicina
-      nVrijednost := POS->Kolicina * POS->Cijena
       nIzlaz := 0
-      nStanjeKolicina := POS->Kolicina
       nKalo := 0
+      nPopustVrijednost := 0
+      nVrijednost := POS->Kolicina * POS->Cijena
+      nStanjeKolicina := POS->Kolicina
+
       IF lPrint
          ?
          ?? DToC( pos->datum ) + " " + pos->vrij_obrade + " "
@@ -377,6 +390,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
       ENDIF
       nVrijednost -= POS->Kolicina * nCijenaBruto
       nStanjeKolicina -= POS->Kolicina
+      nRealizacijaVrijednost += POS->Kolicina * nCijenaBruto
       nPopustVrijednost += POS->Kolicina * ( nCijenaBruto - nCijenaNeto )
       IF lPrint
          ?

@@ -11,9 +11,7 @@
 
 #include "f18.ch"
 
-// ----------------------------------
-// fix brnal
-// ----------------------------------
+
 FUNCTION fin_fix_broj_naloga( cBrNal )
 
    IF Right( AllTrim( cBrNal ), 1 ) == "*"

@@ -590,3 +590,235 @@ BEGIN
 
 END;
 $$;
+
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikal_stanje( cIdRoba varchar, dDatOD date, dDatDo date )
+    RETURNS TABLE(p_prijem numeric, p_povrat numeric, p_ulaz_ostalo numeric,
+                  p_realizacija numeric, p_popust numeric, p_izlaz_ostalo numeric, p_kalo numeric,
+                  p_realizacija_v numeric, p_popust_v numeric, p_vrijednost numeric,
+                  prijem numeric, povrat numeric, ulaz_ostalo numeric,
+                  realizacija numeric, popust numeric, izlaz_ostalo numeric, kalo numeric,
+                  relizacija_v numeric, popust_v numeric, vrijednost numeric)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+
+  nTPrijem numeric;
+  nTPovrat numeric;
+  nTUlazOstalo numeric;
+  nTrealizacija numeric;
+  nTPopust numeric;
+  nTIzlazOstalo numeric;
+  nTKalo numeric;
+  nTRealizacijaV numeric;
+  nTPopustV numeric;
+  nTVrijednost numeric;
+
+  nPPrijem numeric;
+  nPPovrat numeric;
+  nPUlazOstalo numeric;
+  nPrealizacija numeric;
+  nPPopust numeric;
+  nPIzlazOstalo numeric;
+  nPKalo numeric;
+  nPRealizacijaV numeric;
+  nPPopustV numeric;
+  nPVrijednost numeric;
+
+  nPrijem numeric;
+  nPovrat numeric;
+  nUlazOstalo numeric;
+  nrealizacija numeric;
+  nPopust numeric;
+  nIzlazOstalo numeric;
+  nKalo numeric;
+  nRealizacijaV numeric;
+  nPopustV numeric;
+  nVrijednost numeric;
+
+  rec RECORD;
+  nCnt integer;
+  lInit boolean;
+BEGIN
+
+  nCnt := 0;
+
+  nPPrijem := 0;
+  nPPovrat := 0;
+  nPUlazOstalo := 0;
+  nPrealizacija := 0;
+  nPPopust := 0;
+  nPIzlazOstalo := 0;
+  nPKalo := 0;
+  nPRealizacijaV := 0;
+  nPPopustV := 0;
+  nPVrijednost := 0;
+
+  nPrijem := 0;
+  nPovrat := 0;
+  nUlazOstalo := 0;
+  nrealizacija := 0;
+  nPopust := 0;
+  nIzlazOstalo := 0;
+  nKalo := 0;
+  nRealizacijaV := 0;
+  nPopustV := 0;
+  nVrijednost :=0;
+
+  FOR rec IN
+    SELECT *, date(pos.obradjeno) as datum_obrade, to_char(pos.obradjeno, 'HH24:MI') as vrij_obrade, pos.dat_od, pos.dat_do
+      FROM {{ item_prodavnica }}.pos_items
+       LEFT JOIN  {{ item_prodavnica }}.pos
+       ON pos_items.idpos=pos.idpos and pos_items.idvd=pos.idvd and pos_items.brdok=pos.brdok and pos_items.datum=pos.datum
+       WHERE pos.idvd <> '21'
+       AND rtrim(idroba)=Trim( cIdRoba )
+       ORDER BY idroba, pos.datum, pos.obradjeno, pos.idvd, pos.brdok
+  LOOP
+      nCnt := nCnt + 1;
+
+      nTPrijem := 0;
+      nTPovrat := 0;
+      nTUlazOstalo := 0;
+      nTrealizacija := 0;
+      nTPopust := 0;
+      nTIzlazOstalo := 0;
+      nTKalo := 0;
+      nTRealizacijaV := 0;
+      nTPopustV := 0;
+      nTVrijednost := 0;
+
+      lInit := False;
+
+      CASE
+       WHEN rec.idvd = '02' THEN
+          lInit := True;
+          nTUlazOstalo := rec.kolicina;
+          nTVrijednost := rec.kolicina * rec.cijena;
+
+       WHEN rec.idvd = '22' THEN
+          nTPrijem := rec.kolicina;
+          nTVrijednost := rec.kolicina * rec.cijena;
+
+       WHEN rec.idvd = '42' THEN
+           nTrealizacija := rec.kolicina;
+           IF rec.ncijena <> 0 THEN
+              nTPopustV := rec.kolicina * (rec.cijena - rec.ncijena);
+           END IF;
+           nTRealizacijaV := rec.kolicina * rec.cijena;
+           nTVrijednost := - rec.kolicina * rec.cijena;
+
+       WHEN rec.idvd IN ('90','IP') THEN
+          IF rec.kolicina - rec.kol2 > 0 THEN
+              -- visak
+              nTUlazOstalo := rec.kolicina - rec.kol2;
+          ELSE
+              nTIzlazOstalo := - (rec.kolicina - rec.kol2);
+          END IF;
+          nTVrijednost := nTUlazOstalo * rec.cijena - nTIzlazOstalo * rec.cijena;
+
+       WHEN rec.idvd IN ('19', '29') THEN
+
+          nTVrijednost := (rec.ncijena - rec.cijena) * rec.kolicina;
+
+       WHEN rec.idvd = '99' THEN
+
+          nTKalo := rec.kolicina;
+          nTVrijednost := 0;
+
+      ELSE
+          nTVrijednost := 0;
+      END CASE;
+
+      IF rec.datum < dDatOd THEN
+         IF lInit THEN
+              nPPrijem := 0;
+              nPPovrat := 0;
+              nPUlazOstalo := 0;
+              nPrealizacija := 0;
+              nPPopust := 0;
+              nPIzlazOstalo := 0;
+              nPKalo := 0;
+              nPRealizacijaV := 0;
+              nPPopustV := 0;
+              nPVrijednost := 0;
+        END IF;
+        nPPrijem := nPPrijem +nTPrijem;
+        nPPovrat := nPPovrat +nTPovrat;
+        nPUlazOstalo := nPUlazOstalo +nTUlazOstalo;
+        nPrealizacija := nPrealizacija + nTrealizacija;
+        nPPopust := nPPopust + nTPopust;
+        nPIzlazOstalo := nPIzlazOstalo + nTIzlazOstalo;
+        nPKalo := nPKalo + nTKalo;
+        nPRealizacijaV := nPRealizacijaV + nTrealizacijaV;
+        nPPopustV := nPPopustV + nTPopustV;
+        nPVrijednost := nPVrijednost + nTVrijednost;
+
+      ELSIF rec.datum >= dDatOd AND rec.datum <= dDatDo THEN
+
+        -- razmatrani datumski period
+        IF lInit THEN
+             nPPrijem := 0;
+             nPPovrat := 0;
+             nPUlazOstalo := 0;
+             nPrealizacija := 0;
+             nPPopust := 0;
+             nPIzlazOstalo := 0;
+             nPKalo := 0;
+             nPRealizacijaV := 0;
+             nPPopustV := 0;
+             nPVrijednost := 0;
+
+             nPrijem := 0;
+             nPovrat := 0;
+             nUlazOstalo := 0;
+             nrealizacija := 0;
+             nPopust := 0;
+             nIzlazOstalo := 0;
+             nKalo := 0;
+             nRealizacijaV := 0;
+             nPopustV := 0;
+             nVrijednost := 0;
+        END IF;
+
+        nPrijem := nPrijem + nTPrijem;
+        nPovrat := nPovrat + nTPovrat;
+        nUlazOstalo := nUlazOstalo + nTUlazOstalo;
+        nRealizacija := nRealizacija + nTrealizacija;
+        nPopust := nPopust + nTPopust;
+        nIzlazOstalo := nIzlazOstalo + nTIzlazOstalo;
+        nKalo := nKalo + nTKalo;
+        nRealizacijaV := nRealizacijaV + nTRealizacijaV;
+        nPopustV := nPopustV + nTPopustV;
+        nVrijednost := nVrijednost + nTVrijednost;
+
+      END IF;
+
+  END LOOP;
+
+
+  RETURN QUERY SELECT
+              nPPrijem,
+              nPPovrat,
+              nPUlazOstalo,
+              nPRealizacija,
+              nPPopust,
+              nPIzlazOstalo,
+              nPKalo,
+              nPRealizacijaV,
+              nPPopustV,
+              nPVrijednost,
+
+              nPrijem,
+              nPovrat,
+              nUlazOstalo,
+              nRealizacija,
+              nPopust,
+              nIzlazOstalo,
+              nKalo,
+              nRealizacijaV,
+              nPopustV,
+              nVrijednost;
+
+END;
+$$;
