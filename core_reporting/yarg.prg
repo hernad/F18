@@ -144,7 +144,7 @@ METHOD YargReport:create_report_properties()
 
 METHOD YargReport:create_yarg_xml()
 
-   LOCAL cTemplate, hRec, cKey, lFirst, lFirst2
+   LOCAL cTemplate, hRec, cKey, lFirst, lFirst2, nI
 
    ::cReportXml := my_home() + my_dbf_prefix() + "yarg_" + ::cName + ".xml"
 
@@ -218,7 +218,6 @@ METHOD YargReport:create_yarg_xml()
    ENDIF
 
    IF "BandSql1" $ ::cBands
-
       xml_subnode_start( 'band name="Sql1" orientation="H"' )
       xml_subnode_start( "queries" )
 
@@ -228,36 +227,43 @@ METHOD YargReport:create_yarg_xml()
       ?
       ?E ::aSql[ 1 ]
       xml_subnode_end( "script" )
-
       xml_subnode_end( "query" )
-
       xml_subnode_end( "queries" )
-
       xml_subnode_end( "band" ) // band1
-
    ENDIF
 
-   IF "Header2#" $ ::cBands
-      xml_subnode_start( 'band name="Header2" orientation="H"' )
+   IF "#Footer " $ ::cBands
+      xml_subnode_start( 'band name="Footer" orientation="H"' )
       xml_subnode_end( "band" )
    ENDIF
 
-   IF "BandSql2" $ ::cBands
+   FOR nI := 2 TO 10
+      IF "Header" + AllTrim( Str( nI ) ) + "#" $ ::cBands
+         xml_subnode_start( 'band name="Header' + AllTrim( Str( nI ) ) + '" orientation="H"' )
+         xml_subnode_end( "band" )
+      ENDIF
 
-      xml_subnode_start( 'band name="Sql2" orientation="H"' )
-      xml_subnode_start( "queries" )
+      IF "BandSql" + AllTrim( Str( nI ) )  $ ::cBands
+         xml_subnode_start( 'band name="Sql' + AllTrim( Str( nI ) ) + '" orientation="H"' )
+         xml_subnode_start( "queries" )
 
-      xml_subnode_start( 'query name="Sql2" type="sql"' )
-      xml_subnode_start( "script" )
-      ??  to_xml_encoding( ::aSql[ 2 ] )
-      ?
-      ?E ::aSql[ 2 ]
-      xml_subnode_end( "script" )
-      xml_subnode_end( "query" )
-      xml_subnode_end( "queries" )
-      xml_subnode_end( "band" ) // BandSql2
+         xml_subnode_start( 'query name="Sql' + AllTrim( Str( nI ) ) + '" type="sql"' )
+         xml_subnode_start( "script" )
+         ??  to_xml_encoding( ::aSql[ nI ] )
+         ?
+         ?E ::aSql[ nI ]
+         xml_subnode_end( "script" )
+         xml_subnode_end( "query" )
+         xml_subnode_end( "queries" )
+         xml_subnode_end( "band" ) // BandSql2, 3, ,4
+      ENDIF
 
-   ENDIF
+      IF "#Footer" + AllTrim( Str( nI ) ) $ ::cBands
+         xml_subnode_start( 'band name="Footer' + AllTrim( Str( nI ) ) + '" orientation="H"' )
+         xml_subnode_end( "band" )
+      ENDIF
+
+   NEXT
 
    xml_subnode_end( "bands" )
    xml_subnode_end( "rootBand" )
