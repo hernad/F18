@@ -11,7 +11,11 @@
 
 #include "f18.ch"
 
-#define TEMPLATE_URL_BASE "https://github.com/hernad/F18_template/releases/download/"
+#define TEMPLATE_RELEASE_URL_BASE "https://github.com/hernad/F18_template/releases/download/"
+
+// https://github.com/hernad/F18_template/blob/master/kalk_pregled_prod_1.xlsx?raw=true
+#define TEMPLATE_MASTER_URL_BASE "https://github.com/hernad/F18_template/blob/master/"
+#define TEMPLATE_MASTER_URL_BASE_SUFIX "?raw=true"
 
 STATIC s_cDirF18Template
 STATIC s_cUrl
@@ -35,10 +39,16 @@ FUNCTION download_template_ld_obr_2001() // v17
    RETURN download_template( "ld_obr_2001.xlsx", "de948c56cc6dfc8d08b6a3671252b29376f9476624de82ace1f20d9da045b1aa" )
 
 
-FUNCTION download_template( cTemplateName,  cSHA256sum )
+FUNCTION download_template( cTemplateName,  cSHA256sum, lMaster )
+
+   LOCAL lChecksum
 
    IF s_hTemplates == NIL
       s_hTemplates := hb_Hash()
+   ENDIF
+
+   IF lMaster == NIL
+      lMaster := .F.
    ENDIF
 
    IF hb_HHasKey( s_hTemplates, cTemplateName )
@@ -46,8 +56,11 @@ FUNCTION download_template( cTemplateName,  cSHA256sum )
    ENDIF
 
    s_cDirF18Template := f18_exe_path() + f18_template_path()
-   s_cUrl := TEMPLATE_URL_BASE + f18_template_ver() + "/" + cTemplateName
-
+   IF lMaster
+      s_cUrl := TEMPLATE_MASTER_URL_BASE + "/" + cTemplateName + TEMPLATE_MASTER_URL_BASE_SUFIX
+   ELSE
+      s_cUrl := TEMPLATE_RELEASE_URL_BASE + f18_template_ver() + "/" + cTemplateName
+   ENDIF
    IF DirChange( s_cDirF18Template ) != 0
       IF MakeDir( s_cDirF18Template ) != 0
          error_bar( "tpl", "Kreiranje dir: " + s_cDirF18Template + " neuspješno?! STOP" )
@@ -55,10 +68,17 @@ FUNCTION download_template( cTemplateName,  cSHA256sum )
       ENDIF
    ENDIF
 
+   IF !File( s_cDirF18Template + cTemplateName )
+      lChecksum := .F.
+   ELSE
+      IF cSHA256sum == "#"
+         lChecksum := .T.  // ignorisemo checksum
+      ELSE
+         lChecksum := sha256sum( s_cDirF18Template + cTemplateName ) == cSHA256sum
+      ENDIF
+   ENDIF
 // #ifndef F18_DEBUG
-   IF !File( s_cDirF18Template + cTemplateName ) .OR. ;
-         ( sha256sum( s_cDirF18Template + cTemplateName ) != cSHA256sum )
-
+   IF !lChecksum
       IF !Empty( download_file( s_cUrl, s_cDirF18Template + cTemplateName ) )
          info_bar( "tpl", "Download " + s_cDirF18Template + cTemplateName )
       ELSE
@@ -67,7 +87,7 @@ FUNCTION download_template( cTemplateName,  cSHA256sum )
       ENDIF
    ENDIF
 
-   IF sha256sum( s_cDirF18Template + cTemplateName ) != cSHA256sum
+   IF cSHA256sum != "#" .AND. sha256sum( s_cDirF18Template + cTemplateName ) != cSHA256sum
       MsgBeep( "ERROR sha256sum: " + s_cDirF18Template + cTemplateName + "##" + cSHA256sum )
       RETURN .F.
    ENDIF

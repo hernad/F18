@@ -160,9 +160,7 @@ METHOD YargReport:create_yarg_xml()
    cTemplate += " outputNamePattern=" + xml_quote( "outputNamePattern" )
 
    xml_single_node( "template", cTemplate )
-
    xml_subnode_end( "templates" )
-
    xml_subnode_start( "parameters" )
    /*
        <parameter name="param1" alias="param1" required="true" class="java.lang.String" defaultValue="defaultParam1"/>
