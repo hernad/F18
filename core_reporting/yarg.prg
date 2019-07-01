@@ -21,6 +21,7 @@ CREATE CLASS YargReport
    VAR cReportProperties // ~/.f18/rg_2016/ld_obr_2002.properties
 
    VAR cReportOutput
+   VAR aHeader
    VAR aRecords // { { 'id':1, 'naz':'dva' }, { 'id':2, 'naz':'tri' } }
    VAR aSql  // { "select * from fmk.fin_suban",  "select * from fmk.partn where id=${BandSql1.idpartner}"}
    VAR cBands   // primjer: "Band1", "Header#Band1"
@@ -176,15 +177,43 @@ METHOD YargReport:create_yarg_xml()
    xml_subnode_start( 'rootBand name="Root" orientation="H"' )
    xml_subnode_start( "bands" )
 
-   IF "Header#" $ ::cBands
-      xml_subnode_start( 'band name="Header" orientation="H"' )
+   IF "Header#" $ ::cBands .OR. "Header1#" $ ::cBands
+
+      IF "Header#" $ ::cBands // kompatibilnost sa starim izvjestajima
+         xml_subnode_start( 'band name="Header" orientation="H"' )
+      ELSE
+         xml_subnode_start( 'band name="Header1" orientation="H"' )
+      ENDIF
+
+      IF ValType( ::aHeader ) == "A" .AND. Len( ::aHeader ) >= 1
+         // aHeader := { { 'datod', '01.01.19'}, {'datdo', '31.12.19'} }
+         xml_subnode_start( "queries" )
+         xml_subnode_start( 'query name="Data_set_h1" type="groovy"' )
+         xml_subnode_start( "script" )
+         ?? "return ["
+         hRec := ::aHeader[ 1 ]
+         ?? "["
+         lFirst2 := .T.
+         FOR EACH cKey IN hRec:Keys
+            IF !lFirst2
+               ?? ","
+            ENDIF
+            lFirst2 := .F.
+            ?? sql_quote( cKey ) + ":" + sql_quote( hRec[ cKey ] )
+         NEXT
+         ?? "]"
+         ?? "]"
+
+         xml_subnode_end( "script" )
+         xml_subnode_end( "query" )
+         xml_subnode_end( "queries" )
+      ENDIF
       xml_subnode_end( "band" )
    ENDIF
 
    IF "Band1" $ ::cBands
       xml_subnode_start( 'band name="Band1" orientation="H"' )
       xml_subnode_start( "queries" )
-
       xml_subnode_start( 'query name="Data_set_1" type="groovy"' )
       xml_subnode_start( "script" )
       ?? "return ["
@@ -238,6 +267,30 @@ METHOD YargReport:create_yarg_xml()
    FOR nI := 2 TO 10
       IF "Header" + AllTrim( Str( nI ) ) + "#" $ ::cBands
          xml_subnode_start( 'band name="Header' + AllTrim( Str( nI ) ) + '" orientation="H"' )
+
+         IF ValType( ::aHeader ) == "A" .AND. Len( ::aHeader ) >= nI
+            // aHeader[ nI ] := hash ['datod' => '01.01.19', 'datdo' => '31.12.19']
+            xml_subnode_start( "queries" )
+            xml_subnode_start( 'query name="Data_set_h' + AllTrim( Str( nI ) ) + '" type="groovy"' )
+            xml_subnode_start( "script" )
+            ?? "return ["
+            hRec := ::aHeader[ nI ]
+            ?? "["
+            lFirst2 := .T.
+            FOR EACH cKey IN hRec:Keys
+               IF !lFirst2
+                  ?? ","
+               ENDIF
+               lFirst2 := .F.
+               ?? sql_quote( cKey ) + ":" + sql_quote( hRec[ cKey ] )
+            NEXT
+            ?? "]"
+            ?? "]"
+            xml_subnode_end( "script" )
+            xml_subnode_end( "query" )
+            xml_subnode_end( "queries" )
+         ENDIF
+
          xml_subnode_end( "band" )
       ENDIF
 

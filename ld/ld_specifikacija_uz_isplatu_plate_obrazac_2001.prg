@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR gZaok2
+MEMVAR gZaok2, gObracun
 
 
 FUNCTION ld_specifikacija_plate_obr_2001()
