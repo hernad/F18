@@ -34,6 +34,7 @@ FUNCTION Parsiraj( cFilterUpit, cImeSifre, cTip, lRekurzivno ) // , nSifWA )
 
    LOCAL cStartSifra, cOperator, nPoz1, nPos, nPoz1End, nSiflen
    LOCAL cIzraz, cLijevo, cDesno
+   LOCAL cProlaz, nLen, cIza
 
    LOCAL cVeznik := "", cToken := "", cIddd
 
@@ -312,7 +313,7 @@ FUNCTION  Zagrade( cSifra, nPoz1, nPoz1end )
 
 
 
-FUNCTION VeznikRight( cLijevo, cVeznik )
+STATIC FUNCTION VeznikRight( cLijevo, cVeznik )
 
    // 456.I. -> 456;  cVeznik:=".and."
 
@@ -334,7 +335,8 @@ FUNCTION VeznikRight( cLijevo, cVeznik )
       cLijevo := Left( clijevo, Len( clijevo - 1 ) )
    ENDIF
 
-FUNCTION VeznikLeft( cIza, cVeznik )
+
+STATIC FUNCTION VeznikLeft( cIza, cVeznik )
 
    //
    // .I.456;  ->  456;   cVeznik:=".and."
@@ -360,7 +362,7 @@ FUNCTION VeznikLeft( cIza, cVeznik )
 
 FUNCTION NextToken( cSif, cVeznik )
 
-   LOCAL i := 0, npoz := 9999, npom := 0, iTek
+   LOCAL i := 0, nPoz := 9999, nPom := 0, iTek
 
    FOR i := 1 TO Len( aTokens )
       nPom := At( aTokens[ i ], Upper( cSif ) )

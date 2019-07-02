@@ -22,6 +22,7 @@ CREATE CLASS YargReport
 
    VAR cReportOutput
    VAR aHeader
+   VAR aFooter
    VAR aRecords // { { 'id':1, 'naz':'dva' }, { 'id':2, 'naz':'tri' } }
    VAR aSql  // { "select * from fmk.fin_suban",  "select * from fmk.partn where id=${BandSql1.idpartner}"}
    VAR cBands   // primjer: "Band1", "Header#Band1"
@@ -212,6 +213,7 @@ METHOD YargReport:create_yarg_xml()
    ENDIF
 
    IF "Band1" $ ::cBands
+
       xml_subnode_start( 'band name="Band1" orientation="H"' )
       xml_subnode_start( "queries" )
       xml_subnode_start( 'query name="Data_set_1" type="groovy"' )
@@ -259,8 +261,29 @@ METHOD YargReport:create_yarg_xml()
       xml_subnode_end( "band" ) // band1
    ENDIF
 
-   IF "#Footer " $ ::cBands
-      xml_subnode_start( 'band name="Footer" orientation="H"' )
+   IF "#Footer1 " $ ::cBands
+      xml_subnode_start( 'band name="Footer1" orientation="H"' )
+      IF ValType( ::aFooter ) == "A" .AND. Len( ::aFooter ) >= 1
+         xml_subnode_start( "queries" )
+         xml_subnode_start( 'query name="Data_set_f1" type="groovy"' )
+         xml_subnode_start( "script" )
+         ?? "return ["
+         hRec := ::aFooter[ 1 ]
+         ?? "["
+         lFirst2 := .T.
+         FOR EACH cKey IN hRec:Keys
+            IF !lFirst2
+               ?? ","
+            ENDIF
+            lFirst2 := .F.
+            ?? sql_quote( cKey ) + ":" + sql_quote( hRec[ cKey ] )
+         NEXT
+         ?? "]"
+         ?? "]"
+         xml_subnode_end( "script" )
+         xml_subnode_end( "query" )
+         xml_subnode_end( "queries" )
+      ENDIF
       xml_subnode_end( "band" )
    ENDIF
 
@@ -311,6 +334,28 @@ METHOD YargReport:create_yarg_xml()
 
       IF "#Footer" + AllTrim( Str( nI ) ) $ ::cBands
          xml_subnode_start( 'band name="Footer' + AllTrim( Str( nI ) ) + '" orientation="H"' )
+         IF ValType( ::aFooter ) == "A" .AND. Len( ::aFooter ) >= nI
+            // aHeader[ nI ] := hash ['datod' => '01.01.19', 'datdo' => '31.12.19']
+            xml_subnode_start( "queries" )
+            xml_subnode_start( 'query name="Data_set_f' + AllTrim( Str( nI ) ) + '" type="groovy"' )
+            xml_subnode_start( "script" )
+            ?? "return ["
+            hRec := ::aFooter[ nI ]
+            ?? "["
+            lFirst2 := .T.
+            FOR EACH cKey IN hRec:Keys
+               IF !lFirst2
+                  ?? ","
+               ENDIF
+               lFirst2 := .F.
+               ?? sql_quote( cKey ) + ":" + sql_quote( hRec[ cKey ] )
+            NEXT
+            ?? "]"
+            ?? "]"
+            xml_subnode_end( "script" )
+            xml_subnode_end( "query" )
+            xml_subnode_end( "queries" )
+         ENDIF
          xml_subnode_end( "band" )
       ENDIF
 
