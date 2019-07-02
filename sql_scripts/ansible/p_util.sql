@@ -609,7 +609,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikal_stanje( cIdRoba var
                   p_realizacija_v numeric, p_popust_v numeric, p_vrijednost numeric,
                   prijem numeric, povrat numeric, ulaz_ostalo numeric,
                   realizacija numeric, popust numeric, izlaz_ostalo numeric, kalo numeric,
-                  relizacija_v numeric, popust_v numeric, vrijednost numeric)
+                  realizacija_v numeric, popust_v numeric, vrijednost numeric)
 LANGUAGE plpgsql
 AS $$
 DECLARE
