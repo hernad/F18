@@ -287,7 +287,8 @@ METHOD YargReport:create_yarg_xml()
       xml_subnode_end( "band" )
    ENDIF
 
-   FOR nI := 2 TO 10
+   FOR nI := 2 TO 50
+
       IF "Header" + AllTrim( Str( nI ) ) + "#" $ ::cBands
          xml_subnode_start( 'band name="Header' + AllTrim( Str( nI ) ) + '" orientation="H"' )
 

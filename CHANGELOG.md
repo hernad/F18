@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-07-03
+
+- kalk pregled prod maloprodajna mreza
+
 ## 2019-06-26
 
 - KALK IP - pos dostupna osnovna cijena
