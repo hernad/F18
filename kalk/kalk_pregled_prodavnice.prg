@@ -91,6 +91,7 @@ FUNCTION kalk_pregled_prod_1()
       cSql := "select idroba, pdv, sum(prijem) as prijem, sum(povrat) as povrat, sum(ulaz_ostalo) as ulaz_ostalo, sum(p_popust) p_popust, sum(popust) popust, sum(p_izlaz_ostalo) p_izlaz_ostalo, sum(izlaz_ostalo) izlaz_ostalo,"
       cSql += "sum(p_kalo + kalo) u_kalo, sum(p_prijem+p_ulaz_ostalo-p_povrat-p_realizacija-p_izlaz_ostalo) p_stanje, sum(p_realizacija) p_realizacija, sum(realizacija) realizacija,"
       cSql += "sum(p_realizacija_v) p_realizacija_v, sum(realizacija_v) realizacija_v,sum(p_popust_v) p_popust_v, sum(popust_v) popust_v, sum(p_vrijednost + vrijednost) u_vrijednost,"
+      cSql += "public.prodavnica_nc(" + Token( cProdavnice, ",", nI ) + ", idroba, " + sql_quote(dDatDo) + ") nc,"
       cSql += cProdavnica + ".pos_dostupna_osnovna_cijena_za_artikal( idroba ) osnovna_cijena, roba.naz roba_naz, roba.jmj  "
       cSql += " FROM " + cProdavnica + ".pos_artikal_stanje( " + sql_quote( cIdRoba ) + ", " + sql_quote( dDatOd ) + ", " + sql_quote( dDatDo ) + " ) pstanje"
       cSql += " LEFT JOIN roba on pstanje.idroba = roba.id"

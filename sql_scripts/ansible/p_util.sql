@@ -844,3 +844,67 @@ BEGIN
 
 END;
 $$;
+
+
+CREATE OR REPLACE FUNCTION public.prodavnica_nc( nProdavnica integer, cIdRoba varchar, dDatDo date )
+    RETURNS numeric
+LANGUAGE plpgsql
+AS $$
+DECLARE
+
+cPKonto varchar;
+rec RECORD;
+nNV numeric;
+nKolicina numeric;
+nLastUlazNC numeric;
+
+BEGIN
+
+SELECT id INTO cPKonto
+       from public.koncij where prod=nProdavnica;
+
+nNV := 0;
+nKolicina := 0;
+nLastUlazNC := 0;
+
+FOR rec IN
+   SELECT nc, kolicina, pu_i, gkolicin2 from kalk_kalk
+          WHERE trim(idroba) = trim(cIdRoba) and pkonto = cPKonto and datdok <= dDatDo
+LOOP
+
+    CASE
+        WHEN rec.pu_i = '1' THEN
+           nNV := nNV +  rec.nc * rec.kolicina;
+           nKolicina := nKolicina + rec.kolicina;
+           nLastUlazNC := rec.nc;
+
+        WHEN rec.pu_i = '5' THEN
+          nNV := nNV - rec.nc * rec.kolicina;
+          nKolicina := nKolicina - rec.kolicina;
+
+        WHEN rec.pu_i = 'I' THEN
+          nNV := nNV - rec.nc * rec.gkolicin2;
+          nKolicina := nKolicina - rec.gkolicin2;
+        ELSE
+          nNV := nNV + 0;
+     END CASE;
+END LOOP;
+
+IF nKolicina <> 0 THEN
+   RETURN ROUND(nNV / nKolicina, 4);
+
+ELSE
+   IF round(nNV, 4) <> 0 THEN
+      IF nLastUlazNC > 0 THEN -- kolicina 0, ali NV postoji - iskoristiti nc zadnjeg ulaza
+         RETURN nLastUlazNC;
+      ELSE
+        RETURN -1.00;
+      END IF;
+   ELSE
+      RETURN 0;
+   END IF;
+END IF;
+
+
+END;
+$$;
