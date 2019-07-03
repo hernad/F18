@@ -2,7 +2,7 @@
 
 ## 2019-07-03
 
-- kalk pregled prod maloprodajna mreza
+- kalk pregled prod maloprodajna mreza /1
 
 ## 2019-06-26
 
