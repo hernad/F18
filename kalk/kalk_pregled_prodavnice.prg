@@ -38,17 +38,19 @@ FUNCTION kalk_pregled_prod_1()
    LOCAL GetList := {}
    LOCAL hHeader, hHeader2
    LOCAL cProdavnice := fetch_metric( "pregled_prod", my_user(), "2,16" )
+   LOCAL cNcDN := fetch_metric( "pregled_prod_nc", my_user(), "N" )
    LOCAL nI, nProdavnica, cProdavnica
    LOCAL hFooter
 
    cProdavnice := PadR( cProdavnice, 200 )
 
-   Box(, 5, 60 )
+   Box(, 6, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2  SAY "Datum od " GET dDatOd
    @ box_x_koord() + 1, Col() + 2 SAY "do" GET dDatDo
    @ box_x_koord() + 3, box_y_koord() + 2  SAY "Roba% : " GET cIdRoba
+   @ box_x_koord() + 4, box_y_koord() + 2  SAY "Prikaz nabavne (DN) : " GET cNcDN PICT "@!" VALID cNcDN $ "DN"
 
-   @ box_x_koord() + 5, box_y_koord() + 2  SAY "Prodavnice : " GET cProdavnice PICTURE "@S40"
+   @ box_x_koord() + 6, box_y_koord() + 2  SAY "Prodavnice : " GET cProdavnice PICTURE "@S40"
 
    READ
    BoxC()
@@ -61,10 +63,11 @@ FUNCTION kalk_pregled_prod_1()
    set_metric( "pregled_prod_d_od", my_user(), dDatOd )
    set_metric( "pregled_prod_d_do", my_user(), dDatDo )
    set_metric( "pregled_prod", my_user(), cProdavnice )
+   set_metric( "pregled_prod_nc", my_user(), cNcDN )
 
    nProdavnica := NumToken( cProdavnice, ',' )
 
-   download_template( "kalk_pregled_prod_1.xlsx", "#", .T. )
+   download_template( "kalk_pregled_prod_1.xlsx", "1443c32d8b87e85ec1043c2041b5f79c5328c61f34a20d1305a01306dbea352c", .T. )
    oReport := YargReport():New( "kalk_pregled_prod_1", "xlsx", NIL )
 
    oReport:aSql := {}
@@ -91,7 +94,11 @@ FUNCTION kalk_pregled_prod_1()
       cSql := "select idroba, pdv, sum(prijem) as prijem, sum(povrat) as povrat, sum(ulaz_ostalo) as ulaz_ostalo, sum(p_popust) p_popust, sum(popust) popust, sum(p_izlaz_ostalo) p_izlaz_ostalo, sum(izlaz_ostalo) izlaz_ostalo,"
       cSql += "sum(p_kalo + kalo) u_kalo, sum(p_prijem+p_ulaz_ostalo-p_povrat-p_realizacija-p_izlaz_ostalo) p_stanje, sum(p_realizacija) p_realizacija, sum(realizacija) realizacija,"
       cSql += "sum(p_realizacija_v) p_realizacija_v, sum(realizacija_v) realizacija_v,sum(p_popust_v) p_popust_v, sum(popust_v) popust_v, sum(p_vrijednost + vrijednost) u_vrijednost,"
-      cSql += "public.prodavnica_nc(" + Token( cProdavnice, ",", nI ) + ", idroba, " + sql_quote(dDatDo) + ") nc,"
+      IF cNcDN == "D"
+        cSql += "public.prodavnica_nc(" + Token( cProdavnice, ",", nI ) + ", idroba, " + sql_quote(dDatDo) + ") nc,"
+      ELSE
+        cSql += "0 nc,"
+      ENDIF
       cSql += cProdavnica + ".pos_dostupna_osnovna_cijena_za_artikal( idroba ) osnovna_cijena, roba.naz roba_naz, roba.jmj  "
       cSql += " FROM " + cProdavnica + ".pos_artikal_stanje( " + sql_quote( cIdRoba ) + ", " + sql_quote( dDatOd ) + ", " + sql_quote( dDatDo ) + " ) pstanje"
       cSql += " LEFT JOIN roba on pstanje.idroba = roba.id"
