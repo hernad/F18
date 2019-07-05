@@ -3,7 +3,7 @@
 ## 2019-07-05
 
 - kalk pregled prod varijanta 2
-- parametri kad je admin = false
+- shift-F10 - parametri aplikacije kad je non admin
 
 ## 2019-07-03
 
