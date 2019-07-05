@@ -3,6 +3,7 @@
 ## 2019-07-05
 
 - kalk pregled prod varijanta 2
+- parametri kad je admin = false
 
 ## 2019-07-03
 

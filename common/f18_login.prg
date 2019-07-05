@@ -738,6 +738,7 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    LOCAL aMeni := {}, aMeniExec := {}
    LOCAL oAdmin
    LOCAL nIzbor := 1
+   LOCAL lAdmin := .F.
 
    nX := nXPos
    nY := ( f18_max_cols() / 2 ) - 5
@@ -745,8 +746,8 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    oAdmin := F18Admin():New()
 
    IF oAdmin == NIL
-      MsgBeep( "Nemate Admin prava? STOP !" )
-      RETURN .F.
+      // MsgBeep( "Nemate Admin prava? STOP !" )
+      lAdmin := .F.
    ENDIF
    // print_sql_connections()
 
@@ -757,23 +758,25 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    // AAdd( aMeniExec, {|| F18Admin():update_app(), .T. } )
 
 
-   AAdd( aMeni, hb_UTF8ToStr( "1. nova baza                  " ) )
-   AAdd( aMeniExec, {|| oAdmin:create_new_pg_db(), .T. } )
+   IF lAdmin
+      AAdd( aMeni, hb_UTF8ToStr( "1. nova baza                  " ) )
+      AAdd( aMeniExec, {|| oAdmin:create_new_pg_db(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "2. brisanje baze" ) )
-   AAdd( aMeniExec, {|| oAdmin:drop_pg_db(), .T. } )
+      AAdd( aMeni, hb_UTF8ToStr( "2. brisanje baze" ) )
+      AAdd( aMeniExec, {|| oAdmin:drop_pg_db(), .T. } )
 
-   AAdd( aMeni, hb_UTF8ToStr( "3. otvaranje nove godine" ) )
-   AAdd( aMeniExec, {|| oAdmin:razdvajanje_sezona(), .T. } )
+      AAdd( aMeni, hb_UTF8ToStr( "3. otvaranje nove godine" ) )
+      AAdd( aMeniExec, {|| oAdmin:razdvajanje_sezona(), .T. } )
 
-   // AAdd( aMeni, hb_UTF8ToStr( "4. sql_cleanup_all" ) )
-   // AAdd( aMeniExec, {|| oAdmin:sql_cleanup_all(), .T. } )
+      // AAdd( aMeni, hb_UTF8ToStr( "4. sql_cleanup_all" ) )
+      // AAdd( aMeniExec, {|| oAdmin:sql_cleanup_all(), .T. } )
 
-   AAdd( aMeni, "S. promjena sezone" )
-   AAdd( aMeniExec, {|| f18_promjena_sezone() } )
+      AAdd( aMeni, "S. promjena sezone" )
+      AAdd( aMeniExec, {|| f18_promjena_sezone() } )
 
-   AAdd( aMeni, "B. backup podataka" )
-   AAdd( aMeniExec, {|| f18_backup_now() } )
+      AAdd( aMeni, "B. backup podataka" )
+      AAdd( aMeniExec, {|| f18_backup_now() } )
+   ENDIF
 
    AAdd( aMeni, "P. parametri aplikacije" )
    AAdd( aMeniExec, {|| set_parametre_f18_aplikacije() } )
