@@ -69,7 +69,6 @@ FUNCTION kalk_stampa_dok_11()
    ENDIF
 
 
-
    cLinija := "--- ---------- " + Replicate( "-", s_nRobaNazivSirina + 5 ) + " ---------- ---------- " + "---------- ---------- " +  "---------- ---------- "  + "---------- ---------- ---------- --------- -----------"
 
    select_o_koncij( kalk_pripr->mkonto )
@@ -90,7 +89,7 @@ FUNCTION kalk_stampa_dok_11()
       kalk_pozicioniraj_roba_tarifa_by_kalk_fields()
       Scatter()
       IF lVPC
-         nVPC := vpc_magacin_rs( .T. )
+         nVPC := vpc_magacin_rs_priprema()
          SELECT kalk_pripr
          _VPC := nVPC
       ENDIF

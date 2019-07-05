@@ -112,7 +112,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
          @ PRow(), PCol() + 1 SAY field->nc PICT piccdem()
          @ PRow(), nC1 := PCol() + 1 SAY nUNv PICT picdem()
          IF lVPC
-            nVPC := vpc_magacin_rs( .T. )
+            nVPC := vpc_magacin_rs_priprema
             SELECT kalk_pripr
             nUVPV := nVPC * field->kolicina
             // nv * (marzavp% + 1) = vpv =>  marzavp% = vpv/nv - 1 x 100%
@@ -174,6 +174,7 @@ FUNCTION is_magacin_evidencija_vpc( cMKonto )
 
    LOCAL lVPC := .F.
 
+altd()
    select_o_koncij( cMKonto )
    IF koncij->region == "RS"
       lVPC := .T.

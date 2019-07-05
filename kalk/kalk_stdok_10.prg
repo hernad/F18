@@ -64,6 +64,8 @@ FUNCTION kalk_stampa_dok_10()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "font_size" ] := 10
+
    xPrintOpt[ "opdf" ] := s_oPDF
    IF f18_start_print( NIL, xPrintOpt,  "KALK Br:" + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( DatDok ) ) == "X"
       RETURN .F.
@@ -195,7 +197,7 @@ FUNCTION kalk_stampa_dok_10()
    check_nova_strana( bZagl, s_oPDF )
 
    ? m
-   ? Space( PRINT_LEFT_SPACE ) + "Magacin se zadužuje po nabavnoj vrijednosti " + AllTrim( Transform( nTot8, picdem ) )
+   ?U Space( PRINT_LEFT_SPACE ) + "Magacin se zadužuje po nabavnoj vrijednosti " + AllTrim( Transform( nTot8, picdem ) )
    ? m
 
    f18_end_print( NIL, xPrintOpt )

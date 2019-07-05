@@ -71,7 +71,7 @@ FUNCTION sif_roba_kalk_stanje_magacin_key_handler_s( cIdRoba )
             nIzlaz := kolicina
          ELSEIF mu_i == "1" .AND. ( idvd $ "12#22#94" )    // povrat
             nIzlaz := -kolicina
-         ELSEIF mu_i == "8"
+    --     ELSEIF mu_i == "8"
             nIzlaz := -kolicina
             nUlaz  := -kolicina
          ENDIF

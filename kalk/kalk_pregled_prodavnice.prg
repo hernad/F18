@@ -34,6 +34,7 @@ FUNCTION kalk_pregled_prod_1()
    LOCAL cIdPartner := Space( 6 )
    LOCAL dDatOd := fetch_metric( "pregled_prod_d_od", my_user(), CToD( "01.01." + AllTrim( Str( Year( Date() ) ) ) ) )
    LOCAL dDatDo := fetch_metric( "pregled_prod_d_do", my_user(), Date() )
+   LOCAL cVarijanta := fetch_metric( "pregled_prod_var", my_user(), "2" )
 
    LOCAL GetList := {}
    LOCAL hHeader, hHeader2
@@ -44,13 +45,15 @@ FUNCTION kalk_pregled_prod_1()
 
    cProdavnice := PadR( cProdavnice, 200 )
 
-   Box(, 6, 60 )
+   Box(, 7, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2  SAY "Datum od " GET dDatOd
    @ box_x_koord() + 1, Col() + 2 SAY "do" GET dDatDo
    @ box_x_koord() + 3, box_y_koord() + 2  SAY "Roba% : " GET cIdRoba
-   @ box_x_koord() + 4, box_y_koord() + 2  SAY "Prikaz nabavne (DN) : " GET cNcDN PICT "@!" VALID cNcDN $ "DN"
+   @ box_x_koord() + 4, box_y_koord() + 2  SAY8 "Proračun nabavne cijene (DN) : " GET cNcDN PICT "@!" VALID cNcDN $ "DN"
+   @ box_x_koord() + 4, col() + 2  SAY "Varijanta : " GET cVarijanta VALID cVarijanta $ "12"
 
    @ box_x_koord() + 6, box_y_koord() + 2  SAY "Prodavnice : " GET cProdavnice PICTURE "@S40"
+
 
    READ
    BoxC()
@@ -64,11 +67,14 @@ FUNCTION kalk_pregled_prod_1()
    set_metric( "pregled_prod_d_do", my_user(), dDatDo )
    set_metric( "pregled_prod", my_user(), cProdavnice )
    set_metric( "pregled_prod_nc", my_user(), cNcDN )
+   set_metric( "pregled_prod_var", my_user(), cVarijanta )
 
    nProdavnica := NumToken( cProdavnice, ',' )
 
+   download_template( "kalk_pregled_prod_2.xlsx", "4588ede2a2c1178a1e0ff3e04278b810c2d72cb7f4b2cfdcd35d28e8a5beda88", .T. )
    download_template( "kalk_pregled_prod_1.xlsx", "1443c32d8b87e85ec1043c2041b5f79c5328c61f34a20d1305a01306dbea352c", .T. )
-   oReport := YargReport():New( "kalk_pregled_prod_1", "xlsx", NIL )
+
+   oReport := YargReport():New( "kalk_pregled_prod_" + cVarijanta, "xlsx", NIL )
 
    oReport:aSql := {}
    oReport:cBands := "Header1#BandSql1#Footer1"

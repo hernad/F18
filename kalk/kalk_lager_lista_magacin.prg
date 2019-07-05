@@ -476,9 +476,9 @@ FUNCTION kalk_lager_lista_magacin()
 
          nVPC := vpc_magacin_rs()
 
-         IF mu_i == "1"
+         IF kalk->mu_i == "1"
 
-            IF !( idvd $ "12#22#94" )
+            IF !( kalk->idvd $ "12#22#94" )
 
                nKolicina := field->kolicina - field->gkolicina - field->gkolicin2
                nUlaz += nKolicina
@@ -527,7 +527,7 @@ FUNCTION kalk_lager_lista_magacin()
             // datum zadnjeg izlaza
             dL_izlaz := field->datdok
 
-         ELSEIF mu_i == "8"
+         ELSEIF kalk->mu_i == "8"
             nKolicina := -field->kolicina
             nIzlaz += nKolicina
             kalk_sumiraj_kolicinu( 0, nKolicina, @nTUlazP, @nTIzlazP )

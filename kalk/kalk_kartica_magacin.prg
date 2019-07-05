@@ -15,6 +15,8 @@ STATIC s_cLinija
 STATIC s_cTxt1
 STATIC s_cTxt2
 
+MEMVAR PicKol, PicDem, PicCDEM
+
 FUNCTION kalk_kartica_magacin()
 
    PARAMETERS cIdFirma, cIdRoba, cIdKonto
@@ -33,6 +35,7 @@ FUNCTION kalk_kartica_magacin()
    LOCAL lRobaTackaZarez := .F.
    LOCAL cIdRobaTackaZarez := cIdRoba
    LOCAL GetList := {}
+   LOCAL lPrviProlaz
 
    PRIVATE fKNabC := .F.
 
@@ -80,7 +83,7 @@ FUNCTION kalk_kartica_magacin()
       cPVSS := fetch_metric( "kalk_kartica_magacin_prikaz_samo_saldo", my_user(), cPVSS )
       cIdKonto := PadR( cIdKonto, FIELD_LENGTH_IDKONTO )
 
-      Box(, 16, 60 )
+      Box(, 16, 70 )
       DO WHILE .T.
 
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
@@ -195,6 +198,7 @@ FUNCTION kalk_kartica_magacin()
    EOF CRET
 
    select_o_koncij( cIdKonto )
+
    SELECT kalk
    gaZagFix := { 7, 4 }
 
@@ -213,7 +217,7 @@ FUNCTION kalk_kartica_magacin()
 
    DO WHILE !Eof() .AND. iif( lRobaTackaZarez, field->idfirma + field->mkonto + field->idroba >= cIdFirma + cIdKonto + cIdRobaTackaZarez, field->idfirma + field->mkonto + field->idroba == cIdFirma + cIdKonto + cIdRobaTackaZarez )
 
-      IF field->mkonto <> cIdKonto .OR. field->idfirma <> cIdFirma
+      IF kalk->mkonto <> cIdKonto .OR. kalk->idfirma <> cIdFirma
          EXIT
       ENDIF
 
@@ -231,13 +235,14 @@ FUNCTION kalk_kartica_magacin()
       nUlaz := nIzlaz := 0
       nRabat := nNV := nVPV := 0
       tnNVd := tnNVp := tnVPVd := tnVPVp := 0
-      fPrviProl := .T.
+      lPrviProlaz := .T.
       nColDok := 9
       nColFCJ2 := 68
       cLastPar := ""
       cSKGrup := ""
+      nNC := 0
 
-      DO WHILE !Eof() .AND. cIdFirma + cIdKonto + cIdRoba == field->idFirma + field->mkonto + field->idroba
+      DO WHILE !Eof() .AND. cIdFirma + cIdKonto + cIdRoba == kalk->idFirma + kalk->mkonto + kalk->idroba
          nNVd := nNVp := nVPVd := nVPVp := 0
 
          IF lBezG2 .AND. field->idvd == "14"
@@ -250,18 +255,23 @@ FUNCTION kalk_kartica_magacin()
                LOOP
             ENDIF
          ENDIF
-         IF datdok < ddatod .AND. cPredh == "N"
+
+         IF kalk->datdok < dDatod .AND. cPredh == "N"
             SKIP
             LOOP
          ENDIF
-         IF datdok > ddatdo
+         IF kalk->datdok > dDatdo
+            SKIP
+            LOOP
+         ENDIF
+         IF kalk->idvd $ "21#22#"
             SKIP
             LOOP
          ENDIF
 
-         IF cPredh == "D" .AND. datdok >= dDatod .AND. fPrviProl
+         IF cPredh == "D" .AND. kalk->datdok >= dDatod .AND. lPrviProlaz
 
-            fPrviprol := .F. // ispis predhodnog stanja
+            lPrviProlaz := .F. // ispis predhodnog stanja
 
             ? "Stanje do ", dDatOd
 
@@ -315,21 +325,16 @@ FUNCTION kalk_kartica_magacin()
 
             ENDIF
 
-            nNVd := field->nc * ( kolicina - gkolicina - gkolicin2 )
+            nNVd := field->nc * kalk->kolicina
             tnNVd += nNVd
-            nNV += field->nc * ( kolicina - gkolicina - gkolicin2 )
+            nNV += field->nc * kalk->kolicina
 
-            IF koncij->naz == "P2"
-               nVPVd := roba->plc * ( kolicina - gkolicina - gkolicin2 )
-               tnVPVd += nVPVd
-               nVPV += roba->plc * ( kolicina - gkolicina - gkolicin2 )
-            ELSE
-               nVPVd := vpc * ( kolicina - gkolicina - gkolicin2 )
-               tnVPVd += nVPVd
-               nVPV += vpc * ( kolicina - gkolicina - gkolicin2 )
-            ENDIF
+            nVPVd := kalk->vpc * kalk->kolicina
+            tnVPVd += nVPVd
+            nVPV += kalk->vpc * kalk->kolicina
 
-            IF datdok >= dDatod
+
+            IF kalk->datdok >= dDatod
 
                IF cPVSS == "N" // NV dug. NV pot.
                   @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNVd   )
@@ -337,7 +342,6 @@ FUNCTION kalk_kartica_magacin()
                ENDIF
 
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNV   )
-
                @ PRow(), PCol() + 1 SAY say_cijena( 0 ) // RABAT
 
                IF koncij->naz == "P2" // VPC
@@ -348,10 +352,10 @@ FUNCTION kalk_kartica_magacin()
 
                IF cPrikazBrojaFaktureDN == "D"
                   @ PRow() + 1, nColDok SAY field->brfaktp
-                  //IF !Empty( idzaduz2 )
-                  //   @ PRow(), PCol() + 1 SAY " RN: "
-                  //   ?? idzaduz2
-                  //ENDIF
+                  // IF !Empty( idzaduz2 )
+                  // @ PRow(), PCol() + 1 SAY " RN: "
+                  // ?? idzaduz2
+                  // ENDIF
                ENDIF
 
                IF cPrikFCJ2 == "D" .AND. field->idvd == "10"
@@ -359,15 +363,15 @@ FUNCTION kalk_kartica_magacin()
                ENDIF
             ENDIF
 
-         ELSEIF mu_i == "5"
+         ELSEIF kalk->mu_i == "5"
 
-            nIzlaz += kolicina
-            IF datdok >= ddatod
-               ? datdok, idvd + "-" + brdok, field->idtarifa
+            nIzlaz += kalk->kolicina
+            IF kalk->datdok >= dDatod
+               ? kalk->datdok, kalk->idvd + "-" + kalk->brdok, field->idtarifa
                ?? "", field->idpartner
                nCol1 := PCol() + 1
                @ PRow(), PCol() + 1 SAY say_kolicina( 0         )
-               @ PRow(), PCol() + 1 SAY say_kolicina( kolicina  )
+               @ PRow(), PCol() + 1 SAY say_kolicina( kalk->kolicina  )
                @ PRow(), PCol() + 1 SAY say_kolicina( nUlaz - nIzlaz    )
 
                nNc := field->nc
@@ -379,18 +383,14 @@ FUNCTION kalk_kartica_magacin()
 
             ENDIF
 
-            nNVp := field->nc * ( kolicina )
+            nNVp := kalk->nc * kalk->kolicina
             tnNVp += nNVp
-            nNV -= nc * ( kolicina )
-            IF koncij->naz == "P2"
-               nVPVp := roba->plc * ( kolicina )
-               tnVPVp += nVPVp
-               nVPV -= roba->plc * ( kolicina )
-            ELSE
-               nVPVp := vpc * ( kolicina )
-               tnVPVp += nVPVp
-               nVPV -= vpc * ( kolicina )
-            ENDIF
+            nNV -= kalk->nc * kalk->kolicina
+
+            nVPVp := kalk->vpc * kalk->kolicina
+            tnVPVp += nVPVp
+            nVPV -= kalk->vpc * kalk->kolicina
+
             nRabat += field->vpc * field->rabatv / 100 * field->kolicina
 
             IF field->datdok >= dDatod
@@ -404,30 +404,26 @@ FUNCTION kalk_kartica_magacin()
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNV )
 
                // VPC
-               IF koncij->naz == "P2"
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc * rabatv / 100 * kolicina  )
-                  @ PRow(), PCol() + 1 SAY say_cijena( roba->plc )
-               ELSE
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc * rabatv / 100 * kolicina  )
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc )
-               ENDIF
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc * kalk->rabatv / 100 * kalk->kolicina  )
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc )
+
 
                IF cPrikazBrojaFaktureDN == "D"
-                  @ PRow() + 1, nColDok SAY brfaktp
-                  //IF !Empty( field->idzaduz2 )
-                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
-                  //ENDIF
+                  @ PRow() + 1, nColDok SAY kalk->brfaktp
+                  // IF !Empty( field->idzaduz2 )
+                  // @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
+                  // ENDIF
                ENDIF
             ENDIF
 
-         ELSEIF mu_i == "1" .AND. ( idvd $ "12#22#94" )    // povrat
-            nIzlaz -= kolicina
-            IF datdok >= ddatod
-               ? datdok, idvd + "-" + brdok, idtarifa
-               ?? "", idpartner
+         ELSEIF kalk->mu_i == "1" .AND. ( kalk->idvd $ "12#22#94" )    // povrat
+            nIzlaz -= kalk->kolicina
+            IF kalk->datdok >= dDatod
+               ? kalk->datdok, kalk->idvd + "-" + kalk->brdok, kalk->idtarifa
+               ?? "", kalk->idpartner
                nCol1 := PCol() + 1
                @ PRow(), PCol() + 1 SAY say_kolicina( 0          )
-               @ PRow(), PCol() + 1 SAY say_kolicina( - kolicina  )
+               @ PRow(), PCol() + 1 SAY say_kolicina( - kalk->kolicina  )
                @ PRow(), PCol() + 1 SAY say_kolicina( nUlaz - nIzlaz    )
 
                nNc := field->nc
@@ -442,33 +438,25 @@ FUNCTION kalk_kartica_magacin()
                @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNV )
 
             ENDIF
-            nNVp := -field->nc * ( kolicina )
+            nNVp := -field->nc * kalk->kolicina
             tnNVp += nNVp
             nNV += nc * ( kolicina )
-            IF koncij->naz == "P2"
-               nVPVp := -roba->plc * ( kolicina )
-               tnVPVp += nVPVp
-               nVPV += roba->plc * ( kolicina )
-            ELSE
-               nVPVp := -vpc * ( kolicina )
-               tnVPVp += nVPVp
-               nVPV += vpc * ( kolicina )
-            ENDIF
 
-            IF datdok >= dDatod
+            nVPVp := -kalk->vpc * kalk->kolicina
+            tnVPVp += nVPVp
+            nVPV += kalk->vpc * kalk->kolicina
+
+
+            IF kalk->datdok >= dDatod
 
                @ PRow(), PCol() + 1 SAY say_cijena( 0  ) // RABAT
-               IF koncij->naz == "P2"
-                  @ PRow(), PCol() + 1 SAY say_cijena( roba->plc )  // planska cijena
-               ELSE
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc )
-               ENDIF
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc )
 
                IF cPrikazBrojaFaktureDN == "D"
-                  @ PRow() + 1, nColDok SAY brfaktp
-                  //IF !Empty( idzaduz2 )
-                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
-                  //ENDIF
+                  @ PRow() + 1, nColDok SAY kalk->brfaktp
+                  // IF !Empty( idzaduz2 )
+                  // @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
+                  // ENDIF
                ENDIF
             ENDIF
 
@@ -478,68 +466,28 @@ FUNCTION kalk_kartica_magacin()
                ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa
             ENDIF // cpredh
 
-            nVPVd := field->vpc * ( field->kolicina )
+            nVPVd := field->vpc * field->kolicina
             tnVPVd += nVPVd
-            nVPV += field->vpc * ( field->kolicina )
+            nVPV += field->vpc * field->kolicina
+
             IF field->datdok >= dDatod
 
-               @ PRow(), PCol() + 1 SAY PadR( "NIV   (" + Transform( kolicina, pickol ) + ")", Len( pickol ) * 2 + 1 )
+               @ PRow(), PCol() + 1 SAY PadR( "NIV   (" + Transform( kalk->kolicina, pickol ) + ")", Len( pickol ) * 2 + 1 )
                @ PRow(), PCol() + 1 SAY PadR( " stara VPC:", Len( pickol ) - 2 )
-               @ PRow(), PCol() + 1 SAY say_cijena( mpcsapp       )  // kod ove kalk to predstavlja staru vpc
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp       )  // kod ove kalk to predstavlja staru vpc
                @ PRow(), PCol() + 1 SAY PadR( "nova VPC:", Len( piccdem ) + iif( cPVSS == "N", 2 * ( Len( picdem ) + 1 ), 0 ) )
-               @ PRow(), PCol() + 1 SAY say_cijena( vpc + mpcsapp )
-               @ PRow(), PCol() + 1 SAY say_cijena( vpc         )
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc + kalk->mpcsapp )
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc         )
 
                IF cPrikazBrojaFaktureDN == "D"
-                  @ PRow() + 1, nColDok SAY brfaktp
-                  //IF !Empty( idzaduz2 )
-                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
-                  //ENDIF
+                  @ PRow() + 1, nColDok SAY kalk->brfaktp
+                  // IF !Empty( idzaduz2 )
+                  // @ PRow(), PCol() + 1 SAY " RN: "; ?? idzaduz2
+                  // ENDIF
                ENDIF
             ENDIF
 
-         ELSEIF mu_i == "8"
-            // 15-ka
 
-            nIzlaz +=  - kolicina
-            nUlaz +=  - kolicina
-            IF datdok >= dDatod
-               ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa
-               ?? "", field->idpartner
-               nCol1 := PCol() + 1
-               @ PRow(), PCol() + 1 SAY say_kolicina( - kolicina  )
-               @ PRow(), PCol() + 1 SAY say_kolicina( - kolicina  )
-               @ PRow(), PCol() + 1 SAY say_kolicina( nUlaz - nIzlaz    )
-
-               nNc := field->nc
-               cTransakcija := "   x"
-               @ PRow(), PCol() + 1 SAY say_cijena( nNc )
-
-            ENDIF
-
-            nRabat += vpc * rabatv / 100 * kolicina
-            IF field->datdok >= dDatod
-
-               IF cPVSS == "N"
-                  @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNVd   )
-                  @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNVp   )
-               ENDIF
-               @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNv  )
-               IF koncij->naz == "P2"
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc * rabatv / 100 * kolicina  )
-                  @ PRow(), PCol() + 1 SAY say_cijena( roba->plc  )
-               ELSE
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc * rabatv / 100 * kolicina  )
-                  @ PRow(), PCol() + 1 SAY say_cijena( vpc  )
-               ENDIF
-
-               IF cPrikazBrojaFaktureDN == "D"
-                  @ PRow() + 1, nColDok SAY field->brfaktp
-                  //IF !Empty( field->idzaduz2 )
-                  //   @ PRow(), PCol() + 1 SAY " RN: "; ?? field->idzaduz2
-                  //ENDIF
-               ENDIF
-            ENDIF
          ENDIF
 
          IF cPrikSredNc == "D"
@@ -579,7 +527,6 @@ FUNCTION kalk_kartica_magacin()
             ?? AllTrim(  say_kolicina( Abs( nOdstupanje ) ) ) + "%"
             ?
          ENDIF
-
 
          IF lExport
             hParams[ "idkonto" ] := cIdKonto
@@ -642,45 +589,45 @@ FUNCTION kalk_kartica_magacin()
 
 STATIC FUNCTION kartica_magacin_open_tabele()
 
-   SELECT ( F_SIFK )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_SIFK )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_SIFV )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_SIFV )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_PARTN )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_PARTN )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_TARIFA )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_TARIFA )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_ROBA )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_ROBA )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_KONTO )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_KONTO )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_KALK )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_KALK )
+   // IF Used()
+   // USE
+   // ENDIF
 
-   SELECT ( F_KONCIJ )
-   IF Used()
-      USE
-   ENDIF
+   // SELECT ( F_KONCIJ )
+   // IF Used()
+   // USE
+   // ENDIF
 
    // o_partner()
 // o_tarifa()
@@ -747,7 +694,6 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cPVSS, cPicKol, cPicCDem )
    // PC
    AAdd( aKMag, { nPom, PadC( "PC", nPom ), PadC( "bez PDV", nPom ) } )
 
-
    cLine := SetRptLineAndText( aKMag, 0 )
    cTxt1 := SetRptLineAndText( aKMag, 1, "*" )
    cTxt2 := SetRptLineAndText( aKMag, 2, "*" )
@@ -761,7 +707,6 @@ STATIC FUNCTION zagl_mag_kart()
    select_o_konto( cIdKonto )
 
    ?
-
    Preduzece()
    P_12CPI
 

@@ -190,6 +190,7 @@ FUNCTION kalk_get_1_11()
 
    RETURN LastKey()
 
+
 STATIC FUNCTION kalk_11_valid_brfaktp( cIdVd, cPKonto, cBrFaktP )
 
    LOCAL lPostoji := kalk_pkonto_idvd_brfaktp_kalk_exists( cIdVd, cPKonto, cBrFaktP )

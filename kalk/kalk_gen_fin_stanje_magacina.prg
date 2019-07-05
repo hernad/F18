@@ -41,6 +41,7 @@ FUNCTION vpc_magacin_rs( lKalkPriprema )
 
    hb_default( @lKalkPriprema, .F. )
 
+altd()
    IF lKalkPriprema
       IF kalk_pripr->IdVd $ "14#10#KO" // u dokumentu je vpc
          nVPC := kalk_pripr->vpc

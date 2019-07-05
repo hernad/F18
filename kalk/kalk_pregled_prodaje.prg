@@ -15,6 +15,8 @@
 
 FUNCTION roba_pregled_prodaje_po_grupama()
 
+   LOCAL GetList := {}
+     
    cre_prodaja()
    o_partner()
 

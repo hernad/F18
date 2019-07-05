@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+MEMVAR picdem, piccdem
 
 FUNCTION finansijsko_stanje_magacin()
 
@@ -25,7 +25,7 @@ FUNCTION finansijsko_stanje_magacin()
    LOCAL nVPC
    LOCAL GetList := {}
 
-   _o_tbl()
+   //_o_tbl()
 
    PicDEM := kalk_prosiri_pic_iznos_za_2()
    PicCDEM := kalk_prosiri_pic_cjena_za_2()
@@ -42,13 +42,12 @@ FUNCTION finansijsko_stanje_magacin()
    PRIVATE cErr := "N"
    PRIVATE cPapir := "1"
 
-   Box( , 11, 60 )
+   Box( , 11, 70 )
 
    DO WHILE .T.
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "
       ?? self_organizacija_id(), "-", self_organizacija_naziv()
-
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Varijanta (1/2)" GET cPapir VALID cPapir $ "12"
 
       READ
@@ -110,7 +109,6 @@ FUNCTION finansijsko_stanje_magacin()
    IF lExport
       _cre_tmp_tbl()
       _o_tbl()
-
    ENDIF
 
    cIdFirma := self_organizacija_id()
@@ -221,8 +219,7 @@ FUNCTION finansijsko_stanje_magacin()
       cTipDok := idvd
 
 
-      SELECT tdok
-      HSEEK cTipDok
+      select_o_tdok( cTipDok )
       cDokNaz := field->naz
 
       select_o_partner( cIdPartner )
@@ -267,17 +264,20 @@ FUNCTION finansijsko_stanje_magacin()
          SELECT KALK
          nVPC := vpc_magacin_rs()
 
-         IF mu_i == "1" .AND. !( idvd $ "12#22#94" )
-            nVPVU += Round( nVPC * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-            nNVU += Round( kalk->nc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-         ELSEIF mu_i == "5"
-            nVPVI += Round( nVPC * kolicina, gZaokr )
-            nRabat += Round( kalk->rabatv / 100 * vpc * kolicina, gZaokr )
-            nNVI += Round( nc * kolicina, gZaokr )
-         ELSEIF mu_i == "1" .AND. ( idvd $ "12#22#94" )    // povrat
+         IF kalk->mu_i == "1" .AND. !( kalk->idvd $ "12#22#94" )
+            nVPVU += Round( nVPC * kalk->kolicina, gZaokr )
+            nNVU += Round( kalk->nc * kalk->kolicina, gZaokr )
+
+         ELSEIF kalk->mu_i == "5"
+            nVPVI += Round( nVPC * kalk->kolicina, gZaokr )
+            nRabat += Round( kalk->rabatv / 100 * kalk->vpc * kalk->kolicina, gZaokr )
+            nNVI += Round( kalk->nc * kalk->kolicina, gZaokr )
+
+         ELSEIF kalk->mu_i == "1" .AND. kalk->idvd $ "12#22#94"    // povrat
             nVPVI -= Round( nVPC * kalk->kolicina, gZaokr )
-            nRabat -= Round( kalk->rabatv / 100 * vpc * kolicina, gZaokr )
+            nRabat -= Round( kalk->rabatv / 100 * nVPC * kalk->kolicina, gZaokr )
             nNVI -= Round( kalk->nc * kalk->kolicina, gZaokr )
+
          ELSEIF mu_i == "3"    // nivelacija
             nVPVU += Round( nVPC * kalk->kolicina, gZaokr )
          ENDIF
@@ -285,15 +285,15 @@ FUNCTION finansijsko_stanje_magacin()
          IF cPapir != "4"
             nDod1 += kalk_marza_veleprodaja()
             nDod2 += kalk_marza_maloprodaja()
-            nDod3 += prevoz
-            nDod4 += prevoz2
-            nDod5 += banktr
-            nDod6 += spedtr
-            nDod7 += cardaz
-            nDod8 += zavtr
+            nDod3 += kalk->prevoz
+            nDod4 += kalk->prevoz2
+            nDod5 += kalk->banktr
+            nDod6 += kalk->spedtr
+            nDod7 += kalk->cardaz
+            nDod8 += kalk->zavtr
          ENDIF
 
-         SKIP 1
+         SKIP
 
       ENDDO
 
@@ -426,33 +426,30 @@ STATIC FUNCTION kalk_zagl_fin_stanje_magacin()
    RETURN .T.
 
 
-// ----------------------------------------------
-// kreiranje pomocne tabele izvjestaja
-// ----------------------------------------------
 STATIC FUNCTION _cre_tmp_tbl()
 
-   LOCAL _dbf := {}
+   LOCAL aDbf := {}
 
-   AAdd( _dbf, { "broj", "C", 10, 0 } )
-   AAdd( _dbf, { "datum", "D",  8, 0 } )
-   AAdd( _dbf, { "vr_dok", "C", 30, 0 } )
-   AAdd( _dbf, { "idpartner", "C",  6, 0 } )
-   AAdd( _dbf, { "part_naz", "C", 100, 0 } )
-   AAdd( _dbf, { "part_mj", "C", 50, 0 } )
-   AAdd( _dbf, { "part_ptt", "C", 10, 0 } )
-   AAdd( _dbf, { "part_adr", "C", 50, 0 } )
-   AAdd( _dbf, { "br_fakt", "C", 20, 0 } )
-   AAdd( _dbf, { "nv_dug", "N", 15, 2 } )
-   AAdd( _dbf, { "nv_pot", "N", 15, 2 } )
-   AAdd( _dbf, { "nv_saldo", "N", 15, 2 } )
-   AAdd( _dbf, { "vp_dug", "N", 15, 2 } )
-   AAdd( _dbf, { "vp_pot", "N", 15, 2 } )
-   AAdd( _dbf, { "vp_saldo", "N", 15, 2 } )
-   AAdd( _dbf, { "vp_rabat", "N", 15, 2 } )
+   AAdd( aDbf, { "broj", "C", 10, 0 } )
+   AAdd( aDbf, { "datum", "D",  8, 0 } )
+   AAdd( aDbf, { "vr_dok", "C", 30, 0 } )
+   AAdd( aDbf, { "idpartner", "C",  6, 0 } )
+   AAdd( aDbf, { "part_naz", "C", 100, 0 } )
+   AAdd( aDbf, { "part_mj", "C", 50, 0 } )
+   AAdd( aDbf, { "part_ptt", "C", 10, 0 } )
+   AAdd( aDbf, { "part_adr", "C", 50, 0 } )
+   AAdd( aDbf, { "br_fakt", "C", 20, 0 } )
+   AAdd( aDbf, { "nv_dug", "N", 15, 2 } )
+   AAdd( aDbf, { "nv_pot", "N", 15, 2 } )
+   AAdd( aDbf, { "nv_saldo", "N", 15, 2 } )
+   AAdd( aDbf, { "vp_dug", "N", 15, 2 } )
+   AAdd( aDbf, { "vp_pot", "N", 15, 2 } )
+   AAdd( aDbf, { "vp_saldo", "N", 15, 2 } )
+   AAdd( aDbf, { "vp_rabat", "N", 15, 2 } )
 
-   create_dbf_r_export( _dbf )
+   create_dbf_r_export( aDbf )
 
-   RETURN _dbf
+   RETURN aDbf
 
 
 STATIC FUNCTION _add_to_exp( broj_dok, datum_dok, vrsta_dok, id_partner, ;
@@ -495,9 +492,9 @@ STATIC FUNCTION _o_tbl()
 
    // o_sifk()
    // o_sifv()
-   o_tdok()
+   //o_tdok()
    // o_roba()
-   o_koncij()
+   //o_koncij()
    // o_konto()
    // o_partner()
 

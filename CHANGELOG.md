@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-07-05
+
+- kalk pregled prod varijanta 2
+
 ## 2019-07-03
 
 - kalk pregled prod maloprodajna mreza v1.1 - nc D/N
