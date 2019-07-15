@@ -56,4 +56,5 @@ CREATE INDEX IF NOT EXISTS pos_items_id2_knjig ON {{ item_prodavnica }}.pos_item
 CREATE INDEX IF NOT EXISTS pos_items_id4_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (datum);
 CREATE INDEX IF NOT EXISTS pos_items_id5_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idpos, idroba, datum);
 CREATE INDEX IF NOT EXISTS pos_items_id6_knjig ON {{ item_prodavnica }}.pos_items_knjig USING btree (idroba);
+CREATE UNIQUE INDEX IF NOT EXISTS pos_items_knjig_rbr ON {{ item_prodavnica }}.pos_items_knjig USING btree (idpos, idvd, brdok, datum, rbr);
 GRANT ALL ON TABLE {{ item_prodavnica }}.pos_items_knjig TO xtrole;
