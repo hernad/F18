@@ -12,11 +12,10 @@
 #include "f18.ch"
 
 
-
 FUNCTION roba_pregled_prodaje_po_grupama()
 
    LOCAL GetList := {}
-     
+
    cre_prodaja()
    o_partner()
 
@@ -56,7 +55,6 @@ FUNCTION roba_pregled_prodaje_po_grupama()
   // o_roba()
   // o_sifk()
   // o_sifv()
-
 
    MsgO( "Preuzimanje podataka sa SQL servera" )
    // SELECT KALK

@@ -602,6 +602,7 @@ $$;
 -- jedan artikal
 -- select * from p2.pos_artikal_stanje( '0000000001', '2019-05-26', '2019-12-31' );
 
+-- DROP FUNCTION p2.pos_artikal_stanje
 
 CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_artikal_stanje( cIdRoba varchar, dDatOD date, dDatDo date )
     RETURNS TABLE(idroba varchar, p_prijem numeric, p_povrat numeric, p_ulaz_ostalo numeric,
@@ -711,7 +712,7 @@ BEGIN
             nTUlazOstalo := rec.kolicina;
             nTVrijednost := rec.kolicina * rec.cijena;
 
-         WHEN rec.idvd = '22' THEN
+         WHEN rec.idvd IN ('22', '89') THEN
             If rec.kolicina < 0 AND trim(rec.opis) LIKE '780 %'  THEN -- povrat kalo
                nTPovrat := ABS( rec.kolicina );
             ELSE
@@ -745,6 +746,11 @@ BEGIN
 
             nTKalo := rec.kolicina;
             nTVrijednost := 0;
+
+         WHEN rec.idvd = '80' THEN
+
+            nTUlazOstalo := rec.kolicina;
+            nTVrijednost := nTUlazOstalo * rec.cijena;
 
         ELSE
             nTVrijednost := 0;
