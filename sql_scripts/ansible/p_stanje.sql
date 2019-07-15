@@ -497,8 +497,12 @@ BEGIN
       nRbr := 1;
       lInsertovano := FALSE;
 
-      FOR rec_stanje IN SELECT * from {{ item_prodavnica }}.pos_stanje ORDER BY idroba
+      FOR rec_stanje IN SELECT id, dat_od, dat_do, idroba, roba_id, ulazi, izlazi, kol_ulaz, kol_izlaz, cijena, ncijena from {{ item_prodavnica }}.pos_stanje
+                           UNION
+                        SELECT 0 id, current_date dat_od, current_date dat_do, 'X#X' idroba, null roba_id, '{}'::text[] ulazi, '{}'::text[] izlazi, 0 kol_ulaz, 0 kol_izlaz, 9999 cijena, 0 ncijena
+                        ORDER BY idroba
       LOOP
+         -- ovaj union dole se radi zato da uvijek prodje kroz ovaj if nakon odredjenog artikla
          IF cIdRoba <> rec_stanje.idroba THEN
            IF cIdRoba <> 'X#X' AND lInsertovano THEN
               -- uvijek na kraju zadati stavku sa kolicinom 0 i aktuelnom osnovnom cijenom da se ne bi promijenila osnovna cijena
@@ -517,15 +521,21 @@ BEGIN
          END IF;
 
          nStanje := rec_stanje.kol_ulaz - rec_stanje.kol_izlaz;
-         IF nStanje <> 0 AND rec_stanje.cijena <> nOsnovnaCijena AND rec_stanje.ncijena = 0 THEN
+         IF nStanje <> 0 AND rec_stanje.cijena <> nOsnovnaCijena AND
+            (rec_stanje.ncijena = 0 OR (nStanje < 0 AND rec_stanje.ncijena<>0 AND rec_stanje.dat_do < current_date)) THEN
             -- stavka koja je bila osnovna cijena je 'ziva' a nije po aktuelnoj osnovnoj cijeni
+            -- ili stavka sa popustom kod koje je negativno stanje a popust je istekao
 
             IF nStanje > 0 THEN
                nStaraCijena := rec_stanje.cijena;
                nNovaCijena := nOsnovnaCijena;
             ELSE
                nStaraCijena := nOsnovnaCijena;
-               nNovaCijena := rec_stanje.cijena;
+               IF rec_stanje.ncijena <> 0 THEN  -- slucaj prodaje sa popustom koji je otisao u minus
+                 nNovaCijena := rec_stanje.ncijena;
+               ELSE
+                 nNovaCijena := rec_stanje.cijena;
+               END IF;
                nStanje := - nStanje;
                IF nDostupnaKolicina - nStanje > 0 THEN
                  nDostupnaKolicina := nDostupnaKolicina - nStanje;

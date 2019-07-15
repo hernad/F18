@@ -551,7 +551,7 @@ FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
 
 FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
 
-   LOCAL cSql, oData, oRow
+   LOCAL cSql, oData
    LOCAL nTotal := 0
 
    PushWA()
