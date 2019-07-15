@@ -491,13 +491,11 @@ DECLARE
 BEGIN
 
       nCount := 0;
-      -- proci kroz stavke dokumenta '72'
       cIdRoba := 'X#X';
       cBrDokNew := NULL;
       dDatum := current_date;
       nRbr := 1;
       lInsertovano := FALSE;
-
 
       FOR rec_stanje IN SELECT * from {{ item_prodavnica }}.pos_stanje ORDER BY idroba
       LOOP
@@ -507,7 +505,7 @@ BEGIN
               nStanje := 0;
               EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
                 using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nOsnovnaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
-
+                nRbr := nRbr + 1;
            END IF;
            cIdRoba := rec_stanje.idroba;
            nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
