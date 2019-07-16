@@ -2,7 +2,7 @@
 
 ## 2019-07-15
 
-- pos kartica i lager lista u kalk
+- pos izvj u kalk
 
 ## 2019-07-05
 
