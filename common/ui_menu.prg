@@ -371,8 +371,8 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
                   nItemNo := nI  // broja u stavki samo u prva 3 karaktera
                   lExitFromMeni := .T.
                ENDIF
-            ELSE // veliko slovo se trazi po citavom stringu - promijenjeno
-               IF ( aItems[ nI ] <> NIL ) .AND. Upper( Chr( nChar ) ) $ Left( aItems[ nI ], 3 )
+            ELSE
+               IF ValType(aItems[ nI ]) == "C"  .AND. Upper( Chr( nChar ) ) $ Left( aItems[ nI ], 3 ) // veliko slovo se trazi u prva tri znaka
                   nItemNo := nI
                   lExitFromMeni := .T.
                ENDIF

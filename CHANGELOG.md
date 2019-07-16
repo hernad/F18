@@ -2,7 +2,7 @@
 
 ## 2019-07-15
 
-- pos izvj u kalk
+- pos izvj u kalk / 2
 
 ## 2019-07-05
 

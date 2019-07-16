@@ -194,9 +194,9 @@ STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina, nCijena, nNCijena )
    IF ( nKolicina + nPotrebnaKolicinaVecUnesenoUPripremu ) > nStanjeRobe
       cMsg := AllTrim( cIdroba ) + " na stanju: " + AllTrim( Str( nStanjeRobe, 12, 3 ) )
       cMsg += " vi želite prodati " +  AllTrim( Str( nKolicina + nPotrebnaKolicinaVecUnesenoUPripremu, 12, 3 ) )
-      IF ROUND(nCijena, 4) <> 0 .OR. gPosPratiStanjePriProdaji == "!"
+      IF ROUND(nNCijena, 4) <> 0 .OR. gPosPratiStanjePriProdaji == "!"
          cMsg += "#Unos artikla onemogućen !"
-         IF ROUND( nCijena, 4 ) <> 0
+         IF ROUND( nNCijena, 4 ) <> 0
             cMsg += "#Za robu sa popustom zabranjen minus"
          ENDIF
          MsgBeep( cMsg )
