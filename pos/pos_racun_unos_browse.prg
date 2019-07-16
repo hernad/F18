@@ -14,7 +14,7 @@
 STATIC s_oBrowse
 
 MEMVAR Ch // browse privatna var
-MEMVAR Kol, ImeKol, gPosProdajnoMjesto, gOcitBarKod, gIdRadnik
+MEMVAR Kol, ImeKol, gOcitBarKod, gIdRadnik
 MEMVAR gPosPratiStanjePriProdaji
 MEMVAR _idpos, _idroba, _cijena, _ncijena, _kolicina, _iznos, _popust, _idvd, _brdok, _datum, _idradnik
 MEMVAR _robanaz, _jmj, _idtarifa
@@ -83,7 +83,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    ENDIF
 
    Scatter()
-   _idpos := gPosProdajnoMjesto
+   _idpos := pos_pm()
    _idvd  := POS_IDVD_RACUN
    _brdok := cBrDok
    _datum := danasnji_datum()

@@ -42,8 +42,8 @@ FUNCTION kalk_maloprodaja()
    AAdd( aOpc,  "6. pos direktni ulaz od dobavljača [89]->[81]" )
    AAdd( aOpcExe, {|| kalk_89_to_81_unos() } )
 
-   // AAdd( aOpc,   "3. šifre robe u prodavnici" )
-   // AAdd( aOpcExe, {|| p_roba_prodavnica() } )
+   AAdd( aOpc,   "P. pos izvještaji" )
+   AAdd( aOpcExe, {|| kalk_maloprodaja_pos_izvjestaji() } )
 
    f18_menu( "mp", .F.,  nIzbor, aOpc, aOpcExe )
 
@@ -140,13 +140,15 @@ FUNCTION get_pkonto_by_prodajno_mjesto( nProdavnica )
 
 FUNCTION set_prodavnica_by_pkonto( cPKonto )
 
-      LOCAL cQuery := "select prod from " + f18_sql_schema( "koncij" ) + " where trim(id)=" + sql_quote( Trim(cPKonto) ) + " LIMIT 1"
-      LOCAL nProdavnica
-      dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
-      nProdavnica := TMP->prod
-      USE
-      pos_prodavnica( nProdavnica )
-      RETURN nProdavnica
+   LOCAL cQuery := "select prod from " + f18_sql_schema( "koncij" ) + " where trim(id)=" + sql_quote( Trim( cPKonto ) ) + " LIMIT 1"
+   LOCAL nProdavnica
+
+   dbUseArea_run_query( cQuery, F_TMP_1, "TMP" )
+   nProdavnica := TMP->prod
+   USE
+   pos_prodavnica( nProdavnica )
+
+   RETURN nProdavnica
 
 
 FUNCTION kalk_mp_inicijalizacija()
@@ -250,8 +252,8 @@ FUNCTION kalk_mp_inicijalizacija()
          idtarifa WITH tarifa->id, ;
          kolicina WITH nKolicina, ;
          mpcsapp WITH nMpc, ;
-         tmarza with "%", ;
-         tmarza2 with "%", ;
+         tmarza WITH "%", ;
+         tmarza2 WITH "%", ;
          mpc WITH mpc_bez_pdv_by_tarifa( tarifa->id, nMpc )
 
       SELECT TMP

@@ -55,7 +55,7 @@ FUNCTION pos_porezna_faktura_traka( lSilent )
    st_pf_traka()
 
    IF !lPfTraka
-      porezna_faktura_azur_podataka_o_kupcu( gPosProdajnoMjesto )
+  --    porezna_faktura_azur_podataka_o_kupcu( gPosProdajnoMjesto )
    ENDIF
 */
 

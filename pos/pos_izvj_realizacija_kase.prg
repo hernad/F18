@@ -16,7 +16,7 @@ STATIC LEN_RAZMAK := 1
 STATIC PIC_UKUPNO := "9999999.99"
 STATIC s_oPDF
 
-MEMVAR gPosProdajnoMjesto, dDatum0, dDatum1, plPrikazPRO
+MEMVAR dDatum0, dDatum1, plPrikazPRO
 MEMVAR cUslovRadnici, cUslovVrsteP
 MEMVAR cPrikazPoVrstamaPlacanja
 
@@ -30,7 +30,7 @@ FUNCTION realizacija_kase
 
    PRIVATE cUslovRadnici := Space( 60 )
    PRIVATE cUslovVrsteP := Space( 60 )
-   PRIVATE cIdPos := gPosProdajnoMjesto
+   PRIVATE cIdPos := pos_pm()
 
    PRIVATE aNiz
    PRIVATE cFilterIdRadnik := {}
@@ -102,7 +102,7 @@ STATIC FUNCTION pos_get_vars_izvjestaj_realizacija( cIdPos, dDatum0, dDatum1, cV
    LOCAL aNiz
 
    aNiz := {}
-   cIdPos := gPosProdajnoMjesto
+   cIdPos := pos_pm()
 
    AAdd( aNiz, { "Radnici (prazno-svi)", "cUslovRadnici",, "@!S30", } )
    AAdd( aNiz, { "Vrste plaćanja (prazno-sve)", "cUslovVrsteP",, "@!S30", } )

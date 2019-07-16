@@ -44,7 +44,7 @@ FUNCTION pos_pdv_po_tarifama
       PRIVATE cNaplaceno := "1"
    ENDIF
 
-   cIdPos := gPosProdajnoMjesto
+   cIdPos := pos_pm()
 
    IF fSolo
 

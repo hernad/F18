@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-07-15
+
+- pos kartica i lager lista u kalk
+
 ## 2019-07-05
 
 - kalk pregled prod varijanta 2

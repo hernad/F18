@@ -258,4 +258,9 @@ METHOD set_module_gvars()
 
 
 FUNCTION pos_pm()
+
+   IF Type("gPosProdajnoMjesto") == "U"
+     RETURN "1 "
+   ENDIF
+
    RETURN gPosProdajnoMjesto

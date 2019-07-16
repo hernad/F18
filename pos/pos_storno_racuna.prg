@@ -11,14 +11,14 @@
 
 #include "f18.ch"
 
-MEMVAR gPosProdajnoMjesto, Ch
+MEMVAR Ch
 
 /*
 FUNCTION pos_vrati_broj_racuna_iz_fiskalnog( cFiskalniBroj, cBrDok, dDatumRacuna )
 
    LOCAL cQuery, oTable
    LOCAL nI, oRow
-   LOCAL cIdPos := gPosProdajnoMjesto
+--   LOCAL cIdPos := gPosProdajnoMjesto
    LOCAL aPosStavke
    LOCAL _rn_broj := ""
    LOCAL lOk := .F.
@@ -82,7 +82,7 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
       cTmp := ""
       cTmp += DToC( arr[ nI, 1 ] )
       cTmp += " cBrRacuna: "
-      cTmp += PadR( PadL( AllTrim( gPosProdajnoMjesto ), 2 ) + "-" + AllTrim( arr[ nI, 2 ]  ), 10 )
+      cTmp += PadR( PadL( AllTrim( pos_pm() ), 2 ) + "-" + AllTrim( arr[ nI, 2 ]  ), 10 )
       cTmp += PadL( AllTrim( Str( arr[ nI, 4 ] - arr[ nI, 5 ], 12, 2 ) ), 10 )
       AAdd( aOpc, cTmp )
       AAdd( aOpcExe, {|| "" } )

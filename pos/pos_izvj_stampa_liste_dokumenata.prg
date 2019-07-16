@@ -20,7 +20,7 @@ FUNCTION pos_stampa_liste_dokumenata()
    LOCAL cIdRadnik
    LOCAL nBH := 8
    LOCAL nR := 5
-   LOCAL cIdPos := gPosProdajnoMjesto
+   LOCAL cIdPos := pos_pm()
    LOCAL cLM := ""
    LOCAL nRW := 13
    LOCAL nSir
@@ -28,7 +28,7 @@ FUNCTION pos_stampa_liste_dokumenata()
 
    SET CURSOR ON
 
-   cIdPos := gPosProdajnoMjesto
+   cIdPos := pos_pm()
    cIdRadnik := Space( FIELD_LEN_POS_IDRADNIK )
    cIdVd := Space( 2 )
 
@@ -50,7 +50,7 @@ FUNCTION pos_stampa_liste_dokumenata()
 
    START PRINT CRET
    ?
-   ? PadC( "KASA " + gPosProdajnoMjesto, 40 )
+   ? PadC( "KASA " + pos_pm(), 40 )
    ?U PadC( "ŠTAMPA LISTE DOKUMENATA", nSir )
    ? PadC( "NA DAN " + FormDat1 ( danasnji_datum() ), nSir )
    ? PadC( "-------------------------", nSir )

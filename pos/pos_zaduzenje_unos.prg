@@ -13,7 +13,7 @@
 
 STATIC s_oBrowse
 
-MEMVAR gPosProdajnoMjesto, gPosSamoProdaja, gIdRadnik
+MEMVAR gPosSamoProdaja, gIdRadnik
 MEMVAR Kol, ImeKol, Ch
 MEMVAR _IdPos, _IdVd, _IdRadnik, _idpartner, _BrDok, _IdRoba, _BrFaktP, _Opis, _Datum, _kolicina, _cijena, _ncijena
 MEMVAR _robanaz, _idtarifa, _jmj, _barkod, _dat_od, _dat_do, _kol2
@@ -68,7 +68,7 @@ FUNCTION pos_zaduzenje( cIdVd )
       ENDIF
    ENDIF
    Scatter()
-   _IdPos := gPosProdajnoMjesto
+   _IdPos := pos_pm()
    _IdVd := cIdVd
    _BrDok := POS_BRDOK_PRIPREMA
    _IdRadnik := gIdRadnik
@@ -396,7 +396,7 @@ FUNCTION pos_pripr_gen_stavke_inventura()
       SELECT PRIPRZ
       APPEND BLANK
       rreplace ;
-         idPos WITH gPosProdajnoMjesto, ;
+         idPos WITH pos_pm(), ;
          brDok WITH POS_BRDOK_PRIPREMA, ;
          idRadnik WITH gIdRadnik, ;
          datum WITH danasnji_datum(), ;

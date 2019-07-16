@@ -45,12 +45,12 @@ FUNCTION pos_kartica_artikla()
 
    SET CURSOR ON
 
-   Box(, 11, 60 )
+   Box(, 6, 60 )
 
-   @ box_x_koord() + 5, box_y_koord() + 6 SAY8 "Šifra artikla (prazno-svi)" GET cIdRoba VALID Empty( cIdRoba ) .OR. P_Roba( @cIdRoba ) PICT "@!"
-   @ box_x_koord() + 7, box_y_koord() + 2 SAY "za period " GET dDatum0
-   @ box_x_koord() + 7, Col() + 2 SAY "do " GET dDatum1
-   @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "sa predhodnim stanjem D/N ?" GET cPredhodnoStanje VALID cPredhodnoStanje $ "DN" PICT "@!"
+   @ box_x_koord() + 1, box_y_koord() + 6 SAY8 "Šifra artikla (prazno-svi)" GET cIdRoba VALID Empty( cIdRoba ) .OR. P_Roba( @cIdRoba ) PICT "@!"
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY "za period " GET dDatum0
+   @ box_x_koord() + 3, Col() + 2 SAY "do " GET dDatum1
+   @ box_x_koord() + 5, box_y_koord() + 2 SAY8 "sa predhodnim stanjem D/N ?" GET cPredhodnoStanje VALID cPredhodnoStanje $ "DN" PICT "@!"
    // @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Prikaz partnera D/N ?" GET cPPar VALID cPPar $ "DN" PICT "@!"
    READ
 

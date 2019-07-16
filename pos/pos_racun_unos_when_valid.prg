@@ -13,7 +13,7 @@
 
 STATIC s_nMaxKolicinaPosRacun := NIL
 
-MEMVAR gPosProdajnoMjesto, gOcitBarKod, gPosPratiStanjePriProdaji
+MEMVAR gOcitBarKod, gPosPratiStanjePriProdaji
 MEMVAR _cijena, _ncijena
 
 FUNCTION pos_when_racun_artikal( cIdRoba )
