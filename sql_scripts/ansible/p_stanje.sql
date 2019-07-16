@@ -521,21 +521,18 @@ BEGIN
          END IF;
 
          nStanje := rec_stanje.kol_ulaz - rec_stanje.kol_izlaz;
-         IF nStanje <> 0 AND rec_stanje.cijena <> nOsnovnaCijena AND
-            (rec_stanje.ncijena = 0 OR (nStanje < 0 AND rec_stanje.ncijena<>0 AND rec_stanje.dat_do < current_date)) THEN
+         IF nStanje <> 0 AND rec_stanje.cijena <> nOsnovnaCijena AND (rec_stanje.ncijena = 0) THEN
             -- stavka koja je bila osnovna cijena je 'ziva' a nije po aktuelnoj osnovnoj cijeni
-            -- ili stavka sa popustom kod koje je negativno stanje a popust je istekao
 
+            -- ili stavka sa popustom kod koje je negativno stanje a popust je istekao
+            -- OR (rec_stanje.ncijena<>0 and nStanje < 0 and dat_do < current_date)) THEN
+            
             IF nStanje > 0 THEN
                nStaraCijena := rec_stanje.cijena;
                nNovaCijena := nOsnovnaCijena;
             ELSE
                nStaraCijena := nOsnovnaCijena;
-               IF rec_stanje.ncijena <> 0 THEN  -- slucaj prodaje sa popustom koji je otisao u minus
-                 nNovaCijena := rec_stanje.ncijena;
-               ELSE
-                 nNovaCijena := rec_stanje.cijena;
-               END IF;
+               nNovaCijena := rec_stanje.cijena;
                nStanje := - nStanje;
                IF nDostupnaKolicina - nStanje > 0 THEN
                  nDostupnaKolicina := nDostupnaKolicina - nStanje;
