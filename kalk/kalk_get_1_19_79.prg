@@ -158,7 +158,6 @@ STATIC FUNCTION kalk_when_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
 
 STATIC FUNCTION kalk_valid_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
 
-
    IF dDatOd < danasnji_datum()
       Alert( _u( "datum OD mora biti >= današnji datum !" ) )
       RETURN .F.
@@ -167,7 +166,7 @@ STATIC FUNCTION kalk_valid_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
    IF cIdVd == POS_IDVD_ZAHTJEV_NIVELACIJA
       IF Empty( dDatDo ) // nivelacija do daljnjeg - bez ogranicenja
          RETURN .T.
-      ELSEIF dDatDo >= dDatDo
+      ELSEIF dDatDo >= dDatOd
          RETURN .T.
       ENDIF
    ENDIF
@@ -176,11 +175,12 @@ STATIC FUNCTION kalk_valid_dat_od_do_19_72_79( cIdVd, dDatOd, dDatDo )
       IF Empty( dDatDo )
          dDatDo := dDatOd + 5
          RETURN .T.
-      ELSEIF dDatDo >= dDatDo
+      ELSEIF dDatDo >= dDatOd
          RETURN .T.
       ENDIF
    ENDIF
-   
+
+   Alert( _u( "datum DO mora biti >=  datum OD !" ) )
    RETURN .F.
 
 
