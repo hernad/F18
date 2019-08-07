@@ -305,7 +305,6 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
    cTmp := Left( Upper( AllTrim( cIdTarifa ) ), 4 ) // PDV17 -> PDV1 ili PDV7NP -> PDV7 ili PDV0IZ -> PDV0 ili PDVM
 
-   AltD()
    DO CASE
 
    CASE ( cTmp == "PDV1" .OR. cTmp == "PDV7" ) .AND. cPDVDN == "D"  // pdv17

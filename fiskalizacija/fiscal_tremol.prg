@@ -570,7 +570,6 @@ FUNCTION tremol_cekam_fajl_odgovora( hFiskalniParams, cFajl, nTimeOut )
       BoxC()
 
       Alert( _u( "Vaša operacija je zabilježena. Obavijestite kontrolora!" ) )
-      AltD()
       cMsg := "FISK_RN_ERROR: fiskalni račun " + AllTrim( Str( nBroj ) ) + " je ipak odštampan kupcu!"
       log_write_file( cMsg, 2 )
       log_write( cMsg, 2 )

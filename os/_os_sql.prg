@@ -50,7 +50,6 @@ FUNCTION find_os_sii_by_naz_or_id( cId )
    cSqlQuery += " OR naz ilike " + cIdSql
 
    IF !use_sql( cTable, cSqlQuery, cAlias )
-      AltD()
       RETURN .F.
    ENDIF
 

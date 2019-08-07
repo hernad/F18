@@ -378,9 +378,7 @@ FUNCTION korisnik_postavke_fiskalni_uredjaj()
       RETURN .F.
    ENDIF
 
-altd()
    set_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, AllTrim( cOutDir ) )
-
    set_metric( "fiscal_device_" + cDevTmp + "_out_file", cUserName, AllTrim( cOutFile ) )
    set_metric( "fiscal_device_" + cDevTmp + "_out_answer", cUserName, AllTrim( cOutAnswer ) )
    set_metric( "fiscal_device_" + cDevTmp + "_op_id", cUserName, AllTrim( cOperaterId ) )

@@ -213,7 +213,6 @@ FUNCTION fiskalni_array_to_fajl( cFilePath, cFileName, aStruct, aData, cSeparato
       lLastSep := .T.
    ENDIF
 
-altd()
    cPrintFile := AllTrim( cFilePath ) + AllTrim( cFileName )
 
    SET PRINTER to ( cPrintFile )

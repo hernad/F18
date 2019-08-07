@@ -174,7 +174,6 @@ FUNCTION is_magacin_evidencija_vpc( cMKonto )
 
    LOCAL lVPC := .F.
 
-altd()
    select_o_koncij( cMKonto )
    IF koncij->region == "RS"
       lVPC := .T.
