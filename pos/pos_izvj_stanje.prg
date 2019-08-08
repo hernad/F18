@@ -121,7 +121,7 @@ FUNCTION pos_stanje_artikala()
 
       // 1) promet prije zadanog datuma
       DO WHILE !Eof() .AND. pos->idRoba == cIdRoba .AND. pos->datum < dDatum
-         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaRealizacija, @nPredhodnaVrijednost, @nPredhodniPopust, .F. )
+         pos_stanje_proracun_kartica( @nPredhodnoStanjeUlaz, @nPredhodnoStanjeIzlaz, @nPredhodnoStanjeKalo, @nStanjeKolicina, @nPredhodnaVrijednost, @nPredhodnaRealizacija, @nPredhodniPopust, .F. )
          SELECT POS
          SKIP
       ENDDO
@@ -135,7 +135,7 @@ FUNCTION pos_stanje_artikala()
 
       // 2) stanje na tekuci dan
       DO WHILE !Eof() .AND. pos->idroba == cIdRoba .AND. pos->datum == dDatum
-         // pos_stanje_proracun( @nUlaz, @nIzlaz, @nVrijednost, @lInicijalizacija )
+
          pos_stanje_proracun_kartica( @nUlaz, @nIzlaz, @nKalo, @nStanjeKolicina, @nVrijednost, @nRealizacija, @nPopust, .F. )
 
          SELECT POS
