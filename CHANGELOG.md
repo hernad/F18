@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-08-08
+
+- pos stanje fix, nivelacije dat_od >= dat_do fix
+
 ## 2019-07-15
 
 - pos izvj u kalk / 2
