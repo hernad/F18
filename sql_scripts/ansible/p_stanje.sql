@@ -234,6 +234,8 @@ DECLARE
    idRaspolozivo bigint;
    cMsg text;
    nStanje decimal;
+   idRaspolozivoPatchMinus bigint;
+   nStanjePatchMinus decimal;
 BEGIN
 
 IF ( NOT idvd IN ('19','29','79') ) THEN -- knjig nivelacija, pos nivelacija, snizenje
@@ -284,17 +286,30 @@ IF idvd = '79' AND dat_od > current_date THEN -- ako se odobrava snizenje unapri
    RETURN -1;
 END IF;
 
--- raspoloziva roba po starim cijenama, kolicina treba biti > 0
--- ncijena=0, gledaju se samo DOSADASNJE OSNOVNE cijene
 
-EXECUTE  'select id, kol_ulaz-kol_izlaz as stanje from {{ item_prodavnica }}.pos_stanje WHERE ' ||
+-- PATCH fix minus istekao popust PATHCV
+EXECUTE  'select id, -kol_ulaz+kol_izlaz as stanje from {{ item_prodavnica }}.pos_stanje WHERE ' ||
+         '(pos_stanje.ncijena<>0 AND pos_stanje.dat_od<current_date AND pos_stanje.dat_do<current_date AND pos_stanje.cijena=$2)' ||
+         ' AND pos_stanje.idroba=$1 AND pos_stanje.kol_ulaz-pos_stanje.kol_izlaz<0' ||
+         ' ORDER BY kol_ulaz-kol_izlaz LIMIT 1'
+      using idroba, ncijena
+      INTO idRaspolozivoPatchMinus, nStanjePatchMinus;
+
+IF NOT idRaspolozivoPatchMinus IS NULL THEN
+  RAISE INFO 'PATCH MINUS! = % % % kol: % cij: % ncij: %', idroba, idRaspolozivoPatchMinus, nStanjePatchMinus, kolicina, cijena, ncijena;
+ELSE
+  -- raspoloziva roba po starim cijenama, kolicina treba biti > 0
+  -- ncijena=0, gledaju se samo DOSADASNJE OSNOVNE cijene
+  EXECUTE  'select id, kol_ulaz-kol_izlaz as stanje from {{ item_prodavnica }}.pos_stanje WHERE ' ||
          '(ncijena=0 AND dat_od<=current_date AND dat_do>=current_date AND $3<=current_date AND $4<=dat_do AND cijena=$2)' ||
          ' AND idroba=$1 AND kol_ulaz-kol_izlaz>0' ||
          ' ORDER BY kol_ulaz-kol_izlaz LIMIT 1'
       using idroba, cijena, dat_od, dat_do
       INTO idRaspolozivo, nStanje;
 
-RAISE INFO 'idDokument = % % % %', idRaspolozivo, dat_od, dat_do, nStanje;
+   RAISE INFO 'pos_stanje id: %  idroba: % dat_od: % dat_do: % cij: % stanje: % kol: %', idRaspolozivo, idroba, dat_od, dat_do, cijena, nStanje, kolicina;
+END IF;
+
 
 IF (NOT idRaspolozivo IS NULL) AND (nStanje < kolicina) THEN
     IF idvd = '79' THEN -- odobrenje snizenja se primjenjuje na dostupnu kolicinu
@@ -319,7 +334,8 @@ IF NOT idRaspolozivo IS NULL THEN
   END IF;
 
   -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu po novim cijenama
-  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date) AND idroba=$1 AND cijena=$2 AND ncijena=$3'
+  EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date) AND idroba=$1 AND cijena=$2 AND ncijena=$3' ||
+      ' order by id desc limit 1'
       using idroba, cijena, ncijena
       INTO idRaspolozivo;
 
@@ -334,6 +350,30 @@ IF NOT idRaspolozivo IS NULL THEN
           USING dat_od, dat_do, idroba, dokumenti, '{}'::text[], kolicina, 0, cijena, ncijena;
   END IF;
 
+ELSIF (NOT idRaspolozivoPatchMinus IS NULL) AND (kolicina = nStanjePatchMinus) AND (idvd = '29') THEN
+   -- PATCH PATCH PATCH
+   -- umanjiti - ugasiti minusnu zalihu istekao stari popust
+
+   EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_izlaz=kol_izlaz-$1,izlazi=izlazi || $3' ||
+   ' WHERE id=$2'
+    USING kolicina, idRaspolozivoPatchMinus, dokument;
+
+    ncijena := 0;
+
+    -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu po novim cijenama
+    EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date) AND idroba=$1 AND cijena=$2 AND ncijena=$3' ||
+        ' order by id desc limit 1'
+        using idroba, cijena, ncijena
+        INTO idRaspolozivo;
+
+    IF NOT idRaspolozivo IS NULL THEN
+        -- ako postoji onda ovu nivelaciju ODUZETI za tu prodaju sa isteklim popustom
+        EXECUTE 'update {{ item_prodavnica }}.pos_stanje set kol_ulaz=kol_ulaz - $1, ulazi = ulazi || $3' ||
+            ' WHERE id=$2'
+            USING kolicina, idRaspolozivo, dokument;
+    ELSE -- nema 'kompatibilnih' stavki stanja (ni roba na stanju, ni prodaja u minus)
+        RAISE EXCEPTION 'ERROR FIX -POPUST % kol: % cij: %', idroba, kolicina, cijena;
+    END IF;
 
 ELSE
   -- nema dostupne zalihe za promjenu ?!
@@ -526,7 +566,7 @@ BEGIN
 
             -- ili stavka sa popustom kod koje je negativno stanje a popust je istekao
             -- OR (rec_stanje.ncijena<>0 and nStanje < 0 and dat_do < current_date)) THEN
-            
+
             IF nStanje > 0 THEN
                nStaraCijena := rec_stanje.cijena;
                nNovaCijena := nOsnovnaCijena;
@@ -548,6 +588,103 @@ BEGIN
                cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatum);
                insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,opis)
                     values(cIdPos, '29', cBrDokNew, dDatum, dDatum, 'GEN: fix pos_stanje')
+                    RETURNING dok_id into uuidPos;
+            END IF;
+
+            SELECT * FROM {{ item_prodavnica }}.roba
+               WHERE id=cIdRoba
+               INTO rec_roba;
+
+            EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+                 using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nStaraCijena, nNovaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+             lInsertovano := TRUE;
+             nRbr := nRbr + 1;
+             nCount := nCount + 1;
+
+         END IF;
+
+
+      END LOOP;
+
+      RETURN nCount;
+END;
+$$;
+
+
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fix_pos_stanje_patch_minus_popust_istekao() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar DEFAULT '1 ';
+      nCount integer;
+      rec_stanje RECORD;
+      rec_roba RECORD;
+      cIdRoba varchar;
+      nOsnovnaCijena numeric;
+      nStanje numeric;
+      cBrDokNew varchar;
+      dDatum date;
+      nRbr integer;
+      uuidPos uuid;
+      nStaraCijena numeric;
+      nNovaCijena numeric;
+      nDostupnaKolicina numeric;
+      cMsg varchar;
+      lInsertovano boolean;
+BEGIN
+
+      nCount := 0;
+      cIdRoba := 'X#X';
+      cBrDokNew := NULL;
+      dDatum := current_date;
+      nRbr := 1;
+      lInsertovano := FALSE;
+
+      FOR rec_stanje IN SELECT id, dat_od, dat_do, idroba, roba_id, ulazi, izlazi, kol_ulaz, kol_izlaz, cijena, ncijena from {{ item_prodavnica }}.pos_stanje
+                           UNION
+                        SELECT 0 id, current_date dat_od, current_date dat_do, 'X#X' idroba, null roba_id, '{}'::text[] ulazi, '{}'::text[] izlazi, 0 kol_ulaz, 0 kol_izlaz, 9999 cijena, 0 ncijena
+                        ORDER BY idroba
+      LOOP
+         -- ovaj union dole se radi zato da uvijek prodje kroz ovaj if nakon odredjenog artikla
+         IF cIdRoba <> rec_stanje.idroba THEN
+           IF cIdRoba <> 'X#X' AND lInsertovano THEN
+              -- uvijek na kraju zadati stavku sa kolicinom 0 i aktuelnom osnovnom cijenom da se ne bi promijenila osnovna cijena
+              nStanje := 0;
+              EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+                using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nOsnovnaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+                nRbr := nRbr + 1;
+           END IF;
+           cIdRoba := rec_stanje.idroba;
+           nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
+           nDostupnaKolicina := {{ item_prodavnica }}.pos_dostupno_artikal_za_cijenu(cIdRoba, nOsnovnaCijena, 0);
+           lInsertovano := FALSE;
+           IF nOsnovnaCijena = 0 THEN
+              CONTINUE;
+           END IF;
+         END IF;
+
+         nStanje := rec_stanje.kol_ulaz - rec_stanje.kol_izlaz;
+         IF nStanje < 0 AND rec_stanje.ncijena <> 0 AND rec_stanje.dat_do < current_date THEN
+
+            -- stavka sa popustom kod koje je negativno stanje a popust je istekao
+            nStaraCijena := nOsnovnaCijena;
+            nNovaCijena := rec_stanje.cijena;
+            nStanje := - nStanje;
+            IF nDostupnaKolicina - nStanje > 0 THEN
+                 nDostupnaKolicina := nDostupnaKolicina - nStanje;
+            ELSE
+                  cMsg := format('%s : cij: %s stanje: %s', cIdRoba, rec_stanje.cijena, -nStanje);
+                  PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_FIX_POS_STANJE-POPUST', cMsg);
+                  RAISE INFO 'preskacemo % % % nema dovoljno osnovne kolicine', cIdRoba, rec_stanje.cijena, -nStanje;
+                  CONTINUE;
+            END IF;
+
+            IF cBrDokNew IS NULL THEN
+               cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatum);
+               insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,opis)
+                    values(cIdPos, '29', cBrDokNew, dDatum, dDatum, 'GEN: fix pos_stanje patch -popust')
                     RETURNING dok_id into uuidPos;
             END IF;
 
