@@ -287,7 +287,7 @@ IF idvd = '79' AND dat_od > current_date THEN -- ako se odobrava snizenje unapri
 END IF;
 
 
--- PATCH fix minus istekao popust PATHCV
+-- PATCH fix minus istekao popust PATCH PATCH --
 EXECUTE  'select id, -kol_ulaz+kol_izlaz as stanje from {{ item_prodavnica }}.pos_stanje WHERE ' ||
          '(pos_stanje.ncijena<>0 AND pos_stanje.dat_od<current_date AND pos_stanje.dat_do<current_date AND pos_stanje.cijena=$2)' ||
          ' AND pos_stanje.idroba=$1 AND pos_stanje.kol_ulaz-pos_stanje.kol_izlaz<0' ||
@@ -358,9 +358,11 @@ ELSIF (NOT idRaspolozivoPatchMinus IS NULL) AND (kolicina = nStanjePatchMinus) A
    ' WHERE id=$2'
     USING kolicina, idRaspolozivoPatchMinus, dokument;
 
+
+    cijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( idroba );
     ncijena := 0;
 
-    -- u ovom narednom upitu cemo provjeriti postoji li ranija prodaja ovog artikla u minusu po novim cijenama
+    -- naci stavku pos_stanje po osnovnoj cijeni
     EXECUTE  'select id from {{ item_prodavnica }}.pos_stanje where (dat_od<=current_date AND dat_do>=current_date) AND idroba=$1 AND cijena=$2 AND ncijena=$3' ||
         ' order by id desc limit 1'
         using idroba, cijena, ncijena
@@ -669,7 +671,8 @@ BEGIN
          IF nStanje < 0 AND rec_stanje.ncijena <> 0 AND rec_stanje.dat_do < current_date THEN
 
             -- stavka sa popustom kod koje je negativno stanje a popust je istekao
-            nStaraCijena := nOsnovnaCijena;
+            --nStaraCijena := nOsnovnaCijena;
+            nStaraCijena := rec_stanje.cijena;
             nNovaCijena := rec_stanje.cijena;
             nStanje := - nStanje;
             IF nDostupnaKolicina - nStanje > 0 THEN
