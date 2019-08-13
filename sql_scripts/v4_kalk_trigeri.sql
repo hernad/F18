@@ -22,13 +22,9 @@ DECLARE
     robaJmj varchar;
     cProdShema varchar;
     nKol2 decimal;
-    cMsg varchar;
 BEGIN
 
 IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
-
-      cMsg := format('%s-%s / %s : roba: %s kol: %s mpc: %s mpcsapp: %s', NEW.idvd, NEW.brdok, NEW.pkonto, NEW.idroba, NEW.kolicina, NEW.mpc, NEW.mpcsapp);
-      PERFORM public.logiraj( current_user::varchar, 'KALK_TRIG_29', cMsg);
 
       PERFORM public.kalk_kontiranje_stavka(
         NEW.idvd, NEW.brdok, NEW.pkonto, NEW.mkonto,

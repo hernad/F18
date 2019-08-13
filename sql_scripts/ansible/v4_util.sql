@@ -829,6 +829,7 @@ DECLARE
    nMaxRbr numeric;
    aArray text[];
    nRows integer;
+   cMsg varchar;
 BEGIN
 
    SELECT public.fetchmetrictext('org_id') INTO cIdFirma;
@@ -873,6 +874,8 @@ BEGIN
          WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrnal;
    END IF;
 
+   cMsg := format('%s / %s : roba: %s kol: %s mpc: %s mpcsapp: %s ; ROWS %s', cBrNal, cPKonto, cIdRoba, nKolicina, nMPC, nMPCSAPDV, nRows);
+   PERFORM public.logiraj( current_user::varchar, 'KALK_TRIG_29', cMsg);
 
    FOR rec_trfp IN SELECT * FROM public.trfp WHERE shema=cShema AND idvd=cIdVd
        AND btrim(id)<>'ZAOKRUZENJE'
@@ -919,6 +922,7 @@ BEGIN
           nIznos := 0;
       END CASE;
 
+      nIznos := coalesce( nIznos, 0);
       IF (rec_trfp.znak = '-') THEN
          nIznos := -nIznos;
       END IF;
@@ -935,6 +939,7 @@ BEGIN
       END IF;
 
       RAISE INFO 'fin_suban seek %-%-% [%]', cIdFirma, cIdVn, cBrNal, cIdKonto;
+
       SELECT * from fmk.fin_suban
           WHERE idfirma=cIdFirma and idvn=cIdVn and brnal=cBrNal and trim(idkonto)=trim(cIdKonto)
           INTO rec_suban;
@@ -959,6 +964,10 @@ BEGIN
    IF (nRbr >= nRows) THEN
       -- ako je potrebno prvo zatvoriti zaokruzenje
       PERFORM public.kalk_kontiranje_stavka_zaokruzenje( cIdVd, cBrDok, cPKonto, cMKonto );
+
+      cMsg := format('ZADNJI RED %s / %s / ROWS %s', cBrNal, cIdKonto, nRows);
+      PERFORM public.logiraj( current_user::varchar, 'KALK_TRIG_29_END', cMsg);
+
       RAISE INFO 'ZADNJI RED % - gen_anal_sint % !', nRows, public.fin_gen_anal_sint(cIdFirma, cIdVn, cBrNal);
    END IF;
 
@@ -1037,6 +1046,7 @@ BEGIN
     cIdKonto := rpad(trim(cIdKonto),7);
     nSaldo := public.fin_saldo(cIdFirma, cIdVn, cBrNal);
     cDP := rec_trfp.d_p;
+    nIznos := coalesce( nIznos, 0);
 
     IF cDP = '1' THEN
         nIznos := -nSaldo;
