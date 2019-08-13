@@ -645,7 +645,7 @@ STATIC FUNCTION kalk_azur_sql()
          EXIT
       ELSE
          run_sql_query( "COMMIT" )
-         log_write( "F18_DOK_OPER: ažuriranje kalk dokumenta: " + cDokument, 2 )
+         log_write( "F18_DOK_OPER: azuriranje kalk dokumenta: " + cDokument, 2 )
       ENDIF
    ENDDO
 

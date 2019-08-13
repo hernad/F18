@@ -20,7 +20,7 @@ FUNCTION dbf_update_rec( hRec, lNoLock )
    LOCAL _key
    LOCAL _field_b
    LOCAL cMsg
-   LOCAL _a_dbf_rec
+   LOCAL aDbfRec
    LOCAL lSql := ( my_rddName() == "SQLMIX" )
 
    IF lNoLock == NIL
@@ -37,15 +37,13 @@ FUNCTION dbf_update_rec( hRec, lNoLock )
 
    IF lNoLock .OR. my_rlock()
 
-      _a_dbf_rec := get_a_dbf_rec( Alias(), .F. )
+      aDbfRec := get_a_dbf_rec( Alias(), .F. )
 
       FOR EACH _key in hRec:Keys
 
-
-         IF field_in_blacklist( _key, _a_dbf_rec[ "blacklisted" ] )  // blacklistovano polje
+         IF field_in_blacklist( _key, aDbfRec[ "blacklisted" ] )  // blacklistovano polje
             LOOP
          ENDIF
-
 
          IF FieldPos( _key ) == 0 // replace polja
             cMsg := RECI_GDJE_SAM + " dbf field " + _key + " ne postoji u " + Alias()

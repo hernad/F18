@@ -22,19 +22,25 @@ DECLARE
     robaJmj varchar;
     cProdShema varchar;
     nKol2 decimal;
+    cMsg varchar;
 BEGIN
 
 IF (TG_OP = 'INSERT' AND NEW.idvd = '29') THEN -- kontiranje 29-ke
+
+      cMsg := format('%s-%s / %s : roba: %s kol: %s mpc: %s mpcsapp: %s', NEW.idvd, NEW.brdok, NEW.pkonto, NEW.idroba, NEW.kolicina, NEW.mpc, NEW.mpcsapp);
+      PERFORM public.logiraj( current_user::varchar, 'KALK_TRIG_29', cMsg);
+
       PERFORM public.kalk_kontiranje_stavka(
         NEW.idvd, NEW.brdok, NEW.pkonto, NEW.mkonto,
         NEW.idroba, NEW.idtarifa,
         NEW.rbr, NEW.kolicina, NEW.nc, NEW.mpc, NEW.mpcsapp,
         NEW.datdok, NEW.brfaktp
       );
+
 END IF;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
-   IF ( NOT NEW.idvd IN ('02','19','21','72','79','80', 'IP') ) THEN
+   IF ( NOT NEW.idvd IN ('02','19','21','72','79','80','IP') ) THEN
      RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));

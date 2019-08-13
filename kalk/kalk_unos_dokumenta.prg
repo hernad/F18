@@ -1080,7 +1080,6 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
 
    SELECT kalk_pripr
    GO TOP
-
    SEEK cIdFirmaNew + cIdVdNew + cBrDokNew
    IF !Found()
       RETURN .F.
@@ -1122,7 +1121,7 @@ STATIC FUNCTION kalk_izmjeni_sve_stavke_dokumenta( old_dok, new_dok )
       SKIP -1
       hRec := dbf_get_rec()
       hRec[ "idfirma" ] := hRecTekuci[ "idfirma" ]
-      hRec[ "idtipdok" ] := hRecTekuci[ "idvd" ]
+      hRec[ "idvd" ] := hRecTekuci[ "idvd" ]
       hRec[ "brdok" ] := hRecTekuci[ "brdok" ]
       dbf_update_rec( hRec )
       GO ( nTrec )
