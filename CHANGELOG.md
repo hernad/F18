@@ -2,6 +2,7 @@
 
 ## 2019-08-28
 
+- eshell_cmd
 - test localhost azure-pipeline / fedora docker-ce / $(NEXTCLOUD_HERNAD_PWD) defined in Pipelines/Library/API_KEYS variable group
 
 ## 2019-08-08
