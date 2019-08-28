@@ -80,7 +80,7 @@ METHOD BEGIN() CLASS PDFClass
 
       IF File( cFontFile )
          ::cEmbeddedFontName := HPDF_LoadTTFontFromFile( ::oPdf, cFontFile, .T. )
-         info_bar( "pdf", ::cEmbeddedFontName + " / " + AllTrim( Str( ::nFontSize ) ) )
+         // info_bar( "pdf", ::cEmbeddedFontName + " / " + AllTrim( Str( ::nFontSize ) ) )
          ::cFontName := ::cEmbeddedFontName
       ENDIF
 

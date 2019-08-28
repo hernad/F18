@@ -13,6 +13,7 @@ FUNCTION eshell_cmd( cCmd, cFile )
    // @ 0, 0 SAY ""
    Inkey( 0.05 )
    OutStd( "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
+   Inkey( 0.05 )
    // OutStd( "" )
    // IF is_windows()
    // Inkey( 0.1 )
