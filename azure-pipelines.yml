@@ -21,108 +21,8 @@ resources:
     image: hernad/azure-linux-build-agent:ia32
 
 jobs:
-- job: Windows_x64
-  pool:
-    vmImage: VS2017-Win2016
-  variables:
-    VSCODE_ARCH: x64
-    HB_COMPILER: mingw64
-    BINTRAY_ARCH: x64
-    MINGW_ARCH: x86_64
-  steps:
-    - script: |
-        git clone https://github.com/lazka/msys2-ci-base.git %CD:~0,2%\msys64
-        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
-      displayName: Install MSYS2
-    - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
-      displayName: Update MSYS2
-    - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
-      displayName: Install Toolchain
-    - script: |
-        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        cd $(Build.SourcesDirectory)
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
-      displayName: CI-Build F18 windows 64-bit
-      env:
-        CHERE_INVOKING: yes
-    - script: |
-        cd $(Build.SourcesDirectory)
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
-      displayName: upload F18-windows-x64 version $(BUILD.BUILDNUMBER)
-      env:
-        CHERE_INVOKING: yes
-        BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
-
-- job: Windows_ia32
-  pool:
-    vmImage: VS2017-Win2016
-  variables:
-    VSCODE_ARCH: ia32
-    HB_COMPILER: mingw
-    BINTRAY_ARCH: x86
-    MINGW_ARCH: i686
-  steps:
-    - script: |
-        git clone https://github.com/lazka/msys2-ci-base.git %CD:~0,2%\msys64
-        %CD:~0,2%\msys64\usr\bin\rm -rf %CD:~0,2%\msys64\.git
-      displayName: Install MSYS2
-    - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Syyuu
-      displayName: Update MSYS2
-    
-    - script: |
-        set PATH=%CD:~0,2%\msys64\usr\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain
-        %CD:~0,2%\msys64\usr\bin\pacman --noconfirm -Scc
-      displayName: Install gcc build toolchain
-
-    - script: |
-        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        cd $(Build.SourcesDirectory)
-        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
-      displayName: CI-Build F18 windows 32-bit
-      env:
-        CHERE_INVOKING: yes
-    - script: |
-        cd $(Build.SourcesDirectory)
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
-      displayName: upload F18-windows-x86 version $(BUILD.BUILDNUMBER)
-      env:
-        BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
-        CHERE_INVOKING: yes
-
-
-- job: Linux_ia32
-  pool:
-    vmImage: 'Ubuntu-16.04'
-  container: vscode-ia32
-  variables:
-    BUILD_ARCH: ia32
-    BINTRAY_ARCH: x86
-    MINGW_ARCH: i686
-  steps:
-  - script: |
-      cd $(Build.SourcesDirectory)
-      ./ci-build-linux.sh
-    displayName: CI-Build F18 32-bit
-  - script: |
-      cd $(Build.SourcesDirectory)
-      ./upload_bintray_linux.sh
-    displayName: upload F18-linux-x86 version $(BUILD.BUILDNUMBER)
-    env:
-      BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
-
 - job: Linux_x64
-  pool:
-    vmImage: 'Ubuntu-16.04'
+  pool: local-dell-xps15
   container: vscode-ia32
   variables:
     BUILD_ARCH: x64
@@ -135,7 +35,7 @@ jobs:
     displayName: CI-Build F18 64-bit
   - script: |
       cd $(Build.SourcesDirectory)
-      ./upload_bintray_linux.sh
+      ./upload_localhost.sh
     displayName: upload F18-linux-x64 version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
