@@ -20,7 +20,7 @@ zip -r -v $FILE F18
 ls -lh $FILE
 
 set
-echo uploading $FILE to bintray ...
+echo uploading $FILE to nextcloud ${NEXTCLOUD_HERNAD_PWD} ...
 
 #curl -s -T $FILE \
 #      -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
@@ -31,6 +31,5 @@ echo uploading $FILE to bintray ...
 #   -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$BINTRAY_PACKAGE_VER/publish
 
 
-ls -lh $FILE
-
-curl -X PUT -u "hernad@bring.out.ba:$NEXTCLOUD_HERNAD_PWD" "https://drive.bring.out.ba/remote.php/webdav/Downloads/upload_localhost.sh" --data-binary @"$FILE"
+echo curl -X PUT -u "hernad@bring.out.ba:${NEXTCLOUD_HERNAD_PWD}" "https://drive.bring.out.ba/remote.php/webdav/Downloads/${FILE}" --data-binary @"${FILE}"
+curl -X PUT -u "hernad@bring.out.ba:${NEXTCLOUD_HERNAD_PWD}" "https://drive.bring.out.ba/remote.php/webdav/Downloads/${FILE}" --data-binary @"${FILE}"
