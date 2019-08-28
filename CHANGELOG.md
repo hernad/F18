@@ -2,7 +2,7 @@
 
 ## 2019-08-28
 
-- test localhost azure-pipeline
+- test localhost azure-pipeline / fedora docker-ce
 
 ## 2019-08-08
 
