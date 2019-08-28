@@ -8,14 +8,14 @@ FUNCTION eshell_cmd( cCmd, cFile )
    nRow := Row()
    nCol := Col()
    SAVE SCREEN TO cScr
-   CLEAR SCREEN
+   // CLEAR SCREEN
    SetPRC( 0, 0 )
    // @ 0, 0 SAY ""
    Inkey( 0.05 )
-   OutStd( hb_eol(), "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
+   OutStd( "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
    // OutStd( "" )
    // IF is_windows()
-   Inkey( 0.1 )
+   // Inkey( 0.1 )
    // ENDIF
    RESTORE SCREEN FROM cScr
    SetPRC( nRow, nCol )
