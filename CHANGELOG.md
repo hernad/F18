@@ -2,7 +2,7 @@
 
 ## 2019-08-28
 
-- test localhost azure-pipeline / fedora docker-ce / $(NEXTCLOUD_HERNAD_PWD) / 2
+- test localhost azure-pipeline / fedora docker-ce / $(NEXTCLOUD_HERNAD_PWD) / Pipelines/Library/API_KEYS variable group
 
 ## 2019-08-08
 
