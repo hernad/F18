@@ -9,11 +9,11 @@ FUNCTION eshell_cmd( cCmd, cFile )
    nCol := Col()
    SAVE SCREEN TO cScr
    // CLEAR SCREEN
-   SetPRC( 0, 0 )
+   //SetPRC( 0, 0 )
    // @ 0, 0 SAY ""
-   Inkey( 0.05 )
-   OutStd( "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
-   Inkey( 0.05 )
+   Inkey( 0.01 )
+   OutStd( hb_eol(), "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
+   Inkey( 0.01 )
    // OutStd( "" )
    // IF is_windows()
    // Inkey( 0.1 )
