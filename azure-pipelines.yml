@@ -39,3 +39,4 @@ jobs:
     displayName: upload F18-linux-x64 version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
+      NEXTCLOUD_HERNAD_PWD: $(NEXTCLOUD_HERNAD_PWD)

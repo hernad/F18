@@ -30,4 +30,7 @@ echo uploading $FILE to bintray ...
 #curl -s -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
 #   -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$BINTRAY_PACKAGE_VER/publish
 
-echo "file=$FILE"
+
+ls -lh $FILE
+
+curl -X PUT -u "hernad@bring.out.ba:$NEXTCLOUD_HERNAD_PWD" "https://drive.bring.out.ba/remote.php/webdav/Downloads/upload_localhost.sh" --data-binary @"$FILE"

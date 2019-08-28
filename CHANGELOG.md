@@ -2,7 +2,7 @@
 
 ## 2019-08-28
 
-- test localhost azure-pipeline / fedora docker-ce
+- test localhost azure-pipeline / fedora docker-ce / $(NEXTCLOUD_HERNAD_PWD)
 
 ## 2019-08-08
 
