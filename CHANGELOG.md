@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-08-28
+
+- test localhost azure-pipeline
+
 ## 2019-08-08
 
 - pos stanje fix, nivelacije dat_od >= dat_do fix
