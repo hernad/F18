@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-08-29
+
+- azure-pipeline localhost windows
+
 ## 2019-08-28
 
 - eshell_cmd / 4
