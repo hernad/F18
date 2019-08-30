@@ -771,6 +771,8 @@ BEGIN
       RAISE INFO 'Srv[BL] - 598 error?!';
    END;
 
+   PERFORM public.cron_kontiranje_29_zadnja_sedmica();
+
    -- brisanje logova od prije tri dana
    delete from log where ( date(l_time) <= (current_date-3) ) and msg like 'CRON_ZPROPMAG:%';
 
@@ -799,7 +801,6 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION IF EXISTS public.kalk_kontiranje;
 
 CREATE OR REPLACE FUNCTION public.kalk_kontiranje_stavka(
   cIdVd varchar, cBrDok varchar, cPKonto varchar, cMKonto varchar,
@@ -1235,6 +1236,28 @@ BEGIN
 END;
 $$;
 
+
+CREATE OR REPLACE FUNCTION public.cron_kontiranje_29_zadnja_sedmica() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+       rec_kalk record;
+       nCount integer;
+BEGIN
+     nCount := 0;
+
+     FOR rec_kalk IN SELECT kalk_doks.idfirma,kalk_doks.idvd,kalk_doks.brdok from kalk_doks
+       LEFT JOIN fmk.fin_nalog on kalk_doks.idfirma=fin_nalog.idfirma and kalk_doks.idvd=fin_nalog.idvn and kalk_doks.brdok=fin_nalog.brnal
+       WHERE idvd='29' and datdok>current_date-7 and datdok<=current_date and dugbhd is null
+       ORDER BY datdok
+     LOOP
+          PERFORM public.kalk_kontiranje( rec_kalk.idfirma, rec_kalk.idvd, rec_kalk.brdok );
+          nCount := nCount + 1;
+     END LOOP;
+
+     RETURN nCount;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.get_sifk(param_id character varying, param_oznaka character varying, param_sif character varying, OUT vrijednost text) RETURNS text
     LANGUAGE plpgsql
