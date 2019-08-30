@@ -173,8 +173,9 @@ BEGIN
          IF nStanje > 0 THEN -- osnovna cijena za artikal u pos
             nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal(cIdRoba);
             IF nOsnovnaCijena <> nC2 THEN
-               cMsg := format('%s : nova cijena %s u dokumentu i akutelna osnovna cijena %s se razlikuju?', cIdRoba, nC, nOsnovnaCijena);
+               cMsg := format('%s : nova cijena nC=%s, nC2=%s u dokumentu i aktuelna osnovna cijena %s se razlikuju! NIV-NA-NIV', cIdRoba, nC, nC2, nOsnovnaCijena);
                PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_72_ZNIV_END', cMsg);
+               nC := nOsnovnaCijena; -- napraviti nivelaciju bez efekta; npr nC=8, nC2=6, nOsnovnaCijena=7 =>   nOsnovnaCijena=7, nC=7
                RAISE INFO '%', cMsg;
             END IF;
          ELSIF nStanje < 0 THEN
