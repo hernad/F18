@@ -405,6 +405,16 @@ BEGIN
       INTO nCijenaMem, dDatOd, dDatDo;
 
     IF nCijenaMem IS NULL THEN
+
+      -- ako je stanje minus, gledati zadnju prodaju u pos_items
+      SELECT cijena from {{ item_prodavnica }}.pos_items  
+        LEFT JOIN {{ item_prodavnica }}.pos on pos.dok_id=pos_items.dok_id
+        WHERE pos_items.idvd='42' and rtrim(idroba)=rtrim(cIdRoba)
+        ORDER BY obradjeno DESC
+        LIMIT 1
+        INTO nCijenaMem;
+      
+      IF nCijenaMem IS NULL THEN -- nema transakcija sa stanjem > 0 u pos_stanje, niti prodaje u pos_items
         SELECT mpc from {{ item_prodavnica }}.roba WHERE rtrim(id)=rtrim(cIdRoba)
            INTO nCijenaSif;
         IF nCijenaSif IS NULL THEN -- cijene nema ni u p2.pos_stanje ni u p2.roba
@@ -412,6 +422,7 @@ BEGIN
         ELSE
            RETURN nCijenaSif;
         END IF;
+      END IF;
     END IF;
 
     RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
@@ -557,11 +568,14 @@ BEGIN
   SELECT  {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(current_date)
       INTO nCount79;
 
-   SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start()
+  -- ako imamo dva zahtjeva za nivelaciju za isti artikal na isti dan od kojih jedna zavrsava, 
+  -- a druga pocinje (sto je prakticno nastavak akcije), prvo treba zavrsiti staru akciju, pa onda poceti novu
+  SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end()
+      INTO nNivEnd;
+
+  SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_start()
        INTO nNivStart;
 
-   SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end()
-      INTO nNivEnd;
 
    SELECT {{ item_prodavnica }}.pos_popust_naknadna_obrada()
       INTO nPopustNaknadno;

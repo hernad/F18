@@ -307,6 +307,7 @@ BEGIN
      -- ref nije popunjen => startna nivelacija nije napravljena, a planirana je za danas
      FOR uuid72 IN SELECT dok_id FROM {{ item_prodavnica }}.pos
           WHERE idvd='72' AND ref IS NULL AND dat_od<=current_date -- tekuci datum je jednak ili veci od dat_od
+          ORDER BY obradjeno
      LOOP
             RAISE INFO 'nivelacija_start 72: %', uuid72;
 
@@ -339,6 +340,7 @@ BEGIN
      -- ref_2 nije popunjen => zavrsna nivelacija nije napravljena, a planirana je za danas
      FOR uuid72 IN SELECT dok_id FROM {{ item_prodavnica }}.pos
           WHERE idvd='72' AND ( ref_2 IS NULL ) AND ( dat_do IS NOT NULL ) AND dat_do<current_date -- dat_do=15.05 => 16.05 ujutro end nivelacija
+          ORDER BY obradjeno
      LOOP
           RAISE INFO 'nivelacija_end %', uuid72;
 
