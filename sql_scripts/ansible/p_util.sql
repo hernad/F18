@@ -406,15 +406,25 @@ BEGIN
 
     IF nCijenaMem IS NULL THEN
 
-      -- ako je stanje minus, gledati zadnju prodaju u pos_items
-      SELECT cijena from {{ item_prodavnica }}.pos_items  
-        LEFT JOIN {{ item_prodavnica }}.pos on pos.dok_id=pos_items.dok_id
-        WHERE pos_items.idvd='42' and rtrim(idroba)=rtrim(cIdRoba)
-        ORDER BY obradjeno DESC
+      -- ako ima stanje minus, gledati tu cijenu iz pos_stanje
+      SELECT cijena dat_od, dat_do FROM {{ item_prodavnica }}.pos_stanje
+        WHERE rtrim(idroba)=rtrim(cIdRoba)
+        AND kol_ulaz-kol_izlaz < 0
+        AND dat_od<=current_date AND dat_do>=current_date
+        AND ncijena=0
+        ORDER BY id DESC
         LIMIT 1
-        INTO nCijenaMem;
-      
-      IF nCijenaMem IS NULL THEN -- nema transakcija sa stanjem > 0 u pos_stanje, niti prodaje u pos_items
+        INTO nCijenaMem, dDatOd, dDatDo;
+
+      -- ovo je stvaralo bug - kada je stanje 0 i posalje se nivelacija na stanje 0
+      -- SELECT cijena from {{ item_prodavnica }}.pos_items  
+      --   LEFT JOIN {{ item_prodavnica }}.pos on pos.dok_id=pos_items.dok_id
+      --   WHERE pos_items.idvd='42' and rtrim(idroba)=rtrim(cIdRoba)
+      --   ORDER BY obradjeno DESC
+      --   LIMIT 1
+      --   INTO nCijenaMem;
+
+      IF nCijenaMem IS NULL THEN -- nema transakcija sa stanjem > 0 u pos_stanje, ili stanjem < 0 pos_stanje, tada sifarnik citati
         SELECT mpc from {{ item_prodavnica }}.roba WHERE rtrim(id)=rtrim(cIdRoba)
            INTO nCijenaSif;
         IF nCijenaSif IS NULL THEN -- cijene nema ni u p2.pos_stanje ni u p2.roba
@@ -423,6 +433,7 @@ BEGIN
            RETURN nCijenaSif;
         END IF;
       END IF;
+
     END IF;
 
     RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
