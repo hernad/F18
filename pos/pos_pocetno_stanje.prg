@@ -121,7 +121,6 @@ STATIC FUNCTION prebaci_se_u_bazu( db_params, database, nYear )
 
 
 
-
 STATIC FUNCTION pocetno_stanje_sql( hParams )
 
    LOCAL _db_params := my_server_params()

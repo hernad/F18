@@ -602,6 +602,26 @@ FUNCTION pos_get_mpc( cIdRoba )
    RETURN nCijena
 
 
+FUNCTION pos_nivelacija_29_ref_dokument( dDatum, cBrDok )
+
+      LOCAL cQuery, oRet, oError, cRet := ""
+
+      cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_nivelacija_29_ref_dokument(" + ;
+         sql_quote( dDatum ) + "," + sql_quote( cBrDok ) + ")"
+
+      BEGIN SEQUENCE WITH {| err | Break( err ) }
+
+         oRet := run_sql_query( cQuery )
+         IF is_var_objekat_tpqquery( oRet )
+            cRet := oRet:FieldGet( 1 )
+         ENDIF
+
+      RECOVER USING oError
+         Alert( _u( "pos_nivelacija_29_ref_dokument error ?!" ) )
+      END SEQUENCE
+
+      RETURN cRet
+
 FUNCTION o_vrstep( cId )
 
    SELECT ( F_VRSTEP )

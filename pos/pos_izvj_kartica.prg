@@ -208,7 +208,12 @@ FUNCTION pos_kartica_artikla()
          nCijena := 0
       ENDIF
       ?? Str( nCijena, 10, 2 ) + " "
-      ?? Str( nVrijednost, 10, 2 )
+      IF ABS(nVrijednost) < 10 .AND. Abs( nStanjeKolicina ) < 1
+         ?? Str( nVrijednost, 10, 3 )
+      ELSE
+         ?? Str( nVrijednost, 10, 2 )
+      ENDIF
+
       ? m
 
 
@@ -336,6 +341,10 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
                ??U " do daljnjeg"
             ENDIF
          ENDIF
+         IF pos->idvd == POS_IDVD_GENERISANA_NIVELACIJA
+            ?? " ", pos_nivelacija_29_ref_dokument( pos->datum, pos->brdok )
+         ENDIF
+
          IF pos->idvd <> POS_IDVD_ZAHTJEV_NIVELACIJA
             @ PRow() + 1, s_nKol2 + 1 SAY PadR( _u( cStr2 ), 10 ) + " "
             ?? Str( pos->kolicina, 10, 3 ) + " "
@@ -360,6 +369,7 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
             ?? Str ( pos->ncijena - pos->cijena, 10, 2 ) + " "
          ENDIF
          ?? Str ( nVrijednost, 10, 2 )
+
       ENDIF
 
    ELSEIF POS->IdVd == POS_IDVD_PRIJEM_KALO
@@ -374,7 +384,11 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
          ?? Str ( pos->kolicina, 10, 3 ) + " "
          ?? Str ( nStanjeKolicina, 10, 3 ) + " "
          ?? Str ( pos->cijena, 10, 2 ) + " "
-         ?? Str ( nVrijednost, 10, 2 )
+         // ?? Str ( nVrijednost, 10, 2 )
+
+         IF pos->idvd == POS_IDVD_PRIJEM_KALO
+            ?? ":", Left( pos->opis, 60 )
+         ENDIF
       ENDIF
 
    ELSEIF POS->IdVd == POS_IDVD_RACUN

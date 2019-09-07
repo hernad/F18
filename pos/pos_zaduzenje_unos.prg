@@ -58,7 +58,6 @@ FUNCTION pos_zaduzenje( cIdVd )
       AAdd( Kol, nI )
    NEXT
 
-
    o_pos_tables()
    SELECT PRIPRZ
 
@@ -157,7 +156,7 @@ FUNCTION pos_zaduzenje( cIdVd )
       _robanaz := roba->naz
       _jmj := roba->jmj
       _idtarifa := roba->idtarifa
-      _cijena := iif( Empty( _cijena ), pos_get_mpc( roba->id ), _cijena )
+      _cijena := iif( Empty( _cijena ), pos_dostupna_osnovna_cijena_za_artikal( _idRoba ), _cijena )
       _barkod := roba->barkod
       my_rlock()
       Gather()
@@ -401,7 +400,7 @@ FUNCTION pos_pripr_gen_stavke_inventura()
          idRadnik WITH gIdRadnik, ;
          datum WITH danasnji_datum(), ;
          idvd WITH POS_IDVD_INVENTURA, ;
-         cijena WITH pos_get_mpc( cIdRoba ), ;
+         cijena WITH pos_dostupna_osnovna_cijena_za_artikal( cIdRoba ), ;
          idroba WITH cIdRoba, ;
          jmj WITH roba->jmj, ;
          robanaz WITH roba->naz, ;

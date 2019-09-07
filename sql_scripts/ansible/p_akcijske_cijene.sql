@@ -360,3 +360,36 @@ BEGIN
      RETURN nCount;
 END;
 $$;
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.pos_nivelacija_29_ref_dokument( dDatum date, cBrDok varchar ) RETURNS varchar
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+       uuid29 uuid;
+       dDatum72 date;
+       cBrDok72 varchar;
+BEGIN
+
+   SELECT dok_id FROM {{ item_prodavnica }}.pos WHERE datum=dDatum AND idvd='29' AND brdok=cBrDok
+       INTO uuid29;
+
+   -- datum i broj 72-ke
+   SELECT datum, brdok FROM {{ item_prodavnica }}.pos WHERE ref=uuid29
+       INTO dDatum72, cBrDok72;
+   
+   IF cBrDok72 IS NULL THEN
+      SELECT datum, brdok FROM {{ item_prodavnica }}.pos WHERE ref_2=uuid29
+       INTO dDatum72, cBrDok72;
+      
+      IF cBrDok IS NULL THEN
+         RETURN 'ERR_NO_REF' ;
+      ELSE
+         RETURN 'ref_2: ' || dDatum72 || '/72-' || cBrDok72;
+      END IF;
+   ELSE
+      RETURN 'ref  : ' || dDatum72 || '/72-' || cBrDok72;
+   END IF;
+
+END;
+$$;

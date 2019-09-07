@@ -85,7 +85,7 @@ FUNCTION pos_postoji_roba( cId, nRow, nCol, cBarkodVratiti, aGetList )
       //   _kolicina := nTezina
       //ENDIF
       IF roba->tip <> "T"
-         _cijena := pos_get_mpc( roba->id )
+         _cijena := pos_dostupna_osnovna_cijena_za_artikal( cId )
       ENDIF
 
    ENDIF

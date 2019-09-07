@@ -69,7 +69,7 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
    LOCAL lOk, cBarkodProcitati, aCijene, nOdabranaCijena
 
    lOk := pos_postoji_roba( @cIdroba, nRow, nCol, @cBarkodProcitati, aGetList ) ;
-      .AND. pos_racun_provjera_dupli_artikal( cIdroba )
+      .AND. pos_racun_provjera_dupli_artikal( cIdRoba )
 
    aCijene := pos_dostupne_cijene_za_artikal( cIdRoba )
    IF Len( aCijene ) > 1
@@ -88,7 +88,7 @@ FUNCTION pos_valid_racun_artikal( cIdroba, aGetList, nRow, nCol )
       IF !pos_ignorisi_stanje()
          Alert( "Artikla " + cIdRoba + " nema na stanju !?" )
       ENDIF
-      _cijena := pos_get_mpc( roba->id )
+      _cijena := pos_dostupna_osnovna_cijena_za_artikal( cIdRoba )
       _ncijena := 0
    ENDIF
 
