@@ -113,7 +113,7 @@ FUNCTION rekap_finansijsko_stanje_magacin()
    nKolUlaz := 0
    nKolIzlaz := 0
 
-   DO WHILE !Eof() .AND. cIdfirma == idfirma .AND.  IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdfirma == idfirma .AND.  ispitaj_prekid()
 
       nUlaz := nIzlaz := 0
       nVPVU := nVPVI := nNVU := nNVI := 0
@@ -127,7 +127,7 @@ FUNCTION rekap_finansijsko_stanje_magacin()
       dDatDok := datdok
       cBroj := mkonto
 
-      DO WHILE !Eof() .AND. cIdfirma + cBroj == idFirma + mkonto .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdfirma + cBroj == idFirma + mkonto .AND. ispitaj_prekid()
 
          IF aUsl1 <> '.t.'
             IF ! &aUsl1

@@ -27,22 +27,23 @@ FUNCTION kalk_stampa_dok_ip()
    LOCAL cNaslov
    LOCAL xPrintOpt, bZagl
    LOCAL cPKonto
-   LOCAL nTot4
+   LOCAL nTotVisakManjak
    LOCAL nTot5
    LOCAL nTot6
    LOCAL nTot7
    LOCAL nTot8
    LOCAL nTot9
    LOCAL nTota
-   LOCAL nTotb
-   LOCAL nTotc
+   LOCAL nTotKnjiznaVrijednost
+   LOCAL nTotPopisanaVrijednost
    LOCAL nTotd
-   LOCAL nTotKol
-   LOCAL nTotGKol
+   LOCAL nTotPopisanaKolicina
+   LOCAL nTotKnjiznaKolicina
    LOCAL nTotVisak
    LOCAL nTotManjak
    LOCAL nPosKol
-   LOCAL nU4
+   LOCAL nUVisakManjak
+   LOCAL nKnjiznaVrijednost
 
    // LOCAL cIdPartner, cBrFaktp
 
@@ -89,18 +90,18 @@ FUNCTION kalk_stampa_dok_ip()
    m := "--- --------------------------------------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ----------"
 
    bZagl := {|| zagl_ip() }
-   nTot4 := 0
+   nTotVisakManjak := 0
    nTot5 := 0
    nTot6 := 0
    nTot7 := 0
    nTot8 := 0
    nTot9 := 0
    nTota := 0
-   nTotb := 0
-   nTotc := 0
+   nTotKnjiznaVrijednost := 0
+   nTotPopisanaVrijednost := 0
    nTotd := 0
-   nTotKol := 0
-   nTotGKol := 0
+   nTotPopisanaKolicina := 0
+   nTotKnjiznaKolicina := 0
    nTotVisak := 0
    nTotManjak := 0
 
@@ -147,25 +148,27 @@ FUNCTION kalk_stampa_dok_ip()
       ENDIF
 
       @ PRow(), PCol() + 1 SAY field->mpcsapp PICT PicCDEM
-      nTotb += field->fcj
-      nTotc += field->kolicina * field->mpcsapp
-      nTot4 += ( nU4 := ( field->MPCSAPP * field->Kolicina ) - field->fcj )
-      nTotKol += field->kolicina
-      nTotGKol += field->gkolicina
+      //nTotKnjiznaVrijednost += field->fcj
+      nKnjiznaVrijednost := kalk_pripr->gkolicina * kalk_pripr->mpcsapp
+      nTotKnjiznaVrijednost += nKnjiznaVrijednost
+      nTotPopisanaVrijednost += field->kolicina * field->mpcsapp
+      nTotVisakManjak += ( nUVisakManjak := ( field->MPCSAPP * field->Kolicina ) - nKnjiznaVrijednost )
+      nTotPopisanaKolicina += field->kolicina
+      nTotKnjiznaKolicina += field->gkolicina
 
       IF cSamoObraz == "D"
-         @ PRow(), PCol() + 1 SAY nU4 PICT Replicate( " ", Len( PicDEM ) )
+         @ PRow(), PCol() + 1 SAY nUVisakManjak PICT Replicate( " ", Len( PicDEM ) )
       ELSE
-         IF ( nU4 < 0 )
+         IF ( nUVisakManjak < 0 )
             // manjak
             @ PRow(), PCol() + 1 SAY 0 PICT picdem
-            @ PRow(), PCol() + 1 SAY nU4 PICT picdem
-            nTotManjak += nU4
+            @ PRow(), PCol() + 1 SAY nUVisakManjak PICT picdem
+            nTotManjak += nUVisakManjak
          ELSE
             // visak
-            @ PRow(), PCol() + 1 SAY nU4 PICT picdem
+            @ PRow(), PCol() + 1 SAY nUVisakManjak PICT picdem
             @ PRow(), PCol() + 1 SAY 0 PICT picdem
-            nTotVisak += nU4
+            nTotVisak += nUVisakManjak
 
          ENDIF
       ENDIF
@@ -198,10 +201,10 @@ FUNCTION kalk_stampa_dok_ip()
 
    ? m
    @ PRow() + 1, 0 SAY PadR( "Ukupno:", 43 )
-   @ PRow(), PCol() + 1 SAY nTotKol PICT pickol
-   @ PRow(), PCol() + 1 SAY nTotGKol PICT pickol
-   @ PRow(), PCol() + 1 SAY nTotb PICT picdem
-   @ PRow(), PCol() + 1 SAY nTotc PICT picdem
+   @ PRow(), PCol() + 1 SAY nTotPopisanaKolicina PICT pickol
+   @ PRow(), PCol() + 1 SAY nTotKnjiznaKolicina PICT pickol
+   @ PRow(), PCol() + 1 SAY nTotKnjiznaVrijednost PICT picdem
+   @ PRow(), PCol() + 1 SAY nTotPopisanaVrijednost PICT picdem
    @ PRow(), PCol() + 1 SAY 0 PICT picdem
    @ PRow(), PCol() + 1 SAY 0 PICT picdem
    @ PRow(), PCol() + 1 SAY nTotVisak PICT picdem
@@ -209,10 +212,10 @@ FUNCTION kalk_stampa_dok_ip()
    ? m
    ? "Rekapitulacija:"
    ? "---------------"
-   ?U "  popisana količina:", Str( nTotKol, 18, 2 )
-   ?U "popisana vrijednost:", Str( nTotC, 18, 2 )
-   ?U "   knjižna količina:", Str( nTotGKol, 18, 2 )
-   ?U " knjižna vrijednost:", Str( nTotB, 18, 2 )
+   ?U "  popisana količina:", Str( nTotPopisanaKolicina, 18, 2 )
+   ?U "popisana vrijednost:", Str( nTotPopisanaVrijednost, 18, 2 )
+   ?U "   knjižna količina:", Str( nTotKnjiznaKolicina, 18, 2 )
+   ?U " knjižna vrijednost:", Str( nTotKnjiznaVrijednost, 18, 2 )
    ?U "          + (višak):", Str( nTotVisak, 18, 2 )
    ?U "         - (manjak):", Str( nTotManjak, 18, 2 )
    ? m

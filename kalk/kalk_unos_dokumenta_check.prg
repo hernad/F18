@@ -209,11 +209,11 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
 
 
 
-FUNCTION IspitajPrekid()
+FUNCTION ispitaj_prekid()
 
    Inkey()
 
-   RETURN IF( LastKey() == 27, PrekSaEsc(), .T. )
+   RETURN IIF( LastKey() == 27, PrekSaEsc(), .T. )
 
 
 

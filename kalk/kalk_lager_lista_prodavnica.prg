@@ -274,7 +274,7 @@ FUNCTION kalk_lager_lista_prodavnica()
    ENDIF
    Eval( bZagl )
 
-   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. ispitaj_prekid()
 
       cIdRoba := kalk->Idroba
       select_o_roba( cIdRoba )
@@ -296,7 +296,7 @@ FUNCTION kalk_lager_lista_prodavnica()
          LOOP
       ENDIF
 
-      DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdfirma + cIdkonto + cIdroba == kalk->idFirma + kalk->pkonto + kalk->idroba .AND. ispitaj_prekid()
 
          check_nova_strana( bZagl, s_oPDF )
          IF cPredhStanje == "D"
@@ -792,7 +792,7 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
 
    SELECT kalk
 
-   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdFirma + cIdKonto == kalk->idfirma + kalk->pkonto .AND. ispitaj_prekid()
 
       cIdroba := kalk->Idroba
       select_o_roba( cIdroba )
@@ -806,7 +806,7 @@ STATIC FUNCTION kalk_gen_xml_lager_lista_prodavnica( hParamsOdt )
       _mpv_u := 0
       _mpv_i := 0
       _rabat := 0
-      DO WHILE !Eof() .AND. cIdFirma + cIdKonto + cIdroba == kalk->idfirma + kalk->pkonto + kalk->idroba .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + cIdKonto + cIdroba == kalk->idfirma + kalk->pkonto + kalk->idroba .AND. ispitaj_prekid()
 
          IF kalk->datdok < hParamsOdt[ "datum_od" ] .OR. kalk->datdok > hParamsOdt[ "datum_do" ]
             SKIP

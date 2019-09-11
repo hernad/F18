@@ -132,7 +132,7 @@ FUNCTION sint_lager_lista_prodavnice()
 
    Eval( bZagl )
 
-   DO WHILE !Eof() .AND. cidfirma == idfirma .AND.  IspitajPrekid()
+   DO WHILE !Eof() .AND. cidfirma == idfirma .AND.  ispitaj_prekid()
       cIdRoba := Idroba
       select_o_roba( cIdRoba )
       SELECT kalk
@@ -159,7 +159,7 @@ FUNCTION sint_lager_lista_prodavnice()
          ENDIF
       ENDIF
 
-      DO WHILE !Eof() .AND. cIdFirma + cIdRoba == idFirma + idroba .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + cIdRoba == idFirma + idroba .AND. ispitaj_prekid()
          IF !Empty( cGrupacija )
             IF cGrupacija <> roba->k1
                SKIP

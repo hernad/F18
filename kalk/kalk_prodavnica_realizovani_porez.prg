@@ -93,7 +93,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
 
    nMPVUkupno := nPDVUkupno := n5 := n6 := n7 := nMPVSaPPUkupno := 0
 
-   DO WHILE !Eof() .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. ispitaj_prekid()
 
       B := 0
       cIdFirma := KALK->IdFirma
@@ -121,7 +121,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
       cLastTarifa := ""
 
 
-      DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. ispitaj_prekid()
 
          cIdKonto := PKonto
          cIdTarifa := IdTarifa
@@ -135,7 +135,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
          nMPVSaPP := 0
          cPoDok := IDVD + BRDOK
          cLastTarifa := cIdTarifa
-         DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdtarifa == kalk->IdTarifa .AND. cIdKonto == kalk->pkonto .AND. IspitajPrekid()
+         DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdtarifa == kalk->IdTarifa .AND. cIdKonto == kalk->pkonto .AND. ispitaj_prekid()
 
             select_o_roba( kalk->idroba )
             SELECT KALK

@@ -106,7 +106,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
    n6 := 0
    n7 := 0
 
-   DO WHILE !Eof() .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. ispitaj_prekid()
       B := 0
       cIdFirma := KALK->IdFirma
       Preduzece()
@@ -135,7 +135,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
       // PRIVATE aTarife := {}, nReal := 0
 
       SELECT KALK
-      DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma == KALK->IdFirma .AND. ispitaj_prekid()
 
          cIdKonto := kalk->PKonto
          cIdTarifa := kalk->IdTarifa
@@ -144,7 +144,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
          nMPV := 0
          nMPVSaPDV := 0
          nNV := 0
-         DO WHILE !Eof() .AND. cIdFirma == kalk->IdFirma .AND. cIdKonto == kalk->pkonto .AND.  cIdtarifa == kalk->IdTarifa .AND. IspitajPrekid()
+         DO WHILE !Eof() .AND. cIdFirma == kalk->IdFirma .AND. cIdKonto == kalk->pkonto .AND.  cIdtarifa == kalk->IdTarifa .AND. ispitaj_prekid()
 
             SELECT KALK
             // IF  idvd == "42" .OR. idvd == "43"

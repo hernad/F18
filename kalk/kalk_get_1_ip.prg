@@ -142,8 +142,8 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
 
    LOCAL nUlaz := 0
    LOCAL nIzlaz := 0
-   LOCAL nMPVU := 0
-   LOCAL nMPVI := 0
+   LOCAL nMPVUSaPDV := 0
+   LOCAL nMPVISaPDV := 0
    LOCAL nNVU := 0
    LOCAL nNVI := 0
 
@@ -168,26 +168,26 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
 
       IF kalk->pu_i == "1"
          nUlaz += field->kolicina - field->GKolicina - field->GKolicin2
-         nMPVU += field->mpcsapp * field->kolicina
+         nMPVUSaPDV += field->mpcsapp * field->kolicina
          nNVU += field->nc * field->kolicina
 
       ELSEIF kalk->pu_i == "5"  .AND. !( kalk->idvd $ "12#13#22" )
          nIzlaz += field->kolicina
-         nMPVI += field->mpcsapp * field->kolicina
+         nMPVISaPDV += field->mpcsapp * field->kolicina
          nNVI += field->nc * field->kolicina
 
       ELSEIF kalk->pu_i == "5"  .AND. ( kalk->idvd $ "12#13#22" )
          // povrat
          nUlaz -= field->kolicina
-         nMPVU -= field->mpcsapp * field->kolicina
+         nMPVUSaPDV -= field->mpcsapp * field->kolicina
          nNvu -= field->nc * field->kolicina
 
       ELSEIF kalk->pu_i == "3"    // nivelacija
-         nMPVU += field->mpcsapp * field->kolicina
+         nMPVUSaPDV += field->mpcsapp * field->kolicina
 
       ELSEIF kalk->pu_i == "I"
          nIzlaz += field->gkolicin2
-         nMPVI += field->mpcsapp * field->gkolicin2
+         nMPVISaPDV += field->mpcsapp * field->gkolicin2
          nNVI += field->nc * field->gkolicin2
       ENDIF
       SKIP
@@ -196,9 +196,9 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
 
    IF lRucniUnosIP // nalazimo se u pripremi, vrsimo rucni unos ip stavke, potrebno samo utvrditi popisanu kolicinu
       _gkolicina := nUlaz - nIzlaz // popisana kolicina
-      _fcj := nMpvu - nMpvi // stanje mpvsapp
+      _fcj := nMPVUSaPDV - nMPVISaPDV // stanje mpvsapp
       IF Round( nUlaz - nIzlaz, 4 ) <> 0
-         _mpcsapp := Round( ( nMPVU - nMPVI ) / ( nUlaz - nIzlaz ), 3 )
+         _mpcsapp := Round( ( nMPVUSaPDV - nMPVISaPDV ) / ( nUlaz - nIzlaz ), 3 )
          _nc := Round( ( nNvu - nNvi ) / ( nUlaz - nIzlaz ), 3 )
       ELSE
          _mpcsapp := 0
@@ -206,7 +206,7 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
       RETURN .T.
    ENDIF
 
-   IF ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nMpvu - nMpvi, 4 ) <> 0 )
+   IF ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nMPVUSaPDV - nMPVISaPDV, 4 ) <> 0 )
 
       select_o_roba(  cIdroba )
       SELECT kalk_pripr
@@ -228,9 +228,9 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
       _datdok := dDatdok
       _ERROR := ""
 
-      _fcj := nMpvu - nMpvi // stanje mpvsapp
+      _fcj := nMPVUSaPDV - nMPVISaPDV // stanje mpvsapp
       IF Round( nUlaz - nIzlaz, 4 ) <> 0
-         _mpcsapp := Round( ( nMPVU - nMPVI ) / ( nUlaz - nIzlaz ), 3 )
+         _mpcsapp := Round( ( nMPVUSaPDV - nMPVISaPDV ) / ( nUlaz - nIzlaz ), 3 )
          _nc := Round( ( nNvu - nNvi ) / ( nUlaz - nIzlaz ), 3 )
       ELSE
          _mpcsapp := 0
@@ -255,8 +255,8 @@ FUNCTION gen_ip_razlika()
    LOCAL hRec
    LOCAL nUlaz
    LOCAL nIzlaz
-   LOCAL nMPVU
-   LOCAL nMPVI
+   LOCAL nMPVUSaPDV
+   LOCAL nMPVISaPDV
    LOCAL nNVU
    LOCAL nNVI
    LOCAL nCount := 0
@@ -328,8 +328,8 @@ FUNCTION gen_ip_razlika()
 
       nUlaz := 0
       nIzlaz := 0
-      nMPVU := 0
-      nMPVI := 0
+      nMPVUSaPDV := 0
+      nMPVISaPDV := 0
       nNVU := 0
       nNVI := 0
 
@@ -350,23 +350,23 @@ FUNCTION gen_ip_razlika()
 
          IF field->pu_i == "1"
             nUlaz += field->kolicina - field->GKolicina - field->GKolicin2
-            nMPVU += field->mpcsapp * field->kolicina
+            nMPVUSaPDV += field->mpcsapp * field->kolicina
             nNVU += field->nc * field->kolicina
          ELSEIF field->pu_i == "5"  .AND. !( field->idvd $ "12#13#22" )
             nIzlaz += field->kolicina
-            nMPVI += field->mpcsapp * field->kolicina
+            nMPVISaPDV += field->mpcsapp * field->kolicina
             nNVI += field->nc * field->kolicina
          ELSEIF field->pu_i == "5"  .AND. ( field->idvd $ "12#13#22" )
             // povrat
             nUlaz -= field->kolicina
-            nMPVU -= field->mpcsapp * field->kolicina
+            nMPVUSaPDV -= field->mpcsapp * field->kolicina
             nNvu -= field->nc * field->kolicina
          ELSEIF field->pu_i == "3"
             // nivelacija
-            nMPVU += field->mpcsapp * field->kolicina
+            nMPVUSaPDV += field->mpcsapp * field->kolicina
          ELSEIF field->pu_i == "I"
             nIzlaz += field->gkolicin2
-            nMPVI += field->mpcsapp * field->gkolicin2
+            nMPVISaPDV += field->mpcsapp * field->gkolicin2
             nNVI += field->nc * field->gkolicin2
          ENDIF
 
@@ -374,7 +374,7 @@ FUNCTION gen_ip_razlika()
 
       ENDDO
 
-      IF ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nMpvu - nMpvi, 4 ) <> 0 )
+      IF ( Round( nUlaz - nIzlaz, 4 ) <> 0 ) .OR. ( Round( nMPVUSaPDV - nMPVISaPDV, 4 ) <> 0 )
 
          select_o_roba(  cIdRoba )
          SELECT kalk_pripr
@@ -400,11 +400,11 @@ FUNCTION gen_ip_razlika()
          hRec[ "datdok" ] := dDatDok
          // hRec[ "datfaktp" ] := dDatdok
          hRec[ "error" ] := ""
-         hRec[ "fcj" ] := nMpvu - nMpvi
+         hRec[ "fcj" ] := nMPVUSaPDV - nMPVISaPDV
 
          IF Round( nUlaz - nIzlaz, 4 ) <> 0 // stanje mpvsapp
             // treba li ovo zaokruzivati ????
-            hRec[ "mpcsapp" ] := Round( ( nMPVU - nMPVI ) / ( nUlaz - nIzlaz ), 3 )
+            hRec[ "mpcsapp" ] := Round( ( nMPVUSaPDV - nMPVISaPDV ) / ( nUlaz - nIzlaz ), 3 )
             hRec[ "nc" ] := Round( ( nNvu - nNvi ) / ( nUlaz - nIzlaz ), 3 )
          ELSE
             hRec[ "mpcsapp" ] := 0

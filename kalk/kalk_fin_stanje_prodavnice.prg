@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+STATIC s_nTekucaStrana := 0
+
 FUNCTION kalk_finansijsko_stanje_prodavnice()
 
    LOCAL nKolUlaz
@@ -19,12 +21,25 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    LOCAL dDatOd, dDatDo
    LOCAL cIdFirma
    LOCAL nPDV
+   LOCAL cPKonto
+   LOCAL GetList := {}
+
+   LOCAL nUlaz, nIzlaz
+   LOCAL nMPVBU, nMPVBI, nMPVU, nMPVI, nNVU, nNVI, nMPVIP, nPopust
+   LOCAL nTUlaz, nTIzlaz
+   LOCAL ntMPVBU, ntMPVBI, ntMPVU, ntMPVI, ntNVU, ntNVI, ntMPVIP
+   LOCAL ntPopust
+   LOCAL cBroj
+   LOCAL aRFLLP, cLine
+   LOCAL bZagl
+   LOCAL nRbr, dDatDok
+   LOCAL cIdTarifaPrije, nPDVPrije
 
    cPicIznos := kalk_prosiri_pic_iznos_za_2()
    cPicCijena := kalk_prosiri_pic_cjena_za_2()
 
    cIdFirma := self_organizacija_id()
-   cIdKonto := PadR( "133", FIELD_LENGTH_IDKONTO )
+   cPKonto := PadR( "133", FIELD_LENGTH_IDKONTO )
 
    // o_koncij()
    // o_roba()
@@ -37,20 +52,20 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    qqTarifa := qqidvd := Space( 60 )
    PRIVATE cPNab := "N"
    PRIVATE cNula := "D", cErr := "N"
-   PRIVATE cTU := "2"
+   // PRIVATE cTU := "2"
 
    Box(, 9, 60 )
 
    DO WHILE .T.
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto   " GET cIdKonto VALID P_Konto( @cIdKonto )
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto   " GET cPKonto VALID P_Konto( @cPKonto )
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Tarife  " GET qqTarifa PICT "@!S50"
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "Vrste dokumenata  " GET qqIDVD PICT "@!S30"
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Roba  " GET qqRoba PICT "@!S30"
       @ box_x_koord() + 7, box_y_koord() + 2 SAY "Datum od " GET dDatOd
       @ box_x_koord() + 7, Col() + 2 SAY "do" GET dDatDo
-      @ box_x_koord() + 8, box_y_koord() + 2  SAY "Prikaz: roba tipa T / dokumenati IP (1/2)" GET cTU  VALID cTU $ "12"
+      // @ box_x_koord() + 8, box_y_koord() + 2  SAY "Prikaz: roba tipa T / dokumenati IP (1/2)" GET cTU  VALID cTU $ "12"
 
       READ
       ESC_BCR
@@ -81,11 +96,11 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    hParams := hb_Hash()
    hParams[ "idfirma" ] := cIdFirma
 
-   IF Len( Trim( cIdkonto ) ) == 3  // sinteticki konto
-      cIdkonto := Trim( cIdkonto )
-      hParams[ "pkonto_sint" ] := cIdKonto
+   IF Len( Trim( cPKonto ) ) == 3  // sinteticki konto
+      cPKonto := Trim( cPKonto )
+      hParams[ "pkonto_sint" ] := cPKonto
    ELSE
-      hParams[ "pkonto" ] := cIdKonto
+      hParams[ "pkonto" ] := cPKonto
    ENDIF
 
    IF !Empty( dDatOd )
@@ -120,7 +135,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
 
    EOF CRET
 
-   select_o_koncij( cIdkonto )
+   // select_o_koncij( cPKonto )
 
    SELECT KALK
 
@@ -143,7 +158,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    AAdd( aRFLLP, { Len( cPicIznos ), " PV sa PDV", " - pop." } )
    AAdd( aRFLLP, { Len( cPicIznos ), " PV sa PDV", " ukupno" } )
 
-   PRIVATE cLine := SetRptLineAndText( aRFLLP, 0 )
+   cLine := SetRptLineAndText( aRFLLP, 0 )
    PRIVATE cText1 := SetRptLineAndText( aRFLLP, 1, "*" )
    PRIVATE cText2 := SetRptLineAndText( aRFLLP, 2, "*" )
 
@@ -152,63 +167,55 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    ?
    gpO_Land()
 
-   PRIVATE nTStrana := 0
-   PRIVATE bZagl := {|| kalk_zagl_fin_stanje_prodavnica( dDatOd, dDatDo ) }
+
+   bZagl := {|| kalk_zagl_fin_stanje_prodavnica( cPKonto, dDatOd, dDatDo, cLine ) }
 
    Eval( bZagl, dDatOd, dDatDo )
    nTUlaz := nTIzlaz := 0
    ntMPVBU := ntMPVBI := ntMPVU := ntMPVI := ntNVU := ntNVI := ntMPVIP := 0
    ntPopust := 0
    nCol1 := nCol0 := 10
-   PRIVATE nRbr := 0
+   nRbr := 0
 
-#define CMORE
-
-#xcommand CMINIT => ncmSlogova:=100; ncmRec:=1
-   // #DEFINE CMNEOF  !eof() .and. ncmRec<=ncmSLOGOVA
-   // #XCOMMAND CMSKIP => ++ncmRec; if ncmrec>ncmslogova;exit;end; skip
-
-
-   CMINIT
    // showkorner( ncmslogova, 1, 16 )
    // showkorner( 0, 100 )
-
 
    PRIVATE nKU := nKI := 0 // kolicine ulaz/izlaz
 
    nKolUlaz := 0
    nKolIzlaz := 0
+   cIdTarifaPrije := "XYZ"
+   nPDVPrije := 0
 
-   DO WHILE !Eof() .AND. cIdfirma == idfirma .AND.  IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdfirma == kalk->idfirma
 
       nUlaz := nIzlaz := 0
       nMPVBU := nMPVBI := nMPVU := nMPVI := nNVU := nNVI := nMPVIP := 0
       nPopust := 0
 
       // nRabat:=0
+      dDatDok := kalk->datdok
+      cBroj := kalk->idvd + "-" + kalk->brdok
 
-      dDatDok := datdok
-      cBroj := idvd + "-" + brdok
+      DO WHILE !Eof() .AND. cIdfirma + DToS( dDatDok ) + cBroj == kalk->idFirma + DToS( kalk->datdok ) + kalk->idvd + "-" + kalk->brdok
 
-      DO WHILE !Eof()  .AND. cIdfirma + DToS( ddatdok ) + cBroj == idFirma + DToS( datdok ) + idvd + "-" + brdok .AND.  IspitajPrekid()
-
-         select_o_roba( KALK->idroba )
+         // select_o_roba( KALK->idroba )
          SELECT KALK
 
          // showkorner( 1, 100 )
-         IF cTU == "2" .AND.  roba->tip $ "UT"
-            // prikaz dokumenata IP, a ne robe tipa "T"
-            SKIP
-            LOOP
-         ENDIF
-         IF cTU == "1" .AND. idvd == "IP"
-            SKIP
-            LOOP
-         ENDIF
+         // IF cTU == "2" .AND.  roba->tip $ "UT"
+         // // prikaz dokumenata IP, a ne robe tipa "T"
+         // SKIP
+         // LOOP
+         // ENDIF
+         // IF cTU == "1" .AND. idvd == "IP"
+         // SKIP
+         // LOOP
+         // ENDIF
 
-         select_o_roba( KALK->idroba )
-         select_o_tarifa( KALK->idtarifa )
-         SELECT KALK
+         // select_o_roba( KALK->idroba )
+         // select_o_tarifa( KALK->idtarifa )
+         // SELECT KALK
 
          IF field->pu_i == "1"
             nMPVBU += kalk->mpc * kalk->kolicina
@@ -217,7 +224,13 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
 
          ELSEIF field->pu_i == "5"
 
-            nPDV := field->mpc * pdv_procenat_by_tarifa( kalk->idtarifa )
+            IF cIdTarifaPrije <> kalk->idtarifa
+               nPDV := kalk->mpc * pdv_procenat_by_tarifa( kalk->idtarifa )
+               cIdTarifaPrije := kalk->idtarifa
+               nPDVPrije := nPDV
+            ELSE
+               nPDV := nPDVPrije
+            ENDIF
 
             IF field->idvd $ "12#13"
                nMPVBU -= kalk->mpc * kalk->kolicina
@@ -239,9 +252,11 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
 
          ELSEIF kalk->pu_i == "I"
             nMPVBI += field->mpc * field->gkolicin2
-            nMPVI += mpcsapp * gkolicin2
-            nNVI += nc * gkolicin2
+            nMPVI += kalk->mpcsapp * kalk->gkolicin2
+            nNVI += kalk->nc * kalk->gkolicin2
          ENDIF
+
+         SELECT KALK
          SKIP
 
       ENDDO
@@ -284,7 +299,7 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    ? cLine
    ? "UKUPNO:"
 
-   @ PRow(), nCol1    SAY ntNVU PICT cPicIznos
+   @ PRow(), nCol1 SAY ntNVU PICT cPicIznos
    @ PRow(), PCol() + 1 SAY ntNVI PICT cPicIznos
    @ PRow(), PCol() + 1 SAY ntNVU - ntNVI PICT cPicIznos
    @ PRow(), PCol() + 1 SAY ntMPVBU PICT cPicIznos
@@ -298,7 +313,6 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
 
    ? cLine
 
-
    FF
    ENDPRINT
 
@@ -307,9 +321,9 @@ FUNCTION kalk_finansijsko_stanje_prodavnice()
    RETURN .T.
 
 
-FUNCTION kalk_zagl_fin_stanje_prodavnica( dDatOd, dDatDo )
+FUNCTION kalk_zagl_fin_stanje_prodavnica( cPKonto, dDatOd, dDatDo, cLine )
 
-   select_o_konto( cIdKonto )
+   select_o_konto( cPKonto )
    Preduzece()
 
    // IF Val( gFPicDem ) > 0
@@ -319,9 +333,10 @@ FUNCTION kalk_zagl_fin_stanje_prodavnica( dDatOd, dDatDo )
    // ENDIF
 
    ?? "KALK:PROD Finansijsko stanje za period", dDatOd, "-", dDatDo, " NA DAN "
-   ?? Date(), Space( 10 ), "Str:", Str( ++nTStrana, 3 )
-   ? "Prodavnica:", cIdKonto, "-", konto->naz
+   ?? Date(), Space( 10 ), "Str:", Str( ++s_nTekucaStrana, 3 )
+   ? "Prodavnica:", cPKonto, "-", konto->naz
 
+   info_bar( "fin_pro", AllTrim( "KALK " + Str( kalk->( RecNo() ), 5 ) + "/" + Str( kalk->( RecCount() ), 5 ) + " Str:" + Str( s_nTekucaStrana, 4 ) ) )
    SELECT KALK
 
    ? cLine

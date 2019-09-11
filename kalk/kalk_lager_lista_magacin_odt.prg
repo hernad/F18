@@ -70,7 +70,7 @@ STATIC FUNCTION _gen_xml( hParams )
    xml_node( "fnaz", to_xml_encoding( self_organizacija_naziv() ) )
    xml_node( "tip", "MAGACIN" )
 
-   DO WHILE !Eof() .AND. field->idfirma + field->mkonto = _idfirma + _sintk .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. field->idfirma + field->mkonto = _idfirma + _sintk .AND. ispitaj_prekid()
 
       _idroba := field->idroba
 
@@ -113,7 +113,7 @@ STATIC FUNCTION _gen_xml( hParams )
 
       _idkonto := field->mkonto
 
-      DO WHILE !Eof() .AND. _idfirma + _idkonto + _idroba == field->idfirma + field->mkonto + field->idroba .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. _idfirma + _idkonto + _idroba == field->idfirma + field->mkonto + field->idroba .AND. ispitaj_prekid()
 
          IF roba->tip $ "TU"
             SKIP

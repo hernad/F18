@@ -1,5 +1,10 @@
 # F18 klijent, lista promjena
 
+## 2019-09-11
+
+- KALK - IP fix knjizna vrijednost kada se cijene u dokumentu mijenjaju
+- azure-pipeline hosted
+
 ## 2019-08-29
 
 - azure-pipeline localhost windows

@@ -97,7 +97,7 @@ FUNCTION kalk_real_partnera()
    nIzlazO := nIzlazNO := 0
    // ostali izlazi
 
-   DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. cIdkonto = mkonto .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. cIdkonto = mkonto .AND. ispitaj_prekid()
 
       nPaNV := nPaVPV := nPaRuc := nPaPP := nPaZarada := nPaRabat := 0
       cIdPartner := idpartner
@@ -113,7 +113,7 @@ FUNCTION kalk_real_partnera()
          SELECT kalk
       ENDIF
 
-      DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. idpartner == cIdpartner  .AND. cIdkonto = mkonto .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. idpartner == cIdpartner  .AND. cIdkonto = mkonto .AND. ispitaj_prekid()
 
          select_o_roba( kalk->idroba )
          select_o_tarifa( kalk->idtarifa )

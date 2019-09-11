@@ -129,7 +129,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 PadR( "Generisanje pomoćne tabele u toku...", 58 ) COLOR f18_color_i()
 
-   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. ispitaj_prekid()
 
       IF _vise_konta .AND. !Empty( _usl_konto )
          IF !Tacno( _usl_konto )
@@ -205,7 +205,7 @@ FUNCTION kalk_gen_fin_stanje_prodavnice( hParamsIn )
       ENDIF
 
       SELECT KALK
-      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + _broj_dok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + _broj_dok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. ispitaj_prekid()
 
          IF _vise_konta .AND. !Empty( _usl_konto )
             IF !Tacno( _usl_konto )

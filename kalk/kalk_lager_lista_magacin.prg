@@ -372,7 +372,7 @@ FUNCTION kalk_lager_lista_magacin()
 
    PRIVATE nRbr := 0
 
-   DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, idfirma, idfirma + mkonto ) == cIdfirma + cSintK .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, idfirma, idfirma + mkonto ) == cIdfirma + cSintK .AND. ispitaj_prekid()
 
       cIdRoba := field->Idroba
 
@@ -467,7 +467,7 @@ FUNCTION kalk_lager_lista_magacin()
 
       cIdkonto := kalk->mkonto
 
-      DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, cIdFirma + cIdRoba == idFirma + field->idroba, cIdFirma + cIdKonto + cIdRoba == idFirma + mkonto + field->idroba ) .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, cIdFirma + cIdRoba == idFirma + field->idroba, cIdFirma + cIdKonto + cIdRoba == idFirma + mkonto + field->idroba ) .AND. ispitaj_prekid()
 
          IF roba->tip $ "TU"
             SKIP

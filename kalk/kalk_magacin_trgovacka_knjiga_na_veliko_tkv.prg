@@ -146,7 +146,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 PadR( "Generisanje pomoćne tabele u toku...", 58 ) COLOR f18_color_i()
 
-   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. ispitaj_prekid()
 
       IF !lViseKonta .AND. field->mkonto <> cUslovKonto
          SKIP
@@ -212,7 +212,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       cPartnerAdresa := field->adresa
 
       SELECT ( nDbfArea )
-      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + cIdVdBrDok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + cIdVdBrDok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. ispitaj_prekid()
 
          // ispitivanje konta u varijanti jednog konta i datuma
          IF !lViseKonta .AND. ( field->datdok < dDatumOd .OR. field->datdok > dDatumDo .OR. field->mkonto <> cUslovKonto )

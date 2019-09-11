@@ -137,13 +137,13 @@ FUNCTION Rfinansijsko_stanje_prodavnica()
    nKolUlaz := 0
    nKolIzlaz := 0
 
-   DO WHILE !Eof() .AND. cIdFirma == idfirma .AND. IspitajPrekid()
+   DO WHILE !Eof() .AND. cIdFirma == idfirma .AND. ispitaj_prekid()
       nUlaz := nIzlaz := 0
       nMPVU := nMPVI := nNVU := nNVI := 0
       nMPVBU := nMPVBI := 0
       dDatDok := datdok
       cBroj := pkonto
-      DO WHILE !Eof() .AND. cIdFirma + cBroj == idFirma + pkonto .AND. IspitajPrekid()
+      DO WHILE !Eof() .AND. cIdFirma + cBroj == idFirma + pkonto .AND. ispitaj_prekid()
          select_o_roba( kalk->idroba )
 
          SELECT kalk
