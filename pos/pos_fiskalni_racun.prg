@@ -33,12 +33,13 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
    ENDIF
 
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
-   IF nDeviceId > 0
+   IF nDeviceId <> NIL .AND. nDeviceId > 0
       hDeviceParams := get_fiscal_device_params( nDeviceId, my_user() )
       IF hDeviceParams == NIL
          RETURN lRet
       ENDIF
    ELSE
+      error_bar( "fisk", "Error GEN_FISK_RN: " +  hParams[ "brdok" ] )
       RETURN lRet
    ENDIF
 
@@ -61,6 +62,8 @@ FUNCTION pos_fiskalni_racun( hParams, hFiskalniParams )
    LOCAL aStavkeRacuna
    LOCAL nStorno
    LOCAL nUplaceno
+   LOCAL nFiskalniRnKojiSeStornira
+   LOCAL GetList := {}
 
    IF hFiskalniParams == NIL
       RETURN 0
@@ -77,7 +80,24 @@ FUNCTION pos_fiskalni_racun( hParams, hFiskalniParams )
    s_cFiskalniDrajverNaziv := cFiskalniDravjerIme
 
    // lStorno := pos_is_storno( cIdPos, "42", dDatDok, cBrDok )
-   nStorno := pos_racun_u_pripremi_broj_storno_rn()
+   IF nUplaceno == -1 // fiskalizacija azuriranog racuna
+      IF pos_iznos_racuna( cIdPos, "42", dDatDok, cBrDok ) < 0
+         nFiskalniRnKojiSeStornira := 0
+         Box(, 1, 60 )
+         @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fisk rn koji se stornira: " GET nFiskalniRnKojiSeStornira
+         READ
+         BoxC()
+         IF LastKey() <> K_ESC
+            nStorno := nFiskalniRnKojiSeStornira
+         ELSE
+            RETURN 1
+         ENDIF
+      ELSE
+         nStorno := 0
+      ENDIF
+   ELSE
+      nStorno := pos_racun_u_pripremi_broj_storno_rn()
+   ENDIF
    lStorno := nStorno > 0
 
    aStavkeRacuna := pos_fiskalni_stavke_racuna( cIdPos, "42", dDatDok, cBrDok, nStorno, nUplaceno )
@@ -146,10 +166,14 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       nUplaceniIznos := 0
    ENDIF
 
-   IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
-      RETURN NIL
+   IF nUplaceniIznos < 0
+      // fiskalizacija azuriranog racuna, vec smo pozicionirani na pos_doks
+   ELSE
+      IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
+         RETURN NIL
+      ENDIF
    ENDIF
-   cVrstaPlacanja := pos_get_vrsta_placanja_0123( field->idvrstep )
+   cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep )
    // IF cVrstaPlacanja <> "0"
    nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
    // ELSE
@@ -347,6 +371,7 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
 
    LOCAL cQuery, oRet, oError, lRet := .F.
 
+altd()
    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna(" + ;
       sql_quote( cIdPos ) + "," + ;
       sql_quote( cIdVd ) + "," + ;
@@ -373,6 +398,7 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
 FUNCTION pos_get_broj_fiskalnog_racuna_str( cIdPos, cIdVd, dDatDok, cBrDok )
 
    RETURN PadL( AllTrim( Str( pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok ) ) ), 6 )
+
 
 FUNCTION pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
 

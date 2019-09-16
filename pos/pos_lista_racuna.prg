@@ -82,8 +82,7 @@ FUNCTION pos_lista_racuna( hParams )
       hParams[ "brdok" ] := PadL( AllTrim( hParams[ "brdok" ] ),  FIELD_LEN_POS_BRDOK )
    ENDIF
 
-
-   //seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
+   // seek_pos_doks( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
    seek_pos_doks_h( hParams )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
@@ -99,7 +98,7 @@ FUNCTION pos_lista_racuna( hParams )
    NEXT
 
    SELECT pos_doks
-   //cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( hParams[ "idpos" ] )
+   // cFilter += ".and. IdRadnik=" + dbf_quote( gIdRadnik ) + ".and. Idpos=" + dbf_quote( hParams[ "idpos" ] )
 
    IF hParams[ "idroba" ] <> NIL .AND. !Empty( hParams[ "idroba" ] )
       cFilter += ".and. pos_racun_sadrzi_artikal(IdPos, IdVd, datum, BrDok, " + dbf_quote( hParams[ "idroba" ] ) + ")"
@@ -114,11 +113,13 @@ FUNCTION pos_lista_racuna( hParams )
       hParams[ "brdok" ] := pos_doks->brdok
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "idradnik" ] := pos_doks->idradnik
-      RETURN .T.
+      IF !hParams[ "browse" ]
+         RETURN .T.
+      ENDIF
    ENDIF
 
    IF hParams[ "browse" ]
-      cFnc := "<Enter> ili <P>-Pregled, <S> Storno"
+      cFnc := "<Enter> ili <P>-Pregled, <S> Storno, <R> Napravi fiskalni"
    ELSE
       cFnc := "<Enter>-Odabir   <P>-Pregled"
    ENDIF
@@ -145,7 +146,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
    LOCAL nTrec
    LOCAL nTrec2
    LOCAL hRec
-   LOCAL nFiscNo
+   LOCAL nFiskalniRn
    LOCAL GetList := {}
    LOCAL hParams := hb_Hash()
 
@@ -177,6 +178,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       RETURN DE_REFRESH
    ENDIF
 
+/*
    IF Upper( Chr( nCh ) ) == "F"
       hParams[ "idpos" ] := pos_doks->idpos
       hParams[ "datum" ] := pos_doks->datum
@@ -193,9 +195,10 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       SELECT pos_doks
       RETURN DE_REFRESH
    ENDIF
+*/
 
    IF Upper( Chr( nCh ) ) == "S"
-      Alert( "TODO pos_storno" )
+      // Alert( "TODO pos_storno" )
 
       hParams[ "idpos" ] := pos_doks->idpos
       hParams[ "datum" ] := pos_doks->datum
@@ -214,21 +217,42 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
 
    ENDIF
 
+   IF Upper( Chr( nCh ) ) == "R"
+
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+
+      nFiskalniRn := pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok )
+
+      IF nFiskalniRn == NIL .OR. nFiskalniRn == 0
+         hParams[ "fiskalni_izdat" ] := .F.
+         hParams[ "uplaceno" ] := -1
+         pos_stampa_fiskalni_racun( hParams )
+      ELSE
+         MessageBox( "Postoji fiskalni račun " + AllTrim( Str( nFiskalniRn ) ) + "?!" )
+      ENDIF
+
+      SELECT pos_doks
+      RETURN DE_REFRESH
+
+   ENDIF
+
    IF nCh == K_CTRL_V
       IF pos_doks->idvd <> "42"
          RETURN DE_CONT
       ENDIF
-      nFiscNo := pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok )
+      nFiskalniRn := pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok )
       Box(, 1, 40 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFiscNo
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFiskalniRn PICT "99999"
       READ
       BoxC()
 
       IF LastKey() <> K_ESC
-         IF pos_set_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdPos, pos_doks->datum, pos_doks->brdok, nFiscNo )
-            MsgBeep( "setovan broj fiskalnog računa: " + AllTrim( Str( nFiscNo ) ) )
+         IF pos_set_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok, nFiskalniRn )
+            MsgBeep( "setovan broj fiskalnog računa: " + AllTrim( Str( nFiskalniRn ) ) )
          ELSE
-            Alert( "Setovanje fiskalnog računa neuspješno ?!" )
+            Alert( _u("Setovanje fiskalnog računa neuspješno ?!") )
          ENDIF
          RETURN DE_REFRESH
       ENDIF

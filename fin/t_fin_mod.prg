@@ -41,52 +41,53 @@ METHOD mMenu()
 
 METHOD programski_modul_osnovni_meni()
 
-   LOCAL _izbor := 1
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL nIzbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
      LOCAL cSeparator := Replicate( "-", 50)
 
 
-   AAdd( _opc, "1. unos/ispravka dokumenta                         " )
-   AAdd( _opcexe, {|| fin_unos_naloga() } )
-   AAdd( _opc, "2. izvještaji" )
-   AAdd( _opcexe, {|| fin_izvjestaji() } )
-   AAdd( _opc, "3. pregled i kontrola dokumenata" )
-   AAdd( _opcexe, {|| fin_pregled_dokumenata_meni() } )
-   AAdd( _opc, "4. generacija dokumenata" )
-   AAdd( _opcexe, {|| MnuGenDok() } )
-   AAdd( _opc, "5. moduli - razmjena podataka" )
-   AAdd( _opcexe, {|| fin_razmjena_podataka_meni() } )
-   AAdd( _opc, "6. ostale operacije nad dokumentima" )
-   AAdd( _opcexe, {|| fin_ostale_operacije_meni() } )
+   AAdd( aOpc, "1. unos/ispravka dokumenta                         " )
+   AAdd( aOpcExe, {|| fin_unos_naloga() } )
+   AAdd( aOpc, "2. izvještaji" )
+   AAdd( aOpcExe, {|| fin_izvjestaji() } )
+   AAdd( aOpc, "3. pregled i kontrola dokumenata" )
+   AAdd( aOpcExe, {|| fin_pregled_dokumenata_meni() } )
+   AAdd( aOpc, "4. generacija dokumenata" )
+   AAdd( aOpcExe, {|| MnuGenDok() } )
+   AAdd( aOpc, "5. moduli - razmjena podataka" )
+   AAdd( aOpcExe, {|| fin_razmjena_podataka_meni() } )
+   AAdd( aOpc, "6. ostale operacije nad dokumentima" )
+   AAdd( aOpcExe, {|| fin_ostale_operacije_meni() } )
 
-   AAdd( _opc, "O. otvorene stavke" )
-   AAdd( _opcexe, {|| fin_otvorene_stavke_meni() } )
+   AAdd( aOpc, "O. otvorene stavke" )
+   AAdd( aOpcExe, {|| fin_otvorene_stavke_meni() } )
 
-   AAdd( _opc, "R. udaljene lokacije - razmjena podataka " )
-   AAdd( _opcexe, {|| fin_udaljena_razmjena_podataka() } )
-   AAdd( _opc, cSeparator )
-   AAdd( _opcexe, {|| nil } )
-   AAdd( _opc, "S. matični podaci (šifarnici)" )
-   AAdd( _opcexe, {|| MnuSifrarnik() } )
+   AAdd( aOpc, "R. udaljene lokacije - razmjena podataka " )
+   AAdd( aOpcExe, {|| fin_udaljena_razmjena_podataka() } )
+   AAdd( aOpc, cSeparator )
+   AAdd( aOpcExe, {|| nil } )
+   AAdd( aOpc, "S. matični podaci (šifarnici)" )
+   AAdd( aOpcExe, {|| MnuSifrarnik() } )
 
-   AAdd( _opc, "A. kontrolni izvještaji" )
-   AAdd( _opcexe, {|| fin_kontrolni_izvjestaji_meni() } )
+   //AAdd( aOpc, "A. kontrolni izvještaji" )
+   AAdd( aOpc, "https://www.google.ba" )
+   AAdd( aOpcExe, {|| fin_kontrolni_izvjestaji_meni() } )
 
-   AAdd( _opc, cSeparator )
-   AAdd( _opcexe, {|| nil } )
-   AAdd( _opc, "K. kontrola zbira finansijskih transakcija" )
-   AAdd( _opcexe, {|| fin_kontrola_zbira_tabele_prometa( .T. ) } )
-   AAdd( _opc, "P. povrat dokumenta u pripremu" )
-   AAdd( _opcexe, {|| fin_povrat_naloga() } )
+   AAdd( aOpc, cSeparator )
+   AAdd( aOpcExe, {|| nil } )
+   AAdd( aOpc, "K. kontrola zbira finansijskih transakcija" )
+   AAdd( aOpcExe, {|| fin_kontrola_zbira_tabele_prometa( .T. ) } )
+   AAdd( aOpc, "P. povrat dokumenta u pripremu" )
+   AAdd( aOpcExe, {|| fin_povrat_naloga() } )
 
 
-   AAdd( _opc, cSeparator )
-   AAdd( _opcexe, {|| nil } )
-   AAdd( _opc, "X. parametri" )
-   AAdd( _opcexe, {|| mnu_fin_params() } )
+   AAdd( aOpc, cSeparator )
+   AAdd( aOpcExe, {|| nil } )
+   AAdd( aOpc, "X. parametri" )
+   AAdd( aOpcExe, {|| mnu_fin_params() } )
 
-   f18_menu( "gfin", .T., _izbor, _opc, _opcexe )
+   f18_menu( "gfin", .T., nIzbor, aOpc, aOpcExe )
 
    RETURN .T.
 

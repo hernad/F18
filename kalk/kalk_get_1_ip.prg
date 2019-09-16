@@ -228,7 +228,7 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
       _datdok := dDatdok
       _ERROR := ""
 
-      _fcj := nMPVUSaPDV - nMPVISaPDV // stanje mpvsapp
+      _fcj := nMPVUSaPDV - nMPVISaPDV // knjizna vrijednosti
       IF Round( nUlaz - nIzlaz, 4 ) <> 0
          _mpcsapp := Round( ( nMPVUSaPDV - nMPVISaPDV ) / ( nUlaz - nIzlaz ), 3 )
          _nc := Round( ( nNvu - nNvi ) / ( nUlaz - nIzlaz ), 3 )

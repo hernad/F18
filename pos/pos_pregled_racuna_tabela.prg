@@ -11,21 +11,20 @@
 
 #include "f18.ch"
 
+
 FUNCTION pos_pregled_racuna_tabela()
 
    LOCAL fScope := .T.
    LOCAL GetList := {}
    LOCAL cFilterDatumOdDo
    LOCAL dDatOd, dDatDo
-   LOCAL hParams := hb_hash()
-
-   PRIVATE dMinDatProm := CToD( "" )
+   LOCAL hParams := hb_Hash()
 
    o_pos__pripr()
    dDatOd := Date()
    dDatDo := Date()
 
-   //qIdRoba := Space( FIELD_ROBA_ID_LENGTH )
+   // qIdRoba := Space( FIELD_ROBA_ID_LENGTH )
 
    SET CURSOR ON
 
@@ -41,21 +40,20 @@ FUNCTION pos_pregled_racuna_tabela()
       RETURN .F.
    ENDIF
 
-   //cFilterDatumOdDo := ""
+   // cFilterDatumOdDo := ""
 
-   //IF !Empty( dDatOd ) .AND. !Empty( dDatDo )
-  //    cFilterDatumOdDo := "datum >= " + _filter_quote( dDatOD ) + " .and. datum <= " + _filter_quote( dDatDo )
-   //ENDIF
+   // IF !Empty( dDatOd ) .AND. !Empty( dDatDo )
+   // cFilterDatumOdDo := "datum >= " + _filter_quote( dDatOD ) + " .and. datum <= " + _filter_quote( dDatDo )
+   // ENDIF
 
    hParams[ "idpos" ] := pos_pm()
    hParams[ "idvd" ] := POS_IDVD_RACUN
-   hParams["dat_od"] := dDatOd
-   hParams["dat_do"] := dDatDo
-   hParams["browse"] := .T.
+   hParams[ "dat_od" ] := dDatOd
+   hParams[ "dat_do" ] := dDatDo
+   hParams[ "browse" ] := .T.
 
-   pos_lista_racuna(hParams)
+   pos_lista_racuna( hParams )
 
    my_close_all_dbf()
-
 
    RETURN .T.

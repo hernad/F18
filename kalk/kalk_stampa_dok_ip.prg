@@ -137,22 +137,24 @@ FUNCTION kalk_stampa_dok_ip()
 
       nC1 := PCol()
 
+      //nTotKnjiznaVrijednost += field->fcj
+      nKnjiznaVrijednost := kalk_pripr->gkolicina * kalk_pripr->mpcsapp
+
       IF cSamoObraz == "D"
-         @ PRow(), PCol() + 1 SAY field->fcj PICT Replicate( " ", Len( PicDEM ) )
+         @ PRow(), PCol() + 1 SAY nKnjiznaVrijednost PICT Replicate( " ", Len( PicDEM ) )
          @ PRow(), PCol() + 1 SAY field->kolicina * field->mpcsapp PICT Replicate( "_", Len( PicDEM ) )
          @ PRow(), PCol() + 1 SAY field->Kolicina - field->gkolicina PICT Replicate( " ", Len( PicKol ) )
       ELSE
-         @ PRow(), PCol() + 1 SAY field->fcj PICT Picdem // knjizna vrijednost
+         @ PRow(), PCol() + 1 SAY nKnjiznaVrijednost PICT Picdem // knjizna vrijednost
          @ PRow(), PCol() + 1 SAY field->kolicina * field->mpcsapp PICT Picdem
          @ PRow(), PCol() + 1 SAY field->kolicina - field->gkolicina PICT PicKol
       ENDIF
 
       @ PRow(), PCol() + 1 SAY field->mpcsapp PICT PicCDEM
-      //nTotKnjiznaVrijednost += field->fcj
-      nKnjiznaVrijednost := kalk_pripr->gkolicina * kalk_pripr->mpcsapp
+
       nTotKnjiznaVrijednost += nKnjiznaVrijednost
       nTotPopisanaVrijednost += field->kolicina * field->mpcsapp
-      nTotVisakManjak += ( nUVisakManjak := ( field->MPCSAPP * field->Kolicina ) - nKnjiznaVrijednost )
+      nTotVisakManjak += ( nUVisakManjak := kalk_pripr->MPCSAPP * kalk_pripr->Kolicina - nKnjiznaVrijednost )
       nTotPopisanaKolicina += field->kolicina
       nTotKnjiznaKolicina += field->gkolicina
 
