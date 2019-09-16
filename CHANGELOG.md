@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-09-16
+
+- F18 - eShell - onTitleChanged
+
 ## 2019-09-11
 
 - KALK - IP fix knjizna vrijednost kada se cijene u dokumentu mijenjaju

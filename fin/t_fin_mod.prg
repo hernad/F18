@@ -70,8 +70,7 @@ METHOD programski_modul_osnovni_meni()
    AAdd( aOpc, "S. matični podaci (šifarnici)" )
    AAdd( aOpcExe, {|| MnuSifrarnik() } )
 
-   //AAdd( aOpc, "A. kontrolni izvještaji" )
-   AAdd( aOpc, "https://www.google.ba" )
+   AAdd( aOpc, "A. kontrolni izvještaji" )
    AAdd( aOpcExe, {|| fin_kontrolni_izvjestaji_meni() } )
 
    AAdd( aOpc, cSeparator )

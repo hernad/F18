@@ -2,6 +2,7 @@
 
 FUNCTION eshell_cmd( cCmd, cFile )
 
+/*
    LOCAL  nRow, nCol, cScr, lConsole
 
    lConsole := Set( _SET_CONSOLE, .T. )
@@ -23,5 +24,8 @@ FUNCTION eshell_cmd( cCmd, cFile )
    @ nRow, nCol SAY ""
 
    Set( _SET_CONSOLE, lConsole )
+*/
+
+   hb_gtInfo( HB_GTI_WINTITLE, "[vscode#" + cCmd + "]" + cFile + "[vscode#end]" )
 
    RETURN .T.
