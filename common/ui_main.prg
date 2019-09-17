@@ -1078,17 +1078,17 @@ FUNCTION IzreziPath( cPath, cTekst )
 
 
 
-FUNCTION pos_form_browse( nT, nL, nB, nR, aImeKol, aKol, aHFCS, nFreeze, bIstakni )
+FUNCTION pos_form_browse( nTop, nLeft, nBottom, nRight, aImeKol, aKol, aHFCS, nFreeze, bIstakni )
 
    LOCAL oBrowse     // browse object
    LOCAL oColumn     // column object
-   LOCAL k
+   LOCAL nK
    LOCAL i
 
-   oBrowse := TBrowseDB( nT, nL, nB, nR )
+   oBrowse := TBrowseDB( nTop, nLeft, nBottom, nRight )
 
-   FOR k := 1 TO Len( aKol )
-      i := AScan( aKol, k )
+   FOR nK := 1 TO Len( aKol )
+      i := AScan( aKol, nK )
       IF i <> 0
          oColumn := TBColumnNew( aImeKol[ i, 1 ], aImeKol[ i, 2 ] )
          IF bIstakni <> nil

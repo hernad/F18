@@ -28,6 +28,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    LOCAL aUnosMsg := {}
    LOCAL GetList := {}
    LOCAL cTmp
+   LOCAL nTop, nLeft, nBottom, nRight
 
    PRIVATE ImeKol := {}
    PRIVATE Kol := {}
@@ -58,8 +59,16 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    Box(, nMaxRows - 3, nMaxCols - 3, , aUnosMsg )
    @ box_x_koord(), box_y_koord() + 23 SAY8 PadC ( "RAČUN BR: " + AllTrim( cBrDok ), 40 ) COLOR f18_color_invert()
-   s_oBrowse := pos_form_browse( box_x_koord() + 7, box_y_koord() + 1, box_x_koord() + nMaxRows - 12, box_y_koord() + nMaxCols - 2, ;
-      ImeKol, Kol, ;
+   nTop := box_x_koord() + 7
+   nLeft := box_y_koord() + 1
+   nBottom := box_x_koord() + nMaxRows - 12
+   nRight := box_y_koord() + nMaxCols - 2
+
+   IF nBottom < nTop
+      Alert( _u( "Smanjiti font nBottom=" + AllTrim( Str( nBottom ) ) ) )
+      QUIT
+   ENDIF
+   s_oBrowse := pos_form_browse( nTop, nLeft, nBottom, nRight, ImeKol, Kol, ;
       { hb_UTF8ToStrBox( BROWSE_PODVUCI_2 ), ;
       hb_UTF8ToStrBox( BROWSE_PODVUCI ), ;
       hb_UTF8ToStrBox( BROWSE_COL_SEP ) }, 0 )
@@ -79,7 +88,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    GO TOP
    IF _pos_pripr->idvd = POS_IDVD_RACUN .AND. !Empty( _pos_pripr->opis )
       Alert( _u( "Predhodno ažuriranje nije bilo uspješno, da li je fiskalni račun izdan?" ) )
-      MsgBeep("Ako je fiskalni račun izdan, zaključite račun")
+      MsgBeep( "Ako je fiskalni račun izdan, zaključite račun" )
    ENDIF
 
    Scatter()
