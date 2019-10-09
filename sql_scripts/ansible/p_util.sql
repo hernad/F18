@@ -417,7 +417,7 @@ BEGIN
         INTO nCijenaMem, dDatOd, dDatDo;
 
       -- ovo je stvaralo bug - kada je stanje 0 i posalje se nivelacija na stanje 0
-      -- SELECT cijena from {{ item_prodavnica }}.pos_items  
+      -- SELECT cijena from {{ item_prodavnica }}.pos_items
       --   LEFT JOIN {{ item_prodavnica }}.pos on pos.dok_id=pos_items.dok_id
       --   WHERE pos_items.idvd='42' and rtrim(idroba)=rtrim(cIdRoba)
       --   ORDER BY obradjeno DESC
@@ -579,7 +579,7 @@ BEGIN
   SELECT  {{ item_prodavnica }}.pos_artikli_istekao_popust_gen_79_storno(current_date)
       INTO nCount79;
 
-  -- ako imamo dva zahtjeva za nivelaciju za isti artikal na isti dan od kojih jedna zavrsava, 
+  -- ako imamo dva zahtjeva za nivelaciju za isti artikal na isti dan od kojih jedna zavrsava,
   -- a druga pocinje (sto je prakticno nastavak akcije), prvo treba zavrsiti staru akciju, pa onda poceti novu
   SELECT {{ item_prodavnica }}.cron_akcijske_cijene_nivelacija_end()
       INTO nNivEnd;
@@ -957,11 +957,11 @@ BEGIN
    -- datum i broj 72-ke
    SELECT datum, brdok FROM {{ item_prodavnica }}.pos WHERE ref=uuid29
        INTO dDatum72, cBrDok72;
-   
+
    IF cBrDok72 IS NULL THEN
       SELECT datum, brdok FROM {{ item_prodavnica }}.pos WHERE ref_2=uuid29
        INTO dDatum72, cBrDok72;
-      
+
       IF cBrDok IS NULL THEN
          RETURN 'ERR_NO_REF' ;
       ELSE

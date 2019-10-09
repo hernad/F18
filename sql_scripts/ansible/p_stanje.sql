@@ -709,3 +709,53 @@ BEGIN
       RETURN nCount;
 END;
 $$;
+
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.fix_pos_stanje_prema_kartica() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar DEFAULT '1 ';
+      nCount integer;
+      rec_roba RECORD;
+      cIdRoba varchar;
+      nOsnovnaCijena numeric;
+      nPosStanjeStanje numeric;
+      nKarticaStanje numeric;
+
+BEGIN
+
+      nCount := 0;
+
+      FOR rec_roba IN SELECT * from {{ item_prodavnica }}.roba
+            ORDER BY id
+      LOOP
+
+        cIdRoba := rec_roba.id;
+        nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
+        nPosStanjeStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba ); -- raspolozivo_stanje prema pos stanje
+
+        -- select prijem-povrat+ulaz_ostalo as ulaz, realizacija+izlaz_ostalo as izlaz, kalo,
+        --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,
+        --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) - kalo as raspolozivo_stanje,
+        --   round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) as cijena from p4.pos_artikal_stanje( 'P47402', '1900-01-01', current_date );
+
+        -- raspolozivo_stanje prema kartici
+        EXECUTE  'SELECT prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)-kalo as raspolozivo_stanje from {{ item_prodavnica }}.pos_artikal_stanje( $1, $2, $3 )'
+          USING cIdRoba, '1900-01-01'::date, current_date
+          INTO nKarticaStanje;
+
+        IF nPosStanjeStanje <> nKarticaStanje THEN
+          EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
+               USING cIdPos, '80', 'FIX_KART', 999, current_date, cIdRoba, nKarticaStanje - nPosStanjeStanje, nOsnovnaCijena, 0;
+
+          nCount := nCount + 1;
+        END IF;
+
+
+      END LOOP;
+
+      RETURN nCount;
+END;
+$$;
