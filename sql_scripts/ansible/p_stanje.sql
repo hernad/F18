@@ -723,6 +723,7 @@ DECLARE
       nOsnovnaCijena numeric;
       nPosStanjeStanje numeric;
       nKarticaStanje numeric;
+      cMsg varchar;
 
 BEGIN
 
@@ -749,6 +750,10 @@ BEGIN
         IF nPosStanjeStanje <> nKarticaStanje THEN
           EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
                USING cIdPos, '80', 'FIX_KART', 999, current_date, cIdRoba, nKarticaStanje - nPosStanjeStanje, nOsnovnaCijena, 0;
+
+          cMsg := format('%s : cij: %s kartica stanje: %s, pos_stanje: %s, razlika: %s', cIdRoba, nOsnovnaCijena, nKarticaStanje, nPosStanjeStanje, nKarticaStanje - nPosStanjeStanje);
+          PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_FIX_POS_STANJE_KARTICA', cMsg);
+          RAISE INFO 'ERROR_FIX_POS_STANJE_KARTICA: %', cMsg;
 
           nCount := nCount + 1;
         END IF;
