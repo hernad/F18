@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+FIELD ID, NAZ, SIFRADOB
 
 FUNCTION o_roba( cId )
 

@@ -25,7 +25,6 @@ THREAD STATIC s_cF18Home := NIL // svaki thread ima svoj my home ovisno o tekuco
 
 STATIC s_cRunOnStartParam
 
-
 STATIC s_lTestMode := .F.
 STATIC s_lNoSQLMode := .F.
 
@@ -487,7 +486,6 @@ FUNCTION font_width( nWidth )
    RETURN s_nFontWidth
 
 
-
 FUNCTION font_weight_bold()
 
    IF is_terminal()
@@ -497,6 +495,7 @@ FUNCTION font_weight_bold()
    ?E " set font_weight: ", hb_gtInfo( HB_GTI_FONTWEIGHT, HB_GTI_FONTW_BOLD )
 
    RETURN .T.
+
 
 FUNCTION desktop_rows()
 

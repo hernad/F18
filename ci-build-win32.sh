@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "bintray arch = $BINTRAY_ARCH"
+echo "bintray arch = $BINTRAY_ARCH, PATH= $PATH"
 
 HARBOUR_VERSION=`./bintray_get_latest_version.sh harbour harbour-windows-${BINTRAY_ARCH}`
 
