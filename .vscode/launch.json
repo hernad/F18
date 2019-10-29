@@ -4,11 +4,13 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "harbour-dbg",
             "request": "launch",
             "name": "F18 debug",
-            "program": ".\\F18.exe",
+            "terminalType": "integrated",
+            "program": ".\\F18_debug.exe ",
             "arguments": [],
             "workingDir": "${workspaceFolder}\\",
             "sourcePaths": [
@@ -24,7 +26,8 @@
                 "${workspaceFolder}\\core_string",
                 "${workspaceFolder}\\core_sql",
                 "${workspaceFolder}\\core_ui2",
-            ]
+            ],
+            "preLaunchTask": "CompileDebug"
         }
     ]
 }

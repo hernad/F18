@@ -40,7 +40,7 @@ FUNCTION sifra_ispis_naziva( nDbf, dx, dy )
       ENDIF
 
    ELSEIF dx <> NIL .AND. dx > 0 .AND. dx < 25
-      CentrTxt( cTmp, dx )
+      // CentrTxt( cTmp, dx )
    ENDIF
 
    RETURN .T.

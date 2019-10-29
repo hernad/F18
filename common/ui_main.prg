@@ -429,8 +429,8 @@ FUNCTION f18_tone( nFreq, nTimes )
    RETURN NIL
 #endif
 
-
-FUNCTION CentrTxt( tekst, lin )
+/*
+-- FUNCTION CentrTxt( tekst, lin )
 
    LOCAL kol
 
@@ -445,7 +445,7 @@ FUNCTION CentrTxt( tekst, lin )
    ENDIF
 
    RETURN .T.
-
+*/
 
 
 FUNCTION box_crno_na_zuto( v1, h1, v2, h2, cNaslov, cBojaN, cOkvir, cBojaO, cBojaT, nKursor )
@@ -632,6 +632,7 @@ FUNCTION KudaDalje( cTekst, aOpc, cPom )
 
    LOCAL nVrati := 1, nTipka, i := 0, nOpc := Len( aOpc ), nRedova := 1, p := 0
    LOCAL nXp := 0, aTxt := {}, cPom1, cPom2
+   LOCAL j
 
    FOR i := 1 TO nOpc
       cPom1 := PadC( AllTrim( MemoLine( aOpc[ i ], 16, 1 ) ), 16 )

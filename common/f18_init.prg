@@ -107,8 +107,9 @@ FUNCTION post_login()
 
       thread_dbfs( hb_threadStart( @thread_create_dbfs() ) )
       // thread_dbfs( hb_threadStart( @f18_http_server() ) )
-
+#ifndef F18_DEBUG
       thread_dbfs( hb_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
+#endif
    ENDIF
 
    IF !check_server_db_version()
@@ -594,8 +595,12 @@ FUNCTION set_f18_home_root()
    cHome := GetEnv( 'F18_HOME' )
 
    IF Empty( cHome )
+#ifdef F18_DEBUG
+      cHome := f18_current_directory() + SLASH + "data"
+#else
       Alert( 'F18_HOME envar - lokacija podataka nije definisana!?' )
       QUIT_1
+#endif
    ENDIF
 
    cF18eShell := GetEnv( 'F18_ESHELL' )

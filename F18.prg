@@ -221,9 +221,7 @@ STATIC FUNCTION init_f18_params(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
       hParams[ "p" + AllTrim( Str( ++nCount ) ) ] := xParam // p1, p2, p3...
    ENDDO
 
-   altd()
    RETURN hParams
-
 
 
 
@@ -286,7 +284,7 @@ FUNCTION f18_programski_moduli_meni()
       set_program_module_menu( @aMeniOpcije, @aMeniExec, get_f18_param("p3"), get_f18_param("p4"), get_f18_param("p5"), get_f18_param("p6"), get_f18_param("p7") )
       // info_bar( "init", "gen f18_programski_moduli_meni end" )
 
-      nMeniIzbor := meni_0_inkey( mnu_top, mnu_left, mnu_bottom, mnu_right, aMeniOpcije, 1 )
+      nMeniIzbor := meni_0_inkey_draw( mnu_top, mnu_left, mnu_bottom, mnu_right, aMeniOpcije, 1 )
       SetColor( cOldColors )
 
       DO CASE
