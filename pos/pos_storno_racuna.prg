@@ -90,7 +90,7 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
    NEXT
 
    DO WHILE .T. .AND. LastKey() != K_ESC
-      nIzbor := meni_0( "choice", aOpc, nIzbor, .F. )
+      nIzbor := meni_0( "choice", aOpc, NIL, nIzbor, .F. )
       IF nIzbor == 0
          EXIT
       ELSE

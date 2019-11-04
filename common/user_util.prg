@@ -146,36 +146,36 @@ FUNCTION choose_f18_user_from_list( nOperaterId )
 
 
 
-STATIC FUNCTION izaberi_f18_korisnika( arr )
+STATIC FUNCTION izaberi_f18_korisnika( nArrF18Korisnik )
 
    LOCAL _ret := 0
    LOCAL nI, _n
    LOCAL _tmp
    LOCAL _choice := 0
-   LOCAL _izbor := 1
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL nIzbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
    LOCAL _m_x := box_x_koord()
    LOCAL _m_y := box_y_koord()
 
-   FOR nI := 1 TO Len( arr )
+   FOR nI := 1 TO Len( nArrF18Korisnik )
 
       _tmp := ""
       _tmp += PadL( AllTrim( Str( nI ) ) + ")", 3 )
-      _tmp += " " + PadR( arr[ nI, 2 ], 30 )
+      _tmp += " " + PadR( nArrF18Korisnik[ nI, 2 ], 30 )
 
-      AAdd( _opc, _tmp )
-      AAdd( _opcexe, {|| "" } )
+      AAdd( aOpc, _tmp )
+      AAdd( aOpcExe, {|| "" } )
 
    NEXT
 
    DO WHILE .T. .AND. LastKey() != K_ESC
-      _izbor := meni_0( "choice", _opc, _izbor, .F. )
-      IF _izbor == 0
+      nIzbor := meni_0( "choice", aOpc, NIL, nIzbor, .F. )
+      IF nIzbor == 0
          EXIT
       ELSE
-         _ret := arr[ _izbor, 1 ]
-         _izbor := 0
+         _ret := nArrF18Korisnik[ nIzbor, 1 ]
+         nIzbor := 0
       ENDIF
    ENDDO
 

@@ -137,7 +137,7 @@ FUNCTION kalk_prenos_iz_pos_u_kalk()
 
    DO WHILE .T.
 
-      nMeniOdabir := meni_0( "topk", aOpcije, nMeniOdabir, .F. )
+      nMeniOdabir := meni_0( "topk", aOpcije, NIL, nMeniOdabir, .F. )
       IF nMeniOdabir == 0
          EXIT
       ENDIF

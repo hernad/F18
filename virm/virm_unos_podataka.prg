@@ -476,7 +476,7 @@ FUNCTION virm_odredi_ziro_racun( cIdPartn, cDefault, fSilent )
 
       DO WHILE .T.
 
-         izbor := meni_0( "ab-1", aBanke, izbor, .F., "1" )
+         izbor := meni_0( "ab-1", aBanke, NIL, izbor, .F.)
 
          IF izbor = 0
             EXIT

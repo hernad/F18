@@ -640,7 +640,7 @@ STATIC FUNCTION fiskalni_uredjaji_meni( aOpcije )
    NEXT
 
    DO WHILE .T. .AND. LastKey() != K_ESC
-      _izbor := meni_0( "choice", aOpc, _izbor, .F. )
+      _izbor := meni_0( "choice", aOpc, NIL, _izbor, .F. )
       IF _izbor == 0
          EXIT
       ELSE

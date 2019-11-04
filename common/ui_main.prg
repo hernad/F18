@@ -12,6 +12,8 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
+STATIC s_cColorShemaNaslova
+
 MEMVAR m_x, m_y
 
 THREAD STATIC aBoxStack := {}
@@ -263,17 +265,17 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
       ENDIF
    ENDIF
 
-   IF  aOpcijeIliCPoruka == NIL
+   IF aOpcijeIliCPoruka == NIL
       aOpcijeIliCPoruka := ""
    ENDIF
 
 
    StackPush( aBoxStack, ;
-      {  box_x_koord(), ;
+      { box_x_koord(), ;
       box_y_koord(), ;
       nVisina,   ;
       nSirina, ;
-      SaveScreen( m_x, m_y, m_x + nVisina + 1, m_Y + nSirina + 2 ), ;
+      SaveScreen( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 2 ), ;
       iif( ValType( aOpcijeIliCPoruka ) != "A", "", cBoxId ), ;
       Row(), ;
       Col(), ;
@@ -288,7 +290,8 @@ FUNCTION Box( cBoxId, nVisina, nSirina, lInvert, aOpcijeIliCPoruka, cHelpT )
 
    cColor := iif ( lInvert, f18_color_invert(), f18_color_normal() )
    SetColor( cColor )
-   Scroll( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 2 )
+   // Scroll( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 2 )
+   @ box_x_koord(), box_y_koord() CLEAR TO box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 1
    @ box_x_koord(), box_y_koord() TO box_x_koord() + nVisina + 1, box_y_koord() + nSirina + 2 DOUBLE
 
    IF !Empty( cNaslovBoxa )
@@ -315,7 +318,8 @@ FUNCTION BoxC()
    nVisina := aBoxPar[ 3 ]
    nSirina := aBoxPar[ 4 ]
 
-   Scroll( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2 )
+   // Scroll( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2 )
+  
    RestScreen( m_x, m_y, m_x + nVisina + 1, m_y + nSirina + 2, aBoxPar[ 5 ] )
 
    @ aBoxPar[ 7 ], aBoxPar[ 8 ] SAY ""
@@ -768,37 +772,37 @@ FUNCTION ShemaBoja( cIzbor )
    IF IsColor()
       DO CASE
       CASE cIzbor == "B1"
-         cbnaslova := "GR+/N"
+         s_cColorShemaNaslova := "GR+/N"
          cbokvira  := "GR+/N"
          cbteksta  := "W/N  ,R/BG ,,,B/W"
       CASE cIzbor == "B2"
-         cbnaslova := "N/G"
+         s_cColorShemaNaslova := "N/G"
          cbokvira  := "N/G"
          cbteksta  := "W+/G ,R/BG ,,,B/W"
       CASE cIzbor == "B3"
-         cbnaslova := "R+/N"
+         s_cColorShemaNaslova := "R+/N"
          cbokvira  := "R+/N"
          cbteksta  := "N/GR ,R/BG ,,,B/W"
       CASE cIzbor == "B4"
-         cbnaslova := "B/BG"
+         s_cColorShemaNaslova := "B/BG"
          cbokvira  := "B/W"
          cbteksta  := "B/W  ,R/BG ,,,B/W"
       CASE cIzbor == "B5"
-         cbnaslova := "B/W"
+         s_cColorShemaNaslova := "B/W"
          cbokvira  := "R/W"
          cbteksta  := "GR+/N,R/BG ,,,B/W"
       CASE cIzbor == "B6"
-         cbnaslova := "B/W"
+         s_cColorShemaNaslova := "B/W"
          cbokvira  := "R/W"
          cbteksta  := "W/N,R/BG ,,,B/W"
       CASE cIzbor == "B7"
-         cbnaslova := "B/W"
+         s_cColorShemaNaslova := "B/W"
          cbokvira  := "R/W"
          cbteksta  := "N/G,R+/N ,,,B/W"
       OTHERWISE
       ENDCASE
    ELSE
-      cbnaslova := "N/W"
+      s_cColorShemaNaslova := "N/W"
       cbokvira  := "N/W"
       cbteksta  := "W/N  ,N/W  ,,,N/W"
    ENDIF
@@ -872,7 +876,7 @@ FUNCTION VarEdit( aNiz, nX1, nY1, nX2, nY2, cNaslov, cBoje )
 
    PushWa()
    SET DEVICE TO SCREEN
-   box_crno_na_zuto( nX1, nY1, nX2, nY2, _u( cNaslov ), cBNaslova,, cBOkvira, cBTeksta, 2 )
+   box_crno_na_zuto( nX1, nY1, nX2, nY2, _u( cNaslov ), s_cColorShemaNaslova,, cBOkvira, cBTeksta, 2 )
    FOR i := 1 TO Len( aNiz )
       cPom := aNiz[ i, 2 ]
       IF aNiz[ i, 3 ] == NIL .OR. Len( aNiz[ i, 3 ] ) == 0
