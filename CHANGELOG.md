@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-11-4
+
+- F18 eShell windows debug, ui_menu.prg refactor
+
 ## 2019-09-16
 
 - F18 - eShell - onTitleChanged
