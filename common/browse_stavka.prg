@@ -13,7 +13,7 @@
 
 MEMVAR ImeKol
 
-FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIsp, lShowPGroup, Ch, nGet, nI, nTekRed )
+FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabraniIspravke, aZabIsp, lShowPGroup, Ch, nGet, nI, nTekRed )
 
    LOCAL bWhen, bValid, cGetPictureCode
    LOCAL nRed, nKolona
@@ -26,18 +26,18 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
    LOCAL nXP, nYP
 
    // uzmi when, valid kodne blokove
-   IF ( Ch == K_F2 .AND. lZabIsp .AND. AScan( aZabIsp, Upper( ImeKol[ nI, 3 ] ) ) > 0 )
+   IF ( Ch == K_F2 .AND. lZabraniIspravke .AND. AScan( aZabIsp, Upper( ImeKol[ nI, BROWSE_IMEKOL_IME_VARIJABLE ] ) ) > 0 )
       bWhen := {|| .F. }
-   ELSEIF ( Len( ImeKol[ nI ] ) < 4 .OR. ImeKol[ nI, 4 ] == NIL )
+   ELSEIF ( Len( ImeKol[ nI ] ) < BROWSE_IMEKOL_WHEN .OR. ImeKol[ nI, BROWSE_IMEKOL_WHEN ] == NIL )
       bWhen := {|| .T. }
    ELSE
-      bWhen := Imekol[ nI, 4 ]
+      bWhen := Imekol[ nI, BROWSE_IMEKOL_WHEN ]
    ENDIF
 
-   IF ( Len( ImeKol[ nI ] ) < 5 .OR. ImeKol[ nI, 5 ] == NIL )
+   IF ( Len( ImeKol[ nI ] ) < BROWSE_IMEKOL_VALID .OR. ImeKol[ nI, BROWSE_IMEKOL_VALID ] == NIL )
       bValid := {|| .T. }
    ELSE
-      bValid := Imekol[ nI, 5 ]
+      bValid := Imekol[ nI, BROWSE_IMEKOL_VALID ]
    ENDIF
 
    bVariableEval := MemVarBlock( cVariableName )
@@ -55,18 +55,18 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
 
    IF cGetPictureCode ==  "@S50" .OR. Len( ToStr( Eval( bVariableEval ) ) ) > 50
       cGetPictureCode :=  "@S50"
-      @ box_x_koord() + nTekRed + 1, box_y_koord() + 67 SAY Chr( 16 )
+      @ box_x_koord() + nTekRed + 1, box_y_koord() + 67 SAY ">" // Chr( 16 )  // strelica >
    ENDIF
 
-   IF Len( ImeKol[ nI ] ) >= 7 .AND. ImeKol[ nI, 7 ] <> NIL // picture kod zadan u ImeKol
-      cGetPictureCode := ImeKol[ nI, 7 ]
+   IF Len( ImeKol[ nI ] ) >= 7 .AND. ImeKol[ nI, BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ] <> NIL
+      cGetPictureCode := ImeKol[ nI, BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ]
    ENDIF
 
    nRed := 1
    nKolona := 1
 
-   IF Len( ImeKol[ nI ] ) >= 10 .AND. Imekol[ nI, 10 ] <> NIL
-      nKolona := ImeKol[ nI, 10 ] + 1
+   IF Len( ImeKol[ nI ] ) >= BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU .AND. Imekol[ nI, BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] <> NIL
+      nKolona := ImeKol[ nI, BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] + 1
       nRed := 0
    ENDIF
 
@@ -134,7 +134,6 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
       ATail( GetList ):display()
 
    RETURN .T.
-
 
 
 
