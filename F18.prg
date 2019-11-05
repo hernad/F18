@@ -12,7 +12,7 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
-STATIC __relogin_opt := .F.
+// STATIC s_lReloginOpc := .F.
 
 STATIC s_hF18Params := NIL
 
@@ -48,6 +48,7 @@ STATIC FUNCTION to_run_f18_module()
 
 FUNCTION Main(...)
 
+
    IF s_hF18Params == NIL
      s_hF18Params := init_f18_params(...)
    ENDIF
@@ -76,7 +77,6 @@ FUNCTION Main(...)
    RETURN .T.
 
 #endif
-
 
 
 FUNCTION f18_login_loop(lAutoConnect)
@@ -225,7 +225,6 @@ STATIC FUNCTION init_f18_params(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
 
 
 
-
 FUNCTION f18_programski_moduli_meni()
 
    LOCAL aMeniOpcije := {}
@@ -268,14 +267,14 @@ FUNCTION f18_programski_moduli_meni()
       @ nX, mnu_left SAY Replicate( "-", 55 )
 
 
-      // IF _count == 1 .OR. __relogin_opt // backup okidamo samo na prvom ulasku ili na opciji relogina
+      // IF _count == 1 .OR. s_lReloginOpc // backup okidamo samo na prvom ulasku ili na opciji relogina
 
       // IF oBackup:locked( .F. ) // provjera da li je backup locked ?
       // oBackup:unlock()
       // ENDIF
 
       // f18_auto_backup_data( 1 ) // automatski backup podataka preduzeca
-      // __relogin_opt := .F.
+      // s_lReloginOpc := .F.
 
       // ENDIF
 
@@ -285,7 +284,7 @@ FUNCTION f18_programski_moduli_meni()
       set_program_module_menu( @aMeniOpcije, @aMeniExec, get_f18_param("p3"), get_f18_param("p4"), get_f18_param("p5"), get_f18_param("p6"), get_f18_param("p7") )
       // info_bar( "init", "gen f18_programski_moduli_meni end" )
 
-      nMeniIzbor := meni_0_inkey( mnu_top, mnu_left, mnu_bottom, mnu_right, aMeniOpcije, 1 )
+      nMeniIzbor := meni_0_inkey_draw( mnu_top, mnu_left, mnu_bottom, mnu_right, aMeniOpcije, NIL, 1 )
       SetColor( cOldColors )
 
       DO CASE

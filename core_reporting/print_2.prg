@@ -12,7 +12,7 @@
 #include "f18.ch"
 #include "f18_color.ch"
 
-MEMVAR /*GetList,*/ gModul
+MEMVAR /*GetList,*/ gModul, gPrinter, gPIni, gpCond, gPCond2, gP10Cpi, gP12CPI, gPB_ON, gPB_OFF
 
 THREAD STATIC s_cF18Txt
 THREAD STATIC s_xPrintOpt
@@ -768,3 +768,4 @@ FUNCTION page_length()
 FUNCTION page_length_landscape()
 
    RETURN page_length() - 20
+

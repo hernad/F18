@@ -14,7 +14,7 @@
 
 // nOldCursor koriste browse funkcije
 MEMVAR gNaslov, h, nOldCursor
-MEMVAR GetList
+MEMVAR GetList, m_x, m_y, goModul
 
 FUNCTION pripremi_naslovni_ekran( oApp )
 

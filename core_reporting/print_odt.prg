@@ -16,10 +16,10 @@ STATIC s_cF18UtilPath
 STATIC s_cXmlFile
 STATIC s_cOutOdtFile
 STATIC s_cOutputPdf
-STATIC __template
-STATIC __template_filename
+STATIC s_cTemplate
+STATIC s_cTemplateFileName
 STATIC cKnowhowUtilPath
-STATIC __current_odt
+STATIC s_cCurrentOdt
 
 
 /*
@@ -76,7 +76,7 @@ FUNCTION generisi_odt_iz_xml( cTemplate, cXml_file, cOutOdtFile, lBezPitanja )
       s_cOutOdtFile := cOutOdtFile
    ENDIF
 
-   __current_odt := s_cOutOdtFile
+   s_cCurrentOdt := s_cOutOdtFile
 
    lOk := f18_template_copy_to_my_home( cTemplate )
 
@@ -100,8 +100,8 @@ FUNCTION generisi_odt_iz_xml( cTemplate, cXml_file, cOutOdtFile, lBezPitanja )
    ENDIF
 
 
-   __template := cTemplate
-   __template_filename := cTemplate
+   s_cTemplate := cTemplate
+   s_cTemplateFileName := cTemplate
 
    cCommand := java_cmd() + " -jar " + file_path_quote( cJodReportsFullPath ) + " "
    cCommand += file_path_quote( cTemplate ) + " "
@@ -114,7 +114,7 @@ FUNCTION generisi_odt_iz_xml( cTemplate, cXml_file, cOutOdtFile, lBezPitanja )
    CLEAR SCREEN
 
    hJava := java_version()
-   ? "GEN JOD/" + hJava[ "name" ] + "(" + hJava[ "version" ] + ") > " + + Right( __current_odt, 20 )
+   ? "GEN JOD/" + hJava[ "name" ] + "(" + hJava[ "version" ] + ") > " + + Right( s_cCurrentOdt, 20 )
 
    nError := f18_run( cCommand )
    RESTORE SCREEN FROM cScreen
@@ -175,36 +175,36 @@ STATIC FUNCTION samo_naziv_fajla( cFajl )
 STATIC FUNCTION naziv_izlaznog_odt_fajla()
 
    LOCAL nI
-   LOCAL _tmp := "out.odt"
+   LOCAL cTmp := "out.odt"
 
    FOR nI := 1 TO 1000
-      _tmp := "out_" + PadL( AllTrim( Str( nI ) ), 4, "0" ) + ".odt"
-      IF !File( my_home() + _tmp )
+      cTmp := "out_" + PadL( AllTrim( Str( nI ) ), 4, "0" ) + ".odt"
+      IF !File( my_home() + cTmp )
          EXIT
       ENDIF
    NEXT
 
-   RETURN _tmp
+   RETURN cTmp
 
 
 
 
 STATIC FUNCTION brisi_odt_fajlove_iz_home_path()
 
-   LOCAL _tmp
-   LOCAL _f_path
+   LOCAL cTmp
+   LOCAL cFilePath
 
-   _f_path := my_home()
-   _tmp := "out_*.odt"
+   cFilePath := my_home()
+   cTmp := "out_*.odt"
 
    // lock fajl izgleda ovako
    // .~lock.out_0001.odt#
 
-   AEval( Directory( _f_path + _tmp ), {| aFile | ;
+   AEval( Directory( cFilePath + cTmp ), {| aFile | ;
       iif( ;
-      File( _f_path + ".~lock." + AllTrim( aFile[ 1 ] ) + "#" ), ;
+      File( cFilePath + ".~lock." + AllTrim( aFile[ 1 ] ) + "#" ), ;
       .T., ;
-      FErase( _f_path + AllTrim( aFile[ 1 ] ) ) ;
+      FErase( cFilePath + AllTrim( aFile[ 1 ] ) ) ;
       ) ;
       } )
 
@@ -261,7 +261,7 @@ FUNCTION f18_odt_copy( cOutOdtFile, cDestination_file )
    LOCAL lOk := .F.
 
    IF ( cOutOdtFile == NIL )
-      s_cOutOdtFile := __current_odt
+      s_cOutOdtFile := s_cCurrentOdt
    ELSE
       s_cOutOdtFile := cOutOdtFile
    ENDIF
@@ -282,7 +282,7 @@ FUNCTION f18_odt_copy( cOutOdtFile, cDestination_file )
 
    Napomene:
      Ukoliko nije zadat parametar cOutOdtFile, štampa se zadnji generisani ODT dokuement koji je smješten
-     u statičku varijablu __current_odt
+     u statičku varijablu s_cCurrentOdt
 */
 
 FUNCTION prikazi_odt( cOutOdtFile )
@@ -292,7 +292,7 @@ FUNCTION prikazi_odt( cOutOdtFile )
    LOCAL cOdgovor
 
    IF ( cOutOdtFile == NIL )
-      s_cOutOdtFile := __current_odt
+      s_cOutOdtFile := s_cCurrentOdt
    ELSE
       s_cOutOdtFile := cOutOdtFile
    ENDIF
@@ -305,7 +305,7 @@ FUNCTION prikazi_odt( cOutOdtFile )
 
    SAVE SCREEN TO cScreen
    CLEAR SCREEN
-   ? "LO_prikaz : " + Right( __current_odt, 50 )
+   ? "LO_prikaz : " + Right( s_cCurrentOdt, 50 )
 
 #ifndef TEST
    nError := LO_open_dokument( s_cOutOdtFile )
@@ -409,7 +409,7 @@ STATIC FUNCTION odt_email_attachment( lIzlazniOdt )
    LOCAL aFiles := {}
    LOCAL cPath := my_home()
    LOCAL cServer := my_server_params()
-   LOCAL cZipFile
+   LOCAL cZipFile, nError
 
    cZipFile := AllTrim( cServer[ "database" ] )
    cZipFile += "_" + AllTrim( f18_user() )
@@ -420,13 +420,13 @@ STATIC FUNCTION odt_email_attachment( lIzlazniOdt )
    DirChange( my_home() )
 
    AAdd( aFiles, samo_naziv_fajla( s_cXmlFile ) )
-   AAdd( aFiles, __template_filename )
+   AAdd( aFiles, s_cTemplateFileName )
 
    IF lIzlazniOdt
-      AAdd( aFiles, samo_naziv_fajla( __current_odt ) )
+      AAdd( aFiles, samo_naziv_fajla( s_cCurrentOdt ) )
    ENDIF
 
-   _err := zip_files( cPath, cZipFile, aFiles )
+   nError := zip_files( cPath, cZipFile, aFiles )
 
    RETURN cZipFile
 
@@ -454,13 +454,13 @@ FUNCTION konvertuj_odt_u_pdf( cInput_file, cOutOdtFile, lOverwrite_file )
    LOCAL cScreen, nError
 
    IF ( cInput_file == NIL )
-      s_cOutOdtFile := __current_odt
+      s_cOutOdtFile := s_cCurrentOdt
    ELSE
       s_cOutOdtFile := cInput_file
    ENDIF
 
    IF ( cOutOdtFile == NIL )
-      s_cOutputPdf := StrTran( __current_odt, ".odt", ".pdf" )
+      s_cOutputPdf := StrTran( s_cCurrentOdt, ".odt", ".pdf" )
    ELSE
       s_cOutputPdf := cOutOdtFile
    ENDIF
@@ -523,7 +523,7 @@ FUNCTION konvertuj_odt_u_pdf( cInput_file, cOutOdtFile, lOverwrite_file )
 STATIC FUNCTION naziv_izlaznog_pdf_fajla( cOut_file, lOverwrite )
 
    LOCAL _ret := .F.
-   LOCAL nI, _ext, _tmp, _wo_ext
+   LOCAL nI, _ext, cTmp, _wo_ext
 
    IF lOverwrite == NIL
       lOverwrite := .T.
@@ -541,10 +541,10 @@ STATIC FUNCTION naziv_izlaznog_pdf_fajla( cOut_file, lOverwrite )
 
    FOR nI := 1 TO 99
 
-      _tmp := _wo_ext + PadL( AllTrim( Str( nI ) ), 2, "0" ) + _ext
+      cTmp := _wo_ext + PadL( AllTrim( Str( nI ) ), 2, "0" ) + _ext
 
-      IF !File( _tmp )
-         cOut_file := _tmp
+      IF !File( cTmp )
+         cOut_file := cTmp
          EXIT
       ENDIF
 

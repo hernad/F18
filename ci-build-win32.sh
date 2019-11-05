@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "bintray arch = $BINTRAY_ARCH"
+echo "bintray arch = $BINTRAY_ARCH, PATH= $PATH"
 
 HARBOUR_VERSION=`./bintray_get_latest_version.sh harbour harbour-windows-${BINTRAY_ARCH}`
 
@@ -62,6 +62,7 @@ export F18_POS=1
 export F18_RNAL=0
 export F18_GT_CONSOLE=1
 
+hbmk2 -workdir=.h F18.hbp -clean
 hbmk2 -workdir=.h F18.hbp
 
 #cp -av /usr/lib/i386-linux-gnu/libpq.so .

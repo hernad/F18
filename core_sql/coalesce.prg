@@ -80,6 +80,7 @@ FUNCTION coalesce_int( cField, lZarez )
 
    RETURN coalesce_num( cField, cFormat, lZarez )
 
+
 FUNCTION coalesce_int_zarez( cField )
 
    RETURN coalesce_int( cField, .T. )
@@ -88,7 +89,6 @@ FUNCTION coalesce_int_zarez( cField )
 FUNCTION coalesce_real_zarez( cField )
 
    RETURN coalesce_real( cField, .T. )
-
 
 
 FUNCTION coalesce_real( cField, lZarez )

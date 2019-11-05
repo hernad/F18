@@ -207,7 +207,7 @@ STATIC FUNCTION get_katops_file( cBrDok, cDestinacijaDir, cFile )
    nIzbor := 1
    lPrenijeti := .F.
    DO WHILE .T.
-      nIzbor := meni_0( "k2p", _opc, nIzbor, .F. )
+      nIzbor := meni_0( "k2p", _opc, NIL, nIzbor, .F. )
       IF nIzbor == 0
          EXIT
       ELSE

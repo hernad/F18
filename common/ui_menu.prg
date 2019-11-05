@@ -29,7 +29,7 @@ FUNCTION f18_menu( cIzp, lOsnovniMeni, nIzbor, aOpc, aOpcExe )
    ENDIF
 
    DO WHILE .T.
-      nIzbor := meni_0( cIzp, aOpc, nIzbor, .F. )
+      nIzbor := meni_0( cIzp, aOpc, aOpcExe, nIzbor, .F. )
 
       DO CASE
       CASE nIzbor == 0
@@ -48,18 +48,7 @@ FUNCTION f18_menu( cIzp, lOsnovniMeni, nIzbor, aOpc, aOpcExe )
             ENDIF
          ELSE
             EXIT
-         ENDIF
-
-      OTHERWISE
-
-         IF aOpcExe[ nIzbor ] <> nil
-            nMenuExeOpcija := aOpcExe[ nIzbor ]
-            IF ValType( nMenuExeOpcija ) == "B"
-               Eval( nMenuExeOpcija )
-            ELSE
-               MsgBeep( "meni čudan ?" + hb_ValToStr( nIzbor ) )
-            ENDIF
-         ENDIF
+         ENDIF 
 
       ENDCASE
 
@@ -77,13 +66,13 @@ FUNCTION f18_menu_sa_priv_vars_opc_opcexe_izbor( cIzp, lMain )
 
 
 
-FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
+FUNCTION meni_fiksna_lokacija( nX1, nY1, aOpc, nIzb )
 
    LOCAL nOpcija := 0, nYm := 0
    LOCAL nX2
 
-   nOpcija := Len( aNiz )
-   AEval( aNiz, {| x | iif( Len( x ) > nYm, nYm := Len( x ), ) } )
+   nOpcija := Len( aOpc )
+   AEval( aOpc, {| x | iif( Len( x ) > nYm, nYm := Len( x ), ) } )
 
    nX2 := nX1 + nOpcija + 1
 
@@ -92,7 +81,7 @@ FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
    ENDIF
 
    box_crno_na_zuto( nX1, nY1, nX2, nY1 + nYm + 1,,,,,, 0 )
-   nIzb := meni_0_inkey( nX1 + 1, nY1 + 1, nX2, nY1 + nYm, aNiz, nIzb )
+   nIzb := meni_0_inkey_draw( nX1 + 1, nY1 + 1, nX2, nY1 + nYm, aOpc, NIL, nIzb )
    box_crno_na_zuto_end()
 
    RETURN nIzb
@@ -102,8 +91,8 @@ FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
  *  Prikazuje zadati meni, vraca odabranu opciju
  *
  *  cMeniId  - identifikacija menija     C
- *  aItems   - niz opcija za nIzbor       {}
- *  nItemNo  - Broj pocetne pozicije     N
+ *  aOpc   - niz opcija za nIzbor       {}
+ *  nOdabranaStavka  - Broj pocetne pozicije     N
  *  lInvert     - da li je meni f18_color_invert() ovan  L
  *
  *  Broj izabrane opcije, 0 kraj
@@ -111,45 +100,45 @@ FUNCTION meni_fiksna_lokacija( nX1, nY1, aNiz, nIzb )
 
 */
 
-FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, nMaxVR )
+FUNCTION meni_0( cMeniId, aOpc, aOpcExe, nOdabranaStavka, lInvert )
 
-   LOCAL nLength
-   LOCAL nVisina
+   LOCAL nMeniSirina
+   LOCAL nUIMeniVelicina
    LOCAL cOldColor
    LOCAL cLocalColor
    LOCAL cLocalInvertedColor
-   LOCAL nTItemNo
    LOCAL nChar
    LOCAL cMeniItem
 
    // LOCAL ItemSav
    LOCAL aMenu := {}
    LOCAL cPom := Set( _SET_DEVICE )
-   LOCAL lFiksneKoordinate := .F.
-
+ 
    SET DEVICE TO SCREEN
 
+   /*
    IF nPovratak == NIL
       nPovratak := 0
    ENDIF
    IF nMaxVR == NIL
       nMaxVR := 16
    ENDIF
-   IF aFixKoo == NIL
-      aFixKoo := {}
+   IF aFiksneKoordinate == NIL
+      aFiksneKoordinate := {}
    ENDIF
-   IF Len( aFixKoo ) == 2
+   IF Len( aFiksneKoordinate ) == 2
       lFiksneKoordinate := .T.
    ENDIF
+   */
 
-   nVisina := iif( Len( aItems ) > nMaxVR, nMaxVR, Len( aItems ) )
+   nUIMeniVelicina := iif( Len( aOpc ) > 18, 18, Len( aOpc ) )
 
-   IF ValType( aItems[ 1 ] ) == "B"
-      cMeniItem := Eval( aItems[ 1 ] )
+   IF ValType( aOpc[ 1 ] ) == "B"
+      cMeniItem := Eval( aOpc[ 1 ] )
    ELSE
-      cMeniItem := aItems[ 1 ]
+      cMeniItem := aOpc[ 1 ]
    ENDIF
-   nLength := Len( cMeniItem ) + 1
+   nMeniSirina := Len( cMeniItem ) + 1
 
    IF lInvert == NIL
       lInvert := .F.
@@ -159,89 +148,77 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
    cLocalInvertedColor := iif( lInvert, f18_color_normal(), f18_color_invert() )
 
    cOldColor := SetColor( cLocalColor )
-
+   
    // Ako se meni zove prvi put, upisi ga na stek
    IF Len( aMenuStack ) == 0 .OR. ( Len( aMenuStack ) <> 0 .AND. cMeniId <> ( StackTop( aMenuStack ) )[ 1 ] )
-      IF lFiksneKoordinate
-         box_x_koord( aFixKoo[ 1 ] )
-         box_y_koord(  aFixKoo[ 2 ] )
-      ELSE
-         ui_calc_xy( nVisina, nLength ) // odredi koordinate menija
-      ENDIF
-
+      
+      ui_calc_xy( nUIMeniVelicina, nMeniSirina ) // odredi koordinate menija
+      
       StackPush( aMenuStack, { cMeniId, ;
          box_x_koord(), ;
          box_y_koord(), ;
-         SaveScreen( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 ) ), ;
-         nItemNo, ;
-         cHelpT;
+         SaveScreen( box_x_koord(), box_y_koord(), box_x_koord() + nUIMeniVelicina + 2, box_y_koord() + nMeniSirina + 4), ;
+         nOdabranaStavka ;
          } )
 
    ELSE
       aMenu := StackTop( aMenuStack ) // Ako se meni ne zove prvi put, uzmi koordinate sa steka
       box_x_koord( aMenu[ 2 ] )
-      box_y_koord(  aMenu[ 3 ] )
+      box_y_koord( aMenu[ 3 ] )
 
    END IF
-
-   SetColor( f18_color_invert() )
-
-   IF nItemNo == 0
-      CentrTxt( h[ 1 ], f18_max_rows() - 1 )
-   END IF
-
+   
    SetColor( cLocalColor )
+   nOdabranaStavka := meni_0_inkey_draw(  box_x_koord() + 1, box_y_koord() + 2, box_x_koord() + nUIMeniVelicina + 1, box_y_koord() + nMeniSirina + 1, aOpc, aOpcExe, nOdabranaStavka, .T.)
 
-   nItemNo := meni_0_inkey(  box_x_koord() + 1, box_y_koord() + 2, box_x_koord() + nVisina + 1, box_y_koord() + nLength + 1, aItems, nItemNo, .T., lFiksneKoordinate )
-
-
-   nTItemNo := nItemNo // nTItemNo := RetItem( nItemNo )
+   //nTekucaStavkaMeni := nOdabranaStavka // nTekucaStavkaMeni := RetItem( nOdabranaStavka )
 
    aMenu := StackTop( aMenuStack )
    box_x_koord( aMenu[ 2 ] )
    box_y_koord( aMenu[ 3 ] )
-   aMenu[ 5 ] := nTItemNo
+   aMenu[ 5 ] := nOdabranaStavka
 
-   @ box_x_koord(), box_y_koord() TO box_x_koord() + nVisina + 1, box_y_koord() + nLength + 3
+   @ box_x_koord(), box_y_koord() TO box_x_koord() + nUIMeniVelicina + 1, box_y_koord() + nMeniSirina + 3
 
-   IF nTItemNo <> 0 // Ako nije pritisnuto ESC, <-, ->, oznaci izabranu opciju
-      IF ValType( aItems[ nTItemNo ] ) == "B"
-         cMeniItem := Eval( aItems[ nTItemNo ] )
+   /*
+   IF nTekucaStavkaMeni <> 0 // Ako nije pritisnuto ESC, <-, ->, oznaci izabranu opciju
+      IF ValType( aOpc[ nTekucaStavkaMeni ] ) == "B"
+         cMeniItem := Eval( aOpc[ nTekucaStavkaMeni ] )
       ELSE
-         cMeniItem := aItems[ nTItemNo ]
+         cMeniItem := aOpc[ nTekucaStavkaMeni ]
       ENDIF
       SetColor( cLocalInvertedColor )
-      @ box_x_koord() + Min( nTItemNo, nMaxVR ), box_y_koord() + 1 SAY8 " " + cMeniItem + " "
-      @ box_x_koord() + Min( nTItemNo, nMaxVR ), box_y_koord() + 2 SAY ""
+      @ box_x_koord() + Min( nTekucaStavkaMeni, nMaxVR ), box_y_koord() + 1 SAY8 " " + cMeniItem + " "
+      @ box_x_koord() + Min( nTekucaStavkaMeni, nMaxVR ), box_y_koord() + 2 SAY ""
    END IF
 
    nChar := LastKey()
-
-   IF nChar == K_ESC .OR. nTItemNo == 0 .OR. nTItemNo == nPovratak  // Ako je ESC meni treba odmah izbrisati (nItemNo=0),  skini meni sa steka
-      @ box_x_koord(), box_y_koord() CLEAR TO box_x_koord() + nVisina + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 )
+   */
+  
+   IF nOdabranaStavka == 0 //.OR. nTekucaStavkaMeni == nPovratak  // Ako je ESC meni treba odmah izbrisati (nOdabranaStavka=0),  skini meni sa steka
+      @ box_x_koord(), box_y_koord() CLEAR TO box_x_koord() + nUIMeniVelicina + 2, box_y_koord() + nMeniSirina + 4
       aMenu := StackPop( aMenuStack )
-
-      RestScreen( box_x_koord(), box_y_koord(), box_x_koord() + nVisina + 2 - iif( lFiksneKoordinate, 1, 0 ), box_y_koord() + nLength + 4 - iif( lFiksneKoordinate, 1, 0 ), aMenu[ 4 ] )
+      RestScreen( box_x_koord(), box_y_koord(), box_x_koord() + nUIMeniVelicina + 2, box_y_koord() + nMeniSirina + 4, aMenu[ 4 ] )
    END IF
 
    SetColor( cOldColor )
    Set( _SET_DEVICE, cPom )
 
-   RETURN nItemNo
+   RETURN nOdabranaStavka
 
 
 /*
---FUNCTION retitem( nItemNo )
+--FUNCTION retitem( nOdabranaStavka )
 
    LOCAL nRetItem
    LOCAL cAction
 
    DO CASE
-   CASE RANGE( nItemNo, 10000, 10999 )
+   CASE RANGE( nOdabranaStavka, 10000, 10999 )
       cAction := "K_CTRL_N"
-   CASE RANGE( nItemNo, 20000, 20999 )
+   CASE RANGE( nOdabranaStavka, 20000, 20999 )
       cAction := "K_F2"
-   CASE RANGE( nItemNo, 30000, 30999 )
+   CASE RANGE( nOdabranaStavka, 30000, 30999 )
       cAction := "K_CTRL_T"
    OTHERWISE
       cAction := ""
@@ -249,38 +226,44 @@ FUNCTION meni_0( cMeniId, aItems, nItemNo, lInvert, cHelpT, nPovratak, aFixKoo, 
 
    DO CASE
    CASE cAction == "K_CTRL_N"
-      nRetItem := nItemNo - 10000
+      nRetItem := nOdabranaStavka - 10000
    CASE cAction == "K_F2"
-      nRetItem := nItemNo - 20000
+      nRetItem := nOdabranaStavka - 20000
    CASE cAction == "K_CTRL_T"
-      nRetItem := nItemNo - 30000
+      nRetItem := nOdabranaStavka - 30000
    OTHERWISE
-      nRetItem := nItemNo
+      nRetItem := nOdabranaStavka
    ENDCASE
 
    RETURN nRetItem
 */
 
 
-FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoordinate )
+FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, lOkvir )
 
-   LOCAL nI, nWidth, nLen, nOldCurs, cOldColor, nOldItemNo, cSavC
+   LOCAL nI, nWidth, nBrStavkiMeni, nOldCurs, cOldColor, nOldItemNo, cSavC
    LOCAL nGornja
-   LOCAL nVisina
+   LOCAL nUIMeniVelicina
    LOCAL cMeniItem
    LOCAL cPrvaTriSlova
-
+   LOCAL lPrvoCrtanje
+   LOCAL lIzvrsiOpciju
+   LOCAL cColor
+   LOCAL lNagore, lNaDole
    // LOCAL nCtrlKeyVal := 0
    LOCAL nChar
-   LOCAL lExitFromMeni
+   LOCAL nStart, nEnd, nStep
+   //LOCAL lExitFromMeni
 
    hb_default( @lOkvir, .F. ) // iscrtavanje okvira
 
-   IF nItemNo == 0
-      RETURN nItemNo
-   ENDIF
+   //IF nOdabranaStavka == 0
+   //   RETURN nOdabranaStavka
+   //ENDIF
 
-   lExitFromMeni := .F.
+   //lExitFromMeni := .F.
+   lIzvrsiOpciju := .F.
+   lPrvoCrtanje := .T.
 
    nOldCurs := iif( SetCursor() == 0, 0, iif( ReadInsert(), 2, 1 ) )
    cOldColor := SetColor()
@@ -288,15 +271,17 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
 
    @ nX1, nY1 CLEAR TO nX2 - 1, nY2
 
+   lNaGore := .F.
+   lNaDole := .T.
    DO WHILE .T.
 
       nWidth := nY2 - nY1
-      nLen := Len( aItems )
-      nVisina := nX2 - nX1
-      nGornja := iif( nItemNo > nVisina, nItemNo - nVisina + 1, 1 )
+      nBrStavkiMeni := Len( aOpc )
+      nUIMeniVelicina := nX2 - nX1
+      nGornja := iif( nOdabranaStavka > nUIMeniVelicina, nOdabranaStavka - nUIMeniVelicina + 1, 1 )
 
       IF lOkvir
-         meni_0_okvir( nX1, nY1, nX2, nY2, lFiksneKoordinate )
+        meni_0_okvir( nX1, nY1, nX2, nY2, .F. )
       ENDIF
 
       IF in_calc()
@@ -304,37 +289,64 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
          LOOP
       ENDIF
 
-      IF nVisina < nLen
-         @  nX2, nY1 + Int( nWidth / 2 ) SAY iif( nGornja == 1, " ^ ", iif( nItemNo == nLen, " v ", " v " ) )
-         @  nX1 - 1, nY1 + Int( nWidth / 2 ) SAY iif( nGornja == 1, " v ", iif( nItemNo == nLen, " ^ ", " ^ " ) )
+      IF nUIMeniVelicina < nBrStavkiMeni
+         @  nX2, nY1 + Int( nWidth / 2 ) SAY iif( nGornja == 1, " ^ ", iif( nOdabranaStavka == nBrStavkiMeni, " v ", " v " ) )
+         @  nX1 - 1, nY1 + Int( nWidth / 2 ) SAY iif( nGornja == 1, " v ", iif( nOdabranaStavka == nBrStavkiMeni, " ^ ", " ^ " ) )
       ENDIF
 
-      FOR nI := nGornja TO nVisina + nGornja - 1
-         IF nI == nItemNo
-            IF Left( cOldColor, 3 ) == Left( f18_color_normal(), 3 )
-               SetColor( f18_color_invert()  )
-            ELSE
-               SetColor( f18_color_normal() )
-            ENDIF
-         ELSE
-            SetColor( cOldColor )
-         ENDIF
-         IF nLen >= nI
-            IF ValType( aItems[ nI ] ) == "B"
-               cMeniItem := Eval( aItems[ nI ] )
-            ELSE
-               cMeniItem := aItems[ nI ]
-            ENDIF
-            @ nX1 + nI - nGornja, nY1 SAY PadRU( cMeniItem, nWidth )
+      IF lNaGore
+         nEnd := nGornja 
+         nStart := nUIMeniVelicina + nGornja - 1
+         nStep := -1
+      ELSE   
+         nStart := nGornja 
+         nEnd := nUIMeniVelicina + nGornja - 1
+         nStep := 1
+      ENDIF
+      FOR nI := nStart TO nEnd STEP nStep
+         IF nI <= nBrStavkiMeni .AND. (lPrvoCrtanje .OR. range( nI, nOdabranaStavka-1, nOdabranaStavka+1))
+            // range - ako nije prvo crtanje, onda treba samo ispis stavke iznad, ispod i odabir
+
+               IF nI == nOdabranaStavka // odabrana stavka
+                  IF Left( cOldColor, 3 ) == Left( f18_color_normal(), 3 )
+                     cColor := f18_color_invert()
+                  ELSE
+                     cColor := f18_color_normal()
+                  ENDIF
+               ELSE
+                  cColor := cOldColor
+               ENDIF
+
+               IF ValType( aOpc[ nI ] ) == "B"
+                  cMeniItem := Eval( aOpc[ nI ] )
+               ELSE
+                  cMeniItem := aOpc[ nI ]
+               ENDIF
+               @ nX1 + nI - nGornja, nY1 SAY PadRU( cMeniItem, nWidth ) COLOR cColor
+            
          ENDIF
       NEXT
 
-      SetColor( f18_color_invert() )
+      IF lIzvrsiOpciju
+         IF aOpcExe <> NIL // execute opcija
+           IF aOpcExe[ nOdabranaStavka ] <> NIL
+
+            @ nX1 + Min( nOdabranaStavka, 16 ) - 1, nY1 + 1 SAY ""
+            IF ValType( aOpcExe[ nOdabranaStavka ] ) == "B"
+               Eval( aOpcExe[ nOdabranaStavka ] )
+            ELSE
+               MsgBeep( "meni čudan ?" + hb_ValToStr( nOdabranaStavka ) )
+            ENDIF
+           ENDIF
+         ENDIF
+      ENDIF
+
+      // SetColor( f18_color_invert() )
       SetColor( cOldColor )
 
-      IF lExitFromMeni
-         EXIT
-      ENDIF
+      //IF lExitFromMeni
+      //  EXIT
+      //ENDIF
 
       nChar := Inkey( 0 )
 
@@ -342,92 +354,97 @@ FUNCTION meni_0_inkey( nX1, nY1, nX2, nY2, aItems, nItemNo, lOkvir, lFiksneKoord
          goModul:GProc( nChar )
       ENDIF
 
-      nOldItemNo := nItemNo
+      lIzvrsiOpciju := .F.
+      nOldItemNo := nOdabranaStavka
       DO CASE
       CASE nChar == K_ESC
-         nItemNo := 0
+         nOdabranaStavka := 0
          EXIT
       CASE nChar == K_HOME
-         nItemNo := 1
+         nOdabranaStavka := 1
+         lNaGore := .T.
       CASE nChar == K_END
-         nItemNo := nLen
+         nOdabranaStavka := nBrStavkiMeni
+         lNaDole := .T.
       CASE nChar == K_DOWN
-         nItemNo++
+         nOdabranaStavka++
+         lNaDole := .T.
       CASE nChar == K_UP
-         nItemNo--
-
+         nOdabranaStavka--
+         lNaGore := .T.
       CASE nChar == K_ENTER
-         EXIT
+         lIzvrsiOpciju := .T.
 
       CASE IsAlpha( Chr( nChar ) ) .OR. IsDigit( Chr( nChar ) )
-         FOR nI := 1 TO nLen
+         FOR nI := 1 TO nBrStavkiMeni
             IF IsDigit( Chr( nChar ) ) // cifra
-               IF ValType( aItems[ nI ] ) == "C"
-                  cPrvaTriSlova := Left( aItems[ nI ], 3 )
+               IF ValType( aOpc[ nI ] ) == "C"
+                  cPrvaTriSlova := Left( aOpc[ nI ], 3 )
                ELSE
-                  cPrvaTriSlova := Left( Eval( aItems[ nI ] ), 3 )
+                  cPrvaTriSlova := Left( Eval( aOpc[ nI ] ), 3 )
                ENDIF
-               IF Chr( nChar ) $  cPrvaTriSlova
-                  nItemNo := nI  // broja u stavki samo u prva 3 karaktera
-                  lExitFromMeni := .T.
+               IF Chr( nChar ) $ cPrvaTriSlova
+                  IF nI > nOdabranaStavka
+                     lNaDole := .T.
+                  ELSE
+                     lNaGore := .T.
+                  ENDIF
+                  nOdabranaStavka := nI  // broja u stavki samo u prva 3 karaktera
+                  lIzvrsiOpciju := .T.
+                  lPrvoCrtanje := .T.
                ENDIF
             ELSE
-               IF ValType(aItems[ nI ]) == "C"  .AND. Upper( Chr( nChar ) ) $ Left( aItems[ nI ], 3 ) // veliko slovo se trazi u prva tri znaka
-                  nItemNo := nI
-                  lExitFromMeni := .T.
+               IF ValType(aOpc[ nI ]) == "C"  .AND. Upper( Chr( nChar ) ) $ Left( aOpc[ nI ], 3 ) // veliko slovo se trazi u prva tri znaka
+                  IF nI > nOdabranaStavka
+                     lNaDole := .T.
+                  ELSE
+                     lNaGore := .T.
+                  ENDIF
+                  nOdabranaStavka := nI
+                  lIzvrsiOpciju := .T.
+                  lPrvoCrtanje := .T.
                ENDIF
             ENDIF
          NEXT
 
-         // CASE nChar == K_CTRL_N
-         // nCtrlKeyVal := 10000
-         // EXIT
-
-         // CASE nChar == K_F2
-         // nCtrlKeyVal := 20000
-         // EXIT
-
-         // CASE nChar == K_CTRL_T
-         // nCtrlKeyVal := 30000
-         // EXIT
-
       ENDCASE
 
-      IF nItemNo > nLen
-         nItemNo--
+      IF nOdabranaStavka > nBrStavkiMeni
+         nOdabranaStavka--
       ENDIF
-      IF nItemNo < 1; nItemNo++; ENDIF
+      IF nOdabranaStavka < 1
+           nOdabranaStavka++
+      ENDIF
 
-      nGornja := iif( nItemNo > nVisina, nItemNo - nVisina + 1, 1 )
+      nGornja := iif( nOdabranaStavka > nUIMeniVelicina, nOdabranaStavka - nUIMeniVelicina + 1, 1 )
 
+      IF aOpcExe == NIL
+         EXIT
+      ENDIF
    ENDDO
 
    SetCursor( iif( nOldCurs == 0, 0, iif( ReadInsert(), 2, 1 ) ) )
    SetColor( cOldColor )
 
-   RETURN nItemNo // + nCtrlKeyVal
+   RETURN nOdabranaStavka // + nCtrlKeyVal
 
 
 
+STATIC FUNCTION meni_0_okvir( nX1, nY1, nX2, nY2 )
 
-STATIC FUNCTION meni_0_okvir( nX1, nY1, nX2, nY2, lFiksneKoordinate )
-
-   LOCAL nI, nLength := nY2 - nY1
+   LOCAL nI, nMeniSirina := nY2 - nY1
 
    // @ nX1 - 1, nY1 - 2 CLEAR TO nX2, nY2 + 2
    @ nX1, nY1 - 1 CLEAR TO nX2 - 1, nY1 - 1 // ispis lijeve praznine (#) :  |#1. opcija 1 %|
-   @ nX1,  nY2     CLEAR TO nX2 - 1, nY2 + 1 // ispis desne praznine (%)  :  |#2. opcija 2 %|
-   IF lFiksneKoordinate
-      @ nX1 - 1, nY1 - 2 TO nX2, nY2 + 2
-   ELSE
+   @ nX1,  nY2   CLEAR TO nX2 - 1, nY2 + 1 // ispis desne praznine (%)  :  |#2. opcija 2 %|
+   
 
-      @ nX1 - 1, nY1 - 2 TO nX2, nY2 + 2 DOUBLE // okvir duple linije
+   @ nX1 - 1, nY1 - 2 TO nX2, nY2 + 2 DOUBLE // okvir duple linije
 
-      FOR nI := 1 TO ( nX2 - nX1 + 2 )
-         @ nX1 + nI - 1, nY1 + nLength + 3 SAY Chr( 177 ) // sjena desno
-      NEXT
-      @ nX2 + 1, nY1 - 1 SAY Replicate( Chr( 177 ), nLength + 5 ) // sjena dno
+    FOR nI := 1 TO ( nX2 - nX1 + 2 )
+         @ nX1 + nI - 1, nY1 + nMeniSirina + 3 SAY Chr( 177 ) // sjena desno
+    NEXT
+    @ nX2 + 1, nY1 - 1 SAY Replicate( Chr( 177 ), nMeniSirina + 5 ) // sjena dno
 
-   ENDIF
 
    RETURN .T.

@@ -1033,17 +1033,17 @@ FUNCTION fin_tek_rec_2()
 
 FUNCTION fin_knjizenje_ostale_opcije()
 
-   PRIVATE opc[ 1 ]
+   PRIVATE aOpc[ 1 ]
 
-   opc[ 1 ] := "1. novi datum->datum, stari datum->dat.valute "
-   // opc[ 2 ] := "2. podijeli nalog na vise dijelova"
+   aOpc[ 1 ] := "1. novi datum->datum, stari datum->dat.valute "
+   // aOpc[ 2 ] := "2. podijeli nalog na vise dijelova"
 
    h[ 1 ] := h[ 2 ] := ""
    PRIVATE Izbor := 1
    PRIVATE am_x := box_x_koord(), am_y := box_y_koord()
    my_close_all_dbf()
    DO WHILE .T.
-      Izbor := meni_0( "prip", opc, Izbor, .F. )
+      Izbor := meni_0( "prip", aOpc, NIL, Izbor, .F. )
       DO CASE
       CASE Izbor == 0
          EXIT

@@ -25,7 +25,6 @@ THREAD STATIC s_cF18Home := NIL // svaki thread ima svoj my home ovisno o tekuco
 
 STATIC s_cRunOnStartParam
 
-
 STATIC s_lTestMode := .F.
 STATIC s_lNoSQLMode := .F.
 
@@ -108,8 +107,9 @@ FUNCTION post_login()
 
       thread_dbfs( hb_threadStart( @thread_create_dbfs() ) )
       // thread_dbfs( hb_threadStart( @f18_http_server() ) )
-
+#ifndef F18_DEBUG
       thread_dbfs( hb_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
+#endif
    ENDIF
 
    IF !check_server_db_version()
@@ -487,7 +487,6 @@ FUNCTION font_width( nWidth )
    RETURN s_nFontWidth
 
 
-
 FUNCTION font_weight_bold()
 
    IF is_terminal()
@@ -497,6 +496,7 @@ FUNCTION font_weight_bold()
    ?E " set font_weight: ", hb_gtInfo( HB_GTI_FONTWEIGHT, HB_GTI_FONTW_BOLD )
 
    RETURN .T.
+
 
 FUNCTION desktop_rows()
 
@@ -595,8 +595,12 @@ FUNCTION set_f18_home_root()
    cHome := GetEnv( 'F18_HOME' )
 
    IF Empty( cHome )
+#ifdef F18_DEBUG
+      cHome := f18_current_directory() + SLASH + "data"
+#else
       Alert( 'F18_HOME envar - lokacija podataka nije definisana!?' )
       QUIT_1
+#endif
    ENDIF
 
    cF18eShell := GetEnv( 'F18_ESHELL' )
