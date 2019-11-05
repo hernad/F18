@@ -675,7 +675,7 @@ BEGIN
             nStaraCijena := rec_stanje.cijena;
             nNovaCijena := rec_stanje.cijena;
             nStanje := - nStanje;
-            IF nDostupnaKolicina - nStanje > 0 THEN
+            IF nDostupnaKolicina - nStanje >= 0 THEN
                  nDostupnaKolicina := nDostupnaKolicina - nStanje;
             ELSE
                   cMsg := format('%s : cij: %s stanje: %s', cIdRoba, rec_stanje.cijena, -nStanje);
@@ -754,6 +754,62 @@ BEGIN
           cMsg := format('%s : cij: %s kartica stanje: %s, pos_stanje: %s, razlika: %s', cIdRoba, nOsnovnaCijena, nKarticaStanje, nPosStanjeStanje, nKarticaStanje - nPosStanjeStanje);
           PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_FIX_POS_STANJE_KARTICA', cMsg);
           RAISE INFO 'ERROR_FIX_POS_STANJE_KARTICA: %', cMsg;
+
+          nCount := nCount + 1;
+        END IF;
+
+
+      END LOOP;
+
+      RETURN nCount;
+END;
+$$;
+
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.error_pos_stanje_prema_kartica() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar DEFAULT '1 ';
+      nCount integer;
+      rec_roba RECORD;
+      cIdRoba varchar;
+      nKarticaCijena numeric;
+      nOsnovnaCijena numeric;
+      nPosStanjeStanje numeric;
+      nKarticaStanje numeric;
+      cMsg varchar;
+
+BEGIN
+
+      nCount := 0;
+
+      FOR rec_roba IN SELECT * from {{ item_prodavnica }}.roba
+            ORDER BY id
+      LOOP
+
+        cIdRoba := rec_roba.id;
+        nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
+        nPosStanjeStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba ); -- raspolozivo_stanje prema pos stanje
+
+        -- select prijem-povrat+ulaz_ostalo as ulaz, realizacija+izlaz_ostalo as izlaz, kalo,
+        --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,
+        --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) - kalo as raspolozivo_stanje,
+        --   round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) as cijena from p4.pos_artikal_stanje( 'P47402', '1900-01-01', current_date );
+
+        -- raspolozivo_stanje prema kartici
+        EXECUTE  'SELECT prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,' ||
+           'case when (prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)) = 0 then 0 else round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) end as cijena'
+           ' FROM {{ item_prodavnica }}.pos_artikal_stanje( $1, $2, $3 )'
+
+          USING cIdRoba, '1900-01-01'::date, current_date
+          INTO nKarticaStanje, nKarticaCijena;
+
+        IF nKarticaCijena<>0 AND nOsnovnaCijena <> nKarticaCijena THEN
+
+          cMsg := format('%s : osnovna cijena: %s KARTICA knjig stanje: %s,  cijena: %s pos_stanje: %s', cIdRoba, nOsnovnaCijena, nKarticaStanje, nKarticaCijena, nPosStanjeStanje);
+          RAISE INFO 'ERROR_POS_STANJE_KARTICA: %', cMsg;
 
           nCount := nCount + 1;
         END IF;

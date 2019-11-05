@@ -436,7 +436,7 @@ BEGIN
 
     END IF;
 
-    RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
+    -- RAISE INFO 'Dostupno za % % % %', cIdRoba, nCijenaMem, dDatOd, dDatDo;
     RETURN nCijenaMem;
 
 END;
