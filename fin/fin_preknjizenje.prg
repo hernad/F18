@@ -11,9 +11,9 @@
 
 #include "f18.ch"
 
-// ----------------------------------------------------------
-// preknjizenje konta
-// ----------------------------------------------------------
+MEMVAR gFinRj, cSection, cHistory, aHistory
+
+
 FUNCTION fin_preknjizenje_konta()
 
    LOCAL fK1 := "N"
@@ -22,6 +22,16 @@ FUNCTION fin_preknjizenje_konta()
    LOCAL fk4 := "N"
    LOCAL cSK := "N"
    LOCAL GetList := {}
+   LOCAL bCond
+   LOCAL cPreknjizi
+   LOCAL nD, nP, nD2, nP2
+   LOCAL nC, nRbr
+   LOCAL cK1, cK2, cK3, cK4
+   LOCAL dDatOd, dDatDo, cIdKonto, cIdPartner
+   LOCAL cIdFirma, cTip, cIdRj, dDatDok
+   LOCAL cUslovKonto, cUslovPartner, cUslovRj
+   LOCAL cFilterKonto, cFilterPartner, cFilterRj
+   LOCAL cRascanitilPoRj, lRasclanitiPoRj
 
    nC := 50
 
@@ -47,10 +57,10 @@ FUNCTION fin_preknjizenje_konta()
    dDatOd := CToD( "" )
    dDatDo := CToD( "" )
 
-   qqKonto := Space( 100 )
-   qqPartner := Space( 100 )
+   cUslovKonto := Space( 100 )
+   cUslovPartner := Space( 100 )
    IF gFinRj == "D"
-      qqIdRj := Space( 100 )
+      cUslovRj := Space( 100 )
    ENDIF
 
    cTip := "1"
@@ -62,27 +72,25 @@ FUNCTION fin_preknjizenje_konta()
    cK2 := "9"
    cK3 := "99"
    cK4 := "99"
-   cNula := "N"
    cPreknjizi := "P"
    cStrana := "D"
    cIDVN := "88"
    cBrNal := "00000001"
    dDatDok := Date()
-   cRascl := "D"
-   PRIVATE lRJRascl := .F.
-
+   cRascanitilPoRj := "D"
+   
 
    DO WHILE .T.
-      @ box_x_koord() + 1, box_y_koord() + 6 SAY "PREKNJIZENJE SUBANALITICKIH KONTA"
+      @ box_x_koord() + 1, box_y_koord() + 6 SAY8 "PREKNJIŽENJE SUBANALITICKIH KONTA"
 
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "
       ?? self_organizacija_id(), "-", self_organizacija_naziv()
 
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto   " GET qqKonto  PICT "@!S50"
-      @ box_x_koord() + 4, box_y_koord() + 2 SAY "Partner " GET qqPartner PICT "@!S50"
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY "Konto   " GET cUslovKonto  PICT "@!S50"
+      @ box_x_koord() + 4, box_y_koord() + 2 SAY "Partner " GET cUslovPartner PICT "@!S50"
       IF gFinRj == "D"
-         @ box_x_koord() + 5, box_y_koord() + 2 SAY "Rad.jed." GET qqIdRj PICT "@!S50"
-         @ box_x_koord() + 6, box_y_koord() + 2 SAY "Rasclaniti po RJ" GET cRascl PICT "@!" VALID cRascl $ "DN"
+         @ box_x_koord() + 5, box_y_koord() + 2 SAY "Rad.jed." GET cUslovRj PICT "@!S50"
+         @ box_x_koord() + 6, box_y_koord() + 2 SAY "Rasclaniti po RJ" GET cRascanitilPoRj PICT "@!" VALID cRascanitilPoRj $ "DN"
       ENDIF
       @ box_x_koord() + 7, box_y_koord() + 2 SAY "Datum dokumenta od" GET dDatOd
       @ box_x_koord() + 7, Col() + 2 SAY "do" GET dDatDo
@@ -90,7 +98,7 @@ FUNCTION fin_preknjizenje_konta()
       READ
 
       IF cPreknjizi == "T"
-         @ box_x_koord() + 9, box_y_koord() + 38 SAY "Duguje/Potrazuje (D/P)" GET cStrana VALID cStrana $ "DP" PICT "@!"
+         @ box_x_koord() + 9, box_y_koord() + 38 SAY8 "Duguje/Potražuje (D/P)" GET cStrana VALID cStrana $ "DP" PICT "@!"
       ENDIF
 
       @ box_x_koord() + 10, box_y_koord() + 2 SAY "Sifra naloga koji se generise" GET cIDVN
@@ -112,24 +120,24 @@ FUNCTION fin_preknjizenje_konta()
       READ
       ESC_BCR
 
-      aUsl1 := Parsiraj( qqKonto, "IdKonto" )
-      aUsl2 := Parsiraj( qqPartner, "IdPartner" )
+      cFilterKonto := Parsiraj( cUslovKonto, "IdKonto" )
+      cFilterPartner := Parsiraj( cUslovPartner, "IdPartner" )
 
       IF gFinRj == "D"
-         IF cRascl == "D"
-            lRJRascl := .T.
+         IF cRascanitilPoRj == "D"
+            lRasclanitiPoRj := .T.
          ENDIF
       ENDIF
 
       IF gFinRj == "D"
-         aUsl3 := Parsiraj( qqIdRj, "IdRj" )
+         cFilterRj := Parsiraj( cUslovRj, "IdRj" )
       ENDIF
 
-      IF aUsl1 <> NIL .AND. aUsl2 <> NIL
+      IF cFilterKonto <> NIL .AND. cFilterPartner <> NIL
          EXIT
       ENDIF
 
-      IF gFinRj == "D" .AND. aUsl3 <> NIL
+      IF gFinRj == "D" .AND. cFilterRj <> NIL
          EXIT
       ENDIF
 
@@ -139,7 +147,7 @@ FUNCTION fin_preknjizenje_konta()
    cIdFirma := Left( cIdFirma, 2 )
 
    o_fin_pripr()
-   o_konto()
+   select_o_konto()
    //o_suban()
    find_suban_za_period( cIdFirma, dDatOd, dDatDo )
 
@@ -161,20 +169,20 @@ FUNCTION fin_preknjizenje_konta()
    SELECT SUBAN
 
 /*
-   IF ( gFinRj == "D" .AND. lRjRascl )
+   IF ( gFinRj == "D" .AND. lRasclanitiPoRj )
       SET ORDER TO TAG "9" // idfirma+idkonto+idrj+idpartner+...
    ELSE
       SET ORDER TO TAG "1"
    ENDIF
 */
 
-   cFilt1 := "IDFIRMA=" + dbf_quote( cIdFirma ) + ".and." + aUsl1 + ".and." + aUsl2 + IF( gFinRj == "D", ".and." + aUsl3, "" ) + ;
-      IF( Empty( dDatOd ), "", ".and.DATDOK>=" + dbf_quote( dDatOd ) ) + ;
-      IF( Empty( dDatDo ), "", ".and.DATDOK<=" + dbf_quote( dDatDo ) ) + ;
-      IF( fk1 == "N", "", ".and.k1=" + dbf_quote( ck1 ) ) + ;
-      IF( fk2 == "N", "", ".and.k2=" + dbf_quote( ck2 ) ) + ;
-      IF( fk3 == "N", "", ".and.k3=ck3" ) + ;
-      IF( fk4 == "N", "", ".and.k4=" + dbf_quote( ck4 ) )
+   cFilt1 := "IDFIRMA=" + dbf_quote( cIdFirma ) + ".and." + cFilterKonto + ".and." + cFilterPartner + IF( gFinRj == "D", ".and." + cFilterRj, "" ) + ;
+      IIF( Empty( dDatOd ), "", ".and.DATDOK>=" + dbf_quote( dDatOd ) ) + ;
+      IIF( Empty( dDatDo ), "", ".and.DATDOK<=" + dbf_quote( dDatDo ) ) + ;
+      IIF( fk1 == "N", "", ".and.k1=" + dbf_quote( ck1 ) ) + ;
+      IIF( fk2 == "N", "", ".and.k2=" + dbf_quote( ck2 ) ) + ;
+      IIF( fk3 == "N", "", ".and.k3=ck3" ) + ;
+      IIF( fk4 == "N", "", ".and.k4=" + dbf_quote( ck4 ) )
 
    cFilt1 := StrTran( cFilt1, ".t..and.", "" )
 
@@ -186,12 +194,6 @@ FUNCTION fin_preknjizenje_konta()
    EOF CRET
 
    Pic := PicBhd
-
-   IF cTip == "3"
-      m := "------  ------ ------------------------------------------------- --------------------- --------------------"
-   ELSE
-      m := "------  ------ ------------------------------------------------- --------------------- -------------------- --------------------"
-   ENDIF
 
    nStr := 0
    nUd := 0
@@ -206,35 +208,35 @@ FUNCTION fin_preknjizenje_konta()
    SELECT suban
 
    DO WHILE !Eof()
-      cSin := Left( idkonto, 3 )
+      cSin := Left( suban->idkonto, 3 )
       nKd := 0
       nKp := 0
       nKd2 := 0
       nKp2 := 0
-      DO WHILE !Eof() .AND.  cSin == Left( idkonto, 3 )
-         cIdKonto := IdKonto
-         cIdPartner := IdPartner
+      DO WHILE !Eof() .AND.  cSin == Left( suban->idkonto, 3 )
+         cIdKonto := suban->IdKonto
+         cIdPartner := suban->IdPartner
          IF gFinRj == "D"
-            cIdRj := idRj
+            cIdRj := suban->idRj
          ENDIF
          nD := 0
          nP := 0
          nD2 := 0
          nP2 := 0
 
-         IF ( gFinRj == "D" .AND. lRjRascl )
-            bCond := {|| cIdKonto == IdKonto .AND. IdRj == cIdRj .AND. IdPartner == cIdPartner }
+         IF ( gFinRj == "D" .AND. lRasclanitiPoRj )
+            bCond := {|| cIdKonto == suban->IdKonto .AND. suban->IdRj == cIdRj .AND. suban->IdPartner == cIdPartner }
          ELSE
-            bCond := {|| cIdKonto == IdKonto .AND. IdPartner == cIdPartner }
+            bCond := {|| cIdKonto == suban->IdKonto .AND. cIdPartner == suban->IdPartner }
          ENDIF
 
          DO WHILE !Eof() .AND. Eval( bCond )
-            IF d_P == "1"
-               nD += iznosbhd
-               nD2 += iznosdem
+            IF suban->d_P == "1"
+               nD += suban->iznosbhd
+               nD2 += suban->iznosdem
             ELSE
-               nP += iznosbhd
-               nP2 += iznosdem
+               nP += suban->iznosbhd
+               nP2 += suban->iznosdem
             ENDIF
             SKIP
          ENDDO    // partner
@@ -288,6 +290,7 @@ FUNCTION fin_preknjizenje_konta()
          nKd2 += nD2
          nKp2 += nP2  // ukupno  za klasu
       ENDDO  // sintetika
+
       nUd += nKd
       nUp += nKp   // ukupno za sve
       nUd2 += nKd2
@@ -295,4 +298,5 @@ FUNCTION fin_preknjizenje_konta()
    ENDDO // eof
 
    my_close_all_dbf()
-   RETURN
+
+   RETURN .T.
