@@ -93,6 +93,9 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
    LOCAL cN2Fin
    LOCAL nI
    LOCAL lRet
+   LOCAL aImeKolKupac := ARRAY(10)
+   LOCAL aImeKolDobavljac := ARRAY(10)
+   LOCAL bPodvuciNeaktivne
 
    PRIVATE ImeKol
    PRIVATE Kol
@@ -122,7 +125,7 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
    AAdd( ImeKol, { PadR( "Mjesto", 16 ),  {|| MJESTO },  "mjesto"   } )
    AAdd( ImeKol, { PadR( "Adresa", 24 ),  {|| ADRESA },  "adresa"   } )
 
-   AAdd( ImeKol, { _u( "Žiro Račun"), {|| ZIROR },   "ziror", {|| .T. }, {|| .T. }  } )
+   AAdd( ImeKol, { _u( "Žiro Račun"), {|| ZIROR }, "ziror", {|| .T. }, {|| .T. }  } )
 
    Kol := {}
 
@@ -131,12 +134,27 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
    AAdd ( ImeKol, { PadR( "Fax", 12 ), {|| fax }, "fax" } )
    AAdd ( ImeKol, { PadR( "MobTel", 20 ), {|| mobtel }, "mobtel" } )
    AAdd ( ImeKol, { PadR( ToStrU( "Općina" ), 6 ), {|| idOps }, "idops", {|| .T. }, {|| p_ops( @wIdops ) } } )
-
    AAdd ( ImeKol, { PadR( "Referent", 10 ), {|| field->idrefer }, "idrefer", {|| .T. }, {|| EMPTY(wIdrefer) .OR. p_refer( @wIdrefer ) } } )
-   //AAdd( ImeKol, { "kup?", {|| _kup }, "_kup", {|| .T. }, {|| valid_da_ili_n( w_kup ) } } )
-   //AAdd( ImeKol, { "dob?", {|| " " + _dob + " " }, "_dob", {|| .T. }, {|| valid_da_ili_n( w_dob ) }, nil, nil, nil, nil, 20 } )
-   //AAdd( ImeKol, { "banka?", {|| " " + _banka + " " }, "_banka", {|| .T. }, {|| valid_da_ili_n( w_banka ) }, nil, nil, nil, nil, 30 } )
-   //AAdd( ImeKol, { "radnik?", {|| " " + _radnik + " " }, "_radnik", {|| .T. }, {|| valid_da_ili_n( w_radnik ) }, nil, nil, nil, nil, 40 } )
+
+   aImeKolKupac[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := "kupac?"
+   aImeKolKupac[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| _kup }
+   aImeKolKupac[ BROWSE_IMEKOL_IME_VARIJABLE ] := "_kup"
+   aImeKolKupac[ BROWSE_IMEKOL_WHEN ] := {|| .T. }
+   aImeKolKupac[ BROWSE_IMEKOL_VALID ] := {|| valid_da_ili_n( w_kup ) }
+   aImeKolKupac[ BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ] := "@!"
+   AAdd( ImeKol, aImeKolKupac )
+
+   aImeKolDobavljac[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := "dobav?"
+   aImeKolDobavljac[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| _dob }
+   aImeKolDobavljac[ BROWSE_IMEKOL_IME_VARIJABLE ] := "_dob"
+   aImeKolDobavljac[ BROWSE_IMEKOL_WHEN ] := {|| .T. }
+   aImeKolDobavljac[ BROWSE_IMEKOL_VALID ] := {|| valid_da_ili_n( w_dob ) }
+   aImeKolDobavljac[ BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ] := "@!"
+   aImeKolDobavljac[ BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] := 20
+   AAdd( ImeKol, aImeKolDobavljac )
+
+   AAdd( ImeKol, { "banka?", {|| " " + _banka + " " }, "_banka", {|| .T. }, {|| valid_da_ili_n( w_banka ) }, nil, nil, nil, nil, 30 } )
+   AAdd( ImeKol, { "radnik?", {|| " " + _radnik + " " }, "_radnik", {|| .T. }, {|| valid_da_ili_n( w_radnik ) }, nil, nil, nil, nil, 40 } )
 
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )
@@ -144,8 +162,10 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
 
    SELECT PARTN
    sifk_fill_ImeKol( "PARTN", @ImeKol, @Kol )
+   bPodvuciNeaktivne := { || partn->_kup == 'X' }
 
-   lRet := p_sifra( F_PARTN, 1, f18_max_rows() - 15, f18_max_cols() - 15, "Lista Partnera", @cId, dx, dy, {| nCh| partn_k_handler( nCh ) },,,,, { "ID" } )
+   lRet := p_sifra( F_PARTN, 1, f18_max_rows() - 15, f18_max_cols() - 15, "Lista Partnera", @cId, dx, dy, {| nCh| partn_k_handler( nCh ) }, NIL,; // 1-10 param
+           bPodvuciNeaktivne, NIL, NIL, { "ID" } ) // param 11-14
 
    PopWa()
 
@@ -177,19 +197,16 @@ STATIC FUNCTION partn_k_handler( nCh )
 
 
 
-// -------------------------------------
-// validacija polja P_TIP
-// -------------------------------------
 STATIC FUNCTION valid_da_ili_n( cDn )
 
    LOCAL lRet := .F.
 
-   IF Upper( cDN ) $ " DN"
+   IF Upper( cDN ) $ " DNX"
       lRet := .T.
    ENDIF
 
    IF lRet == .F.
-      MsgBeep( "Unijeti D ili N" )
+      MsgBeep( "Unijeti D / N / X" )
    ENDIF
 
    RETURN lRet

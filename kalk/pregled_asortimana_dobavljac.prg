@@ -15,20 +15,20 @@
 
 FUNCTION asortiman_dobavljac_mp()
 
-   LOCAL _vars
+   LOCAL hVars
 
-   IF !frm_vars( @_vars )
+   IF !frm_vars( @hVars )
       RETURN
    ENDIF
 
    _cre_tmp()
 
-   gen_rpt( _vars )
+   gen_rpt( hVars )
 
-   IF _vars[ "narudzba" ] == "D"
-      print_frm_asort_nar( _vars )
+   IF hVars[ "narudzba" ] == "D"
+      print_frm_asort_nar( hVars )
    ELSE
-      print_report( _vars )
+      print_report( hVars )
    ENDIF
 
    RETURN
@@ -58,7 +58,7 @@ STATIC FUNCTION _cre_tmp()
    RETURN
 
 
-STATIC FUNCTION frm_vars( vars )
+STATIC FUNCTION frm_vars( hVars )
 
    LOCAL _dat_od, _dat_do, _p_konto, _artikli, _dob, _prik_nule
    LOCAL _narudzba
@@ -105,30 +105,30 @@ STATIC FUNCTION frm_vars( vars )
    set_metric( "kalk_spec_mp_dob_nule", my_user(), _prik_nule )
    set_metric( "kalk_spec_mp_dob_narudzba", my_user(), _narudzba )
 
-   vars := hb_Hash()
-   vars[ "datum_od" ] := _dat_od
-   vars[ "datum_do" ] := _dat_do
-   vars[ "p_konto" ] := _p_konto
-   vars[ "artikli" ] := _artikli
-   vars[ "dobavljac" ] := _dob
-   vars[ "nule" ] := _prik_nule
-   vars[ "narudzba" ] := _narudzba
+   hVars := hb_Hash()
+   hVars[ "datum_od" ] := _dat_od
+   hVars[ "datum_do" ] := _dat_do
+   hVars[ "p_konto" ] := _p_konto
+   hVars[ "artikli" ] := _artikli
+   hVars[ "dobavljac" ] := _dob
+   hVars[ "nule" ] := _prik_nule
+   hVars[ "narudzba" ] := _narudzba
 
    RETURN .T.
 
 
-STATIC FUNCTION gen_rpt( vars )
+STATIC FUNCTION gen_rpt( hVars )
 
-   IF _izdvoji_ulaze( vars ) == 0
+   IF _izdvoji_ulaze( hVars ) == 0
       RETURN .F.
    ENDIF
-   IF vars[ "narudzba" ] == "N"
-      _izdvoji_prodaju( vars )
+   IF hVars[ "narudzba" ] == "N"
+      _izdvoji_prodaju( hVars )
    ENDIF
 
    RETURN .T.
 
-STATIC FUNCTION _izdvoji_ulaze( vars )
+STATIC FUNCTION _izdvoji_ulaze( hVars )
 
    LOCAL cQuery := ""
    LOCAL _date := ""
@@ -138,11 +138,11 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
    LOCAL nI, oRow
    LOCAL _cnt := 0
 
-   _p_konto := vars[ "p_konto" ]
-   _dat_od := vars[ "datum_od" ]
-   _dat_do := vars[ "datum_do" ]
-   _artikli := vars[ "artikli" ]
-   _dob := vars[ "dobavljac" ]
+   _p_konto := hVars[ "p_konto" ]
+   _dat_od := hVars[ "datum_od" ]
+   _dat_do := hVars[ "datum_do" ]
+   _artikli := hVars[ "artikli" ]
+   _dob := hVars[ "dobavljac" ]
    _id_firma := self_organizacija_id()
 
    IF _dat_od <> CToD( "" )
@@ -223,7 +223,7 @@ STATIC FUNCTION _izdvoji_ulaze( vars )
    RETURN _cnt
 
 
-STATIC FUNCTION _izdvoji_prodaju( vars )
+STATIC FUNCTION _izdvoji_prodaju( hVars )
 
    LOCAL cQuery := ""
    LOCAL _date := ""
@@ -235,11 +235,11 @@ STATIC FUNCTION _izdvoji_prodaju( vars )
    LOCAL cIdRoba
    LOCAL hRec
 
-   _p_konto := vars[ "p_konto" ]
-   _dat_od := vars[ "datum_od" ]
-   _dat_do := vars[ "datum_do" ]
-   _artikli := vars[ "artikli" ]
-   _dob := vars[ "dobavljac" ]
+   _p_konto := hVars[ "p_konto" ]
+   _dat_od := hVars[ "datum_od" ]
+   _dat_do := hVars[ "datum_do" ]
+   _artikli := hVars[ "artikli" ]
+   _dob := hVars[ "dobavljac" ]
    _id_firma := self_organizacija_id()
 
    IF _dat_od <> CToD( "" )
@@ -309,7 +309,7 @@ STATIC FUNCTION _izdvoji_prodaju( vars )
 // printanje obrasca narudzbe na osnovu podataka
 // ---------------------------------------------------------
 
-STATIC FUNCTION print_frm_asort_nar( vars )
+STATIC FUNCTION print_frm_asort_nar( hVars )
 
    LOCAL _my_xml := my_home() + "data.xml"
    LOCAL _template := "kalk_asort_nar.odt"
@@ -376,17 +376,15 @@ STATIC FUNCTION print_frm_asort_nar( vars )
 
 
 
-// ----------------------------------------
-// printaj report
-// ----------------------------------------
-STATIC FUNCTION print_report( vars )
+
+STATIC FUNCTION print_report( hVars )
 
    LOCAL _cnt := 0
    LOCAL _head, _line
    LOCAL _t_ulaz := 0
    LOCAL _t_izlaz := 0
    LOCAL _n_pos := 50
-   LOCAL _nule := vars[ "nule" ]
+   LOCAL _nule := hVars[ "nule" ]
 
    IF RecCount() == 0
       MsgBeep( "Ne postoje traženi podaci !" )
@@ -400,17 +398,17 @@ STATIC FUNCTION print_report( vars )
    ?
 
    ?U "SPECIFIKACIJA ASORTIMANA PO DOBAVLJAČIMA NA DAN", DToC( Date() )
-   ?U "Za period od", DToC( vars[ "datum_od" ] ), "do", DToC( vars[ "datum_do" ] )
-   ?U "Prodavnički konto:", vars[ "p_konto" ]
+   ?U "Za period od", DToC( hVars[ "datum_od" ] ), "do", DToC( hVars[ "datum_do" ] )
+   ?U "Prodavnički konto:", hVars[ "p_konto" ]
 
    o_konto()
-   SEEK vars[ "p_konto" ]
+   SEEK hVars[ "p_konto" ]
    ?? AllTrim( konto->naz )
 
-   ?U "Dobavljač:", vars[ "dobavljac" ]
+   ?U "Dobavljač:", hVars[ "dobavljac" ]
 
    o_partner()
-   SEEK vars[ "dobavljac" ]
+   SEEK hVars[ "dobavljac" ]
    ?? AllTrim( partn->naz )
 
    P_COND

@@ -797,7 +797,7 @@ STATIC FUNCTION my_browse_edit_red( nCh, cOrderTag, aZabIsp, lNovi )
       nTrebaredova := Len( ImeKol )
 
       FOR nI := 1 TO Len( ImeKol )
-         IF Len( ImeKol[ nI ] ) >= 10 .AND. Imekol[ nI, 10 ] <> NIL
+         IF Len( ImeKol[ nI ] ) >= BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU .AND. Imekol[ nI, BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] <> NIL
             nTrebaRedova--
          ENDIF
       NEXT
@@ -824,13 +824,13 @@ STATIC FUNCTION my_browse_edit_red( nCh, cOrderTag, aZabIsp, lNovi )
 
             lShowPGroup := .F.
 
-            IF Empty( ImeKol[ nI, 3 ] )
+            IF Empty( ImeKol[ nI, BROWSE_IMEKOL_IME_VARIJABLE ] )
                cPom := ""
             ELSE
                cPom := set_w_var( ImeKol, nI, @lShowPGroup )
             ENDIF
 
-            cPic := ""
+            //cPic := ""
 
             IF !Empty( cPom )
                browse_stavka_formiraj_getlist( cPom, @GetList,  lZabIsp, aZabIsp, lShowPGroup, Ch, @nGet, @nI, @nTekRed )
@@ -838,21 +838,21 @@ STATIC FUNCTION my_browse_edit_red( nCh, cOrderTag, aZabIsp, lNovi )
             ELSE
                nRed := 1
                nKolona := 1
-               IF Len( ImeKol[ nI ] ) >= 10 .AND. Imekol[ nI, 10 ] <> NIL
-                  nKolona := ImeKol[ nI, 10 ]
+               IF Len( ImeKol[ nI ] ) >= BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU .AND. Imekol[ nI, BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] <> NIL
+                  nKolona := ImeKol[ nI, BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ]
                   nRed := 0
                ENDIF
 
                IF nKolona == 1
                   ++nTekRed
                ENDIF
-               @ box_x_koord() + nTekRed, box_y_koord() + nKolona SAY8 PadL( AllTrim( ImeKol[ nI, 1 ] ), 15 )
-               @ box_x_koord() + nTekRed, Col() + 1 SAY Eval( ImeKol[ nI, 2 ] )
+               @ box_x_koord() + nTekRed, box_y_koord() + nKolona SAY8 PadL( AllTrim( ImeKol[ nI, BROWSE_IMEKOL_NASLOV_VARIJABLE ] ), 15 )
+               @ box_x_koord() + nTekRed, Col() + 1 SAY Eval( ImeKol[ nI, BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] )
 
             ENDIF
 
             nI++
-            IF ( Len( ImeKol ) < nI ) .OR. ( nTekRed > Min( f18_max_rows() - 7, nTrebaRedova ) .AND. !( Len( ImeKol[ nI ] ) >= 10 .AND. ImeKol[ nI, 10 ] <> NIL )  )
+            IF ( Len( ImeKol ) < nI ) .OR. ( nTekRed > Min( f18_max_rows() - 7, nTrebaRedova ) .AND. !( Len( ImeKol[ nI ] ) >= BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU .AND. ImeKol[ nI, BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] <> NIL )  )
                EXIT
             ENDIF
 
@@ -1048,7 +1048,7 @@ FUNCTION snimi_promjene_cirkularne_ispravke_sifarnika()
 
 STATIC FUNCTION set_w_var( aImeKol, nI, lShowGrupa )
 
-   LOCAL _tmp, cVariableName
+   LOCAL cTmp, cVariableName
 
    IF Left( aImeKol[ nI, 3 ], 6 ) != "SIFK->"
 
@@ -1062,13 +1062,13 @@ STATIC FUNCTION set_w_var( aImeKol, nI, lShowGrupa )
 
       cVariableName := "wSifk_" + SubStr( aImeKol[ nI, 3 ], 7 )
 
-      _tmp := get_sifk_sifv( Alias(), SubStr( aImeKol[ nI, 3 ], 7 ) )
+      cTmp := get_sifk_sifv( Alias(), SubStr( aImeKol[ nI, 3 ], 7 ) )
 
-      IF _tmp == NIL
+      IF cTmp == NIL
          cVariableName := ""
       ELSE
          __mvPublic( cVariableName )
-         Eval( MemVarBlock( cVariableName ), _tmp )
+         Eval( MemVarBlock( cVariableName ), cTmp )
       ENDIF
 
    ENDIF
@@ -1456,9 +1456,9 @@ FUNCTION k_f8_nadji_novu_sifru()
    LOCAL cLast := Chr( 252 ) + Chr( 253 )
    LOCAL nKor := 0
 
-   IF my_get_from_ini( "NovaSifraOpc_F8", "PopunjavaPraznine", "N" ) == "D"
-      lPopuni := .T.
-   ENDIF
+   //IF my_get_from_ini( "NovaSifraOpc_F8", "PopunjavaPraznine", "N" ) == "D"
+   //   lPopuni := .T.
+   //ENDIF
 
    // ime polja
    PRIVATE cImeVar := ReadVar()
