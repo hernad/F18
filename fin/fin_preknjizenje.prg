@@ -149,7 +149,7 @@ FUNCTION fin_preknjizenje_konta()
    o_fin_pripr()
    select_o_konto()
    //o_suban()
-   find_suban_za_period( cIdFirma, dDatOd, dDatDo )
+   find_suban_za_period( cIdFirma, dDatOd, dDatDo, "idkonto,idpartner" )
 
    IF cK1 == "9"
       cK1 := ""
