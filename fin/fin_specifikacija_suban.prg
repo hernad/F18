@@ -88,7 +88,7 @@ FUNCTION fin_specifikacija_suban()
 
    cTipDomacaStranaObje := "1"
    Box( "", 21, 77 )
-   SET CURSOR ON
+   set_cursor_on()
    PRIVATE cK1 := cK2 := "9"
    PRIVATE cK3 := cK4 := "99"
 

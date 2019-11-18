@@ -66,7 +66,7 @@ FUNCTION fin_suban_kartica2( lOtvSt )
    cNula := "N"
 
    Box( "", 18, 65 )
-   SET CURSOR ON
+   set_cursor_on()
    IF lOtvoreneStavke
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "KARTICA OTVORENIH STAVKI KONTO/KONTO2"
    ELSE

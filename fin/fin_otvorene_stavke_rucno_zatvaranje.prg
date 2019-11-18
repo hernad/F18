@@ -32,7 +32,7 @@ FUNCTION fin_rucno_zatvaranje_otvorenih_stavki()
 
    Box(, 7, 66, )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "ISPRAVKA BROJA VEZE - OTVORENE STAVKE"
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
@@ -130,7 +130,7 @@ FUNCTION fin_rucno_zatvaranje_otvorenih_stavki()
    // PRIVATE bBKUslov := {|| idFirma + idkonto + idpartner == cIdFirma + cIdkonto + cIdpartner }
    PRIVATE bBkTrazi := {|| cIdFirma + cIdkonto + cIdPartner }
 
-   SET CURSOR ON
+   set_cursor_on()
 
    PRIVATE cPomBrDok := Space( 10 )
 

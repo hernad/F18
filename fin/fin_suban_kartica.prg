@@ -128,7 +128,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    Box( "#" + cBoxName, 25, 65 )
 
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "LibreOffice kartica (D/N) ?" GET cLibreOffice PICT "@!"
    READ
 

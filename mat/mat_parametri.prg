@@ -45,7 +45,7 @@ STATIC FUNCTION _mat_obr_params()
    kalk_pic_kolicina_bilo_gpickol() := PadR( kalk_pic_kolicina_bilo_gpickol(), 15 )
 
    Box(, 21, 74 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Polje K1  D/N" GET cK1 VALID cK1 $ "DN" PICT "@!"
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Polje K2  D/N" GET cK2 VALID cK2 $ "DN" PICT "@!"
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "Polje K3  D/N" GET cK3 VALID cK3 $ "DN" PICT "@!"

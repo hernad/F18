@@ -155,7 +155,7 @@ FUNCTION kalk_kontiranje_dokumenata_period()
    cMKonto := PadR( "", 7 )
    cPKonto := PadR( "", 7 )
 
-   SET CURSOR ON
+   set_cursor_on()
    Box(, 6, 60 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY  "Vrsta kalkulacije " GET cVrsta PICT "@!" VALID !Empty( cVrsta )
 

@@ -56,7 +56,7 @@ FUNCTION Pitanje( cId, cPitanje, cOdgDefault, cMogOdg, cHeader )
       @ box_x_koord() + 0, box_y_koord() + 2 SAY cId
    ENDIF
 
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 2, box_y_koord() + 3 SAY8 cPitanje GET cOdgovor PICTURE "@!"  VALID ValidSamo( cOdgovor, cMogOdg )
 
    READ
@@ -122,7 +122,7 @@ FUNCTION Pitanje2( cId, cPitanje, cOdgDefault )
 #endif
 
    Box( "", 5, nDuz + 4, .F. )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 2, box_y_koord() + 3 SAY PadR( cPitanje, nDuz ) GET cOdg PICTURE "@!" VALID cOdg $ 'DNAO'
    @ box_x_koord() + 4, box_y_koord() + 3 SAY8 PadC( "Mogući odgovori:  D - DA  ,  A - DA sve do kraja", nDuz )
    @ box_x_koord() + 5, box_y_koord() + 3 SAY8 PadC( "                  N - NE  ,  O - NE sve do kraja", nDuz )
@@ -144,7 +144,7 @@ FUNCTION Pitanje2( cId, cPitanje, cOdgDefault )
 FUNCTION print_dialog_box( cDirekt )
 
    SET CONFIRM OFF
-   SET CURSOR ON
+   set_cursor_on()
 
    cDirekt := select_print_mode( @cDirekt )
 

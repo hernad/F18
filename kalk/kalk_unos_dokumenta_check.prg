@@ -371,7 +371,7 @@ FUNCTION kopiraj_set_cijena()
    LOCAL _tmp1, _tmp2, hRec
    LOCAL _tmp, _count, nI
 
-   SET CURSOR ON
+   set_cursor_on()
 
    Box(, 5, 60 )
    @ 1 + box_x_koord(), 2 + box_y_koord() SAY "Kopiranje seta cijena iz - u..."

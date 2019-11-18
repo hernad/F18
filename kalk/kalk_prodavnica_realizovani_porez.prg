@@ -32,7 +32,7 @@ FUNCTION kalk_realizovani_porez_prodavnice()
 
    Box(, 6, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Konto prodavnice/magacina:" GET qqKonto PICT "@!S30"

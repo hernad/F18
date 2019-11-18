@@ -145,7 +145,7 @@ STATIC FUNCTION _get_vars( hParams )
 
    Box( "", 18, 65 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY 'KREIRANJE OBRASCA "IZJAVA O KOMPENZACIJI"'
 

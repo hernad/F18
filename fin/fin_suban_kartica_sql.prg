@@ -91,7 +91,7 @@ STATIC FUNCTION _get_vars( rpt_vars )
 
    Box( "#" + _box_name, _box_x, _box_y )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Brza kartica (D/N)" GET _brza PICT "@!" VALID _brza $ "DN"

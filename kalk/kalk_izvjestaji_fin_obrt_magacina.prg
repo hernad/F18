@@ -71,7 +71,7 @@ FUNCTION kalk_finansijski_obrt()
    cKolDN := "N"
 
    Box(, 17, 75 )
-   SET CURSOR ON
+   set_cursor_on()
    cNObjekat := Space( 20 )
    cKartica := "D"
    DO WHILE .T.

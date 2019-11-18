@@ -39,7 +39,7 @@ FUNCTION realizacija_kase
    PRIVATE cFilter := ".t."
    PRIVATE cPartId := Space( 8 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    IF ( dDatum0 == NIL )
       dDatum0 := danasnji_datum()

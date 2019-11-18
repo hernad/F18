@@ -52,7 +52,7 @@ FUNCTION pos_ispravi_stavku_racuna()
    ENDIF
 
    Scatter()
-   SET CURSOR ON
+   set_cursor_on()
    Box(, 3, 80 )
    @ box_x_koord() + 1, box_y_koord() + 3 SAY8 "    Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
       WHEN pos_when_racun_artikal( @_idroba ) VALID pos_valid_racun_artikal( @_idroba, GetList, 1, 28 )

@@ -63,7 +63,7 @@ STATIC FUNCTION virm_edit_pripr( fNovi )
 
    LOCAL _firma := PadR( fetch_metric( "virm_org_id", NIL, "" ), 6 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Svrha plaćanja :" GET _svrha_pl PICT "@!" VALID P_Vrprim( @_svrha_pl )
 

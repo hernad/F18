@@ -40,7 +40,7 @@ FUNCTION browse_rugov( cId )
    set_a_kol( @ImeKol, @Kol )
    o_rugov( cIdUgov )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 1, box_y_koord() + 1 SAY ""
 

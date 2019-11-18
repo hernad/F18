@@ -479,7 +479,7 @@ FUNCTION PPrint()
 
    PushWA()
 
-   SET CURSOR ON
+   set_cursor_on()
 
    SetKey( K_SH_F2, NIL )
    SetKey( k_alt_r(), {|| UzmiPPr(), AEval( GetList, {| o | o:display() } ) } )
@@ -497,7 +497,7 @@ FUNCTION PPrint()
    RPAR( "px", @gPrinter )
 
    Box(, 3, 65 )
-   SET CURSOR ON
+   set_cursor_on()
    info_bar( "info", "<a-R> - preuzmi parametre štampača" )
    @ box_x_koord() + 1, box_y_koord() + 2  SAY8 "TEKUCI STAMPAC:"
    @ box_x_koord() + 1, Col() + 4  GET  gPrinter PICT "@!"

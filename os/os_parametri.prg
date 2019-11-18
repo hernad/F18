@@ -37,7 +37,7 @@ FUNCTION os_set_datum_obrade()
    _os_sii := fetch_metric( "os_sii_modul", my_user(), _os_sii )
 
    Box(, 4, 50 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Obrada (O) OS / (S) SII" GET _os_sii VALID _os_sii $ "OS" PICT "@!"
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Datum obrade  " GET _dat_obr
    READ
@@ -123,7 +123,7 @@ FUNCTION _os_sii_parametri()
 
    Box(, 20, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Radna jedinica" GET _os_rj
 

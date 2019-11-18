@@ -114,7 +114,7 @@ FUNCTION box_fin_nalog( cIdFirma, cIdVn, cBrNal, dDatNal )
 
    Box( "", 2, 50 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nalog broj:"
 

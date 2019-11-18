@@ -171,7 +171,7 @@ FUNCTION pos_get_osob( fNovi )
 
    Box( "", 4, 60, .F., "Unos novog korisnika,sifre" )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    IF fNovi .OR. pos_admin()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Šifra radnika (ID)." GET _id VALID validacija_postoji_sifra( _id )

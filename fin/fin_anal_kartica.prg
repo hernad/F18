@@ -49,7 +49,7 @@ FUNCTION fin_anal_kartica()
 
    Box( "", 9, 65, .F. )
    DO WHILE .T.
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "ANALITIČKA KARTICA"
       //IF gNW == "D"
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()

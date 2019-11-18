@@ -28,7 +28,7 @@ PROCEDURE calc_on_idle_handler()
    hb_DispOutAt( f18_max_rows(),  f18_max_cols() - 8 - 8 - 1, "< CALC >", F18_COLOR_INFO_PANEL )
    IF !in_calc() .AND. MINRECT( f18_max_rows(), f18_max_cols() - 8 - 8 - 1, f18_max_rows(), f18_max_cols() - 8 - 1, .F. )
       in_calc( .T. )
-      SET CURSOR OFF
+      set_cursor_off()
       SET CONSOLE OFF
       hb_threadStart( @f18_kalkulator(), NIL )
    ENDIF
@@ -60,7 +60,7 @@ FUNCTION f18_kalkulator()
 
    Box(, 3, 60 )
 
-   SET CURSOR ON
+   set_cursor_on()
    //SET( _SET_CURSOR, 16 )
    SET ESCAPE ON
    //ReadInsert()
@@ -319,7 +319,7 @@ STATIC FUNCTION DefKonv()
    RPAR( "vk", @gKurs )
 
    Box(, 5, 65 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord(), box_y_koord() + 19 SAY "PROGRAMIRANJE KURSIRANJA"
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Oznaka valute iz koje se vrsi konverzija:" GET gValIz
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Oznaka valute u koju se vrsi konverzija :" GET gValU

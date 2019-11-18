@@ -42,7 +42,7 @@ FUNCTION fin_kontrola_zbira_tabele_prometa( lKontrolaZaDatumskiPeriod )
 
    Box( "#Promet bez datumskog ograničenja", 11, 77, .F. )
 
-   SET CURSOR OFF
+   set_cursor_off()
 
    _line := Replicate( "=", 10 ) + " " + Replicate( "=", 16 ) + " " + ;
       Replicate( "=", 16 ) + " " + Replicate( "=", 16 ) + " " + Replicate( "=", 16 )

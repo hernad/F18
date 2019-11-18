@@ -123,7 +123,7 @@ METHOD FaktDokumenti:pretvori_otpremnice_u_racun()
    _idpartner := Space( 6 )
    _suma      := 0
 
-   SET CURSOR ON
+   set_cursor_on()
 
    Box(, f18_max_rows() - 7, f18_max_cols() - 10 )
 

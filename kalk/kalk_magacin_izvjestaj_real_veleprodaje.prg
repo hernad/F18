@@ -34,7 +34,7 @@ FUNCTION kalk_real_partnera()
    cPRUC := "N"
    Box(, 8, 70 )
    DO WHILE .T.
-      SET CURSOR ON
+      set_cursor_on()
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Magacinski konto:" GET cIdKonto PICT "@!" VALID P_Konto( @cIdKonto )

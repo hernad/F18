@@ -36,7 +36,7 @@ FUNCTION fin_sint_kart_po_mjesecima()
 
    Box( "", 5, 75 )
    DO WHILE .T.
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "KARTICA (SINTETIČKI KONTO) PO MJESECIMA"
 
 

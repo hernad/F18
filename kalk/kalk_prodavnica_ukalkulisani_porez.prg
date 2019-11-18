@@ -47,7 +47,7 @@ FUNCTION kalk_ukalkulisani_porez_prodavnice()
 
    qqKonto := PadR( "13;", 60 )
    Box(, 5, 75 )
-   SET CURSOR ON
+   set_cursor_on()
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Konto prodavnice:" GET qqKonto PICT "@!S50"
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Tip dokumenta (11/12/13/15/19/80/81/99):" GET cVDok  VALID cVDOK $ "11/12/13/15/19/16/22/80/81/99"

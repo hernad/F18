@@ -2,7 +2,7 @@
 #-static
 #-request=ARRAYRDD
 F18.prg
-{F18_VSCODE}vscode_debugger.prg
+#{F18_VSCODE}vscode_debugger.prg
 fin/*.prg
 fakt/*.prg
 kalk/*.prg

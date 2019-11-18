@@ -66,7 +66,7 @@ FUNCTION fin_preknjizenje_konta()
    cTip := "1"
 
    Box( "", 14, 65 )
-   SET CURSOR ON
+   set_cursor_on()
 
    cK1 := "9"
    cK2 := "9"

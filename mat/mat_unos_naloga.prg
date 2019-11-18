@@ -370,7 +370,7 @@ FUNCTION mat_pripr_key_handler()
 
       Box( "kzb", 8, 60, .F., "Kontrola zbira naloga" )
 
-      SET CURSOR ON
+      set_cursor_on()
 
       cFirma := IdFirma
       cIdVN := IdVN
@@ -671,7 +671,7 @@ FUNCTION mat_st_anal_nalog( fnovi )
       cBrNal := BrNal
 
       Box( "", 1, 50 )
-      // set cursor on
+      // set_cursor_on()
       // set confirm off
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Nalog broj:" GET cIdFirma
       @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVn

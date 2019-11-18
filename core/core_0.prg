@@ -33,8 +33,9 @@ FUNCTION harbour_init()
    SET DELETED ON
 
    SetCancel( .F. )
-   Set( _SET_EVENTMASK, INKEY_ALL )
+   
    MSetCursor( .T. )
+   SET( _SET_EVENTMASK, HB_INKEY_ALL )
 
    SET DATE GERMAN
    SET SCOREBOARD OFF
@@ -43,6 +44,7 @@ FUNCTION harbour_init()
    SET ESCAPE ON
    SET SOFTSEEK ON
    CLEAR TYPEAHEAD
+   Alert("hello world")
 
    SetKey( K_F12, {|| k_f12() } )
    SetColor( f18_color_normal() )
@@ -204,3 +206,30 @@ FUNCTION my_rddName()
 FUNCTION danasnji_datum()
 
    RETURN datum_server()
+
+
+FUNCTION set_cursor_on()
+
+   LOCAL nCursor := SetCursor()
+
+   IF nCursor == 0
+       SetCursor( 1 )
+   ENDIF
+
+   Set( _SET_EVENTMASK, HB_INKEY_ALL )
+   MSetCursor(.T.)
+
+   RETURN .T.
+
+
+FUNCTION set_cursor_off()
+
+      LOCAL nCursor := SetCursor()
+   
+      IF nCursor <> 0
+          // SetCursor( 1 )
+          SetCursor( 0 )
+          //MSetCursor(.F.)
+      ENDIF
+   
+      RETURN .T.

@@ -189,7 +189,7 @@ FUNCTION MsgO( cText, nSec, lUtf )
    @ msg_x1 + 1, msg_y1 + 2 TO msg_x2 - 1, msg_y2 - 2 DOUBLE
    @ msg_x1 + 3, msg_y1 + 4 SAY cText
 
-   SET CURSOR OFF
+   set_cursor_off()
    Set( _SET_DEVICE, cPom )
 
    RETURN .T.

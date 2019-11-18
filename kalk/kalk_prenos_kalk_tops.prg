@@ -24,7 +24,7 @@ FUNCTION kalk_tops_meni()
 
    DO WHILE .T.
       Box(, 5, 40 )
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Generacija KALK -> POS: "
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "-------------------------------"
       @ box_x_koord() + 4, box_y_koord() + 2 SAY "Dokument: " GET cIDFirma

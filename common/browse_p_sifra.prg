@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-MEMVAR ImeKol
+MEMVAR ImeKol, GetList
 MEMVAR Ch  // , fID_J
 // MEMVAR aAstruct
 
@@ -811,8 +811,7 @@ STATIC FUNCTION my_browse_edit_red( nCh, cOrderTag, aZabIsp, lNovi )
             BoxCLS()
          ENDIF
 
-         SET CURSOR ON
-
+         
          PRIVATE Getlist := {}
 
          nGet := 1
@@ -862,6 +861,7 @@ STATIC FUNCTION my_browse_edit_red( nCh, cOrderTag, aZabIsp, lNovi )
          SET KEY K_F9 TO sifarnik_f9_nova_sifra()
          // SET KEY K_F5 TO k_f5_nadji_novu_sifru()
 
+         set_cursor_on()
          READ
 
          SET KEY K_F8 TO
@@ -1548,7 +1548,7 @@ FUNCTION UslovSif()
       NEXT
    ENDIF
 
-   SET CURSOR ON
+   set_cursor_on()
 
 
 #ifndef F18_USE_MATCH_CODE

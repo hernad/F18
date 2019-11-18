@@ -39,7 +39,7 @@ FUNCTION ld_ispravka_kredita
       AAdd( Kol, i )
    NEXT
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "KREDIT - pregled, ispravka"
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Radnik:   " GET cIdRadn  ;

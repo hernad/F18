@@ -267,9 +267,9 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
 
    nOldCurs := iif( SetCursor() == 0, 0, iif( ReadInsert(), 2, 1 ) )
    cOldColor := SetColor()
-   SET CURSOR OFF
-
+   
    @ nX1, nY1 CLEAR TO nX2 - 1, nY2
+   set_cursor_off()
 
    lNaGore := .F.
    lNaDole := .T.
@@ -303,6 +303,8 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
          nEnd := nUIMeniVelicina + nGornja - 1
          nStep := 1
       ENDIF
+
+      
       FOR nI := nStart TO nEnd STEP nStep
          IF nI <= nBrStavkiMeni .AND. (lPrvoCrtanje .OR. range( nI, nOdabranaStavka-1, nOdabranaStavka+1))
             // range - ako nije prvo crtanje, onda treba samo ispis stavke iznad, ispod i odabir
@@ -316,7 +318,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
                ELSE
                   cColor := cOldColor
                ENDIF
-
+               
                IF ValType( aOpc[ nI ] ) == "B"
                   cMeniItem := Eval( aOpc[ nI ] )
                ELSE
@@ -348,7 +350,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
       //  EXIT
       //ENDIF
 
-      nChar := Inkey( 0 )
+      nChar := hb_keyStd(Inkey( 0, hb_bitOr( HB_INKEY_ALL, HB_INKEY_EXT ) ))
 
       IF ValType( goModul ) == "O"
          goModul:GProc( nChar )

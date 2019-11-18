@@ -510,7 +510,7 @@ FUNCTION fin_asistent_otv_st()
    PRIVATE bBkTrazi := {|| cIdFirma + cIdkonto + cIdPartner }
    PRIVATE aPPos := { cIdPartner, 1 }  // pozicija kolone partner, broj veze
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + ( _max_rows - 5 ), box_y_koord() + 1 SAY "****************  REZULTATI ASISTENTA ************"
    @ box_x_koord() + ( _max_rows - 4 ), box_y_koord() + 1 SAY REPL( "=", f18_max_cols() - 2 )

@@ -275,7 +275,7 @@ STATIC FUNCTION _ed_pop_list_khandler()
 
       Box( "edpopl", 6, 70, .F., "Stavka popisne liste" )
 
-      SET CURSOR ON
+      set_cursor_on()
 
       _r_br := Val( _vars[ "rbr" ] )
 
@@ -306,7 +306,7 @@ STATIC FUNCTION _ed_pop_list_khandler()
 
          _vars := dbf_get_rec()
 
-         SET CURSOR ON
+         set_cursor_on()
 
          _r_br := Val( _vars[ "rbr" ] )
          _form_data( @_r_br, @_vars )

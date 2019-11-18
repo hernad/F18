@@ -36,7 +36,7 @@ FUNCTION pos_katops_priprz()
 
    _destination :=  pos_kalk_prenos_dir()
 
-   SET CURSOR ON
+   set_cursor_on()
    o_pos_priprz()
 
    cBrDok := Space( FIELD_LEN_POS_BRDOK )

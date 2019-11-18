@@ -48,7 +48,7 @@ FUNCTION ed_zf_params()
    nX := 1
    Box(, 15, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "1. Prikazi ***"
    nX ++
@@ -87,7 +87,7 @@ FUNCTION ed_fi_params()
    nX := 1
    Box(, 20, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "1. Opci podaci ***"
 
@@ -156,7 +156,7 @@ FUNCTION ed_ex_params()
 
    Box(, 20, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "****** export GPS.opt Lisec parametri", nLeft )
 
@@ -198,7 +198,7 @@ FUNCTION ed_doc_params()
    nX := 2
    Box(, 10, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "Dodati redovi po listu:", 35 ) GET gDd_redovi PICT "99"
    nX ++
@@ -233,7 +233,7 @@ FUNCTION ed_elat_params()
 
    Box(, 18, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "***** Parametri atributa i elemenata"
 
@@ -296,7 +296,7 @@ FUNCTION ed_ost_params()
 
    Box(, 20, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "1. Pretraga artikla *******"
 

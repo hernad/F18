@@ -86,7 +86,7 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
 
    Box( "#" + _box_name, _box_x, _box_y )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Firma "
    ?? self_organizacija_id(), "-", AllTrim( self_organizacija_naziv() )

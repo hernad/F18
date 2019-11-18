@@ -38,7 +38,7 @@ FUNCTION fin_specif_otvorene_stavke()
    Box( "Spec", 13, 75, .F. )
 
    DO WHILE .T.
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "SPECIFIKACIJA OTVORENIH STAVKI"
       IF gNW == "D"
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()

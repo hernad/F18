@@ -88,7 +88,7 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
    IF lAzuriraniDokument
       IF !lKontiranjeViseKalk
          Box( "", 1, 50 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Dokument broj:"
          @ box_x_koord() + 1, Col() + 2  SAY cIdFirma
          @ box_x_koord() + 1, Col() + 1 SAY "-" GET cIdVD

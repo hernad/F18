@@ -114,7 +114,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       nCijenaSaPopustom := 0
 
       @ box_x_koord() + 2, box_y_koord() + 25 SAY Space ( 40 )
-      SET CURSOR ON
+      set_cursor_on()
 
       @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
          WHEN pos_when_racun_artikal( @_idroba ) ;

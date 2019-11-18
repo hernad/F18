@@ -241,7 +241,7 @@ STATIC FUNCTION edit_fakt_priprema( lFaktNoviRec, hFaktItemsAttributi )
    ENDIF
 
 
-   SET CURSOR ON
+   set_cursor_on()
 
    IF lFaktNoviRec  // nova stavka
 

@@ -51,7 +51,7 @@ STATIC FUNCTION fin_parametri_obrade_naloga()
 
    Box(, 24, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "*********************** Unos naloga:"
 
@@ -148,7 +148,7 @@ STATIC FUNCTION fin_parametri_izgleda()
 
    Box(, 15, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "*************** Varijante izgleda i prikaza:"
 

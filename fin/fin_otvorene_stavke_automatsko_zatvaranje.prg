@@ -54,7 +54,7 @@ FUNCTION fin_automatsko_zatvaranje_otvorenih_stavki( lAuto, cKto, cPtn )
 
       Box( "AZST", 6, 65, .F. )
 
-      SET CURSOR ON
+      set_cursor_on()
 
       cPobST := "N"
 

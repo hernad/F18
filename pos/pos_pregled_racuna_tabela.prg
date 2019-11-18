@@ -26,7 +26,7 @@ FUNCTION pos_pregled_racuna_tabela()
 
    // qIdRoba := Space( FIELD_ROBA_ID_LENGTH )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    Box(, 2, 60 )
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datumski period:" GET dDatOd

@@ -35,10 +35,11 @@ FUNCTION empty_error_bar()
 
 FUNCTION info_bar( cDoc, cMsg )
 
-   LOCAL lPrinter, lConsole, cDevice
+   LOCAL lPrinter, lConsole, cDevice, nCursor
 
    hb_default( @cMsg, "" )
 
+   nCursor := SetCursor()
    lPrinter :=  Set( _SET_PRINTER,  .F. )
    lConsole := Set( _SET_CONSOLE, .T. )
    cDevice := Set( _SET_DEVICE, "SCREEN" )
@@ -47,6 +48,7 @@ FUNCTION info_bar( cDoc, cMsg )
 
    // SET PRINTER TO ( cFileName )
    // SET PRINTER ON
+   set_cursor_off()
 
    @ f18_max_rows(), 1 SAY8  "> " + PadC( Left( cMsg, MaxCol() - 6 ), MaxCol() - 5 ) + " <" COLOR F18_COLOR_INFO_PANEL
 
@@ -57,6 +59,7 @@ FUNCTION info_bar( cDoc, cMsg )
    Set( _SET_PRINTER,  lPrinter )
    Set( _SET_CONSOLE, lConsole )
    Set( _SET_DEVICE, cDevice )
+   SetCursor( nCursor )
 
    IF Len( aInfos ) > INFO_MESSAGES_LENGTH
       ADel( aInfos, 1 )

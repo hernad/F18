@@ -670,7 +670,7 @@ METHOD F18Admin:razdvajanje_sezona()
    nFromSezona := Year( Date() ) - 1
    nToSezona := Year( Date() )
 
-   SET CURSOR ON
+   set_cursor_on()
    lConfirmEnter := Set( _SET_CONFIRM, .T. )
 
 

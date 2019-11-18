@@ -48,7 +48,7 @@ FUNCTION pos_parametri()
 //   LOCAL cPom := ""
 //   LOCAL _user := my_user()
 //
-//   SET CURSOR ON
+//   set_cursor_on()
 //
 //   AAdd( aNiz, { "Oznaka/ID prodajnog mjesta", "gPosProdajnoMjesto",, "@!", } )
 //
@@ -69,7 +69,7 @@ FUNCTION pos_param_firma()
 
    gFirIdBroj := PadR( gFirIdBroj, 13 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    AAdd( aNiz, { "Puni naziv firme", "gFirNaziv", , , } )
    AAdd( aNiz, { "Adresa firme", "gFirAdres", , , } )
@@ -129,7 +129,7 @@ FUNCTION pos_principi_rada_kase()
    PRIVATE cKalkKontoMagacin := pos_kalk_konto_magacin()
    PRIVATE _max_qtty := fetch_metric( "pos_maksimalna_kolicina_na_unosu", NIL, 0 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    aNiz := {}
 
@@ -194,7 +194,7 @@ FUNCTION pos_param_izgled_racuna()
    gSjecistr := PadR( GETPStr( gSjeciStr ), 20 )
    gOtvorstr := PadR( GETPStr( gOtvorStr ), 20 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    gSjeciStr := PadR( gSjeciStr, 30 )
    gOtvorStr := PadR( gOtvorStr, 30 )
@@ -232,7 +232,7 @@ FUNCTION pos_param_cijene()
 
    LOCAL aNiz := {}
 
-   SET CURSOR ON
+   set_cursor_on()
 
    AAdd ( aNiz, { "Generalni popust % (99-gledaj sifranik)", "gPopust", , "99", } )
    AAdd ( aNiz, { "Zakružiti cijenu na (broj decimala)    ", "gPopDec", ,  "9", } )

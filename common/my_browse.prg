@@ -669,7 +669,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF Alias() == "OS" .OR. Alias() == "SII"
          Box( "#Unijeti dio šifre ili naziva ili mjesta", 1, 70 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
          READ
          BoxC()
@@ -683,7 +683,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF Alias() == "PARTN"
          Box( "#Unijeti dio šifre ili naziva ili mjesta", 1, 70 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
          READ
          BoxC()
@@ -697,7 +697,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF Alias() == "ROBA" .OR. Alias() == "ROBA_P"
          Box( "#Unijeti dio šifre / sifredob / naziva", 1, 70 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
          READ
          BoxC()
@@ -715,7 +715,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF Alias() == "KONTO"
          Box( "#Unijeti dio šifre ili naziva", 1, 70 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
          READ
          BoxC()
@@ -729,7 +729,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF Alias() == "RADN"
          Box( "#Unijeti dio šifre, prezimena ili imena radnika", 1, 70 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
          READ
          BoxC()
@@ -743,7 +743,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
       IF Alias() == "FAKT_FTXT"
          Box( "#Unijeti dio šifre ili sadržaja uzorka", 1, 70 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
          READ
          BoxC()
@@ -825,7 +825,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
          Box("<CENTAR>", 3, 60, .F. )
 
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uzmi podatke posljednje pretrage ?" GET cLastSearchDN VALID cLastSearchDN $ "DN" PICT "@!"
 
          READ
@@ -892,7 +892,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
          Box(, 3, 66, .F. )
 
-         SET CURSOR ON
+         set_cursor_on()
          cTraziVrijednost := &cKolona
          cTraziUslov := Space( 80 )
 

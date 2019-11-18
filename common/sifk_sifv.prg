@@ -32,7 +32,7 @@ FUNCTION copy_to_sifk()
 
    Box(, 6, 65, .F. )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    nTekX := box_x_koord()
    nTekY := box_y_koord()
@@ -101,7 +101,7 @@ FUNCTION repl_sifk_item()
    LOCAL nTekX, nTekY, nTRec
 
    Box(, 3, 60, .F. )
-   SET CURSOR ON
+   set_cursor_on()
 
    nTekX := box_x_koord()
    nTekY := box_y_koord()

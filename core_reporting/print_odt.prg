@@ -330,7 +330,7 @@ STATIC FUNCTION pitanje_prikazi_odt()
    LOCAL GetList := {}
 
    SET CONFIRM OFF
-   SET CURSOR ON
+   set_cursor_on()
 
    Box(, 1, 50 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Prikazati Libre Office izvještaj (D/N/P) ?" GET cRet PICT "@!" VALID cRet $ "DNP"

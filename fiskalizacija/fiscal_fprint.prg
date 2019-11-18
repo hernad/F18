@@ -137,7 +137,7 @@ FUNCTION fprint_dupliciraj_racun( hFiskalniParams, hRacunParams )
 
       Box(, 10, 60 )
 
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Za datum od:" GET dDatumFrom
       @ box_x_koord() + 1, Col() + 1 SAY "vrijeme od (hh:mm):" GET cTimeVrijemeFrom
       @ box_x_koord() + 1, Col() SAY ":" GET cTM_from

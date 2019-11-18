@@ -95,7 +95,7 @@ END CLASS
 METHOD open()
 
    Box(, 20, 77 )
-   SET CURSOR ON
+   set_cursor_on()
 
    if ::lNovaStavka
       ::newItem()

@@ -105,7 +105,7 @@ STATIC FUNCTION ispravka_unosa( l_novi )
       _idkonto := PadR( "2110", 7 )
    ENDIF
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + 1, box_y_koord() + 2  SAY "Partner  :" GET _IdPartner PICT "@!" VALID p_partner( @_idpartner )
    @ box_x_koord() + 3, box_y_koord() + 2  SAY "Broj Veze:" GET _BrDok

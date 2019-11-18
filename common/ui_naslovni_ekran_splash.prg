@@ -31,7 +31,7 @@ FUNCTION naslovni_ekran_splash_screen( cNaslov, cVer )
    SetPos( 0, 0 )
 
    //Box( , 12, 60, lInvert )
-   SET CURSOR OFF
+   set_cursor_off()
 
    @  2, 2 SAY PadC( cNaslov, 60 )
    @  3, 2 SAY PadC( "Verzija: " + cVer, 60 )

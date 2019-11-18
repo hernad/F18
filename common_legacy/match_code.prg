@@ -27,7 +27,7 @@ FUNCTION m_code_src()
    Box(, 7, 60 )
    PRIVATE GetList := {}
    cSrch := Space( 20 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Match code:" GET cSrch VALID !Empty( cSrch )
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Uslovi za pretragu:" COLOR f18_color_i()
    @ box_x_koord() + 4, box_y_koord() + 2 SAY " /ABC = m.code pocinje sa 'ABC'  ('ABC001')"

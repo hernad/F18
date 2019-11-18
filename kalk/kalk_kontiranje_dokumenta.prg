@@ -175,7 +175,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    IF lAGen == .F.
 
       Box( "brn?", 5, 55 )
-      SET CURSOR ON
+      set_cursor_on()
 
       IF lAutomatskiSetBrojNaloga
          IF !lAFin
@@ -630,7 +630,7 @@ FUNCTION Konto( nBroj, cDef, cTekst )
    ENDIF
 
    Box(, 2, 60 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY cTekst
    IF nBroj == 1
       cKonto1 := cDef
@@ -696,7 +696,7 @@ FUNCTION RJ( nBroj, cDef, cTekst )
    ENDIF
 
    Box(, 2, 60 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY cTekst
    IF nBroj == 1
       cRJ1 := cdef

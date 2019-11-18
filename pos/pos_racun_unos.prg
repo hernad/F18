@@ -134,7 +134,7 @@ STATIC FUNCTION pos_form_zakljucenje_racuna( hParams )
 
    Box(, 10, 67 )
 
-   SET CURSOR ON
+   set_cursor_on()
    // 01 - gotovina
    // KT - kartica
    // VR - virman

@@ -246,7 +246,7 @@ FUNCTION fin_unos_asistent_gen_otvorene_stavke()
 
    Box(, nBoxRow, nBoxCol, .T. ) // rucni asistent
 
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + nBoxRow - 2, box_y_koord() + 1 SAY "<Enter> Izaberi/ostavi stavku"
    @ box_x_koord() + nBoxRow - 1, box_y_koord() + 1 SAY "<F10>   Asistent"
    @ box_x_koord() + nBoxRow,    box_y_koord() + 1 SAY ""

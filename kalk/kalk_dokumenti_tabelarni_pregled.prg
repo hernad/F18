@@ -187,7 +187,7 @@ STATIC FUNCTION usl_browse_kalk_dokumenti( cIdFirma, cIdVd, dDatOd, dDatDo, cMag
 
    Box(, 10, 65 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ nX + box_x_koord(), 2 + box_y_koord() SAY "Firma" GET cIdFirma
 

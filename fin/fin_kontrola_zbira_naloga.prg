@@ -22,7 +22,7 @@ FUNCTION kontrola_zbira_naloga_u_pripremi()
 
    Box( "kzb", 12, 70, .F., "Kontrola zbira naloga" )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    cIdFirma := IdFirma
    cIdVN := IdVN
@@ -40,7 +40,7 @@ FUNCTION kontrola_zbira_naloga_u_pripremi()
       RETURN DE_CONT
    ENDIF
 
-   SET CURSOR OFF
+   set_cursor_off()
    cIdFirma := Left( cIdFirma, 2 )
 
 
@@ -86,7 +86,7 @@ FUNCTION kontrola_zbira_naloga_u_pripremi()
    IF Round( nDug - nPot, 2 ) <> 0  .AND. gRavnot == "D"
 
       cDN := "N"
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Želite li uravnotežiti nalog (D/N) ?" GET cDN valid ( cDN $ "DN" ) PICT "@!"
       READ
 

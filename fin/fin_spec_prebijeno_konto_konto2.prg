@@ -50,7 +50,7 @@ FUNCTION fin_spec_prebijeno_konto_konto2( lOtvSt )
    cNula := "D"
 
    Box( "", 17, 65 )
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "SPECIFIKACIJA SUBANALITIKE KONTO/KONTO2"
    READ
    // DO WHILE .T.

@@ -87,7 +87,7 @@ FUNCTION get_kup_data()
    LOCAL nMX
    LOCAL nMY
 
-   SET CURSOR ON
+   set_cursor_on()
    IF read_kup_data()
       cKNaziv := PadR( get_dtxt_opis( "K01" ), 35 )
       cKAdres := PadR( get_dtxt_opis( "K02" ), 35 )

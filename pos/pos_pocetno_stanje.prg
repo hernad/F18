@@ -63,7 +63,7 @@ STATIC FUNCTION _get_vars( params )
 
    Box(, _box_x, _box_y )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Parametri prenosa u novu godinu" COLOR "BG+/B"
 

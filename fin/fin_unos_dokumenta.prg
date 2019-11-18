@@ -162,7 +162,7 @@ FUNCTION edit_fin_priprema( lNovaStavka )
       _idrj := s_cIdRjTekuca
    ENDIF
 
-   SET CURSOR ON
+   set_cursor_on()
    // lConfirmEnter := Set( _SET_CONFIRM, .F. )
    lConfirmEnter := Set( _SET_CONFIRM )
    lDugmeOtvoreneStavke := .T.

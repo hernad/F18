@@ -88,7 +88,7 @@ FUNCTION print_lista( Zaglavlje, ImeDat, bFor, fIndex, lBezUpita )
       nColStr := 80
       nSort := "ID       "
       Box(, 8, 76, .T. )
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 20 SAY8 "Tekst koji se štampa kao naslov:"
       @ box_x_koord() + 2, box_y_koord() + 3  GET Zaglavlje
       cValid := ""
@@ -341,7 +341,7 @@ FUNCTION sifarnik_izbor_polja( Kol, cImef )
    wx := nDiv + 2
 
    BOX( '', wx, 77, .T., "", "Izbor polja za prikaz" )
-   SET CURSOR ON
+   set_cursor_on()
 
    Odg = ' '
 

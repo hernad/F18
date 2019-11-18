@@ -49,7 +49,7 @@ FUNCTION pos_prijava( nX, nY )
          RETURN "X"
       ENDIF
 
-      SET CURSOR OFF
+      set_cursor_off()
       SetColor ( f18_color_normal() )
       IF pos_set_user( cKorSif, nSifLen, @cLevel ) == 0
          LOOP

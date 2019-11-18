@@ -31,7 +31,7 @@ FUNCTION fin_specif_suban_proizv_sort()
 
    Box( "", 20, 65 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    PRIVATE cSort := "1"
 

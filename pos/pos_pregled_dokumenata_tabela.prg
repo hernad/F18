@@ -61,7 +61,7 @@ FUNCTION pos_lista_azuriranih_dokumenata()
    NEXT
 
    seek_pos_doks_za_period( NIL, cIdVd, dDatOd, dDatDo, "POS_DOKS_2" )
-   SET CURSOR ON
+   set_cursor_on()
 
    aOpc := { "<ENTER> Odabir", "<E> eksport" }
 

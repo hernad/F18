@@ -246,7 +246,7 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
 
    Box( "brn?", 5, 55 )
    // dDatNal:=datdok
-   SET CURSOR ON
+   set_cursor_on()
    @ box_x_koord() + 1, box_y_koord() + 2  SAY "Broj naloga u FIN  " + finmat->idfirma + " - " + cIdvn + " -" GET cBrNalF
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "(ako je broj naloga prazan - ne vrsi se kontiranje)"
    READ

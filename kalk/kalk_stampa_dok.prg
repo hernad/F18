@@ -90,7 +90,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       ENDIF
       IF !lBezPitanjaBrDok
          Box( "", 6, 65 )
-         SET CURSOR ON
+         set_cursor_on()
          @ box_x_koord() + 1, box_y_koord() + 2 SAY "KALK Dok broj:"
 
          @ box_x_koord() + 1, Col() + 2  SAY cIdFirma

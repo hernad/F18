@@ -43,7 +43,7 @@ FUNCTION pos_kartica_artikla()
    cIdRoba := fetch_metric( "pos_kartica_artikal", my_user(), cIdRoba )
    // cPPar := fetch_metric( "pos_kartica_prikaz_partnera", my_user(), "N" )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    Box(, 6, 60 )
 

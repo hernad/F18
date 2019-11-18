@@ -63,7 +63,7 @@ FUNCTION fakt_uplate()
       // utvrdimo ukupno zaduzenje
       nUkZaduz := UkZaduz()
 
-      SET CURSOR ON
+      set_cursor_on()
 
       // utvrdimo ukupan iznos uplata
       nUkUplata := UkUplata()
@@ -378,7 +378,7 @@ FUNCTION SaldaKupaca( lPocStanje )
          LOOP
       ENDIF
 
-      SET CURSOR ON
+      set_cursor_on()
 
       EXIT
 

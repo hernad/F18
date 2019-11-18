@@ -853,7 +853,7 @@ STATIC FUNCTION uslovi_izvjestaja( cNObjekat )
    cPrikProd := "N"
 
    Box(, 10, 70 )
-   SET CURSOR ON
+   set_cursor_on()
 
    DO WHILE .T.
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Konta objekata:" GET s_cUslovIdKonto PICT "@!S50"

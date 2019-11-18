@@ -75,7 +75,7 @@ FUNCTION ed_g_params()
    nX := 1
    Box(, 20, 70 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "1. Zaokruzenje ***"
    nX++

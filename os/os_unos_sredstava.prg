@@ -29,7 +29,7 @@ FUNCTION unos_osnovnih_sredstava()
 
       _o_tables()
 
-      SET CURSOR ON
+      set_cursor_on()
 
       cPicSif := "@!"
 
@@ -150,7 +150,7 @@ FUNCTION unos_osnovnih_sredstava()
          AAdd( Kol, i )
       NEXT
 
-      SET CURSOR ON
+      set_cursor_on()
 
       @ box_x_koord() + 20, box_y_koord() + 2 SAY "<ENT> Ispravka, <c-T> Brisi, <c-N> Nove prom, <c-O> Otpis, <c-I> Novi ID"
 

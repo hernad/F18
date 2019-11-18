@@ -45,7 +45,7 @@ FUNCTION mat_kzb()
 
    Box( "KZB", 10, 77, .F. )
 
-   SET CURSOR OFF
+   set_cursor_off()
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY _header
 

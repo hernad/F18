@@ -44,7 +44,7 @@ FUNCTION fin_sint_kartica()
 
    Box( "", 9, 75 )
    DO WHILE .T.
-      SET CURSOR ON
+      set_cursor_on()
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "KARTICA (SINTETICKI KONTO)"
 
        @ box_x_koord() + 2, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()

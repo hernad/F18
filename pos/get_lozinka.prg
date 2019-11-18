@@ -65,6 +65,6 @@ FUNCTION pos_get_lozinka( nSiflen )
 
    BoxC()
 
-   SET CURSOR ON
+   set_cursor_on()
 
    RETURN PadR( cKorSif, nSifLen )

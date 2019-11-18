@@ -76,7 +76,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    ENDIF
 
    Box( "#" + cIdVd + "-" + pos_dokument_naziv( cIdVd ), 8, f18_max_cols() - 15 )
-   SET CURSOR ON
+   set_cursor_on()
    IF cIdVd == POS_IDVD_DOBAVLJAC_PRODAVNICA
       @ box_x_koord() + 2, box_y_koord() + 2 SAY " Partner:" GET _idPartner PICT "@!" VALID  !Empty( _idPartner ) .AND. p_partner( @_idPartner )
       @ box_x_koord() + 2, Col() + 2 SAY "Broj fakture:" GET _BrFaktP VALID !Empty( _brFaktP )
@@ -106,7 +106,7 @@ FUNCTION pos_zaduzenje( cIdVd )
    s_oBrowse:autolite := .F.
 
 
-   SET CURSOR ON
+   set_cursor_on()
    DO WHILE .T.
 
       DO WHILE !s_oBrowse:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )

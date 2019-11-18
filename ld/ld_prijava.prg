@@ -26,7 +26,7 @@ FUNCTION ld_postavi_parametre_obracuna()
 
    Box(, 6 + iif( _v_obr_unos, 1, 0 ), 50 )
 
-   SET CURSOR ON
+   set_cursor_on()
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PadC( "*** PRISTUPNI PODACI ZA OBRAČUN ***", 50 )
 

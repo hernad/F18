@@ -28,7 +28,7 @@ FUNCTION specifikacija_po_analitickim_kontima()
 
    cTip := "1"
    Box( "", 10, 65 )
-   SET CURSOR ON
+   set_cursor_on()
 
    cNula := "N"
 

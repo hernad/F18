@@ -26,13 +26,13 @@ FUNCTION pos_stampa_liste_dokumenata()
    LOCAL nSir
    LOCAL GetList := {}
 
-   SET CURSOR ON
+   set_cursor_on()
 
    cIdPos := pos_pm()
    cIdRadnik := Space( FIELD_LEN_POS_IDRADNIK )
    cIdVd := Space( 2 )
 
-   SET CURSOR ON
+   set_cursor_on()
    Box(, 10, 77 )
 
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "          Radnik (prazno-svi)" GET cIdRadnik PICT "@!" VALID Empty( cIdRadnik ) .OR. P_Osob( @cIdRadnik, 2, 37 )
