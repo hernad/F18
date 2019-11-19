@@ -44,7 +44,6 @@ FUNCTION harbour_init()
    SET ESCAPE ON
    SET SOFTSEEK ON
    CLEAR TYPEAHEAD
-   Alert("hello world")
 
    SetKey( K_F12, {|| k_f12() } )
    SetColor( f18_color_normal() )
