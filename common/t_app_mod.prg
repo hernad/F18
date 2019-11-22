@@ -166,6 +166,8 @@ METHOD gProc( nKey, nKeyHandlerRetEvent )
    CASE nKey == K_F12
       k_f12()
 
+   CASE nKey == K_CTRL_F12
+      k_ctrl_f12()
    OTHERWISE
       IF !( "U" $ Type( "gaKeys" ) )
          FOR nI := 1 TO Len( gaKeys )
@@ -249,4 +251,11 @@ PROCEDURE k_f12()
    RESTORE SCREEN FROM cScr
 
 
+   RETURN
+
+
+PROCEDURE k_ctrl_f12()
+
+   __Quit()   
+   
    RETURN
