@@ -1,5 +1,9 @@
 # F18 klijent, lista promjena
 
+## 2019-11-22
+
+- init mouse support 
+
 ## 2019-11-19
 
 - F18 eShell, ui_meni debug

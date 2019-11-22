@@ -253,6 +253,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
    // LOCAL nCtrlKeyVal := 0
    LOCAL nChar
    LOCAL nStart, nEnd, nStep
+   LOCAL aRows
    //LOCAL lExitFromMeni
 
    hb_default( @lOkvir, .F. ) // iscrtavanje okvira
@@ -304,7 +305,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
          nStep := 1
       ENDIF
 
-      
+
       FOR nI := nStart TO nEnd STEP nStep
          IF nI <= nBrStavkiMeni .AND. (lPrvoCrtanje .OR. range( nI, nOdabranaStavka-1, nOdabranaStavka+1))
             // range - ako nije prvo crtanje, onda treba samo ispis stavke iznad, ispod i odabir
@@ -325,7 +326,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
                   cMeniItem := aOpc[ nI ]
                ENDIF
                @ nX1 + nI - nGornja, nY1 SAY PadRU( cMeniItem, nWidth ) COLOR cColor
-            
+              
          ENDIF
       NEXT
 
@@ -350,14 +351,35 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
       //  EXIT
       //ENDIF
 
-      nChar := hb_keyStd(Inkey( 0, hb_bitOr( HB_INKEY_ALL, HB_INKEY_EXT ) ))
+      lIzvrsiOpciju := .F.
+
+      nChar := hb_keyStd(Inkey( 0, hb_bitOr( hb_bitOr( INKEY_KEYBOARD, INKEY_LDOWN ), HB_INKEY_EXT ) )  )
+
+      info_bar("mouse", "mrow:" + Str(MRow(),3,0) + "mcol:" + Str(MCol(),3,0)) 
+      IF nChar == K_LBUTTONDOWN .OR. nChar == K_LDBLCLK
+         FOR nI := nStart TO nEnd STEP nStep
+            IF MRow() == nX1 + nI - nGornja
+               nChar := -1
+               lIzvrsiOpciju := .T.
+               IF nI > nOdabranaStavka
+                  lNaDole := .T.
+                  lNaGore := .F.
+               ELSE
+                  lNaGore := .F.
+                  lNaDole := .T.
+               ENDIF
+               nOdabranaStavka := nI
+            ENDIF
+         NEXT
+      ENDIF
+
 
       IF ValType( goModul ) == "O"
          goModul:GProc( nChar )
       ENDIF
-
-      lIzvrsiOpciju := .F.
-      nOldItemNo := nOdabranaStavka
+ 
+      
+      // nOldItemNo := nOdabranaStavka
       DO CASE
       CASE nChar == K_ESC
          nOdabranaStavka := 0
