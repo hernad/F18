@@ -61,19 +61,17 @@ ELSIF (TG_OP = 'INSERT') THEN
       IF (NEW.idvd = '19') THEN
          robaCijena := NEW.ncijena;
       ELSE
-         -- kada je '72' i radi se o novom artiklu, u sifarnik se stavi stara cijena sa ovog dokumenta
-         -- to je dobro, jer kada se bude generisala '29'-ka ocekivace se ta cijena kao stara cijena
          robaCijena := NEW.cijena;
       END IF;
 
       IF NOT robaId IS NULL THEN -- roba postoji u sifarniku
-         IF NOT NEW.idvd IN ('21', '79', 'IP') THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba ; 79 radi samo sa postojecom robom
+         IF NOT NEW.idvd IN ('21', '79', '72', 'IP') THEN -- dokument 21 moze da sadrzi stare cijene, zato ne update-uj prodavnica.roba, 72 takodje ne smije da utice na sifarnik ; 79 radi samo sa postojecom robom
             EXECUTE 'UPDATE {{ item_prodavnica }}.roba SET barkod=$2, idtarifa=$3, naz=$4, mpc=$5, jmj=$6 WHERE id=$1'
                USING robaId, public.num_to_barkod_ean13(NEW.kol2, 3), NEW.idtarifa, NEW.robanaz, robaCijena, NEW.jmj;
          END IF;
       ELSE
          -- ako artikla uopste nema, onda i 21-ca moze setovati sifru u prodavnica.roba; ali ovo ne bi trebalo da se desava !
-         IF NOT NEW.idvd IN ('79', 'IP') THEN
+         IF NOT NEW.idvd IN ('79', '72', 'IP') THEN
            EXECUTE 'INSERT INTO {{ item_prodavnica }}.roba(id,barkod,mpc,idtarifa,naz,jmj) values($1,$2,$3,$4,$5,$6)'
               USING NEW.idroba, public.num_to_barkod_ean13(NEW.kol2, 3), robaCijena, NEW.idtarifa, NEW.robanaz, NEW.jmj;
          END IF;
