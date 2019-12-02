@@ -335,6 +335,7 @@ FUNCTION my_user()
 
 INIT PROCEDURE init_my_sql_server()
 
+   OutStd('init-4' + hb_eol())
    s_mtxMutex := hb_mutexCreate()
    s_psqlServer_params := hb_Hash()
 

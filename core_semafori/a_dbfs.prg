@@ -765,6 +765,7 @@ STATIC FUNCTION zatvori_dbf( hValue )
 
 INIT PROCEDURE  init_a_dbfs()
 
+   OutStd('init-2' + hb_eol())
    IF s_mtxMutex == NIL
       s_mtxMutex := hb_mutexCreate()
    ENDIF

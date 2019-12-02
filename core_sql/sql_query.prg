@@ -383,6 +383,7 @@ FUNCTION sql_query_bez_zapisa( ret )
 
 INIT PROCEDURE init_sql_qry()
 
+   OutStd('init-5' + hb_eol())
    s_mtxMutex := hb_mutexCreate()
 
    RETURN
