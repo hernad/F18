@@ -1,0 +1,29 @@
+1       VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  4,3,0,0
+FILEFLAGSMASK   0X3FL
+FILEFLAGS       0L
+FILEOS          0X40004L
+FILETYPE        0X2
+FILESUBTYPE     0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "ProductVersion", "4.3.0.0"
+            VALUE "OriginalFilename", "F18.exe"
+            VALUE "InternalName", "F18.exe"
+            VALUE "FileDescription", "F18 knjigovodstvo"
+            VALUE "CompanyName", "bring.out doo Sarajevo"
+            VALUE "LegalCopyright", "(c) bring.out"
+            VALUE "ProductName", "F18 klijent"
+            VALUE "PrivateBuild", "napravljen by hernad"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+            VALUE "Translation", 0x0409, 0x04B0
+    END
+END
