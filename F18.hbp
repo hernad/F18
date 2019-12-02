@@ -27,6 +27,7 @@ core_semafori/*.prg
 common_legacy/*.prg
 fiskalizacija/*.prg
 reports/*.prg
+{win}F18.rc
 
 -inc
 -Iinclude
