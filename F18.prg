@@ -48,6 +48,7 @@ STATIC FUNCTION to_run_f18_module()
 
 FUNCTION Main(...)
 
+   inkey(0)
    // hb_tracestate(1)
    // hb_traceLevel(5)
    OutStd('start-m-1' + hb_eol())

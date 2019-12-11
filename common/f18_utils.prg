@@ -58,15 +58,24 @@ FUNCTION set_f18_params()
    LOCAL cVal, cQuery
    LOCAL cTok, hParams
    LOCAL cHostName, nPort, cDataBase, cUser, cPassWord
+   LOCAL aOpcije, cOpcije
 
    hParams := hb_Hash()
    hParams[ "admin_user" ]  := "<undefined>"
    hParams[ "admin_password" ]  := "<undefined>"
    hParams[ "pos_pm" ] := Padr("1", 2)
 
+   cOpcije := ""
    DO WHILE nI <= PCount()
+      cOpcije += hb_PValue( nI++ )
+   ENDDO
 
-      cTok := hb_PValue( nI++ )
+   aOpcije := hb_ATokens( cOpcije, " ")
+
+   nI := 1
+   DO WHILE nI <= LEN( aOpcije )
+
+      cTok := aOpcije[ nI++ ]
 
       DO CASE
 
@@ -84,44 +93,44 @@ FUNCTION set_f18_params()
          __Quit()
 
       CASE cTok == "--dbf-prefix"   // prefix privatni dbf
-         dbf_prefix( hb_PValue( nI++ ) )
+         dbf_prefix( aOpcije[ nI++ ] )
 
       CASE cTok == "--run-on-start"
-         run_on_start_param( hb_PValue( nI++ ) )
+         run_on_start_param( aOpcije[ nI++ ] )
 
       CASE cTok == "-h"
-         cHostName := hb_PValue( nI++ )
+         cHostName := aOpcije[ nI++ ]
          set_f18_param( "host", cHostName )
          hParams[ "host" ] := cHostName
 
       CASE cTok == "-y"
-         nPort := Val( hb_PValue( nI++ ) )
+         nPort := Val( aOpcije[ nI++ ] )
          // cParams += Space( 1 ) + "port=" + AllTrim( Str( nPort ) )
          set_f18_param( "port", nPort )
          hParams[ "port" ] := nPort
 
       CASE cTok == "-d"
-         cDataBase := hb_PValue( nI++ )
+         cDataBase := aOpcije[ nI++ ]
          set_f18_param( "database", cDatabase )
          hParams[ "database" ] := cDatabase
 
       CASE cTok == "-u"
-         cUser := hb_PValue( nI++ )
+         cUser := aOpcije[ nI++ ]
          set_f18_param( "user", cUser )
          hParams[ "user" ] := cUser
 
       CASE cTok == "-ua"
-         cUser := hb_PValue( nI++ )
+         cUser := aOpcije[ nI++ ]
          set_f18_param( "admin_user", cUser )
          hParams[ "admin_user" ]  := cUser
 
       CASE cTok == "-pa"
-         cPassWord := hb_PValue( nI++ )
+         cPassWord := aOpcije[ nI++ ]
          set_f18_param( "admin_password", cPassword )
          hParams[ "admin_password" ]  := cPassword
 
       CASE cTok == "-p"
-         cPassWord := hb_PValue( nI++ )
+         cPassWord := aOpcije[ nI++ ]
          set_f18_param( "password", cPassword )
          hParams[ "password" ]  := cPassword
 
@@ -140,7 +149,7 @@ FUNCTION set_f18_params()
 
       CASE cTok == "--set-pos"
          f18_sql_connect( hParams )
-         cVal := hb_PValue( nI++ )
+         cVal := aOpcije[ nI++ ]
          cQuery := "SELECT public.setmetric('pos_prod','" + cVal + "')"
          dbUseArea( .T., , cQuery, "INFO" )
          OutStd( "Parametar [pos_pod] postavljen: " + cVal )
@@ -156,7 +165,7 @@ FUNCTION set_f18_params()
          set_f18_param( "run", "pos" )
 
       CASE cTok == "--pos-pm"
-         set_f18_param( "pos_pm", hb_PValue(nI++) )
+         set_f18_param( "pos_pm", aOpcije[ nI++ ] )
 
       CASE cTok == "--kalk"
          set_f18_param( "run", "kalk" )

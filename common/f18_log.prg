@@ -12,6 +12,132 @@
 #include "f18.ch"
 
 
+STATIC s_psqlServer_log := .F. // logiranje na server
+
+#ifdef F18_DEBUG
+STATIC s_nLogLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
+#else
+STATIC s_nLogLevel := F18_DEFAULT_LOG_LEVEL
+#endif
+
+
+PROCEDURE F18_OutErr( ... )
+  LOCAL nI, cMsg
+
+  cMsg := hb_PValue( 1 )
+  FOR nI := 2 TO PCount()
+      cMsg += " " + hb_ValToStr( hb_PValue( nI ) )
+  NEXT
+
+  log_write_file( cMsg )
+RETURN
+
+FUNCTION log_level( nLevel )
+
+   IF ValType( nLevel ) == "N"
+      s_nLogLevel := nLevel
+   ENDIF
+
+   RETURN s_nLogLevel
+
+
+
+   FUNCTION log_write( cMsg, nLevel, lSilent )
+
+      LOCAL cMsgTime
+   
+      IF nLevel == NIL
+   #ifdef F18_DEBUG
+         nLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
+   #else
+         nLevel := F18_DEFAULT_LOG_LEVEL
+   #endif
+      ENDIF
+   
+      IF lSilent == NIL
+         lSilent := .F.
+      ENDIF
+   
+      IF nLevel > log_level()
+         RETURN .T.
+      ENDIF
+   
+      cMsgTime := DToC( Date() )
+      cMsgTime += ", "
+      cMsgTime += PadR( Time(), 8 )
+      cMsgTime += ": "
+   
+      //?E cMsgTime, cMsg
+   
+      IF server_log()
+         server_log_write( cMsg, lSilent )
+      ENDIF
+   
+      RETURN .T.
+   
+   
+   FUNCTION danasnji_log_file()
+
+      RETURN my_home_root() + "F18_" + DToS( Date() ) + ".log"
+   
+   
+   FUNCTION log_write_file( cMsg, nLevel, lSilent )
+   
+      LOCAL cMsgTime
+      LOCAL cLogFile := danasnji_log_file()
+      LOCAL nHandle
+   
+      IF nLevel == NIL
+   #ifdef F18_DEBUG
+         nLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
+   #else
+         nLevel := F18_DEFAULT_LOG_LEVEL
+   #endif
+      ENDIF
+   
+      IF lSilent == NIL
+         lSilent := .F.
+      ENDIF
+   
+      IF nLevel > log_level()
+         RETURN .T.
+      ENDIF
+   
+      IF !File( cLogFile )
+         nHandle := hb_vfOpen( cLogFile, FO_CREAT + FO_TRUNC + FO_WRITE )
+      ELSE
+         nHandle := hb_vfOpen( cLogFile, FO_WRITE )
+         hb_vfSeek( nHandle, 0, FS_END )
+      ENDIF
+   
+      cMsgTime := PadR( Time(), 8 )
+      cMsgTime += ": "
+   
+      hb_vfWrite( nHandle, cMsgTime + cMsg + hb_eol() )
+      hb_vfClose( nHandle )
+   
+      //?E cMsgTime + cMsg
+   
+      RETURN .T.
+   
+   
+
+
+FUNCTION server_log()
+   RETURN s_psqlServer_log
+
+
+FUNCTION server_log_disable()
+
+   s_psqlServer_log := .F.
+   RETURN .T.
+
+
+FUNCTION server_log_enable()
+
+   s_psqlServer_log := .T.
+   RETURN .T.
+
 FUNCTION f18_view_log( hParams )
 
    LOCAL oData

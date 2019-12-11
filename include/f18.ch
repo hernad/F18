@@ -518,8 +518,8 @@
 #command ?C  [ <xList,...> ] => ( OutStd( hb_eol() ) [, OutStd( <xList> ) ] )
 #command ??C [ <xList,...> ] => OutStd( <xList> )
 
-#command ?E  [ <xList,...> ] => ( OutErr( hb_eol() ) [, OutErr( <xList> ) ] )
-#command ??E [ <xList,...> ] => OutErr( <xList> )
+#command ?E  [ <xList,...> ] => F18_OutErr ( <xList> )
+#command ??E [ <xList,...> ] => F18_OutErr ( <xList> )
 
 // ----- fin.ch ------------
 #define DABLAGAS lBlagAsis .and. _IDVN == cBlagIDVN
@@ -649,3 +649,5 @@
 #define BROWSE_IMEKOL_VALID 5
 #define BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE 7
 #define BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU 10
+
+#define DBF_TRY_OPEN_COUNT 3

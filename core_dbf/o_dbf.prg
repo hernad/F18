@@ -35,7 +35,7 @@ FUNCTION o_dbf_table( nArea, xTable, cTag )
    ENDIF
 
    SELECT ( nArea )
-   DO WHILE !lUsed .AND. nCount < 7
+   DO WHILE !lUsed .AND. nCount <= DBF_TRY_OPEN_COUNT
 
       IF cAlias != NIL
          lMyUse := my_use( cAlias, cTable )
