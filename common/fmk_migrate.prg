@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+#ifdef F18_MIGRATE
+
 STATIC __fin_fmk_tables := { { "suban", "fin_suban" }, { "anal", "fin_anal" } }
 
 #ifdef TEST
@@ -43,7 +45,7 @@ FUNCTION fmk_migrate( cur_dir )
 
    log_write( ProcName( 1 ) + ": " + cur_dir )
 
-   _files := Directory( cur_dir + HB_OSPATHSEPARATOR() + "*", "D" )
+   _files := Directory( cur_dir + hb_ps()() + "*", "D" )
 
    FOR EACH _file in _files
       IF _file[ 5 ] != "D"
@@ -55,7 +57,7 @@ FUNCTION fmk_migrate( cur_dir )
 
    FOR EACH _file in _files
       IF _file[ 5 ] == "D"
-         fmk_migrate( cur_dir + HB_OSPATHSEPARATOR() +  _file[ 1 ] )
+         fmk_migrate( cur_dir + hb_ps()() +  _file[ 1 ] )
       ENDIF
    NEXT
 
@@ -101,3 +103,5 @@ FUNCTION push_fmk_dbf_to_server( cur_dir, dbf_name )
       NEXT
 
    NEXT
+
+#endif

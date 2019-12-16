@@ -58,7 +58,7 @@ FUNCTION check_server_db_version()
       error_bar( "init", "serverdb: " + AllTrim(Str(nServerDbVersion)) )
 
       MsgBeep( cMsg )
-      OutMsg( 1, cMsg + hb_osNewLine() )
+      OutMsg( 1, cMsg + hb_eol() )
       RETURN .T.
    ENDIF
 

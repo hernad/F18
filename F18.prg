@@ -130,7 +130,7 @@ FUNCTION f18_login_loop(lAutoConnect)
 
    RETURN .T.
 
-
+/*
 PROCEDURE f18_http_server()
 
    LOCAL oLogAccess, oLogError, nPort, oServer
@@ -191,6 +191,7 @@ PROCEDURE f18_http_server()
    close_thread( "f18_http_server" )
 
    RETURN
+*/
 
 /*
     vraca hash matricu sa parametrima

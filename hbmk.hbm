@@ -24,11 +24,4 @@
 {F18_DEBUG}-trace
 {!F18_DEBUG}-q
 F18.hbc
-sddpg.hbc
-hbmzip.hbc
-hbpgsql.hbc
-xhb.hbc
-hbtip.hbc
-rdduser.hbc
-hbhpdf.hbc
-hbhttpd.hbc
+

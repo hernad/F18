@@ -408,8 +408,7 @@
                             ;   return  .F.              ;
                             ;endif
 
-#define SLASH  HB_OSPATHSEPARATOR()
-
+#define SLASH  hb_ps()
 
 
 #define NRED_DOS Chr(13)+Chr(10)

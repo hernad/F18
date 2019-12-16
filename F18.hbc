@@ -1,10 +1,6 @@
 #10.8 macosc/darvin ne treba ovo
 {mingw|mingwce|(gcc&(linux))}libs=supc++
 
-libs=hbct
-libs=hbmzip minizip
-libs=hbtip
-
 {F18_GT_CONSOLE&unix}gt=gtnul
 
 {F18_GT_CONSOLE&unix}gt=gttrm
@@ -13,7 +9,6 @@ libs=hbtip
 {F18_GT_CONSOLE&allwin}gt=gtwin
 {!F18_GT_CONSOLE&allwin}gt=gtwvt
 
-libs=hbpgsql
 {unix}libs=pq
 {win}libs=libpq
 libs=sddpg

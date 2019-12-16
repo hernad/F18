@@ -46,3 +46,17 @@ reports/*.prg
 {win}-Ld:/x86/postgresql-10.11-1/pgsql/lib
 
 {linux}-lm
+
+hbct.hbc
+hbmzip.hbc
+hbtip.hbc
+hbssl.hbc
+hbpgsql.hbc
+
+hbpgsql.hbc
+sddpg.hbc
+hbtip.hbc
+rddmisc.hbc
+hbhpdf.hbc
+
+#hbhttpd.hbc

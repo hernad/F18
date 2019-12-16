@@ -230,7 +230,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
          hParams[ "uplaceno" ] := -1
          pos_stampa_fiskalni_racun( hParams )
       ELSE
-         MessageBox( "Postoji fiskalni račun " + AllTrim( Str( nFiskalniRn ) ) + "?!" )
+         MsgBeep( "Postoji fiskalni račun " + AllTrim( Str( nFiskalniRn ) ) + "?!" )
       ENDIF
 
       SELECT pos_doks
