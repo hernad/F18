@@ -10,8 +10,10 @@
             "request": "launch",
             "name": "F18 debug",
             "terminalType": "integrated",
-            "program": ".\\F18_debug.exe ",
-            "arguments": [],
+            "program": "F18-klijent.exe",
+            "arguments": [
+                "--dbf-prefix 1 -h ${env:F18_HOST} -u ${env:F18_USER} -p ${env:F18_PASSWORD} -y 5432 -d ${env:F18_DATABASE} --${env:F18_MODUL}"
+            ],
             "workingDir": "${workspaceFolder}\\",
             "sourcePaths": [
                 "${workspaceFolder}",
@@ -27,7 +29,7 @@
                 "${workspaceFolder}\\core_sql",
                 "${workspaceFolder}\\core_ui2",
             ],
-            "preLaunchTask": "CompileDebug"
+            "preLaunchTask": "compileDebug"
         }
     ]
 }

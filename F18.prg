@@ -48,11 +48,15 @@ STATIC FUNCTION to_run_f18_module()
 
 FUNCTION Main(...)
 
-
+   inkey(0)
+   // hb_tracestate(1)
+   // hb_traceLevel(5)
+   OutStd('start-m-1' + hb_eol())
    IF s_hF18Params == NIL
      s_hF18Params := init_f18_params(...)
    ENDIF
 
+   OutStd('start-m-2' + hb_eol())
    //set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    set_f18_params(...)
 

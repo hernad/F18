@@ -1,4 +1,4 @@
-#-oF18
+-oF18-klijent
 #-static
 #-request=ARRAYRDD
 F18.prg
@@ -27,6 +27,7 @@ core_semafori/*.prg
 common_legacy/*.prg
 fiskalizacija/*.prg
 reports/*.prg
+{win}F18.rc
 
 -inc
 -Iinclude

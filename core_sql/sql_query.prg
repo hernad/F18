@@ -203,8 +203,7 @@ FUNCTION run_sql_query( cQry, hParams )
    ENDIF
 
    IF log_level() == 9
-      ?E "QUERY:"
-      ?E cQry
+      ?E "QUERY9:", cQry
    ENDIF
 
    FOR nI := 1 TO nRetry
@@ -383,6 +382,7 @@ FUNCTION sql_query_bez_zapisa( ret )
 
 INIT PROCEDURE init_sql_qry()
 
+   OutStd('init-5' + hb_eol())
    s_mtxMutex := hb_mutexCreate()
 
    RETURN

@@ -13,13 +13,11 @@
 
 THREAD STATIC s_lAlreadyRunStartup := .F. // startup funkcija vec pokrenuta
 
-STATIC s_psqlServer_log := .F. // logiranje na server
-
 STATIC s_cF18HomeRoot := NIL // za sve threadove identican cHomeRootDir
 STATIC s_cF18HomeBackup := NIL // svi threadovi ista backup lokacija
 STATIC s_cF18CurrentDirectory := NIL
 STATIC s_lEshell := .F.
-STATIC s_aLog
+
 
 THREAD STATIC s_cF18Home := NIL // svaki thread ima svoj my home ovisno o tekucoj bazi
 
@@ -38,11 +36,6 @@ STATIC s_nFontWidth := 10
 STATIC s_nDesktopRows := NIL
 STATIC s_nDesktopCols := NIL
 
-#ifdef F18_DEBUG
-STATIC s_nLogLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
-#else
-STATIC s_nLogLevel := F18_DEFAULT_LOG_LEVEL
-#endif
 
 FUNCTION f18_error_block()
 
@@ -64,7 +57,6 @@ FUNCTION f18_init_app_opts()
    AAdd( aOpc, hb_UTF8ToStr( "3. otvaranje nove firme  " ) )
    AAdd( aOpcExe, {|| NIL } )
 
-
    f18_menu( "mn", .F., _izbor, aOpc, aOpcExe  )
 
    RETURN .T.
@@ -82,10 +74,13 @@ FUNCTION post_login()
    set_sql_search_path()
    server_log_enable()
 
+   OutStd("start-1" + hb_eol())
    // ~/.F18/empty38/
    set_f18_home( cDatabase )
    //info_bar( "init", "home baze: " + my_home() )
    hb_gtInfo( HB_GTI_WINTITLE, "[ " + my_server_params()[ "user" ] + " ][ " + cDatabase + " ]" )
+
+   OutStd("start-2" + hb_eol())
    set_a_dbfs()
    set_global_vars_1()
    set_global_screen_vars( .F. )
@@ -186,7 +181,6 @@ STATIC FUNCTION get_log_level_from_params()
 #endif
 
    RETURN .T.
-
 
 
 FUNCTION set_screen_dimensions()
@@ -521,15 +515,6 @@ FUNCTION desktop_cols()
    RETURN s_nDesktopCols
 
 
-FUNCTION log_level( nLevel )
-
-   IF ValType( nLevel ) == "N"
-      s_nLogLevel := nLevel
-   ENDIF
-
-   RETURN s_nLogLevel
-
-
 
 FUNCTION my_home( cHome )
 
@@ -692,119 +677,6 @@ FUNCTION no_sql_mode( val )
    RETURN s_lNoSQLMode
 
 
-
-
-FUNCTION log_write( cMsg, nLevel, lSilent )
-
-   LOCAL cMsgTime
-
-   IF nLevel == NIL
-#ifdef F18_DEBUG
-      nLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
-#else
-      nLevel := F18_DEFAULT_LOG_LEVEL
-#endif
-   ENDIF
-
-   IF lSilent == NIL
-      lSilent := .F.
-   ENDIF
-
-   IF nLevel > log_level()
-      RETURN .T.
-   ENDIF
-
-   cMsgTime := DToC( Date() )
-   cMsgTime += ", "
-   cMsgTime += PadR( Time(), 8 )
-   cMsgTime += ": "
-
-   ?E cMsgTime, cMsg
-
-   IF server_log()
-      server_log_write( cMsg, lSilent )
-   ENDIF
-
-   RETURN .T.
-
-
-FUNCTION danasnji_log_file()
-   RETURN my_home_root() + "F18_" + DToS( danasnji_datum() ) + ".log"
-
-FUNCTION log_write_file( cMsg, nLevel, lSilent )
-
-   LOCAL cMsgTime
-   LOCAL cLogFile := danasnji_log_file()
-   LOCAL nHandle
-
-   IF nLevel == NIL
-#ifdef F18_DEBUG
-      nLevel := F18_DEFAULT_LOG_LEVEL_DEBUG
-#else
-      nLevel := F18_DEFAULT_LOG_LEVEL
-#endif
-   ENDIF
-
-   IF lSilent == NIL
-      lSilent := .F.
-   ENDIF
-
-   IF nLevel > log_level()
-      RETURN .T.
-   ENDIF
-
-   IF !File( cLogFile )
-      nHandle := hb_vfOpen( cLogFile, FO_CREAT + FO_TRUNC + FO_WRITE )
-   ELSE
-      nHandle := hb_vfOpen( cLogFile, FO_WRITE )
-      hb_vfSeek( nHandle, 0, FS_END )
-   ENDIF
-
-   cMsgTime := PadR( Time(), 8 )
-   cMsgTime += ": "
-
-   hb_vfWrite( nHandle, cMsgTime + cMsg + hb_eol() )
-   hb_vfClose( nHandle )
-
-   ?E cMsgTime + cMsg
-
-   RETURN .T.
-
-FUNCTION server_log()
-   RETURN s_psqlServer_log
-
-
-FUNCTION server_log_disable()
-
-   s_psqlServer_log := .F.
-
-   RETURN .T.
-
-FUNCTION server_log_enable()
-
-   s_psqlServer_log := .T.
-
-   RETURN .T.
-
-
-
-
-
-FUNCTION log_close()
-
-   FClose( s_nF18FileHandle )
-
-   RETURN .T.
-
-
-
-FUNCTION log_handle( handle )
-
-   IF handle != NIL
-      s_nF18FileHandle := handle
-   ENDIF
-
-   RETURN s_nF18FileHandle
 
 
 
