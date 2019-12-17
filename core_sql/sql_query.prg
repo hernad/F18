@@ -67,6 +67,10 @@ FUNCTION sql_schema_exists( cShema )
    cQuery := "SELECT exists(select schema_name FROM information_schema.schemata WHERE schema_name = '" + cShema + "')"
    oRet := run_sql_query( cQuery )
 
+   IF ValType( oRet ) <> "O"
+      RETURN .F.
+   ENDIF
+
    RETURN oRet:FieldGet( 1 )
 
 

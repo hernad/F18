@@ -19,7 +19,10 @@ FUNCTION fetch_metric( cSection, cUser, xDefaultValue )
 
    LOCAL cPrefix
 
-   cPrefix := params_prefix()
+   cPrefix := params_prefix( .F. )
+   IF cPrefix == "XYZ"
+      RETURN "undefined"
+   ENDIF
 
    RETURN f18_fetch_metric( cPrefix, cSection, cUser, xDefaultValue )
 
@@ -161,9 +164,13 @@ FUNCTION f18_set_metric( cPrefix, cSection, cUser, xValue )
 
 
 
-STATIC FUNCTION params_prefix()
+STATIC FUNCTION params_prefix( lExit )
 
    LOCAL cPrefix, cError
+
+   IF lExit == NIL
+      lExit := .T.
+   ENDIF
 
    IF programski_modul() == "POS"
       cPrefix := pos_prodavnica_sql_schema()
@@ -173,10 +180,14 @@ STATIC FUNCTION params_prefix()
 
    IF s_lProvjeriPrefix
       IF !sql_schema_exists( cPrefix )
-         cError := "SQL Schema " + cPrefix + " NE POSTOJI ?!"
-         ?E cError
-         Alert( cError )
-         QUIT_1
+         IF lExit
+           cError := "SQL Schema " + cPrefix + " NE POSTOJI ?!"
+           ?E cError
+           Alert( cError )
+           QUIT_1
+         ELSE
+           RETURN "XYZ"
+         ENDIF
       ENDIF
       s_lProvjeriPrefix := .F.
    ENDIF

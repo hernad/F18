@@ -48,10 +48,10 @@ STATIC FUNCTION to_run_f18_module()
 
 FUNCTION Main(...)
 
-   inkey(0)
    // hb_tracestate(1)
    // hb_traceLevel(5)
    OutStd('start-m-1' + hb_eol())
+
    IF s_hF18Params == NIL
      s_hF18Params := init_f18_params(...)
    ENDIF
@@ -69,6 +69,7 @@ FUNCTION Main(...)
       set_f18_home_root()
       set_global_vars_0()
       f18_error_block()
+
       set_screen_dimensions()
       naslovni_ekran_splash_screen( "F18", f18_ver() )
       IF no_sql_mode()

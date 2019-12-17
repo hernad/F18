@@ -307,6 +307,10 @@ FUNCTION f18_user( lAdmin )
       RETURN  get_f18_param( "admin_user" )
    ENDIF
 
+   IF !hb_HHasKey(s_psqlServer_params, "user")
+      RETURN "unknown"
+   ENDIF
+
    RETURN s_psqlServer_params[ "user" ]
 
 FUNCTION f18_password( lAdmin )

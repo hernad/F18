@@ -71,6 +71,7 @@ FUNCTION GlobalErrorHandler( oError, lShowErrorReport, lQuitApp )
    cOutFile := my_home_root() + "error.txt"
 
    IF is_in_main_thread()
+
 #ifdef F18_DEBUG
       Alert( oError:Description + " " + oError:operation )
       AltD() // oError:Description
@@ -313,14 +314,17 @@ STATIC FUNCTION bug_send_email( oError, lNotify )
    LOCAL hParamsEmail
    LOCAL cBody, cSubject
    LOCAL cAttachment
-   LOCAL cAnswer := fetch_metric( "bug_report_email", my_user(), "A" )
+   LOCAL cAnswer
    LOCAL cDatabase
    LOCAL aAttach
 
 
+   cAnswer := fetch_metric( "bug_report_email", my_user(), "A" )
+
    IF lNotify == NIL
       lNotify := .F.
    ENDIF
+#ifndef F18_DEBUG 
    DO CASE
    CASE cAnswer $ "D#N#A"
       IF cAnswer $ "DN"
@@ -331,7 +335,7 @@ STATIC FUNCTION bug_send_email( oError, lNotify )
    OTHERWISE
       RETURN .F.
    ENDCASE
-
+#endif
    // BUG F18 1.7.21, rg_2013/bjasko, 02.04.04, 15:00:07, variable does not exist
    IF lNotify
       cSubject := "NOTIFY F18 "
