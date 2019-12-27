@@ -27,6 +27,7 @@ fiskalizacija/*.prg
 reports/*.prg
 {win}F18.rc
 
+-static
 -inc
 -Iinclude
 -n
