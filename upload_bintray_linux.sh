@@ -6,16 +6,18 @@ if [[ ! `which curl` ]] ; then
     sudo apt-get install -y curl
 fi
 
+#BINTRAY_PACKAGE_VER=${BUILD_BUILDNUMBER}
+BINTRAY_PACKAGE_VER=`echo "const json=require('./package.json') ; console.log(json.f18)" | node`
+
 BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 BINTRAY_OWNER=bringout
 BINTRAY_REPOS=F18
 BINTRAY_PACKAGE=F18-linux-$BINTRAY_ARCH
-BINTRAY_PACKAGE_VER=${BUILD_BUILDNUMBER}
 
 FILE=${BINTRAY_PACKAGE}_${BINTRAY_PACKAGE_VER}.zip
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
-zip -r -v $FILE F18
+zip -r -v $FILE F18-klijent
 
 ls -lh $FILE
 
