@@ -42,9 +42,11 @@ IF [%BINTRAY_ARCH%] NEQ [x64] set VCBUILDTOOLS=x86
 IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x86\harbour
 
 set VCBUILDTOOLS_PATH="C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"    
-set LIB_BIN_ROOT=%ROOT_DIR%\3rd\%BUILD_ARCH%
+set LIB_BIN_ROOT=%ROOT_DIR%\3rd\%BINTRAY_ARCH%
+
 
 echo set-up vc build tools ......................
+set PATH=c:\windows;c:\windows\system32
 call %VCBUILDTOOLS_PATH% %VCBUILDTOOLS%
 set PATH=%HB_INSTALL_PREFIX%\bin;%PATH%
 
