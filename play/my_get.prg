@@ -75,7 +75,7 @@ PROCEDURE custom_reader( oGet )
    CASE nKeyStd == K_CTRL_HOME
       oGet:exitState := GE_TOP
 
-   CASE nKeyStd == K_LBUTTONDOWN .OR. nKeyStd == K_LDBLCLK
+   CASE nKeyStd == K_LDBLCLK
       // is there any GET object hit?
       IF Empty( HitTest( oGetList:aGetList, MRow(), MCol() ) )
          oGet:exitState := GE_NOEXIT

@@ -355,8 +355,8 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
 
       nChar := hb_keyStd(Inkey( 0, hb_bitOr( hb_bitOr( INKEY_KEYBOARD, INKEY_LDOWN ), HB_INKEY_EXT ) )  )
 
-      info_bar("mouse", "mrow:" + Str(MRow(),3,0) + "mcol:" + Str(MCol(),3,0)) 
-      IF nChar == K_LBUTTONDOWN .OR. nChar == K_LDBLCLK
+      //info_bar("mouse", "mrow:" + Str(MRow(),3,0) + "mcol:" + Str(MCol(),3,0)) 
+      IF nChar == K_LDBLCLK
          FOR nI := nStart TO nEnd STEP nStep
             IF MRow() == nX1 + nI - nGornja
                nChar := -1
