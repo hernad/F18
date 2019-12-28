@@ -1,5 +1,6 @@
 
 set CURRENT_DIR=%~dp0
+set HARBOUR_REPOS_GIT=\users\%USERNAME%\harbour
 
 echo "bintray arch = %BINTRAY_ARCH%, PATH= %PATH%"
 
@@ -26,22 +27,25 @@ echo %NODE_PROG% | node > tmpFile
 set /p F18_DATE= < tmpFile
 del tmpFile
 
+echo "Harbour repos git=%HARBOUR_REPOS_GIT%"
 echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
 
+cd %HARBOUR_REPOS_GIT%
 REM x64
-IF [%BINTRAY_ARCH%] EQU [x64] \users\%USERNAME%\harbour\tools\win32\msvc_x64.bat
+IF [%BINTRAY_ARCH%] EQU [x64] tools\win32\msvc_x64.bat
 IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x64\harbour
 
+
 REM x86
-IF [%BINTRAY_ARCH%] NEQ [x64] \users\%USERNAME%\harbour\tools\win32\msvc_x86.bat
+IF [%BINTRAY_ARCH%] NEQ [x64] tools\win32\msvc_x86.bat
 IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x86\harbour
 
 
 set PATH=%HARBOUR_ROOT%\bin;%PATH%
 
-echo %PATH%
+echo ---PATH=%PATH%----------------------
 
-echo ====== current_dir=%CURRENT_DIR% ================================
+echo ====== skip to current_dir=%CURRENT_DIR% ================================
 cd %CURRENT_DIR%
 
 set LINE=#define F18_VER_DEFINED
