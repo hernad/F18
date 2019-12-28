@@ -1,0 +1,44 @@
+trigger:
+  branches:
+    include:
+    - 4
+    - releases/*
+  paths:
+    exclude:
+    - README.md
+    include:
+    - CHANGELOG.md
+
+
+variables:
+- group: API_KEYS
+
+resources:
+  containers:
+  - container: vscode-x64
+    image: joaomoreno/vscode-linux-build-agent:x64
+  - container: vscode-ia32
+    image: hernad/azure-linux-build-agent:ia32
+
+jobs:
+- job: Windows_x64_local_windows
+  pool: windows
+  #  vmImage: VS2017-Win2016
+  variables:
+    VSCODE_ARCH: x64
+    HB_COMPILER: mingw64
+    BINTRAY_ARCH: x64
+    MINGW_ARCH: x86_64
+  steps:
+    - script: |
+        build-win32-msvc.bat
+      displayName: Build F18 windows 64-bit
+      env:
+        CHERE_INVOKING: yes
+    - script: |
+        cd $(Build.SourcesDirectory)
+        %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
+      displayName: upload F18-windows-x64 version $(BUILD.BUILDNUMBER)
+      env:
+        CHERE_INVOKING: yes
+        BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
