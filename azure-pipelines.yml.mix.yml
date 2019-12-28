@@ -32,10 +32,6 @@ jobs:
   steps:
     - script: |
         build-win32-msvc.bat
-        set PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem
-        %CD:~0,2%\msys64\usr\bin\sed -i "s|#CacheDir.*|CacheDir=/c/Users/%USERNAME%/AppData/Local/Temp|g" /etc/pacman.conf
-        cd $(Build.SourcesDirectory)
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash ci-build-win32.sh %CD:~0,1%"
       displayName: Build F18 windows 64-bit
       env:
         CHERE_INVOKING: yes

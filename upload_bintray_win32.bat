@@ -52,11 +52,14 @@ IF [%BINTRAY_ARCH%] NEQ [x64] set FILES=%FILES% libssl-1_1.dll
 
 
 echo FILES=%FILES%
-%ZIPACMD% %FILE% %FILES%
+%ZIPACMD% ..\%FILE% %FILES%
 
-
+echo back from temp dir
+cd ..\
 dir  %FILE%
+
 echo uploading %FILE% to bintray ...
+
 
 %CURL% -s -T %FILE% ^
       -u %BINTRAY_OWNER%:%BINTRAY_API_KEY% ^
