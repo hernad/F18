@@ -31,6 +31,7 @@ echo "Harbour repos git=%HARBOUR_REPOS_GIT%"
 echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
 
 set WINSDK_VER=10.0.18362.0
+set BUILD_ARCH=%BINTRAY_ARCH%
 
 cd %HARBOUR_REPOS_GIT%
 REM x64
@@ -57,7 +58,7 @@ set PATH=%PATH%;C:\Program Files (x86)\Windows Kits\10\bin\%WINSDK_VER%\%BUILD_A
 echo --- PATH=%PATH% ----------------------
 echo --- HB_INSTALL_PREFIX=%HB_INSTALL_PREFIX% --------------------
 cl
-
+rc /?
 echo ====== skip to current_dir=%CURRENT_DIR% ================================
 cd %CURRENT_DIR%
 
