@@ -1,0 +1,88 @@
+
+CURRENT_DIR=%~dp0
+
+echo "bintray arch = %BINTRAY_ARCH%, PATH= %PATH%"
+
+
+REM HARBOUR_VERSION=`./bintray_get_latest_version.sh harbour harbour-windows-${BINTRAY_ARCH}`
+set NODE_PROG=const json=require('./package.json') ; console.log(json.harbour)
+echo %NODE_PROG% | node > tmpFile
+set /p HARBOUR_VERSION= < tmpFile
+del tmpFile
+set NODE_PROG=const json=require('./package.json') ; console.log(json.harbour_date)
+echo %NODE_PROG% | node > tmpFile
+set /p HARBOUR_DATE= < tmpFile
+del tmpFile
+
+
+REM F18_VERSION
+set NODE_PROG=const json=require('./package.json') ; console.log(json.f18)
+echo %NODE_PROG% | node > tmpFile
+set /p F18_VERSION= < tmpFile
+del tmpFile
+REM F18_DATE
+set NODE_PROG=const json=require('./package.json') ; console.log(json.f18_date)
+echo %NODE_PROG% | node > tmpFile
+set /p F18_DATE= < tmpFile
+del tmpFile
+
+echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
+
+REM x64
+IF [%BINTRAY_ARCH%] EQU [x64] \users\%USERNAME%\harbour\tools\win32\msvc_x64.bat
+IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x64\harbour
+
+REM x86
+IF [%BINTRAY_ARCH%] NEQ [x64] \users\%USERNAME%\harbour\tools\win32\msvc_x86.bat
+IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x86\harbour
+
+
+set PATH=%HARBOUR_ROOT%\bin;%PATH%
+
+echo %PATH%
+
+echo ====== current_dir=%CURRENT_DIR% ================================
+cd %CURRENT_DIR%
+
+set LINE=#define F18_VER_DEFINED
+echo %LINE% > include\f18_ver.ch
+
+set LINE=#define F18_VER       "%F18_VERSION%"
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_VER_DATE  "%F18_DATE%"
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_DEV_PERIOD  "1994-2020"
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_HARBOUR   "HARBOUR_VERSION"
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_ARCH   "%BINTRAY_ARCH%"
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_TEMPLATE_VER "3.1.0"
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_DBF_VER_MAJOR  2
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_DBF_VER_MINOR  1
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define F18_DBF_VER_PATCH  6
+echo %LINE% >> include\f18_ver.ch
+
+set LINE=#define SERVER_DB_VER  0
+echo %LINE% >> include\f18_ver.ch
+
+set F18_POS=1
+set F18_RNAL=0
+set F18_GT_CONSOLE=1
+set F18_DEBUG=
+
+hbmk2 -workdir=.h F18.hbp -clean
+hbmk2 -workdir=.h F18.hbp
+
+IF NOT EXIST F18-klijent.exe EXIT /B 10001
