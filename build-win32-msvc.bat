@@ -32,16 +32,16 @@ echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
 
 cd %HARBOUR_REPOS_GIT%
 REM x64
-IF [%BINTRAY_ARCH%] EQU [x64] tools\win32\msvc_x64.bat
-IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x64\harbour
+IF [%BINTRAY_ARCH%] EQU [x64] call tools\win32\msvc_x64.bat
+IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x64\harbour
 
 
 REM x86
-IF [%BINTRAY_ARCH%] NEQ [x64] tools\win32\msvc_x86.bat
-IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x86\harbour
+IF [%BINTRAY_ARCH%] NEQ [x64] call tools\win32\msvc_x86.bat
+IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x86\harbour
 
 
-set PATH=%HARBOUR_ROOT%\bin;%PATH%
+set PATH=%HARBOUR_BINARIES_ROOT%\bin;%PATH%
 
 echo ---PATH=%PATH%----------------------
 
