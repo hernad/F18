@@ -36,8 +36,7 @@ jobs:
       env:
         CHERE_INVOKING: yes
     - script: |
-        cd $(Build.SourcesDirectory)
-        %CD:~0,2%\msys64\usr\bin\bash -lc "bash upload_bintray_win32.sh"
+        upload_bintray_win32.bat
       displayName: upload F18-windows-x64 version $(BUILD.BUILDNUMBER)
       env:
         CHERE_INVOKING: yes

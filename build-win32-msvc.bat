@@ -30,6 +30,8 @@ del tmpFile
 echo "Harbour repos git=%HARBOUR_REPOS_GIT%"
 echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
 
+set WINSDK_VER=10.0.18362.0
+
 cd %HARBOUR_REPOS_GIT%
 REM x64
 IF [%BINTRAY_ARCH%] EQU [x64] set VCBUILDTOOLS=amd64
@@ -49,6 +51,7 @@ set PATH=%HB_INSTALL_PREFIX%\bin;%PATH%
 
 set HB_INSTALL_PREFIX=%HARBOUR_BINARIES_ROOT%
 set PATH=%HARBOUR_BINARIES_ROOT%\bin;%PATH%
+set PATH=%PATH%;C:\Program Files (x86)\Windows Kits\10\bin\%WINSDK_VER%\%BUILD_ARCH%
 
 echo --- PATH=%PATH% ----------------------
 echo --- HB_INSTALL_PREFIX=%HB_INSTALL_PREFIX% --------------------
@@ -69,7 +72,7 @@ echo %LINE% >> include\f18_ver.ch
 set LINE=#define F18_DEV_PERIOD  "1994-2020"
 echo %LINE% >> include\f18_ver.ch
 
-set LINE=#define F18_HARBOUR   "HARBOUR_VERSION"
+set LINE=#define F18_HARBOUR   "%HARBOUR_VERSION%"
 echo %LINE% >> include\f18_ver.ch
 
 set LINE=#define F18_ARCH   "%BINTRAY_ARCH%"
