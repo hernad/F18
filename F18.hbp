@@ -50,13 +50,10 @@ reports/*.prg
 hbct.hbc
 hbmzip.hbc
 hbtip.hbc
-hbssl.hbc
-hbpgsql.hbc
-
-hbpgsql.hbc
+#sddpg contains hbpgsql.hbc, so no need to double on that
 sddpg.hbc
-hbtip.hbc
 rddmisc.hbc
 hbhpdf.hbc
 
+#hbssl.hbc
 #hbhttpd.hbc
