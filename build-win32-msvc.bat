@@ -32,18 +32,27 @@ echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
 
 cd %HARBOUR_REPOS_GIT%
 REM x64
-IF [%BINTRAY_ARCH%] EQU [x64] call tools\win32\msvc_x64.bat
+IF [%BINTRAY_ARCH%] EQU [x64] set VCBUILDTOOLS=amd64
 IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x64\harbour
 
-
 REM x86
-IF [%BINTRAY_ARCH%] NEQ [x64] call tools\win32\msvc_x86.bat
+IF [%BINTRAY_ARCH%] NEQ [x64] set VCBUILDTOOLS=x86
 IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x86\harbour
 
 
+set VCBUILDTOOLS_PATH="C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"    
+set LIB_BIN_ROOT=%ROOT_DIR%\3rd\%BUILD_ARCH%
+
+echo set-up vc build tools ......................
+call %VCBUILDTOOLS_PATH% %VCBUILDTOOLS%
+set PATH=%HB_INSTALL_PREFIX%\bin;%PATH%
+
+set HB_INSTALL_PREFIX=%HARBOUR_BINARIES_ROOT%
 set PATH=%HARBOUR_BINARIES_ROOT%\bin;%PATH%
 
-echo ---PATH=%PATH%----------------------
+echo --- PATH=%PATH% ----------------------
+echo --- HB_INSTALL_PREFIX=%HB_INSTALL_PREFIX% --------------------
+cl
 
 echo ====== skip to current_dir=%CURRENT_DIR% ================================
 cd %CURRENT_DIR%
@@ -80,6 +89,11 @@ echo %LINE% >> include\f18_ver.ch
 
 set LINE=#define SERVER_DB_VER  0
 echo %LINE% >> include\f18_ver.ch
+
+echo ===========f18_ver====================================
+type include\f18_ver.ch
+echo ======================================================
+
 
 set F18_POS=1
 set F18_RNAL=0
