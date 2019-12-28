@@ -21,7 +21,7 @@ resources:
     image: hernad/azure-linux-build-agent:ia32
 
 jobs:
-- job: Windows_x64
+- job: Windows_x64_local_windows
   pool: windows
   #  vmImage: VS2017-Win2016
   variables:
@@ -104,7 +104,7 @@ jobs:
 #    env:
 #      BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
 
-- job: Linux_x64
+- job: Linux_x64_hosted_ubuntu1604
   pool:
     vmImage: 'Ubuntu-16.04'
   container: vscode-ia32

@@ -1,5 +1,5 @@
 
-CURRENT_DIR=%~dp0
+set CURRENT_DIR=%~dp0
 
 echo "bintray arch = %BINTRAY_ARCH%, PATH= %PATH%"
 
