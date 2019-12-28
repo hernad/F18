@@ -9,11 +9,11 @@
 {F18_GT_CONSOLE&allwin}gt=gtwin
 {!F18_GT_CONSOLE&allwin}gt=gtwvt
 
-{unix}libs=pq
-{win}libs=libpq
-libs=sddpg
+#{unix}libs=pq
+#{win}libs=libpq
+#libs=sddpg
 
-{mingw}libpaths=c:/msys32/mingw32/lib
-{darwin}libpaths=/Library/PostgreSQL/9.1/lib
+#{mingw}libpaths=c:/msys32/mingw32/lib
+#{darwin}libpaths=/Library/PostgreSQL/9.1/lib
 
 mt=yes

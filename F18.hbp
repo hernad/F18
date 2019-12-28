@@ -42,8 +42,8 @@ reports/*.prg
 #{LX_64&linux}-lz
 #{!LX_64&linux}-lz
 
-{win}-Lc:/postgresql/pgsql_10_32/lib
-{win}-Ld:/x86/postgresql-10.11-1/pgsql/lib
+#{win}-Lc:/postgresql/pgsql_10_32/lib
+#{win}-Ld:/x86/postgresql-10.11-1/pgsql/lib
 
 {linux}-lm
 
