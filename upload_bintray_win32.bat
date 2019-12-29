@@ -68,7 +68,6 @@ powershell -Command "& { \"$ENV:FILES\".split() | foreach { move $_ tmpzip } }"
 echo back from tmp\tmpzip
 cd ..\..\
 
-powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"test.zip\")}"
 powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"$PWD\\tmp\\tmpzip\",\"$ENV:FILE\")}"
 
 echo dir %FILE%
