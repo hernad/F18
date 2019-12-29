@@ -38,7 +38,7 @@ mkdir tmp
 cd tmp
 copy %HARBOR_ROOT%\bin\*.* .
 move ..\F18-klijent.exe .
-echo copy harbour binaries to tmp ...
+echo copy harbour binaries (exe, dll) to tmp ...
 copy /y %HARBOUR_ROOT%\bin\*.* .
 
 set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
