@@ -39,7 +39,7 @@ if [ "$BUILD_ARCH" == "x86" ] ; then
 fi
 
 export HB_ROOT=$(pwd)/harbour
-export LD_LIBRARY_PATH=$(pwd)/harbour
+export LD_LIBRARY_PATH=$HB_ROOT/bin
 
 set
 
