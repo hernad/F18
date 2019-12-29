@@ -1,5 +1,6 @@
 REM BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 
+set CURRENT_DIR=%~dp0
 set BINTRAY_OWNER=bringout
 set BINTRAY_REPOS=F18
 set BINTRAY_PACKAGE=F18-windows-%BUILD_ARCH%
@@ -34,7 +35,7 @@ REM IF [%BUILD_ARCH%] NEQ  [x64] move .build\win32-ia32\user-setup\eShellSetup.e
 
 echo "======================== package: %BINTRAY_PACKAGE% ========== package_ver: %BINTRAY_PACKAGE_VER% =================="
 
-set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
+REM set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
 set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
 
 REM x64
@@ -54,10 +55,21 @@ copy /y %HARBOUR_ROOT%\bin\*.* .
 
 echo ZIP=%FILE% FILES=%FILES%
 echo CMD=%ZIPACMD% ..\%FILE% %FILES% 
-%ZIPACMD% ..\%FILE% %FILES%
 
-echo back from temp dir
-cd ..\
+REM %ZIPACMD% ..\%FILE% %FILES%
+
+REM public static void CreateFromDirectory (string sourceDirectoryName, string destinationArchiveFileName);
+REM public System.IO.Compression.ZipArchiveEntry CreateEntry (string entryName);
+
+mkdir tmpzip
+echo moving files to tmp\tmpzip
+powershell -Command "& { \"$ENV:FILES\".split() | foreach { move $_ tmpzip } }" 
+
+ech back from tmp\tmpzip
+cd ..\..\
+
+powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"$ENV:FILE\", \"tmp\tmpzip\")}"
+
 echo dir %FILE%
 dir  %FILE%
 
