@@ -74,13 +74,14 @@ FUNCTION post_login()
    set_sql_search_path()
    server_log_enable()
 
-   OutStd("start-1" + hb_eol())
    // ~/.F18/empty38/
    set_f18_home( cDatabase )
    //info_bar( "init", "home baze: " + my_home() )
-   hb_gtInfo( HB_GTI_WINTITLE, "[ " + my_server_params()[ "user" ] + " ][ " + cDatabase + " ]" )
+   
+   IF !is_in_eshell()
+      hb_gtInfo( HB_GTI_WINTITLE, "[ " + my_server_params()[ "user" ] + " ][ " + cDatabase + " ]" )
+   ENDIF
 
-   OutStd("start-2" + hb_eol())
    set_a_dbfs()
    set_global_vars_1()
    set_global_screen_vars( .F. )

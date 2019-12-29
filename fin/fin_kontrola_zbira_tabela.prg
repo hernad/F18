@@ -30,8 +30,9 @@ FUNCTION fin_kontrola_zbira_tabele_prometa( lKontrolaZaDatumskiPeriod )
    LOCAL nNalP := 0
    LOCAL nAnalP := 0
    LOCAL nAnalD := 0
-   LOCAL _line
+   LOCAL cLinija
    LOCAL dDatOd, dDatDo
+   LOCAL GetList := {}
 
    IF ( lKontrolaZaDatumskiPeriod == NIL )
       lKontrolaZaDatumskiPeriod := .T.
@@ -44,7 +45,7 @@ FUNCTION fin_kontrola_zbira_tabele_prometa( lKontrolaZaDatumskiPeriod )
 
    set_cursor_off()
 
-   _line := Replicate( "=", 10 ) + " " + Replicate( "=", 16 ) + " " + ;
+   cLinija := Replicate( "=", 10 ) + " " + Replicate( "=", 16 ) + " " + ;
       Replicate( "=", 16 ) + " " + Replicate( "=", 16 ) + " " + Replicate( "=", 16 )
 
    @ box_x_koord() + 1, box_y_koord() + 11 SAY "|" + PadC( "NALOZI", 16 ) + ;
@@ -52,7 +53,7 @@ FUNCTION fin_kontrola_zbira_tabele_prometa( lKontrolaZaDatumskiPeriod )
       "|" + PadC( "ANALITIKA", 16 ) + ;
       "|" + PadC( "SUBANALITIKA", 16 )
 
-   @ box_x_koord() + 2, box_y_koord() + 1 SAY _line
+   @ box_x_koord() + 2, box_y_koord() + 1 SAY cLinija
 
    @ box_x_koord() + 3, box_y_koord() + 1 SAY "duguje " + valuta_domaca_skraceni_naziv()
    @ box_x_koord() + 4, box_y_koord() + 1 SAY "potraz." + valuta_domaca_skraceni_naziv()
@@ -61,7 +62,7 @@ FUNCTION fin_kontrola_zbira_tabele_prometa( lKontrolaZaDatumskiPeriod )
    @ box_x_koord() + 8, box_y_koord() + 1 SAY "potraz." + ValPomocna()
    @ box_x_koord() + 9, box_y_koord() + 1 SAY "saldo  " + ValPomocna()
 
-   @ box_x_koord() + 10, box_y_koord() + 1 SAY _line
+   @ box_x_koord() + 10, box_y_koord() + 1 SAY cLinija
 
    @ box_x_koord() + 11, box_y_koord() + 1 SAY "<ANYKEY> - kontrola"
 
@@ -93,6 +94,7 @@ FUNCTION fin_kontrola_zbira_tabele_prometa( lKontrolaZaDatumskiPeriod )
    fin_kontrola_zbira_sintetika()
 
    ESC_BCR
+   
    @ box_x_koord() + 3, box_y_koord() + 29 SAY duguje PICTURE picBHD
    @ box_x_koord() + 4, box_y_koord() + 29 SAY potrazuje PICTURE picBHD
    @ box_x_koord() + 5, box_y_koord() + 29 SAY duguje - potrazuje PICTURE picBHD
