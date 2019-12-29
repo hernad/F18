@@ -1,13 +1,11 @@
 
 set CURRENT_DIR=%~dp0
-set HARBOUR_REPOS_GIT=\users\%USERNAME%\harbour
 set WINSDK_VER=10.0.18362.0
-set BUILD_ARCH=%BINTRAY_ARCH%
 
-echo "bintray arch = %BINTRAY_ARCH%, PATH= %PATH%"
+echo "bintray arch = %BUILD_ARCH%, PATH= %PATH%"
 
 
-REM HARBOUR_VERSION=`./bintray_get_latest_version.sh harbour harbour-windows-${BINTRAY_ARCH}`
+REM HARBOUR_VERSION=`./bintray_get_latest_version.sh harbour harbour-windows-${BUILD_ARCH}`
 set NODE_PROG=const json=require('./package.json') ; console.log(json.harbour)
 echo %NODE_PROG% | node > tmpFile
 set /p HARBOUR_VERSION= < tmpFile
@@ -29,27 +27,26 @@ echo %NODE_PROG% | node > tmpFile
 set /p F18_DATE= < tmpFile
 del tmpFile
 
-echo "Harbour repos git=%HARBOUR_REPOS_GIT%"
-echo "F18 windows %BINTRAY_ARCH% CI build with %HARBOUR_VERSION%
 
+echo "F18 windows %BUILD_ARCH% CI build with %HARBOUR_VERSION%
 
-cd %HARBOUR_REPOS_GIT%
 REM x64
-IF [%BINTRAY_ARCH%] EQU [x64] set VCBUILDTOOLS=amd64
-IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x64\harbour
+IF [%BUILD_ARCH%] EQU [x64] set VCBUILDTOOLS=amd64
+IF [%BUILD_ARCH%] EQU [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\%BUILD_ARCH%\harbour
 
 REM x86
-IF [%BINTRAY_ARCH%] NEQ [x64] set VCBUILDTOOLS=x86
-IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\x86\harbour
+IF [%BUILD_ARCH%] NEQ [x64] set VCBUILDTOOLS=x86
+IF [%BUILD_ARCH%] NEQ [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\%BUILD_ARCH%\harbour
 
 set VCBUILDTOOLS_PATH="C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"    
-set LIB_BIN_ROOT=%ROOT_DIR%\3rd\%BINTRAY_ARCH%
+REM set LIB_BIN_ROOT=%ROOT_DIR%\3rd\%BUILD_ARCH%
 
+echo creating \users\%USERNAME%\ah\%BUILD_ARCH ... 
 IF NOT FILE \users\%USERNAME%\ah mkdir \users\%USERNAME%\ah
-IF NOT FILE \users\%USERNAME%\ah\%BUILD_ARCH mkdir \users\%USERNAME%\%BINTRAY_ARCH%
+IF NOT FILE \users\%USERNAME%\ah\%BUILD_ARCH mkdir \users\%USERNAME%\ah\%BUILD_ARCH%
 REM IF NOT FILE %HARBOUR_BINARIES_ROOT% mkdir %HARBOUR_BINARIES_ROOT%
 
-cd \users\%USERNAME%\%BINTRAY_ARCH%
+cd \users\%USERNAME%\ah\%BUILD_ARCH%
 curl -LO https://github.com/hernad/harbour/releases/download/%HARBOUR_VERSION%/harbour-windows-%BUILD_ARCH%-%HARBOUR_VERSION%.zip
 
 REM https://redmine.bring.out.ba/issues/37472
@@ -57,7 +54,7 @@ rmdir /q /s harbour
 powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]::ExtractToDirectory(\"harbour-windows-$ENV:BUILD_ARCH-$ENV:HARBOUR_VERSION.zip\", \"$PWD\")}"
 
 
-echo set-up vc build tools ......................
+echo --- set-up vc build tools ......................
 set PATH=c:\windows;c:\windows\system32
 call %VCBUILDTOOLS_PATH% %VCBUILDTOOLS%
 set PATH=%HB_INSTALL_PREFIX%\bin;%PATH%
@@ -72,6 +69,7 @@ echo --- PATH=%PATH% ----------------------
 echo --- HB_INSTALL_PREFIX=%HB_INSTALL_PREFIX% --------------------
 cl
 rc /?
+
 echo ====== skip to current_dir=%CURRENT_DIR% ================================
 cd %CURRENT_DIR%
 
@@ -90,7 +88,7 @@ echo %LINE% >> include\f18_ver.ch
 set LINE=#define F18_HARBOUR   "%HARBOUR_VERSION%"
 echo %LINE% >> include\f18_ver.ch
 
-set LINE=#define F18_ARCH   "%BINTRAY_ARCH%"
+set LINE=#define F18_ARCH   "%BUILD_ARCH%"
 echo %LINE% >> include\f18_ver.ch
 
 set LINE=#define F18_TEMPLATE_VER "3.1.0"

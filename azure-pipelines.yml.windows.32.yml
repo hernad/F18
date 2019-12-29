@@ -25,8 +25,7 @@ jobs:
   pool: windows
   #  vmImage: VS2017-Win2016
   variables:
-    VSCODE_ARCH: x86
-    BINTRAY_ARCH: x86
+    BUILD_ARCH: x86
   steps:
     - task: NodeTool@0
       inputs:
