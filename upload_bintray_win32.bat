@@ -66,7 +66,7 @@ echo moving files to tmp\tmpzip
 powershell -Command "& { \"$ENV:FILES\".split() | foreach { move $_ tmpzip } }" 
 
 echo back from tmp\tmpzip
-cd ..\..\
+cd ..\
 
 IF EXIST %ZIP_FILE% del %ZIP_FILE%
 powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"tmp\\tmpzip\",\"$ENV:ZIP_FILE\")}"
