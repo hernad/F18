@@ -2,11 +2,11 @@ REM BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 
 set BINTRAY_OWNER=bringout
 set BINTRAY_REPOS=F18
-set BINTRAY_PACKAGE=F18-windows-%BINTRAY_ARCH%
+set BINTRAY_PACKAGE=F18-windows-%BUILD_ARCH%
 
 set BINTRAY_OWNER=bringout
 set BINTRAY_REPOS=F18
-set BINTRAY_PACKAGE=F18-windows-%BINTRAY_ARCH%
+set BINTRAY_PACKAGE=F18-windows-%BUILD_ARCH%
 set CURL=curl.exe
 
 
@@ -19,17 +19,17 @@ REM F18-windows-x64_4.20.0.zip
 set FILE=%BINTRAY_PACKAGE%_%BINTRAY_PACKAGE_VER%.zip
 
 REM x64
-IF [%BINTRAY_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x64\harbour
+IF [%BUILD_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x64\harbour
 
 REM x86
-IF [%BINTRAY_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x86\harbour
+IF [%BUILD_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\x86\harbour
 
 
 REM x64
-REM IF [%BINTRAY_ARCH%] EQU  [x64] move .build\win32-x64\user-setup\eShellSetup.exe eShellSetup-x64-%BINTRAY_PACKAGE_VER%.exe
+REM IF [%BUILD_ARCH%] EQU  [x64] move .build\win32-x64\user-setup\eShellSetup.exe eShellSetup-x64-%BINTRAY_PACKAGE_VER%.exe
 
 REM x86
-REM IF [%BINTRAY_ARCH%] NEQ  [x64] move .build\win32-ia32\user-setup\eShellSetup.exe eShellSetup-x86-%BINTRAY_PACKAGE_VER%.exe
+REM IF [%BUILD_ARCH%] NEQ  [x64] move .build\win32-ia32\user-setup\eShellSetup.exe eShellSetup-x86-%BINTRAY_PACKAGE_VER%.exe
 
 
 echo "======================== package: %BINTRAY_PACKAGE% ========== package_ver: %BINTRAY_PACKAGE_VER% =================="
@@ -45,12 +45,12 @@ set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
 set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
 
 REM x64
-IF [%BINTRAY_ARCH%] EQU [x64] set FILES=%FILES% libcrypto-1_1-x64.dll
-IF [%BINTRAY_ARCH%] EQU [x64] set FILES=%FILES% libssl-1_1-x64.dll
+IF [%BUILD_ARCH%] EQU [x64] set FILES=%FILES% libcrypto-1_1-x64.dll
+IF [%BUILD_ARCH%] EQU [x64] set FILES=%FILES% libssl-1_1-x64.dll
 
 REM x86
-IF [%BINTRAY_ARCH%] NEQ [x64] set FILES=%FILES% libcrypto-1_1.dll
-IF [%BINTRAY_ARCH%] NEQ [x64] set FILES=%FILES% libssl-1_1.dll
+IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libcrypto-1_1.dll
+IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libssl-1_1.dll
 
 
 echo FILES=%FILES%
