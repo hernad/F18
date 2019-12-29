@@ -28,14 +28,17 @@ echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
 export HB_ROOT=$(pwd)/harbour
 
-cp $HB_ROOT/lib/libssl.so .
-cp $HB_ROOT/lib/libcrypto.so .
-cp $HB_ROOT/lib/libpq.so .
-cp $HB_ROOT/bin/psql .
-cp $HB_ROOT/bin/pg_dump .
-cp $HB_ROOT/bin/pg_restore .
+cp -av $HB_ROOT/lib/libssl.so .
+cp -av $HB_ROOT/lib/libcrypto.so .
+cp -av $HB_ROOT/lib/libpq.so .
+cp -av $HB_ROOT/bin/psql .
+cp -av $HB_ROOT/bin/pg_dump .
+cp -av $HB_ROOT/bin/pg_restore .
 
 FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore"
+
+chmod +x F18-klijent
+chmod +x pg_dump pg_restore
 
 echo "FILE=$FILE FILES=$FILES"
 zip -r -v $FILE $FILES
