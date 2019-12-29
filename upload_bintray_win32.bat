@@ -38,6 +38,8 @@ mkdir tmp
 cd tmp
 copy %HARBOR_ROOT%\bin\*.* .
 move ..\F18-klijent.exe .
+echo copy harbour binaries to tmp ...
+copy /y %HARBOUR_ROOT%\bin\*.* .
 
 set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
 set FILES=F18-klijent.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
