@@ -2,22 +2,32 @@
 
 # https://github.com/$BINTRAY_OWNER/greenbox/blob/apps_modular/upload_app.sh
 
-if [[ ! `which curl` ]] ; then
-    sudo apt-get install -y curl
-fi
-
-#BINTRAY_PACKAGE_VER=${BUILD_BUILDNUMBER}
-BINTRAY_PACKAGE_VER=`echo "const json=require('./package.json') ; console.log(json.f18)" | node`
-
 BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 BINTRAY_OWNER=bringout
 BINTRAY_REPOS=F18
-BINTRAY_PACKAGE=F18-linux-$BINTRAY_ARCH
+BINTRAY_PACKAGE=F18-linux-$BUILD_ARCH
 
-FILE=${BINTRAY_PACKAGE}_${BINTRAY_PACKAGE_VER}.zip
+RHEL=0
+[ -d /etc/redhat-release ] && RHEL=1
+
+if [[ ! `which curl` ]] ; then
+    if [ "$RHEL" == "1" ] ; then
+        sudo yum -y install -y curl
+    else
+       sudo apt-get install -y curl
+    fi
+fi
+
+#F18_VERSION=${BUILD_BUILDNUMBER}
+F18_VERSION=`echo "const json=require('./package.json') ; console.log(json.f18)" | node`
+
+
+FILE=${BINTRAY_PACKAGE}_${F18_VERSION}.zip
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
 zip -r -v $FILE F18-klijent
+
+[ ! -f $FILE ] exit 1  
 
 ls -lh $FILE
 
@@ -27,8 +37,8 @@ echo uploading $FILE to bintray ...
 curl -s -T $FILE \
       -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
       --header "X-Bintray-Override: 1" \
-     https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$BINTRAY_PACKAGE_VER/$FILE
+     https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$F18_VERSION/$FILE
 
 curl -s -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
-   -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$BINTRAY_PACKAGE_VER/publish
+   -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$F18_VERSION/publish
 

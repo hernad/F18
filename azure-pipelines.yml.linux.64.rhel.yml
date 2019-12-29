@@ -26,7 +26,6 @@ jobs:
   pool: default
   variables:
     BUILD_ARCH: x64
-    BINTRAY_ARCH: x64
   steps:
   - script: |
       cd $(Build.SourcesDirectory)
