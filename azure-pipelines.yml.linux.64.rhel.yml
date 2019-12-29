@@ -21,22 +21,21 @@ resources:
     image: hernad/azure-linux-build-agent:ia32
 
 jobs:
-- job: Linux_x64
-  pool: local-dell-xps15
-  container: vscode-ia32
+- job: Linux_x64_Centos7
+  # centos 7
+  pool: default
   variables:
     BUILD_ARCH: x64
     BINTRAY_ARCH: x64
-    MINGW_ARCH: x86_64
   steps:
   - script: |
       cd $(Build.SourcesDirectory)
-      ./ci-build-linux.sh
-    displayName: CI-Build F18 64-bit
+      ./azure-build-linux-rhel.sh
+    displayName: CI-Build F18 64-bit RHEL/CENTOS7 linux
   - script: |
       cd $(Build.SourcesDirectory)
       ./upload_localhost.sh
     displayName: upload F18-linux-x64 version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
-      NEXTCLOUD_HERNAD_PWD: $(NEXTCLOUD_HERNAD_PWD)
+
