@@ -34,13 +34,6 @@ REM IF [%BUILD_ARCH%] NEQ  [x64] move .build\win32-ia32\user-setup\eShellSetup.e
 
 echo "======================== package: %BINTRAY_PACKAGE% ========== package_ver: %BINTRAY_PACKAGE_VER% =================="
 
-mkdir tmp
-cd tmp
-copy %HARBOR_ROOT%\bin\*.* .
-move ..\F18-klijent.exe .
-echo copy harbour binaries (exe, dll) to tmp ...
-copy /y %HARBOUR_ROOT%\bin\*.* .
-
 set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
 set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
 
@@ -52,12 +45,20 @@ REM x86
 IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libcrypto-1_1.dll
 IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libssl-1_1.dll
 
+mkdir tmp
+cd tmp
+copy %HARBOR_ROOT%\bin\*.* .
+move ..\F18-klijent.exe .
+echo copy harbour binaries (exe, dll) to tmp ...
+copy /y %HARBOUR_ROOT%\bin\*.* .
 
-echo FILES=%FILES%
+echo ZIP=%FILE% FILES=%FILES%
+echo CMD=%ZIPACMD% ..\%FILE% %FILES% 
 %ZIPACMD% ..\%FILE% %FILES%
 
 echo back from temp dir
 cd ..\
+echo dir %FILE%
 dir  %FILE%
 
 echo uploading %FILE% to bintray ...
