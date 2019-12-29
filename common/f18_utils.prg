@@ -52,7 +52,7 @@ FUNCTION f18_help()
  setup ulazne parametre F18
 */
 
-FUNCTION set_f18_params()
+FUNCTION set_f18_params( ... )
 
    LOCAL nI := 1
    LOCAL cVal, cQuery
@@ -67,7 +67,7 @@ FUNCTION set_f18_params()
 
    cOpcije := ""
    DO WHILE nI <= PCount()
-      cOpcije += hb_PValue( nI++ )
+      cOpcije += IIF(nI==0,"", " ") + hb_PValue( nI++ )
    ENDDO
 
    aOpcije := hb_ATokens( cOpcije, " ")

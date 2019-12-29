@@ -57,7 +57,6 @@ FUNCTION Main(...)
    ENDIF
 
    OutStd('start-m-2' + hb_eol())
-   //set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    set_f18_params(...)
 
    IF to_run_f18_module()

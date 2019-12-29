@@ -1,5 +1,5 @@
 -oF18-klijent
-F18.prg
+F18-klijent.prg
 #{F18_VSCODE}vscode_debugger.prg
 fin/*.prg
 fakt/*.prg
