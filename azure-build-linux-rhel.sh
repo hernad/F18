@@ -40,6 +40,8 @@ fi
 
 export HB_ROOT=$(pwd)/harbour
 export LD_LIBRARY_PATH=$HB_ROOT/lib
+echo patch libpq.so - libpq.so.5
+ln -s $HB_ROOT/lib/libpq.so $HB_ROOT/lib/libpq.so.5
 
 
 set
