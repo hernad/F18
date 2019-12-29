@@ -1,5 +1,5 @@
 #10.8 macosc/darvin ne treba ovo
-{mingw|mingwce|(gcc&(linux))}libs=supc++
+#{mingw|mingwce|(gcc&(linux))}libs=supc++
 
 {F18_GT_CONSOLE&unix}gt=gtnul
 

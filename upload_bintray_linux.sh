@@ -25,7 +25,20 @@ F18_VERSION=`echo "const json=require('./package.json') ; console.log(json.f18)"
 FILE=${BINTRAY_PACKAGE}_${F18_VERSION}.zip
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
-zip -r -v $FILE F18-klijent
+
+export HB_ROOT=$(pwd)/harbour
+
+cp $HB_ROOT/lib/libssl.so .
+cp $HB_ROOT/lib/libcrypto.so .
+cp $HB_ROOT/lib/libpq.so .
+cp $HB_ROOT/bin/psql .
+cp $HB_ROOT/bin/pg_dump .
+cp $HB_ROOT/bin/pg_restore .
+
+FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore"
+
+echo "FILE=$FILE FILES=$FILEs"
+zip -r -v $FILE $FILES
 
 [ ! -f $FILE ] exit 1  
 
