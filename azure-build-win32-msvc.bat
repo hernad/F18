@@ -41,9 +41,9 @@ IF [%BUILD_ARCH%] NEQ [x64] set HARBOUR_BINARIES_ROOT=\users\%USERNAME%\ah\%BUIL
 set VCBUILDTOOLS_PATH="C:\Program Files (x86)\Microsoft Visual C++ Build Tools\vcbuildtools.bat"    
 REM set LIB_BIN_ROOT=%ROOT_DIR%\3rd\%BUILD_ARCH%
 
-echo creating \users\%USERNAME%\ah\%BUILD_ARCH ... 
+echo creating \users\%USERNAME%\ah\%BUILD_ARCH% ... 
 IF NOT FILE \users\%USERNAME%\ah mkdir \users\%USERNAME%\ah
-IF NOT FILE \users\%USERNAME%\ah\%BUILD_ARCH mkdir \users\%USERNAME%\ah\%BUILD_ARCH%
+IF NOT FILE \users\%USERNAME%\ah\%BUILD_ARCH% mkdir \users\%USERNAME%\ah\%BUILD_ARCH%
 REM IF NOT FILE %HARBOUR_BINARIES_ROOT% mkdir %HARBOUR_BINARIES_ROOT%
 
 cd \users\%USERNAME%\ah\%BUILD_ARCH%
