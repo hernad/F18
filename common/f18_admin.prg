@@ -33,7 +33,7 @@ CLASS F18Admin
    METHOD relogin_as_admin()
    METHOD update_app()
    METHOD get_os_name()
-   METHOD wget_download()
+   METHOD download_file()
    // METHOD sql_cleanup()
    // METHOD sql_cleanup_all()
 
@@ -351,7 +351,7 @@ METHOD F18Admin:update_app_run_app_update( hF18Params )
 // RETURN SELF
 // ENDIF
 
-   IF !::wget_download( hF18Params[ "url" ], cUpdateFile, my_home_root() + cUpdateFile, .T., .T. )
+   IF !::download_file( hF18Params[ "url" ], cUpdateFile, my_home_root() + cUpdateFile, .T., .T. )
       RETURN SELF
    ENDIF
 
@@ -539,7 +539,7 @@ METHOD F18Admin:f18_upd_download()
 
    MsgO( "preuzimanje podataka o aktuelnoj verziji ..." )
    cUrl := f18_download_url() + "/"
-   IF !::wget_download( cUrl, ::update_app_info_file, cPath + ::update_app_info_file, _always_erase, _silent )
+   IF !::download_file( cUrl, ::update_app_info_file, cPath + ::update_app_info_file, _always_erase, _silent )
       MsgC()
       RETURN .F.
    ENDIF
@@ -547,7 +547,7 @@ METHOD F18Admin:f18_upd_download()
 
    info_bar( "upd", "download " +  ::update_app_script_file )
    cUrl := f18_download_url() + "/scripts/"
-   IF !::wget_download( cUrl, ::update_app_script_file, cPath + ::update_app_script_file, _always_erase, _silent )
+   IF !::download_file( cUrl, ::update_app_script_file, cPath + ::update_app_script_file, _always_erase, _silent )
       MsgC()
       RETURN .F.
    ENDIF
@@ -575,44 +575,23 @@ METHOD F18Admin:get_os_name()
 
 
 
-METHOD F18Admin:wget_download( cUrl, cFileName, cLocalFileName, lEraseFile, silent, only_newer )
+METHOD F18Admin:download_file( cUrlPath, cFileName, cLocalFileName, lEraseFile, silent, only_newer )
 
    LOCAL lOk := .F.
    LOCAL cCmd
    LOCAL nFileHandle, nLength
 
-   // IF lEraseFile == NIL
-   // lEraseFile := .F.
-   // ENDIF
 
-   // IF silent == NIL
-   // silent := .F.
-   // ENDIF
+   cCmd := "curl -L "
 
-   // IF only_newer == NIL
-   // only_newer := .F.
-   // ENDIF
+   cCmd += cUrlPath + cFileName // http://test.com/FILE
 
-   // IF lEraseFile
-   // FErase( cLocalFileName )
-   // Sleep( 1 )
-   // ENDIF
-
-   cCmd := "wget "
-
-// #ifdef __PLATFORM__WINDOWS
-   cCmd += " -q  --tries=4 --timeout=4  --no-cache --no-check-certificate "
-// #endif
-
-   cCmd += cUrl + cFileName // http://test.com/FILE
-
-   cCmd += " -O "
+   cCmd += " -o "
 
    IF f18_run( cCmd + " " + file_path_quote( cLocalFileName ) ) != 0
       MsgBeep( "Error: " + cCmd  + "?!" )
       RETURN .F.
    ENDIF
-   // Sleep( 1 )
 
    IF !File( cLocalFileName )
       error_bar( "upd", "Fajl " + cLocalFileName + " nije download-ovan !" )

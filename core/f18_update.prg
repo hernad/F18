@@ -30,7 +30,7 @@ FUNCTION download_version( cUrl, lForceRefresh )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY Left( cUrl, 67 )
 
-   IF !F18Admin():wget_download( cUrl, "",  cFileName )
+   IF !F18Admin():download_file( cUrl, "",  cFileName )
       BoxC()
       RETURN ""
    ENDIF

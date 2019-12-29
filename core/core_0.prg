@@ -111,7 +111,7 @@ FUNCTION download_file( cUrl, cDestFile )
    hFile := hb_vfTempFile( @cFileName, my_home_root(), "wget_", ".tmp" )
    hb_vfClose( hFile )
 
-   lRet := F18Admin():wget_download( cUrl, "", cFileName )
+   lRet := F18Admin():download_file( cUrl, "", cFileName )
 
    IF is_in_main_thread()
       BoxC()
