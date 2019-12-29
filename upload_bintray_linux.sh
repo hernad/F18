@@ -37,7 +37,7 @@ cp $HB_ROOT/bin/pg_restore .
 
 FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore"
 
-echo "FILE=$FILE FILES=$FILEs"
+echo "FILE=$FILE FILES=$FILES"
 zip -r -v $FILE $FILES
 
 [ ! -f $FILE ] exit 1  
