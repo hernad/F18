@@ -42,7 +42,7 @@ echo copy harbour binaries (exe, dll) to tmp ...
 copy /y %HARBOUR_ROOT%\bin\*.* .
 
 set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
-set FILES=F18-klijent.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
+set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
 
 REM x64
 IF [%BINTRAY_ARCH%] EQU [x64] set FILES=%FILES% libcrypto-1_1-x64.dll
