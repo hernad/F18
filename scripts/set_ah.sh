@@ -1,7 +1,10 @@
 #!/bin/bash
 
-export HARBOUR_ROOT=/home/$USER/ah/x64
+BUILD_ARCH=x64
 
+export HARBOUR_ROOT=/home/$USER/ah/$BUILD_ARCH/harbour
+
+export HB_INSTALL_PREFIX=$HARBOUR_ROOT
 
 export PATH=$HARBOUR_ROOT/bin:$PATH
 
@@ -18,3 +21,7 @@ if [ ! -e $HARBOUR_ROOT/lib/libssl.so.1.1 ] ; then
 fi
 
 export LD_LIBRARY_PATH=$HARBOUR_ROOT/lib:.
+
+cp -av $HARBOUR_ROOT/lib/libpq.so $HOME/F18/F18/F18_0/
+cp -av $HARBOUR_ROOT/lib/libssl.so $HOME/F18/F18/F18_0/
+cp -av $HARBOUR_ROOT/lib/libcrypto.so $HOME/F18/F18/F18_0/
