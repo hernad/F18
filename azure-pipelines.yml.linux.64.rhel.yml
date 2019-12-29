@@ -36,7 +36,7 @@ jobs:
     displayName: CI-Build F18 64-bit RHEL/CENTOS7 linux
   - script: |
       cd $(Build.SourcesDirectory)
-      ./upload_localhost.sh
+      ./upload_bintray_linux.sh
     displayName: upload F18-linux-x64 version $(BUILD.BUILDNUMBER)
     env:
       BINTRAY_API_KEY: $(BINTRAY_BRINGOUT_API_KEY)
