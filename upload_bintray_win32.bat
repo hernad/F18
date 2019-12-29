@@ -65,13 +65,16 @@ mkdir tmpzip
 echo moving files to tmp\tmpzip
 powershell -Command "& { \"$ENV:FILES\".split() | foreach { move $_ tmpzip } }" 
 
-ech back from tmp\tmpzip
+echo back from tmp\tmpzip
 cd ..\..\
 
-powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"$ENV:FILE\", \"tmp\tmpzip\")}"
+powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"test.zip\")}"
+powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"$PWD\\tmp\\tmpzip\",\"$ENV:FILE\")}"
 
 echo dir %FILE%
 dir  %FILE%
+
+IF NOT EXIST %FILE% EXIT /B 10001
 
 echo uploading %FILE% to bintray ...
 
