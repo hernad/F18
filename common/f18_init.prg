@@ -16,7 +16,7 @@ THREAD STATIC s_lAlreadyRunStartup := .F. // startup funkcija vec pokrenuta
 STATIC s_cF18HomeRoot := NIL // za sve threadove identican cHomeRootDir
 STATIC s_cF18HomeBackup := NIL // svi threadovi ista backup lokacija
 STATIC s_cF18CurrentDirectory := NIL
-STATIC s_lEshell := .F.
+STATIC s_lEshell := NIL
 
 
 THREAD STATIC s_cF18Home := NIL // svaki thread ima svoj my home ovisno o tekucoj bazi
@@ -588,10 +588,6 @@ FUNCTION set_f18_home_root()
 #endif
    ENDIF
 
-   cF18eShell := GetEnv( 'F18_ESHELL' )
-   IF cF18eShell == "1"
-      s_lEshell := .T.
-   ENDIF
 
    cHome := hb_DirSepAdd( cHome )
    f18_create_dir( cHome )
@@ -602,6 +598,15 @@ FUNCTION set_f18_home_root()
 
 
 FUNCTION is_in_eshell()
+
+   IF s_lEshell == NIL
+      cF18eShell := GetEnv( 'F18_ESHELL' )
+      IF cF18eShell == "1"
+         s_lEshell := .T.
+      ELSE
+         s_lEshell := .F.
+      ENDIF
+   ENDIF
 
    RETURN s_lEshell
 
