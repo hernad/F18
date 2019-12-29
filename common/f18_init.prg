@@ -606,7 +606,6 @@ FUNCTION is_in_eshell()
       ELSE
          s_lEshell := .F.
       ENDIF
-      Alert("F18_ESHELL=" + cF18eShell)
    ENDIF
 
    RETURN s_lEshell
