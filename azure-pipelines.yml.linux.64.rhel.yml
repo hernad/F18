@@ -23,7 +23,7 @@ resources:
 jobs:
 - job: Linux_x64_Centos7
   # centos 7
-  pool: default
+  pool: Default
   variables:
     BUILD_ARCH: x64
   steps:
