@@ -34,6 +34,7 @@ cp -av $HB_ROOT/lib/libpq.so .
 cp -av $HB_ROOT/bin/psql .
 cp -av $HB_ROOT/bin/pg_dump .
 cp -av $HB_ROOT/bin/pg_restore .
+cp -av $HB_ROOT/bin/curl .
 
 FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore curl"
 
@@ -43,7 +44,7 @@ chmod +x pg_dump pg_restore
 echo "FILE=$FILE FILES=$FILES"
 zip -r -v $FILE $FILES
 
-[ ! -f $FILE ] exit 1  
+[ ! -f $FILE ] && exit 1  
 
 ls -lh $FILE
 
