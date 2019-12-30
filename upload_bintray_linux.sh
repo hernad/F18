@@ -35,7 +35,7 @@ cp -av $HB_ROOT/bin/psql .
 cp -av $HB_ROOT/bin/pg_dump .
 cp -av $HB_ROOT/bin/pg_restore .
 
-FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore"
+FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore curl"
 
 chmod +x F18-klijent
 chmod +x pg_dump pg_restore

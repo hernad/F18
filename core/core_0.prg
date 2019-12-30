@@ -108,6 +108,8 @@ FUNCTION download_file( cUrl, cDestFile )
    ELSE
       ?E "Download", cURL
    ENDIF
+   
+   // kreira se temp file
    hFile := hb_vfTempFile( @cFileName, my_home_root(), "wget_", ".tmp" )
    hb_vfClose( hFile )
 

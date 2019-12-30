@@ -333,7 +333,6 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
       IF lIzvrsiOpciju
          IF aOpcExe <> NIL // execute opcija
            IF aOpcExe[ nOdabranaStavka ] <> NIL
-
             @ nX1 + Min( nOdabranaStavka, 16 ) - 1, nY1 + 1 SAY ""
             IF ValType( aOpcExe[ nOdabranaStavka ] ) == "B"
                Eval( aOpcExe[ nOdabranaStavka ] )
@@ -341,6 +340,9 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
                MsgBeep( "meni čudan ?" + hb_ValToStr( nOdabranaStavka ) )
             ENDIF
            ENDIF
+         ELSE
+            altd()
+            RETURN nOdabranaStavka 
          ENDIF
       ENDIF
 
@@ -378,7 +380,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
          goModul:GProc( nChar )
       ENDIF
  
-      
+
       // nOldItemNo := nOdabranaStavka
       DO CASE
       CASE nChar == K_ESC
@@ -442,9 +444,9 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
 
       nGornja := iif( nOdabranaStavka > nUIMeniVelicina, nOdabranaStavka - nUIMeniVelicina + 1, 1 )
 
-      IF aOpcExe == NIL
-         EXIT
-      ENDIF
+      //IF aOpcExe == NIL
+      //   EXIT
+      //ENDIF
    ENDDO
 
    SetCursor( iif( nOldCurs == 0, 0, iif( ReadInsert(), 2, 1 ) ) )

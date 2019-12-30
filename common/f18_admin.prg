@@ -573,7 +573,9 @@ METHOD F18Admin:get_os_name()
    RETURN _os
 
 
-
+// cUrl := http://downloads.bring.out.ba"
+// cFile := "F18_MacOSX_1.4.262.gz"
+// F18Admin():download_file( cUrl, cFile, cLocalFileName )
 
 METHOD F18Admin:download_file( cUrlPath, cFileName, cLocalFileName, lEraseFile, silent, only_newer )
 
@@ -583,10 +585,8 @@ METHOD F18Admin:download_file( cUrlPath, cFileName, cLocalFileName, lEraseFile, 
 
 
    cCmd := "curl -L "
-
    cCmd += cUrlPath + cFileName // http://test.com/FILE
-
-   cCmd += " -o "
+   cCmd += " -o " + cLocalFileName
 
    IF f18_run( cCmd + " " + file_path_quote( cLocalFileName ) ) != 0
       MsgBeep( "Error: " + cCmd  + "?!" )
