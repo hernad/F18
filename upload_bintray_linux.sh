@@ -39,7 +39,7 @@ cp -av $HB_ROOT/bin/curl .
 FILES="F18-klijent libssl.so libcrypto.so libpq.so psql pg_dump pg_restore curl"
 
 chmod +x F18-klijent
-chmod +x pg_dump pg_restore
+chmod +x pg_dump pg_restore curl
 
 echo "FILE=$FILE FILES=$FILES"
 zip -r -v $FILE $FILES
