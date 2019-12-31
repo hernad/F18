@@ -393,7 +393,7 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
       hOutput[ "stdout" ] := cStdOut
       hOutput[ "stderr" ] := cStdErr
       IF nRet <> 0 .OR. lAsync
-         log_write_file( "ERR-run-1:" + cCommand + " Ret:" + AllTrim(Str( nRet )), 2 )
+         log_write_file( IIF( lAsync, "ASYNC", "ERR") + "-run-1:" + cCommand + "# RET:" + AllTrim(Str( nRet )), 2 )
       ENDIF
    ELSE
       IF Left( cCommand, 4 ) != "cmd " .AND. Left( cCommand, 5 ) != "start"
@@ -402,12 +402,12 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
             cCommand := "start " + cCommand
          ENDIF
       ENDIF
-      ?E "win32_run:", cCommand
+      //?E "win32_run:", cCommand
 
       //nRet := __WIN32_SYSTEM( cCommand )
-      nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr, lAsync )
+      nRet := hb_processRun( cCommand, NIL, NIL, NIL, lAsync )
       IF nRet <> 0 .OR. lAsync
-         log_write_file( "ERR-run-2:" + cCommand + " Ret:" + AllTrim(Str( nRet )), 2 )
+         log_write_file( IIF( lAsync, "ASYNC", "ERR") + "-run-2:" + cCommand + " Ret:" + AllTrim(Str( nRet )), 2 )
       ENDIF
    ENDIF
 

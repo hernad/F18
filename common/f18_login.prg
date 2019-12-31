@@ -1034,6 +1034,7 @@ STATIC PROCEDURE test_execute()
       
    BoxC()
 
+   cCmd := Trim(cCmd)
    f18_run( cCmd, hOutput, IIF( cAsync == "D", .T., .F. ) )
 
    IF hb_hhasKey( hOutput, "stdout" ) .and. ValType( hOutput[ "stdout" ] ) == "C"
