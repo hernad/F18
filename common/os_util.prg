@@ -638,29 +638,9 @@ FUNCTION open_folder( cFolder )
 
 FUNCTION f18_open_mime_document( cDocument )
 
-   LOCAL cCmd := "", nError, cPrefixCmd
+   LOCAL cCmd := "start", nError, cPrefixCmd
 
-   // IF Pitanje(, "Otvoriti " + AllTrim( cDocument ) + " ?", "D" ) == "N"
-   // RETURN .F.
-   // ENDIF
-
-/*
-#ifdef __PLATFORM__UNIX
-
-#ifdef __PLATFORM__DARWIN
-   cCmd += "open " + cDocument
-#else
-   cCmd += "xdg-open " + cDocument + " &"
-#endif
-
-#else __PLATFORM__WINDOWS
-
-   cCmd += "cmd /c " + cDocument
-
-#endif
-*/
-
-   // cDocument := file_path_quote( cDocument )
+   
 
    IF is_windows()
       nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .T. )
