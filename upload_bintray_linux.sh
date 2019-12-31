@@ -32,12 +32,13 @@ cp -av $HB_ROOT/lib/libssl.so .
 cp -av $HB_ROOT/lib/libcrypto.so .
 cp -av $HB_ROOT/lib/libpq.so .
 cp -av $HB_ROOT/lib/libcurl.so .
+cp -av $HB_ROOT/lib/libz.so .
 cp -av $HB_ROOT/bin/psql .
 cp -av $HB_ROOT/bin/pg_dump .
 cp -av $HB_ROOT/bin/pg_restore .
 cp -av $HB_ROOT/bin/curl .
 
-FILES="F18-klijent libssl.so libcrypto.so libpq.so libcurl.so psql pg_dump pg_restore curl"
+FILES="F18-klijent libz.so libssl.so libcrypto.so libpq.so libcurl.so psql pg_dump pg_restore curl"
 
 chmod +x F18-klijent
 chmod +x psql
