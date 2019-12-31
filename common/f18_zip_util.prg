@@ -182,13 +182,7 @@ STATIC FUNCTION __unzip( cZipFileDir, cZipFileName, cZipFileDestination, aFiles,
             ENDIF
          ENDIF
 
-         // IF nSize == 0 .AND. Right( cFile, 1 ) == "/" // directory
-         // cFile := Left( cFile, Len( cFile ) - 1 )
-         // altd()
-         // IF Directory( cFile ) != 0
-         // MakeDir( cFile )
-         // ENDIF
-         // ELSE  // file
+   
          IF lOverwriteFiles // prvo provjeri postoji li fajl, ako je u overwrite modu
 
             IF nSize > 0 .AND. File( cFile )

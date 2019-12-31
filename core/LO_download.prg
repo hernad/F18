@@ -68,7 +68,7 @@ FUNCTION LO_open_dokument( cFile )
 
    IF lUseLibreofficeSystem
       IF is_linux()
-         RETURN f18_run( "soffice --norestore --nologo " + file_path_quote( cFile ), NIL, lAsync)
+         RETURN f18_run( "LD_LIBRARY_PATH= soffice --norestore --nologo " + file_path_quote( cFile ), NIL, .T.)
       ELSE
          RETURN f18_open_mime_document( cFile )
       ENDIF

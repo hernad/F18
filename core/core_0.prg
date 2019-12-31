@@ -10,7 +10,7 @@
  */
 
 #include "f18.ch"
-
+#include "f18_ver.ch"
 
 FUNCTION harbour_init()
 

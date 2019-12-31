@@ -262,40 +262,7 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
       ENDIF
 
 
-      // DO WHILE !TB:stabilize() .AND. ( NextKey() == 0 )
-      // Tb:stabilize()
-      // ENDDO
-
-      // DO WHILE !lKeyPressed .AND. !TB:Stabilize()
-      // lKeyPressed := ( nKey := Inkey(, hb_bitOr( Set( _SET_EVENTMASK ), HB_INKEY_EXT ) ) ) != 0
-      // hb_idleSleep( 0.5 )
-      // altd()
-      // ENDDO
-
-      // IF lKeyPressed
-      // lKeyPressed := .F.
-      // Ch := hb_keyStd( nKey )
-      // ENDIF
-
-
-
-/*
-      IF !TBInitialized
-         TBInitialized := .T.
-         Eval( TB:SkipBlock, 1 )
-         Eval( TB:SkipBlock, - 1 )
-      ENDIF
-*/
-
-      // IF nCiklus == 2
-      // Ch := 0
-      // ELSE
-
-      // Ch := Inkey( 0 )
-
-      // ENDIF
-      // hb_idleSleep( 0.2 )
-
+    
 
       DO CASE
 

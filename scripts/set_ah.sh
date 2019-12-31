@@ -25,3 +25,5 @@ export LD_LIBRARY_PATH=$HARBOUR_ROOT/lib:.
 cp -av $HARBOUR_ROOT/lib/libpq.so $HOME/F18/F18/F18_0/
 cp -av $HARBOUR_ROOT/lib/libssl.so $HOME/F18/F18/F18_0/
 cp -av $HARBOUR_ROOT/lib/libcrypto.so $HOME/F18/F18/F18_0/
+
+

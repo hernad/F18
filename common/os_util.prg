@@ -344,7 +344,7 @@ HB_FUNC( __WIN32_SYSTEM )
         WaitForSingleObject( pi.hProcess, INFINITE );
 
         GetExitCodeProcess( pi.hProcess, &exitCode );
-        printf( "exitcode =%d", exitCode );
+        //printf( "exitcode =%d", exitCode );
 
         iResult = exitCode;
 
@@ -398,61 +398,72 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
          ENDIF
       ENDIF
       ?E "win32_run:", cCommand
+
       nRet := __WIN32_SYSTEM( cCommand )
       ?E "win32_run exit:", nRet
    ENDIF
 
    RETURN nRet
+
+#else // linux
+
+altd()
+   IF lAsync
+      nRet := __run_system( cCommand + "&" ) // .AND. ( is_linux() .OR. is_mac()
+   ELSE
+      /* hb_processRun( <cCommand>, [ <cStdIn> ], [ @<cStdOut> ], [ @<cStdErr> ], ;
+                     [ <lDetach> ] ) --> <nResult> */
+      nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr, lAsync )
+   ENDIF
+
+   ?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
+
+   IF nRet == 0
+      info_bar( "run1", cCommand  + " : " + cStdOut + " : " + cStdErr )
+   ELSE
+      error_bar( "run1", cCommand  + " " + " : " + cStdOut + " : " + cStdErr )
+      cPrefixCmd := get_run_prefix_cmd( cCommand )
+
+      IF lAsync
+         nRet := __run_system( cPrefixCmd + cCommand + "&" )
+      ELSE
+         nRet := hb_processRun( cPrefixCmd + cCommand, NIL, @cStdOut, @cStdErr )
+      ENDIF
+
+      ?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
+
+
+      IF nRet == 0
+         info_bar( "run2", cPrefixCmd + cCommand + " : " + cStdOut + " : " + cStdErr )
+      ELSE
+         // error_bar( "run2", cPrefixCmd + cCommand  + " : " + cStdOut + " : " + cStdErr )
+         log_write_file("run2:" + cPrefixCmd + cCommand  + " : " + cStdOut + " : " + cStdErr, 2 )
+
+         nRet := __run_system( cCommand )  // npr. copy komanda trazi system run a ne hbprocess run
+         //?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
+         IF nRet <> 0
+            // error_bar( "run3", cCommand + " : " + cStdOut + " : " + cStdErr )
+            cMsg := "ERR run3 cmd: " + cCommand + " : " + cStdOut + " : " + cStdErr
+            log_write_file( cMsg, 2 )
+
+            cCommand := "LD_LIBRARY_PATH= " + cCommand
+            nRet := __run_system( cCommand )
+            IF nRet <> 0
+              error_bar( "run4:", cCommand + " : " + cStdOut + " : " + cStdErr )
+              cMsg := "ERR run4 cmd: " + cCommand + " : " + cStdOut + " : " + cStdErr
+              log_write_file( cMsg, 2 )
+            ENDIF
+         ENDIF
+
+   ENDIF
+
+   ENDIF
+
+   IF ValType( hOutput ) == "H"
+   hOutput[ "stdout" ] := cStdOut // hash matrica
+   hOutput[ "stderr" ] := cStdErr
+   ENDIF
 #endif
-
-IF lAsync
-nRet := __run_system( cCommand + "&" ) // .AND. ( is_linux() .OR. is_mac()
-ELSE
-// cCommand := get_run_cmd_with_prefix( cCommand, lAsync )
-nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr, lAsync )
-ENDIF
-
-?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
-
-IF nRet == 0
-info_bar( "run1", cCommand  + " : " + cStdOut + " : " + cStdErr )
-ELSE
-error_bar( "run1", cCommand  + " " + " : " + cStdOut + " : " + cStdErr )
-cPrefixCmd := get_run_prefix_cmd( cCommand )
-
-// #ifdef __PLATFORM__UNIX
-IF lAsync
-nRet := __run_system( cPrefixCmd + cCommand + "&" )
-ELSE
-nRet := hb_processRun( cPrefixCmd + cCommand, NIL, @cStdOut, @cStdErr )
-ENDIF
-// # else
-// nRet := hb_processRun( cPrefixCmd + cCommand, NIL, @cStdOut, @cStdErr, lAsync )
-// #endif
-?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
-
-
-IF nRet == 0
-info_bar( "run2", cPrefixCmd + cCommand + " : " + cStdOut + " : " + cStdErr )
-ELSE
-error_bar( "run2", cPrefixCmd + cCommand  + " : " + cStdOut + " : " + cStdErr )
-
-nRet := __run_system( cCommand )  // npr. copy komanda trazi system run a ne hbprocess run
-?E cCommand, nRet, "stdout:", cStdOut, "stderr:", cStdErr
-IF nRet <> 0
-error_bar( "run3", cCommand + " : " + cStdOut + " : " + cStdErr )
-cMsg := "ERR run cmd: " + cCommand + " : " + cStdOut + " : " + cStdErr
-log_write( cMsg, 2 )
-ENDIF
-
-ENDIF
-
-ENDIF
-
-IF ValType( hOutput ) == "H"
-hOutput[ "stdout" ] := cStdOut // hash matrica
-hOutput[ "stderr" ] := cStdErr
-ENDIF
 
    RETURN nRet
 
