@@ -393,7 +393,7 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
       hOutput[ "stdout" ] := cStdOut
       hOutput[ "stderr" ] := cStdErr
       IF nRet <> 0 .OR. lAsync
-         log_write_file( IIF( lAsync, "ASYNC", "ERR") + "-run-1:" + cCommand + "# RET:" + AllTrim(Str( nRet )), 2 )
+         log_write_file( IIF( lAsync, "ASYNC", "ERR") + "ERR-run-1:" + cCommand + "# RET:" + AllTrim(Str( nRet )), 2 )
       ENDIF
    ELSE
       IF Left( cCommand, 4 ) != "cmd " .AND. Left( cCommand, 5 ) != "start"
@@ -646,12 +646,13 @@ FUNCTION open_folder( cFolder )
 
 FUNCTION f18_open_mime_document( cDocument )
 
-   LOCAL cCmd := "start", nError, cPrefixCmd
+   LOCAL cCmd := "", nError, cPrefixCmd
 
    
 
    IF is_windows()
-      nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .T. )
+      cCmd := "cmd /c start "
+      nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .F. ) // start daje async efekat, ako stavimo .T. proces zakuca
    ELSE
       cPrefixCmd := get_run_prefix_cmd()
       cCmd += cPrefixCmd
