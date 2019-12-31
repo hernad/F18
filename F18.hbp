@@ -26,7 +26,8 @@ common_legacy/*.prg
 fiskalizacija/*.prg
 reports/*.prg
 {win}F18.rc
-{linux}-ldflag+=${hb_lib}/libz.a
+# static libz.a
+#{linux}-ldflag+=${hb_lib}/libz.a
 
 -static
 -inc
