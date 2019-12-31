@@ -27,3 +27,7 @@ cp -av $HARBOUR_ROOT/lib/libssl.so $HOME/F18/F18/F18_0/
 cp -av $HARBOUR_ROOT/lib/libcrypto.so $HOME/F18/F18/F18_0/
 
 
+export F18_POS=1
+export F18_GT_CONSOLE=1
+export F18_DEBUG=1
+

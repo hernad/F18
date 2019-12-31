@@ -787,8 +787,8 @@ METHOD F18Login:administratorske_opcije( nXPos, nYPos )
    // AAdd( aMeniOpcije, " V. vpn podrška" )
    // AAdd( aMeniExec, {|| vpn_support() } )
 
-   // AAdd( aMeni, " X. diag info" )
-   // AAdd( aMeniExec, {|| diag_info() } )
+   AAdd( aMeni, "X. test execute" )
+   AAdd( aMeniExec, {|| test_execute() } )
    f18_menu( "adm4", .F., nIzbor, aMeni, aMeniExec )
 
    RETURN .T.
@@ -1019,3 +1019,29 @@ STATIC FUNCTION _skip_it( aOrganizacije, curr, skiped )
    ENDIF
 
    RETURN( skiped )
+
+STATIC PROCEDURE test_execute()
+
+   LOCAL cCmd := SPACE(400)
+   LOCAL cAsync := "N"
+   LOCAL hOutput := hb_Hash()
+
+   Box(, 2, 60)
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Komanda:" GET cCmd PICT "@S45"
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Async D/N:" GET cAsync PICT "@S!" ;
+            VALID  cAsync $ "DN"
+      READ
+      
+   BoxC()
+
+   f18_run( cCmd, hOutput, IIF( cAsync == "D", .T., .F. ) )
+
+   IF hb_hhasKey( hOutput, "stdout" ) .and. ValType( hOutput[ "stdout" ] ) == "C"
+      Alert( "OUT:" + hOutput[ "stdout" ] )
+   ENDIF
+
+   IF hb_hhasKey( hOutput, "stderr" ) .and. ValType( hOutput[ "stderr" ] ) == "C"
+      Alert( "ERR:" + hOutput[ "stderr" ] )
+   ENDIF
+   
+   RETURN

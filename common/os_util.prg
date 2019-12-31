@@ -366,6 +366,8 @@ HB_FUNC( __WIN32_SYSTEM )
 
 /*
   f18_run( 'lo_dbf_xlsx.cmd "c:\temp\test.dbf" "c:\temp"')
+
+  lAsync - .T. - asynchronous execute
 */
 
 FUNCTION f18_run( cCommand, hOutput, lAsync )
@@ -376,7 +378,7 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
    LOCAL cMsg, nI, nNumArgs
 
    IF lAsync == NIL
-      lAsync := .F. // default sync execute
+      lAsync := .F.
    ENDIF
 
 
@@ -387,9 +389,12 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
    ENDIF
 
    IF ValType( hOutput ) == "H"
-      nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr )
+      nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr, lAsync )
       hOutput[ "stdout" ] := cStdOut
       hOutput[ "stderr" ] := cStdErr
+      IF nRet <> 0 .OR. lAsync
+         log_write_file( "ERR-run-1:" + cCommand + " Ret:" + AllTrimStr( nRet ), 2 )
+      ENDIF
    ELSE
       IF Left( cCommand, 4 ) != "cmd " .AND. Left( cCommand, 5 ) != "start"
          cCommand := "cmd /c " + cCommand
@@ -399,8 +404,11 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
       ENDIF
       ?E "win32_run:", cCommand
 
-      nRet := __WIN32_SYSTEM( cCommand )
-      ?E "win32_run exit:", nRet
+      //nRet := __WIN32_SYSTEM( cCommand )
+      nRet := hb_processRun( cCommand, NIL, @cStdOut, @cStdErr, lAsync )
+      IF nRet <> 0 .OR. lAsync
+         log_write_file( "ERR-run-2:" + cCommand + " Ret:" + AllTrimStr( nRet ), 2 )
+      ENDIF
    ENDIF
 
    RETURN nRet
