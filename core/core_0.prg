@@ -155,10 +155,10 @@ FUNCTION f18_exe_path()
 
 
 FUNCTION f18_util_path()
-   RETURN SLASH + ".." + SLASH + "F18_util" + SLASH
+   RETURN ".." + SLASH + "F18_util" + SLASH
 
 FUNCTION f18_template_path()
-   RETURN SLASH + ".." + SLASH + "F18_template" + SLASH
+   RETURN ".." + SLASH + "F18_template" + SLASH
 
 FUNCTION f18_template_file_name( cTemplate )
    RETURN f18_exe_path() + f18_template_path() + cTemplate

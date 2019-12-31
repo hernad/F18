@@ -586,9 +586,11 @@ METHOD F18Admin:download_file( cUrlPath, cFileName, cLocalFileName, lEraseFile, 
 
    cCmd := "curl -L "
    cCmd += cUrlPath + cFileName // http://test.com/FILE
-   cCmd += " -o " + cLocalFileName
+   cCmd += " -s -o " + file_path_quote( cLocalFileName )
 
-   IF f18_run( cCmd + " " + file_path_quote( cLocalFileName ) ) != 0
+   IF f18_run( cCmd ) != 0
+      log_write_file( "DOWNLOAD:" + cCmd, 2 )
+
       MsgBeep( "Error: " + cCmd  + "?!" )
       RETURN .F.
    ENDIF
