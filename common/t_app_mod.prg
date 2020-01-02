@@ -253,7 +253,8 @@ PROCEDURE k_f11()
         Box(, 3, 60)
            @ box_x_koord() + 1, box_y_koord() + 2 SAY "Programski modul?" GET cModul ;
                VALID Trim(cModul) $ "POS#FIN#KALK#FAKT#OS#LD#VIRM#EPDV" PICT "@!"
-           @ box_x_koord() + 2, box_y_koord() + 2 SAY "Predhodna godina D/N?" GET cPredhodna
+           @ box_x_koord() + 2, box_y_koord() + 2 SAY "Predhodna godina D/N?" GET cPredhodna ;
+               VALID cPredhodna $ "DN" PICT "@!" V
            READ
         BoxC()
 
