@@ -791,14 +791,14 @@ BEGIN
 
         cIdRoba := rec_roba.id;
         nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
-        nPosStanjeStanje := {{ item_prodavnica }}.pos_dostupno_artikal(cIdRoba ); -- raspolozivo_stanje prema pos stanje
+        nPosStanjeStanje := {{ item_prodavnica }}.pos_dostupno_artikal( cIdRoba ); -- raspolozivo_stanje prema pos stanje
 
         -- select prijem-povrat+ulaz_ostalo as ulaz, realizacija+izlaz_ostalo as izlaz, kalo,
         --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,
         --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) - kalo as raspolozivo_stanje,
         --   round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) as cijena from p4.pos_artikal_stanje( 'P47402', '1900-01-01', current_date );
 
-        -- raspolozivo_stanje prema kartici
+        -- raspolozivo_stanje prema pos kartici artikla
         EXECUTE  'SELECT prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,' ||
            'case when (prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)) = 0 then 0 else round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) end as cijena'
            ' FROM {{ item_prodavnica }}.pos_artikal_stanje( $1, $2, $3 )'
@@ -821,107 +821,113 @@ BEGIN
 END;
 $$;
 
+-- select p2.gen_pocetno_stanje(); # -> nRbrErr - broj stavki sa errorom;
+
+-- select * from public.pos_tmp;
+-- stanje:
+-- select * from public.pos_items_tmp;
+
+-- stavke sa karticom van integriteta:
+-- select * from pos_items_error_tmp; 
 
 
-
-CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.gen_pos_pocetno_stanje() RETURNS integer
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.gen_pocetno_stanje() RETURNS integer
        LANGUAGE plpgsql
        AS $$
 DECLARE
       cIdPos varchar DEFAULT '1 ';
-      nCount integer;
-      rec_stanje RECORD;
       rec_roba RECORD;
       cIdRoba varchar;
+      nKarticaCijena numeric;
       nOsnovnaCijena numeric;
-      nStanje numeric;
+      nPosStanjeStanje numeric;
+      nKarticaStanje numeric;
+      cMsg varchar;
       cBrDokNew varchar;
       dDatum date;
-      nRbr integer;
       uuidPos uuid;
-      nStaraCijena numeric;
-      nNovaCijena numeric;
-      nDostupnaKolicina numeric;
-      cMsg varchar;
-      lInsertovano boolean;
+      nRbr integer;
+      nRbrErr integer;
+
 BEGIN
 
-      nCount := 0;
-      cIdRoba := 'X#X';
-      cBrDokNew := NULL;
-      dDatum := current_date;
-      nRbr := 1;
-      lInsertovano := FALSE;
+      DROP TABLE IF EXISTS public.pos_tmp;
+      DROP TABLE IF EXISTS public.pos_items_tmp;
+      DROP TABLE IF EXISTS public.pos_items_error_tmp;
+      CREATE TABLE public.pos_tmp AS TABLE {{ item_prodavnica }}.pos WITH NO DATA;
+      CREATE TABLE public.pos_items_tmp AS TABLE {{ item_prodavnica }}.pos_items WITH NO DATA;
+      CREATE TABLE public.pos_items_error_tmp AS TABLE {{ item_prodavnica }}.pos_items WITH NO DATA;
 
-      FOR rec_stanje IN SELECT id, dat_od, dat_do, idroba, roba_id, ulazi, izlazi, kol_ulaz, kol_izlaz, cijena, ncijena from {{ item_prodavnica }}.pos_stanje
-                           UNION
-                        SELECT 0 id, current_date dat_od, current_date dat_do, 'X#X' idroba, null roba_id, '{}'::text[] ulazi, '{}'::text[] izlazi, 0 kol_ulaz, 0 kol_izlaz, 9999 cijena, 0 ncijena
-                        ORDER BY idroba
+      -- now: 2020-01-02 => 2020-01-01
+      -- SELECT date_trunc('MONTH',now())::DATE;
+      dDatum :=  date_trunc('MONTH',now())::DATE;
+
+      cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '02', dDatum);
+      
+      insert into public.pos_tmp(idPos,idVd,brDok,datum,dat_od,opis,korisnik)
+                  values(cIdPos, '02', cBrDokNew, dDatum, dDatum, 'GEN pocetno stanje', current_user)
+               RETURNING dok_id into uuidPos;
+
+      nRbr := 0;
+      nRbrErr := 0;
+
+      FOR rec_roba IN SELECT * from {{ item_prodavnica }}.roba
+            ORDER BY id
       LOOP
-         -- ovaj union dole se radi zato da uvijek prodje kroz ovaj if nakon odredjenog artikla
-         IF cIdRoba <> rec_stanje.idroba THEN
-           IF cIdRoba <> 'X#X' AND lInsertovano THEN
-              -- uvijek na kraju zadati stavku sa kolicinom 0 i aktuelnom osnovnom cijenom da se ne bi promijenila osnovna cijena
-              nStanje := 0;
-              EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
-                using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nOsnovnaCijena, nOsnovnaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
-                nRbr := nRbr + 1;
-           END IF;
-           cIdRoba := rec_stanje.idroba;
-           nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
-           nDostupnaKolicina := {{ item_prodavnica }}.pos_dostupno_artikal_za_cijenu(cIdRoba, nOsnovnaCijena, 0);
-           lInsertovano := FALSE;
-           IF nOsnovnaCijena = 0 THEN
-              CONTINUE;
-           END IF;
+
+        cIdRoba := rec_roba.id;
+        nOsnovnaCijena := {{ item_prodavnica }}.pos_dostupna_osnovna_cijena_za_artikal( cIdRoba );
+        nPosStanjeStanje := {{ item_prodavnica }}.pos_dostupno_artikal( cIdRoba ); -- raspolozivo_stanje prema pos stanje
+
+        -- select prijem-povrat+ulaz_ostalo as ulaz, realizacija+izlaz_ostalo as izlaz, kalo,
+        --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,
+        --   prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) - kalo as raspolozivo_stanje,
+        --   round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) as cijena from p4.pos_artikal_stanje( 'P47402', '1900-01-01', current_date );
+
+        -- raspolozivo_stanje prema pos kartici artikla
+        EXECUTE  'SELECT prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,' ||
+           'case when (prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)) = 0 then 0 else round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) end as cijena'
+           ' FROM {{ item_prodavnica }}.pos_artikal_stanje( $1, $2, $3 )'
+
+         USING cIdRoba, '1900-01-01'::date, current_date
+         INTO nKarticaStanje, nKarticaCijena;
+
+         IF nKarticaCijena<>0 AND nOsnovnaCijena <> nKarticaCijena THEN
+             nRbrErr := nRbrErr + 1;
+             EXECUTE 'insert into public.pos_items_error_tmp(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+                 using cIdPos, '02', cBrDokNew, dDatum, uuidPos, nRbrErr, cIdRoba, 
+                       nKarticaStanje, nOsnovnaCijena, nKarticaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
+ 
+            cMsg := format('%s : osnovna cijena: %s KARTICA knjig stanje: %s,  cijena: %s pos_stanje: %s', cIdRoba, nOsnovnaCijena, nKarticaStanje, nKarticaCijena, nPosStanjeStanje);
+            RAISE INFO 'ERROR_POS_STANJE_KARTICA: %', cMsg;
          END IF;
 
-         nStanje := rec_stanje.kol_ulaz - rec_stanje.kol_izlaz;
-         IF nStanje <> 0 AND rec_stanje.cijena <> nOsnovnaCijena AND (rec_stanje.ncijena = 0) THEN
-            -- stavka koja je bila osnovna cijena je 'ziva' a nije po aktuelnoj osnovnoj cijeni
-
-            -- ili stavka sa popustom kod koje je negativno stanje a popust je istekao
-            -- OR (rec_stanje.ncijena<>0 and nStanje < 0 and dat_do < current_date)) THEN
-
-            IF nStanje > 0 THEN
-               nStaraCijena := rec_stanje.cijena;
-               nNovaCijena := nOsnovnaCijena;
-            ELSE
-               nStaraCijena := nOsnovnaCijena;
-               nNovaCijena := rec_stanje.cijena;
-               nStanje := - nStanje;
-               IF nDostupnaKolicina - nStanje > 0 THEN
-                 nDostupnaKolicina := nDostupnaKolicina - nStanje;
-               ELSE
-                  cMsg := format('%s : cij: %s stanje: %s', cIdRoba, rec_stanje.cijena, -nStanje);
-                  PERFORM {{ item_prodavnica }}.logiraj( current_user::varchar, 'ERROR_FIX_POS_STANJE', cMsg);
-                  RAISE INFO 'preskacemo % % % nema dovoljno osnovne kolicine', cIdRoba, rec_stanje.cijena, -nStanje;
-                  CONTINUE;
-               END IF;
-            END IF;
-
-            IF cBrDokNew IS NULL THEN
-               cBrDokNew := {{ item_prodavnica }}.pos_novi_broj_dokumenta(cIdPos, '29', dDatum);
-               insert into {{ item_prodavnica }}.pos(idPos,idVd,brDok,datum,dat_od,opis)
-                    values(cIdPos, '29', cBrDokNew, dDatum, dDatum, 'GEN: fix pos_stanje')
-                    RETURNING dok_id into uuidPos;
-            END IF;
-
-            SELECT * FROM {{ item_prodavnica }}.roba
-               WHERE id=cIdRoba
-               INTO rec_roba;
-
-            EXECUTE 'insert into {{ item_prodavnica }}.pos_items(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
-                 using cIdPos, '29', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, nStanje, nStaraCijena, nNovaCijena, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
-             lInsertovano := TRUE;
-             nRbr := nRbr + 1;
-             nCount := nCount + 1;
-
+         IF nKarticaStanje <> 0 THEN
+            nRbr := nRbr + 1;
+            EXECUTE 'insert into public.pos_items_tmp(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)'
+                     using cIdPos, '02', cBrDokNew, dDatum, uuidPos, nRbr, cIdRoba, 
+                       nKarticaStanje, nOsnovnaCijena, 0, rec_roba.naz, rec_roba.idtarifa, rec_roba.jmj;
          END IF;
-
-
       END LOOP;
 
-      RETURN nCount;
+      RETURN nRbrErr;
+END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.import_pocetno_stanje() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+BEGIN
+      INSERT INTO {{ item_prodavnica }}.pos_knjig(idPos,idVd,brDok,datum,dat_od,opis,korisnik)
+           SELECT idPos,idVd,brDok,datum,dat_od,opis,korisnik
+              FROM public.pos_tmp;
+
+      INSERT INTO {{ item_prodavnica }}.pos_items_knjig(idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj)
+           SELECT idPos,idVd,brDok,datum,dok_id,rbr,idRoba,kolicina,cijena,ncijena,robanaz,idtarifa,jmj
+              FROM public.pos_items_tmp;
+
+      RETURN 0;
 END;
 $$;
