@@ -11,9 +11,11 @@
 
 DO $$
 BEGIN
-    ALTER SUBSCRIPTION {{ item.name }}_pos_sub REFRESH PUBLICATION;
+    -- bilo ovako do 01.02.2020
+    -- ALTER SUBSCRIPTION {{ item.name }}_pos_sub REFRESH PUBLICATION;
+    ALTER SUBSCRIPTION {{ item.name }}_pos_sub_{{ tekuca_godina }} REFRESH PUBLICATION;
 EXCEPTION WHEN OTHERS THEN
-    RAISE INFO 'subskripcija {{ item.name }}_pos_sub ne postoji?!';
+    RAISE INFO 'subskripcija {{ item.name }}_pos_sub_{{ tekuca_godina }} ne postoji?!';
     RAISE INFO '% %', SQLERRM, SQLSTATE;
 END;
 $$;
