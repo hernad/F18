@@ -1,7 +1,19 @@
 CREATE SCHEMA IF NOT EXISTS {{ prod_schema }};
 
-DROP ROLE IF EXISTS xtrole;
-CREATE ROLE xtrole NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+
+DO
+$do$
+BEGIN
+   IF NOT EXISTS (
+      SELECT                       -- SELECT list can stay empty for this
+      FROM   pg_catalog.pg_roles
+      WHERE  rolname = 'xtrole') THEN
+
+      CREATE ROLE xtrole NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+   END IF;
+END
+$do$;
+
 
 GRANT ALL ON SCHEMA {{ prod_schema }} TO xtrole;
 ALTER ROLE admin SUPERUSER INHERIT CREATEDB CREATEROLE REPLICATION;

@@ -907,7 +907,7 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
 
    OTHERWISE
 
-      nKeyHandlerRetEvent := goModul:gProc( nKey, nKeyHandlerRetEvent )
+      nKeyHandlerRetEvent := goModul:globalni_key_handler( nKey, nKeyHandlerRetEvent )
       IF nKeyHandlerRetEvent == DE_ABORT
          RETURN DE_ABORT
       ENDIF

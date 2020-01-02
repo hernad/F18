@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION public.zatvori_otvst(
-	cidkonto text,
-	cidpartner text,
-	cbrdok text)
+	cIdkonto text,
+	cIdpartner text,
+	cBrdok text)
     RETURNS integer
     LANGUAGE 'plpgsql'
 
@@ -51,7 +51,6 @@ END;
 $BODY$;
 
 ALTER FUNCTION public.zatvori_otvst(text, text, text) OWNER TO admin;
-
 
 
 DO $$ BEGIN

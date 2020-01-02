@@ -45,7 +45,7 @@ CLASS TAppMod
    METHOD setName
    METHOD RUN
    METHOD QUIT
-   METHOD gProc
+   METHOD globalni_key_handler
    METHOD gParams
    METHOD setTGVars
 
@@ -120,7 +120,7 @@ METHOD run()
    RETURN .T.
 
 
-METHOD gProc( nKey, nKeyHandlerRetEvent )
+METHOD globalni_key_handler( nKey, nKeyHandlerRetEvent )
 
    LOCAL lPushWa
    LOCAL nI
@@ -129,11 +129,7 @@ METHOD gProc( nKey, nKeyHandlerRetEvent )
 
    DO CASE
 
-#ifdef __PLATFORM__DARWIN
-   CASE ( nKey == K_F12 )
-#else
    CASE ( nKey == K_INS )
-#endif
       show_insert_over_stanje( .T. )
       // RETURN DE_CONT
 
@@ -154,20 +150,24 @@ METHOD gProc( nKey, nKeyHandlerRetEvent )
    CASE ( nKey == K_SH_F2 .OR. nKey == K_CTRL_F2 )
       PPrint()
 
-   CASE nKey == iif( is_mac(), K_F10, K_SH_F10 )
+   CASE nKey == K_SH_F10
       ::gParams()
 
-   CASE nKey == iif( is_mac(), K_F9, K_SH_F9 )
+   CASE nKey == K_SH_F9
       Adresar()
 
    CASE nKey == K_F1
       k_f1()
 
+   CASE nKey == K_F11
+      k_f11()
+
    CASE nKey == K_F12
       k_f12()
 
-   CASE nKey == K_CTRL_F12
+   CASE nKey == K_CTRL_F12 // eShell koristi da uradi shutdown aplikacije!
       k_ctrl_f12()
+
    OTHERWISE
       IF !( "U" $ Type( "gaKeys" ) )
          FOR nI := 1 TO Len( gaKeys )
@@ -239,23 +239,49 @@ PROCEDURE k_f1()
    RETURN
 
 
+PROCEDURE k_f11()
+
+   LOCAL cModul := PADR(gModul,6), cPredhodna := "N"
+   LOCAL cCmd
+   LOCAL GetList := {}
+
+   IF is_in_eshell()
+      IF Pitanje(, "Pokrenuti novi programski modul?", "N" ) == "D"
+        Box(, 3, 60)
+           @ box_x_koord() + 1, box_y_koord() + 2 SAY "Programski modul?" GET cModul ;
+               VALID Trim(cModul) $ "POS#FIN#KALK#FAKT#OS#LD#VIRM#EPDV"
+           @ box_x_koord() + 2, box_y_koord() + 2 SAY "Predhodna godina D/N?" GET cPredhodna
+           READ
+        BoxC()
+
+        IF LastKey() == K_ESC
+            RETURN
+        ENDIF
+
+        cCmd := "start.f18." + LOWER(TRIM(cModul)) + IIF( cPredhodna == "D", "_pg", "")
+        // e.g. eShell cmd 'start.f18.fin_pg' 
+        eshell_cmd( cCmd )
+      ENDIF
+   ENDIF
+
+   RETURN
+
+
 PROCEDURE k_f12()
 
-   LOCAL cScr, nI, cColor
-
-   //Beep(4)
-   //info_bar( "tty", "refresh/0" )
-   cColor := SetColor()
-   SAVE SCREEN TO cScr
-   setColor(cColor)
-   RESTORE SCREEN FROM cScr
-
+   IF is_in_eshell()
+      IF Pitanje(, "Pokrenuti predhodnu godinu?", "N" ) == "D"
+        // e.g. eShell cmd 'start.f18.fin_pg' 
+        eshell_cmd(  "start.f18." + LOWER(gModul) + "_pg")
+      ENDIF
+   ENDIF
 
    RETURN
 
 
 PROCEDURE k_ctrl_f12()
 
+   // eShell koristi da uradi shutdown aplikacije
    __Quit()   
    
    RETURN

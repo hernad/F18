@@ -341,7 +341,6 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
             ENDIF
            ENDIF
          ELSE
-            altd()
             RETURN nOdabranaStavka 
          ENDIF
       ENDIF
@@ -377,7 +376,7 @@ FUNCTION meni_0_inkey_draw( nX1, nY1, nX2, nY2, aOpc, aOpcExe, nOdabranaStavka, 
 
 
       IF ValType( goModul ) == "O"
-         goModul:GProc( nChar )
+         goModul:globalni_key_handler( nChar )
       ENDIF
  
 
