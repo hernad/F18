@@ -70,6 +70,7 @@ FUNCTION crtaj_naslovni_ekran()
    // povrsina iza menija
    DispBox( 5, 0, nMaxRows - 1, nMaxCols - 1, B_DOUBLE + BOX_CHAR_BACKGROUND, f18_color_invert()  )
 
+   @ f18_max_rows() - 3, 4 SAY "<F1> - Help" COLOR f18_color_invert()
    IF !in_tekuca_godina()
       ispisi_velikim_slovima( AllTrim( Str( tekuca_sezona() ) ), f18_max_rows() - 12, f18_max_cols() - 5, ;
          iif( in_tekuca_godina(), F18_COLOR_NAGLASENO, F18_COLOR_NAGLASENO_STARA_SEZONA ) )

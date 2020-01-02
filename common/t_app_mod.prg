@@ -229,12 +229,16 @@ METHOD setTGVars()
 
 PROCEDURE k_f1()
 
-   IF is_windows()
-      // Run("mode con: cols=120 lines=40")
-   ELSE
-      // Run("stty cols 120 rows 40")
-   ENDIF
-   // info_bar( "tty", "120 x 40" )
+   Box(, 5, 60)
+     @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "<F11> - pokretanje novog programskog modula"
+     @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "<F12> - pokretanje predhodne godine"
+
+     @ box_x_koord() + 4, box_y_koord() + 2 SAY8 " <E>  - log - greške"
+     @ box_x_koord() + 5, box_y_koord() + 2 SAY8 " <I>  - log - informacije"
+     
+     inkey(0)
+
+   BoxC()
 
    RETURN
 
@@ -246,7 +250,6 @@ PROCEDURE k_f11()
    LOCAL GetList := {}
 
    IF is_in_eshell()
-      IF Pitanje(, "Pokrenuti novi programski modul?", "N" ) == "D"
         Box(, 3, 60)
            @ box_x_koord() + 1, box_y_koord() + 2 SAY "Programski modul?" GET cModul ;
                VALID Trim(cModul) $ "POS#FIN#KALK#FAKT#OS#LD#VIRM#EPDV" PICT "@!"
@@ -261,7 +264,6 @@ PROCEDURE k_f11()
         cCmd := "f18.start." + LOWER(TRIM(cModul)) + IIF( cPredhodna == "D", "_pg", "")
         // e.g. eShell cmd 'start.f18.fin_pg' 
         eshell_cmd( cCmd )
-      ENDIF
    ENDIF
 
    RETURN
