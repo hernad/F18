@@ -7,8 +7,5 @@
 -- END;
 -- $$;
 
--- od 2020 treba ovako:
--- ALTER SUBSCRIPTION {{ item.name }}_pos_sub_{{ predhodna_godina }} DISABLE;
 
--- za sada radi 2019 treba ovako:
 ALTER SUBSCRIPTION {{ item.name }}_pos_sub DISABLE;
