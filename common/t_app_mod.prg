@@ -258,7 +258,7 @@ PROCEDURE k_f11()
             RETURN
         ENDIF
 
-        cCmd := "start.f18." + LOWER(TRIM(cModul)) + IIF( cPredhodna == "D", "_pg", "")
+        cCmd := "f18.start." + LOWER(TRIM(cModul)) + IIF( cPredhodna == "D", "_pg", "")
         // e.g. eShell cmd 'start.f18.fin_pg' 
         eshell_cmd( cCmd )
       ENDIF
@@ -273,7 +273,7 @@ PROCEDURE k_f12()
       IF Pitanje(, "Pokrenuti predhodnu godinu?", "N" ) == "D"
         // e.g. eShell cmd 'start.f18.fin_pg' 
         altd()
-        eshell_cmd(  "start.f18." + LOWER(gModul) + "_pg")
+        eshell_cmd(  "f18.start." + LOWER(gModul) + "_pg")
       ENDIF
    ENDIF
 
