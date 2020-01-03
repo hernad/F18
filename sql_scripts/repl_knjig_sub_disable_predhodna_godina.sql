@@ -8,4 +8,4 @@
 -- $$;
 
 
-ALTER SUBSCRIPTION {{ item.name }}_pos_sub DISABLE;
+ALTER SUBSCRIPTION {{ item.name }}_pos_sub_{{ predhodna_godina }} DISABLE;
