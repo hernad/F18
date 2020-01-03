@@ -27,7 +27,7 @@ $$;
 DO $$
 BEGIN
 
-ALTER PUBLICATION {{ item.name }}_pos_knjig DROP TABLE {{ item.name }}.roba;
+ALTER PUBLICATION {{ item.name }}_pos_knjig_{{ tekuca_godina }} DROP TABLE {{ item.name }}.roba;
 
 EXCEPTION WHEN OTHERS THEN
    RAISE INFO '{{ item.name }}_pos_knjig roba uklonjena';
