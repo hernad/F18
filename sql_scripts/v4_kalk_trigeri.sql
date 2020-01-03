@@ -186,7 +186,7 @@ CREATE TRIGGER t_kalk_disable_delete
 
 DROP TRIGGER IF EXISTS t_kalk_disable_insert on f18.kalk_doks;
 CREATE TRIGGER t_kalk_disable_insert
-   BEFORE DELETE ON f18.kalk_doks
+   BEFORE INSERT ON f18.kalk_doks
    FOR EACH ROW EXECUTE PROCEDURE f18.before_kalk_doks_insert();
 
 -- f18.kalk_kalk -> p15.pos_items_knjig -> ...
