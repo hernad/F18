@@ -2,7 +2,7 @@ DO $$
 BEGIN
    CREATE PUBLICATION {{ prod_schema }}_pos_{{ tekuca_godina }};
 EXCEPTION WHEN OTHERS THEN
-   RAISE INFO '{{ prod_schema }}_pos publikacija_{{ tekuca_godina } postoji replikacija';
+   RAISE INFO '{{ prod_schema }}_pos publikacija_{{ tekuca_godina }} postoji replikacija';
    RAISE INFO '% %', SQLERRM, SQLSTATE;
 END;
 $$;
@@ -13,7 +13,7 @@ BEGIN
    ALTER PUBLICATION {{ prod_schema }}_pos_{{ tekuca_godina }} ADD TABLE {{ prod_schema }}.pos;
    ALTER PUBLICATION {{ prod_schema }}_pos_{{ tekuca_godina }} ADD TABLE {{ prod_schema }}.pos_items;
 EXCEPTION WHEN OTHERS THEN
-   RAISE INFO 'tabele su vec ubacene u publikaciju {{ prod_schema }}_pos_{{ tekuca_godina }';
+   RAISE INFO 'tabele su vec ubacene u publikaciju {{ prod_schema }}_pos_{{ tekuca_godina }}';
    RAISE INFO '% %', SQLERRM, SQLSTATE;
 END;
 $$;
