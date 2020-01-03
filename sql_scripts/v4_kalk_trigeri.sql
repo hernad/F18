@@ -165,11 +165,29 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION f18.before_kalk_doks_insert() RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+   IF ( OLD.idvd IN ('02','80') ) and NOT current_user IN ('postgres', 'admin') THEN
+       RAISE EXCEPTION '02, 80 nije dozvoljeno azuriranje % : % - % - %', current_user, NEW.idvd, NEW.brdok, NEW.datdok;
+   END IF;
+
+   RETURN NEW;
+END;
+$$;
+
 
 DROP TRIGGER IF EXISTS t_kalk_disable_delete on f18.kalk_doks;
 CREATE TRIGGER t_kalk_disable_delete
    BEFORE DELETE ON f18.kalk_doks
    FOR EACH ROW EXECUTE PROCEDURE f18.before_kalk_doks_delete();
+
+
+DROP TRIGGER IF EXISTS t_kalk_disable_insert on f18.kalk_doks;
+CREATE TRIGGER t_kalk_disable_insert
+   BEFORE DELETE ON f18.kalk_doks
+   FOR EACH ROW EXECUTE PROCEDURE f18.before_kalk_doks_insert();
 
 -- f18.kalk_kalk -> p15.pos_items_knjig -> ...
 
