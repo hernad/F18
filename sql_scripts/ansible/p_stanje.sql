@@ -919,6 +919,7 @@ CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.import_pocetno_stanje() RETURNS
        LANGUAGE plpgsql
        AS $$
 DECLARE
+ 
 BEGIN
       INSERT INTO {{ item_prodavnica }}.pos_knjig(idPos,idVd,brDok,datum,dat_od,opis,korisnik)
            SELECT idPos,idVd,brDok,datum,dat_od,opis,korisnik
@@ -929,5 +930,39 @@ BEGIN
               FROM public.pos_items_tmp;
 
       RETURN 0;
+END;
+$$;
+
+
+------  public.roba_tmp sadrzi barkodove
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.patch_barkod_by_roba_tmp() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   rec_roba RECORD;
+   nCount integer;
+   cBarKod varchar;
+BEGIN
+
+      nCount := 0;
+
+      FOR rec_roba IN SELECT * from {{ item_prodavnica }}.roba
+                        ORDER BY id
+      LOOP
+         -- p2.roba nema barkod
+         IF rec_roba.barkod IS NULL THEN
+            -- uzeti barkod iz roba_tmp
+
+            SELECT barkod FROM public.roba_tmp WHERE id=rec_roba.id
+                INTO cBarkod;
+         
+            -- update p2.roba
+            UPDATE {{ item_prodavnica }}.roba SET barkod=cBarkod WHERE id=rec_roba.id;
+            nCount := nCount + 1; 
+         END IF;
+      END LOOP;
+  
+      RETURN nCount;
 END;
 $$;
