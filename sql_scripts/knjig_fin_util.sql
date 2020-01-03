@@ -189,25 +189,25 @@ ALTER FUNCTION public.sp_duguje_stanje_2(param_konto character varying, param_pa
 --
 -- Name: sp_dugovanja(date, date, character varying, character varying); Type: FUNCTION; Schema: public; Owner: admin
 --
-CREATE OR REPLACE FUNCTION public.sp_dugovanja(date, date, character varying, character varying) RETURNS SETOF public.t_dugovanje
-    LANGUAGE sql
-    AS $_$
-SELECT idkonto::varchar as konto_id, partn.naz::varchar as partner_naz, refer.naz::varchar as referent_naz, idpartner::varchar as partner_id,
-pocstanje::numeric(16,2) as i_pocstanje, dospjelo::numeric(16,2) as i_dospjelo,
-nedospjelo::numeric(16,2) as i_nedospjelo,
-(dospjelo+nedospjelo+pocstanje)::numeric(16,2) as i_ukupno, valuta,
- convert_to_integer(get_sifk( 'PARTN', 'ROKP', idpartner  )) AS rok_pl  from
-(
-select idkonto, idpartner, (dug_0.sp_duguje_stanje_2).*  from
-(
-   SELECT  idkonto, idpartner, sp_duguje_stanje_2( kto_partner.idkonto, kto_partner.idpartner, $1, $2)  FROM
-     (select  distinct on (idkonto, idpartner) idkonto, idpartner
-      from fmk.fin_suban where  trim(idpartner)<>'' and trim(idkonto) LIKE $3 and trim(idpartner) LIKE $4
-      order by idkonto, idpartner) as kto_partner
-) as dug_0
-) as dugovanja
-LEFT JOIN fmk.partn ON partn.id=dugovanja.idpartner
-LEFT OUTER JOIN fmk.refer ON (partn.idrefer = refer.id);
-$_$;
-
-ALTER FUNCTION public.sp_dugovanja(date, date, character varying, character varying) OWNER TO admin;
+-- CREATE OR REPLACE FUNCTION public.sp_dugovanja(date, date, character varying, character varying) RETURNS SETOF public.t_dugovanje
+--     LANGUAGE sql
+--     AS $_$
+-- SELECT idkonto::varchar as konto_id, partn.naz::varchar as partner_naz, refer.naz::varchar as referent_naz, idpartner::varchar as partner_id,
+-- pocstanje::numeric(16,2) as i_pocstanje, dospjelo::numeric(16,2) as i_dospjelo,
+-- nedospjelo::numeric(16,2) as i_nedospjelo,
+-- (dospjelo+nedospjelo+pocstanje)::numeric(16,2) as i_ukupno, valuta,
+--  convert_to_integer(get_sifk( 'PARTN', 'ROKP', idpartner  )) AS rok_pl  from
+-- (
+-- select idkonto, idpartner, (dug_0.sp_duguje_stanje_2).*  from
+-- (
+--    SELECT  idkonto, idpartner, sp_duguje_stanje_2( kto_partner.idkonto, kto_partner.idpartner, $1, $2)  FROM
+--      (select  distinct on (idkonto, idpartner) idkonto, idpartner
+--       from fmk.fin_suban where  trim(idpartner)<>'' and trim(idkonto) LIKE $3 and trim(idpartner) LIKE $4
+--       order by idkonto, idpartner) as kto_partner
+-- ) as dug_0
+-- ) as dugovanja
+-- LEFT JOIN fmk.partn ON partn.id=dugovanja.idpartner
+-- LEFT OUTER JOIN fmk.refer ON (partn.idrefer = refer.id);
+-- $_$;
+-- 
+-- ALTER FUNCTION public.sp_dugovanja(date, date, character varying, character varying) OWNER TO admin;
