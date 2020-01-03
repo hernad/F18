@@ -169,7 +169,7 @@ CREATE OR REPLACE FUNCTION f18.before_kalk_doks_insert() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-   IF ( OLD.idvd IN ('02','80') ) and NOT current_user IN ('postgres', 'admin') THEN
+   IF ( NEW.idvd IN ('02','80') ) and NOT current_user IN ('postgres', 'admin') THEN
        RAISE EXCEPTION '02, 80 nije dozvoljeno azuriranje % : % - % - %', current_user, NEW.idvd, NEW.brdok, NEW.datdok;
    END IF;
 
