@@ -27,6 +27,7 @@ FUNCTION fakt_azuriraj_dokumente_u_pripremi( lSilent )
       lSilent := .F.
    ENDIF
 
+altd()
    close_open_fakt_tabele()
 
    IF ( !lSilent .AND. Pitanje( "FAKT_AZUR", "Sigurno želite izvršiti ažuriranje (D/N) ?", "N" ) == "N" )
@@ -253,7 +254,7 @@ STATIC FUNCTION fakt_azur_dbf( cIdFirma, cIdTipDok, cBrDok, lSilent )
 
    LOCAL _a_memo
    LOCAL hRec
-   LOCAL _fakt_totals
+   LOCAL hFaktTotali
    LOCAL _fakt_doks_data
    LOCAL _fakt_doks2_data
    LOCAL cMsg
@@ -388,7 +389,7 @@ FUNCTION get_fakt_doks2_data( cIdFirma, cIdTipDok, cBrDok )
 
 FUNCTION get_fakt_doks_data( cIdFirma, cIdTipDok, cBrDok )
 
-   LOCAL _fakt_totals
+   LOCAL hFaktTotali
    LOCAL hFaktData
    LOCAL aMemo
 
@@ -422,10 +423,10 @@ FUNCTION get_fakt_doks_data( cIdFirma, cIdTipDok, cBrDok )
    hFaktData[ "fisc_date" ] := CToD( "" )
    hFaktData[ "fisc_time" ] := PadR( "", 10 )
 
-   _fakt_totals := izracunaj_ukupni_iznos_dokumenta_iz_pripreme( cIdFirma, cIdTipDok, cBrDok )
+   hFaktTotali := izracunaj_ukupni_iznos_dokumenta_iz_pripreme( cIdFirma, cIdTipDok, cBrDok )
 
-   hFaktData[ "iznos" ] := _fakt_totals[ "iznos" ]
-   hFaktData[ "rabat" ] := _fakt_totals[ "rabat" ]
+   hFaktData[ "iznos" ] := hFaktTotali[ "iznos" ]
+   hFaktData[ "rabat" ] := hFaktTotali[ "rabat" ]
 
    RETURN hFaktData
 

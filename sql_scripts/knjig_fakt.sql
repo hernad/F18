@@ -236,3 +236,229 @@ $$;
 
 ALTER FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) OWNER TO admin;
 
+
+------------------ CREATE TABLES --------------------------------------------
+
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_doks (
+    idfirma character(2) NOT NULL,
+    idtipdok character(2) NOT NULL,
+    brdok character varying(12) NOT NULL,
+    partner character varying(200),
+    datdok date,
+    dindem character(3),
+    iznos numeric(12,3),
+    rabat numeric(12,3),
+    rezerv character(1),
+    m1 character(1),
+    idpartner character(6),
+    sifra character(6),
+    brisano character(1),
+    idvrstep character(2),
+    datpl date,
+    idpm character(15),
+    oper_id integer,
+    fisc_rn numeric(10,0),
+    dat_isp date,
+    dat_otpr date,
+    dat_val date,
+    fisc_st numeric(10,0),
+    fisc_time character(10),
+    fisc_date date,
+    obradjeno timestamp without time zone DEFAULT now(),
+    korisnik text DEFAULT "current_user"()
+);
+
+ALTER TABLE fmk.fakt_doks OWNER TO admin;
+
+--
+-- Name: fakt_doks2; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_doks2 (
+    idfirma character(2),
+    idtipdok character(2),
+    brdok character varying(12),
+    k1 character(15),
+    k2 character(15),
+    k3 character(15),
+    k4 character(20),
+    k5 character(20),
+    n1 numeric(15,2),
+    n2 numeric(15,2)
+);
+
+ALTER TABLE fmk.fakt_doks2 OWNER TO admin;
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_fakt (
+    idfirma character(2) NOT NULL,
+    idtipdok character(2) NOT NULL,
+    brdok character varying(12) NOT NULL,
+    datdok date,
+    idpartner character(6),
+    dindem character(3),
+    zaokr numeric(1,0),
+    rbr character(3) NOT NULL,
+    podbr character(2),
+    idroba character(10),
+    serbr character(15),
+    kolicina numeric(14,5),
+    cijena numeric(14,5),
+    rabat numeric(8,5),
+    porez numeric(9,5),
+    txt text,
+    k1 character(4),
+    k2 character(4),
+    m1 character(1),
+    brisano character(1),
+    idroba_j character(10),
+    idvrstep character(2),
+    idpm character(15),
+    c1 character(20),
+    c2 character(20),
+    c3 character(20),
+    n1 numeric(10,3),
+    n2 numeric(10,3),
+    idrelac character(4)
+);
+ALTER TABLE fmk.fakt_fakt OWNER TO admin;
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_fakt_atributi (
+    idfirma character(2) NOT NULL,
+    idtipdok character(2) NOT NULL,
+    brdok character(12) NOT NULL,
+    rbr character(3) NOT NULL,
+    atribut character(50) NOT NULL,
+    value character varying
+);
+
+ALTER TABLE fmk.fakt_fakt_atributi OWNER TO admin;
+
+--
+-- Name: fakt_ftxt; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_ftxt (
+    id character(2),
+    match_code character(10),
+    naz character varying
+);
+
+ALTER TABLE fmk.fakt_ftxt OWNER TO admin;
+
+--
+-- Name: fakt_gen_ug; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_gen_ug (
+    dat_obr date,
+    dat_gen date,
+    dat_u_fin date,
+    kto_kup character(7),
+    kto_dob character(7),
+    opis character(100),
+    brdok_od character(8),
+    brdok_do character(8),
+    fakt_br numeric(5,0),
+    saldo numeric(15,5),
+    saldo_pdv numeric(15,5),
+    brisano character(1),
+    dat_val date
+);
+
+ALTER TABLE fmk.fakt_gen_ug OWNER TO admin;
+
+--
+-- Name: fakt_gen_ug_p; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_gen_ug_p (
+    dat_obr date,
+    idpartner character(6),
+    id_ugov character(10),
+    saldo_kup numeric(15,5),
+    saldo_dob numeric(15,5),
+    d_p_upl_ku date,
+    d_p_prom_k date,
+    d_p_prom_d date,
+    f_iznos numeric(15,5),
+    f_iznos_pd numeric(15,5)
+);
+
+ALTER TABLE fmk.fakt_gen_ug_p OWNER TO admin;
+
+--
+-- Name: fakt_objekti; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_objekti (
+    id character(10),
+    naz character varying(100)
+);
+
+ALTER TABLE fmk.fakt_objekti OWNER TO admin;
+
+--
+-- Name: fakt_rugov; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_rugov (
+    id character(10),
+    idroba character(10),
+    kolicina numeric(15,4),
+    rabat numeric(6,3),
+    porez numeric(5,2),
+    k1 character(1),
+    k2 character(2),
+    dest character(6),
+    cijena numeric(15,3)
+);
+
+
+ALTER TABLE fmk.fakt_rugov OWNER TO admin;
+
+--
+-- Name: fakt_ugov; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_ugov (
+    id character(10) NOT NULL,
+    datod date,
+    idpartner character(6),
+    datdo date,
+    vrsta character(1),
+    idtipdok character(2),
+    naz character(20),
+    aktivan character(1),
+    dindem character(3),
+    idtxt character(2),
+    zaokr numeric(1,0),
+    lab_prn character(1),
+    iddodtxt character(2),
+    a1 numeric(12,2),
+    a2 numeric(12,2),
+    b1 numeric(12,2),
+    b2 numeric(12,2),
+    txt2 character(2),
+    txt3 character(2),
+    txt4 character(2),
+    f_nivo character(1),
+    f_p_d_nivo numeric(5,0),
+    dat_l_fakt date,
+    def_dest character(6)
+);
+
+ALTER TABLE fmk.fakt_ugov OWNER TO admin;
+
+--
+-- Name: fakt_upl; Type: TABLE; Schema: fmk; Owner: admin
+--
+
+CREATE TABLE IF NOT EXISTS fmk.fakt_upl (
+    datupl date,
+    idpartner character(6),
+    opis character(100),
+    iznos numeric(12,2)
+);
+
+ALTER TABLE fmk.fakt_upl OWNER TO admin;
