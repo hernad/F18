@@ -158,9 +158,9 @@ FUNCTION f18_sql_schema( cTable )
 
    IF cTable $ "pos#pos_items#vrstep#pos_osob#pos_strad#pos_stanje#pos_fisk_doks"
       IF programski_modul() == "POS"
-         RETURN sql_primarna_schema() + "." + cTable
-      ELSE
          RETURN pos_prodavnica_sql_schema() + "." + cTable
+      ELSE
+         RETURN sql_primarna_schema() + "." + cTable
       ENDIF
    ENDIF
 

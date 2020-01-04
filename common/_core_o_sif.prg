@@ -166,7 +166,7 @@ FUNCTION o_vrste_placanja()
    LOCAL cTabela := "vrstep"
 
    SELECT ( F_VRSTEP )
-   IF !use_sql_sif  ( cTabela )
+   IF !use_sql_sif( cTabela )
       error_bar( "o_sql", "open sql " + cTabela )
       RETURN .F.
    ENDIF
