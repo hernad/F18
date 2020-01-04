@@ -117,22 +117,6 @@ STATIC FUNCTION set_a_kol( aImeKol, aKol )
 
    RETURN .T.
 
-/*
-FUNCTION st_dok_status( cIdFirma, cIdVd, cBrDok )
-
-   LOCAL nTArea := Select()
-   LOCAL cStatus := "na stanju"
-
-   IF cIdVd == "80" .AND. dok_u_procesu( cIdFirma, cIdVd, cBrDok )
-      cStatus := "u procesu"
-   ENDIF
-
-   cStatus := PadR( cStatus, 10 )
-
-   SELECT ( nTArea )
-
-   RETURN cStatus
-*/
 
 STATIC FUNCTION brow_keyhandler( Ch )
 

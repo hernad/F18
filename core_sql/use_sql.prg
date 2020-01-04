@@ -150,20 +150,35 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 
 
 FUNCTION f18_sql_schema( cTable )
-
+  
+   LOCAL cModul := programski_modul()
    LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "log" }
+   
+   // npr. "f18.partn"
    IF "." $ cTable
       RETURN cTable
    ENDIF
 
-   IF cTable $ "pos#pos_items#vrstep#pos_osob#pos_strad#pos_stanje#pos_fisk_doks"
-      IF programski_modul() == "POS"
-         RETURN pos_prodavnica_sql_schema() + "." + cTable
+   IF cTable == "vrstep" 
+      IF cModul == "POS"
+        // identicna tabela vrstep postoji u POS
+        RETURN pos_prodavnica_sql_schema() + "." + cTable
       ELSE
-         RETURN sql_primarna_schema() + "." + cTable
+        // i u FAKT
+        RETURN sql_primarna_schema() + "." + cTable
       ENDIF
    ENDIF
 
+   IF cTable $ "pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks"
+      IF cModul == "POS" 
+         RETURN sql_primarna_schema() + "." + cTable
+      ELSE
+         // KALK modul maloprodaja koristi pos tabele ovako
+         RETURN pos_prodavnica_sql_schema() + "." + cTable
+      ENDIF
+   ENDIF
+
+   // navedene su f18 tabele, ovim tabelama se pristupa preko public view-ova 
    IF AScan( aF18Tables, cTable ) > 0
       RETURN "public." + cTable
    ENDIF

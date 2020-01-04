@@ -23,7 +23,7 @@ STATIC s_oPDF
 STATIC s_cLinija
 STATIC s_nRobaNazivSirina := 39
 
-FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
+FUNCTION kalk_stampa_dok_01_02_80( lStampatiBezNabavneCijene )
 
    LOCAL nCol1 := 0
    LOCAL nPom := 0
@@ -55,7 +55,9 @@ FUNCTION kalk_stampa_dok_80( lStampatiBezNabavneCijene )
    cPKonto := kalk_pripr->pkonto
    cPKonto2 := kalk_pripr->IdKonto2
 
-   IF cIdVd == "02"
+   IF cIdVd == "01"
+      cNaslov := "KALK PROD POČETNO STANJE"
+   ELSEIF cIdVd == "02"
       cNaslov := "POS POČETNO STANJE"
    ELSEIF cIdVd == "61"
       cNaslov := "POS Zahtjev za narudžbu robe"

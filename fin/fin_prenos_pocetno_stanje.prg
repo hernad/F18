@@ -639,7 +639,11 @@ STATIC FUNCTION fin_pocetno_stanje_get_data( hParam, oFinQuery, oKontoDataset, o
 
 
 
+/*
+    tekuca baza podataka bringout_2020
 
+    switch_to_database( hDbParams, 'bringout_2020', 2019 )
+*/
 
 FUNCTION switch_to_database( hDbParams, cDatabase, nYear )
 
@@ -649,11 +653,15 @@ FUNCTION switch_to_database( hDbParams, cDatabase, nYear )
 
    my_server_logout()
 
+   
    IF nYear <> Year( Date() )
+      // zadata godina 2019, tekuca 2020
       hDbParams[ "database" ] := Left( cDatabase, Len( cDatabase ) - 4 ) + AllTrim( Str( nYear ) )
    ELSE
       hDbParams[ "database" ] := cDatabase
+      
    ENDIF
+   info_bar("db", "switch to db: " + hDbParams[ "database"] )
    my_server_params( hDbParams )
    my_server_login( hDbParams )
    set_sql_search_path()

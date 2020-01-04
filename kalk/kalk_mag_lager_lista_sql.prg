@@ -18,10 +18,10 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
    LOCAL oDataSet
    LOCAL cQuery, cWhere
    LOCAL dDatOd, dDatDo, dDatPocStanje, cIdKontoMagacin
-   LOCAL _art_filter, _dok_filter, _tar_filter, _part_filter
+   LOCAL cFilterArtikli, cFilterDokumenti, cFilterTarife, cFilterPartneri
    LOCAL hServerParams := my_server_params()
    LOCAL cDatabaseTekuca := my_server_params()[ "database" ]
-   LOCAL nYearSezona, nYearTekuca
+   LOCAL nYearPredhodna, nYearTekuca
    LOCAL cZaokruzenje := AllTrim( Str( gZaokr ) )
 
    IF hParams == NIL
@@ -35,7 +35,7 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
    dDatDo := hParams[ "datum_do" ]
    dDatPocStanje := hParams[ "datum_ps" ]
    cIdKontoMagacin := hParams[ "m_konto" ]
-   nYearSezona := Year( dDatDo )
+   nYearPredhodna := Year( dDatDo )
    nYearTekuca := Year( dDatPocStanje )
 
 
@@ -75,9 +75,10 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
    cQuery += " GROUP BY k.idroba "
    cQuery += " ORDER BY k.idroba "
 
+   stop_refresh_operations()
 
    IF lPocetnoStanje
-      switch_to_database( hServerParams, cDatabaseTekuca, nYearSezona )
+      switch_to_database( hServerParams, cDatabaseTekuca, nYearPredhodna )
    ENDIF
 
    IF lPocetnoStanje
@@ -102,6 +103,7 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
       switch_to_database( hServerParams, cDatabaseTekuca, nYearTekuca )
    ENDIF
 
+   start_refresh_operations()
    RETURN oDataSet
 
 
@@ -112,11 +114,11 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    LOCAL _ret := .T.
    LOCAL cIdKontoMagacin, dDatOd, dDatDo, _nule, _pr_nab, _roba_tip_tu, dDatPocStanje, _do_nab
    LOCAL nX := 1
-   LOCAL _art_filter := Space( 300 )
-   LOCAL _tar_filter := Space( 300 )
-   LOCAL _part_filter := Space( 300 )
-   LOCAL _dok_filter := Space( 300 )
-   LOCAL _brfakt_filter := Space( 300 )
+   LOCAL cFilterArtikli := Space( 300 )
+   LOCAL cFilterTarife := Space( 300 )
+   LOCAL cFilterPartneri := Space( 300 )
+   LOCAL cFilterDokumenti := Space( 300 )
+   LOCAL cFilterBrFakt := Space( 300 )
    LOCAL _curr_user := my_user()
    LOCAL cMinimalneKolicineDN
 
@@ -160,15 +162,15 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
 
    ++nX
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po artiklima:" GET _art_filter PICT "@S50"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po artiklima:" GET cFilterArtikli PICT "@S50"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po tarifama:" GET _tar_filter PICT "@S50"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po tarifama:" GET cFilterTarife PICT "@S50"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po partnerima:" GET _part_filter PICT "@S50"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po partnerima:" GET cFilterPartneri PICT "@S50"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po v.dokument:" GET _dok_filter PICT "@S50"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po v.dokument:" GET cFilterDokumenti PICT "@S50"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po broju.fakt:" GET _brfakt_filter PICT "@S50"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Filter po broju.fakt:" GET cFilterBrFakt PICT "@S50"
 
    ++nX
    ++nX
@@ -206,11 +208,11 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    hParams[ "pr_nab" ] := _pr_nab
    hParams[ "do_nab" ] := _do_nab
    hParams[ "min_kol" ] := cMinimalneKolicineDN
-   hParams[ "filter_dok" ] := _dok_filter
-   hParams[ "filter_roba" ] := _art_filter
-   hParams[ "filter_partner" ] := _part_filter
-   hParams[ "filter_tarifa" ] := _tar_filter
-   hParams[ "filter_brfakt" ] := _brfakt_filter
+   hParams[ "filter_dok" ] := cFilterDokumenti
+   hParams[ "filter_roba" ] := cFilterArtikli
+   hParams[ "filter_partner" ] := cFilterPartneri
+   hParams[ "filter_tarifa" ] := cFilterTarife
+   hParams[ "filter_brfakt" ] := cFilterBrFakt
 
    RETURN _ret
 
@@ -218,13 +220,12 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
 
 FUNCTION kalk_pocetno_stanje_magacin()
 
-   LOCAL lPocetnoStanje := .T.
    LOCAL hParams := NIL
    LOCAL oDataSet
    LOCAL nCount := 0
 
    stop_refresh_operations()
-   oDataSet := kalk_mag_lager_lista_sql( @hParams, lPocetnoStanje )
+   oDataSet := kalk_mag_lager_lista_sql( @hParams, .T. )
 
    IF oDataSet == NIL
       start_refresh_operations()

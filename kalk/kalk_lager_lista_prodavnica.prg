@@ -97,12 +97,6 @@ FUNCTION kalk_lager_lista_prodavnica()
    dDatOd := Date()
    dDatDo := Date()
 
-   // PRIVATE cPrikazNuleDN := "D"
-   // PRIVATE cSredCij := "N"
-   // PRIVATE cPrikazDob := "N"
-   // PRIVATE cPlVrsta := Space( 1 )
-   // PRIVATE cPrikK2 := "N"
-
    Box(, 18, 70 )
 
    cGrupacijaK1 := Space( 4 )
@@ -184,19 +178,10 @@ FUNCTION kalk_lager_lista_prodavnica()
    IF lPocStanje
       o_kalk_pripr()
    ENDIF
-   // lPrikK2 := .F.
-   // IF cPrikK2 == "D"
-   // lPrikK2 := .T.
-   // ENDIF
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    find_kalk_by_pkonto_idroba( self_organizacija_id(), cIdKonto )
    MsgC()
-
-   // PRIVATE lSMark := .F.
-   // IF Right( Trim( cIdRobaUslov ), 1 ) = "*"
-   // lSMark := .T.
-   // ENDIF
 
    IF cIdRobaFilter <> ".t."
       cFilter += ".and." + cIdRobaFilter   // roba
@@ -289,7 +274,6 @@ FUNCTION kalk_lager_lista_prodavnica()
       nMpvIzlaz := 0
       nNvUlaz := 0
       nNvIzlaz := 0
-      // nRabat := 0
 
       IF roba->tip $ "TU"
          SKIP

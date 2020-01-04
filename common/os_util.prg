@@ -415,7 +415,6 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
 
 #else // linux
 
-altd()
    IF lAsync
       nRet := __run_system( cCommand + "&" ) // .AND. ( is_linux() .OR. is_mac()
    ELSE

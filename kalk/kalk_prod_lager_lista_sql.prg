@@ -17,11 +17,11 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
 
    LOCAL oDataSet
    LOCAL cQuery, _where
-   LOCAL _dat_od, _dat_do, _dat_ps, _p_konto
+   LOCAL _dat_od, _dat_do, _dat_ps, cPKonto
    LOCAL _art_filter, _dok_filter, _tar_filter, _part_filter
-   LOCAL _db_params := my_server_params()
-   LOCAL _tek_database := my_server_params()[ "database" ]
-   LOCAL _year_sez, _year_tek
+   LOCAL hServerParams := my_server_params()
+   LOCAL cTekucaBaza := my_server_params()[ "database" ]
+   LOCAL nYearPredhodna, nYearTekuca
 
    IF hParams == NIL
       hParams := hb_Hash()
@@ -33,15 +33,15 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
    _dat_od := hParams[ "datum_od" ]
    _dat_do := hParams[ "datum_do" ]
    _dat_ps := hParams[ "datum_ps" ]
-   _p_konto := hParams[ "p_konto" ]
-   _year_sez := Year( _dat_do )
-   _year_tek := Year( _dat_ps )
+   cPKonto := hParams[ "p_konto" ]
+   nYearPredhodna := Year( _dat_do )
+   nYearTekuca := Year( _dat_ps )
 
 
    _where := " WHERE "
    _where += _sql_date_parse( "k.datdok", _dat_od, _dat_do )
    _where += " AND " + _sql_cond_parse( "k.idfirma", self_organizacija_id() )
-   _where += " AND " + _sql_cond_parse( "k.pkonto", _p_konto )
+   _where += " AND " + _sql_cond_parse( "k.pkonto", cPKonto )
 
    cQuery := " SELECT " + ;
       " k.idroba, k.idtarifa, " + ;
@@ -78,7 +78,8 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
    cQuery += " ORDER BY k.idroba, k.idtarifa "
 
    IF lPocetnoStanje
-      switch_to_database( _db_params, _tek_database, _year_sez )
+      switch_to_database( hServerParams, cTekucaBaza, nYearPredhodna )
+      MsgO( "Preuzimanje podataka " + AllTrim(Str( nYearPredhodna)))
    ENDIF
 
    IF lPocetnoStanje
@@ -88,6 +89,9 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
    ENDIF
 
    oDataSet := run_sql_query( cQuery )
+   IF lPocetnoStanje
+      MsgC()
+   ENDIF
 
    IF !is_var_objekat_tpqquery( oDataSet )
       oDataSet := NIL
@@ -100,7 +104,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
    MsgC()
 
    IF lPocetnoStanje
-      switch_to_database( _db_params, _tek_database, _year_tek )
+      switch_to_database( hServerParams, cTekucaBaza, nYearTekuca )
    ENDIF
 
    RETURN oDataSet
@@ -111,7 +115,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
 FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
 
    LOCAL _ret := .T.
-   LOCAL _p_konto, _dat_od, _dat_do, _nule, _pr_nab, cRobaTipUslugeDN, _dat_ps
+   LOCAL cPKonto, _dat_od, _dat_do, _nule, _pr_nab, cRobaTipUslugeDN, _dat_ps
    LOCAL nX := 1
    LOCAL _art_filter := Space( 300 )
    LOCAL _tar_filter := Space( 300 )
@@ -125,7 +129,7 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
       lPocetnoStanje := .F.
    ENDIF
 
-   _p_konto := fetch_metric( "kalk_lager_lista_prod_id_konto", _curr_user, PadR( "1330", 7 ) )
+   cPKonto := fetch_metric( "kalk_lager_lista_prod_id_konto", _curr_user, PadR( "1330", 7 ) )
    _pr_nab := fetch_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, "D" )
    _nule := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, "N" )
    _dat_od := fetch_metric( "kalk_lager_lista_prod_datum_od", _curr_user, Date() -30 )
@@ -147,7 +151,7 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
 
    ++nX
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prodavnički konto:" GET _p_konto VALID P_Konto( @_p_konto )
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prodavnički konto:" GET cPKonto VALID P_Konto( @cPKonto )
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Datum od:" GET _dat_od
@@ -187,7 +191,7 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
       RETURN .F.
    ENDIF
 
-   set_metric( "kalk_lager_lista_prod_id_konto", _curr_user, _p_konto )
+   set_metric( "kalk_lager_lista_prod_id_konto", _curr_user, cPKonto )
    set_metric( "kalk_lager_lista_prod_po_nabavnoj", _curr_user, _pr_nab )
    set_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, _nule )
    set_metric( "kalk_lager_lista_prod_datum_od", _curr_user, _dat_od )
@@ -196,7 +200,7 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
    hParams[ "datum_od" ] := _dat_od
    hParams[ "datum_do" ] := _dat_do
    hParams[ "datum_ps" ] := _dat_ps
-   hParams[ "p_konto" ] := _p_konto
+   hParams[ "p_konto" ] := cPKonto
    hParams[ "nule" ] := _nule
    hParams[ "roba_tip_tu" ] := cRobaTipUslugeDN
    hParams[ "pr_nab" ] := _pr_nab
@@ -210,14 +214,13 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
 
 
 
-FUNCTION kalk_prod_pocetno_stanje()
+FUNCTION kalk_pocetno_stanje_prodavnica()
 
-   LOCAL _ps := .T.
    LOCAL hParams := NIL
    LOCAL oDataSet
    LOCAL nCount := 0
 
-   oDataSet := kalk_prod_lager_lista_sql( @hParams, _ps )
+   oDataSet := kalk_prod_lager_lista_sql( @hParams, .T. )
 
    IF oDataSet == NIL
       RETURN .F.
@@ -241,9 +244,9 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
 
    LOCAL nCount := 0
    LOCAL cKalkBrDok := ""
-   LOCAL _kalk_tip := "80"
+   LOCAL cIdVd := "01"
    LOCAL _kalk_datum := hParams[ "datum_ps" ]
-   LOCAL _p_konto := hParams[ "p_konto" ]
+   LOCAL cPKonto := hParams[ "p_konto" ]
    LOCAL cRobaTipUslugeDN := hParams[ "roba_tip_tu" ]
    LOCAL oRow, _sufix
    LOCAL nUlaz, nIzlaz, nNVUlaz, nNVIzlaz, nMpvUlaz, nMpvIzlaz, cIdRoba, cIdTarifa
@@ -252,20 +255,15 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
    o_kalk_pripr()
    o_kalk_doks()
 
-   //IF glKalkBrojacPoKontima
-      // _sufix := kalk_sufiks_brdok( _p_konto )
-      cKalkBrDok := kalk_get_next_broj_v5( self_organizacija_id(), _kalk_tip, _p_konto )
-   //ELSE
-    //  cKalkBrDok := kalk_get_next_broj_v5( self_organizacija_id(), _kalk_tip, NIL )
-   //ENDIF
+   cKalkBrDok := kalk_get_next_broj_v5( self_organizacija_id(), cIdVd, cPKonto )
 
    IF Empty( cKalkBrDok )
       cKalkBrDok := PadR( "00001", 8 )
    ENDIF
 
-   select_o_koncij( _p_konto )
+   select_o_koncij( cPKonto )
 
-   MsgO( "Punjenje pripreme podacima početnog stanja u toku, dok: " + _kalk_tip + "-" + AllTrim( cKalkBrDok ) )
+   MsgO( "Punjenje pripreme podacima početnog stanja u toku, dok: " + cIdVd + "-" + AllTrim( cKalkBrDok ) )
 
    oDataset:GoTo( 1 )
 
@@ -297,18 +295,17 @@ STATIC FUNCTION kalk_prod_insert_ps_into_pripr( oDataset, hParams )
 
       hRec := dbf_get_rec()
       hRec[ "idfirma" ] := self_organizacija_id()
-      hRec[ "idvd" ] := _kalk_tip
+      hRec[ "idvd" ] := cIdVd
       hRec[ "brdok" ] := cKalkBrDok
       hRec[ "rbr" ] := ++nCount
       hRec[ "datdok" ] := _kalk_datum
       hRec[ "idroba" ] := cIdRoba
-      hRec[ "idkonto" ] := _p_konto
-      hRec[ "pkonto" ] := _p_konto
+      hRec[ "idkonto" ] := cPKonto
+      hRec[ "pkonto" ] := cPKonto
       hRec[ "idtarifa" ] := cIdTarifa
       hRec[ "tcardaz" ] := "%"
       hRec[ "pu_i" ] := "1"
-      hRec[ "brfaktp" ] := PadR( "lPocetnoStanje", Len( hRec[ "brfaktp" ] ) )
-      // hRec[ "datfaktp" ] := _kalk_datum
+      hRec[ "brfaktp" ] := PadR( "POCST", Len( hRec[ "brfaktp" ] ) )
       hRec[ "tmarza2" ] := "A"
       hRec[ "kolicina" ] := ( nUlaz - nIzlaz )
       hRec[ "nc" ] := ( nNVUlaz - nNVIzlaz ) / ( nUlaz - nIzlaz )

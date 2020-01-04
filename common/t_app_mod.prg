@@ -229,12 +229,13 @@ METHOD setTGVars()
 
 PROCEDURE k_f1()
 
-   Box(, 5, 60)
-     @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "<F11> - pokretanje novog programskog modula"
-     @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "<F12> - pokretanje predhodne godine"
-
-     @ box_x_koord() + 4, box_y_koord() + 2 SAY8 " <E>  - log - greške"
-     @ box_x_koord() + 5, box_y_koord() + 2 SAY8 " <I>  - log - informacije"
+   Box(, 6, 60)
+     @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "  <F11>   - pokretanje novog programskog modula"
+     @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "  <F12>   - pokretanje predhodne godine"
+     @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "<Shift+F6> - prelazak u predhodnu godinu"
+     
+     @ box_x_koord() + 5, box_y_koord() + 2 SAY8 " <E>  - log - greške"
+     @ box_x_koord() + 6, box_y_koord() + 2 SAY8 " <I>  - log - informacije"
      
      inkey(0)
 

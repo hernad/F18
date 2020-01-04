@@ -416,7 +416,7 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 
          IF Empty( field->mu_i ) .AND. Empty( field->pu_i )
             Beep( 2 )
-            Msg( "Stavka broj " + Transform( field->rbr, '99999' ) + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
+            Msg( "Stavka broj " + AllTrim(Transform( field->rbr, '99999' )) + ". neobrađena (pu_i, mu_i), sa <A> pokrenite obradu" )
             my_close_all_dbf()
             RETURN .F.
          ENDIF

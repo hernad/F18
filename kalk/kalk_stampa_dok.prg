@@ -142,8 +142,8 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       ELSEIF ( cIdvd $ "19#29#71#79#72" )
          kalk_stampa_dok_19_79()
 
-      ELSEIF ( cIdvd $ "02#80#61" )
-         kalk_stampa_dok_80()
+      ELSEIF ( cIdvd $ "01#02#80#61" )
+         kalk_stampa_dok_01_02_80()
 
       ELSEIF ( cIdvd $ "81#89" )
          kalk_stampa_dok_81()
@@ -228,40 +228,6 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
 
    ENDDO  // vrti kroz kalkulacije
 
-/*
-   IF ( lDokumentZaPOS .AND. !lAzuriraniDokument .AND. gTops != "0 " )
-      IF !pdf_kalk_dokument( cIdVd )
-         START PRINT CRET
-      ENDIF
-      SELECT kalk_pripr
-      SET ORDER TO TAG "1"
-      GO TOP
-      cIdFirma := kalk_pripr->IdFirma
-      cBrDok := kalk_pripr->BrDok
-      cIdVD := kalk_pripr->IdVD
-      // IF ( cIdVd $ "11#12" )
-      // kalk_stampa_dok_11( .T. )  // maksuzija za tops - bez NC
-      // ELSEIF ( cIdVd == "80" )
-      // kalk_stampa_dok_80( .T. )
-      // ELSEIF ( cIdVd == "81" )
-      // kalk_stampa_dok_81_tops( .T. )
-      // ELSEIF ( cIdVd == "IP" )
-      // kalk_stampa_dok_ip( .T. )
-      // ELSEIF ( cIdVd $ "19#71#79" )
-      // kalk_stampa_dok_19_79()
-      // ENDIF
-      IF lCloseAllNaKraju
-         my_close_all_dbf()
-      ENDIF
-      IF !pdf_kalk_dokument( cIdVd )
-         FF
-         ENDPRINT
-      ENDIF
-
-      kalk_generisi_tops_dokumente()
-
-   ENDIF
-*/
 
    IF ( lDokumentZaFakt .AND. !lAzuriraniDokument .AND. gFakt != "0 " )
 
@@ -337,4 +303,4 @@ STATIC FUNCTION pdf_kalk_dokument( cIdVd )
    // RETURN .F.
    // ENDIF
 
-   RETURN cIdVd $ "10#14#19#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61#90#IP#29"
+   RETURN cIdVd $ "10#14#19#01#80#41#42#11#71#79#49#16#95#96#IM#21#22#72#02#81#89#61#90#IP#29"

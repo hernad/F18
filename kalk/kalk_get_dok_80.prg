@@ -19,7 +19,7 @@ MEMVAR _idfirma, _kolicina, _nc, _idroba, _pkonto, _pu_i, _mkonto, _mu_i, _datfa
 MEMVAR _idtarifa, _idvd, _idkonto2, _brfaktp, _mpcsapp
 MEMVAR _Vpc, _Mpc, _TMarza2, _Marza2, _TCarDaz, _CarDaz, _dat_od, _dat_do
 
-FUNCTION kalk_get1_80_02()
+FUNCTION kalk_get1_80_01_02()
 
    LOCAL nX := 5
    LOCAL nXCurrent := 0

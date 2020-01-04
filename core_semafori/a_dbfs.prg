@@ -239,11 +239,18 @@ FUNCTION get_a_dbf_rec( cTable, _only_basic_params )
       _only_basic_params = .F.
    ENDIF
 
+
    IF !hb_HHasKey( hServerParams, "database" ) .OR. ValType( s_hF18Dbfs[ hServerParams[ "database" ] ] ) <> "H"
       _msg := ""
       LOG_CALL_STACK _msg
-      ?E  "get_a_dbf_rec: " + cTable + " s_hF18Dbfs nije inicijalizirana " + _msg
+      log_write( "ERR-get_a_dbf_rec: " + cTable + " s_hF18Dbfs nije inicijalizirana " + _msg, 2)
    ENDIF
+
+   IF !hb_HHasKey( s_hF18Dbfs, cDatabase )
+      log_write("ERR-get_a_dbfRec-2:" + hb_ValToStr(cDatabase) )
+      RETURN NIL
+   ENDIF
+
 
    IF hb_HHasKey( s_hF18Dbfs[ cDatabase ], cTable )
       cDbfTable := cTable

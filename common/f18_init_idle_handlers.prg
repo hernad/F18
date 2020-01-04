@@ -115,6 +115,10 @@ PROCEDURE on_idle_dbf_refresh()
 
    aDbfRec := get_a_dbf_rec( cAlias, .T. )
 
+   IF aDBfRec == NIL
+      RETURN
+   ENDIF
+
    IF we_need_dbf_refresh( aDbfRec[ "table" ] )
       thread_dbfs( hb_threadStart(  @thread_dbf_refresh(), aDbfRec[ "table" ] ) )
 #ifdef F18_DEBUG_THREAD

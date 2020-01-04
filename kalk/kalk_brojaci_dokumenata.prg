@@ -80,7 +80,7 @@ FUNCTION kalk_konto_za_brojac( cIdVd, cMKonto, cPKonto )
    CASE cIdvd $ "KO#10#16#14#96#95#IM#11"  // 11-ke uzimaju konto magacina za osnovu brojaca, malo glupo, ali tako je napravljeno
       RETURN cMkonto
 
-   CASE cIdvd $ "80#81#41#42#19"
+   CASE cIdvd $ "01#80#81#41#42#19"
       RETURN cPKonto
    OTHERWISE
 

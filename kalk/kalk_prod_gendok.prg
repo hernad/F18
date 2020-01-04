@@ -22,7 +22,7 @@ FUNCTION kalk_prod_generacija_dokumenata()
    LOCAL nIzbor := 1
 
    AAdd( aOpc, "1. početno stanje prodavnica                               " )
-   AAdd( aOpcExe, {|| kalk_prod_pocetno_stanje() } )
+   AAdd( aOpcExe, {|| kalk_pocetno_stanje_prodavnica() } )
    // TODO: izbaciti
    // AADD(aOpc, "2. pocetno stanje (stara opcija/legacy)")
    // AADD(aOpcExe, {|| PocStProd() } )

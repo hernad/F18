@@ -63,7 +63,7 @@ FUNCTION krpt_export()
       READ
    ENDIF
 
-   IF cIdVd $ "IP#11#12#13#19#80#41#42"
+   IF cIdVd $ "IP#11#12#13#19#01#80#41#42"
       cMpcCij := "D"
       cVpcCij := "N"
    ELSE
