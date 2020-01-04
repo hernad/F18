@@ -1,4 +1,8 @@
 
+DO $$ BEGIN
+
+CREATE TYPE my_type AS (/* fields go here */);
+
 CREATE TYPE public.ulaz_izlaz AS (
 	ulaz double precision,
 	izlaz double precision,
@@ -7,7 +11,6 @@ CREATE TYPE public.ulaz_izlaz AS (
 );
 
 ALTER TYPE public.ulaz_izlaz OWNER TO admin;
-
 
 CREATE TYPE public.t_dugovanje AS (
 	konto_id character varying,
@@ -24,6 +27,12 @@ CREATE TYPE public.t_dugovanje AS (
 
 ALTER TYPE public.t_dugovanje OWNER TO admin;
 
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+
+
 
 --
 -- Name: konto_roba_stanje; Type: TABLE; Schema: public; Owner: xtrole
@@ -33,7 +42,7 @@ ALTER TYPE public.t_dugovanje OWNER TO admin;
 --    13322       R01      01.02.19    p       10         3      9      2.7    1.5      2
 --
 --
-CREATE TABLE public.konto_roba_stanje (
+CREATE TABLE IF NOT EXISTS public.konto_roba_stanje (
     idkonto character varying(7) NOT NULL,
     idroba character varying(10) NOT NULL,
     datum date NOT NULL,
@@ -53,7 +62,7 @@ ALTER TABLE public.konto_roba_stanje OWNER TO xtrole;
 --
 -- Name: cleanup_konto_roba_stanje(); Type: FUNCTION; Schema: public; Owner: admin
 --
-CREATE FUNCTION public.cleanup_konto_roba_stanje() RETURNS trigger
+CREATE OR REPLACE FUNCTION public.cleanup_konto_roba_stanje() RETURNS trigger
     LANGUAGE plpgsql
     AS $_$
 
@@ -137,7 +146,7 @@ ALTER FUNCTION public.cleanup_konto_roba_stanje() OWNER TO admin;
 --
 -- Name: sp_konto_stanje(character varying, character varying, character varying, date); Type: FUNCTION; Schema: public; Owner: admin
 --
-CREATE FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) RETURNS SETOF public.ulaz_izlaz
+CREATE OR REPLACE FUNCTION public.sp_konto_stanje(mag_prod character varying, param_konto character varying, param_idroba character varying, param_datum date) RETURNS SETOF public.ulaz_izlaz
     LANGUAGE plpgsql
     AS $$
 
