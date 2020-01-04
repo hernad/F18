@@ -15,7 +15,11 @@ FUNCTION pos_racun_unos_ispravka()
 
    DO WHILE .T.
       // SetKXLat( "'", "-" )
-      o_pos_tables()
+      IF !o_pos_tables()
+          Alert( "POS tabele se ne mogu otvoriti?!")
+          RETURN .F.
+      ENDIF
+      
       SELECT _pos_pripr
       IF reccount2() <> 0
          IF AllTrim( field->brdok ) != POS_BRDOK_PRIPREMA

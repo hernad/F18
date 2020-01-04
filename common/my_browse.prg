@@ -89,10 +89,6 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
    PRIVATE bTekCol
    PRIVATE Ch := 0
 
-
-   // azImeKol := ImeKol
-   // azKol := Kol
-
    IF nPrazno == NIL
       nPrazno := 0
    ENDIF
@@ -127,50 +123,14 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
    hParams[ "gprazno" ]       := nGPrazno
    hParams[ "podvuci_b" ]     := bPodvuci
 
-   // IF bSkipBlock <> NIL
-   // ovo je zadavanje skip bloka kroz parametar
-   // TBSkipBlock := bSkipBlock
-   // ELSE
-   // TBSkipBlock := {| nSkip | SkipDB( nSkip, @nTBLine ) }
-   // TBSkipBlock     := {| nRecs | __my_dbSkipper( nRecs ) }
-   // ENDIF
-
-   // harbour-core src/rtl/dbedit.prg
-
-
-
-   // lKeyPressed := .F.
-
-   // TB:ForceStable()
-
-   // DispEnd()
-   // IF LastRec() == 0
-   // Ch := hb_keyNew( HB_KX_DOWN )
-   // lKeyPressed := .T.
-   // ENDIF
    lDoIdleCall := .T.
    lContinue := .T.
-
-   // browse_only( oBrowse, hParams, .T. )
-
-
-   // LOCAL i, j, k
-
-   // LOCAL lSql := ( my_rddName() == "SQLMIX" )
-   // LOCAL bShowField
-
-   // IF lIzOBJDB == NIL
-   // lIzOBJDB := .F.
-   // ENDIF
 
    nHeight        :=  hParams[ "xw" ]
    nBrojRedovaZaPoruke :=  hParams[ "prazno" ] + iif( hParams[ "prazno" ] <> 0, 1, 0 )
    nWidth       :=  hParams[ "yw" ]
 
    IF hParams[ "prazno" ] == 0
-      // IF !lIzOBJDB
-      // BoxC()
-      // ENDIF
       Box( hParams[ "ime" ], nHeight, nWidth, hParams[ "invert" ], hParams[ "msgs" ] )
    ELSE
       @ box_x_koord() + hParams[ "xw" ] - hParams[ "prazno" ], box_y_koord() + 1 SAY Replicate( hb_UTF8ToStrBox( BROWSE_PODVUCI ), hParams[ "yw" ] )
@@ -187,8 +147,19 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
    // @ box_x_koord() + hParams[ "xw" ] + 1,  Col() + 1 SAY REPL( hb_UTF8ToStrBox( BROWSE_PODVUCI_2 ), 42 )
    @ box_x_koord() + 1, box_y_koord() + hParams[ "yw" ] - 6    SAY Str( RecCount(), 5 )
 
-   oBrowse := TBrowseDB( box_x_koord() + 2 + hParams[ "prazno" ], box_y_koord() + 1, box_x_koord() + nHeight - nBrojRedovaZaPoruke, box_y_koord() + nWidth )
 
+   BEGIN SEQUENCE WITH {| oErr | Break( oErr ) }
+      oBrowse := TBrowseDB( box_x_koord() + 2 + hParams[ "prazno" ], box_y_koord() + 1, box_x_koord() + nHeight - nBrojRedovaZaPoruke, box_y_koord() + nWidth )
+
+   RECOVER using oErr
+      IF nPrazno == 0
+         Boxc()
+      ENDIF
+      Alert( _u("Povećati ekran. Nema se gdje nacrtati tabela!"))
+      RETURN .F.
+   END SEQUENCE
+
+ 
    IF bSkipBlock <> NIL
       oBrowse:SkipBlock := bSkipBlock
    ENDIF
@@ -216,10 +187,7 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
    ENDIF
 
    TB := oBrowse
-
-
    DO WHILE lContinue
-
 
       DO WHILE .T.
          Ch := hb_keyStd( Inkey(, hb_bitOr( Set( _SET_EVENTMASK ), f18_browse_inkey() ) ) )
@@ -260,9 +228,6 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
       IF Ch == 0
          LOOP
       ENDIF
-
-
-    
 
       DO CASE
 
@@ -341,20 +306,17 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
          lContinue := .F.
       ENDIF
 
-
    ENDDO
-
-
 
    RETURN .T.
 
 
 STATIC FUNCTION browse_stabilize_boxc( oBrowse )
 
-DO WHILE !oBrowse:stabilize() // ENTER keystorm unos nove sifre prevenirati
-   oBrowse:stabilize()
-ENDDO
-BoxC()
+   DO WHILE !oBrowse:stabilize() // ENTER keystorm unos nove sifre prevenirati
+      oBrowse:stabilize()
+   ENDDO
+   BoxC()
 
 RETURN .T.
 

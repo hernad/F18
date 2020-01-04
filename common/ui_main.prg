@@ -1090,8 +1090,15 @@ FUNCTION pos_form_browse( nTop, nLeft, nBottom, nRight, aImeKol, aKol, aHFCS, nF
    LOCAL nK
    LOCAL i
 
-   oBrowse := TBrowseDB( nTop, nLeft, nBottom, nRight )
+   BEGIN SEQUENCE WITH {| oErr | Break( oErr ) }
+       oBrowse := TBrowseDB( nTop, nLeft, nBottom, nRight )
 
+   RECOVER using oErr
+      Alert( _u("Povećati ekran. Nema se gdje nacrtati tabela!"))
+      RETURN .F.
+   END SEQUENCE
+
+  
    FOR nK := 1 TO Len( aKol )
       i := AScan( aKol, nK )
       IF i <> 0

@@ -26,8 +26,17 @@ FUNCTION BrowseKey( y1, x1, y2, x2, ImeKol, bfunk, uslov, traz, brkol, dx, dy, b
    usl = 'USL' + AllTrim( Str( POZIV, 2 ) )
    POZIV++
    &usl = uslov
-   TB := TBrowseDB( y1, x1, y2, x2 )
 
+
+   BEGIN SEQUENCE WITH {| oErr | Break( oErr ) }
+      TB := TBrowseDB( y1, x1, y2, x2 )
+   RECOVER using oErr
+      Alert( _u("Povećati ekran. Nema se gdje nacrtati tabela!"))
+      RETURN .F.
+   END SEQUENCE
+
+
+  
    TB:headsep := hb_UTF8ToStrBox( BROWSE_HEAD_SEP )
    TB:colsep := hb_UTF8ToStrBox( BROWSE_COL_SEP )
 

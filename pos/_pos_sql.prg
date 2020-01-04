@@ -336,18 +336,21 @@ FUNCTION seek_pos_doks_h( hParams  )
       cSql += "brfaktp=" + sql_quote( hParams[ "brfaktp" ] )
    ENDIF
 
-   use_sql( cTable, cSql, cAlias )
-   hIndexes := h_pos_doks_indexes()
+   IF use_sql( cTable, cSql, cAlias )
+      hIndexes := h_pos_doks_indexes()
 
-   FOR EACH cKey IN hIndexes:Keys
-      INDEX ON  &( hIndexes[ cKey ] )  TAG ( cKey ) TO ( cAlias )
-   NEXT
+      FOR EACH cKey IN hIndexes:Keys
+         INDEX ON  &( hIndexes[ cKey ] )  TAG ( cKey ) TO ( cAlias )
+      NEXT
 
-   IF cTag == NIL
-      cTag := "1"
+      IF cTag == NIL
+         cTag := "1"
+      ENDIF
+      SET ORDER TO TAG ( cTag )
+      GO TOP
+   ELSE
+      log_write_file( "ERR-use_sql:" + cSql, 2)
    ENDIF
-   SET ORDER TO TAG ( cTag )
-   GO TOP
 
    RETURN !Eof()
 

@@ -83,15 +83,20 @@ STATIC FUNCTION pos_definisi_inicijalne_podatke()
 
 FUNCTION o_pos_tables( lOtvoriKumulativ )
 
+   LOCAL lKumulativOtvoren := .F.
    my_close_all_dbf()
 
    IF lOtvoriKumulativ == NIL
       lOtvoriKumulativ := .T.
    ENDIF
    IF lOtvoriKumulativ
-      o_pos_kumulativne_tabele()
+      lKumulativOtvoren := o_pos_kumulativne_tabele()
    ENDIF
 
+   IF !lKumulativOtvoren
+      RETURN .F.
+   ENDIF
+   
    o_pos_priprz()
    o_pos__pripr()
    IF lOtvoriKumulativ
@@ -106,6 +111,5 @@ FUNCTION o_pos_tables( lOtvoriKumulativ )
 FUNCTION o_pos_kumulativne_tabele()
 
    o_pos_pos()
-   o_pos_doks()
+   RETURN o_pos_doks()
 
-   RETURN .T.
