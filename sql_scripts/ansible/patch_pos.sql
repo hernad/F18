@@ -12,8 +12,8 @@ BEGIN
     EXECUTE 'ALTER SEQUENCE {{ item_prodavnica }}.metric_metric_id_seq RESTART WITH ' || nMax;
 
     -- public.metric
-    select MAX(metric_id) + 1 from public.metric INTO nMax;
-    EXECUTE 'ALTER SEQUENCE public.metric_metric_id_seq RESTART WITH ' || nMax;
+    select MAX(metric_id) + 1 from f18.metric INTO nMax;
+    EXECUTE 'ALTER SEQUENCE f18.metric_metric_id_seq RESTART WITH ' || nMax;
 
 
    RETURN nMax;
