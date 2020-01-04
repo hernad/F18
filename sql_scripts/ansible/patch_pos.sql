@@ -7,14 +7,19 @@ DECLARE
    nMax integer;
 BEGIN
 
-    -- p2.metric
-    select MAX(metric_id) + 1 from {{ item_prodavnica }}.metric INTO nMax;
-    EXECUTE 'ALTER SEQUENCE {{ item_prodavnica }}.metric_metric_id_seq RESTART WITH ' || nMax;
-
     -- public.metric
     select MAX(metric_id) + 1 from f18.metric INTO nMax;
-    EXECUTE 'ALTER SEQUENCE f18.metric_metric_id_seq RESTART WITH ' || nMax;
+    IF nMax IS NOT NULL THEN
+       EXECUTE 'ALTER SEQUENCE f18.metric_metric_id_seq RESTART WITH ' || nMax;
+    END IF;
 
+    -- p2.metric
+    select MAX(metric_id) + 1 from {{ item_prodavnica }}.metric INTO nMax;
+    IF nMax IS NOT NULL THEN
+       EXECUTE 'ALTER SEQUENCE {{ item_prodavnica }}.metric_metric_id_seq RESTART WITH ' || nMax;
+    ELSE
+        nMax := 0;
+    END IF;
 
    RETURN nMax;
 END;
