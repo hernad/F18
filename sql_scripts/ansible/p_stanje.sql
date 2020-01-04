@@ -966,3 +966,38 @@ BEGIN
       RETURN nCount;
 END;
 $$;
+
+
+------  public.roba_tmp sadrzi barkodove
+
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.patch_nepostojece_sifre_by_roba_tmp() RETURNS integer
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+   rec_roba RECORD;
+   nCount integer;
+   cId varchar;
+BEGIN
+
+      nCount := 0;
+      -- prodji kroz roba_tmp
+      FOR rec_roba IN SELECT * from public.roba_tmp
+                     ORDER BY id
+      LOOP
+
+         SELECT id FROM {{ item_prodavnica }}.roba WHERE id=rec_roba.id
+                INTO cId;
+
+         -- p2.roba nema ovog artikla, dodati ga iz roba_tmp
+         IF cId IS NULL THEN
+           INSERT INTO {{ item_prodavnica }}.roba(id, sifradob, naz, jmj, idtarifa, mpc, tip, opis, barkod, fisc_plu)
+              VALUES( rec_roba.id, rec_roba.sifradob, rec_roba.naz, rec_roba.jmj, rec_roba.idtarifa, rec_roba.mpc, rec_roba.tip, rec_roba.opis, rec_roba.barkod, rec_roba.fisc_plu );
+            nCount := nCount + 1; 
+         END IF;
+      END LOOP;
+  
+      RETURN nCount;
+END;
+$$;
+
+
