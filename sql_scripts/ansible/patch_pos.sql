@@ -1,6 +1,6 @@
 
 
-CREATE OR REPLACE FUNCTION patch_metric_id_seq_pos() RETURNS integer
+CREATE OR REPLACE FUNCTION {{ item_prodavnica }}.patch_metric_id_seq_pos() RETURNS integer
 LANGUAGE plpgsql
  AS $$
 DECLARE
