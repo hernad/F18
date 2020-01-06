@@ -22,10 +22,10 @@ FUNCTION pos_main_menu_upravnik()
    AAdd( aOpcexe, {|| pos_izvjestaji() } )
    AAdd( aOpc, "L. lista ažuriranih dokumenata" )
    AAdd( aOpcexe, {|| pos_lista_azuriranih_dokumenata() } )
-   AAdd( aOpc, "D. unos dokumenata" )
-   AAdd( aOpcexe, {|| pos_menu_dokumenti() } )
+   //AAdd( aOpc, "D. unos dokumenata" )
+   //AAdd( aOpcexe, {|| pos_menu_dokumenti() } )
    AAdd( aOpc, "R. robno-materijalno poslovanje" )
-   AAdd( aOpcexe, {|| pos_menu_dokumenti() } )
+   AAdd( aOpcexe, {|| pos_robno_meni() } )
 
    AAdd( aOpc, "--------------" )
    AAdd( aOpcexe, NIL )
@@ -40,7 +40,7 @@ FUNCTION pos_main_menu_upravnik()
 
    closeret
 
-FUNCTION pos_menu_dokumenti()
+FUNCTION pos_robno_meni()
 
    LOCAL nIzbor
    LOCAL aOpc := {}
@@ -74,6 +74,9 @@ FUNCTION pos_menu_dokumenti()
 
    AAdd( aOpc, "P. pregled neobrađenih zahtjeva za prijem [21]" )
    AAdd( aOpcexe, {|| pos_21_neobradjeni_lista() } )
+
+   AAdd( aOpc, "Y. prenos dokumenata iz predhodne godine            " )
+   AAdd( aOpcexe, {|| pos_patch_prebaci_dokument_stara_godina() } )
 
    f18_menu( "pos6", .F., nIzbor, aOpc, aOpcexe )
 

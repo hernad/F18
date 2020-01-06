@@ -561,6 +561,7 @@ DECLARE
   nRet integer;
 BEGIN
 
+    -- k22.dok_id <-> k11.ref znaci da postoji obradjen dokument 11
     RETURN QUERY select k22.pkonto::varchar, k22.brdok::varchar, k22.datdok::date, k22.brfaktp::varchar from f18.kalk_doks k22
         left join f18.kalk_doks k11
         on k11.ref=k22.dok_id
