@@ -20,14 +20,14 @@ FUNCTION prenos_fakt_kalk_prodavnica()
    AAdd( Opc, "1. fakt 13 -> kalk 11 otpremnica maloprodaje        " )
    AAdd( opcexe, {||  fakt_13_kalk_11() } )
 
-   AAdd( Opc, "2. fakt 11 -> kalk 41 racun maloprodaje" )
+   AAdd( Opc, "2. fakt 11 -> kalk 41 račun maloprodaje" )
    AAdd( opcexe, {||  fakt_11_kalk_41()  } )
 
    AAdd( Opc, "3. fakt 11 -> kalk 42 paragon" )
    AAdd( opcexe, {||  fakt_11_kalk_42()  } )
 
-   AAdd( Opc, "4. fakt 11 -> kalk 11 zaduzenje diskonta" )
-   AAdd( opcexe, {||  fakt_11_kalk_prenos_11()  } )
+   AAdd( Opc, "4. fakt 11 -> kalk 11 zaduženje diskonta" )
+   AAdd( opcexe, {||  fakt_11_kalk_prenos_11_zad_diskont()  } )
 
    AAdd( Opc, "5. fakt 01 -> kalk 81 doprema u prod" )
    AAdd( opcexe, {||  fakt_01_kalk_81() } )
@@ -44,7 +44,7 @@ FUNCTION prenos_fakt_kalk_prodavnica()
 
 
 
-FUNCTION fakt_11_kalk_prenos_11()
+FUNCTION fakt_11_kalk_prenos_11_zad_diskont()
 
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL cIdTipDok := "11"
@@ -58,6 +58,7 @@ FUNCTION fakt_11_kalk_prenos_11()
    LOCAL nX
    LOCAL cFaktBrDokumenti := Space( 150 ), cFilterBrDok
    LOCAL nPos, aDokumenti
+   LOCAL cBrOtpr := SPACE(10)
    LOCAL aGetList := {}
 
    o_kalk_pripr()
@@ -87,16 +88,21 @@ FUNCTION fakt_11_kalk_prenos_11()
       nRBr := 0
       nX := 1
 
-      @ box_x_koord() + nX++, box_y_koord() + 2   SAY "Broj kalkulacije 11 -" GET cBrKalk PICT "@!"
-      @ box_x_koord() + nX++, Col() + 2 SAY "Datum:" GET dDatKalk
+      @ box_x_koord() + nX, box_y_koord() + 2   SAY "Broj kalkulacije 11 -" GET cBrKalk PICT "@!"
+      @ box_x_koord() + nX, Col() + 2 SAY "Datum:" GET dDatKalk
+      @ box_x_koord() + nX++, Col() + 2 SAY "Br.Otpr:" GET cBrOtpr ;
+         WHEN {||  cBrOtpr := PADR(DTOS(dDatKalk), 10) , .T.};
+         VALID !Empty(cBrOtpr) 
+      
+      
       @ box_x_koord() + nX++, box_y_koord() + 2  SAY8 "            Magacinski konto razdužuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
-      @ box_x_koord() + nX++, box_y_koord() + 2  SAY8 "Prodavnički konto (diskonto) zadužuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
+      @ box_x_koord() + nX++, box_y_koord() + 2  SAY8 "Prodavnički konto (diskont) zadužuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
 
       cFaktIdFirma := cIdFirma
 
       nX++
-
       @ box_x_koord() + nX++, box_y_koord() + 2 SAY "Brojevi dokumenata (BRDOK1;BRDOK2;)" GET cFaktBrDokumenti PICT "@!S20"
+
       READ
       IF LastKey() == K_ESC
          EXIT
@@ -135,7 +141,6 @@ FUNCTION fakt_11_kalk_prenos_11()
 
       aDokumenti := {}
       DO WHILE !Eof() .AND. cFaktIdFirma + cIdTipDok == field->IdFirma + field->IdTipDok
-
 
          IF cFilterBrDok == ".t."
             IF fakt->datdok < dFaktOd .OR. fakt->datdok > dFaktDo // datumska provjera
@@ -184,7 +189,7 @@ FUNCTION fakt_11_kalk_prenos_11()
                brdok WITH cBrKalk, ;
                datdok WITH dDatKalk, ;
                idtarifa WITH roba->idtarifa, ;
-               brfaktp WITH "", ;
+               brfaktp WITH cBrOtpr, ;
                datfaktp WITH fakt->datdok, ;
                idkonto   WITH cPKonto, ;
                idkonto2  WITH cidkonto2, ;
