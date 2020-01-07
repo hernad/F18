@@ -33,9 +33,9 @@ FUNCTION fin_ios_meni()
    // AAdd( _opc, "1. specifikacija IOS-a (pregled podataka prije štampe) " )
    // AAdd( _opcexe, {|| ios_specifikacija() } )
    AAdd( _opc, "1. štampa IOS-a            " )
-   AAdd( _opcexe, {|| mnu_ios_print() } )
+   AAdd( _opcexe, {|| fin_ios_print() } )
    // AAdd( _opc, "3. generisanje podataka za štampu IOS-a" )
-   // AAdd( _opcexe, {|| ios_generacija_podataka() } )
+   // AAdd( _opcexe, {|| fin_ios_generacija() } )
    AAdd( _opc, "2. podešenje član-a" )
    AAdd( _opcexe, {|| ios_clan_setup() } )
 
@@ -48,7 +48,7 @@ FUNCTION fin_ios_meni()
 
 
 
-STATIC FUNCTION mnu_ios_print()
+STATIC FUNCTION fin_ios_print()
 
    LOCAL dDatumDo := Date()
    LOCAL hParams := hb_Hash()
@@ -76,9 +76,6 @@ STATIC FUNCTION mnu_ios_print()
 
    download_template( "ios.odt",  "8d1fa4972d42e54cc0e97e5c8d8c525787fc6b7b4d7c07ce092c38897b48ce85" )
    download_template( "ios_2.odt", "8a4f3492b7e0372dd8a0c78958fe45159333aaa4b1b2a4d61b7226e9ac1b0225" )
-
-   // o_konto()
-   // o_partner()
 
    Box(, 16, 65, .F. )
 
@@ -154,7 +151,7 @@ STATIC FUNCTION mnu_ios_print()
 
    hParametriGenIOS[ "saldo_nula" ] := "D"
    hParametriGenIOS[ "datum_do" ] := dDatumDo
-   ios_generacija_podataka( hParametriGenIOS )     // generisi podatke u IOS tabelu
+   fin_ios_generacija( hParametriGenIOS )     // generisi podatke u IOS tabelu
 
    // ENDIF
 
@@ -279,8 +276,8 @@ STATIC FUNCTION print_ios_xml( hParams )
    LOCAL cIdFirma := hParams[ "id_firma" ]
    LOCAL cIdKonto := hParams[ "id_konto" ]
    LOCAL cIdPartner := hParams[ "id_partner" ]
-   LOCAL _iznos_bhd := hParams[ "iznos_bhd" ]
-   LOCAL _iznos_dem := hParams[ "iznos_dem" ]
+   LOCAL nIznosBhd := hParams[ "iznos_bhd" ]
+   LOCAL nIznosDEM := hParams[ "iznos_dem" ]
    LOCAL _din_dem := hParams[ "din_dem" ]
    LOCAL dDatumDo := hParams[ "datum_do" ]
    LOCAL dDatumIOS := hParams[ "ios_datum" ]
@@ -330,14 +327,14 @@ STATIC FUNCTION print_ios_xml( hParams )
    xml_node( "id_konto", to_xml_encoding( cIdKonto ) )
    xml_node( "id_partner", to_xml_encoding( cIdPartner ) )
 
-   _total_bhd := _iznos_bhd
-   _total_dem := _iznos_dem
+   _total_bhd := nIznosBhd
+   _total_dem := nIznosDEM
 
-   IF _iznos_bhd < 0
-      _total_bhd := -_iznos_bhd
+   IF nIznosBhd < 0
+      _total_bhd := -nIznosBhd
    ENDIF
-   IF _iznos_dem < 0
-      _total_dem := -_iznos_dem
+   IF nIznosDEM < 0
+      _total_dem := -nIznosDEM
    ENDIF
 
    IF _din_dem == "1"
@@ -348,7 +345,7 @@ STATIC FUNCTION print_ios_xml( hParams )
       xml_node( "valuta", to_xml_encoding ( ValPomocna() ) )
    ENDIF
 
-   IF _iznos_bhd > 0
+   IF nIznosBhd > 0
       xml_node( "dp", "1" )
    ELSE
       xml_node( "dp", "2" )
@@ -867,7 +864,7 @@ STATIC FUNCTION _spec_zaglavlje( id_firma, id_partner, line )
 */
 
 
-STATIC FUNCTION ios_generacija_podataka( hParams )
+STATIC FUNCTION fin_ios_generacija( hParams )
 
    LOCAL dDatumDo, cIdFirma, cIdKonto, cPrikazSaSaldoNulaDN
    LOCAL cIdPartner, hRec, nCount
@@ -878,7 +875,7 @@ STATIC FUNCTION ios_generacija_podataka( hParams )
    LOCAL cIdPartnerTekuci
 
    IF hParams == NIL
-      MsgBeep( "Napomena: ova opcija puni pomocnu tabelu na osnovu koje se#stampaju IOS obrasci" )
+      MsgBeep( "Napomena: ova opcija puni pomoćnu tabelu na osnovu koje se#štampaju IOS obrasci" )
       hParams := hb_Hash()
    ELSE
       _auto := .T.
@@ -897,7 +894,7 @@ STATIC FUNCTION ios_generacija_podataka( hParams )
    cPrikazSaSaldoNulaDN := hParams[ "saldo_nula" ]
 
    // o_partner()
-   o_konto()
+   //o_konto()
    o_suban()
    o_fin_ios()
 
@@ -915,7 +912,7 @@ STATIC FUNCTION ios_generacija_podataka( hParams )
    nCount := 0
    Box(, 3, 65 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "sačekajte ... generacija ios tabele"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Generacija IOS tabele u toku ..."
 
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdKonto == field->idkonto
 
@@ -935,6 +932,13 @@ STATIC FUNCTION ios_generacija_podataka( hParams )
       DO WHILE !Eof() .AND. cIdFirma == field->idfirma  .AND. cIdKonto == field->idkonto  .AND. cIdPartnerTekuci == field->idpartner
 
          IF field->datdok > dDatumDo // ako je datum veci od datuma do kojeg generisem
+            SKIP
+            LOOP
+         ENDIF
+
+         select_o_partner( cIdPartnerTekuci )
+         SELECT suban
+         IF partn->_kup == "X" // neaktivan partner
             SKIP
             LOOP
          ENDIF
@@ -994,8 +998,7 @@ STATIC FUNCTION ios_generacija_podataka( hParams )
 
 STATIC FUNCTION ios_xml_partner( cSubnode, cIdPartner )
 
-   LOCAL _ret := .T.
-   LOCAL _jib, cPdvBroj, cIdBroj
+   LOCAL cJIB, cPdvBroj, cIdBroj
 
    select_o_partner( cIdPartner )
 
@@ -1025,19 +1028,19 @@ STATIC FUNCTION ios_xml_partner( cSubnode, cIdPartner )
       xml_node( "ziror", to_xml_encoding( partn->ziror ) )
       xml_node( "tel", to_xml_encoding( partn->telefon ) )
 
-      _jib := firma_pdv_broj( cIdPartner )
+      cJIB := firma_pdv_broj( cIdPartner )
 
-      cPdvBroj := _jib
+      cPdvBroj := cJIB
       cIdBroj := firma_id_broj( cIdPartner )
 
-      xml_node( "jib", _jib )
+      xml_node( "jib", cJIB )
       xml_node( "pdvbr", cPdvBroj )
       xml_node( "idbbr", cIdBroj )
    ENDIF
 
    xml_subnode( cSubnode, .T. )
 
-   RETURN _ret
+   RETURN .T.
 
 
 
@@ -1049,8 +1052,8 @@ STATIC FUNCTION print_ios_txt( hParams )
    LOCAL cIdFirma := hParams[ "id_firma" ]
    LOCAL cIdKonto := hParams[ "id_konto" ]
    LOCAL cIdPartner := hParams[ "id_partner" ]
-   LOCAL _iznos_bhd := hParams[ "iznos_bhd" ]
-   LOCAL _iznos_dem := hParams[ "iznos_dem" ]
+   LOCAL nIznosBhd := hParams[ "iznos_bhd" ]
+   LOCAL nIznosDEM := hParams[ "iznos_dem" ]
    LOCAL _din_dem := hParams[ "din_dem" ]
    LOCAL dDatumDo := hParams[ "datum_do" ]
    LOCAL dDatumIOS := hParams[ "ios_datum" ]
@@ -1109,15 +1112,15 @@ STATIC FUNCTION print_ios_txt( hParams )
    ?
    @ PRow(), 0 SAY "POKAZUJE SALDO:"
 
-   qqIznosBHD := _iznos_bhd
-   qqIznosDEM := _iznos_dem
+   qqIznosBHD := nIznosBhd
+   qqIznosDEM := nIznosDEM
 
-   IF _iznos_bhd < 0
-      qqIznosBHD := -_iznos_bhd
+   IF nIznosBhd < 0
+      qqIznosBHD := -nIznosBhd
    ENDIF
 
-   IF _iznos_dem < 0
-      qqIznosDEM := -_iznos_dem
+   IF nIznosDEM < 0
+      qqIznosDEM := -nIznosDEM
    ENDIF
 
    IF _din_dem == "1"
@@ -1131,7 +1134,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
    @ PRow(), 0 SAY "U"
 
-   IF _iznos_bhd > 0
+   IF nIznosBhd > 0
       @ PRow(), PCol() + 1 SAY8 "NAŠU"
    ELSE
       @ PRow(), PCol() + 1 SAY8 "VAŠU"

@@ -91,7 +91,7 @@ FUNCTION fakt_11_kalk_prenos_11_zad_diskont()
       @ box_x_koord() + nX, box_y_koord() + 2   SAY "Broj kalkulacije 11 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + nX, Col() + 2 SAY "Datum:" GET dDatKalk
       @ box_x_koord() + nX++, Col() + 2 SAY "Br.Otpr:" GET cBrOtpr ;
-         WHEN {||  cBrOtpr := PADR(DTOS(dDatKalk), 10) , .T.};
+         WHEN {||  cBrOtpr := PADR(DTOS(dDatKalk) + "/D", 10) , .T.};
          VALID !Empty(cBrOtpr) 
       
       
