@@ -51,16 +51,20 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL nRbr
    LOCAL dDatFaktP
    LOCAL cPom, cPomFK777
-   LOCAL cIdKonto, cKonto1, cKonto2, cKonto3
+   LOCAL cIdKonto
    LOCAL nIznosKontiratiKM, nIznosKontiratiDEM
    LOCAL dDatDok, cIdPartner
-   LOCAL cPartner1, cPartner2, cPartner3, cPartner4, cPartner5
+   
    LOCAL cBrFakt1, cBrFakt2, cBrFakt3, cBrFakt4, cBrFakt5
    LOCAL dDatFakt1, dDatFakt2, dDatFakt3, dDatFakt4, dDatFakt5
    LOCAL cRj1, cRj2
    LOCAL nLen
    LOCAL nStranaValutaIznos
    LOCAL nKursPomocna
+
+   PRIVATE p_cKontoKontiranje1, p_cKontoKontiranje2, p_cKontoKontiranje3
+   PRIVATE p_cPartnerKontiranje1, p_cPartnerKontiranje2, p_cPartnerKontiranje3, p_cPartnerKontiranje4
+
 
    // LOCAL cIdVrsteP
 
@@ -229,11 +233,11 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       cIDVD := finmat->IdVD
       cBrDok := finmat->BrDok
 
-      IF ValType( cKonto1 ) <> "C"
-         cKonto1 := ""
-         cKonto2 := ""
-         cKonto3 := ""
-         cPartner1 := cPartner2 := cPartner3 := cPartner4 := cPartner5 := ""
+      IF ValType( p_cKontoKontiranje1 ) <> "C"
+         p_cKontoKontiranje1 := ""
+         p_cKontoKontiranje2 := ""
+         p_cKontoKontiranje3 := ""
+         p_cPartnerKontiranje1 := p_cPartnerKontiranje2 := p_cPartnerKontiranje3 := p_cPartnerKontiranje4 := ""
          cBrFakt1 := cBrFakt2 := cBrFakt3 := cBrFakt4 := cBrFakt5 := Space( 10 )
          dDatFakt1 := dDatFakt2 := dDatFakt3 := dDatFakt4 := dDatFakt5 := CToD( "" )
          cRj1 := ""
@@ -365,19 +369,19 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                IF ValType( cIdKonto ) != "C"
                   cIdKonto := Replicate( "X", 7 )
                ENDIF
-               IF ValType( cKonto1 ) != "C"
-                  cKonto1 := Space( 7 )
+               IF ValType( p_cKontoKontiranje1 ) != "C"
+                  p_cKontoKontiranje1 := Space( 7 )
                ENDIF
-               IF ValType( cKonto2 ) != "C"
-                  cKonto2 := Space( 7 )
+               IF ValType( p_cKontoKontiranje2 ) != "C"
+                  p_cKontoKontiranje2 := Space( 7 )
                ENDIF
-               IF ValType( cKonto3 ) != "C"
-                  cKonto3 := Space( 7 )
+               IF ValType( p_cKontoKontiranje3 ) != "C"
+                  p_cKontoKontiranje3 := Space( 7 )
                ENDIF
 
-               cIdkonto := StrTran( cIdkonto, "?1", Trim( cKonto1 ) )
-               cIdkonto := StrTran( cIdkonto, "?2", Trim( cKonto2 ) )
-               cIdkonto := StrTran( cIdkonto, "?3", Trim( cKonto3 ) )
+               cIdkonto := StrTran( cIdkonto, "?1", Trim( p_cKontoKontiranje1 ) )
+               cIdkonto := StrTran( cIdkonto, "?2", Trim( p_cKontoKontiranje2 ) )
+               cIdkonto := StrTran( cIdkonto, "?3", Trim( p_cKontoKontiranje3 ) )
                cIdkonto := PadR( cIdkonto, 7 )
                cBrDok := Space( 8 )
                dDatDok := finmat->datdok
@@ -401,7 +405,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   cIdPartner := finmat->IdPartner
 
                ELSEIF hRecTrfp[ "partner" ] == "A"
-                  cIdpartner := cPartner1
+                  cIdpartner := p_cPartnerKontiranje1
                   IF !Empty( dDatFakt1 )
                      dDatDok := dDatFakt1
                   ENDIF
@@ -409,7 +413,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                      cBrDok := cBrFakt1
                   ENDIF
                ELSEIF hRecTrfp[ "partner" ] == "B"
-                  cIdpartner := cPartner2
+                  cIdpartner := p_cPartnerKontiranje2
                   IF !Empty( dDatFakt2 )
                      dDatDok := dDatFakt2
                   ENDIF
@@ -417,7 +421,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                      cBrDok := cBrFakt2
                   ENDIF
                ELSEIF hRecTrfp[ "partner" ] == "C"
-                  cIdpartner := cPartner3
+                  cIdpartner := p_cPartnerKontiranje3
                   IF !Empty( dDatFakt3 )
                      dDatDok := dDatFakt3
                   ENDIF
@@ -425,7 +429,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                      cBrDok := cBrFakt3
                   ENDIF
                ELSEIF hRecTrfp[ "partner" ] == "D"
-                  cIdpartner := cPartner4
+                  cIdpartner := p_cPartnerKontiranje4
                   IF !Empty( dDatFakt4 )
                      dDatDok := dDatFakt4
                   ENDIF
@@ -612,20 +616,25 @@ STATIC FUNCTION __val_nalog( cNalog )
 
 
 /* Konto(nBroj, cDef, cTekst)
- *   param: nBroj - koju varijablu punimo (1-cKonto1,2-cKonto2,3-cKonto3)
+ *   param: nBroj - koju varijablu punimo (1-p_cKontoKontiranje1,2-p_cKontoKontiranje2,3-p_cKontoKontiranje3)
  *   param: cDef - default tj.ponudjeni tekst
  *   param: cTekst - opis podatka koji se unosi
- *     Edit proizvoljnog teksta u varijablu ckonto1,ckonto2 ili ckonto3 ukoliko je izabrana varijabla duzine 0 tj.nije joj vec dodijeljena vrijednost
+ *     Edit proizvoljnog teksta u varijablu p_cKontoKontiranje1,p_cKontoKontiranje2 ili p_cKontoKontiranje3 ukoliko je izabrana varijabla duzine 0 tj.nije joj vec dodijeljena vrijednost
  *  return 0
+
+
+    Konto(1, "10", "Dobavljac domaci-10 strani-20")
+
+   Funkciju koriste sheme kontiranja kalk-fin
  */
 
 FUNCTION Konto( nBroj, cDef, cTekst )
 
    LOCAL GetList := {}
 
-   IF ( nBroj == 1 .AND. Len( cKonto1 ) <> 0 ) .OR. ;
-         ( nBroj == 2 .AND. Len( cKonto2 ) <> 0 ) .OR. ;
-         ( nBroj == 3 .AND. Len( cKonto3 ) <> 0 )
+   IF ( nBroj == 1 .AND. Len( p_cKontoKontiranje1 ) <> 0 ) .OR. ;
+         ( nBroj == 2 .AND. Len( p_cKontoKontiranje2 ) <> 0 ) .OR. ;
+         ( nBroj == 3 .AND. Len( p_cKontoKontiranje3 ) <> 0 )
       RETURN 0
    ENDIF
 
@@ -633,14 +642,14 @@ FUNCTION Konto( nBroj, cDef, cTekst )
    set_cursor_on()
    @ box_x_koord() + 1, box_y_koord() + 2 SAY cTekst
    IF nBroj == 1
-      cKonto1 := cDef
-      @ Row(), Col() + 1 GET cKonto1
+      p_cKontoKontiranje1 := cDef
+      @ Row(), Col() + 1 GET p_cKontoKontiranje1
    ELSEIF nBroj == 2
-      cKonto2 := cDef
-      @ Row(), Col() + 1 GET cKonto2
+      p_cKontoKontiranje2 := cDef
+      @ Row(), Col() + 1 GET p_cKontoKontiranje2
    ELSE
-      cKonto3 := cDef
-      @ Row(), Col() + 1 GET cKonto3
+      p_cKontoKontiranje3 := cDef
+      @ Row(), Col() + 1 GET p_cKontoKontiranje3
    ENDIF
    READ
    BoxC()
@@ -654,9 +663,9 @@ FUNCTION SetKonto( nBroj, lValue, cTrue, cFalse )
 
    LOCAL cPom
 
-   IF ( nBroj == 1 .AND. Len( cKonto1 ) <> 0 ) .OR. ;
-         ( nBroj == 2 .AND. Len( cKonto2 ) <> 0 ) .OR. ;
-         ( nBroj == 3 .AND. Len( cKonto3 ) <> 0 )
+   IF ( nBroj == 1 .AND. Len( p_cKontoKontiranje1 ) <> 0 ) .OR. ;
+         ( nBroj == 2 .AND. Len( p_cKontoKontiranje2 ) <> 0 ) .OR. ;
+         ( nBroj == 3 .AND. Len( p_cKontoKontiranje3 ) <> 0 )
       RETURN 0
    ENDIF
 
@@ -667,11 +676,11 @@ FUNCTION SetKonto( nBroj, lValue, cTrue, cFalse )
    ENDIF
 
    IF nBroj == 1
-      cKonto1 := cPom
+      p_cKontoKontiranje1 := cPom
    ELSEIF nBroj == 2
-      cKonto2 := cPom
+      p_cKontoKontiranje2 := cPom
    ELSE
-      cKonto3 := cPom
+      p_cKontoKontiranje3 := cPom
    ENDIF
 
    RETURN 0

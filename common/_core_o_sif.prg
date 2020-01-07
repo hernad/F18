@@ -442,6 +442,7 @@ FUNCTION o_trfp()
 
    RETURN .T.
 
+
 FUNCTION o_trfp2()
 
    SELECT ( F_TRFP2 )
@@ -449,3 +450,18 @@ FUNCTION o_trfp2()
    SET ORDER TO TAG "ID"
 
    RETURN .T.
+
+
+
+FUNCTION select_o_trfp2()
+
+   SELECT ( F_TRFP2 )
+   IF Used()
+         IF RecCount() > 1
+            RETURN .T.
+         ELSE
+            USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
+         ENDIF
+   ENDIF
+   
+   RETURN o_trfp2()

@@ -213,7 +213,7 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
 
    // o_roba()
    o_finmat()
-   //o_trfp2()
+   o_trfp2()
    //o_koncij()
    //o_valute()
 
@@ -246,9 +246,9 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
 
    Box( "brn?", 5, 55 )
    // dDatNal:=datdok
-   set_cursor_on()
-   @ box_x_koord() + 1, box_y_koord() + 2  SAY "Broj naloga u FIN  " + finmat->idfirma + " - " + cIdvn + " -" GET cBrNalF
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY "(ako je broj naloga prazan - ne vrsi se kontiranje)"
+     set_cursor_on()
+     @ box_x_koord() + 1, box_y_koord() + 2  SAY "Broj naloga u FIN  " + finmat->idfirma + " - " + cIdvn + " -" GET cBrNalF
+     @ box_x_koord() + 5, box_y_koord() + 2 SAY "(ako je broj naloga prazan - ne vrsi se kontiranje)"
    READ
    ESC_BCR
    BoxC()
@@ -257,16 +257,16 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
    MsgO( "Prenos FAKT -> FIN" )
 
    SELECT finmat
-   PRIVATE cKonto1 := NIL
+   PRIVATE p_cKontoKontiranje1 := NIL
    PRIVATE KursLis := "1"
 
    DO WHILE !finmat->( Eof() )    // finmat
 
       cIDVD := IdVD
       cBrDok := BrDok
-      IF ValType( cKonto1 ) <> "C"
-         PRIVATE cKonto1 := ""; cKonto2 := "";cKonto3 := ""
-         PRIVATE cPartner1 := ""; cPartner2 := cPartner3 := ""
+      IF ValType( p_cKontoKontiranje1 ) <> "C"
+         PRIVATE p_cKontoKontiranje1 := ""; p_cKontoKontiranje2 := ""; p_cKontoKontiranje3 := ""
+         PRIVATE p_cPartnerKontiranje1 := ""; p_cPartnerKontiranje2 := p_cPartnerKontiranje3 := ""
       ENDIF
       DO WHILE cIdVD == IdVD .AND. cBrDok == BrDok .AND. !Eof()
 
@@ -300,9 +300,9 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
                nIz2 := nIz * Kurs( dDatNal, "D", "P" )
 
                cIdKonto := trfp2->Idkonto
-               cIdKonto := StrTran( cIdKonto, "?1", Trim( cKonto1 ) )
-               cIdKonto := StrTran( cIdKonto, "?2", Trim( cKonto2 ) )
-               cIdKonto := StrTran( cIdKonto, "?3", Trim( cKonto3 ) )
+               cIdKonto := StrTran( cIdKonto, "?1", Trim( p_cKontoKontiranje1 ) )
+               cIdKonto := StrTran( cIdKonto, "?2", Trim( p_cKontoKontiranje2 ) )
+               cIdKonto := StrTran( cIdKonto, "?3", Trim( p_cKontoKontiranje3 ) )
 
                IF "F1" $ cIdKonto
                   IF Empty( gDzokerF1 )
@@ -318,11 +318,11 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
                IF trfp2->Partner == "1"  // stavi Partnera
                   cIdpartner := FINMAT->IdPartner
                ELSEIF trfp2->Partner == "A"   // stavi  Lice koje se zaduz2
-                  cIdpartner := PadR( cPartner1, 7 )
+                  cIdpartner := PadR( p_cPartnerKontiranje1, 7 )
                ELSEIF trfp2->Partner == "B"   // stavi  Lice koje se zaduz2
-                  cIdpartner := PadR( cPartner2, 7 )
+                  cIdpartner := PadR( p_cPartnerKontiranje2, 7 )
                ELSEIF trfp2->Partner == "C"   // stavi  Lice koje se zaduz2
-                  cIdpartner := PadR( cPartner3, 7 )
+                  cIdpartner := PadR( p_cPartnerKontiranje3, 7 )
                ENDIF
 
                cBrDok := Space( 8 )
