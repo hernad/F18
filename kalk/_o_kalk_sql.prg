@@ -55,6 +55,7 @@ FUNCTION find_kalk_doks_za_tip_sufix_zadnji_broj( cIdFirma, cIdVd, cBrDokSfx )
       hParams[ "idvd" ] := cIdVd
    ENDIF
 
+   altd()
    hParams[ "brdok_sfx" ] := cBrDokSfx  // 000010/T => /T
    hParams[ "order_by" ] := "SUBSTR(brdok," + AllTrim( Str( 8 - nLenSufiks + 1 ) ) + "),LEFT(brdok," + AllTrim( Str( 8 -nLenSufiks ) ) + ")" // ako ima brojeva dokumenata sortiraj po sufixu
    hParams[ "indeks" ] := .F.
@@ -851,8 +852,8 @@ STATIC FUNCTION sql_kalk_doks_where( hParams )
       where substr(brdok,6) ='/T'
       order by substr(brdok,6),left(brdok,5) DESC
 */
-      // cWhere += "substr(brdok,6) = " + sql_quote( Trim(hParams[ "brdok_sfx" ]) )
-      cWhere += "substr(brdok," + AllTrim( Str( 8 -Len( hParams[ "brdok_sfx" ] ) + 1 ) ) + ")=" + sql_quote( Trim( hParams[ "brdok_sfx" ] ) )
+      // cWhere += "substr(brdok,6) = " + sql_quote( hParams[ "brdok_sfx" ] )
+      cWhere += "substr(brdok," + AllTrim( Str( 8 -Len( hParams[ "brdok_sfx" ] ) + 1 ) ) + ")=" + sql_quote( hParams[ "brdok_sfx" ] )
    ENDIF
 
    IF hb_HHasKey( hParams, "dat_do" )

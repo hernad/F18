@@ -85,8 +85,9 @@ FUNCTION ka_pripr9_key_handler()
       kalk_del_smece_pripr9( idfirma, idvd, brdok )
 
       RETURN DE_REFRESH
+      
    CASE Ch == k_ctrl_f9() // brisanje kompletnog kalk_pripr9
-      ErP9All()
+      kalk_pripr_smece_sve_izbrisati()
       RETURN DE_REFRESH
 
    CASE Chr( Ch ) $ "pP" // povrat dokumenta u kalk_pripremu
@@ -169,7 +170,7 @@ FUNCTION kalk_del_smece_pripr9( cIdF, cIdVd, cBrDok )
 
 
 
-FUNCTION ErP9All()
+STATIC FUNCTION kalk_pripr_smece_sve_izbrisati()
 
    IF Pitanje(, "Sigurno zelite izbrisati sve zapise?", "N" ) == "N"
       RETURN .F.
