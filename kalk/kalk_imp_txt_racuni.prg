@@ -365,7 +365,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
       select_o_kalk_pript()
       APPEND BLANK // pript
       REPLACE idfirma WITH self_organizacija_id(), ;
-         rBr WITH Str( ++nRbr, 3 ), ;
+         rBr WITH ++nRbr, ;
          idvd WITH cTDok, ;
          brdok WITH cBrojKalk, ;
          datdok WITH kalk_imp_temp->datdok, ;

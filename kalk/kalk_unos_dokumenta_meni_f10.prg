@@ -27,7 +27,7 @@ FUNCTION kalk_meni_f10()
    AAdd( aOpcExe, {|| kalk_povrat_dokumenta() } )
 
    AAdd( aOpc, "3. priprema -> smeće" )
-   AAdd( aOpcExe, {|| kalk_azuriranje_tabele_pripr9() } )
+   AAdd( aOpcExe, {|| kalk_azuriranje_pripr_smece_pripr9() } )
 
    AAdd( aOpc,  "4. smeće    -> priprema" )
    AAdd( aOpcExe, {|| kalk_povrat_dokumenta_iz_pripr9() } )

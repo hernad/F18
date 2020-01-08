@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 
-
 FUNCTION kalk_pregled_smece_pripr9()
 
    PRIVATE aUslFirma := self_organizacija_id()
@@ -21,11 +20,11 @@ FUNCTION kalk_pregled_smece_pripr9()
    PRIVATE dDat2 := Date()
 
    Box(, 10, 60 )
-   @ 1 + box_x_koord(), 2 + box_y_koord() SAY "Uslovi pregleda smeca:" COLOR f18_color_i()
-   @ 3 + box_x_koord(), 2 + box_y_koord() SAY "Firma (prazno-sve)" GET aUslFirma PICT "@S40"
-   @ 4 + box_x_koord(), 2 + box_y_koord() SAY "Vrste dokumenta (prazno-sve)" GET aUslDok PICT "@S20"
-   @ 5 + box_x_koord(), 2 + box_y_koord() SAY "Datum od" GET dDat1
-   @ 5 + box_x_koord(), 20 + box_y_koord() SAY "do" GET dDat2
+   @ 1 + box_x_koord(), 2 + box_y_koord() SAY8 "Uslovi pregleda smeća:" COLOR f18_color_i()
+   @ 3 + box_x_koord(), 2 + box_y_koord() SAY8 "Firma (prazno-sve)" GET aUslFirma PICT "@S40"
+   @ 4 + box_x_koord(), 2 + box_y_koord() SAY8 "Vrste dokumenta (prazno-sve)" GET aUslDok PICT "@S20"
+   @ 5 + box_x_koord(), 2 + box_y_koord() SAY8 "Datum od" GET dDat1
+   @ 5 + box_x_koord(), 20 + box_y_koord() SAY8 "do" GET dDat2
    READ
    BoxC()
 
@@ -39,15 +38,15 @@ FUNCTION kalk_pregled_smece_pripr9()
 
    PRIVATE PicV := "99999999.9"
    ImeKol := { ;
-      { "F.", {|| IdFirma                  }, "IdFirma"     }, ;
-      { "VD", {|| IdVD                     }, "IdVD"        }, ;
-      { "BrDok", {|| BrDok                    }, "BrDok"       }, ;
-      { "Dat.Kalk", {|| DatDok                   }, "DatDok"      }, ;
-      { "K.zad. ", {|| IdKonto                  }, "IdKonto"     }, ;
-      { "K.razd.", {|| IdKonto2                 }, "IdKonto2"    }, ;
-      { "Br.Fakt", {|| brfaktp                  }, "brfaktp"     }, ;
-      { "Partner", {|| idpartner                }, "idpartner"   }, ;
-      { "E", {|| error                    }, "error"       } ;
+      { "F.", {|| IdFirma }, "IdFirma"     }, ;
+      { "VD", {|| IdVD }, "IdVD"        }, ;
+      { "BrDok", {|| BrDok }, "BrDok"       }, ;
+      { "Dat.Kalk", {|| DatDok }, "DatDok"      }, ;
+      { "K.zad. ", {|| IdKonto  }, "IdKonto"     }, ;
+      { "K.razd.", {|| IdKonto2  }, "IdKonto2"    }, ;
+      { "Br.Fakt", {|| brfaktp }, "brfaktp"     }, ;
+      { "Partner", {|| idpartner }, "idpartner"   }, ;
+      { "E", {|| error }, "error"       } ;
       }
 
    Kol := {}
@@ -56,8 +55,8 @@ FUNCTION kalk_pregled_smece_pripr9()
    NEXT
 
    Box(, 20, 77 )
-   @ box_x_koord() + 17, box_y_koord() + 2 SAY "<c-T>  Brisi stavku                              "
-   @ box_x_koord() + 18, box_y_koord() + 2 SAY "<c-F9> Brisi sve     "
+   @ box_x_koord() + 17, box_y_koord() + 2 SAY8 "<c-T>  Briši stavku                              "
+   @ box_x_koord() + 18, box_y_koord() + 2 SAY8 "<c-F9> Briši sve     "
    @ box_x_koord() + 19, box_y_koord() + 2 SAY "<P> Povrat dokumenta u pripremu "
    @ box_x_koord() + 20, box_y_koord() + 2 SAY "               "
 
@@ -67,7 +66,7 @@ FUNCTION kalk_pregled_smece_pripr9()
 
    // PRIVATE lKalkAsistentAuto := .F.
 
-   my_browse( "KALK_PRIPR9", 20, 77, {|| ka_pripr9_key_handler() }, "<P>-povrat dokumenta u pripremu", "Pregled smeca...", , , , , 4 )
+   my_browse( "KALK_PRIPR9", 20, 77, {|| ka_pripr9_key_handler() }, "<P>-povrat dokumenta u pripremu", "Pregled smeća...", , , , , 4 )
    BoxC()
 
    RETURN .T.
@@ -85,7 +84,7 @@ FUNCTION ka_pripr9_key_handler()
       kalk_del_smece_pripr9( idfirma, idvd, brdok )
 
       RETURN DE_REFRESH
-      
+
    CASE Ch == k_ctrl_f9() // brisanje kompletnog kalk_pripr9
       kalk_pripr_smece_sve_izbrisati()
       RETURN DE_REFRESH

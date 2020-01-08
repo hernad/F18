@@ -49,7 +49,6 @@ FUNCTION kalk_ostale_operacije_doks()
    AAdd( aOpc, "S. pregled smeća " )
    AAdd( aOpcExe, {|| kalk_pregled_smece_pripr9() } )
 
-
    f18_menu( "mazd", .F., nIzbor, aOpc, aOpcExe )
 
    //my_close_all_dbf()

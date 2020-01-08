@@ -14,9 +14,11 @@
 #include "f18.ch"
 
 
-
-FUNCTION kalk_azuriranje_tabele_pripr9()
-
+/*
+      
+*/
+FUNCTION kalk_azuriranje_pripr_smece_pripr9()
+   
    LOCAL lGen := .F.
    LOCAL cPametno := "D"
    LOCAL cIdFirma
@@ -36,7 +38,7 @@ FUNCTION kalk_azuriranje_tabele_pripr9()
       RETURN .F.
    ENDIF
 
-   IF Pitanje( "p1", "Želite li pripremu prebaciti u smeće (D/N) ?", "N" ) == "N"
+   IF Pitanje( "#PRIPR->SMECE", "Želite li pripremu prebaciti u smeće (D/N) ?", "N" ) == "N"
       RETURN .F.
    ENDIF
 
