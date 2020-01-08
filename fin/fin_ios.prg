@@ -32,7 +32,7 @@ FUNCTION fin_ios_meni()
 
    // AAdd( _opc, "1. specifikacija IOS-a (pregled podataka prije štampe) " )
    // AAdd( _opcexe, {|| ios_specifikacija() } )
-   AAdd( _opc, "1. štampa IOS-a            " )
+   AAdd( _opc, "1. štampa ios-a            " )
    AAdd( _opcexe, {|| fin_ios_print() } )
    // AAdd( _opc, "3. generisanje podataka za štampu IOS-a" )
    // AAdd( _opcexe, {|| fin_ios_generacija() } )
@@ -77,7 +77,7 @@ STATIC FUNCTION fin_ios_print()
    download_template( "ios.odt",  "8d1fa4972d42e54cc0e97e5c8d8c525787fc6b7b4d7c07ce092c38897b48ce85" )
    download_template( "ios_2.odt", "8a4f3492b7e0372dd8a0c78958fe45159333aaa4b1b2a4d61b7226e9ac1b0225" )
 
-   Box(, 16, 65, .F. )
+   Box(, 17, 65, .F. )
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 " Štampa IOS-a **** "
 
@@ -893,6 +893,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
    dDatumDo := hParams[ "datum_do" ]
    cPrikazSaSaldoNulaDN := hParams[ "saldo_nula" ]
 
+   MsgO("Preuzimanje podataka sa servera...")
    // o_partner()
    //o_konto()
    o_suban()
@@ -906,6 +907,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
    // SET ORDER TO TAG "1"
    // SEEK cIdFirma + cIdKonto
    find_suban_by_konto_partner( cIdFirma, cIdKonto, cIdPartner )
+   MsgC()
 
    EOF CRET
 
