@@ -867,12 +867,13 @@ STATIC FUNCTION _spec_zaglavlje( id_firma, id_partner, line )
 STATIC FUNCTION fin_ios_generacija( hParams )
 
    LOCAL dDatumDo, cIdFirma, cIdKonto, cPrikazSaSaldoNulaDN
-   LOCAL cIdPartner, hRec, nCount
+   LOCAL cIdPartner, hRec, nCount, nCountPartner
    LOCAL _auto := .F.
    LOCAL _dug_1, _dug_2, _u_dug_1, _u_dug_2
    LOCAL _pot_1, _pot_2, _u_pot_1, _u_pot_2
    LOCAL nSaldo1, nSaldo2
    LOCAL cIdPartnerTekuci
+   LOCAL lNeaktivanPartner
 
    IF hParams == NIL
       MsgBeep( "Napomena: ova opcija puni pomoćnu tabelu na osnovu koje se#štampaju IOS obrasci" )
@@ -911,7 +912,6 @@ STATIC FUNCTION fin_ios_generacija( hParams )
 
    EOF CRET
 
-   nCount := 0
    Box(, 3, 65 )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Generacija IOS tabele u toku ..."
@@ -931,16 +931,20 @@ STATIC FUNCTION fin_ios_generacija( hParams )
       nSaldo1 := 0
       nSaldo2 := 0
 
-      DO WHILE !Eof() .AND. cIdFirma == field->idfirma  .AND. cIdKonto == field->idkonto  .AND. cIdPartnerTekuci == field->idpartner
+      nCountPartner := 0
+      select_o_partner( suban->idpartner )
+      SELECT suban
+      lNeaktivanPartner := (partn->_kup == "X")
+
+      nCount := 0
+      DO WHILE !Eof() .AND. cIdFirma == suban->idfirma  .AND. cIdKonto == suban->idkonto  .AND. cIdPartnerTekuci == suban->idpartner
 
          IF field->datdok > dDatumDo // ako je datum veci od datuma do kojeg generisem
             SKIP
             LOOP
          ENDIF
 
-         select_o_partner( cIdPartnerTekuci )
-         SELECT suban
-         IF partn->_kup == "X" // neaktivan partner
+         IF lNeaktivanPartner
             SKIP
             LOOP
          ENDIF
@@ -959,6 +963,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
             ENDIF
          ENDIF
 
+         @ box_x_koord() + 3, box_y_koord() + 5 SAY Str( ++nCountPartner 5, 0)
          SKIP
 
       ENDDO
