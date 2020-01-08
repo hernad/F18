@@ -963,7 +963,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
             ENDIF
          ENDIF
 
-         @ box_x_koord() + 3, box_y_koord() + 5 SAY Str( ++nCountPartner 5, 0)
+         @ box_x_koord() + 3, box_y_koord() + 5 SAY Str(++nCountPartner, 5, 0)
          SKIP
 
       ENDDO
