@@ -21,12 +21,10 @@ FUNCTION kalk_azuriranje_pripr_smece_pripr9()
    
    LOCAL lGen := .F.
    LOCAL cPametno := "D"
-   LOCAL cIdFirma
-   LOCAL cIdvd
-   LOCAL cBrDok
-   LOCAL _a_pripr
-   LOCAL nI, hRec, _scan
-   LOCAL _id_firma, _id_vd, _br_dok
+   LOCAL aDokumentiPriprema
+   LOCAL nI, hRec, nScan
+   LOCAL cIdFirma, cIdVd, cBrDok
+   LOCAL lDupli
 
    o_kalk_pripr9()
    o_kalk_pripr()
@@ -42,47 +40,63 @@ FUNCTION kalk_azuriranje_pripr_smece_pripr9()
       RETURN .F.
    ENDIF
 
-   _a_pripr := kalk_dokumenti_iz_pripreme_u_matricu()
+   aDokumentiPriprema := kalk_dokumenti_iz_pripreme_u_matricu()
 
-   postoji_li_dokument_u_pripr9( @_a_pripr )
+   // aDokument[4] == 1 ako ga ima u smecu, 0 ako ga nema u smecu 
+   postoji_li_dokument_u_pripr9( @aDokumentiPriprema )
 
    SELECT kalk_pripr
    GO TOP
 
+   lDupli := .F. // postoje i u pripremu i u smecu
+
    DO WHILE !Eof()
 
-      _scan := AScan( _a_pripr, {| var | VAR[ 1 ] == field->idfirma .AND. ;
-         VAR[ 2 ] == field->idvd .AND. ;
-         VAR[ 3 ] == field->brdok } )
+      nScan := AScan( aDokumentiPriprema, {| aDokument | aDokument[ 1 ] == kalk_pripr->idfirma .AND. aDokument[ 2 ] == kalk_pripr->idvd .AND. aDokument[ 3 ] == kalk_pripr->brdok } )
 
-      IF _scan > 0 .AND. _a_pripr[ _scan, 4 ] == 0
+      altd()
+      
+      IF nScan > 0 
+         
+         IF aDokumentiPriprema[ nScan, 4 ] == 0 // postoji u pripremi, nema ga u smecu
 
-         _id_firma := field->idfirma
-         _id_vd := field->idvd
-         _br_dok := field->brdok
+            cIdFirma := kalk_pripr->idfirma
+            cIdVd := kalk_pripr->idvd
+            cBrDok := kalk_pripr->brdok
 
-         DO WHILE !Eof() .AND. field->idfirma + field->idvd + field->brdok == _id_firma + _id_vd + _br_dok
+            DO WHILE !Eof() .AND. kalk_pripr->idfirma + kalk_pripr->idvd + kalk_pripr->brdok == cIdFirma + cIdVd + cBrDok
 
-            hRec := dbf_get_rec()
+               hRec := dbf_get_rec()
 
-            SELECT kalk_pripr9
-            APPEND BLANK
+               SELECT kalk_pripr9
+               APPEND BLANK
 
-            dbf_update_rec( hRec )
+               dbf_update_rec( hRec )
 
-            SELECT kalk_pripr
+               SELECT kalk_pripr
+               SKIP
+
+            ENDDO
+
+            log_write( "F18_DOK_OPER: kalk, prenos dokumenta iz pripreme u smece: " + cIdFirma + "-" + cIdVd + "-" + cBrDok, 2 )
+
+         ELSE
+            // vec postoji u smecu
+            lDupli := .T.
+            info_bar("smece", "SMECE DUPLI: " + aDokumentiPriprema[nScan, 1] + "-" + aDokumentiPriprema[nScan, 2] + "-" + aDokumentiPriprema[nScan, 3] )
+            SELECT KALK_PRIPR
             SKIP
-
-         ENDDO
-
-         log_write( "F18_DOK_OPER: kalk, prenos dokumenta iz pripreme u smece: " + _id_firma + "-" + _id_vd + "-" + _br_dok, 2 )
-
+         ENDIF
       ENDIF
 
    ENDDO
 
-   SELECT kalk_pripr
-   my_dbf_zap()
+   IF lDupli
+      MsgBeep("Postoje dokumenti u smeću pod istim brojem!#Zato se priprema ne prazni")
+   ELSE
+      SELECT kalk_pripr
+      my_dbf_zap()
+   ENDIF
 
    my_close_all_dbf()
 
@@ -94,6 +108,7 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
 
    LOCAL nRec
    LOCAL hRec
+   LOCAL GetList := {}
 
    lSilent := .T.
 
@@ -143,7 +158,7 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
          ENDDO
          Boxc()
 
-         IF Pitanje(, "Povuci u pripremu dokumente sa ovim kriterijom ?", "N" ) == "D"
+         IF Pitanje(, "Povući u pripremu dokumente sa ovim kriterijom ?", "N" ) == "D"
             SELECT kalk_pripr9
             PRIVATE cFilt1 := ""
             cFilt1 := "IDFIRMA==" + dbf_quote( cIdFirma ) + ".and." + aUsl1 + ".and." + aUsl2 + ".and." + aUsl3
@@ -153,8 +168,7 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
             ENDIF
 
             GO TOP
-            MsgO( "Prolaz kroz SMECE..." )
-
+            MsgO( "Prolaz kroz SMEĆE..." )
             DO WHILE !Eof()
                SELECT kalk_pripr9
                Scatter()
@@ -176,7 +190,7 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
       ENDIF
    ENDIF
 
-   IF Pitanje( "", "Iz smeca " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " povuci u pripremu (D/N) ?", "D" ) == "N"
+   IF Pitanje( "", "Iz smeća " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " povući u pripremu (D/N) ?", "D" ) == "N"
       IF !lSilent
          my_close_all_dbf()
          RETURN
@@ -192,9 +206,10 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
 
    MsgO( "PRIPREMA" )
 
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdVD == IdVD .AND. cBrDok == BrDok
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr9->IdFirma .AND. cIdVD == kalk_pripr9->IdVD .AND. cBrDok == kalk_pripr9->BrDok
       SELECT kalk_pripr9
       Scatter()
+
       SELECT kalk_pripr
       APPEND ncnl
       _ERROR := ""
@@ -204,9 +219,10 @@ FUNCTION kalk_povrat_dokumenta_iz_pripr9( cIdFirma, cIdVd, cBrDok )
    ENDDO
 
    SELECT kalk_pripr9
+   SET ORDER TO TAG "1"
    SEEK cidfirma + cidvd + cBrDok
    my_flock()
-   DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdVD == IdVD .AND. cBrDok == BrDok
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr9->IdFirma .AND. cIdVD == kalk_pripr9->IdVD .AND. cBrDok == kalk_pripr9->BrDok
       SKIP 1
       nRec := RecNo()
       SKIP -1
@@ -271,6 +287,7 @@ FUNCTION kalk_povrat_najstariji_dokument_iz_pripr9()
 
    SET ORDER TO TAG "1"
    SELECT kalk_pripr9
+   SET ORDER TO TAG "1"
    SEEK cidfirma + cidvd + cBrDok
 
    DO WHILE !Eof() .AND. cIdFirma == IdFirma .AND. cIdVD == IdVD .AND. cBrDok == BrDok
@@ -289,22 +306,23 @@ FUNCTION kalk_povrat_najstariji_dokument_iz_pripr9()
 
 
 
-STATIC FUNCTION postoji_li_dokument_u_pripr9( arr )
+STATIC FUNCTION postoji_li_dokument_u_pripr9( aDokumentiPriprema )
 
    LOCAL nI
-   LOCAL _ctrl
+   LOCAL cSeek
 
-   FOR nI := 1 TO Len( arr )
+   FOR nI := 1 TO Len( aDokumentiPriprema )
 
-      _ctrl := arr[ nI, 1 ] + arr[ nI, 2 ] + arr[ nI, 3 ]
+      cSeek := aDokumentiPriprema[ nI, 1 ] + aDokumentiPriprema[ nI, 2 ] + aDokumentiPriprema[ nI, 3 ]
 
       SELECT kalk_pripr9
-      SEEK _ctrl
+      SET ORDER TO TAG "1"
+      SEEK cSeek
 
       IF Found()
-         arr[ nI, 4 ] := 1
+         aDokumentiPriprema[ nI, 4 ] := 1
       ENDIF
 
    NEXT
 
-   RETURN
+   RETURN .T.

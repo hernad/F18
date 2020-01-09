@@ -14,6 +14,8 @@
 
 FUNCTION kalk_pregled_smece_pripr9()
 
+   LOCAL GetList := {}
+
    PRIVATE aUslFirma := self_organizacija_id()
    PRIVATE aUslDok := Space( 50 )
    PRIVATE dDat1 := CToD( "" )
@@ -42,8 +44,9 @@ FUNCTION kalk_pregled_smece_pripr9()
       { "VD", {|| IdVD }, "IdVD"        }, ;
       { "BrDok", {|| BrDok }, "BrDok"       }, ;
       { "Dat.Kalk", {|| DatDok }, "DatDok"      }, ;
-      { "K.zad. ", {|| IdKonto  }, "IdKonto"     }, ;
-      { "K.razd.", {|| IdKonto2  }, "IdKonto2"    }, ;
+      { "Mag konto", {|| mkonto  }, "mkonto"     }, ;
+      { "Kto2", {|| IdKonto2  }, "IdKonto2"    }, ;
+      { "Prod konto", {|| pkonto  }, "pkonto"    }, ;
       { "Br.Fakt", {|| brfaktp }, "brfaktp"     }, ;
       { "Partner", {|| idpartner }, "idpartner"   }, ;
       { "E", {|| error }, "error"       } ;
@@ -66,7 +69,7 @@ FUNCTION kalk_pregled_smece_pripr9()
 
    // PRIVATE lKalkAsistentAuto := .F.
 
-   my_browse( "KALK_PRIPR9", 20, 77, {|| ka_pripr9_key_handler() }, "<P>-povrat dokumenta u pripremu", "Pregled smeća...", , , , , 4 )
+   my_browse( "KALK_PRIPR9", 20, 77, {|| ka_pripr9_key_handler() }, "<P>-povrat dokumenta u pripremu", _u("Pregled smeća..."), , , , , 4 )
    BoxC()
 
    RETURN .T.
@@ -147,16 +150,17 @@ STATIC FUNCTION ka_pripr9_set_filter( aUslFirma, aUslDok, dDat1, dDat2 )
 
 
 
-FUNCTION kalk_del_smece_pripr9( cIdF, cIdVd, cBrDok )
+FUNCTION kalk_del_smece_pripr9( cIdFirma, cIdVd, cBrDok )
 
-   IF Pitanje(, "Sigurno zelite izbrisati dokument?", "N" ) == "N"
+   IF Pitanje(, "Sigurno želite izbrisati dokument?", "N" ) == "N"
       RETURN .F.
    ENDIF
 
    SELECT kalk_pripr9
-   SEEK cIdF + cIdVd + cBrDok
+   SET ORDER TO TAG "1"
+   SEEK cIdFirma + cIdVd + cBrDok
    my_flock()
-   DO WHILE !Eof() .AND. cIdF == IdFirma .AND. cIdVD == IdVD .AND. cBrDok == BrDok
+   DO WHILE !Eof() .AND. cIdFirma == kalk_pripr9->IdFirma .AND. cIdVD == kalk_pripr9->IdVD .AND. cBrDok == kalk_pripr9->BrDok
       SKIP 1
       nRec := RecNo()
       SKIP -1
@@ -171,7 +175,7 @@ FUNCTION kalk_del_smece_pripr9( cIdF, cIdVd, cBrDok )
 
 STATIC FUNCTION kalk_pripr_smece_sve_izbrisati()
 
-   IF Pitanje(, "Sigurno zelite izbrisati sve zapise?", "N" ) == "N"
+   IF Pitanje(, "Sigurno želite izbrisati sve iz smeća?", "N" ) == "N"
       RETURN .F.
    ENDIF
 
