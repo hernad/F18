@@ -2,6 +2,7 @@ trigger:
   branches:
     include:
     - 4
+    - 4-dev
     - releases/*
   paths:
     exclude:

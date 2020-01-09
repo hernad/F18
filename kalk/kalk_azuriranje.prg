@@ -664,7 +664,7 @@ FUNCTION kalk_dokumenti_iz_pripreme_u_matricu()
 
    DO WHILE !Eof()
 
-      nScan := AScan( aKalkDokumenti, {| aVar | aVar[ 1 ] == field->idfirma .AND. aVar[ 2 ] == field->idvd .AND. aVar[ 3 ] == field->brdok  } )
+      nScan := AScan( aKalkDokumenti, {| aDokument | aDokument[ 1 ] == kalk_pripr->idfirma .AND. aDokument[ 2 ] == kalk_pripr->idvd .AND. aDokument[ 3 ] == kalk_pripr->brdok  } )
       IF nScan == 0
          AAdd( aKalkDokumenti, { field->idfirma, field->idvd, field->brdok, 0 } )
       ENDIF

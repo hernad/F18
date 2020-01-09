@@ -52,8 +52,8 @@ FUNCTION kalk_get_1_95_96()
    ELSE
       @  box_x_koord() + 6, box_y_koord() + 2   SAY "Dokument Broj: "; ?? _BrFaktP
       @  box_x_koord() + 6, Col() + 2 SAY "Datum: "; ?? _DatFaktP
-      @ box_x_koord() + 8, box_y_koord() + 2 SAY "Magacinski konto razduzuje "; ?? _mkonto
-      @ box_x_koord() + 9, box_y_koord() + 2 SAY "Konto zadužuje "; ?? _IdKonto
+      @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Magacinski konto razdužuje "; ?? _mkonto
+      @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Konto zadužuje "; ?? _IdKonto
 
    ENDIF
 

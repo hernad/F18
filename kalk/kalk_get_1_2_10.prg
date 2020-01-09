@@ -140,9 +140,9 @@ STATIC FUNCTION kalk_valid_dobavljac( cIdPartner, nX )
 
 
 
-STATIC FUNCTION ino_dobavljac_set_konverzija_valute( cPartn, s_cKonverzijaValuteDN )
+STATIC FUNCTION ino_dobavljac_set_konverzija_valute( cIdPartner, s_cKonverzijaValuteDN )
 
-   IF kalk_is_novi_dokument() .AND. partner_is_ino( cPartn )
+   IF kalk_is_novi_dokument() .AND. partner_is_ino( cIdPartner )
       s_cKonverzijaValuteDN := "D"
    ENDIF
 
