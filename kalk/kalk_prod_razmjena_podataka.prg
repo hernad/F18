@@ -54,7 +54,7 @@ FUNCTION fakt_11_kalk_prenos_11_zad_diskont()
    LOCAL dFaktDo := Date()
    LOCAL cArtPocinju := Space( 10 )
    LOCAL nLeftArt := 0
-   LOCAL dDatKalk, cIdKonto, cIdKonto2, cIdZaduz, cIdZaduz2, cSabirati, cCjenSif
+   LOCAL dDatKalk, cIdKonto, cMagKonto, cIdZaduz, cIdZaduz2, cSabirati, cCjenSif
    LOCAL nX
    LOCAL cFaktBrDokumenti := Space( 150 ), cFilterBrDok
    LOCAL nPos, aDokumenti
@@ -69,7 +69,7 @@ FUNCTION fakt_11_kalk_prenos_11_zad_diskont()
    dDatKalk := Date()
 
    cIdKonto := PadR( "1330", 7 )
-   cIdKonto2 := PadR( "1320", 7 )
+   cMagKonto := PadR( "1320", 7 )
 
    cIdZaduz2 := Space( 6 )
    cIdZaduz := Space( 6 )
@@ -95,7 +95,7 @@ FUNCTION fakt_11_kalk_prenos_11_zad_diskont()
          VALID !Empty(cBrOtpr) 
       
       
-      @ box_x_koord() + nX++, box_y_koord() + 2  SAY8 "            Magacinski konto razdužuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
+      @ box_x_koord() + nX++, box_y_koord() + 2  SAY8 "            Magacinski konto razdužuje:" GET cMagKonto PICT "@!" VALID P_Konto( @cMagKonto )
       @ box_x_koord() + nX++, box_y_koord() + 2  SAY8 "Prodavnički konto (diskont) zadužuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
 
       cFaktIdFirma := cIdFirma
@@ -191,8 +191,8 @@ FUNCTION fakt_11_kalk_prenos_11_zad_diskont()
                idtarifa WITH roba->idtarifa, ;
                brfaktp WITH cBrOtpr, ;
                datfaktp WITH fakt->datdok, ;
-               idkonto   WITH cPKonto, ;
-               idkonto2  WITH cidkonto2, ;
+               idkonto  WITH cMagKonto, ;
+               idkonto2   WITH cPKonto, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
                vpc WITH fakt->cijena, ;
@@ -264,18 +264,10 @@ FUNCTION fakt_13_kalk_11()
    LOCAL cBrKalk := Space( 8 )
 
    o_kalk_pripr()
-//   o_koncij()
-   // o_kalk()
-// o_roba()
-//   o_konto()
-//   o_partner()
-//   o_tarifa()
-
-//   o_fakt_dbf()
 
    dDatKalk := Date()
    cIdKonto := PadR( "1320", 7 )
-   cIdKonto2 := PadR( "1310", 7 )
+   cMagKonto := PadR( "1310", 7 )
    cIdZaduz2 := cIdZaduz := Space( 6 )
 
    cBrkalk := Space( 8 )
@@ -291,7 +283,7 @@ FUNCTION fakt_13_kalk_11()
       nRBr := 0
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 11 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
-      @ box_x_koord() + 3, box_y_koord() + 2   SAY "Magac. konto razduzuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
+      @ box_x_koord() + 3, box_y_koord() + 2   SAY "Magac. konto razduzuje:" GET cMagKonto PICT "@!" VALID P_Konto( @cMagKonto )
 
 
       IF gVar13u11 == "1"
@@ -367,8 +359,8 @@ FUNCTION fakt_13_kalk_11()
                idtarifa WITH roba->idtarifa, ;
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
-               idkonto   WITH cPKonto, ;
-               idkonto2  WITH cidkonto2, ;
+               idkonto2 WITH cPKonto, ;
+               idkonto  WITH cMagKonto, ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
@@ -804,7 +796,7 @@ FUNCTION fakt_13_kalk_80()
 
    dDatKalk := Date()
    cIdKonto := PadR( "1320999", 7 )
-   cIdKonto2 := PadR( "1320", 7 )
+   cMagKonto := PadR( "1320", 7 )
    cIdZaduz2 := cIdZaduz := Space( 6 )
 
    cBrkalk := Space( 8 )
@@ -819,7 +811,7 @@ FUNCTION fakt_13_kalk_80()
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 80 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
       @ box_x_koord() + 3, box_y_koord() + 2   SAY "Prodavn. konto zaduzuje :" GET cIdKonto  PICT "@!" VALID P_Konto( @cIdKonto )
-      @ box_x_koord() + 4, box_y_koord() + 2   SAY "CM. konto razduzuje:" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
+      @ box_x_koord() + 4, box_y_koord() + 2   SAY "CM. konto razduzuje:" GET cMagKonto PICT "@!" VALID P_Konto( @cMagKonto )
 
 
       cFaktIdFirma := cIdFirma
@@ -890,7 +882,7 @@ FUNCTION fakt_13_kalk_80()
                idtarifa WITH roba->idtarifa, ;
                brfaktp WITH fakt->brdok, ;
                datfaktp WITH fakt->datdok, ;
-               idkonto   WITH cidkonto2, ;
+               idkonto   WITH cMagKonto, ;
                idkonto2  WITH cidkonto, ;
                kolicina WITH -fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
