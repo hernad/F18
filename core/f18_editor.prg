@@ -34,7 +34,9 @@ FUNCTION f18_editor( cTxt )
    check_prog_download()
 
    IF is_linux()
-      cCmd := "f18_editor" + " " + cTxt
+      // cCmd := "f18_editor" + " " + cTxt
+      //hc_edit( )
+      hc_edit( cTxt, .F. )
    ELSE
       cCmd := s_cDirF18Util + s_cUtilName + SLASH + s_cProg
       IF ! File( s_cDirF18Util + s_cUtilName + SLASH + s_cProg )
