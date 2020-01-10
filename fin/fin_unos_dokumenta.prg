@@ -258,8 +258,10 @@ FUNCTION edit_fin_priprema( lNovaStavka )
    @ box_x_koord() + 14, box_y_koord() + 2 SAY "Partner:" GET _IdPartner PICT "@!" ;
       VALID  {|| iif( Empty( _idpartner ), say_from_valid( 14, 20, Space( 25 ) ), ), ;
       ( p_partner( @_IdPartner, 14, 20 ) ) .AND. fin_pravilo_partner() .AND. ;
-      iif( g_knjiz_help == "D" .AND. !Empty( _idpartner ), fin_partner_prikaz_stanja_ekran( _idpartner, _idkonto, NIL ), .T. ) } ;
-      WHEN {|| iif( ChkKtoMark( _idkonto ), .T., .F. ) }
+      iif( g_knjiz_help == "D" .AND. !Empty( _idpartner ), fin_partner_prikaz_stanja_ekran( _idpartner, _idkonto, NIL ), .T. ) }
+       
+
+      //WHEN {|| iif( ChkKtoMark( _idkonto ), .T., .F. ) }
 
 
    @ box_x_koord() + 16, box_y_koord() + 2  SAY8 "Duguje/Potražuje (1/2):" GET _D_P VALID V_DP() .AND. fin_pravilo_dug_pot() .AND. fin_pravilo_broj_veze()
@@ -718,7 +720,7 @@ FUNCTION MinKtoLen( cIdKonto )
  *   param: cIdKonto - oznaka konta
  *   param: cIdPartner - sifra partnera koja ce se ponuditi
  *   param: cNewPartner - zapamcena sifra partnera
- */
+ 
 
 FUNCTION CheckMark( cIdKonto, cIdPartner, cNewPartner )
 
@@ -729,7 +731,7 @@ FUNCTION CheckMark( cIdKonto, cIdPartner, cNewPartner )
    ENDIF
 
    RETURN .T.
-
+*/
 
 
 /* Partija(cIdKonto)

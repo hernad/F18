@@ -187,7 +187,7 @@ FUNCTION sredi_rbr_fin_nalog( lSilent )
  *     provjeri da li postoji marker na kontu
  *     Uslov za ovu opciju: SIFK podesenje: ID=KONTO, OZNAKA=MARK, TIP=C, DUZ=1
  *   param: cIdKonto - id konto
- */
+ 
 FUNCTION ChkKtoMark( cIdKonto )
 
    bRet := .T.
@@ -205,3 +205,4 @@ FUNCTION ChkKtoMark( cIdKonto )
    ENDCASE
 
    RETURN bRet
+*/

@@ -233,7 +233,7 @@ STATIC FUNCTION FaFillroba_naljepnice()
 // "2" - za dokument nivelacije - prikazuju snizenje,
 // gdje se vidi i precrtana stara cijena
 // -------------------------------------------------------------------
-STATIC FUNCTION Printroba_naljepnice( cVarijanta )
+STATIC FUNCTION print_roba_naljepnice_rtm( cVarijanta )
 
    LOCAL _rtm_naziv := AllTrim( "rLab" + cVarijanta )
 
@@ -292,7 +292,7 @@ STATIC FUNCTION _gen_xml( xml_file, tkm_no, len_naz )
 STATIC FUNCTION cre_open_roba_naljepnice()
 
    LOCAL aDbf
-   LOCAL _tbl
+   LOCAL cTabela
    LOCAL _dbf
    LOCAL _cdx
 
@@ -301,9 +301,9 @@ STATIC FUNCTION cre_open_roba_naljepnice()
       USE
    ENDIF
 
-   _tbl := "rlabele"
-   _dbf := my_home() + my_dbf_prefix() + _tbl + ".dbf"
-   _cdx := my_home() + my_dbf_prefix() + _tbl + ".cdx"
+   cTabela := "rlabele"
+   _dbf := my_home() + my_dbf_prefix() + cTabela + ".dbf"
+   _cdx := my_home() + my_dbf_prefix() + cTabela + ".cdx"
 
    FErase( _dbf )
    FErase( _cdx )

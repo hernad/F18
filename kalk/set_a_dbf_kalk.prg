@@ -51,6 +51,8 @@ FUNCTION set_a_dbf_kalk()
    set_a_dbf_temp( "topska", "TOPSKA", F_TMP_TOPSKA )
    set_a_dbf_temp( "katops", "KATOPS", F_TMP_KATOPS )
 
+   set_a_dbf_temp( "rlabele", "RLABELE", F_RLABELE )
+
    RETURN .T.
 
 
