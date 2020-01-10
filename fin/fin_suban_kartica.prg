@@ -765,7 +765,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   nDuguje := 0
                   nPotrazuje :=  hRec[ "iznosbhd" ]
                ENDIF
-               fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
+               fin_suban_add_item_to_xlsx( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
                   s_cBrVeze, dDatDok, dDatVal, s_cOpis, nDuguje, nPotrazuje, nDugBHD - nPotBHD )
             ENDIF
 
@@ -945,21 +945,24 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
 
 
-STATIC FUNCTION fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, ;
-     cIdVn, cBrNal, nRbr, cBrVeze, dDatum, dDatVal, cOpis, nDug, nPot, nSaldo )
+STATIC FUNCTION fin_suban_add_item_to_xlsx( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, ;
+     cIdVn, cBrNal, nRbr, cBrVeze, dDatdok, dDatVal, cOpis, nDug, nPot, nSaldo )
 
    LOCAL nI
-   LOCAL aKarticaKolone := { ;
+   LOCAL aKarticaKolone
+
+   
+   // { "C", "Naziv",   30, Trim(cKontoNaziv) },;
+
+   aKarticaKolone := { ;
 	      { "C", "Konto ID", 8, Trim(cIdKonto) },;
-         { "C", "Naziv",   30, Trim(cKontoNaziv) },;
 		   { "C", "Partner ID", 8, Trim(cIdPartner) },;
-         { "C", "Naziv", 30, Trim(cPartnerNaziv) }, ;
          { "C", "VN", 5, cIdVn }, ;
          { "C", "Br.Nal", 12, Trim(cBrNal) }, ;
-         { "N", "Rbr", 5, nRbr }, ;
+         { "N", "Rbr", 7, nRbr }, ;
          { "C", "Br.Veze", 17, Trim(cBrVeze) }, ;
-         { "D", "Dat.Dok", 12, dDatum }, ;
-         { "D", "Dat.Valute", 12, dDatVal }, ;
+         { "D", "Dat.Dok", 12, dDatDok }, ;
+         { "D", "Valuta", 12, dDatVal }, ;
          { "C", "Opis", 40, Trim(cOpis)  }, ;
          { "M", "Duguje", 15, nDug }, ;
          { "M", "Potrazuje", 15, nPot }, ;          
@@ -975,7 +978,7 @@ STATIC FUNCTION fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartne
       format_set_num_format(s_pMoneyFormat, /*"#,##0"*/ "#0.00" )
 
       s_pDateFormat := workbook_add_format(s_pWorkBook)
-      format_set_num_format(s_pDateFormat, "DD.MM.YY")
+      format_set_num_format(s_pDateFormat, "d.mm.yy")
     
       
       /* Set the column width. */
@@ -984,10 +987,18 @@ STATIC FUNCTION fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartne
          worksheet_set_column(s_pWorkSheet, nI - 1, nI - 1, aKarticaKolone[ nI, 3], NIL)
        next
 
+
+       worksheet_write_string( s_pWorkSheet, 0, 0,  "Konto:", NIL)
+       worksheet_write_string( s_pWorkSheet, 0, 1,  hb_StrToUtf8(cIdKonto + " - " + Trim( cKontoNaziv)), NIL)
+      
+       worksheet_write_string( s_pWorkSheet, 1, 0,  "Partner:", NIL)
+       worksheet_write_string( s_pWorkSheet, 1, 1,  hb_StrToUtf8(cIdPartner + " - " + Trim(cPartnerNaziv)), NIL)
+    
        /* Set header */
        for nI := 1 TO LEN(aKarticaKolone)
-         worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow := 0, nI - 1,  aKarticaKolone[nI, 2], NIL)
+         worksheet_write_string( s_pWorkSheet, 3, nI - 1,  aKarticaKolone[nI, 2], NIL)
        next
+       s_nWorkSheetRow := 3
    ENDIF
 
 
@@ -995,13 +1006,13 @@ STATIC FUNCTION fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartne
 
    FOR nI := 1 TO LEN(aKarticaKolone)
           IF aKarticaKolone[ nI, 1 ] == "C"
-             worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], NIL)
+             worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  hb_StrToUtf8(aKarticaKolone[nI, 4]), NIL)
           ELSEIF aKarticaKolone[ nI, 1 ] == "M"
              worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], s_pMoneyFormat)
           ELSEIF aKarticaKolone[ nI, 1 ] == "N"
             worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], NIL)
          ELSEIF aKarticaKolone[ nI, 1 ] == "D"
-            worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], s_pDateFormat)
+            worksheet_write_datetime( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], s_pDateFormat)
          ENDIF
    NEXT
         
