@@ -44,5 +44,6 @@ sddpg.hbc
 rddmisc.hbc
 hbhpdf.hbc
 
+hbxlsxwriter.hbc
 #hbssl.hbc
 #hbhttpd.hbc

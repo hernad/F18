@@ -648,12 +648,11 @@ FUNCTION f18_open_mime_document( cDocument )
    LOCAL cCmd := "", nError, cPrefixCmd
 
    
-
    IF is_windows()
       cCmd := "cmd /c start "
       nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .F. ) // start daje async efekat, ako stavimo .T. proces zakuca
    ELSE
-      cPrefixCmd := get_run_prefix_cmd()
+      cPrefixCmd := "LD_LIBRARY_PATH= " + get_run_prefix_cmd()
       cCmd += cPrefixCmd
       nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .T. ) // async
    ENDIF

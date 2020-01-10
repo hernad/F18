@@ -21,6 +21,10 @@ MEMVAR cPrikazK1234, cSamoDomacaValuta1Ne2, cKumulativniPrometBez1Sa2
 MEMVAR cUslovUpperBrDok, cUslovIdKonto, cUslovIdPartner, cUslovNazivKonta
 FIELD iznosbhd, iznosdem, d_p, otvst, idpartner, idfirma, idkonto, datdok, datval, brdok, brnal
 
+STATIC s_cXlsxName := NIL
+STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
+STATIC s_pMoneyFormat, s_pDateFormat
+
 
 FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
@@ -32,12 +36,12 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL cBoxName
    LOCAL dPom := CToD( "" )
    LOCAL cOpcine := Space( 20 )
-   LOCAL cExpDbf := "N"
+   LOCAL cExpXlsx := "N"
    LOCAL aExpFields
    LOCAL cIdVn
    LOCAL cBrNal
    LOCAL s_cBrVeze
-   LOCAL cRbr
+   LOCAL nRbr
    LOCAL dDatVal
    LOCAL dDatDok
    LOCAL s_cOpis
@@ -190,16 +194,16 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
       @ Row() + 1, box_y_koord() + 2 SAY8 "Općina (prazno-sve):" GET cOpcine
       //@ Row() + 1, box_y_koord() + 2 SAY "Svaka kartica treba da ima zaglavlje kolona ? (D/N)"  GET c1k1z PICT "@!" VALID c1k1z $ "DN"
-      @ Row() + 1, box_y_koord() + 2 SAY "Export u XLSX (D/N)?"  GET cExpDbf PICT "@!" VALID cExpDbf $ "DN"
+      @ Row() + 1, box_y_koord() + 2 SAY "Export u XLSX (D/N)?"  GET cExpXlsx PICT "@!" VALID cExpXlsx $ "DN"
 
       READ
       ESC_BCR
 
-      IF cExpDbf == "D"
-         aExpFields := fin_suban_export_dbf_struct()
-         create_dbf_r_export( aExpFields )
+      IF cExpXlsx == "D"
+         s_cXlsxName := my_home_root() + "fin_suban_kartica.xlsx"
       ENDIF
 
+      
       pRegex := hb_regexComp( "(..)_SP_(\d)" )
       aMatch := hb_regex( pRegex, cUslovUpperBrDok )
       IF Len( aMatch ) > 0 // aMatch[1]="61_SP_2", aMatch[2]=61, aMatch[3]=2
@@ -614,7 +618,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
             IF !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" )
                cIdVn := hRec[ "idvn" ]
                cBrNal := hRec[ "brnal" ]
-               cRbr := hRec[ "rbr" ]
+               nRbr := hRec[ "rbr" ]
                dDatDok := hRec[ "datdok" ]
                dDatVal := fix_dat_var( hRec[ "datval" ], .T. )
                s_cOpis := hRec[ "opis" ]
@@ -753,7 +757,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                ENDIF
             ENDIF
             fin_print_ostatak_opisa( @cOpis, nCOpis, {|| check_nova_strana( bZagl, oPDF ) }, nSirinaOpis )
-            IF cExpDbf == "D" .AND. !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" )
+            IF cExpXlsx == "D" .AND. !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" )
                IF  hRec[ "d_p" ] == "1"
                   nDuguje := hRec[ "iznosbhd" ]
                   nPotrazuje := 0
@@ -761,7 +765,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   nDuguje := 0
                   nPotrazuje :=  hRec[ "iznosbhd" ]
                ENDIF
-               fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, cRbr, ;
+               fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
                   s_cBrVeze, dDatDok, dDatVal, s_cOpis, nDuguje, nPotrazuje, nDugBHD - nPotBHD )
             ENDIF
 
@@ -924,9 +928,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    end_print( xPrintOpt )
 
-   IF cExpDbf == "D"
+   IF cExpXlsx == "D"
       my_close_all_dbf()
-      open_r_export_table()
+      workbook_close( s_pWorkBook )
+      s_pWorkBook := NIL
+      s_pWorkSheet := NIL
+      f18_open_mime_document( s_cXlsxName )
+      //open_r_export_table()
    ENDIF
 
    my_close_all_dbf()
@@ -934,53 +942,69 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    RETURN .T.
 
 
-FUNCTION fin_suban_export_dbf_struct()
-
-   LOCAL aDbf := {}
-
-   AAdd( aDbf, { "id_konto", "C", 7, 0 }  )
-   AAdd( aDbf, { "naz_konto", "C", 100, 0 }  )
-   AAdd( aDbf, { "id_partn", "C", 6, 0 }  )
-   AAdd( aDbf, { "naz_partn", "C", 50, 0 }  )
-   AAdd( aDbf, { "vrsta_nal", "C", 2, 0 }  )
-   AAdd( aDbf, { "broj_nal", "C", 8, 0 }  )
-   AAdd( aDbf, { "nal_rbr", "N", 6, 0 }  )
-   AAdd( aDbf, { "broj_veze", "C", 10, 0 }  )
-   AAdd( aDbf, { "dat_nal", "D", 8, 0 }  )
-   AAdd( aDbf, { "dat_val", "D", 8, 0 }  )
-   AAdd( aDbf, { "opis_nal", "C", 100, 0 }  )
-   AAdd( aDbf, { "duguje", "N", 15, 2 }  )
-   AAdd( aDbf, { "potrazuje", "N", 15, 2 }  )
-   AAdd( aDbf, { "saldo", "N", 15, 2 }  )
-
-   RETURN aDbf
 
 
-STATIC FUNCTION fin_suban_add_item_to_r_export( cKonto, cK_naz, cPartn, cP_naz, cVn, cBr, nRbr, cBrVeze, dDatum, dDatVal, cOpis, nDug, nPot, nSaldo )
 
-   LOCAL nTArea := Select()
+STATIC FUNCTION fin_suban_add_item_to_r_export( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, ;
+     cIdVn, cBrNal, nRbr, cBrVeze, dDatum, dDatVal, cOpis, nDug, nPot, nSaldo )
 
-   o_r_export()
-   SELECT r_export
+   LOCAL nI
+   LOCAL aKarticaKolone := { ;
+	      { "C", "Konto ID", 8, Trim(cIdKonto) },;
+         { "C", "Naziv",   30, Trim(cKontoNaziv) },;
+		   { "C", "Partner ID", 8, Trim(cIdPartner) },;
+         { "C", "Naziv", 30, Trim(cPartnerNaziv) }, ;
+         { "C", "VN", 5, cIdVn }, ;
+         { "C", "Br.Nal", 12, Trim(cBrNal) }, ;
+         { "N", "Rbr", 5, nRbr }, ;
+         { "C", "Br.Veze", 17, Trim(cBrVeze) }, ;
+         { "D", "Dat.Dok", 12, dDatum }, ;
+         { "D", "Dat.Valute", 12, dDatVal }, ;
+         { "C", "Opis", 40, Trim(cOpis)  }, ;
+         { "M", "Duguje", 15, nDug }, ;
+         { "M", "Potrazuje", 15, nPot }, ;          
+         { "M", "Saldo", 15, nSaldo } ;      
+   }
 
-   APPEND BLANK
-   REPLACE field->id_konto WITH cKonto
-   REPLACE field->naz_konto WITH ( cK_naz )
-   REPLACE field->id_partn WITH cPartn
-   REPLACE field->naz_partn WITH ( cP_naz )
-   REPLACE field->vrsta_nal WITH cVn
-   REPLACE field->broj_nal WITH cBr
-   REPLACE field->nal_rbr WITH nRbr
-   REPLACE field->broj_veze WITH ( cBrVeze )
-   REPLACE field->dat_nal WITH dDatum
-   REPLACE field->dat_val WITH fix_dat_var( dDatVal, .T. )
-   REPLACE field->opis_nal WITH ( cOpis )
-   REPLACE field->duguje WITH nDug
-   REPLACE field->potrazuje WITH nPot
-   REPLACE field->saldo WITH nSaldo
+   IF s_pWorkSheet == NIL
+      
+      s_pWorkBook := workbook_new( s_cXlsxName )
+      s_pWorkSheet := workbook_add_worksheet(s_pWorkBook, NIL)
 
-   SELECT ( nTArea )
+      s_pMoneyFormat := workbook_add_format(s_pWorkBook)
+      format_set_num_format(s_pMoneyFormat, /*"#,##0"*/ "#0.00" )
 
+      s_pDateFormat := workbook_add_format(s_pWorkBook)
+      format_set_num_format(s_pDateFormat, "DD.MM.YY")
+    
+      
+      /* Set the column width. */
+       for nI := 1 TO LEN(aKarticaKolone)
+         // worksheet_set_column(lxw_worksheet *self, lxw_col_t firstcol, lxw_col_t lastcol, double width, lxw_format *format)
+         worksheet_set_column(s_pWorkSheet, nI - 1, nI - 1, aKarticaKolone[ nI, 3], NIL)
+       next
+
+       /* Set header */
+       for nI := 1 TO LEN(aKarticaKolone)
+         worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow := 0, nI - 1,  aKarticaKolone[nI, 2], NIL)
+       next
+   ENDIF
+
+
+   s_nWorkSheetRow++
+
+   FOR nI := 1 TO LEN(aKarticaKolone)
+          IF aKarticaKolone[ nI, 1 ] == "C"
+             worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], NIL)
+          ELSEIF aKarticaKolone[ nI, 1 ] == "M"
+             worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], s_pMoneyFormat)
+          ELSEIF aKarticaKolone[ nI, 1 ] == "N"
+            worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], NIL)
+         ELSEIF aKarticaKolone[ nI, 1 ] == "D"
+            worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 4], s_pDateFormat)
+         ENDIF
+   NEXT
+        
    RETURN .T.
 
 
