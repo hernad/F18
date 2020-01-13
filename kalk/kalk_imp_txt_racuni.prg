@@ -375,8 +375,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          datfaktp WITH kalk_imp_temp->datdok, ;
          datval WITH kalk_imp_temp->datval, ;
          idkonto WITH cIdKontoZaduzuje, ;
-         idkonto2 WITH cIdKontoRazduzuje, ;
-         idzaduz2 WITH ""
+         idkonto2 WITH cIdKontoRazduzuje ;
 
       IF cTDok $ "11#41"
          REPLACE tmarza2 WITH "A"
