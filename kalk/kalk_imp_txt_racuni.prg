@@ -15,7 +15,7 @@ MEMVAR cSection, cHistory, aHistory, izbor, opc, opcexe, gAImpPrint
 MEMVAR GetList, m_x, m_y
 MEMVAR cExpPath, cImpFile
 
-STATIC __stampaj // stampanje dokumenata .t. or .f.
+STATIC s_lStampatiDokumente // stampanje dokumenata .t. or .f.
 // STATIC s_lAutom := .T. // Automatski asistent i ažuriranje naloga (D/N)
 
 FUNCTION meni_import_vindija()
@@ -24,10 +24,10 @@ FUNCTION meni_import_vindija()
    PRIVATE opc := {}
    PRIVATE opcexe := {}
 
-   __stampaj := .F.
+   s_lStampatiDokumente := .F.
 
    IF gAImpPrint == "D"
-      __stampaj := .T.
+      s_lStampatiDokumente := .T.
    ENDIF
 
    AAdd( opc, "1. import vindija računi                 " )
@@ -68,14 +68,9 @@ FUNCTION kalk_auto_import_racuni()
 
    cExpPath := get_liste_za_import_path()
 
-   cFFilt := kalk_get_vp_ili_mp() // filter za import MP ili VP
+   cFilesFilter := kalk_get_vp_ili_mp() // filter za import MP ili VP
 
-   // IF prag_odstupanja_nc_sumnjiv() > 0 .AND. Pitanje(, "Ispusti artikle sa sumnjivom NC (D/N)",  "N" ) == "D"
-   // cCtrl_art := "D"
-   // ENDIF
-
-
-   IF get_file_list( cFFilt, cExpPath, @cImpFile ) == 0 // daj pregled fajlova za import, te setuj varijablu cImpFile
+   IF get_file_list( cFilesFilter, cExpPath, @cImpFile ) == 0 // daj pregled fajlova za import, te setuj varijablu cImpFile
       RETURN .F.
    ENDIF
 
@@ -114,20 +109,23 @@ FUNCTION kalk_auto_import_racuni()
       lNegative := .T.
    ENDIF
 
-   IF kalk_imp_from_temp_to_pript( aFaktEx, lFtSkip, lNegative ) == 0  // , cCtrl_art ) == 0
+   IF kalk_imp_from_temp_to_pript( aFaktEx, lFtSkip, lNegative ) == 0  
       MsgBeep( "Operacija prekinuta!" )
       RETURN .F.
    ENDIF
 
    IF Pitanje(, "Obraditi dokumente iz kalk pript (D/N)?", "D" ) == "D"
-      IF kalk_imp_obradi_sve_dokumente_iz_pript( NIL, __stampaj )
+      altd()
+      IF kalk_imp_obradi_sve_dokumente_iz_pript( NIL, s_lStampatiDokumente )
          kalk_imp_brisi_txt( cImpFile )
+         kalk_14_autoimport( .F. )
       ENDIF
    ELSE
       MsgBeep( "Dokumenti nisu obrađeni!#Obrada se moze uraditi i naknadno!" )
       my_close_all_dbf()
    ENDIF
 
+   
    RETURN .T.
 
 
@@ -138,6 +136,7 @@ FUNCTION kalk_auto_import_racuni()
 STATIC FUNCTION kalk_get_vp_ili_mp()
 
    LOCAL cVPMP := "V", cRet
+   LOCAL GetList := {}
 
    // pozovi box za izbor
    Box(, 5, 60 )
@@ -226,6 +225,7 @@ FUNCTION kalk_imp_txt_to_temp( aDbf, aRules, cTxtFile )
 
    MsgBeep( "Import txt => temp - OK" )
 
+   altd()
    RETURN .T.
 
 
@@ -256,8 +256,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
    my_close_all_dbf()
 
    o_kalk_pripr()
-   // o_koncij()
-   // select_o_roba()
+
    o_kalk_pript()
    select_o_kalk_imp_temp()
 
@@ -289,41 +288,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
       cIdProdajnoMjesto := kalk_imp_temp->idpm
       cIdPJ := kalk_imp_temp->idpj
 
-   /*
-         IF cCtrl_art == "D"   // pregledaj CACHE, da li treba preskociti ovaj artikal
-
-            nT_scan := 0
-
-            cIdKontoTmp := kalk_imp_get_konto_by_tip_pm_poslovnica( cTDok, kalk_imp_temp->idpm, "R", cIdPJ )
-
-    ---        SELECT roba
-            -- SET ORDER TO TAG "ID_VSD"
-            cSifraDobavljaca := PadL( AllTrim( kalk_imp_temp->idroba ), 5, "0" )
-
-            SEEK cSifraDobavljaca // aha trazi se po sifri dobavljaca 52 => 00052
-            cIdRobaTmp := field->id
-
-            O_CACHE
-            SELECT cache
-            SET ORDER TO TAG "1"
-            GO TOP
-            SEEK PadR( cIdKontoTmp, 7 ) + PadR( cIdRobaTmp, 10 )
-
-
-            IF Found() .AND. prag_odstupanja_nc_sumnjiv() > 0 .AND. ( field->odst > prag_odstupanja_nc_sumnjiv() ) // dodaj sporne u kontrolnu matricu
-
-               nT_scan := AScan( aArr_ctrl, ;
-                  {| xVal| xVal[ 1 ] + PadR( xVal[ 2 ], 10 ) == cTDok + PadR( AllTrim( cFakt ), 10 ) } )
-
-               IF nT_scan = 0
-                  AAdd( aArr_ctrl, { cTDok, PadR( AllTrim( cFakt ), 10 ) } )
-               ENDIF
-
-            ENDIF
-
-            SELECT kalk_imp_temp
-         ENDIF
-   */
 
       IF lFSkip // ako je ukljucena opcija preskakanja postojecih faktura
          IF Len( aFExist ) > 0
@@ -336,9 +300,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          ENDIF
       ENDIF
 
-      // IF cTDok <> cPredhodniTipDokumenta // promjena tipa dokumenta
-      // nUvecaj := 0
-      // ENDIF
 
       IF ( cFakt <> cPredhodniFaktDokument ) // .OR. (cTDok == "11" .AND. (cIdProdajnoMjesto <> cPredhodnoProdMjesto) )
          ++nUvecaj
@@ -347,14 +308,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          AAdd( aPom, { cTDok, cBrojKalk, cFakt } )
       ENDIF
 
-/*
 
---      SELECT roba   // pronadji robu sifra dobavljaca
-      --SET ORDER TO TAG "ID_VSD"
-
-      GO TOP
-  --    SEEK cIdRobaSifraDob
-*/
       cIdRobaSifraDob := PadL( AllTrim( kalk_imp_temp->idroba ), 5, "0" )
       find_roba_by_sifradob( cIdRobaSifraDob )
 
@@ -426,15 +380,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          cT_brfakt := aPom[ i, 3 ]
          cT_ctrl := ""
 
-   /*
-            IF cCtrl_art == "D" .AND. Len( aArr_ctrl ) > 0
-               nT_scan := AScan( aArr_ctrl, {| xVal| xVal[ 1 ] + PadR( xVal[ 2 ], 10 ) == cT_tipdok + PadR( cT_brfakt, 10 ) } )
-
-               IF nT_scan <> 0
-                  cT_ctrl := " !!! ERROR !!!"
-               ENDIF
-            ENDIF
-   */
          ? cT_tipdok + " - " + cT_brdok, cT_ctrl
 
       NEXT
@@ -445,47 +390,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
 
    ENDIF
 
-   /*
-      IF cCtrl_art == "D" .AND. Len( aArr_ctrl ) > 0
-
-         START PRINT EDITOR
-
-         ?
-         ? "Ispusteni dokumenti:"
-         ? "------------------------------------"
-
-         FOR xy := 1 TO Len( aArr_ctrl )
-            ? aArr_ctrl[ xy, 1 ] + "-" + aArr_ctrl[ xy, 2 ]
-         NEXT
-
-         FF
-         ENDPRINT
-
-      ENDIF
-   */
-
-   /*
-      IF cCtrl_art == "D" .AND. Len( aArr_ctrl ) > 0 // pobrisi ispustene dokumente
-
-         nT_scan := 0
-
-         SELECT pript
-         SET ORDER TO TAG "0"
-         GO TOP
-
-         DO WHILE !Eof()
-
-            nT_scan := AScan( aArr_ctrl, {| xval| xval[ 1 ] + PadR( xval[ 2 ], 10 ) == field->idvd + PadR( field->brfaktp, 10 ) } )
-
-            IF nT_scan <> 0
-               DELETE
-            ENDIF
-
-            SKIP
-         ENDDO
-
-      ENDIF
-   */
+   
 
    RETURN 1
 
@@ -630,11 +535,7 @@ STATIC FUNCTION kalk_postoji_faktura_a()
    LOCAL cTDok
    LOCAL aRet, cDok, cBrOriginal
 
-   // IF nRight == nil
-   // nRight := 0
-   // ENDIF
 
-   // o_kalk_doks()
    select_o_kalk_imp_temp()
    GO TOP
 
@@ -1107,10 +1008,10 @@ STATIC FUNCTION kalk_imp_continue_from_check_point()
       RETURN .F.
    ENDIF
 
-   IF kalk_imp_obradi_sve_dokumente_iz_pript( nDosaoDo, __stampaj )
+   IF kalk_imp_obradi_sve_dokumente_iz_pript( nDosaoDo, s_lStampatiDokumente )
 
       kalk_imp_set_check_point( 0 ) // oznaci da je obrada zavrsena
-      MsgBeep( "Dokumenti obradjeni!" )
+      MsgBeep( "Dokumenti obrađeni!" )
       kalk_imp_brisi_txt( cImpFile )
    ENDIF
 

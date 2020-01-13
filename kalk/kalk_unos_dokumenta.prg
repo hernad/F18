@@ -66,7 +66,8 @@ FUNCTION kalk_header_get1( lNoviDokument )
       SELECT kalk_pripr
    ENDIF
 
-   @ box_x_koord() + 2, box_y_koord() + 49  SAY "Broj:" GET _brdok VALID {|| !kalk_dokument_postoji( _idfirma, _idvd, _brdok ) }
+   // _idvd == 14 - patch obrada 14
+   @ box_x_koord() + 2, box_y_koord() + 49  SAY "Broj:" GET _brdok VALID {|| (_idvd=="14" .AND. kalk_14_autoimport()) .OR. !kalk_dokument_postoji( _idfirma, _idvd, _brdok ) }
    @ box_x_koord() + 2, Col() + 2 SAY "Datum:" GET _datdok VALID {||  datum_not_empty_upozori_godina( _datDok, "Datum KALK" ) }
    @ box_x_koord() + 3, box_y_koord() + 2  SAY "Rbr:" GET nKalkRBr PICT '9999' VALID {|| valid_kalk_rbr_stavke( _idvd ) }
 

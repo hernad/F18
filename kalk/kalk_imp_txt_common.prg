@@ -1,7 +1,7 @@
 #include "f18.ch"
 
 STATIC s_cKalkAutoImportPodatakaKonto := nil
-
+STATIC s_lKalk14AutoImport := .F.
 
 /*
  *   Brisanje fajla cTxtFile
@@ -57,9 +57,9 @@ FUNCTION cre_kalk_priprt()
 
 
 /*
-    *     Obrada importovanih dokumenata pript -> pripr
-    *     ( funkcija se koristi i za prenos kalk -> kalk)
-    *     lOstaviBrdok - kalk_imprort sa udaljene lokacije koristi brojeve
+    Obrada importovanih dokumenata pript -> pripr
+    ( funkcija se koristi i za prenos kalk -> kalk)
+    lOstaviBrdok - kalk_import sa udaljene lokacije koristi brojeve
 */
 
 FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdok )
@@ -87,11 +87,6 @@ FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdo
 
    hb_default( @lOstaviBrdok, .F. ) // ostavi broj dokumenta koji se nalazi u pript
 
-   // IF Pitanje(, "Automatski asistent i ažuriranje naloga (D/N)?", "D" ) == "D"
-   // s_lAutom := .T.
-   // ENDIF
-
-
    SELECT pript // iz kalk_pript prebaci u kalk_pripr jednu po jednu kalkulaciju
    SET ORDER TO TAG "1"
 
@@ -104,8 +99,8 @@ FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdo
 
    cBBTipDok := Space( 30 ) // uzmi parametre koje ces dokumente prenositi
    Box(, 3, 70 )
-   @ 1 + box_x_koord(), 2 + box_y_koord() SAY "Prenos sljedecih tipova dokumenata ( kalk pript -> pripr) :"
-   @ 3 + box_x_koord(), 2 + box_y_koord() SAY "Tip dokumenta (prazno-svi):" GET cBBTipDok PICT "@S25"
+   @ 1 + box_x_koord(), 2 + box_y_koord() SAY8 "Prenos sljedećih tipova dokumenata ( kalk pript -> pripr) :"
+   @ 3 + box_x_koord(), 2 + box_y_koord() SAY8 "Tip dokumenta (prazno-svi):" GET cBBTipDok PICT "@S25"
    READ
    BoxC()
 
@@ -168,6 +163,7 @@ FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdo
 
          IF hRec[ "idvd" ] == "14"
             update_kalk_14_datval( cNoviKalkBrDok, dDatVal )
+            kalk_14_autoimport( .T. )
          ENDIF
 
          SELECT pript
@@ -213,6 +209,21 @@ FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdo
 
    RETURN .T.
 
+
+/*
+
+u toku importa KALK IDVD 14 napravi se kalk_doks stavka (sa  update_kalk_14_datval( cNoviKalkBrDok, dDatVal )) 
+još dok je dokument u pripremi
+
+*/
+
+FUNCTION kalk_14_autoimport( lSet )
+
+   IF lSet <> nil
+      s_lKalk14AutoImport := lSet
+   ENDIF
+
+   RETURN s_lKalk14AutoImport
 
 /*
        *  Obrada jednog dokumenta

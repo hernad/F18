@@ -38,7 +38,8 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
    SELECT kalk_pripr
    GO TOP
 
-   IF kalk_dokument_postoji( kalk_pripr->idfirma, kalk_pripr->idvd, kalk_pripr->brdok )
+   IF !(kalk_pripr->idvd == "14" .AND. kalk_14_autoimport()) ; // u toku procedure autoimporta 14-ke, "visi" kalk_doks 14 radi datval
+      .AND. kalk_dokument_postoji( kalk_pripr->idfirma, kalk_pripr->idvd, kalk_pripr->brdok )
       MsgBeep( "Dokument " + kalk_pripr->idfirma + "-" + kalk_pripr->idvd + "-" + ;
          AllTrim( kalk_pripr->brdok ) + " već postoji u bazi !#Promjenite broj dokumenta pa ponovite proceduru ažuriranja." )
       RETURN .F.
@@ -424,8 +425,9 @@ STATIC FUNCTION kalk_provjera_integriteta( aDoks, lViseDok )
 
       ENDDO
 
-      IF find_kalk_doks_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
-         error_bar( cIdfirma + "-" + cIdvd + "-" + cBrdok, "Postoji dokument na stanju: " + cIdFirma + "-" + cIdvd + "-" + AllTrim( cBrDok ) )
+      IF !(cIdVd == "14" .AND. kalk_14_autoimport()) ; // ovo je PATCH za autoimport 14-ke
+         .AND. find_kalk_doks_by_broj_dokumenta( cIdFirma, cIdvd, cBrDok )
+         error_bar( cIdfirma + "-" + cIdvd + "-" + cBrdok, "Postoji dokument na stanju: " + cIdFirma + "-" + cIdVd + "-" + AllTrim( cBrDok ) )
          IF !lViseDok
             my_close_all_dbf()
             RETURN .F.
@@ -554,6 +556,7 @@ STATIC FUNCTION kalk_azur_sql()
    LOCAL bDokument := {| cIdFirma, cIdVd, cBrDok |   cIdFirma == field->idFirma .AND. ;
       cIdVd == field->IdVd .AND. cBrDok == field->BrDok }
    LOCAL cIdVd, cIdFirma, cBrDok
+   LOCAL lUpdate
 
    // cKalkTableName := "kalk_kalk"
    // cKalkDoksTableName := "kalk_doks"
@@ -607,13 +610,19 @@ STATIC FUNCTION kalk_azur_sql()
          hRecKalkDok[ "rabat" ] := nDokRabat
          hRecKalkDok[ "mpv" ] := nDokMPV
          @ box_x_koord() + 2, box_y_koord() + 2 SAY "kalk_doks -> server "
+
+
+         IF find_kalk_doks_by_broj_dokumenta( hRecKalkDok[ "idfirma"], hRecKalkDok[ "idvd"], hRecKalkDok[ "brdok"] )
+            // kalk_14_autoimport se desava PATCH
+            hRecKalkDok[ "datval" ] := kalk_doks->datval
+            sql_table_update( "kalk_doks", "del", hRecKalkDok )
+         ENDIF
+
          IF !sql_table_update( "kalk_doks", "ins", hRecKalkDok )
             lOk := .F.
             run_sql_query( "ROLLBACK" )
             BoxC()
             RETURN .F.
-            // ELSE
-            // run_sql_query( "COMMIT" )
          ENDIF
 
       ENDIF
