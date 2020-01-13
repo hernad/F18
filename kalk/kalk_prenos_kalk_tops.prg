@@ -34,7 +34,7 @@ FUNCTION kalk_tops_meni()
       ESC_BCR
       BoxC()
 
-      IF kalk_dokument_postoji( cIDFirma, cIdVd, cBrDok, .F. )
+   --   IF kalk_dokument_postoji( cIDFirma, cIdVd, cBrDok, .F. )
          kalk_generisi_tops_dokumente( cIDFirma, cIdVd, cBrDok )
       ENDIF
       cBrDok := kalk_fix_brdok_add_1( cBrDok )

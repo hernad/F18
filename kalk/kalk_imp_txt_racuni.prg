@@ -248,7 +248,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
    LOCAL aArr_ctrl := {}
    LOCAL cIdKontoZaduzuje, cIdKontoRazduzuje
    LOCAL nRbr, nUvecaj, nCnt, cPredhodniFaktDokument, cPredhodniTipDokumenta, cPredhodnoProdMjesto, aPom
-   LOCAL cFakt, cTDok, cIdProdajnoMjesto
+   LOCAL cFakt, cIdVd, cIdProdajnoMjesto
    LOCAL nFExist, nT_scan, cIdRobaSifraDob
    LOCAL cIdKontoTmp, cSifraDobavljaca, cIdRobaTmp
    LOCAL i
@@ -284,7 +284,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
    DO WHILE !Eof()
 
       cFakt := AllTrim( kalk_imp_temp->brdok )
-      cTDok := get_kalk_tip_by_vind_fakt_tip( AllTrim( kalk_imp_temp->idtipdok ), kalk_imp_temp->idpm )
+      cIdVd := get_kalk_tip_by_vind_fakt_tip( AllTrim( kalk_imp_temp->idtipdok ), kalk_imp_temp->idpm )
       cIdProdajnoMjesto := kalk_imp_temp->idpm
       cIdPJ := kalk_imp_temp->idpj
 
@@ -301,40 +301,51 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
       ENDIF
 
 
-      IF ( cFakt <> cPredhodniFaktDokument ) // .OR. (cTDok == "11" .AND. (cIdProdajnoMjesto <> cPredhodnoProdMjesto) )
+      IF ( cFakt <> cPredhodniFaktDokument ) // .OR. (cIdVd == "11" .AND. (cIdProdajnoMjesto <> cPredhodnoProdMjesto) )
          ++nUvecaj
          cBrojKalk := kalk_imp_get_next_temp_broj( nUvecaj )
          nRbr := 0
-         AAdd( aPom, { cTDok, cBrojKalk, cFakt } )
+         AAdd( aPom, { cIdVd, cBrojKalk, cFakt } )
       ENDIF
 
 
       cIdRobaSifraDob := PadL( AllTrim( kalk_imp_temp->idroba ), 5, "0" )
       find_roba_by_sifradob( cIdRobaSifraDob )
 
-      cIdKontoZaduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cTDok, kalk_imp_temp->idpm, "Z", cIdPJ )
-      cIdKontoRazduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cTDok, kalk_imp_temp->idpm, "R", cIdPJ )
+      cIdKontoZaduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "Z", cIdPJ )
+      cIdKontoRazduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "R", cIdPJ )
 
       select_o_koncij( cIdKontoZaduzuje )
       select_o_kalk_pript()
       APPEND BLANK // pript
       REPLACE idfirma WITH self_organizacija_id(), ;
          rBr WITH ++nRbr, ;
-         idvd WITH cTDok, ;
+         idvd WITH cIdVd, ;
          brdok WITH cBrojKalk, ;
          datdok WITH kalk_imp_temp->datdok, ;
          idpartner WITH kalk_imp_temp->idpartner, ;
          idtarifa WITH ROBA->idtarifa, ;
          brfaktp WITH cFakt, ;
          datfaktp WITH kalk_imp_temp->datdok, ;
-         datval WITH kalk_imp_temp->datval, ;
-         idkonto WITH cIdKontoZaduzuje, ;
-         idkonto2 WITH cIdKontoRazduzuje ;
+         datval WITH kalk_imp_temp->datval
+         
+         //, ;
+         //idkonto WITH cIdKontoZaduzuje, ;
+         //idkonto2 WITH cIdKontoRazduzuje ;
 
-      IF cTDok $ "11#41"
+      IF cIdVd $ "14#KO#95"
+         REPLACE mkonto WITH cIdKontoRazduzuje
+      ENDIF
+
+      IF cIdVd $ "11"
+         REPLACE pkonto WITH cIdKontoZaduzuje, ;
+                 mkonto WITH cIdKontoRazduzuje
+      ENDIF
+
+      IF cIdVd $ "11#41"
          REPLACE tmarza2 WITH "A"
          REPLACE tprevoz WITH "A"
-         IF cTDok == "11"
+         IF cIdVd == "11"
             REPLACE pkonto WITH cIdKontoZaduzuje, ;
                mkonto WITH cIdKontoRazduzuje, ;
                mpcsapp WITH kalk_get_mpc_by_koncij_pravilo( cIdKontoZaduzuje )
@@ -352,7 +363,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          mpc WITH kalk_imp_temp->porez
 
       cPredhodniFaktDokument := cFakt
-      cPredhodniTipDokumenta := cTDok
+      cPredhodniTipDokumenta := cIdVd
       cPredhodnoProdMjesto := cIdProdajnoMjesto
 
       ++nCnt
@@ -532,7 +543,7 @@ FUNCTION kalk_imp_roba_exist_sifradob()
 STATIC FUNCTION kalk_postoji_faktura_a()
 
    LOCAL cBrFakt
-   LOCAL cTDok
+   LOCAL cIdVd
    LOCAL aRet, cDok, cBrOriginal
 
 
@@ -550,14 +561,14 @@ STATIC FUNCTION kalk_postoji_faktura_a()
       // IF nRight > 0
       // cBrFakt := PadR( cBrFakt, Len( cBrFakt ) - nRight )
       // ENDIF
-      cTDok := get_kalk_tip_by_vind_fakt_tip( AllTrim( kalk_imp_temp->idtipdok ), kalk_imp_temp->idpm )
+      cIdVd := get_kalk_tip_by_vind_fakt_tip( AllTrim( kalk_imp_temp->idtipdok ), kalk_imp_temp->idpm )
 
       IF cBrFakt == cDok
          SKIP
          LOOP
       ENDIF
 
-      IF find_kalk_doks_by_broj_fakture( cTDok,  PadR( cBrFakt, 10 ) )
+      IF find_kalk_doks_by_broj_fakture( cIdVd,  PadR( cBrFakt, 10 ) )
          AAdd( aRet, { cBrOriginal, kalk_doks->idfirma + "-" + kalk_doks->idvd + "-" + AllTrim( kalk_doks->brdok ) } )
       ENDIF
 

@@ -100,7 +100,7 @@ FUNCTION meni_fiksna_lokacija( nX1, nY1, aOpc, nIzb )
 
 */
 
-FUNCTION meni_0( cMeniId, aOpc, aOpcExe, nOdabranaStavka, lInvert )
+FUNCTION meni_0( cMeniId, aOpc, aOpcExe, nOdabranaStavka, lInvert, lOdaberiPaZavrsi )
 
    LOCAL nMeniSirina
    LOCAL nUIMeniVelicina
@@ -115,6 +115,10 @@ FUNCTION meni_0( cMeniId, aOpc, aOpcExe, nOdabranaStavka, lInvert )
    LOCAL cPom := Set( _SET_DEVICE )
  
    SET DEVICE TO SCREEN
+
+   IF lOdaberiPaZavrsi == NIL
+      lOdaberiPaZavrsi := .F.
+   ENDIF
 
    /*
    IF nPovratak == NIL
@@ -195,7 +199,7 @@ FUNCTION meni_0( cMeniId, aOpc, aOpcExe, nOdabranaStavka, lInvert )
    nChar := LastKey()
    */
   
-   IF nOdabranaStavka == 0 //.OR. nTekucaStavkaMeni == nPovratak  // Ako je ESC meni treba odmah izbrisati (nOdabranaStavka=0),  skini meni sa steka
+   IF (nOdabranaStavka == 0) .OR. lOdaberiPaZavrsi //.OR. nTekucaStavkaMeni == nPovratak  // Ako je ESC meni treba odmah izbrisati (nOdabranaStavka=0),  skini meni sa steka
       @ box_x_koord(), box_y_koord() CLEAR TO box_x_koord() + nUIMeniVelicina + 2, box_y_koord() + nMeniSirina + 4
       aMenu := StackPop( aMenuStack )
       RestScreen( box_x_koord(), box_y_koord(), box_x_koord() + nUIMeniVelicina + 2, box_y_koord() + nMeniSirina + 4, aMenu[ 4 ] )

@@ -102,13 +102,19 @@ FUNCTION KalkNaF( cIdroba, nKolicinaNaStanju )
 
    RETURN .T.
 
-
-FUNCTION kalk_dokument_postoji( cFirma, cIdVd, cBroj, lSilent )
+/*
+    cReci = "" - ne reci nista
+    cReci := "DA" - reci da postoji
+    cReci := "NE" - reci da NE POSTOJI
+*/
+FUNCTION kalk_dokument_postoji( cFirma, cIdVd, cBroj, cReci )
 
    LOCAL lExist := .F.
    LOCAL cWhere
 
-   hb_default( @lSilent, .T. )
+   if cReci == NIL
+      cReci := ""
+   ENDIF
 
    cWhere := "idfirma = " + sql_quote( cFirma )
    cWhere += " AND idvd = " + sql_quote( cIdVd )
@@ -118,8 +124,12 @@ FUNCTION kalk_dokument_postoji( cFirma, cIdVd, cBroj, lSilent )
       lExist := .T.
    ENDIF
 
-   IF !lSilent .AND. !lExist
-      MsgBeep( "Dokument " + Trim( cFirma ) + "-" + Trim( cIdVd ) + "-" + Trim( cBroj ) + " ne postoji !" )
+   IF cReci == "DA" .AND. lExist
+      MsgBeep( "Dokument " + Trim( cFirma ) + "-" + Trim( cIdVd ) + "-" + Trim( cBroj ) + " postoji !" )
+   ENDIF
+   
+   IF cReci == "NE" .AND. !lExist
+      MsgBeep( "Dokument " + Trim( cFirma ) + "-" + Trim( cIdVd ) + "-" + Trim( cBroj ) + "NE postoji !?" )
    ENDIF
 
    RETURN lExist

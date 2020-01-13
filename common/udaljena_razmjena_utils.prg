@@ -87,13 +87,15 @@ FUNCTION get_import_file( cProgModul, import_dbf_path )
 // - param cFilter - filter naziva dokumenta
 // - param cPath - putanja do exportovanih dokumenata
 // ------------------------------------------------------
-FUNCTION get_file_list( cFilter, cPath, cImpFile )
+FUNCTION get_file_list( cFilter, cPath, cFileToImport )
+
+   LOCAL cFajlIme
+   LOCAL nIzbor
 
    OpcF := {}
-
+   
 
    aFiles := Directory( cPath + cFilter )  // cFilter := "*.txt"
-
 
    IF Len( aFiles ) == 0 // da li postoje fajlovi
       MsgBeep( "U direktoriju za prenos nema podataka!##" + cPath + cFilter )
@@ -112,27 +114,34 @@ FUNCTION get_file_list( cFilter, cPath, cImpFile )
    NEXT
 
    // selekcija fajla
-   IzbF := 1
+   nIzbor := 1
    lRet := .F.
-   DO WHILE .T. .AND. LastKey() != K_ESC
-      IzbF := meni_0( "imp", OpcF, NIL, IzbF, .F. )
-      IF IzbF == 0
-         EXIT
+   //DO WHILE .T. .AND. LastKey() != K_ESC
+      altd()
+      nIzbor := meni_0( "imp", OpcF, NIL, nIzbor, .F., .T. ) // odaberi pa zavrsi
+
+      IF nIzbor == 0
+         //EXIT
+         RETURN 0
       ELSE
-         cImpFile := Trim( cPath ) + Trim( Left( OpcF[ IzbF ], 15 ) )
-         IF Pitanje( , "Želite li izvršiti import fajla ?", "D" ) == "D"
-            IzbF := 0
-            lRet := .T.
+         cFajlIme := Trim( Left( OpcF[ nIzbor ], 15 ) )
+         cFileToImport := Trim( cPath ) + cFajlIme
+         IF Pitanje( , "Želite li izvršiti import fajla " + cFajlIme + " ?", "D" ) == "D"
+
+            RETURN 1
+         ELSE
+            RETURN 0
          ENDIF
       ENDIF
-   ENDDO
-   IF lRet
-      RETURN 1
-   ELSE
-      RETURN 0
-   ENDIF
+   //ENDDO
 
-   RETURN 1
+   //IF lRet
+   //   RETURN 1
+   //ELSE
+   //   RETURN 0
+   //ENDIF
+
+   RETURN 0
 
 /*
  update tabele konto na osnovu pomocne tabele
