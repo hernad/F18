@@ -113,7 +113,7 @@ METHOD TKalkMod:set_module_gvars()
    PUBLIC gDirFaKK := ""
    //PUBLIC gBrojacKalkulacija := "D"
    //PUBLIC gRokTr := "N"
-   PUBLIC gVarVP := "1"
+   //PUBLIC gVarVP := "1"
    PUBLIC gAFin := "D"
    PUBLIC gAMat := "0"
    PUBLIC gAFakt := "D"
@@ -232,7 +232,7 @@ METHOD TKalkMod:set_module_gvars()
    g10Porez := fetch_metric( "kalk_dokument_10_prikaz_ukalk_poreza", nil, g10Porez )
    g11BezNC := fetch_metric( "kalk_dokument_11_bez_nc", nil, g11bezNC )
    g80VRT := fetch_metric( "kalk_dokument_80_rekap_po_tar", nil, g80VRT )
-   gVarVP := fetch_metric( "kalk_dokument_14_varijanta_poreza", nil, gVarVP )
+   //gVarVP := fetch_metric( "kalk_dokument_14_varijanta_poreza", nil, gVarVP )
    gVar13u11 := fetch_metric( "kalk_varijanta_fakt_13_kalk_11_cijena", nil, gVar13u11 )
    //gTops := fetch_metric( "kalk_prenos_pos", f18_user(), gTops )
    gFakt := fetch_metric( "kalk_prenos_fakt", f18_user(), gFakt )

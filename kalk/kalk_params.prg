@@ -113,7 +113,7 @@ FUNCTION kalk_par_varijante_prikaza()
    IF LastKey() <> K_ESC
       set_metric( "kalk_magacin_po_nc", NIL, gMagacin )
       set_metric( "kalk_dokument_10_prikaz_ukalk_poreza", NIL, g10Porez )
-      set_metric( "kalk_dokument_14_varijanta_poreza", NIL, gVarVP )
+      //set_metric( "kalk_dokument_14_varijanta_poreza", NIL, gVarVP )
       set_metric( "kalk_dokument_11_bez_nc", NIL, g11bezNC )
       set_metric( "kalk_dokument_80_rekap_po_tar", NIL, g80VRT )
       set_metric( "kalk_varijanta_fakt_13_kalk_11_cijena", NIL, gVar13u11 )

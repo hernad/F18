@@ -101,7 +101,7 @@ FUNCTION kalk_get_1_14()
    SELECT kalk_pripr
 
    @ box_x_koord() + 13, box_y_koord() + 2   SAY8 " Nab. Cjena:" GET _NC  PICTURE picdem()   VALID kalk_valid_kolicina_mag( nKolicinaNaStanju )
-   @ box_x_koord() + 14, box_y_koord() + 2   SAY8 "VPC bez PDV:" GET _VPC  VALID {|| iif( gVarVP == "2" .AND. ( _vpc - _nc ) > 0, cisMarza := ( _vpc - _nc ), _vpc - _nc ), .T. }  PICTURE picdem()
+   @ box_x_koord() + 14, box_y_koord() + 2   SAY8 "VPC bez PDV:" GET _VPC  VALID {|| .T. }  PICTURE picdem()
 
    PRIVATE cTRabat := "%"
    @ box_x_koord() + 15, box_y_koord() + 2    SAY8 "RABAT    " GET  _RABATV PICT picdem()

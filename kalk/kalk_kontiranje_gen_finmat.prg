@@ -36,6 +36,7 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
    LOCAL cIdPartner, cBrFaktP, dDatFaktP, cIdKonto, cIdKonto2
    LOCAL nCount
    LOCAL nFV
+   LOCAL nNetoVPC
 
    // LOCAL nZaokruzenje := gZaokr
    LOCAL nZaokruzenje := 12
@@ -241,9 +242,14 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
          nPom := Round( nPom, nZaokruzenje )
          REPLACE MPV WITH nPom
 
-         // PDV = mpc_sa_pdv_bruto - mpc_bez_pdv_neto - popust
-         nPom := mpc_sa_pdv_by_tarifa( kalk_pripr->idtarifa, kalk_pripr->mpc ) - kalk_pripr->mpc
-         REPLACE Porez WITH Round(  nKolicina * nPom, nZaokruzenje )
+         IF kalk_pripr->idvd == "14"
+            nNetoVPC := kalk_pripr->VPC * ( 1 - kalk_pripr->RabatV / 100 )
+            nPom := mpc_sa_pdv_by_tarifa( kalk_pripr->idtarifa, nNetoVPC ) - nNetoVPC
+         ELSE
+            // PDV = mpc_sa_pdv_bruto - mpc_bez_pdv_neto - popust
+            nPom := mpc_sa_pdv_by_tarifa( kalk_pripr->idtarifa, kalk_pripr->mpc ) - kalk_pripr->mpc
+         ENDIF
+         REPLACE Porez WITH Round( nKolicina * nPom, nZaokruzenje )
 
          nPom := kalk_pripr->MPCSaPP * kalk_pripr->Kolicina
          nPom := Round( nPom, nZaokruzenje )
