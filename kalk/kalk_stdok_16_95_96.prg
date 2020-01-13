@@ -85,8 +85,8 @@ FUNCTION kalk_stampa_dok_16_95_96()
       select_o_partner( cIdPartner )
       SELECT kalk_pripr
 
-      DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND. cBrDok == field->BrDok .AND. cIdVD == field->IdVD ;
-            .AND. field->idpartner + field->brfaktp == cIdpartner + cBrfaktp
+      DO WHILE !Eof() .AND. cIdFirma == kalk_pripr->IdFirma .AND. cBrDok == kalk_pripr->BrDok .AND. cIdVD == kalk_pripr->IdVD ;
+            .AND. kalk_pripr->idpartner + kalk_pripr->brfaktp == cIdpartner + cBrfaktp
 
          // IF field->tbanktr == "X" // izgenerisani dokument
          // SKIP 1
@@ -99,7 +99,9 @@ FUNCTION kalk_stampa_dok_16_95_96()
          kalk_set_vars_troskovi_marzavp_marzamp()
 
          check_nova_strana( bZagl, s_oPDF )
-         nTNv += ( nUNv := Round( field->nc * field->kolicina, 2 ) )
+         // nTNv += ( nUNv := Round( field->nc * field->kolicina, 2 ) )
+         nTNv += ( nUNv := Round( field->nc * field->kolicina, 8 ) )
+
 
          @ PRow() + 1, s_nLijevaMargina SAY field->rbr PICT "99999"
          IF field->idvd == "16"
@@ -216,7 +218,7 @@ STATIC FUNCTION zagl( cIdVd, cMKonto, cIdkonto2, lVpc )
 
    s_cLinija := get_linija( lVPC )
    ? s_cLinija
-   ?U Space( s_nLijevaMargina ) + "*Rbr.* Konto * ARTIKAL  (šifra-naziv-jmj)                                 * Količina *   NC     *    NV     *"
+   ?U Space( s_nLijevaMargina ) + "*R.br* Konto *   ARTIKAL  (šifra-naziv-jmj)                                 * Količina *   NC     *   NV    *"
    IF lVPC
       ??U "   VPC   *  Marža % *   Marža  *   VPV   *"
    ENDIF
@@ -236,7 +238,7 @@ STATIC FUNCTION get_linija( lVPC )
    cLine += Space( 1 )
    cLine += Replicate( "-", 7 )
    cLine += Space( 1 )
-   cLine += Replicate( "-", 60 )
+   cLine += Replicate( "-", 62 )
    cLine += Space( 1 )
    cLine += Replicate( "-", 10 )
    cLine += Space( 1 )
