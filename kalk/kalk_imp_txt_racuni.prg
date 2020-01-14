@@ -315,6 +315,8 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
       cIdKontoZaduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "Z", cIdPJ )
       cIdKontoRazduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "R", cIdPJ )
 
+      altd()
+
       select_o_koncij( cIdKontoZaduzuje )
       select_o_kalk_pript()
       APPEND BLANK // pript
@@ -337,6 +339,10 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          REPLACE mkonto WITH cIdKontoRazduzuje
       ENDIF
 
+      IF cIdVd $ "41"
+         REPLACE pkonto WITH cIdKontoZaduzuje
+      ENDIF
+      
       IF cIdVd $ "11"
          REPLACE pkonto WITH cIdKontoZaduzuje, ;
                  mkonto WITH cIdKontoRazduzuje

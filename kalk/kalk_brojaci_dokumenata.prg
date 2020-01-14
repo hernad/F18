@@ -105,7 +105,6 @@ STATIC FUNCTION kalk_sljedeci_brdok_sufiks( cTipKalk, cIdFirma, cSufiks )
    LOCAL nLenGlavni //:= 5
    LOCAL nLenSufiks //:= 8 - nLenGlavni
 
-   altd()
    //IF cSufiks == NIL .OR. Empty( cSufiks )
    //   cSufiks := Space( nLenSufiks )
    //ELSE

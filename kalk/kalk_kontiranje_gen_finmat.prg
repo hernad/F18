@@ -222,7 +222,7 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
             Marza     WITH Round( nKalkMarzaVP * kalk_pripr->Kolicina, nZaokruzenje ), ;           // marza se ostvaruje nad stvarnom kolicinom
             VPV       WITH Round( kalk_PRIPR->VPC * kalk_pripr->Kolicina, nZaokruzenje )        // vpv se formira nad stvarnom kolicinom
 
-         IF kalk_pripr->idvd == '42'
+         IF kalk_pripr->idvd $ '41#42'
             REPLACE RABATV WITH kalk_pripr->RABATV * kalk_pripr->kolicina
          ELSE
             nPom := kalk_pripr->RabatV / 100 * kalk_pripr->VPC * kalk_pripr->Kolicina
