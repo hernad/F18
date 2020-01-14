@@ -339,6 +339,11 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          REPLACE mkonto WITH cIdKontoRazduzuje
       ENDIF
 
+      IF cIdVd == "96"
+         REPLACE mkonto WITH cIdKontoRazduzuje
+         REPLACE idkonto2 WITH cIdKontoZaduzuje
+      ENDIF
+
       IF cIdVd $ "41"
          REPLACE pkonto WITH cIdKontoZaduzuje
       ENDIF

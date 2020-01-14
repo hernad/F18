@@ -117,7 +117,13 @@ FUNCTION kalk_pripr_obrada( lAsistentObrada )
    AAdd( ImeKol, { "Dat.Kalk", {|| field->DatDok              }, "DatDok"      } )
    // AAdd( ImeKol, { "Dat.Fakt", {|| field->DatFaktP            }, "DatFaktP"    } )
    AAdd( ImeKol, { "K.mag. ", {|| field->mkonto               }, "mKonto"     } )
-   AAdd( ImeKol, { "K.prod.", {|| field->pkonto               }, "pKonto"    } )
+
+   IF kalk_pripr->idvd == "96"
+      AAdd( ImeKol, { "K.prenos.", {|| field->idkonto2               }, "idkonto2"    } )
+   ELSE
+      AAdd( ImeKol, { "K.prod.", {|| field->pkonto               }, "pKonto"    } )
+   ENDIF
+
    AAdd( ImeKol, { "IdRoba", {|| field->IdRoba                }, "IdRoba"      } )
    IF roba_barkod_pri_unosu()
       AAdd( ImeKol, { "Barkod", {|| roba_ocitaj_barkod( field->idroba ) }, "IdRoba" } )
