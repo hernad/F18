@@ -202,5 +202,5 @@ FUNCTION remove_global_idle_handlers()
 
 
 INIT PROCEDURE idle_init()
-   OutStd('init-1' + hb_eol())
+   //OutStd('init-1' + hb_eol())
    RETURN

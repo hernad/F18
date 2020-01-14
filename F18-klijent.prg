@@ -50,13 +50,13 @@ FUNCTION Main(...)
 
    // hb_tracestate(1)
    // hb_traceLevel(5)
-   OutStd('start-m-1' + hb_eol())
+   //OutStd('start-m-1' + hb_eol())
 
    IF s_hF18Params == NIL
      s_hF18Params := init_f18_params(...)
    ENDIF
 
-   OutStd('start-m-2' + hb_eol())
+   //OutStd('start-m-2' + hb_eol())
    set_f18_params(...)
 
    IF to_run_f18_module()

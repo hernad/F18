@@ -915,7 +915,7 @@ FUNCTION skip_semaphore_sync( xArg )
 
 INIT PROCEDURE init_semaphores()
 
-   OutStd('init-3' + hb_eol())
+   //OutStd('init-3' + hb_eol())
    IF s_mtxMutex == NIL
       s_mtxMutex := hb_mutexCreate()
    ENDIF

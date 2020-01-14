@@ -11,31 +11,31 @@
 
 #include "f18.ch"
 
-STATIC __import_dbf_path
+STATIC s_cImportDbfPath
 STATIC s_cExportDbfPath
-STATIC __import_zip_name
-STATIC __export_zip_name
+STATIC s_cImportZipName
+STATIC s_cExportZipName
 
 FIELD id
 
 FUNCTION kalk_udaljena_razmjena_podataka()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
-   LOCAL _izbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
+   LOCAL nIzbor := 1
 
-   __import_dbf_path := my_home() + "export_dbf" + SLASH
+   s_cImportDbfPath := my_home() + "export_dbf" + SLASH
    s_cExportDbfPath := my_home() + "export_dbf" + SLASH
-   __import_zip_name := "kalk_exp.zip"
-   __export_zip_name := "kalk_exp.zip"
+   s_cImportZipName := "kalk_exp.zip"
+   s_cExportZipName := "kalk_exp.zip"
 
-   AAdd( _opc, "1. => kalk export podataka               " )
-   AAdd( _opcexe, {|| kalk_export_start() } )
+   AAdd( aOpc, "1. => kalk export podataka               " )
+   AAdd( aOpcExe, {|| kalk_export_start() } )
 
-   AAdd( _opc, "2. <= kalk import podataka    " )
-   AAdd( _opcexe, {|| kalk_import_start() } )
+   AAdd( aOpc, "2. <= kalk import podataka    " )
+   AAdd( aOpcExe, {|| kalk_import_start() } )
 
-   f18_menu( "razmjena", .F., _izbor, _opc, _opcexe )
+   f18_menu( "razmjena", .F., nIzbor, aOpc, aOpcExe )
 
    my_close_all_dbf()
 
@@ -114,11 +114,11 @@ STATIC FUNCTION kalk_import_start()
       RETURN .F.
    ENDIF
 
-   __import_dbf_path := AllTrim( _imp_path ) // snimi u parametre
+   s_cImportDbfPath := AllTrim( _imp_path ) // snimi u parametre
    set_metric( "kalk_import_path", my_user(), _imp_path )
 
 
-   _imp_file := get_import_file( "kalk", __import_dbf_path ) // import fajl iz liste
+   _imp_file := get_import_file( "kalk", s_cImportDbfPath ) // import fajl iz liste
 
    IF _imp_file == NIL .OR. Empty( _imp_file )
       MsgBeep( "Nema odabranog import fajla !?" )
@@ -135,22 +135,20 @@ STATIC FUNCTION kalk_import_start()
    ENDIF
 
 
-   IF razmjena_decompress_files( _imp_file, __import_dbf_path, __import_zip_name ) <> 0 // dekompresovanje podataka
+   IF razmjena_decompress_files( _imp_file, s_cImportDbfPath, s_cImportZipName ) <> 0 // dekompresovanje podataka
       // ako je bilo greske
       RETURN .F.
    ENDIF
 
 #ifdef __PLATFORM__UNIX
-   set_file_access( __import_dbf_path )
+   set_file_access( s_cImportDbfPath )
 #endif
 
 
    nImportovanoZapisa := kalk_import_podataka( _vars, @_a_data )
 
    my_close_all_dbf()
-
-
-   delete_exp_files( __import_dbf_path, "kalk" )  // brisi fajlove importa
+   delete_exp_files( s_cImportDbfPath, "kalk" )  // brisi fajlove importa
 
    IF ( nImportovanoZapisa > 0 ) // nakon uspjesnog importa
 
@@ -259,7 +257,7 @@ STATIC FUNCTION _vars_import( hParams )
    LOCAL GetList := {}
 
    IF Empty( AllTrim( _imp_path ) )
-      _imp_path := PadR( __import_dbf_path, 300 )
+      _imp_path := PadR( s_cImportDbfPath, 300 )
    ENDIF
 
    Box(, 15, 70 )
@@ -311,7 +309,7 @@ STATIC FUNCTION _vars_import( hParams )
       set_metric( "kalk_import_pript", my_user(), cPript )
 
       // set static var
-      __import_dbf_path := AllTrim( _imp_path )
+      s_cImportDbfPath := AllTrim( _imp_path )
 
       hParams[ "datum_od" ] := _dat_od
       hParams[ "datum_do" ] := _dat_do
@@ -541,7 +539,7 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
    LOCAL nRedniRbroj := 0
    LOCAL _total_doks := 0
    LOCAL _total_kalk := 0
-   LOCAL _gl_brojac := 0
+   LOCAL nGlavniBrojac := 0
    LOCAL aDokDetail
    LOCAL lOk := .T.
    LOCAL hRec
@@ -560,7 +558,7 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
       _fmk_import := .T.
    ENDIF
 
-   kalk_o_exp_tabele( __import_dbf_path, _fmk_import )
+   kalk_o_exp_tabele( s_cImportDbfPath, _fmk_import )
    kalk_o_tabele()
 
    SELECT e_doks
@@ -714,18 +712,22 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
 
       nRedniRbroj := 0
 
-      DO WHILE !Eof() .AND. field->idfirma == cIdFirma .AND. field->idvd == cIdVd .AND. field->brdok == cBrDok
+      DO WHILE !Eof() .AND. e_kalk->idfirma == cIdFirma .AND. e_kalk->idvd == cIdVd .AND. e_kalk->brdok == cBrDok
 
          aDoksRec := dbf_get_rec()
 
          // hb_HDel( aDoksRec, "roktr" )
          hb_HDel( aDoksRec, "datkurs" )
 
-         aDoksRec[ "rbr" ] := PadL( AllTrim( Str( ++nRedniRbroj ) ), 3 )
+         IF ValType( aDoksRec[ "rbr" ] ) == "N"
+            aDoksRec[ "rbr" ] := ++nRedniRbroj
+         ELSE
+            aDoksRec[ "rbr" ] := PadL( AllTrim( Str( ++nRedniRbroj ) ), 3 )
+         ENDIF
 
-         _gl_brojac += nRedniRbroj
+         nGlavniBrojac += nRedniRbroj
 
-         @ box_x_koord() + 3, box_y_koord() + 40 SAY "stavka: " + AllTrim( Str( _gl_brojac ) ) + " / " + aDoksRec[ "rbr" ]
+         @ box_x_koord() + 3, box_y_koord() + 40 SAY "stavka: " + AllTrim( Str( nGlavniBrojac ) ) + " / " +  ToStr( aDoksRec[ "rbr" ] )
 
          IF hParams[ "pript" ]
             hRec := dbf_get_rec()

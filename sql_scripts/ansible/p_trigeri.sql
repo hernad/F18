@@ -307,7 +307,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' OR  NEW.idvd = '99' OR ( NEW.idvd
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_izlaz_update_stanje(''+'', $1, $2, $3, $4, $5, $6, $7, $8, $9)'
               USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum,  NEW.idroba, nKolicina, NEW.cijena, NEW.ncijena
               INTO lRet;
-        RAISE INFO 'insert 42 ret=%', lRet;
+        -- RAISE INFO 'insert 42 ret=%', lRet;
         RETURN NEW;
 
 ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd IN ('90', 'IP') AND nVisak > 0) ) THEN
@@ -316,7 +316,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('02','22','80','89') OR ( NEW.idvd I
         EXECUTE 'SELECT {{ item_prodavnica }}.pos_prijem_update_stanje(''+'', $1, $2, $3, $4, $5, $5, NULL, $6, $7, $8, $9)'
              USING idPos, NEW.idvd, NEW.brdok, NEW.rbr, NEW.datum, NEW.idroba, nKolicina, NEW.cijena, NEW.ncijena
              INTO lRet;
-             RAISE INFO 'insert ret=%', lRet;
+             -- RAISE INFO 'insert ret=%', lRet;
         RETURN NEW;
 
 ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd IN ('19','29','79') ) THEN
