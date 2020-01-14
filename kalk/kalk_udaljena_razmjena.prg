@@ -714,11 +714,12 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
 
       DO WHILE !Eof() .AND. e_kalk->idfirma == cIdFirma .AND. e_kalk->idvd == cIdVd .AND. e_kalk->brdok == cBrDok
 
-         aDoksRec := dbf_get_rec()
+         aDoksRec := dbf_get_rec() // e_kalk
 
          // hb_HDel( aDoksRec, "roktr" )
          hb_HDel( aDoksRec, "datkurs" )
 
+         // PATCH rbr numeric
          IF ValType( aDoksRec[ "rbr" ] ) == "N"
             aDoksRec[ "rbr" ] := ++nRedniRbroj
          ELSE
@@ -730,9 +731,15 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
          @ box_x_koord() + 3, box_y_koord() + 40 SAY "stavka: " + AllTrim( Str( nGlavniBrojac ) ) + " / " +  ToStr( aDoksRec[ "rbr" ] )
 
          IF hParams[ "pript" ]
-            hRec := dbf_get_rec()
+            hRec := dbf_get_rec() // e_kalk
             SELECT pript
             APPEND BLANK
+            IF ValType( pript->rbr ) == "N" .AND. ValType( hRec[ "rbr" ] ) == "C"
+               hRec[ "rbr" ] := Val( hRec[ "rbr"] ) // C -> N
+            ENDIF
+            IF Empty( hRec[ "brfaktp"] )
+               hRec[ "brfaktp" ] := hRec[ "brdok" ]
+            ENDIF
             dbf_update_rec( hRec )
          ELSE
 
