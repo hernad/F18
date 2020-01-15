@@ -423,7 +423,7 @@ STATIC FUNCTION fakt_realiz_pdv_cre_open_r_export_table()
    AAdd( aDbf, { "c_pdv", "N", _FNUM, _FDEC } )
    AAdd( aDbf, { "uk_fakt", "N", _FNUM, _FDEC } )
 
-   IF !create_dbf_r_export( aDbf )
+   IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
 

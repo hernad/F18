@@ -76,7 +76,7 @@ FUNCTION os_pregled_po_rj()
    IF _export_dn == "D"
 
       _export := .T.
-      create_dbf_r_export( _g_exp_flds() )
+      xlsx_export_init( _g_exp_flds() )
 
       // otvori ponovo tabele...
       o_rj()
@@ -276,7 +276,7 @@ FUNCTION os_pregled_po_rj()
    ENDPRINT
 
    IF _export
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    my_close_all_dbf()

@@ -999,7 +999,7 @@ FUNCTION mip_tmp_tbl()
    AAdd( aDbf, { "BOL_PREKO", "C", 1, 0 } )
    AAdd( aDbf, { "PRINT", "C", 1, 0 } )
 
-   IF !create_dbf_r_export( aDbf )
+   IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
 

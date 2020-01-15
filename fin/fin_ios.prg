@@ -157,7 +157,7 @@ STATIC FUNCTION fin_ios_print()
 
    IF lExportXLSX == "D"    // eksport podataka u dbf tabelu
       _exp_fields := g_exp_fields()
-      IF !create_dbf_r_export( _exp_fields )
+      IF !xlsx_export_init( _exp_fields )
          RETURN .F.
       ENDIF
    ENDIF
@@ -250,7 +250,7 @@ STATIC FUNCTION fin_ios_print()
    ENDIF
 
    IF cPrintTip12 == "2" .AND. lExportXLSX == "D"
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    my_close_all_dbf()
@@ -1221,7 +1221,7 @@ STATIC FUNCTION print_ios_txt( hParams )
                ENDIF
 
                IF lExportXLSX == "D"
-                  fill_exp_tbl( cIdPartner, ;
+                  xlsx_export_fill_row( cIdPartner, ;
                      cPartnerNaziv, ;
                      field->brdok, ;
                      field->opis, ;
@@ -1296,7 +1296,7 @@ STATIC FUNCTION print_ios_txt( hParams )
                @ PRow(), PCol() + 1 SAY nPBhD PICT picBHD
 
                IF lExportXLSX == "D"
-                  fill_exp_tbl( cIdPartner, ;
+                  xlsx_export_fill_row( cIdPartner, ;
                      cPartnerNaziv, ;
                      cBrDok, ;
                      cOpis, ;
@@ -1325,7 +1325,7 @@ STATIC FUNCTION print_ios_txt( hParams )
                @ PRow(), PCol() + 1 SAY nPDEM PICT picBHD
 
                IF lExportXLSX == "D"
-                  fill_exp_tbl( cIdPartner, ;
+                  xlsx_export_fill_row( cIdPartner, ;
                      cPartnerNaziv, ;
                      cBrdok, ;
                      cOpis, ;
@@ -1489,7 +1489,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 // ---------------------------------------------------------
 // filovanje tabele sa podacima
 // ---------------------------------------------------------
-STATIC FUNCTION fill_exp_tbl( cIdPart, cNazPart, cBrRn, cOpis, dDatum, dValuta, nDug, nPot )
+STATIC FUNCTION xlsx_export_fill_row( cIdPart, cNazPart, cBrRn, cOpis, dDatum, dValuta, nDug, nPot )
 
    LOCAL nDbfArea := Select()
 

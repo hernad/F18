@@ -418,7 +418,7 @@ FUNCTION sastavnice_duple()
    AAdd( aDbf, { "SAST", "C", 150, 0 } )
    AAdd( aDbf, { "MARK", "C", 1, 0 } )
 
-   IF !create_dbf_r_export( aDbf )
+   IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
 
@@ -609,7 +609,7 @@ FUNCTION _exp_sast_dbf()
    AAdd( aDbf, { "VPC", "N", 12, 2 } )
    AAdd( aDbf, { "MPC", "N", 12, 2 } )
 
-   IF !create_dbf_r_export( aDbf )
+   IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
 

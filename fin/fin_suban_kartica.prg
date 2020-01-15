@@ -50,7 +50,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL nDuguje
    LOCAL nPotrazuje
    LOCAL hFinParams := fin_params()
-   LOCAL _fakt_params := fakt_params()
+   LOCAL hFaktParams := fakt_params()
    LOCAL cLibreOffice := "N"
    LOCAL nX := 2
    LOCAL bZagl  :=  {|| zagl_suban_kartica( cBrza ) }
@@ -318,7 +318,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    ENDIF
    GO TOP
 
-   IF _fakt_params[ "fakt_vrste_placanja" ]
+   IF hFaktParams[ "fakt_vrste_placanja" ]
       lVrsteP := .T.
       o_vrstep()
    ENDIF
@@ -765,7 +765,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   nDuguje := 0
                   nPotrazuje :=  hRec[ "iznosbhd" ]
                ENDIF
-               fin_suban_add_item_to_xlsx( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
+               xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
                   s_cBrVeze, dDatDok, dDatVal, s_cOpis, nDuguje, nPotrazuje, nDugBHD - nPotBHD )
             ENDIF
 
@@ -934,7 +934,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       s_pWorkBook := NIL
       s_pWorkSheet := NIL
       f18_open_mime_document( s_cXlsxName )
-      //open_r_export_table()
+      //open_exported_xlsx()
    ENDIF
 
    my_close_all_dbf()
@@ -945,15 +945,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
 
 
-STATIC FUNCTION fin_suban_add_item_to_xlsx( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, ;
+STATIC FUNCTION xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, ;
      cIdVn, cBrNal, nRbr, cBrVeze, dDatdok, dDatVal, cOpis, nDug, nPot, nSaldo )
 
    LOCAL nI
    LOCAL aKarticaKolone
 
-   
-   // { "C", "Naziv",   30, Trim(cKontoNaziv) },;
-
+ 
    aKarticaKolone := { ;
 	      { "C", "Konto ID", 8, Trim(cIdKonto) },;
 		   { "C", "Partner ID", 8, Trim(cIdPartner) },;

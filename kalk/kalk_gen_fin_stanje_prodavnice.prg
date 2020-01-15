@@ -345,7 +345,7 @@ STATIC FUNCTION _cre_tmp_tbl()
    AAdd( aDbf, { "t_cardaz", "N", 18, 5 } )
    AAdd( aDbf, { "t_zav", "N", 18, 5 } )
 
-   create_dbf_r_export( aDbf )
+   xlsx_export_init( aDbf )
 
    RETURN aDbf
 

@@ -116,7 +116,7 @@ STATIC FUNCTION cre_export_table()
    LOCAL aDbf
 
    aDbf := get_export_fields()
-   IF !create_dbf_r_export( aDbf )
+   IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
 

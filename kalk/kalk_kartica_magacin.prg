@@ -113,7 +113,7 @@ FUNCTION kalk_kartica_magacin()
 
          IF cExportDN == "D"
             lExport := .T.
-            create_dbf_r_export( kalk_kartica_magacin_export_dbf_struct() )
+            xlsx_export_init( kalk_kartica_magacin_export_dbf_struct() )
          ENDIF
          // IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
          // PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
@@ -580,7 +580,7 @@ FUNCTION kalk_kartica_magacin()
 
    my_close_all_dbf()
    IF lExport
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    RETURN .T.

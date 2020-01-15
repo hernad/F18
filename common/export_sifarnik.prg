@@ -165,7 +165,7 @@ FUNCTION export_sifarnik()
 
    r_export_fill( @aKol, @aDbfStruct )
 
-   open_r_export_table()
+   open_exported_xlsx()
 
    RETURN .T.
 
@@ -181,7 +181,7 @@ STATIC FUNCTION r_export_fill( aKol, aDbfStruct )
 
    PushWa()
 
-   create_dbf_r_export( aDbfStruct )
+   xlsx_export_init( aDbfStruct )
    o_r_export()
 
    PopWA()

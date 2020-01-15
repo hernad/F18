@@ -1015,7 +1015,7 @@ STATIC FUNCTION napravi_pomocnu_tabelu()
    AAdd( aDbf, { "ODBICI", "N", 12, 2 } )
    AAdd( aDbf, { "ISPLATA", "N", 12, 2 } )
 
-   create_dbf_r_export( aDbf )
+   xlsx_export_init( aDbf )
 
    RETURN .T.
 

@@ -47,11 +47,12 @@ FUNCTION kalk_lager_lista_magacin()
    //LOCAL dMIDate := CToD( "" )
    LOCAL cMI_type := ""
    LOCAL cSrKolNula := "0"
-   LOCAL dL_ulaz := CToD( "" )
+   LOCAL dDatZadnjiUlaz := CToD( "" )
    LOCAL dL_izlaz := CToD( "" )
    LOCAL hParams
    LOCAL nVPC
    LOCAL cIdKonto
+   LOCAL aHeader
 
    // pPicDem := kalk_prosiri_pic_iznos_za_2()
    // pPicCDem := kalk_prosiri_pic_cjena_za_2()
@@ -105,7 +106,7 @@ FUNCTION kalk_lager_lista_magacin()
    qqIdPartner := Space( 60 )
 
    PRIVATE cPNab := "N"
-   PRIVATE cDoNab := "N"
+   PRIVATE p_cPrikazSamoNabavne := "N"
    PRIVATE cNulaDN := "N"
    PRIVATE cErr := "N"
    PRIVATE cNCSif := "N"
@@ -123,7 +124,7 @@ FUNCTION kalk_lager_lista_magacin()
       cNulaDN := fetch_metric( "kalk_lager_lista_prikaz_nula", _curr_user, cNulaDN )
       dDatOd := fetch_metric( "kalk_lager_lista_datum_od", _curr_user, dDatOd )
       dDatDo := fetch_metric( "kalk_lager_lista_datum_do", _curr_user, dDatDo )
-      cDoNab := fetch_metric( "kalk_lager_Lista_prikaz_do_nabavne", _curr_user, cDoNab )
+      p_cPrikazSamoNabavne := fetch_metric( "kalk_lager_Lista_prikaz_do_nabavne", _curr_user, p_cPrikazSamoNabavne )
       cVpcIzSifarnikaDN := fetch_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
       cTxtOdt := fetch_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
    ENDIF
@@ -145,7 +146,7 @@ FUNCTION kalk_lager_lista_magacin()
       @ box_x_koord() + 6, Col() + 1 SAY "Br.fakture " GET cFaBrDok  PICT "@!S15"
       @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikaz Nab.vrijednosti D/N" GET cPNab  VALID cpnab $ "DN" PICT "@!"
 
-      @ box_x_koord() + 7, Col() + 1 SAY "Prikaz samo do nab.vr. D/N" GET cDoNab  VALID cDoNab $ "DN" PICT "@!"
+      @ box_x_koord() + 7, Col() + 1 SAY "Prikaz samo do nab.vr. D/N" GET p_cPrikazSamoNabavne  VALID p_cPrikazSamoNabavne $ "DN" PICT "@!"
 
       @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Pr.stavki kojima je NV 0 D/N" GET cNulaDN  VALID cNulaDN $ "DN" PICT "@!"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Prikaz 'ERR' ako je NV/Kolicina<>NC " GET cErr PICT "@!" VALID cErr $ "DN"
@@ -216,7 +217,7 @@ FUNCTION kalk_lager_lista_magacin()
       set_metric( "kalk_lager_lista_prikaz_nula", f18_user(), cNulaDN )
       set_metric( "kalk_lager_lista_datum_od", f18_user(), dDatOd )
       set_metric( "kalk_lager_lista_datum_do", f18_user(), dDatDo )
-      set_metric( "kalk_lager_lista_prikaz_do_nabavne", f18_user(), cDoNab )
+      set_metric( "kalk_lager_lista_prikaz_do_nabavne", f18_user(), p_cPrikazSamoNabavne )
       set_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
       set_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
    ENDIF
@@ -246,7 +247,11 @@ FUNCTION kalk_lager_lista_magacin()
 
    IF lExpDbf
       aExpFields := g_exp_fields()
-      create_dbf_r_export( aExpFields )
+      aHeader := {}
+      AADD( aHeader, { "Period", DTOC(dDatOd) + " -" + DTOC(dDatDo) } )
+      AADD( aHeader, { "Magacin:", cIdKonto } )
+      
+      xlsx_export_init( aExpFields, aHeader, "kalk_llm_" + Alltrim(cIdKonto) + ".xlsx" )
    ENDIF
 
    kalk_llm_open_tables()
@@ -394,7 +399,7 @@ FUNCTION kalk_lager_lista_magacin()
       cMINumber := ""
       //dMIDate := CToD( "" )
 
-      dL_ulaz := CToD( "" )
+      dDatZadnjiUlaz := CToD( "" )
       dL_izlaz := CToD( "" )
 
       select_o_roba(  cIdRoba )
@@ -414,44 +419,7 @@ FUNCTION kalk_lager_lista_magacin()
          ENDIF
       ENDIF
 
-/*
-      IF  !Empty( cOpcine )
-         select_o_partner( kalk->idpartner )
-         IF At( AllTrim( partn->idops ), cOpcine ) == 0
-            SELECT kalk
-            SKIP
-            LOOP
-         ENDIF
-         SELECT roba
-      ENDIF
-*/
 
-/*
-      // po vindija GRUPA
-      // IF IsVindija()
-      IF !Empty( cGr )
-         IF AllTrim( cGr ) <> IzSifKRoba( "GR1", cIdRoba, .F. )
-            SELECT kalk
-            SKIP
-            LOOP
-         ELSE
-            IF Empty( IzSifKRoba( "GR2", cIdRoba, .F. ) )
-               SELECT kalk
-               SKIP
-               LOOP
-            ENDIF
-         ENDIF
-      ENDIF
-      IF ( cPSPDN == "D" )
-         SELECT kalk
-         IF ( kalk->mu_i <> "5" ) .AND. ( kalk->mkonto <> cIdKonto )
-            SKIP
-            LOOP
-         ENDIF
-         SELECT roba
-      ENDIF
-      // ENDIF
-*/
 
       IF ( FieldPos( "MINK" ) ) <> 0
          nMink := roba->mink
@@ -488,8 +456,8 @@ FUNCTION kalk_lager_lista_magacin()
                   nVPVU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
                   nVPVRU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
                ELSE
-                  nVPVU += Round( roba->vpc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-                  nVPVRU += Round( nVPC * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
+                  nVPVU += Round( roba->vpc * kolicina, gZaokr )
+                  nVPVRU += Round( nVPC * kolicina, gZaokr )
                ENDIF
 
                nNVU += Round( nc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
@@ -507,8 +475,7 @@ FUNCTION kalk_lager_lista_magacin()
                nNVI -= Round( nc * kolicina, gZaokr )
             ENDIF
 
-            // datum zadnjeg ulaza
-            dL_ulaz := field->datdok
+            dDatZadnjiUlaz := field->datdok
 
          ELSEIF mu_i == "5"
             nKolicina := field->kolicina
@@ -672,7 +639,7 @@ FUNCTION kalk_lager_lista_magacin()
          @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNVI  )
          @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNVU - nNVI )
 
-         IF cDoNab == "N"
+         IF p_cPrikazSamoNabavne == "N"
 
             IF cVpcIzSifarnikaDN == "D"
                // sa vpc iz sifrarnika robe
@@ -739,7 +706,7 @@ FUNCTION kalk_lager_lista_magacin()
             @ PRow(), PCol() + 1 SAY kalk_say_iznos( ( nNVU - nNVI ) / ( nUlaz - nIzlaz ) )
 
          ENDIF
-         IF cDoNab == "N"
+         IF p_cPrikazSamoNabavne == "N"
             // pv.dug - prazno
             @ PRow(), PCol() + 1 SAY Space( Len( kalk_prosiri_pic_iznos_za_2() ) )
             // rabat - prazno
@@ -782,23 +749,23 @@ FUNCTION kalk_lager_lista_magacin()
                cTmp := roba->sifradob
 
                IF cNulaDN == "D" .AND. Round( nUlaz - nIzlaz, 4 ) == 0
-                  fill_exp_tbl( 0, roba->id, cTmp, ;
+                  xlsx_export_fill_row( 0, roba->id, cTmp, ;
                      roba->naz, roba->idtarifa, cJmj, ;
                      nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
                      nNVU, nNVI, ( nNVU - nNVI ), 0, ;
                      nVPVU, nVPVI, ( nVPVU - nVPVI ), 0, ;
                      nVPVRU, nVPVRI, ;
-                     dL_ulaz, dL_izlaz )
+                     dDatZadnjiUlaz, dL_izlaz )
 
                ELSE
-                  fill_exp_tbl( 0, roba->id, cTmp, ;
+                  xlsx_export_fill_row( 0, roba->id, cTmp, ;
                      roba->naz, roba->idtarifa, cJmj, ;
                      nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
                      nNVU, nNVI, ( nNVU - nNVI ), ;
                      ( nNVU - nNVI ) / ( nUlaz - nIzlaz ), ;
                      nVPVU, nVPVI, ( nVPVU - nVPVI ), ;
                      nVPCIzSif, nVPVRU, nVPVRI, ;
-                     dL_ulaz, dL_izlaz )
+                     dDatZadnjiUlaz, dL_izlaz )
                ENDIF
             ENDIF
          ENDIF
@@ -830,7 +797,7 @@ FUNCTION kalk_lager_lista_magacin()
    @ PRow(), PCol() + 1 SAY say_kolicina( ntNVI )
    @ PRow(), PCol() + 1 SAY say_kolicina( ntNV )
 
-   IF cDoNab == "N"
+   IF p_cPrikazSamoNabavne == "N"
       IF cVpcIzSifarnikaDN == "D"
          @ PRow(), PCol() + 1 SAY say_kolicina( ntVPVU )
          @ PRow(), PCol() + 1 SAY say_kolicina( ntRabat )
@@ -867,9 +834,8 @@ FUNCTION kalk_lager_lista_magacin()
    ENDIF
 
    IF lExpDbf
-      open_r_export_table() // lansiraj report
+      open_exported_xlsx() // lansiraj report
    ENDIF
-
 
    my_close_all_dbf()
 
@@ -914,80 +880,73 @@ STATIC FUNCTION g_exp_fields()
 
    LOCAL aDbf := {}
 
-   AAdd( aDbf, { "IDROBA", "C", 10, 0 } )
-   AAdd( aDbf, { "SIFRADOB", "C", 10, 0 } )
-   AAdd( aDbf, { "NAZIV", "C", 40, 0 } )
-   AAdd( aDbf, { "TARIFA", "C", 6, 0 } )
-   AAdd( aDbf, { "JMJ", "C", 3, 0 } )
-   AAdd( aDbf, { "ULAZ", "N", 15, 4 } )
-   AAdd( aDbf, { "IZLAZ", "N", 15, 4 } )
-   AAdd( aDbf, { "STANJE", "N", 15, 4 } )
-   AAdd( aDbf, { "NVDUG", "N", 20, 3 } )
-   AAdd( aDbf, { "NVPOT", "N", 20, 3 } )
-   AAdd( aDbf, { "NV", "N", 15, 4 } )
-   AAdd( aDbf, { "NC", "N", 15, 4 } )
+   AAdd( aDbf, { "IDROBA", "C", 10, 0, "Roba.ID", 10 } )
+   AAdd( aDbf, { "SIFRADOB", "C", 10, 0, "Sifra.Dob", 10 } )
+   AAdd( aDbf, { "NAZIV", "C", 40, 0,  "Naziv", 30 } )
+   AAdd( aDbf, { "TARIFA", "C", 6, 0, "Tarifa", 8 } )
+   AAdd( aDbf, { "JMJ", "C", 3, 0, "jmj", 5 } )
+   AAdd( aDbf, { "ULAZ", "M", 15, 4, "kol.ulaz", 15 } )
+   AAdd( aDbf, { "IZLAZ", "M", 15, 4, "kol.izl", 15 } )
+   AAdd( aDbf, { "STANJE", "M", 15, 4, "kol.stanje", 15 } )
+   AAdd( aDbf, { "NVDUG", "M", 20, 3, "NV.dug", 17 } )
+   AAdd( aDbf, { "NVPOT", "M", 20, 3, "NV.pot", 17 } )
+   AAdd( aDbf, { "NV", "M", 15, 4, "NV", 17 } )
+   AAdd( aDbf, { "NC", "M", 15, 4, "NC", 15 } )
 
-   AAdd( aDbf, { "PVDUG", "N", 20, 3 } )
-   AAdd( aDbf, { "PVPOT", "N", 20, 3 } )
+   AAdd( aDbf, { "PVDUG", "M", 20, 3, "VPV.dug", 14 } )
+   AAdd( aDbf, { "PVPOT", "M", 20, 3, "VPV.pot", 14 } )
 
-   AAdd( aDbf, { "PVRDUG", "N", 20, 3 } )
-   AAdd( aDbf, { "PVRPOT", "N", 20, 3 } )
+   AAdd( aDbf, { "PVRDUG", "M", 20, 3, "VPV.R.dug", 14 } )
+   AAdd( aDbf, { "PVRPOT", "M", 20, 3, "VPV.R.pot", 14 } )
 
-   AAdd( aDbf, { "PV", "N", 15, 3 } )
-   AAdd( aDbf, { "PC", "N", 15, 3 } )
-   AAdd( aDbf, { "D_ULAZ", "D", 8, 0 } )
-   AAdd( aDbf, { "D_IZLAZ", "D", 8, 0 } )
+   AAdd( aDbf, { "PV", "M", 15, 3, "VPV", 14 } )
+   AAdd( aDbf, { "PC", "M", 15, 3, "VPC", 10 } )
+   AAdd( aDbf, { "D_ULAZ", "D", 8, 0, "D.Poslj.Ul", 12 } )
+   AAdd( aDbf, { "D_IZLAZ", "D", 8, 0, "D.poslj.Izl", 12  } )
 
    RETURN aDbf
 
 
-STATIC FUNCTION fill_exp_tbl( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;
+STATIC FUNCTION xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;
       cJmj, nUlaz, nIzlaz, nSaldo, nNVDug, nNVPot, nNV, nNC, ;
-      nPVDug, nPVPot, nPV, nPC, nPVrdug, nPVrpot, dL_ulaz, dL_izlaz )
+      nPVDug, nPVPot, nPV, nPC, nPVrdug, nPVrpot, dDatZadnjiUlaz, dL_izlaz )
 
-   PushWa()
+   LOCAL hRow := hb_hash()
 
    IF nVar == nil
       nVar := 0
    ENDIF
 
-   o_r_export()
-
-   APPEND BLANK
-
-   REPLACE field->idroba WITH cIdRoba
-   REPLACE field->sifradob WITH cSifDob
-   REPLACE field->naziv WITH cNazRoba
-   REPLACE field->tarifa WITH cTarifa
-   REPLACE field->jmj WITH cJmj
-   REPLACE field->ulaz WITH nUlaz
-   REPLACE field->izlaz WITH nIzlaz
-   REPLACE field->stanje WITH nSaldo
-   REPLACE field->nvdug WITH nNVDug
-   REPLACE field->nvpot WITH nNVPot
-   REPLACE field->nv WITH nNV
-   REPLACE field->nc WITH nNC
-
-   IF cDoNab == "D"  // resetuj varijable
+   IF p_cPrikazSamoNabavne == "D"  // resetuj varijable
       nPVDug := 0
       nPVPot := 0
       nPV := 0
       nPC := 0
    ENDIF
 
-   REPLACE field->pvdug WITH nPVDug
-   REPLACE field->pvpot WITH nPVPot
+   hRow[ "idroba" ] := Trim( cIdRoba )
+   hRow[ "sifradob" ] := Trim( cSifDob )
+   hRow[ "naziv" ] := Trim( cNazRoba )
+   hRow[ "tarifa" ] := Trim( cTarifa )
+   hRow[ "jmj" ] := Trim( cJmj )
+   hRow[ "ulaz" ] := nUlaz
+   hRow[ "izlaz" ] := nIzlaz
+   hRow[ "stanje" ] := nSaldo
+   hRow[ "nvdug" ] := nNVDug
+   hRow[ "nvpot" ] := nNVPot
+   hRow[ "nv" ] := nNV
+   hRow[ "nc" ] := nNC
 
-   REPLACE field->pvrdug WITH nPVrDug
-   REPLACE field->pvrpot WITH nPVrPot
+   hRow[ "pvdug" ] := nPVDug
+   hRow[ "pvpot" ] :=nPVPot
+   hRow[ "pvrdug" ] := nPVrDug
+   hRow[ "pvrpot" ] := nPVrPot
+   hRow[ "pv" ] := nPV
+   hRow[ "pc" ] := nPC
+   hRow[ "d_ulaz" ] := dDatZadnjiUlaz
+   hRow[ "d_izlaz" ] :=dL_izlaz
 
-   REPLACE field->pv WITH nPV
-   REPLACE field->pc WITH nPC
-
-   REPLACE field->d_ulaz WITH dL_ulaz
-   REPLACE field->d_izlaz WITH dL_izlaz
-
-   PopWa()
+   xlsx_export_do_fill_row( hRow )
 
    RETURN .T.
 
@@ -1034,7 +993,7 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
    // NV
    AAdd( aLLM, { nPom, PadC( "NV", nPom ), PadC( "NC", nPom ), PadC( "6 - 7", nPom ) } )
 
-   IF cDoNab == "N"
+   IF p_cPrikazSamoNabavne == "N"
 
       nPom := Len( kalk_prosiri_pic_cjena_za_2() )
       // pv.dug
@@ -1051,7 +1010,6 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
 
 
    IF cSredCij == "D"
-
       nPom := Len( kalk_prosiri_pic_cjena_za_2() )
       // sredi cijene
       AAdd( aLLM, { nPom, PadC( "Sred.cij", nPom ), PadC( "", nPom ), PadC( "", nPom ) } )
@@ -1152,7 +1110,7 @@ STATIC FUNCTION kalk_llm_open_tables()
    // o_sifv()
 
    // o_roba()
-   IF o_koncij()
+   IF select_o_koncij()
       ?E "open koncij ok"
    ELSE
       ?E "open koncij ERROR?!"

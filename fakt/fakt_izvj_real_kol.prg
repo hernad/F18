@@ -160,7 +160,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
 
    IF lExpRpt == .T. // export dokumenta
       aExpFields := get_rpt_fields()
-      IF !create_dbf_r_export( aExpFields )
+      IF !xlsx_export_init( aExpFields )
          RETURN .F.
       ENDIF
    ENDIF
@@ -317,7 +317,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
          ENDIF
 
          IF lExpRpt
-            fill_exp_tbl( cIdPartner, partn->naz, nKolicina, 0 )
+            xlsx_export_fill_row( cIdPartner, partn->naz, nKolicina, 0 )
          ENDIF
       ENDDO
    ELSE
@@ -482,7 +482,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
          ENDIF
 
          IF lExpRpt
-            fill_exp_tbl( cIdRoba, Left( roba->naz, 40 ), nKolicina, nOsn, nUkupno )
+            xlsx_export_fill_row( cIdRoba, Left( roba->naz, 40 ), nKolicina, nOsn, nUkupno )
          ENDIF
 
       ENDDO
@@ -512,14 +512,14 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
    SET FILTER TO
 
    IF lExpRpt
-      fill_exp_tbl( "UKUPNO", "", nTKolicina, nTOsn, nTUkupno )
+      xlsx_export_fill_row( "UKUPNO", "", nTKolicina, nTOsn, nTUkupno )
    ENDIF
 
    FF
    ENDPRINT
 
    IF lExpRpt
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    RETURN .T.
@@ -642,7 +642,7 @@ STATIC FUNCTION get_rpt_fields()
 // -------------------------------------------
 // filuje export tabelu sa podacima
 // -------------------------------------------
-STATIC FUNCTION fill_exp_tbl( cIdSif, cNazSif, nKol, nOsn, nUk )
+STATIC FUNCTION xlsx_export_fill_row( cIdSif, cNazSif, nKol, nOsn, nUk )
 
    LOCAL nArr
 

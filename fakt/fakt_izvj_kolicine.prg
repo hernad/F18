@@ -137,7 +137,7 @@ STATIC FUNCTION _g_exp_fields( article_arr )
 // -------------------------------------------
 // filuje export tabelu sa podacima
 // -------------------------------------------
-STATIC FUNCTION fill_exp_tbl( cRbr, cDistrib, cPmId, cPmNaz, ;
+STATIC FUNCTION xlsx_export_fill_row( cRbr, cDistrib, cPmId, cPmNaz, ;
       cPmTip, cPmMj, cPmPtt, cPmAdr, cPmKtBr, aRoba )
 
    LOCAL nDbfArea
@@ -234,7 +234,7 @@ FUNCTION fakt_kol_pregled_isporuke_robe_partneri()
    ENDIF
 
    aExpFields := _g_exp_fields( aRoba )
-   IF !create_dbf_r_export( aExpFields )
+   IF !xlsx_export_init( aExpFields )
       RETURN .F.
    ENDIF
 
@@ -308,7 +308,7 @@ FUNCTION fakt_kol_pregled_isporuke_robe_partneri()
          select_o_partner( cPartner )
          SELECT fakt
 
-         fill_exp_tbl( ;
+         xlsx_export_fill_row( ;
             AllTrim( Str( ++nCount ) ), cDistNaz, firma_pdv_broj( cPartner ), partn->naz, ;
             get_partn_sifk_sifv( "TIP", cPartner, .F. ), ;
             partn->mjesto, ;
@@ -322,7 +322,7 @@ FUNCTION fakt_kol_pregled_isporuke_robe_partneri()
 
    BoxC()
 
-   open_r_export_table()
+   open_exported_xlsx()
 
    RETURN .T.
 

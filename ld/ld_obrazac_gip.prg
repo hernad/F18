@@ -1400,7 +1400,7 @@ FUNCTION ol_tmp_tbl()
    AAdd( aDbf, { "TP_4", "N", 12, 2 } )
    AAdd( aDbf, { "TP_5", "N", 12, 2 } )
 
-   create_dbf_r_export( aDbf )
+   xlsx_export_init( aDbf )
 
    o_r_export()
    INDEX ON idradn + Str( godina, 4 ) + Str( mjesec, 2 ) TAG "1"

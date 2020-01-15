@@ -176,7 +176,7 @@ FUNCTION fin_specifikacija_suban()
 
    IF lExpRpt
       aSSFields := get_ss_fields( gFinRj, FIELD_LEN_PARTNER_ID )
-      create_dbf_r_export( aSSFields )
+      xlsx_export_init( aSSFields )
    ENDIF
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
@@ -544,7 +544,7 @@ FUNCTION fin_specifikacija_suban()
    end_print( xPrintOpt )
 
    IF lExpRpt
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    closeret

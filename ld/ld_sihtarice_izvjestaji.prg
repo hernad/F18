@@ -630,7 +630,7 @@ STATIC FUNCTION cre_tmp_tbl()
    AAdd( aDbf, { "IZN_POR", "N", 12, 2 } )
    AAdd( aDbf, { "UKUPNO", "N", 12, 2 } )
 
-   create_dbf_r_export( aDbf )
+   xlsx_export_init( aDbf )
 
    o_r_export()
 

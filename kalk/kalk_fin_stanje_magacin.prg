@@ -107,8 +107,8 @@ FUNCTION finansijsko_stanje_magacin()
    ENDIF
 
    IF lExport
-      _cre_tmp_tbl()
-      _o_tbl()
+      xlsx_init()
+      //_o_tbl()
    ENDIF
 
    cIdFirma := self_organizacija_id()
@@ -337,7 +337,7 @@ FUNCTION finansijsko_stanje_magacin()
 
       IF lExport
 
-         _add_to_exp( cBroj, dDatDok, cDokNaz, cIdPartner, ;
+         xlsx_export_fill_row( cBroj, dDatDok, cDokNaz, cIdPartner, ;
             cPartnNaz, cPartnMj, cPartnPtt, cPartnAdr, cBrFaktP, ;
             nNVU, nNVI, nTNVU - nTNVI, ;
             nVPVU, nVPVI, nTVPVU - nTVPVI, ;
@@ -372,8 +372,7 @@ FUNCTION finansijsko_stanje_magacin()
    ? cLine
 
    IF lExport
-      // dodaj stavku ukupno
-      _add_to_exp( "UKUPNO:", CToD( "" ), "", "", ;
+      xlsx_export_fill_row( "UKUPNO:", CToD( "" ), "", "", ;
          "", "", "", "", "", ;
          nTNVU, nTNVI, nTNVU - nTNVI, ;
          nTVPVU, nTVPVI, nTVPVU - nTVPVI, ;
@@ -385,7 +384,7 @@ FUNCTION finansijsko_stanje_magacin()
 
    // pregled izvjestaja nakon generisanja u spreadsheet aplikaciji
    IF lExport
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    my_close_all_dbf()
@@ -426,59 +425,58 @@ STATIC FUNCTION kalk_zagl_fin_stanje_magacin()
    RETURN .T.
 
 
-STATIC FUNCTION _cre_tmp_tbl()
+STATIC FUNCTION xlsx_init()
 
    LOCAL aDbf := {}
 
    AAdd( aDbf, { "broj", "C", 10, 0 } )
    AAdd( aDbf, { "datum", "D",  8, 0 } )
-   AAdd( aDbf, { "vr_dok", "C", 30, 0 } )
-   AAdd( aDbf, { "idpartner", "C",  6, 0 } )
-   AAdd( aDbf, { "part_naz", "C", 100, 0 } )
-   AAdd( aDbf, { "part_mj", "C", 50, 0 } )
-   AAdd( aDbf, { "part_ptt", "C", 10, 0 } )
-   AAdd( aDbf, { "part_adr", "C", 50, 0 } )
-   AAdd( aDbf, { "br_fakt", "C", 20, 0 } )
-   AAdd( aDbf, { "nv_dug", "N", 15, 2 } )
-   AAdd( aDbf, { "nv_pot", "N", 15, 2 } )
-   AAdd( aDbf, { "nv_saldo", "N", 15, 2 } )
-   AAdd( aDbf, { "vp_dug", "N", 15, 2 } )
-   AAdd( aDbf, { "vp_pot", "N", 15, 2 } )
-   AAdd( aDbf, { "vp_saldo", "N", 15, 2 } )
-   AAdd( aDbf, { "vp_rabat", "N", 15, 2 } )
+   AAdd( aDbf, { "vr_dok", "C", 30, 0, "VD", 10 } )
+   AAdd( aDbf, { "idpartner", "C",  6, 0, "Partner.ID", 14 } )
+   AAdd( aDbf, { "part_naz", "C", 100, 0, "Naziv", 50 } )
+   AAdd( aDbf, { "part_mj", "C", 50, 0, "Mjesto", 40 } )
+   AAdd( aDbf, { "part_ptt", "C", 10, 0, "PTT", 30 } )
+   AAdd( aDbf, { "part_adr", "C", 50, 0, "Adresa", 45 } )
+   AAdd( aDbf, { "br_fakt", "C", 20, 0, "Br.Fakt", 25 } )
+   AAdd( aDbf, { "nv_dug", "M", 15, 2, "NV.dug", 15 } )
+   AAdd( aDbf, { "nv_pot", "M", 15, 2, "NV.pot", 15 } )
+   AAdd( aDbf, { "nv_saldo", "M", 15, 2, "NV", 15 } )
+   AAdd( aDbf, { "vp_dug", "M", 15, 2, "VPV.dug", 15  } )
+   AAdd( aDbf, { "vp_pot", "M", 15, 2, "VPV.pot", 15 } )
+   AAdd( aDbf, { "vp_saldo", "M", 15, 2, "VPV", 15 } )
+   AAdd( aDbf, { "vp_rabat", "M", 15, 2, "Rabat VP", 15 } )
 
-   create_dbf_r_export( aDbf )
+   xlsx_export_init( aDbf, {}, "kalk_fin_stanje_magacin.xlsx" )
 
-   RETURN aDbf
+   RETURN .T.
 
 
-STATIC FUNCTION _add_to_exp( broj_dok, datum_dok, vrsta_dok, id_partner, ;
+STATIC FUNCTION xlsx_export_fill_row( broj_dok, datum_dok, vrsta_dok, id_partner, ;
       part_naz, part_mjesto, part_ptt, part_adr, broj_fakture, ;
       n_v_dug, n_v_pot, n_v_saldo, ;
       v_p_dug, v_p_pot, v_p_saldo, ;
       v_p_rabat )
 
-   select_o_r_export()
+   LOCAL hRec := hb_hash()
 
-   APPEND BLANK
-   REPLACE field->broj WITH broj_dok
-   REPLACE field->datum WITH datum_dok
-   REPLACE field->vr_dok WITH vrsta_dok
-   REPLACE field->idpartner WITH id_partner
-   REPLACE field->part_naz WITH part_naz
-   REPLACE field->part_mj WITH part_mjesto
-   REPLACE field->part_ptt WITH part_ptt
-   REPLACE field->part_adr WITH part_adr
-   REPLACE field->br_fakt WITH broj_fakture
-   REPLACE field->nv_dug WITH n_v_dug
-   REPLACE field->nv_pot WITH n_v_pot
-   REPLACE field->nv_saldo WITH n_v_saldo
-   REPLACE field->vp_dug WITH v_p_dug
-   REPLACE field->vp_pot WITH v_p_pot
-   REPLACE field->vp_saldo WITH v_p_saldo
-   REPLACE field->vp_rabat WITH v_p_rabat
+   hRec["broj"] := trim( broj_dok )
+   hRec["datum"] := datum_dok
+   hRec["vr_dok"] := trim( vrsta_dok )
+   hRec["idpartner"] := trim( id_partner )
+   hRec["part_naz"] := trim( part_naz )
+   hRec["part_mj"] := trim( part_mjesto )
+   hRec["part_ptt"] := trim( part_ptt )
+   hRec["part_adr"] := trim( part_adr )
+   hRec["br_fakt"] := trim( broj_fakture )
+   hRec["nv_dug"] := n_v_dug
+   hRec["nv_pot"] := n_v_pot
+   hRec["nv_saldo"] := n_v_saldo
+   hRec["vp_dug"] := v_p_dug
+   hRec["vp_pot"] := v_p_pot
+   hRec["vp_saldo"] := v_p_saldo
+   hRec["vp_rabat"] := v_p_rabat
 
-   SELECT KALK
+   xlsx_export_do_fill_row( hRec )
 
    RETURN .T.
 

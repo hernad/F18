@@ -682,7 +682,7 @@ STATIC FUNCTION ld_aug_cre_dbf_r_export()
    AAdd( aDbf, { "IZN_POR", "N", 12, 2 } )
    AAdd( aDbf, { "DOP_PIO", "N", 12, 2 } )
 
-   create_dbf_r_export( aDbf )
+   xlsx_export_init( aDbf )
 
    RETURN .T.
 

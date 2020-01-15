@@ -344,7 +344,7 @@ FUNCTION exp_roba_dbf() // export robe u dbf
    AAdd( aDbf, { "VPC", "N", 12, 2 } )
    AAdd( aDbf, { "MPC", "N", 12, 2 } )
 
-   IF !create_dbf_r_export( aDbf )
+  -- IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
 

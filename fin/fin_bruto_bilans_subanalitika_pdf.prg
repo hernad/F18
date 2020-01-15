@@ -101,7 +101,7 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
 
    IF lExpRpt
       aExpFields := struktura_pomocne_tabele_eksporta()
-      IF !create_dbf_r_export( aExpFields )
+      IF !xlsx_export_init( aExpFields )
          RETURN .F.
       ENDIF
    ENDIF
@@ -524,7 +524,7 @@ FUNCTION fin_bb_subanalitika_pdf( hParams )
    my_close_all_dbf()
 
    IF lExpRpt
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    RETURN .T.

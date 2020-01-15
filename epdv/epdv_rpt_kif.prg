@@ -174,7 +174,7 @@ FUNCTION epdv_rpt_kif( nBrDok, cIdTarifa )
 
    IF cExportDN == "D"
       cExportDbf := my_home() + "epdv_r_kif.dbf"
-      open_r_export_table( cExportDbf )
+      open_exported_xlsx( cExportDbf )
 
    ELSE
       show_rpt(  .F.,  .F. )

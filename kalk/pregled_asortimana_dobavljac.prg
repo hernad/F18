@@ -50,7 +50,7 @@ STATIC FUNCTION _cre_tmp()
    AAdd( _dbf, { "STANJE", "N", 15, 5 } )
    AAdd( _dbf, { "PC", "N", 15, 5 } )
 
-   create_dbf_r_export( _dbf )
+   xlsx_export_init( _dbf )
 
    o_r_export()
    INDEX ON idroba TAG "roba"

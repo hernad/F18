@@ -53,7 +53,7 @@ FUNCTION fin_suban_specifikacija_sql()
    ENDIF
 
    IF lExported
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    RETURN .T.
@@ -73,7 +73,7 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
    LOCAL _export_dbf := fetch_metric( "fin_spec_rpt_export_dbf", my_user(), "N" )
    LOCAL _sintetika := fetch_metric( "fin_spec_rpt_sintetika", my_user(), "N" )
    LOCAL _nule := fetch_metric( "fin_spec_rpt_nule", my_user(), "N" )
-   LOCAL _rasclan := fetch_metric( "fin_spec_rpt_rasclaniti_rj", my_user(), "N" )
+   LOCAL lRasclanitiRj := fetch_metric( "fin_spec_rpt_rasclaniti_rj", my_user(), "N" )
    LOCAL _box_name := "SUBANALITICKA SPECIFIKACIJA"
    LOCAL _box_x := 21
    LOCAL _box_y := 65
@@ -129,7 +129,7 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
 
    ++ _x
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Prikaz sintetike (D/N)?" GET _sintetika PICT "@!" VALID _sintetika $ "DN"
-   @ box_x_koord() + _x, Col() + 1 SAY8 "Raščlaniti po RJ/FOND/FUNK (D/N)?" GET _rasclan PICT "@!" VALID _rasclan $ "DN"
+   @ box_x_koord() + _x, Col() + 1 SAY8 "Raščlaniti po RJ/FOND/FUNK (D/N)?" GET lRasclanitiRj PICT "@!" VALID lRasclanitiRj $ "DN"
 
    ++ _x
    ++ _x
@@ -153,7 +153,7 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
    set_metric( "fin_spec_rpt_export_dbf", my_user(), _export_dbf )
    set_metric( "fin_spec_rpt_sintetika", my_user(), _sintetika )
    set_metric( "fin_spec_rpt_nule", my_user(), _nule )
-   set_metric( "fin_spec_rpt_rasclaniti_rj", my_user(), _rasclan )
+   set_metric( "fin_spec_rpt_rasclaniti_rj", my_user(), lRasclanitiRj )
 
    rpt_vars[ "konto" ] := _konto
    rpt_vars[ "partner" ] := _partner
@@ -166,14 +166,14 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
    rpt_vars[ "export_dbf" ] := _export_dbf
    rpt_vars[ "nule" ] := _nule
    rpt_vars[ "sintetika" ] := _sintetika
-   rpt_vars[ "rasclaniti_rj" ] := _rasclan
+   rpt_vars[ "rasclaniti_rj" ] := lRasclanitiRj
 
    RETURN .T.
 
 
 STATIC FUNCTION _cre_rpt( rpt_vars )
 
-   LOCAL _rasclan, _nule, _sintetika, _konto, _partner, _brdok, _idvn
+   LOCAL lRasclanitiRj, _nule, _sintetika, _konto, _partner, _brdok, _idvn
    LOCAL _datum_od, _datum_do, _tip_valute
    LOCAL cQuery, _table
    LOCAL _where, _opcina
@@ -193,14 +193,14 @@ STATIC FUNCTION _cre_rpt( rpt_vars )
    _tip_valute := rpt_vars[ "valuta" ]
    _nule := rpt_vars[ "nule" ] == "D"
    _sintetika := rpt_vars[ "sintetika" ] == "D"
-   _rasclan := rpt_vars[ "rasclaniti_rj" ] == "D"
+   lRasclanitiRj := rpt_vars[ "rasclaniti_rj" ] == "D"
    _fld_iznos := "sub.iznosbhd"
 
    IF _tip_valute == 2
       _fld_iznos := "sub.iznosdem"
    ENDIF
 
-   IF _rasclan
+   IF lRasclanitiRj
       _rj_fond_funk := " sub.idrj, sub.fond, sub.funk, "
    ENDIF
 
@@ -224,13 +224,13 @@ STATIC FUNCTION _cre_rpt( rpt_vars )
 
    _group_cond := " GROUP BY sub.idkonto, kto.naz, sub.idpartner, part.naz"
 
-   IF _rasclan
+   IF lRasclanitiRj
       _group_cond += ", sub.idrj, sub.fond, sub.funk "
    ENDIF
 
    _order_cond := " ORDER BY sub.idkonto, kto.naz, sub.idpartner, part.naz"
 
-   IF _rasclan
+   IF lRasclanitiRj
       _order_cond += ", sub.idrj, sub.fond, sub.funk "
    ENDIF
 
@@ -263,8 +263,8 @@ STATIC FUNCTION _cre_rpt( rpt_vars )
 
 STATIC FUNCTION export_podataka_u_dbf( table, rpt_vars )
 
-   LOCAL oRow, _struct
-   LOCAL _rasclan := rpt_vars[ "rasclaniti_rj" ] == "D"
+   LOCAL oRow, aExportStruct
+   LOCAL lRasclanitiRj := rpt_vars[ "rasclaniti_rj" ] == "D"
    LOCAL _nule := rpt_vars[ "nule" ] == "D"
    LOCAL hRec, cKontoId, cPartnerId
 
@@ -272,8 +272,8 @@ STATIC FUNCTION export_podataka_u_dbf( table, rpt_vars )
       RETURN .F.
    ENDIF
 
-   _struct := fin_specifikacija_dbf_struct()
-   create_dbf_r_export( _struct )
+   aExportStruct := fin_specifikacija_dbf_struct()
+   xlsx_export_init( aExportStruct )
 
    o_r_export()
 
@@ -297,7 +297,7 @@ STATIC FUNCTION export_podataka_u_dbf( table, rpt_vars )
          hRec[ "naziv" ] := query_row( oRow, "konto_naz" )
       ENDIF
 
-      IF _rasclan
+      IF lRasclanitiRj
          hRec[ "rj" ] := query_row( oRow, "idrj" )
          hRec[ "fond" ] := query_row( oRow, "fond" )
          hRec[ "funk" ] := query_row( oRow, "funk" )
@@ -359,7 +359,7 @@ STATIC FUNCTION _cre_xml( table, rpt_vars )
    LOCAL _id_konto, _id_partner
    LOCAL _sintetika := rpt_vars[ "sintetika" ] == "D"
    LOCAL _nule := rpt_vars[ "nule" ] == "D"
-   LOCAL _rasclan := rpt_vars[ "rasclaniti_rj" ] == "D"
+   LOCAL lRasclanitiRj := rpt_vars[ "rasclaniti_rj" ] == "D"
 
    IF table:LastRec() == 0
       RETURN .F.
@@ -405,7 +405,7 @@ STATIC FUNCTION _cre_xml( table, rpt_vars )
 
       _sint_kto := PadR( _id_konto, 3 )
 
-      IF _rasclan
+      IF lRasclanitiRj
          _rj := oItem:FieldGet( oItem:FieldPos( "idrj" ) )
          _fond := oItem:FieldGet( oItem:FieldPos( "fond" ) )
          _funk := oItem:FieldGet( oItem:FieldPos( "funk" ) )
@@ -431,7 +431,7 @@ STATIC FUNCTION _cre_xml( table, rpt_vars )
          xml_node( "naziv", to_xml_encoding( hb_UTF8ToStr( _naz_konto ) ) )
       ENDIF
 
-      IF _rasclan
+      IF lRasclanitiRj
          xml_node( "rj", to_xml_encoding( hb_UTF8ToStr( _rj ) ) )
          xml_node( "fond", to_xml_encoding( hb_UTF8ToStr( _fond ) ) )
          xml_node( "funk", to_xml_encoding( hb_UTF8ToStr( _funk ) ) )

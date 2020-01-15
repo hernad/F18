@@ -103,7 +103,7 @@ FUNCTION kalk_kartica_prodavnica()
 
    IF cExportDN == "D"
       lExport := .T.
-      create_dbf_r_export( kalk_kartica_prodavnica_export_dbf_struct() )
+      xlsx_export_init( kalk_kartica_prodavnica_export_dbf_struct() )
    ENDIF
 
    IF Empty( cIdRoba )
@@ -472,7 +472,7 @@ FUNCTION kalk_kartica_prodavnica()
 
    my_close_all_dbf()
    IF lExport
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    f18_end_print( NIL, xPrintOpt )

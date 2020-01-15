@@ -72,7 +72,7 @@ FUNCTION os_amortizacija_po_stopama()
 
    IF lExpRpt
       aDbfFields := get_exp_fields()
-      create_dbf_r_export( aDbfFields )
+      xlsx_export_init( aDbfFields )
    ENDIF
 
    //o_amort()
@@ -310,7 +310,7 @@ FUNCTION os_amortizacija_po_stopama()
    ENDPRINT
 
    IF lExpRpt
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    my_close_all_dbf()

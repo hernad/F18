@@ -23,12 +23,12 @@ FUNCTION fakt_export_dokument_lo()
 
    aDbf := _g_fields()
 
-   IF !create_dbf_r_export( aDbf )
+   IF !xlsx_export_init( aDbf )
       RETURN .F.
    ENDIF
    
    _exp_dok()
-   open_r_export_table()
+   open_exported_xlsx()
 
    RETURN .T.
 

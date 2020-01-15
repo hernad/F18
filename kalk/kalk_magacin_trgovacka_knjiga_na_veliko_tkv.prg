@@ -509,7 +509,7 @@ STATIC FUNCTION stampaj_tkv( hParams )
    ENDPRINT
 
    IF hParams[ "xlsx" ]
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    RETURN .T.
@@ -634,6 +634,6 @@ STATIC FUNCTION tkv_header()
       AAdd( aDbf, { "vp_real", "N", 15, 2 } )
       AAdd( aDbf, { "vp_real_nt", "N", 15, 2 } )
 
-      create_dbf_r_export( aDbf )
+      xlsx_export_init( aDbf )
 
       RETURN aDbf

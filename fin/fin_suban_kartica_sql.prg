@@ -64,7 +64,7 @@ FUNCTION fin_suban_kartica_sql( otv_stavke )
    ENDIF
 
    IF _exported
-      open_r_export_table( my_home() + "r_export.dbf" )
+      open_exported_xlsx( my_home() + "r_export.dbf" )
    ENDIF
 
    RETURN .T.
@@ -278,7 +278,7 @@ STATIC FUNCTION _export_dbf( table, rpt_vars )
       RETURN .F.
    ENDIF
 
-   create_dbf_r_export( fin_suban_export_dbf_struct() )
+   xlsx_export_init( fin_suban_export_dbf_struct() )
 
    o_r_export()
 

@@ -193,7 +193,7 @@ STATIC FUNCTION stampaj_tkm( hParams )
    ENDPRINT
 
    IF hParams[ "xlsx" ]
-      open_r_export_table()
+      open_exported_xlsx()
    ENDIF
 
    RETURN .T.

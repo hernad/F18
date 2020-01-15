@@ -775,7 +775,7 @@ METHOD FinBrutoBilans:print()
    ::fill_r_export()
 
    IF ::hParams[ "export_dbf" ]
-      open_r_export_table()
+      open_exported_xlsx()
       RETURN SELF
    ENDIF
 
@@ -1269,7 +1269,7 @@ METHOD FinBrutoBilans:create_r_export()
    AAdd( _dbf, { "sld_dug", "N", 18, 2 } )
    AAdd( _dbf, { "sld_pot", "N", 18, 2 } )
 
-   IF !create_dbf_r_export( _dbf )
+   IF !xlsx_export_init( _dbf )
       RETURN .F.
    ENDIF
 

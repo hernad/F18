@@ -229,7 +229,7 @@ STATIC FUNCTION barkod_terminal_cre_r_export()
    AAdd( aFields, { "tk", "N", 8, 2 } )
    AAdd( aFields, { "tc", "N", 8, 2 } )
 
-   IF !create_dbf_r_export( aFields )
+   IF !xlsx_export_init( aFields )
       RETURN .F.
    ENDIF
 
