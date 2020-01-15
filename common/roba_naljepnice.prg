@@ -28,18 +28,18 @@ FUNCTION kalk_roba_naljepnice_stampa( cIdFirma, cIdVd, cBrDok )
    LOCAL cKolicina
    LOCAL _tkm_no
    LOCAL _xml_file := my_home() + "data.xml"
-   LOCAL _template := "rlab1.odt"
+   LOCAL cTemplate := "rlab1.odt"
    LOCAL _len_naz := 25
    LOCAL lPriprema := .F.
 
    cVarijanta := "1"
    cKolicina := "N"
 
-   download_template( "rlab1.odt", "56c4e769a40a99f642878d3bf2876533a5611f2629c5c4e6a14155b31e4af78f" )
-   download_template( "rlab2.odt", "f7ad93b382e9fdf26cada7b9cf95314b8e5d98cf17a926ab65ab53aa07ce74d8" )
+   downloadcTemplate( "rlab1.odt", "56c4e769a40a99f642878d3bf2876533a5611f2629c5c4e6a14155b31e4af78f" )
+   downloadcTemplate( "rlab2.odt", "f7ad93b382e9fdf26cada7b9cf95314b8e5d98cf17a926ab65ab53aa07ce74d8" )
 
    IF cVarijanta == "2"
-      _template := "rlab2.odt"
+      cTemplate := "rlab2.odt"
    ENDIF
 
    IF cIdFirma != NIL .AND. cIdVd != NIL .AND. cBrDok != NIL
@@ -69,7 +69,7 @@ FUNCTION kalk_roba_naljepnice_stampa( cIdFirma, cIdVd, cBrDok )
    _gen_xml( _xml_file, _tkm_no, _len_naz )
 
    my_close_all_dbf()
-   IF generisi_odt_iz_xml( _template, _xml_file )
+   IF generisi_odt_iz_xml( cTemplate, _xml_file )
       prikazi_odt()
    ENDIF
 

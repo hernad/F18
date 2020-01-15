@@ -122,7 +122,7 @@ FUNCTION generisi_odt_iz_xml( cTemplate, cXml_file, cOutOdtFile, lBezPitanja )
    IF nError <> 0
 
       log_write( "JOD report gen: greška - " + AllTrim( Str( nError ) ), 7 )
-      cErr := "Došlo je do greške prilikom generisanja reporta ! #" + "Greška: " + AllTrim( Str( nError ) )
+      cErr := "Doslo je do greske prilikom generisanja izvjestaja!#" + "Greska: " + AllTrim( Str( nError ) )
 
       MsgBeep( cErr )
       IF fetch_metric( "bug_report_email", my_user(), "A" ) $ "D#A"
