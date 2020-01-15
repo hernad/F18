@@ -109,7 +109,6 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
 
    ++ _x
    ++ _x
-
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Datum dokumenta od:" GET _datum_od
    @ box_x_koord() + _x, Col() + 2 SAY "do" GET _datum_do VALID _datum_od <= _datum_do
 
@@ -129,13 +128,11 @@ STATIC FUNCTION uslovi_izvjestaja( rpt_vars )
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Prikaz stavki sa stanjem 0 (D/N)?" GET _nule PICT "@!" VALID _nule $ "DN"
 
    ++ _x
-
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Prikaz sintetike (D/N)?" GET _sintetika PICT "@!" VALID _sintetika $ "DN"
    @ box_x_koord() + _x, Col() + 1 SAY8 "Raščlaniti po RJ/FOND/FUNK (D/N)?" GET _rasclan PICT "@!" VALID _rasclan $ "DN"
 
    ++ _x
    ++ _x
-
    @ box_x_koord() + _x, box_y_koord() + 2 SAY "Eksport izvjestaja u dbf (D/N)?" GET _export_dbf PICT "@!" VALID _export_dbf $ "DN"
 
    READ
@@ -269,7 +266,7 @@ STATIC FUNCTION export_podataka_u_dbf( table, rpt_vars )
    LOCAL oRow, _struct
    LOCAL _rasclan := rpt_vars[ "rasclaniti_rj" ] == "D"
    LOCAL _nule := rpt_vars[ "nule" ] == "D"
-   LOCAL _rec, cKontoId, cPartnerId
+   LOCAL hRec, cKontoId, cPartnerId
 
    IF table:LastRec() == 0
       RETURN .F.
@@ -290,31 +287,31 @@ STATIC FUNCTION export_podataka_u_dbf( table, rpt_vars )
       SELECT r_export
       APPEND BLANK
 
-      _rec := dbf_get_rec()
-      _rec[ "id_konto" ] := cKontoId
-      _rec[ "id_partn" ] := cPartnerId
+      hRec := dbf_get_rec()
+      hRec[ "id_konto" ] := cKontoId
+      hRec[ "id_partn" ] := cPartnerId
 
       IF !Empty ( cPartnerId )
-         _rec[ "naziv" ] := query_row( oRow, "partner_naz" )
+         hRec[ "naziv" ] := query_row( oRow, "partner_naz" )
       ELSE
-         _rec[ "naziv" ] := query_row( oRow, "konto_naz" )
+         hRec[ "naziv" ] := query_row( oRow, "konto_naz" )
       ENDIF
 
       IF _rasclan
-         _rec[ "rj" ] := query_row( oRow, "idrj" )
-         _rec[ "fond" ] := query_row( oRow, "fond" )
-         _rec[ "funk" ] := query_row( oRow, "funk" )
+         hRec[ "rj" ] := query_row( oRow, "idrj" )
+         hRec[ "fond" ] := query_row( oRow, "fond" )
+         hRec[ "funk" ] := query_row( oRow, "funk" )
       ENDIF
 
-      _rec[ "duguje" ] := query_row( oRow, "duguje" )
-      _rec[ "potrazuje" ] := query_row( oRow, "potrazuje" )
-      _rec[ "saldo" ] := _rec[ "duguje" ] - _rec[ "potrazuje" ]
+      hRec[ "duguje" ] := query_row( oRow, "duguje" )
+      hRec[ "potrazuje" ] := query_row( oRow, "potrazuje" )
+      hRec[ "saldo" ] := hRec[ "duguje" ] - hRec[ "potrazuje" ]
 
-      IF Round( _rec[ "saldo" ], 2 ) == 0 .AND. !_nule
+      IF Round( hRec[ "saldo" ], 2 ) == 0 .AND. !_nule
          LOOP
       ENDIF
 
-      dbf_update_rec( _rec )
+      dbf_update_rec( hRec )
 
    NEXT
 

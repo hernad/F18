@@ -29,7 +29,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL cExpDbf := "N"
    LOCAL cPodaciOFakturiPartneraDN := "N"
    LOCAL cVpcIzSifarnikaDN := "D"
-   LOCAL _print := "1"
+   LOCAL cTxtOdt := "1"
    LOCAL GetList := {}
 
    LOCAL nTUlazP  // ulaz, izlaz parovno
@@ -125,7 +125,7 @@ FUNCTION kalk_lager_lista_magacin()
       dDatDo := fetch_metric( "kalk_lager_lista_datum_do", _curr_user, dDatDo )
       cDoNab := fetch_metric( "kalk_lager_Lista_prikaz_do_nabavne", _curr_user, cDoNab )
       cVpcIzSifarnikaDN := fetch_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
-      _print := fetch_metric( "kalk_lager_print_varijanta", _curr_user, _print )
+      cTxtOdt := fetch_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
    ENDIF
 
    cArtikalNaz := Space( 30 )
@@ -154,7 +154,7 @@ FUNCTION kalk_lager_lista_magacin()
       @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Datum od " GET dDatOd
       @ box_x_koord() + 10, Col() + 2 SAY8 "do" GET dDatDo
 
-      @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Vrsta štampe TXT/ODT (1/2)" GET _print VALID _print $ "12" PICT "@!"
+      @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Vrsta štampe TXT/ODT (1/2)" GET cTxtOdt VALID cTxtOdt $ "12" PICT "@!"
 
       @ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Postaviti srednju NC u šifarnik?" GET cNCSif PICT "@!" VALID ( ( cpnab == "D" .AND. cncsif == "D" ) .OR. cNCSif == "N" )
 
@@ -218,7 +218,7 @@ FUNCTION kalk_lager_lista_magacin()
       set_metric( "kalk_lager_lista_datum_do", f18_user(), dDatDo )
       set_metric( "kalk_lager_lista_prikaz_do_nabavne", f18_user(), cDoNab )
       set_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
-      set_metric( "kalk_lager_print_varijanta", _curr_user, _print )
+      set_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
    ENDIF
 
    // export u dbf ?
@@ -244,7 +244,7 @@ FUNCTION kalk_lager_lista_magacin()
       lSaberiStanjeZaSvaKonta := ( Pitanje(, "Računati stanje robe kao zbir stanja na svim obuhvacenim kontima? (D/N)", "N" ) == "D" )
    ENDIF
 
-   IF lExpDbf == .T.
+   IF lExpDbf
       aExpFields := g_exp_fields()
       create_dbf_r_export( aExpFields )
    ENDIF
@@ -308,7 +308,7 @@ FUNCTION kalk_lager_lista_magacin()
    SELECT kalk
    // ?E "trace-kalk-llm-11"
 
-   IF _print == "2"
+   IF cTxtOdt == "2"
       // stampa dokumenta u odt formatu
       hParams := hb_Hash()
       hParams[ "idfirma" ] := self_organizacija_id()
@@ -774,7 +774,7 @@ FUNCTION kalk_lager_lista_magacin()
             ? Space( 6 ) + podaci_o_fakturi_partnera( cMIPart, CTOD(""), cMINumber, cMI_type )
          ENDIF
 
-         IF lExpDbf == .T.
+         IF lExpDbf
             IF ( cNulaDN == "N" .AND. Round( nUlaz - nIzlaz, 4 ) <> 0 ) ;
                   .OR. ( cNulaDN == "D" )
 
@@ -866,7 +866,7 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
    ENDIF
 
-   IF lExpDbf == .T.
+   IF lExpDbf
       open_r_export_table() // lansiraj report
    ENDIF
 
@@ -986,10 +986,6 @@ STATIC FUNCTION fill_exp_tbl( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;
 
    REPLACE field->d_ulaz WITH dL_ulaz
    REPLACE field->d_izlaz WITH dL_izlaz
-
-   IF nVar == 1
-      //
-   ENDIF
 
    PopWa()
 
