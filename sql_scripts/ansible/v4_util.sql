@@ -1301,3 +1301,214 @@ END;
 $$;
 
 ALTER FUNCTION public.convert_to_integer(v_input text) OWNER TO admin;
+
+
+-- stanje prodavnica 2, artikal 000000001, 01.01.20
+-- vraca array: [ kolicina, MpcSaPDV, MpvSaPDV ]
+-- select * from unnest(kalk_prod_stanje(2, '0000000001', '2020-01-01', array[0.00,0.00,0.00]));
+-- Result 3 rows:
+--    kolicina
+--    cijena
+--    vrijednost
+-- ili
+-- select (kalk_prod_stanje(2, '0000000001', '2020-01-01', array[0.00,0.00,0.00]))[1]; => kolicina
+
+-- Ova funkcija nije najbolje napravljena  - koristiti kalk_artikal_stanje
+
+-- CREATE OR REPLACE FUNCTION public.kalk_prod_stanje( nProdavnica numeric, cIdRoba varchar, dDatDo date, anyarray )
+--     RETURNS anyarray
+-- LANGUAGE plpgsql
+-- AS $$
+-- DECLARE
+-- 
+-- cPKonto varchar;
+-- nMPVsaPDV numeric;
+-- rec RECORD;
+-- nKolicina numeric;
+-- nMpcSaPDV numeric;
+-- 
+-- BEGIN
+-- 
+-- SELECT id INTO cPKonto
+--        from public.koncij where prod=nProdavnica;
+-- 
+-- nKolicina := 0;
+-- nMPVsaPDV := 0;
+-- 
+-- FOR rec IN
+--    SELECT mpcsapp, kolicina, pu_i, gkolicin2 from kalk_kalk
+--           WHERE trim(idroba) = trim(cIdRoba) and pkonto = cPKonto and datdok <= dDatDo
+-- LOOP
+-- 
+--     CASE
+--         WHEN rec.pu_i = '1' THEN
+--            nMPVsaPDV := nMPVSaPDV +  rec.mpcsapp * rec.kolicina;
+--            nKolicina := nKolicina + rec.kolicina;
+-- 
+--         WHEN rec.pu_i = '5' THEN
+--           nMPVsaPDV := nMPVSaPDV - rec.mpcsapp * rec.kolicina;
+--           nKolicina := nKolicina - rec.kolicina;
+-- 
+--         WHEN rec.pu_i = 'I' THEN
+--           nMpvSaPDV := nMPVSaPDV - rec.mpcsapp * rec.gkolicin2;
+--           nKolicina := nKolicina - rec.gkolicin2;
+--         ELSE
+--           nMpvSaPDV := nMpvSaPDV + 0;
+--      END CASE;
+-- END LOOP;
+-- 
+-- IF nKolicina <> 0 THEN
+--    nMpcSaPDV := ROUND(nMpvSaPDV / nKolicina, 4);
+-- 
+-- ELSE
+--    IF round(nMpvSaPDV, 4) <> 0 THEN
+--       nMpcSaPDV := -999.00;
+--    ELSE
+--       nMpcSaPDV := 0;
+--    END IF;
+-- END IF;
+-- 
+-- RETURN array[nKolicina, Round(nMpcSaPDV, 2), Round(nMpvSaPDV, 2)];
+-- END;
+-- $$;
+-- 
+
+
+
+-- select * from kalk_artikal_stanje(2, '0000000001', '2020-01-01');
+
+CREATE OR REPLACE FUNCTION public.kalk_artikal_stanje( nProdavnica numeric, cIdRoba varchar, dDatDo date )
+    RETURNS TABLE( kolicina numeric, mpcsapdv numeric, mpvsapdv numeric)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+
+cPKonto varchar;
+nMPVsaPDV numeric;
+rec RECORD;
+nKolicina numeric;
+nMpcSaPDV numeric;
+
+BEGIN
+
+SELECT id INTO cPKonto
+       from public.koncij where prod=nProdavnica;
+
+nKolicina := 0;
+nMPVsaPDV := 0;
+
+FOR rec IN
+   SELECT kalk_kalk.mpcsapp, kalk_kalk.kolicina, kalk_kalk.pu_i, kalk_kalk.gkolicin2 from kalk_kalk
+          WHERE trim(idroba) = trim(cIdRoba) and pkonto = cPKonto and datdok <= dDatDo
+LOOP
+
+    CASE
+        WHEN rec.pu_i = '1' THEN
+           nMPVsaPDV := nMPVSaPDV +  rec.mpcsapp * rec.kolicina;
+           nKolicina := nKolicina + rec.kolicina;
+
+        WHEN rec.pu_i = '5' THEN
+          nMPVsaPDV := nMPVSaPDV - rec.mpcsapp * rec.kolicina;
+          nKolicina := nKolicina - rec.kolicina;
+
+        WHEN rec.pu_i = 'I' THEN
+          nMpvSaPDV := nMPVSaPDV - rec.mpcsapp * rec.gkolicin2;
+          nKolicina := nKolicina - rec.gkolicin2;
+        ELSE
+          nMpvSaPDV := nMpvSaPDV + 0;
+     END CASE;
+END LOOP;
+
+IF nKolicina <> 0 THEN
+   nMpcSaPDV := ROUND(nMpvSaPDV / nKolicina, 4);
+
+ELSE
+   IF round(nMpvSaPDV, 4) <> 0 THEN
+      nMpcSaPDV := -999.00;
+   ELSE
+      nMpcSaPDV := 0;
+   END IF;
+END IF;
+
+RETURN QUERY SELECT 
+        nKolicina,
+        Round(nMpcSaPDV, 2), 
+        Round(nMpvSaPDV, 2);
+END;
+$$;
+
+
+
+-- select * from stanje_kalk_pos_uporedno(2, '2020-01-01');
+
+
+-- select idroba, kol_kalk, kol_pos, kol_kalk-kol_pos as razlika, 
+--        mpcsapdv_kalk, mpcsapdv_pos, pos_osnovna_cijena from stanje_kalk_pos_uporedno(12, '2020-01-01');
+
+
+
+CREATE OR REPLACE FUNCTION public.stanje_kalk_pos_uporedno( nProdavnica integer, dDatumDo date) 
+       RETURNS TABLE( idroba varchar, kol_kalk numeric, kol_pos numeric, mpcsapdv_pos numeric, mpcsapdv_kalk numeric, pos_osnovna_cijena numeric)
+       LANGUAGE plpgsql
+       AS $$
+DECLARE
+      cIdPos varchar DEFAULT '1 ';
+      rec_roba RECORD;
+      cIdRoba varchar;
+
+      nKarticaPosStanje numeric;
+      nKarticaPosCijena numeric;
+      
+      nPosOsnovnaCijena numeric;
+      
+      nKalkStanje numeric;
+      nKalkCijena numeric;
+
+      cMsg varchar;
+
+      nRbr integer;
+      nRbrErr integer;
+
+BEGIN
+
+      nRbr := 0;
+      nRbrErr := 0;
+
+      -- vrtimo se kroz p2.roba
+      FOR rec_roba IN EXECUTE 'SELECT * from p' ||  trim( nProdavnica::varchar ) || '.roba ORDER by id'
+           
+      LOOP
+
+        cIdRoba := rec_roba.id;
+       
+        -- raspolozivo_stanje prema pos kartici artikla
+        EXECUTE  'SELECT prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo) as knjig_stanje,' ||
+           'case when (prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)) = 0 then 0 else round( vrijednost/(prijem-povrat+ulaz_ostalo-(realizacija+izlaz_ostalo)), 4) end as cijena'
+           ' FROM p' ||  trim( nProdavnica::varchar ) ||  '.pos_artikal_stanje( $1, $2, $3 )'
+         USING cIdRoba, '1900-01-01'::date, dDatumDo
+         INTO nKarticaPosStanje, nKarticaPosCijena;
+
+
+         SELECT kolicina, mpcsapdv from kalk_artikal_stanje( nProdavnica, cIdRoba, dDatumDo)
+           INTO nKalkStanje, nKalkCijena;
+
+         IF nKarticaPosStanje <> nKalkStanje THEN
+
+           EXECUTE 'SELECT  p' ||  trim( nProdavnica::varchar ) || '.pos_dostupna_osnovna_cijena_za_artikal( $1 )'
+             USING cIdRoba
+             INTO nPosOsnovnaCijena;
+
+           RETURN QUERY SELECT
+		      cIdRoba,
+		      round(nKalkStanje, 3),
+				round(nKarticaPosStanje, 3),
+            round(nKarticaPosCijena, 2),
+				round(nKalkCijena, 2),
+            round(nPosOsnovnaCijena, 2);
+				
+		 END IF;
+        
+      END LOOP;
+
+END;
+$$;

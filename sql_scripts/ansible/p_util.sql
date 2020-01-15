@@ -732,7 +732,7 @@ BEGIN
         lInit := False;
 
         CASE
-         WHEN rec.idvd = '02' THEN
+         WHEN rec.idvd = '02' THEN -- pos inicijalizacija
             lInit := True;
             nTUlazOstalo := rec.kolicina;
             nTVrijednost := rec.kolicina * rec.cijena;
@@ -763,7 +763,7 @@ BEGIN
             END IF;
             nTVrijednost := nTUlazOstalo * rec.cijena - nTIzlazOstalo * rec.cijena;
 
-         WHEN rec.idvd IN ('19', '29') THEN
+         WHEN rec.idvd IN ('19','29') THEN
 
             nTVrijednost := (rec.ncijena - rec.cijena) * rec.kolicina;
 
@@ -772,7 +772,7 @@ BEGIN
             nTKalo := rec.kolicina;
             nTVrijednost := 0;
 
-         WHEN rec.idvd = '80' THEN
+         WHEN rec.idvd IN ('03','80') THEN -- 03 je za POS prijem, za KALK nema efekta na kartici 
 
             nTUlazOstalo := rec.kolicina;
             nTVrijednost := nTUlazOstalo * rec.cijena;

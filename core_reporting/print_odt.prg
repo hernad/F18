@@ -369,7 +369,7 @@ STATIC FUNCTION odt_na_email_podrska( cErrorTxt )
       lIzlazniOdt := .F.
    ENDIF
 
-   cSubject := "Uzorak ODT izvještaja, F18 " + f18_ver()
+   cSubject := "Uzorak ODT izvjestaja, F18 " + f18_ver()
    cSubject += ", " + my_server_params()[ "database" ] + "/" + AllTrim( f18_user() )
    cSubject += ", " + DToC( Date() ) + " " + PadR( Time(), 8 )
 
@@ -379,7 +379,7 @@ STATIC FUNCTION odt_na_email_podrska( cErrorTxt )
       cBody += cErrorTxt + ". "
    ENDIF
 
-   cBody += "U prilogu fajlovi neophodni za generisanje ODT izvještaja."
+   cBody += "U prilogu fajlovi neophodni za generisanje ODT izvjestaja."
 
    cZipFile := odt_email_attachment( lIzlazniOdt )
 

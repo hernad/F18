@@ -142,8 +142,8 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       ELSEIF ( cIdvd $ "19#29#71#79#72" )
          kalk_stampa_dok_19_79()
 
-      ELSEIF ( cIdvd $ "01#02#80#61" )
-         kalk_stampa_dok_01_02_80()
+      ELSEIF ( cIdvd $ "01#02#03#80#61" )
+         kalk_stampa_dok_01_03_80()
 
       ELSEIF ( cIdvd $ "81#89" )
          kalk_stampa_dok_81()

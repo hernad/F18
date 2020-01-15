@@ -37,14 +37,14 @@ BEGIN
 -- END IF;
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
-   IF ( NOT NEW.idvd IN ('02','19','21','72','79','80','IP') ) THEN
+   IF ( NOT NEW.idvd IN ('02','03','19','21','72','79','80','IP') ) THEN
      RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
    SELECT barkod, naz, jmj INTO barkodRoba, robaNaz, robaJmj
           from public.roba where id=NEW.idroba;
 ELSE
-   IF ( NOT OLD.idvd IN ('02','19','21','72','79','80','IP') ) THEN
+   IF ( NOT OLD.idvd IN ('02','03','19','21','72','79','80','IP') ) THEN
       RETURN NULL;
    END IF;
    cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -110,12 +110,12 @@ DECLARE
 BEGIN
 
 IF (TG_OP = 'INSERT') OR (TG_OP = 'UPDATE') THEN --  KALK -> POS
-      IF ( NOT NEW.idvd IN ('02','19','21','72','79','80','IP') ) THEN
+      IF ( NOT NEW.idvd IN ('02','03','19','21','72','79','80','IP') ) THEN
          RETURN NULL;
       END IF;
       cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( NEW.pkonto ), '999'));
 ELSE
-     IF ( NOT OLD.idvd IN ('02','19','21','72','79','80','IP') ) THEN
+     IF ( NOT OLD.idvd IN ('02','03','19','21','72','79','80','IP') ) THEN
         RETURN NULL;
      END IF;
      cProdShema := 'p' || btrim(to_char(public.pos_prodavnica_by_pkonto( OLD.pkonto ), '999'));
@@ -157,8 +157,8 @@ CREATE OR REPLACE FUNCTION f18.before_kalk_doks_delete() RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-   IF ( OLD.idvd IN ('49','71', '72', '22', '29', '79', 'IP', '90', '80') ) and NOT current_user IN ('postgres', 'admin') THEN
-       RAISE EXCEPTION '29, 49, 71, 72, 22, 79, IP, 90, 80 nije dozvoljeno brisanje % : % - % - %', current_user, OLD.idvd, OLD.brdok, OLD.datdok;
+   IF ( OLD.idvd IN ('02','03','49','71', '72', '22', '29', '79', 'IP', '90', '80') ) and NOT current_user IN ('postgres', 'admin') THEN
+       RAISE EXCEPTION '02, 03, 29, 49, 71, 72, 22, 79, IP, 90, 80 nije dozvoljeno brisanje % : % - % - %', current_user, OLD.idvd, OLD.brdok, OLD.datdok;
    END IF;
 
    RETURN OLD;
@@ -170,8 +170,8 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
    --aktivirano na pocetku godine (03.01.20) da se ne bi sa ovim dokumentima KALK napravio haos u POS
-   --IF ( NEW.idvd IN ('02','80') ) and NOT current_user IN ('postgres', 'admin') THEN
-   --    RAISE EXCEPTION '02, 80 nije dozvoljeno azuriranje % : % - % - %', current_user, NEW.idvd, NEW.brdok, NEW.datdok;
+   --IF ( NEW.idvd IN ('02','03', '80') ) and NOT current_user IN ('postgres', 'admin') THEN
+   --    RAISE EXCEPTION '02, 03, 80 nije dozvoljeno azuriranje % : % - % - %', current_user, NEW.idvd, NEW.brdok, NEW.datdok;
    --END IF;
 
    RETURN NEW;

@@ -22,7 +22,7 @@ DECLARE
    idRaspolozivo bigint;
 BEGIN
 
-IF ( NOT idvd IN ('02','80','89','22','90','IP') ) THEN
+IF ( NOT idvd IN ('02','03','80','89','22','90','IP') ) THEN
         RETURN FALSE;
 END IF;
 
@@ -136,7 +136,7 @@ DECLARE
    dat_do date DEFAULT '3999-01-01';
 BEGIN
 
-IF ( NOT idvd IN ('42','90', 'IP', '99') )  THEN -- 42 prodaja, 90 (kada je manjak), 99 - kalo stanje za prodaju umanjeno
+IF ( NOT idvd IN ('42','90','IP','99') )  THEN -- 42 prodaja, 90 (kada je manjak), 99 - kalo stanje za prodaju umanjeno
         RETURN FALSE;
 END IF;
 
@@ -999,5 +999,10 @@ BEGIN
       RETURN nCount;
 END;
 $$;
+
+
+
+
+
 
 

@@ -968,8 +968,8 @@ FUNCTION kalk_unos_1( lNoviDokument, hParams )
    ELSEIF _idvd == "81"
       RETURN kalk_unos_dok_81( @hParams )
 
-   ELSEIF _idvd $ "01#02#80"
-      RETURN kalk_get1_80_01_02( @hParams )
+   ELSEIF _idvd $ "01#02#03#80"
+      RETURN kalk_get1_01_02_03_80( @hParams )
 
    ELSEIF _idvd $ "95#96"
       RETURN kalk_get_1_95_96()
