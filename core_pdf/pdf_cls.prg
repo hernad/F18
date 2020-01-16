@@ -334,9 +334,9 @@ METHOD MaxRow() CLASS PDFClass
 
       SWITCH Round( ::nFontSize, 0 )
       CASE 10
-         RETURN Round( 33 * ::nXScale, 0 )
+         RETURN Round( 35 * ::nXScale, 0 )
       CASE 9
-         RETURN Round( 38 * ::nXScale, 0 )
+         RETURN Round( 42 * ::nXScale, 0 )
       CASE 8
          RETURN Round( 45 * ::nXScale, 0 )
       CASE 7

@@ -42,7 +42,6 @@ FUNCTION set_sql_search_path( cPrimarnaSchema )
 
    cQuery := "SET search_path TO " + cPrimarnaSchema + ",public"
 
-
    oQuery := run_sql_query( cQuery )
    IF sql_error_in_query( oQuery, "SET" )
       RETURN .F.
@@ -206,9 +205,9 @@ FUNCTION run_sql_query( cQry, hParams )
       quit_1
    ENDIF
 
-   IF log_level() == 9
-      ?E "QUERY9:", cQry
-   ENDIF
+   //IF log_level() > 8
+      log_write_file( "QUERY9: " + cQry, 8)
+   //ENDIF
 
    FOR nI := 1 TO nRetry
 

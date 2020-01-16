@@ -386,7 +386,12 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    xPrintOpt[ "opdf" ] := oPDF
    xPrintOpt[ "left_space" ] := 0
 
-   cNaslov := "SUBANALITIČKA KARTICA za period " + DToC(dDatOd) + " - " + DToC(dDatDo)
+   cNaslov := "SUBANALITIČKA KARTICA [" + ;
+       AllTrim( iif( cSamoDomacaValuta1Ne2 == "1", valuta_domaca_skraceni_naziv(), iif( cSamoDomacaValuta1Ne2 == "2", ValPomocna(), valuta_domaca_skraceni_naziv() + "-" + ValPomocna() ) )) +;
+       "] za period " + DToC(dDatOd) + " - " + DToC(dDatDo) +;
+       " na dan: " + DTOC( Date() )
+
+
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF
@@ -488,7 +493,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          lPrviProlaz := .T.  // prvi prolaz
          DO WHILE Eval( bEvalSubanKartPartner )
 
-            IF check_nova_strana( bZagl, oPdf, .F., 6, 0 )
+            IF check_nova_strana( bZagl, oPdf, .F., 4, 0 )
                ? m
                ?U "KONTO: "
                @ PRow(), PCol() + 1 SAY cIdKonto
@@ -840,7 +845,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          nKonD += nDugBHD;  nKonP += nPotBHD
          nKonD2 += nDugDEM; nKonP2 += nPotDEM
 
-
          check_nova_strana( bZagl, oPdf, .F., 0, 1 )
 
       ENDDO // konto
@@ -1045,13 +1049,11 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
 
    Preduzece()
 
-   IF lOtvoreneStavke
-      ?U "FIN: KARTICA OTVORENIH STAVKI "
-   ELSE
-      ?U "FIN: SUBANALITIČKA KARTICA ZA "
-   ENDIF
-
-   ?? iif( cSamoDomacaValuta1Ne2 == "1", valuta_domaca_skraceni_naziv(), iif( cSamoDomacaValuta1Ne2 == "2", ValPomocna(), valuta_domaca_skraceni_naziv() + "-" + ValPomocna() ) ), " NA DAN:", Date()
+   //IF lOtvoreneStavke
+   //   ?U "FIN: KARTICA OTVORENIH STAVKI "
+   //ELSE
+   //   ?U "FIN: SUBANALITIČKA KARTICA ZA "
+   //ENDIF
 
    IF cBrza != "D"
       ??U " KONTO: ", cIdKonto

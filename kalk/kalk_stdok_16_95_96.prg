@@ -26,7 +26,6 @@ MEMVAR cIdFirma, cIdVd, cBrDok
 FUNCTION kalk_stampa_dok_16_95_96()
 
    LOCAL cPom
-   LOCAL _page_len := RPT_PAGE_LEN
    LOCAL lVPC := .F.
    LOCAL nVPC, nUVPV, nTVPV, nTotVPV
    LOCAL nTotNv, nTot6, nTot7, nTot8, nTot9, nTota, nTotb, nTotc, nTotd
@@ -55,7 +54,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
-   xPrintOpt[ "layout" ] := "landscape"
+   xPrintOpt[ "layout" ] := "portrait"
    xPrintOpt[ "opdf" ] := s_oPDF
    IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
@@ -114,7 +113,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
          @ PRow(), PCol() + 1 SAY field->nc PICT piccdem()
          @ PRow(), nC1 := PCol() + 1 SAY nUNv PICT picdem()
          IF lVPC
-            nVPC := vpc_magacin_rs_priprema
+            nVPC := vpc_magacin_rs_priprema()
             SELECT kalk_pripr
             nUVPV := nVPC * field->kolicina
             // nv * (marzavp% + 1) = vpv =>  marzavp% = vpv/nv - 1 x 100%

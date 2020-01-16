@@ -87,7 +87,7 @@ FUNCTION LO_cmd()
 
    check_LO_download()
 
-   RETURN s_cDirF18Util + s_cUtilName + SLASH + s_cProg
+   RETURN clean_up_file_name_double_slash( s_cDirF18Util + s_cUtilName + SLASH + s_cProg )
 
 
 FUNCTION LO_convert_xlsx_cmd( cFile, cOutDir )

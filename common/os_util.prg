@@ -381,6 +381,8 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
       lAsync := .F.
    ENDIF
 
+altd()
+   log_write_file( "f18_run: "  + cCommand + " " + IIF( lAsync, "[ASYNC]", "[SYNC]" ), 5)
 
 #ifdef __PLATFORM__WINDOWS
 
@@ -663,3 +665,10 @@ FUNCTION f18_open_mime_document( cDocument )
    ENDIF
 
    RETURN nError
+
+/*
+     c:\Users\hernad\\LO\program -> c:\Users\hernad\LO\program
+*/
+FUNCTION clean_up_file_name_double_slash( cFile )
+
+    RETURN StrTran( cFile, SLASH + SLASH, SLASH )

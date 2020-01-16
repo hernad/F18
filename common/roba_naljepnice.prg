@@ -100,14 +100,14 @@ STATIC FUNCTION GetVars( cVarijanta, cKolicina, tkm_no, len_naz )
 
    Box(, 10, 65 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Broj labela zavisi od kolicine artikla (D/N):" GET cKolicina VALID cKolicina $ "DN" PICT "@!"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj labela zavisi od količine artikla (D/N):" GET cKolicina VALID cKolicina $ "DN" PICT "@!"
 
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY "1 - standardna naljepnica"
-   @ box_x_koord() + 4, box_y_koord() + 2 SAY "2 - sa prikazom stare cijene (prekrizeno)"
+   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "1 - standardna naljepnica"
+   @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "2 - sa prikazom stare cijene (prekriženo)"
 
-   @ box_x_koord() + 6, box_y_koord() + 3 SAY "Odaberi zeljenu varijantu "  GET cVarijanta VALID cVarijanta $ "12"
-   @ box_x_koord() + 7, box_y_koord() + 2 SAY "Broj TKM:" GET tkm_no
-   @ box_x_koord() + 8, box_y_koord() + 2 SAY "Naziv skrati na broj karaktera:" GET len_naz PICT "999"
+   @ box_x_koord() + 6, box_y_koord() + 3 SAY8 "Odaberi željenu varijantu "  GET cVarijanta VALID cVarijanta $ "12"
+   @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Broj TKM:" GET tkm_no
+   @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Naziv skrati na broj karaktera:" GET len_naz PICT "999"
 
    READ
 
