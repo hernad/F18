@@ -118,8 +118,8 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
 
    ImeKol := {}
 
-   AAdd( ImeKol, { PadR( "ID", 6 ),   {|| id },  "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) }    } )
-   AAdd( ImeKol, { PadR( "Naziv", 35 ),  {|| PadR( naz, 35 ) },  "naz" } )
+   AAdd( ImeKol, { PadR( "ID", 6 ),   {|| partn->id },  "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) }    } )
+   AAdd( ImeKol, { PadR( "Naziv", 35 ),  {|| PadR( partn->naz, 35 ) },  "naz" } )
 
    AAdd( ImeKol, { PadR( "PTT", 5 ),      {|| PTT },     "ptt"      } )
    AAdd( ImeKol, { PadR( "Mjesto", 16 ),  {|| MJESTO },  "mjesto"   } )

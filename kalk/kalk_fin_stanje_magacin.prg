@@ -25,8 +25,6 @@ FUNCTION finansijsko_stanje_magacin()
    LOCAL nVPC
    LOCAL GetList := {}
 
-   //_o_tbl()
-
    PicDEM := kalk_prosiri_pic_iznos_za_2()
    PicCDEM := kalk_prosiri_pic_cjena_za_2()
 
@@ -63,7 +61,7 @@ FUNCTION finansijsko_stanje_magacin()
       READ
 
       IF cViseKonta == "N"
-         @ box_x_koord() + 5, box_y_koord() + 2 SAY "Konto   " GET cIdKonto VALID "." $ cidkonto .OR. P_Konto( @cIdKonto )
+         @ box_x_koord() + 5, box_y_koord() + 2 SAY "Konto   " GET cIdKonto VALID "." $ cIdkonto .OR. P_Konto( @cIdKonto )
       ELSE
          @ box_x_koord() + 5, box_y_koord() + 2 SAY "Konta " GET qqMKonta PICT "@!S30"
       ENDIF
@@ -107,8 +105,7 @@ FUNCTION finansijsko_stanje_magacin()
    ENDIF
 
    IF lExport
-      xlsx_init()
-      //_o_tbl()
+      xlsx_init( trim(cIdKonto), dDatOd, dDatDo )
    ENDIF
 
    cIdFirma := self_organizacija_id()
@@ -425,19 +422,19 @@ STATIC FUNCTION kalk_zagl_fin_stanje_magacin()
    RETURN .T.
 
 
-STATIC FUNCTION xlsx_init()
+STATIC FUNCTION xlsx_init( cIdKonto, dDatOd, dDatDo )
 
-   LOCAL aDbf := {}
+   LOCAL aDbf := {}, aHeader := {}
 
    AAdd( aDbf, { "broj", "C", 10, 0 } )
    AAdd( aDbf, { "datum", "D",  8, 0 } )
    AAdd( aDbf, { "vr_dok", "C", 30, 0, "VD", 10 } )
    AAdd( aDbf, { "idpartner", "C",  6, 0, "Partner.ID", 14 } )
-   AAdd( aDbf, { "part_naz", "C", 100, 0, "Naziv", 50 } )
-   AAdd( aDbf, { "part_mj", "C", 50, 0, "Mjesto", 40 } )
-   AAdd( aDbf, { "part_ptt", "C", 10, 0, "PTT", 30 } )
-   AAdd( aDbf, { "part_adr", "C", 50, 0, "Adresa", 45 } )
-   AAdd( aDbf, { "br_fakt", "C", 20, 0, "Br.Fakt", 25 } )
+   AAdd( aDbf, { "part_naz", "C", 100, 0, "Naziv", 35 } )
+   AAdd( aDbf, { "part_mj", "C", 50, 0, "Mjesto", 20 } )
+   AAdd( aDbf, { "part_ptt", "C", 10, 0, "PTT", 12 } )
+   AAdd( aDbf, { "part_adr", "C", 50, 0, "Adresa", 20 } )
+   AAdd( aDbf, { "br_fakt", "C", 20, 0, "Br.Fakt", 20 } )
    AAdd( aDbf, { "nv_dug", "M", 15, 2, "NV.dug", 15 } )
    AAdd( aDbf, { "nv_pot", "M", 15, 2, "NV.pot", 15 } )
    AAdd( aDbf, { "nv_saldo", "M", 15, 2, "NV", 15 } )
@@ -446,12 +443,15 @@ STATIC FUNCTION xlsx_init()
    AAdd( aDbf, { "vp_saldo", "M", 15, 2, "VPV", 15 } )
    AAdd( aDbf, { "vp_rabat", "M", 15, 2, "Rabat VP", 15 } )
 
-   xlsx_export_init( aDbf, {}, "kalk_fin_stanje_magacin.xlsx" )
+   AADD( aHeader, {"Konto:", cIdKonto })
+   AADD( aHeader, {"Period:", DTOC(dDatOd) + " - " + DTOC(dDatDo) })
+
+   xlsx_export_init( aDbf, aHeader, "kalk_fin_stanje_magacin_" + Alltrim( cIdKonto ) + "_" + AllTrim(DTOS(dDatOd)) + "_" + AllTrim(DTOS(dDatDo)) + ".xlsx" )
 
    RETURN .T.
 
 
-STATIC FUNCTION xlsx_export_fill_row( broj_dok, datum_dok, vrsta_dok, id_partner, ;
+STATIC FUNCTION xlsx_export_fill_row( cBrojDok, dDatDok, cIdVd, cIdPartner, ;
       part_naz, part_mjesto, part_ptt, part_adr, broj_fakture, ;
       n_v_dug, n_v_pot, n_v_saldo, ;
       v_p_dug, v_p_pot, v_p_saldo, ;
@@ -459,10 +459,10 @@ STATIC FUNCTION xlsx_export_fill_row( broj_dok, datum_dok, vrsta_dok, id_partner
 
    LOCAL hRec := hb_hash()
 
-   hRec["broj"] := trim( broj_dok )
-   hRec["datum"] := datum_dok
-   hRec["vr_dok"] := trim( vrsta_dok )
-   hRec["idpartner"] := trim( id_partner )
+   hRec["broj"] := trim( cBrojDok )
+   hRec["datum"] := dDatDok
+   hRec["vr_dok"] := trim( cIdVd )
+   hRec["idpartner"] := trim( cIdPartner )
    hRec["part_naz"] := trim( part_naz )
    hRec["part_mj"] := trim( part_mjesto )
    hRec["part_ptt"] := trim( part_ptt )
@@ -477,23 +477,5 @@ STATIC FUNCTION xlsx_export_fill_row( broj_dok, datum_dok, vrsta_dok, id_partner
    hRec["vp_rabat"] := v_p_rabat
 
    xlsx_export_do_fill_row( hRec )
-
-   RETURN .T.
-
-
-
-
-// -----------------------------------
-// otvaranje potrebnih tabela
-// -----------------------------------
-STATIC FUNCTION _o_tbl()
-
-   // o_sifk()
-   // o_sifv()
-   //o_tdok()
-   // o_roba()
-   //o_koncij()
-   // o_konto()
-   // o_partner()
 
    RETURN .T.

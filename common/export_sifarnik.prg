@@ -74,7 +74,8 @@ FUNCTION export_sifarnik()
       FOR i := 1 TO Len( aStruct )
          IF aNDuzine[ i, 1 ] != nil
             ++j
-            AAdd( aNDuzine[ i, 2 ], 1 ); AAdd( aNDuzine[ i, 2 ], j )
+            AAdd( aNDuzine[ i, 2 ], 1 )
+            AAdd( aNDuzine[ i, 2 ], j )
             AAdd( aKol, aNDuzine[ i, 2 ] )
          ENDIF
       NEXT
@@ -104,18 +105,18 @@ FUNCTION export_sifarnik()
             xPom := Eval( ImeKol[ i, 2 ] )
             IF Len( ImeKol[ i ] ) > 2 .AND. ValType( ImeKol[ i, 3 ] ) == "C" .AND. "SIFK->" $ ImeKol[ i, 3 ]
                AAdd( aKol, { ImeKol[ i, 1 ], ImeKol[ i, 2 ], IF( Len( ImeKol[ i ] ) > 2 .AND. ValType( ImeKol[ i, 3 ] ) == "L", ImeKol[ i, 3 ], .F. ), ;
-                  IF( SIFK->veza == "N", "P", ValType( xPom ) ), ;
-                  IF( SIFK->veza == "N", SIFK->duzina + 1, Max( SIFK->duzina, Len( Trim( ImeKol[ i, 1 ] ) ) ) ), ;
-                  IF( ValType( xPom ) == "N", SIFK->f_decimal, 0 ), 1, Kol[ i ] + 1 } )
+                  IIF( SIFK->veza == "N", "P", ValType( xPom ) ), ;
+                  IIF( SIFK->veza == "N", SIFK->duzina + 1, Max( SIFK->duzina, Len( Trim( ImeKol[ i, 1 ] ) ) ) ), ;
+                  IIF( ValType( xPom ) == "N", SIFK->f_decimal, 0 ), 1, Kol[ i ] + 1 } )
                LOOP
             ENDIF
-            nDuz1 := IF( Len( ImeKol[ i ] ) > 4 .AND. ValType( ImeKol[ i, 5 ] ) == "N", ImeKol[ i, 5 ], LENx( xPom ) )
+            nDuz1 := IIF( Len( ImeKol[ i ] ) > 4 .AND. ValType( ImeKol[ i, 5 ] ) == "N", ImeKol[ i, 5 ], LENx( xPom ) )
             nDuz2 := IF( Len( ImeKol[ i ] ) > 5 .AND. ValType( ImeKol[ i, 6 ] ) == "N", ImeKol[ i, 6 ], IF( ValType( xPom ) == "N", nDuz1 - At( ".", Str( xPom ) ), 0 ) )
             nPosRKol := 0
 
-            AAdd( aKol, { ImeKol[ i, 1 ], ImeKol[ i, 2 ], IF( Len( ImeKol[ i ] ) > 2 .AND. ValType( ImeKol[ i, 3 ] ) == "L", ImeKol[ i, 3 ], .F. ), ;
-               IF( Len( ImeKol[ i ] ) > 3 .AND. ValType( ImeKol[ i, 4 ] ) == "C" .AND. ImeKol[ i, 4 ] $ "N#C#D#P", ImeKol[ i, 4 ], IF( nDuz1 > 100, "P", ValType( xPom ) ) ), ;
-               IF( nDuz1 > 100, 100, nDuz1 ), nDuz2, 1, Kol[ i ] + 1 } )
+            AAdd( aKol, { ImeKol[ i, 1 ], ImeKol[ i, 2 ], IIF( Len( ImeKol[ i ] ) > 2 .AND. ValType( ImeKol[ i, 3 ] ) == "L", ImeKol[ i, 3 ], .F. ), ;
+               IIF( Len( ImeKol[ i ] ) > 3 .AND. ValType( ImeKol[ i, 4 ] ) == "C" .AND. ImeKol[ i, 4 ] $ "N#C#D#P", ImeKol[ i, 4 ], IF( nDuz1 > 100, "P", ValType( xPom ) ) ), ;
+               IIF( nDuz1 > 100, 100, nDuz1 ), nDuz2, 1, Kol[ i ] + 1 } )
 
          ENDIF
       NEXT
@@ -129,26 +130,13 @@ FUNCTION export_sifarnik()
    NEXT
    ++nSirIzvj
 
-/*
-   IF fIndex
-      FOR i := 1 TO 10
-         IF Upper( Trim( ordKey( i ) ) ) == Upper( Trim( nSort ) )
-            nSort := i
-            EXIT
-         ENDIF
-      NEXT
-      dbSetOrder( nSort )
-   ENDIF
-   COUNT TO nSlogova
-   GO TOP
-*/
-
-   // RedBr := 0
-
    IF cRazmak == "D"
       AAdd( aKol, { "", {|| " " }, .F., "C", aKol[ 1, 5 ], 0, 2, 1 } )
    ENDIF
 
+   // AAdd( ImeKol, { PadR( "ID", 6 ),   {|| id },  "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) }    } )
+   // AAdd( ImeKol, { PadR( "Naziv", 35 ),  {|| PadR( naz, 35 ) },  "naz" } )
+   // Kol := { 1, 2 }
 
    aDbfStruct := {}
    FOR i := 1 TO Len( aKol )
@@ -163,7 +151,8 @@ FUNCTION export_sifarnik()
       AAdd( aDbfStruct, { hField[ "name" ], hField[ "tip" ], nLen,  nDec } )
    NEXT
 
-   r_export_fill( @aKol, @aDbfStruct )
+   altd()
+   xlsx_napuni( @aKol, @aDbfStruct )
 
    open_exported_xlsx()
 
@@ -174,26 +163,21 @@ FUNCTION export_sifarnik()
 
 
 
-STATIC FUNCTION r_export_fill( aKol, aDbfStruct )
+STATIC FUNCTION xlsx_napuni( aKol, aDbfStruct )
 
    LOCAL hRec, nArea, nKol, hField, xValue
    LOCAL nCnt
 
-   PushWa()
+   xlsx_export_init( aDbfStruct, { {"Datum:", DtoC(Date())}, {"Lista:", Alias()} }, "lista_" + AllTrim(lower(Alias())) + ".xlsx"  )
 
-   xlsx_export_init( aDbfStruct )
-   o_r_export()
-
-   PopWA()
 
    GO TOP
    nCnt := 0
    DO WHILE !Eof()
 
       nArea := Select()
-      SELECT r_export
-      APPEND BLANK
-      hRec := dbf_get_rec()
+      altd()
+      hRec := hb_hash()
 
       FOR nKol := 1 TO Len( aKol ) // { "ID", { || field->id }}
          Select( nArea )
@@ -209,16 +193,15 @@ STATIC FUNCTION r_export_fill( aKol, aDbfStruct )
          hRec[ Lower( hField[ "name" ] ) ] := xValue
       NEXT
 
-      SELECT r_export
-      dbf_update_rec( hRec )
+      xlsx_export_do_fill_row( hRec )
+
       info_bar( "exp_sif", (nArea)->( Alias() ) + Str( ++nCnt, 5, 0 ) )
 
       Select( nArea )
       SKIP
    ENDDO
 
-   SELECT r_export
-   USE
+   
 
    RETURN .T.
 
@@ -243,7 +226,7 @@ FUNCTION get_field_from_a_kol( cKol1 )
    cField := StrTran( cField, hb_UTF8ToStr( "Š" ), "S" )
    cField := StrTran( cField, hb_UTF8ToStr( "Đ" ), "DJ" )
 
-   cField := Left( cField, 10 )
+   //cField := Left( cField, 10 )
 
    IF cField $ "VPC#MPC#VPC2#MPC1#MPC2#MPC3#NC#"
       cTip := "N"
@@ -251,7 +234,7 @@ FUNCTION get_field_from_a_kol( cKol1 )
       nDec := 3
    ENDIF
 
-   hRet[ "name" ] := cField
+   hRet[ "name" ] := Upper( AllTrim( cField ) )
    hRet[ "tip" ] := cTip
    hRet[ "len" ] := nLen
    hRet[ "dec" ] := nDec

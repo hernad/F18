@@ -844,7 +844,7 @@ FUNCTION kalk_lager_lista_magacin()
 
 
 
-   STATIC FUNCTION podaci_o_fakturi_partnera( cPartner, dDatum, cFaktura, cMU_I )
+STATIC FUNCTION podaci_o_fakturi_partnera( cPartner, dDatum, cFaktura, cMU_I )
 
       LOCAL cRet := ""
       LOCAL cMIPart := ""
