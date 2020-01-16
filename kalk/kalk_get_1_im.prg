@@ -20,13 +20,14 @@ FUNCTION kalk_get_1_im()
    LOCAL nKolicinaNaStanju := 0
    LOCAL nKolicinaZadnjaNabavka := 0
    LOCAL nNabCjZadnjaNabavka := 0
+   LOCAL GetList := {}
 
    IF Empty( _mkonto )
       _mkonto := _idkonto
    ENDIF
 
    _DatFaktP := _datdok
-   @ box_x_koord() + 8, box_y_koord() + 2  SAY "Konto koji zaduzuje" GET _mkonto VALID  P_Konto( @_mkonto, 8, 30 ) PICT "@!"
+   @ box_x_koord() + 8, box_y_koord() + 2  SAY8 "Konto koji zadužuje" GET _mkonto VALID  P_Konto( @_mkonto, 8, 30 ) PICT "@!"
    READ
    ESC_RETURN K_ESC
 
@@ -47,6 +48,7 @@ FUNCTION kalk_get_1_im()
    READ
 
    IF kalk_is_novi_dokument()
+      select_o_koncij( _mkonto )
       _VPC := kalk_vpc_za_koncij()
       _NC := roba->NC
       SELECT kalk_pripr

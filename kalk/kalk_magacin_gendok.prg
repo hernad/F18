@@ -155,7 +155,7 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
    ENDIF
    select_o_koncij( kalk_pripr->idkonto )
 
-   lOdvojiVisak := Pitanje(, "Napraviti poseban dokument za visak?", "N" ) == "D"
+   lOdvojiVisak := Pitanje(, "Napraviti poseban dokument za višak?", "N" ) == "D"
 
    PRIVATE cBrOtp := kalk_get_next_broj_v5( cIdFirma, "95", NIL )
    IF lOdvojiVisak
@@ -167,7 +167,7 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
          SEEK cIdFirma + "16" + cBrDop
          IF Found()
             Beep( 1 )
-            IF Pitanje(, "U smecu vec postoji " + cidfirma + "-16-" + cbrdop + ", zelite li ga izbrisati?", "D" ) == "D"
+            IF Pitanje(, "U smeću vec postoji " + cIdfirma + "-16-" + cbrdop + ", zelite li ga izbrisati?", "D" ) == "D"
                DO WHILE !Eof() .AND. idfirma + idvd + brdok == cIdFirma + "16" + cBrDop
                   SKIP 1; nBrSl := RecNo()
                   SKIP -1
@@ -198,6 +198,8 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
       SELECT kalk_pripr
 
       IF Round( kolicina - gkolicina, 3 ) <> 0   // popisana-stvarna=(>0 visak,<0 manjak)
+
+         // generacija 16-ke
          IF lOdvojiVisak .AND. Round( kolicina - gkolicina, 3 ) > 0  // visak odvojiti
             PRIVATE nKolZn := nKolicinaNaStanju := nc1 := nc2 := 0
 
@@ -213,16 +215,17 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             _rabat := prevoz := prevoz2 := _banktr := _spedtr := _zavtr := _marza := _marza2 := _mpc := 0
             _kolicina := kalk_pripr->( kolicina - gkolicina )
             _gkolicina := _gkolicin2 := _mpc := 0
-            _idkonto := _idkonto
+            //_mkonto := _mkonto
             _Idkonto2 := ""
             _VPC := nFaktVPC
             _rbr := ++nRbr2
 
             _brdok := cBrDop
-            _MKonto := _Idkonto
+            //_MKonto := _Idkonto
             _MU_I := "1"     // ulaz
             _PKonto := "";      _PU_I := ""
             _idvd := "16"
+            _brfaktp := "IM" + DTOS(Date())
             _ERROR := ""
             gather()
          ELSE
@@ -234,8 +237,12 @@ FUNCTION kalk_generisi_95_za_manjak_16_za_visak()
             _rabat := prevoz := prevoz2 := _banktr := _spedtr := _zavtr := _nc := _marza := _marza2 := _mpc := 0
             _kolicina := kalk_pripr->( -kolicina + gkolicina )
             _gkolicina := _gkolicin2 := _mpc := 0
-            _idkonto2 := _idkonto
-            _Idkonto := ""
+            _idkonto2 := ""
+            _brfaktp := "IM" + DTOS(Date())
+            //_Idkonto := ""
+            
+            //_mkonto := _mkonto
+
             _VPC := nFaktVPC
             _rbr := ++nRbr
 
