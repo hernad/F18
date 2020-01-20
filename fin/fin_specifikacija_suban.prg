@@ -17,6 +17,7 @@ MEMVAR cIdFirma, cIdRj, dDatOd, dDatDo, cFunk, cFond, cNula
 MEMVAR cSpecifSkracenaVarijantaDN, cRasclaniti, cRascFunkFond, cN2Fin
 MEMVAR cFilter
 MEMVAR fK1, fK2, fK3, fK4, cK1, cK2, cSection, cHistory, aHistory
+MEMVAR m
 
 FIELD idkonto, idpartner, idrj
 
@@ -40,6 +41,7 @@ FUNCTION fin_specifikacija_suban()
    LOCAL nTArea
    LOCAL nC
    LOCAL lExpRpt
+   LOCAL GetList := {}
 
    PRIVATE cSpecifSkracenaVarijantaDN := "N"
    PRIVATE fK1 := fk2 := fk3 := fk4 := "N"
@@ -176,7 +178,7 @@ FUNCTION fin_specifikacija_suban()
 
    IF lExpRpt
       aSSFields := get_ss_fields( gFinRj, FIELD_LEN_PARTNER_ID )
-      xlsx_export_init( aSSFields )
+      xlsx_export_init( aSSFields, {}, "fin_specif_suban_" + DTOS(date()) + ".xlsx" )
    ENDIF
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
@@ -450,21 +452,18 @@ FUNCTION fin_specifikacija_suban()
 
             IF lExpRpt
                IF gFinRj == "D" .AND. cRasclaniti == "D"
-
                   cRj_id := cRasclan
-
                   IF !Empty( cRj_id )
                      cRj_naz := rj->naz
                   ELSE
                      cRj_naz := ""
                   ENDIF
-
                ELSE
                   cRj_id := nil
                   cRj_naz := nil
                ENDIF
 
-               fill_ss_tbl( cIdKonto, cIdPartner, iif( Empty( cIdPartner ), konto->naz, AllTrim( partn->naz ) ), nD, nP, nD - nP, cRj_id, cRj_naz )
+               xlsx_export_fill_row( cIdKonto, cIdPartner, iif( Empty( cIdPartner ), konto->naz, AllTrim( partn->naz ) ), nD, nP, nD - nP, cRj_id, cRj_naz )
             ENDIF
 
             nKd += nD
@@ -534,7 +533,7 @@ FUNCTION fin_specifikacija_suban()
    ENDIF
 
    IF lExpRpt
-      fill_ss_tbl( "UKUPNO", "", "", nUD, nUP, nUD - nUP )
+      xlsx_export_fill_row( "UKUPNO", "", "", nUD, nUP, nUD - nUP )
    ENDIF
 
    ? m
@@ -563,7 +562,7 @@ FUNCTION getmjesto( cMjesto )
 
    select_o_partner( ( nSel )->idpartner )
    fRet := .F.
-   IF mjesto = cMjesto
+   IF mjesto == cMjesto
       fRet := .T.
    ENDIF
    SELECT ( nSel )
@@ -702,26 +701,28 @@ FUNCTION zagl_fin_specif( cSpecifSkracenaVarijantaDN, cOpcine, cUslovPartnerTele
    RETURN .T.
 
 
-STATIC FUNCTION fill_ss_tbl( cKonto, cPartner, cNaziv, nFDug, nFPot, nFSaldo, cRj, cRjNaz )
+STATIC FUNCTION xlsx_export_fill_row( cKonto, cPartner, cNaziv, nFDug, nFPot, nFSaldo, cRj, cRjNaz )
 
-   LOCAL nArr
+   LOCAL hRec := hb_hash()
 
-   nArr := Select()
-   o_r_export()
-   APPEND BLANK
-   REPLACE field->konto WITH cKonto
-   REPLACE field->partner WITH cPartner
-   REPLACE field->naziv WITH cNaziv
-   REPLACE field->duguje WITH nFDug
-   REPLACE field->potrazuje WITH nFPot
-   REPLACE field->saldo WITH nFSaldo
+
+   altd()
+   // nArr := Select()
+   //o_r_export()
+   // APPEND BLANK
+   hRec["konto"] := Trim(cKonto)
+   hRec["partner"] := Trim(cPartner)
+   hRec["naziv"] := Trim(cNaziv)
+   hRec["duguje"] := nFDug
+   hRec["potrazuje"] := nFPot
+   hRec["saldo"] := nFSaldo
 
    IF cRj <> nil
-      REPLACE field->rj WITH cRj
-      REPLACE field->rjnaziv WITH cRjNaz
+      hRec["rj"] := cRj
+      hRec["rjnaziv"] := cRjNaz
    ENDIF
 
-   SELECT ( nArr )
+   xlsx_export_do_fill_row( hRec )
 
    RETURN .T.
 
