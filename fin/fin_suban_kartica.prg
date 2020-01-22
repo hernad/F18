@@ -17,7 +17,7 @@ MEMVAR cIdFirma, cIdKonto, fk1, fk2, fk3, fk4, cK1, cK2, cK3, cK4
 MEMVAR nStr
 MEMVAR gPicBHD, picDEM, picBHD, lOtvoreneStavke
 MEMVAR dDatOd, dDatDo
-MEMVAR cPrikazK1234, cSamoDomacaValuta1Ne2, cKumulativniPrometBez1Sa2
+MEMVAR cPrikazK1234, p_cValutaDom1Eur2Obje3, cKumulativniPrometBez1Sa2
 MEMVAR cUslovUpperBrDok, cUslovIdKonto, cUslovIdPartner, cUslovNazivKonta
 FIELD iznosbhd, iznosdem, d_p, otvst, idpartner, idfirma, idkonto, datdok, datval, brdok, brnal
 
@@ -86,7 +86,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    PRIVATE cPrikazK1234 := "2" // default prikazati datval
 
-   cSamoDomacaValuta1Ne2 := "1"
+   p_cValutaDom1Eur2Obje3 := "1"
    dDatOd := CToD( "" )
    dDatDo := CToD( "" )
    cKumulativniPrometBez1Sa2 := "1"
@@ -109,7 +109,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    cUslovUpperBrDok := fetch_metric( "fin_kart_broj_dokumenta", my_user(), cUslovUpperBrDok )
    dDatOd := fetch_metric( "fin_kart_datum_od", my_user(), dDatOd )
    dDatDo := fetch_metric( "fin_kart_datum_do", my_user(), dDatDo )
-   cSamoDomacaValuta1Ne2 := fetch_metric( "fin_kart_valuta", my_user(), cSamoDomacaValuta1Ne2 )
+   p_cValutaDom1Eur2Obje3 := fetch_metric( "fin_kart_valuta", my_user(), p_cValutaDom1Eur2Obje3 )
    //c1K1Z := fetch_metric( "fin_kart_kz", my_user(), c1K1Z )
    cPrikazK1234 := fetch_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
    cIdFirma := self_organizacija_id()
@@ -171,9 +171,9 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "Uslov za vrstu naloga (prazno-sve)" GET cUslovIdVn PICT "@!S20"
 
       IF fin_dvovalutno()
-         @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "Kartica za " + AllTrim( valuta_domaca_skraceni_naziv() ) + "/" + AllTrim( ValPomocna() ) + "/" + AllTrim( valuta_domaca_skraceni_naziv() ) + "-" + AllTrim( ValPomocna() ) + " (1/2/3)"  GET cSamoDomacaValuta1Ne2 VALID cSamoDomacaValuta1Ne2 $ "123"
+         @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "Kartica za " + AllTrim( valuta_domaca_skraceni_naziv() ) + "/" + AllTrim( ValPomocna() ) + "/" + AllTrim( valuta_domaca_skraceni_naziv() ) + "-" + AllTrim( ValPomocna() ) + " (1/2/3)"  GET p_cValutaDom1Eur2Obje3 VALID p_cValutaDom1Eur2Obje3 $ "123"
       ELSE
-         cSamoDomacaValuta1Ne2 := "1"
+         p_cValutaDom1Eur2Obje3 := "1"
       ENDIF
 
       @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY8 "Prikaz  K1-K4 (1); Dat.Valute (2); oboje (3)" + iif( hFinParams[ "fin_tip_dokumenta" ], "; ništa (4)", "" )  GET cPrikazK1234 VALID cPrikazK1234 $ "123" + iif( hFinParams[ "fin_tip_dokumenta" ], "4", "" )
@@ -216,13 +216,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          cPrikazK1234 := "3"
       ENDIF
 
-      IF cSamoDomacaValuta1Ne2 == "3"
+      IF p_cValutaDom1Eur2Obje3 == "3"
          nC1 := 59 + iif( hFinParams[ "fin_tip_dokumenta" ], 17, 0 )
       ELSE
          nC1 := 63 + iif( hFinParams[ "fin_tip_dokumenta" ], 17, 0 )
       ENDIF
 
-      IF cSamoDomacaValuta1Ne2 == "3"
+      IF p_cValutaDom1Eur2Obje3 == "3"
          cKumulativniPrometBez1Sa2 := "1"
       ENDIF
 
@@ -255,7 +255,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    set_metric( "fin_kart_broj_dokumenta", my_user(), cUslovUpperBrDok )
    set_metric( "fin_kart_datum_od", my_user(), dDatOd )
    set_metric( "fin_kart_datum_do", my_user(), dDatDo )
-   set_metric( "fin_kart_valuta", my_user(), cSamoDomacaValuta1Ne2 )
+   set_metric( "fin_kart_valuta", my_user(), p_cValutaDom1Eur2Obje3 )
    //set_metric( "fin_kart_kz", my_user(), c1K1Z )
    set_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
 
@@ -267,7 +267,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    cIdFirma := Trim( cIdFirma )
 
-   IF cSamoDomacaValuta1Ne2 == "3"
+   IF p_cValutaDom1Eur2Obje3 == "3"
       IF hFinParams[ "fin_tip_dokumenta" ] .AND. cPrikazK1234 == "4"
          m := "--- -------- ---- ---------------- ---------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
       ELSEIF hFinParams[ "fin_tip_dokumenta" ]
@@ -378,7 +378,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
-   IF cKumulativniPrometBez1Sa2 == "2" // sa kumulativnim prometom
+   IF cKumulativniPrometBez1Sa2 == "2" .AND. p_cValutaDom1Eur2Obje3 == "3" // sa kumulativnim prometom
       xPrintOpt[ "font_size" ] := 7.5
    ELSE
       xPrintOpt[ "font_size" ] := 9
@@ -387,7 +387,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    xPrintOpt[ "left_space" ] := 0
 
    cNaslov := "SUBANALITIČKA KARTICA [" + ;
-       AllTrim( iif( cSamoDomacaValuta1Ne2 == "1", valuta_domaca_skraceni_naziv(), iif( cSamoDomacaValuta1Ne2 == "2", ValPomocna(), valuta_domaca_skraceni_naziv() + "-" + ValPomocna() ) )) +;
+       AllTrim( iif( p_cValutaDom1Eur2Obje3 == "1", valuta_domaca_skraceni_naziv(), iif( p_cValutaDom1Eur2Obje3 == "2", ValPomocna(), valuta_domaca_skraceni_naziv() + "-" + ValPomocna() ) )) +;
        "] za period " + DToC(dDatOd) + " - " + DToC(dDatDo) +;
        " na dan: " + DTOC( Date() )
 
@@ -539,7 +539,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                ENDDO  // prethodni promet
 
                ? "PROMET DO "; ?? dDatOd
-               IF cSamoDomacaValuta1Ne2 == "3"
+               IF p_cValutaDom1Eur2Obje3 == "3"
                   IF hFinParams[ "fin_tip_dokumenta" ]
                      @ PRow(), 83 + iif( cPrikazK1234 == "4", 8, 17 ) SAY ""
                   ELSE
@@ -554,17 +554,17 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                ENDIF
 
                nC1 := PCol() + 1
-               IF cSamoDomacaValuta1Ne2 == "1"
+               IF p_cValutaDom1Eur2Obje3 == "1"
                   @ PRow(), PCol() + 1 SAY nPDugBHD PICTURE picBHD
                   @ PRow(), PCol() + 1 SAY nPPotBHD PICTURE picBHD
                   nDugBHD += nPDugBHD
                   nPotBHD += nPPotBHD
-               ELSEIF cSamoDomacaValuta1Ne2 == "2"   // devize
+               ELSEIF p_cValutaDom1Eur2Obje3 == "2"   // devize
                   @ PRow(), PCol() + 1 SAY nPDugDEM PICTURE picbhd
                   @ PRow(), PCol() + 1 SAY nPPotDEM PICTURE picbhd
                   nDugDEM += nPDugDEM
                   nPotDEM += nPPotDEM
-               ELSEIF cSamoDomacaValuta1Ne2 == "3"   // devize
+               ELSEIF p_cValutaDom1Eur2Obje3 == "3"   // devize
                   @ PRow(), PCol() + 1 SAY nPDugBHD PICTURE picBHD
                   @ PRow(), PCol() + 1 SAY nPPotBHD PICTURE picBHD
                   nDugBHD += nPDugBHD
@@ -578,7 +578,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                ENDIF
 
                IF cKumulativniPrometBez1Sa2 == "2"  // sa kumulativom
-                  IF cSamoDomacaValuta1Ne2 == "1"
+                  IF p_cValutaDom1Eur2Obje3 == "1"
                      @ PRow(), PCol() + 1 SAY nDugBHD PICTURE picbhd
                      @ PRow(), PCol() + 1 SAY nPotBHD PICTURE picbhd
                   ELSE
@@ -587,9 +587,9 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   ENDIF
                ENDIF
 
-               IF cSamoDomacaValuta1Ne2 == "1"  // KM
+               IF p_cValutaDom1Eur2Obje3 == "1"  // KM
                   @ PRow(), PCol() + 1 SAY nDugBHD - nPotBHD PICT picbhd
-               ELSEIF cSamoDomacaValuta1Ne2 == "2"
+               ELSEIF p_cValutaDom1Eur2Obje3 == "2"
                   @ PRow(), PCol() + 1 SAY nDugDEM - nPotDEM PICT picbhd
                ENDIF
 
@@ -651,7 +651,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   @ PRow(), nc7 SAY get_datval_field()
                ENDIF
 
-               IF cSamoDomacaValuta1Ne2 == "3"
+               IF p_cValutaDom1Eur2Obje3 == "3"
                   nSirinaOpis := 36
                   nCOpis := PCol() + 1
                   @ PRow(), PCol() + 1 SAY PadR( cOpis := AllTrim( hRec[ "opis" ] ), nSirinaOpis )
@@ -663,7 +663,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                nC1 := PCol() + 1
             ENDIF
 
-            IF cSamoDomacaValuta1Ne2 == "1"
+            IF p_cValutaDom1Eur2Obje3 == "1"
                IF lOtvoreneStavke .AND. hRec[ "otvst" ] == "9"
                   IF hRec[ "d_p" ] == "1"
                      nZDugBHD += hRec[ "iznosbhd" ]   // zatvorena stavka
@@ -686,7 +686,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   ENDIF
                ENDIF
 
-            ELSEIF cSamoDomacaValuta1Ne2 == "2" // dvovalutno
+            ELSEIF p_cValutaDom1Eur2Obje3 == "2" // dvovalutno
 
                IF lOtvoreneStavke .AND. hRec[ "otvst" ] == "9"
                   IF hRec[ "d_p" ] == "1"
@@ -711,7 +711,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
                ENDIF
 
-            ELSEIF cSamoDomacaValuta1Ne2 == "3"
+            ELSEIF p_cValutaDom1Eur2Obje3 == "3"
                IF lOtvoreneStavke .AND. hRec[ "otvst" ] == "9"
                   IF hRec[ "d_p" ] == "1"
                      nZDugBHD += hRec[ "iznosbhd" ]
@@ -745,9 +745,9 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
             ENDIF
 
             IF !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" ) // ako se radi o otvorenim stavkama, prikazati samo ono sto nije zatvoreno
-               IF cSamoDomacaValuta1Ne2 = "1"
+               IF p_cValutaDom1Eur2Obje3 = "1"
                   @ PRow(), PCol() + 1 SAY nDugBHD - nPotBHD PICT picbhd // saldo KM
-               ELSEIF cSamoDomacaValuta1Ne2 == "2"
+               ELSEIF p_cValutaDom1Eur2Obje3 == "2"
                   @ PRow(), PCol() + 1 SAY nDugDEM - nPotDEM PICT picbhd // saldo EUR
                ENDIF
                IF cPrikazK1234 == "3"
@@ -784,7 +784,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          IF cRasclaniti == "D"
             @ PRow(), PCol() + 1 SAY Left( cRasclan, 6 ) + "/" + SubStr( cRasclan, 7, 5 ) + "/" + SubStr( cRasclan, 12 ) + " / " + get_rj_naz( Left( cRasclan, 6 ) )
          ENDIF
-         IF cSamoDomacaValuta1Ne2 == "1"
+         IF p_cValutaDom1Eur2Obje3 == "1"
             @ PRow(), nC1      SAY nDugBHD PICTURE picBHD
             @ PRow(), PCol() + 1 SAY nPotBHD PICTURE picBHD
             IF cKumulativniPrometBez1Sa2 == "2"
@@ -792,7 +792,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                @ PRow(), PCol() + 1 SAY nPotBHD PICT picbhd
             ENDIF
             @ PRow(), PCol() + 1 SAY nDugBHD - nPotBHD PICT picbhd
-         ELSEIF cSamoDomacaValuta1Ne2 == "2"
+         ELSEIF p_cValutaDom1Eur2Obje3 == "2"
             @ PRow(), nC1      SAY nDugDEM PICTURE picBHD
             @ PRow(), PCol() + 1 SAY nPotDEM PICTURE picBHD
             IF cKumulativniPrometBez1Sa2 == "2"
@@ -800,7 +800,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                @ PRow(), PCol() + 1 SAY nPotDEM PICT picbhd
             ENDIF
             @ PRow(), PCol() + 1 SAY nDugDEM - nPotDEM PICT picbhd
-         ELSEIF  cSamoDomacaValuta1Ne2 == "3"
+         ELSEIF  p_cValutaDom1Eur2Obje3 == "3"
             @ PRow(), nC1      SAY nDugBHD PICTURE picBHD
             @ PRow(), PCol() + 1 SAY nPotBHD PICTURE picBHD
             @ PRow(), PCol() + 1 SAY nDugBHD - nPotBHD PICT picbhd
@@ -812,7 +812,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
          IF lOtvoreneStavke
             ? "Promet zatvorenih stavki:"
-            IF cSamoDomacaValuta1Ne2 == "1"
+            IF p_cValutaDom1Eur2Obje3 == "1"
                @ PRow(), nC1      SAY nZDugBHD PICTURE picBHD
                @ PRow(), PCol() + 1 SAY nZPotBHD PICTURE picBHD
                IF cKumulativniPrometBez1Sa2 == "2"
@@ -821,7 +821,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                ENDIF
                @ PRow(), PCol() + 1 SAY nZDugBHD - nZPotBHD PICT picbhd
 
-            ELSEIF cSamoDomacaValuta1Ne2 == "2"
+            ELSEIF p_cValutaDom1Eur2Obje3 == "2"
                @ PRow(), nC1      SAY nZDugDEM PICTURE picBHD
                @ PRow(), PCol() + 1 SAY nZPotDEM PICTURE picBHD
                IF cKumulativniPrometBez1Sa2 == "2"
@@ -829,7 +829,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   @ PRow(), PCol() + 1 SAY nZPotDEM PICT picbhd
                ENDIF
                @ PRow(), PCol() + 1 SAY nZDugDEM - nZPotDEM PICT picbhd
-            ELSEIF  cSamoDomacaValuta1Ne2 == "3"
+            ELSEIF  p_cValutaDom1Eur2Obje3 == "3"
                @ PRow(), nC1      SAY nZDugBHD PICTURE picBHD
                @ PRow(), PCol() + 1 SAY nZPotBHD PICTURE picBHD
                @ PRow(), PCol() + 1 SAY nZDugBHD - nZPotBHD PICT picbhd
@@ -854,7 +854,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          check_nova_strana( bZagl, oPdf, .F., 3 )
          ? M
          ?U "UKUPNO ZA KONTO: " + cIdKonto
-         IF cSamoDomacaValuta1Ne2 == "1"
+         IF p_cValutaDom1Eur2Obje3 == "1"
             @ PRow(), nC1            SAY nKonD  PICTURE picBHD
             @ PRow(), PCol() + 1       SAY nKonP  PICTURE picBHD
             IF cKumulativniPrometBez1Sa2 == "2"
@@ -862,7 +862,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                @ PRow(), PCol() + 1       SAY nKonP  PICTURE picBHD
             ENDIF
             @ PRow(), PCol() + 1  SAY nKonD - nKonP PICT picbhd
-         ELSEIF cSamoDomacaValuta1Ne2 == "2"
+         ELSEIF p_cValutaDom1Eur2Obje3 == "2"
             @ PRow(), nC1            SAY nKonD2 PICTURE picBHD
             @ PRow(), PCol() + 1       SAY nKonP2 PICTURE picBHD
             IF cKumulativniPrometBez1Sa2 == "2"
@@ -870,7 +870,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                @ PRow(), PCol() + 1       SAY nKonP2 PICTURE picBHD
             ENDIF
             @ PRow(), PCol() + 1  SAY nKonD2 - nKonP2 PICT picbhd
-         ELSEIF cSamoDomacaValuta1Ne2 == "3"
+         ELSEIF p_cValutaDom1Eur2Obje3 == "3"
             @ PRow(), nC1            SAY nKonD  PICTURE picBHD
             @ PRow(), PCol() + 1       SAY nKonP  PICTURE picBHD
             @ PRow(), PCol() + 1  SAY nKonD - nKonP PICT picbhd
@@ -901,7 +901,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       check_nova_strana( bZagl, oPdf, .F., 4 )
       ? M
       ?U "UKUPNO ZA SVA KONTA:"
-      IF cSamoDomacaValuta1Ne2 == "1"
+      IF p_cValutaDom1Eur2Obje3 == "1"
          @ PRow(), nC1       SAY nSviD        PICTURE picBHD
          @ PRow(), PCol() + 1  SAY nSviP        PICTURE picBHD
          IF cKumulativniPrometBez1Sa2 == "2"
@@ -909,7 +909,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
             @ PRow(), PCol() + 1  SAY nSviP        PICTURE picBHD
          ENDIF
          @ PRow(), PCol() + 1  SAY nSviD - nSviP  PICTURE picBHD
-      ELSEIF cSamoDomacaValuta1Ne2 == "2"
+      ELSEIF p_cValutaDom1Eur2Obje3 == "2"
          @ PRow(), nC1       SAY nSviD2        PICTURE picBHD
          @ PRow(), PCol() + 1  SAY nSviP2        PICTURE picBHD
          IF cKumulativniPrometBez1Sa2 == "2"
@@ -917,7 +917,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
             @ PRow(), PCol() + 1  SAY nSviP2       PICTURE picBHD
          ENDIF
          @ PRow(), PCol() + 1  SAY nSviD2 - nSviP2 PICTURE picBHD
-      ELSEIF cSamoDomacaValuta1Ne2 == "3"
+      ELSEIF p_cValutaDom1Eur2Obje3 == "3"
          @ PRow(), nC1       SAY nSviD        PICTURE picBHD
          @ PRow(), PCol() + 1  SAY nSviP        PICTURE picBHD
          @ PRow(), PCol() + 1  SAY nSviD - nSviP  PICTURE picBHD
@@ -944,7 +944,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 
@@ -1068,7 +1067,7 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
 
    SELECT SUBAN
 
-   IF cSamoDomacaValuta1Ne2 == "3"
+   IF p_cValutaDom1Eur2Obje3 == "3"
 
       IF hFinParams[ "fin_tip_dokumenta" ] .AND. cPrikazK1234 == "4"
          ? "-(1)------------- ------------------------------------------------------------------------- --------------------------------- -------------- -------------------------- -------------"
@@ -1125,7 +1124,7 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
          ?U  "-(7)------------- --------------------------------------------------------------------- ---------------------------------- ---------------------------------- ---------------"
          ?U  "*  NALOG         *                    D O K U M E N T                                  *           P R O M E T            *           K U M U L A T I V      *    SALDO     *"
          ?U  "----------------- ------------------- -------- ---------------------------------------- ---------------------------------- ----------------------------------               *"
-         ?U  "*V.*BR     *  R. *   BROJ   *  DATUM *" + iif( cPrikazK1234 == "1", " K1-K4  ", " VALUTA " ) + "*              OPIS                      *    DUGUJE     *    POTRAZUJE     *    DUGUJE     *    POTRAŽUJE     *              *"
+         ?U  "*V.*BR     *  R. *   BROJ   *  DATUM *" + iif( cPrikazK1234 == "1", " K1-K4  ", " VALUTA " ) + "*              OPIS                      *    DUGUJE     *    POTRAŽUJE     *    DUGUJE     *    POTRAŽUJE     *              *"
          ?U  "*N.*       *  Br.*          *        *        *                                        *               *                  *               *                  *              *"
       ENDIF
 
