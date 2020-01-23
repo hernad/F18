@@ -18,7 +18,7 @@ STATIC s_oPDF
    - ako smo na fin_pripr onda puni psuban sa sadržajem fin_pripr
 */
 
-FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziObradjeni )
+FUNCTION fin_nalog_stampa_fill_psuban( cNalog12Dnevnik3, lStampa, dDatNal, oNalog, aNaloziObradjeni )
 
    LOCAL nArr := Select()
    LOCAL aRez := {}
@@ -55,7 +55,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
    PicBHD := "@Z " + FormPicL( gPicBHD, 15 )
    PicDEM := "@Z " + FormPicL( pic_iznos_eur(), 10 )
 
-   M := iif( cInd == "3", "------ -------------- --- ", "" )
+   M := iif( cNalog12Dnevnik3 == "3", "------ -------------- --- ", "" )
    IF hParams[ "fin_tip_dokumenta" ]
       M +=  + "---- ------- " + REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------"
       M +=  " -- ------------- ----------- -------- -------- --------------- ---------------"
@@ -67,7 +67,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
    ENDIF
    M += iif( fin_jednovalutno(), "-", " ---------- ----------" )
 
-   IF cInd $ "1#2"
+   IF cNalog12Dnevnik3 $ "1#2"
       nUkDugBHD := nUkPotBHD := nUkDugDEM := nUkPotDEM := 0
       nStr := 0
    ENDIF
@@ -82,7 +82,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
    b2 := {|| cIdFirma == field->IdFirma .AND. cIdVN == field->IdVN .AND. cBrNal == field->BrNal }
 
-   IF cInd $ "1#2" .AND. lStampa
+   IF cNalog12Dnevnik3 $ "1#2" .AND. lStampa
       bZagl := {|| fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal ) }
       Eval( bZagl )
    ENDIF
@@ -101,8 +101,8 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
       IF lStampa
 
-         // IF PRow() > 61 + iif( cInd == "3", -7, 0 ) + dodatni_redovi_po_stranici()
-         IF cInd == "3" // dnevnik naloga
+         // IF PRow() > 61 + iif( cNalog12Dnevnik3 == "3", -7, 0 ) + dodatni_redovi_po_stranici()
+         IF cNalog12Dnevnik3 == "3" // dnevnik naloga
             fin_stampa_prenos_na_sljedecoj_strani()
             fin_nalog_zaglavlje( dDatnal, cIdFirma, cIdVN, cBrNal )
          ELSE
@@ -114,7 +114,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
          // P_NRED
          ?
 
-         IF cInd == "3"
+         IF cNalog12Dnevnik3 == "3"
             @ PRow(), 0 SAY Str( ++nRBrDN, 6 )
             @ PRow(), PCol() + 1 SAY cIdFirma + "-" + cIdVN + "-" + cBrNal
             @ PRow(), PCol() + 1 SAY " " + Left( DToC( dDatNal ), 2 )
@@ -207,7 +207,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
             @ PRow(), PCol() + 1 SAY 0 PICTURE PicBHD
          ENDIF
          nUkDugBHD += IznosBHD
-         IF cInd == "3"
+         IF cNalog12Dnevnik3 == "3"
             nTSDugBHD += IznosBHD
          ENDIF
 
@@ -218,7 +218,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
             @ PRow(), PCol() + 1 SAY IznosBHD PICTURE PicBHD
          ENDIF
          nUkPotBHD += IznosBHD
-         IF cInd == "3"
+         IF cNalog12Dnevnik3 == "3"
             nTSPotBHD += IznosBHD
          ENDIF
 
@@ -232,7 +232,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
                @ PRow(), PCol() + 1 SAY 0 PICTURE PicDEM
             ENDIF
             nUkDugDEM += IznosDEM
-            IF cInd == "3"
+            IF cNalog12Dnevnik3 == "3"
                nTSDugDEM += IznosDEM
             ENDIF
 
@@ -243,7 +243,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
                @ PRow(), PCol() + 1 SAY IznosDEM PICTURE PicDEM
             ENDIF
             nUkPotDEM += IznosDEM
-            IF cInd == "3"
+            IF cNalog12Dnevnik3 == "3"
                nTSPotDEM += IznosDEM
             ENDIF
          ENDIF
@@ -278,7 +278,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
       ENDIF
 
-      IF cInd == "1" .AND. AScan( aNaloziObradjeni, cIdFirma + cIdVN + cBrNal ) == 0
+      IF cNalog12Dnevnik3 == "1" .AND. AScan( aNaloziObradjeni, cIdFirma + cIdVN + cBrNal ) == 0
 
          SELECT ( nArr ) // fin_pripr
          Scatter()
@@ -294,7 +294,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
 
    my_unlock()
 
-   IF cInd $ "1#2" .AND. lStampa
+   IF cNalog12Dnevnik3 $ "1#2" .AND. lStampa
 
       // IF PRow() > 58 + dodatni_redovi_po_stranici()
       // FF
@@ -340,7 +340,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
       ENDIF
       // FF
 
-   ELSEIF cInd == "3" // glavna knjiga
+   ELSEIF cNalog12Dnevnik3 == "3" // glavna knjiga
       IF PRow() > 54 + dodatni_redovi_po_stranici()
          fin_stampa_prenos_na_sljedecoj_strani()
       ENDIF

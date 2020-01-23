@@ -61,7 +61,11 @@ FUNCTION fin_nalog_suban_stampa_azurirani_dokument()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "portrait"
-   xPrintOpt[ "font_size" ] := 8
+   IF fin_jednovalutno()
+    xPrintOpt[ "font_size" ] := 9
+   ELSE
+    xPrintOpt[ "font_size" ] := 8
+   ENDIF
    xPrintOpt[ "opdf" ] := s_oPDF
    fin_nalog_set_pdf( s_oPDF )
    IF f18_start_print( NIL, xPrintOpt,  "FIN NALOG " + fin_dokument_str( cIdFirma, cIdVn, cBrNal ) + "  NA DAN: " + DToC( Date() ) ) == "X"
