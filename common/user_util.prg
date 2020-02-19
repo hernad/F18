@@ -148,9 +148,9 @@ FUNCTION choose_f18_user_from_list( nOperaterId )
 
 STATIC FUNCTION izaberi_f18_korisnika( nArrF18Korisnik )
 
-   LOCAL _ret := 0
+   LOCAL nRet := 0
    LOCAL nI, _n
-   LOCAL _tmp
+   LOCAL cTmp
    LOCAL _choice := 0
    LOCAL nIzbor := 1
    LOCAL aOpc := {}
@@ -160,11 +160,11 @@ STATIC FUNCTION izaberi_f18_korisnika( nArrF18Korisnik )
 
    FOR nI := 1 TO Len( nArrF18Korisnik )
 
-      _tmp := ""
-      _tmp += PadL( AllTrim( Str( nI ) ) + ")", 3 )
-      _tmp += " " + PadR( nArrF18Korisnik[ nI, 2 ], 30 )
+      cTmp := ""
+      cTmp += PadL( AllTrim( Str( nI ) ) + ")", 3 )
+      cTmp += " " + PadR( nArrF18Korisnik[ nI, 2 ], 30 )
 
-      AAdd( aOpc, _tmp )
+      AAdd( aOpc, cTmp )
       AAdd( aOpcExe, {|| "" } )
 
    NEXT
@@ -174,7 +174,7 @@ STATIC FUNCTION izaberi_f18_korisnika( nArrF18Korisnik )
       IF nIzbor == 0
          EXIT
       ELSE
-         _ret := nArrF18Korisnik[ nIzbor, 1 ]
+         nRet := nArrF18Korisnik[ nIzbor, 1 ]
          nIzbor := 0
       ENDIF
    ENDDO
@@ -182,7 +182,7 @@ STATIC FUNCTION izaberi_f18_korisnika( nArrF18Korisnik )
    box_x_koord( _m_x )
    box_y_koord( _m_y )
 
-   RETURN _ret
+   RETURN nRet
 
 
 FUNCTION get_list_f18_users()

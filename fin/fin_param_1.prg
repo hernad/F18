@@ -145,6 +145,7 @@ STATIC FUNCTION fin_parametri_izgleda()
    LOCAL nX := 1
    LOCAL cJednoValutno := fetch_metric( "fin_izvjestaji_jednovalutno", NIL, "1" )
    LOCAL cPicEuro := pic_iznos_eur()
+   LOCAL GetList := {}
 
    Box(, 15, 70 )
 

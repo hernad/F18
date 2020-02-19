@@ -16,12 +16,12 @@ STATIC picBHD
 STATIC picDEM
 STATIC R1
 STATIC R2
-STATIC __ios_clan := ""
+STATIC s_cIOSClan := ""
 
 
 FUNCTION fin_ios_meni()
 
-   LOCAL _izbor := 1
+   LOCAL nIzbor := 1
    LOCAL _opc := {}
    LOCAL _opcexe := {}
 
@@ -40,7 +40,7 @@ FUNCTION fin_ios_meni()
    AAdd( _opcexe, {|| ios_clan_setup() } )
 
 
-   f18_menu( "ios", .F., _izbor, _opc, _opcexe )
+   f18_menu( "ios", .F., nIzbor, _opc, _opcexe )
 
    RETURN .T.
 
@@ -56,7 +56,7 @@ STATIC FUNCTION fin_ios_print()
    LOCAL cIdFirma := self_organizacija_id()
    LOCAL cIdKonto := fetch_metric( "ios_print_id_konto", my_user(), Space( 7 ) )
    LOCAL cIdPartner := fetch_metric( "ios_print_id_partner", my_user(), Space( 6 ) )
-   LOCAL _din_dem := "1"
+   LOCAL cKm1EUR2 := "1"
    LOCAL _kao_kartica := fetch_metric( "ios_print_kartica", my_user(), "D" )
    LOCAL _prelomljeno := fetch_metric( "ios_print_prelom", my_user(), "N" )
    LOCAL lExportXLSX := "N"
@@ -67,7 +67,7 @@ STATIC FUNCTION fin_ios_print()
    LOCAL nX := 1
    LOCAL _launch, _exp_fields
    LOCAL cXmlIos := my_home() + "data.xml"
-   LOCAL _template := "ios.odt"
+   LOCAL cTemplate := "ios.odt"
    LOCAL cIdPartnerTekuci
    LOCAL nCount, nCountLimit := 12000 // broj izgenerisanih stavki
    LOCAL cNastavak := "N"
@@ -75,14 +75,14 @@ STATIC FUNCTION fin_ios_print()
    LOCAL cPrintSaldo0DN := fetch_metric( "ios_print_saldo_0", my_user(), "D" )
 
    download_template( "ios.odt",  "8d1fa4972d42e54cc0e97e5c8d8c525787fc6b7b4d7c07ce092c38897b48ce85" )
-   download_template( "ios_2.odt", "8a4f3492b7e0372dd8a0c78958fe45159333aaa4b1b2a4d61b7226e9ac1b0225" )
+   download_template( "ios_2.odt", "c7db11e88caf0a7e33d069b096fd4e908b38f3b203c51084c9e84ddcb4fa5f11" )
 
    Box(, 17, 65, .F. )
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 " Štampa IOS-a **** "
 
    nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "       Datum IOS-a:" GET dDatumIOS
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY " Datum generacije IOS-a:" GET dDatumIOS
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY " Gledati period do:" GET dDatumDo
@@ -99,7 +99,7 @@ STATIC FUNCTION fin_ios_print()
    IF fin_dvovalutno()
       ++nX
       @ box_x_koord() + nX, box_y_koord() + 2 SAY "Prikaz " +   AllTrim( valuta_domaca_skraceni_naziv() ) + "/" +  AllTrim( ValPomocna() ) + " (1/2)" ;
-         GET _din_dem VALID _din_dem $ "12"
+         GET cKm1EUR2 VALID cKm1EUR2 $ "12"
    ENDIF
 
    nX += 2
@@ -215,7 +215,7 @@ STATIC FUNCTION fin_ios_print()
       hParams[ "id_partner" ] := cIdPartnerTekuci
       hParams[ "id_konto" ] := cIdKonto
       hParams[ "id_firma" ] := cIdFirma
-      hParams[ "din_dem" ] := _din_dem
+      hParams[ "din_dem" ] := cKm1EUR2
       hParams[ "datum_do" ] := dDatumDo
       hParams[ "ios_datum" ] := dDatumIOS
       hParams[ "export_dbf" ] := lExportXLSX
@@ -258,10 +258,10 @@ STATIC FUNCTION fin_ios_print()
    IF cPrintTip12 == "1"
 
       IF Empty( cIdPartner ) .OR. cNastavak == "D" // vise partnera
-         _template := "ios_2.odt"
+         cTemplate := "ios_2.odt"
       ENDIF
 
-      IF generisi_odt_iz_xml( _template, cXmlIos )
+      IF generisi_odt_iz_xml( cTemplate, cXmlIos )
          prikazi_odt()
       ENDIF
 
@@ -276,9 +276,9 @@ STATIC FUNCTION print_ios_xml( hParams )
    LOCAL cIdFirma := hParams[ "id_firma" ]
    LOCAL cIdKonto := hParams[ "id_konto" ]
    LOCAL cIdPartner := hParams[ "id_partner" ]
-   LOCAL nIznosBhd := hParams[ "iznos_bhd" ]
+   LOCAL nIznosKM := hParams[ "iznos_bhd" ]
    LOCAL nIznosDEM := hParams[ "iznos_dem" ]
-   LOCAL _din_dem := hParams[ "din_dem" ]
+   LOCAL cKm1EUR2 := hParams[ "din_dem" ]
    LOCAL dDatumDo := hParams[ "datum_do" ]
    LOCAL dDatumIOS := hParams[ "ios_datum" ]
    LOCAL _kao_kartica := hParams[ "kartica" ]
@@ -290,6 +290,7 @@ STATIC FUNCTION print_ios_xml( hParams )
    LOCAL _total_bhd
    LOCAL _total_dem
    LOCAL nCount
+   LOCAL cOtvSt
 
    // <ios_item>
    //
@@ -327,17 +328,17 @@ STATIC FUNCTION print_ios_xml( hParams )
    xml_node( "id_konto", to_xml_encoding( cIdKonto ) )
    xml_node( "id_partner", to_xml_encoding( cIdPartner ) )
 
-   _total_bhd := nIznosBhd
+   _total_bhd := nIznosKM
    _total_dem := nIznosDEM
 
-   IF nIznosBhd < 0
-      _total_bhd := -nIznosBhd
+   IF nIznosKM < 0
+      _total_bhd := -nIznosKM
    ENDIF
    IF nIznosDEM < 0
       _total_dem := -nIznosDEM
    ENDIF
 
-   IF _din_dem == "1"
+   IF cKm1EUR2 == "1"
       xml_node( "total", AllTrim( Str( _total_bhd, 12, 2 ) ) )
       xml_node( "valuta", to_xml_encoding ( valuta_domaca_skraceni_naziv() ) )
    ELSE
@@ -345,7 +346,7 @@ STATIC FUNCTION print_ios_xml( hParams )
       xml_node( "valuta", to_xml_encoding ( ValPomocna() ) )
    ENDIF
 
-   IF nIznosBhd > 0
+   IF nIznosKM > 0
       xml_node( "dp", "1" )
    ELSE
       xml_node( "dp", "2" )
@@ -361,7 +362,6 @@ STATIC FUNCTION print_ios_xml( hParams )
       find_suban_by_konto_partner( cIdFirma, cIdKonto, cIdPartner, NIL, "IdFirma,IdKonto,IdPartner,brdok" )
    ENDIF
 
-
    _u_dug_1 := 0
    _u_dug_2 := 0
    _u_pot_1 := 0
@@ -370,7 +370,6 @@ STATIC FUNCTION print_ios_xml( hParams )
    _u_dug_2z := 0
    _u_pot_1z := 0
    _u_pot_2z := 0
-
 
    IF _kao_kartica == "D" // ako je kartica, onda nikad ne prelamaj
       _prelomljeno := "N"
@@ -389,7 +388,7 @@ STATIC FUNCTION print_ios_xml( hParams )
       _pot_1 := 0
       _dug_2 := 0
       _pot_2 := 0
-      __otv_st := field->otvst
+      cOtvSt := field->otvst
 
       DO WHILE !Eof() .AND. cIdFirma == suban->IdFirma .AND. cIdKonto == field->IdKonto  .AND. cIdPartner == suban->IdPartner ;
             .AND. ( _kao_kartica == "D" .OR. suban->brdok == __br_dok )
@@ -412,7 +411,7 @@ STATIC FUNCTION print_ios_xml( hParams )
                xml_node( "datdok", DToC( field->datdok ) )
                xml_node( "datval", DToC( fix_dat_var( field->datval ) ) )
 
-               IF _din_dem == "1"
+               IF cKm1EUR2 == "1"
                   xml_node( "dug", AllTrim( Str( iif( field->d_p == "1", field->iznosbhd, 0 ), 12, 2 ) ) )
                   xml_node( "pot", AllTrim( Str( iif( field->d_p == "2", field->iznosbhd, 0 ), 12, 2 ) ) )
                ELSE
@@ -432,7 +431,7 @@ STATIC FUNCTION print_ios_xml( hParams )
                _pot_2 += field->IznosDEM
             ENDIF
 
-            __otv_st := " "
+            cOtvSt := " "
 
          ELSE
 
@@ -451,11 +450,11 @@ STATIC FUNCTION print_ios_xml( hParams )
 
       ENDDO
 
-      IF __otv_st == " "
+      IF cOtvSt == " "
 
          IF _prelomljeno == "D"
 
-            IF _din_dem == "1"
+            IF cKm1EUR2 == "1"
 
                IF ( _dug_1 - _pot_1 ) > 0    // domaca valuta
                   _dug_1 := ( _dug_1 - _pot_1 )
@@ -478,7 +477,6 @@ STATIC FUNCTION print_ios_xml( hParams )
          ENDIF
 
          IF _kao_kartica == "N"
-
 
             IF !( Round( _dug_1, 2 ) == 0 .AND. Round( _pot_1, 2 ) == 0 ) // ispisi ove stavke ako dug i pot <> 0
 
@@ -511,7 +509,7 @@ STATIC FUNCTION print_ios_xml( hParams )
    nSaldo1 := ( _u_dug_1 - _u_pot_1 ) // saldo
    nSaldo2 := ( _u_dug_2 - _u_pot_2 )
 
-   IF _din_dem == "1"
+   IF cKm1EUR2 == "1"
 
       xml_node( "u_dug", AllTrim( Str( _u_dug_1, 12, 2 ) ) )
       xml_node( "u_pot", AllTrim( Str( _u_pot_1, 12, 2 ) ) )
@@ -550,11 +548,9 @@ STATIC FUNCTION print_ios_xml( hParams )
    ENDIF
 
    xml_node( "mjesto", to_xml_encoding( AllTrim( gMjStr ) ) )
-   xml_node( "datum", DToC( Date() ) )
+   xml_node( "datum", DToC( dDatumDo ) )
 
-   _clan_txt := __ios_clan
-
-   xml_node( "clan", to_xml_encoding( _clan_txt ) )
+   xml_node( "clan", to_xml_encoding( s_cIOSClan ) )
 
    xml_subnode( "ios_item", .T. )
 
@@ -597,7 +593,7 @@ STATIC FUNCTION ios_clan_setup( setup_box )
 
 
    set_metric( "ios_clan_txt", NIL, AllTrim( _clan ) )
-   __ios_clan := AllTrim( _clan )
+   s_cIOSClan := AllTrim( _clan )
 
    RETURN .T.
 
@@ -622,7 +618,7 @@ STATIC FUNCTION _ios_spec_vars( hParams )
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "
    ?? self_organizacija_id(), "-", self_organizacija_naziv()
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Konto: " GET cIdKonto VALID P_Konto( @cIdKonto )
-   @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum do kojeg se generise  :" GET dDatumDo
+   @ box_x_koord() + 5, box_y_koord() + 2 SAY8 "Datum do kojeg se generiše  :" GET dDatumDo
    @ box_x_koord() + 6, box_y_koord() + 2 SAY "Prikaz partnera sa saldom 0 :" GET cPrikazSaSaldoNulaDN VALID cPrikazSaSaldoNulaDN $ "DN" PICT "@!"
    READ
    BoxC()
@@ -1059,9 +1055,9 @@ STATIC FUNCTION print_ios_txt( hParams )
    LOCAL cIdFirma := hParams[ "id_firma" ]
    LOCAL cIdKonto := hParams[ "id_konto" ]
    LOCAL cIdPartner := hParams[ "id_partner" ]
-   LOCAL nIznosBhd := hParams[ "iznos_bhd" ]
+   LOCAL nIznosKM := hParams[ "iznos_bhd" ]
    LOCAL nIznosDEM := hParams[ "iznos_dem" ]
-   LOCAL _din_dem := hParams[ "din_dem" ]
+   LOCAL cKm1EUR2 := hParams[ "din_dem" ]
    LOCAL dDatumDo := hParams[ "datum_do" ]
    LOCAL dDatumIOS := hParams[ "ios_datum" ]
    LOCAL lExportXLSX := hParams[ "export_dbf" ]
@@ -1119,18 +1115,18 @@ STATIC FUNCTION print_ios_txt( hParams )
    ?
    @ PRow(), 0 SAY "POKAZUJE SALDO:"
 
-   qqIznosBHD := nIznosBhd
+   qqIznosBHD := nIznosKM
    qqIznosDEM := nIznosDEM
 
-   IF nIznosBhd < 0
-      qqIznosBHD := -nIznosBhd
+   IF nIznosKM < 0
+      qqIznosBHD := -nIznosKM
    ENDIF
 
    IF nIznosDEM < 0
       qqIznosDEM := -nIznosDEM
    ENDIF
 
-   IF _din_dem == "1"
+   IF cKm1EUR2 == "1"
       @ PRow(), 16 SAY qqIznosBHD PICT R1
    ELSE
       @ PRow(), 16 SAY qqIznosDEM PICT R2
@@ -1141,7 +1137,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
    @ PRow(), 0 SAY "U"
 
-   IF nIznosBhd > 0
+   IF nIznosKM > 0
       @ PRow(), PCol() + 1 SAY8 "NAŠU"
    ELSE
       @ PRow(), PCol() + 1 SAY8 "VAŠU"
@@ -1154,7 +1150,7 @@ STATIC FUNCTION print_ios_txt( hParams )
    m := "       ---- ---------- -------------------- -------- -------- ---------------- ----------------"
 
    ? m
-   ? "       *R. *   BROJ   *    OPIS            * DATUM  * VALUTA *       IZNOS  U  " + iif( _din_dem == "1", valuta_domaca_skraceni_naziv(), ValPomocna() ) + "            *"
+   ? "       *R. *   BROJ   *    OPIS            * DATUM  * VALUTA *       IZNOS  U  " + iif( cKm1EUR2 == "1", valuta_domaca_skraceni_naziv(), ValPomocna() ) + "            *"
    ? "       *Br.*          *                    *                 * --------------------------------"
    ?U "       *   *  RAČUNA  *                    * RA�UNA * RAČUNA *     DUGUJE     *   POTRAŽUJE   *"
    ? m
@@ -1212,7 +1208,7 @@ STATIC FUNCTION print_ios_txt( hParams )
                @ PRow(), PCol() + 1 SAY field->DatDok
                @ PRow(), PCol() + 1 SAY fix_dat_var( field->DatVal )
 
-               IF _din_dem == "1"
+               IF cKm1EUR2 == "1"
                   @ PRow(), nCol1 SAY iif( field->D_P == "1", field->iznosbhd, 0 ) PICT picBHD
                   @ PRow(), PCol() + 1 SAY iif( field->D_P == "2", field->iznosbhd, 0 ) PICT picBHD
                ELSE
@@ -1276,7 +1272,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
          ENDIF
 
-         IF _din_dem == "1"
+         IF cKm1EUR2 == "1"
 
             IF _prelomljeno == "D"
 
@@ -1356,7 +1352,7 @@ STATIC FUNCTION print_ios_txt( hParams )
    @ PRow() + 1, 0 SAY m
    @ PRow() + 1, 8 SAY "UKUPNO:"
 
-   IF _din_dem == "1"
+   IF cKm1EUR2 == "1"
       @ PRow(), nCol1 SAY nDugBHD PICTURE picBHD
       @ PRow(), PCol() + 1 SAY nPotBHD PICTURE picBHD
    ELSE
@@ -1365,7 +1361,7 @@ STATIC FUNCTION print_ios_txt( hParams )
    ENDIF
 
    // ako je promet zatvorenih stavki <> 0  prikazi ga ????
-   IF _din_dem == "1"
+   IF cKm1EUR2 == "1"
       IF Round( nDugBHDZ - nPOTBHDZ, 4 ) <> 0
          @ PRow() + 1, 0 SAY m
          @ PRow() + 1, 8 SAY "ZATVORENE STAVKE"
@@ -1387,7 +1383,7 @@ STATIC FUNCTION print_ios_txt( hParams )
    nSaldoBHD := ( nDugBHD - nPotBHD )
    nSaldoDEM := ( nDugDEM - nPotDEM )
 
-   IF _din_dem == "1"
+   IF cKm1EUR2 == "1"
       IF nSaldoBHD >= 0
          @ PRow(), nCol1 SAY nSaldoBHD PICT picBHD
          @ PRow(), PCol() + 1 SAY 0 PICT picBHD
