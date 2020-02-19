@@ -30,12 +30,10 @@ FUNCTION fin_ios_meni()
    R1 := R1 + " " + valuta_domaca_skraceni_naziv()
    R2 := R2 + " " + ValPomocna()
 
-   // AAdd( _opc, "1. specifikacija IOS-a (pregled podataka prije štampe) " )
-   // AAdd( _opcexe, {|| ios_specifikacija() } )
+
    AAdd( _opc, "1. štampa ios-a            " )
    AAdd( _opcexe, {|| fin_ios_print() } )
-   // AAdd( _opc, "3. generisanje podataka za štampu IOS-a" )
-   // AAdd( _opcexe, {|| fin_ios_generacija() } )
+
    AAdd( _opc, "2. podešenje član-a" )
    AAdd( _opcexe, {|| ios_clan_setup() } )
 
@@ -642,7 +640,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
 
    LOCAL dDatumDo, cIdFirma, cIdKonto, cPrikazSaSaldoNulaDN
    LOCAL cIdPartner, hRec, nCount, nCountPartner
-   LOCAL _auto := .F.
+   LOCAL lAuto := .F.
    LOCAL _dug_1, _dug_2, _u_dug_1, _u_dug_2
    LOCAL _pot_1, _pot_2, _u_pot_1, _u_pot_2
    LOCAL nSaldo1, nSaldo2
@@ -653,11 +651,11 @@ STATIC FUNCTION fin_ios_generacija( hParams )
       MsgBeep( "Napomena: ova opcija puni pomoćnu tabelu na osnovu koje se#štampaju IOS obrasci" )
       hParams := hb_Hash()
    ELSE
-      _auto := .T.
+      lAuto := .T.
    ENDIF
 
 
-   IF !_auto .AND. !_ios_spec_vars( @hParams )
+   IF !lAuto .AND. !_ios_spec_vars( @hParams )
       RETURN .F.
    ENDIF
 
@@ -677,9 +675,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
    SELECT ios  // reset tabele IOS
    my_dbf_zap()
 
-   // SELECT suban
-   // SET ORDER TO TAG "1"
-   // SEEK cIdFirma + cIdKonto
+
    find_suban_by_konto_partner( cIdFirma, cIdKonto, cIdPartner )
    MsgC()
 
@@ -689,9 +685,9 @@ STATIC FUNCTION fin_ios_generacija( hParams )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Generacija IOS tabele u toku ..."
 
-   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdKonto == field->idkonto
+   DO WHILE !Eof() .AND. cIdFirma == suban->idfirma .AND. cIdKonto == suban->idkonto
 
-      cIdPartnerTekuci := field->idpartner
+      cIdPartnerTekuci := suban->idpartner
 
       _dug_1 := 0
       _u_dug_1 := 0
@@ -705,34 +701,29 @@ STATIC FUNCTION fin_ios_generacija( hParams )
       nSaldo2 := 0
 
       nCountPartner := 0
-      select_o_partner( suban->idpartner )
+      select_o_partner( cIdPartnerTekuci )
       SELECT suban
       lNeaktivanPartner := (partn->_kup == "X")
 
       nCount := 0
       DO WHILE !Eof() .AND. cIdFirma == suban->idfirma  .AND. cIdKonto == suban->idkonto  .AND. cIdPartnerTekuci == suban->idpartner
 
-         IF field->datdok > dDatumDo // ako je datum veci od datuma do kojeg generisem
-            SKIP
-            LOOP
-         ENDIF
-
-         IF lNeaktivanPartner
+         IF (suban->datdok > dDatumDo) .OR. lNeaktivanPartner
             SKIP
             LOOP
          ENDIF
 
          IF field->otvst == " "
             IF field->d_p == "1"
-               _dug_1 += field->iznosbhd
-               _u_dug_1 += field->Iznosbhd
-               _dug_2 += field->Iznosdem
-               _u_dug_2 += field->Iznosdem
+               _dug_1 += suban->iznosbhd
+               _u_dug_1 += suban->Iznosbhd
+               _dug_2 += suban->Iznosdem
+               _u_dug_2 += suban->Iznosdem
             ELSE
-               _pot_1 += field->IznosBHD
-               _u_pot_1 += field->IznosBHD
-               _pot_2 += field->IznosDEM
-               _u_pot_2 += field->IznosDEM
+               _pot_1 += suban->IznosBHD
+               _u_pot_1 += suban->IznosBHD
+               _pot_2 += suban->IznosDEM
+               _u_pot_2 += suban->IznosDEM
             ENDIF
          ENDIF
 
@@ -744,23 +735,26 @@ STATIC FUNCTION fin_ios_generacija( hParams )
       nSaldo1 := _dug_1 - _pot_1
       nSaldo2 := _dug_2 - _pot_2
 
-      IF !lNeaktivanPartner .AND.  (cPrikazSaSaldoNulaDN == "D" .OR. Round( nSaldo1, 2 ) <> 0)
+      IF !lNeaktivanPartner // neaktivne partnere ne dodavati u ios.dbf
+         
+         IF (Round( nSaldo1, 2 ) <> 0) .OR. (cPrikazSaSaldoNulaDN == "D") 
 
-         SELECT ios
-         APPEND BLANK
-         hRec := dbf_get_rec()
+           SELECT ios
+           APPEND BLANK
+           hRec := dbf_get_rec()
 
-         hRec[ "idfirma" ] := cIdFirma
-         hRec[ "idkonto" ] := cIdKonto
-         hRec[ "idpartner" ] := cIdPartnerTekuci
-         hRec[ "iznosbhd" ] := nSaldo1
-         hRec[ "iznosdem" ] := nSaldo2
+           hRec[ "idfirma" ] := cIdFirma
+           hRec[ "idkonto" ] := cIdKonto
+           hRec[ "idpartner" ] := cIdPartnerTekuci
+           hRec[ "iznosbhd" ] := nSaldo1
+           hRec[ "iznosdem" ] := nSaldo2
 
-         dbf_update_rec( hRec )
+           dbf_update_rec( hRec )
 
-         @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "Partner: " + cIdPartnerTekuci + ", saldo: " + AllTrim( Str( nSaldo1, 12, 2 ) ), 60 )
+           @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "Partner: " + cIdPartnerTekuci + ", saldo: " + AllTrim( Str( nSaldo1, 12, 2 ) ), 60 )
 
-         ++nCount
+           ++nCount
+         ENDIF
 
       ENDIF
 
