@@ -57,7 +57,7 @@ STATIC FUNCTION fin_ios_print()
    LOCAL cIdKonto := fetch_metric( "ios_print_id_konto", my_user(), Space( 7 ) )
    LOCAL cIdPartner := fetch_metric( "ios_print_id_partner", my_user(), Space( 6 ) )
    LOCAL cKm1EUR2 := "1"
-   LOCAL _kao_kartica := fetch_metric( "ios_print_kartica", my_user(), "D" )
+   LOCAL cKaoKartica := fetch_metric( "ios_print_kartica", my_user(), "D" )
    LOCAL _prelomljeno := fetch_metric( "ios_print_prelom", my_user(), "N" )
    LOCAL lExportXLSX := "N"
    LOCAL cPrintTip12 := fetch_metric( "ios_print_tip", my_user(), "1" )
@@ -106,7 +106,7 @@ STATIC FUNCTION fin_ios_print()
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz prebijenog stanja " GET _prelomljeno  VALID _prelomljeno $ "DN" PICT "@!"
 
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz identično kartici " GET _kao_kartica  VALID _kao_kartica $ "DN" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz identično kartici " GET cKaoKartica  VALID cKaoKartica $ "DN" PICT "@!"
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Export u XLSX (D/N)?" GET lExportXLSX   VALID lExportXLSX $ "DN" PICT "@!"
 
@@ -127,7 +127,7 @@ STATIC FUNCTION fin_ios_print()
 
    set_metric( "ios_print_id_konto", my_user(), cIdKonto )
    set_metric( "ios_print_id_partner", my_user(), cIdPartner )
-   set_metric( "ios_print_kartica", my_user(), _kao_kartica )
+   set_metric( "ios_print_kartica", my_user(), cKaoKartica )
    set_metric( "ios_print_prelom", my_user(), _prelomljeno )
    set_metric( "ios_print_tip", my_user(), cPrintTip12 )
    set_metric( "ios_print_saldo_0", my_user(), cPrintSaldo0DN )
@@ -166,7 +166,6 @@ STATIC FUNCTION fin_ios_print()
    GO TOP
 
    SEEK cIdFirma + cIdKonto
-
    NFOUND CRET
 
    IF cPrintTip12 == "2" // txt forma
@@ -186,8 +185,8 @@ STATIC FUNCTION fin_ios_print()
 
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdKonto == field->idkonto
 
-      cIdPartnerTekuci := field->idpartner
-
+      cIdPartnerTekuci := ios->idpartner
+    
       IF !Empty( cIdPartner )
          IF cNastavak == "N" .AND. ( cIdPartner <> cIdPartnerTekuci ) // samo jedan partner
             SKIP
@@ -215,7 +214,7 @@ STATIC FUNCTION fin_ios_print()
       hParams[ "export_dbf" ] := lExportXLSX
       hParams[ "iznos_bhd" ] := ios->iznosbhd
       hParams[ "iznos_dem" ] := ios->iznosdem
-      hParams[ "kartica" ] := _kao_kartica
+      hParams[ "kartica" ] := cKaoKartica
       hParams[ "prelom" ] := _prelomljeno
 
       IF cPrintTip12 == "2"
@@ -275,7 +274,7 @@ STATIC FUNCTION print_ios_xml( hParams )
    LOCAL cKm1EUR2 := hParams[ "din_dem" ]
    LOCAL dDatumDo := hParams[ "datum_do" ]
    LOCAL dDatumIOS := hParams[ "ios_datum" ]
-   LOCAL _kao_kartica := hParams[ "kartica" ]
+   LOCAL cKaoKartica := hParams[ "kartica" ]
    LOCAL _prelomljeno := hParams[ "prelom" ]
    LOCAL nSaldo1, nSaldo2, __saldo_1, __saldo_2
    LOCAL _dug_1, _dug_2, _u_dug_1, _u_dug_2, _u_dug_1z, _u_dug_2z
@@ -284,7 +283,7 @@ STATIC FUNCTION print_ios_xml( hParams )
    LOCAL _total_bhd
    LOCAL _total_dem
    LOCAL nCount
-   LOCAL cOtvSt
+   LOCAL cOtvSt, cBrDok
 
    // <ios_item>
    //
@@ -348,7 +347,7 @@ STATIC FUNCTION print_ios_xml( hParams )
 
    SELECT suban
 
-   IF _kao_kartica == "D"
+   IF cKaoKartica == "D"
       // SET ORDER TO TAG "1"
       find_suban_by_konto_partner( cIdFirma, cIdKonto, cIdPartner, NIL, "idfirma,idvn,brnal" )
    ELSE
@@ -365,7 +364,7 @@ STATIC FUNCTION print_ios_xml( hParams )
    _u_pot_1z := 0
    _u_pot_2z := 0
 
-   IF _kao_kartica == "D" // ako je kartica, onda nikad ne prelamaj
+   IF cKaoKartica == "D" // ako je kartica, onda nikad ne prelamaj
       _prelomljeno := "N"
    ENDIF
 
@@ -374,7 +373,7 @@ STATIC FUNCTION print_ios_xml( hParams )
 
    DO WHILE !Eof() .AND. cIdFirma == suban->IdFirma .AND. cIdKonto == suban->IdKonto  .AND. cIdPartner == suban->IdPartner
 
-      __br_dok := field->brdok
+      cBrDok := field->brdok
       __dat_dok := field->datdok
       __opis := AllTrim( field->opis )
       __dat_val := fix_dat_var( field->datval )
@@ -385,7 +384,7 @@ STATIC FUNCTION print_ios_xml( hParams )
       cOtvSt := field->otvst
 
       DO WHILE !Eof() .AND. cIdFirma == suban->IdFirma .AND. cIdKonto == field->IdKonto  .AND. cIdPartner == suban->IdPartner ;
-            .AND. ( _kao_kartica == "D" .OR. suban->brdok == __br_dok )
+            .AND. ( cKaoKartica == "D" .OR. suban->brdok == cBrDok )
 
          IF field->datdok > dDatumDo
             SKIP
@@ -394,7 +393,7 @@ STATIC FUNCTION print_ios_xml( hParams )
 
          IF field->otvst = " "
 
-            IF _kao_kartica == "D"
+            IF cKaoKartica == "D"
 
                nCount++
                xml_subnode( "data_kartica", .F. )
@@ -470,14 +469,14 @@ STATIC FUNCTION print_ios_xml( hParams )
 
          ENDIF
 
-         IF _kao_kartica == "N"
+         IF cKaoKartica == "N"
 
             IF !( Round( _dug_1, 2 ) == 0 .AND. Round( _pot_1, 2 ) == 0 ) // ispisi ove stavke ako dug i pot <> 0
 
                xml_subnode( "data_kartica", .F. )
                ++nCount
                xml_node( "rbr", AllTrim( Str( ++_rbr ) ) )
-               xml_node( "brdok", to_xml_encoding( __br_dok ) )
+               xml_node( "brdok", to_xml_encoding( cBrDok ) )
                xml_node( "opis", to_xml_encoding( __opis ) )
                xml_node( "datdok", DToC( fix_dat_var( __dat_dok ) ) )
                xml_node( "datval", DToC( fix_dat_var( __dat_val ) ) )
@@ -593,8 +592,6 @@ STATIC FUNCTION ios_clan_setup( setup_box )
 
 
 
-
-
 // ----------------------------------------------------------
 // uslovi izvjestaja IOS specifikacija
 // ----------------------------------------------------------
@@ -637,222 +634,9 @@ STATIC FUNCTION _ios_spec_vars( hParams )
 
 
 
-
 /*
-STATIC FUNCTION ios_specifikacija( hParams )
-
-   LOCAL dDatumDo, cIdFirma, cIdKonto, cPrikazSaSaldoNulaDN
-   LOCAL _line
-   LOCAL cIdPartner, _rbr
-   LOCAL _auto := .F.
-
-   IF hParams == NIL
-      hParams := hb_Hash()
-   ELSE
-      _auto := .T.
-   ENDIF
-
-   // uslovi izvjestaja
-   IF !_auto .AND. !_ios_spec_vars( @hParams )
-      RETURN .F.
-   ENDIF
-
-   // iz parametara uzmi uslove
-   cIdFirma := hParams[ "id_firma" ]
-   cIdKonto := hParams[ "id_konto" ]
-   dDatumDo := hParams[ "datum_do" ]
-   cPrikazSaSaldoNulaDN := hParams[ "saldo_nula" ]
-
-   _line := _ios_spec_get_line()
-
-   -- o_partner()
-   o_konto()
-
-   find_suban_by_broj_dokumenta(  cIdFirma, cIdKonto )
-
-   EOF CRET
-
-
-   IF !start_print()
-      RETURN .F.
-   ENDIF
-   ?
-
-   _rbr := 0
-
-   nDugBHD := nUkDugBHD := nDugDEM := nUkDugDEM := 0
-   nPotBHD := nUkPotBHD := nPotDEM := nUkPotDEM := 0
-   nUkBHDDS := nUkBHDPS := 0
-   nUkDEMDS := nUkDEMPS := 0
-
-   DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. cIdKonto == field->idkonto
-
-      cIdPartner := field->idpartner
-
-      DO WHILE !Eof() .AND. cIdFirma == field->idfirma ;
-            .AND. cIdKonto == field->idkonto ;
-            .AND. cIdPartner == field->idpartner
-
-         // ako je datum veci od datuma do kojeg generisem
-         // preskoci
-         IF field->datdok > dDatumDo
-            SKIP
-            LOOP
-         ENDIF
-
-         IF field->otvst == " "
-            IF field->d_p == "1"
-               nDugBHD += field->iznosbhd
-               nUkDugBHD += field->Iznosbhd
-               nDugDEM += field->Iznosdem
-               nUkDugDEM += field->Iznosdem
-            ELSE
-               nPotBHD += field->IznosBHD
-               nUkPotBHD += field->IznosBHD
-               nPotDEM += field->IznosDEM
-               nUkPotDEM += field->IznosDEM
-            ENDIF
-         ENDIF
-         SKIP
-      ENDDO
-
-      nSaldoBHD := nDugBHD - nPotBHD
-      nSaldoDEM := nDugDEM - nPotDEM
-
-      IF cPrikazSaSaldoNulaDN == "D" .OR. Round( nSaldoBHD, 2 ) <> 0
-         // ako je iznos <> 0
-
-         // daj mi prvi put zaglavlje
-         IF _rbr == 0
-            _spec_zaglavlje( cIdFirma, cIdPartner, _line )
-         ENDIF
-
-         IF PRow() > 61 + dodatni_redovi_po_stranici()
-            FF
-            _spec_zaglavlje( cIdFirma, cIdPartner, _line )
-         ENDIF
-
-         @ PRow() + 1, 0 SAY + + _rbr PICT "9999"
-         @ PRow(), 5 SAY cIdPartner
-
-         -- SELECT PARTN
-         -- HSEEK cIdPartner
-
-         @ PRow(), 12 SAY PadR( AllTrim( partn->naz ), 20 )
-         @ PRow(), 37 SAY AllTrim( partn->naz2 ) PICT 'XXXXXXXXXXXX'
-         @ PRow(), 50 SAY partn->PTT
-         @ PRow(), 56 SAY partn->Mjesto
-
-         // BHD
-         @ PRow(), 73 SAY nDugBHD PICT picBHD
-         @ PRow(), PCol() + 1 SAY nPotBHD PICT picBHD
-
-      ENDIF
-
-      SELECT suban
-
-      IF nSaldoBHD >= 0
-         @ PRow(), PCol() + 1 SAY nSaldoBHD PICT picBHD
-         @ PRow(), PCol() + 1 SAY 0 PICT picBHD
-         nUkBHDDS += nSaldoBHD
-      ELSE
-         @ PRow(), PCol() + 1 SAY 0 PICT picBHD
-         @ PRow(), PCol() + 1 SAY -nSaldoBHD PICT picBHD
-         nUkBHDPS += -nSaldoBHD
-      ENDIF
-
-      // strana valuta
-      IF fin_dvovalutno()
-
-         @ PRow(), PCol() + 1 SAY nDugDEM PICTURE picDEM
-         @ PRow(), PCol() + 1 SAY nPotDEM PICTURE picDEM
-
-         IF nSaldoDEM >= 0
-            @ PRow(), PCol() + 1 SAY nSaldoDEM PICTURE picDEM
-            @ PRow(), PCol() + 1 SAY 0 PICTURE picDEM
-            nUkDEMDS += nSaldoDEM
-         ELSE
-            @ PRow(), PCol() + 1 SAY 0 PICTURE picDEM
-            @ PRow(), PCol() + 1 SAY -nSaldoDEM PICTURE picDEM
-            nUkDEMPS += -nSaldoDEM
-         ENDIF
-      ENDIF
-
-      nDugBHD := nPotBHD := nDugDEM := nPotDEM := 0
-      cIdPartner := field->IdPartner
-
-   ENDDO
-
-   IF PRow() > 61 + dodatni_redovi_po_stranici()
-      FF
-      _spec_zaglavlje( cIdFirma, cIdPartner, _line )
-   ENDIF
-
-   @ PRow() + 1, 0 SAY _line
-   @ PRow() + 1, 0 SAY "UKUPNO ZA KONTO:"
-   @ PRow(), 73 SAY nUkDugBHD PICTURE picBHD
-   @ PRow(), PCol() + 1 SAY nUkPotBHD PICTURE picBHD
-
-   nS := nUkBHDDS - nUkBHDPS
-   @ PRow(), PCol() + 1 SAY iif( nS >= 0, nS, 0 ) PICTURE picBHD
-   @ PRow(), PCol() + 1 SAY iif( nS <= 0, nS, 0 ) PICTURE picBHD
-
-   IF fin_dvovalutno()
-
-      @ PRow(), PCol() + 1 SAY nUkDugDEM PICTURE picDEM
-      @ PRow(), PCol() + 1 SAY nUkPotDEM PICTURE picDEM
-
-      nS := nUkDEMDS - nUkDEMPS
-
-      @ PRow(), PCol() + 1 SAY iif( nS >= 0, nS, 0 ) PICTURE picDEM
-      @ PRow(), PCol() + 1 SAY iif( nS <= 0, nS, 0 ) PICTURE picDEM
-
-   ENDIF
-
-   @ PRow() + 1, 0 SAY _line
-
-   FF
-   end_print()
-
-   my_close_all_dbf()
-
-   RETURN
-
-
-
-
-
-// -----------------------------------------------------------------
-// zaglavlje specifikacije
-// -----------------------------------------------------------------
-STATIC FUNCTION _spec_zaglavlje( id_firma, id_partner, line )
-
-   P_COND
-
-   ??  "FIN: SPECIFIKACIJA IOS-a     NA DAN "
-   ?? Date()
-   ? "FIRMA:"
-   @ PRow(), PCol() + 1 SAY id_firma
-
-   -- SELECT partn
-   -- HSEEK id_partner
-
-   @ PRow(), PCol() + 1 SAY AllTrim( naz )
-   @ PRow(), PCol() + 1 SAY AllTrim( naz2 )
-
-   ? line
-
-   ?U "*RED.* ŠIFRA*      NAZIV POSLOVNOG PARTNERA      * PTT *      MJESTO     *   KUMULATIVNI PROMET  U  " + valuta_domaca_skraceni_naziv() + "  *    S A L D O   U   " + valuta_domaca_skraceni_naziv() + "         " + IF( fin_dvovalutno(), "*  KUMULAT. PROMET U " + ValPomocna() + " *  S A L D O   U   " + ValPomocna() + "  ", "" ) + "*"
-   ?U "                                                                          ________________________________ _________________________________" + IF( fin_dvovalutno(), "*_________________________ ________________________", "" ) + "_"
-   ? "*BROJ*      *                                    * BROJ*                 *    DUGUJE     *   POTRAZUJE    *    DUGUJE      *   POTRAZUJE    " + IF( fin_dvovalutno(), "*    DUGUJE  * POTRAZUJE  *   DUGUJE   * POTRAZUJE ", "" ) + "*"
-   ?U line
-
-   SELECT suban
-
-   RETURN .T.
-
+   generisanje ios.dbf
 */
-
 
 STATIC FUNCTION fin_ios_generacija( hParams )
 
@@ -885,8 +669,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
    cPrikazSaSaldoNulaDN := hParams[ "saldo_nula" ]
 
    MsgO("Preuzimanje podataka sa servera...")
-   // o_partner()
-   //o_konto()
+
    o_suban()
    o_fin_ios()
 
@@ -961,7 +744,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
       nSaldo1 := _dug_1 - _pot_1
       nSaldo2 := _dug_2 - _pot_2
 
-      IF cPrikazSaSaldoNulaDN == "D" .OR. Round( nSaldo1, 2 ) <> 0
+      IF !lNeaktivanPartner .AND.  (cPrikazSaSaldoNulaDN == "D" .OR. Round( nSaldo1, 2 ) <> 0)
 
          SELECT ios
          APPEND BLANK
@@ -1055,7 +838,7 @@ STATIC FUNCTION print_ios_txt( hParams )
    LOCAL dDatumDo := hParams[ "datum_do" ]
    LOCAL dDatumIOS := hParams[ "ios_datum" ]
    LOCAL lExportXLSX := hParams[ "export_dbf" ]
-   LOCAL _kao_kartica := hParams[ "kartica" ]
+   LOCAL cKaoKartica := hParams[ "kartica" ]
    LOCAL _prelomljeno := hParams[ "prelom" ]
    LOCAL cPartnerNaziv
 
@@ -1151,7 +934,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
    nCol1 := 62
 
-   IF _kao_kartica == "D"
+   IF cKaoKartica == "D"
       find_suban_by_konto_partner( cIdFirma, cIdKonto, cIdPartner, NIL, "idfirma,idvn,brnal" )
    ELSE
       find_suban_by_konto_partner( cIdFirma, cIdKonto, cIdPartner, NIL, "IdFirma,IdKonto,IdPartner,brdok" )
@@ -1163,7 +946,7 @@ STATIC FUNCTION print_ios_txt( hParams )
    _rbr := 0
 
 
-   IF _kao_kartica == "D"    // ako je kartica, onda nikad ne prelamaj
+   IF cKaoKartica == "D"    // ako je kartica, onda nikad ne prelamaj
       _prelomljeno := "N"
    ENDIF
 
@@ -1180,7 +963,7 @@ STATIC FUNCTION print_ios_txt( hParams )
       cOtvSt := field->otvst
 
       DO WHILE !Eof() .AND. cIdFirma == field->IdFirma .AND. cIdKonto == field->IdKonto ;
-            .AND. cIdPartner == field->IdPartner .AND. ( _kao_kartica == "D" .OR. field->brdok == cBrdok )
+            .AND. cIdPartner == field->IdPartner .AND. ( cKaoKartica == "D" .OR. field->brdok == cBrdok )
 
          IF field->datdok > dDatumDo
             SKIP
@@ -1189,7 +972,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
          IF field->otvst = " "
 
-            IF _kao_kartica == "D"
+            IF cKaoKartica == "D"
 
                IF PRow() > 61 + dodatni_redovi_po_stranici()
                   FF
@@ -1251,7 +1034,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
       IF cOtvSt == " "
 
-         IF _kao_kartica == "N"
+         IF cKaoKartica == "N"
 
             IF PRow() > 61 + dodatni_redovi_po_stranici()
                FF
@@ -1280,7 +1063,7 @@ STATIC FUNCTION print_ios_txt( hParams )
 
             ENDIF
 
-            IF _kao_kartica == "N"
+            IF cKaoKartica == "N"
 
                @ PRow(), nCol1 SAY nDBHD PICT picBHD
                @ PRow(), PCol() + 1 SAY nPBhD PICT picBHD
@@ -1309,7 +1092,7 @@ STATIC FUNCTION print_ios_txt( hParams )
                ENDIF
             ENDIF
 
-            IF _kao_kartica == "N"
+            IF cKaoKartica == "N"
 
                @ PRow(), nCol1 SAY nDDEM PICT picBHD
                @ PRow(), PCol() + 1 SAY nPDEM PICT picBHD
@@ -1413,8 +1196,8 @@ STATIC FUNCTION print_ios_txt( hParams )
 
    F12CPI
 
-   @ PRow(), 13 SAY "PO�ILJALAC IZVODA:"
-   @ PRow(), 53 SAY "POTVR�UJEMO SAGLASNOST"
+   @ PRow(), 13 SAY "POSILJALAC IZVODA:"
+   @ PRow(), 53 SAY "POTVRDJUJEMO SAGLASNOST"
    @ PRow() + 1, 50 SAY "OTVORENIH STAVKI:"
 
    ?
@@ -1505,18 +1288,18 @@ STATIC FUNCTION xlsx_export_fill_row( cIdPart, cNazPart, cBrRn, cOpis, dDatum, d
 // ------------------------------------------
 STATIC FUNCTION g_exp_fields()
 
-   LOCAL _dbf := {}
+   LOCAL aDbf := {}
 
-   AAdd( _dbf, { "idpartner", "C", 10, 0 } )
-   AAdd( _dbf, { "partner", "C", 40, 0 } )
-   AAdd( _dbf, { "brrn", "C", 10, 0 } )
-   AAdd( _dbf, { "opis", "C", 40, 0 } )
-   AAdd( _dbf, { "datum", "D", 8, 0 } )
-   AAdd( _dbf, { "valuta", "D", 8, 0 } )
-   AAdd( _dbf, { "duguje", "N", 15, 5 } )
-   AAdd( _dbf, { "potrazuje", "N", 15, 5 } )
+   AAdd( aDbf, { "idpartner", "C", 10, 0 } )
+   AAdd( aDbf, { "partner", "C", 40, 0 } )
+   AAdd( aDbf, { "brrn", "C", 10, 0 } )
+   AAdd( aDbf, { "opis", "C", 40, 0 } )
+   AAdd( aDbf, { "datum", "D", 8, 0 } )
+   AAdd( aDbf, { "valuta", "D", 8, 0 } )
+   AAdd( aDbf, { "duguje", "N", 15, 5 } )
+   AAdd( aDbf, { "potrazuje", "N", 15, 5 } )
 
-   RETURN _dbf
+   RETURN aDbf
 
 
 
