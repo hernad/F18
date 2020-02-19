@@ -131,8 +131,8 @@ STATIC FUNCTION fin_ios_print()
    set_metric( "ios_print_prelom", my_user(), _prelomljeno )
    set_metric( "ios_print_tip", my_user(), cPrintTip12 )
    set_metric( "ios_print_saldo_0", my_user(), cPrintSaldo0DN )
-   fetch_metric( "ios_datum_do", my_user(), dDatumDo )
-   fetch_metric( "ios_datum_gen", my_user(), dDatumIOS )
+   set_metric( "ios_datum_do", my_user(), dDatumDo )
+   set_metric( "ios_datum_gen", my_user(), dDatumIOS )
 
    cIdFirma := Left( cIdFirma, 2 )
 
