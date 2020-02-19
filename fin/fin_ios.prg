@@ -75,8 +75,8 @@ STATIC FUNCTION fin_ios_print()
    LOCAL cPrintSaldo0DN := fetch_metric( "ios_print_saldo_0", my_user(), "D" )
 
    download_template( "ios.odt",  "8d1fa4972d42e54cc0e97e5c8d8c525787fc6b7b4d7c07ce092c38897b48ce85" )
-   download_template( "ios_2.odt", "c7db11e88caf0a7e33d069b096fd4e908b38f3b203c51084c9e84ddcb4fa5f11" )
-
+   download_template( "ios_2.odt", "c0ef9bd9871aa73d09c343c19681ae7a449ffbf0a7dd0196ca548a04fd080d03" )
+ 
    Box(, 17, 65, .F. )
 
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 " Štampa IOS-a **** "
