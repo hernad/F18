@@ -1,7 +1,7 @@
 /*
  * This file is part of the bring.out knowhow ERP, a free and open source
  * Enterprise Resource Planning software suite,
- * Copyright (c) 1994-2018 by bring.out doo Sarajevo.
+ * Copyright (c) 1994-2020 by bring.out doo Sarajevo.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including FMK specific Exhibits)
  * is available in the file LICENSE_CPAL_bring.out_knowhow.md located at the
@@ -50,7 +50,7 @@ FUNCTION fin_ios_meni()
 
 STATIC FUNCTION fin_ios_print()
 
-   LOCAL dDatumDo := Date()
+   LOCAL dDatumDo := fetch_metric( "ios_datum_do", my_user(), Date() )
    LOCAL hParams := hb_Hash()
    LOCAL hParametriGenIOS := hb_Hash()
    LOCAL cIdFirma := self_organizacija_id()
@@ -63,7 +63,7 @@ STATIC FUNCTION fin_ios_print()
    LOCAL cPrintTip12 := fetch_metric( "ios_print_tip", my_user(), "1" )
 
    // LOCAL _auto_gen := fetch_metric( "ios_auto_gen", my_user(), "D" )
-   LOCAL dDatumIOS := Date()
+   LOCAL dDatumIOS := fetch_metric( "ios_datum_gen", my_user(), Date() )
    LOCAL nX := 1
    LOCAL _launch, _exp_fields
    LOCAL cXmlIos := my_home() + "data.xml"
@@ -119,9 +119,6 @@ STATIC FUNCTION fin_ios_print()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Print sa saldom 0?" GET cPrintSaldo0DN VALID cPrintSaldo0DN $ "DN" PICT "@!"
 
-   // ++nX
-   // @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Generiši podatke IOS-a automatski kod pokretanja (D/N) ?" GET _auto_gen  VALID _auto_gen $ "DN" PICT "@!"
-
    READ
 
    ESC_BCR
@@ -134,6 +131,8 @@ STATIC FUNCTION fin_ios_print()
    set_metric( "ios_print_prelom", my_user(), _prelomljeno )
    set_metric( "ios_print_tip", my_user(), cPrintTip12 )
    set_metric( "ios_print_saldo_0", my_user(), cPrintSaldo0DN )
+   fetch_metric( "ios_datum_do", my_user(), dDatumDo )
+   fetch_metric( "ios_datum_gen", my_user(), dDatumIOS )
 
    cIdFirma := Left( cIdFirma, 2 )
 
@@ -163,11 +162,6 @@ STATIC FUNCTION fin_ios_print()
    ENDIF
 
 
-   // o_konto()
-   // o_partner()
-   // o_suban()
-   // o_tnal()
-   // o_suban()
    o_fin_ios()
    GO TOP
 
