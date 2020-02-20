@@ -18,7 +18,7 @@ CREATE CLASS PDFClass
    VAR    cFontName         INIT s_cFont
    VAR    nFontSize         INIT 7
    VAR    nLineHeight       INIT 1.3
-   VAR    nMargin           INIT 30
+   VAR    nMargin           INIT 20 // margina
    VAR    nType             INIT 1
    VAR    nPdfPage          INIT 0
    VAR    nPageNumber       INIT 0
@@ -301,10 +301,16 @@ METHOD MaxRow() CLASS PDFClass
    LOCAL nPageHeight, nMaxRow
 
    IF ::nType == PDF_TXT_PORTRAIT
+      IF ::nFontSize == 9.5
+        RETURN Round( 56 * ::nXScale, 0 )
+      ENDIF
       IF ::nFontSize == 8.5
          RETURN Round( 62 * ::nXScale, 0 )
       ENDIF
-
+      IF ::nFontSize == 9.5
+        RETURN Round( 56 * ::nXScale, 0 )
+      ENDIF
+    
       SWITCH Round( ::nFontSize, 0 )
       CASE 10
          RETURN Round( 53 * ::nXScale, 0 )
@@ -462,7 +468,7 @@ METHOD PageHeader() CLASS PDFClass
    ::nPdfPage    += 1
    ::nPageNumber += 1
    ::nRow        := 0
-   info_bar( "debug", Str( ::MaxCol() ) )
+   //info_bar( "debug", Str( ::MaxCol() ) )
    ::AddPage()
    ::DrawText( 0, 0, "(c) bring.out" )
    ::DrawText( 0, ( ::MaxCol() - Len( ::cHeader ) ) / 2, ::cHeader )

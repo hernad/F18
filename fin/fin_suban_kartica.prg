@@ -24,13 +24,13 @@ FIELD iznosbhd, iznosdem, d_p, otvst, idpartner, idfirma, idkonto, datdok, datva
 STATIC s_cXlsxName := NIL
 STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
 STATIC s_pMoneyFormat, s_pDateFormat
-
+STATIC s_nOpisRptLength := 40
+STATIC s_cPortretDN := "D"
 
 FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    LOCAL cBrza := "D"
    LOCAL nC1 := 37
-   LOCAL nSirinaOpis := 40
    LOCAL nCOpis := 0
    LOCAL cOpis := ""
    LOCAL cBoxName
@@ -113,6 +113,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    //c1K1Z := fetch_metric( "fin_kart_kz", my_user(), c1K1Z )
    cPrikazK1234 := fetch_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
    cIdFirma := self_organizacija_id()
+   s_cPortretDN := fetch_metric( "fin_kart_suban_portret", my_user(), "N")
 
    cK1 := "9"
    cK2 := "9"
@@ -184,16 +185,21 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       ENDIF
 
       fin_get_k1_k4_funk_fond( @GetList, 14 )
+      
+      /*
       @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za broj veze: " GET cUslovUpperBrDok PICT "@!S30"
       @ Row() + 1, box_y_koord() + 2 SAY8 "(prazno-svi; 61_SP_2-spoji uplate za naloge tipa 61;"
       @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_2 - kupci spojiti uplate za sve vrste naloga; "
       @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_1 - dobavljači spojiti plaćanja za sve vrste naloga)"
+      */
+
       IF cBrza <> "D"
          @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za naziv konta (prazno-svi) " GET cUslovNazivKonta PICT "@!S20"
       ENDIF
-
       @ Row() + 1, box_y_koord() + 2 SAY8 "Općina (prazno-sve):" GET cOpcine
-      //@ Row() + 1, box_y_koord() + 2 SAY "Svaka kartica treba da ima zaglavlje kolona ? (D/N)"  GET c1k1z PICT "@!" VALID c1k1z $ "DN"
+
+      @ Row() + 2, box_y_koord() + 2 SAY8 "Portret prikaz D/N? " GET s_cPortretDN VALID s_cPortretDN $ "DN" PICTURE "@!"
+
       @ Row() + 1, box_y_koord() + 2 SAY "Export u XLSX (D/N)?"  GET cExpXlsx PICT "@!" VALID cExpXlsx $ "DN"
 
       READ
@@ -258,6 +264,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    set_metric( "fin_kart_valuta", my_user(), p_cValutaDom1Eur2Obje3 )
    //set_metric( "fin_kart_kz", my_user(), c1K1Z )
    set_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
+   set_metric( "fin_kart_suban_portret", my_user(), s_cPortretDN)
 
    IF !lSpojiUplate
       cFilterBrDok := Parsiraj( cUslovUpperBrDok, "UPPER(BRDOK)", "C" )
@@ -267,31 +274,37 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    cIdFirma := Trim( cIdFirma )
 
+   IF s_cPortretDN == "D"
+      s_nOpisRptLength := 20
+   ELSE
+      s_nOpisRptLength := 40
+   ENDIF
+
    IF p_cValutaDom1Eur2Obje3 == "3"
       IF hFinParams[ "fin_tip_dokumenta" ] .AND. cPrikazK1234 == "4"
-         m := "--- -------- ---- ---------------- ---------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
+         m := "--- -------- ---- ---------------- ---------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
       ELSEIF hFinParams[ "fin_tip_dokumenta" ]
-         m := "--- -------- ---- ---------------- ---------- -------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
+         m := "--- -------- ---- ---------------- ---------- -------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
       ELSE
-         m := "--- -------- ---- ---------- -------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
+         m := "--- -------- ---- ---------- -------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ---------------- --------------- ------------- ------------ ------------"
       ENDIF
 
    ELSEIF cKumulativniPrometBez1Sa2 == "1"
 
       IF hFinParams[ "fin_tip_dokumenta" ]
-         m := "--- -------- ---- ---------------- ---------- -------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ----------------- ---------------"
+         m := "--- -------- ---- ---------------- ---------- -------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ----------------- ---------------"
       ELSE
-         m := "--- -------- ---- ---------- -------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ----------------- ---------------"
+         m := "--- -------- ---- ---------- -------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ----------------- ---------------"
       ENDIF
 
    ELSE
 
       IF hFinParams[ "fin_tip_dokumenta" ] .AND. cPrikazK1234 == "4"
-         m := "--- -------- ---- ---------------- ---------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ----------------- ---------------- ----------------- ---------------"
+         m := "--- -------- ---- ---------------- ---------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ----------------- ---------------- ----------------- ---------------"
       ELSEIF hFinParams[ "fin_tip_dokumenta" ]
-         m := "--- -------- ---- ---------------- ---------- -------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ----------------- ---------------- ----------------- ---------------"
+         m := "--- -------- ---- ---------------- ---------- -------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ----------------- ---------------- ----------------- ---------------"
       ELSE
-         m := "--- -------- ---- ---------- -------- -------- " + Replicate( "-", nSirinaOpis ) + " ---------------- ----------------- ---------------- ----------------- ---------------"
+         m := "--- -------- ---- ---------- -------- -------- " + Replicate( "-", s_nOpisRptLength ) + " ---------------- ----------------- ---------------- ----------------- ---------------"
       ENDIF
 
    ENDIF
@@ -377,11 +390,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
+   
    xPrintOpt[ "layout" ] := "landscape"
    IF cKumulativniPrometBez1Sa2 == "2" .AND. p_cValutaDom1Eur2Obje3 == "3" // sa kumulativnim prometom
       xPrintOpt[ "font_size" ] := 7.5
    ELSE
-      xPrintOpt[ "font_size" ] := 9
+      xPrintOpt[ "font_size" ] := 9.5
+      xPrintOpt[ "layout" ] := IIF( s_cPortretDN == "D", "portrait", "landscape" )
    ENDIF
    xPrintOpt[ "opdf" ] := oPDF
    xPrintOpt[ "left_space" ] := 0
@@ -487,7 +502,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
          check_nova_strana( bZagl, oPdf )
          //IF c1K1z != "D"
-            ? m
+         ? m
          //ENDIF
 
          lPrviProlaz := .T.  // prvi prolaz
@@ -652,13 +667,12 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                ENDIF
 
                IF p_cValutaDom1Eur2Obje3 == "3"
-                  nSirinaOpis := 36
+                  s_nOpisRptLength := 36
                   nCOpis := PCol() + 1
-                  @ PRow(), PCol() + 1 SAY PadR( cOpis := AllTrim( hRec[ "opis" ] ), nSirinaOpis )
+                  @ PRow(), PCol() + 1 SAY PadR( cOpis := AllTrim( hRec[ "opis" ] ), s_nOpisRptLength )
                ELSE
-                  nSirinaOpis := 40
                   nCOpis := PCol() + 1
-                  @ PRow(), PCol() + 1 SAY PadR( cOpis := AllTrim( hRec[ "opis" ] ), nSirinaOpis )
+                  @ PRow(), PCol() + 1 SAY PadR( cOpis := AllTrim( hRec[ "opis" ] ), s_nOpisRptLength )
                ENDIF
                nC1 := PCol() + 1
             ENDIF
@@ -761,7 +775,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   ENDIF
                ENDIF
             ENDIF
-            fin_print_ostatak_opisa( @cOpis, nCOpis, {|| check_nova_strana( bZagl, oPDF ) }, nSirinaOpis )
+            fin_print_ostatak_opisa( @cOpis, nCOpis, {|| check_nova_strana( bZagl, oPDF ) }, s_nOpisRptLength )
             IF cExpXlsx == "D" .AND. !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" )
                IF  hRec[ "d_p" ] == "1"
                   nDuguje := hRec[ "iznosbhd" ]
@@ -1099,11 +1113,12 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
          ?U  "*V.*BR     * R.  *     TIP I      *  BROJ    *  DATUM *" + iif( cPrikazK1234 == "1", " K1-K4  ", " VALUTA " ) + "*              OPIS                      *    DUGUJE     *    POTRAŽUJE     *              *"
          ?U  "*N.*       * Br. *     NAZIV      *          *        *        *                    *               *                  *              *"
       ELSE
-         ?U  "----------------- --------------------------------------------------------------------- ---------------------------------- ---------------"
-         ?U  "*  NALOG         *                   D O K U M E N T                                   *           P R O M E T            *    SALDO     *"
-         ?U  "----------------- ------------------- -------- ---------------------------------------- ----------------------------------               *"
-         ?U  "*V.*BR     * R.  *   BROJ   *  DATUM *" + iif( cPrikazK1234 == "1", " K1-K4  ", " VALUTA " ) + "*              OPIS                      *    DUGUJE     *    POTRAŽUJE     *              *"
-         ?U  "*N.*       * Br. *          *        *        *                                        *               *                  *              *"
+         // default
+         ?U  "----------------- " + Replicate("-", 29 + s_nOpisRptLength) + " ---------------------------------- ---------------"
+         ?U  "*  NALOG         *" + PadC("D O K U M E N T", 29 + s_nOpisRptLength) + "*           P R O M E T            *    SALDO     *"
+         ?U  "----------------- " + "------------------- -------- " + Replicate("-", s_nOpisRptLength) + " ----------------------------------               *"
+         ?U  "*V.*BR     * R.  *   BROJ   *  DATUM *" + iif( cPrikazK1234 == "1", " K1-K4  ", " VALUTA " ) + "*" + PadC("OPIS", s_nOpisRptLength) + "*    DUGUJE     *    POTRAŽUJE     *              *"
+         ?U  "*N.*       * Br. *          *        *        *" + SPACE(s_nOpisRptLength) + "*               *                  *              *"
       ENDIF
 
    ELSE
@@ -1112,7 +1127,7 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
          ?U  "-(5)------------ ----------------------------------------------------------------------------- ---------------------------------- ---------------------------------- ---------------"
          ?U  "*  NALOG        *                        D  O  K  U  M  E  N  T                               *           P R O M E T            *           K U M U L A T I V      *    SALDO     *"
          ?U  "---------------- ------------------------------------ ---------------------------------------- ---------------------------------- ----------------------------------               *"
-         ?U  "*V.*BR     * R. *     TIP I      *   BROJ   *  DATUM *              OPIS                      *    DUGUJE     *    POTRAŽUJE     *    DUGUJE     *    POTRA¦UJE     *              *"
+         ?U  "*V.*BR     * R. *     TIP I      *   BROJ   *  DATUM *              OPIS                      *    DUGUJE     *    POTRAŽUJE     *    DUGUJE     *    POTRAŽUJE     *              *"
          ?U  "*N.*       * Br.*     NAZIV      *          *        *                                        *               *                  *               *                  *              *"
       ELSEIF hFinParams[ "fin_tip_dokumenta" ]
          ?U  "-(6)------------ -------------------------------------------------------------------------------------- ---------------------------------- ---------------------------------- ---------------"
