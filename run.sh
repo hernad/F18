@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+F18_EXE=~/ziher/src/bazel-bin/Z18/src/Z18-klijent
+
 F18_HOST=192.168.124.1
 F18_ORG=proba_2018
 F18_USER=knjig
@@ -19,6 +21,6 @@ export F18_HOME=$(pwd)/data
 echo $F18_HOME
 
 
-/home/hernad/F18_knowhow/F18 2>${1}_1.log --dbf-prefix 1 -h $F18_HOST -y 5432 -ua admin -pa $F18_ADMIN_PASSWORD -u $F18_USER -p $F18_PASSWORD -d $F18_ORG --${1} ${4}
+$F18_EXE 2>${1}_1.log --dbf-prefix 1 -h $F18_HOST -y 5432 -ua admin -pa $F18_ADMIN_PASSWORD -u $F18_USER -p $F18_PASSWORD -d $F18_ORG --${1} ${4}
 #/home/hernad/F18_knowhow/F18 2>${1}_1.log --dbf-prefix 1 -h $F18_HOST -y 5432  -u $F18_USER -p $F18_PASSWORD -d $F18_ORG --${1} ${4}
 
