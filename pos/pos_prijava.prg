@@ -83,7 +83,7 @@ FUNCTION pos_status_traka()
    LOCAL nX := f18_max_rows() - 1
    LOCAL nY := 0
 
-   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " PROD-PM:" + pos_prodavnica_str() + " " + pos_pm()
+   @ 1, nY + 1 SAY8 "RADI:" + PadR( LTrim( gKorIme ), 31 ) +  " DATUM:" + DToC( danasnji_datum() ) + " PROD-PM:" + pos_prodavnica_str() + "/" + pos_pm()
    @ nX - 1, nY + 1 SAY PadC ( Razrijedi ( gKorIme ), f18_max_cols() - 2 ) COLOR f18_color_invert()
 
    RETURN .T.

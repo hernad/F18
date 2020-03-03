@@ -151,11 +151,12 @@ IF (TG_OP = 'DELETE') THEN
 ELSIF (TG_OP = 'UPDATE') THEN
          RAISE INFO 'update kalk_kalk !? % % %', cPKonto, cBrDok, idvdKalk;
          RETURN NEW;
+
 ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
-         RAISE INFO 'FIRST delete kalk_kalk % % % %', idvdKalk, cPKonto, NEW.datum, cBrDok;
+         -- RAISE INFO 'FIRST delete kalk_kalk % % % %', idvdKalk, cPKonto, NEW.datum, cBrDok;
          EXECUTE 'DELETE FROM ' || knjigShema || '.kalk_kalk WHERE pkonto=$1 AND idvd=$2 AND datdok=$3 AND brDok=$4'
                 USING cPKonto, idvdKalk, NEW.datum, cBrDok;
-         RAISE INFO 'THEN insert POS 42 => kalk_kalk % % % % %', NEW.idpos, idvdKalk, cBrDok, NEW.datum, cPKonto;
+         -- RAISE INFO 'THEN insert POS 42 => kalk_kalk % % % % %', NEW.idpos, idvdKalk, cBrDok, NEW.datum, cPKonto;
          EXECUTE 'INSERT INTO ' || knjigShema || '.kalk_kalk(idfirma, idvd, rbr, brdok, datdok, pkonto, idroba, idtarifa, mpcsapp, kolicina, mpc, nc, fcj, pu_i, mu_i, tmarza2, rabatv) ' ||
                  '(SELECT $1 as idfirma, $2 as idvd,' ||
                  ' (row_number() over (order by idroba))::integer as rbr,' ||
@@ -163,7 +164,7 @@ ELSIF (TG_OP = 'INSERT') AND ( NEW.idvd = '42' ) THEN -- 42 POS => 49 KALK
                  ' public.pos_neto_cijena(cijena, ncijena)/(1 + tarifa.pdv/100) as mpc, 0.00000001 as nc, 0.00000001 as fcj,''9'','''',''A'', public.pos_popust(cijena, ncijena)/(1 + tarifa.pdv/100) ' ||
                  ' FROM {{ item_prodavnica }}.pos_items ' ||
                  ' LEFT JOIN public.tarifa on pos_items.idtarifa = tarifa.id' ||
-                 ' WHERE idvd=''42'' AND datum=$4 AND idpos=$5' ||
+                 ' WHERE idvd=''42'' AND datum=$4 ' ||
                  ' GROUP BY idroba,idtarifa,cijena,ncijena,tarifa.pdv' ||
                  ' ORDER BY idroba)'
               USING idFirma, idvdKalk, cBrDok, NEW.datum, NEW.idpos, cPKonto;

@@ -53,8 +53,6 @@ FUNCTION kalk_azuriranje_pripr_smece_pripr9()
    DO WHILE !Eof()
 
       nScan := AScan( aDokumentiPriprema, {| aDokument | aDokument[ 1 ] == kalk_pripr->idfirma .AND. aDokument[ 2 ] == kalk_pripr->idvd .AND. aDokument[ 3 ] == kalk_pripr->brdok } )
-
-      altd()
       
       IF nScan > 0 
          

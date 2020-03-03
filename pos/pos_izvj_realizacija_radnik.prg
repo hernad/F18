@@ -32,7 +32,7 @@ FUNCTION pos_realizacija_radnik
    PRIVATE dDatOd := danasnji_datum()
    PRIVATE dDatDo := danasnji_datum()
 
-   cPrikazPazarRoba := iif ( cPrikazPazarRoba == NIL, "P", cPrikazPazarRoba )
+   cPrikazPazarRoba := IIF( cPrikazPazarRoba == NIL, "P", cPrikazPazarRoba )
 
    IF lTekuci
       cIdRadnik := gIdRadnik
@@ -41,7 +41,7 @@ FUNCTION pos_realizacija_radnik
       aNiz := {}
       cIdPos := pos_pm()
 
-      AAdd( aNiz, { "Šifra radnika  (prazno-svi)", "cIdRadnik", "IF(!EMPTY(cIdRadnik),P_OSOB(@cIdRadnik),.t.)",, } )
+      AAdd( aNiz, { "Šifra radnika  (prazno-svi)", "cIdRadnik", "IIF(!EMPTY(cIdRadnik), P_OSOB(@cIdRadnik),.t.)",, } )
       AAdd( aNiz, { "Vrsta placanja (prazno-sve)", "cVrsteP",, "@!S30", } )
       AAdd( aNiz, { "Izvještaj se pravi od datuma", "dDatOd",,, } )
       AAdd( aNiz, { "                   do datuma", "dDatDo",,, } )
@@ -93,7 +93,7 @@ FUNCTION pos_realizacija_radnik
    xPrintOpt[ "font_size" ] := 10
 
    cNaslov := "POS "
-   cNaslov += AllTrim(Str(pos_prodavnica())) + ": "
+   cNaslov += AllTrim(Str(pos_prodavnica())) + "/" + pos_pm() + " : "
    IF lTekuci
       IF cPrikazPazarRoba $ "PO"
          cNaslov += "PAZAR RADNIKA"
@@ -117,8 +117,8 @@ FUNCTION pos_realizacija_radnik
       ?
    ELSE
       ?U "PROD.MJESTO: " + cIdpos
-      ?U "RADNIK     : " + IF( Empty( cIdRadnik ), "svi", cIdRadnik + "-" + RTrim( find_pos_osob_naziv( cIdRadnik ) ) )
-      ?U "VR.PLAĆANJA: " + IF( Empty( cVrsteP ), "sve", RTrim( cVrsteP ) )
+      ?U "RADNIK     : " + IIF( Empty( cIdRadnik ), "svi", cIdRadnik + "-" + RTrim( find_pos_osob_naziv( cIdRadnik ) ) )
+      ?U "VR.PLAĆANJA: " + IIF( Empty( cVrsteP ), "sve", RTrim( cVrsteP ) )
 
       ?U "PERIOD     : " + FormDat1( dDatOd ) + " - " + FormDat1( dDatDo )
       ?

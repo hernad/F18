@@ -45,6 +45,7 @@ FUNCTION pos_lista_azuriranih_dokumenata()
       RETURN .F.
    ENDIF
    AAdd( ImeKol, { "Vrsta", {|| pos_doks_2->IdVd } } )
+   AAdd( ImeKol, { "PM", {|| pos_doks_2->idpos } } )
    AAdd( ImeKol, { "Broj ", {|| pos_doks_2->brdok } } )
    AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna_str( pos_doks_2->IdPos, pos_doks_2->IdVd, pos_doks_2->datum, pos_doks_2->brdok ) } } )
    AAdd( ImeKol, { "Datum", {|| pos_doks_2->datum } } )

@@ -1,7 +1,11 @@
+*.log
+cloc
+.git/
+*/**/*.bak
 **/*.bak
 **/*.BAK
 home
-.h
+.h/
 *.bak
 *.BAK
 .r

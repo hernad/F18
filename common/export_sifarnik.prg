@@ -151,7 +151,6 @@ FUNCTION export_sifarnik()
       AAdd( aDbfStruct, { hField[ "name" ], hField[ "tip" ], nLen,  nDec } )
    NEXT
 
-   altd()
    xlsx_napuni( @aKol, @aDbfStruct )
 
    open_exported_xlsx()
@@ -176,7 +175,6 @@ STATIC FUNCTION xlsx_napuni( aKol, aDbfStruct )
    DO WHILE !Eof()
 
       nArea := Select()
-      altd()
       hRec := hb_hash()
 
       FOR nKol := 1 TO Len( aKol ) // { "ID", { || field->id }}

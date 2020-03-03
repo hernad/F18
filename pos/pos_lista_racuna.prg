@@ -125,7 +125,7 @@ FUNCTION pos_lista_racuna( hParams )
    ENDIF
 
    KEYBOARD '\'
-   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh, @hParams ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str(), "", NIL, cFnc,, bRacunMarkiran )
+   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh, @hParams ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str() + "/" + pos_pm(), "", NIL, cFnc,, bRacunMarkiran )
 
    SET FILTER TO
 

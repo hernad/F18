@@ -115,7 +115,7 @@ FUNCTION kalk_auto_import_racuni()
    ENDIF
 
    IF Pitanje(, "Obraditi dokumente iz kalk pript (D/N)?", "D" ) == "D"
-      altd()
+
       IF kalk_imp_obradi_sve_dokumente_iz_pript( NIL, s_lStampatiDokumente )
          kalk_imp_brisi_txt( cImpFile )
          kalk_14_autoimport( .F. )
@@ -225,7 +225,6 @@ FUNCTION kalk_imp_txt_to_temp( aDbf, aRules, cTxtFile )
 
    MsgBeep( "Import txt => temp - OK" )
 
-   altd()
    RETURN .T.
 
 
@@ -315,7 +314,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
       cIdKontoZaduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "Z", cIdPJ )
       cIdKontoRazduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "R", cIdPJ )
 
-      altd()
 
       select_o_koncij( cIdKontoZaduzuje )
       select_o_kalk_pript()

@@ -276,7 +276,6 @@ PROCEDURE k_f12()
    IF is_in_eshell()
       IF Pitanje(, "Pokrenuti predhodnu godinu?", "N" ) == "D"
         // e.g. eShell cmd 'start.f18.fin_pg' 
-        altd()
         eshell_cmd(  "f18.start." + LOWER(gModul) + "_pg")
       ENDIF
    ENDIF

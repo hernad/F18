@@ -381,7 +381,6 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
       lAsync := .F.
    ENDIF
 
-altd()
    log_write_file( "f18_run: "  + cCommand + " " + IIF( lAsync, "[ASYNC]", "[SYNC]" ), 5)
 
 #ifdef __PLATFORM__WINDOWS

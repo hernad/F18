@@ -67,7 +67,8 @@ FUNCTION pos_zaduzenje( cIdVd )
       ENDIF
    ENDIF
    Scatter()
-   _IdPos := pos_pm()
+   //_IdPos := pos_pm()
+   _IdPos := '1 ' // svi prijemi imaju PM 1
    _IdVd := cIdVd
    _BrDok := POS_BRDOK_PRIPREMA
    _IdRadnik := gIdRadnik
@@ -296,7 +297,8 @@ FUNCTION pos_brisi_stavku_zaduzenja()
 
 FUNCTION pos_zaduzenje_unos_cifra( cCifra )
 
-   LOCAL GetList := {}, nPopisana, nBoxWidth :=  Max( f18_max_cols() - 12, 70 )
+   LOCAL GetList := {}
+   LOCAL nPopisana, nBoxWidth :=  Max( f18_max_cols() - 12, 70 )
    LOCAL nCnt := 0
 
    SELECT PRIPRZ

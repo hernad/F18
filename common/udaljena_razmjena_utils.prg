@@ -117,7 +117,7 @@ FUNCTION get_file_list( cFilter, cPath, cFileToImport )
    nIzbor := 1
    lRet := .F.
    //DO WHILE .T. .AND. LastKey() != K_ESC
-      altd()
+   
       nIzbor := meni_0( "imp", OpcF, NIL, nIzbor, .F., .T. ) // odaberi pa zavrsi
 
       IF nIzbor == 0

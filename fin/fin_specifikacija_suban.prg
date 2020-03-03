@@ -706,7 +706,6 @@ STATIC FUNCTION xlsx_export_fill_row( cKonto, cPartner, cNaziv, nFDug, nFPot, nF
    LOCAL hRec := hb_hash()
 
 
-   altd()
    // nArr := Select()
    //o_r_export()
    // APPEND BLANK

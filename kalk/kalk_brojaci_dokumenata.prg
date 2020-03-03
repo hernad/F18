@@ -46,7 +46,6 @@ FUNCTION kalk_get_next_broj_v5( cIdFirma, cIdVd, cIdKonto )
    cSufiks := kalk_sufiks_brdok( cIdKonto )
    // ENDIF
 
-   altd()
    IF !Empty(cSufiks)
     RETURN kalk_sljedeci_brdok_sufiks( cIdVd, cIdFirma, cSufiks )
    ENDIF

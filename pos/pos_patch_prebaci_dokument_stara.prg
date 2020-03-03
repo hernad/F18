@@ -75,7 +75,7 @@ FUNCTION pos_patch_prebaci_dokument_stara_godina()
    cSql := "SELECT * from " + f18_sql_schema( "pos_items" ) + " WHERE "
    cSql += "datum=" + sql_quote( dDatDok ) + " AND idvd=" + sql_quote( cIdVd ) + " AND brdok=" + sql_quote( cBrDok )
 
-   altd()
+
    IF !use_sql( "POS_ITEMS_STARA",  cSql, "POS_ITEMS_STARA" )
       Alert( "cSqlQuery")
       RETURN .F.

@@ -27,7 +27,6 @@ FUNCTION fakt_azuriraj_dokumente_u_pripremi( lSilent )
       lSilent := .F.
    ENDIF
 
-altd()
    close_open_fakt_tabele()
 
    IF ( !lSilent .AND. Pitanje( "FAKT_AZUR", "Sigurno želite izvršiti ažuriranje (D/N) ?", "N" ) == "N" )

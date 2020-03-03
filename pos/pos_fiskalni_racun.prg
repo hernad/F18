@@ -215,7 +215,7 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       ENDIF
 
       cRobaNaziv := fiscal_art_naz_fix( roba->naz, s_hFiskalniUredjajParams[ "drv" ] )
-      aStavka[ FISK_INDEX_BRDOK ] := cBrDok
+      aStavka[ FISK_INDEX_BRDOK ] := AllTrim(cIdPos) + "-" + AllTrim(cBrDok)
       aStavka[ FISK_INDEX_RBR ] := AllTrim( Str( ++nRbr ) )
       aStavka[ FISK_INDEX_IDROBA ] := cIdRoba
       aStavka[ FISK_INDEX_ROBANAZIV ] := cRobaNaziv
@@ -371,7 +371,6 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
 
    LOCAL cQuery, oRet, oError, lRet := .F.
 
-altd()
    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna(" + ;
       sql_quote( cIdPos ) + "," + ;
       sql_quote( cIdVd ) + "," + ;

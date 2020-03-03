@@ -11,7 +11,7 @@ FUNCTION sha256sum( cFile )
    cCmd := cProg + " " + cFile
 
    ? "cmd=", cCmd
-   altd()
+
    nRet := f18_run( cCmd, @hOutput )
 
    RETURN hOutput[ "stdout" ]
