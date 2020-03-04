@@ -25,8 +25,7 @@ FUNCTION kalk_lager_lista_magacin()
 
    LOCAL fimagresaka := .F.
    LOCAL _curr_user := "<>"
-   LOCAL lExpDbf := .F.
-   LOCAL cExpDbf := "N"
+   LOCAL cExpXlsx := "N"
    LOCAL cPodaciOFakturiPartneraDN := "N"
    LOCAL cVpcIzSifarnikaDN := "D"
    LOCAL cTxtOdt := "1"
@@ -53,6 +52,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL nVPC
    LOCAL cIdKonto
    LOCAL aHeader
+   LOCAL cXlsxName
 
    // pPicDem := kalk_prosiri_pic_iznos_za_2()
    // pPicCDem := kalk_prosiri_pic_cjena_za_2()
@@ -185,9 +185,8 @@ FUNCTION kalk_lager_lista_magacin()
          @ box_x_koord() + 19, box_y_koord() + 2 SAY "Broj radnog naloga:"  GET cRNalBroj PICT "@S20"
       ENDIF
 
-      @ box_x_koord() + 20, box_y_koord() + 2 SAY8 "Export izvještaja u XLSX?" GET cExpDbf VALID cExpDbf $ "DN" PICT "@!"
-
-      @ box_x_koord() + 20, Col() + 1 SAY "Podaci o fakturi partenra ?" GET cPodaciOFakturiPartneraDN VALID cPodaciOFakturiPartneraDN $ "DN" PICT "@!"
+      @ box_x_koord() + 20, box_y_koord() + 2 SAY8 "Export izvještaja u XLSX (D-da/F-flat/N-e)?" GET cExpXlsx VALID cExpXlsx $ "DNF" PICT "@!"
+      @ box_x_koord() + 21, box_y_koord() + 2 SAY "Podaci o fakturi partenra ?" GET cPodaciOFakturiPartneraDN VALID cPodaciOFakturiPartneraDN $ "DN" PICT "@!"
 
       READ
       ESC_BCR
@@ -222,10 +221,6 @@ FUNCTION kalk_lager_lista_magacin()
       set_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
    ENDIF
 
-   // export u dbf ?
-   IF cExpDbf == "D"
-      lExpDbf := .T.
-   ENDIF
 
    lSvodi := .F.
 
@@ -245,13 +240,18 @@ FUNCTION kalk_lager_lista_magacin()
       lSaberiStanjeZaSvaKonta := ( Pitanje(, "Računati stanje robe kao zbir stanja na svim obuhvacenim kontima? (D/N)", "N" ) == "D" )
    ENDIF
 
-   IF lExpDbf
+   IF cExpXlsx $ "DF"
       aExpFields := g_exp_fields()
       aHeader := {}
-      AADD( aHeader, { "Period", DTOC(dDatOd) + " -" + DTOC(dDatDo) } )
-      AADD( aHeader, { "Magacin:", cIdKonto } )
-      
-      xlsx_export_init( aExpFields, aHeader, "kalk_llm_" + Alltrim(cIdKonto) + ".xlsx" )
+      IF cExpXlsx == "D"
+        AADD( aHeader, { "Period", DTOC(dDatOd) + " -" + DTOC(dDatDo) } )
+        AADD( aHeader, { "Magacin:", cIdKonto } )
+        cXlsxName := "kalk_llm_" + Alltrim(cIdKonto) + ".xlsx"
+      ELSE
+         cXlsxName := "kalk_llm.xlsx" 
+      ENDIF
+
+      xlsx_export_init( aExpFields, aHeader, cXlsxName )
    ENDIF
 
    kalk_llm_open_tables()
@@ -741,7 +741,7 @@ FUNCTION kalk_lager_lista_magacin()
             ? Space( 6 ) + podaci_o_fakturi_partnera( cMIPart, CTOD(""), cMINumber, cMI_type )
          ENDIF
 
-         IF lExpDbf
+         IF cExpXlsx $ "DF"
             IF ( cNulaDN == "N" .AND. Round( nUlaz - nIzlaz, 4 ) <> 0 ) ;
                   .OR. ( cNulaDN == "D" )
 
@@ -833,8 +833,8 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
    ENDIF
 
-   IF lExpDbf
-      open_exported_xlsx() // lansiraj report
+   IF cExpXlsx $ "DF"
+      open_exported_xlsx()
    ENDIF
 
    my_close_all_dbf()
@@ -905,6 +905,7 @@ STATIC FUNCTION g_exp_fields()
    AAdd( aDbf, { "D_IZLAZ", "D", 8, 0, "D.poslj.Izl", 12  } )
 
    RETURN aDbf
+
 
 
 STATIC FUNCTION xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;

@@ -36,6 +36,7 @@ FUNCTION kalk_kartica_magacin()
    LOCAL cIdRobaTackaZarez := cIdRoba
    LOCAL GetList := {}
    LOCAL lPrviProlaz
+   LOCAL nCount := 0
 
    PRIVATE fKNabC := .F.
 
@@ -111,10 +112,7 @@ FUNCTION kalk_kartica_magacin()
          READ
          ESC_BCR
 
-         IF cExportDN == "D"
-            lExport := .T.
-            xlsx_export_init( kalk_kartica_magacin_export_dbf_struct() )
-         ENDIF
+
          // IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
          // PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
          // ENDIF
@@ -125,6 +123,11 @@ FUNCTION kalk_kartica_magacin()
 
       ENDDO
       BoxC()
+
+      IF cExportDN == "D"
+         lExport := .T.
+         xlsx_init( trim(cIdKonto), trim(cIdRoba), dDatOd, dDatDo )
+      ENDIF
 
       IF Empty( cIdRoba )
          IF pitanje(, "Niste zadali šifru artikla, izlistati sve kartice ?", "N" ) == "N"
@@ -214,6 +217,8 @@ FUNCTION kalk_kartica_magacin()
    PRIVATE nTStrana := 0
 
    zagl_mag_kart()
+
+   nCount := 0
 
    DO WHILE !Eof() .AND. iif( lRobaTackaZarez, field->idfirma + field->mkonto + field->idroba >= cIdFirma + cIdKonto + cIdRobaTackaZarez, field->idfirma + field->mkonto + field->idroba == cIdFirma + cIdKonto + cIdRobaTackaZarez )
 
@@ -417,6 +422,7 @@ FUNCTION kalk_kartica_magacin()
             ENDIF
 
          ELSEIF kalk->mu_i == "1" .AND. ( kalk->idvd $ "12#22#94" )    // povrat
+
             nIzlaz -= kalk->kolicina
             IF kalk->datdok >= dDatod
                ? kalk->datdok, kalk->idvd + "-" + kalk->brdok, kalk->idtarifa
@@ -542,8 +548,8 @@ FUNCTION kalk_kartica_magacin()
             hParams[ "rabatv" ] := field->rabatv
             hParams[ "vpc" ] := vpc_magacin_rs()
             hParams[ "stanje" ] := nUlaz - nIzlaz
-
-            kalk_kartica_magacin_add_item_to_r_export( hParams )
+            xlsx_export_fill_row( hParams)
+            nCount ++
          ENDIF
          SKIP
 
@@ -575,6 +581,24 @@ FUNCTION kalk_kartica_magacin()
 
    ENDDO
 
+   IF lExport .AND. nCount == 0
+      hParams[ "idkonto" ] := cIdKonto
+      hParams[ "idroba" ] := cIdRoba
+      hParams[ "idpartner" ] := cIdPartner
+      hParams[ "kolicina" ] := 0
+      hParams[ "brdok" ] := ""
+      hParams[ "idvd" ] := ""
+      hParams[ "datdok" ] := date()
+      hParams[ "brfaktp" ] := ""
+      hParams[ "nc" ] := 0
+      hParams[ "nv" ] := 0
+      hParams[ "rabatv" ] := 0
+      hParams[ "vpc" ] := 0
+      hParams[ "stanje" ] := 0
+      xlsx_export_fill_row( hParams)
+   ENDIF
+
+
    FF
    endprint
 
@@ -589,53 +613,7 @@ FUNCTION kalk_kartica_magacin()
 
 STATIC FUNCTION kartica_magacin_open_tabele()
 
-   // SELECT ( F_SIFK )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_SIFV )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_PARTN )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_TARIFA )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_ROBA )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_KONTO )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_KALK )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // SELECT ( F_KONCIJ )
-   // IF Used()
-   // USE
-   // ENDIF
-
-   // o_partner()
-// o_tarifa()
-// o_sifk()
-// o_sifv()
-   // o_roba()
-// o_konto()
-// o_koncij()
+   
    o_kalk() // kalk_kartica
 
    RETURN .T.
@@ -732,49 +710,44 @@ STATIC FUNCTION zagl_mag_kart()
 
 
 
-STATIC FUNCTION kalk_kartica_magacin_add_item_to_r_export( hParams )
 
-   LOCAL nTArea := Select()
+STATIC FUNCTION xlsx_export_fill_row( hRow )
+   
+   hRow[ "idkonto" ] := Trim( hRow[ "idkonto" ] )
 
-   o_r_export()
-   SELECT r_export
+   hRow[ "brfaktp" ] := Trim( hRow[ "brfaktp" ] )
+   hRow[ "idpartner" ] := Trim( hRow[ "idpartner" ] )
 
-   APPEND BLANK
-   REPLACE field->idkonto WITH hParams[ "idkonto" ], ;
-      field->idvd WITH hParams[ "idvd" ], ;
-      field->idroba WITH hParams[ "idroba" ], ;
-      field->brdok WITH hParams[ "brdok" ], ;
-      field->datdok WITH hParams[ "datdok" ], ;
-      field->kolicina WITH hParams[ "kolicina" ], ;
-      field->nc WITH hParams[ "nc" ], ;
-      field->stanje WITH hParams[ "stanje" ], ;
-      field->nv WITH hParams[ "nv" ], ;
-      field->rabatv WITH hParams[ "rabatv" ], ;
-      field->vpc WITH hParams[ "vpc" ], ;
-      field->brfaktp WITH hParams[ "brfaktp" ], ;
-      field->idpartner WITH hParams[ "idpartner" ]
-
-   SELECT ( nTArea )
+   xlsx_export_do_fill_row( hRow )
 
    RETURN .T.
 
 
-FUNCTION kalk_kartica_magacin_export_dbf_struct()
+STATIC FUNCTION xlsx_init( cIdKonto, cIdRoba, dDatOd, dDatDo )
 
-   LOCAL aDbf := {}
+     
+      LOCAL aDbf := {}, aHeader := {}
 
-   AAdd( aDbf, { "idkonto", "C", 7, 0 }  )
-   AAdd( aDbf, { "idroba", "C", 10, 0 }  )
-   AAdd( aDbf, { "idpartner", "C", 6, 0 }  )
-   AAdd( aDbf, { "idvd", "C", 2, 0 }  )
-   AAdd( aDbf, { "brdok", "C", 8, 0 }  )
-   AAdd( aDbf, { "brfaktp", "C", 10, 0 }  )
-   AAdd( aDbf, { "datdok", "D", 8, 0 }  )
-   AAdd( aDbf, { "kolicina", "N", 15, 3 }  )
-   AAdd( aDbf, { "stanje", "N", 15, 3 }  )
-   AAdd( aDbf, { "nc", "N", 15, 3 }  )
-   AAdd( aDbf, { "nv", "N", 15, 3 }  )
-   AAdd( aDbf, { "rabatv", "N", 15, 3 }  )
-   AAdd( aDbf, { "vpc", "N", 15, 3 }  )
+      AAdd( aDbf, { "idkonto", "C", 7, 0 }  )
+      AAdd( aDbf, { "idroba", "C", 10, 0 }  )
+      AAdd( aDbf, { "idpartner", "C", 6, 0 }  )
+      AAdd( aDbf, { "idvd", "C", 2, 0 }  )
+      AAdd( aDbf, { "brdok", "C", 8, 0 }  )
+      AAdd( aDbf, { "brfaktp", "C", 10, 0 }  )
+      AAdd( aDbf, { "datdok", "D", 8, 0 }  )
+      AAdd( aDbf, { "kolicina", "N", 15, 3 }  )
+      AAdd( aDbf, { "stanje", "N", 15, 3 }  )
+      AAdd( aDbf, { "nc", "N", 15, 3 }  )
+      AAdd( aDbf, { "nv", "N", 15, 3 }  )
+      AAdd( aDbf, { "rabatv", "N", 15, 3 }  )
+      AAdd( aDbf, { "vpc", "N", 15, 3 }  )
 
-   RETURN aDbf
+      
+      AADD( aHeader, {"Konto:", cIdKonto })
+      AADD( aHeader, {"Artikal:", cIdRoba })
+      AADD( aHeader, {"Period:", DTOC(dDatOd) + " - " + DTOC(dDatDo) })
+   
+      xlsx_export_init( aDbf, aHeader, "kalk_kartica_mag_" + Alltrim( cIdKonto ) + "-" + Alltrim( cIdRoba ) + "_" + AllTrim( DTOS(dDatOd) ) + "_" + AllTrim(DTOS(dDatDo)) + ".xlsx" )
+   
+      RETURN .T.
+
