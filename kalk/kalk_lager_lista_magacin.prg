@@ -241,7 +241,7 @@ FUNCTION kalk_lager_lista_magacin()
    ENDIF
 
    IF cExpXlsx $ "DF"
-      aExpFields := g_exp_fields()
+      aExpFields := get_export_fields()
       aHeader := {}
       IF cExpXlsx == "D"
         AADD( aHeader, { "Period", DTOC(dDatOd) + " -" + DTOC(dDatDo) } )
@@ -876,33 +876,33 @@ STATIC FUNCTION podaci_o_fakturi_partnera( cPartner, dDatum, cFaktura, cMU_I )
 
       RETURN cRet
 
-STATIC FUNCTION g_exp_fields()
+STATIC FUNCTION get_export_fields()
 
    LOCAL aDbf := {}
 
-   AAdd( aDbf, { "IDROBA", "C", 10, 0, "Roba.ID", 10 } )
-   AAdd( aDbf, { "SIFRADOB", "C", 10, 0, "Sifra.Dob", 10 } )
+   AAdd( aDbf, { "IDROBA", "C", 10, 0, "Roba_ID", 10 } )
+   AAdd( aDbf, { "SIFRADOB", "C", 10, 0, "Sifra_Dob", 10 } )
    AAdd( aDbf, { "NAZIV", "C", 40, 0,  "Naziv", 30 } )
    AAdd( aDbf, { "TARIFA", "C", 6, 0, "Tarifa", 8 } )
    AAdd( aDbf, { "JMJ", "C", 3, 0, "jmj", 5 } )
-   AAdd( aDbf, { "ULAZ", "M", 15, 4, "kol.ulaz", 15 } )
-   AAdd( aDbf, { "IZLAZ", "M", 15, 4, "kol.izl", 15 } )
-   AAdd( aDbf, { "STANJE", "M", 15, 4, "kol.stanje", 15 } )
-   AAdd( aDbf, { "NVDUG", "M", 20, 3, "NV.dug", 17 } )
-   AAdd( aDbf, { "NVPOT", "M", 20, 3, "NV.pot", 17 } )
+   AAdd( aDbf, { "ULAZ", "M", 15, 4, "kol_ulaz", 15 } )
+   AAdd( aDbf, { "IZLAZ", "M", 15, 4, "kol_izl", 15 } )
+   AAdd( aDbf, { "STANJE", "M", 15, 4, "kol_stanje", 15 } )
+   AAdd( aDbf, { "NVDUG", "M", 20, 3, "NV_dug", 17 } )
+   AAdd( aDbf, { "NVPOT", "M", 20, 3, "NV_pot", 17 } )
    AAdd( aDbf, { "NV", "M", 15, 4, "NV", 17 } )
    AAdd( aDbf, { "NC", "M", 15, 4, "NC", 15 } )
 
-   AAdd( aDbf, { "PVDUG", "M", 20, 3, "VPV.dug", 14 } )
-   AAdd( aDbf, { "PVPOT", "M", 20, 3, "VPV.pot", 14 } )
+   AAdd( aDbf, { "PVDUG", "M", 20, 3, "VPV_dug", 14 } )
+   AAdd( aDbf, { "PVPOT", "M", 20, 3, "VPV_pot", 14 } )
 
-   AAdd( aDbf, { "PVRDUG", "M", 20, 3, "VPV.R.dug", 14 } )
-   AAdd( aDbf, { "PVRPOT", "M", 20, 3, "VPV.R.pot", 14 } )
+   AAdd( aDbf, { "PVRDUG", "M", 20, 3, "VPV_R_dug", 14 } )
+   AAdd( aDbf, { "PVRPOT", "M", 20, 3, "VPV_R_pot", 14 } )
 
    AAdd( aDbf, { "PV", "M", 15, 3, "VPV", 14 } )
    AAdd( aDbf, { "PC", "M", 15, 3, "VPC", 10 } )
-   AAdd( aDbf, { "D_ULAZ", "D", 8, 0, "D.Poslj.Ul", 12 } )
-   AAdd( aDbf, { "D_IZLAZ", "D", 8, 0, "D.poslj.Izl", 12  } )
+   AAdd( aDbf, { "D_ULAZ", "D", 8, 0, "D_Poslj_Ul", 12 } )
+   AAdd( aDbf, { "D_IZLAZ", "D", 8, 0, "D_poslj_Izl", 12  } )
 
    RETURN aDbf
 
@@ -1107,25 +1107,12 @@ FUNCTION IsInGroup( cGr, cPodGr, cIdRoba )
 
 STATIC FUNCTION kalk_llm_open_tables()
 
-   // o_sifk()
-   // o_sifv()
 
-   // o_roba()
    IF select_o_koncij()
       ?E "open koncij ok"
    ELSE
       ?E "open koncij ERROR?!"
    ENDIF
 
-   // IF o_konto()
-   // ?E "open konto"
-   // ELSE
-   // ?E "open konto ERROR"
-   // ENDIF
-   // IF o_partner()
-   // ?E "open partn ok"
-   // ELSE
-// ?E "open partn error"
-// ENDIF
 
    RETURN .T.
