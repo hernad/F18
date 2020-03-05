@@ -126,7 +126,7 @@ FUNCTION run_sql_query( cQry, hParams )
       ENDIF
 
       IF hb_HHasKey( hParams, "log" )
-         lLog :=  hParams[ "log" ]
+         lLog := hParams[ "log" ]
       ENDIF
 
       IF hb_HHasKey( hParams, "unlock" )
@@ -148,7 +148,7 @@ FUNCTION run_sql_query( cQry, hParams )
       ?E "run_sql_query server not defined !"
       RETURN NIL
    ENDIF
-
+  
    IF Left( cQry, 5 ) == "BEGIN"
       IF hb_mutexLock( s_mtxMutex )
 
@@ -189,6 +189,7 @@ FUNCTION run_sql_query( cQry, hParams )
       ENDIF
 
    ENDIF
+  
 
    IF Left( Upper( cQry ), 6 ) == "SELECT"
       cTip := "SELECT"
@@ -262,6 +263,7 @@ FUNCTION is_in_main_thread_sql_transaction()
       RETURN .F.
    ENDIF
 
+
    IF hb_mutexLock( s_mtxMutex )
 
       nPos := AScan( s_aTransactions, {| aItem | ValType( aItem ) == "A" ;
@@ -273,6 +275,7 @@ FUNCTION is_in_main_thread_sql_transaction()
       ENDIF
 
    ENDIF
+
 
    RETURN .F.
 

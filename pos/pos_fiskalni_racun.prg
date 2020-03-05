@@ -27,6 +27,12 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
    LOCAL lRet := .F.
    LOCAL nError
 
+   /*
+   IF hParams[ "idpos" ] = "2 "
+      Alert("Debug stampa fisk racun")
+   ENDIF
+   */
+
    IF hParams[ "fiskalni_izdat" ]
       // fiskalni račun je u ranijem pokušaju odštampan ali proces nije završen do kraja, ažuriranje u bazu nije uspjelu
       RETURN pos_set_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ], hParams[ "fiskalni_broj" ] )

@@ -19,12 +19,12 @@ FUNCTION pos_azuriraj_racun( hParams )
    LOCAL nCount := 0
    LOCAL lOk
    LOCAL lRet := .F.
-   LOCAL hTranParams := hb_Hash()
+   //LOCAL hTranParams := hb_Hash()
    LOCAL cUUIDFiskStorniran
    LOCAL nOldFiskRn
    LOCAL cMsg
 
-   hTranParams[ "tran_name" ] := "pos_rn_azur"
+   //hTranParams[ "tran_name" ] := "pos_rn_azur"
    o_pos_tables()
    IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
       RETURN .F.
@@ -33,7 +33,7 @@ FUNCTION pos_azuriraj_racun( hParams )
    SELECT _pos_pripr
    GO TOP
 
-   run_sql_query( "BEGIN", hTranParams )
+   //run_sql_query( "BEGIN" ) //, hTranParams )
 
    cDokument := pos_dokument_sa_vrijeme( hParams)
 
@@ -118,11 +118,11 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    IF lOk
       lRet := .T.
-      run_sql_query( "COMMIT", hTranParams )
-      log_write( "F18_DOK_OPER, ažuriran računa " + cDokument, 2 )
+      //run_sql_query( "COMMIT" ) //, hTranParams )
+      log_write( "PS azur_rn: " + cDokument, 2 )
    ELSE
-      run_sql_query( "ROLLBACK", hTranParams )
-      log_write( "F18_DOK_OPER, greška sa ažuriranjem računa " + cDokument, 2 )
+      //run_sql_query( "ROLLBACK" ) //, hTranParams )
+      log_write( "POS ERR_azur_rn_ERR: " + cDokument, 2 )
    ENDIF
 
    IF lOk
