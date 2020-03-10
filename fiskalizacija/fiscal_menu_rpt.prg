@@ -22,6 +22,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
    LOCAL cFiskalniDrajver
    LOCAL _m_x
    LOCAL _m_y
+   LOCAL hParams := hb_hash()
 
 
    LOCAL nIzbor := 1
@@ -35,6 +36,10 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
    IF lPozivFromPOS == NIL
       lPozivFromPOS := .F.
    ENDIF
+
+   altd()
+   hParams[ "idpos" ] := pos_pm()
+   cleanup_pos_tmp( hParams )
 
    s_nFiskalniDeviceId := odaberi_fiskalni_uredjaj( NIL, lPozivFromPOS, .F. )
 

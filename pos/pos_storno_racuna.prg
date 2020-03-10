@@ -145,9 +145,9 @@ FUNCTION pos_storno_racuna( hParams )
    hParams[ "idvd" ] := "42"
    hParams[ "fisk_rn" ] := pos_get_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )
 
-   IF is_flink_fiskalni() // hParams[ "fisk_rn" ] == 0
+   IF is_flink_fiskalni()
       hParams[ "fisk_rn" ] := 999
-      hParams[ "fisk_id" ] := "BRDOK-" + hParams[ "idpos" ] + "-" + hParams[ "idvd" ] + DTOS(hParams[ "datum" ]) + "-" + hParams[ "brdok" ]
+      hParams[ "fisk_id" ] := "BRDOK-" + AllTrim(hParams[ "idpos" ]) + "-" + hParams[ "idvd" ] + DTOS(hParams[ "datum" ]) + "-" + hParams[ "brdok" ]
       IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + "?", "D" ) == "D"
          pos_napravi_u_pripremi_storno_dokument( hParams )
       ENDIF

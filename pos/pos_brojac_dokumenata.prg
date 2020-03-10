@@ -15,7 +15,6 @@ FUNCTION pos_novi_broj_dokumenta( cIdPos, cIdTipDokumenta, dDatDok )
 
    LOCAL nBrojDokumenta
    LOCAL cPosBrojacParam
-   LOCAL _tmp, _rest
    LOCAL cRet := ""
    LOCAL nDbfArea := Select()
 

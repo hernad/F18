@@ -64,6 +64,30 @@ FUNCTION seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok, cTag, cAlias )
    RETURN seek_pos_h( hParams )
 
 
+
+FUNCTION seek_pos_pos_tmp( cIdPos, cIdVd, dDatum, cBrDok)
+
+      LOCAL oQry, cSql, cTable := "pos_pos", cAlias := "POS"
+      LOCAL cSqlTable := pos_prodavnica_sql_schema() + ".pos_items_tmp_" + AllTrim(cIdPos)
+   
+      // test p2.pos_items_tmp_1 exists
+      cSql := "SELECT to_regclass('" + cSqlTable + "')"
+
+      oQry := run_sql_query( cSql )
+      IF oQry:FieldGet(1) $  cSqlTable
+
+        cSql := "SELECT * FROM " + cSqlTable
+        SELECT F_POS
+        use_sql( cTable, cSql, cAlias )
+        GO TOP
+      ELSE
+        // tmp NOT exists
+        RETURN .F.
+      ENDIF
+
+      RETURN !Eof()
+
+
 FUNCTION seek_pos_h( hParams )
 
    LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag
@@ -371,6 +395,30 @@ FUNCTION seek_pos_doks( cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAl
    RETURN seek_pos_doks_h( hParams )
 
 
+
+FUNCTION seek_pos_doks_tmp( cIdPos, cIdVd, dDatum, cBrDok)
+
+      LOCAL oQry, cSql, cTable := "pos_doks", cAlias := "POS_DOKS"
+      LOCAL cSqlTable := pos_prodavnica_sql_schema() + ".pos_tmp_" + AllTrim(cIdPos)
+
+      // test p2.pos_items_tmp_1 exists
+      cSql := "SELECT to_regclass('" + cSqlTable + "')"
+      oQry := run_sql_query( cSql )
+      IF oQry:FieldGet(1) $ cSqlTable
+
+        cSql := "SELECT * FROM " + cSqlTable
+        SELECT F_POS_DOKS
+        use_sql( cTable, cSql, cAlias )
+        GO TOP
+
+      ELSE
+         RETURN .F.
+      ENDIF
+
+      RETURN !Eof()
+  
+
+
 FUNCTION h_pos_doks_indexes()
 
    LOCAL hIndexes := hb_Hash()
@@ -552,10 +600,19 @@ FUNCTION pos_dostupne_cijene_za_artikal( cIdRoba )
    RETURN aCijene
 
 
-FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
+FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
 
    LOCAL cSql, oData
    LOCAL nTotal := 0
+   LOCAL cSqlTable := f18_sql_schema( "pos_pos" )
+
+   IF lTmp == NIL
+      lTmp := .F.
+   ENDIF
+
+   IF lTmp
+      cSqlTable := pos_prodavnica_sql_schema() + ".pos_items_tmp_" + AllTrim(cIdPos)
+   ENDIF
 
    PushWA()
    IF PCount() == 0
@@ -567,7 +624,7 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok )
 
    cSql := "SELECT "
    cSql += " SUM( ( kolicina * cijena ) - ( kolicina * (CASE WHEN (ncijena <>0) THEN cijena-ncijena ELSE 0.00 END) ) ) AS total "
-   cSql += "FROM " + f18_sql_schema( "pos_pos" )
+   cSql += "FROM " + cSqlTable
    cSql += " WHERE "
    cSql += " idpos = " + sql_quote( cIdPos )
    cSql += " AND idvd = " + sql_quote( cIdVd )

@@ -36,6 +36,7 @@ FUNCTION kalk_stampa_dok_41_42_49()
    LOCAL nPDVCijena
    LOCAL cNaslov
    LOCAL bZagl, xPrintOpt
+   LOCAL nTmp
 
    LOCAL nTotPopustBezPDV, nTotNabVr, nTotMarzaMPBruto, nTotMPVbezPDV, nTotPDV, nTotMpvBezPDVNeto
    LOCAL nTotMPVSaPDVNeto, nTotMPvSaPDV
@@ -143,7 +144,14 @@ FUNCTION kalk_stampa_dok_41_42_49()
       ELSE
          @ PRow() + 1, nCol1 SAY 0 PICT picproc()
       ENDIF
-      @ PRow(), nCol2 SAY kalk_pripr->rabatv / ( kalk_pripr->mpc + kalk_pripr->rabatv ) * 100 PICT picproc() // procenat popusta u malaprodaji
+
+      IF ROUND( kalk_pripr->mpc + kalk_pripr->rabatv, 9) <> 0
+          nTmp := kalk_pripr->rabatv / ( kalk_pripr->mpc + kalk_pripr->rabatv )
+      ELSE
+         nTmp := 0
+      ENDIF
+
+      @ PRow(), nCol2 SAY nTmp * 100 PICT picproc() // procenat popusta u malaprodaji
       SKIP 1
 
    ENDDO

@@ -418,7 +418,7 @@ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTip
    LOCAL aRacunData := {}
    LOCAL _n_rn_broj, _rn_iznos, _rn_rabat, _rn_datum, cFiskalniReklamiraniRnBroj
    LOCAL _vrsta_pl, cIdPartner, nTotalRacuna, nRacunFaktTotal
-   LOCAL _art_id, nRobaPLU_kod, cNazivArtikla, cRobaJmj, cVrstaPlacanja
+   LOCAL _art_id, nRobaFiscPLU, cNazivArtikla, cRobaJmj, cVrstaPlacanja
    LOCAL cArtikalBarkod, _rn_rbr, aMemo
    LOCAL lPopustNaTeretProdavca := .F.
    LOCAL lInoPartner := .F.
@@ -519,14 +519,14 @@ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTip
       ENDIF
 
       cRobaJmj := AllTrim( roba->jmj )
-      nRobaPLU_kod := roba->fisc_plu
+      nRobaFiscPLU := roba->fisc_plu
 
       IF s_hFiskalniParams[ "plu_type" ] == "D" .AND.  ;
             ( s_hFiskalniParams[ "vp_sum" ] <> 1 .OR. cIdTipDok $ "11" .OR. Len( _a_iznosi ) > 1 )
 
-         nRobaPLU_kod := auto_plu( NIL, NIL,  s_hFiskalniParams )
+         nRobaFiscPLU := auto_plu( NIL, NIL,  s_hFiskalniParams )
 
-         IF s_cFiskalniUredjaj == "FPRINT" .AND. nRobaPLU_kod == 0
+         IF s_cFiskalniUredjaj == "FPRINT" .AND. nRobaFiscPLU == 0
             MsgBeep( "PLU artikla = 0, to nije moguce !" )
             RETURN NIL
          ENDIF
@@ -596,7 +596,7 @@ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTip
          nKolicina, ;
          cIdTarifa, ;
          cStornoRacunOpis, ;
-         nRobaPLU_kod, ;
+         nRobaFiscPLU, ;
          nCijena, ;
          _rn_rabat, ;
          cArtikalBarkod, ;

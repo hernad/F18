@@ -20,12 +20,17 @@ STATIC s_cFiskalniDrajverHCP := "HCP"
 STATIC s_cFiskalniDrajverTRING := "TRING"
 STATIC s_cFiskalniDrajverNaziv
 
-FUNCTION pos_stampa_fiskalni_racun( hParams )
+
+/*
+  pos_fiskaliziraj_racun( @hParams ) => set hParams["fiskalni_broj"]
+*/
+
+FUNCTION pos_fiskaliziraj_racun( hParams )
 
    LOCAL nDeviceId
    LOCAL hDeviceParams
    LOCAL lRet := .F.
-   LOCAL nError
+   LOCAL hRet
 
    /*
    IF hParams[ "idpos" ] = "2 "
@@ -34,8 +39,9 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
    */
 
    IF hParams[ "fiskalni_izdat" ]
-      // fiskalni račun je u ranijem pokušaju odštampan ali proces nije završen do kraja, ažuriranje u bazu nije uspjelu
-      RETURN pos_set_broj_fiskalnog_racuna( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ], hParams[ "fiskalni_broj" ] )
+      // fiskalni račun je u ranijem pokušaju odštampan ali proces nije završen do kraja, ažuriranje u bazu nije uspjelo
+      // hParams["fiskalni_broj"] - broj fiskalnog racuna
+      RETURN pos_set_broj_fiskalnog_racuna( hParams )
    ENDIF
 
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
@@ -49,17 +55,20 @@ FUNCTION pos_stampa_fiskalni_racun( hParams )
       RETURN lRet
    ENDIF
 
-   nError := pos_fiskalni_racun( hParams, hDeviceParams )
-   IF nError <> 0
-      log_write_file( "FISK_RN_ERROR:" + AllTrim( Str( nError ) ) )
+   // hRet["error"], hRet["broj"]
+   hRet := pos_send_to_fiskalni_printer( hParams, hDeviceParams )
+   IF hRet["error"] <> 0
+      log_write_file( "FISK_RN_ERROR:" + AllTrim( Str( hRet["error"] ) ) )
       MsgBeep( "Greška pri štampi fiskalnog računa: " + AllTrim( hParams[ "brdok" ] ) + " !?##Račun će ostati u pripremi" )
       RETURN .F.
    ENDIF
 
+   hParams["fiskalni_broj"] := hRet["broj"] 
+
    RETURN .T.
 
 
-FUNCTION pos_fiskalni_racun( hParams, hFiskalniParams )
+STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
 
    LOCAL cIdPos, dDatDok, cBrDok
    LOCAL nErrorLevel := 0
@@ -70,9 +79,13 @@ FUNCTION pos_fiskalni_racun( hParams, hFiskalniParams )
    LOCAL nUplaceno
    LOCAL nFiskalniRnKojiSeStornira
    LOCAL GetList := {}
+   LOCAL hRet := hb_hash()
+
+   hRet["error"] := 0
+   hRet["broj"] := 0
 
    IF hFiskalniParams == NIL
-      RETURN 0
+      RETURN hRet
    ENDIF
 
    cIdPos := hParams[ "idpos" ]
@@ -96,7 +109,8 @@ FUNCTION pos_fiskalni_racun( hParams, hFiskalniParams )
          IF LastKey() <> K_ESC
             nStorno := nFiskalniRnKojiSeStornira
          ELSE
-            RETURN 1
+            hRet["error"] := 1
+            RETURN hRet
          ENDIF
       ELSE
          nStorno := 0
@@ -107,37 +121,37 @@ FUNCTION pos_fiskalni_racun( hParams, hFiskalniParams )
    lStorno := nStorno > 0
 
    aStavkeRacuna := pos_fiskalni_stavke_racuna( cIdPos, "42", dDatDok, cBrDok, nStorno, nUplaceno )
-   IF aStavkeRacuna == NIL
-      RETURN 1
+   IF aStavkeRacuna == NIL .OR. pitanje(,"simulirati gresku", "N") == "D"
+      hRet["error"] := 1
+      RETURN hRet
    ENDIF
 
    DO CASE
 
    CASE cFiskalniDravjerIme == "TEST"
-      nErrorLevel := 0
+      hRet["error"] := 0
+      hRet["broj"] := 0
+      RETURN hRet
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverFPRINT
-      nErrorLevel := pos_to_fprint( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
+      RETURN pos_to_fprint( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverFLINK
-      nErrorLevel := pos_to_flink( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
+      RETURN pos_to_flink( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverTRING
-      nErrorLevel := pos_to_tring( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
+      RETURN pos_to_tring( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverHCP
-      nErrorLevel := pos_to_hcp( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno, nUplaceno )
+      RETURN pos_to_hcp( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno, nUplaceno )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverTremol
-      nErrorLevel := pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
+      RETURN pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    ENDCASE
 
-   IF nErrorLevel > 0
-      MsgBeep( "Problem sa štampanjem na fiskalni uređaj ?!" )
-   ENDIF
-
-   RETURN nErrorLevel
+   RETURN hRet
+   
 
 
 STATIC FUNCTION pos_racun_u_pripremi_broj_storno_rn()
@@ -166,6 +180,7 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
    LOCAL nLevel
    LOCAL aStavka
    LOCAL lStorno
+   LOCAL lTmpTabele := .T.
 
    lStorno := ( nStorno > 0 )
    IF nUplaceniIznos == NIL
@@ -175,13 +190,16 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
    IF nUplaceniIznos < 0
       // fiskalizacija azuriranog racuna, vec smo pozicionirani na pos_doks
    ELSE
-      IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
-         RETURN NIL
+      IF !seek_pos_doks_tmp( cIdPos, cIdVd, dDatDok, cBrdok)
+        lTmpTabele := .F.
+        IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
+           RETURN NIL
+        ENDIF
       ENDIF
    ENDIF
-   cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep )
+   cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep)
    // IF cVrstaPlacanja <> "0"
-   nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
+   nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele)
    // ELSE
    // nPosRacunUkupno := 0
    // ENDIF
@@ -189,8 +207,10 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       nPosRacunUkupno := nUplaceniIznos
    ENDIF
 
-   IF !seek_pos_pos( cIdPos, cIdVd, dDatDok, cBrDok )
-      RETURN NIL
+   IF !seek_pos_pos_tmp( cIdPos, cIdVd, dDatDok, cBrDok )
+     IF !seek_pos_pos( cIdPos, cIdVd, dDatDok, cBrDok )
+         RETURN NIL
+     ENDIF
    ENDIF
    DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
 
@@ -203,7 +223,8 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       select_o_roba( cIdRoba )
       nPLU := roba->fisc_plu
       IF s_hFiskalniUredjajParams[ "plu_type" ] == "D"
-         nPLU := auto_plu( NIL, NIL, s_hFiskalniUredjajParams )
+         altd()
+         nPLU := auto_plu( .F., .F., s_hFiskalniUredjajParams )
       ENDIF
 
       IF s_cFiskalniDrajverNaziv == "FPRINT" .AND. nPLU == 0
@@ -288,6 +309,7 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
 
    ENDIF
 
+   /*
    IF ( nBrojFiskalnogRacuna > 0 .AND. nErrorLevel == 0 )
       IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
          MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
@@ -295,6 +317,7 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
          nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
       ENDIF
    ENDIF
+   */
 
    RETURN nErrorLevel
 
@@ -309,6 +332,10 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    LOCAL nTotal
    LOCAL nTremolCeka
    LOCAL bOutputHandler := {| cOutput | pos_pripr_set_opis( cOutput ) }  // sadrzaj xml-a staviti u polje _pos_pripr->opis
+   LOCAL hRet := hb_hash()
+
+   hRet["error"] := 0
+   hRet["broj"] := 0
 
    nErrorLevel := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno, bOutputHandler )
    cFiskalniFajlOdgovor := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
@@ -321,29 +348,42 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
       ELSE
          nErrorLevel := tremol_read_output( s_hFiskalniUredjajParams, cFiskalniFajlOdgovor, @nBrojFiskalnogRacuna, @nTotal )
       ENDIF
-      IF nErrorLevel == 0 .AND. nBrojFiskalnogRacuna > 0
+
+      IF nErrorLevel <> 0
+         hRet["error"] := nErrorLevel
+         RETURN hRet
+      ENDIF
+      IF nBrojFiskalnogRacuna <= 0
+         /*
          IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
          ELSE
             nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
          ENDIF
+         */
+         hRet["error"] := FISK_ERROR_GET_BROJ_RACUNA
       ELSE
-         nErrorLevel := FISK_ERROR_GET_BROJ_RACUNA
+         hRet["error"] := 0
+         hRet["broj"] := nErrorLevel
       ENDIF
    ELSE
-      nErrorLevel := FISK_NEMA_ODGOVORA
+      hRet["error"] := FISK_NEMA_ODGOVORA
    ENDIF
 
    log_write_file( "FISK_RN: TREMOL " +  AllTrim( cIdPos ) + "-" + AllTrim( cIdVd ) + "-" + AllTrim( cBrDok ) + ;
       " err level: " + AllTrim( Str( nErrorLevel ) ), 2 )
 
-   RETURN nErrorLevel
+   RETURN hRet
 
 
 STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno, nUplaceniIznos )
 
    LOCAL nErrorLevel := 0
    LOCAL nBrojFiskalnogRacuna := 0
+   LOCAL hRet := hb_hash()
+
+   hRet["error"] := 0
+   hRet["broj"] := 0
 
    IF nUplaceniIznos == NIL
       nUplaceniIznos := 0
@@ -351,31 +391,70 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorn
    nErrorLevel := fiskalni_hcp_racun( s_hFiskalniUredjajParams, aRacunStavke, NIL, lStorno, nUplaceniIznos )
    IF nErrorLevel == 0
       nBrojFiskalnogRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
-      IF nBrojFiskalnogRacuna > 0
+      IF nBrojFiskalnogRacuna <= 0
+         /*
          IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
          ELSE
             nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
          ENDIF
+         */
+         hRet["error"] := FISK_ERROR_GET_BROJ_RACUNA
+      ELSE
+         hRet["error"] := 0
+         hRet["broj"] := nBrojFiskalnogRacuna
       ENDIF
 
    ENDIF
 
-   RETURN nErrorLevel
+   RETURN hRet
 
 
 STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel := 0
+   LOCAL hParams := hb_hash()
+   LOCAL hRet := hb_hash()
+
+   hRet["error"] := 0
+   hRet["broj"] := 0
+
+   hParams["idpos"] := cIdPos
+   hParams["idvd"] := cIdVd
+   hParams["datum"] := dDatDok
+   hParams["brdok"] := cBrDok
 
    nErrorLevel := fiskalni_flink_racun( s_hFiskalniUredjajParams, aRacunStavke, lStorno )
 
-   RETURN nErrorLevel
+   /*
+   IF pos_tmp_to_pos( hParams ) == -1
+      RETURN -100
+   ENDIF
+   */
+   hRet["error"] := nErrorLevel
+ 
+   RETURN hRet
 
 
-FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna )
+FUNCTION pos_set_broj_fiskalnog_racuna( hParams )
 
    LOCAL cQuery, oRet, oError, lRet := .F.
+ 
+   LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna
+
+
+   cIdPos := hParams["idpos"]
+   cIdVd := hParams["idvd"]
+   dDatDok := hParams["datum"]
+   cBrDok := hParams["brdok"]
+   nBrojFiskRacuna := hParams["fiskalni_broj"]
+   
+  
+   // flink ne setuje broj racuna, zato stavljamo uvijek -1, cime se setuje fisk_doks setuje broj racuna=NULL
+   IF is_flink_fiskalni()
+       nBrojFiskRacuna := -1
+   ENDIF
+
 
    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna(" + ;
       sql_quote( cIdPos ) + "," + ;
@@ -388,7 +467,7 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
 
       oRet := run_sql_query( cQuery )
       IF is_var_objekat_tpqquery( oRet )
-         IF oRet:FieldGet( 1 ) <> 0
+         IF oRet:FieldGet( 1 ) <> 0 .OR. nBrojFiskRacuna == -1
             lRet := .T.
          ENDIF
       ENDIF
@@ -398,6 +477,8 @@ FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFis
    END SEQUENCE
 
    RETURN lRet
+
+
 
 
 FUNCTION pos_get_broj_fiskalnog_racuna_str( cIdPos, cIdVd, dDatDok, cBrDok )
@@ -489,9 +570,9 @@ FUNCTION pos_set_ref_storno_fisk_dok( cIdPos, cIdVd, dDatDok, cBrDok, cUUIDFiskS
    RETURN .T.
 
 /*
- broj fiskalnog racuna koji je storno dokumenta ciji je uuid= cUUIDFiskStorniran
+   broj fiskalnog racuna koji je storno dokumenta ciji je uuid= cUUIDFiskStorniran
 
- FUNCTION p15.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
+  PSQL FUNCTION p15.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
 */
 FUNCTION pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran )
 
@@ -516,9 +597,11 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran )
 
    RETURN 0
 
+/*
+   u p2.pos_fisk_doks.ref_storno_fisk_dok postoji ovaj racun
 
-// FUNCTION p15.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
-
+   FUNCTION p15.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+*/
 FUNCTION pos_is_storno( cIdPos, cIdVd, dDatDok, cBrDok )
 
    LOCAL cQuery, oRet, lValue
@@ -565,6 +648,7 @@ FUNCTION pos_storno_broj_rn( cIdPos, cIdVd, dDatDok, cBrDok )
 
    RETURN 0
 
+
 STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
 
    LOCAL cRet := "0"
@@ -604,10 +688,15 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
 STATIC FUNCTION pos_to_tring( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
    LOCAL nErrorLevel := 0
+   LOCAL hRet := hb_hash()
+
+   hRet["error"] := 0
+   hRet["broj"] := 0
 
    nErrorLevel := tring_rn( s_hFiskalniUredjajParams, aRacunStavke, NIL, lStorno )
 
-   RETURN nErrorLevel
+   hRet["error"] := nErrorLevel
+   RETURN hRet
 
 
 
@@ -628,8 +717,7 @@ STATIC FUNCTION pos_pripr_set_opis( cOpis )
 
 
 
-
-   /*
+/*
       Opis: u slučaju greške sa fajlom odgovora, kada nema broja fiskalnog računa
             korisnika ispituje da li je račun fiskalizovan te nudi mogućnost ručnog unosa
             broja fiskalnog računa
@@ -640,7 +728,7 @@ STATIC FUNCTION pos_pripr_set_opis( cOpis )
          .F. => račun primarno nije fiskalizovan na uređaj
          nFiskalniBroj - varijabla proslijeđena po refernci, sadrži broj fiskalnog računa
                    broj koji je korisnik unjeo na formi
-   */
+*/
 FUNCTION pos_fprint_da_li_je_racun_fiskalizovan( nFiskalniBroj )
 
    LOCAL lRet := .F.
@@ -686,3 +774,6 @@ FUNCTION pos_fprint_da_li_je_racun_fiskalizovan( nFiskalniBroj )
    ENDDO
 
    RETURN lRet
+
+
+

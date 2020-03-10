@@ -86,6 +86,23 @@ CREATE INDEX IF NOT EXISTS pos_items_id5 ON {{ item_prodavnica }}.pos_items USIN
 CREATE INDEX IF NOT EXISTS pos_items_id6 ON {{ item_prodavnica }}.pos_items USING btree (idroba);
 CREATE UNIQUE INDEX IF NOT EXISTS pos_items_rbr ON {{ item_prodavnica }}.pos_items USING btree (idpos, idvd, brdok, datum, rbr);
 
+
+---CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_tmp_1
+---   AS TABLE   {{ item_prodavnica }}.pos WITH NO DATA;
+   
+---CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_tmp_2
+---   AS TABLE   {{ item_prodavnica }}.pos WITH NO DATA;
+   
+---CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_items_tmp_1
+---    AS TABLE {{ item_prodavnica }}.pos_items WITH NO DATA;
+
+---CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.pos_items_tmp_2
+---    AS TABLE {{ item_prodavnica }}.pos_items WITH NO DATA;
+
+
+
+
+
 CREATE TABLE IF NOT EXISTS {{ item_prodavnica }}.roba (
     roba_id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
     id character(10) NOT NULL,

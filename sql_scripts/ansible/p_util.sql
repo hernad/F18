@@ -160,7 +160,7 @@ BEGIN
 END;
 $$;
 
--- harbour FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojRacuna )
+-- F18 FUNCTION pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojRacuna )
 -- TEST:
 -- insert into {{ item_prodavnica }}.pos_doks(idpos, idvd, brdok, datum) values('1 ', '42', 'XX', current_date );
 

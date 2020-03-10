@@ -6,6 +6,7 @@ HB_DBG_PATH=$HB_DBG:$HB_DBG/common:$HB_DBG/pos:$HB_DBG/kalk:$HB_DBG/fin:$HB_DBG/
 HB_DBG_PATH=$HB_DBG_PATH:$HB_DBG/core_pdf
 HB_DBG_PATH=$HB_DBG_PATH:$HB_DBG/core_sql
 HB_DBG_PATH=$HB_DBG_PATH:$HB_DBG/core_semafori
+HB_DBG_PATH=$HB_DBG_PATH:$HB_DBG/fiskalizacija
 
 export HB_DBG_PATH
 

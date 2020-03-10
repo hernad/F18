@@ -228,7 +228,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       IF nFiskalniRn == NIL .OR. nFiskalniRn == 0
          hParams[ "fiskalni_izdat" ] := .F.
          hParams[ "uplaceno" ] := -1
-         pos_stampa_fiskalni_racun( hParams )
+         pos_fiskaliziraj_racun( hParams )
       ELSE
          MsgBeep( "Postoji fiskalni račun " + AllTrim( Str( nFiskalniRn ) ) + "?!" )
       ENDIF

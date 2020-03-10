@@ -224,9 +224,9 @@ FUNCTION gen_all_plu( lSilent )
 FUNCTION fiskalni_get_last_plu( nFiskDeviceId )
 
    LOCAL nFiskPLU := 0
-   LOCAL _param_name := _get_auto_plu_param_name( nFiskDeviceId )
+   LOCAL cParamName := _get_auto_plu_param_name( nFiskDeviceId )
 
-   nFiskPLU := fetch_metric( _param_name, NIL, nFiskPLU )
+   nFiskPLU := fetch_metric( cParamName, NIL, nFiskPLU )
 
    RETURN nFiskPLU
 
@@ -239,22 +239,23 @@ FUNCTION fiskalni_get_last_plu( nFiskDeviceId )
 FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
 
    LOCAL nFiskPLU := 0
-   LOCAL nDbfArea := Select()
-   LOCAL _param_name := _get_auto_plu_param_name( hFiskalniParams[ "id" ] )
+   //LOCAL nDbfArea := Select()
+   LOCAL cParamName := _get_auto_plu_param_name( hFiskalniParams[ "id" ] )
 
-   IF lResetPLU == nil
+   IF lResetPLU == NIL
       lResetPLU := .F.
    ENDIF
 
-   IF lSilentMode == nil
+   IF lSilentMode == NIL
       lSilentMode := .F.
    ENDIF
 
-   IF lResetPLU = .T.
+   IF lResetPLU
       // uzmi inicijalni plu iz parametara
       nFiskPLU := hFiskalniParams[ "plu_init" ]
    ELSE
-      nFiskPLU := fetch_metric( _param_name, NIL, nFiskPLU )
+      // auto_plu_dev_1
+      nFiskPLU := fetch_metric( cParamName, NIL, nFiskPLU )
       // prvi put pokrecemo opciju, uzmi init vrijednost !
       IF nFiskPLU == 0
          nFiskPLU := hFiskalniParams[ "plu_init" ]
@@ -266,19 +267,19 @@ FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
    IF lResetPLU .AND. !lSilentMode
       IF !spec_funkcije_sifra( "RESET" )
          MsgBeep( "Unesena pogrešna šifra !" )
-         SELECT ( nDbfArea )
+         //SELECT ( nDbfArea )
          RETURN nFiskPLU
       ENDIF
    ENDIF
 
    // upisi u sql/db
-   set_metric( _param_name, NIL, nFiskPLU )
+   set_metric( cParamName, NIL, nFiskPLU )
 
-   IF lResetPLU = .T. .AND. !lSilentMode
+   IF lResetPLU .AND. !lSilentMode
       MsgBeep( "Setovan početni PLU na: " + AllTrim( Str( nFiskPLU ) ) )
    ENDIF
 
-   SELECT ( nDbfArea )
+   //SELECT ( nDbfArea )
 
    RETURN nFiskPLU
 
