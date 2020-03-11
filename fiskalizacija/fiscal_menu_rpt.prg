@@ -39,6 +39,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
 
    altd()
    hParams[ "idpos" ] := pos_pm()
+   create_pos_tmp( hParams )
    cleanup_pos_tmp( hParams )
 
    s_nFiskalniDeviceId := odaberi_fiskalni_uredjaj( NIL, lPozivFromPOS, .F. )

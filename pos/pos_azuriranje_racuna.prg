@@ -199,7 +199,7 @@ STATIC FUNCTION racun_se_moze_azurirati( cIdPos, cIdVd, dDatum, cBroj )
    RETURN lRet
 
 
-STATIC FUNCTION create_pos_tmp( hParams )
+FUNCTION create_pos_tmp( hParams )
 
    LOCAL cQuery
    LOCAL cShema := pos_prodavnica_sql_schema()
