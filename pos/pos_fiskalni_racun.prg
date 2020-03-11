@@ -121,7 +121,7 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
    lStorno := nStorno > 0
 
    aStavkeRacuna := pos_fiskalni_stavke_racuna( cIdPos, "42", dDatDok, cBrDok, nStorno, nUplaceno )
-   IF aStavkeRacuna == NIL .OR. pitanje(,"simulirati gresku", "N") == "D"
+   IF aStavkeRacuna == NIL /*.OR. pitanje(,"simulirati gresku", "N") == "D"*/
       hRet["error"] := 1
       RETURN hRet
    ENDIF
