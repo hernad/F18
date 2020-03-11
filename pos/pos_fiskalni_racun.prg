@@ -324,36 +324,39 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
 
 STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
-   LOCAL nErrorLevel
+   //LOCAL nErrorLevel
    LOCAL cFiskalniFajlOdgovor
-   LOCAL nBrojFiskalnogRacuna := 0
+   //LOCAL nBrojFiskalnogRacuna := 0
    LOCAL aRacunHeader := NIL
    LOCAL cFileWithPath
    LOCAL nTotal
    LOCAL nTremolCeka
    LOCAL bOutputHandler := {| cOutput | pos_pripr_set_opis( cOutput ) }  // sadrzaj xml-a staviti u polje _pos_pripr->opis
    LOCAL hRet := hb_hash()
+   LOCAL nTmp
 
    hRet["error"] := 0
    hRet["broj"] := 0
 
-   nErrorLevel := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno, bOutputHandler )
+   hRet["error"] := fiskalni_tremol_racun( s_hFiskalniUredjajParams, aRacunStavke, aRacunHeader, lStorno, bOutputHandler )
    cFiskalniFajlOdgovor := fiscal_out_filename( s_hFiskalniUredjajParams[ "out_file" ], cBrDok )
    nTremolCeka := tremol_cekam_fajl_odgovora( s_hFiskalniUredjajParams, cFiskalniFajlOdgovor )
    IF nTremolCeka >= 0
+      // ima odgovor
       IF nTremolCeka > 0
          log_write_file( "FISK_RN: prodavac manuelno naveo broj računa " + AllTrim( Str( nTremolCeka ) ), 2 )
-         nErrorLevel := 0
-         nBrojFiskalnogRacuna := nTremolCeka
+         hRet["error"] := 0
+         hRet["broj"] := nTremolCeka
       ELSE
-         nErrorLevel := tremol_read_output( s_hFiskalniUredjajParams, cFiskalniFajlOdgovor, @nBrojFiskalnogRacuna, @nTotal )
+         hRet["error"] := tremol_read_output( s_hFiskalniUredjajParams, cFiskalniFajlOdgovor, @nTmp, @nTotal )
+         hRet["broj"] := nTmp
       ENDIF
-
-      IF nErrorLevel <> 0
-         hRet["error"] := nErrorLevel
+  
+      IF hRet["error"] <> 0
          RETURN hRet
       ENDIF
-      IF nBrojFiskalnogRacuna <= 0
+
+      IF hRet["broj"] <= 0
          /*
          IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
@@ -362,16 +365,13 @@ STATIC FUNCTION pos_to_tremol( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
          ENDIF
          */
          hRet["error"] := FISK_ERROR_GET_BROJ_RACUNA
-      ELSE
-         hRet["error"] := 0
-         hRet["broj"] := nErrorLevel
       ENDIF
    ELSE
       hRet["error"] := FISK_NEMA_ODGOVORA
    ENDIF
 
    log_write_file( "FISK_RN: TREMOL " +  AllTrim( cIdPos ) + "-" + AllTrim( cIdVd ) + "-" + AllTrim( cBrDok ) + ;
-      " err level: " + AllTrim( Str( nErrorLevel ) ), 2 )
+      " err level: " + AllTrim( Str( hRet["error"] ) ), 2 )
 
    RETURN hRet
 
@@ -412,7 +412,7 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorn
 
 STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
 
-   LOCAL nErrorLevel := 0
+   //LOCAL nErrorLevel := 0
    LOCAL hParams := hb_hash()
    LOCAL hRet := hb_hash()
 
@@ -424,15 +424,9 @@ STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSto
    hParams["datum"] := dDatDok
    hParams["brdok"] := cBrDok
 
-   nErrorLevel := fiskalni_flink_racun( s_hFiskalniUredjajParams, aRacunStavke, lStorno )
+   hRet["error"] := fiskalni_flink_racun( s_hFiskalniUredjajParams, aRacunStavke, lStorno )
 
-   /*
-   IF pos_tmp_to_pos( hParams ) == -1
-      RETURN -100
-   ENDIF
-   */
-   hRet["error"] := nErrorLevel
- 
+
    RETURN hRet
 
 
