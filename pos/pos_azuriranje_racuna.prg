@@ -17,12 +17,12 @@ FUNCTION pos_azuriraj_racun( hParams )
    LOCAL cDokument
    LOCAL hRec
    LOCAL nCount := 0
-   LOCAL lOk
-   LOCAL lRet := .F.
+   LOCAL lOk := .F.
    LOCAL cUUIDFiskStorniran
    LOCAL nOldFiskRn
    LOCAL cMsg
    LOCAL nFiskBroj, cBroj
+   LOCAL lBezFiskalnih := .F.
 
 
    o_pos_tables()
@@ -92,16 +92,18 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    
    IF lOk
+
       IF !fiscal_opt_active()
+         lBezFiskalnih := .T.
          IF Pitanje(, "Fiskalni štampač nije aktivan. Svejedno ažurirati?", " " ) == "D"
-           lOk := .T.
-         ELSE
-           lOk := .F.
-         ENDIF
-      ELSE
-         
-         IF !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
             altd()
+         ELSE
+            lOk := .F.
+         ENDIF
+      ENDIF
+         
+         IF lOk .AND. !lBezFiskalnih .AND. !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
+
             IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
                cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
                MsgBeep( cMsg )
@@ -112,18 +114,22 @@ FUNCTION pos_azuriraj_racun( hParams )
 
          // unutar pos_fiskaliziraj_racun se desava transakcija
          // auto-plu set_params (TREBA LI?!) ; zato ovo nije unutar PSQL transakcije
-         IF lOk .AND. pos_fiskaliziraj_racun( @hParams )
+         IF lOk .AND. (lBezFiskalnih .OR. hParams["fiskalni_izdat"] .OR. pos_fiskaliziraj_racun( @hParams ))
 
             run_sql_query( "BEGIN" )
             IF pos_tmp_to_pos( hParams ) != -1
-               lOk := pos_set_broj_fiskalnog_racuna( hParams )
+               IF !lBezFiskalnih
+                   lOk := pos_set_broj_fiskalnog_racuna( hParams )
+               ENDIF
 
                // stornirani racun, set referencu na originalni 
-               IF !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
+               IF lOk .AND. !lBezFiskalnih 
+                  IF !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
                      // PSQL p2.set_ref_storno_fisk_dok( cIdPos, cIdVd, dDatDok, cBrDok, uuidFiskStorniran )
                      pos_set_ref_storno_fisk_dok( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], cUUIDFiskStorniran )
                      info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
                      lOk := .T.
+                  ENDIF
                ENDIF
 
             ELSE
@@ -131,13 +137,11 @@ FUNCTION pos_azuriraj_racun( hParams )
             ENDIF
 
             IF lOk
-               lRet := .T.
                run_sql_query( "COMMIT" )
                log_write( "PS azur_rn: " + cDokument, 2 )
 
                pos_brisi_pripremu_racuna()
             ELSE
-               lRet := .F.
                run_sql_query( "ROLLBACK" ) //, hTranParams )
                log_write( "POS ERR_azur_rn_ERR: " + cDokument, 2 )
             ENDIF
@@ -145,13 +149,13 @@ FUNCTION pos_azuriraj_racun( hParams )
          ELSE
             lOk := .F.
          ENDIF
-      ENDIF
+
    ENDIF
 
    cleanup_pos_tmp( hParams )
    priprema_set_order_to()
 
-   RETURN lRet
+   RETURN lOk
 
 
 STATIC FUNCTION pos_brisi_pripremu_racuna()

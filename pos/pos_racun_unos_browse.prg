@@ -86,7 +86,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    SELECT _pos_pripr
    SET ORDER TO
    GO TOP
-   IF _pos_pripr->idvd = POS_IDVD_RACUN .AND. !Empty( _pos_pripr->opis )
+   IF _pos_pripr->idvd == POS_IDVD_RACUN .AND. !Empty( _pos_pripr->opis )
       Alert( _u( "Predhodno ažuriranje nije bilo uspješno, da li je fiskalni račun izdan?" ) )
       MsgBeep( "Ako je fiskalni račun izdan, zaključite račun" )
    ENDIF

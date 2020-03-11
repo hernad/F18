@@ -32,17 +32,13 @@ FUNCTION pos_fiskaliziraj_racun( hParams )
    LOCAL lRet := .F.
    LOCAL hRet
 
-   /*
-   IF hParams[ "idpos" ] = "2 "
-      Alert("Debug stampa fisk racun")
-   ENDIF
-   */
 
-   IF hParams[ "fiskalni_izdat" ]
+   // vec je izdat fiskalni racun, postoji hParams["fiskalni_broj"]
+   //IF hParams[ "fiskalni_izdat" ]
       // fiskalni račun je u ranijem pokušaju odštampan ali proces nije završen do kraja, ažuriranje u bazu nije uspjelo
       // hParams["fiskalni_broj"] - broj fiskalnog racuna
-      RETURN pos_set_broj_fiskalnog_racuna( hParams )
-   ENDIF
+    //  RETURN pos_set_broj_fiskalnog_racuna( hParams )
+   //ENDIF
 
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
    IF nDeviceId <> NIL .AND. nDeviceId > 0
@@ -57,7 +53,7 @@ FUNCTION pos_fiskaliziraj_racun( hParams )
 
    // hRet["error"], hRet["broj"]
    hRet := pos_send_to_fiskalni_printer( hParams, hDeviceParams )
-   IF hRet["error"] <> 0
+   IF hRet[ "error" ] <> 0
       log_write_file( "FISK_RN_ERROR:" + AllTrim( Str( hRet["error"] ) ) )
       MsgBeep( "Greška pri štampi fiskalnog računa: " + AllTrim( hParams[ "brdok" ] ) + " !?##Račun će ostati u pripremi" )
       RETURN .F.
