@@ -1,4 +1,4 @@
-SET HB_INSTALL_PREFIX=c:\users\hernad\ah\x64\harbour
+SET HB_INSTALL_PREFIX=c:\dev\harbour\x64\harbour
 SET F18_POS=1
 SET F18_GT_CONSOLE=1
 SET F18_DEBUG=1
