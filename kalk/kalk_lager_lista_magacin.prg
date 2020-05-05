@@ -127,6 +127,7 @@ FUNCTION kalk_lager_lista_magacin()
       p_cPrikazSamoNabavne := fetch_metric( "kalk_lager_Lista_prikaz_do_nabavne", _curr_user, p_cPrikazSamoNabavne )
       cVpcIzSifarnikaDN := fetch_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
       cTxtOdt := fetch_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
+      cExpXlsx := fetch_metric( "kalk_lager_mag_export", _curr_user, "N")
    ENDIF
 
    cArtikalNaz := Space( 30 )
@@ -219,6 +220,7 @@ FUNCTION kalk_lager_lista_magacin()
       set_metric( "kalk_lager_lista_prikaz_do_nabavne", f18_user(), p_cPrikazSamoNabavne )
       set_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
       set_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
+      set_metric( "kalk_lager_mag_export", _curr_user, cExpXlsx)
    ENDIF
 
 
