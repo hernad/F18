@@ -83,6 +83,7 @@ FUNCTION kalk_kartica_magacin()
       cPrikFCJ2 := fetch_metric( "kalk_kartica_magacin_prikaz_fakturne_cijene", my_user(), cPrikFCJ2 )
       cPVSS := fetch_metric( "kalk_kartica_magacin_prikaz_samo_saldo", my_user(), cPVSS )
       cIdKonto := PadR( cIdKonto, FIELD_LENGTH_IDKONTO )
+      cExportDN := fetch_metric( "kalk_kartica_mag_export", my_user(), "N")
 
       Box(, 16, 70 )
       DO WHILE .T.
@@ -161,6 +162,7 @@ FUNCTION kalk_kartica_magacin()
          set_metric( "kalk_kartica_magacin_prikaz_broja_fakture", my_user(), cPrikazBrojaFaktureDN )
          set_metric( "kalk_kartica_magacin_prikaz_fakturne_cijene", my_user(), cPrikFCJ2 )
          set_metric( "kalk_kartica_magacin_prikaz_samo_saldo", my_user(), cPVSS )
+         set_metric( "kalk_kartica_mag_export", my_user(), cExportDN)
       ENDIF
 
    ENDIF
