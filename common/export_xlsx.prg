@@ -105,8 +105,7 @@ FUNCTION xlsx_export_do_fill_row( hRow )
    ENDIF
    
     s_nWorkSheetRow++
-   
-    altd()
+  
     FOR EACH cKey in hRow:Keys
            xValue := hRow[ cKey ]
            // 

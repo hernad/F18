@@ -26,6 +26,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL fimagresaka := .F.
    LOCAL _curr_user := "<>"
    LOCAL cExpXlsx := "N"
+   LOCAL lExpXlsx := .F.
    LOCAL cPodaciOFakturiPartneraDN := "N"
    LOCAL cVpcIzSifarnikaDN := "D"
    LOCAL cTxtOdt := "1"
@@ -234,6 +235,8 @@ FUNCTION kalk_lager_lista_magacin()
    fSint := .F.
    cSintK := cIdKonto
 
+   altd()
+
    IF "." $ cIdKonto
       cIdkonto := StrTran( cIdKonto, ".", "" )
       cIdkonto := Trim( cIdKonto )
@@ -243,6 +246,7 @@ FUNCTION kalk_lager_lista_magacin()
    ENDIF
 
    IF cExpXlsx $ "DF"
+      lExpXlsx := .T.
       aExpFields := get_export_fields()
       aHeader := {}
       IF cExpXlsx == "D"
@@ -379,6 +383,7 @@ FUNCTION kalk_lager_lista_magacin()
 
    PRIVATE nRbr := 0
 
+   // cMKonto
    DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, idfirma, idfirma + mkonto ) == cIdfirma + cSintK .AND. ispitaj_prekid()
 
       cIdRoba := field->Idroba
@@ -422,7 +427,6 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
 
 
-
       IF ( FieldPos( "MINK" ) ) <> 0
          nMink := roba->mink
       ELSE
@@ -437,6 +441,7 @@ FUNCTION kalk_lager_lista_magacin()
 
       cIdkonto := kalk->mkonto
 
+      // cIdroba
       DO WHILE !Eof() .AND. iif( fSint .AND. lSaberiStanjeZaSvaKonta, cIdFirma + cIdRoba == idFirma + field->idroba, cIdFirma + cIdKonto + cIdRoba == idFirma + mkonto + field->idroba ) .AND. ispitaj_prekid()
 
          IF roba->tip $ "TU"
@@ -531,6 +536,7 @@ FUNCTION kalk_lager_lista_magacin()
 
          SKIP
       ENDDO
+
 
       IF cMinK == "D" .AND. ( nUlaz - nIzlaz - nMink ) > 0
          LOOP
@@ -743,34 +749,6 @@ FUNCTION kalk_lager_lista_magacin()
             ? Space( 6 ) + podaci_o_fakturi_partnera( cMIPart, CTOD(""), cMINumber, cMI_type )
          ENDIF
 
-         IF cExpXlsx $ "DF"
-            IF ( cNulaDN == "N" .AND. Round( nUlaz - nIzlaz, 4 ) <> 0 ) ;
-                  .OR. ( cNulaDN == "D" )
-
-               cTmp := ""
-               cTmp := roba->sifradob
-
-               IF cNulaDN == "D" .AND. Round( nUlaz - nIzlaz, 4 ) == 0
-                  xlsx_export_fill_row( 0, roba->id, cTmp, ;
-                     roba->naz, roba->idtarifa, cJmj, ;
-                     nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
-                     nNVU, nNVI, ( nNVU - nNVI ), 0, ;
-                     nVPVU, nVPVI, ( nVPVU - nVPVI ), 0, ;
-                     nVPVRU, nVPVRI, ;
-                     dDatZadnjiUlaz, dL_izlaz )
-
-               ELSE
-                  xlsx_export_fill_row( 0, roba->id, cTmp, ;
-                     roba->naz, roba->idtarifa, cJmj, ;
-                     nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
-                     nNVU, nNVI, ( nNVU - nNVI ), ;
-                     ( nNVU - nNVI ) / ( nUlaz - nIzlaz ), ;
-                     nVPVU, nVPVI, ( nVPVU - nVPVI ), ;
-                     nVPCIzSif, nVPVRU, nVPVRI, ;
-                     dDatZadnjiUlaz, dL_izlaz )
-               ENDIF
-            ENDIF
-         ENDIF
 
       ENDIF
 
@@ -781,6 +759,35 @@ FUNCTION kalk_lager_lista_magacin()
       IF lSignZal
          ?? Space( 6 ) + "p.kol: " + Str( IzSifKRoba( "PKOL", roba->id, .F. ) )
          ?? ", p.cij: " + Str( IzSifKRoba( "PCIJ", roba->id, .F. ) )
+      ENDIF
+
+
+      IF lExpXlsx
+         IF cNulaDN == "D" .OR. Round( nNVU - nNVI, 4 ) <> 0
+
+            cTmp := ""
+            cTmp := roba->sifradob
+
+            IF cNulaDN == "D" .AND. Round( nUlaz - nIzlaz, 4 ) == 0
+               kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, ;
+                  roba->naz, roba->idtarifa, cJmj, ;
+                  nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
+                  nNVU, nNVI, ( nNVU - nNVI ), 0, ;
+                  nVPVU, nVPVI, ( nVPVU - nVPVI ), 0, ;
+                  nVPVRU, nVPVRI, ;
+                  dDatZadnjiUlaz, dL_izlaz )
+
+            ELSE
+               kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, ;
+                  roba->naz, roba->idtarifa, cJmj, ;
+                  nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
+                  nNVU, nNVI, ( nNVU - nNVI ), ;
+                  0, ;
+                  nVPVU, nVPVI, ( nVPVU - nVPVI ), ;
+                  nVPCIzSif, nVPVRU, nVPVRI, ;
+                  dDatZadnjiUlaz, dL_izlaz )
+            ENDIF
+         ENDIF
       ENDIF
 
    ENDDO
@@ -835,7 +842,7 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
    ENDIF
 
-   IF cExpXlsx $ "DF"
+   IF lExpXlsx
       open_exported_xlsx()
    ENDIF
 
@@ -910,12 +917,13 @@ STATIC FUNCTION get_export_fields()
 
 
 
-STATIC FUNCTION xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;
+STATIC FUNCTION kalk_llm_xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;
       cJmj, nUlaz, nIzlaz, nSaldo, nNVDug, nNVPot, nNV, nNC, ;
       nPVDug, nPVPot, nPV, nPC, nPVrdug, nPVrpot, dDatZadnjiUlaz, dL_izlaz )
 
    LOCAL hRow := hb_hash()
 
+  
    IF nVar == nil
       nVar := 0
    ENDIF
