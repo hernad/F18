@@ -30,7 +30,7 @@ MEMVAR cIdFirma, cIdVD, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2  //dDa
 
 FIELD IdFirma, BrDok, IdVD, IdTarifa, rbr, DatDok, idpartner, brfaktp, idkonto, idkonto2, GKolicina, GKolicin2
 
-FUNCTION kalk_stampa_dok_10()
+FUNCTION kalk_stampa_dok_10( lViseDokumenata )
 
    LOCAL nCol1 := 0
    LOCAL nCol2 := 0
@@ -41,6 +41,7 @@ FUNCTION kalk_stampa_dok_10()
    LOCAL nKolicina
    LOCAL nPDV, nPDVStopa
    LOCAL hParams := hb_hash()
+   LOCAL cFileName
 
 
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
@@ -48,10 +49,10 @@ FUNCTION kalk_stampa_dok_10()
    cIdPartner := field->IdPartner
    cBrFaktP := field->BrFaktP
 
-
    cIdKonto := field->IdKonto
    cIdKonto2 := field->IdKonto2
 
+   
    IF FIELDPOS("datfaktp") <> 0
       hParams["datfaktp"] := kalk_pripr->datfaktp
    ELSE
@@ -67,7 +68,13 @@ FUNCTION kalk_stampa_dok_10()
    xPrintOpt[ "font_size" ] := 10
 
    xPrintOpt[ "opdf" ] := s_oPDF
-   IF f18_start_print( NIL, xPrintOpt,  "KALK Br:" + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( DatDok ) ) == "X"
+   IF lViseDokumenata <> NIL .AND. lViseDokumenata
+      xPrintOpt["vise_dokumenata" ] := .T.
+   ENDIF 
+
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+
+   IF f18_start_print(cFileName, xPrintOpt,  "KALK Br:" + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( DatDok ) ) == "X"
       RETURN .F.
    ENDIF
 

@@ -23,7 +23,7 @@ MEMVAR nKalkCarDaz
 MEMVAR nKalkZavTr
 MEMVAR cIdFirma, cIdVd, cBrDok
 
-FUNCTION kalk_stampa_dok_16_95_96()
+FUNCTION kalk_stampa_dok_16_95_96( lViseDokumenata )
 
    LOCAL cPom
    LOCAL lVPC := .F.
@@ -37,6 +37,7 @@ FUNCTION kalk_stampa_dok_16_95_96()
    LOCAL nC1, nC2, nC3
    LOCAL cIdPartner, cBrFaktP
    LOCAL nMarzaVPStopa, nTMarzaVP, nTotMarzaVP
+   LOCAL cFileName
 
    SELECT kalk_pripr
    cIdFirma := kalk_pripr->idfirma
@@ -56,7 +57,12 @@ FUNCTION kalk_stampa_dok_16_95_96()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "portrait"
    xPrintOpt[ "opdf" ] := s_oPDF
-   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+   IF lViseDokumenata <> NIL .AND. lViseDokumenata
+      xPrintOpt["vise_dokumenata" ] := .T.
+   ENDIF 
+
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+   IF f18_start_print( cFileName, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF
 

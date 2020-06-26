@@ -558,11 +558,13 @@ FUNCTION windows_run_invisible( cProg, cArgumenti, cStdOut, cStdErr, lAsync )
    RETURN hb_processRun( cCmd, NIL, @cStdOut, @cStdErr, lAsync )
 
 
-FUNCTION get_run_prefix_cmd( cCommand, lAsync )
+FUNCTION get_run_prefix_cmd( cCommand, lAsync, lDirectory )
 
    LOCAL cPrefix
 
    hb_default( @lAsync, .F. )
+   hb_default( @lDirectory, .F. )
+   
 
    IF is_windows()
       // cPrefix := "cmd /c "
@@ -571,8 +573,12 @@ FUNCTION get_run_prefix_cmd( cCommand, lAsync )
       ELSEIF cCommand != NIL .AND. Left( cCommand, 4 ) == "cmd "
          cPrefix := ""
       ELSE
-         // IF lAsync
-         cPrefix := 'start "" '
+         
+         IF lDirectory
+            cPrefix := "cmd /c start "    
+         ELSE
+            cPrefix := 'start "" '
+         ENDIF
          // ELSE
          // https://stackoverflow.com/questions/324539/how-can-i-run-a-program-from-a-batch-file-without-leaving-the-console-open-after
          // cPrefix := 'cmd /c '
@@ -624,13 +630,19 @@ FUNCTION get_run_cmd_with_prefix( cCommand, lAsync )
 
 FUNCTION f18_open_document( cDocument )
 
-   LOCAL cPrefixCmd
-   LOCAL cMsg
+   LOCAL cPrefixCmd := ""
+   LOCAL cRun
+   LOCAL lDirectory := .F.
 
-   cPrefixCmd := get_run_prefix_cmd()
+   IF hb_DirExists( cDocument)
+      lDirectory := .T.
+   ENDIF
+
+   cPrefixCmd := get_run_prefix_cmd( , , lDirectory)
    cDocument := file_path_quote( cDocument )
+   cRun := cPrefixCmd + " " + file_path_quote( cDocument )
 
-   RETURN f18_run( cPrefixCmd + " " + file_path_quote( cDocument ), NIL, .T. )
+   RETURN f18_run( cRun, NIL, .T. )
 
 
 
@@ -648,9 +660,10 @@ FUNCTION f18_open_mime_document( cDocument )
 
    LOCAL cCmd := "", nError, cPrefixCmd
 
-   
+
    IF is_windows()
       cCmd := "cmd /c start "
+      
       nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .F. ) // start daje async efekat, ako stavimo .T. proces zakuca
    ELSE
       cPrefixCmd := "LD_LIBRARY_PATH= " + get_run_prefix_cmd()

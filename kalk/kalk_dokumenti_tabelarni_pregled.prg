@@ -16,12 +16,13 @@ MEMVAR ImeKol, Kol
 FUNCTION kalk_pregled_dokumenata_tabela()
 
    LOCAL cIdFirma := self_organizacija_id()
-   LOCAL cIdVd := Space( 2 )
-   LOCAL dDatOd := Date() - 7
-   LOCAL dDatDo := Date()
-   LOCAL cProdKto := PadR( "", 7 )
-   LOCAL cMagKto := PadR( "", 7 )
-
+   LOCAL cIdVd := fetch_metric( "kalk_lista_dokumenata_vd", my_user(), Space( 2 ) )
+   LOCAL dDatOd := fetch_metric( "kalk_lista_dokumenata_datum_od", my_user(), DATE() - 1 )
+   LOCAL dDatDo := fetch_metric( "kalk_lista_dokumenata_datum_do", my_user(), DATE() )
+   LOCAL cProdKto := fetch_metric( "kalk_lista_dokumenata_pkonto1", my_user(), PadR( "", 7 ) )
+   LOCAL cMagKto := fetch_metric( "kalk_lista_dokumenata_mkonto1", my_user(), PadR( "", 7 ) )
+   LOCAL nMaxRow := f18_max_rows() - 5
+    
    // LOCAL cPartner := PadR( "", 6 )
    LOCAL cFooter := ""
    LOCAL cHeader := "KALK pregled dokumenata"
@@ -34,8 +35,12 @@ FUNCTION kalk_pregled_dokumenata_tabela()
       RETURN .F.
    ENDIF
 
-
-
+   set_metric( "kalk_lista_dokumenata_datum_od", my_user(), dDatOd )
+   set_metric( "kalk_lista_dokumenata_datum_do", my_user(), dDatDo )
+   set_metric( "kalk_lista_dokumenata_vd", my_user(), cIdVd )
+   set_metric( "kalk_lista_dokumenata_pkonto1", my_user(), cProdKto )
+   set_metric( "kalk_lista_dokumenata_mkonto1", my_user(), cMagKto )
+  
    IF cIdFirma <> NIL
       hParams[ "idfirma" ] := cIdFirma
    ENDIF
@@ -72,12 +77,10 @@ FUNCTION kalk_pregled_dokumenata_tabela()
    use_sql_kalk_doks( hParams )
    GO TOP
 
-   Box(, f18_max_rows() - 5, f18_max_cols() - 8 )
+   Box(, nMaxRow, f18_max_cols() - 8 )
 
-   @ box_x_koord() + 18, box_y_koord() + 2 SAY ""
-   @ box_x_koord() + 19, box_y_koord() + 2 SAY ""
-   @ box_x_koord() + 20, box_y_koord() + 2 SAY ""
-
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 _upadr("<c-P> Štampa dokumenata", 30)
+   
    set_a_kol( @ImeKol, @Kol )
 
    my_browse( "pregl", f18_max_rows() - 5, f18_max_cols() - 8, {|| brow_keyhandler( Ch ) }, cFooter, cHeader,,,,, 3 )
@@ -123,11 +126,57 @@ STATIC FUNCTION brow_keyhandler( Ch )
    LOCAL GetList := {}
    LOCAL hRec
    LOCAL cBrFaktP
-   LOCAL hParams
+   LOCAL hParams := hb_hash()
+   LOCAL lError := .F.
 
    DO CASE
 
-      // CASE Ch == K_F2
+      CASE Ch == K_CTRL_P
+         IF Pitanje(, "Odštampati sve ove dokumente?", "N" ) == "D"
+
+            lError := .F.
+            f18_create_dir(my_home() + "PDF")
+
+            IF !hb_DirExists(my_home() + "PDF")
+               Alert("ERR_Dir: " + my_home() + "PDF")
+               lError := .T.
+            ENDIF
+
+            Box(, 3, 60, .T.)
+               select kalk_doks2
+               go top
+               DO WHILE !lError .AND. !EOF()
+                  @ box_x_koord() + 1, box_y_koord() + 2 SAY kalk_doks2->datdok
+                  @ box_x_koord() + 1, col() + 2 SAY kalk_doks2->idvd + " - " + kalk_doks2->brdok
+                  @ box_x_koord() + 3, box_y_koord() + 2 SAY "<ESC> prekid"
+               
+                  hParams[ "idfirma" ] := kalk_doks2->idfirma
+                  hParams[ "idvd" ] := kalk_doks2->idvd
+                  hParams[ "brdok" ] := kalk_doks2->brdok
+                  hParams[ "vise_dokumenata" ] := .T.
+                  PushWa()
+                  kalk_stampa_azuriranog_dokumenta_by_hparams( hParams )
+                  PopWa()
+                
+                  IF Inkey(1) == K_ESC
+                     IF Pitanje(, "Prekid?", " ") == "D"
+                        lError := .T.
+                     ENDIF
+                  ENDIF
+                  SKIP
+               ENDDO
+
+            BoxC()
+
+            IF !lError
+              altd()
+              open_folder(my_home() + "PDF")
+              RETURN DE_ABORT
+            ENDIF
+
+
+
+         ENDIF
 
       // hRec := dbf_get_rec()
       // cBrFaktP := hRec[ "brfaktp" ]

@@ -30,6 +30,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    LOCAL lBezParametara := .F.
 
    cFileName := set_print_file_name( cFileName )
+
    IF ( cDocumentName == NIL )
       cDocumentName :=  gModul + '_' + DToC( Date() )
    ENDIF
@@ -135,6 +136,8 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    LOCAL cPrinterPort
    LOCAL cOpt
    LOCAL oPDF
+   LOCAL lStampaViseDokumenata := .F.
+   LOCAL cPdfFileName
 
    IF cOpt == "PDF"
       // hb_cdpSelect( "SLWIN" )
@@ -219,14 +222,28 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       IF hb_HHasKey( xPrintOpt, "font_size" )
          oPDF:SetFontSize( xPrintOpt[ "font_size" ] )
       ENDIF
-      oPDF:cFileName := StrTran( txt_print_file_name(), ".txt", ".pdf" )
+
+      // KALK_20200626_10-10-00000001.txt -> KALK_20200626_10-10-00000001.pdf
+      cPdfFileName := StrTran( txt_print_file_name(), ".txt", ".pdf" )
+
+      IF hb_hhasKey( xPrintOpt, "vise_dokumenata") .AND. xPrintOpt[ "vise_dokumenata" ]
+         
+         lStampaViseDokumenata := .T.   
+         // my_home/KALK_20200626_10-10-00000001.pdf -> my_home/PDF/KALK_20200626_10-10-00000001.pdf
+         cPdfFileName := StrTran(cPdfFileName, my_home(), my_home() + "PDF" + SLASH)
+      ENDIF
+
+      oPDF:cFileName := cPdfFileName
       oPDF:Begin()
       oPDF:PrnToPdf( txt_print_file_name() )
       oPDF:End()
 
       hb_cdpSelect( "SL852" )
       // hb_SetTermCP( "SLISO" )
-      oPDF:View()
+
+      IF !lStampaViseDokumenata
+         oPDF:View()
+      ENDIF
 
    CASE cOpt == "R"
 
@@ -247,6 +264,24 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
 
    RETURN .T.
 
+
+FUNCTION kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+   
+   LOCAL cFileName
+
+   cFileName := "KALK_" + DTOS(Date()) + "_" + AllTrim(cIdFirma) + "-" + AllTrim(cIdVD) + "-" + AllTrim(cBrDok)
+   // 0001/TS => 0001_TS
+   cFileName := StrTran(cFileName, "/", "_")
+   cFileName := StrTran(cFileName, "#", "_")
+   cFileName := StrTran(cFileName, ".", "_")
+   cFileName := StrTran(cFileName, ":", "_")
+   // KALK_20200623_10_10_0001_TS.txt
+   cFileName += ".txt"
+   cFileName := my_home() + cFileName
+
+   RETURN cFileName
+
+   
 
 FUNCTION start_print_editor()
 
