@@ -28,8 +28,16 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    LOCAL cOpt
    LOCAL oPDF
    LOCAL lBezParametara := .F.
+   LOCAL cViseDokumenata, lPrviDokument := .T., lPosljednjiDokument := .T.
+
+   IF ValType( xPrintOpt ) == "H" .AND. hb_hhasKey( xPrintOpt, "vise_dokumenata") ;
+      .AND. xPrintOpt[ "vise_dokumenata"] == "Z" .AND. !xPrintOpt[ "prvi_dokument" ]
+      lPrviDokument := .F.
+   ENDIF
+
 
    cFileName := set_print_file_name( cFileName )
+
 
    IF ( cDocumentName == NIL )
       cDocumentName :=  gModul + '_' + DToC( Date() )
@@ -41,6 +49,11 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
 
    IF ValType( xPrintOpt ) == "H"
       cOpt := xPrintOpt[ "tip" ]
+      IF hb_hhasKey( xPrintOpt, "vise_dokumenata")
+         cViseDokumenata := xPrintOpt[ "vise_dokumenata"]
+         lPrviDokument := xPrintOpt[ "prvi_dokument" ]
+         lPosljednjiDokument := xPrintOpt[ "posljednji_dokument" ]
+      ENDIF
    ELSEIF ValType( xPrintOpt ) == "C"
       cOpt := xPrintOpt
    ELSE
@@ -70,30 +83,55 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    ENDIF
 
    LOG_CALL_STACK cLogMsg
-   SetPRC( 0, 0 )
+
+   If lPrviDokument
+      SetPRC( 0, 0 )
+   ENDIF
+
    s_lConsole := Set( _SET_CONSOLE, .F. )
    // SET PRINTER OFF
    s_cDevice := Set( _SET_DEVICE, "PRINTER" )
-   s_cPrinterFile := Set( _SET_PRINTFILE, cFileName )
-   s_lPrinter := Set( _SET_PRINTER, .T. )
 
+   IF lPrviDokument // kreiramo novi print fajl
+      s_cPrinterFile := Set( _SET_PRINTFILE, cFileName )
+      s_lPrinter := Set( _SET_PRINTER, .T. ) // aktiviramo printer rezim
+   ENDIF
+   
+   
    IF cOpt != "PDF"
       GpIni( cDocumentName )
    ELSE
+      
       hb_cdpSelect( "SLWIN" )
       oPDF := xPrintOpt[ "opdf" ]
+
+      
       oPDF:cFileName := txt_print_file_name()
       oPDF:cHeader := hb_UTF8ToStr( cDocumentName )
-      IF xPrintOpt[ "layout" ] == "portrait"
-         oPDF:SetType( PDF_TXT_PORTRAIT )
+
+      IF lPrviDokument
+         IF xPrintOpt[ "layout" ] == "portrait"
+            oPDF:SetType( PDF_TXT_PORTRAIT )
+         ELSE
+            oPDF:SetType( PDF_TXT_LANDSCAPE )
+         ENDIF
+         IF hb_HHasKey( xPrintOpt, "font_size" )
+            oPDF:SetFontSize( xPrintOpt[ "font_size" ] )
+         ENDIF
+      ENDIF
+
+      // ---- PDF generacija faza 1 - TXT -----------------------
+      // ako je stampa pojedinacnog dokumanta cViseDokumenata == NIL
+      // ako je vise dokumenata - P pojedinacni PDF-ovi
+      // ako je vise dokumenata - Z zbirno jedan PDF i prva stranica
+      // => oPDF Begin
+      IF lPrviDokument
+         oPDF:Begin()
+         oPDF:PageHeader()
       ELSE
-         oPDF:SetType( PDF_TXT_LANDSCAPE )
+         check_nova_strana( NIL, oPDF, .T.)
       ENDIF
-      IF hb_HHasKey( xPrintOpt, "font_size" )
-         oPDF:SetFontSize( xPrintOpt[ "font_size" ] )
-      ENDIF
-      oPDF:Begin()
-      oPDF:PageHeader()
+      
    ENDIF
 
    my_use_refresh_stop()
@@ -136,11 +174,26 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    LOCAL cPrinterPort
    LOCAL cOpt
    LOCAL oPDF
-   LOCAL lStampaViseDokumenata := .F.
    LOCAL cPdfFileName
+   LOCAL cViseDokumenata := NIL, lPrviDokument := .T., lPosljednjiDokument := .T.
+
+   IF ValType( xPrintOpt ) == "H"
+      IF hb_hhasKey( xPrintOpt, "vise_dokumenata")
+         cViseDokumenata := xPrintOpt[ "vise_dokumenata"]
+         lPrviDokument := xPrintOpt[ "prvi_dokument" ]
+         lPosljednjiDokument := xPrintOpt[ "posljednji_dokument" ]
+      ENDIF
+   ENDIF
 
    IF cOpt == "PDF"
+      IF cViseDokumenata <> NIL .AND. (cViseDokumenata == "Z" .AND. !lPosljednjiDokument) 
+         // ako je zbirno i nije posljednji dokument ne generise se PDF
+         my_use_refresh_start()
+         RETURN .T.
+      ENDIF
+
       // hb_cdpSelect( "SLWIN" )
+      // PDF kraj prvog kruga - generacija TXT-a
       oPDF:End()
    ENDIF
 
@@ -169,29 +222,28 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    cPrinterPort := get_printer_port( cOpt )
    cFileName := txt_print_file_name( cFileName )
 
-   // SET DEVICE TO SCREEN
-   // SET PRINTER OFF
-   // SET PRINTER TO
-   // SET CONSOLE ON
    Set( _SET_CONSOLE, s_lConsole )
    Set( _SET_DEVICE, s_cDevice )
-   IF is_windows()
-      // ne kontam zasto je redoslijed bitan, ali ako ne idem ovako ubrlja se ekran
-      Set( _SET_PRINTER, s_lPrinter  )
-      IF ValType( s_cPrinterFile ) == "C" .AND. s_lPrinter
+
+   IF lPosljednjiDokument
+      IF is_windows()
+         // ne kontam zasto je redoslijed bitan, ali ako ne idem ovako ubrlja se ekran
+         Set( _SET_PRINTER, s_lPrinter  )
+         IF ValType( s_cPrinterFile ) == "C" .AND. s_lPrinter
+            Set( _SET_PRINTFILE, s_cPrinterFile )
+         ENDIF
+      ELSE
+         Set( _SET_PRINTER, s_lPrinter  )
          Set( _SET_PRINTFILE, s_cPrinterFile )
       ENDIF
-   ELSE
-      Set( _SET_PRINTER, s_lPrinter  )
-      Set( _SET_PRINTFILE, s_cPrinterFile )
    ENDIF
 
    MsgC()
 
-
-   f18_tone( 440, 1.5 )
-   f18_tone( 440, 0.5 )
-
+   IF cViseDokumenata == NIL
+     f18_tone( 440, 1.5 )
+     f18_tone( 440, 0.5 )
+   ENDIF
 
    DO CASE
 
@@ -226,18 +278,16 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       // KALK_20200626_10-10-00000001.txt -> KALK_20200626_10-10-00000001.pdf
       cPdfFileName := StrTran( txt_print_file_name(), ".txt", ".pdf" )
 
-      IF hb_hhasKey( xPrintOpt, "vise_dokumenata") .AND. xPrintOpt[ "vise_dokumenata" ]
-         
-         lStampaViseDokumenata := .T.   
+      IF cViseDokumenata <> NIL .AND. cViseDokumenata $ "PZ"
          // my_home/KALK_20200626_10-10-00000001.pdf -> my_home/PDF/KALK_20200626_10-10-00000001.pdf
          cPdfFileName := StrTran(cPdfFileName, my_home(), my_home() + "PDF" + SLASH)
       ENDIF
 
       Ferase(cPdfFileName)
       IF File(cPdfFileName)
-         error_bar("PDF", "ERR! Brisanje:" + cPdfFileName)
+           error_bar("PDF", "ERR! Brisanje:" + cPdfFileName)
       ENDIF
-
+      
       oPDF:cFileName := cPdfFileName
       oPDF:Begin()
       oPDF:PrnToPdf( txt_print_file_name() )
@@ -250,7 +300,7 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       hb_cdpSelect( "SL852" )
       // hb_SetTermCP( "SLISO" )
 
-      IF !lStampaViseDokumenata
+      IF cViseDokumenata == NIL
          oPDF:View()
       ENDIF
 
@@ -273,24 +323,60 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
 
    RETURN .T.
 
-
-FUNCTION kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+// --------------------------------------------------------------------------
+// cViseDokumenata: P - pojedinacno PDF-ovi, Z - zbirno
+FUNCTION kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok, cViseDokumenata)
    
    LOCAL cFileName
 
-   cFileName := "KALK_" + DTOS(Date()) + "_" + AllTrim(cIdFirma) + "-" + AllTrim(cIdVD) + "-" + AllTrim(cBrDok)
-   // 0001/TS => 0001_TS
-   cFileName := StrTran(cFileName, "/", "_")
-   cFileName := StrTran(cFileName, "#", "_")
-   cFileName := StrTran(cFileName, ".", "_")
-   cFileName := StrTran(cFileName, ":", "_")
-   // KALK_20200623_10_10_0001_TS.txt
+   IF cViseDokumenata == NIL
+      cViseDokumenata := "P"
+   ENDIF
+   
+   cFileName := "KALK_" + DTOS(Date())
+   
+   IF cViseDokumenata == "P"
+      cFileName += "_" + AllTrim(cIdFirma) + "-" + AllTrim(cIdVD) + "-" + AllTrim(cBrDok)
+       // 0001/TS => 0001_TS
+      cFileName := StrTran(cFileName, "/", "_")
+      cFileName := StrTran(cFileName, "#", "_")
+      cFileName := StrTran(cFileName, ".", "_")
+      cFileName := StrTran(cFileName, ":", "_")
+      // KALK_20200623_10_10_0001_TS.txt
+   ENDIF
+
+   IF cViseDokumenata == "Z"
+      // KALK_20200623_zbirno.txt
+      cFileName += "_zbirno"
+   ENDIF
+
    cFileName += ".txt"
    cFileName := my_home() + cFileName
 
    RETURN cFileName
 
    
+FUNCTION PDF_zapoceti_novi_dokument(hViseDokumenata)
+
+   IF hViseDokumenata == NIL
+      RETURN .T.
+   ENDIF 
+   
+   IF !hb_HHasKey(hViseDokumenata, "vise_dokumenata")
+      RETURN .T.
+   endif
+   
+   IF hViseDokumenata["vise_dokumenata"] == "P"  // PDF pojedinacno
+      return .T.
+   ENDIF
+
+   IF hViseDokumenata["vise_dokumenata"] == "Z" .AND. hViseDokumenata["prvi_dokument"]
+      return .T.
+   ENDIF
+
+   return .F.
+
+
 
 FUNCTION start_print_editor()
 

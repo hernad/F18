@@ -219,7 +219,6 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       select_o_roba( cIdRoba )
       nPLU := roba->fisc_plu
       IF s_hFiskalniUredjajParams[ "plu_type" ] == "D"
-         altd()
          nPLU := auto_plu( .F., .F., s_hFiskalniUredjajParams )
       ENDIF
 

@@ -37,9 +37,10 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
    LOCAL GetList := {}
    LOCAL lDokumentZaPOS, lDokumentZaFakt
    LOCAL lCloseAllNaKraju := .T., lStampaJedanDokument := .F.
-   LOCAL lGrupnaStampa := .F.
+   LOCAL hGrupnaStampa := NIL
+   
    PRIVATE cIdfirma, cIdvd, cBrdok
-
+   
    PRIVATE PicCDEM := kalk_pic_cijena_bilo_gpiccdem()
    PRIVATE PicProc := gPICPROC
    PRIVATE PicDEM  := kalk_pic_iznos_bilo_gpicdem()
@@ -63,8 +64,11 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
          cBrDok := hParams[ "brdok" ]
          lCloseAllNaKraju := .F.
          lStampaJedanDokument := .T.
-         IF hb_hhaskey( hParams, "vise_dokumenata") .AND. hParams[ "vise_dokumenata"] 
-            lGrupnaStampa := .T.
+         IF hb_hhaskey( hParams, "vise_dokumenata")
+            hGrupnaStampa := hb_hash()
+            hGrupnaStampa[ "vise_dokumenata" ] := hParams[ "vise_dokumenata" ]
+            hGrupnaStampa[ "prvi_dokument" ] := hParams[ "prvi_dokument" ]
+            hGrupnaStampa[ "posljednji_dokument" ] := hParams[ "posljednji_dokument" ]
          ENDIF
       ENDIF
       open_kalk_as_pripr( cIdFirma, cIdVd, cBrDok )
@@ -126,44 +130,54 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
       ENDIF
 
       IF cIdVD == "10"
-         kalk_stampa_dok_10(lGrupnaStampa)
+         kalk_stampa_dok_10( hGrupnaStampa )
 
       ELSEIF ( cIdvd $ "11#12#13#21#22" )
-         kalk_stampa_dok_11(lGrupnaStampa)
+         kalk_stampa_dok_11( hGrupnaStampa )
 
       ELSEIF ( cIdvd $ "14#KO" )
-         kalk_stampa_dok_14(lGrupnaStampa)
+         kalk_stampa_dok_14( hGrupnaStampa )
 
       ELSEIF ( cIdvd $ "16#95#96" )
-         kalk_stampa_dok_16_95_96(lGrupnaStampa)
+         kalk_stampa_dok_16_95_96( hGrupnaStampa )
 
       ELSEIF ( cIdvd $ "41#42#49" )
-         kalk_stampa_dok_41_42_49(lGrupnaStampa)
+         IF hGrupnaStampa == NIL  // ovi dokumenti se moraju stampati pojedinicno
+         kalk_stampa_dok_41_42_49()
+         ENDIF
 
       ELSEIF ( cIdvd == "18" )
-         kalk_stampa_dok_18(lGrupnaStampa)
+         IF hGrupnaStampa == NIL
+            kalk_stampa_dok_18()
+         ENDIF
 
       ELSEIF ( cIdvd $ "19#29#71#79#72" )
-         kalk_stampa_dok_19_79(lGrupnaStampa)
+         IF hGrupnaStampa == NIL
+           kalk_stampa_dok_19_79()
+         ENDIF
 
       ELSEIF ( cIdvd $ "01#02#03#80#61" )
-         kalk_stampa_dok_01_03_80(lGrupnaStampa)
+         IF hGrupnaStampa == NIL  
+            kalk_stampa_dok_01_03_80()
+         ENDIF
 
       ELSEIF ( cIdvd $ "81#89" )
-         kalk_stampa_dok_81(lGrupnaStampa)
+         IF hGrupnaStampa == NIL
+           kalk_stampa_dok_81()
+         ENDIF
 
       ELSEIF ( cIdvd == "IM" )
-         IF !lGrupnaStampa // ovi dokumenti se moraju stampati pojedinicno
-            kalk_stampa_dok_im(lGrupnaStampa)
+         IF hGrupnaStampa == NIL 
+            kalk_stampa_dok_im()
          ENDIF
 
       ELSEIF ( cIdvd $ "IP#90" )
-         IF !lGrupnaStampa
+         IF hGrupnaStampa == NIL
             kalk_stampa_dok_ip()
          ENDIF
 
       ELSEIF ( cIdvd == "RN" )
-         IF !lGrupnaStampa
+         IF hGrupnaStampa == NIL
            IF !lAzuriraniDokument
               kalk_raspored_troskova( .T. )
            ENDIF
@@ -171,7 +185,7 @@ FUNCTION kalk_stampa_dokumenta( lAzuriraniDokument, lBezPitanjaBrDok, hParams )
          ENDIF
 
       ELSEIF ( cIdvd == "PR" )
-         IF !lGrupnaStampa
+         IF hGrupnaStampa == NIL
             kalk_stampa_dok_pr()
          ENDIF
       ENDIF

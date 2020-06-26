@@ -23,7 +23,7 @@ MEMVAR nKalkCarDaz
 MEMVAR nKalkZavTr
 MEMVAR cIdFirma, cIdVd, cBrDok
 
-FUNCTION kalk_stampa_dok_16_95_96( lViseDokumenata )
+FUNCTION kalk_stampa_dok_16_95_96( hViseDokumenata )
 
    LOCAL cPom
    LOCAL lVPC := .F.
@@ -37,7 +37,7 @@ FUNCTION kalk_stampa_dok_16_95_96( lViseDokumenata )
    LOCAL nC1, nC2, nC3
    LOCAL cIdPartner, cBrFaktP
    LOCAL nMarzaVPStopa, nTMarzaVP, nTotMarzaVP
-   LOCAL cFileName
+   LOCAL cFileName, cViseDokumenata := NIL
 
    SELECT kalk_pripr
    cIdFirma := kalk_pripr->idfirma
@@ -52,16 +52,23 @@ FUNCTION kalk_stampa_dok_16_95_96( lViseDokumenata )
    // cIdZaduz2 := field->IdZaduz2
 
    cNaslov := _get_naslov_dokumenta( cIdVd ) + ": " + cIdFirma + "-" + cIdVD + "-" + AllTrim( cBrDok ) + "  Datum:" +  DToC( field->datdok )
-   s_oPDF := PDFClass():New()
+
+   IF PDF_zapoceti_novi_dokument( hViseDokumenata )
+       s_oPDF := PDFClass():New()
+   ENDIF
+
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "portrait"
    xPrintOpt[ "opdf" ] := s_oPDF
-   IF lViseDokumenata <> NIL .AND. lViseDokumenata
-      xPrintOpt["vise_dokumenata" ] := .T.
-   ENDIF 
 
-   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+   IF hViseDokumenata <> NIL
+      cViseDokumenata := hViseDokumenata["vise_dokumenata"]
+      xPrintOpt["vise_dokumenata" ] := cViseDokumenata
+      xPrintOpt["prvi_dokument" ] := hViseDokumenata["prvi_dokument"]
+      xPrintOpt["posljednji_dokument" ] := hViseDokumenata["posljednji_dokument"]
+   ENDIF 
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok, cViseDokumenata)
    IF f18_start_print( cFileName, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF

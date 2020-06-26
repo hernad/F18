@@ -27,12 +27,12 @@ FUNCTION Pitanje( cId, cPitanje, cOdgDefault, cMogOdg, cHeader )
    LOCAL cPom
    LOCAL cOdgovor
    LOCAL lConfirmEnter := Set( _SET_CONFIRM )
+   LOCAL GetList := {}
 
    IF cMogOdg == NIL
       cMogOdg := "YDNL"
    ENDIF
 
-   PRIVATE GetList := {}
 
    cPom := Set( _SET_DEVICE )
    SET DEVICE TO SCREEN

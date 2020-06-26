@@ -21,6 +21,7 @@ FUNCTION kalk_pregled_dokumenata_tabela()
    LOCAL dDatDo := fetch_metric( "kalk_lista_dokumenata_datum_do", my_user(), DATE() )
    LOCAL cProdKto := fetch_metric( "kalk_lista_dokumenata_pkonto1", my_user(), PadR( "", 7 ) )
    LOCAL cMagKto := fetch_metric( "kalk_lista_dokumenata_mkonto1", my_user(), PadR( "", 7 ) )
+   LOCAL cIdPartner := Padr("", 6)
    LOCAL nMaxRow := f18_max_rows() - 5
     
    // LOCAL cPartner := PadR( "", 6 )
@@ -31,7 +32,7 @@ FUNCTION kalk_pregled_dokumenata_tabela()
    PRIVATE ImeKol
    PRIVATE Kol
 
-   IF usl_browse_kalk_dokumenti( @cIdFirma, @cIdVd, @dDatOd, @dDatDo, @cMagKto, @cProdKto ) == 0
+   IF usl_browse_kalk_dokumenti( @cIdFirma, @cIdVd, @dDatOd, @dDatDo, @cMagKto, @cProdKto, @cIdPartner ) == 0
       RETURN .F.
    ENDIF
 
@@ -65,9 +66,9 @@ FUNCTION kalk_pregled_dokumenata_tabela()
    ENDIF
 
 
-   // IF !Empty( cPartner )
-   // hParams[ "idpartner" ] := cPartner
-   // ENDIF
+   IF !Empty( cIdPartner )
+     hParams[ "idpartner" ] := cIdPartner
+   ENDIF
 
    hParams[ "order_by" ] := "idfirma, idvd, brdok, datdok" // ako ima vise brojeva dokumenata sortiraj po njima
    hParams[ "indeks" ] := .F.
@@ -129,11 +130,15 @@ STATIC FUNCTION brow_keyhandler( Ch )
    LOCAL hParams := hb_hash()
    LOCAL nError := 0
    LOCAL nCount := 0
+   LOCAL cOdgovor := "N"
+   LOCAL lPrviDokument, lPosljednjiDokument, lPrekid := .F.
+
 
    DO CASE
 
       CASE Ch == K_CTRL_P
-         IF Pitanje(, "Odštampati sve ove dokumente?", "N" ) == "D"
+         cOdgovor := Pitanje(, "Generisati PDF-ove pojedinačno (P), zbirno(Z)?", "N", "PZN" )
+         IF cOdgovor $ "PZ"
 
             nError := 0
             f18_create_dir(my_home() + "PDF")
@@ -147,7 +152,11 @@ STATIC FUNCTION brow_keyhandler( Ch )
                select kalk_doks2
                go top
                nCount := 0
-               DO WHILE nError < 2 .AND. !EOF()
+               lPosljednjiDokument := .F.
+               lPrviDokument := .T.
+               lPrekid := .F.
+
+               DO WHILE nError < 2 .AND. !EOF() .AND. !lPrekid
                   @ box_x_koord() + 1, box_y_koord() + 2 SAY kalk_doks2->datdok
                   @ box_x_koord() + 1, col() + 2 SAY kalk_doks2->idvd + " - " + kalk_doks2->brdok
                   
@@ -157,13 +166,37 @@ STATIC FUNCTION brow_keyhandler( Ch )
                   hParams[ "idfirma" ] := kalk_doks2->idfirma
                   hParams[ "idvd" ] := kalk_doks2->idvd
                   hParams[ "brdok" ] := kalk_doks2->brdok
-                  hParams[ "vise_dokumenata" ] := .T.
+                  hParams[ "vise_dokumenata" ] := cOdgovor
+                  
+                  IF nError == 1
+                     lPrekid := .T.
+                     lPosljednjiDokument := .T.
+                  ENDIF
+
+                  IF cOdgovor == "Z" // ispitati je li ovo posljednji dokument
+                    lPosljednjiDokument := .F. 
+                    SKIP
+                    IF Eof() // je li ovo posljednji dokument? 
+                      lPrekid := .T.
+                    ENDIF
+                    SKIP -1
+                    hParams[ "prvi_dokument" ] := lPrviDokument
+                    lPrviDokument := .F.
+                    hParams[ "posljednji_dokument" ] := lPosljednjiDokument
+                  ELSE
+                    lPosljednjiDokument := .T.
+                    lPrviDokument := .T.
+                    // kod generacije P - pojedinacni PDF-ovi svaki je prvi posljednji
+                    hParams[ "prvi_dokument" ] := .T.
+                    hParams[ "posljednji_dokument" ] := .T.
+                  ENDIF
+                  
                   PushWa()
                   kalk_stampa_azuriranog_dokumenta_by_hparams( hParams )
                   PopWa()
                 
                   IF Inkey(1) == K_ESC
-                     IF Pitanje(, "Prekid?", " ") == "D"
+                     IF Pitanje(, "Prekid?", "D") == "D"
                         nError := 1
                      ENDIF
                   ENDIF
@@ -217,12 +250,12 @@ STATIC FUNCTION brow_keyhandler( Ch )
    RETURN DE_CONT
 
 
-STATIC FUNCTION usl_browse_kalk_dokumenti( cIdFirma, cIdVd, dDatOd, dDatDo, cMagKto, cProdKto )
+STATIC FUNCTION usl_browse_kalk_dokumenti( cIdFirma, cIdVd, dDatOd, dDatDo, cMagKto, cProdKto, cIdPartner )
 
    LOCAL nX := 1
    LOCAL GetList := {}
 
-   Box(, 10, 65 )
+   Box(, 11, 65 )
 
    set_cursor_on()
 
@@ -240,8 +273,10 @@ STATIC FUNCTION usl_browse_kalk_dokumenti( cIdFirma, cIdVd, dDatOd, dDatDo, cMag
    ++nX
    @ nX + box_x_koord(), 2 + box_y_koord() SAY8 "Prodavnički konto: " GET cProdKto PICT "@S30"
 
-   // nX := nX + 2
-   // @ nX + box_x_koord(), 2 + box_y_koord() SAY8 "Partner:" GET cPartner VALID Empty( cPartner ) .OR. p_partner( @cPartner )
+
+   ++nX
+   @ nX + box_x_koord(), 2 + box_y_koord() SAY8 "Partner: " GET cIdPartner VALID Empty( cIdPartner ) .OR. p_partner( @cIdPartner )
+
 
    READ
    BoxC()

@@ -235,7 +235,6 @@ FUNCTION kalk_lager_lista_magacin()
    fSint := .F.
    cSintK := cIdKonto
 
-   altd()
 
    IF "." $ cIdKonto
       cIdkonto := StrTran( cIdKonto, ".", "" )

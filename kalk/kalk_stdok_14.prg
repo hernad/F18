@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+STATIC s_oPDF
+
 MEMVAR m
 MEMVAR nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 MEMVAR nStr, cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2  // dDatFaktP
@@ -18,14 +20,14 @@ MEMVAR nStr, cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2 
 FIELD IdPartner, BrFaktP, DatFaktP, IdKonto, IdKonto2, Kolicina, DatDok
 FIELD naz, pkonto, mkonto
 
-FUNCTION kalk_stampa_dok_14(lViseDokumenata)
+FUNCTION kalk_stampa_dok_14( hViseDokumenata )
 
    LOCAL nCol1 := 0
    LOCAL nCol2 := 0
    LOCAL nPom := 0
-   LOCAL oPDF, xPrintOpt, bZagl
+   LOCAL xPrintOpt, bZagl
    LOCAL nPDVStopa, nPDV, nNetoVPC
-   LOCAL cFileName
+   LOCAL cFileName, cViseDokumenata
       
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
@@ -37,17 +39,24 @@ FUNCTION kalk_stampa_dok_14(lViseDokumenata)
    cIdKonto := IdKonto
    cIdKonto2 := IdKonto2
 
-   oPDF := PDFClass():New()
+   IF PDF_zapoceti_novi_dokument( hViseDokumenata )
+       s_OPDF := PDFClass():New()
+   ENDIF
+
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "portrait"
-   xPrintOpt[ "opdf" ] := oPDF
+   xPrintOpt[ "opdf" ] := s_OPDF
    xPrintOpt[ "left_space" ] := 0
-   IF lViseDokumenata <> NIL .AND. lViseDokumenata
-      xPrintOpt["vise_dokumenata" ] := .T.
-   ENDIF 
-   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+   IF hViseDokumenata <> NIL
+      cViseDokumenata := hViseDokumenata["vise_dokumenata"]
+      xPrintOpt["vise_dokumenata" ] := cViseDokumenata
+      xPrintOpt["prvi_dokument" ] := hViseDokumenata["prvi_dokument"]
+      xPrintOpt["posljednji_dokument" ] := hViseDokumenata["posljednji_dokument"]
+   ENDIF
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok, cViseDokumenata)
 
+  
    IF f18_start_print( cFileName, xPrintOpt,  "KALK Br:" + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( DatDok ) ) == "X"
       RETURN .F.
    ENDIF
@@ -68,7 +77,7 @@ FUNCTION kalk_stampa_dok_14(lViseDokumenata)
       SELECT kalk_pripr
 
       kalk_set_vars_troskovi_marzavp_marzamp()
-      check_nova_strana( bZagl, oPdf )
+      check_nova_strana( bZagl, s_OPdf )
 
       
       //SKol := Kolicina
@@ -145,7 +154,7 @@ FUNCTION kalk_stampa_dok_14(lViseDokumenata)
 
    ENDDO
 
-   check_nova_strana( bZagl, oPdf )
+   check_nova_strana( bZagl, s_oPDF )
 
    ? m
 

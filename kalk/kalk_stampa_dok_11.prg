@@ -17,7 +17,7 @@ STATIC s_nRobaNazivSirina := 34
 MEMVAR cIdPartner, cBrFaktP, dDatFaktP
 MEMVAR cIdFirma, cIdVd, cBrDok
 
-FUNCTION kalk_stampa_dok_11( lViseDokumenata )
+FUNCTION kalk_stampa_dok_11( hViseDokumenata )
 
    LOCAL nCol0 := 0
    LOCAL nCol1 := 0
@@ -30,7 +30,7 @@ FUNCTION kalk_stampa_dok_11( lViseDokumenata )
    LOCAL nTot1, nTot1b, nTot2, nTotVPV, nTotMarzaVP, nTotMarzaMP, nTot5, nTot6, nTot7
    LOCAL nTot4c
    LOCAL cPKonto, cMKonto
-   LOCAL cFileName
+   LOCAL cFileName, cViseDokumenata
 
    PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
@@ -59,16 +59,23 @@ FUNCTION kalk_stampa_dok_11( lViseDokumenata )
    ENDIF
 
    cNaslov += " " + cIdFirma + "-" + cIdVD + "-" + cBrDok  + ", Datum dokumenta:" + DToC( kalk_pripr->DatDok )
-   s_oPDF := PDFClass():New()
+   
+   IF PDF_zapoceti_novi_dokument(hViseDokumenata) 
+      s_oPDF := PDFClass():New()
+   ENDIF
+
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "font_size" ] := 9
    xPrintOpt[ "opdf" ] := s_oPDF
-   IF lViseDokumenata <> NIL .AND. lViseDokumenata
-      xPrintOpt["vise_dokumenata" ] := .T.
-   ENDIF 
-   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+   IF hViseDokumenata <> NIL
+      cViseDokumenata := hViseDokumenata["vise_dokumenata"]
+      xPrintOpt["vise_dokumenata" ] := cViseDokumenata
+      xPrintOpt["prvi_dokument" ] := hViseDokumenata["prvi_dokument"]
+      xPrintOpt["posljednji_dokument" ] := hViseDokumenata["posljednji_dokument"]
+   ENDIF
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok, cViseDokumenata)
 
    IF f18_start_print( cFileName, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
