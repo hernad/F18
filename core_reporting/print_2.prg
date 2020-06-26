@@ -189,8 +189,8 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
    MsgC()
 
 
-   f18_tone( 440, 2 )
-   f18_tone( 440, 2 )
+   f18_tone( 440, 1.5 )
+   f18_tone( 440, 0.5 )
 
 
    DO CASE
@@ -233,10 +233,19 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
          cPdfFileName := StrTran(cPdfFileName, my_home(), my_home() + "PDF" + SLASH)
       ENDIF
 
+      Ferase(cPdfFileName)
+      IF File(cPdfFileName)
+         error_bar("PDF", "ERR! Brisanje:" + cPdfFileName)
+      ENDIF
+
       oPDF:cFileName := cPdfFileName
       oPDF:Begin()
       oPDF:PrnToPdf( txt_print_file_name() )
       oPDF:End()
+
+      IF !File(cPdfFileName)
+         error_bar("PDF", "NEMA?!:" + cPdfFileName)
+      ENDIF
 
       hb_cdpSelect( "SL852" )
       // hb_SetTermCP( "SLISO" )

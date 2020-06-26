@@ -127,29 +127,33 @@ STATIC FUNCTION brow_keyhandler( Ch )
    LOCAL hRec
    LOCAL cBrFaktP
    LOCAL hParams := hb_hash()
-   LOCAL lError := .F.
+   LOCAL nError := 0
+   LOCAL nCount := 0
 
    DO CASE
 
       CASE Ch == K_CTRL_P
          IF Pitanje(, "Odštampati sve ove dokumente?", "N" ) == "D"
 
-            lError := .F.
+            nError := 0
             f18_create_dir(my_home() + "PDF")
 
             IF !hb_DirExists(my_home() + "PDF")
                Alert("ERR_Dir: " + my_home() + "PDF")
-               lError := .T.
+               nError := 2
             ENDIF
 
             Box(, 3, 60, .T.)
                select kalk_doks2
                go top
-               DO WHILE !lError .AND. !EOF()
+               nCount := 0
+               DO WHILE nError < 2 .AND. !EOF()
                   @ box_x_koord() + 1, box_y_koord() + 2 SAY kalk_doks2->datdok
                   @ box_x_koord() + 1, col() + 2 SAY kalk_doks2->idvd + " - " + kalk_doks2->brdok
-                  @ box_x_koord() + 3, box_y_koord() + 2 SAY "<ESC> prekid"
-               
+                  
+                  @ box_x_koord() + 3, box_x_koord() + 2 SAY Str( ++nCount, 5)
+                  @ box_x_koord() + 3, COL() + 2 SAY "<ESC> prekid"
+                  
                   hParams[ "idfirma" ] := kalk_doks2->idfirma
                   hParams[ "idvd" ] := kalk_doks2->idvd
                   hParams[ "brdok" ] := kalk_doks2->brdok
@@ -160,7 +164,7 @@ STATIC FUNCTION brow_keyhandler( Ch )
                 
                   IF Inkey(1) == K_ESC
                      IF Pitanje(, "Prekid?", " ") == "D"
-                        lError := .T.
+                        nError := 1
                      ENDIF
                   ENDIF
                   SKIP
@@ -168,10 +172,10 @@ STATIC FUNCTION brow_keyhandler( Ch )
 
             BoxC()
 
-            IF !lError
-              altd()
-              open_folder(my_home() + "PDF")
-              RETURN DE_ABORT
+            IF nError < 2
+               info_bar( "gen", "Dokumenti izgenerisani: " + my_home() + "PDF")
+               open_folder(my_home() + "PDF")
+               RETURN DE_ABORT
             ENDIF
 
 

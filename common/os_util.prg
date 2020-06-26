@@ -633,16 +633,19 @@ FUNCTION f18_open_document( cDocument )
    LOCAL cPrefixCmd := ""
    LOCAL cRun
    LOCAL lDirectory := .F.
+   LOCAL lAsync := .T.
 
    IF hb_DirExists( cDocument)
       lDirectory := .T.
+      lAsync := .F.
    ENDIF
 
    cPrefixCmd := get_run_prefix_cmd( , , lDirectory)
    cDocument := file_path_quote( cDocument )
    cRun := cPrefixCmd + " " + file_path_quote( cDocument )
 
-   RETURN f18_run( cRun, NIL, .T. )
+   
+   RETURN f18_run( cRun, NIL, lAsync )
 
 
 

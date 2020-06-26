@@ -18,15 +18,15 @@ MEMVAR nStr, cIdFirma, cIdVd, cBrDok, cIdPartner, cBrFaktP, cIdKonto, cIdKonto2 
 FIELD IdPartner, BrFaktP, DatFaktP, IdKonto, IdKonto2, Kolicina, DatDok
 FIELD naz, pkonto, mkonto
 
-FUNCTION kalk_stampa_dok_14()
+FUNCTION kalk_stampa_dok_14(lViseDokumenata)
 
    LOCAL nCol1 := 0
    LOCAL nCol2 := 0
    LOCAL nPom := 0
    LOCAL oPDF, xPrintOpt, bZagl
    LOCAL nPDVStopa, nPDV, nNetoVPC
+   LOCAL cFileName
       
-
    PRIVATE nKalkPrevoz, nKalkCarDaz, nKalkZavTr, nKalkBankTr, nKalkSpedTr, nKalkMarzaVP, nKalkMarzaMP
 
    m := "--- ---------- ---------- ----------  ---------- ---------- ---------- ----------- --------- ----------"
@@ -43,7 +43,12 @@ FUNCTION kalk_stampa_dok_14()
    xPrintOpt[ "layout" ] := "portrait"
    xPrintOpt[ "opdf" ] := oPDF
    xPrintOpt[ "left_space" ] := 0
-   IF f18_start_print( NIL, xPrintOpt,  "KALK Br:" + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( DatDok ) ) == "X"
+   IF lViseDokumenata <> NIL .AND. lViseDokumenata
+      xPrintOpt["vise_dokumenata" ] := .T.
+   ENDIF 
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+
+   IF f18_start_print( cFileName, xPrintOpt,  "KALK Br:" + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( P_TipDok( cIdVD, - 2 ) ) + " , Datum:" + DToC( DatDok ) ) == "X"
       RETURN .F.
    ENDIF
 
@@ -117,8 +122,7 @@ FUNCTION kalk_stampa_dok_14()
       @ PRow(), PCol() + 1 SAY RABATV PICTURE PicProc
 
 
-      
-
+   
       @ PRow(), PCol() + 1 SAY nNetoVPC PICTURE PiccDEM
 
       @ PRow(), PCol() + 1 SAY nPDVStopa * 100 PICTURE PicProc

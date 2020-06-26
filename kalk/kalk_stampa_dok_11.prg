@@ -17,7 +17,7 @@ STATIC s_nRobaNazivSirina := 34
 MEMVAR cIdPartner, cBrFaktP, dDatFaktP
 MEMVAR cIdFirma, cIdVd, cBrDok
 
-FUNCTION kalk_stampa_dok_11()
+FUNCTION kalk_stampa_dok_11( lViseDokumenata )
 
    LOCAL nCol0 := 0
    LOCAL nCol1 := 0
@@ -30,6 +30,7 @@ FUNCTION kalk_stampa_dok_11()
    LOCAL nTot1, nTot1b, nTot2, nTotVPV, nTotMarzaVP, nTotMarzaMP, nTot5, nTot6, nTot7
    LOCAL nTot4c
    LOCAL cPKonto, cMKonto
+   LOCAL cFileName
 
    PRIVATE nKalkMarzaVP, nKalkMarzaMP
 
@@ -64,7 +65,12 @@ FUNCTION kalk_stampa_dok_11()
    xPrintOpt[ "layout" ] := "landscape"
    xPrintOpt[ "font_size" ] := 9
    xPrintOpt[ "opdf" ] := s_oPDF
-   IF f18_start_print( NIL, xPrintOpt,  cNaslov ) == "X"
+   IF lViseDokumenata <> NIL .AND. lViseDokumenata
+      xPrintOpt["vise_dokumenata" ] := .T.
+   ENDIF 
+   cFileName := kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok)
+
+   IF f18_start_print( cFileName, xPrintOpt,  cNaslov ) == "X"
       RETURN .F.
    ENDIF
 
