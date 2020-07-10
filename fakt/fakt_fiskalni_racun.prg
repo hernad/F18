@@ -315,6 +315,14 @@ STATIC FUNCTION fakt_fiscal_o_tables()
 
 // ----------------------------------------------------------
 // kalkulise iznose na osnovu datih parametara
+// [ "PDV17", 10.55 ]
+// [ "PDV17", 3.22 ]
+// => sve sabere, zaokruzi FIKSNO na 2 DECIMALE pa da hash[
+//     "ukupno"
+//     "osnovica"
+//     "pdv"
+// ]
+
 // ----------------------------------------------------------
 STATIC FUNCTION fakt_izracunaj_total( aTarifaIznos, cIdPartner, cIdTipDok )
 
@@ -372,6 +380,7 @@ STATIC FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
    LOCAL cIdTarifa, cIdRoba, nPos
    LOCAL nKolicina, nRabat, nCijena, nIznos
 
+   altd()
    seek_fakt( cIdFirma, cIdTipDok, cBrDok )
    DO WHILE !Eof() .AND. field->idfirma == cIdFirma .AND. field->idtipdok == cIdTipDok .AND. field->brdok == cBrDok
 
@@ -533,14 +542,21 @@ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTip
 
       ENDIF
 
-      nCijena := roba->mpc
+      //nCijena := roba->mpc
       cIdTarifa := AllTrim( roba->idtarifa )
 
-      aArray := {}
-      AAdd( aArray, { cIdTarifa, field->cijena } )
-      hDataItem := fakt_izracunaj_total( aArray, cIdPartner, cIdTipDok )
-
-      nCijena := hDataItem[ "ukupno" ]
+      
+      altd()
+      IF field->dindem != Left( ValBazna(), 3 )
+           /////////// FIX BUG zaokr na 2 DEC /////////////////
+           nCijena :=  field->cijena
+      ELSE
+          aArray := {}
+          AAdd( aArray, { cIdTarifa, field->cijena } )
+          hDataItem := fakt_izracunaj_total( aArray, cIdPartner, cIdTipDok )
+          nCijena := hDataItem[ "ukupno" ]
+      ENDIF    
+      nCijena := field->cijena
 
       IF cIdTipDok == "10"
          _vr_plac := "3"
