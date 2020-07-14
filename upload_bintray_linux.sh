@@ -25,8 +25,9 @@ F18_VERSION=`echo "const json=require('./package.json') ; console.log(json.f18)"
 FILE=${BINTRAY_PACKAGE}_${F18_VERSION}.zip
 echo "upload: ${BINTRAY_PACKAGE} / ${FILE}"
 
-
-export HB_ROOT=$(pwd)/harbour
+if [[ -z "$HB_ROOT" ]] ; then
+    export HB_ROOT=$(pwd)/harbour
+fi
 
 cp -av $HB_ROOT/lib/libssl.so .
 cp -av $HB_ROOT/lib/libcrypto.so .
