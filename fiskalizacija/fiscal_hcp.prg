@@ -12,20 +12,21 @@
 
 #include "f18.ch"
 
-STATIC _cmdok := "CMD.OK"
-STATIC _razmak1 := " "
-STATIC _answ_dir := "FROM_FP"
-STATIC _inp_dir := "TO_FP"
-STATIC __zahtjev_nula := "0"
+STATIC _cmdok := "cCmd.OK"
+STATIC cRazmak1 := " "
+STATIC cAnswerDirectory := "FROM_FP"
+STATIC s_cInputDir := "TO_FP"
+STATIC s_cZahtjevNula := "0"
 
 // trigeri
-STATIC _tr_cmd := "CMD"
-STATIC _tr_plu := "PLU"
-STATIC _tr_txt := "TXT"
-STATIC _tr_rcp := "RCP"
-STATIC _tr_cli := "clients.XML"
-STATIC _tr_foo := "footer.XML"
+STATIC s_cTrigerCMD := "cCmd"
+STATIC s_cTrigerPLU := "PLU"
+STATIC s_cTrigerTXT := "TXT"
+STATIC s_cTrigerRCP := "RCP"
+STATIC s_cTrigerClientsXML := "clients.XML"
+STATIC s_cTrigerFooterXML := "footer.XML"
 
+#define ERROR_ALT_Q -100
 
 // fiskalne funkcije HCP fiskalizacije
 
@@ -57,164 +58,169 @@ STATIC _tr_foo := "footer.XML"
 // aKupac[5] - grad stanovanja
 
 
-// --------------------------------------------------------------------------
-// stampa fiskalnog racuna tring fiskalizacija
-// --------------------------------------------------------------------------
-FUNCTION fiskalni_hcp_racun( hFiskalniParams, items, head, storno, rn_total )
+/*
 
-   LOCAL _xml, _f_name
-   LOCAL nI, _ibk, _rn_broj, _footer
-   LOCAL _v_pl
-   LOCAL _total_placanje
-   LOCAL _rn_reklamni
-   LOCAL _kolicina, _cijena, _rabat, _art_id, _art_barkod, _art_plu
-   LOCAL _art_naz, _art_jmj, _dep, _tmp
-   LOCAL _oper := ""
-   LOCAL _customer := .F.
-   LOCAL _err_level := 0
-   LOCAL _cmd := ""
-   LOCAL _del_all := .T.
+<?xml version="1.0" encoding="UTF-8"?>
+<PLU>
+<DATA BCR="62842" VAT="1" MES="0" DEP="0" DSC="HD VRE&#262;ICA &#352;TAM bijela COD 280+(" PRC="0.10" LGR="0.00" />
+</PLU>
 
-   IF head <> NIL .AND. Len( head ) > 0
-      _customer := .T.
+PRC - Cijena
+
+*/
+
+FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTotal )
+
+   LOCAL cXmlFile, cFiskalniFileName
+   LOCAL nI, cIBK, cBrojRacuna, aFooter
+   // LOCAL _v_pl
+   LOCAL nTotalPlacanje
+   LOCAL cReklamiraniRn
+   LOCAL nKolicina
+   LOCAL nCijena
+   LOCAL cArtikalID
+   LOCAL cArtikalBarKOD
+   LOCAL nArtikalPLU
+   LOCAL cRobaNaziv, cArtikalJMJ, cTmp
+   // LOCAL cOperater := ""
+   LOCAL lCustomer := .F.
+   LOCAL nErrorLevel := 0
+   LOCAL cCommand := ""
+   LOCAL lDeleteAll := .T.
+   LOCAL cDepartment
+   LOCAL cIdTarifa
+   LOCAL nRabat
+   LOCAL cVrstaPlacanja
+
+   IF aHeader <> NIL .AND. Len( aHeader ) > 0
+      lCustomer := .T.
    ENDIF
 
+   hcp_delete_tmp( hFiskalniParams, lDeleteAll ) // brisi tmp fajlove ako su ostali
 
-   hcp_delete_tmp( hFiskalniParams, _del_all ) // brisi tmp fajlove ako su ostali
-
-   IF rn_total == nil
-      rn_total := 0
+   IF nRacunTotal == nil
+      nRacunTotal := 0
    ENDIF
 
+   IF lStorno // ako je lStorno posalji predkomandu
 
-   IF storno // ako je storno posalji pred komandu
+      // daj mi lStorno komandu
+      cReklamiraniRn := AllTrim( aItems[ 1, 8 ] )
+      cCommand := _on_storno( cReklamiraniRn )
+      // posalji lStorno komandu
+      nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-      // daj mi storno komandu
-      _rn_reklamni := AllTrim( items[ 1, 8 ] )
-      _cmd := _on_storno( _rn_reklamni )
-      // posalji storno komandu
-      _err_level := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
-
-      IF _err_level > 0
-         RETURN _err_level
+      IF nErrorLevel > 0
+         RETURN nErrorLevel
       ENDIF
 
    ENDIF
 
    // programiraj artikal prije nego izdas racun
-   _err_level := hcp_plu( hFiskalniParams, items )
-
-   IF _err_level > 0
-      RETURN _err_level
+   nErrorLevel := hcp_plu( hFiskalniParams, aItems )
+   IF nErrorLevel == ERROR_ALT_Q
+        RETURN ERROR_ALT_Q
    ENDIF
 
-   IF _customer = .T.
+   IF nErrorLevel > 0
+      RETURN nErrorLevel
+   ENDIF
 
+   IF lCustomer
+      nErrorLevel := hcp_cli( hFiskalniParams, aHeader ) // dodaj kupca
 
-      _err_level := hcp_cli( hFiskalniParams, head ) // dodaj kupca
-
-      IF _err_level > 0
-         RETURN _err_level
+      IF nErrorLevel > 0
+         RETURN nErrorLevel
       ENDIF
 
       // setuj triger za izdavanje racuna sa partnerom
-      _ibk := head[ 1, 1 ]
-      _cmd := _on_partn( _ibk )
+      cIBK := aHeader[ 1, 1 ]
+      cCommand := hcp_racun_partner( cIBK )
+      nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-      _err_level := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
-
-      IF _err_level > 0
-         RETURN _err_level
+      IF nErrorLevel > 0
+         RETURN nErrorLevel
       ENDIF
-
    ENDIF
 
    // posalji komandu za reset footera...
-   _cmd := _off_footer()
-   _err_level := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+   cCommand := hcp_footer_off()
+   nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-   IF _err_level > 0
-      RETURN _err_level
+   IF nErrorLevel > 0
+      RETURN nErrorLevel
    ENDIF
 
    // to je zapravo broj racuna !!!
-   _rn_broj := items[ 1, 1 ]
+   cBrojRacuna := aItems[ 1, 1 ]
    // posalji footer...
-   _footer := {}
-   AAdd( _footer, { "Broj rn: " + _rn_broj } )
-   _err_level := hcp_footer( hFiskalniParams, _footer, _tr_foo )
-   IF _err_level > 0
-      RETURN _err_level
+   aFooter := {}
+   AAdd( aFooter, { "Broj rn: " + cBrojRacuna } )
+   nErrorLevel := hcp_footer( hFiskalniParams, aFooter, s_cTrigerFooterXML )
+   IF nErrorLevel > 0
+      RETURN nErrorLevel
    ENDIF
 
    // sredi mi naziv fajla...
-   _f_name := fiscal_out_filename( hFiskalniParams[ "out_file" ], _rn_broj, _tr_rcp )
+   cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], cBrojRacuna, s_cTrigerRCP )
 
    // putanja do izlaznog xml fajla
-   _xml := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _f_name
+   cXmlFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + cFiskalniFileName
 
-   // otvori xml
-   create_xml( _xml )
-
-   // upisi header
+   create_xml( cXmlFile )
    xml_head()
-
    xml_subnode( "RECEIPT" )
 
-   _total_placanje := 0
+   nTotalPlacanje := 0
 
-   FOR nI := 1 TO Len( items )
+   FOR nI := 1 TO Len( aItems )
 
-      _art_plu := items[ nI, 9 ]
-      _art_barkod := items[ nI, 12 ]
-      _art_id := items[ nI, 3 ]
-      _art_naz := PadR( items[ nI, 4 ], 32 )
-      _art_jmj := _g_jmj( items[ nI, 16 ] )
-      _cijena := items[ nI, 5 ]
-      _kolicina := items[ nI, 6 ]
-      _rabat := items[ nI, 11 ]
-      _tarifa := fiskalni_tarifa( items[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
-      _dep := "0"
+      nArtikalPLU := aItems[ nI, 9 ]
+      cArtikalBarKOD := aItems[ nI, 12 ]
+      cArtikalID := aItems[ nI, 3 ]
+      cRobaNaziv := PadR( aItems[ nI, 4 ], 32 )
+      cArtikalJMJ := get_jmj_hcp( aItems[ nI, 16 ] )
+      nCijena := aItems[ nI, 5 ]
+      nKolicina := aItems[ nI, 6 ]
+      nRabat := aItems[ nI, 11 ]
+      cIdTarifa := fiskalni_tarifa( aItems[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
+      cDepartment := "0"
 
-      _tmp := ""
-
+      cTmp := ""
       // sta ce se koristiti za 'kod' artikla
       IF hFiskalniParams[ "plu_type" ] $ "P#D"
          // PLU artikla
-         _tmp := 'BCR="' + AllTrim( Str( _art_plu ) ) + '"'
+         cTmp := 'BCR="' + AllTrim( Str( nArtikalPLU ) ) + '"'
       ELSEIF hFiskalniParams[ "plu_type" ] == "I"
          // ID artikla
-         _tmp := 'BCR="' + AllTrim( _art_id ) + '"'
+         cTmp := 'BCR="' + AllTrim( cArtikalID ) + '"'
       ELSEIF hFiskalniParams[ "plu_type" ] == "B"
          // barkod artikla
-         _tmp := 'BCR="' + AllTrim( _art_barkod ) + '"'
+         cTmp := 'BCR="' + AllTrim( cArtikalBarKOD ) + '"'
       ENDIF
 
 
-      _tmp += _razmak1 + 'VAT="' + _tarifa + '"' // poreska stopa
+      cTmp += cRazmak1 + 'VAT="' + cIdTarifa + '"' // poreska stopa
       // jedinica mjere
-      _tmp += _razmak1 + 'MES="' + _art_jmj + '"'
+      cTmp += cRazmak1 + 'MES="' + cArtikalJMJ + '"'
       // odjeljenje
-      _tmp += _razmak1 + 'DEP="' + _dep + '"'
+      cTmp += cRazmak1 + 'DEP="' + cDepartment + '"'
       // naziv artikla
-      _tmp += _razmak1 + 'DSC="' + to_xml_encoding( _art_naz ) + '"'
+      cTmp += cRazmak1 + 'DSC="' + to_xml_encoding( cRobaNaziv ) + '"'
       // cijena artikla
-      _tmp += _razmak1 + 'PRC="' + AllTrim( Str( _cijena, 12, 2 ) ) + '"'
+      cTmp += cRazmak1 + 'PRC="' + AllTrim( Str( nCijena, 12, 2 ) ) + '"'
       // kolicina artikla
-      _tmp += _razmak1 + 'AMN="' + AllTrim( Str( _kolicina, 12, 3 ) ) + '"'
+      cTmp += cRazmak1 + 'AMN="' + AllTrim( Str( nKolicina, 12, 3 ) ) + '"'
 
-      IF _rabat > 0
-
+      IF nRabat > 0
          // vrijednost popusta
-         _tmp += _razmak1 + 'DS_VALUE="' + AllTrim( Str( _rabat, 12, 2 ) ) ;
-            + '"'
+         cTmp += cRazmak1 + 'DS_VALUE="' + AllTrim( Str( nRabat, 12, 2 ) ) + '"'
          // vrijednost popusta
-         _tmp += _razmak1 + 'DISCOUNT="' + "true" + '"'
+         cTmp += cRazmak1 + 'DISCOUNT="' + "true" + '"'
 
       ENDIF
 
-      xml_single_node( "DATA", _tmp )
-
+      xml_single_node( "DATA", cTmp )
    NEXT
 
 
@@ -227,107 +233,98 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, items, head, storno, rn_total )
    //
    // iznos = 0, ako je 0 onda sve ide tom vrstom placanja
 
-   _v_plac := fiskalni_vrsta_placanja( items[ 1, 13 ], "HCP" )
-   _total_placanje := Abs( rn_total )
+   cVrstaPlacanja := fiskalni_vrsta_placanja( aItems[ 1, 13 ], "HCP" )
+   nTotalPlacanje := Abs( nRacunTotal )
 
-   IF storno
-      // ako je storno onda je placanje gotovina i iznos 0
-      _v_plac := "0"
-      _total_placanje := 0
+   IF lStorno
+      // ako je lStorno onda je placanje gotovina i iznos 0
+      cVrstaPlacanja := "0"
+      nTotalPlacanje := 0
    ENDIF
 
-   _tmp := 'PAY="' + _v_plac + '"'
-   _tmp += _razmak1 + 'AMN="' + AllTrim( Str( _total_placanje, 12, 2 ) ) + '"'
+   cTmp := 'PAY="' + cVrstaPlacanja + '"'
+   cTmp += cRazmak1 + 'AMN="' + AllTrim( Str( nTotalPlacanje, 12, 2 ) ) + '"'
 
-   xml_single_node( "DATA", _tmp )
-
+   xml_single_node( "DATA", cTmp )
    xml_subnode( "RECEIPT", .T. )
 
    close_xml()
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _err_level
+      RETURN nErrorLevel
    ENDIF
 
-   // kreiraj cmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF !hcp_read_ok( hFiskalniParams, _f_name )
-      // procitaj poruku greske
-      _err_level := hcp_read_error( hFiskalniParams, _f_name, _tr_rcp )
+   IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q 
+      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerRCP )
+   ELSE
+      RETURN ERROR_ALT_Q
    ENDIF
 
-   RETURN _err_level
+   RETURN nErrorLevel
 
 
 
 // ----------------------------------------------
 // brise fajlove iz ulaznog direktorija
 // ----------------------------------------------
-FUNCTION hcp_delete_tmp( hFiskalniParams, del_all )
+FUNCTION hcp_delete_tmp( hFiskalniParams, lDeleteAll )
 
-   LOCAL _tmp, _f_path
+   LOCAL cTmp, cFiskalniFileName
 
-   IF del_all == NIL
-      del_all := .F.
+   IF lDeleteAll == NIL
+      lDeleteAll := .F.
    ENDIF
 
    MsgO( "brisem tmp fajlove..." )
 
    // input direktorij...
-   _f_path := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH
-   _tmp := "*.*"
+   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH
+   cTmp := "*.*"
 
-   AEval( Directory( _f_path + _tmp ), {| aFile| FErase( _f_path + ;
+   AEval( Directory( cFiskalniFileName + cTmp ), {| aFile| FErase( cFiskalniFileName + ;
       AllTrim( aFile[ 1 ] ) ) } )
 
-   IF del_all
+   IF lDeleteAll
 
       // output direktorij...
-      _f_path := hFiskalniParams[ "out_dir" ] + _answ_dir + SLASH
-      _tmp := "*.*"
-
-      AEval( Directory( _f_path + _tmp ), {| _file | FErase( _f_path + AllTrim( _file[ 1 ] ) ) } )
+      cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH
+      cTmp := "*.*"
+      AEval( Directory( cFiskalniFileName + cTmp ), {| cFile | FErase( cFiskalniFileName + AllTrim( cFile[ 1 ] ) ) } )
 
    ENDIF
 
-   Sleep( 1 )
-
+   // Sleep( 1 )
    MsgC()
 
-   RETURN
+   RETURN .T.
 
 
-// -------------------------------------------------------------------
-// hcp programiranje footer
-// -------------------------------------------------------------------
+
 FUNCTION hcp_footer( hFiskalniParams, footer )
 
-   LOCAL _xml, _tmp, nI
-   LOCAL _err := 0
+   LOCAL cXmlFile, cTmp, nI
+   LOCAL nError := 0
+   LOCAL cFiskalniFileName
 
-   _f_name := fiscal_out_filename( hFiskalniParams[ "out_file" ], __zahtjev_nula, _tr_foo )
+   cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula, s_cTrigerFooterXML )
 
    // putanja do izlaznog xml fajla
-   _xml := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _f_name
+   cXmlFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + cFiskalniFileName
 
-   // otvori xml
-   create_xml( _xml )
 
-   // upisi header
+   create_xml( cXmlFile )
    xml_head()
-
    xml_subnode( "FOOTER" )
 
    FOR nI := 1 TO Len( footer )
+      cTmp := 'TEXT="' + AllTrim( footer[ nI, 1 ] ) + '"'
+      cTmp += ' '
+      cTmp += 'BOLD="false"'
 
-      _tmp := 'TEXT="' + AllTrim( footer[ nI, 1 ] ) + '"'
-      _tmp += ' '
-      _tmp += 'BOLD="false"'
-
-      xml_single_node( "DATA", _tmp )
-
+      xml_single_node( "DATA", cTmp )
    NEXT
 
    xml_subnode( "FOOTER", .T. )
@@ -336,17 +333,17 @@ FUNCTION hcp_footer( hFiskalniParams, footer )
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _err
+      RETURN nError
    ENDIF
 
-   // kreiraj triger cmd.ok
+   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF !hcp_read_ok( hFiskalniParams, _f_name )
-      _err := hcp_read_error( hFiskalniParams, _f_name, _tr_foo )
+   IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
+      nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerFooterXML )
    ENDIF
 
-   RETURN _err
+   RETURN nError
 
 
 
@@ -354,122 +351,108 @@ FUNCTION hcp_footer( hFiskalniParams, footer )
 // -------------------------------------------------------------------
 // hcp programiranje klijenti
 // -------------------------------------------------------------------
-FUNCTION hcp_cli( hFiskalniParams, head )
+FUNCTION hcp_cli( hFiskalniParams, aHeader )
 
-   LOCAL _xml, _f_name, _tmp, nI
-   LOCAL _err := 0
+   LOCAL cXmlFile, cFiskalniFileName, cTmp, nI
+   LOCAL nError := 0
 
-   _f_name := fiscal_out_filename( hFiskalniParams[ "out_file" ], __zahtjev_nula, _tr_cli )
+   cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula, s_cTrigerClientsXML )
 
    // putanja do izlaznog xml fajla
-   _xml := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _f_name
+   cXmlFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + cFiskalniFileName
 
-   // otvori xml
-   create_xml( _xml )
-
-   // upisi header
+   create_xml( cXmlFile )
    xml_head()
-
    xml_subnode( "CLIENTS" )
 
-   FOR nI := 1 TO Len( head )
+   FOR nI := 1 TO Len( aHeader )
 
-      _tmp := 'IBK="' + head[ nI, 1 ] + '"'
-      _tmp += _razmak1 + 'NAME="' + ;
-         AllTrim( to_xml_encoding( head[ nI, 2 ] ) ) + '"'
-      _tmp += _razmak1 + 'ADDRESS="' + ;
-         AllTrim( to_xml_encoding( head[ nI, 3 ] ) ) + '"'
-      _tmp += _razmak1 + 'TOWN="' + ;
-         AllTrim( to_xml_encoding( head[ nI, 5 ] ) ) + '"'
+      cTmp := 'cIBK="' + aHeader[ nI, 1 ] + '"'
+      cTmp += cRazmak1 + 'NAME="' + ;
+         AllTrim( to_xml_encoding( aHeader[ nI, 2 ] ) ) + '"'
+      cTmp += cRazmak1 + 'ADDRESS="' + ;
+         AllTrim( to_xml_encoding( aHeader[ nI, 3 ] ) ) + '"'
+      cTmp += cRazmak1 + 'TOWN="' + ;
+         AllTrim( to_xml_encoding( aHeader[ nI, 5 ] ) ) + '"'
 
-      xml_single_node( "DATA", _tmp )
+      xml_single_node( "DATA", cTmp )
 
    NEXT
 
    xml_subnode( "CLIENTS", .T. )
-
    close_xml()
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _err
+      RETURN nError
    ENDIF
 
-   // kreiraj triger cmd.ok
+   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF !hcp_read_ok( hFiskalniParams, _f_name )
+   IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
       // procitaj poruku greske
-      _err := hcp_read_error( hFiskalniParams, _f_name, _tr_cli )
+      nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerClientsXML )
    ENDIF
 
-   RETURN _err
+   RETURN nError
 
 
 // -------------------------------------------------------------------
 // hcp programiranje PLU
 // -------------------------------------------------------------------
-FUNCTION hcp_plu( hFiskalniParams, items )
+FUNCTION hcp_plu( hFiskalniParams, aItems )
 
-   LOCAL _xml
-   LOCAL _err := 0
-   LOCAL nI, _tmp, _f_name
-   LOCAL _art_plu, _art_naz, _art_jmj, _art_cijena, _art_tarifa
-   LOCAL _dep, _lager
+   LOCAL cXmlFile
+   LOCAL nError := 0
+   LOCAL nI, cTmp, cFiskalniFileName
+   LOCAL nArtikalPLU, cRobaNaziv, cArtikalJMJ, nArtikalCijena, cArtikalTarifa
+   LOCAL cDepartment, nLager
 
-   _f_name := fiscal_out_filename( hFiskalniParams[ "out_file" ], __zahtjev_nula, _tr_plu )
+   cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula, s_cTrigerPLU )
 
    // putanja do izlaznog xml fajla
-   _xml := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _f_name
+   cXmlFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + cFiskalniFileName
 
-   // otvori xml
-   create_xml( _xml )
-
-   // upisi header
+   create_xml( cXmlFile )
    xml_head()
 
    xml_subnode( "PLU" )
 
-   FOR nI := 1 TO Len( items )
-
-      _art_plu := items[ nI, 9 ]
-      _art_naz := PadR( items[ nI, 4 ], 32 )
-      _art_jmj := _g_jmj( items[ nI, 16 ] )
-      _art_cijena := items[ nI, 5 ]
-      _art_tarifa := fiskalni_tarifa( items[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
-      _dep := "0"
-      _lager := 0
-
-      _tmp := 'BCR="' + AllTrim( Str( _art_plu ) ) + '"'
-      _tmp += _razmak1 + 'VAT="' + _art_tarifa + '"'
-      _tmp += _razmak1 + 'MES="' + _art_jmj + '"'
-      _tmp += _razmak1 + 'DEP="' + _dep + '"'
-      _tmp += _razmak1 + 'DSC="' + to_xml_encoding( _art_naz ) + '"'
-      _tmp += _razmak1 + 'PRC="' + AllTrim( Str( _art_cijena, 12, 2 ) ) + '"'
-      _tmp += _razmak1 + 'LGR="' + AllTrim( Str( _lager, 12, 2 ) ) + '"'
-
-      xml_single_node( "DATA", _tmp )
-
+   FOR nI := 1 TO Len( aItems )
+      nArtikalPLU := aItems[ nI, 9 ]
+      cRobaNaziv := PadR( aItems[ nI, 4 ], 32 )
+      cArtikalJMJ := get_jmj_hcp( aItems[ nI, 16 ] )
+      nArtikalCijena := aItems[ nI, 5 ]
+      cArtikalTarifa := fiskalni_tarifa( aItems[ nI, 7 ], hFiskalniParams[ "pdv" ], "HCP" )
+      cDepartment := "0"
+      nLager := 0
+      cTmp := 'BCR="' + AllTrim( Str( nArtikalPLU ) ) + '"'
+      cTmp += cRazmak1 + 'VAT="' + cArtikalTarifa + '"'
+      cTmp += cRazmak1 + 'MES="' + cArtikalJMJ + '"'
+      cTmp += cRazmak1 + 'DEP="' + cDepartment + '"'
+      cTmp += cRazmak1 + 'DSC="' + to_xml_encoding( cRobaNaziv ) + '"'
+      cTmp += cRazmak1 + 'PRC="' + AllTrim( Str( nArtikalCijena, 12, 2 ) ) + '"'
+      cTmp += cRazmak1 + 'LGR="' + AllTrim( Str( nLager, 12, 2 ) ) + '"'
+      xml_single_node( "DATA", cTmp )
    NEXT
 
    xml_subnode( "PLU", .T. )
-
    close_xml()
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _err
+      RETURN nError
    ENDIF
 
-   // kreiraj triger cmd.ok
+   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
-
-   IF !hcp_read_ok( hFiskalniParams, _f_name )
+   IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
       // procitaj poruku greske
-      _err := hcp_read_error( hFiskalniParams, _f_name, _tr_plu )
+      nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerPLU )
    ENDIF
 
-   RETURN _err
+   RETURN nError
 
 
 
@@ -478,173 +461,165 @@ FUNCTION hcp_plu( hFiskalniParams, items )
 // -------------------------------------------------------------------
 FUNCTION hcp_txt( hFiskalniParams, br_dok )
 
-   LOCAL _cmd := ""
-   LOCAL _xml, _data, _tmp
-   LOCAL _err_level := 0
+   LOCAL cCommand := ""
+   LOCAL cXmlFile, cData, cTmp
+   LOCAL nErrorLevel := 0
+   LOCAL cFiskalniFileName
 
-   _cmd := 'TXT="POS RN: ' + AllTrim( br_dok ) + '"'
+   cCommand := 'TXT="POS RN: ' + AllTrim( br_dok ) + '"'
 
-   _f_name := fiscal_out_filename( hFiskalniParams[ "out_file" ], __zahtjev_nula, _tr_txt )
+   cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula, s_cTrigerTXT )
 
    // putanja do izlaznog xml fajla
-   _xml := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _f_name
+   cXmlFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + cFiskalniFileName
 
    // otvori xml
-   create_xml( _xml )
+   create_xml( cXmlFile )
 
    // upisi header
    xml_head()
-
    xml_subnode( "USER_TEXT" )
 
-   IF !Empty( _cmd )
+   IF !Empty( cCommand )
 
-      _data := "DATA"
-      _tmp := _cmd
+      cData := "DATA"
+      cTmp := cCommand
 
-      xml_single_node( _data, _tmp )
+      xml_single_node( cData, cTmp )
 
    ENDIF
 
    xml_subnode( "USER_TEXT", .T. )
-
    close_xml()
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _err_level
+      RETURN nErrorLevel
    ENDIF
 
-   // kreiraj triger cmd.ok
+   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF !hcp_read_ok( hFiskalniParams, _f_name )
+   IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
       // procitaj poruku greske
-      _err_level := hcp_read_error( hFiskalniParams, _f_name, _tr_txt )
+      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerTXT )
    ENDIF
 
-   RETURN _err_level
+   RETURN nErrorLevel
 
 
 
 // -------------------------------------------------------------------
 // hcp komanda
 // -------------------------------------------------------------------
-FUNCTION hcp_cmd( hFiskalniParams, cmd, trig )
+FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
 
-   LOCAL _xml
-   LOCAL _err_level := 0
-   LOCAL _f_name
+   LOCAL cXmlFile
+   LOCAL nErrorLevel := 0
+   LOCAL cFiskalniFileName
+   LOCAL cData
+   LOCAL cTmp
 
-   _f_name := fiscal_out_filename( hFiskalniParams[ "out_file" ], __zahtjev_nula, trig )
+   cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula, cTrigerCMD )
 
    // putanja do izlaznog xml fajla
-   _xml := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _f_name
+   cXmlFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + cFiskalniFileName
 
-   // otvori xml
-   create_xml( _xml )
-
-   // upisi header
+   create_xml( cXmlFile )
    xml_head()
-
    xml_subnode( "COMMAND" )
 
-   IF !Empty( cmd )
+   IF !Empty( cCmd )
 
-      _data := "DATA"
-      _tmp := cmd
+      cData := "DATA"
+      cTmp := cCmd
 
-      xml_single_node( _data, _tmp )
+      xml_single_node( cData, cTmp )
 
    ENDIF
 
    xml_subnode( "COMMAND", .T. )
-
    close_xml()
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _err_level
+      RETURN nErrorLevel
    ENDIF
 
-   // kreiraj triger cmd.ok
+   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF !hcp_read_ok( hFiskalniParams, _f_name )
-      // procitaj poruku greske
-      _err_level := hcp_read_error( hFiskalniParams, _f_name, trig )
+   IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) > ERROR_ALT_Q
+      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, cTrigerCMD )
    ENDIF
 
-   RETURN _err_level
+   RETURN nErrorLevel
 
 
 // -------------------------------------------------
-// ukljuci storno racuna
+// ukljuci lStorno racuna
 // -------------------------------------------------
 STATIC FUNCTION _on_storno( broj_rn )
 
-   LOCAL _cmd
+   LOCAL cCommand
 
-   _cmd := 'CMD="REFUND_ON"'
-   _cmd += _razmak1 + 'NUM="' + AllTrim( broj_rn ) + '"'
+   cCommand := 'cCmd="REFUND_ON"'
+   cCommand += cRazmak1 + 'NUM="' + AllTrim( broj_rn ) + '"'
 
-   RETURN _cmd
+   RETURN cCommand
 
 
 // -------------------------------------------------
 // ponistavanje footer-a
 // -------------------------------------------------
-STATIC FUNCTION _off_footer()
+STATIC FUNCTION hcp_footer_off()
 
-   LOCAL _cmd
+   LOCAL cCommand
 
-   _cmd := 'CMD="FOOTER_OFF"'
+   cCommand := 'cCmd="FOOTER_OFF"'
 
-   RETURN _cmd
+   RETURN cCommand
 
 
 // -------------------------------------------------
-// iskljuci storno racuna
+// iskljuci lStorno racuna
 // -------------------------------------------------
-STATIC FUNCTION _off_storno()
+STATIC FUNCTION hcp_storno_off()
 
-   LOCAL _cmd
+   LOCAL cCommand
 
-   _cmd := 'CMD="REFUND_OFF"'
+   cCommand := 'cCmd="REFUND_OFF"'
 
-   RETURN _cmd
+   RETURN cCommand
 
 
 // -------------------------------------------------
 // ukljuci racun za klijenta
 // -------------------------------------------------
-STATIC FUNCTION _on_partn( ibk )
+STATIC FUNCTION hcp_racun_partner( cIBK )
 
-   LOCAL _cmd
+   LOCAL cCommand
 
-   _cmd := 'CMD="SET_CLIENT"'
-   _cmd += _razmak1 + 'NUM="' + AllTrim( ibk ) + '"'
+   cCommand := 'cCmd="SET_CLIENT"'
+   cCommand += cRazmak1 + 'NUM="' + AllTrim( cIBK ) + '"'
 
-   RETURN _cmd
-
-
+   RETURN cCommand
 
 
-// ------------------------------------------
-// vraca jedinicu mjere
-// ------------------------------------------
-STATIC FUNCTION _g_jmj( jmj )
 
-   LOCAL _ret := "0"
+
+STATIC FUNCTION get_jmj_hcp( cJmj )
+
+   LOCAL cRet := "0"
 
    DO CASE
-   CASE Upper( AllTrim( jmj ) ) = "KOM"
-      _ret := "0"
-   CASE Upper( AllTrim( jmj ) ) = "LIT"
-      _ret := "1"
+   CASE Upper( AllTrim( cJmj ) ) = "KOM"
+      cRet := "0"
+   CASE Upper( AllTrim( cJmj ) ) = "LIT"
+      cRet := "1"
    ENDCASE
 
-   RETURN _ret
+   RETURN cRet
 
 
 
@@ -654,9 +629,11 @@ STATIC FUNCTION _g_jmj( jmj )
 // -----------------------------------------------------
 FUNCTION hcp_z_rpt( hFiskalniParams )
 
-   LOCAL _cmd, _err_level
+   LOCAL cCommand, nErrorLevel
    LOCAL _param_date, _param_time
    LOCAL _rpt_type := "Z"
+   LOCAL _last_date
+   LOCAL _last_time
 
    _param_date := "zadnji_" + _rpt_type + "_izvjestaj_datum"
    _param_time := "zadnji_" + _rpt_type + "_izvjestaj_vrijeme"
@@ -669,8 +646,8 @@ FUNCTION hcp_z_rpt( hFiskalniParams )
       MsgBeep( "Zadnji dnevni izvjestaj radjen " + DToC( _last_date ) + " u " + _last_time )
    ENDIF
 
-   _cmd := 'CMD="Z_REPORT"'
-   _err_level := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+   cCommand := 'cCmd="Z_REPORT"'
+   nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    // upisi zadnji dnevni izvjestaj
    set_metric( _param_date, NIL, Date() )
@@ -683,12 +660,12 @@ FUNCTION hcp_z_rpt( hFiskalniParams )
       MsgO( "resetujem prodaju..." )
 
       // reset sold plu
-      _cmd := 'CMD="RESET_SOLD_PLU"'
-      _err_level := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+      cCommand := 'cCmd="RESET_SOLD_PLU"'
+      nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
       // ako su dinamicki PLU kodovi
-      _cmd := 'CMD="DELETE_ALL_PLU"'
-      _err_level := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+      cCommand := 'cCmd="DELETE_ALL_PLU"'
+      nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
       // resetuj PLU brojac u bazi...
       auto_plu( .T., .T., hFiskalniParams )
@@ -706,13 +683,13 @@ FUNCTION hcp_z_rpt( hFiskalniParams )
       Sleep( 5 )
 
       // unesi polog vrijednosti iz parametra
-      _err_level := hcp_polog( hFiskalniParams, hFiskalniParams[ "auto_avans" ] )
+      nErrorLevel := hcp_polog( hFiskalniParams, hFiskalniParams[ "auto_avans" ] )
 
       MsgC()
 
    ENDIF
 
-   RETURN
+   RETURN .T.
 
 
 // -----------------------------------------------------
@@ -720,12 +697,12 @@ FUNCTION hcp_z_rpt( hFiskalniParams )
 // -----------------------------------------------------
 FUNCTION hcp_x_rpt( hFiskalniParams )
 
-   LOCAL _cmd, _err
+   LOCAL cCommand, nError
 
-   _cmd := 'CMD="X_REPORT"'
-   _err := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+   cCommand := 'cCmd="X_REPORT"'
+   nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -736,11 +713,13 @@ FUNCTION hcp_x_rpt( hFiskalniParams )
 // -----------------------------------------------------
 FUNCTION hcp_s_rpt( hFiskalniParams )
 
-   LOCAL _cmd
+   LOCAL cCommand
    LOCAL _date_from := Date() -30
    LOCAL _date_to := Date()
    LOCAL _txt_date_from := ""
    LOCAL _txt_date_to := ""
+   LOCAL GetList := {}
+   LOCAL nError
 
    Box(, 1, 50 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Datum od:" GET _date_from
@@ -749,49 +728,50 @@ FUNCTION hcp_s_rpt( hFiskalniParams )
    BoxC()
 
    IF LastKey() == K_ESC
-      RETURN
+      RETURN .F.
    ENDIF
 
    _txt_date_from := fprint_formatiranje_datuma( _date_from )
    _txt_date_to := fprint_formatiranje_datuma( _date_to )
 
-   _cmd := 'CMD="SUMMARY_REPORT" FROM="' + _txt_date_from + '" TO="' + _txt_date_to + '"'
-   _err := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+   cCommand := 'cCmd="SUMMARY_REPORT" FROM="' + _txt_date_from + '" TO="' + _txt_date_to + '"'
+   nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-   RETURN
+   RETURN .T.
 
 
 
 // -----------------------------------------------------
 // vraca broj fiskalnog racuna
 // -----------------------------------------------------
-FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, storno )
+FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
 
-   LOCAL _cmd
-   LOCAL _fiscal_no := 0
-   LOCAL _f_state := "BILL_S~1.XML"
+   LOCAL cCommand
+   LOCAL nBrojFiskalnog := 0
+   LOCAL cFajlOdgovora := "BILL_S~1.XML"
+   LOCAL nError
 
 #ifdef __PLATFORM__UNIX
 
-   _f_state := "bill_state.xml"
+   cFajlOdgovora := "bill_state.xml"
 #endif
 
    // posalji komandu za stanje fiskalnog racuna
-   _cmd := 'CMD="RECEIPT_STATE"'
-   _err := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+   cCommand := 'cCmd="RECEIPT_STATE"'
+   nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN _fiscal_no := 999
+      RETURN nBrojFiskalnog := 999
    ENDIF
 
    // ako nema gresaka, iscitaj broj racuna
-   IF _err = 0
-      // e sada iscitaj iz fajla
-      _fiscal_no := hcp_read_billstate( hFiskalniParams, _f_state, storno )
+   IF nError == 0
+      // iscitaj iz fajla
+      nBrojFiskalnog := hcp_read_odgovor( hFiskalniParams, cFajlOdgovora, lStorno )
    ENDIF
 
-   RETURN _fiscal_no
+   RETURN nBrojFiskalnog
 
 
 
@@ -802,12 +782,13 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, storno )
 // -----------------------------------------------------
 FUNCTION hcp_reset( hFiskalniParams )
 
-   LOCAL _cmd
+   LOCAL cCommand
+   LOCAL nError
 
-   _cmd := 'CMD="RESET_SOLD_PLU"'
-   _err := hcp_cmd( hFiskalniParams, _cmd, _tr_cmd )
+   cCommand := 'cCmd="RESET_SOLD_PLU"'
+   nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -816,9 +797,11 @@ FUNCTION hcp_reset( hFiskalniParams )
 // ---------------------------------------------------
 // polog pazara
 // ---------------------------------------------------
-FUNCTION hcp_polog( dev_param, value )
+FUNCTION hcp_polog( hDevParams, value )
 
-   LOCAL _cmd
+   LOCAL cCommand
+   LOCAL GetList := {}
+   LOCAL nError
 
    IF value == nil
       value := 0
@@ -833,24 +816,23 @@ FUNCTION hcp_polog( dev_param, value )
       BoxC()
 
       IF LastKey() == K_ESC .OR. value = 0
-         RETURN
+         RETURN .F.
       ENDIF
 
    ENDIF
 
    IF value < 0
       // polog komanda
-      _cmd := 'CMD="CASH_OUT"'
+      cCommand := 'cCmd="CASH_OUT"'
    ELSE
       // polog komanda
-      _cmd := 'CMD="CASH_IN"'
+      cCommand := 'cCmd="CASH_IN"'
    ENDIF
 
-   _cmd += _razmak1 + 'VALUE="' +  AllTrim( Str( Abs( value ), 12, 2 ) ) + '"'
+   cCommand += cRazmak1 + 'VALUE="' +  AllTrim( Str( Abs( value ), 12, 2 ) ) + '"'
+   nError := hcp_cmd( hDevParams, cCommand, s_cTrigerCMD )
 
-   _err := hcp_cmd( dev_param, _cmd, _tr_cmd )
-
-   RETURN
+   RETURN .T.
 
 
 
@@ -858,12 +840,13 @@ FUNCTION hcp_polog( dev_param, value )
 // ---------------------------------------------------
 // stampa kopije racuna
 // ---------------------------------------------------
-FUNCTION hcp_rn_copy( dev_param )
+FUNCTION hcp_rn_copy( hDevParams )
 
-   LOCAL _cmd
+   LOCAL cCommand
    LOCAL _broj_rn := Space( 10 )
    LOCAL _refund := "N"
-   LOCAL _err := 0
+   LOCAL nError := 0
+   LOCAL GetList := {}
 
    // box - daj broj racuna
    Box(, 2, 50 )
@@ -875,113 +858,116 @@ FUNCTION hcp_rn_copy( dev_param )
    BoxC()
 
    IF LastKey() == K_ESC
-      RETURN
+      RETURN .F.
    ENDIF
 
    IF _refund == "N"
       // obicni racun
-      _cmd := 'CMD="RECEIPT_COPY"'
+      cCommand := 'cCmd="RECEIPT_COPY"'
    ELSE
       // reklamni racun
-      _cmd := 'CMD="REFUND_RECEIPT_COPY"'
+      cCommand := 'cCmd="REFUND_RECEIPT_COPY"'
    ENDIF
 
-   _cmd += _razmak1 + 'NUM="' +  AllTrim( _broj_rn ) + '"'
+   cCommand += cRazmak1 + 'NUM="' +  AllTrim( _broj_rn ) + '"'
 
-   _err := hcp_cmd( dev_param, _cmd, _tr_cmd )
+   nError := hcp_cmd( hDevParams, cCommand, s_cTrigerCMD )
 
-   RETURN
+   RETURN .T.
 
 
 
 // --------------------------------------------
 // cekanje na fajl odgovora
 // --------------------------------------------
-STATIC FUNCTION hcp_read_ok( dev_param, f_name, time_out )
+STATIC FUNCTION hcp_read_cmd_ok( hDevParams, cFileName, nTimeOut )
 
-   LOCAL _ok := .T.
-   LOCAL _tmp
-   LOCAL _time
+   LOCAL nError := 0
+   LOCAL cTmp
 
-   IF time_out == nil
-      time_out := 30
+   IF nTimeOUT == nil
+      nTimeOUT := 30
    ENDIF
 
-   _time := time_out
-
-   _tmp := dev_param[ "out_dir" ] + _answ_dir + SLASH + StrTran( f_name, "XML", "OK" )
+   cTmp := hDevParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "OK" )
 
    Box(, 3, 60 )
+  
+   @ box_x_koord() + 0, box_y_koord() + 10 SAY "<Alt-Q> prekid"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY _u("Uređaj ID: ") + AllTrim( Str( hDevParams[ "id" ] ) ) + " : " + PadR( hDevParams[ "name" ], 40 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( dev_param[ "id" ] ) ) + ;
-      " : " + PadR( dev_param[ "name" ], 40 )
+   DO WHILE nTimeOut > 0 
+      
+      IF (LastKey() == K_ALT_Q) .AND. Pitanje(,"Prekinuti slanje na fiskalni ?", "N" ) == "D"
+         BoxC()
+         altd()
+         RETURN ERROR_ALT_Q
+      ENDIF
 
-   DO WHILE _time > 0
+      -- nTimeOut
+      Sleep( 0.2 )
 
-      -- _time
-
-      Sleep( 1 )
-
-      IF File( _tmp )
+      IF File( cTmp )
          // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
 
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "Cekam odgovor OK: " + AllTrim( Str( _time ) ), 48 )
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( _u("Čekam odgovor HCP OK: ") + AllTrim( Str( nTimeOut ) ), 48 )
 
-      IF _time == 0 .OR. LastKey() == K_ALT_Q
+      IF nTimeOut == 0
          BoxC()
-         _ok := .F.
-         RETURN _ok
+         RETURN -10
       ENDIF
+
+      Sleep( 0.4 )
 
    ENDDO
 
    BoxC()
 
-   IF !File( _tmp )
-      _ok := .F.
+   IF !File( cTmp )
+      nError := -1
    ELSE
       // obrisi fajl "OK"
-      FErase( _tmp )
+      FErase( cTmp )
    ENDIF
 
-   RETURN _ok
+   RETURN nError
 
 
 
 
 // ----------------------------------
-// create cmd.ok file
+// create cCmd.ok file
 // ----------------------------------
 FUNCTION hcp_create_cmd_ok( hFiskalniParams )
 
-   LOCAL _tmp
+   LOCAL cTmp
 
-   _tmp := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _cmdok
+   cTmp := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + _cmdok
 
    // iskoristit cu postojecu funkciju za kreiranje xml fajla...
-   create_xml( _tmp )
+   create_xml( cTmp )
    close_xml()
 
-   RETURN
+   RETURN .T.
 
 
 
 // ----------------------------------
-// delete cmd.ok file
+// delete cCmd.ok file
 // ----------------------------------
 FUNCTION hcp_delete_cmd_ok( hFiskalniParams )
 
-   LOCAL _tmp
+   LOCAL cTmp
 
-   _tmp := hFiskalniParams[ "out_dir" ] + _inp_dir + SLASH + _cmdok
+   cTmp := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + _cmdok
 
-   IF FErase( _tmp ) < 0
-      MsgBeep( "greska sa brisanjem fajla CMD.OK !" )
+   IF FErase( cTmp ) < 0
+      MsgBeep( "greska sa brisanjem fajla cCmd.OK !" )
    ENDIF
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -990,18 +976,18 @@ FUNCTION hcp_delete_cmd_ok( hFiskalniParams )
 // --------------------------------------------------
 // brise fajl greske
 // --------------------------------------------------
-FUNCTION hcp_delete_error( hFiskalniParams, f_name )
+FUNCTION hcp_delete_error( hFiskalniParams, cFileName )
 
-   LOCAL _err := 0
-   LOCAL _f_name
+   LOCAL nError := 0
+   LOCAL cFiskalniFileName
 
    // primjer: c:\hcp\from_fp\RAC001.ERR
-   _f_name := hFiskalniParams[ "out_dir" ] + _answ_dir + SLASH + StrTran( f_name, "XML", "ERR" )
-   IF FErase( _f_name ) < 0
+   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "ERR" )
+   IF FErase( cFiskalniFileName ) < 0
       MsgBeep( "greska sa brisanjem fajla..." )
    ENDIF
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -1013,39 +999,39 @@ FUNCTION hcp_delete_error( hFiskalniParams, f_name )
 //
 // nTimeOut - time out fiskalne operacije
 // ------------------------------------------------
-FUNCTION hcp_read_billstate( hFiskalniParams, f_name, storno )
+FUNCTION hcp_read_odgovor( hFiskalniParams, cFileName, lStorno )
 
-   LOCAL _fisc_no
-   LOCAL _o_file, _time, _f_name
-   LOCAL _err := 0
-   LOCAL _bill_data, _line, _scan_txt, _scan
-   LOCAL _receipt, _msg
+   LOCAL nBrojFiskalnog
+   LOCAL oFile, nTime, cFiskalniFileName
+   LOCAL nError := 0
+   LOCAL aRacunData, cLine, cScanTxt, nScan
+   LOCAL _receipt, cMsg
 
-   IF storno == nil
-      storno := .F.
+   IF lStorno == nil
+      lStorno := .F.
    ENDIF
 
-   _time := hFiskalniParams[ "timeout" ]
+   nTime := hFiskalniParams[ "timeout" ]
 
    // primjer: c:\hcp\from_fp\bill_state.xml
-   _f_name := hFiskalniParams[ "out_dir" ] + _answ_dir + SLASH + f_name
+   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH + cFileName
 
    Box(, 3, 60 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY _u("Uređaj ID: ") + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
       " : " + PadR( hFiskalniParams[ "name" ], 40 )
-   DO WHILE _time > 0
 
-      -- _time
+   DO WHILE nTime > 0
 
-      IF File( _f_name )
+      -- nTime
+      IF File( cFiskalniFileName )
          // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
 
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "Cekam na fiskalni uredjaj: " + AllTrim( Str( _time ) ), 48 )
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( _u("Čekam na fiskalni uredjaj: ") + AllTrim( Str( nTime ) ), 48 )
 
-      IF _time == 0 .OR. LastKey() == K_ALT_Q
+      IF nTime == 0 .OR. LastKey() == K_ALT_Q
          BoxC()
          RETURN -9
       ENDIF
@@ -1056,64 +1042,63 @@ FUNCTION hcp_read_billstate( hFiskalniParams, f_name, storno )
 
    BoxC()
 
-   IF !File( _f_name )
-      MsgBeep( "Fajl " + _f_name + " ne postoji !!!" )
-      _err := -9
-      RETURN _err
+   IF !File( cFiskalniFileName )
+      MsgBeep( "Fajl " + cFiskalniFileName + " ne postoji !!!" )
+      nError := -9
+      RETURN nError
    ENDIF
 
-   _fisc_no := 0
+   nBrojFiskalnog := 0
 
-   _f_name := AllTrim( _f_name )
+   cFiskalniFileName := AllTrim( cFiskalniFileName )
 
-   _o_file := TFileRead():New( _f_name )
-   _o_file:Open()
+   oFile := TFileRead():New( cFiskalniFileName )
+   oFile:Open()
 
-   IF _o_file:Error()
-      MsgBeep( _o_file:ErrorMsg( "Problem sa otvaranjem fajla: " + _f_name ) )
+   IF oFile:Error()
+      MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " + cFiskalniFileName ) )
       RETURN -9
    ENDIF
 
    // prodji kroz svaku liniju i procitaj zapise
-   WHILE _o_file:MoreToRead()
+   WHILE oFile:MoreToRead()
 
       // uzmi u cLine liniju fajla
-      _line := hb_StrToUTF8( _o_file:ReadLine() )
+      cLine := hb_StrToUTF8( oFile:ReadLine() )
 
-      IF Upper( "xml version" ) $ Upper( _line )
+      IF Upper( "xml version" ) $ Upper( cLine )
          // ovo je prvi red, preskoci
          LOOP
       ENDIF
 
       // zamjeni ove znakove...
-      _line := StrTran( _line, ">", "" )
-      _line := StrTran( _line, "<", "" )
-      _line := StrTran( _line, "'", "" )
+      cLine := StrTran( cLine, ">", "" )
+      cLine := StrTran( cLine, "<", "" )
+      cLine := StrTran( cLine, "'", "" )
 
-      _bill_data := TokToNiz( _line, " " )
+      aRacunData := TokToNiz( cLine, " " )
 
-      _scan_txt := "RECEIPT_NUMBER"
+      cScanTxt := "RECEIPT_NUMBER"
 
-      IF storno
-         _scan_txt := "REFOUND_RECEIPT_NUMBER"
+      IF lStorno
+         cScanTxt := "REFOUND_RECEIPT_NUMBER"
       ENDIF
 
-      _scan := AScan( _bill_data, {| val | _scan_txt $ val } )
+      nScan := AScan( aRacunData, {| val | cScanTxt $ val } )
 
-      IF _scan > 0
+      IF nScan > 0
 
-         _receipt := TokToNiz( _bill_data[ _scan ], "=" )
-         _fisc_no := Val( _receipt[ 2 ] )
+         _receipt := TokToNiz( aRacunData[ nScan ], "=" )
+         nBrojFiskalnog := Val( _receipt[ 2 ] )
 
-         _msg := "Formiran "
+         cMsg := "Formiran "
 
-         IF storno
-            _msg += "rekl."
+         IF lStorno
+            cMsg += "rekl."
          ENDIF
 
-         _msg += "fiskalni racun: "
-
-         MsgBeep( _msg + AllTrim( Str( _fisc_no ) ) )
+         cMsg += "fiskalni racun: "
+         MsgBeep( cMsg + AllTrim( Str( nBrojFiskalnog ) ) )
 
          EXIT
 
@@ -1121,14 +1106,14 @@ FUNCTION hcp_read_billstate( hFiskalniParams, f_name, storno )
 
    ENDDO
 
-   _o_file:Close()
+   oFile:Close()
 
    // brisi fajl odgovora
-   IF _fisc_no > 0
-      FErase( _f_name )
+   IF nBrojFiskalnog > 0
+      FErase( cFiskalniFileName )
    ENDIF
 
-   RETURN _fisc_no
+   RETURN nBrojFiskalnog
 
 
 
@@ -1138,87 +1123,87 @@ FUNCTION hcp_read_billstate( hFiskalniParams, f_name, storno )
 // nTimeOut - time out fiskalne operacije
 // nFisc_no - broj fiskalnog isjecka
 // ------------------------------------------------
-FUNCTION hcp_read_error( hFiskalniParams, f_name, trig )
+FUNCTION hcp_read_error( hFiskalniParams, cFileName )
 
-   LOCAL _err := 0
-   LOCAL _f_name, nI, _time
-   LOCAL _fiscal_no, _line, _o_file
-   LOCAL _err_code, _err_descr
+   LOCAL nError := 0
+   LOCAL cFiskalniFileName, nI, nTime
+   LOCAL nBrojFiskalnog, cLine, oFile
+   LOCAL cErrorCode, _err_descr
+   LOCAL aErrors
 
-   _time := hFiskalniParams[ "timeout" ]
+   nTime := hFiskalniParams[ "timeout" ]
 
    // primjer: c:\hcp\from_fp\RAC001.ERR
-   _f_name := hFiskalniParams[ "out_dir" ] + _answ_dir + SLASH + StrTran( f_name, "XML", "ERR" )
+   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "ERR" )
 
-   Box(, 3, 60 )
+   Box("#hcp_read_err", 3, 60 )
 
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
+   @ box_x_koord(), box_y_koord() + 35 SAY "<Alt-Q> Prekid"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY _u("Uređaj ID: ") + AllTrim( Str( hFiskalniParams[ "id" ] ) ) + ;
       " : " + PadR( hFiskalniParams[ "name" ], 40 )
 
-   DO WHILE _time > 0
+   DO WHILE nTime > 0 .OR. LastKey() == K_ALT_Q
 
-      -- _time
-
-      IF File( _f_name )
+      -- nTime
+      IF File( cFiskalniFileName )
          // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
 
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "Cekam na fiskalni uredjaj: " + AllTrim( Str( _time ) ), 48 )
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( _u("Čekam na fiskalni uređaj: ") + AllTrim( Str( nTime ) ), 48 )
 
-      IF _time == 0 .OR. LastKey() == K_ESC
+      IF nTime == 0 .OR. LastKey() == K_ALT_Q
          BoxC()
          RETURN -9
       ENDIF
 
-      Sleep( 1 )
+      Sleep( 0.7 )
 
    ENDDO
 
    BoxC()
 
-   IF !File( _f_name )
-      MsgBeep( "Fajl " + _f_name + " ne postoji !!!" )
-      _err := -9
-      RETURN _err
+   IF !File( cFiskalniFileName )
+      MsgBeep( "Fajl " + cFiskalniFileName + " ne postoji !!!" )
+      nError := -9
+      RETURN nError
    ENDIF
 
-   _fiscal_no := 0
+   nBrojFiskalnog := 0
 
-   _o_file := TFileRead():New( _f_name )
-   _o_file:Open()
+   oFile := TFileRead():New( cFiskalniFileName )
+   oFile:Open()
 
-   IF _o_file:Error()
-      MsgBeep( _o_file:ErrorMsg( "Problem sa otvaranjem fajla: " + _f_name ) )
+   IF oFile:Error()
+      MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " + cFiskalniFileName ) )
       RETURN -9
    ENDIF
 
-   _err_code := ""
+   cErrorCode := ""
 
    // prodji kroz svaku liniju i procitaj zapise
-   WHILE _o_file:MoreToRead()
+   WHILE oFile:MoreToRead()
 
       // uzmi u cLine liniju fajla
-      _line := hb_StrToUTF8( _o_file:ReadLine() )
-      _a_err := TokToNiz( _line, "-" )
+      cLine := hb_StrToUTF8( oFile:ReadLine() )
+      aErrors := TokToNiz( cLine, "-" )
 
       // ovo je kod greske, npr. 1
-      _err_code := AllTrim( _a_err[ 1 ] )
-      _err_descr := AllTrim( _a_err[ 2 ] )
+      cErrorCode := AllTrim( aErrors[ 1 ] )
+      _err_descr := AllTrim( aErrors[ 2 ] )
 
-      IF !Empty( _err_code )
+      IF !Empty( cErrorCode )
          EXIT
       ENDIF
 
    ENDDO
 
-   _o_file:Close()
+   oFile:Close()
 
-
-   IF !Empty( _err_code )
-      MsgBeep( "Greska: " + _err_code + " - " + _err_descr )
-      _err := Val( _err_code )
-      FErase( _f_name )
+   IF !Empty( cErrorCode )
+      MsgBeep( "Greska: " + cErrorCode + " - " + _err_descr )
+      nError := Val( cErrorCode )
+      FErase( cFiskalniFileName )
    ENDIF
 
-   RETURN _err
+   RETURN nError

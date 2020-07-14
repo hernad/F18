@@ -752,13 +752,13 @@ FUNCTION tring_read_error( dev_param, fisc_no, trig )
    LOCAL nErr := 0
    LOCAL _trig := trg_trig( trig )
    LOCAL cFileName
-   LOCAL nI, _time
+   LOCAL nI, nTime
    LOCAL _err_data, _scan, cErrorTxt
    LOCAL _ok
    LOCAL oFile
    LOCAL cFiskalniTxt
 
-   _time := dev_param[ "timeout" ]
+   nTime := dev_param[ "timeout" ]
 
    // primjer: c:\tring\xml\odgovori\sfr.001
    cFileName := dev_param[ "out_dir" ] + ;
@@ -773,15 +773,15 @@ FUNCTION tring_read_error( dev_param, fisc_no, trig )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Uredjaj ID: " + AllTrim( Str( dev_param[ "id" ] ) ) + ;
       " : " + PadR( dev_param[ "name" ], 40 )
 
-   DO WHILE _time > 0
+   DO WHILE nTime > 0
 
-      -- _time
+      -- nTime
       IF File( cFileName )
          // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
 
-      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( "Cekam na fiskalni uredjaj: " + AllTrim( Str( _time ) ), 48 )
+      @ box_x_koord() + 3, box_y_koord() + 2 SAY PadR( _u("Čekam na fiskalni uredjaj: ") + AllTrim( Str( nTime ) ), 48 )
 
       sleep( 1 )
 

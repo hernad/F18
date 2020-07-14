@@ -1,6 +1,6 @@
 @echo off
 
-set F18_DEBUG=1
+set F18_DEBUG=
 set F18_POS=1
 SET F18_GT_CONSOLE=1
 
@@ -9,6 +9,10 @@ set HB_DBG_PATH=%HB_DBG%\common;%HB_DBG%\pos;%HB_DBG%\kalk;%HB_DBG%\fin;%HB_DBG%
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\core_reporting
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\fiskalizacija
 
+
+IF EXIST tmpFile (
+    del tmpFile
+)
 
 REM get F18 version from package.json
 set NODE_PROG=const json=require('./package.json') ; console.log(json.f18)
@@ -83,7 +87,6 @@ IF [%BUILD_ARCH%]==[64] (
 
 )
 
-
 set LINE=#define F18_VER_DEFINED
 echo %LINE% > include\f18_ver.ch
 
@@ -122,7 +125,7 @@ type include\f18_ver.ch
 echo ======================================================
 
 
-REM hbmk2 F18 -clean
+hbmk2 F18 -clean
 REM hbmk2 F18 -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
 hbmk2 F18 -trace-
 

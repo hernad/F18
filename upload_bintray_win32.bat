@@ -1,3 +1,5 @@
+@echo off
+
 REM BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 
 set CURRENT_DIR=%~dp0
@@ -19,12 +21,15 @@ del tmpFile
 REM F18-windows-x64_4.20.0.zip
 set ZIP_FILE=%BINTRAY_PACKAGE%_%F18_VERSION%.zip
 
-REM x64
-IF [%BUILD_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\%BUILD_ARCH%\harbour
+if [%HARBOUR_ROOT%] EQU [] (
+  REM x64
+  IF [%BUILD_ARCH%] EQU [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\%BUILD_ARCH%\harbour
 
-REM x86
-IF [%BUILD_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\%BUILD_ARCH%\harbour
+  REM x86
+  IF [%BUILD_ARCH%] NEQ [x64] set HARBOUR_ROOT=\users\%USERNAME%\ah\%BUILD_ARCH%\harbour
+)
 
+echo ==== HARBOUR_ROOT=%HARBOUR_ROOT% ====
 
 REM x64
 REM IF [%BUILD_ARCH%] EQU  [x64] move .build\win32-x64\user-setup\eShellSetup.exe eShellSetup-x64-%F18_VERSION%.exe
@@ -48,8 +53,9 @@ IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libssl-1_1.dll
 
 mkdir tmp
 cd tmp
+echo copy %HARBOR_ROOT%\bin\*.* => %CD%
 copy %HARBOR_ROOT%\bin\*.* .
-move ..\F18-klijent.exe .
+copy /y ..\F18-klijent.exe .
 echo copy harbour binaries (exe, dll) to tmp ...
 copy /y %HARBOUR_ROOT%\bin\*.* .
 

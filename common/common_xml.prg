@@ -14,13 +14,19 @@
 
 FUNCTION create_xml( cFile )
 
+   LOCAL oError
+   
    IF cFile == nil
       cFile := my_home() + "data.xml"
    ENDIF
 
-   SET PRINTER to ( cFile )
-   SET PRINTER ON
-   SET CONSOLE OFF
+   BEGIN SEQUENCE WITH {| oErr | Break( oErr ) }
+      SET PRINTER to ( cFile )
+      SET PRINTER ON
+      SET CONSOLE OFF
+   RECOVER USING oError
+      error_bar( "xml",  oError:description + " : " + cFile )
+   END SEQUENCE
 
    RETURN .T.
 
@@ -43,6 +49,7 @@ FUNCTION xml_head( lWrite, cTxt )
    ENDIF
 
    RETURN cTxt
+
 
 FUNCTION xml_node( cName, cData, lWrite )
 
