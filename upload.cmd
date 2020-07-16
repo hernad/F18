@@ -1,9 +1,7 @@
 @echo off
 
-
 set CURRENT_DIR=%~dp0
 echo %CURRENT_DIR%
-goto end
 
 REM get architecture x64, x32
 set NODE_PROG=console.log( process.arch === "x64" ? "x64" : "x86");
@@ -11,7 +9,10 @@ echo %NODE_PROG% | node > tmpFile
 set /p BUILD_ARCH= < tmpFile
 del tmpFile
 
+echo BUILD_ARCH=%BUILD_ARCH%
+
 IF EXIST tmp (
+  echo delete tmp ...
   c:\cygwin64\bin\rm -rf tmp
 )
 
