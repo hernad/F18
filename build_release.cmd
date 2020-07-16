@@ -9,6 +9,9 @@ set HB_DBG_PATH=%HB_DBG%\common;%HB_DBG%\pos;%HB_DBG%\kalk;%HB_DBG%\fin;%HB_DBG%
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\core_reporting
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\fiskalizacija
 
+set CL_X86=0
+set CL_X64=0
+
 
 IF EXIST tmpFile (
     del tmpFile
@@ -79,7 +82,7 @@ IF [%BUILD_ARCH%]==[64] (
     IF [%CL_X86%]==[1] (
         echo ====== MSVC cl x86 ok =========
     ) ELSE (
-        echo ERROR cl x86 nije u PATH-u!
+        echo ERROR [CL_X64=%CL_X86%] cl x86 nije u PATH-u!
         echo run c:\dev\x86_VS_2019.lnk
         goto end
     )
