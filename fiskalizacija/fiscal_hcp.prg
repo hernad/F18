@@ -257,7 +257,7 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
 
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q 
+   IF (nErrorLevel := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
       nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerRCP )
    ELSE
       RETURN ERROR_ALT_Q
@@ -339,9 +339,12 @@ FUNCTION hcp_footer( hFiskalniParams, footer )
    // kreiraj triger cmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
-      nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerFooterXML )
+   nError := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )
+   IF nError == ERROR_ALT_Q .OR. nError == 0
+      RETURN nError
    ENDIF
+
+   nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerFooterXML )
 
    RETURN nError
 
@@ -389,10 +392,12 @@ FUNCTION hcp_cli( hFiskalniParams, aHeader )
 
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
-      // procitaj poruku greske
-      nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerClientsXML )
+   nError := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )   
+   IF nError == ERROR_ALT_Q .OR. nError == 0
+      RETURN nError
    ENDIF
+
+   nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerClientsXML )
 
    RETURN nError
 
@@ -446,10 +451,12 @@ FUNCTION hcp_plu( hFiskalniParams, aItems )
 
 
    hcp_create_cmd_ok( hFiskalniParams )
-   IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
-      // procitaj poruku greske
-      nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerPLU )
+   nError := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )
+   IF nError == ERROR_ALT_Q .OR. nError == 0
+      RETURN nError
    ENDIF
+
+   nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerPLU )
 
    RETURN nError
 
@@ -458,14 +465,15 @@ FUNCTION hcp_plu( hFiskalniParams, aItems )
 // -------------------------------------------------------------------
 // ispis nefiskalnog teksta
 // -------------------------------------------------------------------
-FUNCTION hcp_txt( hFiskalniParams, br_dok )
+FUNCTION hcp_txt( hFiskalniParams, cBrDok )
 
    LOCAL cCommand := ""
    LOCAL cXmlFile, cData, cTmp
-   LOCAL nErrorLevel := 0
+   LOCAL nError := 0
    LOCAL cFiskalniFileName
 
-   cCommand := 'TXT="POS RN: ' + AllTrim( br_dok ) + '"'
+
+   cCommand := 'TXT="POS RN: ' + AllTrim( cBrDok ) + '"'
 
    cFiskalniFileName := fiscal_out_filename( hFiskalniParams[ "out_file" ], s_cZahtjevNula, s_cTrigerTXT )
 
@@ -493,23 +501,25 @@ FUNCTION hcp_txt( hFiskalniParams, br_dok )
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN nErrorLevel
+      RETURN nError
    ENDIF
 
    hcp_create_cmd_ok( hFiskalniParams )
 
-   IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
-      // procitaj poruku greske
-      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerTXT )
+   hcp_create_cmd_ok( hFiskalniParams )
+   nError := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )
+   IF nError == ERROR_ALT_Q .OR. nError == 0
+      RETURN nError
    ENDIF
+   nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerPLU )
 
-   RETURN nErrorLevel
+   RETURN nError
 
 
 FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
 
    LOCAL cXmlFile
-   LOCAL nErrorLevel := 0
+   LOCAL nError := 0
    LOCAL cFiskalniFileName
    LOCAL cData
    LOCAL cTmp
@@ -527,7 +537,6 @@ FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
 
       cData := "DATA"
       cTmp := cCmd
-
       xml_single_node( cData, cTmp )
 
    ENDIF
@@ -537,16 +546,19 @@ FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
 
    // testni rezim uredjaja
    IF hFiskalniParams[ "print_fiscal" ] == "T"
-      RETURN nErrorLevel
+      RETURN nError
    ENDIF
 
    hcp_create_cmd_ok( hFiskalniParams )
-
-   IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) > ERROR_ALT_Q
-      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, cTrigerCMD )
+   nError := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )
+   IF nError == ERROR_ALT_Q .OR. nError == 0
+      RETURN nError
    ENDIF
 
-   RETURN nErrorLevel
+   nError := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerPLU )
+
+
+   RETURN nError
 
 
 // -------------------------------------------------
@@ -741,13 +753,14 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
 
    LOCAL cCommand
    LOCAL nBrojFiskalnog := 0
-   LOCAL cFajlOdgovora := "BILL_S~1.XML"
+   //LOCAL cFajlOdgovora := "BILL_S~1.XML"
+   LOCAL cFajlOdgovora := "bill_state.xml"
    LOCAL nError
 
-#ifdef __PLATFORM__UNIX
+//#ifdef __PLATFORM__UNIX
 
-   cFajlOdgovora := "bill_state.xml"
-#endif
+   
+//#endif
 
    // posalji komandu za stanje fiskalnog racuna
    cCommand := 'CMD="RECEIPT_STATE"'
@@ -760,12 +773,10 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
 
    // ako nema gresaka, iscitaj broj racuna
    IF nError == 0
-      // iscitaj iz fajla
-      nBrojFiskalnog := hcp_read_odgovor( hFiskalniParams, cFajlOdgovora, lStorno )
+      nBrojFiskalnog := hcp_read_broj_racuna( hFiskalniParams, cFajlOdgovora, lStorno )
    ENDIF
 
    RETURN nBrojFiskalnog
-
 
 
 
@@ -869,11 +880,7 @@ FUNCTION hcp_rn_copy( hDevParams )
    RETURN .T.
 
 
-
-// --------------------------------------------
-// cekanje na fajl odgovora
-// --------------------------------------------
-STATIC FUNCTION hcp_read_cmd_ok( hDevParams, cFileName, nTimeOut )
+STATIC FUNCTION hcp_read_odgovor( hDevParams, cFileName, nTimeOut )
 
    LOCAL nError := 0
    LOCAL cTmp
@@ -977,15 +984,12 @@ FUNCTION hcp_delete_error( hFiskalniParams, cFileName )
 
 
 
-
-
-
-// ------------------------------------------------
+// -----------------------------------------------
 // citanje fajla bill_state.xml
 //
 // nTimeOut - time out fiskalne operacije
 // ------------------------------------------------
-FUNCTION hcp_read_odgovor( hFiskalniParams, cFileName, lStorno )
+FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFileName, lStorno )
 
    LOCAL nBrojFiskalnog
    LOCAL oFile, nTime, cFiskalniFileName
