@@ -27,6 +27,7 @@ STATIC s_cTrigerClientsXML := "clients.XML"
 STATIC s_cTrigerFooterXML := "footer.XML"
 
 #define ERROR_ALT_Q -100
+#define ERROR_NO_RESPONSE_FILE -100
 
 // fiskalne funkcije HCP fiskalizacije
 
@@ -103,7 +104,6 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
    ENDIF
 
    IF lStorno // ako je lStorno posalji predkomandu
-
       // daj mi lStorno komandu
       cReklamiraniRn := AllTrim( aItems[ 1, 8 ] )
       cCommand := _on_storno( cReklamiraniRn )
@@ -138,7 +138,7 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
       cCommand := hcp_racun_partner( cIBK )
       nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
-      IF nErrorLevel > 0
+      IF nErrorLevel <> 0
          RETURN nErrorLevel
       ENDIF
    ENDIF
@@ -217,7 +217,6 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
          cTmp += cRazmak1 + 'DS_VALUE="' + AllTrim( Str( nRabat, 12, 2 ) ) + '"'
          // vrijednost popusta
          cTmp += cRazmak1 + 'DISCOUNT="' + "true" + '"'
-
       ENDIF
 
       xml_single_node( "DATA", cTmp )
@@ -232,7 +231,6 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
    // "KARTICA"
    //
    // iznos = 0, ako je 0 onda sve ide tom vrstom placanja
-
    cVrstaPlacanja := fiskalni_vrsta_placanja( aItems[ 1, 13 ], "HCP" )
    nTotalPlacanje := Abs( nRacunTotal )
 
@@ -256,11 +254,14 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
    ENDIF
 
    hcp_create_cmd_ok( hFiskalniParams )
-
-   IF (nErrorLevel := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
-      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerRCP )
-   ELSE
+   nErrorLevel := hcp_read_odgovor( hFiskalniParams, cFiskalniFileName )
+   
+   IF nErrorLevel == ERROR_ALT_Q
       RETURN ERROR_ALT_Q
+   ENDIF
+
+   IF nErrorLevel <> 0
+      nErrorLevel := hcp_read_error( hFiskalniParams, cFiskalniFileName, s_cTrigerRCP )
    ENDIF
 
    RETURN nErrorLevel
@@ -534,7 +535,6 @@ FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
    xml_subnode( "COMMAND" )
 
    IF !Empty( cCmd )
-
       cData := "DATA"
       cTmp := cCmd
       xml_single_node( cData, cTmp )
@@ -746,9 +746,6 @@ FUNCTION hcp_s_rpt( hFiskalniParams )
 
 
 
-// -----------------------------------------------------
-// vraca broj fiskalnog racuna
-// -----------------------------------------------------
 FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
 
    LOCAL cCommand
@@ -757,12 +754,7 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
    LOCAL cFajlOdgovora := "bill_state.xml"
    LOCAL nError
 
-//#ifdef __PLATFORM__UNIX
 
-   
-//#endif
-
-   // posalji komandu za stanje fiskalnog racuna
    cCommand := 'CMD="RECEIPT_STATE"'
    nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
@@ -882,14 +874,13 @@ FUNCTION hcp_rn_copy( hDevParams )
 
 STATIC FUNCTION hcp_read_odgovor( hDevParams, cFileName, nTimeOut )
 
-   LOCAL nError := 0
-   LOCAL cTmp
+   LOCAL cResponseFile
 
    IF nTimeOUT == nil
       nTimeOUT := 30
    ENDIF
 
-   cTmp := hDevParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "OK" )
+   cResponseFile := hDevParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "OK" )
 
    Box(, 3, 60 )
   
@@ -900,15 +891,13 @@ STATIC FUNCTION hcp_read_odgovor( hDevParams, cFileName, nTimeOut )
       
       IF (LastKey() == K_ALT_Q) .AND. Pitanje(,"Prekinuti slanje na fiskalni ?", "N" ) == "D"
          BoxC()
-         altd()
          RETURN ERROR_ALT_Q
       ENDIF
 
       -- nTimeOut
       Sleep( 0.2 )
 
-      IF File( cTmp )
-         // fajl se pojavio - izadji iz petlje !
+      IF File( cResponseFile ) // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
 
@@ -925,14 +914,14 @@ STATIC FUNCTION hcp_read_odgovor( hDevParams, cFileName, nTimeOut )
 
    BoxC()
 
-   IF !File( cTmp )
-      nError := -1
+   IF !File( cResponseFile )
+      error_bar("hcp", "NO " + cResponseFile)
+      return ERROR_NO_RESPONSE_FILE
    ELSE
-      // obrisi fajl "OK"
-      FErase( cTmp )
+      FErase( cResponseFile )
    ENDIF
 
-   RETURN nError
+   RETURN 0
 
 
 
