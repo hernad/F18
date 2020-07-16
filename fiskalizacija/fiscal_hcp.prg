@@ -14,7 +14,7 @@
 
 STATIC s_CmdOK := "CMD.OK"
 STATIC cRazmak1 := " "
-STATIC cAnswerDirectory := "FROM_FP"
+STATIC s_cAnswerDirectory := "FROM_FP"
 STATIC s_cInputDir := "TO_FP"
 STATIC s_cZahtjevNula := "0"
 
@@ -28,6 +28,7 @@ STATIC s_cTrigerFooterXML := "footer.XML"
 
 #define ERROR_ALT_Q -100
 #define ERROR_NO_RESPONSE_FILE -100
+#define ERROR_READ_FILE -9
 
 // fiskalne funkcije HCP fiskalizacije
 
@@ -268,9 +269,7 @@ FUNCTION fiskalni_hcp_racun( hFiskalniParams, aItems, aHeader, lStorno, nRacunTo
 
 
 
-// ----------------------------------------------
-// brise fajlove iz ulaznog direktorija
-// ----------------------------------------------
+
 FUNCTION hcp_delete_tmp( hFiskalniParams, lDeleteAll )
 
    LOCAL cTmp, cFiskalniFileName
@@ -291,7 +290,7 @@ FUNCTION hcp_delete_tmp( hFiskalniParams, lDeleteAll )
    IF lDeleteAll
 
       // output direktorij...
-      cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH
+      cFiskalniFileName := hFiskalniParams[ "out_dir" ] + s_cAnswerDirectory + SLASH
       cTmp := "*.*"
       AEval( Directory( cFiskalniFileName + cTmp ), {| cFile | FErase( cFiskalniFileName + AllTrim( cFile[ 1 ] ) ) } )
 
@@ -751,9 +750,20 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
    LOCAL cCommand
    LOCAL nBrojFiskalnog := 0
    //LOCAL cFajlOdgovora := "BILL_S~1.XML"
-   LOCAL cFajlOdgovora := "bill_state.xml"
+   LOCAL cFajlRacunOdgovor
    LOCAL nError
 
+   // primjer: c:\hcp\from_fp\bill_state.xml
+   cFajlRacunOdgovor := hFiskalniParams[ "out_dir" ] + s_cAnswerDirectory + SLASH + "bill_state.xml"
+
+   IF File(cFajlRacunOdgovor)
+      FErase( cFajlRacunOdgovor)
+   ENDIF
+
+   IF File(cFajlRacunOdgovor)
+     error_bar("hcp", "RESP_FILE_ERR_BRISI :" + cFajlRacunOdgovor)
+     RETURN 0
+   ENDIF
 
    cCommand := 'CMD="RECEIPT_STATE"'
    nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
@@ -765,7 +775,7 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
 
    // ako nema gresaka, iscitaj broj racuna
    IF nError == 0
-      nBrojFiskalnog := hcp_read_broj_racuna( hFiskalniParams, cFajlOdgovora, lStorno )
+      nBrojFiskalnog := hcp_read_broj_racuna( hFiskalniParams, cFajlRacunOdgovor, lStorno )
    ENDIF
 
    RETURN nBrojFiskalnog
@@ -848,7 +858,7 @@ FUNCTION hcp_rn_copy( hDevParams )
    Box(, 2, 50 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Broj racuna:" GET _broj_rn ;
       VALID !Empty( _broj_rn )
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "racun je reklamni (D/N)?" GET _refund ;
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY "racun je storno (D/N)?" GET _refund ;
       VALID _refund $ "DN" PICT "@!"
    READ
    BoxC()
@@ -880,7 +890,7 @@ STATIC FUNCTION hcp_read_odgovor( hDevParams, cFileName, nTimeOut )
       nTimeOUT := 30
    ENDIF
 
-   cResponseFile := hDevParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "OK" )
+   cResponseFile := hDevParams[ "out_dir" ] + s_cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "OK" )
 
    Box(, 3, 60 )
   
@@ -964,7 +974,7 @@ FUNCTION hcp_delete_error( hFiskalniParams, cFileName )
    LOCAL cFiskalniFileName
 
    // primjer: c:\hcp\from_fp\RAC001.ERR
-   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "ERR" )
+   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + s_cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "ERR" )
    IF FErase( cFiskalniFileName ) < 0
       MsgBeep( "greska sa brisanjem fajla..." )
    ENDIF
@@ -978,22 +988,19 @@ FUNCTION hcp_delete_error( hFiskalniParams, cFileName )
 //
 // nTimeOut - time out fiskalne operacije
 // ------------------------------------------------
-FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFileName, lStorno )
+FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFullFileName, lStorno )
 
    LOCAL nBrojFiskalnog
-   LOCAL oFile, nTime, cFiskalniFileName
+   LOCAL oFile, nTime
    LOCAL nError := 0
    LOCAL aRacunData, cLine, cScanTxt, nScan
-   LOCAL _receipt, cMsg
+   LOCAL aRacun, cMsg
 
    IF lStorno == nil
       lStorno := .F.
    ENDIF
 
    nTime := hFiskalniParams[ "timeout" ]
-
-   // primjer: c:\hcp\from_fp\bill_state.xml
-   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH + cFileName
 
    Box(, 3, 60 )
 
@@ -1003,7 +1010,7 @@ FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFileName, lStorno )
    DO WHILE nTime > 0
 
       -- nTime
-      IF File( cFiskalniFileName )
+      IF File( cFullFileName )
          // fajl se pojavio - izadji iz petlje !
          EXIT
       ENDIF
@@ -1021,22 +1028,21 @@ FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFileName, lStorno )
 
    BoxC()
 
-   IF !File( cFiskalniFileName )
-      MsgBeep( "Fajl " + cFiskalniFileName + " ne postoji !!!" )
+   IF !File( cFullFileName )
+      error_bar( "hcp", "Fajl " + cFullFileName + " ne postoji?!" )
       nError := -9
       RETURN nError
    ENDIF
 
    nBrojFiskalnog := 0
+   cFullFileName := AllTrim( cFullFileName )
 
-   cFiskalniFileName := AllTrim( cFiskalniFileName )
-
-   oFile := TFileRead():New( cFiskalniFileName )
+   oFile := TFileRead():New( cFullFileName )
    oFile:Open()
 
    IF oFile:Error()
-      MsgBeep( oFile:ErrorMsg( "Problem sa otvaranjem fajla: " + cFiskalniFileName ) )
-      RETURN -9
+      error_bar("hcp", oFile:ErrorMsg( "FERROR: " + cFullFileName ) )
+      RETURN ERROR_READ_FILE
    ENDIF
 
    // prodji kroz svaku liniju i procitaj zapise
@@ -1049,38 +1055,31 @@ FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFileName, lStorno )
          // ovo je prvi red, preskoci
          LOOP
       ENDIF
-
       // zamjeni ove znakove...
       cLine := StrTran( cLine, ">", "" )
       cLine := StrTran( cLine, "<", "" )
       cLine := StrTran( cLine, "'", "" )
 
       aRacunData := TokToNiz( cLine, " " )
-
       cScanTxt := "RECEIPT_NUMBER"
-
       IF lStorno
          cScanTxt := "REFOUND_RECEIPT_NUMBER"
       ENDIF
 
       nScan := AScan( aRacunData, {| val | cScanTxt $ val } )
-
       IF nScan > 0
+         aRacun := TokToNiz( aRacunData[ nScan ], "=" )
+         nBrojFiskalnog := Val( aRacun[ 2 ] )
 
-         _receipt := TokToNiz( aRacunData[ nScan ], "=" )
-         nBrojFiskalnog := Val( _receipt[ 2 ] )
-
-         cMsg := "Formiran "
-
+         cMsg := ""
          IF lStorno
-            cMsg += "rekl."
+            cMsg += "STORN "
          ENDIF
 
-         cMsg += "fiskalni racun: "
-         MsgBeep( cMsg + AllTrim( Str( nBrojFiskalnog ) ) )
+         cMsg += "FISK_RN: "
+         info_bar("hcp", cMsg + AllTrim( Str( nBrojFiskalnog ) ) )
 
          EXIT
-
       ENDIF
 
    ENDDO
@@ -1089,7 +1088,7 @@ FUNCTION hcp_read_broj_racuna( hFiskalniParams, cFileName, lStorno )
 
    // brisi fajl odgovora
    IF nBrojFiskalnog > 0
-      FErase( cFiskalniFileName )
+      FErase( cFullFileName )
    ENDIF
 
    RETURN nBrojFiskalnog
@@ -1113,7 +1112,7 @@ FUNCTION hcp_read_error( hFiskalniParams, cFileName )
    nTime := hFiskalniParams[ "timeout" ]
 
    // primjer: c:\hcp\from_fp\RAC001.ERR
-   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "ERR" )
+   cFiskalniFileName := hFiskalniParams[ "out_dir" ] + s_cAnswerDirectory + SLASH + StrTran( cFileName, "XML", "ERR" )
 
    Box("#hcp_read_err", 3, 60 )
 

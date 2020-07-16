@@ -1039,12 +1039,11 @@ STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRa
    LOCAL nBrojFiskalnogRacuna := 0
 
    nErrorLevel := fiskalni_hcp_racun( s_hFiskalniParams, aRacunData, aRacunHeader, lStorno, aRacunData[ 1, 14 ] )
-   IF nErrorLevel = 0
+   IF nErrorLevel == 0
 
       nBrojFiskalnogRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniParams, lStorno )
       IF nBrojFiskalnogRacuna > 0
          fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nBrojFiskalnogRacuna, lStorno )
-
       ENDIF
 
    ENDIF
