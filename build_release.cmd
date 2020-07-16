@@ -3,6 +3,13 @@
 REM https://stackoverflow.com/questions/22278456/enable-and-disable-delayed-expansion-what-does-it-do/22278518#22278518
 setlocal enableDelayedExpansion
 
+del /F /Q F18-klijent.exe
+
+IF EXIST F18-klijent.exe (
+   echo F18-klijent.exe se ne moze izbrisati?!
+   goto end
+)
+
 set F18_DEBUG=
 set F18_POS=1
 SET F18_GT_CONSOLE=1
