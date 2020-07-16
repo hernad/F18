@@ -12,14 +12,14 @@
 
 #include "f18.ch"
 
-STATIC _cmdok := "cCmd.OK"
+STATIC s_CmdOK := "CMD.OK"
 STATIC cRazmak1 := " "
 STATIC cAnswerDirectory := "FROM_FP"
 STATIC s_cInputDir := "TO_FP"
 STATIC s_cZahtjevNula := "0"
 
 // trigeri
-STATIC s_cTrigerCMD := "cCmd"
+STATIC s_cTrigerCMD := "CMD"
 STATIC s_cTrigerPLU := "PLU"
 STATIC s_cTrigerTXT := "TXT"
 STATIC s_cTrigerRCP := "RCP"
@@ -336,7 +336,7 @@ FUNCTION hcp_footer( hFiskalniParams, footer )
       RETURN nError
    ENDIF
 
-   // kreiraj triger cCmd.ok
+   // kreiraj triger cmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
    IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
@@ -387,7 +387,6 @@ FUNCTION hcp_cli( hFiskalniParams, aHeader )
       RETURN nError
    ENDIF
 
-   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
    IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
@@ -445,7 +444,7 @@ FUNCTION hcp_plu( hFiskalniParams, aItems )
       RETURN nError
    ENDIF
 
-   // kreiraj triger cCmd.ok
+
    hcp_create_cmd_ok( hFiskalniParams )
    IF (nError := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
       // procitaj poruku greske
@@ -497,7 +496,6 @@ FUNCTION hcp_txt( hFiskalniParams, br_dok )
       RETURN nErrorLevel
    ENDIF
 
-   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
    IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) <> ERROR_ALT_Q
@@ -508,10 +506,6 @@ FUNCTION hcp_txt( hFiskalniParams, br_dok )
    RETURN nErrorLevel
 
 
-
-// -------------------------------------------------------------------
-// hcp komanda
-// -------------------------------------------------------------------
 FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
 
    LOCAL cXmlFile
@@ -546,7 +540,6 @@ FUNCTION hcp_cmd( hFiskalniParams, cCmd, cTrigerCMD )
       RETURN nErrorLevel
    ENDIF
 
-   // kreiraj triger cCmd.ok
    hcp_create_cmd_ok( hFiskalniParams )
 
    IF (nErrorLevel := hcp_read_cmd_ok( hFiskalniParams, cFiskalniFileName )) > ERROR_ALT_Q
@@ -865,7 +858,7 @@ FUNCTION hcp_rn_copy( hDevParams )
       // obicni racun
       cCommand := 'CMD="RECEIPT_COPY"'
    ELSE
-      // reklamni racun
+      // reklamirani racun
       cCommand := 'CMD="REFUND_RECEIPT_COPY"'
    ENDIF
 
@@ -936,15 +929,11 @@ STATIC FUNCTION hcp_read_cmd_ok( hDevParams, cFileName, nTimeOut )
 
 
 
-
-// ----------------------------------
-// create cCmd.ok file
-// ----------------------------------
 FUNCTION hcp_create_cmd_ok( hFiskalniParams )
 
    LOCAL cTmp
 
-   cTmp := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + _cmdok
+   cTmp := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + s_CmdOK
 
    // iskoristit cu postojecu funkciju za kreiranje xml fajla...
    create_xml( cTmp )
@@ -954,17 +943,14 @@ FUNCTION hcp_create_cmd_ok( hFiskalniParams )
 
 
 
-// ----------------------------------
-// delete cCmd.ok file
-// ----------------------------------
 FUNCTION hcp_delete_cmd_ok( hFiskalniParams )
 
-   LOCAL cTmp
+   LOCAL cTmpFile
 
-   cTmp := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + _cmdok
+   cTmpFile := hFiskalniParams[ "out_dir" ] + s_cInputDir + SLASH + s_CmdOK
 
-   IF FErase( cTmp ) < 0
-      MsgBeep( "greska sa brisanjem fajla cCmd.OK !" )
+   IF FErase( cTmpFile ) < 0
+      MsgBeep( "greska sa brisanjem fajla CMD.OK !" )
    ENDIF
 
    RETURN .T.
