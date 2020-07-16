@@ -49,3 +49,9 @@ docker/
 docker/postgresql_data/**
 docker/data
 data/
+curl
+F18-linux-*.zip
+lib*so
+F18-klijent
+pg_*
+psql
