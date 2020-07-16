@@ -38,7 +38,7 @@ REM x86
 REM IF [%BUILD_ARCH%] NEQ  [x64] move .build\win32-ia32\user-setup\eShellSetup.exe eShellSetup-x86-%F18_VERSION%.exe
 
 
-echo "======================== package: %BINTRAY_PACKAGE% ========== package_ver: %F18_VERSION% =================="
+echo "============ package: %BINTRAY_PACKAGE% ======= package_ver: %F18_VERSION% ============="
 
 REM set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
 set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
@@ -51,14 +51,25 @@ REM x86
 IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libcrypto-1_1.dll
 IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libssl-1_1.dll
 
-mkdir tmp
-cd tmp
-echo copy %HARBOR_ROOT%\bin\*.* => %CD%
-copy %HARBOR_ROOT%\bin\*.* .
-copy /y ..\F18-klijent.exe .
-echo copy harbour binaries (exe, dll) to tmp ...
-copy /y %HARBOUR_ROOT%\bin\*.* .
 
+IF NOT EXIST %CURRENT_DIR%tmp\nul (
+  echo mkdir %CURRENT_DIR%tmp ...
+  mkdir tmp
+  echo mkdir tmp end ...
+
+) else (
+  echo delete tmp\ tmp\tmpzip ...
+  del /Q tmp\*.*
+  del /Q tmp\tmpzip\*.*
+)
+
+
+echo == COPY %HARBOUR_ROOT%\bin\*.* TO tmp\ ====
+copy %HARBOUR_ROOT%\bin\*.* tmp\
+copy /y F18-klijent.exe tmp\
+
+
+cd tmp
 echo ZIP=%ZIP_FILE% FILES=%FILES%
 echo CMD=%ZIPACMD% ..\%ZIP_FILE% %FILES% 
 
@@ -72,8 +83,9 @@ echo moving files to tmp\tmpzip
 powershell -Command "& { \"$ENV:FILES\".split() | foreach { move $_ tmpzip } }" 
 
 echo back from tmp\tmpzip
-cd ..\
+cd ..
 
+echo curdir=%CD%
 IF EXIST %ZIP_FILE% del %ZIP_FILE%
 powershell -Command "& {Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]:: CreateFromDirectory(\"tmp\\tmpzip\",\"$ENV:ZIP_FILE\")}"
 
@@ -93,3 +105,7 @@ echo uploading %ZIP_FILE% to bintray ...
 
 %CURL% -s -u %BINTRAY_OWNER%:%BINTRAY_API_KEY% ^
    -X POST https://api.bintray.com/content/%BINTRAY_OWNER%/%BINTRAY_REPOS%/%BINTRAY_PACKAGE%/%F18_VERSION%/publish
+
+:end
+
+echo kraj upload_bintray_win32

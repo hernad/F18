@@ -55,3 +55,6 @@ lib*so
 F18-klijent
 pg_*
 psql
+F18-Windows-*.zip
+.b32/
+.b64/
