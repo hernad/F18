@@ -9,14 +9,14 @@
     cd c:\dev\
     set_developer_toolset.cmd
     x64_VS_2019.lnk
-    cd \dev
+    cd \dev\F18
 
 #### set developer toolset x86:
 
     cd c:\dev\
     set_developer_toolset_x86.cmd
     x86_VS_2019.lnk
-    cd \dev
+    cd \dev\F18
 
 #### `c:\dev\F18` build debug:
 

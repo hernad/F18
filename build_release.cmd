@@ -65,7 +65,7 @@ IF [%BUILD_ARCH%]==[64] (
     IF [%CL_X64%]==[1] (
         echo ===== MSVC cl x64 ok =============
     ) ELSE (
-        echo ERROR cl x64 nije u PATH-u!
+        echo ERROR [CL_X64=%CL_X64%] cl x64 nije u PATH-u!
         echo run c:\dev\x64_VS_2019.lnk
         goto end
     )

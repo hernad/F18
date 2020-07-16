@@ -563,7 +563,7 @@ STATIC FUNCTION _on_storno( broj_rn )
 
    LOCAL cCommand
 
-   cCommand := 'cCmd="REFUND_ON"'
+   cCommand := 'CMD="REFUND_ON"'
    cCommand += cRazmak1 + 'NUM="' + AllTrim( broj_rn ) + '"'
 
    RETURN cCommand
@@ -576,7 +576,7 @@ STATIC FUNCTION hcp_footer_off()
 
    LOCAL cCommand
 
-   cCommand := 'cCmd="FOOTER_OFF"'
+   cCommand := 'CMD="FOOTER_OFF"'
 
    RETURN cCommand
 
@@ -588,7 +588,7 @@ STATIC FUNCTION hcp_storno_off()
 
    LOCAL cCommand
 
-   cCommand := 'cCmd="REFUND_OFF"'
+   cCommand := 'CMD="REFUND_OFF"'
 
    RETURN cCommand
 
@@ -600,7 +600,7 @@ STATIC FUNCTION hcp_racun_partner( cIBK )
 
    LOCAL cCommand
 
-   cCommand := 'cCmd="SET_CLIENT"'
+   cCommand := 'CMD="SET_CLIENT"'
    cCommand += cRazmak1 + 'NUM="' + AllTrim( cIBK ) + '"'
 
    RETURN cCommand
@@ -646,7 +646,7 @@ FUNCTION hcp_z_rpt( hFiskalniParams )
       MsgBeep( "Zadnji dnevni izvjestaj radjen " + DToC( _last_date ) + " u " + _last_time )
    ENDIF
 
-   cCommand := 'cCmd="Z_REPORT"'
+   cCommand := 'CMD="Z_REPORT"'
    nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    // upisi zadnji dnevni izvjestaj
@@ -660,11 +660,11 @@ FUNCTION hcp_z_rpt( hFiskalniParams )
       MsgO( "resetujem prodaju..." )
 
       // reset sold plu
-      cCommand := 'cCmd="RESET_SOLD_PLU"'
+      cCommand := 'CMD="RESET_SOLD_PLU"'
       nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
       // ako su dinamicki PLU kodovi
-      cCommand := 'cCmd="DELETE_ALL_PLU"'
+      cCommand := 'CMD="DELETE_ALL_PLU"'
       nErrorLevel := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
       // resetuj PLU brojac u bazi...
@@ -699,7 +699,7 @@ FUNCTION hcp_x_rpt( hFiskalniParams )
 
    LOCAL cCommand, nError
 
-   cCommand := 'cCmd="X_REPORT"'
+   cCommand := 'CMD="X_REPORT"'
    nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    RETURN .T.
@@ -734,7 +734,7 @@ FUNCTION hcp_s_rpt( hFiskalniParams )
    _txt_date_from := fprint_formatiranje_datuma( _date_from )
    _txt_date_to := fprint_formatiranje_datuma( _date_to )
 
-   cCommand := 'cCmd="SUMMARY_REPORT" FROM="' + _txt_date_from + '" TO="' + _txt_date_to + '"'
+   cCommand := 'CMD="SUMMARY_REPORT" FROM="' + _txt_date_from + '" TO="' + _txt_date_to + '"'
    nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    RETURN .T.
@@ -757,7 +757,7 @@ FUNCTION fiskalni_hcp_get_broj_racuna( hFiskalniParams, lStorno )
 #endif
 
    // posalji komandu za stanje fiskalnog racuna
-   cCommand := 'cCmd="RECEIPT_STATE"'
+   cCommand := 'CMD="RECEIPT_STATE"'
    nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    // testni rezim uredjaja
@@ -785,7 +785,7 @@ FUNCTION hcp_reset( hFiskalniParams )
    LOCAL cCommand
    LOCAL nError
 
-   cCommand := 'cCmd="RESET_SOLD_PLU"'
+   cCommand := 'CMD="RESET_SOLD_PLU"'
    nError := hcp_cmd( hFiskalniParams, cCommand, s_cTrigerCMD )
 
    RETURN .T.
@@ -823,10 +823,10 @@ FUNCTION hcp_polog( hDevParams, value )
 
    IF value < 0
       // polog komanda
-      cCommand := 'cCmd="CASH_OUT"'
+      cCommand := 'CMD="CASH_OUT"'
    ELSE
       // polog komanda
-      cCommand := 'cCmd="CASH_IN"'
+      cCommand := 'CMD="CASH_IN"'
    ENDIF
 
    cCommand += cRazmak1 + 'VALUE="' +  AllTrim( Str( Abs( value ), 12, 2 ) ) + '"'
@@ -863,10 +863,10 @@ FUNCTION hcp_rn_copy( hDevParams )
 
    IF _refund == "N"
       // obicni racun
-      cCommand := 'cCmd="RECEIPT_COPY"'
+      cCommand := 'CMD="RECEIPT_COPY"'
    ELSE
       // reklamni racun
-      cCommand := 'cCmd="REFUND_RECEIPT_COPY"'
+      cCommand := 'CMD="REFUND_RECEIPT_COPY"'
    ENDIF
 
    cCommand += cRazmak1 + 'NUM="' +  AllTrim( _broj_rn ) + '"'
