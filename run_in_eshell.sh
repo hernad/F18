@@ -1,22 +1,29 @@
 #!/bin/bash
 
-ESHELL_DEV_INSTALLED=`ls -d $HOME/.eShell-dev/extensions/F18/F18-linux-x64-*`
+F18_INSTALLED_ALREADY=`ls -d $HOME/.eShell-dev/extensions/F18/F18-linux-x64-*`
 
 CURRENTDIR=`pwd`
 
-echo F18 installed in eShell: $ESHELL_DEV_INSTALLED
+echo F18 installed in eShell: $F18_INSTALLED_ALREADY
 
 echo "eShell-dev F18 provjera nove verzije iskljuciti !"
 
 
-PATH=$HOME/.eShell-dev/extensions/F18/$ESHELL_DEV_INSTALLED:$PATH
+PATH=$F18_INSTALLED_ALREADY:$PATH
+#konflikt sa eShell openssl LD_LIBRARY_PATH=$F18_INSTALLED_ALREADY:$LD_LIBRARY_PATH
 
 F18_0_DIR=$HOME/.eShell-dev/extensions/F18/F18_0
 
+for f in libcrypto.so libcurl.so libpq.so libssl.so libz.so
+do
+   echo "ln -sf ${F18_INSTALLED_ALREADY}/$f $F18_0_DIR"
+   ln -sf ${F18_INSTALLED_ALREADY}/$f $F18_0_DIR
+done
 
+ls -l $F18_0_DIR/*.so
 
 if [[ ! -d "${F18_0_DIR}" ]] ; then 
-   echo F180DIR=${F18_0_DIR} ne postoji
+   echo F18_0_DIR=${F18_0_DIR} ne postoji
    mkdir -p ${F18_0_DIR}
    
 fi
@@ -25,7 +32,7 @@ fi
 cp -av F18-klijent ${F18_0_DIR}/F18-klijent
 
 
-cd $HOME/eShell
+cd ../eShell
 scripts/code.sh
 
 #set Token=ESHELL_%RANDOM%
