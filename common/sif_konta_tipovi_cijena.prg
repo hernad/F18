@@ -91,11 +91,14 @@ FUNCTION P_KonCij2( CId, dx, dy )
    AAdd( ImeKol, { "Tip", {|| naz }, "naz" } )
    AAdd( ImeKol, { "PM", {|| idprodmjes }, "idprodmjes" } )
 
-   IF KONCIJ->( FieldPos( "KPD" ) ) <> 0
+   IF KONCIJ->( FieldPos( "KP9" ) ) <> 0   
       AAdd ( ImeKol, { PadC( "KP6", 7 ), {|| KP6 }, "KP6", {|| .T. }, {|| Empty( wKP6 ) .OR. P_Konto( @wKP6 ) } } )
       AAdd ( ImeKol, { PadC( "KP7", 7 ), {|| KP7 }, "KP7", {|| .T. }, {|| Empty( wKP7 ) .OR. P_Konto( @wKP7 ) } } )
       AAdd ( ImeKol, { PadC( "KP8", 7 ), {|| KP8 }, "KP8", {|| .T. }, {|| Empty( wKP8 ) .OR. P_Konto( @wKP8 ) } } )
       AAdd ( ImeKol, { PadC( "KP9", 7 ), {|| KP9 }, "KP9", {|| .T. }, {|| Empty( wKP9 ) .OR. P_Konto( @wKP9 ) } } )
+   ENDIF
+
+   IF KONCIJ->( FieldPos( "KPD" ) ) <> 0
       AAdd ( ImeKol, { PadC( "KPA", 7 ), {|| KPA }, "KPA", {|| .T. }, {|| Empty( wKPA ) .OR. P_Konto( @wKPA ) } } )
       AAdd ( ImeKol, { PadC( "KPB", 7 ), {|| KPB }, "KPB", {|| .T. }, {|| Empty( wKPB ) .OR. P_Konto( @wKPB ) } } )
       AAdd ( ImeKol, { PadC( "KPC", 7 ), {|| KPC }, "KPC", {|| .T. }, {|| Empty( wKPC ) .OR. P_Konto( @wKPC ) } } )
@@ -111,11 +114,14 @@ FUNCTION P_KonCij2( CId, dx, dy )
       AAdd ( ImeKol, { PadC( "KPK", 7 ), {|| KOK }, "KPK", {|| .T. }, {|| Empty( wKPK ) .OR. P_Konto( @wKPK ) } } )
    ENDIF
 
-   IF KONCIJ->( FieldPos( "KOD" ) ) <> 0
+   IF KONCIJ->( FieldPos( "KO9" ) ) <> 0
       AAdd ( ImeKol, { PadC( "KO6", 7 ), {|| KO6 }, "KO6", {|| .T. }, {|| Empty( wKO6 ) .OR. P_Konto( @wKO6 ) } } )
       AAdd ( ImeKol, { PadC( "KO7", 7 ), {|| KO7 }, "KO7", {|| .T. }, {|| Empty( wKO7 ) .OR. P_Konto( @wKO7 ) } } )
       AAdd ( ImeKol, { PadC( "KO8", 7 ), {|| KO8 }, "KO8", {|| .T. }, {|| Empty( wKO8 ) .OR. P_Konto( @wKO8 ) } } )
       AAdd ( ImeKol, { PadC( "KO9", 7 ), {|| KO9 }, "KO9", {|| .T. }, {|| Empty( wKO9 ) .OR. P_Konto( @wKO9 ) } } )
+   ENDIF
+
+   IF KONCIJ->( FieldPos( "KOD" ) ) <> 0   
       AAdd ( ImeKol, { PadC( "KOA", 7 ), {|| KOA }, "KOA", {|| .T. }, {|| Empty( wKOA ) .OR. P_Konto( @wKOA ) } } )
       AAdd ( ImeKol, { PadC( "KOB", 7 ), {|| KOB }, "KOB", {|| .T. }, {|| Empty( wKOB ) .OR. P_Konto( @wKOB ) } } )
       AAdd ( ImeKol, { PadC( "KOC", 7 ), {|| KOC }, "KOC", {|| .T. }, {|| Empty( wKOC ) .OR. P_Konto( @wKOC ) } } )

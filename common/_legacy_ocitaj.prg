@@ -18,9 +18,12 @@ FUNCTION ocitaj_izbaci( nObl, xKljuc, nPbr, lInd )
    // sifrarn.za zadanu vrijednost indeksa 'xKljuc'
    // Primjer : xRez:=ocitaj_izbaci(F_VALUTE,"D","naz2")
 
+   LOCAL cPom := ""
+   LOCAL xPom
    LOCAL xVrati
+
    IF lInd == NIL; lInd := .F. ; ENDIF
-   PRIVATE cPom := ""
+   //PRIVATE cPom := ""
    IF ValType( nPbr ) == "C"
       cPom := nPbr  // za makro evaluaciju mora biti priv varijabla
    ENDIF
@@ -28,7 +31,8 @@ FUNCTION ocitaj_izbaci( nObl, xKljuc, nPbr, lInd )
    PushWA()
    SELECT ( nObl )
    SEEK xKljuc
-   xPom := iif( ValType( nPbr ) == "C", &cPom, FieldGet( 1 + nPbr ) )
+
+   xPom := IIF( ValType( nPbr ) == "C", &cPom, FieldGet( 1 + nPbr ) )
    IF lInd
       xVrati := iif( Found(), xPom, Blank( xPom ) )
    ELSE
