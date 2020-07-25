@@ -29,13 +29,23 @@ Notes:
 
     build_release.cmd
 
-### `c:\dev\F18` run F18-klijent.exe in eShell-dev:
+#### `c:\dev\F18` run F18-klijent.exe in eShell-dev:
 
     run_in_eshell.cmd
 
-### upload F18-klijent.exe + dlls to bintray
+#### upload F18-klijent.exe + dlls to bintray
 
     upload.cmd
+
+### Centos7
+
+#### build release
+
+    ./build_release.sh
+
+#### upload release to bintray
+
+    ./upload.sh
 
 
  
