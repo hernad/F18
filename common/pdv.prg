@@ -53,18 +53,19 @@ FUNCTION partner_is_ino( cIdPartner, lShow )
          RETURN .F.
       ENDIF
 
-   ELSE
-      RETURN .F.
    ENDIF
+
+   RETURN .F.
+
 
 
 
 /*
    Opis: da li id broj ima 13 cifara
 */
-FUNCTION is_idbroj_13cifara( id_broj )
+FUNCTION is_idbroj_13cifara( cIdBroj )
 
-   IF LEN( ALLTRIM( id_broj ) ) == 13
+   IF LEN( ALLTRIM( cIdBroj ) ) == 13
       RETURN .T.
    ENDIF
 

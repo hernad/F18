@@ -313,15 +313,20 @@ FUNCTION reopen_exclusive( xArg1, lOpenIndex )
 
 
 
-FUNCTION reopen_dbf( lExclusive, xArg1, lOpenIndex )
+FUNCTION reopen_dbf( lExclusive, xArg1, lOpenIndex, lSilent )
 
-   LOCAL hRecDbf, _err
+   LOCAL hRecDbf, oError
    LOCAL cDbfIme
    LOCAL lRet
    LOCAL cMsg
 
    IF lOpenIndex == NIL
       lOpenIndex := .T.
+   ENDIF
+
+   IF lSilent == NIL
+      lSilent := .T. // koristi se za pokušaj ekslkuzivnog otvaranja DBF-a pa fizičkog zapovanja
+                     // u većini neuspješno, nepotrebno informisati korisnika - lSilent TRUE
    ENDIF
 
    IF ValType( xArg1 ) == "H"
@@ -350,11 +355,14 @@ FUNCTION reopen_dbf( lExclusive, xArg1, lOpenIndex )
          lRet := .T.
       ENDIF
 
-   RECOVER USING _err
+   RECOVER USING oError
 
-      cMsg := "tbl:" + hRecDbf[ "table" ] + " : " + _err:description +  " excl:" + ToStr( lExclusive )
-      info_bar( "reop_dbf:" + hRecDbf[ "table" ], cMsg )
-      ?E "ERR-reopen_dbf " + cMsg
+      IF !lSilent
+         cMsg := "tbl:" + hRecDbf[ "table" ] + " : " + oError:description +  " excl:" + ToStr( lExclusive )
+         info_bar( "reop_dbf:" + hRecDbf[ "table" ], cMsg )
+         ?E "ERR-reopen_dbf " + cMsg
+      ENDIF
+
       lRet := .F.
 
    END SEQUENCE
@@ -368,7 +376,7 @@ FUNCTION reopen_dbf( lExclusive, xArg1, lOpenIndex )
 
 FUNCTION reopen_exclusive_and_zap( cDbfTable, lOpenIndex )
 
-   LOCAL _err
+   LOCAL oError
 
    IF lOpenIndex == NIL
       lOpenIndex := .T.
@@ -381,10 +389,10 @@ FUNCTION reopen_exclusive_and_zap( cDbfTable, lOpenIndex )
       ZAP
       reopen_dbf( .F., cDbfTable, lOpenIndex )
 
-   RECOVER USING _err
+   RECOVER USING oError
 
-      ?E "ERROR-REXCL-ZAP ", _err:Description
-      // info_bar( "reop_dbf_zap:" + cDbfTable, cDbfTable + " / " + _err:Description )
+      ?E "ERROR-REXCL-ZAP ", oError:Description
+      // info_bar( "reop_dbf_zap:" + cDbfTable, cDbfTable + " / " + oError:Description )
       reopen_dbf( .F., cDbfTable, lOpenIndex )
       zapp()
 
@@ -396,7 +404,7 @@ FUNCTION reopen_exclusive_and_zap( cDbfTable, lOpenIndex )
 FUNCTION open_exclusive_zap_close( xArg1, lOpenIndex )
 
    LOCAL cDbfTable
-   LOCAL _err
+   LOCAL oError
    LOCAL nRecCount := 999
    LOCAL nCounter := 0
 
@@ -425,10 +433,10 @@ FUNCTION open_exclusive_zap_close( xArg1, lOpenIndex )
 
          USE
 
-      RECOVER USING _err
+      RECOVER USING oError
 
-         ?E "ERR-OXCL-ZAP ", cDbfTable, _err:Description, nCounter
-         // info_bar( "op_zap_clo:" + cDbfTable, cDbfTable + " / " + _err:Description )
+         ?E "ERR-OXCL-ZAP ", cDbfTable, oError:Description, nCounter
+         // info_bar( "op_zap_clo:" + cDbfTable, cDbfTable + " / " + oError:Description )
          IF ValType( xArg1 ) == "H"
             reopen_dbf( .F., xArg1, lOpenIndex )
          ELSE
@@ -487,8 +495,8 @@ FUNCTION my_dbf_pack( lOpenUSharedRezimu )
    ENDIF
 
    PushWA()
-   lRet :=  reopen_dbf( .T., cAlias, .T. )
 
+   lRet := reopen_dbf( .T., cAlias, .T. )
    IF lRet
       __dbPack()
    ENDIF
@@ -510,7 +518,7 @@ FUNCTION my_dbf_pack( lOpenUSharedRezimu )
 
 FUNCTION pakuj_dbf( hDbfRec, lSilent )
 
-   LOCAL _err
+   LOCAL oError
 
    log_write( "PACK table " + hDbfRec[ "alias" ], 2 )
 
@@ -533,8 +541,8 @@ FUNCTION pakuj_dbf( hDbfRec, lSilent )
       ENDDO
 
 
-   RECOVER using _err
-      log_write( "NOTIFY: PACK neuspjesan dbf: " + hDbfRec[ "table" ] + "  " + _err:Description, 3 )
+   RECOVER using oError
+      log_write( "NOTIFY: PACK neuspjesan dbf: " + hDbfRec[ "table" ] + "  " + oError:Description, 3 )
 
    END SEQUENCE
 
