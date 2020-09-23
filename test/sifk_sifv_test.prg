@@ -142,7 +142,8 @@ FUNCTION sifk_sifv_test()
    _tmp := PadR( _tmp, 190 )
    TEST_LINE( get_sifk_sifv( cIdSifK, _karakteristika_n, "01" ), _tmp )
 
-   RETURN
+   RETURN .t.
+   
 
 // -------------------------------------------
 // -------------------------------------------

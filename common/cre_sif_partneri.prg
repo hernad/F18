@@ -224,7 +224,7 @@ FUNCTION p_sifk_partn_group()
    SET ORDER TO TAG "ID"
    GO TOP
    SEEK "PARTN"
-   DO WHILE !Eof() .AND. ID = "PARTN"
+   DO WHILE !Eof() .AND. ID == "PARTN"
       IF field->oznaka == "GRUP"
          lRet := .T.
          EXIT

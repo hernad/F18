@@ -203,6 +203,7 @@ FUNCTION get_partn_sifk_sifv( cDbfName, cOznaka, cIdSif, return_nil )
    RETURN  get_sifk_sifv( "PARTN", cDbfName, cOznaka, xSif, return_nil )
 
 
+   
 FUNCTION IzSifkKonto( cDbfName, cOznaka, cIdSif, return_nil )
 
    LOCAL xSif

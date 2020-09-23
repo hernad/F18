@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 MEMVAR m
-MEMVAR gFinFunkFond
+MEMVAR gFinFunkFond, gFinRJ
 MEMVAR cIdFirma, cIdKonto, fk1, fk2, fk3, fk4, cK1, cK2, cK3, cK4
 MEMVAR nStr
 MEMVAR gPicBHD, picDEM, picBHD, lOtvoreneStavke
@@ -26,6 +26,7 @@ STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
 STATIC s_pMoneyFormat, s_pDateFormat
 STATIC s_nOpisRptLength := 40
 STATIC s_cPortretDN := "D"
+STATIC s_lSifkPRMJ := NIL
 
 FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
@@ -72,6 +73,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL cFilterBrDok
    LOCAL GetList := {}
    LOCAL cNaslov
+   LOCAL cRasclaniti := "N"
+   LOCAL cUslovIdVn := Space( 40 )
+   LOCAL cIdRj, cFunk, cFond
+   LOCAL cFilter
+   LOCAL cIdPartner
+   LOCAL cRasclan
+   LOCAL nTarea
 
    PRIVATE fK1 := hFinParams[ "fin_k1" ]
    PRIVATE fK2 := hFinParams[ "fin_k2" ]
@@ -123,8 +131,15 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    cFunk := "99999"
    cFond := "9999"
 
-   PRIVATE cRasclaniti := "N"
-   PRIVATE cUslovIdVn := Space( 40 )
+
+   // Partner - prikaz prodajnog mjesta
+   IF use_sql_sifk( "PARTN", PADR("PRMJ", 5) )
+      s_lSifkPRMJ := .T.
+   else
+      s_lSifkPRMJ := .F.
+   ENDIF
+   
+
 
    cBoxName := "SUBANALITIČKA KARTICA"
    IF lOtvoreneStavke
@@ -417,7 +432,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    bEvalSubanKartKonto := {|| !Eof() .AND. cIdKonto == field->IdKonto .AND. field->IdFirma == cIdFirma }
    bEvalSubanKartPartner :=  {|| !Eof() .AND. cIdKonto == field->IdKonto .AND. ( cIdPartner == field->IdPartner ;
       .OR. ( cBrza == "D" .AND. RTrim( cUslovIdPartner ) == ";" ) ) ;
-      .AND. Rasclan() .AND. IdFirma == cIdFirma }
+      .AND. RasclanRjFunkFond( cRasclaniti, cRasclan ) .AND. IdFirma == cIdFirma }
 
    Eval( bZagl )
    DO WHILE Eval( bEvalSubanKartFirma )
@@ -784,7 +799,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   nDuguje := 0
                   nPotrazuje :=  hRec[ "iznosbhd" ]
                ENDIF
-               xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
+               ( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
                   s_cBrVeze, dDatDok, dDatVal, s_cOpis, nDuguje, nPotrazuje, nDugBHD - nPotBHD )
             ENDIF
 
@@ -962,28 +977,34 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
 
 
-STATIC FUNCTION xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, ;
-     cIdVn, cBrNal, nRbr, cBrVeze, dDatdok, dDatVal, cOpis, nDug, nPot, nSaldo )
+STATIC FUNCTION xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, cBrVeze, dDatdok, dDatVal, cOpis, nDug, nPot, nSaldo )
 
    LOCAL nI
    LOCAL aKarticaKolone
+   LOCAL cProdajnoMjesto
 
  
-   aKarticaKolone := { ;
-	      { "C", "Konto ID", 8, Trim(cIdKonto) },;
-		   { "C", "Partner ID", 8, Trim(cIdPartner) },;
-         { "C", "VN", 5, cIdVn }, ;
-         { "C", "Br.Nal", 12, Trim(cBrNal) }, ;
-         { "N", "Rbr", 7, nRbr }, ;
-         { "C", "Br.Veze", 17, Trim(cBrVeze) }, ;
-         { "D", "Dat.Dok", 12, dDatDok }, ;
-         { "D", "Valuta", 12, dDatVal }, ;
-         { "C", "Opis", 40, Trim(cOpis)  }, ;
-         { "M", "Duguje", 15, nDug }, ;
-         { "M", "Potrazuje", 15, nPot }, ;          
-         { "M", "Saldo", 15, nSaldo } ;      
-   }
+   aKarticaKolone := {}
+   AADD(aKarticaKolone, { "C", "Konto ID", 8, Trim(cIdKonto) })
+   AADD(aKarticaKolone, { "C", "Partner ID", 8, Trim(cIdPartner) })
+   
+   IF s_lSifkPRMJ
+      cProdajnoMjesto := AllTrim( get_partn_sifk_sifv( "PRMJ", cIdPartner ) )
+      AADD(aKarticaKolone, { "C", "Pr.MJ", 6, cProdajnoMjesto })    
+   ENDIF
 
+   AADD(aKarticaKolone, { "C", "VN", 5, cIdVn })
+   AADD(aKarticaKolone, { "C", "Br.Nal", 12, Trim(cBrNal) })
+   AADD(aKarticaKolone, { "N", "Rbr", 7, nRbr })
+   AADD(aKarticaKolone, { "C", "Br.Veze", 17, Trim(cBrVeze) })
+   AADD(aKarticaKolone, { "D", "Dat.Dok", 12, dDatDok })
+   AADD(aKarticaKolone, { "D", "Valuta", 12, dDatVal })
+   AADD(aKarticaKolone, { "C", "Opis", 40, Trim(cOpis)  })
+   AADD(aKarticaKolone, { "M", "Duguje", 15, nDug })
+   AADD(aKarticaKolone, { "M", "Potrazuje", 15, nPot })        
+   AADD(aKarticaKolone, { "M", "Saldo", 15, nSaldo })     
+   
+   
    IF s_pWorkSheet == NIL
       
       s_pWorkBook := workbook_new( s_cXlsxName )
@@ -1155,13 +1176,15 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
  *  Rasclanjuje SUBAN->(IdRj+Funk+Fond)
  */
 
-FUNCTION Rasclan()
+FUNCTION RasclanRjFunkFond( cRasclaniti, cRasclan )
 
    IF cRasclaniti == "D"
-      RETURN cRasclan == suban->( idrj + funk + fond )
+      RETURN cRasclan ==  suban->idrj + suban->funk + suban->fond
    ELSE
       RETURN .T.
    ENDIF
+
+   RETURN .T.
 
 
 

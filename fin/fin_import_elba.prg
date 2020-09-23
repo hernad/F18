@@ -655,7 +655,7 @@ STATIC FUNCTION get_partner_za_isplate_sa_zr( cTxt, cTrRN )
 
 
 
-STATIC FUNCTION set_banku_za_partnera( cPartn, cBank )
+STATIC FUNCTION set_banku_za_partnera( cIdPartner, cBank )
 
    LOCAL cRead := ""
    LOCAL cOldBank
@@ -670,7 +670,7 @@ STATIC FUNCTION set_banku_za_partnera( cPartn, cBank )
    //o_sifv()
 
    cNewBank := ""
-   cOldBank := AllTrim( get_partn_sifk_sifv( "BANK", cPartn ) )  // stara banka
+   cOldBank := AllTrim( get_partn_sifk_sifv( "BANK", cIdPartner ) )  // stara banka
 
    IF !Empty( cOldBank ) // dodaj staru banku ako postoji
       cNewBank += cOldBank
@@ -681,7 +681,7 @@ STATIC FUNCTION set_banku_za_partnera( cPartn, cBank )
 
    cNewBank += cBank
 
-   USifK( "PARTN", "BANK", cPartn, cNewBank )
+   USifK( "PARTN", "BANK", cIdPartner, cNewBank )
 
    PopWA()
 
