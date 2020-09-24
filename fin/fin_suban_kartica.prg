@@ -19,7 +19,7 @@ MEMVAR gPicBHD, picDEM, picBHD, lOtvoreneStavke
 MEMVAR dDatOd, dDatDo
 MEMVAR cPrikazK1234, p_cValutaDom1Eur2Obje3, cKumulativniPrometBez1Sa2
 MEMVAR cUslovUpperBrDok, cUslovIdKonto, cUslovIdPartner, cUslovNazivKonta
-FIELD iznosbhd, iznosdem, d_p, otvst, idpartner, idfirma, idkonto, datdok, datval, brdok, brnal
+FIELD iznosbhd, iznosdem, d_p, otvst, idpartner, idfirma, idkonto, datdok, datval, brdok, brnal,  idrj, funk, fond, Rbr
 
 STATIC s_cXlsxName := NIL
 STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
@@ -27,6 +27,8 @@ STATIC s_pMoneyFormat, s_pDateFormat
 STATIC s_nOpisRptLength := 40
 STATIC s_cPortretDN := "D"
 STATIC s_lSifkPRMJ := NIL
+
+STATIC s_cIdPartnerPredhodni := "XX", s_cProdajnoMjestoPredhodno := "XX"
 
 FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
@@ -79,7 +81,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL cFilter
    LOCAL cIdPartner
    LOCAL cRasclan
-   LOCAL nTarea
+   LOCAL nCnt
+   LOCAL nC7 := 0
+   LOCAL nKonD, nKonP, nKonP2, nKonD2
+   LOCAL cFilterNazivKonta, cFilterIdKonto, cFilterIdPartner, cFilterIdVn
+   LOCAL nSviD, nSviP, nSviD2, nSviP2
+
+
 
    PRIVATE fK1 := hFinParams[ "fin_k1" ]
    PRIVATE fK2 := hFinParams[ "fin_k2" ]
@@ -132,16 +140,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    cFunk := "99999"
    cFond := "9999"
 
-   altd()
-
    // Partner - prikaz prodajnog mjesta
-   IF use_sql_sifk( "PARTN", PADR("PRMJ", 5) )
+   IF use_sql_sifk( "PARTN", "PRMJ")
       s_lSifkPRMJ := .T.
    else
       s_lSifkPRMJ := .F.
    ENDIF
    
-
 
    cBoxName := "SUBANALITIČKA KARTICA"
    IF lOtvoreneStavke
@@ -261,7 +266,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          cUslovIdPartner := Trim( cUslovIdPartner )
          cFilterIdKonto := parsiraj( cUslovIdKonto, "IdKonto", "C" )
          cFilterIdPartner := parsiraj( cUslovIdPartner, "IdPartner", "C" )
-         IF  cFilterIdKonto <> NIL .AND. cFilterIdPartner <> NIL .AND. cFilterIdVn <> NIL
+         IF cFilterIdKonto <> NIL .AND. cFilterIdPartner <> NIL .AND. cFilterIdVn <> NIL
             EXIT
          ENDIF
       ENDIF
@@ -279,7 +284,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    set_metric( "fin_kart_datum_od", my_user(), dDatOd )
    set_metric( "fin_kart_datum_do", my_user(), dDatDo )
    set_metric( "fin_kart_valuta", my_user(), p_cValutaDom1Eur2Obje3 )
-   //set_metric( "fin_kart_kz", my_user(), c1K1Z )
    set_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
    set_metric( "fin_kart_suban_portret", my_user(), s_cPortretDN)
    set_metric( "fin_kart_suban_xlsx", my_user(), cExpXlsx)
@@ -327,18 +331,33 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    ENDIF
 
-   lVrsteP := .F.
+   //lVrsteP := .F.
+
+   altd()
 
    cOrderBy := "IdFirma,IdKonto,IdPartner,datdok,otvst,idvn,d_p,brdok"
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    IF cBrza == "D"
       IF RTrim( cUslovIdPartner ) == ";" // ne kontam kada se ovo desava
-         find_suban_by_konto_partner( cIdFirma, cUslovIdKonto, NIL, NIL, cOrderBy )
+         IF cPredhodniPromet == "2" // sa predhodnim prometom
+            find_suban_by_konto_partner( cIdFirma, cUslovIdKonto, NIL, NIL, cOrderBy )
+         ELSE
+            find_suban_by_konto_partner_za_period( cIdFirma, cUslovIdKonto, NIL, dDatOd, dDatDo, NIL, cOrderBy )
+         ENDIF  
+         
       ELSE
-         find_suban_by_konto_partner( cIdFirma, cUslovIdKonto, cUslovIdPartner, NIL, cOrderBy )
+         IF cPredhodniPromet == "2"
+            find_suban_by_konto_partner( cIdFirma, cUslovIdKonto, cUslovIdPartner, NIL, cOrderBy )
+         ELSE
+            find_suban_by_konto_partner_za_period( cIdFirma, cUslovIdKonto, cUslovIdPartner, dDatOd, dDatDo, NIL, cOrderBy )
+         ENDIF
       ENDIF
    ELSE
-      o_sql_suban_kto_partner( cIdFirma )
+      IF cPredhodniPromet == "2" // sa predhodnim prometom
+         o_sql_suban_kto_partner( cIdFirma )
+      ELSE
+         o_sql_suban_kto_partner_za_period( cIdFirma, dDatOd, dDatDo )
+      ENDIF
    ENDIF
    MsgC()
 
@@ -349,12 +368,13 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    ENDIF
    GO TOP
 
-   IF hFaktParams[ "fakt_vrste_placanja" ]
-      lVrsteP := .T.
-      o_vrstep()
-   ENDIF
+   //IF hFaktParams[ "fakt_vrste_placanja" ]
+   //   lVrsteP := .T.
+   //   o_vrstep()
+   //ENDIF
 
    SELECT SUBAN
+   info_bar("sub_kart", "suban_rec: " + AllTrim(Str(reccount())))
    fin_cisti_polja_k4k4_funk_fond( .T., @cIdRj, @cK1, @cK2, @cK3, @cK4, @cFunk, @cFond )
 
    cFilter := ".t." + iif( !Empty( cUslovIdVn ), ".and." + cFilterIdVn, "" ) + ;
@@ -429,15 +449,17 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       RETURN .F.
    ENDIF
 
+   nCnt := 0
    prikaz_k1_k4_rj()
    cIdKonto := field->IdKonto
    bEvalSubanKartFirma := {|| !Eof() .AND. field->IdFirma == cIdFirma }
-   bEvalSubanKartKonto := {|| !Eof() .AND. cIdKonto == field->IdKonto .AND. field->IdFirma == cIdFirma }
-   bEvalSubanKartPartner :=  {|| !Eof() .AND. cIdKonto == field->IdKonto .AND. ( cIdPartner == field->IdPartner ;
-      .OR. ( cBrza == "D" .AND. RTrim( cUslovIdPartner ) == ";" ) ) ;
-      .AND. RasclanRjFunkFond( cRasclaniti, cRasclan ) .AND. IdFirma == cIdFirma }
+   bEvalSubanKartKonto := {|| !Eof() .AND. cIdKonto == suban->IdKonto .AND. suban->IdFirma == cIdFirma }
+   bEvalSubanKartPartner :=  {|| !Eof() .AND. cIdKonto == suban->IdKonto .AND. ( cIdPartner == suban->IdPartner ;
+      .OR. ( cBrza == "D" .AND. RTrim( cUslovIdPartner ) == ";" ) ) .AND. RasclanRjFunkFond( cRasclaniti, cRasclan ) .AND. suban->IdFirma == cIdFirma }
+
 
    Eval( bZagl )
+   // Nivo 0 - SVE
    DO WHILE Eval( bEvalSubanKartFirma )
       nKonD := 0
       nKonP := 0
@@ -456,6 +478,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          ENDIF
       ENDIF
 
+      // Nivo 1 - Konto
       DO WHILE Eval( bEvalSubanKartKonto )
 
          cKontoNaziv := ""
@@ -472,19 +495,17 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          nZPotBHD := 0
          nZDugDEM := 0
          nZPotDEM := 0
-         cIdPartner := field->IdPartner
-         nTarea := Select()
+         cIdPartner := suban->IdPartner
 
          IF !Empty( cOpcine )
             select_o_partner( cIdPartner )
-            IF !( Found() .AND. field->id == cIdPartner .AND. AllTrim( field->idops ) $ AllTrim( cOpcine ) )
-               SELECT ( nTarea )
+            IF !( Found() .AND. partn->id == cIdPartner .AND. AllTrim( partn->idops ) $ AllTrim( cOpcine ) )
+               select suban
                SKIP
                LOOP
             ENDIF
          ENDIF
 
-         SELECT ( nTarea )
          IF cRasclaniti == "D"
             cRasclan := field->idrj + field->funk + field->fond
          ELSE
@@ -523,6 +544,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          ? m
          //ENDIF
 
+         // NIVO 2 - Partner
          lPrviProlaz := .T.  // prvi prolaz
          DO WHILE Eval( bEvalSubanKartPartner )
 
@@ -553,19 +575,19 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
                   IF lOtvoreneStavke .AND. OtvSt == "9"
                      IF field->d_P == "1"
-                        nZDugBHD += field->iznosbhd
-                        nZDugDEM += field->iznosdem
+                        nZDugBHD += suban->iznosbhd
+                        nZDugDEM += suban->iznosdem
                      ELSE
-                        nZPotBHD += field->iznosbhd
-                        nZPotDEM += field->iznosdem
+                        nZPotBHD += suban->iznosbhd
+                        nZPotDEM += suban->iznosdem
                      ENDIF
                   ELSE
                      IF field->d_P == "1"
-                        nPDugBHD += field->iznosbhd
-                        nPDugDEM += field->iznosdem
+                        nPDugBHD += suban->iznosbhd
+                        nPDugDEM += suban->iznosdem
                      ELSE
-                        nPPotBHD += field->iznosbhd
-                        nPPotDEM += field->iznosdem
+                        nPPotBHD += suban->iznosbhd
+                        nPPotDEM += suban->iznosdem
                      ENDIF
                   ENDIF
                   SKIP
@@ -634,10 +656,9 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
             hRec := dbf_get_rec()
             nSpojeno := 0
-            DO WHILE lSpojiUplate .AND. hRec[ "datdok" ] == field->datdok .AND. hRec[ "otvst" ] == field->otvst .AND. ;
-                  field->idvn == hRec[ "idvn" ] .AND. field->d_p == hRec[ "d_p" ] .AND. ;
-                  ( field->idvn == cIdVnIzvod .OR. cIdVnIzvod == "**" ) .AND. field->d_p == cSpojiDP .AND. ;
-                  Eval( bEvalSubanKartPartner )
+            DO WHILE lSpojiUplate .AND. hRec[ "datdok" ] == suban->datdok .AND. hRec[ "otvst" ] == field->otvst .AND. ;
+                  field->idvn == hRec[ "idvn" ] .AND. suban->d_p == hRec[ "d_p" ] .AND. ;
+                  ( field->idvn == cIdVnIzvod .OR. cIdVnIzvod == "**" ) .AND. field->d_p == cSpojiDP .AND. Eval( bEvalSubanKartPartner )
 
                IF nSpojeno > 0
                   hRec[ "iznosbhd" ] += field->iznosbhd
@@ -662,6 +683,11 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                s_cOpis := hRec[ "opis" ]
                s_cBrVeze := hRec[ "brdok" ]
 
+               ++nCnt
+               IF nCnt % 100 == 0
+                  info_bar("suban_kart", )
+                  info_bar("sub_kart", "suban: " + AllTrim(Str(nCnt)) + " / " + AllTrim(Str(suban->(reccount()))))
+               ENDIF
                ? hRec[ "idvn" ] // ---- POCETAK STAVKE KARTICE ----
                @ PRow(), PCol() + 1 SAY hRec[ "brnal" ]
                @ PRow(), PCol() + 1 SAY hRec[ "rbr" ] PICT "99999"
@@ -681,7 +707,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   @ PRow(), PCol() + 1 SAY get_datval_field()
                ELSEIF cPrikazK1234 == "3"
                   nC7 := PCol() + 1
-                  @ PRow(), nc7 SAY get_datval_field()
+                  @ PRow(), nC7 SAY get_datval_field()
                ENDIF
 
                IF p_cValutaDom1Eur2Obje3 == "3"
@@ -795,7 +821,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
             ENDIF
             fin_print_ostatak_opisa( @cOpis, nCOpis, {|| check_nova_strana( bZagl, oPDF ) }, s_nOpisRptLength )
             IF cExpXlsx == "D" .AND. !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" )
-               altd()
                IF  hRec[ "d_p" ] == "1"
                   nDuguje := hRec[ "iznosbhd" ]
                   nPotrazuje := 0
@@ -874,8 +899,10 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
          ? M
 
-         nKonD += nDugBHD;  nKonP += nPotBHD
-         nKonD2 += nDugDEM; nKonP2 += nPotDEM
+         nKonD += nDugBHD
+         nKonP += nPotBHD
+         nKonD2 += nDugDEM
+         nKonP2 += nPotDEM
 
          check_nova_strana( bZagl, oPdf, .F., 0, 1 )
 
@@ -978,8 +1005,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    RETURN .T.
 
 
-
-
 STATIC FUNCTION xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, cBrVeze, dDatdok, dDatVal, cOpis, nDug, nPot, nSaldo )
 
    LOCAL nI
@@ -992,7 +1017,13 @@ STATIC FUNCTION xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartne
    AADD(aKarticaKolone, { "C", "Partner ID", 8, Trim(cIdPartner) })
    
    IF s_lSifkPRMJ
-      cProdajnoMjesto := AllTrim( get_partn_sifk_sifv( "PRMJ", cIdPartner ) )
+      IF cIdPartner == s_cIdPartnerPredhodni
+         cProdajnoMjesto := s_cProdajnoMjestoPredhodno
+      ELSE
+         cProdajnoMjesto := AllTrim( get_partn_sifk_sifv( "PRMJ", cIdPartner ) )
+         s_cIdPartnerPredhodni := cIdPartner 
+         s_cProdajnoMjestoPredhodno := cProdajnoMjesto
+      ENDIF
       AADD(aKarticaKolone, { "C", "Pr.MJ", 6, cProdajnoMjesto })    
    ENDIF
 
@@ -1183,7 +1214,7 @@ STATIC FUNCTION zagl_suban_kartica( cBrza )
 FUNCTION RasclanRjFunkFond( cRasclaniti, cRasclan )
 
    IF cRasclaniti == "D"
-      RETURN cRasclan ==  suban->idrj + suban->funk + suban->fond
+      RETURN cRasclan ==  (suban->idrj + suban->funk + suban->fond)
    ELSE
       RETURN .T.
    ENDIF

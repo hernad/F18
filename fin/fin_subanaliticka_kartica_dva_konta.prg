@@ -182,12 +182,11 @@ FUNCTION fin_suban_kartica2( lOtvSt )
       ENDIF
    ENDIF
 
-   lVrsteP := .F.
+   //lVrsteP := .F.
 
-   IF _fakt_params[ "fakt_vrste_placanja" ]
-      lVrsteP := .T.
-
-   ENDIF
+   //IF _fakt_params[ "fakt_vrste_placanja" ]
+   //   lVrsteP := .T.
+   ///ENDIF
 
 
 

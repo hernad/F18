@@ -13,6 +13,8 @@
 
 FIELD id, naz
 
+STATIC s_cIdKontoPredhodni, s_cIdPartnerPredhodni
+
 FUNCTION find_partner_by_naz_or_id( cId )
 
    LOCAL cAlias := "PARTN"
@@ -87,18 +89,46 @@ FUNCTION o_partner( cId )
    RETURN !Eof()
 
 
+FUNCTION select_o_konto( cId )
+
+   SELECT ( F_KONTO )
+   IF Used()
+         // select_o_konto()
+         IF RecCount() > 1 .AND. cId == NIL
+            s_cIdKontoPredhodni := NIL
+            RETURN .T.
+         ELSE
+            IF RecCount() == 1 .AND. s_cIdKontoPredhodni != NIL .AND. s_cIdKontoPredhodni == cId
+               // select_o_konto( cIdKontoKojiJePredhodnoZadan )
+               RETURN .T.
+            ENDIF
+            USE
+         ENDIF
+   ENDIF
+   
+   // zapamti cId
+   s_cIdKontoPredhodni := cId
+   RETURN o_konto( cId )   
+
 
 FUNCTION select_o_partner( cId )
 
    SELECT ( F_PARTN )
    IF Used()
+      // select_o_partner()
       IF RecCount() > 1 .AND. cId == NIL
+         s_cIdPartnerPredhodni := NIL
          RETURN .T.
       ELSE
+         IF RecCount() == 1 .AND. s_cIdPartnerPredhodni != NIL .AND. s_cIdPartnerPredhodni == cId
+            // select_o_partner( cIdPartnerKojiJePredhodnoZadan )
+            RETURN .T.
+         ENDIF
          USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
       ENDIF
    ENDIF
 
+   s_cIdPartnerPredhodni := cId
    RETURN o_partner( cId )
 
 
@@ -147,18 +177,6 @@ FUNCTION o_konto( cId )
    RETURN !Eof()
 
 
-FUNCTION select_o_konto( cId )
-
-   SELECT ( F_KONTO )
-   IF Used()
-      IF RecCount() > 1 .AND. cId == NIL
-         RETURN .T.
-      ELSE
-         USE
-      ENDIF
-   ENDIF
-
-   RETURN o_konto( cId )
 
 
 FUNCTION o_vrste_placanja()

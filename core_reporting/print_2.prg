@@ -35,9 +35,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
       lPrviDokument := .F.
    ENDIF
 
-
    cFileName := set_print_file_name( cFileName )
-
 
    IF ( cDocumentName == NIL )
       cDocumentName :=  gModul + '_' + DToC( Date() )

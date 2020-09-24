@@ -16,6 +16,7 @@ REQUEST ARRAYRDD
 
 STATIC aErrors := {}
 STATIC aInfos := {}
+STATIC s_nCursor, s_lPrinter, s_cPrintFile, s_lConsole, s_cDevice
 
 
 FUNCTION empty_info_bar()
@@ -32,34 +33,56 @@ FUNCTION empty_error_bar()
    RETURN .T.
 
 
+STATIC FUNCTION push_printer_state()
+   
+   // get cursor state
+   s_nCursor := SetCursor()
+   
+   //s_cPrintFile := Set( _SET_PRINTFILE )
+
+   // set printer off
+   s_lPrinter :=  Set( _SET_PRINTER, .F. )
+   // set device to screen
+   s_cDevice := Set( _SET_DEVICE, "SCREEN" )
+   // set console on
+   s_lConsole := Set( _SET_CONSOLE, .T. )
+   
+
+   RETURN .T.
+
+
+STATIC FUNCTION pop_printer_state()
+
+   // ovom komantom se resentuje print fajl
+   //Set( _SET_PRINTFILE, s_cPrintFile )
+
+   // restore device - SCREEN/PRINTER
+   Set( _SET_DEVICE, s_cDevice )
+   // restore printer on/off
+   Set( _SET_PRINTER,  s_lPrinter )
+   // restore console
+   Set( _SET_CONSOLE, s_lConsole )
+   // restore cursor
+   SetCursor( s_nCursor )
+
+   RETURN .T.
+
 
 FUNCTION info_bar( cDoc, cMsg )
 
-   LOCAL lPrinter, lConsole, cDevice, nCursor
-
    hb_default( @cMsg, "" )
 
-   nCursor := SetCursor()
-   lPrinter :=  Set( _SET_PRINTER,  .F. )
-   lConsole := Set( _SET_CONSOLE, .T. )
-   cDevice := Set( _SET_DEVICE, "SCREEN" )
+   push_printer_state()  
 
-   // SET DEVICE TO PRINTER
-
-   // SET PRINTER TO ( cFileName )
-   // SET PRINTER ON
    set_cursor_off()
 
    @ f18_max_rows(), 1 SAY8  "> " + PadC( Left( cMsg, MaxCol() - 6 ), MaxCol() - 5 ) + " <" COLOR F18_COLOR_INFO_PANEL
 
+   pop_printer_state()
+
    IF Empty( cMsg ) .OR. cMsg == "info_bar"
       RETURN .T.
    ENDIF
-
-   Set( _SET_PRINTER,  lPrinter )
-   Set( _SET_CONSOLE, lConsole )
-   Set( _SET_DEVICE, cDevice )
-   SetCursor( nCursor )
 
    IF Len( aInfos ) > INFO_MESSAGES_LENGTH
       ADel( aInfos, 1 )
@@ -91,16 +114,13 @@ FUNCTION error_bar( cDoc, cMsg )
 
    hb_default( @cMsg, "" )
 
-   lPrinter   :=  Set( _SET_PRINTER,  .F. )
-   lConsole := Set( _SET_CONSOLE, .T. )
-   cDevice := Set( _SET_DEVICE, "SCREEN" )
-
+   push_printer_state()
+ 
    @ f18_max_rows() + 1, 1 SAY8  "> " + PadC( Left( cMsg, MaxCol() - 6 ), MaxCol() - 5 ) + " <" ;
       COLOR iif( Empty( cMsg ), F18_COLOR_INFO_PANEL, F18_COLOR_ERROR_PANEL )
 
-   Set( _SET_PRINTER,  lPrinter )
-   Set( _SET_CONSOLE, lConsole )
-   Set( _SET_DEVICE, cDevice )
+   pop_printer_state()
+
 
    IF Empty( cMsg ) .OR. cMsg == "error_bar"
       RETURN .T.

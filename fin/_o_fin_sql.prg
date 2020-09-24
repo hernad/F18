@@ -154,6 +154,34 @@ FUNCTION o_sql_suban_kto_partner( cIdFirma )
    RETURN ! Eof()
 
 
+FUNCTION o_sql_suban_kto_partner_za_period( cIdFirma, dDatOd, dDatDo )
+
+      LOCAL hParams := hb_Hash()
+   
+      IF cIdFirma <> NIL
+         hParams[ "idfirma" ] := cIdFirma
+      ENDIF
+      
+      IF dDatOd != NIL
+         hParams[ "dat_od" ] := dDatOd
+      ENDIF
+   
+      IF dDatDo != NIL
+         hParams[ "dat_do" ] := dDatDo
+      ENDIF
+   
+      hParams[ "order_by" ] := "IdFirma,IdKonto,IdPartner,DatDok,BrNal,RBr"
+      hParams[ "indeks" ] := .F. // ne trositi vrijeme na kreiranje indeksa
+   
+      IF !use_sql_suban( hParams )
+         RETURN .F.
+      ENDIF
+   
+      GO TOP
+   
+      RETURN ! Eof()
+
+
 FUNCTION find_suban_za_period( cIdFirma, dDatOd, dDatDo, cOrderBy, cWhere )
 
    LOCAL hParams := hb_Hash()
@@ -187,8 +215,6 @@ FUNCTION find_suban_za_period( cIdFirma, dDatOd, dDatDo, cOrderBy, cWhere )
    GO TOP
 
    RETURN ! Eof()
-
-
 
 
 
@@ -295,6 +321,56 @@ FUNCTION find_suban_by_konto_partner( xIdFirma, cIdKonto, cIdPartner, cBrDok, cO
 
    RETURN ! Eof()
 
+
+FUNCTION find_suban_by_konto_partner_za_period( xIdFirma, cIdKonto, cIdPartner, dDatOd, dDatDo, cBrDok, cOrderBy, lIndeks )
+
+      LOCAL hParams := hb_Hash()
+   
+      IF xIdFirma != NIL
+         IF ValType( xIdFirma ) == "C"
+            hParams[ "idfirma" ] := xIdFirma
+            hb_default( @cOrderBy, "IdFirma,IdKonto,IdPartner,brdok" )
+            hb_default( @lIndeks, .F. )
+         ELSE
+            hParams := hb_HClone( xIdFirma )
+            IF !use_sql_suban( hParams )
+               RETURN .F.
+            ENDIF
+            GO TOP
+            RETURN !Eof()
+         ENDIF
+      ENDIF
+   
+      IF cIdKonto <> NIL
+         hParams[ "idkonto" ] := cIdKonto
+      ENDIF
+   
+      IF cIdPartner <> NIL
+         hParams[ "idpartner" ] := cIdPartner
+      ENDIF
+   
+      IF cBrDok <> NIL
+         hParams[ "brdok" ] := cBrDok
+      ENDIF
+
+      IF dDatOd != NIL
+         hParams[ "dat_od" ] := dDatOd
+      ENDIF
+   
+      IF dDatDo != NIL
+         hParams[ "dat_do" ] := dDatDo
+      ENDIF
+   
+      hParams[ "order_by" ] := cOrderBy // ako ima vise brojeva dokumenata sortiraj po njima
+      hParams[ "indeks" ] := lIndeks
+   
+      IF !use_sql_suban( hParams )
+         RETURN .F.
+      ENDIF
+      GO TOP
+   
+      RETURN ! Eof()
+      
 
 
 FUNCTION find_anal_za_period( cIdFirma, dDatOd, dDatDo, cOrderBy )
