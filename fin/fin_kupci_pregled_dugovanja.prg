@@ -12,7 +12,6 @@
 #include "f18.ch"
 
 
-
 FUNCTION fin_kupci_pregled_dugovanja()
 
    LOCAL i
@@ -38,7 +37,8 @@ FUNCTION fin_kupci_pregled_dugovanja()
       RETURN .F.
    ENDIF
 
-   download_template( "kupci_pregled_dugovanja.xlsx", "cec90f10beff71ca9ac3f487b7d1734dca727b1953c3bb8d3683313a25b35e27" )
+   //[ernad.husremovic@sa.out.ba@zvijer F18_template]$ sha256sum kupci_pregled_dugovanja.xlsx 
+   download_template( "kupci_pregled_dugovanja.xlsx", "5c36b55c2965951c9430fca176fb9b19943478a0741b4e3830a01f6ed37324bf" )
 
    oReport := YargReport():New( "kupci_pregled_dugovanja", "xlsx", "Header#BandSql1" )
    cSql := "select * from sp_dugovanja("
