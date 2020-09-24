@@ -97,10 +97,11 @@ FUNCTION fin_spec_prebijeno_konto_konto2( lOtvSt )
    cUslovKonta := PadR( cIdKonto + ";" + cIdKonto2 + ";", 100 )
    find_suban_by_konto_partner( cIdFirma, cUslovKonta, cUslovPartneri, NIL, "IdFirma,IdPartner,IdKonto,brdok", .T. )
 
-   cIdRj := REPLICATE("9", FIELD_LEN_FIN_RJ_ID )  // samo da program ne ispada u f-ji CistiK1K4()
+   cIdRj := REPLICATE("9", FIELD_LEN_FIN_RJ_ID )  // samo da program ne ispada u f-ji fin_cisti_polja_k4k4_funk_fond()
    cFunk := "99999"
    cFond := "9999"
-   CistiK1K4()
+ 
+   fin_cisti_polja_k4k4_funk_fond( .T., @cIdRj, @cK1, @cK2, @cK3, @cK4, @cFunk, @cFond )
 
    cFilt1 := ".t."
 

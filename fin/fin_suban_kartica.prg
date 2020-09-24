@@ -37,7 +37,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL cBoxName
    LOCAL dPom := CToD( "" )
    LOCAL cOpcine := Space( 20 )
-   LOCAL cExpXlsx := "N"
+   LOCAL cExpXlsx
    LOCAL aExpFields
    LOCAL cIdVn
    LOCAL cBrNal
@@ -122,6 +122,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    cPrikazK1234 := fetch_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
    cIdFirma := self_organizacija_id()
    s_cPortretDN := fetch_metric( "fin_kart_suban_portret", my_user(), "N")
+   cExpXlsx := fetch_metric( "fin_kart_suban_xlsx", my_user(), "N")
 
    cK1 := "9"
    cK2 := "9"
@@ -131,6 +132,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    cFunk := "99999"
    cFond := "9999"
 
+   altd()
 
    // Partner - prikaz prodajnog mjesta
    IF use_sql_sifk( "PARTN", PADR("PRMJ", 5) )
@@ -280,6 +282,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    //set_metric( "fin_kart_kz", my_user(), c1K1Z )
    set_metric( "fin_kart_k14", my_user(), cPrikazK1234 )
    set_metric( "fin_kart_suban_portret", my_user(), s_cPortretDN)
+   set_metric( "fin_kart_suban_xlsx", my_user(), cExpXlsx)
 
    IF !lSpojiUplate
       cFilterBrDok := Parsiraj( cUslovUpperBrDok, "UPPER(BRDOK)", "C" )
@@ -352,7 +355,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    ENDIF
 
    SELECT SUBAN
-   CistiK1k4()
+   fin_cisti_polja_k4k4_funk_fond( .T., @cIdRj, @cK1, @cK2, @cK3, @cK4, @cFunk, @cFond )
 
    cFilter := ".t." + iif( !Empty( cUslovIdVn ), ".and." + cFilterIdVn, "" ) + ;
       iif( cBrza == "N", ".and." + cFilterIdKonto + ".and." + cFilterIdPartner, "" ) + ;
@@ -792,6 +795,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
             ENDIF
             fin_print_ostatak_opisa( @cOpis, nCOpis, {|| check_nova_strana( bZagl, oPDF ) }, s_nOpisRptLength )
             IF cExpXlsx == "D" .AND. !( lOtvoreneStavke .AND. hRec[ "otvst" ] == "9" )
+               altd()
                IF  hRec[ "d_p" ] == "1"
                   nDuguje := hRec[ "iznosbhd" ]
                   nPotrazuje := 0
@@ -799,8 +803,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
                   nDuguje := 0
                   nPotrazuje :=  hRec[ "iznosbhd" ]
                ENDIF
-               ( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, ;
-                  s_cBrVeze, dDatDok, dDatVal, s_cOpis, nDuguje, nPotrazuje, nDugBHD - nPotBHD )
+               xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartnerNaziv, cIdVn, cBrNal, nRbr, s_cBrVeze, dDatDok, dDatVal, s_cOpis, nDuguje, nPotrazuje, nDugBHD - nPotBHD )
             ENDIF
 
             SKIP 1
@@ -1024,17 +1027,18 @@ STATIC FUNCTION xlsx_export_fill_row( cIdKonto, cKontoNaziv, cIdPartner, cPartne
        next
 
 
-       worksheet_write_string( s_pWorkSheet, 0, 0,  "Konto:", NIL)
-       worksheet_write_string( s_pWorkSheet, 0, 1,  hb_StrToUtf8(cIdKonto + " - " + Trim( cKontoNaziv)), NIL)
-      
-       worksheet_write_string( s_pWorkSheet, 1, 0,  "Partner:", NIL)
-       worksheet_write_string( s_pWorkSheet, 1, 1,  hb_StrToUtf8(cIdPartner + " - " + Trim(cPartnerNaziv)), NIL)
+      //nema smisla header kada imamo vise konta ili vise partnera
+      //worksheet_write_string( s_pWorkSheet, 0, 0,  "Konto:", NIL)
+      //worksheet_write_string( s_pWorkSheet, 0, 1,  hb_StrToUtf8(cIdKonto + " - " + Trim( cKontoNaziv)), NIL)
+      //worksheet_write_string( s_pWorkSheet, 1, 0,  "Partner:", NIL)
+      //worksheet_write_string( s_pWorkSheet, 1, 1,  hb_StrToUtf8(cIdPartner + " - " + Trim(cPartnerNaziv)), NIL)
     
        /* Set header */
+       s_nWorkSheetRow := 0
        for nI := 1 TO LEN(aKarticaKolone)
-         worksheet_write_string( s_pWorkSheet, 3, nI - 1,  aKarticaKolone[nI, 2], NIL)
+         worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKarticaKolone[nI, 2], NIL)
        next
-       s_nWorkSheetRow := 3
+       
    ENDIF
 
 

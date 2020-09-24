@@ -185,7 +185,7 @@ FUNCTION fin_specifikacija_suban()
    find_suban_za_period( cIdFirma, dDatOd, dDatDo, "idfirma,idkonto,idpartner,brdok", cSqlWhere )
    Msgc()
 
-   CistiK1k4()
+   fin_cisti_polja_k4k4_funk_fond( .T., @cIdRj, @cK1, @cK2, @cK3, @cK4, @cFunk, @cFond )
 
    SELECT SUBAN
    // IF !Empty( cIdFirma ) .AND. gDugiUslovFirmaRJFinSpecif != "D"

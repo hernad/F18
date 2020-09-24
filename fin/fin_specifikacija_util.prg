@@ -204,16 +204,17 @@ FUNCTION fin_get_k1_k4_funk_fond( GetList, nYDelta, lK )
   Cisti polja od K1 do K4
  */
 
-FUNCTION CistiK1K4( lK )
+FUNCTION fin_cisti_polja_k4k4_funk_fond( lK, cIdRj, cK1, cK2, cK3, cK4, cFunk, cFond )
 
    IF lK == NIL; lK := .T. ; ENDIF
+
    IF lK
-      IF ck1 == "9"; ck1 := ""; ENDIF
-      IF ck2 == "9"; ck2 := ""; ENDIF
-      IF ck3 == REPL( "9", Len( ck3 ) )
-         ck3 := ""
+      IF cK1 == "9"; cK1 := ""; ENDIF
+      IF cK2 == "9"; cK2 := ""; ENDIF
+      IF cK3 == REPL( "9", Len( ck3 ) )
+         cK3 := ""
       ELSE
-         ck3 := k3u256( ck3 )
+         cK3 := k3u256( cK3 )
       ENDIF
       IF ck4 == "99"; ck4 := ""; ENDIF
    ENDIF
@@ -230,8 +231,8 @@ FUNCTION CistiK1K4( lK )
       cfunk := Trim( StrTran( cfunk, ".", "" ) )
    ENDIF
    IF cFond == "9999"; cFond := ""; ENDIF
-   IF "." $ cfond
-      cfond := Trim( StrTran( cfond, ".", "" ) )
+   IF "." $ cFond
+      cfond := Trim( StrTran( cFond, ".", "" ) )
    ENDIF
 
    RETURN .T.

@@ -72,8 +72,7 @@ FUNCTION fin_specif_otvorene_stavke()
    nStr := 0
 
    o_suban()
-
-   CistiK1k4( .F. )
+   fin_cisti_polja_k4k4_funk_fond( .F., @cIdRj, @cK1, @cK2, @cK3, @cK4, @cFunk, @cFond )
 
 
 
