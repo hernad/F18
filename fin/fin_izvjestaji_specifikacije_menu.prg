@@ -22,7 +22,7 @@ FUNCTION fin_menu_specifikacije()
    AAdd( aOpc, "1. finansijske specifikacije        " )
    AAdd( aOpcExe, {|| fin_specifikacije_meni() } )
 
-   AAdd( aOpc, "1. kupci" )
+   AAdd( aOpc, "2. kupci" )
    AAdd( aOpcExe, {|| fin_specif_kupci() } )
 
    f18_menu( "spec", .F., _izbor, aOpc, aOpcExe )
