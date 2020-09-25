@@ -21,6 +21,9 @@ MEMVAR m
 
 FIELD idkonto, idpartner, idrj
 
+STATIC s_lSifkPRMJ := NIL
+STATIC s_cIdPartnerPredhodni := "XX", s_cProdajnoMjestoPredhodno := "XX"
+
 FUNCTION fin_specifikacija_suban()
 
    LOCAL cSK := "N"
@@ -30,7 +33,6 @@ FUNCTION fin_specifikacija_suban()
    LOCAL cLTreci := ""
    LOCAL cIzr1
    LOCAL cIzr2
-   LOCAL cExpRptDN := "N"
    LOCAL cOpcine := Space( 20 )
    LOCAL cVN := Space( 20 )
    LOCAL cUslovPartnerTelefon := Space( 100 ), cFilterPartnerTelefon
@@ -40,8 +42,12 @@ FUNCTION fin_specifikacija_suban()
    LOCAL cSqlWhere
    LOCAL nTArea
    LOCAL nC
-   LOCAL lExpRpt
+   LOCAL lExpXlsx
    LOCAL GetList := {}
+   LOCAL cExpXlsx := fetch_metric( "fin_specif_suban_xlsx", my_user(), "N")
+   LOCAL aSpecifSubanFields
+
+
 
    PRIVATE cSpecifSkracenaVarijantaDN := "N"
    PRIVATE fK1 := fk2 := fk3 := fk4 := "N"
@@ -89,7 +95,7 @@ FUNCTION fin_specifikacija_suban()
    // o_partner()
 
    cTipDomacaStranaObje := "1"
-   Box( "", 21, 77 )
+   Box( "", 21, 77)
    set_cursor_on()
    PRIVATE cK1 := cK2 := "9"
    PRIVATE cK3 := cK4 := "99"
@@ -141,12 +147,14 @@ FUNCTION fin_specifikacija_suban()
       @ box_x_koord() + 15, box_y_koord() + 2 SAY8 " PARTNER: Općina (prazno-sve):" GET cOpcine
       @ box_x_koord() + 16, box_y_koord() + 2 SAY8 " Telefon (prazno-svi, uslov: '033;032;'):" GET cUslovPartnerTelefon PICT "@!S30"
 
-      @ box_x_koord() + 18, box_y_koord() + 2 SAY "Export u XLSX (D/N)?" GET cExpRptDN PICT "@!" VALID cExpRptDN $ "DN"
+      @ box_x_koord() + 18, box_y_koord() + 2 SAY "Export u XLSX (D/N)?" GET cExpXlsx PICT "@!" VALID cExpXlsx $ "DN"
 
       fin_get_k1_k4_funk_fond( @GetList, 17 )
 
       READ
       ESC_BCR
+
+      // parametri snimanje
       o_params()
       PRIVATE cSection := "S"
       PRIVATE cHistory := " "
@@ -157,6 +165,17 @@ FUNCTION fin_specifikacija_suban()
       WPar( "d2", dDatDo )
       SELECT params
       USE
+      set_metric( "fin_specif_suban_xlsx", my_user(), cExpXlsx)
+      // parametri snimanje end
+
+      // Partner - prikaz prodajnog mjesta
+      IF use_sql_sifk( "PARTN", "PRMJ")
+         s_lSifkPRMJ := .T.
+      else
+         s_lSifkPRMJ := .F.
+      ENDIF
+
+
 
       cSqlWhere := parsiraj_sql( "idkonto", qqKonto )
       cSqlWhere += " AND " + parsiraj_sql( "idpartner", Trim( qqPartner ) )
@@ -174,11 +193,11 @@ FUNCTION fin_specifikacija_suban()
    ENDDO
    BoxC()
 
-   lExpRpt := ( cExpRptDN == "D" )
+   lExpXlsx := ( cExpXlsx == "D" )
 
-   IF lExpRpt
-      aSSFields := get_ss_fields( gFinRj, FIELD_LEN_PARTNER_ID )
-      xlsx_export_init( aSSFields, {}, "fin_specif_suban_" + DTOS(date()) + ".xlsx" )
+   IF lExpXlsx
+      aSpecifSubanFields := get_ss_fields( gFinRj, FIELD_LEN_PARTNER_ID, s_lSifkPRMJ )
+      xlsx_export_init( aSpecifSubanFields, {}, "fin_specif_suban_" + DTOS(date()) + ".xlsx" )
    ENDIF
 
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
@@ -450,7 +469,7 @@ FUNCTION fin_specifikacija_suban()
                @ PRow(), PCol() + 1 SAY nD2 - nP2 PICT pic
             ENDIF
 
-            IF lExpRpt
+            IF lExpXlsx
                IF gFinRj == "D" .AND. cRasclaniti == "D"
                   cRj_id := cRasclan
                   IF !Empty( cRj_id )
@@ -532,7 +551,7 @@ FUNCTION fin_specifikacija_suban()
       @ PRow(), PCol() + 1 SAY nUd2 - nUP2 PICT pic
    ENDIF
 
-   IF lExpRpt
+   IF lExpXlsx
       xlsx_export_fill_row( "UKUPNO", "", "", nUD, nUP, nUD - nUP )
    ENDIF
 
@@ -542,7 +561,7 @@ FUNCTION fin_specifikacija_suban()
    ENDIF
    end_print( xPrintOpt )
 
-   IF lExpRpt
+   IF lExpXlsx
       open_exported_xlsx()
    ENDIF
 
@@ -701,8 +720,9 @@ FUNCTION zagl_fin_specif( cSpecifSkracenaVarijantaDN, cOpcine, cUslovPartnerTele
    RETURN .T.
 
 
-STATIC FUNCTION xlsx_export_fill_row( cKonto, cPartner, cNaziv, nFDug, nFPot, nFSaldo, cRj, cRjNaz )
+STATIC FUNCTION xlsx_export_fill_row( cKonto, cIdPartner, cNaziv, nFDug, nFPot, nFSaldo, cRj, cRjNaz )
 
+   LOCAL cProdajnoMjesto
    LOCAL hRec := hb_hash()
 
 
@@ -710,7 +730,23 @@ STATIC FUNCTION xlsx_export_fill_row( cKonto, cPartner, cNaziv, nFDug, nFPot, nF
    //o_r_export()
    // APPEND BLANK
    hRec["konto"] := Trim(cKonto)
-   hRec["partner"] := Trim(cPartner)
+   hRec["partner"] := Trim(cIdPartner)
+
+   IF s_lSifkPRMJ
+      IF cIdPartner == s_cIdPartnerPredhodni
+         cProdajnoMjesto := s_cProdajnoMjestoPredhodno
+      ELSE
+         IF Empty( cIdPartner )
+            cProdajnoMjesto := ""
+         ELSE
+            cProdajnoMjesto := AllTrim( get_partn_sifk_sifv( "PRMJ", cIdPartner ) )
+         ENDIF
+         s_cIdPartnerPredhodni := cIdPartner 
+         s_cProdajnoMjestoPredhodno := cProdajnoMjesto
+      ENDIF
+      hRec["prmj"] := cProdajnoMjesto   
+   ENDIF
+
    hRec["naziv"] := Trim(cNaziv)
    hRec["duguje"] := nFDug
    hRec["potrazuje"] := nFPot
@@ -727,7 +763,7 @@ STATIC FUNCTION xlsx_export_fill_row( cKonto, cPartner, cNaziv, nFDug, nFPot, nF
 
 
 // vraca matricu sa sub.bb poljima
-STATIC FUNCTION get_ss_fields( cRj, nPartLen )
+STATIC FUNCTION get_ss_fields( cRj, nPartLen, lPartnerPRMJ )
 
    LOCAL aFields
 
@@ -741,6 +777,9 @@ STATIC FUNCTION get_ss_fields( cRj, nPartLen )
    aFields := {}
    AAdd( aFields, { "konto", "C", 7, 0 } )
    AAdd( aFields, { "partner", "C", nPartLen, 0 } )
+   IF lPartnerPRMJ
+      AAdd( aFields, { "prmj", "C", 8, 0 } )
+   ENDIF
    AAdd( aFields, { "naziv", "C", 40, 0 } )
 
    IF cRj == "D"

@@ -67,7 +67,7 @@ STATIC FUNCTION fin_specifikacije_meni()
    LOCAL _izbor := 1
 
 
-   AAdd( aOpc, "1. po subanalitičkim kontima                            " )
+   AAdd( aOpc, "1. specifkacija po subanalitičkim kontima                " )
    AAdd( aOpcExe, {|| fin_specifikacija_suban() } )
 
    AAdd( aOpc, "2. specifikacija po subanalitičkim kontima / sql" )
