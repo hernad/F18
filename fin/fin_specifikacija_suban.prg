@@ -561,11 +561,15 @@ FUNCTION fin_specifikacija_suban()
    ENDIF
    end_print( xPrintOpt )
 
+
    IF lExpXlsx
       open_exported_xlsx()
    ENDIF
 
-   closeret
+
+   my_close_all_dbf()
+
+   RETURN .T.
 
 
 
