@@ -88,7 +88,7 @@ FUNCTION fakt_kalk_prenos_10_14()
       nKalkRBr := 0
       @ box_x_koord() + 1, box_y_koord() + 2   SAY "Broj kalkulacije 14 -" GET cBrKalk PICT "@!"
       @ box_x_koord() + 1, Col() + 2 SAY "Datum:" GET dDatKalk
-      @ box_x_koord() + 4, box_y_koord() + 2   SAY8 "Konto razdužuje:" GET cIdKonto2 PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto2 )
+      //@ box_x_koord() + 4, box_y_koord() + 2   SAY8 "Konto razdužuje:" GET cIdKonto2 PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto2 )
 
 
       cFaktFirma := iif( cIdKonto2 == gKomKonto, gKomFakt, cIdFirma )
