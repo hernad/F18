@@ -19,7 +19,7 @@ IF NOT EXIST %F18_0_DIR%  (
 
 copy /y F18-klijent.exe %USERPROFILE%\.eShell-dev\extensions\F18\F18_0\F18-klijent.exe
 
-cd c:\dev\eShell
+cd c:\dev\F18_mono\eShell
 
 
 set Token=ESHELL_%RANDOM%
@@ -35,4 +35,4 @@ goto waiteShell
 :endloop
 echo eShell-dev died
 
-cd c:\dev\F18
+cd c:\dev\F18_mono\F18
