@@ -81,6 +81,9 @@ METHOD programski_modul_osnovni_meni()
    AAdd( aOpcExe, {|| fin_povrat_naloga() } )
 
 
+   AAdd( aOpc, "Q. eisporuke / enabavke" )
+   AAdd( aOpcExe, {|| fin_eIsporukeNabavkeMenu() } )
+
    AAdd( aOpc, cSeparator )
    AAdd( aOpcExe, {|| nil } )
    AAdd( aOpc, "X. parametri" )
