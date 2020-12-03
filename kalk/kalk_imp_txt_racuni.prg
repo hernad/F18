@@ -630,7 +630,19 @@ STATIC FUNCTION get_kalk_tip_by_vind_fakt_tip( cFaktTD, cIdProdajnoMjesto )
    CASE ( cFaktTD == "11" .AND. cIdProdajnoMjesto >= "200" ) // diskont vindija FAKT 11 -> KALK 41
       cRet := "41"
 
-   CASE cFaktTD $ "90#91#92" // kalo, rastur - otpis radio se u kalku
+   CASE cFaktTD $ "90#91#92#95" // kalo, rastur - otpis radi se u kalu
+
+      // 90 - otpis  
+      // 91 - povrati od kupaca
+      // 92 - otpis zapisnik inspekcije
+
+      //99	POVRATI OD KUPACA	5791	120000	NE	ZAPISNIK O UNIŠTENJU NA DEPONIJI
+      //96	OTPIS GRANICA BEZ ZAPISNIKA INSPEKCIJE	5791	120001	DA	
+      //97	OTPIS SA SKLADIŠTA	5791	120002	NE	ZAPISNIK O UNIŠTENJU NA DEPONIJI
+      //92	MANJAK PRIJEMA	5791	120003	DA	
+      //95	VANREDNI OTPIS NEISPRAVNE ROBE	5791	120004	NE	ZAPISNIK O UNIŠTENJU NA DEPONIJI
+      //98	OTPIS GRANICA UZ ZAPISNIK INSPEKCIJE	5791	120005	NE	ZAPISNIK INSPEKTORA O UZORKOVANJU
+
       cRet := "95"
 
    CASE cFaktTD $ "96"  // otprema - medjuskladisnica
