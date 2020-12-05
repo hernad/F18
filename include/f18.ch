@@ -375,7 +375,7 @@
 
 #command ENDPRINT => f18_end_print(NIL, __print_opt)
 
-
+// EOF close return <x>
 #command EOF CRET <x> =>  if EofFndret(.T., .T.)       ;
                           ;return <x>                  ;
                           ;endif

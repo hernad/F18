@@ -47,7 +47,11 @@ FUNCTION fin_gen_psuban_stampa_nalozi( lAuto, lStampa, dDatNal )
    SET ORDER TO TAG "1"
    GO TOP
 
-   EOF CRET .F.
+   //EOF CRET .F.
+   IF Eof()
+      info_bar("fin", "stampa: prazna priprema")
+      RETURN .F.
+   ENDIF
 
    IF lAuto
       // _print_opt := "D"
