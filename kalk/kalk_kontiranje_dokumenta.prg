@@ -62,6 +62,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL nLen
    LOCAL nStranaValutaIznos
    LOCAL nKursPomocna
+   LOCAL cEnabUvozSwitchKALK := fetch_metric( "fin_enab_uvoz_switch_kalk", NIL, "N" )
 
    PRIVATE p_cKontoKontiranje1, p_cKontoKontiranje2, p_cKontoKontiranje3
    PRIVATE p_cPartnerKontiranje1, p_cPartnerKontiranje2, p_cPartnerKontiranje3, p_cPartnerKontiranje4
@@ -140,6 +141,14 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    GO TOP
    cGlavniKonto := finmat_glavni_konto( finmat->idvd )
    select_o_koncij( cGlavniKonto )
+
+   IF cEnabUvozSwitchKALK == "D"
+      // kalk_10_gen_uvoz( finmat->brdok ) => .F. ako su spediterski troskovi 0
+      IF kalk_10_gen_uvoz( finmat->brdok )
+         my_close_all_dbf()
+         RETURN .T.
+      ENDIF
+   ENDIF
 
    // select_o_trfp()
    use_sql_trfp( koncij->shema, finmat->IdVD )
