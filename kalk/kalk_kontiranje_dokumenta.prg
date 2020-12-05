@@ -144,8 +144,8 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    // select_o_trfp()
    use_sql_trfp( koncij->shema, finmat->IdVD )
    IF EOF()
-      my_close_all_dbf()
       info_bar("kont", "TRFP prazno: " + koncij->shema + "-" + finmat->IdVD)
+      my_close_all_dbf()
       RETURN .T.
    ENDIF
    // SEEK finmat->IdVD + koncij->shema
