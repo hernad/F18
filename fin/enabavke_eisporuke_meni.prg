@@ -27,14 +27,13 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     AAdd( aOpc, "7. eksport eisporuke xlsx                                " )
     AAdd( aOpcexe, {|| export_eIsporuke() } )
  
-    AAdd( aOpc, "9. obračun PDV na osnovu izgenerisanih enabavki/eisporuka" )
+    AAdd( aOpc, "9. obračun PDV na osnovu generisanih enab/eisp" )
     AAdd( aOpcexe, {|| eNab_eIsp_PDV() } )
 
 
     AAdd( aOpc, "X. fin generacija uvoz" )
     AAdd( aOpcexe, {|| fin_gen_uvoz() } )
   
-
 
     f18_menu( "fin_eispn", .F., nIzbor, aOpc, aOpcexe )
  
@@ -211,7 +210,7 @@ FUNCTION eNab_eIsp_PDV()
     nX++
     @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(41) PDV na ulaz od reg.obv. PDV: ", nWidth) + Transform(hPDV[ "41" ], cPict)
     @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) PDV na uvoz:                 ", nWidth) + Transform(hPDV[ "42" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) paus naknada za pojopriv: ", nWidth) + Transform(hPDV[ "43" ], cPict)
+    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) paus nakn za poljopriv:", nWidth) + Transform(hPDV[ "43" ], cPict)
 
     nX++
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
