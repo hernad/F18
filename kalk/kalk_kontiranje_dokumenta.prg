@@ -107,12 +107,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       IF finmat->idvd $ "49#71#79#21#22#72#29#02"
          RETURN .F.
       ENDIF
-      //Beep( 1 )
-      //IF !lAGen
-         //lAfin := Pitanje(, "KALK: Formirati FIN nalog?", "D" ) == "D"
-      //ELSE
-         lAfin := .T.
-      //ENDIF
+      lAfin := .T.
    ENDIF
 
    IF !lAFin
@@ -135,9 +130,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       select_o_fin_pripr()
       SET ORDER TO TAG "1"
       GO TOP
-      // IF reccount2()
-      // MsgBeep("FIN priprema izbrisana !")
-      // ENDIF
       my_dbf_zap()
       o_nalog()
       SET ORDER TO TAG "1"
@@ -151,7 +143,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
    // select_o_trfp()
    use_sql_trfp( koncij->shema, finmat->IdVD )
-   IF !EOF()
+   IF EOF()
       my_close_all_dbf()
       info_bar("kont", "TRFP prazno: " + koncij->shema + "-" + finmat->IdVD)
       RETURN .T.
