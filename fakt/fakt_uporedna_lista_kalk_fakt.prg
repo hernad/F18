@@ -248,7 +248,7 @@ FUNCTION fakt_uporedna_lista_fakt_kalk()
 
    IF FaktEof  //.AND. KalkEof
       Beep ( 3 )
-      Msg ( "Ne postoje traženi podaci" )
+      Msg ( "FAKT.UP.L: Ne postoje traženi podaci" )
       CLOSERET
    ENDIF
 

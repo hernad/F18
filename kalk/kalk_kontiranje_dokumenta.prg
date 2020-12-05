@@ -15,6 +15,7 @@ STATIC dDatMax
 
 MEMVAR gAFin, gAMat, gFunKon1, gFunKon2
 MEMVAR dDatVal // funkcija datval setuje privatnu varijablu dDatVal
+MEMVAR GetList
 
 /*
 
@@ -150,6 +151,11 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
    // select_o_trfp()
    use_sql_trfp( koncij->shema, finmat->IdVD )
+   IF !EOF()
+      my_close_all_dbf()
+      info_bar("kont", "TRFP prazno: " + koncij->shema + "-" + finmat->IdVD)
+      RETURN .T.
+   ENDIF
    // SEEK finmat->IdVD + koncij->shema
 
    cIdVnTrFP := trfp->IdVN

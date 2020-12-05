@@ -101,7 +101,7 @@ FUNCTION fin_pocetno_stanje_sql()
    fin_pocetno_stanje_get_data( hParams, @_data, @_konto_data, @_partn_data )
 
    IF _data == NIL
-      MsgBeep( "Ne postoje traženi podaci... prekidam operaciju !" )
+      MsgBeep( "FIN.PS: Ne postoje traženi podaci... prekidam operaciju !" )
       dbf_refresh_start()
       RETURN .F.
    ENDIF
