@@ -410,6 +410,11 @@ GRANT ALL ON TABLE public.eNabavke TO "admin";
 GRANT ALL ON TABLE public.eNabavke TO xtrole;
 
 */
+
+
+
+
+
 STATIC FUNCTION db_insert_enab( hRec )
 
     LOCAL cQuery := "INSERT INTO public.enabavke", oRet
