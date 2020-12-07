@@ -954,9 +954,10 @@ FUNCTION gen_eIsporuke()
     LOCAL cPorezniPeriod
     LOCAL hUkupno := hb_hash()
     LOCAL nRbr := 0
-    LOCAL nRbr2
+    LOCAL nRbr2 := 0
     LOCAL cBrisatiDN := "N"
     LOCAL nCnt
+    LOCAL oError
 
     LOCAL GetList := {}
     LOCAL cLokacijaExport := my_home() + "export" + SLASH, nCreate
@@ -981,13 +982,13 @@ FUNCTION gen_eIsporuke()
         nRbr := eisp->max + 1
         USE
         SELECT F_TMP
-        IF !use_sql( "EISP", "select max(g_r_br) as max from fmk.epdv_kif")
-            MsgBeep("fmk.epdv_kif sql tabela nedostupna?!")
-            BoxC()
-            RETURN .F.
-        ENDIF
-        nRbr2 := eisp->max + 1
-        USE
+        BEGIN SEQUENCE WITH {| err| Break( err ) }
+            use_sql( "EISP", "select max(g_r_br) as max from fmk.epdv_kif")
+            nRbr2 := enab->max + 1
+            USE
+        RECOVER USING oError
+        END SEQUENCE
+        
         nRbr := Round(Max(nRbr, nRbr2), 0)
         
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY " brisati period " + cPorezniPeriod +" pa ponovo generisati?:" GET cBrisatiDN PICT "@!" VALID cBrisatiDN $ "DN"
@@ -1002,7 +1003,6 @@ FUNCTION gen_eIsporuke()
     set_metric( "fin_enab_my_pdv", NIL, cPDV )
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
-
 
     IF DirChange( cLokacijaExport ) != 0
            nCreate := MakeDir ( cLokacijaExport )

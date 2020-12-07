@@ -1128,9 +1128,10 @@ FUNCTION gen_eNabavke()
     LOCAL cPorezniPeriod
     LOCAL hUkupno := hb_hash()
     LOCAL nRbr := 0
-    LOCAL nRbr2
+    LOCAL nRbr2 := 0
     LOCAL cBrisatiDN := "N"
     LOCAL nCnt
+    LOCAL oError
 
     LOCAL GetList := {}
     LOCAL cLokacijaExport := my_home() + "export" + SLASH, nCreate
@@ -1155,13 +1156,16 @@ FUNCTION gen_eNabavke()
         nRbr := enab->max + 1
         USE
         SELECT F_TMP
-        IF !use_sql( "ENAB", "select max(g_r_br) as max from fmk.epdv_kuf")
-            MsgBeep("fmk.epdv_kuf sql tabela nedostupna?!")
-            BoxC()
-            RETURN .F.
-        ENDIF
-        nRbr2 := enab->max + 1
-        USE
+        BEGIN SEQUENCE WITH {| err| Break( err ) }
+            IF !use_sql( "ENAB", "select max(g_r_br) as max from fmk.epdv_kuf")
+                //MsgBeep("fmk.epdv_kuf sql tabela nedostupna?!")
+            ENDIF
+            nRbr2 := enab->max + 1
+            USE
+        RECOVER USING oError
+        END SEQUENCE
+        
+       
         nRbr := Round(Max(nRbr, nRbr2), 0)
         
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY " brisati period " + cPorezniPeriod +" pa ponovo generisati?:" GET cBrisatiDN PICT "@!" VALID cBrisatiDN $ "DN"
