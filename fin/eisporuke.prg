@@ -605,6 +605,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                  Alert("02:INT.FAKT ERR PDV partner<>" + eisp->pdv_broj)
                ENDIF 
 
+               nPDVNePDVObveznik := eisp->pdv
                nOsnovicaNePdvObveznik := eisp->bez_pdv
                nNePDVObveznikSaPDV := eisp->iznos_sa_pdv
                
