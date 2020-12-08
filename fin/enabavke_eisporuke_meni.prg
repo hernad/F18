@@ -15,7 +15,7 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     AAdd( aOpc, "P. obračun PDV na osnovu generisanih enab/eisp" )
     AAdd( aOpcexe, {|| eNab_eIsp_PDV() } )
 
-    AAdd( aOpc, "X. fin generacija uvoz" )
+    AAdd( aOpc, "U. fin generacija uvoz" )
     AAdd( aOpcexe, {|| fin_gen_uvoz() } )
 
     AAdd( aOpc, "X. admin - init tabele enab/eisp" )
@@ -59,10 +59,13 @@ STATIC FUNCTION fin_eIsporuke()
         AAdd( aOpc, "1. parametri eisporuke                                   " )
         AAdd( aOpcexe, {|| parametri_eIsporuke() } )
     
-        AAdd( aOpc, "2. generacija eisporuke                                  " )
+        AAdd( aOpc, "2. provjera knjiženja eisporuke                        " )
+        AAdd( aOpcexe, {|| check_eIsporuke() } )
+
+        AAdd( aOpc, "3. generacija eisporuke                                  " )
         AAdd( aOpcexe, {|| gen_eIsporuke() } )
     
-        AAdd( aOpc, "3. eksport eisporuke xlsx                                " )
+        AAdd( aOpc, "4. eksport eisporuke xlsx                                " )
         AAdd( aOpcexe, {|| export_eIsporuke() } )
           
     
@@ -381,5 +384,4 @@ FUNCTION db_create_enabavke_eisporuke()
     QUIT_1
 
     RETURN .T.
-    
     
