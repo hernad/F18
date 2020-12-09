@@ -142,7 +142,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    cGlavniKonto := finmat_glavni_konto( finmat->idvd )
    select_o_koncij( cGlavniKonto )
 
-   IF cEnabUvozSwitchKALK == "D"
+   IF finmat->idvd == "10" .AND. cEnabUvozSwitchKALK == "D"
       // kalk_10_gen_uvoz( finmat->brdok ) => .F. ako su spediterski troskovi 0
       IF kalk_10_gen_uvoz( finmat->brdok )
          my_close_all_dbf()
