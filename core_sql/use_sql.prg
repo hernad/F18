@@ -152,7 +152,7 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 FUNCTION f18_sql_schema( cTable )
   
    LOCAL cModul := programski_modul()
-   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "ks", "log" }
+   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "log" }
    
    // npr. "f18.partn"
    IF "." $ cTable
@@ -169,11 +169,13 @@ FUNCTION f18_sql_schema( cTable )
       ENDIF
    ENDIF
 
-   IF cTable $ "pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks"
+   
+   IF "#" + cTable + "#" $ "#pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks#"
       IF cModul == "POS" 
          RETURN sql_primarna_schema() + "." + cTable
       ELSE
          // KALK modul maloprodaja koristi pos tabele ovako
+         // pos_doks  => p2.pos_doks
          RETURN pos_prodavnica_sql_schema() + "." + cTable
       ENDIF
    ENDIF
