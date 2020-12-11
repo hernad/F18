@@ -152,7 +152,7 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 FUNCTION f18_sql_schema( cTable )
   
    LOCAL cModul := programski_modul()
-   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "log" }
+   LOCAL aF18Tables := { "tarifa", "kalk_kalk", "kalk_doks", "koncij", "partn", "valute", "konto", "tnal", "tdok", "sifk", "sifv", "trfp", "ks", "log" }
    
    // npr. "f18.partn"
    IF "." $ cTable
