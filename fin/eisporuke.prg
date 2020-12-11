@@ -155,7 +155,8 @@ FUNCTION check_eIsporuke()
     // nema pridruzenog konta pdv ili je brdok empty
     cQuery += " and (sub2.idkonto is null or trim(sub2.idkonto)='' or trim(fin_suban.brdok)='' )"
 
-  
+   
+
     IF !use_sql( "EISP", cQuery + " order by idfirma, idvn, brnal, rbr, brdok")
         RETURN .F.
     ENDIF
@@ -262,6 +263,7 @@ GRANT ALL ON TABLE public.eisporuke TO xtrole;
 STATIC FUNCTION db_insert_eisp( hRec )
 
     LOCAL cQuery := "INSERT INTO public.eisporuke", oRet
+    LOCAL oError
     
     cQuery += "(eisporuke_id, tip, porezni_period, br_fakt, jci, dat_fakt, "
     cQuery += "kup_naz,kup_sjediste, kup_pdv, kup_jib,"
@@ -298,7 +300,11 @@ STATIC FUNCTION db_insert_eisp( hRec )
     cQuery += sql_quote(hRec["fin_brnal"]) + ","
     cQuery += sql_quote(hRec["fin_rbr"]) + ")"
 
-    oRet := run_sql_query(cQuery)
+    BEGIN SEQUENCE WITH {| err| Break( err ) }
+        oRet := run_sql_query(cQuery)
+    RECOVER USING oError
+        error_bar( "eisp_ins:" + oError:description )  
+    END SEQUENCE
 
     IF sql_error_in_query( oRet, "INSERT" )
       RETURN .F.

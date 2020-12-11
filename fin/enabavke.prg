@@ -171,6 +171,7 @@ FUNCTION check_eNabavke()
     LOCAL nX := 1
     LOCAL GetList := {}
     LOCAL cQuery, cQuery2, cQuery3, cQuery4, cQuery5, cQuery6, cQuery7
+    LOCAL cPartnerBrdokUslov
     
 
     Box(,3, 70)
@@ -185,6 +186,10 @@ FUNCTION check_eNabavke()
       RETURN .F.
     ENDIF
 
+    // dobavljac - partner mora postojati, brdok mora postojati
+    cPartnerBrdokUslov := "(sub2.idpartner is null or trim(sub2.idpartner)='' or trim(fin_suban.brdok)='')"
+
+
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
 
@@ -192,7 +197,7 @@ FUNCTION check_eNabavke()
 
 
     FOR nStep := 1 TO 2 
-        cSelectFields := "SELECT fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr, fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2, fin_suban.brdok"
+        cSelectFields := "SELECT fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr, fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2, fin_suban.brdok as brdok"
         cBrDokFinFin2 := "fin_suban.brdok=sub2.brdok"
         cFinNalogNalog2 := "fin_suban.idfirma=sub2.idfirma and fin_suban.idvn=sub2.idvn and fin_suban.brnal=sub2.brnal"
         cLeftJoinFin2 := " left join fmk.fin_suban sub2 on " + cFinNalogNalog2 + " and " + cBrDokFinFin2 + " and sub2.idkonto like '" + Trim(cIdKontoDobav) + "%'"
@@ -211,7 +216,7 @@ FUNCTION check_eNabavke()
         cQuery += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery += " and " + cPartnerBrdokUslov
     
         // 2710 - uvoz
         cQuery2 := cSelectFields
@@ -226,7 +231,7 @@ FUNCTION check_eNabavke()
         cQuery2 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery2 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery2 += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery2 += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery2 += " and " + cPartnerBrdokUslov
 
         // 2720 - avansi
         cQuery3 := cSelectFields
@@ -241,7 +246,7 @@ FUNCTION check_eNabavke()
         cQuery3 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery3 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery3 += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery3 += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery3 += " and " + cPartnerBrdokUslov
 
         // 2730 - strana lica
         cQuery4 := cSelectFields
@@ -256,7 +261,7 @@ FUNCTION check_eNabavke()
         cQuery4 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery4 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery4 += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery4 += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery4 += " and " + cPartnerBrdokUslov
 
         // 2740 - poljo
         cQuery5 := cSelectFields
@@ -271,7 +276,7 @@ FUNCTION check_eNabavke()
         cQuery5 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery5 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery5 += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery5 += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery5 += " and " + cPartnerBrdokUslov
 
         // 2750 - posebna schema
         cQuery6 := cSelectFields
@@ -286,7 +291,7 @@ FUNCTION check_eNabavke()
         cQuery6 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery6 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery6 += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery6 += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery6 += " and " + cPartnerBrdokUslov
 
         // 2780 - ostalo
         cQuery7 := cSelectFields
@@ -301,7 +306,7 @@ FUNCTION check_eNabavke()
         cQuery7 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery7 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
         cQuery7 += " and not fin_suban.idvn in (" + cTmps + ")"
-        cQuery7 += "  and (sub2.idpartner  is null or trim(sub2.idpartner) ='')"
+        cQuery7 += " and " + cPartnerBrdokUslov
 
     
         IF !use_sql( "ENAB", "(" + cQuery + ") UNION (" + cQuery2 + ") UNION (" + cQuery3 + ") UNION (" + cQuery4 + ") UNION (" + cQuery5 + ") UNION (" + cQuery6 +") UNION (" + cQuery7 +")" +;
@@ -317,7 +322,7 @@ FUNCTION check_eNabavke()
         ++nX
         DO WHILE !EOF()
             @ box_x_koord() + nX++, box_y_koord() + 2 SAY enab->idfirma + "-" + enab->idvn + "-" + enab->brnal + " Rbr:" + str(enab->rbr,4) +;
-                    " Konto: " + trim(enab->idkonto) + " / Konto2: " + trim(enab->idkonto2)
+                    " Konto: " + trim(enab->idkonto) + " / Konto2: " + trim(enab->idkonto2) + " brdok: " + enab->brdok
             IF nX > 13
             Inkey(0)
             nX := 1
@@ -333,7 +338,7 @@ FUNCTION check_eNabavke()
         USE
 
     NEXT
-    //MsgBeep("check eNabavke")
+
     RETURN .T.
 
 
@@ -418,6 +423,7 @@ GRANT ALL ON TABLE public.eNabavke TO xtrole;
 STATIC FUNCTION db_insert_enab( hRec )
 
     LOCAL cQuery := "INSERT INTO public.enabavke", oRet
+    LOCAL oError
     
     cQuery += "(enabavke_id, tip, porezni_period, br_fakt, jci, dat_fakt, dat_fakt_prijem,"
     cQuery += "dob_naz,dob_sjediste, dob_pdv, dob_jib,"
@@ -453,7 +459,13 @@ STATIC FUNCTION db_insert_enab( hRec )
     cQuery += sql_quote(hRec["fin_brnal"]) + ","
     cQuery += sql_quote(hRec["fin_rbr"]) + ")"
 
-    oRet := run_sql_query(cQuery)
+    
+    BEGIN SEQUENCE WITH {| err| Break( err ) }
+        oRet := run_sql_query(cQuery)
+    RECOVER USING oError
+        error_bar( "enab_ins:" + oError:description )  
+     END SEQUENCE
+  
 
     IF sql_error_in_query( oRet, "INSERT" )
       RETURN .F.
@@ -1763,7 +1775,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, dDatDok, cIdDobavljac, cBrFakt, nDobavIznos, nSpe
        @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI NP izn:" GET hParams["fin_uvoz_prev_pdv_np_iznos"] PICT cPictIznos
 
        nX += 2
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prevalmani kto potraž :" GET hParams["fin_uvoz_kto_prevalm_potraz"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prelevmani kto potraž :" GET hParams["fin_uvoz_kto_prevalm_potraz"]
        @ box_x_koord() + nX++, col() + 2 SAY8 "iznos" GET hParams["fin_uvoz_prevalm_iznos"] PICT cPictIznos
 
        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "    Carina kto potraž :" GET hParams["fin_uvoz_kto_car_potraz"]
@@ -1887,10 +1899,10 @@ FUNCTION fin_gen_uvoz(cBrKalk, dDatDok, cIdDobavljac, cBrFakt, nDobavIznos, nSpe
     dbf_update_rec( hRec )
 
     IF ROUND(hParams["fin_uvoz_prevalm_iznos"], 2) > 0
-        // prevalmani potrazuje
+        // prelevmani potrazuje
         APPEND BLANK
         hRec["rbr"] := nRbr++
-        hRec["opis"] := "obaveze prevalmani"
+        hRec["opis"] := "obaveze prelevmani"
         hRec["brdok"] := Alltrim(Str(hParams["fin_uvoz_jci_broj"]))
         hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
         hRec["datval"] := CTOD("")
