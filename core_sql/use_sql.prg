@@ -170,7 +170,7 @@ FUNCTION f18_sql_schema( cTable )
    ENDIF
 
    
-   IF "#" + cTable + "#" $ "#pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks#"
+   IF ("#" + cTable + "#") $ "#pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks#"
       IF cModul == "POS" 
          RETURN sql_primarna_schema() + "." + cTable
       ELSE
