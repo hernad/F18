@@ -1,7 +1,7 @@
 #!/bin/bash
 
 BUILD_ARCH=x64
-HB_VER=4.7.2
+HB_VER=4.8.0
 BUILD_ARCH=x64
 
 CURDIR=`pwd`

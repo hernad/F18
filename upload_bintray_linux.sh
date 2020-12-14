@@ -39,6 +39,12 @@ cp -av $HB_ROOT/bin/pg_dump .
 cp -av $HB_ROOT/bin/pg_restore .
 cp -av $HB_ROOT/bin/curl .
 
+ln -s libcrypto.so libcrypto.so.1.1
+ln -s libssl.so libssl.so.1.1
+ln -s libz.so libz.so.1
+ln -s libcurl.so libcurl.so.4 
+
+
 FILES="F18-klijent libz.so libssl.so libcrypto.so libpq.so libcurl.so psql pg_dump pg_restore curl"
 
 chmod +x F18-klijent
@@ -58,11 +64,13 @@ ls -lh $FILE
 set
 echo uploading $FILE to bintray ...
 
-curl -s -T $FILE \
+export LD_LIBRARY_PATH=.
+
+./curl -s -T $FILE \
       -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
       --header "X-Bintray-Override: 1" \
      https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$F18_VERSION/$FILE
 
-curl -s -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
+./curl -s -u $BINTRAY_OWNER:$BINTRAY_API_KEY \
    -X POST https://api.bintray.com/content/$BINTRAY_OWNER/$BINTRAY_REPOS/$BINTRAY_PACKAGE/$F18_VERSION/publish
 
