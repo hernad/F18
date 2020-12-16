@@ -266,9 +266,10 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     // dobavljac robe potrazuje
     hRec["rbr"] := nRbr++
     hRec["opis"] := "RN " + hParams["fin_uvoz_dob_brdok"] + ", "
+    hRec["opis"] += "JCI: " + Alltrim(Str(hParams["fin_uvoz_jci_broj"]))
     hRec["brdok"] := hParams["fin_uvoz_dob_brdok"]
     hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
-    hRec["opis"] := "JCI: " + Alltrim(Str(hParams["fin_uvoz_jci_broj"]))
+
     IF hParams["fin_uvoz_jci_datprij"] <>  hParams["fin_uvoz_jci_datdok"]
         hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_jci_datdok"])
     ENDIF
