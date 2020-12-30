@@ -352,7 +352,7 @@ STATIC FUNCTION say_string( cString, nLen, lToUTF)
 
 */
 STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDokumenta, cIdKonto, cNabExcludeIdvn, ;
-    lPDVNule, lOsnovaNula, lSchema, cMjestoKrajnjePotrosnje, hUkupno )
+    lPDVNule, lOsnovaNula, lSchema, cMjestoKrajnjePotrosnjeIn, hUkupno )
 
     LOCAL cSelectFields, cBrDokFinFin2, cFinNalogNalog2, cLeftJoinFin2
     LOCAL cQuery, cTmps
@@ -367,6 +367,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL cKto
     LOCAL cBrDok
     LOCAL cTipDokumenta2
+    LOCAL cMjestoKrajnjePotrosnje
 
 
     LOCAL cIdKontoKupac := trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
@@ -451,13 +452,13 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     ELSE
         // konto PDV potrazuje
        cQuery += " and fin_suban.d_p='2'"
-       IF cMjestoKrajnjePotrosnje == NIL
+       IF cMjestoKrajnjePotrosnjeIn == NIL
          // mora postojati partner ako nije definisano mjesto krajnje potrosnje
          cQuery += "  and NOT (sub2.idpartner is null or trim(sub2.idpartner) ='')"
        ENDIF
     ENDIF
 
- 
+    
     SELECT F_TMP
     IF !use_sql( "EISP",  cQuery + " order by fin_suban.datdok, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr")
         RETURN .F.
@@ -465,6 +466,8 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
 
     
     DO WHILE !EOF()
+
+        cMjestoKrajnjePotrosnje := cMjestoKrajnjePotrosnjeIn
 
         hRec["eisporuke_id"] := nRbr
         hRec["porezni_period"] := cPorezniPeriod
