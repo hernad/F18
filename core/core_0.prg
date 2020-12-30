@@ -199,14 +199,13 @@ FUNCTION my_rddName()
 // RETURN date()
 
 /*
-   Opis: vraća tekući datum sa servera
-
-   danasnji_datum() => vraća vrijednost statičke varijable _datum
+   Opis: vraća tekući datum sa database servera
 
 */
 FUNCTION danasnji_datum()
 
-   RETURN datum_server()
+   // uvijek pročitati danasnji datum
+   RETURN datum_server(.T.)
 
 
 FUNCTION set_cursor_on()

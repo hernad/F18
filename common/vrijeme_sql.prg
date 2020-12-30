@@ -38,12 +38,12 @@ FUNCTION datum_server( lSet )
 STATIC FUNCTION datum_server_sql()
 
    LOCAL cQuery := "SELECT CURRENT_DATE;"
-   LOCAL _res
+   LOCAL oQuery
 
-   _res := run_sql_query( cQuery )
+   oQuery := run_sql_query( cQuery )
 
-   IF sql_error_in_query( _res )
+   IF sql_error_in_query( oQuery )
       RETURN Date()
    ENDIF
 
-   RETURN  _res:FieldGet( 1 )
+   RETURN oQuery:FieldGet( 1 )
