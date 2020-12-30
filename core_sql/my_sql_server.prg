@@ -205,7 +205,7 @@ FUNCTION tekuca_sezona()
 
 FUNCTION in_tekuca_godina()
 
-   RETURN tekuca_sezona() == Year( Date() )
+   RETURN tekuca_sezona() == Year( danasnji_datum() )
 
 
 

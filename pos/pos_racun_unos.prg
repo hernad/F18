@@ -13,6 +13,18 @@
 
 FUNCTION pos_racun_unos_ispravka()
 
+
+   IF !in_tekuca_godina()
+      Alert(_u("Tekuća sezona: " + Alltrim(Str(tekuca_sezona())) + " <> " + Alltrim(Str(Year( danasnji_datum() ))) + " !?"))
+      RETURN .F.
+   ENDIF
+
+   IF fetch_metric( "lock_POS", NIL, "N" ) == "D"
+      Alert(_u("POS modul je zaključan!"))
+      RETURN .F.
+   ENDIF
+
+
    DO WHILE .T.
       // SetKXLat( "'", "-" )
       IF !o_pos_tables()

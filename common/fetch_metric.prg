@@ -115,6 +115,10 @@ FUNCTION parametar_dinamican( cSectionIn )
       RETURN .T.
    ENDIF
 
+   IF "lock_" $ cSectionIn
+      RETURN .T.
+   ENDIF
+
    IF Left( cSectionIn, 5 ) == "fakt/"  // fakt brojaci
       RETURN .T.
    ENDIF
