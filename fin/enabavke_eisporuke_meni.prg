@@ -6,7 +6,11 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     LOCAL aOpcexe := {}
     LOCAL nIzbor := 1
 
-    AAdd( aOpc, "1. enabavke                                     " )
+
+    AAdd( aOpc, "0. upute http://download.bring.out.ba/enabavke_eisporuke.pdf" )
+    AAdd( aOpcexe, {|| otvori_eisp_enab_uputstvo() } )
+
+    AAdd( aOpc, "1. enabavke                                                " )
     AAdd( aOpcexe, {|| fin_eNabavke() } )
 
     AAdd( aOpc, "2. eisporuke                          " )
@@ -18,7 +22,8 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     AAdd( aOpc, "U. fin generacija uvoz" )
     AAdd( aOpcexe, {|| fin_gen_uvoz() } )
 
-    AAdd( aOpc, "X. admin - init tabele enab/eisp" )
+
+    AAdd( aOpc, "X. admin - init tabele enab/eisp " )
     AAdd( aOpcexe, {|| db_create_enabavke_eisporuke() } )
     
 
@@ -41,7 +46,7 @@ STATIC FUNCTION fin_eNabavke()
     AAdd( aOpc, "3. generacija enabavke                                  " )
     AAdd( aOpcexe, {|| gen_eNabavke() } )
 
-    AAdd( aOpc, "4. eksport enabavke xlsx                                " )
+    AAdd( aOpc, "4. enabavke execl/libreoffice xlsx                      " )
     AAdd( aOpcexe, {|| export_eNabavke() } )
 
    
@@ -56,16 +61,16 @@ STATIC FUNCTION fin_eIsporuke()
         LOCAL aOpcexe := {}
         LOCAL nIzbor := 1
 
-        AAdd( aOpc, "1. parametri eisporuke                                   " )
+        AAdd( aOpc, "1. parametri eisporuke                                 " )
         AAdd( aOpcexe, {|| parametri_eIsporuke() } )
     
         AAdd( aOpc, "2. provjera knjiženja eisporuke                        " )
         AAdd( aOpcexe, {|| check_eIsporuke() } )
 
-        AAdd( aOpc, "3. generacija eisporuke                                  " )
+        AAdd( aOpc, "3. generacija eisporuke                                " )
         AAdd( aOpcexe, {|| gen_eIsporuke() } )
     
-        AAdd( aOpc, "4. eksport eisporuke xlsx                                " )
+        AAdd( aOpc, "4. eisporuke štampa excel/libreoffice xlsx             " )
         AAdd( aOpcexe, {|| export_eIsporuke() } )
           
     
@@ -385,3 +390,20 @@ FUNCTION db_create_enabavke_eisporuke()
 
     RETURN .T.
     
+
+FUNCTION otvori_eisp_enab_uputstvo()
+
+    LOCAL cCmd
+
+    /*
+    IF is_linux()
+        cCmd := "gio open"
+    ELSE 
+        cCmd := "start"
+    ENDIF
+    */
+
+    cCmd := "http://download.bring.out.ba/enabavke_eisporuke.pdf"
+    f18_open_mime_document( cCmd )
+
+    RETURN .T.
