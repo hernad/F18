@@ -46,7 +46,7 @@ STATIC FUNCTION fin_eNabavke()
     AAdd( aOpc, "3. generacija enabavke                                  " )
     AAdd( aOpcexe, {|| gen_eNabavke() } )
 
-    AAdd( aOpc, "4. enabavke execl/libreoffice xlsx                      " )
+    AAdd( aOpc, "4. enabavke štampa excel/libreoffice xlsx" )
     AAdd( aOpcexe, {|| export_eNabavke() } )
 
    
@@ -394,16 +394,15 @@ FUNCTION db_create_enabavke_eisporuke()
 FUNCTION otvori_eisp_enab_uputstvo()
 
     LOCAL cCmd
+    LOCAL cURL := "http://download.bring.out.ba/enabavke_eisporuke.pdf"
+    
 
-    /*
     IF is_linux()
-        cCmd := "gio open"
+        cCmd := "" //"gio open"
+        f18_open_mime_document( cURL )
     ELSE 
-        cCmd := "start"
+        cCmd := f18_run("cmd /c start " + cURL)
     ENDIF
-    */
-
-    cCmd := "http://download.bring.out.ba/enabavke_eisporuke.pdf"
-    f18_open_mime_document( cCmd )
+    
 
     RETURN .T.
