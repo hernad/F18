@@ -28,6 +28,10 @@ FUNCTION is_flink_fiskalni()
       ENDIF
    ENDIF
 
+   IF !hb_HHasKey( s_hFiskalniUredjajParams, "drv" )
+      RETURN .F.
+   ENDIF
+
    RETURN s_hFiskalniUredjajParams[ "drv" ] == "FLINK"
 
 STATIC FUNCTION flink_init()

@@ -249,7 +249,13 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       BoxC()
 
       IF LastKey() <> K_ESC
-         IF pos_set_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok, nFiskalniRn )
+         hParams["idpos"] := pos_doks->IdPos
+         hParams["idvd"] := pos_doks->idvd
+         hParams["datum"] := pos_doks->datum
+         hParams["brdok"] := pos_doks->brdok
+         hParams["fiskalni_broj"] := nFiskalniRn
+
+         IF pos_set_broj_fiskalnog_racuna( hParams )
             MsgBeep( "setovan broj fiskalnog računa: " + AllTrim( Str( nFiskalniRn ) ) )
          ELSE
             Alert( _u("Setovanje fiskalnog računa neuspješno ?!") )

@@ -314,7 +314,7 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
 
    /*
    IF ( nBrojFiskalnogRacuna > 0 .AND. nErrorLevel == 0 )
-      IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
+    --  IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
          MsgBeep( "Kreiran fiskalni račun broj: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
       ELSE
          nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
@@ -389,7 +389,7 @@ STATIC FUNCTION pos_to_hcp( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorn
       nBrojFiskalnogRacuna := fiskalni_hcp_get_broj_racuna( s_hFiskalniUredjajParams, lStorno )
       IF nBrojFiskalnogRacuna <= 0
          /*
-         IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
+          --  IF pos_set_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskalnogRacuna )
             MsgBeep( "Kreiran fiskalni račun: " + AllTrim( Str( nBrojFiskalnogRacuna ) ) )
          ELSE
             nErrorLevel := FISK_ERROR_SET_BROJ_RACUNA
@@ -431,7 +431,6 @@ FUNCTION pos_set_broj_fiskalnog_racuna( hParams )
    LOCAL cQuery, oRet, oError, lRet := .F.
  
    LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna
-
 
    cIdPos := hParams["idpos"]
    cIdVd := hParams["idvd"]
