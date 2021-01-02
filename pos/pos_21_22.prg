@@ -171,3 +171,39 @@ FUNCTION pos_21_get_lista()
    ENDDO()
 
    RETURN aLista
+
+
+FUNCTION pos_21_neobradjeni_lista_stariji()
+
+      LOCAL cQuery, oData, oRow, cMsg
+   
+      cQuery := "SELECT * FROM  " + pos_prodavnica_sql_schema() + ".pos_21_neobradjeni_dokumenti() where datum <" + sql_quote(danasnji_datum())
+      cQuery += " ORDER by datum"
+      oData := run_sql_query( cQuery )
+   
+      IF oData:Eof()
+        RETURN .F.
+      ENDIF
+
+      Alert(_u("Postoji " + Alltrim(Str(oData:LastRec())) + " neobrađenih otpremnica!"))
+
+      //oData:GoTo( 1 )
+      DO WHILE !oData:Eof()
+         oRow := oData:GetRow()
+         //hRec := hb_Hash()
+         
+         //Box( "#NEOBRAĐEN DOKUMENTI:", 7, 60 )
+         cMsg := "21-" + oRow:FieldGet( oRow:FieldPos( "brdok" ) ) + " od " + DTOC(oRow:FieldGet( oRow:FieldPos( "datum" ) )) + " BR OTPR: " + oRow:FieldGet( oRow:FieldPos( "brfaktp" ) )
+         
+         IF oRow:FieldGet( oRow:FieldPos( "storno" ) )
+            cMsg+= " [POVRAT]"
+         ELSE
+            cMsg+= " [PRIJEM]"
+         ENDIF
+
+         Alert(_u(cMsg))
+
+         oData:skip()
+      ENDDO()
+   
+      RETURN .T.
