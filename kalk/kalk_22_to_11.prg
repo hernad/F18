@@ -37,7 +37,7 @@ FUNCTION kalk_22_to_11_unos()
          ENDIF
          kalk_pripr_obrada( .F. )
       ELSE
-         MsgBeep( "11-" + cBrDokNew + "povrat u pripremu neuspješan?!"  )
+         MsgBeep( "11-" + cBrDokNew + " povrat u pripremu neuspješan?!"  )
       ENDIF
    ELSE
       Alert( _u( "Neuspješno izvršenje operacije 22->11 Status:" + cBrDokNew + " ?!" ) )

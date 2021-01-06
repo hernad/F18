@@ -524,10 +524,10 @@ select get_sifk('PARTN', 'PDVB', fin_suban.idpartner) as pdv_broj, get_sifk('PAR
         (case when fin_suban.d_p='2' then 1 else -1 end) * fin_suban.iznosbhd as iznos_fakture,
         (case when sub2.d_p='1' then 1 else -1 end) * sub2.iznosbhd as iznos_pdv,
         (case when sub3.d_p='1' then 1 else -1 end) * sub3.iznosbhd as iznos_pdv_np,
-        substring(fin_suban.opis from 'JCI:\s+(\d+)') as JCI,
-        substring(fin_suban.opis from 'OSN-PDV0:\s+([\d.]+)')::DECIMAL as from_opis_osn_pdv,
-        substring(fin_suban.opis from 'OSN-PDV17:\s+([\d.]+)')::DECIMAL as from_opis_osn_pdv17,
-        substring(fin_suban.opis from 'OSN-PDV17NP:\s+([\d.]+)')::DECIMAL as from_opis_osn_pdv17np,
+        substring(fin_suban.opis from 'JCI:\s*(\d+)') as JCI,
+        substring(fin_suban.opis from 'OSN-PDV0:\s*([\d.]+)')::DECIMAL as from_opis_osn_pdv,
+        substring(fin_suban.opis from 'OSN-PDV17:\s*([\d.]+)')::DECIMAL as from_opis_osn_pdv17,
+        substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.]+)')::DECIMAL as from_opis_osn_pdv17np,
         fin_suban.idkonto, partn.id, partn.naz, sub2.idkonto, sub3.idkonto, fin_suban.* from fmk.fin_suban
      left join fmk.fin_suban sub2 on fin_suban.idfirma=sub2.idfirma and fin_suban.idvn=sub2.idvn and fin_suban.brnal=sub2.brnal and fin_suban.brdok=sub2.brdok and sub2.idkonto like '27%'
      left join fmk.fin_suban sub3 on fin_suban.idfirma=sub3.idfirma and fin_suban.idvn=sub3.idvn and fin_suban.brnal=sub3.brnal and fin_suban.brdok=sub3.brdok and sub3.idkonto like '2789%'
@@ -562,7 +562,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     cSelectFields += "(case when sub3.d_p='1' then 1 else -1 end) * sub3.iznosbhd as iznos_pdv_np,"
 
     // iz opisa ako ima ekstraktovati JCI, PDV0 osnovicu, PDV17 osnovicu, PDV17 neposlovnu osnovicu
-    cSelectFields += "substring(fin_suban.opis from 'JCI:\s+(\d+)') as JCI,"
+    cSelectFields += "substring(fin_suban.opis from 'JCI:\s*(\d+)') as JCI,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV0:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv0,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17np,"
@@ -1466,7 +1466,7 @@ FUNCTION export_eNabavke()
 
 FUNCTION opis_enabavka(cIdKonto, cOpis)
 
-    LOCAL pRegexJCI := hb_regexComp( "JCI:\s+([\d]+)" )
+    LOCAL pRegexJCI := hb_regexComp( "JCI:\s*([\d]+)" )
     LOCAL pRegexOsnPDV17 := hb_regexComp( "OSN-PDV17:\s*([\d.]+)" )
     LOCAL pRegexOsnPDV17NP := hb_regexComp( "OSN-PDV17NP:\s*([\d.]+)" )
     LOCAL pRegexOsnPDV0 := hb_regexComp( "OSN-PDV0:\s*([\d.]+)" )

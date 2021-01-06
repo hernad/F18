@@ -43,7 +43,7 @@ FUNCTION kalk_89_to_81_unos()
          kalk_pripr_set_idpartner()
          kalk_pripr_obrada( .F. )
       ELSE
-         MsgBeep( "89-" + cBrDok + "povrat u pripremu neuspješan?!" )
+         MsgBeep( "89-" + cBrDok + " povrat u pripremu neuspješan?!" )
       ENDIF
    ELSE
       Alert( _u( "Neuspješno izvršenje operacije 89->81 Status:" + AllTrim( Str( nRet ) ) + " ?!" ) )

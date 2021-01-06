@@ -382,7 +382,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "(case when fin_suban.d_p='1' then 1 else -1 end) * fin_suban.iznosbhd as iznos_sa_pdv,"
         cSelectFields += "0 as pdv,"
         cSelectFields += "0 as bez_pdv,"
-        cSelectFields += "substring(fin_suban.opis from 'JCI:\s+(\d+)') as JCI,"
+        cSelectFields += "substring(fin_suban.opis from 'JCI:\s*(\d+)') as JCI,"
         cSelectFields += "fin_suban.idkonto as idkonto, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
         
     ELSE
@@ -1177,6 +1177,7 @@ STATIC FUNCTION xlsx_export_fill_row()
     
     AADD(aKolona, { "C", "Por.Per", 8, eisp->porezni_period })
     AADD(aKolona, { "C", "Br.Fakt", 20, eisp->br_fakt })
+    AADD(aKolona, { "C", "JCI", 10, eisp->jci })
     AADD(aKolona, { "D", "Dat.fakt", 12, eisp->dat_fakt })
 
     AADD(aKolona, { "C", "Kupac naziv", 60, eisp->kup_naz })

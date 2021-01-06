@@ -44,7 +44,7 @@ FUNCTION kalk_71_to_79_unos()
          MsgBeep( "U pripremi se nalazi dokument 79-" + cBrDok )
          kalk_pripr_obrada(.F.)
       ELSE
-         MsgBeep( "79-" + cBrDok + "povrat u pripremu neuspješan?!" )
+         MsgBeep( "79-" + cBrDok + " povrat u pripremu neuspješan?!" )
       ENDIF
    //ELSE
    //   Alert( _u( "Neuspješno izvršenje operacije 71->79 Status:" + AllTrim( Str( nRet ) ) + " ?!" ) )
