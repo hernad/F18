@@ -121,7 +121,6 @@ FUNCTION check_eIsporuke()
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
 
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
-
     cSelectFields := "SELECT fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr, fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2,"
     cSelectFields += "fin_suban.BrDok brdok, sub2.brdok brdok2, fin_suban.idpartner"
     cFinNalogNalog2 := "fin_suban.idfirma=sub2.idfirma and fin_suban.idvn=sub2.idvn and fin_suban.brnal=sub2.brnal"
@@ -148,7 +147,7 @@ FUNCTION check_eIsporuke()
     cQuery += " where fin_suban.idkonto like  '"  + Trim(cIdKontoKupac) + "%'"
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
     cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
-    
+
     // kupac duguje
     cQuery += " and fin_suban.d_p='1'"
 
@@ -431,7 +430,6 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
       cQuery += " left join fmk.partn on sub2.idpartner=partn.id"
     ENDIF
 
-
     cQuery += " left join public.eisporuke on fin_suban.idfirma=eisporuke.fin_idfirma and fin_suban.idvn=eisporuke.fin_idvn and fin_suban.brnal=eisporuke.fin_brnal and fin_suban.rbr=eisporuke.fin_rbr" 
     
     IF cIdKonto == NIL
@@ -439,7 +437,6 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     ELSE
        cQuery += " where fin_suban.idkonto like  '"  + Trim(cIdKonto) + "%'"
     ENDIF
-
 
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
     cQuery += " and not fin_suban.idvn in (" + cTmps + ")"

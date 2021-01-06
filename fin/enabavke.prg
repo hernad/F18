@@ -122,15 +122,17 @@ FUNCTION get_sql_expression_exclude_idvns(cNabExcludeIdvn)
     LOCAL nI, nNumTokens
     LOCAL cTmp, cTmps
 
-     nNumTokens := NumToken( cNabExcludeIdvn, "," )
-     cTmps := ""
-     FOR nI := 1 TO nNumTokens
+    cNabExcludeIdvn := trim(cNabExcludeIdvn)
+
+    nNumTokens := NumToken( cNabExcludeIdvn, "," )
+    cTmps := ""
+    FOR nI := 1 TO nNumTokens
        cTmp := Token( cNabExcludeIdvn, ",", nI )
        cTmps += sql_quote( cTmp )
        IF nI < nNumTokens
          cTmps += ","
        ENDIF
-     NEXT
+    NEXT
 
     RETURN cTmps
 
