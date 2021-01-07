@@ -58,8 +58,6 @@ FUNCTION fin_otvorene_stavke_meni()
 
 
 
-
-
 FUNCTION fin_brisanje_markera_otvorenih_stavki()
 
    LOCAL lRet := .F.

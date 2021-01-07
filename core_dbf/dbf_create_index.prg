@@ -83,7 +83,6 @@ FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
 
       my_use_temp( hTmpRec, NIL, .F., .F., .T. ) // shared: my_use_temp( hDbfRec, table, new_area, excl, lOpenIndex )
 
-
       IF Used()
          nOrder := index_tag_num( cTag )
          cOrdKey := ordKey( cTag )
@@ -136,7 +135,7 @@ FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
                      INDEX ON &cKljucIz  TAG ( cTag )  TO ( cImeCdx ) FOR &cFilter
                   ENDIF
                ELSE
-                  INDEX ON &cKljucIz  TAG ( cTag )  TO ( cImeCdx )
+                  INDEX ON &cKljucIz  TAG ( cTag ) TO ( cImeCdx )
                ENDIF
             ENDIF
             USE
