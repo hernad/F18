@@ -71,6 +71,32 @@ FUNCTION pos_21_to_22_unos()
    RETURN .T.
 
 
+FUNCTION stavke_21_moraju_imati_cijenu_u_sif_roba(cIdPOS, cIdVd, dDatum, cBrDok)
+
+   LOCAL lOK := .T.
+
+   seek_pos_pos( cIdPos, cIdVd, dDatum, cBrDok )
+   DO WHILE !Eof() .AND. POS->IdPos + POS->IdVd + DToS( POS->datum ) + POS->BrDok == cIdPos + cIdVd + DToS( dDatum ) + cBrDok
+ 
+      SELECT 401
+      use_sql( "RSIF", "SELECT * from " + pos_prodavnica_sql_schema() + ".roba where id=" + sql_quote( pos->idroba), "RSIF" )
+      IF ROUND(RSIF->mpc, 2) <= 0.0
+         Alert("Artikal: '" + POS->Idroba + "' nema definisanu cijenu!")
+         lOK := .F.
+      ENDIF
+      SELECT 401
+      USE
+
+      SELECT POS
+      SKIP
+   ENDDO
+   USE
+
+   RETURN lOK
+
+
+
+
 STATIC FUNCTION pos_21_pregled_valid( cPregledDN, cBrFaktP )
 
    LOCAL hParams := hb_Hash()
@@ -84,10 +110,14 @@ STATIC FUNCTION pos_21_pregled_valid( cPregledDN, cBrFaktP )
 
    IF !find_pos_doks_by_idvd_brfaktp( @hParams )
       Alert( 'Dokument 21 sa brojem optremnice [' + cBrFaktP + "] ne postoji ?!" )
+      RETURN .F.
+   ENDIF
+
+   IF cPregledDN == "N"
       RETURN .T.
    ENDIF
 
-   // pos_stampa_dokumenta( hParams )
+   stavke_21_moraju_imati_cijenu_u_sif_roba(hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ])
 
    PushWa()
    hParams[ "priprema" ] := .F.
@@ -100,7 +130,17 @@ STATIC FUNCTION pos_21_pregled_valid( cPregledDN, cBrFaktP )
 FUNCTION pos_21_to_22( cBrFaktP, cIdRadnik, lPreuzimaSe )
 
    LOCAL cQuery, oRet, oError, nRet := -999, cLPreuzimaSe
-   LOCAL cMsg
+   LOCAL cMsg, hParams := hb_hash()
+
+   hParams[ "idvd" ] := '21'
+   hParams[ "brfaktp" ] := AllTrim( cBrFaktP )
+   find_pos_doks_by_idvd_brfaktp( @hParams )
+
+   IF !stavke_21_moraju_imati_cijenu_u_sif_roba(hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ])
+      Alert(_u("Neuspješno zaduženje zbog nepostojanja cijena!"))
+      RETURN -100
+   ENDIF
+
 
    IF lPreuzimaSe
       cLPreuzimaSe := "True"

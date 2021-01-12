@@ -178,6 +178,9 @@ FUNCTION pos_stampa_dokumenta_key_handler( dDatum0, dDatum1 )
          hParams[ "opis" ] := hb_StrToUTF8( pos_doks_2->opis )
          hParams[ "brfaktp" ] := pos_doks_2->brfaktp
          hParams[ "priprema" ] := .F.
+         IF hParams["idvd"] == "21"
+            stavke_21_moraju_imati_cijenu_u_sif_roba(hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ])
+         ENDIF
          pos_stampa_dokumenta( hParams )
          PopWa()
 
