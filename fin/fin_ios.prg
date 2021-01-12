@@ -25,6 +25,7 @@ FUNCTION fin_ios_meni()
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
 
+
    picBHD := "@Z " + ( R1 := FormPicL( "9 " + gPicBHD, 16 ) )
    picDEM := "@Z " + ( R2 := FormPicL( "9 " + pic_iznos_eur(), 12 ) )
    R1 := R1 + " " + valuta_domaca_skraceni_naziv()
@@ -387,8 +388,6 @@ STATIC FUNCTION print_ios_xml( hParams )
    ELSE
       xml_node( "dp", "2" )
    ENDIF
-
-   SELECT suban
 
    IF cKaoKartica == "D"
       // SET ORDER TO TAG "1"
