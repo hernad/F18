@@ -603,6 +603,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     cQuery += " and fin_suban.d_p='2'"
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
     cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
+    cQuery += " and COALESCE(substring(fin_suban.opis from 'ENAB:\s*(PRESKOCI)'), '')<>'PRESKOCI'"
 
     IF !lSamoPDV0 
         // mora postojati sub2.idkonto ili sub3.idkonto
@@ -610,7 +611,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     ENDIF
 
     //cQuery += "  and NOT (sub2.idpartner is null or trim(sub2.idpartner) ='')"
-    altd()
+
 
     IF !use_sql( "ENAB", cQuery + " order by fin_suban.datdok, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr")
         RETURN .F.
