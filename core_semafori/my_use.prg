@@ -90,7 +90,7 @@ FUNCTION my_use_temp( xArg1, cFullDbf, lNewArea, lExcl, lOpenIndex )
          nCnt := 100
 
       RECOVER USING oError
-         ?E "my_use_temp", oError:Description
+         ?E "my_use_temp", oError:Description, "DBF:", cFullDbf, "ALIAS:", cAlias
          my_use_error( cFullDbf, cAlias, oError )
          hb_idleSleep( 1 )
 
@@ -211,11 +211,11 @@ FUNCTION my_use( cAlias, cTable, lRefresh )
 
 FUNCTION my_use_error( cFullDbf, cAlias, oError )
 
-   LOCAL _msg, nI, cMsg
+   LOCAL nI, cMsg
 
-   _msg := "ERROR: my_use_error " + oError:description + ": tbl:" + cFullDbf + " alias:" + cAlias + " se ne moze otvoriti ?!"
-   LOG_CALL_STACK _msg
-   log_write( _msg, 2 )
+   cMsg := "ERROR: my_use_error " + oError:description + ": tbl:" + cFullDbf + " alias:" + cAlias + " se ne moze otvoriti ?!"
+   LOG_CALL_STACK cMsg
+   log_write( cMsg, 2 )
 
    IF oError:description == "Read error" .OR. oError:description == "Corruption detected"
 

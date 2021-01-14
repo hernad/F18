@@ -606,25 +606,23 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
     IF !lSamoPDV0 
         // mora postojati sub2.idkonto ili sub3.idkonto
-
         cQuery +=" and (sub2.idkonto is not null or sub3.idkonto is not null)"
     ENDIF
 
     //cQuery += "  and NOT (sub2.idpartner is null or trim(sub2.idpartner) ='')"
- 
-    IF !use_sql( "ENAB",  cQuery + " order by fin_suban.datdok, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr")
+    altd()
+
+    IF !use_sql( "ENAB", cQuery + " order by fin_suban.datdok, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr")
         RETURN .F.
     ENDIF
 
     DO WHILE !EOF()
 
-  
         IF cTipDokumenta == "04"
            hRec["jci"] := enab->jci
         ELSE
            hRec["jci"] := ""
         ENDIF
-
 
         cPDVBroj := enab->pdv_broj 
         cJib := enab->jib
