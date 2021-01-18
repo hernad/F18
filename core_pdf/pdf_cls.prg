@@ -436,18 +436,20 @@ METHOD PrnToPdf( cInputFile ) CLASS PDFClass
    LOCAL aTmp
 
    cTxtReport := MemoRead( cInputFile ) + Chr( 12 )
+   // Chr(12) - kraj stranice
    TokenInit( @cTxtReport, Chr( 12 ) )
    DO WHILE ! TokenEnd()
       cTxtPage := TokenNext( cTxtReport ) + hb_eol()
       IF Len( cTxtPage ) > 5
+         // EOL Windows \r\n = chr(13) + chr(10)
          IF SubStr( cTxtPage, 1, 1 ) == Chr( 13 )
             cTxtPage := SubStr( cTxtPage, 2 )
          ENDIF
          ::AddPage()
          nRow := 0
          DO WHILE At( hb_eol(), cTxtPage ) != 0
-            cTxtLine := SubStr( cTxtPage, 1, At( hb_eol(), cTxtPage ) - 1 )
-            cTxtPage := SubStr( cTxtPage, At( hb_eol(), cTxtPage ) + 1 )
+            cTxtLine := SubStr( cTxtPage, 1, At( hb_eol(), cTxtPage ) - Len(hb_eol()) )
+            cTxtPage := SubStr( cTxtPage, At( hb_eol(), cTxtPage ) + Len(hb_eol()) )
             nLineLength := Len( cTxtLine )
             // ::DrawText( nRow, 0, Replicate( " ", ::nLeftSpace + nLineLength ), cPicture, nFontSize, cFontName, nAngle, aNRGB  )
             // IF nRow % 2 == 0
