@@ -448,7 +448,7 @@ METHOD PrnToPdf( cInputFile ) CLASS PDFClass
          ::AddPage()
          nRow := 0
          DO WHILE At( hb_eol(), cTxtPage ) != 0
-            cTxtLine := SubStr( cTxtPage, 1, At( hb_eol(), cTxtPage ) - Len(hb_eol()) )
+            cTxtLine := SubStr( cTxtPage, 1, At( hb_eol(), cTxtPage ) - 1 )
             cTxtPage := SubStr( cTxtPage, At( hb_eol(), cTxtPage ) + Len(hb_eol()) )
             nLineLength := Len( cTxtLine )
             // ::DrawText( nRow, 0, Replicate( " ", ::nLeftSpace + nLineLength ), cPicture, nFontSize, cFontName, nAngle, aNRGB  )
