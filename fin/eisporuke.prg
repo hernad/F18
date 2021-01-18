@@ -543,11 +543,15 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
            IF cTipDokumenta == "04" .OR. lPDVNule
                 cPDVBroj := REPLICATE("0",12)
            ENDIF
-           hRec["kup_pdv"] := cPDVBroj
            cJib := eisp->jib
            IF LEN(TRIM(cJib)) < 13
                 cJib := ""
+                IF LEN(TRIM(cJib)) > 0
+                   // ino partner, IDBR: INO
+                   cPDVBroj := REPLICATE("0", 12)
+                ENDIF
            ENDIF
+           hRec["kup_pdv"] := cPDVBroj
            hRec["kup_jib"] := cJib
         ENDIF
 
@@ -596,7 +600,9 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         ELSEIF cTipDokumenta <> "04" .AND. ROUND(eisp->pdv, 2) == 0
 
             // PDV0 ostalo
-            cTipDokumenta2 := "05"
+            IF cPDVBroj == REPLICATE("0",12) // usluge stranom licu
+                cTipDokumenta2 := "05"
+            ENDIF
             nOsnovicaPDV0Oostalo := eisp->iznos_sa_pdv
         
         ELSEIF cTipDokumenta == "02" .OR. cMjestoKrajnjePotrosnje $ "123"

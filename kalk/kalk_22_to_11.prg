@@ -111,6 +111,55 @@ FUNCTION kalk_21_get_datfaktp( cBrFaktP )
 
    RETURN dRet
 
+/*
+   kalk_neobradjeni_odabir_iz_liste( "22" ) - otpremnice
+   kalk_neobradjeni_odabir_iz_liste( "89" ) - magacin
+*/
+FUNCTION kalk_neobradjeni_odabir_iz_liste( cIdVd )
+
+      LOCAL GetList := {}
+      LOCAL aLista, nI
+      LOCAL aMeni := {}
+      LOCAL nIzbor := 1
+      LOCAL nRet := 0
+   
+      aLista := kalk_get_lista_za_tip( cIdVd )
+      IF Len( aLista ) == 0
+         RETURN  { "", "" }
+      ENDIF
+   
+      FOR nI := 1 TO Len( aLista )
+         AAdd( aMeni, PadR( aLista[ nI ][ "pkonto" ] + ": " + DToC( aLista[ nI ][ "datdok" ] ) + " /" + aLista[ nI ][ "brdok" ] + " - " + aLista[ nI ][ "brfaktp" ], 40 ) )
+      NEXT
+   
+      nRet := meni_fiksna_lokacija( box_x_koord() + 5, box_y_koord() + 10, aMeni, nIzbor )
+      IF nRet == 0
+         RETURN { "", "" }
+      ENDIF
+   
+      RETURN { aLista[ nRet ][ "pkonto" ], aLista[ nRet ][ "brdok" ], aLista[ nRet ][ "brfaktp" ] }
+
+   
+FUNCTION kalk_get_lista_za_tip( cIdVd )
+   
+      LOCAL cQuery, oData, oRow, oError, hRec, aLista := {}
+   
+      cQuery := "SELECT * FROM public.kalk_" + cIdVd + "_neobradjeni_dokumenti() order by datdok";
+   
+      oData := run_sql_query( cQuery )
+      DO WHILE !oData:Eof()
+         oRow := oData:GetRow()
+         hRec := hb_Hash()
+         hRec[ "pkonto" ] := oRow:FieldGet( oRow:FieldPos( "pkonto" ) )
+         hRec[ "brdok" ] := oRow:FieldGet( oRow:FieldPos( "brdok" ) )
+         hRec[ "datdok" ] := oRow:FieldGet( oRow:FieldPos( "datdok" ) )
+         hRec[ "brfaktp" ] := oRow:FieldGet( oRow:FieldPos( "brfaktp" ) )
+         AAdd( aLista, hRec )
+         oData:skip()
+      ENDDO()
+   
+      RETURN aLista
+
 
 FUNCTION kalk_22_neobradjeni_odabir_iz_liste()
 

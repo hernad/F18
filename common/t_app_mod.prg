@@ -141,6 +141,13 @@ METHOD globalni_key_handler( nKey, nKeyHandlerRetEvent )
       show_errors()
       // RETURN DE_CONT
 
+   CASE nKey == Asc( "e" ) .OR. nKey == Asc( "E" )
+         show_errors()
+         // RETURN DE_CONT
+
+   CASE nKey == K_F5
+      f18_open_mime_document( pop_last_pdf() )
+
    CASE ( nKey == K_SH_F1 )
       f18_kalkulator()
 

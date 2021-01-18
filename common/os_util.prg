@@ -664,6 +664,11 @@ FUNCTION f18_open_mime_document( cDocument )
    LOCAL cCmd := "", nError, cPrefixCmd
 
 
+   IF cDocument == NIL
+      Alert(_u("ERROR: open ništa"))
+      RETURN -100
+   ENDIF
+   
    IF is_windows()
       cCmd := "cmd /c start "
       

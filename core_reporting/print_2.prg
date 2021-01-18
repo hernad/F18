@@ -21,6 +21,8 @@ THREAD STATIC s_cColor
 STATIC s_nDodatniRedoviPoStranici
 STATIC s_lConsole, s_cDevice, s_cPrinterFile, s_lPrinter
 
+// posljednji pdf
+STATIC s_cLastPDF
 
 FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
 
@@ -164,6 +166,16 @@ STATIC FUNCTION set_print_codes( cOpt )
    RETURN .T.
 
 
+FUNCTION push_last_pdf( cFilePDF )
+
+   s_cLastPDF := cFilePDF
+   RETURN .T.
+
+FUNCTION pop_last_pdf( cFilePDF )
+
+      RETURN s_cLastPDF
+
+
 FUNCTION f18_end_print( cFileName, xPrintOpt )
 
    LOCAL nRet
@@ -275,6 +287,7 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
 
       // KALK_20200626_10-10-00000001.txt -> KALK_20200626_10-10-00000001.pdf
       cPdfFileName := StrTran( txt_print_file_name(), ".txt", ".pdf" )
+      push_last_pdf( cPdfFileName )
 
       IF cViseDokumenata <> NIL .AND. cViseDokumenata $ "PZ"
          // my_home/KALK_20200626_10-10-00000001.pdf -> my_home/PDF/KALK_20200626_10-10-00000001.pdf

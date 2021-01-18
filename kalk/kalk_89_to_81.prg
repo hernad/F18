@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+/*
 FUNCTION kalk_89_to_81_unos()
 
    LOCAL cIdFirma := self_organizacija_id()
@@ -50,8 +51,70 @@ FUNCTION kalk_89_to_81_unos()
    ENDIF
 
    RETURN .T.
+*/
+
+FUNCTION kalk_89_to_81_unos()
+
+   LOCAL cIdFirma := self_organizacija_id()
+   LOCAL cBrDokNew
+   LOCAL aPKontoBrDok
+   LOCAL dDatDok11
+   LOCAL nRet
+
+   aPKontoBrDok := kalk_neobradjeni_odabir_iz_liste("89")
+   IF Empty( aPKontoBrDok[ 2 ] )
+      MsgBeep( "Nema dokumenata za obradu [89]->[81]" )
+      RETURN .F.
+   ENDIF
+
+   cBrDokNew := aPKontoBrDok[ 2 ]
+
+   // -1, -2 ERROR, 0 - ok 
+   nRet := kalk_89_to_81( aPKontoBrDok[ 2 ] )
+
+   IF nRet == 0
+      IF kalk_povrat_dokumenta_by_idfirma_idvd_brdok( cIdFirma, '81', cBrDokNew )
+         MsgBeep( "U pripremi se nalazi dokument 81-" + cBrDokNew )
+         /*
+         dDatDok11 := kalk_21_get_datfaktp( aPKontoBrDok[ 3 ] )
+         IF Empty( dDatDok11 )
+            Alert( " Datum za 21-" + aPKontoBrDok[ 2 ] + " prazan !?" )
+         ELSE
+            kalk_pripr_set_datdok_datfaktp( dDatDok11, dDatDok11 )
+         ENDIF
+         */
+         kalk_pripr_obrada( .F. )
+      ELSE
+         MsgBeep( "81-" + cBrDokNew + " povrat u pripremu neuspješan?!"  )
+      ENDIF
+   ELSE
+      Alert( _u( "Neuspješno izvršenje operacije 89->81 Status:" + cBrDokNew + " ?!" ) )
+   ENDIF
+
+   RETURN .T.
 
 
+FUNCTION kalk_89_to_81( cBrDok )
+
+   LOCAL cQuery, oRet, oError, nRet := -999
+
+   cQuery := "SELECT public.kalk_89_to_81(" + ;
+      sql_quote( cBrDok ) + ")"
+
+   BEGIN SEQUENCE WITH {| err | Break( err ) }
+
+      oRet := run_sql_query( cQuery )
+      IF is_var_objekat_tpqquery( oRet )
+         nRet := oRet:FieldGet( 1 )
+      ENDIF
+
+   RECOVER USING oError
+      Alert( _u( "SQL neuspješno izvršenje 89->81 [" + AllTrim( Str( nRet ) ) + "] ?" ) )
+   END SEQUENCE
+
+   RETURN nRet
+
+/*
 FUNCTION kalk_89_odabir_brdok_iz_liste()
 
    LOCAL GetList := {}
@@ -116,30 +179,8 @@ FUNCTION kalk_89_get_lista( nProdavnica, dDatum )
    ENDDO()
 
    RETURN aLista
+*/
 
-
-
-// FUNCTION public.kalk_71_to_79( cBrDok varchar ) RETURNS integer
-
-FUNCTION kalk_89_to_81( cBrDok )
-
-   LOCAL cQuery, oRet, oError, nRet := -999
-
-   cQuery := "SELECT public.kalk_89_to_81(" + ;
-      sql_quote( cBrDok ) + ")"
-
-   BEGIN SEQUENCE WITH {| err | Break( err ) }
-
-      oRet := run_sql_query( cQuery )
-      IF is_var_objekat_tpqquery( oRet )
-         nRet := oRet:FieldGet( 1 )
-      ENDIF
-
-   RECOVER USING oError
-      Alert( _u( "SQL neuspješno izvršenje 89->81 [" + AllTrim( Str( nRet ) ) + "] ?" ) )
-   END SEQUENCE
-
-   RETURN nRet
 
 
 STATIC FUNCTION kalk_pripr_set_idpartner()
