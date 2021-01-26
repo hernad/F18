@@ -20,11 +20,13 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
    LOCAL nCol1 := 72
    LOCAL cSvi := "N"
    LOCAL lPrikSldNula := .F.
-   LOCAL lExpRpt := .F.
+   LOCAL lExportXlsx := .F.
    LOCAL cExpRpt := "N"
    LOCAL aExpFld
    LOCAL cStart
    LOCAL cP_naz := ""
+   LOCAL GetList := {}
+   LOCAL i, j
    PRIVATE cIdPartner
 
    IF lKartica == NIL
@@ -108,7 +110,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
    PICPIC := AllTrim( PICPIC )
    set_metric( "fin_spec_po_dosp_picture", NIL, PICPIC )
 
-   lExpRpt := ( cExpRpt == "D" )
+   lExportXlsx := ( cExpRpt == "D" )
 
    IF cPrikNule == "D"
       lPrikSldNula := .T.
@@ -129,9 +131,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
    cSvi := cIdpartner
 
-   IF lExpRpt == .T.
-      aExpFld := get_ost_fields( cSaRokom, FIELD_LEN_PARTNER_ID )
-      xlsx_export_init( aExpFld )
+   IF lExportXlsx
+      aExpFld := get_xlsx_fields( cSaRokom, FIELD_LEN_PARTNER_ID )
+      xlsx_export_init( aExpFld,  {}, "fin_rocni_int_" + DTOS(date()) + ".xlsx"  )
    ENDIF
 
    SELECT ( F_TRFP2 )
@@ -158,9 +160,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
    // kreiraj pomocnu bazu
 
    o_trfp2()
-   o_suban()
+   //o_suban()
    //o_partner()
-   o_konto()
+   //o_konto()
 
    IF cPoRN == "D"
       gaZagFix := { 5, 3 }
@@ -190,7 +192,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
       // SEEK cIdFirma + cIdKonto + cIdPartner
    ENDIF
 
-   DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. cIdKonto == IdKonto
+   DO WHILE !Eof() .AND. suban->idfirma == cIdfirma .AND. cIdKonto == suban->IdKonto
 
       cIdPartner := idpartner
       nUDug2 := 0
@@ -200,7 +202,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
       fPrviprolaz := .T.
 
-      DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. cIdKonto == IdKonto .AND. cIdPartner == IdPartner
+      DO WHILE !Eof() .AND. suban->idfirma == cIdfirma .AND. cIdKonto == suban->IdKonto .AND. cIdPartner == suban->IdPartner
 
          cBrDok := BrDok
          cOtvSt := otvst
@@ -208,7 +210,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
          nDug := nPot := 0
          aFaktura := { CToD( "" ), CToD( "" ), CToD( "" ) }
 
-         DO WHILE !Eof() .AND. idfirma == cIdfirma .AND. cIdKonto == IdKonto .AND. cIdPartner == IdPartner .AND. brdok == cBrDok
+         DO WHILE !Eof() .AND. suban->idfirma == cIdfirma .AND. cIdKonto == suban->IdKonto .AND. cIdPartner == suban->IdPartner .AND. suban->brdok == cBrDok
 
             IF D_P == "1"
                nDug += IznosBHD
@@ -609,11 +611,11 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
                   qqout_sa_x( Transform( nUDug2 - nUPot2, PICPIC ) )
                ENDIF
 
-               IF lExpRpt == .T.
+               IF lExportXlsx
                   IF cValuta == "1"
-                     fill_ost_tbl( cSaRokom, cIdPartner, cP_naz, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot, anInterUV[ 1, 1, 1 ] - anInterUV[ 1, 2, 1 ], anInterUV[ 2, 1, 1 ] - anInterUV[ 2, 2, 1 ], anInterUV[ 3, 1, 1 ] - anInterUV[ 3, 2, 1 ], anInterUV[ 4, 1, 1 ] - anInterUV[ 4, 2, 1 ], anInterUV[ 5, 1, 1 ] - anInterUV[ 5, 2, 1 ], anInterVV[ 1, 1, 1 ] - anInterVV[ 1, 2, 1 ], anInterVV[ 2, 1, 1 ] - anInterVV[ 2, 2, 1 ], anInterVV[ 3, 1, 1 ] - anInterVV[ 3, 2, 1 ], anInterVV[ 4, 1, 1 ] - anInterVV[ 4, 2, 1 ], anInterVV[ 5, 1, 1 ] - anInterVV[ 5, 2, 1 ] )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot, anInterUV[ 1, 1, 1 ] - anInterUV[ 1, 2, 1 ], anInterUV[ 2, 1, 1 ] - anInterUV[ 2, 2, 1 ], anInterUV[ 3, 1, 1 ] - anInterUV[ 3, 2, 1 ], anInterUV[ 4, 1, 1 ] - anInterUV[ 4, 2, 1 ], anInterUV[ 5, 1, 1 ] - anInterUV[ 5, 2, 1 ], anInterVV[ 1, 1, 1 ] - anInterVV[ 1, 2, 1 ], anInterVV[ 2, 1, 1 ] - anInterVV[ 2, 2, 1 ], anInterVV[ 3, 1, 1 ] - anInterVV[ 3, 2, 1 ], anInterVV[ 4, 1, 1 ] - anInterVV[ 4, 2, 1 ], anInterVV[ 5, 1, 1 ] - anInterVV[ 5, 2, 1 ] )
                   ELSE
-                     fill_ost_tbl( cSaRokom, cIdPartner, cP_naz, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2, anInterUV[ 1, 3, 1 ] - anInterUV[ 1, 4, 1 ], anInterUV[ 2, 3, 1 ] - anInterUV[ 2, 4, 1 ], anInterUV[ 3, 3, 1 ] - anInterUV[ 3, 4, 1 ], anInterUV[ 4, 3, 1 ] - anInterUV[ 4, 4, 1 ], anInterUV[ 5, 3, 1 ] - anInterUV[ 5, 4, 1 ], anInterVV[ 1, 3, 1 ] - anInterVV[ 1, 4, 1 ], anInterVV[ 2, 3, 1 ] - anInterVV[ 2, 4, 1 ], anInterVV[ 3, 3, 1 ] - anInterVV[ 3, 4, 1 ], anInterVV[ 4, 3, 1 ] - anInterVV[ 4, 4, 1 ], anInterVV[ 5, 3, 1 ] - anInterVV[ 5, 4, 1 ] )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2, anInterUV[ 1, 3, 1 ] - anInterUV[ 1, 4, 1 ], anInterUV[ 2, 3, 1 ] - anInterUV[ 2, 4, 1 ], anInterUV[ 3, 3, 1 ] - anInterUV[ 3, 4, 1 ], anInterUV[ 4, 3, 1 ] - anInterUV[ 4, 4, 1 ], anInterUV[ 5, 3, 1 ] - anInterUV[ 5, 4, 1 ], anInterVV[ 1, 3, 1 ] - anInterVV[ 1, 4, 1 ], anInterVV[ 2, 3, 1 ] - anInterVV[ 2, 4, 1 ], anInterVV[ 3, 3, 1 ] - anInterVV[ 3, 4, 1 ], anInterVV[ 4, 3, 1 ] - anInterVV[ 4, 4, 1 ], anInterVV[ 5, 3, 1 ] - anInterVV[ 5, 4, 1 ] )
                   ENDIF
                ENDIF
             ELSE
@@ -627,12 +629,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
                   qqout_sa_x( Transform( nUDug2 - nUPot2, PICPIC ) )
                ENDIF
 
-               IF lExpRpt == .T.
+               IF lExportXlsx
                   IF cValuta == "1"
-                     fill_ost_tbl( cSaRokom, cIdPartner, cP_naz, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot )
 
                   ELSE
-                     fill_ost_tbl( cSaRokom, cIdPartner, cP_naz, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2 )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2 )
 
                   ENDIF
                ENDIF
@@ -768,14 +770,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
             qqout_sa_x( Transform( nTUDug2 - nTUPot2, PICPIC ) )
          ENDIF
 
-         IF lExpRpt == .T.
-
+         IF lExportXlsx 
             IF cValuta == "1"
-               fill_ost_tbl( cSaRokom, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot, anInterUV[ 1, 1, 2 ] - anInterUV[ 1, 2, 2 ], anInterUV[ 2, 1, 2 ] - anInterUV[ 2, 2, 2 ], anInterUV[ 3, 1, 2 ] - anInterUV[ 3, 2, 2 ], anInterUV[ 4, 1, 2 ] - anInterUV[ 4, 2, 2 ], anInterUV[ 5, 1, 2 ] - anInterUV[ 5, 2, 2 ], anInterVV[ 1, 1, 2 ] - anInterVV[ 1, 2, 2 ], anInterVV[ 2, 1, 2 ] - anInterVV[ 2, 2, 2 ], anInterVV[ 3, 1, 2 ] - anInterVV[ 3, 2, 2 ], anInterVV[ 4, 1, 2 ] - anInterVV[ 4, 2, 2 ], anInterVV[ 5, 1, 2 ] - anInterVV[ 5, 2, 2 ] )
+               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot, anInterUV[ 1, 1, 2 ] - anInterUV[ 1, 2, 2 ], anInterUV[ 2, 1, 2 ] - anInterUV[ 2, 2, 2 ], anInterUV[ 3, 1, 2 ] - anInterUV[ 3, 2, 2 ], anInterUV[ 4, 1, 2 ] - anInterUV[ 4, 2, 2 ], anInterUV[ 5, 1, 2 ] - anInterUV[ 5, 2, 2 ], anInterVV[ 1, 1, 2 ] - anInterVV[ 1, 2, 2 ], anInterVV[ 2, 1, 2 ] - anInterVV[ 2, 2, 2 ], anInterVV[ 3, 1, 2 ] - anInterVV[ 3, 2, 2 ], anInterVV[ 4, 1, 2 ] - anInterVV[ 4, 2, 2 ], anInterVV[ 5, 1, 2 ] - anInterVV[ 5, 2, 2 ] )
             ELSE
-               fill_ost_tbl( cSaRokom, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2, anInterUV[ 1, 3, 2 ] - anInterUV[ 1, 4, 2 ], anInterUV[ 2, 3, 2 ] - anInterUV[ 2, 4, 2 ], anInterUV[ 3, 3, 2 ] - anInterUV[ 3, 4, 2 ], anInterUV[ 4, 3, 2 ] - anInterUV[ 4, 4, 2 ], anInterUV[ 5, 3, 2 ] - anInterUV[ 5, 4, 2 ], anInterVV[ 1, 3, 2 ] - anInterVV[ 1, 4, 2 ], anInterVV[ 2, 3, 2 ] - anInterVV[ 2, 4, 2 ], anInterVV[ 3, 3, 2 ] - anInterVV[ 3, 4, 2 ], anInterVV[ 4, 3, 2 ] - anInterVV[ 4, 4, 2 ], anInterVV[ 5, 3, 2 ] - anInterVV[ 5, 4, 2 ] )
+               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2, anInterUV[ 1, 3, 2 ] - anInterUV[ 1, 4, 2 ], anInterUV[ 2, 3, 2 ] - anInterUV[ 2, 4, 2 ], anInterUV[ 3, 3, 2 ] - anInterUV[ 3, 4, 2 ], anInterUV[ 4, 3, 2 ] - anInterUV[ 4, 4, 2 ], anInterUV[ 5, 3, 2 ] - anInterUV[ 5, 4, 2 ], anInterVV[ 1, 3, 2 ] - anInterVV[ 1, 4, 2 ], anInterVV[ 2, 3, 2 ] - anInterVV[ 2, 4, 2 ], anInterVV[ 3, 3, 2 ] - anInterVV[ 3, 4, 2 ], anInterVV[ 4, 3, 2 ] - anInterVV[ 4, 4, 2 ], anInterVV[ 5, 3, 2 ] - anInterVV[ 5, 4, 2 ] )
             ENDIF
-
          ENDIF
 
       ELSE
@@ -789,14 +789,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
             qqout_sa_x( Transform( nTUDug2 - nTUPot2, PICPIC ) )
          ENDIF
 
-         IF lExpRpt == .T.
-
+         IF lExportXlsx
             IF cValuta == "1"
-               fill_ost_tbl( cSaRokom, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot )
+               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot )
             ELSE
-               fill_ost_tbl( cSaRokom, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2 )
+               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2 )
             ENDIF
-
          ENDIF
 
       ENDIF
@@ -809,7 +807,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
    end_print()
 
-   IF lExpRpt == .T.
+   IF lExportXlsx == .T.
       open_exported_xlsx()
    ENDIF
 
@@ -1026,13 +1024,13 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          cTmp += "+"
          cTmp += Replicate( " ", 25 )
          cTmp += "+"
-         cTmp += _f_text( "U      V  A  L  U  T  I", ( Len( PICPIC ) * 5 ) + 4 )
+         cTmp += format_text( "U      V  A  L  U  T  I", ( Len( PICPIC ) * 5 ) + 4 )
 
          cTmp += "+"
          cTmp += Replicate( " ", Len( PICPIC ) )
 
          cTmp += "+"
-         cTmp += _f_text( "V  A  N      V  A  L  U  T  E", ( Len( PICPIC ) * 5 ) + 4 )
+         cTmp += format_text( "V  A  N      V  A  L  U  T  E", ( Len( PICPIC ) * 5 ) + 4 )
          cTmp += "+"
          cTmp += Replicate( " ", Len( PICPIC ) )
          cTmp += "+"
@@ -1046,7 +1044,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          cTmp := "+"
          cTmp += PadC( "SIFRA", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
-         cTmp += _f_text( "NAZIV  PARTNERA", 25 )
+         cTmp += format_text( "NAZIV  PARTNERA", 25 )
          cTmp += "+"
 
          FOR nII := 1 TO 5
@@ -1060,7 +1058,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          NEXT
 
-         cTmp += _f_text( " ", Len( PICPIC ) )
+         cTmp += format_text( " ", Len( PICPIC ) )
          cTmp += "+"
 
          FOR nII := 1 TO 5
@@ -1073,9 +1071,9 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
             ENDIF
          NEXT
 
-         cTmp += _f_text( " ", Len( PICPIC ) )
+         cTmp += format_text( " ", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "UKUPNO", Len( PICPIC ) )
+         cTmp += format_text( "UKUPNO", Len( PICPIC ) )
          cTmp += "+"
 
          ? cTmp
@@ -1083,34 +1081,34 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          cTmp := "+"
          cTmp += PadC( "PARTN.", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
-         cTmp += _f_text( " ", 25 )
+         cTmp += format_text( " ", 25 )
 
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana1, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana1, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana2, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana2, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana3, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana3, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana4, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana4, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "PR." + Str( nDoDana4, 2 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "PR." + Str( nDoDana4, 2 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "UKUPNO", Len( PICPIC ) )
+         cTmp += format_text( "UKUPNO", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana1, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana1, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana2, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana2, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana3, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana3, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "DO" + Str( nDoDana4, 3 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "DO" + Str( nDoDana4, 3 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "PR." + Str( nDoDana4, 2 ) + " D.", Len( PICPIC ) )
+         cTmp += format_text( "PR." + Str( nDoDana4, 2 ) + " D.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "UKUPNO", Len( PICPIC ) )
+         cTmp += format_text( "UKUPNO", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( " ", Len( PICPIC ) )
+         cTmp += format_text( " ", Len( PICPIC ) )
          cTmp += "+"
 
          ? cTmp
@@ -1152,13 +1150,13 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          cTmp := "+"
          cTmp += PadC( "SIFRA", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
-         cTmp += _f_text( " ", 25 )
+         cTmp += format_text( " ", 25 )
          cTmp += "+"
-         cTmp += _f_text( "UKUPNO", Len( PICPIC ) )
+         cTmp += format_text( "UKUPNO", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "UKUPNO", Len( PICPIC ) )
+         cTmp += format_text( "UKUPNO", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( " ", Len( PICPIC ) )
+         cTmp += format_text( " ", Len( PICPIC ) )
          cTmp += "+"
 
          ? cTmp
@@ -1168,13 +1166,13 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
          cTmp := "+"
          cTmp += PadC( "PARTN.", FIELD_LEN_PARTNER_ID )
          cTmp += "+"
-         cTmp += _f_text( "NAZIV PARTNERA", 25 )
+         cTmp += format_text( "NAZIV PARTNERA", 25 )
          cTmp += "+"
-         cTmp += _f_text( "U VALUTI", Len( PICPIC ) )
+         cTmp += format_text( "U VALUTI", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "VAN VAL.", Len( PICPIC ) )
+         cTmp += format_text( "VAN VAL.", Len( PICPIC ) )
          cTmp += "+"
-         cTmp += _f_text( "UKUPNO", Len( PICPIC ) )
+         cTmp += format_text( "UKUPNO", Len( PICPIC ) )
          cTmp += "+"
 
          ? cTmp
@@ -1202,7 +1200,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 // ---------------------------------------------
 // formatiraj tekst ... na nLen
 // ---------------------------------------------
-STATIC FUNCTION _f_text( cTxt, nLen )
+STATIC FUNCTION format_text( cTxt, nLen )
    RETURN PadC( cTxt, nLen )
 
 
@@ -1223,3 +1221,77 @@ FUNCTION qqout_sa_x( xVal )
    ?? "+"
 
    RETURN .T.
+
+
+
+
+STATIC FUNCTION fill_xlsx( cIntervals, cIdPart, cP_naz, nTUVal, nTVVal, nTotal, nUVal1, nUVal2, nUVal3, nUVal4, nUValP, nVVal1, nVVal2, nVVal3, nVVal4, nVValP )
+
+ 
+   LOCAL hRec := hb_hash()
+
+   hRec["idpart"] := cIdPart
+   hRec["p_naz"] := cP_naz
+   hRec["t_vval"] := nTVVal
+   hRec["t_uval"] := nTUVal
+   hRec["total"] := nTotal
+
+   IF cIntervals == "D"
+      // u valuti
+      hRec["uval_1"] := nUVal1
+      hRec["uval_2"] := nUVal2
+      hRec["uval_3"] := nUVal3
+      hRec["uval_4"] := nUVal4
+      hRec["uvalp"] :=  nUValP
+      // van valute
+      hRec["vval_1"] := nVVal1
+      hRec["vval_2"] := nVVal2
+      hRec["vval_3"] := nVVal3
+      hRec["vval_4"] := nVVal4
+      hRec["vvalp"] := nVValP
+   ENDIF
+
+   xlsx_export_do_fill_row( hRec )
+   RETURN .T.
+
+
+
+STATIC FUNCTION get_xlsx_fields( cIntervals, nPartLen )
+
+   LOCAL aFields
+
+   IF cIntervals == nil
+      cIntervals := "N"
+   ENDIF
+
+   IF nPartLen == nil
+      nPartLen := 6
+   ENDIF
+
+   aFields := {}
+
+   AAdd( aFields, { "idpart", "C", nPartLen, 0 } )
+   AAdd( aFields, { "p_naz", "C", 40, 0 } )
+
+   IF cIntervals == "D"
+      AAdd( aFields, { "UVal_1", "N", 15, 2 } )
+      AAdd( aFields, { "UVal_2", "N", 15, 2 } )
+      AAdd( aFields, { "UVal_3", "N", 15, 2 } )
+      AAdd( aFields, { "UVal_4", "N", 15, 2 } )
+      AAdd( aFields, { "UValP", "N", 15, 2 } )
+   ENDIF
+
+   AAdd( aFields, { "T_UVal", "N", 15, 2 } )
+
+   IF cIntervals == "D"
+      AAdd( aFields, { "VVal_1", "N", 15, 2 } )
+      AAdd( aFields, { "VVal_2", "N", 15, 2 } )
+      AAdd( aFields, { "VVal_3", "N", 15, 2 } )
+      AAdd( aFields, { "VVal_4", "N", 15, 2 } )
+      AAdd( aFields, { "VValP", "N", 15, 2 } )
+   ENDIF
+
+   AAdd( aFields, { "T_VVal", "N", 15, 2 } )
+   AAdd( aFields, { "Total", "N", 15, 2 } )
+
+   RETURN aFields

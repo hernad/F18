@@ -17,6 +17,7 @@ FUNCTION specif_dugovanja_po_rocnim_intervalima()
    LOCAL nCol1 := 72
    LOCAL cSvi := "N"
    LOCAL _partner := fetch_metric( "fin_spec_po_dobav_partner", NIL, Space( 6 ) )
+   LOCAL GetList := {}
    PRIVATE cIdPartner
 
    cDokument := Space( 8 )

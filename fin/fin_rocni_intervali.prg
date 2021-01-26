@@ -13,19 +13,19 @@
 
 FUNCTION fin_rocni_intervali_meni()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
-   LOCAL _izbor := 1
+   LOCAL aOpc := {}
+   LOCAL aOpcexe := {}
+   LOCAL nIzbor := 1
 
-   AAdd( _opc, "1. specifikacija dugovanja partnera po ročnim intervalima " )
-   AAdd( _opcexe, {|| specif_dugovanja_po_rocnim_intervalima() } )
+   AAdd( aOpc, "1. specifikacija dugovanja partnera po ročnim intervalima " )
+   AAdd( aOpcexe, {|| specif_dugovanja_po_rocnim_intervalima() } )
 
-   AAdd( _opc, "2. kartica dugovanja kupaca valuta/van valute                  " )
-   AAdd( _opcexe, {|| fin_spec_otv_stavke_rocni_intervali( .T. ) } )
-   AAdd( _opc, "3. specifikacija dugovanja kupaca valuta/van valute" )
-   AAdd( _opcexe, {|| fin_spec_otv_stavke_rocni_intervali( .F. ) } )
+   AAdd( aOpc, "2. kartica dugovanja kupaca valuta/van valute                  " )
+   AAdd( aOpcexe, {|| fin_spec_otv_stavke_rocni_intervali( .T. ) } )
+   AAdd( aOpc, "3. specifikacija dugovanja kupaca valuta/van valute" )
+   AAdd( aOpcexe, {|| fin_spec_otv_stavke_rocni_intervali( .F. ) } )
 
-   f18_menu( "spri", .F., _izbor, _opc, _opcexe )
+   f18_menu( "spri", .F., nIzbor, aOpc, aOpcexe )
 
    RETURN .T.
 

@@ -176,7 +176,6 @@ FUNCTION fin_specifikacija_suban()
       ENDIF
 
 
-
       cSqlWhere := parsiraj_sql( "idkonto", qqKonto )
       cSqlWhere += " AND " + parsiraj_sql( "idpartner", Trim( qqPartner ) )
 
