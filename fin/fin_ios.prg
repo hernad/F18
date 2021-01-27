@@ -73,6 +73,7 @@ STATIC FUNCTION fin_ios_print()
 
    download_template( "ios.odt",  "8d1fa4972d42e54cc0e97e5c8d8c525787fc6b7b4d7c07ce092c38897b48ce85" )
    download_template( "ios_2.odt", "c0ef9bd9871aa73d09c343c19681ae7a449ffbf0a7dd0196ca548a04fd080d03" )
+
  
    Box(, 19, 65, .F. )
 
@@ -188,11 +189,12 @@ STATIC FUNCTION fin_ios_print()
       AAdd( aDBf, { "IZNOSDEM", "B",  8,  2 } )
 
       CREATE_INDEX( "1", "IdFirma+IdKonto+IdPartner", _alias )
-      CREATE_INDEX( "IZNOS", "Descend(IdFirma+IdKonto+STR(IZNOSBHD,8,2)+IdPartner)", _alias )
+      INDEX ON IdFirma+IdKonto+STR(ABS(ROUND(IZNOSBHD,0)),12,0)+IdPartner TAG "IZNOSD" DESCENDING
    */
 
+   altd()
    IF cSortIznosDN == "D"
-        SET ORDER TO TAG "IZNOS"
+      SET ORDER TO TAG "IZNDES"
    ENDIF
    GO TOP
 
@@ -677,7 +679,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
    LOCAL nDug1, nDug2, nDUkDug1, nDUkDug2
    LOCAL nPot1, nPot2, nDUkPot1, nDUkPot2
    LOCAL nSaldo1, nSaldo2
-   LOCAL cIdPartnerTekuci := DESCEND("")
+   LOCAL cIdPartnerTekuci
    LOCAL lNeaktivanPartner
 
    IF hParams == NIL

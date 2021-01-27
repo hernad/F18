@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+/*
 FUNCTION fin_specif_otvorene_stavke()
 
    LOCAL nKolTot := 85
@@ -209,9 +209,7 @@ FUNCTION fin_specif_otvorene_stavke()
 
 
 
-/* ZaglSpK()
- *     Zaglavlje specifikacije
- */
+
 
 FUNCTION ZaglSpK()
 
@@ -254,3 +252,5 @@ FUNCTION ZaglSpK()
    SELECT SUBAN
 
    RETURN .T.
+
+*/

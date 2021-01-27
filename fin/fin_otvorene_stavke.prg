@@ -35,8 +35,8 @@ FUNCTION fin_otvorene_stavke_meni()
    AAdd( aOpc, "4. uporedna kartica dva konta" )
    AAdd( aOpcExe, {|| fin_suban_kartica2( .T. ) } )
 
-   AAdd( aOpc, "5. specifikacija otvorenih stavki" )
-   AAdd( aOpcExe, {|| fin_specif_otvorene_stavke() } )
+   //AAdd( aOpc, "5. specifikacija otvorenih stavki" )
+   //AAdd( aOpcExe, {|| fin_specif_otvorene_stavke() } )
 
    AAdd( aOpc, "6. ios" )
    AAdd( aOpcExe, {|| fin_ios_meni() } )

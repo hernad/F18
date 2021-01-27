@@ -15,7 +15,7 @@ THREAD STATIC nSlogova := 0
 
 MEMVAR cTag, cKljucIz, cFilter
 
-FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
+FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent, lDescending )
 
    LOCAL cImeCDX, cImeDbf
    LOCAL nOrder
@@ -43,6 +43,10 @@ FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
       IF Len( xKljuc ) == 3
          _unique := xKljuc[ 3 ]
       ENDIF
+   ENDIF
+
+   IF lDescending == NIL
+      lDescending := .F.
    ENDIF
 
    CLOSE ALL
@@ -135,7 +139,11 @@ FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
                      INDEX ON &cKljucIz  TAG ( cTag )  TO ( cImeCdx ) FOR &cFilter
                   ENDIF
                ELSE
-                  INDEX ON &cKljucIz  TAG ( cTag ) TO ( cImeCdx )
+                  IF lDescending
+                     INDEX ON &cKljucIz  TAG ( cTag ) TO ( cImeCdx ) DESCENDING
+                  ELSE
+                     INDEX ON &cKljucIz  TAG ( cTag ) TO ( cImeCdx )
+                  ENDIF
                ENDIF
             ENDIF
             USE
