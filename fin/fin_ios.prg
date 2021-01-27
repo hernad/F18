@@ -60,7 +60,7 @@ STATIC FUNCTION fin_ios_print()
    // LOCAL _auto_gen := fetch_metric( "ios_auto_gen", my_user(), "D" )
    LOCAL dDatumIOS := fetch_metric( "ios_datum_gen", my_user(), Date() )
    LOCAL nX := 1
-   LOCAL _launch, _exp_fields
+   LOCAL _launch, aDbfFields
    LOCAL cXmlIos := my_home() + "data.xml"
    LOCAL cTemplate := "ios.odt"
    LOCAL cIdPartnerTekuci
@@ -152,8 +152,8 @@ STATIC FUNCTION fin_ios_print()
    ENDIF
 
    IF lExportXLSX == "D"    // eksport podataka u dbf tabelu
-      _exp_fields := g_exp_fields()
-      IF !xlsx_export_init( _exp_fields )
+      aDbfFields := gaDbfFields()
+      IF !xlsx_export_init( aDbfFields )
          RETURN .F.
       ENDIF
    ENDIF
@@ -324,8 +324,8 @@ STATIC FUNCTION print_ios_xml( hParams )
    LOCAL nDug1, nDug2, nDUkDug1, nDUkDug2, _u_dug_1z, _u_dug_2z
    LOCAL nPot1, nPot2, nDUkPot1, nDUkPot2, _u_pot_1z, _u_pot_2z
 
-   LOCAL _total_bhd
-   LOCAL _total_dem
+   LOCAL nTotalKM
+   LOCAL nTotalEUR
    LOCAL nCount
    LOCAL cOtvSt, cBrDok
 
@@ -365,21 +365,21 @@ STATIC FUNCTION print_ios_xml( hParams )
    xml_node( "id_konto", to_xml_encoding( cIdKonto ) )
    xml_node( "id_partner", to_xml_encoding( cIdPartner ) )
 
-   _total_bhd := nIznosKM
-   _total_dem := nIznosDEM
+   nTotalKM := nIznosKM
+   nTotalEUR := nIznosDEM
 
    IF nIznosKM < 0
-      _total_bhd := -nIznosKM
+      nTotalKM := -nIznosKM
    ENDIF
    IF nIznosDEM < 0
-      _total_dem := -nIznosDEM
+      nTotalEUR := -nIznosDEM
    ENDIF
 
    IF cKm1EUR2 == "1"
-      xml_node( "total", AllTrim( Str( _total_bhd, 12, 2 ) ) )
+      xml_node( "total", AllTrim( Str( nTotalKM, 12, 2 ) ) )
       xml_node( "valuta", to_xml_encoding ( valuta_domaca_skraceni_naziv() ) )
    ELSE
-      xml_node( "total", AllTrim( Str( _total_dem, 12, 2 ) ) )
+      xml_node( "total", AllTrim( Str( nTotalEUR, 12, 2 ) ) )
       xml_node( "valuta", to_xml_encoding ( ValPomocna() ) )
    ENDIF
 
@@ -677,7 +677,7 @@ STATIC FUNCTION fin_ios_generacija( hParams )
    LOCAL nDug1, nDug2, nDUkDug1, nDUkDug2
    LOCAL nPot1, nPot2, nDUkPot1, nDUkPot2
    LOCAL nSaldo1, nSaldo2
-   LOCAL cIdPartnerTekuci
+   LOCAL cIdPartnerTekuci := DESCEND("")
    LOCAL lNeaktivanPartner
 
    IF hParams == NIL
@@ -1298,7 +1298,7 @@ STATIC FUNCTION xlsx_export_fill_row( cIdPart, cNazPart, cBrRn, cOpis, dDatum, d
 // ------------------------------------------
 // vraca strukturu tabele za export
 // ------------------------------------------
-STATIC FUNCTION g_exp_fields()
+STATIC FUNCTION gaDbfFields()
 
    LOCAL aDbf := {}
 

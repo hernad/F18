@@ -437,7 +437,6 @@ FUNCTION cre_all_fin( ver )
    // -----------------------------------------------------------
    // FIN_IOS
    // -----------------------------------------------------------
-
    _alias := "IOS"
    _table_name := "fin_ios"
 
@@ -453,7 +452,7 @@ FUNCTION cre_all_fin( ver )
    ENDIF
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX( "1", "IdFirma+IdKonto+IdPartner", _alias )
-   CREATE_INDEX( "IZNOS", "IdFirma+IdKonto+STR(IZNOSBHD,8,2)+IdPartner", _alias )
+   CREATE_INDEX( "IZNOS", "IdFirma+IdKonto+Descend(STR(IZNOSBHD,12,2))+IdPartner", _alias )
 
    // -----------------------------------------------------------
    // KAM_PRIPR
