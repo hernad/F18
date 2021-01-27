@@ -452,7 +452,7 @@ FUNCTION cre_all_fin( ver )
    ENDIF
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX( "1", "IdFirma+IdKonto+IdPartner", _alias )
-   CREATE_INDEX( "IZNOS", "IdFirma+IdKonto+Descend(STR(IZNOSBHD,12,2))+IdPartner", _alias )
+   CREATE_INDEX( "IZNOS", "IdFirma+IdKonto+Descend(STR(ABS(IZNOSBHD),12,2))+IdPartner", _alias )
 
    // -----------------------------------------------------------
    // KAM_PRIPR
