@@ -13,6 +13,10 @@
 
 STATIC s_oPDF
 
+MEMVAR M
+
+#define LEN_OPIS 65
+
 /*
    Štampa (su)banalitičkog finansijski nalog
    - ako smo na fin_pripr onda puni psuban sa sadržajem fin_pripr
@@ -62,8 +66,8 @@ FUNCTION fin_nalog_stampa_fill_psuban( cNalog12Dnevnik3, lStampa, dDatNal, oNalo
    ELSE
       M +=  "---- ------- "
       M += REPL( "-", FIELD_LEN_PARTNER_ID ) + " ----------------------------"
-      M += " ----------- -------- -------- --------------- ---------------"
-
+      // brdok 20
+      M += " " + REPLICATE("-", 20+1) + " -------- -------- --------------- ---------------"
    ENDIF
    M += iif( fin_jednovalutno(), "-", " ---------- ----------" )
 
@@ -168,7 +172,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cNalog12Dnevnik3, lStampa, dDatNal, oNalo
 
          aRez := SjeciStr( cStr, 28 ) // konto partner
          cStr := opis
-         aOpis := SjeciStr( cStr, 20 )
+         aOpis := SjeciStr( cStr, LEN_OPIS )
 
 
          @ PRow(), PCol() + 1 SAY Idpartner( idpartner ) // šifra partnera
@@ -185,10 +189,10 @@ FUNCTION fin_nalog_stampa_fill_psuban( cNalog12Dnevnik3, lStampa, dDatNal, oNalo
             @ PRow(), PCol() + 1 SAY PadR( naz, 13 )
 
             SELECT ( nArr )
-            @ PRow(), PCol() + 1 SAY PadR( BrDok, 11 )
+            @ PRow(), PCol() + 1 SAY PadR( BrDok, 20+1 )
 
          ELSE
-            @ PRow(), PCol() + 1 SAY PadR( BrDok, 11 )
+            @ PRow(), PCol() + 1 SAY PadR( BrDok, 20+1 )
          ENDIF
 
          @ PRow(), PCol() + 1 SAY DatDok
@@ -260,7 +264,7 @@ FUNCTION fin_nalog_stampa_fill_psuban( cNalog12Dnevnik3, lStampa, dDatNal, oNalo
                nPok := 1
             ENDIF
 
-            @ PRow() + nPok, nColDok SAY iif( i - 1 <= Len( aOpis ), aOpis[ i - 1 ], Space( 20 ) )
+            @ PRow() + nPok, nColDok SAY iif( i - 1 <= Len( aOpis ), aOpis[ i - 1 ], Space( LEN_OPIS ) )
             IF i == 2 .AND. ( !Empty( k1 + k2 + k3 + k4 ) .OR. gFinRj == "D" .OR. gFinFunkFond == "D" )
                ?? " " + k1 + "-" + k2 + "-" + K3Iz256( k3 ) + "-" + k4
                IF lVrstePlacanja
@@ -415,20 +419,20 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
       //P_NRED
       ?
       cTmp := iif( lDnevnik, "R.BR. *   BROJ   *DAN*", "" ) + "*R. * KONTO *" + PadC( "PART", FIELD_LEN_PARTNER_ID )
-      cTmp +=  "*" + "    NAZIV PARTNERA ILI      "  + "*   D  O  K  U  M  E  N  T    *         IZNOS U  " + valuta_domaca_skraceni_naziv() + "         *"
+      cTmp +=  "*" + "    NAZIV PARTNERA ILI      "  + "*        D  O  K  U  M  E  N  T         *         IZNOS U  " + valuta_domaca_skraceni_naziv() + "         *"
       cTmp += iif( fin_jednovalutno(), "", "    IZNOS U " + ValPomocna() + "        *" )
       ??U cTmp
       ?
 
       cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "             " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + " "
-      cTmp += "                            " + " ----------------------------- ------------------------------- "
+      cTmp += "                             " +  REPLICATE("-", 20) + "------------------- -------------------------------- "
       cTmp += iif( fin_jednovalutno(), "", "---------------------" )
       ??U cTmp
       //P_NRED
       ?
 
       cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR *       *" + REPL( " ", FIELD_LEN_PARTNER_ID ) + "*"
-      cTmp += "    NAZIV KONTA             "  + "* BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
+      cTmp += "    NAZIV KONTA             "  + "*      BROJ VEZE      * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
       cTmp += iif( fin_jednovalutno(), "", " DUG. " + ValPomocna() + "* POT." + ValPomocna() + "*" )
       ??U cTmp
 
@@ -444,14 +448,14 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
       ?
 
       cTmp := iif( lDnevnik, "U DNE-*  NALOGA  *   *", "" ) + "               " + PadC( "NER", FIELD_LEN_PARTNER_ID ) + " "
-      cTmp += "                            " + " ---------------------------------------------- ------------------------------- "
+      cTmp += "                             " + REPLICATE("-", 20)  + "------------------------------------ -------------------------------- "
       cTmp += iif( fin_jednovalutno(), "", "---------------------" )
       ??U cTmp
       //P_NRED
       ?
 
       cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR   *       *" + REPL( " ", FIELD_LEN_PARTNER_ID ) + "*"
-      cTmp += "    NAZIV KONTA             " + "*  TIP I NAZIV   * BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
+      cTmp += "    NAZIV KONTA             " + "*  TIP I NAZIV   *      BROJ VEZE      * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
       cTmp +=  iif( fin_jednovalutno(), "", " DUG. " + ValPomocna() + "* POT." + ValPomocna() + "*" )
       ??U cTmp
 

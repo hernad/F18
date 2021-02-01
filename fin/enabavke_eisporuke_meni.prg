@@ -1,11 +1,19 @@
 #include "f18.ch"
 
+#define DB_VER 7
+
 FUNCTION fin_eIsporukeNabavkeMenu()
 
     LOCAL aOpc := {}
     LOCAL aOpcexe := {}
     LOCAL nIzbor := 1
+    LOCAL nDbVer
 
+    nDbVer := fetch_metric("fin_enab_eisp_db", NIL, 0)
+
+    IF nDbVer < DB_VER
+        db_create_enabavke_eisporuke(.T.)
+    ENDIF
 
     AAdd( aOpc, "0. upute http://download.bring.out.ba/enabavke_eisporuke.pdf" )
     AAdd( aOpcexe, {|| otvori_eisp_enab_uputstvo() } )
@@ -30,6 +38,7 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     f18_menu( "f_eni", .F., nIzbor, aOpc, aOpcexe )
  
     RETURN .T.
+
 
 STATIC FUNCTION fin_eNabavke()
 
@@ -80,8 +89,6 @@ STATIC FUNCTION fin_eIsporuke()
 
 
 FUNCTION eNab_eIsp_PDV()
-
-
 
     LOCAL cPDV  := fetch_metric( "fin_enab_my_pdv", NIL, PadR( "<POPUNI>", 12 ) )
     LOCAL dDatOd := fetch_metric( "fin_enab_dat_od", my_user(), DATE()-1 )
@@ -186,19 +193,33 @@ FUNCTION eNab_eIsp_PDV()
     hPDV["12"] += ROUND(eisp->fakt_iznos, 0)
     use
 
-    // isporuke PDV0 po ostalim osnovama
-    cQuery := "select sum(fakt_iznos_sa_pdv0_ostalo) as fakt_iznos" 
-    cQuery += " FROM public.eisporuke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
+    altd()
+    // oslobodjeno po clnu 24 i 25 ide u polje PDV 13
+    cQuery := "select sum(fakt_iznos_sa_pdv0_ostalo) as fakt_iznos FROM public.eisporuke" 
+    cQuery += " LEFT JOIN fmk.fin_suban on eisporuke.fin_idfirma=fin_suban.idfirma and eisporuke.fin_idvn=fin_suban.idvn and eisporuke.fin_brnal=fin_suban.brnal and eisporuke.fin_rbr=fin_suban.rbr and extract(year from  fin_suban.datdok)=extract(year from eisporuke.dat_fakt)"
+    cQuery += " WHERE porezni_period=" + sql_quote(cPorezniPeriod)
+    cQuery += " and (substr(get_sifk('PARTN', 'PDVO', fin_suban.idpartner),1,2) IN ('24','25') OR substring(eisporuke.opis from 'PDV0:\s*CLAN(\d+)') IN ('24','25'))"
     use_sql("EISP", cQuery)
     hPDV["13"] := ROUND(eisp->fakt_iznos, 0)
     use
 
-    // isporuke sve iznos bez pdv osim izvoz i pdv0_ostalo
+    // oslobodjeno po ostalim clanovima ide u polje PDV 11
+    cQuery := "select sum(fakt_iznos_sa_pdv0_ostalo) as fakt_iznos FROM public.eisporuke" 
+    cQuery += " LEFT JOIN fmk.fin_suban on eisporuke.fin_idfirma=fin_suban.idfirma and eisporuke.fin_idvn=fin_suban.idvn and eisporuke.fin_brnal=fin_suban.brnal and eisporuke.fin_rbr=fin_suban.rbr and extract(year from  fin_suban.datdok)=extract(year from eisporuke.dat_fakt)"
+    cQuery += " WHERE porezni_period=" + sql_quote(cPorezniPeriod)
+    cQuery += " and NOT (substr(get_sifk('PARTN', 'PDVO', fin_suban.idpartner),1,2) IN ('24','25') OR substring(eisporuke.opis from 'PDV0:\s*CLAN(\d+)') IN ('24','25'))"
+    use_sql("EISP", cQuery)
+    hPDV["11"] := eisp->fakt_iznos
+    use
+
+    // isporuke sve iznos bez pdv osim izvoz i pdv0_ostalo clan 24 i 25
     cQuery := "select sum(fakt_iznos_bez_pdv + fakt_iznos_bez_pdv_np) as fakt_iznos_bez_pdv, sum(fakt_iznos_pdv + fakt_iznos_pdv_np) as iznos_pdv" 
     cQuery += " FROM public.eisporuke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     cQuery += " AND tip<>'04' and fakt_iznos_sa_pdv0_ostalo=0 and fakt_iznos_sa_pdv0_izvoz=0"
     use_sql("EISP", cQuery)
-    hPDV["11"] := ROUND(eisp->fakt_iznos_bez_pdv, 0)
+    hPDV["11"] += eisp->fakt_iznos_bez_pdv
+    hPDV["11"] := ROUND(hPDV["11"], 0)
+
     // izlazni PDV
     hPDV["51"] := ROUND(eisp->iznos_pdv, 0)
     use
@@ -273,14 +294,21 @@ FUNCTION eNab_eIsp_PDV()
     RETURN .T.
 
 
-FUNCTION db_create_enabavke_eisporuke()
+FUNCTION db_create_enabavke_eisporuke(lSilent)
 
     LOCAL hDbServerParams := my_server_params()
     LOCAL cQuery
+    LOCAL oQuery
 
-    IF !spec_funkcije_sifra( "ADMIN" )
-        MsgBeep( "Opcija zaštićena šifrom !" )
-        RETURN .F.
+    IF lSilent == NIL
+        lSilent := .F.
+    ENDIF
+
+    IF !lSilent
+        IF !spec_funkcije_sifra( "ADMIN" )
+            MsgBeep( "Opcija zaštićena šifrom !" )
+            RETURN .F.
+        ENDIF
     ENDIF
 
     IF !F18Admin():relogin_as_admin( hDbServerParams[ "database" ] )
@@ -294,7 +322,6 @@ FUNCTION db_create_enabavke_eisporuke()
     // eisporuke idseq
     cQuery += "CREATE sequence if not exists public.eisporuke_id_seq;"
     run_sql_query( cQuery )
-
 
     // enabavke
     cQuery := "CREATE TABLE if not exists public.enabavke("
@@ -334,14 +361,13 @@ FUNCTION db_create_enabavke_eisporuke()
     cQuery += "GRANT ALL ON TABLE public.enabavke TO xtrole;"
 
     cQuery += "DROP INDEX if exists enabavke_fin_nalog;"
-    cQuery += "CREATE unique INDEX enabavke_fin_nalog ON public.enabavke USING btree (fin_idfirma, fin_idvn, fin_brnal, fin_rbr);"
+    cQuery += "CREATE unique INDEX enabavke_fin_nalog ON public.enabavke USING btree (fin_idfirma, fin_idvn, fin_brnal, fin_rbr, extract(year from dat_fakt_prijem));"
 
     cQuery += 'ALTER TABLE public.eNabavke OWNER TO "admin";'
     cQuery += 'GRANT ALL ON TABLE public.eNabavke TO "admin";'
     cQuery += "GRANT ALL ON TABLE public.eNabavke TO xtrole;"
     
     // eisporuke
-    
     cQuery += "CREATE TABLE if not exists public.eisporuke  ("
     cQuery += " eisporuke_id  integer not null default nextval('eisporuke_id_seq'),"
     cQuery += " tip varchar(2) constraint allowed_eisporuke_vrste check (tip in ('01', '02', '03', '04', '05')),"
@@ -376,15 +402,26 @@ FUNCTION db_create_enabavke_eisporuke()
     cQuery += 'GRANT ALL ON TABLE public.eisporuke TO xtrole;'
 
     cQuery += "DROP INDEX if exists eisporuke_fin_nalog;"
-    cQuery += "CREATE unique INDEX eisporuke_fin_nalog ON public.eisporuke USING btree (fin_idfirma, fin_idvn, fin_brnal, fin_rbr);"
+    cQuery += "CREATE unique INDEX eisporuke_fin_nalog ON public.eisporuke USING btree (fin_idfirma, fin_idvn, fin_brnal, fin_rbr, extract(year from dat_fakt));"
 
     cQuery += 'ALTER TABLE public.eisporuke OWNER TO "admin";'
     cQuery += 'GRANT ALL ON TABLE public.eisporuke TO "admin";'
     cQuery += 'GRANT ALL ON TABLE public.eisporuke TO xtrole;'
 
-    run_sql_query( cQuery )
+    cQuery += 'ALTER TABLE public.enabavke ADD column IF NOT EXISTS idkonto varchar(7);'
+    cQuery += 'ALTER TABLE public.enabavke ADD column IF NOT EXISTS idkonto_np varchar(7);'
 
-    Alert("tabele enabavke/eisporuke kreirane")
+    oQuery := run_sql_query( cQuery )
+    
+    IF sql_error_in_query( oQuery, "UPDATE" )
+        error_bar( "alter_table", cQuery )
+        Alert(_u("Greška! DB_UPDATE nije izvršen"))
+    ELSE
+       set_metric("fin_enab_eisp_db", NIL, DB_VER)
+       Alert("tabele enabavke/eisporuke kreirane - ver: " + AllTrim(Str(DB_VER)))
+    ENDIF
+
+    
     
     QUIT_1
 
@@ -396,7 +433,6 @@ FUNCTION otvori_eisp_enab_uputstvo()
     LOCAL cCmd
     LOCAL cURL := "http://download.bring.out.ba/enabavke_eisporuke.pdf"
     
-
     IF is_linux()
         cCmd := "" //"gio open"
         f18_open_mime_document( cURL )

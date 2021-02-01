@@ -33,7 +33,7 @@ cp -av F18-klijent ${F18_0_DIR}/F18-klijent
 
 
 cd ../eShell
-scripts/code.sh
+LD_LIBRARY_PATH= scripts/code.sh
 
 #set Token=ESHELL_%RANDOM%
 

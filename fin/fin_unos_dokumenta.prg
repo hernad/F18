@@ -56,10 +56,21 @@ FUNCTION fin_knjizenje_naloga()
    LOCAL _y_row := _d
    LOCAL aFinUnosOpcije
    LOCAL _help_columns := 4
-   LOCAL _opts := {}, _opt_d
+   LOCAL _opts := {}, nOptD
    LOCAL i
 
    o_fin_edit()
+   IF Len(fin_pripr->brdok) < 20  .OR. Len(fin_pripr->opis) < 300  .OR. Len(psuban->opis) < 300
+      IF reccount2() > 0
+         Alert(_u("Priprema nije prazna. ispraznite je pa ponovo pokrenite ovu opciju"))
+      ELSE
+         my_close_all_dbf()
+         f18_delete_dbf("fin_pripr")
+         f18_delete_dbf("fin_psuban")
+         Alert(_u("Izvršena promjena BRDOK 10-> 20 priprema, OPIS -> 300"))
+         QUIT_1
+      ENDIF
+   ENDIF
 
    ImeKol := { ;
       { "F.",            {|| my_dbSelectArea( F_FIN_PRIPR ), field->IdFirma }, "IdFirma" }, ;
@@ -94,33 +105,33 @@ FUNCTION fin_knjizenje_naloga()
 
    Box( , _x_row, _y_row )
 
-   _opt_d := ( _d / 4 ) - 1
+   nOptD := ( _d / 4 ) - 1
 
-   aFinUnosOpcije := _upadr( " <c+N> Nova stavka", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <ENT> Ispravka", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <c+T> Briši stavku", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <P> Povrat naloga", _opt_d )
+   aFinUnosOpcije := _upadr( " <c+N> Nova stavka", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <ENT> Ispravka", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <c+T> Briši stavku", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <P> Povrat naloga", nOptD )
 
    @ box_x_koord() + _x_row - 3, box_y_koord() + 2 SAY8 aFinUnosOpcije
 
-   aFinUnosOpcije := _upadr( " <c+A> Ispravka stavki", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <c+P> Štampa naloga", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <a+A> Ažuriranje", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <X> Ažur.bez štampe", _opt_d )
+   aFinUnosOpcije := _upadr( " <c+A> Ispravka stavki", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <c+P> Štampa naloga", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <a+A> Ažuriranje", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <X> Ažur.bez štampe", nOptD )
 
    @ box_x_koord() + _x_row - 2, box_y_koord() + 2 SAY8 aFinUnosOpcije
 
-   aFinUnosOpcije := _upadr( iif( is_mac(), " <9>", " <c+F9>" ) + " Briši sve", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <F5> Kontrola zbira", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <a+F5> Pr.dat", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <a+B> Blagajna", _opt_d )
+   aFinUnosOpcije := _upadr( iif( is_mac(), " <9>", " <c+F9>" ) + " Briši sve", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <F5> Kontrola zbira", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <a+F5> Pr.dat", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <a+B> Blagajna", nOptD )
 
    @ box_x_koord() + _x_row - 1, box_y_koord() + 2 SAY8 aFinUnosOpcije
 
-   aFinUnosOpcije := _upadr( " <a+T> Briši po uslovu", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <B> odredi broj dokumenta", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <F9> sredi Rbr.", _opt_d ) + _sep
-   aFinUnosOpcije += _upadr( " <F10> Ostale opcije", _opt_d ) + _sep
+   aFinUnosOpcije := _upadr( " <a+T> Briši po uslovu", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <B> odredi broj dokumenta", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <F9> sredi Rbr.", nOptD ) + _sep
+   aFinUnosOpcije += _upadr( " <F10> Ostale opcije", nOptD ) + _sep
 
 
    @ box_x_koord() + _x_row, box_y_koord() + 2 SAY8 aFinUnosOpcije
@@ -212,7 +223,7 @@ FUNCTION edit_fin_priprema( lNovaStavka )
       @ box_x_koord() + 8, Col() + 2 SAY "Valuta: " GET _DatVal
    ENDIF
 
-   @ box_x_koord() + 11, box_y_koord() + 2 SAY "Opis: " GET _opis WHEN {|| .T. } VALID {|| .T. } PICT "@S" + AllTrim( Str( f18_max_cols() - 8 ) )
+   @ box_x_koord() + 11, box_y_koord() + 2 SAY "Opis: " GET _opis WHEN {|| .T. } VALID {|| .T. } PICT "@S" + AllTrim( Str( f18_max_cols() - 25 ) )
 
    IF hFinParams[ "fin_k1" ]
       @ box_x_koord() + 11, Col() + 2 SAY "K1" GET _k1 PICT "@!"
@@ -1035,10 +1046,10 @@ FUNCTION fin_tek_rec_2()
 
 FUNCTION fin_knjizenje_ostale_opcije()
 
-   PRIVATE aOpc[ 1 ]
+   PRIVATE aOpc[ 2 ]
 
    aOpc[ 1 ] := "1. novi datum->datum, stari datum->dat.valute "
-   // aOpc[ 2 ] := "2. podijeli nalog na vise dijelova"
+   aOpc[ 2 ] := "2. FIN uvoz promjena broja JCI"
 
    h[ 1 ] := h[ 2 ] := ""
    PRIVATE Izbor := 1
@@ -1051,8 +1062,8 @@ FUNCTION fin_knjizenje_ostale_opcije()
          EXIT
       CASE izbor == 1
          SetDatUPripr()
-         // CASE izbor == 2
-         // PodijeliN()
+      CASE izbor == 2
+         set_novi_broj_jci()
       ENDCASE
    ENDDO
    box_x_koord( am_x )
