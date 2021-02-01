@@ -586,7 +586,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     LOCAL cTipDokumenta2
     LOCAL nUndefined := -9999999.99
     LOCAL cBrDok
-    LOCAL dDatFakt, dDatFaktPrij, dDatJCI
+    LOCAL dDatFakt, dDatFaktPrij, dDatJCI, dDatJCIPrij
     LOCAL cIdKontoDobav := Trim( fetch_metric( "fin_enab_idkonto_dob", NIL, "43" ))
     LOCAL hNal
     LOCAL cIdKontoPDV, cIdKontoPDVNP
@@ -607,6 +607,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17np,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci,"
+    cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI-P:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci_prij,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'MJ-KP:\s*(\d)'), 'X') as from_opis_mj_kp,"
 
     //cSelectFields += "((case when sub2.d_p='1' then 1 else -1 end) * sub2.iznosbhd - (case when fin_suban.d_p='2' then 1 else -1 end) * fin_suban.iznosbhd) * -1 as bez_pdv,"
@@ -774,15 +775,31 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             ELSE
                 dDatJCI := (cAlias)->datdok
             ENDIF
+
+            IF enab->from_opis_dat_jci_prij <> "UNDEF"
+                dDatJCIPrij := CTOD((cAlias)->from_opis_dat_jci_prij)
+            ELSE
+                dDatJCIPrij := dDatJCI
+            ENDIF
         ENDIF
 
         IF cTipDokumenta == "04Z"
              // uvoz zavisni dokumenti
             cTipDokumenta2 := "04"
+            IF Empty(cJib)
+               // INO fakture uvoz
+               cJib := REPLICATE("0", 13)
+            ENDIF
         ENDIF
         hRec["tip"] := cTipDokumenta2
         hRec["dat_fakt"] := dDatFakt
         hRec["dat_fakt_prijem"] := dDatFaktPrij
+        IF cTipDokumenta == "04"
+            hRec["dat_fakt_prijem"] := dDatJCIPrij
+        ENDIF
+        IF cTipDokumenta == "04Z"
+            hRec["dat_fakt_prijem"] := hNalog["jci_dat_prij"]
+        ENDIF
         hRec["dob_naz"] := say_string((cAlias)->partn_naz, 100, .F.)
         hRec["dob_sjediste"] := say_string(trim((cAlias)->partn_ptt) + " " + trim((cAlias)->partn_mjesto) + " " + trim((cAlias)->partn_adresa), 100, .F.)
         hRec["idkonto"] := cIdKonto
@@ -933,6 +950,8 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             hNal["osn_pdv17np_uvoz"] := hRec["osn_pdv17np"] 
             hNal["fakt_iznos_pdv_uvoz"] := nPDVPosl
             hNal["fakt_iznos_pdv_np_uvoz"] := nPDVNP
+            hNal["jci_dat"] := dDatJCI
+            hNal["jci_dat_prij"] := dDatJCIPrij
             
             // 1. stavka - faktura roba
             hRec["osn_pdv0"] := 0
@@ -1003,7 +1022,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             hRec["enabavke_id"] := nRbr
             hRec["br_fakt"]  := ""
             hRec["dat_fakt"] := dDatJCI
-            hRec["dat_fakt_prijem"] := dDatFaktPrij
+            hRec["dat_fakt_prijem"] := dDatJCIPrij
             hRec["dob_naz"] := say_string("UVOZ", 100, .F.)
             hRec["dob_sjediste"] := say_string("", 100, .F.)
             hRec["osn_pdv0"] := 0

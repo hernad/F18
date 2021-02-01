@@ -238,7 +238,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
        @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI NP izn:" GET hParams["fin_uvoz_sped_pdv_np_iznos"] PICT cPictIznos
 
        nX += 2
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prevoznik kto :" GET hParams["fin_uvoz_sped_kto"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prevoznik kto :" GET hParams["fin_uvoz_prev_kto"]
        @ box_x_koord() + nX++, col() + 2 SAY8 "partn:" GET hParams["fin_uvoz_prev_partn"] VALID Empty(hParams["fin_uvoz_prev_partn"]) .OR. P_Partner(@hParams["fin_uvoz_prev_partn"]) 
        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  br.fakt:" GET hParams["fin_uvoz_prev_brdok"] ;
            VALID !Empty(hParams["fin_uvoz_prev_brdok"]) .OR. Empty(hParams["fin_uvoz_prev_partn"])
@@ -327,11 +327,21 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     hRec["opis"] := "RN " + Alltrim(hParams["fin_uvoz_dob_brdok"]) + ", "
     hRec["opis"] += "JCI: " + Alltrim(hParams["fin_uvoz_jci_broj"])
     hRec["brdok"] := hParams["fin_uvoz_dob_brdok"]
-    hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
+    
 
-    IF hParams["fin_uvoz_jci_datprij"] <>  hParams["fin_uvoz_jci_datdok"]
-        hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_jci_datdok"])
+    // jci datum prijema i datum dokumenta razliciti
+    hRec["opis"] += ", DAT-JCI: " + DTOC(hParams["fin_uvoz_jci_datdok"])
+    IF hParams["fin_uvoz_jci_datprij"] <> hParams["fin_uvoz_jci_datdok"]
+        hRec["opis"] += ", DAT-JCI-P: " + DTOC(hParams["fin_uvoz_jci_datprij"])
     ENDIF
+
+    hRec["datdok"] := hParams["fin_uvoz_dob_datdok"]
+    // faktura robe 30.11.2020, jci datum prijema 01.12.2020
+    IF month(hParams["fin_uvoz_jci_datprij"]) <> month(hParams["fin_uvoz_dob_datdok"])
+       hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_dob_datdok"])
+       hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
+    ENDIF
+
     hRec["datval"] := hParams["fin_uvoz_dob_datval"]
     hRec["idkonto"] := hParams["fin_uvoz_dob_kto"]
     hRec["idpartner"] := hParams["fin_uvoz_dob_partn"]
@@ -339,7 +349,6 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     hRec["iznosbhd"] := hParams["fin_uvoz_dob_iznos"]
     hRec["iznosdem"] := fin_km_to_eur(hRec["iznosbhd"], hParams["fin_uvoz_jci_datprij"])
     dbf_update_rec( hRec )
-
 
     cJCIBR := "JCI BR " + Alltrim(hParams["fin_uvoz_jci_broj"])
     nDadzbine := 0
@@ -480,6 +489,10 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
         hRec["opis"] += "SPEDITER RN " + AllTrim(hParams["fin_uvoz_sped_brdok"]) + ", " + cJCIBR
         hRec["brdok"] := hParams["fin_uvoz_sped_brdok"]
         hRec["datdok"] := hParams["fin_uvoz_sped_datdok"]
+        IF month(hParams["fin_uvoz_jci_datprij"]) <> month(hParams["fin_uvoz_sped_datdok"])
+            hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_sped_datdok"])
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
+        ENDIF
         hRec["datval"] := hParams["fin_uvoz_sped_datval"]
         hRec["idkonto"] := hParams["fin_uvoz_sped_kto"]
         hRec["idpartner"] := hParams["fin_uvoz_sped_partn"]
@@ -494,7 +507,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "SPEDITER RN " + AllTrim(hParams["fin_uvoz_sped_brdok"]) + " (VAN JCI PDV) "
             hRec["brdok"] := hParams["fin_uvoz_sped_brdok"]
-            hRec["datdok"] := hParams["fin_uvoz_sped_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv"]
             hRec["idpartner"] := ""
@@ -510,7 +523,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "SPEDITER RN " + AllTrim(hParams["fin_uvoz_sped_brdok"]) + " (VAN JCI PDV VANPOSL) "
             hRec["brdok"] := hParams["fin_uvoz_sped_brdok"]
-            hRec["datdok"] := hParams["fin_uvoz_sped_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv_np"]
             hRec["idpartner"] := ""
@@ -524,7 +537,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "SPEDITER RN " + AllTrim(hParams["fin_uvoz_sped_brdok"]) + " (VAN JCI PDV VANPOSL) PROTUSTAV"
             hRec["brdok"] := ""
-            hRec["datdok"] := hParams["fin_uvoz_sped_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv_np"]
             hRec["idpartner"] := ""
@@ -546,6 +559,10 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
         hRec["opis"] += "PREVOZ RN " + AllTrim(hParams["fin_uvoz_prev_brdok"]) + ", " + cJCIBR
         hRec["brdok"] := hParams["fin_uvoz_prev_brdok"]
         hRec["datdok"] := hParams["fin_uvoz_prev_datdok"]
+        IF month(hParams["fin_uvoz_jci_datprij"]) <> month(hParams["fin_uvoz_prev_datdok"])
+            hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_prev_datdok"])
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
+        ENDIF
         hRec["datval"] := hParams["fin_uvoz_prev_datval"]
         hRec["idkonto"] := hParams["fin_uvoz_prev_kto"]
         hRec["idpartner"] := hParams["fin_uvoz_prev_partn"]
@@ -559,7 +576,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             APPEND BLANK
             hRec["rbr"] := nRbr++
             hRec["opis"] := "PREVOZ RN " + AllTrim(hParams["fin_uvoz_prev_brdok"]) + " (VAN JCI PDV)"
-            hRec["datdok"] := hParams["fin_uvoz_prev_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["brdok"] := hParams["fin_uvoz_prev_brdok"]
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv"]
@@ -577,7 +594,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "PREVOZ RN " + AllTrim(hParams["fin_uvoz_prev_brdok"]) + " (VAN JCI PDV VANPOSL)"
             hRec["brdok"] := hParams["fin_uvoz_prev_brdok"]
-            hRec["datdok"] := hParams["fin_uvoz_prev_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv_np"]
             hRec["idpartner"] := ""
@@ -591,7 +608,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "PREVOZ RN " + AllTrim(hParams["fin_uvoz_prev_brdok"]) + " (VAN JCI PDV VANPOSL) PROTUSTAV"
             hRec["brdok"] := ""
-            hRec["datdok"] := hParams["fin_uvoz_prev_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv_np"]
             hRec["idpartner"] := ""
@@ -613,6 +630,10 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
         hRec["opis"] += "ZAVTR RN " + AllTrim(hParams["fin_uvoz_zav_brdok"]) + ", " + cJCIBR
         hRec["brdok"] := hParams["fin_uvoz_zav_brdok"]
         hRec["datdok"] := hParams["fin_uvoz_zav_datdok"]
+        IF month(hParams["fin_uvoz_jci_datprij"]) <> month(hParams["fin_uvoz_zav_datdok"])
+            hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_zav_datdok"])
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
+        ENDIF
         hRec["datval"] := hParams["fin_uvoz_zav_datval"]
         hRec["idkonto"] := hParams["fin_uvoz_zav_kto"]
         hRec["idpartner"] := hParams["fin_uvoz_zav_partn"]
@@ -626,7 +647,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             APPEND BLANK
             hRec["rbr"] := nRbr++
             hRec["opis"] := "ZAVTR RN " + AllTrim(hParams["fin_uvoz_zav_brdok"]) + " (VAN JCI PDV)"
-            hRec["datdok"] := hParams["fin_uvoz_zav_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["brdok"] := hParams["fin_uvoz_zav_brdok"]
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv"]
@@ -644,7 +665,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "ZAVTR RN " + AllTrim(hParams["fin_uvoz_zav_brdok"]) + " (VAN JCI PDV VANPOSL)"
             hRec["brdok"] := hParams["fin_uvoz_zav_brdok"]
-            hRec["datdok"] := hParams["fin_uvoz_zav_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv_np"]
             hRec["idpartner"] := ""
@@ -658,7 +679,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
             hRec["rbr"] := nRbr++
             hRec["opis"] := "ZAVTR RN " + AllTrim(hParams["fin_uvoz_zav_brdok"]) + " (VAN JCI PDV VANPOSL) PROTUSTAV"
             hRec["brdok"] := ""
-            hRec["datdok"] := hParams["fin_uvoz_zav_datdok"]
+            hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
             hRec["datval"] := CTOD("")
             hRec["idkonto"] := hParams["fin_uvoz_van_jci_pdv_np"]
             hRec["idpartner"] := ""
@@ -868,4 +889,6 @@ FUNCTION set_novi_broj_jci()
 
     Alert(_u("Izvršeno promjena: " + Alltrim(Str(nCnt))))
     RETURN .T.
+
+
 
