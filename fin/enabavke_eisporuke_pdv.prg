@@ -160,7 +160,7 @@ FUNCTION eNab_eIsp_PDV()
     // isporuke sve iznos bez pdv osim izvoz i pdv0_ostalo clan 24 i 25
     cQuery := "select sum(fakt_iznos_bez_pdv + fakt_iznos_bez_pdv_np) as fakt_iznos_bez_pdv, sum(fakt_iznos_pdv + fakt_iznos_pdv_np) as iznos_pdv" 
     cQuery += " FROM public.eisporuke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
-    cQuery += " AND tip<>'04' and fakt_iznos_sa_pdv0_ostalo=0 and fakt_iznos_sa_pdv0_izvoz=0"
+    cQuery += " AND tip<>'04'"
     use_sql("EISP", cQuery)
     hPDV["11"] += eisp->fakt_iznos_bez_pdv
     hPDV["11"] := ROUND(hPDV["11"], 0)
