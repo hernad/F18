@@ -774,7 +774,7 @@ FUNCTION kalk_10_gen_uvoz( cBrKalk )
 
     LOCAL cQuery := "select brfaktp, datdok, idpartner, mkonto from kalk_kalk where idvd='10'"
     LOCAL cQuery2
-    LOCAL cBrFakt, dDatDok, cIdDobavljac
+    LOCAL cBrFakt, dDatDok, cIdDobavljac, cIdKonto
     LOCAL nDobavIznos, nSpedIznos, nPrevoznikIznos
 
 
@@ -834,8 +834,6 @@ FUNCTION set_novi_broj_jci()
     LOCAL cMatch
     LOCAL nCnt
   
-
-
     Box(, 3, 60)
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Stari broj JCI:" GET cOldJCI VALID !Empty(cOldJCI)
       @ box_x_koord() + 2, box_y_koord() + 2 SAY " Novi broj JCI:" GET cNewJCI VALID !Empty(cNewJCI)
