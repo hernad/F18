@@ -300,7 +300,7 @@ STATIC FUNCTION db_insert_eisp( hRec )
     LOCAL oError
     
     cQuery += "(eisporuke_id, tip, porezni_period, br_fakt, jci, dat_fakt, "
-    cQuery += "kup_naz,kup_sjediste, kup_pdv, kup_jib,"
+    cQuery += "kup_naz,kup_sjediste, kup_pdv, kup_jib, idpartner, idkonto_pdv, idkonto_kup,"
     cQuery += "fakt_iznos_sa_pdv,fakt_iznos_sa_pdv_interna,fakt_iznos_sa_pdv0_izvoz,fakt_iznos_sa_pdv0_ostalo,fakt_iznos_bez_pdv,fakt_iznos_pdv,fakt_iznos_bez_pdv_np,"
     cQuery += "fakt_iznos_pdv_np,fakt_iznos_pdv_np_32,fakt_iznos_pdv_np_33,fakt_iznos_pdv_np_34,"
     cQuery += "opis, fin_idfirma, fin_idvn,fin_brnal,fin_rbr) "
@@ -315,6 +315,9 @@ STATIC FUNCTION db_insert_eisp( hRec )
     cQuery += sql_quote(hRec["kup_sjediste"]) + ","
     cQuery += sql_quote(hRec["kup_pdv"]) + ","
     cQuery += sql_quote(hRec["kup_jib"]) + ","
+    cQuery += sql_quote(hRec["idpartner"]) + ","
+    cQuery += sql_quote(hRec["idkonto_pdv"]) + ","
+    cQuery += sql_quote(hRec["idkonto_kup"]) + ","
     cQuery += sql_quote(ROUND(hRec["fakt_iznos_sa_pdv"],2)) + ","
     cQuery += sql_quote(ROUND(hRec["fakt_iznos_sa_pdv_interna"],2)) + ","
     cQuery += sql_quote(ROUND(hRec["fakt_iznos_sa_pdv0_izvoz"],2)) + ","
@@ -403,6 +406,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL cTipDokumenta2
     LOCAL cMjestoKrajnjePotrosnje
     LOCAL dDatJCI
+    LOCAL hNeimenovani := NIL
     //LOCAL cOpisIznosFaktureIzvoz := ""
 
 
@@ -426,7 +430,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "substring(fin_suban.opis from 'JCI:\s*([A-z\d]+)') as JCI,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'JCI-IZN:\s*([\d.]+)')::DECIMAL, 0.0) as JCI_IZN,"
-        cSelectFields += "fin_suban.idkonto as idkonto, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
+        cSelectFields += "fin_suban.idkonto as idkonto_kup, fin_suban.idpartner as idpartner, '' as idkonto_pdv, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
         
     ELSE
         cSelectFields := "SELECT get_sifk('PARTN', 'PDVB', COALESCE(sub2.idpartner,'9999999')) as pdv_broj, get_sifk('PARTN', 'IDBR', COALESCE(sub2.idpartner,'9999999')) as jib,"
@@ -437,7 +441,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "'UNDEF' as from_opis_dat_jci,"
         cSelectFields += "0 as JCI_IZN,"
         cSelectFields += "COALESCE(substring(sub2.opis from 'OSN-PDV17:\s*([-+\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
-        cSelectFields += "fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
+        cSelectFields += "fin_suban.idkonto as idkonto_pdv, sub2.idkonto as idkonto_kup, sub2.idpartner as idpartner, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
     ENDIF
 
     cSelectFields += "fin_suban.brdok, fin_suban.opis, fin_suban.d_p, fin_suban.datdok, fin_suban.datval,"
@@ -528,6 +532,13 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["br_fakt"] := eisp->brdok
         hRec["dat_fakt"] := eisp->datdok
         hRec["jci"] := eisp->jci
+        hRec["idkonto_pdv"] := eisp->idkonto_pdv
+        hRec["idkonto_kup"] := eisp->idkonto_kup
+        hRec["idpartner"] := eisp->idpartner
+        hRec["fin_idfirma"] := eisp->idfirma
+        hRec["fin_idvn"] := eisp->idvn
+        hRec["fin_brnal"] := eisp->brnal
+        hRec["fin_rbr"] := eisp->rbr
 
         IF eisp->eisp_rbr <> -99999
             // vec postoji stavka 21% u tabeli eisporuke
@@ -542,9 +553,8 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             ENDIF
         ENDIF
 
-        //cOpisIznosFaktureIzvoz := ""
         IF cTipDokumenta == "04"
-            cBrDok := eisp->jci
+           cBrDok := eisp->jci
         else   
            cBrDok := eisp->brdok
         ENDIF
@@ -752,14 +762,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["fakt_iznos_pdv_np_33"] := n33
         hRec["fakt_iznos_pdv_np_34"] := n34
         
-        hRec["fin_idfirma"] := eisp->idfirma
-        hRec["fin_idvn"] := eisp->idvn
-        hRec["fin_brnal"] := eisp->brnal
-        hRec["fin_rbr"] := eisp->rbr
         hRec["opis"] := TRIM(eisp->opis) 
-        //IF !Empty(cOpisIznosFaktureIzvoz)
-        //    hRec["opis"] += " " + cOpisIznosFaktureIzvoz
-        //ENDIF
 
         IF hRec["kup_jib"] == REPLICATE("9", 13)
             hRec["kup_jib"] := ""
@@ -767,20 +770,13 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         ENDIF
 
         IF cTipDokumenta == "04"
-
-            IF cTipDokumenta == "04"
-                cBrDok := eisp->jci
-            else   
-               cBrDok := eisp->brdok
-            ENDIF
-
             // faktura izvoz
             hRec["fakt_iznos_sa_pdv0_izvoz"] := eisp->iznos_sa_pdv
             hRec["br_fakt"] := eisp->brdok
             hRec["dat_fakt"] := eisp->datdok
             hRec["jci"] := eisp->jci
             db_insert_eisp( hRec)
-            csv_insert(cPorezniPeriod, cCSV, cTipDokumenta2, eisp->brdok, cJib, cPDVBroj, n32, n33, n34, hRec, @hUkupno, @nRbr )
+            csv_insert(cPorezniPeriod, cCSV, hRec, @hUkupno, @nRbr )
 
             // JCI izvoz
             hRec["kup_naz"] := say_string("IZVOZ", 100, .F.)
@@ -798,40 +794,127 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             hRec["jci"] := eisp->jci
             hRec["fin_rbr"] := eisp->rbr + 1
             db_insert_eisp( hRec)
-            csv_insert(cPorezniPeriod, cCSV, cTipDokumenta2, eisp->jci, cJib, cPDVBroj, n32, n33, n34, hRec, @hUkupno, @nRbr )
+            csv_insert(cPorezniPeriod, cCSV, hRec, @hUkupno, @nRbr )
 
         ELSE
-           db_insert_eisp( hRec)
-           csv_insert(cPorezniPeriod, cCSV, cTipDokumenta2, cBrDok, cJib, cPDVBroj, n32, n33, n34, hRec, @hUkupno, @nRbr )
+
+            IF lMozeNeimenovaniKupac
+                IF !Empty(eisp->partn_id)
+                    IF hNeimenovani != NIL
+                        hNeimenovani["eisporuke_id"] := nRbr
+                        IF hNeimenovani["cnt"] > 1
+                            hNeimenovani["br_fakt"] := DTOS(hNeimenovani["dat_fakt"])
+                            hNeimenovani["opis"] := "zbirni prenos, broj stavki u FIN: [" + Alltrim(Str(hNeimenovani["cnt"])) + "] DATUM: " + DTOC(hNeimenovani["dat_fakt"])
+                        ENDIF
+                        db_insert_eisp(hNeimenovani)
+                        csv_insert(cPorezniPeriod, cCSV, hNeimenovani, @hUkupno, @nRbr )
+                        hNeimenovani := NIL
+                    ENDIF
+                    db_insert_eisp(hRec)
+                    csv_insert(cPorezniPeriod, cCSV, hRec, @hUkupno, @nRbr )
+                ELSE
+                    IF (hNeimenovani != NIL .AND. hNeimenovani["fin_idfirma"] == hRec["fin_idfirma"] .AND. hNeimenovani["fin_idvn"] == hRec["fin_idvn"] .AND. hNeimenovani["fin_brnal"] == hRec["fin_brnal"] ;
+                            .AND. hNeimenovani["dat_fakt"] == hRec["dat_fakt"] .AND. hNeimenovani["idkonto_pdv"] == hRec["idkonto_pdv"])
+                        hNeimenovani["cnt"] += 1
+                        hNeimenovani["fakt_iznos_bez_pdv"]    += hRec["fakt_iznos_bez_pdv"]
+                        hNeimenovani["fakt_iznos_pdv"]        += hRec["fakt_iznos_pdv"] 
+                        hNeimenovani["fakt_iznos_bez_pdv_np"] += hRec["fakt_iznos_bez_pdv_np"]
+                        hNeimenovani["fakt_iznos_pdv_np"]     += hRec["fakt_iznos_pdv_np"]
+                        hNeimenovani["fakt_iznos_sa_pdv"]     += hRec["fakt_iznos_sa_pdv"]
+                        hNeimenovani["fakt_iznos_pdv_np_32"]  += hRec["fakt_iznos_pdv_np_32"]
+                        hNeimenovani["fakt_iznos_pdv_np_33"]  += hRec["fakt_iznos_pdv_np_33"]
+                        hNeimenovani["fakt_iznos_pdv_np_34"]  += hRec["fakt_iznos_pdv_np_34"]
+                    ELSE
+                        // novi nalog - nova nafaka, takodje ako je novi datum unutar naloga hRec["dat_fakt"] ili novi konto hRec["idkonto_pdv"]
+                        IF hNeimenovani != NIL
+                           hNeimenovani["eisporuke_id"] := nRbr
+                           IF hNeimenovani["cnt"] > 1
+                              hNeimenovani["br_fakt"] := DTOS(hNeimenovani["dat_fakt"])
+                              hNeimenovani["opis"] := "zbirni prenos, broj stavki u FIN: [" + Alltrim(Str(hNeimenovani["cnt"])) + "] DATUM: " + DTOC(hNeimenovani["dat_fakt"])
+                           ENDIF
+                           db_insert_eisp(hNeimenovani)
+                           csv_insert(cPorezniPeriod, cCSV, hNeimenovani, @hUkupno, @nRbr )
+                        ENDIF
+                        hNeimenovani := hb_hash()
+                        hNeimenovani["cnt"] := 1
+                        hNeimenovani["tip"] := cTipDokumenta2
+                        hNeimenovani["porezni_period"] := hRec["porezni_period"]
+                        hNeimenovani["idkonto_pdv"] := hRec["idkonto_pdv"] 
+                        hNeimenovani["idkonto_kup"] := hRec["idkonto_kup"]
+                        hNeimenovani["idpartner"] := hRec["idpartner"]
+                        hNeimenovani["opis"] := hRec["opis"]
+                        hNeimenovani["fin_idfirma"] := eisp->idfirma
+                        hNeimenovani["fin_idvn"] := eisp->idvn
+                        hNeimenovani["fin_brnal"] := eisp->brnal
+                        hNeimenovani["fin_rbr"] := eisp->rbr
+                        hNeimenovani["jci"] := ""
+                        hNeimenovani["fakt_iznos_sa_pdv0_izvoz"] := 0
+                        hNeimenovani["br_fakt"] := eisp->brdok
+                        hNeimenovani["dat_fakt"] := eisp->datdok
+                        hNeimenovani["fakt_iznos_sa_pdv_interna"] := 0
+                        hNeimenovani["fakt_iznos_sa_pdv0_izvoz"] := 0
+                        hNeimenovani["fakt_iznos_sa_pdv0_ostalo"] := 0
+                        hNeimenovani["kup_naz"] := hRec["kup_naz"]
+                        hNeimenovani["kup_sjediste"] := hRec["kup_sjediste"]
+                        hNeimenovani["kup_jib"] := hRec["kup_jib"]
+                        hNeimenovani["kup_pdv"] := hRec["kup_pdv"]
+                        hNeimenovani["fakt_iznos_bez_pdv"]    := hRec["fakt_iznos_bez_pdv"]
+                        hNeimenovani["fakt_iznos_pdv"]        := hRec["fakt_iznos_pdv"] 
+                        hNeimenovani["fakt_iznos_bez_pdv_np"] := hRec["fakt_iznos_bez_pdv_np"]
+                        hNeimenovani["fakt_iznos_pdv_np"]     := hRec["fakt_iznos_pdv_np"]
+                        hNeimenovani["fakt_iznos_sa_pdv"]     := hRec["fakt_iznos_sa_pdv"]
+                        hNeimenovani["fakt_iznos_pdv_np_32"]  := hRec["fakt_iznos_pdv_np_32"]
+                        hNeimenovani["fakt_iznos_pdv_np_33"]  := hRec["fakt_iznos_pdv_np_33"]
+                        hNeimenovani["fakt_iznos_pdv_np_34"]  := hRec["fakt_iznos_pdv_np_34"]
+                    ENDIF
+                ENDIF
+            ELSE
+                // imenovani kupac
+                db_insert_eisp( hRec)
+                csv_insert(cPorezniPeriod, cCSV, hRec, @hUkupno, @nRbr )
+            ENDIF 
+
         ENDIF
 
         SKIP
     ENDDO
 
+    IF lMozeNeimenovaniKupac .AND. hNeimenovani != NIL
+        hNeimenovani["eisporuke_id"] := nRbr
+        IF hNeimenovani["cnt"] > 1
+            hNeimenovani["br_fakt"] := DTOS(hNeimenovani["dat_fakt"])
+            hNeimenovani["opis"] := "zbirni prenos, broj stavki u FIN: [" + Alltrim(Str(hNeimenovani["cnt"])) + "] DATUM: " + DTOC(hNeimenovani["dat_fakt"])
+        ENDIF
+        db_insert_eisp(hNeimenovani)
+        csv_insert(cPorezniPeriod, cCSV, hNeimenovani, @hUkupno, @nRbr )
+        hNeimenovani := NIL
+    ENDIF
+
     USE
 
     RETURN .T.
 
-STATIC FUNCTION csv_insert(cPorezniPeriod, cCSV, cTipDokumenta2, cBrDok, cJib, cPDVBroj, n32, n33, n34, hRec, hUkupno, nRbr )
 
-    // Vrsta sloga 2 = slogovi isporuka
+STATIC FUNCTION csv_insert(cPorezniPeriod, cCSV, hRec, hUkupno, nRbr )
+
+     // Vrsta sloga 2 = slogovi isporuka
     ? "2" + cCSV
     ?? cPorezniPeriod + cCSV
-    ?? PADL(AllTrim(STR(nRbr,10,0)), 10, "0") + cCSV
-    ?? cTipDokumenta2 + cCSV
+    ?? PADL(AllTrim(STR(hRec["eisporuke_id"],10,0)), 10, "0") + cCSV
+    ?? hRec["tip"] + cCSV
 
     // 5. broj fakture ili dokumenta
-    ?? say_string(cBrDok, 100) + cCSV
+    ?? say_string(hRec["br_fakt"], 100) + cCSV
     // 6. datum fakture ili dokumenta
-    ?? STRTRAN(sql_quote(eisp->datdok),"'","") + cCSV
+    ?? STRTRAN(sql_quote(hRec["dat_fakt"]),"'","") + cCSV
     // 7. naziv kupca
     ?? say_string(hRec["kup_naz"], 100) + cCSV
     // 8. Sjediste kupca
     ?? say_string(hRec["kup_sjediste"], 100) + cCSV
     // 9. PDV dobav
-    ??  cPDVBroj + cCSV
+    ??  hRec["kup_pdv"] + cCSV
     // 10. JIB dobav
-    ?? cJib + cCSV
+    ?? hRec["kup_jib"] + cCSV
 
     // 11. iznos sa PDV
     // nije interna vanposlovno NITI izvoz NITI PDV0 po ostalim osnovama
@@ -865,16 +948,16 @@ STATIC FUNCTION csv_insert(cPorezniPeriod, cCSV, cTipDokumenta2, cBrDok, cJib, c
     ?? say_number(hRec["fakt_iznos_pdv_np"]) + cCSV
     hUkupno["np"] += hRec["fakt_iznos_pdv_np"]
 
-    hUkupno["np_32"] += n32
-    hUkupno["np_33"] += n33
-    hUkupno["np_34"] += n34
+    hUkupno["np_32"] += hRec["fakt_iznos_pdv_np_32"]
+    hUkupno["np_33"] += hRec["fakt_iznos_pdv_np_33"]
+    hUkupno["np_34"] += hRec["fakt_iznos_pdv_np_34"]
 
     // 19. iznos izlaznog PDV-a koji si unosi u polje 32 PDV FBiH
-    ?? say_number(n32) + cCSV
+    ?? say_number(hRec["fakt_iznos_pdv_np_32"]) + cCSV
     // 20.  iznos izlaznog PDV-a koji si unosi u polje 33 PDV RS
-    ?? say_number(n33) + cCSV
+    ?? say_number(hRec["fakt_iznos_pdv_np_33"]) + cCSV
     // 21.  iznos izlaznog PDV-a koji si unosi u polje 34 PDV Brcko
-    ?? say_number(n34)
+    ?? say_number(hRec["fakt_iznos_pdv_np_34"])
 
     hUkupno["redova"] += 1
     nRbr ++
@@ -1123,13 +1206,11 @@ STATIC FUNCTION xlsx_export_fill_row()
     AADD(aKolona, { "C", "JCI", 10, eisp->jci })
     AADD(aKolona, { "D", "Dat.fakt", 12, eisp->dat_fakt })
 
-    AADD(aKolona, { "C", "Kupac id", 10, eisp->kup_id })
     AADD(aKolona, { "C", "Kupac naziv", 60, eisp->kup_naz })
     AADD(aKolona, { "C", "Kupac sjediste", 100, eisp->kup_sjediste })
     AADD(aKolona, { "C", "Kup. PDV", 12, eisp->kup_pdv })
     AADD(aKolona, { "C", "Kup. JIB", 13, eisp->kup_jib })
-    AADD(aKolona, { "C", "Osl.Cl", 5, eisp->kup_osl_clan })
-
+    
     AADD(aKolona, { "M", "Fakt.SA PDV", 15, eisp->fakt_iznos_sa_pdv })
     AADD(aKolona, { "M", "F.SA PDV interna", 15, eisp->fakt_iznos_sa_pdv_interna })
     AADD(aKolona, { "M", "Fakt izvoz", 15, eisp->fakt_iznos_sa_pdv0_izvoz })
@@ -1147,6 +1228,10 @@ STATIC FUNCTION xlsx_export_fill_row()
     AADD(aKolona, { "C", "Opis", 200, eisp->opis })
     AADD(aKolona, { "C", "FIN nalog", 20, eisp->fin_idfirma + "-" + eisp->fin_idvn + "-" + eisp->fin_brnal + "/" + Alltrim(Str(eisp->fin_rbr)) })
 
+    AADD(aKolona, { "C", "Kto PDV", 7, eisp->idkonto_pdv })
+    AADD(aKolona, { "C", "Kto KUP", 7, eisp->idkonto_kup })
+    AADD(aKolona, { "C", "IdPart", 6, eisp->idpartner })
+    AADD(aKolona, { "C", "Osl.Cl", 5, eisp->kup_osl_clan })
     
     IF s_pWorkSheet == NIL
         
@@ -1222,9 +1307,7 @@ FUNCTION export_eIsporuke()
     ENDIF
     s_cXlsxName := my_home_root() + "eisporuke_" + dtos(dDatOd) + "_" + dtos(dDatDo) + ".xlsx"
 
-    cQuery := "select *, fin_suban.idpartner as kup_id, get_sifk('PARTN', 'PDVO', fin_suban.idpartner) as kup_osl_clan from public.eisporuke"
-    cQuery += " LEFT JOIN fmk.fin_suban on eisporuke.fin_idfirma=fin_suban.idfirma and eisporuke.fin_idvn=fin_suban.idvn and eisporuke.fin_brnal=fin_suban.brnal and eisporuke.fin_rbr=fin_suban.rbr"
-    cQuery += " LEFT JOIN partn on fin_suban.idpartner=partn.id"
+    cQuery := "select *, get_sifk('PARTN', 'PDVO', COALESCE(idpartner,'')) as kup_osl_clan from public.eisporuke"
     cQuery += " WHERE dat_fakt >=" + sql_quote(dDatOd) + " AND dat_fakt <=" + sql_quote(dDatDo)
     cQuery += " ORDER BY eisporuke_id"
 
