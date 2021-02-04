@@ -671,7 +671,6 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             // 02 - interna faktura vlastita potrosnja
             // (Empty(cPDVBroj) .AND. Len(cJib) == 13) - domaci NE-PDV obveznik 
            
-
             IF cMjestoKrajnjePotrosnje $ "123" .AND. Empty(eisp->partn_id)
                IF cTipDokumenta == "02"
                   // 4720
@@ -824,6 +823,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                         hNeimenovani["fakt_iznos_pdv_np_32"]  += hRec["fakt_iznos_pdv_np_32"]
                         hNeimenovani["fakt_iznos_pdv_np_33"]  += hRec["fakt_iznos_pdv_np_33"]
                         hNeimenovani["fakt_iznos_pdv_np_34"]  += hRec["fakt_iznos_pdv_np_34"]
+                        hNeimenovani["fakt_iznos_sa_pdv_interna"] += hRec["fakt_iznos_sa_pdv_interna"]
                     ELSE
                         // novi nalog - nova nafaka, takodje ako je novi datum unutar naloga hRec["dat_fakt"] ili novi konto hRec["idkonto_pdv"]
                         IF hNeimenovani != NIL
@@ -851,7 +851,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                         hNeimenovani["fakt_iznos_sa_pdv0_izvoz"] := 0
                         hNeimenovani["br_fakt"] := eisp->brdok
                         hNeimenovani["dat_fakt"] := eisp->datdok
-                        hNeimenovani["fakt_iznos_sa_pdv_interna"] := 0
+                        hNeimenovani["fakt_iznos_sa_pdv_interna"] := hRec["fakt_iznos_sa_pdv_interna"]
                         hNeimenovani["fakt_iznos_sa_pdv0_izvoz"] := 0
                         hNeimenovani["fakt_iznos_sa_pdv0_ostalo"] := 0
                         hNeimenovani["kup_naz"] := hRec["kup_naz"]
