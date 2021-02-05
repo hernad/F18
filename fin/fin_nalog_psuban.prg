@@ -15,7 +15,7 @@ STATIC s_oPDF
 
 MEMVAR M
 
-#define LEN_OPIS 65
+#define LEN_OPIS 67
 
 /*
    Štampa (su)banalitičkog finansijski nalog

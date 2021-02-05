@@ -399,7 +399,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL nInternaSaPDV, nNePDVObveznikSaPDV, nDaPDVObveznikSaPDV
     LOCAL nPDVInterna, nPDVDaPDVObveznik, nPDVNePDVObveznik
     LOCAL nOsnovicaNePdvObveznik, nOsnovicaDaPDVObveznik      
-    LOCAL nOsnovicaInterna, nOsnovicaIzvoz, nOsnovicaPDV0Oostalo
+    LOCAL nOsnovicaInterna, nOsnovicaIzvoz, nOsnovicaPDV0Ostalo
     LOCAL hRec := hb_hash()
     LOCAL cKto
     LOCAL cBrDok
@@ -633,7 +633,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
 
         nOsnovicaInterna := 0
         nOsnovicaIzvoz := 0
-        nOsnovicaPDV0Oostalo := 0
+        nOsnovicaPDV0Ostalo := 0
         nOsnovicaNePdvObveznik := 0
         nOsnovicaDaPdvObveznik := 0
         
@@ -664,7 +664,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             IF cPDVBroj == REPLICATE("0",12) // usluge stranom licu
                 cTipDokumenta2 := "05"
             ENDIF
-            nOsnovicaPDV0Oostalo := eisp->iznos_sa_pdv
+            nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
         
         ELSEIF cTipDokumenta == "02" .OR. cMjestoKrajnjePotrosnje $ "123"
             
@@ -692,13 +692,13 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                nPDVNePDVObveznik := eisp->pdv
                // ako ima razlike izmedju osnovice i iznosa sa PDV, onda je to PDV0
                // npr 119.00 - 17.00 - (17/0.17=100) = 2.00
-               nOsnovicaPDV0Oostalo := eisp->iznos_sa_pdv - eisp->pdv - ROUND(eisp->pdv / 0.17, 2)
-               IF ABS(nOsnovicaPDV0Oostalo)*10 < 1
+               nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv - eisp->pdv - ROUND(eisp->pdv / 0.17, 2)
+               IF ABS(nOsnovicaPDV0Ostalo)*10 < 1
                  // greske u zaokr
-                 nOsnovicaPDV0Oostalo := 0
+                 nOsnovicaPDV0Ostalo := 0
                ENDIF
                // u slucaju da postoji PDV0 osnovica 2.00, 102.00 - 2 = 100.00
-               nOsnovicaNePdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Oostalo
+               nOsnovicaNePdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Ostalo
                
                nNePDVObveznikSaPDV := eisp->iznos_sa_pdv
                
@@ -708,19 +708,25 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             // PDV obveznik
             nPDVDaPDVObveznik := eisp->pdv
             // ako ima razlike izmedju osnovice i iznosa sa PDV, onda je to PDV0
+                        
             // npr 119.00 - 17.00 - (17/0.17=100) = 2.00
-            nOsnovicaPDV0Oostalo := eisp->iznos_sa_pdv - eisp->pdv - ROUND(eisp->pdv / 0.17, 2)
-            IF ABS(nOsnovicaPDV0Oostalo)*10 < 1
+            // npr -119.00 - (-17.00) - (-17/0.17=-100) =  -119 +17 +100 = -2.00
+            nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv - eisp->pdv - ROUND(eisp->pdv / 0.17, 2)
+
+            IF ABS(nOsnovicaPDV0Ostalo)*10 < 1
                 // greskr u zaokr
-                nOsnovicaPDV0Oostalo := 0
+                nOsnovicaPDV0Ostalo := 0
             ENDIF
             // u slucaju da postoji PDV0 osnovica 2.00, 102.00 - 2 = 100.00
-            nOsnovicaDaPdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Oostalo
+            // u slucaju da postoji PDV0 osnovica -2.00, -102.00 - (-2) = -100.00
+            nOsnovicaDaPdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Ostalo
             nDaPDVObveznikSaPDV := eisp->iznos_sa_pdv
             
-            
+            altd()
             IF ROUND(eisp->from_opis_osn_pdv17, 2) <> -9999999.99
                 nOsnovicaDaPDVObveznik := eisp->from_opis_osn_pdv17
+                // u tom slucaju osnovica PDV0 ovisi o ovoj varijabli
+                nOsnovicaPDV0Ostalo := Round(nOsnovicaDaPDVObveznik * 0.17 - eisp->pdv, 2)
             ENDIF
         ENDIF
 
@@ -747,7 +753,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
 
         hRec["fakt_iznos_sa_pdv_interna"] := nOsnovicaInterna + nPDVInterna
         hRec["fakt_iznos_sa_pdv0_izvoz"] := nOsnovicaIzvoz
-        hRec["fakt_iznos_sa_pdv0_ostalo"] := nOsnovicaPDV0Oostalo
+        hRec["fakt_iznos_sa_pdv0_ostalo"] := nOsnovicaPDV0Ostalo
         
         hRec["fakt_iznos_bez_pdv"] := nOsnovicaDaPDVObveznik
         hRec["fakt_iznos_pdv"] :=  nPDVDaPDVObveznik

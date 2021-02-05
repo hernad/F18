@@ -325,20 +325,20 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     // dobavljac robe potrazuje
     hRec["rbr"] := nRbr++
     hRec["opis"] := "RN " + Alltrim(hParams["fin_uvoz_dob_brdok"]) + ", "
-    hRec["opis"] += "JCI: " + Alltrim(hParams["fin_uvoz_jci_broj"])
+    hRec["opis"] += "JCI:" + Alltrim(hParams["fin_uvoz_jci_broj"])
     hRec["brdok"] := hParams["fin_uvoz_dob_brdok"]
     
 
     // jci datum prijema i datum dokumenta razliciti
-    hRec["opis"] += ", DAT-JCI: " + DTOC(hParams["fin_uvoz_jci_datdok"])
+    hRec["opis"] += ", DAT-JCI:" + DTOC(hParams["fin_uvoz_jci_datdok"])
     IF hParams["fin_uvoz_jci_datprij"] <> hParams["fin_uvoz_jci_datdok"]
-        hRec["opis"] += ", DAT-JCI-P: " + DTOC(hParams["fin_uvoz_jci_datprij"])
+        hRec["opis"] += ", DAT-JCI-P:" + DTOC(hParams["fin_uvoz_jci_datprij"])
     ENDIF
 
     hRec["datdok"] := hParams["fin_uvoz_dob_datdok"]
     // faktura robe 30.11.2020, jci datum prijema 01.12.2020
     IF month(hParams["fin_uvoz_jci_datprij"]) <> month(hParams["fin_uvoz_dob_datdok"])
-       hRec["opis"] += ", DAT-FAKT: " + DTOC(hParams["fin_uvoz_dob_datdok"])
+       hRec["opis"] += ", DAT-FAKT:" + DTOC(hParams["fin_uvoz_dob_datdok"])
        hRec["datdok"] := hParams["fin_uvoz_jci_datprij"]
     ENDIF
 
@@ -750,7 +750,6 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     ENDIF
 
     my_unlock()
-
 
     RETURN .T.
 
