@@ -143,7 +143,7 @@ FUNCTION eNab_eIsp_PDV()
     cQuery := "select sum(fakt_iznos_sa_pdv0_ostalo) as fakt_iznos FROM public.eisporuke" 
     cQuery += " LEFT JOIN fmk.fin_suban on eisporuke.fin_idfirma=fin_suban.idfirma and eisporuke.fin_idvn=fin_suban.idvn and eisporuke.fin_brnal=fin_suban.brnal and eisporuke.fin_rbr=fin_suban.rbr and extract(year from  fin_suban.datdok)=extract(year from eisporuke.dat_fakt)"
     cQuery += " WHERE porezni_period=" + sql_quote(cPorezniPeriod)
-    cQuery += " and (substr(get_sifk('PARTN', 'PDVO', COALESCE(fin_suban.idpartner,'')),1,2) IN ('24','25') OR substring(eisporuke.opis from 'PDV0:\s*CLAN(\d+)') IN ('24','25'))"
+    cQuery += " and (substr(get_sifk('PARTN', 'PDVO', COALESCE(fin_suban.idpartner,'')),1,2) IN ('24','25') OR trim(eisporuke.kup_pdv0_clan) IN ('24','25'))"
     use_sql("EISP", cQuery)
     hPDV["13"] := ROUND(eisp->fakt_iznos, 0)
     use
@@ -152,7 +152,7 @@ FUNCTION eNab_eIsp_PDV()
     cQuery := "select sum(fakt_iznos_sa_pdv0_ostalo) as fakt_iznos FROM public.eisporuke" 
     cQuery += " LEFT JOIN fmk.fin_suban on eisporuke.fin_idfirma=fin_suban.idfirma and eisporuke.fin_idvn=fin_suban.idvn and eisporuke.fin_brnal=fin_suban.brnal and eisporuke.fin_rbr=fin_suban.rbr and extract(year from  fin_suban.datdok)=extract(year from eisporuke.dat_fakt)"
     cQuery += " WHERE porezni_period=" + sql_quote(cPorezniPeriod)
-    cQuery += " and NOT (substr(get_sifk('PARTN', 'PDVO', COALESCE(fin_suban.idpartner,'')),1,2) IN ('24','25') OR substring(eisporuke.opis from 'PDV0:\s*CLAN(\d+)') IN ('24','25'))"
+    cQuery += " and NOT (substr(get_sifk('PARTN', 'PDVO', COALESCE(fin_suban.idpartner,'')),1,2) IN ('24','25') OR trim(eisporuke.kup_pdv0_clan) IN ('24','25'))"
     use_sql("EISP", cQuery)
     hPDV["11"] := eisp->fakt_iznos
     use

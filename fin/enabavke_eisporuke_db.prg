@@ -129,6 +129,7 @@ FUNCTION db_create_enabavke_eisporuke(lSilent)
 
     // fakture koje se odnose na jci mogu biti iz predhodnog mjeseca
     cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS dat_fakt_pravi date;'
+    cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS kup_pdv0_clan varchar(10);'
 
     oQuery := run_sql_query( cQuery )
     
