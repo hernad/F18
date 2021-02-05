@@ -127,6 +127,9 @@ FUNCTION db_create_enabavke_eisporuke(lSilent)
     cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS idkonto_kup varchar(7);'
     cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS idpartner varchar(6);'
 
+    // fakture koje se odnose na jci mogu biti iz predhodnog mjeseca
+    cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS dat_fakt_pravi date;'
+
     oQuery := run_sql_query( cQuery )
     
     IF sql_error_in_query( oQuery, "UPDATE" )
