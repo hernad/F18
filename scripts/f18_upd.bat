@@ -1,18 +1,19 @@
 @echo off
-REM # ver 1.0.2
+REM # ver 1.0.3
 REM # bjasko@bring.out.ba
-REM # date 22.11.2013
+REM # date 09.02.2021
 set PATH=%PATH%;C:\knowhowERP\bin;C:\knowhowERP\lib;C:\knowhowERP\util
 set DEST=C:\knowhowERP\bin
 
 :SERVICE
 echo.
 echo.
-echo "Provjeravam da li je F18 zatvoren"
+echo "Provjeravam dali je F18 zatvoren"
 echo.
 echo.
 
 PING -n 6 www.google.com  >NUL
+taskkill /IM "F18.exe" /F
 REM # provjeri dali se F18 vrti
 tasklist.exe /FI "IMAGENAME eq F18.exe" 2>NUL | find.exe /I /N "F18.exe" >NUL
 if "%ERRORLEVEL%"=="0" echo "izgleda je je F18 aktivan, zatvorite ga" & goto SERVICE  else got UPDATE
