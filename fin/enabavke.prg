@@ -38,6 +38,7 @@ FUNCTION parametri_eNabavke()
 
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
     LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
+    LOCAL cShemaPatch1 := PadR( fetch_metric( "fin_enab_schema_patch_1", NIL, "N" ), 1 )
 
     LOCAL cEnabUvozSwitchKALK := PadR( fetch_metric( "fin_enab_uvoz_switch_kalk", NIL, "N" ), 1 )
 
@@ -69,13 +70,15 @@ FUNCTION parametri_eNabavke()
 
 
        nX++
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji su isključuju iz generacije e-nabavki"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji su isključuju iz generacije eNabavki/eIsporuka"
        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(blagajna, izvodi, obračun PDV)" GET cNabExcludeIdvn PICTURE "@S35" 
 
 
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale e-nabavke"
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(tip 05)" GET cNabIdvn05 PICTURE "@S35" 
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke/eIsporuke"
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "(tip 05)" GET cNabIdvn05 PICTURE "@S35" 
 
+       @ box_x_koord() + nX, COL() + 2 SAY8 "Posebna schema patch[1]  " GET cShemaPatch1 PICTURE "@!" VALID cShemaPatch1 $ "DN"
+       
        nX++
        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Kontiranje KALK 10/uvoz zamijeniti sa FIN-gen enabavke (D/N):" GET cEnabUvozSwitchKALK ;
            PICTURE "@!" VALID cEnabUvozSwitchKALK $ "DN"
@@ -116,6 +119,7 @@ FUNCTION parametri_eNabavke()
     set_metric( "fin_enab_idvn_05", NIL, Trim(cNabIdvn05) )
 
     set_metric( "fin_enab_uvoz_switch_kalk", NIL, cEnabUvozSwitchKALK )
+    set_metric( "fin_enab_schema_patch_1", NIL, cShemaPatch1)
 
     RETURN .T.
 
@@ -142,8 +146,9 @@ FUNCTION get_sql_expression_exclude_idvns(cNabExcludeIdvn)
 
 FUNCTION check_eNabavke()
 
-    LOCAL nStep, cKonto
-    LOCAL cIdKontoDobav := PadR( fetch_metric( "fin_enab_idkonto_dob", NIL, "43" ), 7 )
+    LOCAL nStep, cKonto, cPreskoci
+    LOCAL cIdKontoDobav := Trim( fetch_metric( "fin_enab_idkonto_dob", NIL, "43" ))
+    LOCAL cIdKontoKupac := Trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
     
     LOCAL cIdKontoPDV := PadR( fetch_metric( "fin_enab_idkonto_pdv", NIL, "270" ), 7 )
     LOCAL cIdKontoPDVNP := PadR( fetch_metric( "fin_enab_idkonto_pdv_np", NIL, "27690" ), 7 )
@@ -193,12 +198,13 @@ FUNCTION check_eNabavke()
     // dobavljac - partner mora postojati, brdok mora postojati
     cPartnerBrdokUslov := "(sub2.idpartner is null or trim(sub2.idpartner)='' or trim(fin_suban.brdok)='')"
 
-
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
 
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
 
+    cPreskoci := " and COALESCE(substring(fin_suban.opis from 'ENAB:\s*(PRESKOCI)'), '')<>'PRESKOCI'"
+    cPreskoci += " and not fin_suban.idvn in (" + cTmps + ")"
 
     FOR nStep := 1 TO 2 
         cSelectFields := "SELECT fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr, fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2, fin_suban.brdok as brdok"
@@ -219,7 +225,7 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery += cPreskoci
         cQuery += " and " + cPartnerBrdokUslov
     
         // 2710 - uvoz
@@ -234,7 +240,7 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery2 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery2 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery2 += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery2 += cPreskoci
         cQuery2 += " and " + cPartnerBrdokUslov
 
         // 2720 - avansi
@@ -249,7 +255,7 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery3 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery3 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery3 += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery3 += cPreskoci
         cQuery3 += " and " + cPartnerBrdokUslov
 
         // 2730 - strana lica
@@ -264,7 +270,7 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery4 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery4 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery4 += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery4 += cPreskoci
         cQuery4 += " and " + cPartnerBrdokUslov
 
         // 2740 - poljo
@@ -279,13 +285,16 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery5 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery5 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery5 += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery5 += cPreskoci
         cQuery5 += " and " + cPartnerBrdokUslov
 
         // 2750 - posebna schema
         cQuery6 := cSelectFields
         cQuery6 += " from fmk.fin_suban "
-        cQuery6 += cLeftJoinFin2
+        // u posebnoj schemi moze biti i dobavljac i kupac sa desne strane
+        cQuery6 += " left join fmk.fin_suban sub2 on " + cFinNalogNalog2 + " and " + cBrDokFinFin2
+        cQuery6 += " and (sub2.idkonto like '" + Trim(cIdKontoDobav) + "%' or sub2.idkonto like '" + Trim(cIdKontoKupac) + "%')"
+
         cQuery6 += " left join fmk.partn on sub2.idpartner=partn.id"
         IF nStep == 1
             cKonto := Trim(cIdKontoPDVSchema)
@@ -294,7 +303,7 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery6 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery6 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery6 += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery6 += cPreskoci
         cQuery6 += " and " + cPartnerBrdokUslov
 
         // 2780 - ostalo
@@ -309,7 +318,7 @@ FUNCTION check_eNabavke()
         ENDIF
         cQuery7 += " where fin_suban.idkonto like  '"  + cKonto + "%' and fin_suban.d_p='1'" 
         cQuery7 += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-        cQuery7 += " and not fin_suban.idvn in (" + cTmps + ")"
+        cQuery7 += cPreskoci
         cQuery7 += " and " + cPartnerBrdokUslov
 
     
@@ -346,7 +355,7 @@ FUNCTION check_eNabavke()
     cQuery := "select idvn,brnal,brdok from fmk.fin_suban"
     cQuery += " where fin_suban.idkonto like  '"  + Trim(cIdKontoDobav) + "%'"
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-    cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
+    cQuery += cPreskoci
     cQuery += " group by idvn,brnal,brdok"
     cQuery += " having count(*) > 1"
 
@@ -470,6 +479,10 @@ STATIC FUNCTION db_insert_enab( hRec )
         Alert("dat_fakt_prijem NULL " + hRec["fin_idfirma"] + "-" + hRec["fin_idvn"] + "-" + hRec["fin_brnal"] + "-" + AllTrim(Str(hRec["fin_rbr"])) )
     ENDIF
 
+    IF len(hRec["dob_pdv"]) > 12
+        Alert("PDV od "  + hRec["dob_naz"] + " ne kontam: " + hRec["dob_pdv"])
+    ENDIF
+    
     cQuery += "(enabavke_id, tip, porezni_period, br_fakt, jci, dat_fakt, dat_fakt_prijem,"
     cQuery += "dob_naz,dob_sjediste, dob_pdv, dob_jib,"
     cQuery += "fakt_iznos_bez_pdv, osn_pdv0, osn_pdv17, osn_pdv17np, fakt_iznos_sa_pdv, fakt_iznos_dob, fakt_iznos_poljo_pausal, fakt_iznos_pdv, fakt_iznos_pdv_np, fakt_iznos_pdv_np_32, fakt_iznos_pdv_np_33, fakt_iznos_pdv_np_34,"
@@ -600,10 +613,14 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     LOCAL cBrDok
     LOCAL dDatFakt, dDatFaktPrij, dDatJCI, dDatJCIPrij
     LOCAL cIdKontoDobav := Trim( fetch_metric( "fin_enab_idkonto_dob", NIL, "43" ))
+    LOCAL cIdKontoKupac := Trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
     LOCAL hNal
     LOCAL cIdKontoPDV, cIdKontoPDVNP
     LOCAL cAlias := "ENAB"
     LOCAL cPartnerNaziv, cPartnerSjediste
+    LOCAL cShemaPatch1 := fetch_metric( "fin_enab_schema_patch_1", NIL, "N" )
+    LOCAL lZadanaOsnovica := .F.
+    LOCAL lGreskaUZaokruzivanjuPDV0
 
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
 
@@ -654,7 +671,13 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     cQuery += " left join public.enabavke on fin_suban.idfirma=enabavke.fin_idfirma and fin_suban.idvn=enabavke.fin_idvn"
     cQuery += " and fin_suban.brnal=enabavke.fin_brnal and fin_suban.rbr=enabavke.fin_rbr and extract(year from  fin_suban.datdok)=extract(year from  enabavke.dat_fakt)"
  
-    cQuery += " WHERE fin_suban.idkonto like  '" + Trim(cIdKontoDobav) + "%'" 
+    IF lSchema
+        // ako je kooperant moze biti kupac potrazuje, ako je glavni izvodjac onda je dobavljac potrazuje 0
+        cQuery += " WHERE (fin_suban.idkonto like '" + Trim(cIdKontoDobav) + "%' or fin_suban.idkonto like '"   + Trim(cIdKontoKupac) + "%')"
+    ELSE
+        cQuery += " WHERE fin_suban.idkonto like '" + Trim(cIdKontoDobav) + "%'" 
+    ENDIF
+
     // dobavljac potrazuje, sub2.d_p, sub3.d_p duguje
     cQuery += " and fin_suban.d_p='2'"
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
@@ -804,7 +827,6 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
                hRec["dob_jib"] := cJib
             ENDIF
         ENDIF
-        hRec["tip"] := cTipDokumenta2
         hRec["dat_fakt"] := dDatFakt
         hRec["dat_fakt_prijem"] := dDatFaktPrij
         IF cTipDokumenta == "04"
@@ -855,25 +877,34 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
         hRec["osn_pdv17"] := nUndefined
         hRec["osn_pdv17np"] := nUndefined
 
+        // u opisu je zadana osnovica, npr OSN-PDV0: 0.0, OSN-PDV17NP: 100.00
+        lZadanaOsnovica := .F.
+
         IF lSchema
+            // uplata na po posebnoj shemi je tip ostalo
+            cTipDokumenta2 := "05"
             hRec[ "osn_pdv17"] := 0
             hRec[ "osn_pdv17np"] := 0
         ELSE
             // osnovica PDV
             IF (cAlias)->from_opis_osn_pdv17 <> nUndefined
                 hRec["osn_pdv17"] := (cAlias)->from_opis_osn_pdv17
+                lZadanaOsnovica := .T.
             ELSE
                 hRec["osn_pdv17"] := ROUND((cAlias)->iznos_pdv / 0.17, 2)
             ENDIF
             IF (cAlias)->from_opis_osn_pdv17np <> nUndefined
                 hRec["osn_pdv17np"] := (cAlias)->from_opis_osn_pdv17np
+                lZadanaOsnovica := .T.
             ELSE
                 hRec["osn_pdv17np"] := ROUND((cAlias)->iznos_pdv_np / 0.17, 2)
             ENDIF
         ENDIF
 
+        lGreskaUZaokruzivanjuPDV0 := .F.
         IF (cAlias)->from_opis_osn_pdv0 <> nUndefined
             hRec["osn_pdv0"] := (cAlias)->from_opis_osn_pdv0
+            lZadanaOsnovica := .T.
         ELSE
             IF cTipDokumenta == "04"
                 // stavka uvoza ne sadrzi PDV 0% osnovicu 
@@ -886,18 +917,39 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
                    IF lSchema
                       hRec[ "osn_pdv0" ] := 0
                    ELSE
-                      // proracun osnovice PDV0 na osnovu cijene sa PDV i ostalih osnovica
-                      hRec["osn_pdv0"] := ROUND((cAlias)->iznos_sa_pdv - hRec["osn_pdv17"] * 1.17 - hRec["osn_pdv17np"] * 1.17, 2)
-                      IF ABS(hRec["osn_pdv0"])*10 < 1
-                        // greske u zaokr
+                      IF lZadanaOsnovica
+                        // vec je zadana osnovica OSN-PDV17 ili OSN-PDV17NP
                         hRec["osn_pdv0"] := 0
+                      ELSE
+                        // proracun osnovice PDV0 na osnovu cijene sa PDV i ostalih osnovica
+                        hRec["osn_pdv0"] := ROUND((cAlias)->iznos_sa_pdv - hRec["osn_pdv17"] * 1.17 - hRec["osn_pdv17np"] * 1.17, 2)
+                        IF ABS(hRec["osn_pdv0"])*10 < 1
+                            // greske u zaokr
+                            hRec["osn_pdv0"] := 0
+                            lGreskaUZaokruzivanjuPDV0 := .T.
+                        ENDIF
                       ENDIF
                    ENDIF
                 ENDIF
             ENDIF
         ENDIF
 
-        hRec["fakt_iznos_bez_pdv"] := hRec["osn_pdv17"] + hRec["osn_pdv17np"] + hRec["osn_pdv0"]
+        IF lGreskaUZaokruzivanjuPDV0
+            // ako je bilo greske u zaokuzivanju osnovice PDV 0%, onda se moze ocekivati ta greska kod osnovice PDV 17%
+            // zato se treba osloniti iskljucivo na iznos fakture sa PDV i iznos-om PDV-a
+            // ... a ne na matematiku proracuna osnovice
+            hRec["fakt_iznos_bez_pdv"] := (cAlias)->iznos_sa_pdv - nPDVNP - nPDVPosl
+            IF ROUND(nPDVNP, 2) == 0
+                // nema neposlovnog PDV-a
+                hRec["osn_pdv17"] := hRec["fakt_iznos_bez_pdv"]
+            ENDIF
+            IF ROUND(nPDVPosl, 2) == 0
+                // nema poslovnog PDV-a
+                hRec["osn_pdv17np"] := hRec["fakt_iznos_bez_pdv"]
+            ENDIF
+        ELSE
+            hRec["fakt_iznos_bez_pdv"] := hRec["osn_pdv17"] + hRec["osn_pdv17np"] + hRec["osn_pdv0"]
+        ENDIF
      
         // iznos fakture dobavljaca
         hRec["fakt_iznos_dob"] := (cAlias)->iznos_sa_pdv
@@ -928,7 +980,13 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
                 IF nPDVNP > 0
                     hRec["osn_pdv17np"] := hRec["fakt_iznos_bez_pdv"]
                 ELSE
-                    hRec["osn_pdv17"] := hRec["fakt_iznos_bez_pdv"]
+                    IF ROUND(hNalog["osn_pdv17np_uvoz"], 2) > 0
+                        // neposlovni uvoz
+                        hRec["osn_pdv17np"] := hRec["fakt_iznos_bez_pdv"]
+                    ELSE
+                        // standardni poslovni uovz
+                        hRec["osn_pdv17"] := hRec["fakt_iznos_bez_pdv"]
+                    ENDIF
                 ENDIF
                 hNalog["osn_pdv17"] += hRec["osn_pdv17"]
                 hNalog["osn_pdv17np"] += hRec["osn_pdv17np"]
@@ -943,9 +1001,13 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
                 
             ELSE
                 hRec["fakt_iznos_sa_pdv"] := hRec["fakt_iznos_bez_pdv"] + nPDVPosl + nPDVNP
+                IF lSchema .ANd. cShemaPatch1 == "D"
+                    hRec["fakt_iznos_sa_pdv"] := 0
+                ENDIF
             ENDIF
         ENDIF
 
+        hRec["tip"] := cTipDokumenta2
         hRec["fin_idfirma"] := (cAlias)->idfirma
         hRec["fin_idvn"] := (cAlias)->idvn
         hRec["fin_brnal"] := (cAlias)->brnal
@@ -1325,7 +1387,7 @@ FUNCTION gen_eNabavke()
       NIL, @hUkupno)
 
     // posebna schema u gradjevinarstvu
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cIdKontoPDVSchemaNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .T., ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cIdKontoPDVSchemaNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .T. /* lSchema */, ;
       NIL, @hUkupno)
 
     // poljoprivreda
@@ -1432,7 +1494,7 @@ STATIC FUNCTION xlsx_export_fill_row()
         AADD(aKolona, { "C", "Kto.NP", 7, enab->idkonto_np})
  
         IF s_pWorkSheet == NIL
-           
+
            s_pWorkBook := workbook_new( s_cXlsxName )
            s_pWorkSheet := workbook_add_worksheet(s_pWorkBook, NIL)
      
@@ -1481,7 +1543,7 @@ STATIC FUNCTION xlsx_export_fill_row()
         RETURN .T.
      
 /*
-  vrijednost nabavke bez uvoza, PDV prijava polje 21
+  vrijednost nabavke kod uvoza ali se odnosi na domaci promet speditera, PDV prijava polje 21
 */
 
 FUNCTION enab_pdv_prijava_21()
@@ -1499,7 +1561,7 @@ FUNCTION enab_pdv_prijava_21()
         IF LEFT(enab->idkonto, 3) == s_cIdKontoPDVUvoz
           return 0
         ELSE
-          // preracunato na osnovu PDV-a
+          // preracunato na osnovu PDV-a, odnosi se na domaci promet
           RETURN (enab->fakt_iznos_pdv + enab->fakt_iznos_pdv_np)/0.17
         ENDIF
     ENDIF

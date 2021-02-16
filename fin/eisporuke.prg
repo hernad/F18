@@ -4,7 +4,7 @@ STATIC s_cXlsxName := NIL
 STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
 STATIC s_pMoneyFormat, s_pDateFormat
 
-FUNCTION parametri_eIsporuke
+FUNCTION parametri_eIsporuke()
 
     LOCAL nX := 1
     LOCAL GetList := {}
@@ -23,6 +23,7 @@ FUNCTION parametri_eIsporuke
     LOCAL cIdKontoPDVSchema := PadR( fetch_metric( "fin_eisp_idkonto_pdv_schema", NIL, "475" ), 7 )
     LOCAL cIdKontoPDVOstalo := PadR( fetch_metric( "fin_eisp_idkonto_pdv_ostalo", NIL, "478" ), 7 )
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
+    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
 
     Box(, 18, 80 )
 
@@ -46,8 +47,11 @@ FUNCTION parametri_eIsporuke
        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Konto PDV ostalo                        " GET cIdKontoPDVOstalo VALID !Empty(cIdKontoPDVOstalo)
 
 
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji su isključuju iz generacije e-nabavki/isporuka"
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(blagajna, izvodi, obračun PDV)" GET cNabExcludeIdvn PICTURE "@S35" 
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji su isključuju iz generacije eNabavki/eIsporuke"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(blagajna, izvodi, obračun PDV)" GET cNabExcludeIdvn PICTURE "@S35"
+
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke/eIsporuke"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(tip 05)" GET cNabIdvn05 PICTURE "@S35" 
 
        READ
     BoxC()
@@ -69,6 +73,7 @@ FUNCTION parametri_eIsporuke
     set_metric( "fin_eisp_idkonto_pdv_schema", NIL, cIdKontoPDVSchema)
     set_metric( "fin_eisp_idkonto_pdv_ostalo", NIL, cIdKontoPDVOstalo)
     set_metric( "fin_enab_idvn_exclude", NIL, Trim(cNabExcludeIdvn))
+    set_metric( "fin_enab_idvn_05", NIL, Trim(cNabIdvn05) )
 
 
     RETURN .T.
@@ -77,8 +82,9 @@ FUNCTION parametri_eIsporuke
 
 FUNCTION check_eIsporuke()
 
-    LOCAL cIdKontoKupac := PadR( fetch_metric( "fin_eisp_idkonto_kup", NIL, "21" ), 7 )
+    LOCAL cPreskoci
 
+    LOCAL cIdKontoKupac := PadR( fetch_metric( "fin_eisp_idkonto_kup", NIL, "21" ), 7 )
 
     LOCAL cIdKontoPDV := trim( fetch_metric( "fin_eisp_idkonto_pdv", NIL, "470" ))
     LOCAL cIdKontoPDVAvansi := trim( fetch_metric( "fin_eisp_idkonto_pdv_a", NIL, "471"))
@@ -120,6 +126,10 @@ FUNCTION check_eIsporuke()
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
 
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
+    cPreskoci := " and not fin_suban.idvn in (" + cTmps + ")"
+    cPreskoci += " and COALESCE(substring(fin_suban.opis from 'EISP:\s*(PRESKOCI)'), '')<>'PRESKOCI'"
+
+
     cSelectFields := "SELECT fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr, fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2,"
     cSelectFields += "fin_suban.BrDok brdok, sub2.brdok brdok2, fin_suban.idpartner"
     cFinNalogNalog2 := "fin_suban.idfirma=sub2.idfirma and fin_suban.idvn=sub2.idvn and fin_suban.brnal=sub2.brnal"
@@ -127,7 +137,7 @@ FUNCTION check_eIsporuke()
     // 470
     cQuery := cSelectFields
     cQuery += " from fmk.fin_suban "
-   
+
     
     cLeftJoinFin2 := " left join fmk.fin_suban sub2 on " + cFinNalogNalog2 + " and fin_suban.brdok=sub2.brdok" +;
       " and (sub2.idkonto like '" + Trim(cIdKontoPDV) +;
@@ -145,7 +155,7 @@ FUNCTION check_eIsporuke()
     cQuery += " left join fmk.partn on sub2.idpartner=partn.id"
     cQuery += " where fin_suban.idkonto like  '"  + Trim(cIdKontoKupac) + "%'"
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-    cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
+    cQuery += cPreskoci
 
     // kupac duguje
     cQuery += " and fin_suban.d_p='1'"
@@ -188,7 +198,7 @@ FUNCTION check_eIsporuke()
     cQuery := "select idvn,brnal,brdok from fmk.fin_suban"
     cQuery += " where fin_suban.idkonto like  '"  + Trim(cIdKontoKupac) + "%'"
     cQuery += " and fin_suban.datdok >= " + sql_quote(dDatOd) + " and fin_suban.datdok <= " + sql_quote(dDatDo)
-    cQuery += " and not fin_suban.idvn in (" + cTmps + ")"
+    cQuery += cPreskoci
     cQuery += " group by idvn,brnal,brdok"
     cQuery += " having count(*) > 1"
 
@@ -410,12 +420,12 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL hNeimenovani := NIL
     LOCAL nIzvozPoFakturama
     LOCAL dDatFaktPravi
-    LOCAL cClan
-  
+    LOCAL cClan  
     //LOCAL cOpisIznosFaktureIzvoz := ""
 
     LOCAL cIdKontoKupac := trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
     LOCAL cIdKontoDobavljac := trim(fetch_metric( "fin_enab_idkonto_dob", NIL, '43'))
+    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
     
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
     
@@ -446,7 +456,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "'' as JCI,"
         cSelectFields += "'UNDEF' as from_opis_pdv0_clan,"
         cSelectFields += "'UNDEF' as from_opis_dat_jci,"
-        cSelectFields += "'UNDEF' as from_opis_dat_fakt,"
+        cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
         cSelectFields += "0 as JCI_IZN,"
         cSelectFields += "COALESCE(substring(sub2.opis from 'OSN-PDV17:\s*([-+\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
         cSelectFields += "fin_suban.idkonto as idkonto_pdv, sub2.idkonto as idkonto_kup, sub2.idpartner as idpartner, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
@@ -547,6 +557,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["fin_brnal"] := eisp->brnal
         hRec["fin_rbr"] := eisp->rbr
         hRec["kup_pdv0_clan"] := cClan
+
         set_datumi_eisporuke(@hRec)
 
         IF eisp->eisp_rbr <> -99999
@@ -675,14 +686,24 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             ENDIF
 
             cClan := ""
+            nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
             IF eisp->from_opis_pdv0_clan <> "UNDEF"
                 cClan := eisp->from_opis_pdv0_clan
                 IF cClan == "15" // isporuke stranim licima je tip '05'
                     cTipDokumenta2 := "05"
+                    nOsnovicaPDV0Ostalo := 0
+                    hRec["kup_pdv"] := ""
+                    hRec["kup_jib"] := "" 
+                    cJib := ""
+                    cPDVBroj := ""
+                    //dole ce biti navedeno
+                    //hRec["fakt_iznos_sa_pdv"] := eisp->iznos_sa_pdv
+                ELSE
+                    nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
                 ENDIF
             ENDIF
             hRec["kup_pdv0_clan"] := cClan
-            nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
+            
         
         ELSEIF cTipDokumenta == "02" .OR. cMjestoKrajnjePotrosnje $ "123"
             
@@ -740,7 +761,6 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             nOsnovicaDaPdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Ostalo
             nDaPDVObveznikSaPDV := eisp->iznos_sa_pdv
             
-            altd()
             IF ROUND(eisp->from_opis_osn_pdv17, 2) <> -9999999.99
                 nOsnovicaDaPDVObveznik := eisp->from_opis_osn_pdv17
                 // u tom slucaju osnovica PDV0 ovisi o ovoj varijabli
@@ -767,6 +787,11 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
 
         ENDIF
 
+        // ako se radi o vrsti naloga koji zelimo oznaciti u CSV kao tip '05'
+        IF eisp->idvn $ cNabIdvn05
+            cTipDokumenta2 := "05"
+        ENDIF
+
         hRec["tip"] := cTipDokumenta2
 
         hRec["fakt_iznos_sa_pdv_interna"] := nOsnovicaInterna + nPDVInterna
@@ -779,7 +804,12 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["fakt_iznos_bez_pdv_np"] := nOsnovicaNePdvObveznik + nOsnovicaInterna
         hRec["fakt_iznos_pdv_np"] := nPDVNePDVObveznik + nPDVInterna
         
-        hRec["fakt_iznos_sa_pdv"] := (nOsnovicaDaPDVObveznik + nPDVDaPDVObveznik) + (nOsnovicaNePdvObveznik + nPDVNePDVObveznik)
+        IF hRec["kup_pdv0_clan"] == "15"
+           // usluge stranom licu, mjesto oporezivanja inostranostvo
+           hRec["fakt_iznos_sa_pdv"] := eisp->iznos_sa_pdv
+        ELSE
+           hRec["fakt_iznos_sa_pdv"] := (nOsnovicaDaPDVObveznik + nPDVDaPDVObveznik) + (nOsnovicaNePdvObveznik + nPDVNePDVObveznik)
+        ENDIF
 
         hRec["fakt_iznos_pdv_np_32"] := n32 
         hRec["fakt_iznos_pdv_np_33"] := n33
@@ -792,7 +822,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             cJib := ""
         ENDIF
 
-        IF cTipDokumenta == "04"
+        IF cTipDokumenta == "04" // izvoz
             nIzvozPoFakturama := 0
             DO WHILE .T.
                 // faktura izvoz
@@ -851,7 +881,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             db_insert_eisp(hRec)
             csv_insert(cPorezniPeriod, cCSV, hRec, @hUkupno, @nRbr )
 
-        ELSE
+        ELSE // nije izvoz
 
             IF lMozeNeimenovaniKupac
                 IF !Empty(eisp->partn_id)
@@ -964,6 +994,7 @@ STATIC FUNCTION set_datumi_eisporuke(hRec)
     // za izvoz faktura moze biti proslog mjeseca
     hRec["dat_fakt_pravi"] := eisp->datdok
     IF eisp->from_opis_dat_fakt <> "UNDEF"
+        altd()
         hRec["dat_fakt_pravi"] := CTOD(eisp->from_opis_dat_fakt)
     ENDIF
 
@@ -971,6 +1002,11 @@ STATIC FUNCTION set_datumi_eisporuke(hRec)
 
 STATIC FUNCTION hrec_cleanup(hRec)
     
+    IF hRec["tip"] == "05" .AND. hRec["kup_pdv"] == REPLICATE("0", 12)
+        // ino partner ali nije izvoz
+        hRec["kup_pdv"] := ""
+    ENDIF
+
     hRec["fakt_iznos_sa_pdv"]        := ROUND(hRec["fakt_iznos_sa_pdv"], 2)
     hRec["fakt_iznos_sa_pdv_interna"]:= ROUND(hRec["fakt_iznos_sa_pdv_interna"], 2)
     hRec["fakt_iznos_sa_pdv0_izvoz"] := ROUND(hRec["fakt_iznos_sa_pdv0_izvoz"], 2)
@@ -1284,13 +1320,11 @@ STATIC FUNCTION xlsx_export_fill_row()
     AADD(aKolona, { "N", "Rbr. isporuke", 10, eisp->eisporuke_id })
     AADD(aKolona, { "C", "Tip", 3, eisp->tip })
 
-    
     AADD(aKolona, { "C", "Por.Per", 8, eisp->porezni_period })
     AADD(aKolona, { "C", "Br.Fakt", 20, eisp->br_fakt })
     AADD(aKolona, { "C", "JCI", 10, eisp->jci })
     AADD(aKolona, { "D", "Dat.fakt", 12, eisp->dat_fakt_pravi })
     AADD(aKolona, { "D", "Dat.FIN", 12, eisp->dat_fakt })
-
 
     AADD(aKolona, { "C", "Kupac naziv", 60, eisp->kup_naz })
     AADD(aKolona, { "C", "Kupac sjediste", 100, eisp->kup_sjediste })
@@ -1322,7 +1356,7 @@ STATIC FUNCTION xlsx_export_fill_row()
     AADD(aKolona, { "C", "P.Osl.Cl", 6, eisp->kup_osl_clan })
     
     IF s_pWorkSheet == NIL
-        
+
         s_pWorkBook := workbook_new( s_cXlsxName )
         s_pWorkSheet := workbook_add_worksheet(s_pWorkBook, NIL)
     
