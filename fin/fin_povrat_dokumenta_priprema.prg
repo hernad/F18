@@ -24,6 +24,7 @@ FUNCTION fin_povrat_naloga( lStorno )
    //LOCAL lOk := .T.
    LOCAL GetList := {}
    LOCAL cIdFirma, cIdFirma2, cBrNal, cIdVn, cIdVN2, cBrNal2
+   LOCAL lFinNalogZakljucan
 
    IF lStorno == NIL
       lStorno := .F.
@@ -89,6 +90,13 @@ FUNCTION fin_povrat_naloga( lStorno )
    MsgC()
 
    IF !lBrisiKumulativ .OR. lStorno
+      my_close_all_dbf()
+      RETURN .F.
+   ENDIF
+
+   lFinNalogZakljucan := fin_nalog_zakljucan( cIdFirma, cIdVn, cBrNal )
+   IF lFinNalogZakljucan
+      MsgBeep("FIN nalog se nalazi se unutar zaključanog poreznog perioda.##STOP!")
       my_close_all_dbf()
       RETURN .F.
    ENDIF

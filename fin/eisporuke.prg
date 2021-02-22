@@ -1121,7 +1121,6 @@ FUNCTION gen_eIsporuke()
     LOCAL GetList := {}
     LOCAL cLokacijaExport := my_home() + "export" + SLASH, nCreate
 
-
     Box(, 6, 70 )
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 " Vaš PDV broj:" GET cPDV
         @ box_x_koord() + nX, box_y_koord() + 2 SAY "Za period od:" GET dDatOd
@@ -1131,6 +1130,11 @@ FUNCTION gen_eIsporuke()
 
         // godina: 2020 -> 20   mjesec: 01, 02, 03 ...
        cPorezniPeriod := RIGHT(AllTrim(STR(Year(dDatOd))), 2) + PADL(AllTrim(STR(Month(dDatOd))), 2, "0")
+
+       IF !enab_eisp_check_porezni_period(cPorezniPeriod)
+          BoxC()
+          RETURN .F.
+       ENDIF
 
         SELECT F_TMP
         IF !use_sql( "EISP", "select max(eisporuke_id) as max from public.eisporuke where porezni_period<>" + sql_quote(cPorezniPeriod))

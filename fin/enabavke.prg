@@ -648,8 +648,8 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     cSelectFields += "fin_suban.brdok, fin_suban.opis, fin_suban.d_p, fin_suban.datdok, fin_suban.datval,"
     cSelectFields += "partn.id as partn_id, partn.naz as partn_naz, partn.adresa as partn_adresa, partn.ptt as partn_ptt, partn.mjesto as partn_mjesto, partn.rejon partn_rejon,"
 
-    // postoji li vec enabavke stavka
-    cSelectFields += "COALESCE(enabavke.fin_rbr,-99999) enab_rbr"
+    // postojeca stavka u enabavke
+    cSelectFields += "COALESCE(enabavke.fin_rbr,-99999) enab_rbr, COALESCE(enabavke.porezni_period,'') enab_porezni_period"
 
     // poslovni pdv
     cBrDokFinFin2 := "fin_suban.brdok=sub2.brdok"
@@ -734,6 +734,12 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
         IF (cAlias)->enab_rbr <> -99999
             // vec postoji stavka 43% u tabeli enabavke
+            IF (cAlias)->enab_porezni_period != cPorezniPeriod          
+                Alert(_u("Greška koristi se nalog " +;
+                (cAlias)->idfirma + "-" + (cAlias)->idvn + "-" + (cAlias)->brnal + "/" + AllTrim(Str((cAlias)->rbr)) +;
+                " iz poreznog perioda: " + (cAlias)->enab_porezni_period))
+            ENDIF
+
             SKIP
             LOOP
         ENDIF
@@ -1274,6 +1280,7 @@ FUNCTION gen_eNabavke()
     LOCAL GetList := {}
     LOCAL cLokacijaExport := my_home() + "export" + SLASH, nCreate
 
+
     Box(, 6, 70 )
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 " Vaš PDV broj:" GET cPDV
         @ box_x_koord() + nX, box_y_koord() + 2 SAY "Za period od:" GET dDatOd
@@ -1282,8 +1289,13 @@ FUNCTION gen_eNabavke()
         nX++
 
         // godina: 2020 -> 20   mjesec: 01, 02, 03 ...
-       cPorezniPeriod := RIGHT(AllTrim(STR(Year(dDatOd))), 2) + PADL(AllTrim(STR(Month(dDatOd))), 2, "0")
-
+        cPorezniPeriod := RIGHT(AllTrim(STR(Year(dDatOd))), 2) + PADL(AllTrim(STR(Month(dDatOd))), 2, "0")
+        
+        IF !enab_eisp_check_porezni_period(cPorezniPeriod)
+            BoxC()
+           RETURN .F.
+        ENDIF
+    
         SELECT F_TMP
         IF !use_sql( "ENAB", "select max(enabavke_id) as max from public.enabavke where porezni_period<>" + sql_quote(cPorezniPeriod))
             MsgBeep("enabavke sql tabela nedostupna?!")
@@ -1589,7 +1601,6 @@ FUNCTION enab_pdv_prijava_22()
 
 
 FUNCTION export_eNabavke()
-
 
     LOCAL dDatOd := fetch_metric( "fin_enab_dat_od", my_user(), DATE()-1 )
     LOCAL dDatDo := fetch_metric( "fin_enab_dat_do", my_user(), DATE() )

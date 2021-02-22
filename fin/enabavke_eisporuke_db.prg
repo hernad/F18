@@ -131,6 +131,47 @@ FUNCTION db_create_enabavke_eisporuke(lSilent)
     cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS dat_fakt_pravi date;'
     cQuery += 'ALTER TABLE public.eisporuke ADD column IF NOT EXISTS kup_pdv0_clan varchar(10);'
 
+
+    /*
+    // select fin_nalog_in_nabavke('10', '04', '00000002') => 0 ako ne postoji, 1 ako postoji nalog
+
+    cQuery += "CREATE or replace FUNCTION fin_nalog_in_nabavke(idfirma varchar, idvn varchar, brnal varchar) RETURNS bigint"
+    cQuery += "AS $$"
+    cQuery += "select count(*) from (select $1 as idfirma, $2 as idvn, $3 as brnal) as trazi"
+	cQuery += "  where trazi.idfirma || trazi.idvn || trazi.brnal in "
+	cQuery += "  ("
+	cQuery += "		select fin_idfirma || fin_idvn || fin_brnal from"
+	cQuery += "		("
+	cQuery += "			(select distinct fin_idfirma,fin_idvn,fin_brnal from public.enabavke)"
+	cQuery += "			  union "
+	cQuery += "			(select distinct fin_idfirma,fin_idvn,fin_brnal from public.eisporuke)"
+	cQuery += "			  order by fin_idfirma, fin_idvn, fin_brnal"
+	cQuery += "		) as enab_eisp"
+	cQuery += "  );"
+    cQuery += "$$"
+    cQuery += "LANGUAGE SQL"
+    cQuery += "IMMUTABLE"
+    cQuery += "RETURNS NULL ON NULL INPUT;"
+    */
+
+    cQuery += "CREATE or replace FUNCTION fin_nalog_in_nabavke_period(idfirma varchar, idvn varchar, brnal varchar, period varchar) RETURNS bigint"
+    cQuery += " AS $$"
+    cQuery += " select count(*) from (select $1 as idfirma, $2 as idvn, $3 as brnal) as trazi"
+	cQuery += "  where trazi.idfirma || trazi.idvn || trazi.brnal in "
+	cQuery += "  ("
+	cQuery += "		select fin_idfirma || fin_idvn || fin_brnal from"
+	cQuery += "		("
+	cQuery += "			(select distinct fin_idfirma,fin_idvn,fin_brnal from public.enabavke where porezni_period <= $4)"
+	cQuery += "			  union "
+	cQuery += "			(select distinct fin_idfirma,fin_idvn,fin_brnal from public.eisporuke where porezni_period <= $4)"
+	cQuery += "			  order by fin_idfirma, fin_idvn, fin_brnal"
+	cQuery += "		) as enab_eisp"
+	cQuery += "  );"
+    cQuery += "$$"
+    cQuery += " LANGUAGE SQL"
+    cQuery += " IMMUTABLE"
+    cQuery += " RETURNS NULL ON NULL INPUT;"
+    
     oQuery := run_sql_query( cQuery )
     
     IF sql_error_in_query( oQuery, "UPDATE" )
@@ -145,3 +186,34 @@ FUNCTION db_create_enabavke_eisporuke(lSilent)
     QUIT_1
 
     RETURN .T.
+
+
+FUNCTION fin_nalog_zakljucan( cIdFirma, cIdVn, cBrNal )
+    
+    LOCAL cPeriod := fetch_metric("fin_enab_eisp_lock", NIL, "")
+    LOCAL cQuery, oQuery, nRet
+
+    IF Empty(cPeriod)
+       RETURN .F.
+    ENDIF
+
+    cQuery := "select fin_nalog_in_nabavke_period(" + ;
+         sql_quote(cIdFirma) + "," + sql_quote(cIdVn) + "," + sql_quote(cBrNal) + "," + sql_quote(cPeriod) + ")"
+ 
+    oQuery := run_sql_query( cQuery )
+
+    IF sql_error_in_query( oQuery, "SELECT" )
+       Alert("query error?!")
+       QUIT_1
+    ENDIF
+
+    altd()
+    nRet := oQuery:FieldGet( 1 )
+
+    IF nRet > 0 // nalog se nalazi unutar zakljucanog poreznog perioda
+       RETURN .T.
+    ENDIF
+
+    RETURN .F.
+
+ 

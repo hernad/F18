@@ -29,6 +29,8 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     AAdd( aOpc, "U. fin generacija uvoz" )
     AAdd( aOpcexe, {|| fin_gen_uvoz() } )
 
+    AAdd( aOpc, "Z. zaključavanje poreznog perioda" )
+    AAdd( aOpcexe, {|| fin_lock_porezni_period() } )
 
     AAdd( aOpc, "X. admin - init tabele enab/eisp " )
     AAdd( aOpcexe, {|| db_create_enabavke_eisporuke() } )
@@ -61,6 +63,38 @@ STATIC FUNCTION fin_eNabavke()
     f18_menu( "fin_en", .F., nIzbor, aOpc, aOpcexe )
  
     RETURN .T.
+
+    
+STATIC FUNCTION fin_lock_porezni_period()
+
+  LOCAL dDatOd := fetch_metric( "fin_enab_dat_od", my_user(), DATE()-1 )
+  LOCAL dDatDo := fetch_metric( "fin_enab_dat_do", my_user(), DATE() )
+  LOCAL cPorezniPeriod := RIGHT(AllTrim(STR(Year(dDatOd))), 2) + PADL(AllTrim(STR(Month(dDatOd))), 2, "0")
+
+  IF Pitanje( ,"Zaključati porezni period '" + cPorezniPeriod + "' D/N?", " " ) == "D"
+     IF Pitanje(," Jeste li sigurni da želite zaključati '" + cPorezniPeriod + "' (D/N) ?!",  " " ) == "D"
+        set_metric("fin_enab_eisp_lock", NIL, cPorezniPeriod)
+        set_metric("fin_enab_eisp_lock_user", NIL, my_user()) 
+     ENDIF
+  ENDIF
+
+
+  RETURN .T.
+
+/*
+   => .T. ako je moguce raditi generaciju porezni period
+   => .F. ako je zakljucan
+*/
+FUNCTION enab_eisp_check_porezni_period(cPorezniPeriod)
+  
+  IF fetch_metric("fin_enab_eisp_lock", NIL, "") >= cPorezniPeriod
+     Alert(_u("Porezni period '" + fetch_metric("fin_enab_eisp_lock", NIL, "") + ;
+             "' je zaključao korisnik '" + fetch_metric("fin_enab_eisp_lock_user", NIL, '') + "'" ;
+          ))
+      Alert(_u("Generacija nije moguća"))
+      RETURN .F.
+  ENDIF
+  RETURN .T.
 
 
 STATIC FUNCTION fin_eIsporuke()
