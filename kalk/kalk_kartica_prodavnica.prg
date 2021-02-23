@@ -433,7 +433,7 @@ FUNCTION kalk_kartica_prodavnica()
             hParams[ "vpc" ] := field->vpc
             hParams[ "mpc" ] := kalk->mpcsapp
             hParams[ "stanje" ] := nUlaz - nIzlaz
-            kalk_kartica_prodavnica_add_item_to_r_export( hParams )
+            kalk_kartica_prodavnica_add_item_to_r_export_legacy( hParams )
          ENDIF
 
          SKIP
@@ -538,11 +538,11 @@ FUNCTION Test( cIdRoba )
    RETURN cIdRoba
 
 
-STATIC FUNCTION kalk_kartica_prodavnica_add_item_to_r_export( hParams )
+STATIC FUNCTION kalk_kartica_prodavnica_add_item_to_r_export_legacy( hParams )
 
    LOCAL nTArea := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    SELECT r_export
 
    APPEND BLANK

@@ -62,7 +62,6 @@ FUNCTION xlsx_export_init( aFieldList, aHeader, cXlsxName )
 
 
 
-
 FUNCTION xlsx_export_do_fill_row( hRow )
    
     LOCAL nI, cKey
@@ -134,24 +133,5 @@ FUNCTION open_exported_xlsx()
    s_pWorkBook := NIL
    s_pWorkSheet := NIL
    f18_open_mime_document( s_cXlsxName )
-
-   RETURN .T.
-
-
-
-FUNCTION o_r_export()
-
-   SELECT ( F_R_EXP )
-   my_usex ( "r_export" )
-
-   RETURN .T.
-
-
-FUNCTION select_o_r_export()
-
-   SELECT ( F_R_EXP )
-   IF !Used()
-      my_usex ( "r_export" )
-   ENDIF
 
    RETURN .T.

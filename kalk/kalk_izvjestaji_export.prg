@@ -181,7 +181,6 @@ FUNCTION kcreate_dbf_r_export( cIdVd, lVpcCij, lMpcCij )
    RETURN .T.
 
 
-
 // napuni r_uio
 STATIC FUNCTION fill_exp( cIdFirma, cIdVd,  cBrDok, lVpcCij, lMpcCij )
 
@@ -196,7 +195,7 @@ STATIC FUNCTION fill_exp( cIdFirma, cIdVd,  cBrDok, lVpcCij, lMpcCij )
 
    kcreate_dbf_r_export( cIdVd, lVpcCij, lMpcCij )
 
-   o_r_export()
+   o_r_export_legacy()
    // set ORDER to TAG "ROB"
 
    SELECT ( F_KALK )

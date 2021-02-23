@@ -309,7 +309,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       hRec[ "vp_real_nt" ] := nRealizacija - nVPVRabat
 
 
-      o_r_export()
+      o_r_export_legacy()
       APPEND BLANK
       dbf_update_rec( hRec )
 

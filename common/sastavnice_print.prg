@@ -422,7 +422,7 @@ FUNCTION sastavnice_duple()
       RETURN .F.
    ENDIF
 
-   o_r_export()
+   o_r_export_legacy()
    INDEX ON sast TAG "1"
 
 
@@ -613,7 +613,7 @@ FUNCTION _exp_sast_dbf()
       RETURN .F.
    ENDIF
 
-   o_r_export()
+   o_r_export_legacy()
    o_sastavnice()
    o_roba()
 

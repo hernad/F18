@@ -730,7 +730,7 @@ STATIC FUNCTION xlsx_export_fill_row( cKonto, cIdPartner, cNaziv, nFDug, nFPot, 
 
 
    // nArr := Select()
-   //o_r_export()
+   //o_r_export_legacy()
    // APPEND BLANK
    hRec["konto"] := Trim(cKonto)
    hRec["partner"] := Trim(cIdPartner)

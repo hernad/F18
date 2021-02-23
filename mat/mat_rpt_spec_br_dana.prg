@@ -644,7 +644,7 @@ STATIC FUNCTION _fill_tmp_tbl( id_konto, konto_naz, id_roba, roba_naz, ;
 
    SELECT ( F_R_EXP )
    IF !Used()
-      o_r_export()
+      o_r_export_legacy()
    ENDIF
 
    APPEND BLANK
@@ -689,7 +689,7 @@ STATIC FUNCTION _cre_tmp_tbl()
    // kreiraj tabelu
    xlsx_export_init( _dbf )
 
-   o_r_export()
+   o_r_export_legacy()
    // indeksiraj...
    INDEX ON id_konto + id_roba TAG "1"
 

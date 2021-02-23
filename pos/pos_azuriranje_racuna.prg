@@ -24,12 +24,10 @@ FUNCTION pos_azuriraj_racun( hParams )
    LOCAL nFiskBroj, cBroj
    LOCAL lBezFiskalnih := .F.
 
-
    o_pos_tables()
    IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
       RETURN .F.
    ENDIF
-
 
    create_pos_tmp( hParams )
 
@@ -41,11 +39,10 @@ FUNCTION pos_azuriraj_racun( hParams )
    SELECT _pos_pripr
    GO TOP
 
- 
+
    cDokument := pos_dokument_sa_vrijeme(hParams)
 
    MsgO( "POS[tmp] Ažuriranje " + cDokument + " u toku ..." )
-
 
    hRec := dbf_get_rec()
    hRec[ "idpos" ] := hParams[ "idpos" ]
@@ -90,7 +87,6 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    MsgC()
 
-   
    IF lOk
 
       IF !fiscal_opt_active()

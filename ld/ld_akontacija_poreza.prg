@@ -285,7 +285,7 @@ STATIC FUNCTION ak_print( dDatIspl, cPeriod, cTipRada )
    LOCAL nPageNo := 0
    LOCAL nPoc := 1
 
-   o_r_export()
+   o_r_export_legacy()
    SELECT r_export
    GO TOP
 
@@ -430,7 +430,7 @@ STATIC FUNCTION ld_akontacija_delphirb_print( dDatIspl, cPeriod, cTipRada )
 
    PRIVATE cKom := ""
 
-   o_r_export()
+   o_r_export_legacy()
    SELECT r_export
    INDEX ON naziv TAG "1"
    GO TOP
@@ -646,7 +646,7 @@ STATIC FUNCTION insert_rec_r_export( cJMB, cRadnNaz, nPrihod, ;
 
    LOCAL nTArea := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    SELECT r_export
    APPEND BLANK
 

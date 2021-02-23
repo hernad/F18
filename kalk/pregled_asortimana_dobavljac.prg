@@ -52,7 +52,7 @@ STATIC FUNCTION _cre_tmp()
 
    xlsx_export_init( _dbf )
 
-   o_r_export()
+   o_r_export_legacy()
    INDEX ON idroba TAG "roba"
 
    RETURN

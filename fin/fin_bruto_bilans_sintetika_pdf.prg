@@ -124,13 +124,13 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
       cKlKonto := Left( IdKonto, 1 )
       D3PS := P3PS := D3TP := P3TP := D3KP := P3KP := D3S := P3S := 0
 
-      check_nova_strana( bZagl, s_oPDF )
+      check_nova_strana( bZagl, s_oPDF, .F., 5 )
       DO WHILE !Eof() .AND. IdFirma == cIdFirma .AND. cKlKonto == Left( IdKonto, 1 )
 
          cIdKonto := sint->IdKonto
          D1PS := P1PS := D1TP := P1TP := D1KP := P1KP := D1S := P1S := 0
 
-         check_nova_strana( bZagl, s_oPDF )
+         check_nova_strana( bZagl, s_oPDF, .F., 5 )
          DO WHILE !Eof() .AND. IdFirma == cIdFirma .AND. cIdKonto == Left( IdKonto, 3 )
             IF nValuta == 1
                Dug := DugBHD * nBBK
@@ -151,7 +151,7 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
             SKIP
          ENDDO
 
-         check_nova_strana( bZagl, s_oPDF )
+         check_nova_strana( bZagl, s_oPDF, .F., 5)
          IF cFormat == "1"
             @ PRow() + 1, PRINT_LEFT_SPACE + 1 SAY nBroj PICTURE '9999'
             ?? "."
@@ -202,8 +202,6 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
             ENDIF
             @ PRow(), PCol() + 1 SAY D1S PICTURE PicD
             @ PRow(), PCol() + 1 SAY P1S PICTURE PicD
-
-
          ENDIF
 
          SELECT SINT
@@ -262,7 +260,7 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
 
    ENDDO
 
-   check_nova_strana( bZagl, s_oPDF )
+   check_nova_strana( bZagl, s_oPDF, .F., 5 )
 
    ?U SPACE(PRINT_LEFT_SPACE) + M5
    ? SPACE(PRINT_LEFT_SPACE) + "UKUPNO:"
@@ -315,7 +313,7 @@ FUNCTION fin_bb_sintetika_pdf( hParams )
    nPocDug := nPocPot := nTekPDug := nTekPPot := nKumPDug := nKumPPot := nSalPDug := nSalPPot := 0
    DO WHILE !Eof()
 
-      check_nova_strana( bZagl, s_oPDF )
+      check_nova_strana( bZagl, s_oPDF, .F., 5 )
       @ PRow() + 1, 4    SAY Space( PRINT_LEFT_SPACE ) + IdKlasa
       @ PRow(), 10 + PRINT_LEFT_SPACE   SAY PocDug               PICTURE PicD
       @ PRow(), PCol() + 1 SAY PocPot               PICTURE PicD

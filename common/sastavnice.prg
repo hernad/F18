@@ -348,7 +348,7 @@ FUNCTION exp_roba_dbf() // export robe u dbf
       RETURN .F.
    ENDIF
 
-   o_r_export()
+   o_r_export_legacy()
    o_roba()
    SELECT roba
    SET ORDER TO TAG "ID"

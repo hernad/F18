@@ -114,7 +114,7 @@ FUNCTION barkod_terminal_export_artikle_na_terminal()
 
    barkod_terminal_cre_r_export()
 
-   o_r_export()
+   o_r_export_legacy()
    INDEX ON barkod TAG "ID"
 
    o_roba()

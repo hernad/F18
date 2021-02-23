@@ -275,7 +275,7 @@ STATIC FUNCTION export_podataka_u_dbf( table, rpt_vars )
    aExportStruct := fin_specifikacija_dbf_struct()
    xlsx_export_init( aExportStruct )
 
-   o_r_export()
+   o_r_export_legacy()
 
    FOR nI := 1 TO table:LastRec()
 

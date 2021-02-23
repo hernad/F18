@@ -632,7 +632,7 @@ STATIC FUNCTION cre_tmp_tbl()
 
    xlsx_export_init( aDbf )
 
-   o_r_export()
+   o_r_export_legacy()
 
    // index on ......
    INDEX ON group + idradn + Str( godina, 4 ) + Str( mjesec, 2 ) TAG "1"

@@ -1301,7 +1301,7 @@ STATIC FUNCTION _ins_tbl( cIdRadnik, cIdRj, cTipRada, cNazIspl, dDatIsplate, ;
 
    LOCAL nTArea := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    SELECT r_export
    APPEND BLANK
 
@@ -1354,7 +1354,7 @@ STATIC FUNCTION _ins_tbl( cIdRadnik, cIdRj, cTipRada, cNazIspl, dDatIsplate, ;
 
    SELECT ( nTArea )
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -1402,7 +1402,7 @@ FUNCTION ol_tmp_tbl()
 
    xlsx_export_init( aDbf )
 
-   o_r_export()
+   o_r_export_legacy()
    INDEX ON idradn + Str( godina, 4 ) + Str( mjesec, 2 ) TAG "1"
 
    RETURN

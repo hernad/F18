@@ -648,7 +648,7 @@ STATIC FUNCTION xlsx_export_fill_row( cIdSif, cNazSif, nKol, nOsn, nUk )
 
    nArr := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    APPEND BLANK
    REPLACE field->sifra WITH cIdSif
    REPLACE field->naziv WITH cNazSif

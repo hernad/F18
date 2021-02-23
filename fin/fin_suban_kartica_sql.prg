@@ -280,7 +280,7 @@ STATIC FUNCTION _export_dbf( table, rpt_vars )
 
    xlsx_export_init( fin_suban_export_dbf_struct() )
 
-   o_r_export()
+   o_r_export_legacy()
 
    nSaldo := 0
    FOR nI := 1 TO table:LastRec()

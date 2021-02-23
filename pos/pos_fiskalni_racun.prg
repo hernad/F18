@@ -276,7 +276,6 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    LOCAL nBrojFiskalnogRacuna := 0
    LOCAL hRet := hb_hash()
 
-
    hRet["error"] := 0
    hRet["broj"] := 0
 
@@ -284,6 +283,8 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    fiskalni_fprint_racun( s_hFiskalniUredjajParams, aRacunStavke, NIL, lStorno )
 
    hRet["error"] := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnogRacuna )
+   hRet["broj"] := nBrojFiskalnogRacuna
+   
    IF hRet["error"] = -9
       IF Pitanje(, "Da li je nestalo trake ?", "N" ) == "D"
          IF Pitanje(, "Zamjenite traku i pritisnite 'D'", "D" ) == "D"

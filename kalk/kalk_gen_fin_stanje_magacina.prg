@@ -71,7 +71,7 @@ FUNCTION vpc_magacin_rs( lKalkPriprema )
 
 
 
-STATIC FUNCTION kalk_fin_stanje_add_to_r_export( cIdFirma, cIdVd, cBrDok, dDatDok, cVrstaDokumenta, cIdPartner, ;
+STATIC FUNCTION kalk_fin_stanje_add_to_r_export_legacy( cIdFirma, cIdVd, cBrDok, dDatDok, cVrstaDokumenta, cIdPartner, ;
       part_naz, part_mjesto, part_ptt, part_adr, broj_fakture, ;
       n_v_dug, n_v_pot, n_v_saldo, ;
       v_p_dug, v_p_pot, v_p_saldo, ;
@@ -81,7 +81,7 @@ STATIC FUNCTION kalk_fin_stanje_add_to_r_export( cIdFirma, cIdVd, cBrDok, dDatDo
    LOCAL nDbfArea := Select()
    LOCAL hRec
 
-   o_r_export()
+   o_r_export_legacy()
 
    APPEND BLANK
 

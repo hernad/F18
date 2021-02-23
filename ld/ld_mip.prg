@@ -653,7 +653,7 @@ STATIC FUNCTION mip_insert_record_r_export( cIdRadnik, cIdRj, nGodina, nMjesec, 
 
    LOCAL nTArea := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    SELECT r_export
 
    APPEND BLANK
@@ -1003,7 +1003,7 @@ FUNCTION mip_tmp_tbl()
       RETURN .F.
    ENDIF
 
-   o_r_export()
+   o_r_export_legacy()
    INDEX ON idradn + Str( godina, 4 ) + Str( mjesec, 2 ) + vr_ispl TAG "1"
 
    RETURN .T.

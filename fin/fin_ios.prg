@@ -1280,7 +1280,7 @@ STATIC FUNCTION xlsx_export_fill_row( cIdPart, cNazPart, cBrRn, cOpis, dDatum, d
 
    LOCAL nDbfArea := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    APPEND BLANK
 
    REPLACE field->idpartner WITH cIdPart

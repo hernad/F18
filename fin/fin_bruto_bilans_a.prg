@@ -11,6 +11,8 @@
 
 #include "f18.ch"
 
+STATIC s_cExportDbf := "r_export"
+
 CLASS FinBrutoBilans
 
    DATA hParams
@@ -151,23 +153,23 @@ METHOD FinBrutoBilans:get_vars()
    LOCAL _val := 1
    LOCAL nX := 1
    LOCAL _valuta := 1
-   LOCAL _user := my_user()
-   LOCAL _konto := PadR( fetch_metric( "fin_bb_konto", _user, "" ), 200 )
-   LOCAL _dat_od := fetch_metric( "fin_bb_dat_od", _user, CToD( "" ) )
-   LOCAL _dat_do := fetch_metric( "fin_bb_dat_do", _user, CToD( "" ) )
-   LOCAL _var_ab := fetch_metric( "fin_bb_var_ab", _user, "B" )
-   LOCAL _var_txt := fetch_metric( "fin_bb_var_txt", _user, "1" )
-   LOCAL _tek_prom := fetch_metric( "fin_bb_kol_tek_promet", _user, "D" )
-   LOCAL _saldo_nula := fetch_metric( "fin_bb_saldo_nula", _user, "D" )
-   LOCAL _podklase := fetch_metric( "fin_bb_pod_klase", _user, "N" )
-   LOCAL _format := fetch_metric( "fin_bb_format", _user, "2" )
+   LOCAL cUser := my_user()
+   LOCAL _konto := PadR( fetch_metric( "fin_bb_konto", cUser, "" ), 200 )
+   LOCAL _dat_od := fetch_metric( "fin_bb_dat_od", cUser, CToD( "" ) )
+   LOCAL _dat_do := fetch_metric( "fin_bb_dat_do", cUser, CToD( "" ) )
+   LOCAL cVarijantaAB := fetch_metric( "fin_bb_var_ab", cUser, "B" )
+   LOCAL cVarijantaPdf1Odt2 := fetch_metric( "fin_bb_var_txt", cUser, "1" )
+   LOCAL cTekuciPrometDN := fetch_metric( "fin_bb_kol_tek_promet", cUser, "D" )
+   LOCAL _saldo_nula := fetch_metric( "fin_bb_saldo_nula", cUser, "D" )
+   LOCAL _podklase := fetch_metric( "fin_bb_pod_klase", cUser, "N" )
+   LOCAL _format := fetch_metric( "fin_bb_format", cUser, "2" )
    LOCAL _id_rj := Space( 6 )
-   LOCAL lExportXLSX := "N"
-   LOCAL _tip := 3
+   LOCAL lExportDBF := "N"
+   LOCAL cTipSuban1Anal2Sint3Grupe4 := 3
    LOCAL GetList := {}
 
    IF ::tip <> NIL
-      _tip := ::tip
+      cTipSuban1Anal2Sint3Grupe4 := ::tip
    ENDIF
 
    Box(, 20, 75 )
@@ -177,11 +179,11 @@ METHOD FinBrutoBilans:get_vars()
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "ODABERI VRSTU BILANSA:"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] subanalitički [2] analitički [3] sintetički [4] po grupama :" GET _tip PICT "9"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] subanalitički [2] analitički [3] sintetički [4] po grupama :" GET cTipSuban1Anal2Sint3Grupe4 PICT "9"
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "VRSTA ŠTAMPE:"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] PDF [2] ODT-LO:" GET _var_txt PICT "@!" VALID _var_txt $ "12"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "[1] PDF [2] ODT-LO:" GET cVarijantaPdf1Odt2 PICT "@!" VALID cVarijantaPdf1Odt2 $ "12"
 
    READ
 
@@ -190,11 +192,12 @@ METHOD FinBrutoBilans:get_vars()
       RETURN _ok
    ENDIF
 
-   IF _var_txt == "1" .OR. _var_txt == "3"
-      _var_ab := "B"
-   ELSE
-      _var_ab := "A"
-   ENDIF
+   //IF cVarijantaPdf1Odt2 == "1" .OR. cVarijantaPdf1Odt2 == "3"
+   //    cVarijantaAB := "B"
+   // ELSE
+   //   cVarijantaAB := "A"
+   //ENDIF
+
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "**** USLOVI IZVJEŠTAJA:"
@@ -211,15 +214,15 @@ METHOD FinBrutoBilans:get_vars()
    @ box_x_koord() + nX, Col() + 1 SAY "do:" GET _dat_do
 
    ++nX
-   IF _var_txt == "1"
+   IF cVarijantaPdf1Odt2 == "1"
       ++nX
-      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta izvještaja (A/B):" GET _var_ab PICT "@!" VALID _var_ab $ "AB"
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Varijanta izvještaja (A/B):" GET cVarijantaAB PICT "@!" VALID cVarijantaAB $ "AB"
    ENDIF
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz stavki sa saldom 0 (D/N) ?" GET _saldo_nula VALID _saldo_nula $ "DN" PICT "@!"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz kolone tekući promet (D/N) ?" GET _tek_prom VALID _tek_prom $ "DN" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz kolone tekući promet (D/N) ?" GET cTekuciPrometDN VALID cTekuciPrometDN $ "DN" PICT "@!"
 
    @ box_x_koord() + nX, Col() + 1 SAY8 "Klase unutar izvještaja (D/N) ?" GET _podklase VALID _podklase $ "DN" PICT "@!"
 
@@ -232,7 +235,7 @@ METHOD FinBrutoBilans:get_vars()
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Format izvještaja (1 sa tekućim prometom, 2 - bez) ?" GET _format PICT "@S1" VALID _format $ "12"
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Export u XLSX (D/N)?" GET lExportXLSX VALID lExportXLSX $ "DN" PICT "@!"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Export u XLSX (D/N)?" GET lExportDBF VALID lExportDBF $ "DN" PICT "@!"
 
    READ
 
@@ -242,19 +245,20 @@ METHOD FinBrutoBilans:get_vars()
       RETURN _ok
    ENDIF
 
-   IF _var_ab == "B" .AND. _var_txt == "2"
-      _var_txt := "1"
+   IF cVarijantaAB == "B" .AND. cVarijantaPdf1Odt2 == "2"
+      cVarijantaPdf1Odt2 := "1"
    ENDIF
 
-   set_metric( "fin_bb_konto", _user, AllTrim( _konto ) )
-   set_metric( "fin_bb_dat_od", _user, _dat_od )
-   set_metric( "fin_bb_dat_do", _user, _dat_do )
-   set_metric( "fin_bb_saldo_nula", _user, _saldo_nula )
-   set_metric( "fin_bb_kol_tek_promet", _user, _tek_prom )
-   set_metric( "fin_bb_var_ab", _user, _var_ab )
-   set_metric( "fin_bb_var_txt", _user, _var_txt )
-   set_metric( "fin_bb_pod_klase", _user, _podklase )
-   set_metric( "fin_bb_format", _user, _format )
+   set_metric( "fin_bb_konto", cUser, AllTrim( _konto ) )
+   set_metric( "fin_bb_dat_od", cUser, _dat_od )
+   set_metric( "fin_bb_dat_do", cUser, _dat_do )
+   set_metric( "fin_bb_saldo_nula", cUser, _saldo_nula )
+   set_metric( "fin_bb_kol_tek_promet", cUser, cTekuciPrometDN )
+   altd()
+   set_metric( "fin_bb_var_ab", cUser, cVarijantaAB )
+   set_metric( "fin_bb_var_txt", cUser, cVarijantaPdf1Odt2 )
+   set_metric( "fin_bb_pod_klase", cUser, _podklase )
+   set_metric( "fin_bb_format", cUser, _format )
 
    ::hParams[ "idfirma" ] := self_organizacija_id()
    ::hParams[ "konto" ] := AllTrim( _konto )
@@ -262,16 +266,16 @@ METHOD FinBrutoBilans:get_vars()
    ::hParams[ "datum_do" ] := _dat_do
    ::hParams[ "valuta" ] := _valuta
    ::hParams[ "id_rj" ] := IF( Empty( _id_rj ), AllTrim( _id_rj ), _id_rj )
-   ::hParams[ "export_dbf" ] := ( lExportXLSX == "D" )
+   ::hParams[ "export_dbf" ] := ( lExportDBF == "D" )
    ::hParams[ "saldo_nula" ] := ( _saldo_nula == "D" )
-   ::hParams[ "kolona_tek_prom" ] := ( _tek_prom == "D" )
-   ::hParams[ "varijanta" ] := _var_ab
+   ::hParams[ "kolona_tek_prom" ] := ( cTekuciPrometDN == "D" )
+   ::hParams[ "varijanta" ] := cVarijantaAB
    ::hParams[ "podklase" ] := ( _podklase == "D" )
    ::hParams[ "format" ] := _format
-   ::hParams[ "txt" ] := ( _var_txt == "1" )
-   ::hParams[ "pdf" ] := ( _var_txt == "3" )
+   ::hParams[ "txt" ] := ( cVarijantaPdf1Odt2 == "1" )
+   ::hParams[ "pdf" ] := ( cVarijantaPdf1Odt2 == "3" )
 
-   ::tip := _tip
+   ::tip := cTipSuban1Anal2Sint3Grupe4
 
    ::set_bb_params()
 
@@ -283,7 +287,7 @@ METHOD FinBrutoBilans:get_vars()
 
 METHOD FinBrutoBilans:get_data()
 
-   LOCAL cQuery, _data, _where
+   LOCAL cQuery, oData, _where
    LOCAL _konto := ::hParams[ "konto" ]
    LOCAL _dat_od := ::hParams[ "datum_od" ]
    LOCAL _dat_do := ::hParams[ "datum_do" ]
@@ -294,34 +298,25 @@ METHOD FinBrutoBilans:get_data()
    LOCAL _date_field := "sub.datdok"
 
    IF ::tip == 2
-
       _table := f18_sql_schema( "fin_anal" )
       _date_field := "sub.datnal"
-
       _iznos_dug := "dugbhd"
       _iznos_pot := "potbhd"
-
    ELSEIF ::tip > 2
-
       _table := f18_sql_schema( "fin_sint" )
       _date_field := "sub.datnal"
-
       _iznos_dug := "dugbhd"
       _iznos_pot := "potbhd"
-
    ENDIF
 
    // valuta 1 = domaca
    IF ::hParams[ "valuta" ] == 2
-
       _iznos_dug := "iznosdem"
       _iznos_pot := "iznosdem"
-
       IF ::tip > 1
          _iznos_dug := "dugdem"
          _iznos_pot := "potdem"
       ENDIF
-
    ENDIF
 
    _where := "WHERE sub.idfirma = " + _filter_quote( self_organizacija_id() )
@@ -350,7 +345,6 @@ METHOD FinBrutoBilans:get_data()
    IF ::tip == 1
 
       cQuery += "sub.idpartner, "
-
       cQuery += "SUM( CASE WHEN sub.d_p = '1' AND sub.idvn = '00' THEN sub." + _iznos_dug + " END ) as ps_dug, "
       cQuery += "SUM( CASE WHEN sub.d_p = '2' AND sub.idvn = '00' THEN sub." + _iznos_pot + " END ) as ps_pot, "
 
@@ -396,74 +390,73 @@ METHOD FinBrutoBilans:get_data()
    ENDIF
 
    MsgO( "formiranje sql upita u toku ..." )
-   _data := run_sql_query( cQuery )
+   oData := run_sql_query( cQuery )
    MsgC()
 
-   IF sql_error_in_query( _data )
+   IF sql_error_in_query( oData )
       MsgBeep( "SQL ERROR !?" )
       RETURN NIL
    ENDIF
 
-   ::DATA := _data
+   ::DATA := oData
 
    RETURN SELF
 
 
 
-
 METHOD FinBrutoBilans:set_txt_lines()
 
-   LOCAL _arr := {}
+   LOCAL aZaglavlje := {}
    LOCAL _tmp
    LOCAL oRPT := ReportCommon():new()
 
    // r.br
    _tmp := 4
-   AAdd( _arr, { _tmp, PadC( "R.", _tmp ), PadC( "br.", _tmp ), PadC( "", _tmp ) } )
+   AAdd( aZaglavlje, { _tmp, PadC( "R.", _tmp ), PadC( "br.", _tmp ), PadC( "", _tmp ) } )
 
    IF ::tip == 4
       // grupa konta
       _tmp := 7
-      AAdd( _arr, { _tmp, PadC( "GRUPA", _tmp ), PadC( "KONTA", _tmp ), PadC( "", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "GRUPA", _tmp ), PadC( "KONTA", _tmp ), PadC( "", _tmp ) } )
    ELSE
       // konto
       _tmp := 7
-      AAdd( _arr, { _tmp, PadC( "KONTO", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "KONTO", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
    ENDIF
 
    IF ::tip == 1
       // partner
       _tmp := 6
-      AAdd( _arr, { _tmp, PadC( "PART-", _tmp ), PadC( "NER", _tmp ), PadC( "", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "PART-", _tmp ), PadC( "NER", _tmp ), PadC( "", _tmp ) } )
       // naziv konto/partner
       _tmp := 40
-      AAdd( _arr, { _tmp, PadC( "NAZIV KONTA ILI PARTNERA", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "NAZIV KONTA ILI PARTNERA", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
    ELSEIF ::tip == 2
       // naziv konto/partner
       _tmp := 40
-      AAdd( _arr, { _tmp, PadC( "NAZIV ANALITIČKOG KONTA", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "NAZIV ANALITIČKOG KONTA", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
    ELSEIF ::tip == 3
       // naziv konto/partner
       _tmp := 40
-      AAdd( _arr, { _tmp, PadC( "NAZIV SINTETIČKOG KONTA", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "NAZIV SINTETIČKOG KONTA", _tmp ), PadC( "", _tmp ), PadC( "", _tmp ) } )
    ENDIF
 
    // pocetno stanje
    _tmp := ( Len( ::pict_iznos ) * 2 ) + 1
-   AAdd( _arr, { _tmp, PadC( "POČETNO STANJE", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+   AAdd( aZaglavlje, { _tmp, PadC( "POČETNO STANJE", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
 
    IF ::hParams[ "kolona_tek_prom" ]
       // tekuci promet
-      AAdd( _arr, { _tmp, PadC( "TEKUĆI PROMET", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+      AAdd( aZaglavlje, { _tmp, PadC( "TEKUĆI PROMET", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
    ENDIF
 
    // kumulativni promet
-   AAdd( _arr, { _tmp, PadC( "KUMULATIVNI PROMET", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+   AAdd( aZaglavlje, { _tmp, PadC( "KUMULATIVNI PROMET", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
 
    // saldo
-   AAdd( _arr, { _tmp, PadC( "SALDO", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+   AAdd( aZaglavlje, { _tmp, PadC( "SALDO", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
 
-   oRPT:zagl_arr := _arr
+   oRPT:zagl_arr := aZaglavlje
 
    ::zagl := hb_Hash()
    ::zagl[ "line" ] := oRPT:get_zaglavlje( 0 )
@@ -475,7 +468,6 @@ METHOD FinBrutoBilans:set_txt_lines()
    ::zagl[ "txt3" ] := hb_UTF8ToStr( oRPT:get_zaglavlje( 3, "*" ) )
 
    RETURN SELF
-
 
 
 
@@ -501,8 +493,6 @@ METHOD FinBrutoBilans:zaglavlje_txt()
    ? ::zagl[ "line" ]
 
    RETURN SELF
-
-
 
 
 METHOD FinBrutoBilans:gen_xml()
@@ -750,8 +740,6 @@ METHOD FinBrutoBilans:gen_xml()
    RETURN _ok
 
 
-
-
 METHOD FinBrutoBilans:print()
 
    IF Empty( ::hParams[ "konto" ] )
@@ -775,7 +763,7 @@ METHOD FinBrutoBilans:print()
    ::fill_r_export()
 
    IF ::hParams[ "export_dbf" ]
-      open_exported_xlsx()
+      open_r_export_table()
       RETURN SELF
    ENDIF
 
@@ -1093,9 +1081,6 @@ METHOD FinBrutoBilans:print_txt()
 
 
 
-
-// -----------------------------------------------------------
-// -----------------------------------------------------------
 METHOD FinBrutoBilans:rekapitulacija_klasa()
 
    LOCAL _line
@@ -1247,31 +1232,32 @@ METHOD FinBrutoBilans:fill_r_export()
 
 METHOD FinBrutoBilans:create_r_export()
 
-   LOCAL _dbf := {}
+   LOCAL aDbf := {}
 
-   AAdd( _dbf, { "idkonto", "C", 7, 0 } )
-   AAdd( _dbf, { "konto", "C", 60, 0 } )
+   AAdd( aDbf, { "idkonto", "C", 7, 0 } )
+   AAdd( aDbf, { "konto", "C", 60, 0 } )
 
    IF ::tip == 1
-      AAdd( _dbf, { "idpartner", "C", 6, 0 } )
-      AAdd( _dbf, { "partner", "C", 100, 0 } )
+      AAdd( aDbf, { "idpartner", "C", 6, 0 } )
+      AAdd( aDbf, { "partner", "C", 100, 0 } )
    ENDIF
 
-   AAdd( _dbf, { "ps_dug", "N", 18, 2 } )
-   AAdd( _dbf, { "ps_pot", "N", 18, 2 } )
+   AAdd( aDbf, { "ps_dug", "N", 18, 2 } )
+   AAdd( aDbf, { "ps_pot", "N", 18, 2 } )
 
-   AAdd( _dbf, { "tek_dug", "N", 18, 2 } )
-   AAdd( _dbf, { "tek_pot", "N", 18, 2 } )
+   AAdd( aDbf, { "tek_dug", "N", 18, 2 } )
+   AAdd( aDbf, { "tek_pot", "N", 18, 2 } )
 
-   AAdd( _dbf, { "kum_dug", "N", 18, 2 } )
-   AAdd( _dbf, { "kum_pot", "N", 18, 2 } )
+   AAdd( aDbf, { "kum_dug", "N", 18, 2 } )
+   AAdd( aDbf, { "kum_pot", "N", 18, 2 } )
 
-   AAdd( _dbf, { "sld_dug", "N", 18, 2 } )
-   AAdd( _dbf, { "sld_pot", "N", 18, 2 } )
+   AAdd( aDbf, { "sld_dug", "N", 18, 2 } )
+   AAdd( aDbf, { "sld_pot", "N", 18, 2 } )
 
-   IF !xlsx_export_init( _dbf )
-      RETURN .F.
+   IF !create_dbf_r_export( aDbf )
+     RETURN .F.
    ENDIF
+
 
    o_r_export()
 
@@ -1282,3 +1268,117 @@ METHOD FinBrutoBilans:create_r_export()
    ENDIF
 
    RETURN SELF
+
+
+FUNCTION create_dbf_r_export( aFieldList, lCloseDbfs )
+
+   LOCAL cImeDbf, cImeCdx
+
+   hb_default( @lCloseDbfs, .F. )
+
+   IF lCloseDbfs
+      my_close_all_dbf()
+   ENDIF
+
+   cImeDBf := f18_ime_dbf( "r_export" )
+   cImeCdx := ImeDbfCdx( cImeDbf )
+
+   IF Select( "R_EXPORT" ) != 0
+      SELECT r_export
+      USE
+   ENDIF
+
+   FErase( cImeDbf )
+   FErase( cImeCdx )
+   IF File( cImeDbf )
+      MsgBeep( "Ne mogu obrisati" +  cImeDbf )
+      RETURN .F.
+   ENDIF
+   DbCreate2( cImeDbf, aFieldList )
+
+   IF !File( cImeDbf )
+      ?E "Ne mogu kreirati", cImeDbf
+      RaiseError( "dbcreate2 " + cImeDbf + " " + pp( aFieldList ) )
+      RETURN .F.
+   ENDIF
+
+   RETURN .T.
+
+
+FUNCTION open_r_export_table( cExportDbf )
+
+   LOCAL cCommand
+   LOCAL cPath, cName, cExt, cDrive
+   LOCAL cXlsx
+   LOCAL hFile, cOutFile
+
+   my_close_all_dbf()
+
+   // cCommand := get_run_prefix_cmd() + file_path_quote( my_home() + my_dbf_prefix() + s_cExportDbf + ".dbf" )
+
+   // log_write( "Export " + s_cExportDbf + " cmd: " + _cmd, 9 )
+
+   // DirChange( my_home() )
+   // IF f18_run( cCommand ) <> 0
+   // MsgBeep( "Problem sa pokretanjem ?!" )
+   // ENDIF
+
+
+   IF cExportDbf == NIL
+      cExportDbf := my_home() + my_dbf_prefix() + s_cExportDbf + ".dbf"
+   ENDIF
+
+   hb_FNameSplit( cExportDbf, @cPath, @cName, @cExt, @cDrive )
+
+   MsgO( "LO konvert " + cName + ".dbf -> .xlsx" )
+   hb_FNameSplit( cExportDbf, @cPath, @cName, @cExt, @cDrive )
+   IF Right( cPath, 1 ) == SLASH // c:\temp\ => c:\temp, bez ovoga soffice --outdir zaglavi !
+      cPath := Left( cPath, Len( cPath ) - 1 )
+   ENDIF
+ 
+   f18_run( LO_convert_xlsx_cmd(cExportDbf, cPath) + " " + file_path_quote( cExportDbf ) + " " + file_path_quote( cPath ) ) // libreoffice --convert-to xlsx:"Calc MS Excel 2007 XML" --infilter=dBase:25 r_export.dbf
+
+   Msgc()
+   cXlsx := StrTran( cExportDbf, ".dbf", ".xlsx" )
+
+   IF !File( cXlsx )
+      MsgBeep( "Greška! XLSX nije kreiran:#" + cXlsx )
+      RETURN .F.
+   ENDIF
+
+   IF ( hFile := hb_vfTempFile( @cOutFile, my_home(), "r_export_", ".xlsx" ) ) != NIL // hb_vfTempFile( @<cFileName>, [ <cDir> ], [ <cPrefix> ], [ <cExt> ], [ <nAttr> ] )
+      hb_vfClose( hFile )
+      COPY FILE ( cXlsx ) TO ( cOutFile )
+   ELSE
+      cOutFile := cXlsx
+   ENDIF
+   LO_open_dokument( cOutFile )
+
+   RETURN .T.
+
+
+
+STATIC FUNCTION o_r_export()
+
+   SELECT ( F_R_EXP )
+   my_usex ( "r_export" )
+
+   RETURN .T.
+
+
+FUNCTION o_r_export_legacy()
+
+   Alert("o_r_export legacy")
+   Alert("prebaciti na -> xlsx")
+   RETURN .T.
+
+
+STATIC FUNCTION select_o_r_export_legacy()
+
+   SELECT ( F_R_EXP )
+   IF !Used()
+      my_usex ( "r_export" )
+   ENDIF
+
+   RETURN .T.
+   

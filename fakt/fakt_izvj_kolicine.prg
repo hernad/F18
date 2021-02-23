@@ -146,7 +146,7 @@ STATIC FUNCTION xlsx_export_fill_row( cRbr, cDistrib, cPmId, cPmNaz, ;
 
    nDbfArea := Select()
 
-   o_r_export()
+   o_r_export_legacy()
    APPEND BLANK
    REPLACE field->rbr WITH cRbr
    REPLACE field->distrib WITH cDistrib
