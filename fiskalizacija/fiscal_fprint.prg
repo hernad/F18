@@ -1386,13 +1386,13 @@ STATIC FUNCTION nivo_greske_na_osnovu_odgovora( line )
 // ------------------------------------------------
 // vraca broj fiskalnog isjecka
 // ------------------------------------------------
-STATIC FUNCTION fisc_get_broj_fiskalnog_racuna( txt, lStorno )
+STATIC FUNCTION fisc_get_broj_fiskalnog_racuna( cTxt, lStorno )
 
-   LOCAL _fiscal_no := 0
+   LOCAL nFiskalniBroj := 0
    LOCAL aTmp := {}
-   LOCAL _a_fisc := {}
-   LOCAL _fisc_txt := ""
-   LOCAL _n_pos := 2
+   LOCAL aFiskalni := {}
+   LOCAL cFiscTxt := ""
+   LOCAL nPozicija := 2
 
    IF lStorno == NIL
       lStorno := .F.
@@ -1401,22 +1401,25 @@ STATIC FUNCTION fisc_get_broj_fiskalnog_racuna( txt, lStorno )
    // pozicija u odgovoru
    // 3 - regularni racun
    // 4 - storno racun
-
    IF lStorno
-      _n_pos := 3
+      nPozicija := 3
    ENDIF
 
-   aTmp := toktoniz( txt, ";" )
-   _fisc_txt := aTmp[ 2 ]
-   _a_fisc := toktoniz( _fisc_txt, "," )
-
-   IF Len( _a_fisc ) < 2
-      log_write( "ERROR fiscal out, nema elemenata !", 3 )
-      RETURN _fiscal_no
+   aTmp := toktoniz( cTxt, ";" )
+   IF LEN(aTmp) < 2
+      // nema teksta
+      log_write( "ERROR fiscal out /1, nema elemenata iza ';' !", 3 )
+      RETURN 0 
+   ENDIF
+   
+   cFiscTxt := aTmp[ 2 ]
+   aFiskalni := toktoniz( cFiscTxt, "," )
+   IF Len( aFiskalni ) < 2
+      log_write( "ERROR fiscal out /2, nema elemenata !", 3 )
+      RETURN 0
    ENDIF
 
-   _fiscal_no := Val( _a_fisc[ _n_pos ] )
+   nFiskalniBroj := Val( aFiskalni[ nPozicija ] )
+   log_write( "FISC RN: " + AllTrim( Str( nFiskalniBroj ) ), 3 )
 
-   log_write( "FISC RN: " + AllTrim( Str( _fiscal_no ) ), 3 )
-
-   RETURN _fiscal_no
+   RETURN nFiskalniBroj
