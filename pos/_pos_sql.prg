@@ -623,8 +623,8 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
    ENDIF
 
    cSql := "SELECT "
-   cSql += " SUM( ( kolicina * cijena ) - ( kolicina * (CASE WHEN (ncijena <>0) THEN cijena-ncijena ELSE 0.00 END) ) ) AS total "
-   cSql += "FROM " + cSqlTable
+   cSql += " SUM( ( kolicina * cijena ) - ( kolicina * (CASE WHEN (ncijena<>0) THEN cijena-ncijena ELSE 0.00 END) ) ) AS total"
+   cSql += " FROM " + cSqlTable
    cSql += " WHERE "
    cSql += " idpos = " + sql_quote( cIdPos )
    cSql += " AND idvd = " + sql_quote( cIdVd )

@@ -17,7 +17,7 @@ STATIC ANSW_DIR := "answer"
 STATIC POLOG_LIMIT := 100
 
 // ocekivana matrica
-// aData
+// aRacunData
 //
 // 1 - broj racuna
 // 2 - redni broj
@@ -37,7 +37,7 @@ STATIC POLOG_LIMIT := 100
 
 // --------------------------------------------------------
 // fiskalni racun (FPRINT)
-// aData - podaci racuna
+// aRacunData - podaci racuna
 // lStorno - da li se stampa storno ili ne (.T. ili .F. )
 // --------------------------------------------------------
 FUNCTION fiskalni_fprint_racun( hFiskalniParams, aRacunData, aKupac, lStorno )
@@ -77,7 +77,7 @@ STATIC FUNCTION _max_polog( nPolog )
 
 FUNCTION fprint_unos_pologa( hFiskalniParams, nPolog, lShowBox )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aPolog := {}
    LOCAL aStruct := {}
    LOCAL GetList := {}
@@ -114,7 +114,7 @@ FUNCTION fprint_unos_pologa( hFiskalniParams, nPolog, lShowBox )
 
 FUNCTION fprint_dupliciraj_racun( hFiskalniParams, hRacunParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aDouble := {}
    LOCAL aStruct := {}
    LOCAL dDatumFrom := Date()
@@ -220,7 +220,7 @@ STATIC FUNCTION fprint_fix_time( cTimeIn, nFix )
 
 FUNCTION fprint_komanda_301_zatvori_racun( hFiskalniParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aVoid := {}
    LOCAL aStruct := {}
 
@@ -234,7 +234,7 @@ FUNCTION fprint_komanda_301_zatvori_racun( hFiskalniParams )
 
 FUNCTION fprint_non_fiscal_text( hFiskalniParams, cTxt )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aTxt := {}
    LOCAL aStruct := {}
 
@@ -247,7 +247,7 @@ FUNCTION fprint_non_fiscal_text( hFiskalniParams, cTxt )
 
 FUNCTION fprint_delete_plu( hFiskalniParams, lSilent )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aDel := {}
    LOCAL aStruct := {}
    LOCAL nMaxPlu := 0
@@ -281,7 +281,7 @@ FUNCTION fprint_delete_plu( hFiskalniParams, lSilent )
 
 FUNCTION fiscal_fprint_zatvori_racun( hFiskalniParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aClose := {}
    LOCAL aStruct := {}
 
@@ -294,7 +294,7 @@ FUNCTION fiscal_fprint_zatvori_racun( hFiskalniParams )
 
 FUNCTION fprint_manual_cmd( hFiskalniParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aManCmd := {}
    LOCAL aStruct := {}
    LOCAL nCmd := 0
@@ -332,7 +332,7 @@ FUNCTION fprint_manual_cmd( hFiskalniParams )
 
 FUNCTION fprint_sold_plu( hFiskalniParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aPlu := {}
    LOCAL aStruct := {}
    LOCAL nErr := 0
@@ -360,7 +360,7 @@ FUNCTION fprint_sold_plu( hFiskalniParams )
 
 FUNCTION fprint_daily_rpt( hFiskalniParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aDaily := {}
    LOCAL aStruct := {}
    LOCAL nErr := 0
@@ -448,7 +448,7 @@ FUNCTION fprint_daily_rpt( hFiskalniParams )
 
 FUNCTION fprint_izvjestaj_za_period( hFiskalniParams )
 
-   LOCAL cSep := ";"
+   LOCAL cTackaZarez := ";"
    LOCAL aPer := {}
    LOCAL aStruct := {}
    LOCAL nErrLevel := 0
@@ -477,13 +477,13 @@ FUNCTION fprint_izvjestaj_za_period( hFiskalniParams )
    RETURN nErrLevel
 
 
-STATIC FUNCTION fisk_fprint_get_array( aData, aKupac, lStorno, hFiskalniParams )
+STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniParams )
 
    LOCAL aArr := {}
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL i
    LOCAL cRek_rn := ""
    LOCAL cRnBroj
@@ -501,101 +501,105 @@ STATIC FUNCTION fisk_fprint_get_array( aData, aKupac, lStorno, hFiskalniParams )
       cOperaterPassword := hFiskalniParams[ "op_pwd" ]
    ENDIF
 
-   cVrstaPlacanja := AllTrim( aData[ 1, 13 ] )
-   nTotal := aData[ 1, 14 ]
+   cVrstaPlacanja := AllTrim( aRacunData[ 1, 13 ] )
+   nTotal := aRacunData[ 1, FISK_INDEX_TOTAL ] // ukupno racun
 
    IF nTotal == NIL
       nTotal := 0
    ENDIF
 
    // ocekuje se matrica formata
-   // aData { brrn, rbr, idroba, nazroba, cijena, kolicina, porstopa,
+   // aRacunData { brrn, rbr, idroba, nazroba, cijena, kolicina, porstopa,
    // rek_rn, plu, plu_cijena, popust, barkod, vrsta plac, total racuna }
-   fprint_dodaj_artikle_za_racun( @aArr, aData, lStorno, hFiskalniParams )
+   fprint_dodaj_artikle_za_racun( @aArr, aRacunData, lStorno, hFiskalniParams )
 
-   cRnBroj := AllTrim( aData[ 1, 1 ] ) // broj racuna
+   cRnBroj := AllTrim( aRacunData[ 1, 1 ] ) // broj racuna
    cLogic := "1"
 
    // 1) otvaranje fiskalnog racuna
    cTmp := "48"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += hFiskalniParams[ "iosa" ]
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cOperator
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cOperaterPassword
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    IF lStorno == .T.
-      cRek_rn := AllTrim( aData[ 1, 8 ] )
-      cTmp += cSep
+      cRek_rn := AllTrim( aRacunData[ 1, 8 ] )
+      cTmp += cTackaZarez
       cTmp += cRek_rn
-      cTmp += cSep
+      cTmp += cTackaZarez
    ELSE
-      cTmp += cSep
+      cTmp += cTackaZarez
    ENDIF
    AAdd( aArr, { cTmp } )
 
    // 2. prodaja stavki
-   FOR i := 1 TO Len( aData )
+   FOR i := 1 TO Len( aRacunData )
       cTmp := "52"
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += cLogic
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 6 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 1 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 2 )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // kod PLU
-      cTmp += AllTrim( Str( aData[ i, 9 ] ) )
-      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, 9 ] ) )
+      cTmp += cTackaZarez
       // kolicina 0-99999.999
-      cTmp += AllTrim( Str( aData[ i, 6 ], 12, 3 ) )
-      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, 6 ], 12, 3 ) )
+      cTmp += cTackaZarez
       // popust 0-99.99%
-      IF aData[ i, 10 ] > 0
-         cTmp += "-" + AllTrim( Str( aData[ i, 11 ], 10, 2 ) )
+      IF aRacunData[ i, 10 ] > 0
+         // cijena kolicina 5.880, cijena 5.95, popust 10.92%
+         // 52,1,______,_,__;PLU=25;kolicina=5.880;popust=-10.92;
+         // 52,1,009120,4,0;25;5.880;-10.92;
+         cTmp += "-" + AllTrim( Str( aRacunData[ i, 11 ], 10, 2 ) )
       ENDIF
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       AAdd( aArr, { cTmp } )
    NEXT
 
    // 3. subtotal
    cTmp := "51"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
    // 4. nacin placanja
    cTmp := "53"
-   cTmp += cLogSep
+   // 53,1,009120,6,0;0;31.16; 
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    // 0 - cash
    // 1 - card
@@ -605,12 +609,12 @@ STATIC FUNCTION fisk_fprint_get_array( aData, aKupac, lStorno, hFiskalniParams )
    IF ( cVrstaPlacanja <> "0" .AND. !lStorno ) .OR. ( cVrstaPlacanja == "0" .AND. nTotal <> 0 .AND. !lStorno )
       // imamo drugu vrstu placanja
       cTmp += cVrstaPlacanja
-      cTmp += cSep
+      cTmp += cTackaZarez
       cTmp += AllTrim( Str( nTotal, 12, 2 ) )
-      cTmp += cSep
+      cTmp += cTackaZarez
    ELSE
-      cTmp += cSep
-      cTmp += cSep
+      cTmp += cTackaZarez
+      cTmp += cTackaZarez
    ENDIF
 
    AAdd( aArr, { cTmp } )
@@ -620,17 +624,17 @@ STATIC FUNCTION fisk_fprint_get_array( aData, aKupac, lStorno, hFiskalniParams )
    IF cVrstaPlacanja <> "0" .AND. !lStorno
 
       cTmp := "53"
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += cLogic
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 6 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 1 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 2 )
-      cTmp += cSep
-      cTmp += cSep
-      cTmp += cSep
+      cTmp += cTackaZarez
+      cTmp += cTackaZarez
+      cTmp += cTackaZarez
       AAdd( aArr, { cTmp } )
 
    ENDIF
@@ -641,35 +645,35 @@ STATIC FUNCTION fisk_fprint_get_array( aData, aKupac, lStorno, hFiskalniParams )
       // aKupac = { idbroj, naziv, adresa, ptt, mjesto }
       // postoje podaci...
       cTmp := "55"
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += cLogic
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 6 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 1 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 2 )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // 1. id broj
       cTmp += AllTrim( aKupac[ 1, 1 ] )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // 2. naziv
       cTmp += AllTrim( PadR( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 2 ] ), lConvertTo852 ), 36 ) )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // 3. adresa
       cTmp += AllTrim( PadR( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 3 ] ), lConvertTo852 ), 36 ) )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // 4. ptt, mjesto
       cTmp += AllTrim( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 4 ] ), lConvertTo852 ) ) + " " + ;
          AllTrim( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 5 ] ), lConvertTo852 ) )
 
-      cTmp += cSep
-      cTmp += cSep
-      cTmp += cSep
+      cTmp += cTackaZarez
+      cTmp += cTackaZarez
+      cTmp += cTackaZarez
 
       AAdd( aArr, { cTmp } )
 
@@ -677,31 +681,44 @@ STATIC FUNCTION fisk_fprint_get_array( aData, aKupac, lStorno, hFiskalniParams )
 
    // 6. otvaranje ladice
    cTmp := "106"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
 
    // 7. zatvaranje racuna
    cTmp := "56"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
+
+   /*
+   2 KOM "ROBA TEST 01", CIJENA 1.00, POPUST 8%
+   [ernad.husremovic@sa.out.ba@zvijer fiscal]$ cat out.txt 
+      107,1,______,_,__;2;2;12;1.00;ROBA TEST 01;                                                         
+      107,1,______,_,__;4;12;1.00;                                                                        
+      48,1,______,_,__;1234567890123456;1;000000;;                                                        
+      52,1,______,_,__;12;2.000;-8.00;                                                                    
+      51,1,______,_,__;                                                                                   
+      53,1,______,_,__;0;1.84;                                                                            
+      106,1,______,_,__;                                                                                  
+      56,1,______,_,__;  
+   */
 
    RETURN aArr
 
@@ -711,8 +728,8 @@ STATIC FUNCTION fprint_manuelne_komande( nCmd, cCond )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    cLogic := "1"
@@ -720,15 +737,15 @@ STATIC FUNCTION fprint_manuelne_komande( nCmd, cCond )
    // broj komande
    cTmp := AllTrim( Str( nCmd ) )
    // ostali regularni dio
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    IF !Empty( cCond )
       // ostatak komande
@@ -743,53 +760,53 @@ STATIC FUNCTION fprint_non_fiscal_text_posalji_na_uredjaj( cTxt )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    cLogic := "1"
 
    // otvori non-fiscal racun
    cTmp := "38"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
 
    // ispisi tekst
    cTmp := "42"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += AllTrim( PadR( cTxt, 30 ) )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
 
    // zatvori non-fiscal racun
    cTmp := "39"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -800,8 +817,8 @@ STATIC FUNCTION fprint_brisi_artikle_iz_uredjaja( nMaxPlu, hFiskalniParams )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    // komanda za brisanje artikala je 3
@@ -826,19 +843,19 @@ STATIC FUNCTION fprint_brisi_artikle_iz_uredjaja( nMaxPlu, hFiskalniParams )
    cLogic := "1"
    // brisanje PLU kodova iz uredjaja
    cTmp := "107"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cCmd
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cCmdType
-   cTmp += cSep
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -849,22 +866,22 @@ STATIC FUNCTION fprint_zatvori_racun()
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    cLogic := "1"
    // 7. zatvaranje racuna
    cTmp := "56"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -890,8 +907,8 @@ STATIC FUNCTION fprint_fiskalni_izvjestaj_od_do( dDatumFrom, dDatumTo )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL cD_from
    LOCAL cD_to
    LOCAL aArr := {}
@@ -901,21 +918,21 @@ STATIC FUNCTION fprint_fiskalni_izvjestaj_od_do( dDatumFrom, dDatumTo )
 
    cLogic := "1"
    cTmp := "79"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cD_from
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cD_to
-   cTmp += cSep
-   cTmp += cSep
-   cTmp += cSep
+   cTmp += cTackaZarez
+   cTmp += cTackaZarez
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -926,8 +943,8 @@ STATIC FUNCTION fprint_izvjestaj_o_prodanim_plu( cType )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    // 0 - samo u toku dana
@@ -939,17 +956,17 @@ STATIC FUNCTION fprint_izvjestaj_o_prodanim_plu( cType )
 
    cLogic := "1"
    cTmp := "111"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cType
-   cTmp += cSep
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -960,8 +977,8 @@ STATIC FUNCTION fprint_dnevni_fiskalni_izvjestaj( cType )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    // "N" - bez ciscenja prodaje
@@ -981,22 +998,22 @@ STATIC FUNCTION fprint_dnevni_fiskalni_izvjestaj( cType )
 
    cLogic := "1"
    cTmp := "69"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cType
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    // ovo se dodaje samo kod Z reporta
    IF !Empty ( cOper )
       cTmp += cOper
-      cTmp += cSep
+      cTmp += cTackaZarez
    ENDIF
    AAdd( aArr, { cTmp } )
 
@@ -1009,8 +1026,8 @@ STATIC FUNCTION fprint_duplikat_dokumenta( cType, dDatumFrom, dDatumTo, cTimeFro
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
    LOCAL cStart := ""
    LOCAL cEnd := ""
@@ -1022,23 +1039,23 @@ STATIC FUNCTION fprint_duplikat_dokumenta( cType, dDatumFrom, dDatumTo, cTimeFro
 
    cLogic := "1"
    cTmp := "109"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cType
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cStart
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cEnd
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cParam
-   cTmp += cSep
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -1049,8 +1066,8 @@ STATIC FUNCTION fprint_unos_pologa_array( nIznos )
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
    LOCAL cZnak := "+"
 
@@ -1060,17 +1077,17 @@ STATIC FUNCTION fprint_unos_pologa_array( nIznos )
 
    cLogic := "1"
    cTmp := "70"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
    cTmp += cZnak + AllTrim( Str( nIznos ) )
-   cTmp += cSep
+   cTmp += cTackaZarez
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
@@ -1081,22 +1098,22 @@ STATIC FUNCTION fprint_nasilno_zatvori_racun_iznos_0()
 
    LOCAL cTmp := ""
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL aArr := {}
 
    cLogic := "1"
 
    cTmp := "301"
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += cLogic
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 6 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 1 )
-   cTmp += cLogSep
+   cTmp += cZarez
    cTmp += Replicate( "_", 2 )
-   cTmp += cSep
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
 
@@ -1104,7 +1121,7 @@ STATIC FUNCTION fprint_nasilno_zatvori_racun_iznos_0()
 
 
 
-STATIC FUNCTION fprint_dodaj_artikle_za_racun( aArr, aData, lStorno, hFiskalniParams )
+STATIC FUNCTION fprint_dodaj_artikle_za_racun( aArr, aRacunData, lStorno, hFiskalniParams )
 
    LOCAL i
    LOCAL cTmp := ""
@@ -1116,74 +1133,74 @@ STATIC FUNCTION fprint_dodaj_artikle_za_racun( aArr, aData, lStorno, hFiskalniPa
    // opcija promjene cijene u printeru
    LOCAL cOp_ch := "4"
    LOCAL cLogic
-   LOCAL cLogSep := ","
-   LOCAL cSep := ";"
+   LOCAL cZarez := ","
+   LOCAL cTackaZarez := ";"
    LOCAL lConvertTo852 := .T.
 
    // ocekuje se matrica formata
-   // aData { brrn, rbr, idroba, nazroba, cijena, kolicina, porstopa,
+   // aRacunData { brrn, rbr, idroba, nazroba, cijena, kolicina, porstopa,
    // rek_rn, plu, plu_cijena, popust }
 
    cLogic := "1"
 
-   FOR i := 1 TO Len( aData )
+   FOR i := 1 TO Len( aRacunData )
 
       // 1. dodavanje artikla u printer
       cTmp := "107"
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += cLogic
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 6 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 1 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 2 )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       cTmp += cOp_add // opcija dodavanja "2"
-      cTmp += cSep
+      cTmp += cTackaZarez
 
-      cTmp += fiskalni_tarifa( aData[ i, 7 ], hFiskalniParams[ "pdv" ], "FPRINT" ) // poreska stopa
-      cTmp += cSep
+      cTmp += fiskalni_tarifa( aRacunData[ i, 7 ], hFiskalniParams[ "pdv" ], "FPRINT" ) // poreska stopa
+      cTmp += cTackaZarez
 
       // plu kod
-      cTmp += AllTrim( Str( aData[ i, 9 ] ) )
-      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, 9 ] ) )
+      cTmp += cTackaZarez
 
       // plu cijena
-      cTmp += AllTrim( Str( aData[ i, 10 ], 12, 2 ) )
-      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, 10 ], 12, 2 ) )
+      cTmp += cTackaZarez
 
       // plu naziv
-      cTmp += to_win1250_encoding( AllTrim( PadR( hb_StrToUTF8( aData[ i, 4 ] ), 32 ) ), lConvertTo852 )
-      cTmp += cSep
+      cTmp += to_win1250_encoding( AllTrim( PadR( hb_StrToUTF8( aRacunData[ i, 4 ] ), 32 ) ), lConvertTo852 )
+      cTmp += cTackaZarez
 
       AAdd( aArr, { cTmp } )
 
       // 2. dodavanje stavke promjena cijene - ako postoji
 
       cTmp := "107"
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += cLogic
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 6 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 1 )
-      cTmp += cLogSep
+      cTmp += cZarez
       cTmp += Replicate( "_", 2 )
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // opcija dodavanja "4"
       cTmp += cOp_ch
-      cTmp += cSep
+      cTmp += cTackaZarez
 
       // plu kod
-      cTmp += AllTrim( Str( aData[ i, 9 ] ) )
-      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, 9 ] ) )
+      cTmp += cTackaZarez
 
       // plu cijena
-      cTmp += AllTrim( Str( aData[ i, 10 ], 12, 2 ) )
-      cTmp += cSep
+      cTmp += AllTrim( Str( aRacunData[ i, 10 ], 12, 2 ) )
+      cTmp += cTackaZarez
       AAdd( aArr, { cTmp } )
 
    NEXT

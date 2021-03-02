@@ -171,12 +171,13 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
    LOCAL nPOSRabatProcenat
    LOCAL cRobaBarkod, cIdRoba, cRobaNaziv, cJMJ
    LOCAL nRbr := 0
-   LOCAL nPosRacunUkupno
+   LOCAL nPosRacunUkupno, nPosRacunUkupnoCheck
    LOCAL cVrstaPlacanja
    LOCAL nLevel
    LOCAL aStavka
    LOCAL lStorno
    LOCAL lTmpTabele := .T.
+   LOCAL nI
 
    lStorno := ( nStorno > 0 )
    IF nUplaceniIznos == NIL
@@ -194,11 +195,9 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       ENDIF
    ENDIF
    cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep)
-   // IF cVrstaPlacanja <> "0"
+
    nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele)
-   // ELSE
-   // nPosRacunUkupno := 0
-   // ENDIF
+
    IF nUplaceniIznos > 0
       nPosRacunUkupno := nUplaceniIznos
    ENDIF
@@ -208,6 +207,8 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
          RETURN NIL
      ENDIF
    ENDIF
+
+   nPosRacunUkupnoCheck := 0
    DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
 
       aStavka := Array( 16 )
@@ -232,8 +233,9 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
 
       SELECT pos
       nPOSRabatProcenat := 0
-      IF field->ncijena > 0  // cijena = 100, ncijena = 90, popust = 10
+      IF field->ncijena > 0  // cijena = 100, ncijena = 90 (cijena sa uracunatim popustom), popust = 10%
          nPOSRabatProcenat := ( ( field->cijena - field->ncijena ) / field->cijena ) * 100
+         nPOSRabatProcenat := ROUND(nPOSRabatProcenat, 2)
       ENDIF
 
       cRobaNaziv := fiscal_art_naz_fix( roba->naz, s_hFiskalniUredjajParams[ "drv" ] )
@@ -253,9 +255,22 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       aStavka[ FISK_INDEX_TOTAL ] := nPosRacunUkupno
       aStavka[ FISK_INDEX_DATUM ] := dDatDok
       aStavka[ FISK_INDEX_JMJ ] :=  cJMJ
+
+      // ROUND( kolicina * cijena * (1-POPUST/100), 2)
+      nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_CIJENA ] * (1 - aStavka[ FISK_INDEX_POPUST ]/100.00), 2) 
       AAdd( aStavkeRacuna, aStavka )
       SKIP
    ENDDO
+
+
+   IF ROUND(nPosRacunUkupno, 2) <> ROUND(nPosRacunUkupnoCheck, 2)
+      FOR nI := 1 TO LEN(aStavkeRacuna)
+         // moze se desiti da je radi gresaka zaokruzenja kada ima popusta ukupan iznos koji izracuna fiskalni i ukupan iznos
+         // pri pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele) ima razliku
+         // nPosRacunUkupnoCheck proracunava cijenu onako kako racuna fiskalni
+         aStavkeRacuna[nI, FISK_INDEX_TOTAL] := nPosRacunUkupnoCheck
+      NEXT
+   ENDIF
 
    IF Len( aStavkeRacuna ) == 0
       MsgBeep( "Nema stavki za štampu na fiskalni uređaj !" )
