@@ -1,68 +1,33 @@
-@echo off
-REM # ver 1.0.3
-REM # bjasko@bring.out.ba
-REM # date 09.02.2021
-set PATH=%PATH%;C:\knowhowERP\bin;C:\knowhowERP\lib;C:\knowhowERP\util
-set DEST=C:\knowhowERP\bin
+#!/bin/bash
 
-:SERVICE
-echo.
-echo.
-echo "Provjeravam dali je F18 zatvoren"
-echo.
-echo.
+# VARS
+PATH=/bin:/usr/bin:/usr/local/bin:/opt/knowhowERP/bin:/opt/knowhowERP/util
+VER=1.0.0
+DAT=22.11.2013
+SERVICE=$(ps ax | grep -v grep | grep -c 'F18$')
+DEST=/opt/knowhowERP/bin
 
-PING -n 6 www.google.com  >NUL
-taskkill /IM "F18.exe" /F
-REM # provjeri dali se F18 vrti
-tasklist.exe /FI "IMAGENAME eq F18.exe" 2>NUL | find.exe /I /N "F18.exe" >NUL
-if "%ERRORLEVEL%"=="0" echo "izgleda je je F18 aktivan, zatvorite ga" & goto SERVICE  else got UPDATE
+# spavaj dok se F18 ne zatvori
+sleep 3
 
-:UPDATE
+# da li je update zero lenght
+if [ ! -s $1 ]; then
+    echo "nema fajla!"
+    exit 0
+else
+    echo "sve spremno za update, nastavljam"
+fi
 
-if not exist %1  goto ERR1
+# provjeravam F18 servis i radim update"
+while  [ "$SERVICE" -gt 0 ]
+	do
+       echo "$SERVICE je pokrenut cekam da se zatvori"
+       sleep 5
+    done
+       gzip -dNfc  < $1 > $DEST/F18
+       chmod +x $DEST/F18
+       echo "update je zavrsen"
+       DISPLAY=:0 notify-send  "F18 upgrade završen, možete pokrenuti F18"
+       rm $1
 
-echo.
-echo.
-echo "Provjera ispravnosti arhive"
-echo.
-echo.
-gzip -tv  %1
-if errorlevel 1 goto ERR2 if errorlevel 0 goto OK
-
-:OK
-
-gzip -dNfc  < %1 > %DEST%\F18.exe
-del /Q  %1
-goto END
-
-:ERR1
-echo.
-echo.
-echo "Problem sa F18 update fajlom, Prekidam operaciju UPDATE-a"
-echo.
-echo.
-pause
-rem exit
-
-:ERR2
-
-echo.
-echo.
-echo "Greska unutar F18 update fajla, Prekidam operaciju, ponovite UPDATE"
-echo.
-echo.
-pause
-rem exit
-
-
-:END
-echo.
-echo.
-echo "Update je zavrsen uspjesno"
-echo.
-echo "Mozete zatvoriti ovaj prozor te ponovo pokrenuti F18"
-echo.
-echo.
-pause
-rem exit
+exit 0
