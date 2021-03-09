@@ -1,7 +1,7 @@
 
 #define F18_VER_DEFINED
 
-#define F18_DEV_PERIOD  "1994-2020"
+#define F18_DEV_PERIOD  "1994-2021"
 
 #define F18_LIB_VER   "5.10.0"
 #define F18_TEMPLATE_VER "3.1.0"
