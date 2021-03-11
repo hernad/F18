@@ -588,9 +588,33 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
    cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
+
    // 4. nacin placanja
    cTmp := "53"
-   // 53,1,009120,6,0;0;31.16; 
+   /*
+     53,1,009120,6,0;0;31.16;
+
+     ''53'' – payment
+     53,1,______,_,__;[flag];[amount];
+      ➢ [flag] – parameter that determines the type of the payment:
+      •
+      value '0' means payment in cash;
+      •
+      value '1' means payment via card;
+      •
+      value '2' means payment via cheque;
+      •
+      value '3' means payment type "Virman";
+      ➢ [amount] – the sum of the payment
+      The parameters [flag] and [amount] are optional and if you skip them, the command will execute
+      payment in cash with the whole sum of the current receipt.
+      The command cannot be executed if :
+      – there is no opened receipt
+      – the accumulated sum is negative
+      – the sum for a tax group is negative
+   */
+
+   //53,1,______,_,__;
    cTmp += cZarez
    cTmp += cLogic
    cTmp += cZarez
@@ -606,19 +630,29 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
    // 2 - chek
    // 3 - virman
 
-   IF ( cVrstaPlacanja <> "0" .AND. !lStorno ) .OR. ( cVrstaPlacanja == "0" .AND. nTotal <> 0 .AND. !lStorno )
-      // imamo drugu vrstu placanja
-      cTmp += cVrstaPlacanja
-      cTmp += cTackaZarez
-      cTmp += AllTrim( Str( nTotal, 12, 2 ) )
-      cTmp += cTackaZarez
-   ELSE
-      cTmp += cTackaZarez
-      cTmp += cTackaZarez
-   ENDIF
+   //IF ( cVrstaPlacanja <> "0" .AND. !lStorno ) .OR. ( cVrstaPlacanja == "0" .AND. nTotal <> 0 .AND. !lStorno )
+      //[flag] - 1 - card, 2 - check, 3 - virman; [amount];
+      // imamo drugu vrstu placanja npr
+      // 1;;
+   //   cTmp += cVrstaPlacanja
+   //   cTmp += cTackaZarez
+    //  cTmp += AllTrim( Str( nTotal, 12, 2 ) )
+   //   cTmp += cTackaZarez
+   //ELSE
+      // ";;"
+   //   cTmp += cTackaZarez
+   //   cTmp += cTackaZarez
+   // ENDIF
+   
+   cTmp += cVrstaPlacanja
+   cTmp += cTackaZarez
+   cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
 
+/*
+   ne razumijem cemu ovo pa sam iskljucio, hernad 10.03.2021
+   
    // radi zaokruzenja kod virmanskog placanja
    // salje se jos jedna linija 53 ali prazna
    IF cVrstaPlacanja <> "0" .AND. !lStorno
@@ -638,6 +672,7 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
       AAdd( aArr, { cTmp } )
 
    ENDIF
+*/
 
    // 5. kupac - podaci
    IF aKupac <> NIL .AND. Len( aKupac ) > 0
