@@ -184,7 +184,7 @@ FUNCTION check_eNabavke()
     
 
     Box(,3, 70)
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eIsporuke Generacija *****"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eNabavke Generacija *****"
        @ box_x_koord() + nX, box_y_koord() + 2 SAY "Za period od:" GET dDatOd
        @ box_x_koord() + nX++, col() + 2 SAY "Za period od:" GET dDatDo
        READ
@@ -585,9 +585,9 @@ select get_sifk('PARTN', 'PDVB', fin_suban.idpartner) as pdv_broj, get_sifk('PAR
         (case when sub2.d_p='1' then 1 else -1 end) * sub2.iznosbhd as iznos_pdv,
         (case when sub3.d_p='1' then 1 else -1 end) * sub3.iznosbhd as iznos_pdv_np,
         substring(fin_suban.opis from 'JCI:\s*(\d+)') as JCI,
-        substring(fin_suban.opis from 'OSN-PDV0:\s*([\d.]+)')::DECIMAL as from_opis_osn_pdv,
-        substring(fin_suban.opis from 'OSN-PDV17:\s*([\d.]+)')::DECIMAL as from_opis_osn_pdv17,
-        substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.]+)')::DECIMAL as from_opis_osn_pdv17np,
+        substring(fin_suban.opis from 'OSN-PDV0:\s*([\d.\-]+)')::DECIMAL as from_opis_osn_pdv,
+        substring(fin_suban.opis from 'OSN-PDV17:\s*([\d.\-]+)')::DECIMAL as from_opis_osn_pdv17,
+        substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.\-]+)')::DECIMAL as from_opis_osn_pdv17np,
         fin_suban.idkonto, partn.id, partn.naz, sub2.idkonto, sub3.idkonto, fin_suban.* from fmk.fin_suban
      left join fmk.fin_suban sub2 on fin_suban.idfirma=sub2.idfirma and fin_suban.idvn=sub2.idvn and fin_suban.brnal=sub2.brnal and fin_suban.brdok=sub2.brdok and sub2.idkonto like '27%'
      left join fmk.fin_suban sub3 on fin_suban.idfirma=sub3.idfirma and fin_suban.idvn=sub3.idvn and fin_suban.brnal=sub3.brnal and fin_suban.brdok=sub3.brdok and sub3.idkonto like '2789%'
@@ -632,9 +632,9 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
     // iz opisa ako ima ekstraktovati JCI, PDV0 osnovicu, PDV17 osnovicu, PDV17 neposlovnu osnovicu
     cSelectFields += "substring(fin_suban.opis from 'JCI:\s*([A-z\d]+)') as JCI,"
-    cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV0:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv0,"
-    cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
-    cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17np,"
+    cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV0:\s*([\d.\-]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv0,"
+    cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17:\s*([\d.\-]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
+    cSelectFields += "COALESCE(substring(fin_suban.opis from 'OSN-PDV17NP:\s*([\d.\-]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17np,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI-P:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci_prij,"
@@ -907,12 +907,13 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             ENDIF
         ENDIF
 
+        altd()
         lGreskaUZaokruzivanjuPDV0 := .F.
         IF (cAlias)->from_opis_osn_pdv0 <> nUndefined
             hRec["osn_pdv0"] := (cAlias)->from_opis_osn_pdv0
             lZadanaOsnovica := .T.
         ELSE
-            IF cTipDokumenta == "04"
+            IF cTipDokumenta == "04" .OR. cTipDokumenta == "04Z"
                 // stavka uvoza ne sadrzi PDV 0% osnovicu 
                 hRec["osn_pdv0"] := 0
             ELSE
@@ -1318,7 +1319,7 @@ FUNCTION gen_eNabavke()
         nRbr := Round(Max(nRbr, nRbr2), 0)
         
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY " brisati period " + cPorezniPeriod +" pa ponovo generisati?:" GET cBrisatiDN PICT "@!" VALID cBrisatiDN $ "DN"
-        @ box_x_koord() + nX++, box_y_koord() + 2 SAY "Redni broj naredne eIsporuke:" GET nRbr PICT 99999
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY "Redni broj naredne eNabavke:" GET nRbr PICT 99999
         READ
     BoxC()
 
@@ -1650,9 +1651,9 @@ FUNCTION export_eNabavke()
 FUNCTION opis_enabavka(cIdKonto, cOpis)
 
     LOCAL pRegexJCI := hb_regexComp( "JCI:\s*([A-z]*\d+)" )
-    LOCAL pRegexOsnPDV17 := hb_regexComp( "OSN-PDV17:\s*([\d.]+)" )
-    LOCAL pRegexOsnPDV17NP := hb_regexComp( "OSN-PDV17NP:\s*([\d.]+)" )
-    LOCAL pRegexOsnPDV0 := hb_regexComp( "OSN-PDV0:\s*([\d.]+)" )
+    LOCAL pRegexOsnPDV17 := hb_regexComp( "OSN-PDV17:\s*([\d.\-]+)" )
+    LOCAL pRegexOsnPDV17NP := hb_regexComp( "OSN-PDV17NP:\s*([\d.\-]+)" )
+    LOCAL pRegexOsnPDV0 := hb_regexComp( "OSN-PDV0:\s*([\d.\-]+)" )
     LOCAL pRegexDatFakt := hb_regexComp( "DAT-FAKT:\s*([\d.]+)" )
     LOCAL aMatch
     LOCAL hRez := hb_hash()

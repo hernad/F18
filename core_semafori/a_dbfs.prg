@@ -96,14 +96,14 @@ FUNCTION set_a_dbfs()
 
 FUNCTION set_a_dbfs_key_fields()
 
-   LOCAL _key
+   LOCAL cKey
    LOCAL cDatabase := my_server_params()[ "database" ]
 
-   FOR EACH _key in s_hF18Dbfs[ cDatabase ]:Keys
+   FOR EACH cKey in s_hF18Dbfs[ cDatabase ]:Keys
 
       // nije zadano - na osnovu strukture dbf-a napraviti dbf_fields
-      IF !hb_HHasKey( s_hF18Dbfs[ cDatabase ][ _key ], "dbf_fields" )  .OR.  s_hF18Dbfs[ cDatabase ][ _key ][ "dbf_fields" ] == NIL
-         set_dbf_fields_from_struct( @s_hF18Dbfs[ cDatabase ][ _key ] )
+      IF !hb_HHasKey( s_hF18Dbfs[ cDatabase ][ cKey ], "dbf_fields" )  .OR.  s_hF18Dbfs[ cDatabase ][ cKey ][ "dbf_fields" ] == NIL
+         set_dbf_fields_from_struct( @s_hF18Dbfs[ cDatabase ][ cKey ] )
       ENDIF
 
    NEXT
@@ -230,8 +230,8 @@ FUNCTION get_a_dbf_rec_by_wa( nWa )
 
 FUNCTION get_a_dbf_rec( cTable, _only_basic_params )
 
-   LOCAL _msg, hDbfRecord, _keys, cDbfTable, _key
-   LOCAL nI, cMsg, cDatabase := my_database(), hServerParams := my_server_params()
+   LOCAL cMsg, hDbfRecord, _keys, cDbfTable, cKey
+   LOCAL nI, cDatabase := my_database(), hServerParams := my_server_params()
 
    cDbfTable := "x"
 
@@ -241,9 +241,9 @@ FUNCTION get_a_dbf_rec( cTable, _only_basic_params )
 
 
    IF !hb_HHasKey( hServerParams, "database" ) .OR. ValType( s_hF18Dbfs[ hServerParams[ "database" ] ] ) <> "H"
-      _msg := ""
-      LOG_CALL_STACK _msg
-      log_write( "ERR-get_a_dbf_rec: " + cTable + " s_hF18Dbfs nije inicijalizirana " + _msg, 2)
+      cMsg := ""
+      LOG_CALL_STACK cMsg
+      log_write( "ERR-get_a_dbf_rec: " + cTable + " s_hF18Dbfs nije inicijalizirana " + cMsg, 2)
    ENDIF
 
    IF !hb_HHasKey( s_hF18Dbfs, cDatabase )
@@ -256,15 +256,15 @@ FUNCTION get_a_dbf_rec( cTable, _only_basic_params )
       cDbfTable := cTable
    ELSE
 
-      FOR EACH _key IN s_hF18Dbfs[ cDatabase ]:Keys // probaj preko aliasa
+      FOR EACH cKey IN s_hF18Dbfs[ cDatabase ]:Keys // probaj preko aliasa
          IF ValType( cTable ) == "N"  // zadana je workarea
-            IF s_hF18Dbfs[ cDatabase ][ _key ][ "wa" ] == cTable
-               cDbfTable := _key
+            IF s_hF18Dbfs[ cDatabase ][ cKey ][ "wa" ] == cTable
+               cDbfTable := cKey
                EXIT
             ENDIF
          ELSE
-            IF s_hF18Dbfs[ cDatabase ][ _key ][ "alias" ] == Upper( cTable )
-               cDbfTable := _key
+            IF s_hF18Dbfs[ cDatabase ][ cKey ][ "alias" ] == Upper( cTable )
+               cDbfTable := cKey
                EXIT
             ENDIF
          ENDIF
@@ -273,18 +273,43 @@ FUNCTION get_a_dbf_rec( cTable, _only_basic_params )
 
 
    IF cDbfTable == "x"
-      _msg := "ERROR: x dbf alias " + cTable + " ne postoji u a_dbf_rec ?!"
-
       hDbfRecord := hb_Hash()
+
+      IF cTable == "E_KALK" .OR. cTable == "E_DOKS" .OR. cTable == "E_PARTN" .OR. cTable == "E_KONTO" .OR. cTable == "E_SIFK" .OR. cTable == "E_SIFV"
+
+         IF cTable == "E_DOKS"
+            hDbfRecord[ "wa" ] := F_TMP_E_DOKS
+         ELSEIF cTable == "E_KALK"
+            hDbfRecord[ "wa" ] := F_TMP_E_KALK
+         ELSEIF cTable == "E_PARTN"
+            hDbfRecord[ "wa" ] := F_TMP_E_PARTN
+         ELSEIF cTable == "E_KONTO"
+            hDbfRecord[ "wa" ] := F_TMP_E_KONTO
+         ELSEIF cTable == "E_SIFK"
+            hDbfRecord[ "wa" ] := F_TMP_E_SIFK
+         ELSEIF cTable == "E_SIFV"
+            hDbfRecord[ "wa" ] := F_TMP_E_SIFV
+         ELSEIF cTable == "E_ROBA"
+            hDbfRecord[ "wa" ] := F_TMP_E_ROBA
+         ELSEIF cTable == "E_FAKT"
+            hDbfRecord[ "wa" ] := F_TMP_E_FAKT
+         ENDIF
+      ELSE 
+        cMsg := "ERROR: x dbf alias " + cTable + " ne postoji u a_dbf_rec ?!"
+        hDbfRecord[ "wa" ] := 6000
+      ENDIF
+
       hDbfRecord[ "temp" ] := .T.
       hDbfRecord[ "table" ] := cTable
       hDbfRecord[ "alias" ] := cTable
       hDbfRecord[ "sql" ] := .F.
       hDbfRecord[ "sif" ] := .F.
-      hDbfRecord[ "wa" ] := 6000
-
-      LOG_CALL_STACK _msg
-      ?E _msg
+      
+      IF hDbfRecord[ "wa" ]  == 6000
+         // nepoznata tabela
+         LOG_CALL_STACK cMsg
+         ?E cMsg
+      ENDIF
       RETURN hDbfRecord
 
    ENDIF
@@ -303,10 +328,10 @@ FUNCTION get_a_dbf_rec( cTable, _only_basic_params )
    ENDIF
 
    IF !hb_HHasKey( hDbfRecord, "table" ) .OR. hDbfRecord[ "table" ] == NIL
-      _msg := RECI_GDJE_SAM + " set_a_dbf nije definisan za table= " + cTable
-      Alert( _msg )
-      log_write( _msg, 2 )
-      RaiseError( _msg )
+      cMsg := RECI_GDJE_SAM + " set_a_dbf nije definisan za table= " + cTable
+      Alert( cMsg )
+      log_write( cMsg, 2 )
+      RaiseError( cMsg )
       QUIT_1
    ENDIF
 
@@ -413,7 +438,7 @@ FUNCTION is_sifarnik( cTable )
 FUNCTION dbf_alias_has_semaphore( cAlias )
 
    LOCAL _ret := .F.
-   LOCAL hDbfRecord, cDbfTable, _key
+   LOCAL hDbfRecord, cDbfTable, cKey
    LOCAL cDatabase := my_database()
 
    // ako nema parametra uzmi tekuci alias na kome se nalazimo
@@ -428,15 +453,15 @@ FUNCTION dbf_alias_has_semaphore( cAlias )
 
    cDbfTable := "x"
 
-   FOR EACH _key IN s_hF18Dbfs[ cDatabase ]:Keys
+   FOR EACH cKey IN s_hF18Dbfs[ cDatabase ]:Keys
       IF ValType( cAlias ) == "N"
-         IF s_hF18Dbfs[ cDatabase ][ _key ][ "wa" ] == cAlias // zadana je workarea
-            cDbfTable := _key
+         IF s_hF18Dbfs[ cDatabase ][ cKey ][ "wa" ] == cAlias // zadana je workarea
+            cDbfTable := cKey
             EXIT
          ENDIF
       ELSE
-         IF s_hF18Dbfs[ cDatabase ][ _key ][ "alias" ] == Upper( cAlias )
-            cDbfTable := _key
+         IF s_hF18Dbfs[ cDatabase ][ cKey ][ "alias" ] == Upper( cAlias )
+            cDbfTable := cKey
             EXIT
          ENDIF
       ENDIF

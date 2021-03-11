@@ -318,7 +318,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     APPEND BLANK
     hRec := dbf_get_rec()
 
-    hRec["idfirma"] := "10"
+    hRec["idfirma"] := self_organizacija_id()
     hRec["idvn"] := hParams["fin_uvoz_fin_idvn"]
     hRec["brnal"] := hParams["fin_uvoz_fin_brnal"]
 

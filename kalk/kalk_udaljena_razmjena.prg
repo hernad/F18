@@ -100,13 +100,13 @@ STATIC FUNCTION kalk_import_start()
 
    LOCAL nImportovanoZapisa
    LOCAL _vars := hb_Hash()
-   LOCAL _imp_file
+   LOCAL cImportFile
    LOCAL _a_data := {}
-   LOCAL _imp_path := fetch_metric( "kalk_import_path", my_user(), PadR( "", 300 ) )
+   LOCAL cImportPath := fetch_metric( "kalk_import_path", my_user(), PadR( "", 300 ) )
    LOCAL GetList := {}
 
    Box(, 1, 70 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY "import path:" GET _imp_path PICT "@S50"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "import path:" GET cImportPath PICT "@S50"
    READ
    BoxC()
 
@@ -114,13 +114,13 @@ STATIC FUNCTION kalk_import_start()
       RETURN .F.
    ENDIF
 
-   s_cImportDbfPath := AllTrim( _imp_path ) // snimi u parametre
-   set_metric( "kalk_import_path", my_user(), _imp_path )
+   s_cImportDbfPath := AllTrim( cImportPath ) // snimi u parametre
+   set_metric( "kalk_import_path", my_user(), cImportPath )
 
 
-   _imp_file := get_import_file( "kalk", s_cImportDbfPath ) // import fajl iz liste
+   cImportFile := get_import_file( "kalk", s_cImportDbfPath ) // import fajl iz liste
 
-   IF _imp_file == NIL .OR. Empty( _imp_file )
+   IF cImportFile == NIL .OR. Empty( cImportFile )
       MsgBeep( "Nema odabranog import fajla !?" )
       RETURN .F.
    ENDIF
@@ -129,13 +129,13 @@ STATIC FUNCTION kalk_import_start()
       RETURN .F.
    ENDIF
 
-   IF !import_file_exist( _imp_file )
+   IF !import_file_exist( cImportFile )
       MsgBeep( "import fajl ne postoji !? prekidam operaciju" )
       RETURN .F.
    ENDIF
 
 
-   IF razmjena_decompress_files( _imp_file, s_cImportDbfPath, s_cImportZipName ) <> 0 // dekompresovanje podataka
+   IF razmjena_decompress_files( cImportFile, s_cImportDbfPath, s_cImportZipName ) <> 0 // dekompresovanje podataka
       // ako je bilo greske
       RETURN .F.
    ENDIF
@@ -153,7 +153,7 @@ STATIC FUNCTION kalk_import_start()
    IF ( nImportovanoZapisa > 0 ) // nakon uspjesnog importa
 
       IF Pitanje(, "Pobrisati obrađeni zip fajl razmjene ?", "D" ) == "D"
-         delete_zip_files( _imp_file )
+         delete_zip_files( cImportFile )
       ENDIF
 
       MsgBeep( "Importovao " + AllTrim( Str( nImportovanoZapisa ) ) + " dokumenta." )
@@ -172,7 +172,7 @@ STATIC FUNCTION kalk_import_start()
 // -------------------------------------------
 STATIC FUNCTION _vars_export( hParams )
 
-   LOCAL _ret := .F.
+   LOCAL lRet := .F.
    LOCAL _dat_od := fetch_metric( "kalk_export_datum_od", my_user(), Date() - 30 )
    LOCAL _dat_do := fetch_metric( "kalk_export_datum_do", my_user(), Date() )
    LOCAL _konta := fetch_metric( "kalk_export_lista_konta", my_user(), PadR( "1320;", 200 ) )
@@ -214,7 +214,7 @@ STATIC FUNCTION _vars_export( hParams )
    // snimi parametre
    IF LastKey() <> K_ESC
 
-      _ret := .T.
+      lRet := .T.
 
       set_metric( "kalk_export_datum_od", my_user(), _dat_od )
       set_metric( "kalk_export_datum_do", my_user(), _dat_do )
@@ -234,7 +234,7 @@ STATIC FUNCTION _vars_export( hParams )
 
    ENDIF
 
-   RETURN _ret
+   RETURN lRet
 
 
 
@@ -243,21 +243,21 @@ STATIC FUNCTION _vars_export( hParams )
 // -------------------------------------------
 STATIC FUNCTION _vars_import( hParams )
 
-   LOCAL _ret := .F.
+   LOCAL lRet := .F.
    LOCAL _dat_od := fetch_metric( "kalk_import_datum_od", my_user(), CToD( "" ) )
    LOCAL _dat_do := fetch_metric( "kalk_import_datum_do", my_user(), CToD( "" ) )
    LOCAL _konta := fetch_metric( "kalk_import_lista_konta", my_user(), PadR( "", 200 ) )
    LOCAL _vrste_dok := fetch_metric( "kalk_import_vrste_dokumenata", my_user(), PadR( "", 200 ) )
    LOCAL _zamjeniti_dok := fetch_metric( "kalk_import_zamjeniti_dokumente", my_user(), "N" )
    LOCAL lZamijenitiSifre := fetch_metric( "kalk_import_zamjeniti_sifre", my_user(), "N" )
-   LOCAL _iz_fmk := fetch_metric( "kalk_import_iz_fmk", my_user(), "N" )
-   LOCAL _imp_path := fetch_metric( "kalk_import_path", my_user(), PadR( "", 300 ) )
+   LOCAL cIzFmkDN := fetch_metric( "kalk_import_iz_fmk", my_user(), "N" )
+   LOCAL cImportPath := fetch_metric( "kalk_import_path", my_user(), PadR( "", 300 ) )
    LOCAL nX := 1
-   LOCAL cPript := fetch_metric( "kalk_import_pript", my_user(), "N" )
+   LOCAL cPript := fetch_metric( "kalk_import_pript", my_user(), "D" )
    LOCAL GetList := {}
 
-   IF Empty( AllTrim( _imp_path ) )
-      _imp_path := PadR( s_cImportDbfPath, 300 )
+   IF Empty( AllTrim( cImportPath ) )
+      cImportPath := PadR( s_cImportDbfPath, 300 )
    ENDIF
 
    Box(, 15, 70 )
@@ -282,10 +282,10 @@ STATIC FUNCTION _vars_import( hParams )
 
 //   ++ nX
 //   ++ nX
-//   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Import fajl dolazi iz FMK (D/N) ?" GET _iz_fmk PICT "@!" VALID _iz_fmk $ "DN"
+//   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Import fajl dolazi iz FMK (D/N) ?" GET cIzFmkDN PICT "@!" VALID cIzFmkDN $ "DN"
    ++ nX
    ++ nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Lokacija importa:" GET _imp_path PICT "@S50"
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Lokacija importa:" GET cImportPath PICT "@S50"
 
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "pript->obrada->kalk:" GET cPript PICT "@!" VALID cPript $ "DN"
@@ -297,19 +297,19 @@ STATIC FUNCTION _vars_import( hParams )
    // snimi parametre
    IF LastKey() <> K_ESC
 
-      _ret := .T.
+      lRet := .T.
       set_metric( "kalk_import_datum_od", my_user(), _dat_od )
       set_metric( "kalk_import_datum_do", my_user(), _dat_do )
       set_metric( "kalk_import_lista_konta", my_user(), _konta )
       set_metric( "kalk_import_vrste_dokumenata", my_user(), _vrste_dok )
       set_metric( "kalk_import_zamjeniti_dokumente", my_user(), _zamjeniti_dok )
       set_metric( "kalk_import_zamjeniti_sifre", my_user(), lZamijenitiSifre )
-      set_metric( "kalk_import_iz_fmk", my_user(), _iz_fmk )
-      set_metric( "kalk_import_path", my_user(), _imp_path )
+      set_metric( "kalk_import_iz_fmk", my_user(), cIzFmkDN )
+      set_metric( "kalk_import_path", my_user(), cImportPath )
       set_metric( "kalk_import_pript", my_user(), cPript )
 
       // set static var
-      s_cImportDbfPath := AllTrim( _imp_path )
+      s_cImportDbfPath := AllTrim( cImportPath )
 
       hParams[ "datum_od" ] := _dat_od
       hParams[ "datum_do" ] := _dat_do
@@ -317,18 +317,18 @@ STATIC FUNCTION _vars_import( hParams )
       hParams[ "vrste_dok" ] := _vrste_dok
       hParams[ "zamjeniti_dokumente" ] := _zamjeniti_dok
       hParams[ "zamjeniti_sifre" ] := lZamijenitiSifre
-      hParams[ "import_iz_fmk" ] := _iz_fmk
+      hParams[ "import_iz_fmk" ] := cIzFmkDN
       hParams[ "pript" ] := ( cPript == "D" )
 
    ENDIF
 
-   RETURN _ret
+   RETURN lRet
 
 
 
 STATIC FUNCTION kalk_export( hParams, a_details )
 
-   LOCAL _ret := 0
+   LOCAL lRet := 0
    LOCAL cIdFirma, cIdVd, cBrDok
    LOCAL aDoksRec
    LOCAL nCnt := 0
@@ -348,7 +348,6 @@ STATIC FUNCTION kalk_export( hParams, a_details )
    _cre_exp_tbls( s_cExportDbfPath ) // kreiraj tabele exporta
    kalk_o_exp_tabele( s_cExportDbfPath ) // otvori export tabele za pisanje podataka
 
-   kalk_o_tabele()
 
    Box(, 2, 65 )
 
@@ -517,25 +516,25 @@ STATIC FUNCTION kalk_export( hParams, a_details )
    BoxC()
 
    IF ( nCnt > 0 )
-      _ret := nCnt
+      lRet := nCnt
    ENDIF
 
-   RETURN _ret
+   RETURN lRet
 
 
 
 
 STATIC FUNCTION kalk_import_podataka( hParams, a_details )
 
-   LOCAL _ret := 0
+   LOCAL nRet := 0
    LOCAL cIdFirma, cIdVd, cBrDok
    LOCAL aDoksRec
    LOCAL nCnt := 0
-   LOCAL _dat_od, _dat_do, _konta, _vrste_dok, _zamjeniti_dok, lZamijenitiSifre, _iz_fmk
+   LOCAL _dat_od, _dat_do, _konta, _vrste_dok, _zamjeniti_dok, lZamijenitiSifre, cIzFmkDN
    LOCAL cUslMagacinKonto, cUslProdKonto
    LOCAL _roba_id, _partn_id, _konto_id
    LOCAL _sif_exist
-   LOCAL _fmk_import := .F.
+   LOCAL lFmkImport := .F.
    LOCAL nRedniRbroj := 0
    LOCAL _total_doks := 0
    LOCAL _total_kalk := 0
@@ -551,15 +550,14 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
    _vrste_dok := hParams[ "vrste_dok" ]
    _zamjeniti_dok := hParams[ "zamjeniti_dokumente" ]
    lZamijenitiSifre := hParams[ "zamjeniti_sifre" ]
-   _iz_fmk := hParams[ "import_iz_fmk" ]
+   cIzFmkDN := hParams[ "import_iz_fmk" ]
 
 
-   IF _iz_fmk == "D"
-      _fmk_import := .T.
+   IF cIzFmkDN == "D"
+      lFmkImport := .T.
    ENDIF
 
-   kalk_o_exp_tabele( s_cImportDbfPath, _fmk_import )
-   kalk_o_tabele()
+   kalk_o_exp_tabele( s_cImportDbfPath, lFmkImport )
 
    SELECT e_doks
    _total_doks := RECCOUNT2()
@@ -804,10 +802,10 @@ STATIC FUNCTION kalk_import_podataka( hParams, a_details )
    BoxC()
 
    IF nCnt > 0
-      _ret := nCnt
+      nRet := nCnt
    ENDIF
 
-   RETURN _ret
+   RETURN nRet
 
 
 
@@ -894,20 +892,6 @@ STATIC FUNCTION _cre_exp_tbls( cDbfPath )
    RETURN .T.
 
 
-// ----------------------------------------------------
-// otvaranje potrebnih tabela za prenos
-// ----------------------------------------------------
-STATIC FUNCTION kalk_o_tabele()
-
-   // o_kalk()
-   // o_kalk_doks()
-   //o_sifk()
-   //o_sifv()
-   //o_konto()
-   //o_partner()
-  // o_roba()
-
-   RETURN .T.
 
 
 

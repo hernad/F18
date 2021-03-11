@@ -17,7 +17,7 @@
 
 FUNCTION dbf_update_rec( hRec, lNoLock )
 
-   LOCAL _key
+   LOCAL cKey
    LOCAL _field_b
    LOCAL cMsg
    LOCAL aDbfRec
@@ -39,24 +39,24 @@ FUNCTION dbf_update_rec( hRec, lNoLock )
 
       aDbfRec := get_a_dbf_rec( Alias(), .F. )
 
-      FOR EACH _key in hRec:Keys
+      FOR EACH cKey in hRec:Keys
 
-         IF field_in_blacklist( _key, aDbfRec[ "blacklisted" ] )  // blacklistovano polje
+         IF field_in_blacklist( cKey, aDbfRec[ "blacklisted" ] )  // blacklistovano polje
             LOOP
          ENDIF
 
-         IF FieldPos( _key ) == 0 // replace polja
-            cMsg := RECI_GDJE_SAM + " dbf field " + _key + " ne postoji u " + Alias()
+         IF FieldPos( cKey ) == 0 // replace polja
+            cMsg := RECI_GDJE_SAM + " dbf field " + cKey + " ne postoji u " + Alias()
             // Alert(cMsg)
             log_write( cMsg, 1 )
          ELSE
-            _field_b := FieldBlock( _key )
+            _field_b := FieldBlock( cKey )
 
             // napuni field sa vrijednosti
-            IF ValType( hRec[ _key ] ) == "C" .AND. lSql .AND. F18_SQL_ENCODING == "UTF8"
-               hRec[ _key ] := hb_StrToUTF8( hRec[ _key ] )  // proklete_kvacice - konvertuj SQLMix record u UTF-8
+            IF ValType( hRec[ cKey ] ) == "C" .AND. lSql .AND. F18_SQL_ENCODING == "UTF8"
+               hRec[ cKey ] := hb_StrToUTF8( hRec[ cKey ] )  // proklete_kvacice - konvertuj SQLMix record u UTF-8
             ENDIF
-            Eval( _field_b, hRec[ _key ] )
+            Eval( _field_b, hRec[ cKey ] )
 
          ENDIF
 

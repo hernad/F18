@@ -94,7 +94,6 @@ FUNCTION check_eIsporuke()
     LOCAL cIdKontoPDVNeRS := trim( fetch_metric( "fin_eisp_idkonto_pdv_nepdv_2", NIL, "4731" ) )
     LOCAL cIdKontoPDVNeBD := trim( fetch_metric( "fin_eisp_idkonto_pdv_nepdv_3", NIL, "4732" ) )
 
-    
     LOCAL cIdKontoPDVUslugeStranaLica := trim( fetch_metric( "fin_eisp_idkonto_pdv_ust", NIL, "474" ))
     LOCAL cIdKontoPDVSchema := trim( fetch_metric( "fin_eisp_idkonto_pdv_schema", NIL, "475" ))
     LOCAL cIdKontoPDVOstalo :=trim( fetch_metric( "fin_eisp_idkonto_pdv_ostalo", NIL, "478" ))
@@ -131,7 +130,9 @@ FUNCTION check_eIsporuke()
 
 
     cSelectFields := "SELECT fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr, fin_suban.idkonto as idkonto, sub2.idkonto as idkonto2,"
-    cSelectFields += "fin_suban.BrDok brdok, sub2.brdok brdok2, fin_suban.idpartner"
+    cSelectFields += "fin_suban.BrDok brdok, sub2.brdok brdok2, fin_suban.idpartner,"
+    cSelectFields += "COALESCE(substring(fin_suban.opis from 'PDV0:\s*CLAN(\d+)'), 'UNDEF') as from_opis_pdv0_clan"
+    
     cFinNalogNalog2 := "fin_suban.idfirma=sub2.idfirma and fin_suban.idvn=sub2.idvn and fin_suban.brnal=sub2.brnal"
    
     // 470
@@ -170,12 +171,13 @@ FUNCTION check_eIsporuke()
 
     nX:=1
     Box( ,15, 85)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY "****** FIN nalozi koji nemaju zadane ispravne partnere ili veze (brdok):"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY "       (Provjerite da li je Partner INO ili oslobodjen po ZPDV)         "
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY "****** FIN nalozi koji nemaju zadane ispravne partnere ili veze (brdok)   :"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY "(Da li je: Partner INO ili oslobodjen po ZPDV ili OPIS sadrzi PDV0:CLANXX)"
+
 
     ++nX
     DO WHILE !EOF()
-        IF !is_part_pdv_oslob_po_clanu(eisp->idpartner) .AND. !partner_is_ino(eisp->idpartner )
+        IF !is_part_pdv_oslob_po_clanu(eisp->idpartner) .AND. !partner_is_ino(eisp->idpartner ) .AND. eisp->from_opis_pdv0_clan == "UNDEF"
           @ box_x_koord() + nX++, box_y_koord() + 2 SAY eisp->idfirma + "-" + eisp->idvn + "-" + eisp->brnal + " Rbr:" + str(eisp->rbr,4) +;
                    " Konto:" + trim(eisp->idkonto) + " / " + trim(eisp->idkonto2)
           
@@ -445,7 +447,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'PDV0:\s*CLAN(\d+)'), 'UNDEF') as from_opis_pdv0_clan,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
-        cSelectFields += "COALESCE(substring(fin_suban.opis from 'JCI-IZN:\s*([\d.]+)')::DECIMAL, 0.0) as JCI_IZN,"
+        cSelectFields += "COALESCE(substring(fin_suban.opis from 'JCI-IZN:\s*([\d.\-]+)')::DECIMAL, 0.0) as JCI_IZN,"
         cSelectFields += "fin_suban.idkonto as idkonto_kup, fin_suban.idpartner as idpartner, '' as idkonto_pdv, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
         
     ELSE
@@ -458,7 +460,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "'UNDEF' as from_opis_dat_jci,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
         cSelectFields += "0 as JCI_IZN,"
-        cSelectFields += "COALESCE(substring(sub2.opis from 'OSN-PDV17:\s*([-+\d.]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
+        cSelectFields += "COALESCE(substring(sub2.opis from 'OSN-PDV17:\s*([-+\d.\-]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
         cSelectFields += "fin_suban.idkonto as idkonto_pdv, sub2.idkonto as idkonto_kup, sub2.idpartner as idpartner, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
     ENDIF
 
