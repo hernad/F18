@@ -184,7 +184,7 @@ FUNCTION check_eNabavke()
     
 
     Box(,3, 70)
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eIsporuke Generacija *****"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eNabavke Generacija *****"
        @ box_x_koord() + nX, box_y_koord() + 2 SAY "Za period od:" GET dDatOd
        @ box_x_koord() + nX++, col() + 2 SAY "Za period od:" GET dDatDo
        READ
@@ -913,7 +913,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             hRec["osn_pdv0"] := (cAlias)->from_opis_osn_pdv0
             lZadanaOsnovica := .T.
         ELSE
-            IF cTipDokumenta == "04"
+            IF cTipDokumenta == "04" .OR. cTipDokumenta == "04Z"
                 // stavka uvoza ne sadrzi PDV 0% osnovicu 
                 hRec["osn_pdv0"] := 0
             ELSE
@@ -1319,7 +1319,7 @@ FUNCTION gen_eNabavke()
         nRbr := Round(Max(nRbr, nRbr2), 0)
         
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY " brisati period " + cPorezniPeriod +" pa ponovo generisati?:" GET cBrisatiDN PICT "@!" VALID cBrisatiDN $ "DN"
-        @ box_x_koord() + nX++, box_y_koord() + 2 SAY "Redni broj naredne eIsporuke:" GET nRbr PICT 99999
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY "Redni broj naredne eNabavke:" GET nRbr PICT 99999
         READ
     BoxC()
 
