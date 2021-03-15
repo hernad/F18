@@ -309,7 +309,11 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
       set_metric( cKey, my_user(), hParams[ cKey] )
     NEXT
 
-
+    IF " " $ Trim(hRec[ "fin_uvoz_jci_broj"])
+        Alert(_u("JCI broj ne može da sadrži znakove razmaka. STOP!"))
+        RETURN .F.
+    ENDIF
+    
     o_fin_edit()
     my_flock()
 

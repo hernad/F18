@@ -116,9 +116,13 @@ FUNCTION check_eIsporuke()
        READ
     BoxC()
 
-
     IF Lastkey() == K_ESC
       RETURN .F.
+    ENDIF
+
+    IF (month(dDatOd) <> month(dDatDo)) .OR. (year(dDatOd) <> year(dDatDo))
+        Alert(_u("Ne možete generisati PDV za više mjeseci. STOP!"))
+       RETURN .F.
     ENDIF
 
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
@@ -1163,7 +1167,12 @@ FUNCTION gen_eIsporuke()
 
     IF Lastkey() == K_ESC
         RETURN .F.
-     ENDIF
+    ENDIF
+
+    IF (month(dDatOd) <> month(dDatDo)) .OR. (year(dDatOd) <> year(dDatDo))
+        Alert(_u("Ne možete generisati PDV za više mjeseci. STOP!"))
+       RETURN .F.
+    ENDIF
      
     set_metric( "fin_enab_my_pdv", NIL, cPDV )
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )

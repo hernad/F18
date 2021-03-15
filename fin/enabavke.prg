@@ -190,9 +190,13 @@ FUNCTION check_eNabavke()
        READ
     BoxC()
 
-
     IF Lastkey() == K_ESC
       RETURN .F.
+    ENDIF
+
+    IF (month(dDatOd) <> month(dDatDo)) .OR. (year(dDatOd) <> year(dDatDo))
+        Alert(_u("Ne možete generisati PDV za više mjeseci. STOP!"))
+       RETURN .F.
     ENDIF
 
     // dobavljac - partner mora postojati, brdok mora postojati
@@ -734,7 +738,8 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
         IF (cAlias)->enab_rbr <> -99999
             // vec postoji stavka 43% u tabeli enabavke
-            IF (cAlias)->enab_porezni_period != cPorezniPeriod          
+            IF (cAlias)->enab_porezni_period != cPorezniPeriod
+                altd()       
                 Alert(_u("Greška koristi se nalog " +;
                 (cAlias)->idfirma + "-" + (cAlias)->idvn + "-" + (cAlias)->brnal + "/" + AllTrim(Str((cAlias)->rbr)) +;
                 " iz poreznog perioda: " + (cAlias)->enab_porezni_period))
@@ -907,7 +912,6 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             ENDIF
         ENDIF
 
-        altd()
         lGreskaUZaokruzivanjuPDV0 := .F.
         IF (cAlias)->from_opis_osn_pdv0 <> nUndefined
             hRec["osn_pdv0"] := (cAlias)->from_opis_osn_pdv0
@@ -1325,7 +1329,12 @@ FUNCTION gen_eNabavke()
 
     IF Lastkey() == K_ESC
         RETURN .F.
-     ENDIF
+    ENDIF
+
+    IF (month(dDatOd) <> month(dDatDo)) .OR. (year(dDatOd) <> year(dDatDo))
+        Alert(_u("Ne možete generisati PDV za više mjeseci. STOP!"))
+       RETURN .F.
+    ENDIF
      
     set_metric( "fin_enab_my_pdv", NIL, cPDV )
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
