@@ -455,6 +455,7 @@ FUNCTION fin_kontiranje_naloga( dDatNal )
                      // 4701 -> 4731
                   //   cIdKonto := LEFT(cIdKonto, 2) + "3" + SUBSTR(cIdKonto, 4)
                   //ENDIF
+                  altd()
 
                   cNePDV := partn_nepdv( FINMAT->IdPartner )
                   SWITCH cNePDV

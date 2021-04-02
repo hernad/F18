@@ -25,6 +25,7 @@ FUNCTION ld_asd_aug_obrazac()
    LOCAL cVarPrn := "2"
    LOCAL cObracun := gObracun
    LOCAL cIdRadn := Space( 6 )
+   LOCAL GetList := {}
 
    ld_aug_cre_dbf_r_export()
 
@@ -100,6 +101,7 @@ FUNCTION ld_asd_aug_obrazac()
    cPeriod := AllTrim( Str( nMjesec, 2, 0 ) ) + "/" + AllTrim( Str( nGodina, 4, 0 ) )
 
    IF cVarPrn == "1"
+      // cTipRada (1) AUG-1031 (2) ASD-1032 (3) PDN-1033
       ak_print( dDatIspl, cPeriod, cTipRada )   // printaj obracunski list
    ENDIF
 
