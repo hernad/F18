@@ -1484,11 +1484,13 @@ FUNCTION partn_nepdv( cPartnerId )
 
     LOCAL cPDV := get_partn_pdvb( cPartnerId )
     LOCAL cJib := get_partn_idbr( cPartnerId )
+    LOCAL cRejon
      
+    altd()
     IF LEN(cJib) == 13 .AND. LEN(cPDV) == 0
         // NEPDV obveznik
-        select_o_partner( cPartnerId )
-           SWITCH partn->rejon
+        cRejon := part_rejon( cPartnerId )
+           SWITCH cRejon
             CASE "2"
                // RS 
                RETURN "2"
