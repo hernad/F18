@@ -12,11 +12,11 @@
 #include "f18.ch"
 
 
-FUNCTION calc_mbruto()
+FUNCTION ld_calc_min_bruto_yes_no()
 
    LOCAL lRet := .T.
 
-   IF ld->I01 = 0
+   IF ld->I01 == 0
       lRet := .F.
    ENDIF
 
@@ -347,7 +347,7 @@ FUNCTION ld_bruto_isplata_ispis( nNeto, cTipRada, nLOdb, nSKoef, cTrosk )
 // --------------------------------------------
 // minimalni bruto
 // --------------------------------------------
-FUNCTION min_bruto( nBruto, nSati )
+FUNCTION ld_min_bruto_osnova( nBruto, nSati )
 
    LOCAL nRet
    LOCAL nMBO
@@ -684,12 +684,21 @@ FUNCTION NLjudi()
    RETURN "(" + AllTrim( Str( opsld->ljudi ) ) + ")"
 
 
-FUNCTION ImaUOp( cPD, cSif )
+/*
+
+   !ld_ima_u_ops_porez_ili_doprinos( "DOPR", DOPR->id )
+   IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
+
+   ops.dne - ?
+   ops.pne - ?
+   
+*/
+FUNCTION ld_ima_u_ops_porez_ili_doprinos( cPorezDoprinos, cSif )
 
    LOCAL lVrati := .T.
 
    IF ops->( FieldPos( "DNE" ) ) <> 0
-      IF Upper( cPD ) = "P"
+      IF Upper( cPorezDoprinos ) == "P"
          lVrati := !( cSif $ OPS->pne )
       ELSE
          lVrati := !( cSif $ OPS->dne )
@@ -699,7 +708,7 @@ FUNCTION ImaUOp( cPD, cSif )
    RETURN lVrati
 
 
-FUNCTION PozicOps( cSR )
+FUNCTION ld_opstina_stanovanja_rada( cSR )
 
    LOCAL nArr := Select()
    LOCAL cO := ""

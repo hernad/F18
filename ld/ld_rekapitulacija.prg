@@ -29,7 +29,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    PRIVATE aUsl1, aUsl2
    PRIVATE aNetoMj
    PRIVATE cDoprSpace := ""
-   PRIVATE cLmSk := ""
+   PRIVATE cLDLijevaMargina := ""
 
 
    cTpLine := _gtprline()
@@ -451,7 +451,6 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
    LOCAL i
    LOCAL cTpr
-   LOCAL _benef_st
    LOCAL cOpis2
 
    nPorol := 0
@@ -600,9 +599,9 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
          nMRadn_bo := nRadn_bo
 
-         IF calc_mbruto()
+         IF ld_calc_min_bruto_yes_no()
             // minimalna bruto osnova
-            nMRadn_bo := min_bruto( nRadn_bo, _usati )
+            nMRadn_bo := ld_min_bruto_osnova( nRadn_bo, _usati )
          ENDIF
 
          // ukupno minimalna bruto osnova
@@ -622,10 +621,8 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
          nRadn_bbo := ld_get_bruto_osnova( _oosnneto - if( !Empty( gBFForm ), &gBFForm, 0 ), cTipRada, nKoefLO, nRSpr_koef )
          nURadn_bbo += nRadn_bbo
 
-         // uzmi stepen za radnika koji je ?
-         _benef_st := BenefStepen()
          // upisi osnovicu...
-         add_to_a_benef( @a_benef, AllTrim( radn->k3 ), _benef_st, nRadn_bbo )
+         add_to_a_benef( @a_benef, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nRadn_bbo )
 
       ENDIF
 
@@ -669,9 +666,9 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
          cAlgoritam := get_algoritam()
 
-         PozicOps( POR->poopst )
+         ld_opstina_stanovanja_rada( POR->poopst )
 
-         IF !ImaUOp( "POR", POR->id )
+         IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
             SKIP 1
             LOOP
          ENDIF

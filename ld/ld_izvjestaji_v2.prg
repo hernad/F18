@@ -250,8 +250,8 @@ FUNCTION SortOpSt( cId )
 
 FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
 
-   LOCAL nArr := Select(), nDopr := 0, nPom := 0, nPom2 := 0, nPom0 := 0, nBO := 0, nBFOsn := 0
-   LOCAL _a_benef := {}
+   LOCAL nArr := Select(), nDopr := 0, nPom := 0, nPom2 := 0, nPom0 := 0, nBrutoOsnova := 0, nBFOsn := 0
+   LOCAL aBeneficirani := {}
 
    IF nKLO == nil
       nKLO := 0
@@ -269,7 +269,7 @@ FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
 
    IF gVarObracun == "2"
 
-      nBo := ld_get_bruto_osnova( Max( _UNeto, PAROBR->prosld * gPDLimit / 100 ), cTipRada, nKlo, nSPr_koef )
+      nBrutoOsnova := ld_get_bruto_osnova( Max( _UNeto, PAROBR->prosld * gPDLimit / 100 ), cTipRada, nKlo, nSPr_koef )
 
       IF is_radn_k4_bf_ide_u_benef_osnovu()
 
@@ -279,20 +279,19 @@ FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
 
          nBFOsn := ld_get_bruto_osnova( _UNeto - IF( !Empty( gBFForm ), &gBFForm, 0 ), cTipRada, nKlo, nSPr_koef )
 
-         _benef_st := BenefStepen()
-         add_to_a_benef( @_a_benef, AllTrim( radn->k3 ), _benef_st, nBFOsn )
+         add_to_a_benef( @aBeneficirani, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nBFOsn )
 
       ENDIF
 
       IF cTipRada $ " #I#N"
          // minimalni bruto osnov
-         IF calc_mbruto()
-            nBo := min_bruto( nBo, ld->usati )
+         IF ld_calc_min_bruto_yes_no()
+            nBrutoOsnova := ld_min_bruto_osnova( nBrutoOsnova, ld->usati )
          ENDIF
       ENDIF
 
    ELSE
-      nBo := round2( parobr->k3 / 100 * Max( _UNeto, PAROBR->prosld * gPDLimit / 100 ), gZaok2 )
+      nBrutoOsnova := round2( parobr->k3 / 100 * Max( _UNeto, PAROBR->prosld * gPDLimit / 100 ), gZaok2 )
    ENDIF
 
    select_o_dopr()
@@ -314,18 +313,18 @@ FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
          LOOP
       ENDIF
 
-      PozicOps( DOPR->poopst )   // ? mozda ovo rusi koncepciju zbog sorta na LD-u
+      ld_opstina_stanovanja_rada( DOPR->poopst )   // ? mozda ovo rusi koncepciju zbog sorta na LD-u
 
-      IF !ImaUOp( "DOPR", DOPR->id )
+      IF !ld_ima_u_ops_porez_ili_doprinos( "DOPR", DOPR->id )
          SKIP 1
          LOOP
       ENDIF
 
       IF !Empty( dopr->idkbenef )
          // beneficirani
-         nPom := Max( dlimit, Round( iznos / 100 * get_benef_osnovica( _a_benef, dopr->idkbenef ), gZaok2 ) )
+         nPom := Max( dlimit, Round( iznos / 100 * get_benef_osnovica( aBeneficirani, dopr->idkbenef ), gZaok2 ) )
       ELSE
-         nPom := Max( dlimit, Round( iznos / 100 * nBO, gZaok2 ) )
+         nPom := Max( dlimit, Round( iznos / 100 * nBrutoOsnova, gZaok2 ) )
       ENDIF
 
       IF Round( iznos, 4 ) = 0 .AND. dlimit > 0
@@ -337,7 +336,7 @@ FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
       nDopr += nPom
 
       // resetuj matricu a_benef, posto nam treba za radnika
-      _a_benef := {}
+      aBeneficirani := {}
 
       SKIP 1
 

@@ -345,9 +345,9 @@ FUNCTION ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjese
          nMBruto := nBruto
 
          // prvo provjeri hoces li racunati mbruto
-         IF calc_mbruto()
+         IF ld_calc_min_bruto_yes_no()
             // minimalni bruto
-            nMBruto := min_bruto( nBruto, field->usati )
+            nMBruto := ld_min_bruto_osnova( nBruto, field->usati )
          ENDIF
 
          // ugovori o djelu

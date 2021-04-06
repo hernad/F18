@@ -27,7 +27,7 @@ FUNCTION is_radn_k4_bf_ide_u_benef_osnovu()
 // ----------------------------------------
 // vraca benef stepen za radnika
 // ----------------------------------------
-FUNCTION BenefStepen()
+FUNCTION ld_beneficirani_stepen()
 
    LOCAL nRet := 0
    LOCAL nTArea := Select()

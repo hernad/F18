@@ -294,8 +294,8 @@ FUNCTION ld_pregled_plata()
       nBO := ld_get_bruto_osnova( _uneto - nNetoZaIzbiti, cRTipRada, nLicOdb, nPrKoef, cTrosk )
       nMBO := nBO
 
-      IF calc_mbruto()
-         nMBO := min_bruto( nBo, ld->usati )
+      IF ld_calc_min_bruto_yes_no()
+         nMBO := ld_min_bruto_osnova( nBo, ld->usati )
       ENDIF
 
       nBrOsn := nBo

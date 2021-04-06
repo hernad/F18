@@ -82,7 +82,7 @@ FUNCTION _gdoprline( cDoprSpace )
 
    LOCAL cLine
 
-   cLine := cLMSK
+   cLine := cLDLijevaMargina
    cLine += Replicate( "-", 4 )
    cLine += Space( 1 )
    cLine += Replicate( "-", 23 )
@@ -104,7 +104,7 @@ FUNCTION _gtprline()
 
    LOCAL cLine
 
-   cLine := cLMSK
+   cLine := cLDLijevaMargina
    cLine += Replicate( "-", 23 )
    cLine += Space( 1 )
    cLine += Replicate( "-", 8 )
@@ -123,7 +123,7 @@ FUNCTION _gmainline()
 
    LOCAL cLine
 
-   cLine := cLMSK
+   cLine := cLDLijevaMargina
    cLine += Replicate( "-", 52 )
    cLine += Space( 1 )
    cLine += Replicate( "-", 18 )

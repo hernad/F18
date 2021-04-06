@@ -38,7 +38,7 @@ FUNCTION ld_parametri()
    AAdd( _opcexe, {|| ld_set_obracun() } )
    AAdd( _opc, "5. postavka formula (uk.prim.,uk.sati,godisnji) i koeficijenata " )
    AAdd( _opcexe, {|| ld_set_formule() } )
-   AAdd( _opc, "6. postavka parametara izgleda dokumenata " )
+   AAdd( _opc, "6. parametri izgleda ld dokumenata" )
    AAdd( _opcexe, {|| ld_set_prikaz() } )
    AAdd( _opc, "7. poseban odbitak za elementarne nepogode" )
    AAdd( _opcexe, {|| ld_elementarne_nepogode_parametri() } )
@@ -355,21 +355,22 @@ FUNCTION ld_set_obracun()
 
 FUNCTION ld_set_prikaz()
 
-   LOCAL _pr_kart_pl := fetch_metric( "ld_obracun_prikaz_kartice_na_unosu", NIL, "N" )
-   PRIVATE GetList := {}
+   LOCAL cPrikazKarticeNaUnosuDN := fetch_metric( "ld_obracun_prikaz_kartice_na_unosu", NIL, "N" )
+   LOCAL GetList := {}
+   LOCAL cKarticaSifreTO := fetch_metric("ld_kartica_sifre_to", NIL, SPACE(10))
 
    gPotp1 := PadR( gPotp1, 150 )
    gPotp2 := PadR( gPotp2, 150 )
 
    Box(, 15, 77 )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Krediti-rekap.po 'na osnovu' (D/N/X)?" GET gReKrOs VALID gReKrOs $ "DNX" PICT "@!"
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Na kraju obrade odstampati listic D/N:" GET _pr_kart_pl  PICT "@!" VALID _pr_kart_pl $ "DN"
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Na kraju obrade odštampati listić D/N:" GET cPrikazKarticeNaUnosuDN  PICT "@!" VALID cPrikazKarticeNaUnosuDN $ "DN"
    @ box_x_koord() + 3, box_y_koord() + 2 SAY "Prikaz bruto iznosa na kartici radnika (D/N/X) " GET gPrBruto PICT "@!" VALID gPrBruto $ "DNX"
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "Potpis na kartici radnika D/N:" GET gPotp  VALID gPotp $ "DN"   PICT "@!"
    @ box_x_koord() + 5, box_y_koord() + 2 SAY "Varijanta kartice plate za kredite (1/2) ?" GET gReKrKP VALID gReKrKP $ "12"
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY "Opis osnovnih podataka za obracun (1-bodovi/2-koeficijenti) ?" GET gBodK VALID gBodK $ "12"
-   @ box_x_koord() + 7, box_y_koord() + 2 SAY "Pregled plata: varijanta izvjestaja (1/2)" GET gVarPP VALID gVarPP $ "12"
-   @ box_x_koord() + 8, box_y_koord() + 2 SAY "Potpisi na svim izvjestajima (D/N)" GET gPotpRpt VALID gPotpRpt $ "DN" PICT "@!"
+   @ box_x_koord() + 6, box_y_koord() + 2 SAY8 "Opis osnovnih podataka za obračun (1-bodovi/2-koeficijenti) ?" GET gBodK VALID gBodK $ "12"
+   @ box_x_koord() + 7, box_y_koord() + 2 SAY8 "Pregled plata: varijanta izvještaja (1/2)" GET gVarPP VALID gVarPP $ "12"
+   @ box_x_koord() + 8, box_y_koord() + 2 SAY8 "Potpisi na svim izvještajima (D/N)" GET gPotpRpt VALID gPotpRpt $ "DN" PICT "@!"
    READ
 
    IF gPotpRpt == "D"
@@ -378,7 +379,8 @@ FUNCTION ld_set_prikaz()
       READ
    ENDIF
 
-   @ box_x_koord() + 11, box_y_koord() + 2 SAY "Kartica plate - svi doprinosi (D/N)" GET gKarSDop VALID gKarSDop $ "DN" PICT "@!"
+   @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Kartica plate - svi doprinosi (D/N)" GET gKarSDop VALID gKarSDop $ "DN" PICT "@!"
+   @ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Kartica plate - TO posebna kartica (navesti šifre)" GET cKarticaSifreTO
 
    READ
 
@@ -387,7 +389,7 @@ FUNCTION ld_set_prikaz()
    IF ( LastKey() <> K_ESC )
 
       // parametri sql/db
-      set_metric( "ld_obracun_prikaz_kartice_na_unosu", NIL, _pr_kart_pl )
+      set_metric( "ld_obracun_prikaz_kartice_na_unosu", NIL, cPrikazKarticeNaUnosuDN )
       set_metric( "ld_opis_osnovnih_podataka", NIL, gBodK )
       set_metric( "ld_varijanta_kartice_krediti", NIL, gReKrKP )
       set_metric( "ld_pregled_plata_varijanta", NIL, gVarPP )
@@ -398,6 +400,7 @@ FUNCTION ld_set_prikaz()
       set_metric( "ld_potpis_red_1", NIL, gPotp1 )
       set_metric( "ld_potpis_red_2", NIL, gPotp2 )
       set_metric( "ld_kartica_svi_doprinosi", NIL, gKarSDop )
+      set_metric( "ld_kartica_sifre_to", NIL, cKarticaSifreTO )
 
    ENDIF
 

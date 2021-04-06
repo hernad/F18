@@ -180,7 +180,7 @@ FUNCTION obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
                SELECT opsld
 
-               IF !ImaUOp( "DOPR", DOPR->id )
+               IF !ld_ima_u_ops_porez_ili_doprinos( "DOPR", DOPR->id )
                   SKIP 1
                   LOOP
                ENDIF

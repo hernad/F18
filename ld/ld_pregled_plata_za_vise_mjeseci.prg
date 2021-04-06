@@ -327,8 +327,8 @@ STATIC FUNCTION napuni_podatke( cRj, nGodina, nMjesec, cMjesecDo, ;
 
             nMBrutoST := nBrPoj
 
-            IF calc_mbruto() // minimalni bruto
-               nMBrutoST := min_bruto( nBrPoj, ld->usati )
+            IF ld_calc_min_bruto_yes_no() // minimalni bruto
+               nMBrutoST := ld_min_bruto_osnova( nBrPoj, ld->usati )
             ENDIF
 
             nBruto += nBrPoj // ukupni bruto

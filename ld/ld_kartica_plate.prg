@@ -13,20 +13,23 @@
 
 
 STATIC DUZ_STRANA := 64
-STATIC __var_obr
-STATIC __radni_sati := "N"
+STATIC s_cVarijantaObracuna
+STATIC s_cRadnisatiDN := "N"
 
 
 FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
 
    LOCAL i
    LOCAL aNeta := {}
-   LOCAL _radni_sati := fetch_metric( "ld_radni_sati", NIL, "N" )
+   LOCAL cRadniSatiDN := fetch_metric( "ld_radni_sati", NIL, "N" )
+   LOCAL GetList := {}
+   LOCAL cKarticaSifreTO := fetch_metric("ld_kartica_sifre_to", NIL, SPACE(10))
+   LOCAL cKarticaTODN := fetch_metric("ld_kartica_to_dn", my_user(), "N")
 
    lSkrivena := .F.
-   PRIVATE cLMSK := ""
+   PRIVATE cLDLijevaMargina := ""
 
-   __radni_sati := _radni_sati
+   s_cRadnisatiDN := cRadniSatiDN
 
    l2kolone := .F.
 
@@ -54,11 +57,11 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       cObracun := cObrac
    ENDIF
 
-//   IF __radni_sati == "D"
+//   IF s_cRadnisatiDN == "D"
   //    O_RADSAT
   // ENDIF
 
-   PRIVATE nC1 := 20 + Len( cLMSK )
+   PRIVATE nC1 := 20 + Len( cLDLijevaMargina )
 
    cVarijanta := " "
    c2K1L := "D"
@@ -72,7 +75,7 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       RPar( "2K", @c2K1L )
       RPar( "NK", @cNKNS )
       cIdRadn := Space( LEN_IDRADNIK )
-      Box(, 8, 75 )
+      Box(, 9, 75 )
       @ box_x_koord() + 1, box_y_koord() + 2 SAY _l( "Radna jedinica (prazno-sve rj): " )  GET cIdRJ VALID Empty( cidrj ) .OR. P_LD_RJ( @cidrj )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY _l( "Mjesec: " ) GET nMjesec PICT "99"
       IF ld_vise_obracuna()
@@ -84,7 +87,13 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       @ box_x_koord() + 6, box_y_koord() + 2 SAY _l( "Ako su svi radnici, sortirati po (1-sifri,2-prezime+ime)" )  GET cVarSort VALID cVarSort $ "12"  PICT "9"
       @ box_x_koord() + 7, box_y_koord() + 2 SAY _l( "Dvije kartice na jedan list ? (D/N)" )  GET c2K1L VALID c2K1L $ "DN"  PICT "@!"
       @ box_x_koord() + 8, box_y_koord() + 2 SAY _l( "Ispis svake kartice krece od pocetka stranice? (D/N)" )  GET cNKNS VALID cNKNS $ "DN"  PICT "@!"
+
+      IF !Empty(cKarticaSifreTO)
+         @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Ispis kartice TO? (D/N)"  GET cKarticaTODN VALID cKarticaTODN $ "DN"  PICT "@!"
+      ENDIF
+
       READ
+
       clvbox()
       ESC_BCR
       BoxC()
@@ -94,8 +103,10 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       WPar( "NK", cNKNS )
       SELECT PARAMS
       USE
+      set_metric("ld_kartica_to_dn", my_user(), cKarticaTODN)
       set_tippr_ili_tippr2( cObracun )
    ENDIF
+
 
    ld_porezi_i_doprinosi_iz_sezone( nGodina, nMjesec )
 
@@ -176,7 +187,7 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
 
    nRbrKart := 0
 
-   bZagl := {|| ZaglKar() }
+   bZagl := {|| ld_zagl_kartica() }
 
    nT1 := nT2 := nT3 := nT4 := 0
 
@@ -209,7 +220,7 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
 
       AAdd( aNeta, { vposla->idkbenef, _UNeto } )
 
-      __var_obr := get_varobr()
+      s_cVarijantaObracuna := get_varobr()
 
       IF cRTRada == "S"
          ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, @aNeta )
@@ -218,7 +229,7 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       ELSEIF cRTRada == "P"
          ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, @aNeta )
       ELSE
-         ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, @aNeta )
+         ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, @aNeta, cKarticaSifreTO, cKarticaTODN == "D" )
       ENDIF
 
       nT1 += _usati
@@ -240,7 +251,7 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       my_close_all_dbf()
    ELSE // pcount >= "4"
 
-  //    IF __radni_sati == "D"
+  //    IF s_cRadnisatiDN == "D"
     //     O_RADSAT
   //    ENDIF
 
@@ -260,7 +271,7 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
 
 
 
-FUNCTION ZaglKar()
+STATIC FUNCTION ld_zagl_kartica()
 
    ++nRBrKart
 
@@ -292,18 +303,18 @@ FUNCTION ZaglKar()
          _l( "N2:" ), Transform( radn->n2, "99999999.9999" )
    ENDIF
 
-   IF __var_obr == "2"
+   IF s_cVarijantaObracuna == "2"
       ?? Space( 2 ) +  "Koef.licnog odbitka:", AllTrim( Str( get_koeficijent_licnog_odbitka( ld->ulicodb ) ) )
    ENDIF
 
-   IF __radni_sati == "D"
+   IF s_cRadnisatiDN == "D"
       ?? Space( 2 ) + _l( "Radni sati:   " ) + AllTrim( Str( ld->radsat ) )
    ENDIF
 
    RETURN .T.
 
 
-FUNCTION kart_redova()
+FUNCTION ld_kartica_redova()
 
    LOCAL nRows := 0
    LOCAL cField
@@ -343,16 +354,16 @@ FUNCTION kart_redova()
    RETURN ( nRows + nStRedova )
 
 
-FUNCTION kart_potpis()
+FUNCTION ld_kartica_potpis()
 
    IF gPotp == "D"
       ?
-      ? cLMSK + Space( 5 ), _l( "   Obracunao:  " ), Space( 30 ), _l( "    Potpis:" )
-      ? cLMSK + Space( 5 ), "_______________", Space( 30 ), "_______________"
+      ? cLDLijevaMargina + Space( 5 ), _l( "   Obracunao:  " ), Space( 30 ), _l( "    Potpis:" )
+      ? cLDLijevaMargina + Space( 5 ), "_______________", Space( 30 ), "_______________"
       ?
    ENDIF
 
-   RETURN
+   RETURN .T.
 
 
 
@@ -360,11 +371,11 @@ STATIC FUNCTION prikazi_primanja()
 
    LOCAL nIznos := 0
 
-   IF "U" $ Type( "cLMSK" ); cLMSK := ""; ENDIF
+   IF "U" $ Type( "cLDLijevaMargina" ); cLDLijevaMargina := ""; ENDIF
    IF "U" $ Type( "l2kolone" ); l2kolone := .F. ; ENDIF
    IF tippr->( Found() ) .AND. tippr->aktivan == "D"
       IF _I&cpom <> 0 .OR. _S&cPom <> 0
-         ? cLMSK + tippr->id + "-" + tippr->naz, tippr->opis
+         ? cLDLijevaMargina + tippr->id + "-" + tippr->naz, tippr->opis
          nC1 := PCol()
          IF tippr->uneto == "N"
             nIznos := Abs( _I&cPom )
@@ -373,16 +384,16 @@ STATIC FUNCTION prikazi_primanja()
          ENDIF
          IF tippr->fiksan $ "DN"
             @ PRow(), PCol() + 8 SAY _S&cPom  PICT gpics; ?? " s"
-            @ PRow(), 60 + Len( cLMSK ) SAY niznos        PICT gpici
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY niznos        PICT gpici
          ELSEIF tippr->fiksan == "P"
             @ PRow(), PCol() + 8 SAY _S&cPom  PICT "999.99%"
-            @ PRow(), 60 + Len( cLMSK ) SAY niznos        PICT gpici
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY niznos        PICT gpici
          ELSEIF tippr->fiksan == "B"
             @ PRow(), PCol() + 8 SAY Abs( _S&cPom )  PICT "999999"; ?? " b"
-            @ PRow(), 60 + Len( cLMSK ) SAY niznos        PICT gpici
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY niznos        PICT gpici
          ELSEIF tippr->fiksan == "C"
             IF !( "SUMKREDITA" $ tippr->formula )
-               @ PRow(), 60 + Len( cLMSK ) SAY niznos        PICT gpici
+               @ PRow(), 60 + Len( cLDLijevaMargina ) SAY niznos        PICT gpici
             ENDIF
          ENDIF
 
@@ -398,15 +409,15 @@ STATIC FUNCTION prikazi_primanja()
             ELSE
                P_COND
             ENDIF
-            ? m2 := cLMSK + " ------------------------------------------- --------- --------- -------"
-            ? cLMSK + "    Kreditor   /             na osnovu         Ukupno    Ostalo   Rata"
+            ? m2 := cLDLijevaMargina + " ------------------------------------------- --------- --------- -------"
+            ? cLDLijevaMargina + "    Kreditor   /             na osnovu         Ukupno    Ostalo   Rata"
             ? m2
             DO WHILE !Eof() .AND. _godina == godina .AND. _mjesec = mjesec .AND. idradn == _idradn
                select_o_kred( radkr->idkred )
 
                SELECT radkr
                aIznosi := ld_iznosi_za_kredit( idradn, idkred, naosnovu, _mjesec, _godina )
-               ? cLMSK, idkred, Left( kred->naz, 15 ), PadR( naosnovu, 20 )
+               ? cLDLijevaMargina, idkred, Left( kred->naz, 15 ), PadR( naosnovu, 20 )
                @ PRow(), PCol() + 1 SAY aIznosi[ 1 ] PICT "999999.99" // ukupno
                @ PRow(), PCol() + 1 SAY aIznosi[ 1 ] - aIznosi[ 2 ] PICT "999999.99"// ukupno-placeno
                @ PRow(), PCol() + 1 SAY iznos PICT "9999.99"
@@ -440,10 +451,10 @@ STATIC FUNCTION prikazi_primanja()
             ENDIF
 
             IF tippr->uneto == "N"; nKumPrim := Abs( nKumPrim ); ENDIF
-            ? m2 := cLMSK + "   ----------------------------- ----------------------------"
-            ? cLMSK + "    SUMA IZ PRETHODNIH OBRA¬UNA   UKUPNO (SA OVIM OBRA¬UNOM)"
+            ? m2 := cLDLijevaMargina + "   ----------------------------- ----------------------------"
+            ? cLDLijevaMargina + "    SUMA IZ PRETHODNIH OBRA¬UNA   UKUPNO (SA OVIM OBRA¬UNOM)"
             ? m2
-            ? cLMSK + "   " + PadC( Str( nKumPrim - nIznos ), 29 ) + " " + PadC( Str( nKumPrim ), 28 )
+            ? cLDLijevaMargina + "   " + PadC( Str( nKumPrim - nIznos ), 29 ) + " " + PadC( Str( nKumPrim ), 28 )
             ? m2
          ENDIF
       ENDIF

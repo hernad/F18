@@ -446,9 +446,9 @@ FUNCTION ld_specifikacija_plate_2001_stari()
 
       nMPojBrOsn := nPojBrOsn
 
-      IF calc_mbruto()
+      IF ld_calc_min_bruto_yes_no()
          // minimalni bruto
-         nMPojBrOsn := min_bruto( nPojBrOsn, field->usati )
+         nMPojBrOsn := ld_min_bruto_osnova( nPojBrOsn, field->usati )
       ENDIF
 
       nBrutoOsnova += nPojBrOsn
@@ -468,8 +468,7 @@ FUNCTION ld_specifikacija_plate_2001_stari()
 
          nBrutoOsBenef += nPojBrBenef
 
-         _benef_st := BenefStepen()
-         add_to_a_benef( @_a_benef, AllTrim( radn->k3 ), _benef_st, nPojBrBenef )
+         add_to_a_benef( @_a_benef, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nPojBrBenef )
 
          gBFForm := cFFtmp
 
@@ -615,9 +614,9 @@ FUNCTION ld_specifikacija_plate_2001_stari()
 
       DO WHILE !Eof()
 
-         PozicOps( POR->poopst )
+         ld_opstina_stanovanja_rada( POR->poopst )
 
-         IF !ImaUOp( "POR", POR->id )
+         IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
             SKIP 1
             LOOP
          ENDIF

@@ -533,7 +533,7 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
       IF _I01 = 0
          // ne racunaj min.bruto osnovu
       ELSE
-         nMinBO := min_bruto( _UBruto, _USati )
+         nMinBO := ld_min_bruto_osnova( _UBruto, _USati )
       ENDIF
    ENDIF
 

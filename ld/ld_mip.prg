@@ -455,8 +455,8 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
          nMBruto := nBruto
 
 
-         IF calc_mbruto() // prvo provjeri hoces li racunati mbruto
-            nMBruto := min_bruto( nBruto, field->usati ) // minimalni bruto
+         IF ld_calc_min_bruto_yes_no() // prvo provjeri hoces li racunati mbruto
+            nMBruto := ld_min_bruto_osnova( nBruto, field->usati ) // minimalni bruto
          ENDIF
 
 
@@ -486,7 +486,7 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
             // nRadnihSatiUvecanoTrajanje := field->usati
             // ENDIF
 
-            nStUv := benefstepen() // benef.stepen
+            nStUv := ld_beneficirani_stepen() // benef.stepen
             cBen_stopa := AllTrim( radn->k3 )
 
             cSifraRadnogMjestaUvecanoTrajanje := AllTrim( radn->ben_srmj ) // set sifra stopa beneficiranog radnog staza

@@ -24,14 +24,14 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
    LOCAL cMainLine
    LOCAL _bn_stepen, _bn_osnova
    LOCAL _a_benef := {}
-   PRIVATE cLMSK := ""
+   PRIVATE cLDLijevaMargina := ""
 
    cTprLine := _gtprline()
    cDoprLine := _gdoprline( cDoprSpace )
    cMainLine := _gmainline()
 
    // koliko redova ima kartica
-   nKRedova := kart_redova()
+   nKRedova := ld_kartica_redova()
 
    Eval( bZagl )
 
@@ -135,30 +135,30 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
 
       IF is_radn_k4_bf_ide_u_benef_osnovu()
          _bn_osnova := ld_get_bruto_osnova( nOsnZaBr - if( !Empty( gBFForm ), &gBFForm, 0 ), cRTipRada, nLicOdbitak, nRPrKoef )
-         _bn_stepen := BenefStepen()
+         _bn_stepen := ld_beneficirani_stepen()
          add_to_a_benef( @_a_benef, AllTrim( radn->k3 ), _bn_stepen, _bn_osnova )
       ENDIF
 
       ? cMainLine
-      ? cLMSK + "1. OSNOVA ZA OBRACUN:"
+      ? cLDLijevaMargina + "1. OSNOVA ZA OBRACUN:"
 
-      @ PRow(), 60 + Len( cLMSK ) SAY nOsnZaBr PICT gPici
-
-      ? cMainLine
-      ? cLMSK + "2. PROPISANI KOEFICIJENT:"
-
-      @ PRow(), 60 + Len( cLMSK ) SAY nRPrKoef PICT gpici
+      @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOsnZaBr PICT gPici
 
       ? cMainLine
-      ? cLMSK + "3. BRUTO OSNOVA :  ", ld_bruto_isplata_ispis( nOsnZaBr, cRTipRada, nLicOdbitak, nRPrKoef )
+      ? cLDLijevaMargina + "2. PROPISANI KOEFICIJENT:"
 
-      @ PRow(), 60 + Len( cLMSK ) SAY nBo PICT gpici
+      @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nRPrKoef PICT gpici
+
+      ? cMainLine
+      ? cLDLijevaMargina + "3. BRUTO OSNOVA :  ", ld_bruto_isplata_ispis( nOsnZaBr, cRTipRada, nLicOdbitak, nRPrKoef )
+
+      @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nBo PICT gpici
 
       ? cMainLine
 
       // razrada doprinosa
 
-      ? cLmSK + cDoprSpace +  "Obracun doprinosa:"
+      ? cLDLijevaMargina + cDoprSpace +  "Obracun doprinosa:"
 
       select_o_dopr()
       GO TOP
@@ -166,7 +166,7 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
       nPom := 0
       nDopr := 0
       nUkDoprIz := 0
-      nC1 := 20 + Len( cLMSK )
+      nC1 := 20 + Len( cLDLijevaMargina )
 
       DO WHILE !Eof()
 
@@ -187,9 +187,9 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
 
          ENDIF
 
-         PozicOps( DOPR->poopst )
+         ld_opstina_stanovanja_rada( DOPR->poopst )
 
-         IF !ImaUOp( "DOPR", DOPR->id ) .OR. !lPrikSveDopr .AND. !DOPR->ID $ cPrikDopr
+         IF !ld_ima_u_ops_porez_ili_doprinos( "DOPR", DOPR->id ) .OR. !lPrikSveDopr .AND. !DOPR->ID $ cPrikDopr
             SKIP 1
             LOOP
          ENDIF
@@ -198,7 +198,7 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
             ? cDoprLine
          ENDIF
 
-         ? cLMSK + cDoprSpace + id, "-", naz
+         ? cLDLijevaMargina + cDoprSpace + id, "-", naz
          @ PRow(), PCol() + 1 SAY iznos PICT "99.99%"
 
          IF Empty( idkbenef )
@@ -238,8 +238,8 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
       ENDDO
 
       ? cMainLine
-      ?  cLMSK +  "UKUPNO ZA ISPLATU"
-      @ PRow(), 60 + Len( cLMSK ) SAY nOsnZaBr PICT gpici
+      ?  cLDLijevaMargina +  "UKUPNO ZA ISPLATU"
+      @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOsnZaBr PICT gpici
 
       ? cMainLine
 
@@ -250,7 +250,7 @@ FUNCTION ld_kartica_plate_samostalni( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, 
    ENDIF
 
    // potpis na kartici
-   kart_potpis()
+   ld_kartica_potpis()
 
    // skrivena kartica
    IF lSkrivena

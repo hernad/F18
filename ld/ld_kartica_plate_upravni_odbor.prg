@@ -12,7 +12,7 @@
 #include "f18.ch"
 
 
-MEMVAR cLMSK
+MEMVAR cLDLijevaMargina
 
 
 STATIC DUZ_STRANA := 64
@@ -25,14 +25,14 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    LOCAL cDoprLine
    LOCAL cMainLine
    LOCAL _a_benef
-   PRIVATE cLMSK := ""
+   PRIVATE cLDLijevaMargina := ""
 
    cTprLine := _gtprline()
    cDoprLine := _gdoprline( cDoprSpace )
    cMainLine := _gmainline()
 
    // koliko redova ima kartica
-   nKRedova := kart_redova()
+   nKRedova := ld_kartica_redova()
 
    Eval( bZagl )
 
@@ -45,7 +45,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    cRTipRada := get_ld_rj_tip_rada( ld->idradn, ld->idrj )
 
    ? cTprLine
-   ? cLMSK + _l( " Vrsta                  Opis         sati/iznos             ukupno" )
+   ? cLDLijevaMargina + _l( " Vrsta                  Opis         sati/iznos             ukupno" )
    ? cTprLine
 
    FOR i := 1 TO cLDPolja
@@ -82,10 +82,10 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
          cUneto := "N"
 
          ? cTprLine
-         ? cLMSK + _l( "Ukupna oporeziva primanja:" )
+         ? cLDLijevaMargina + _l( "Ukupna oporeziva primanja:" )
          @ PRow(), nC1 + 8  SAY  _USati  PICT gpics
          ?? Space( 1 ) + _l( "sati" )
-         @ PRow(), 60 + Len( cLMSK ) SAY _UNeto PICT gpici
+         @ PRow(), 60 + Len( cLDLijevaMargina ) SAY _UNeto PICT gpici
          ?? "", gValuta
          ? cTprLine
 
@@ -97,26 +97,26 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
 
             cTpNaz := tippr->naz
 
-            ? cLMSK + tippr->id + "-" + PadR( cTpNaz, Len( tippr->naz ) ), tippr->opis
+            ? cLDLijevaMargina + tippr->id + "-" + PadR( cTpNaz, Len( tippr->naz ) ), tippr->opis
             nC1 := PCol()
 
             IF tippr->fiksan $ "DN"
 
                @ PRow(), PCol() + 8 SAY _S&cPom  PICT gpics
                ?? " s"
-               @ PRow(), 60 + Len( cLMSK ) SAY _I&cPom PICT gpici
+               @ PRow(), 60 + Len( cLDLijevaMargina ) SAY _I&cPom PICT gpici
 
             ELSEIF tippr->fiksan == "P"
 
                @ PRow(), PCol() + 8 SAY _S&cPom  PICT "999.99%"
-               @ PRow(), 60 + Len( cLMSK ) SAY _I&cPom        PICT gpici
+               @ PRow(), 60 + Len( cLDLijevaMargina ) SAY _I&cPom        PICT gpici
             ELSEIF tippr->fiksan == "B"
 
                @ PRow(), PCol() + 8 SAY _S&cPom  PICT "999999"; ?? " b"
-               @ PRow(), 60 + Len( cLMSK ) SAY _I&cPom        PICT gpici
+               @ PRow(), 60 + Len( cLDLijevaMargina ) SAY _I&cPom        PICT gpici
             ELSEIF tippr->fiksan == "C"
 
-               @ PRow(), 60 + Len( cLMSK ) SAY _I&cPom        PICT gpici
+               @ PRow(), 60 + Len( cLDLijevaMargina ) SAY _I&cPom        PICT gpici
             ENDIF
          ENDIF
       ENDIF
@@ -152,16 +152,16 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    // bruto placa iz neta...
 
    ? cMainLine
-   ? cLMSK + "1. BRUTO NAKNADA :  ", ld_bruto_isplata_ispis( nOsnZaBr, cRTipRada, nLicOdbitak )
+   ? cLDLijevaMargina + "1. BRUTO NAKNADA :  ", ld_bruto_isplata_ispis( nOsnZaBr, cRTipRada, nLicOdbitak )
 
-   @ PRow(), 60 + Len( cLMSK ) SAY nBo PICT gpici
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nBo PICT gpici
 
    ? cMainLine
 
    ?
 
    // razrada doprinosa ....
-   ? cLmSK + cDoprSpace + _l( "Obracun doprinosa:" )
+   ? cLDLijevaMargina + cDoprSpace + _l( "Obracun doprinosa:" )
 
    select_o_dopr()
    GO TOP
@@ -169,7 +169,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    nPom := 0
    nDopr := 0
    nUkDoprIz := 0
-   nC1 := 20 + Len( cLMSK )
+   nC1 := 20 + Len( cLDLijevaMargina )
 
    DO WHILE !Eof()
 
@@ -190,9 +190,9 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
 
       ENDIF
 
-      PozicOps( DOPR->poopst )
+      ld_opstina_stanovanja_rada( DOPR->poopst )
 
-      IF !ImaUOp( "DOPR", DOPR->id ) .OR. !lPrikSveDopr .AND. !DOPR->ID $ cPrikDopr
+      IF !ld_ima_u_ops_porez_ili_doprinos( "DOPR", DOPR->id ) .OR. !lPrikSveDopr .AND. !DOPR->ID $ cPrikDopr
          SKIP 1
          LOOP
       ENDIF
@@ -201,7 +201,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
          ? cDoprLine
       ENDIF
 
-      ? cLMSK + cDoprSpace + id, "-", naz
+      ? cLDLijevaMargina + cDoprSpace + id, "-", naz
       @ PRow(), PCol() + 1 SAY iznos PICT "99.99%"
 
       IF Empty( idkbenef )
@@ -251,8 +251,8 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    // oporezivi dohodak ......
 
    ? cMainLine
-   ?  cLMSK + _l( "2. NETO IZNOS NAKNADE ( bruto - dopr.IZ )" )
-   @ PRow(), 60 + Len( cLMSK ) SAY nOporDoh PICT gpici
+   ?  cLDLijevaMargina + _l( "2. NETO IZNOS NAKNADE ( bruto - dopr.IZ )" )
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOporDoh PICT gpici
 
    ? cMainLine
 
@@ -266,14 +266,14 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    // razrada poreza na platu ....
    // u ovom dijelu idu samo porezi na bruto TIP = "B"
 
-   ? cLMSK + _l( "3. AKONTACIJA POREZA NA DOHODAK" )
+   ? cLDLijevaMargina + _l( "3. AKONTACIJA POREZA NA DOHODAK" )
 
    select_o_por()
    GO TOP
 
    nPom := 0
    nPor := 0
-   nC1 := 30 + Len( cLMSK )
+   nC1 := 30 + Len( cLDLijevaMargina )
    nPorOl := 0
 
    DO WHILE !Eof()
@@ -281,9 +281,9 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
       // vrati algoritam poreza
       cAlgoritam := get_algoritam()
 
-      PozicOps( POR->poopst )
+      ld_opstina_stanovanja_rada( POR->poopst )
 
-      IF !ImaUOp( "POR", POR->id )
+      IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
          SKIP 1
          LOOP
       ENDIF
@@ -298,12 +298,12 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
       aPor := obr_por( por->id, nPorOsnovica, 0 )
 
       // ispisi porez
-      nPor += isp_por( aPor, cAlgoritam, cLMSK, .T., .T. )
+      nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
 
       SKIP 1
    ENDDO
 
-   @ PRow(), 60 + Len( cLMSK ) SAY nPor PICT gpici
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nPor PICT gpici
 
    // ukupno za isplatu ....
    nZaIsplatu := ( nOporDoh - nPor )
@@ -311,8 +311,8 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    ?
 
    ? cMainLine
-   ? cLMSK + _l( "UKUPNO ZA ISPLATU ( 4 - 5 )" )
-   @ PRow(), 60 + Len( cLMSK ) SAY nZaIsplatu PICT gpici
+   ? cLDLijevaMargina + _l( "UKUPNO ZA ISPLATU ( 4 - 5 )" )
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nZaIsplatu PICT gpici
 
    ? cMainLine
 
@@ -331,7 +331,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
 
 
    // potpis na kartici
-   kart_potpis()
+   ld_kartica_potpis()
 
    // obrada sekvence za kraj papira
 

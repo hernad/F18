@@ -21,14 +21,14 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    LOCAL cDoprLine
    LOCAL cMainLine
    LOCAL _a_benef := {}
-   PRIVATE cLMSK := ""
+   PRIVATE cLDLijevaMargina := ""
 
    cTprLine := _gtprline()
    cDoprLine := _gdoprline( cDoprSpace )
    cMainLine := _gmainline()
 
    // koliko redova ima kartica
-   nKRedova := kart_redova()
+   nKRedova := ld_kartica_redova()
 
    Eval( bZagl )
 
@@ -91,7 +91,7 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
 
    IF is_radn_k4_bf_ide_u_benef_osnovu()
       _bn_osnova := ld_get_bruto_osnova( nOsnZaBr - if( !Empty( gBFForm ), &gBFForm, 0 ), cRTipRada, nLicOdbitak )
-      _bn_stepen := BenefStepen()
+      _bn_stepen := ld_beneficirani_stepen()
       add_to_a_benef( @_a_benef, AllTrim( radn->k3 ), _bn_stepen, _bn_osnova )
    ENDIF
 
@@ -103,26 +103,26 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    // bruto placa iz neta
 
    ? cMainLine
-   ? cLMSK + "1. BRUTO SA TROSKOVIMA :  ", AllTrim( Str( nBo ) ) + " * 1.2500 ="
+   ? cLDLijevaMargina + "1. BRUTO SA TROSKOVIMA :  ", AllTrim( Str( nBo ) ) + " * 1.2500 ="
 
-   @ PRow(), 60 + Len( cLMSK ) SAY nBSaTr PICT gpici
-
-   ? cMainLine
-   ? cLMSK + "2. TROSKOVI", AllTrim( Str( gAhTrosk ) ) + "% (1 * troskovi%) ="
-
-   @ PRow(), 60 + Len( cLMSK ) SAY nTrosk PICT gpici
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nBSaTr PICT gpici
 
    ? cMainLine
-   ? cLMSK + "3. BRUTO BEZ TROSKOVA :  ", ld_bruto_isplata_ispis( nOsnZaBr, cRTipRada, nLicOdbitak )
+   ? cLDLijevaMargina + "2. TROSKOVI", AllTrim( Str( gAhTrosk ) ) + "% (1 * troskovi%) ="
 
-   @ PRow(), 60 + Len( cLMSK ) SAY nBo PICT gpici
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nTrosk PICT gpici
+
+   ? cMainLine
+   ? cLDLijevaMargina + "3. BRUTO BEZ TROSKOVA :  ", ld_bruto_isplata_ispis( nOsnZaBr, cRTipRada, nLicOdbitak )
+
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nBo PICT gpici
 
    ? cMainLine
 
    ?
 
    // razrada doprinosa ....
-   ? cLmSK + cDoprSpace + _l( "Obracun doprinosa:" )
+   ? cLDLijevaMargina + cDoprSpace + _l( "Obracun doprinosa:" )
 
    select_o_dopr()
    GO TOP
@@ -130,7 +130,7 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    nPom := 0
    nDopr := 0
    nUkDoprIz := 0
-   nC1 := 20 + Len( cLMSK )
+   nC1 := 20 + Len( cLDLijevaMargina )
 
    DO WHILE !Eof()
 
@@ -151,9 +151,9 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
 
       ENDIF
 
-      PozicOps( DOPR->poopst )
+      ld_opstina_stanovanja_rada( DOPR->poopst )
 
-      IF !ImaUOp( "DOPR", DOPR->id ) .OR. !lPrikSveDopr .AND. !DOPR->ID $ cPrikDopr
+      IF !ld_ima_u_ops_porez_ili_doprinos( "DOPR", DOPR->id ) .OR. !lPrikSveDopr .AND. !DOPR->ID $ cPrikDopr
          SKIP 1
          LOOP
       ENDIF
@@ -162,7 +162,7 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
          ? cDoprLine
       ENDIF
 
-      ? cLMSK + cDoprSpace + id, "-", naz
+      ? cLDLijevaMargina + cDoprSpace + id, "-", naz
       @ PRow(), PCol() + 1 SAY iznos PICT "99.99%"
 
       IF Empty( idkbenef )
@@ -207,8 +207,8 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    // oporezivi dohodak ......
 
    ? cMainLine
-   ?  cLMSK + _l( "4. NETO IZNOS NAKNADE ( bruto - dopr.IZ )" )
-   @ PRow(), 60 + Len( cLMSK ) SAY nOporDoh PICT gpici
+   ?  cLDLijevaMargina + _l( "4. NETO IZNOS NAKNADE ( bruto - dopr.IZ )" )
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOporDoh PICT gpici
 
    ? cMainLine
 
@@ -222,14 +222,14 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    // razrada poreza na platu ....
    // u ovom dijelu idu samo porezi na bruto TIP = "B"
 
-   ? cLMSK + _l( "5. AKONTACIJA POREZA NA DOHODAK" )
+   ? cLDLijevaMargina + _l( "5. AKONTACIJA POREZA NA DOHODAK" )
 
    select_o_por()
    GO TOP
 
    nPom := 0
    nPor := 0
-   nC1 := 30 + Len( cLMSK )
+   nC1 := 30 + Len( cLDLijevaMargina )
    nPorOl := 0
 
    DO WHILE !Eof()
@@ -237,9 +237,9 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
       // vrati algoritam poreza
       cAlgoritam := get_algoritam()
 
-      PozicOps( POR->poopst )
+      ld_opstina_stanovanja_rada( POR->poopst )
 
-      IF !ImaUOp( "POR", POR->id )
+      IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
          SKIP 1
          LOOP
       ENDIF
@@ -254,12 +254,12 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
       aPor := obr_por( por->id, nPorOsnovica, 0 )
 
       // ispisi porez
-      nPor += isp_por( aPor, cAlgoritam, cLMSK, .T., .T. )
+      nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
 
       SKIP 1
    ENDDO
 
-   @ PRow(), 60 + Len( cLMSK ) SAY nPor PICT gpici
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nPor PICT gpici
 
    // ukupno za isplatu ....
    nZaIsplatu := ( nOporDoh - nPor )
@@ -267,8 +267,8 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    ?
 
    ? cMainLine
-   ?  cLMSK + _l( "UKUPNO ZA ISPLATU ( 4 - 5 )" )
-   @ PRow(), 60 + Len( cLMSK ) SAY nZaIsplatu PICT gpici
+   ?  cLDLijevaMargina + _l( "UKUPNO ZA ISPLATU ( 4 - 5 )" )
+   @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nZaIsplatu PICT gpici
 
    ? cMainLine
 
@@ -286,7 +286,7 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
    ENDIF
 
 
-   kart_potpis()
+   ld_kartica_potpis()
 
    // obrada sekvence za kraj papira
 

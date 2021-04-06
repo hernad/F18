@@ -120,8 +120,7 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
 
             SELECT opsld
 
-            IF !ImaUOp( "POR", POR->id )
-
+            IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
                SKIP 1
                LOOP
 
@@ -342,9 +341,9 @@ FUNCTION izr_porez( nOsnovica, cTipPor )
       // vrati algoritam poreza
       cAlgoritam := get_algoritam()
 
-      PozicOps( POR->poopst )
+      ld_opstina_stanovanja_rada( POR->poopst )
 
-      IF !ImaUOp( "POR", POR->id )
+      IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
          SKIP 1
          LOOP
       ENDIF
