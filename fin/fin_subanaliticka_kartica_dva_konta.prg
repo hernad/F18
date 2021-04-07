@@ -314,9 +314,9 @@ FUNCTION fin_suban_kartica2( lOtvSt )
             fprosao := .T.
             IF !fzaglavlje
                IF PRow() > 55 + dodatni_redovi_po_stranici()
-                  FF; ZaglSif2( .T. )
+                  FF; fin_zagl_suban_kartica_2( .T. )
                ELSE
-                  ZaglSif2( iif( nstr = 0, .T., .F. ) )
+                  fin_zagl_suban_kartica_2( iif( nStr == 0, .T., .F. ) )
                ENDIF
                fzaglavlje := .T.
             ENDIF
@@ -435,12 +435,12 @@ FUNCTION fin_suban_kartica2( lOtvSt )
                @ PRow(), PCol() + 1 SAY nDugDEM - nPotDEM PICT picbhd
             ENDIF
 
-            fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), ZaglSif2() } ), ) }, nSirOp )
+            fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), fin_zagl_suban_kartica_2() } ), ) }, nSirOp )
             IF ck14 == "3"
                @ PRow() + 1, nc7 SAY k1 + "-" + k2 + "-" + K3Iz256( k3 ) + k4
             ENDIF
          ENDIF
-         fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), ZaglSif2() } ), ) }, nSirOp )
+         fin_print_ostatak_opisa( @cOpis, nCOpis, {|| iif( PRow() > 60 + dodatni_redovi_po_stranici(), Eval( {|| gPFF(), fin_zagl_suban_kartica_2() } ), ) }, nSirOp )
          IF cPoVezi <> "D"
             SKIP
          ENDIF
@@ -456,9 +456,9 @@ FUNCTION fin_suban_kartica2( lOtvSt )
 
          IF !fzaglavlje
             IF PRow() > 55 + dodatni_redovi_po_stranici()
-               FF; ZaglSif2( .T. )
+               FF; fin_zagl_suban_kartica_2( .T. )
             ELSE
-               ZaglSif2( iif( nstr = 0, .T., .F. ) )
+               fin_zagl_suban_kartica_2( iif( nStr == 0, .T., .F. ) )
             ENDIF
             fzaglavlje := .T.
          ENDIF
@@ -572,14 +572,12 @@ FUNCTION fin_suban_kartica2( lOtvSt )
 
 
 
-/*
-    ZaglSif2(fStrana)
-    Zaglavlje subanaliticke kartice 2
-    fStrana
- */
+FUNCTION fin_zagl_suban_kartica_2( lNovaStrana  /* ispis nove strane*/)
 
-FUNCTION ZaglSif2( fStrana )
-
+   IF lNovaStrana == NIL
+      lNovaStrana := .T.
+   ENDIF
+   
    ?
    IF cDinDem == "3"  .OR. cKumul == "2"
       P_COND2
@@ -593,20 +591,17 @@ FUNCTION ZaglSif2( fStrana )
       ??U "FIN: SUBANALITIČKA KARTICA  ZA "
    ENDIF
 
+   
    ?? iif( cDinDem == "1", AllTrim( valuta_domaca_skraceni_naziv() ), iif( cDinDem == "2", AllTrim( ValPomocna() ), AllTrim( valuta_domaca_skraceni_naziv() ) + "-" + AllTrim( ValPomocna() ) ) ), " NA DAN:", Date()
    IF !( Empty( dDatOd ) .AND. Empty( dDatDo ) )
       ?? "   ZA PERIOD OD", dDatOd, "DO", dDatDo
    ENDIF
-   IF fstrana
+   IF lNovaStrana
       @ PRow(), 120 SAY "Str." + Str( ++nStr, 5 )
    ENDIF
 
-   //IF gNW == "D"
-      ? "Firma:", self_organizacija_id(), "-", self_organizacija_naziv()
-   //ELSE
-    //  SELECT PARTN; HSEEK cIdFirma
-  //    ? "Firma:", cIdFirma, AllTrim( partn->naz ), AllTrim( partn->naz2 )
-   //ENDIF
+
+   ? "Firma:", self_organizacija_id(), "-", self_organizacija_naziv()
 
 
    select_o_partner( cIdPartner )
