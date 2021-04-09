@@ -292,7 +292,7 @@ METHOD F18Backup:backup_organizacija()
    cCmd += pg_dump_cmd() + " "
    cCmd += " -h " + AllTrim( cHost )
    cCmd += " -p " + AllTrim( Str( nPort ) )
-   cCmd += " -U " + f18_user()
+   cCmd += " -U " + "admin" //f18_user()
    cCmd += " -w "
    cCmd += " -F c "
    cCmd += " -b "
