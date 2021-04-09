@@ -253,6 +253,7 @@ METHOD F18Backup:backup_organizacija()
    ::get_windows_ping_time()
    ::get_removable_drive()
 
+/*
    IF is_windows()
       cCmd += "set pgusername=" + f18_user() + "&set PGPASSWORD=" + f18_password() + "&"
    ELSE
@@ -262,6 +263,21 @@ METHOD F18Backup:backup_organizacija()
 #ifdef __PLATFORM__WINDOWS
 
    IF ::ping_time > 0
+      cCmd += "ping -n " + AllTrim( Str( ::ping_time ) ) + " 8.8.8.8&"
+   ENDIF
+
+#endif
+*/
+
+#ifdef __PLATFORM__UNIX
+   cCmd += "export pgusername=admin;export PGPASSWORD=boutpgmin;"
+#endif
+
+#ifdef __PLATFORM__WINDOWS
+   cCmd += "set pgusername=admin&set PGPASSWORD=boutpgmin&"
+
+   IF ::ping_time > 0
+      // dodaj ping na komandu za backup radi ENV varijabli
       cCmd += "ping -n " + AllTrim( Str( ::ping_time ) ) + " 8.8.8.8&"
    ENDIF
 

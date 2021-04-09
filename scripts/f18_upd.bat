@@ -62,7 +62,9 @@ rem exit
 
 :PSQL
 
-IF NOT EXIST %UTIL%\psql.exe goto UPSQL
+REM c:\knowhowERP\bin\F18_util\psql
+IF NOT EXIST %PSQLUTIL% mkdir %PSQLUTIL%
+IF NOT EXIST %PSQLUTIL%\psql.exe goto UPSQL
 %PSQLUTIL%\psql.exe --version | %UTIL%\grep.exe "%PSQLVER%"
 
 IF "%ERRORLEVEL%"=="0" GOTO END
