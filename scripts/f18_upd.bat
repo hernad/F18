@@ -1,11 +1,12 @@
 @echo off
-REM # ver 2.0.0
+REM # ver 2.1.0
 REM # hernad@bring.out.ba
 REM # date 09.04.2021
 set PATH=%PATH%;C:\knowhowERP\bin;C:\knowhowERP\lib;C:\knowhowERP\util
 set DEST=C:\knowhowERP\bin
 set UTIL=C:\knowhowERP\util
 set KLIB=C:\knowhowERP\lib
+set PSQLUTIL=C:\knowhowERP\bin\F18_util\psql
 set PSQLVER=12.1
 set URL=http://download.bring.out.ba/F18_v3
 
@@ -62,12 +63,16 @@ rem exit
 :PSQL
 
 IF NOT EXIST %UTIL%\psql.exe goto UPSQL
-%UTIL%\psql.exe --version | %UTIL%\grep.exe "%PSQLVER%"
+%PSQLUTIL%\psql.exe --version | %UTIL%\grep.exe "%PSQLVER%"
 
 IF "%ERRORLEVEL%"=="0" GOTO END
 
 echo upgrade psql utilities
 
+del /Q %PSQLUTIL%\*.exe
+del /Q %PSQLUTIL%\*.dll
+
+del /Q %KLIB%\libpq.dll
 del /Q %KLIB%\psql.exe
 del /Q %KLIB%\pg_dump.exe
 del /Q %KLIB%\pg_dumpall.exe
@@ -81,6 +86,7 @@ set FILE=libcrypto-1_1.dll
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR   
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz 
 
 set FILE=libiconv.dll
@@ -88,6 +94,7 @@ set FILE=libiconv.dll
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz 
 
 set FILE=libpq.dll
@@ -95,6 +102,7 @@ set FILE=libpq.dll
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=libssl-1_1.dll
@@ -102,6 +110,7 @@ set FILE=libssl-1_1.dll
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=libxml2.dll
@@ -109,6 +118,7 @@ set FILE=libxml2.dll
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=zlib1.dll
@@ -116,6 +126,7 @@ set FILE=zlib1.dll
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=pg_dump.exe
@@ -123,6 +134,7 @@ set FILE=pg_dump.exe
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=pg_dumpall.exe
@@ -130,6 +142,7 @@ set FILE=pg_dumpall.exe
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=pg_restore.exe
@@ -137,6 +150,7 @@ set FILE=pg_restore.exe
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 set FILE=psql.exe
@@ -144,6 +158,7 @@ set FILE=psql.exe
 %UTIL%\gzip -tv %FILE%.gz
 if NOT "%ERRORLEVEL%"=="0" GOTO GZERR 
 %UTIL%\gzip -dNfc  < %FILE%.gz > %UTIL%\%FILE%
+%UTIL%\gzip -dNfc  < %FILE%.gz > %PSQLUTIL%\%FILE%
 del /Q %FILE%.gz
 
 goto end
