@@ -27,7 +27,6 @@ FUNCTION pg_dump_cmd( cTxt )
 
    LOCAL cCmd
 
-   ne skidaj sa github psql
    check_prog_download()
 
    IF !is_windows()
