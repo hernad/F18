@@ -332,7 +332,14 @@ FUNCTION sql_error_in_query( oQry, cTip, oServer )
 #ifdef F18_DEBUG
       AltD()  // sql_error_in_query
 #endif
-      ?E oQry:ErrorMsg(), cLogMsg
+      ?E oQry:ErrorMsg(), cLogMsg // npr. ERROR: Dokument garant nije obradjen
+      
+      DO CASE
+      CASE "ERROR:  Dokument garant nije obradjen" $ oQry:ErrorMsg() 
+
+         Alert(_u("Dokument nije obrađen u potpunosti?!"))
+      ENDCASE
+
       error_bar( "sql", oQry:ErrorMsg() )
       RETURN .T.
    ENDIF

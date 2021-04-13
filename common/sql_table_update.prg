@@ -116,7 +116,6 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
       ENDIF
       cQuery += ")  VALUES ("
 
-
       FOR nI := 1 TO Len( hDbfRec[ "dbf_fields" ] )
 
          cTmp := hDbfRec[ "dbf_fields" ][ nI ]
@@ -131,7 +130,6 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
             RaiseError( cMsg + " " + pp( hRecord ) )
             RETURN .F.
          ENDIF
-
 
          IF !hb_HHasKey( hRecord, cTmp )
              log_write( "polje " + cTmp + " ne postoji ?!", 2 )
@@ -177,6 +175,11 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
 
    // ?E "sql table update", cQuery
    oQueryRet := run_sql_query( cQuery )
+
+   IF ValType(oQueryRet) == "O" .AND. oQueryRet:ErrorMsg() <> NIL .AND. Len(oQueryRet:ErrorMsg()) > 0
+      Alert(oQueryRet:ErrorMsg())
+      RETURN .F.
+   ENDIF
 
    log_write( "sql table update, table: " + iif( cTable == NIL, "NIL", cTable ) + ", op: " + cSqlOperator + ", qry: " + cQuery, 8, lSilent )
    log_write( "sql table update, VALTYPE(oQueryRet): " + ValType( oQueryRet ), 9, lSilent )
