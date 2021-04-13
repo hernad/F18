@@ -28,6 +28,7 @@ export HB_ROOT=$HOME/harbour
 echo "$HB_ROOT, bintray: $BINTRAY_OWNER, $BINTRAY_API_KEY"
 
 #read
+./build_zip.sh
 
 #./upload_bintray_linux.sh
 BUILD_ARCH=x64
