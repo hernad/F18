@@ -20,7 +20,8 @@ echo %NODE_PROG% | node > tmpFile
 set /p F18_VERSION= < tmpFile
 del tmpFile
 
-REM F18-windows-x64_4.20.0.zip
+REM http://download.bring.out.ba/F18/F18-windows-x64_4.23.30.zip
+
 set ZIP_FILE=%F18_PACKAGE%_%F18_VERSION%.zip
 
 set HARBOUR_ROOT=c:\dev\harbour\%BUILD_ARCH%\harbour

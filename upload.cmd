@@ -35,7 +35,7 @@ set HARBOUR_ROOT=c:\dev\harbour\%BUILD_ARCH%\harbour
 echo %HARBOUR_ROOT%
 call build_zip.cmd
 
-set F18_PACKAGE=F18-windows-%BUILD_ARCH%.zip
+set F18_PACKAGE=F18-windows-%BUILD_ARCH%
 set NODE_PROG=const json=require('./package.json') ; console.log(json.f18)
 echo %NODE_PROG% | node > tmpFile
 set /p F18_VERSION= < tmpFile
