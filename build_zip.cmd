@@ -1,6 +1,5 @@
 @echo off
 
-REM BINTRAY_API_KEY=${BINTRAY_API_KEY:-`cat bintray_api_key`}
 
 REM get architecture x64, x32
 set NODE_PROG=console.log( process.arch === "x64" ? "x64" : "x86");
@@ -23,6 +22,8 @@ del tmpFile
 
 REM F18-windows-x64_4.20.0.zip
 set ZIP_FILE=%F18_PACKAGE%_%F18_VERSION%.zip
+
+set HARBOUR_ROOT=c:\dev\harbour\%BUILD_ARCH%\harbour
 
 if [%HARBOUR_ROOT%] EQU [] (
   REM x64

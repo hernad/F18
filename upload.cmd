@@ -36,17 +36,23 @@ echo %HARBOUR_ROOT%
 call build_zip.cmd
 
 set F18_PACKAGE=F18-windows-%BUILD_ARCH%.zip
+set NODE_PROG=const json=require('./package.json') ; console.log(json.f18)
+echo %NODE_PROG% | node > tmpFile
+set /p F18_VERSION= < tmpFile
+del tmpFile
+REM F18-windows-x64_4.20.0.zip
+set ZIP_FILE=%F18_PACKAGE%_%F18_VERSION%.zip
 
 set HOST=192.168.168.251
 set DIR=/var/www/html/F18/
-echo scp  %F18_PACKAGE% root@%HOST%:%DIR%
-scp -i %USERPROFILE%\.ssh\id_rsa %F18_PACKAGE% root@%HOST%:%DIR%
-ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%F18_PACKAGE%
+echo scp  %ZIP_FILE% root@%HOST%:%DIR%
+scp -i %USERPROFILE%\.ssh\id_rsa %ZIP_FILE% root@%HOST%:%DIR%
+ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
 
 set HOST=192.168.168.252
-echo scp  %F18_PACKAGE% root@%HOST%:%DIR%
-scp -i %USERPROFILE%\.ssh\id_rsa %F18_PACKAGE% root@%HOST%:%DIR%
-ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%F18_PACKAGE%
+echo scp  %ZIP_FILE% root@%HOST%:%DIR%
+scp -i %USERPROFILE%\.ssh\id_rsa %ZIP_FILE% root@%HOST%:%DIR%
+ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
 
 
 if EXIST %CURRENT_DIR%tmp\nul (
