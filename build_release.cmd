@@ -5,8 +5,8 @@ set HB_COMPILER=msvc
 
 set F18_DEBUG=
 set F18_POS=1
-set DATE=09.04.2021
-set VERSION=3.3.65
+set DATE=21.04.2021
+set VERSION=3.3.70
 
 IF [%VERSION%]==[] (
    echo ENVAR VERSION nije definisana. STOP!
