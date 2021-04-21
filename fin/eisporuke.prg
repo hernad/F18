@@ -416,7 +416,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL nInternaSaPDV, nNePDVObveznikSaPDV, nDaPDVObveznikSaPDV
     LOCAL nPDVInterna, nPDVDaPDVObveznik, nPDVNePDVObveznik
     LOCAL nOsnovicaNePdvObveznik, nOsnovicaDaPDVObveznik      
-    LOCAL nOsnovicaInterna, nOsnovicaIzvoz, nOsnovicaPDV0Ostalo
+    LOCAL nOsnovicaInterna, nOsnovicaIzvoz, nOsnovicaIzvozPrevoz, nOsnovicaPDV0Ostalo
     LOCAL hRec := hb_hash()
     LOCAL cKto
     LOCAL cBrDok
@@ -426,7 +426,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL hNeimenovani := NIL
     LOCAL nIzvozPoFakturama
     LOCAL dDatFaktPravi
-    LOCAL cClan  
+    LOCAL cClan, lRegistrovaniPDVObveznik
     //LOCAL cOpisIznosFaktureIzvoz := ""
 
     LOCAL cIdKontoKupac := trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
@@ -441,6 +441,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         // 01 isporuke oslobodjenje po ZPDV PDV-a
     */
     IF cIdKonto == NIL
+        // PDV0 ili izvoz
         // PDV0 gleda se samo kupac
         cSelectFields := "SELECT get_sifk('PARTN', 'PDVB', COALESCE(fin_suban.idpartner,'9999999')) as pdv_broj, get_sifk('PARTN', 'IDBR', COALESCE(fin_suban.idpartner,'9999999')) as jib,"
         cSelectFields += "(case when fin_suban.d_p='1' then 1 else -1 end) * fin_suban.iznosbhd as iznos_sa_pdv,"
@@ -460,7 +461,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "(case when fin_suban.d_p='2' then 1 else -1 end) * fin_suban.iznosbhd  as pdv,"
         cSelectFields += "(case when sub2.d_p='1' then 1 else -1 end) * sub2.iznosbhd  as iznos_sa_pdv,"
         cSelectFields += "'' as JCI,"
-        cSelectFields += "'UNDEF' as from_opis_pdv0_clan,"
+        cSelectFields += "COALESCE(substring(fin_suban.opis from 'PDV0:\s*CLAN(\d+)'), 'UNDEF') as from_opis_pdv0_clan,"
         cSelectFields += "'UNDEF' as from_opis_dat_jci,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
         cSelectFields += "0 as JCI_IZN,"
@@ -562,6 +563,11 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["fin_idvn"] := eisp->idvn
         hRec["fin_brnal"] := eisp->brnal
         hRec["fin_rbr"] := eisp->rbr
+
+        cClan := ""
+        IF eisp->from_opis_pdv0_clan <> "UNDEF"
+            cClan := eisp->from_opis_pdv0_clan
+        ENDIF    
         hRec["kup_pdv0_clan"] := cClan
 
         set_datumi_eisporuke(@hRec)
@@ -630,11 +636,11 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
            ENDIF
            cJib := eisp->jib
            IF LEN(TRIM(cJib)) < 13
-                cJib := ""
                 IF LEN(TRIM(cJib)) > 0
                    // ino partner, IDBR: INO
                    cPDVBroj := REPLICATE("0", 12)
                 ENDIF
+                cJib := ""
            ENDIF
            hRec["kup_pdv"] := cPDVBroj
            hRec["kup_jib"] := cJib
@@ -656,9 +662,14 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             ENDIF
         ENDIF
 
+        lRegistrovaniPDVObveznik := .F.
+        IF Len(Trim(cPDVBroj)) == 12 .AND. cPDVBroj != REPLICATE("0", 12) .AND. cPDVBroj != REPLICATE("9", 12)
+            lRegistrovaniPDVObveznik := .T.
+        ENDIF 
 
         nOsnovicaInterna := 0
         nOsnovicaIzvoz := 0
+        nOsnovicaIzvozPrevoz := 0
         nOsnovicaPDV0Ostalo := 0
         nOsnovicaNePdvObveznik := 0
         nOsnovicaDaPdvObveznik := 0
@@ -686,33 +697,75 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
 
         ELSEIF cTipDokumenta <> "04" .AND. ROUND(eisp->pdv, 2) == 0
 
+            // PDV 0%
+            
+            //... oslobođen od plaćanja PDV-shodno članu 26. stav (1) tačka 7. Zakona.
+            // U datoteku e-Isporuke u polje 4 kao Tip dokumenta unosi se 01, dok se 
+            // ukupan iznos fakture unosi u polje 11 (iznos fakture) - "Fakt.SA PDV"
+            // kao i u polje 15 (osnovica za obračun PDV-a registrovanom poreskom obvezniku) - "F.bez PDV"
+            // U PDV prijavi iznos usluge se unosi  u polje 11.
+            // ako je registrovani PDV obveznik onda
+
+
             // PDV0 ostalo
-            IF cPDVBroj == REPLICATE("0",12) // usluge stranom licu
+            IF cPDVBroj == REPLICATE("0", 12) // usluge stranom licu
                 cTipDokumenta2 := "05"
             ENDIF
 
-            cClan := ""
-            nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
-            IF eisp->from_opis_pdv0_clan <> "UNDEF"
-                cClan := eisp->from_opis_pdv0_clan
-                IF cClan == "15" // isporuke stranim licima je tip '05'
-                    cTipDokumenta2 := "05"
+ 
+            IF lRegistrovaniPDVObveznik
+                // ako je PDV obveznik kolona 15 UIO
+                nOsnovicaPDV0Ostalo := 0
+                nOsnovicaDaPDVObveznik := eisp->iznos_sa_pdv
+            ELSE
+                // ako je nePDV obveznik kolona 17 UIO
+                nOsnovicaPDV0Ostalo := 0
+                nOsnovicaNePdvObveznik := eisp->iznos_sa_pdv
+            ENDIF
+            
+            
+            IF cClan == "15" // isporuke stranim licima je tip '05'
+                cTipDokumenta2 := "05"
+                nOsnovicaPDV0Ostalo := 0
+                nOsnovicaDaPDVObveznik := 0
+                nOsnovicaNePdvObveznik := eisp->iznos_sa_pdv
+                hRec["kup_pdv"] := ""
+                hRec["kup_jib"] := "" 
+                cJib := ""
+                cPDVBroj := ""
+                //dole ce biti navedeno
+                //hRec["fakt_iznos_sa_pdv"] := eisp->iznos_sa_pdv
+            ELSEIF cClan $ "24#25"
+                // ova dva clana idu u polje 13 PDV prijave koje glasi isporuke oslobodjene placanja PDV-a
+                nOsnovicaDaPDVObveznik := 0
+                nOsnovicaNePDVObveznik := 0
+                nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
+                // i oni idu u kolonu 14 UIO - iznos fakture za ostale isporuke oslobodjenje placanje PDV-a
+            ELSEIF cClan == "27"
+                // prevoz radi izvoza
+                nOsnovicaPDV0Ostalo := 0
+                nOsnovicaDaPDVObveznik := 0
+                nOsnovicaNePDVObveznik := 0
+                nOsnovicaIzvozPrevoz := eisp->iznos_sa_pdv
+            ELSE // ostali clanovi
+                IF lRegistrovaniPDVObveznik
+                    // ako je PDV obveznik kolona 15 UIO
                     nOsnovicaPDV0Ostalo := 0
-                    hRec["kup_pdv"] := ""
-                    hRec["kup_jib"] := "" 
-                    cJib := ""
-                    cPDVBroj := ""
-                    //dole ce biti navedeno
-                    //hRec["fakt_iznos_sa_pdv"] := eisp->iznos_sa_pdv
+                    nOsnovicaNePdvObveznik := 0
+                    nOsnovicaDaPDVObveznik := eisp->iznos_sa_pdv
                 ELSE
-                    nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv
+                    // ako je nePDV obveznik kolona 17 UIO
+                    nOsnovicaPDV0Ostalo := 0
+                    nOsnovicaDaPDVObveznik := 0
+                    nOsnovicaNePdvObveznik := eisp->iznos_sa_pdv
                 ENDIF
             ENDIF
-            hRec["kup_pdv0_clan"] := cClan
+
             
         
         ELSEIF cTipDokumenta == "02" .OR. cMjestoKrajnjePotrosnje $ "123"
             
+            lRegistrovaniPDVObveznik := .F.
             // 02 - interna faktura vlastita potrosnja
             // (Empty(cPDVBroj) .AND. Len(cJib) == 13) - domaci NE-PDV obveznik 
            
@@ -742,6 +795,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                  // greske u zaokr
                  nOsnovicaPDV0Ostalo := 0
                ENDIF
+
                // u slucaju da postoji PDV0 osnovica 2.00, 102.00 - 2 = 100.00
                nOsnovicaNePdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Ostalo
                
@@ -750,6 +804,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             ENDIF
 
         ELSE
+            lRegistrovaniPDVObveznik := .T.
             // PDV obveznik
             nPDVDaPDVObveznik := eisp->pdv
             // ako ima razlike izmedju osnovice i iznosa sa PDV, onda je to PDV0
@@ -757,11 +812,11 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             // npr 119.00 - 17.00 - (17/0.17=100) = 2.00
             // npr -119.00 - (-17.00) - (-17/0.17=-100) =  -119 +17 +100 = -2.00
             nOsnovicaPDV0Ostalo := eisp->iznos_sa_pdv - eisp->pdv - ROUND(eisp->pdv / 0.17, 2)
-
             IF ABS(nOsnovicaPDV0Ostalo)*10 < 1
                 // greskr u zaokr
                 nOsnovicaPDV0Ostalo := 0
             ENDIF
+
             // u slucaju da postoji PDV0 osnovica 2.00, 102.00 - 2 = 100.00
             // u slucaju da postoji PDV0 osnovica -2.00, -102.00 - (-2) = -100.00
             nOsnovicaDaPdvObveznik := eisp->bez_pdv - nOsnovicaPDV0Ostalo
@@ -801,7 +856,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["tip"] := cTipDokumenta2
 
         hRec["fakt_iznos_sa_pdv_interna"] := nOsnovicaInterna + nPDVInterna
-        hRec["fakt_iznos_sa_pdv0_izvoz"] := nOsnovicaIzvoz
+        hRec["fakt_iznos_sa_pdv0_izvoz"] := nOsnovicaIzvoz + nOsnovicaIzvozPrevoz
         hRec["fakt_iznos_sa_pdv0_ostalo"] := nOsnovicaPDV0Ostalo
         
         hRec["fakt_iznos_bez_pdv"] := nOsnovicaDaPDVObveznik
@@ -810,17 +865,31 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["fakt_iznos_bez_pdv_np"] := nOsnovicaNePdvObveznik + nOsnovicaInterna
         hRec["fakt_iznos_pdv_np"] := nPDVNePDVObveznik + nPDVInterna
         
-        IF hRec["kup_pdv0_clan"] == "15"
-           // usluge stranom licu, mjesto oporezivanja inostranostvo
-           hRec["fakt_iznos_sa_pdv"] := eisp->iznos_sa_pdv
-        ELSE
-           hRec["fakt_iznos_sa_pdv"] := (nOsnovicaDaPDVObveznik + nPDVDaPDVObveznik) + (nOsnovicaNePdvObveznik + nPDVNePDVObveznik)
-        ENDIF
-
         hRec["fakt_iznos_pdv_np_32"] := n32 
         hRec["fakt_iznos_pdv_np_33"] := n33
         hRec["fakt_iznos_pdv_np_34"] := n34
         
+        // faktura sadrzi PDV, postoji dio obracunat po stopi PDV 0%
+        IF (Abs(hRec["fakt_iznos_pdv"]) + Abs(hRec["fakt_iznos_pdv_np"])) > 0 .AND.  Abs(hRec["fakt_iznos_sa_pdv0_ostalo"]) > 0
+            altd()
+            IF !( cClan $ "24#25")
+                // ako nije jedan od dva clana to se stavlja u obicni promet
+                IF lRegistrovaniPDVObveznik
+                   hRec["fakt_iznos_bez_pdv"] += hRec["fakt_iznos_sa_pdv0_ostalo"]
+                ELSE
+                   hRec["fakt_iznos_bez_pdv_np"] += hRec["fakt_iznos_sa_pdv0_ostalo"]
+                ENDIF
+                hRec["fakt_iznos_sa_pdv0_ostalo"] := 0
+            ENDIF
+        ENDIF
+
+        //IF hRec["kup_pdv0_clan"] == "15"
+        // usluge stranom licu, mjesto oporezivanja inostranostvo
+        //   hRec["fakt_iznos_sa_pdv"] := eisp->iznos_sa_pdv
+        //ELSE
+        hRec["fakt_iznos_sa_pdv"] := (hRec["fakt_iznos_bez_pdv"] + hRec["fakt_iznos_pdv"]) + (hRec["fakt_iznos_bez_pdv_np"] + hRec["fakt_iznos_pdv_np"])
+        //ENDIF
+
         hRec["opis"] := TRIM(eisp->opis) 
 
         IF hRec["kup_jib"] == REPLICATE("9", 13)
@@ -1000,7 +1069,6 @@ STATIC FUNCTION set_datumi_eisporuke(hRec)
     // za izvoz faktura moze biti proslog mjeseca
     hRec["dat_fakt_pravi"] := eisp->datdok
     IF eisp->from_opis_dat_fakt <> "UNDEF"
-        altd()
         hRec["dat_fakt_pravi"] := CTOD(eisp->from_opis_dat_fakt)
     ENDIF
 
@@ -1272,10 +1340,10 @@ FUNCTION gen_eIsporuke()
     gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cNabExcludeIdvn, .F., .F., NIL, .F., @hUkupno)
 
     // 04 izvoz
-    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04", NIL, cNabExcludeIdvn, .F., .F., NIL, .F., @hUkupno)
+    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04", NIL /*Konto PDV*/, cNabExcludeIdvn, .F., .F., NIL, .F., @hUkupno)
 
     // 01 isporuke oslobodjenje po ZPDV PDV-a
-    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", NIL, cNabExcludeIdvn, .F., .F., NIL, .F., @hUkupno)
+    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", NIL /*Konto PDv*/, cNabExcludeIdvn, .F., .F., NIL, .F., @hUkupno)
 
     // 03 primljeni avansi
     gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "03", cIdKontoPDVAvansi, cNabExcludeIdvn, .F., .F., NIL, .T. /* moze neimenovani kupac*/, @hUkupno)
@@ -1486,7 +1554,6 @@ FUNCTION partn_nepdv( cPartnerId )
     LOCAL cJib := get_partn_idbr( cPartnerId )
     LOCAL cRejon
      
-    altd()
     IF LEN(cJib) == 13 .AND. LEN(cPDV) == 0
         // NEPDV obveznik
         cRejon := part_rejon( cPartnerId )
