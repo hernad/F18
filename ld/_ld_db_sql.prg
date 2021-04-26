@@ -110,6 +110,7 @@ FUNCTION seek_ld( cIdRj, xGodina, nMjesec, cObracun, cIdRadn, cTag, cAlias )
 
 FUNCTION seek_ld_2( cIdRj, nGodina, nMjesec, cObracun, cIdRadn )
 
+   // TAG=2 => hIndexes[ "2" ] := "str(godina,4,0)+str(mjesec,2,0)+obr+idradn+idrj"
    seek_ld( cIdRj, nGodina, nMjesec, cObracun, cIdRadn, "2" )
 
    RETURN .T.

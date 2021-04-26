@@ -12,6 +12,7 @@
 
 #include "f18.ch"
 
+MEMVAR _mjesec, _idradn, _idrj
 
 // -------------------------------------------
 // ukupno radnik
@@ -556,6 +557,24 @@ FUNCTION Prosj1( cTip, cTip2, cF0 )
 
    RETURN  nMj1
 
+/*
+   ld_pmj('field->i37') => primanje "37" u predhodnom mjesecu
+*/
+FUNCTION ld_pmj(cFormula)
+  
+   // predhodni mjesec
+   LOCAL nMinus := 1
+
+   // TAG 2: "str(godina,4,0)+str(mjesec,2,0)+obr+idradn+idrj"
+   IF _mjesec - nMinus < 1
+      // januar
+      seek_ld_2( NIL, _godina - 1,  12 + _mjesec - nMinus, NIL, _idradn )
+   ELSE
+      // ostali mjeseci
+      seek_ld_2( NIL, _godina,  _mjesec - nMinus, NIL, _idradn )
+   ENDIF
+
+   RETURN &cFormula
 
 
 FUNCTION Predhodni( nI, cVar, cObr )
