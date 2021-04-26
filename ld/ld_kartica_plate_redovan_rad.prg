@@ -89,18 +89,21 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
       lFoundTippr := Found()
 
       IF tippr->uneto == "N" .AND. cUneto == "D"
+         IF Empty(cKarticaSifreTO) 
+            cUneto := "N"
+            ? cTprLine
+            // prikaz ukupno neto
+            ? cLDLijevaMargina + "Ukupno:"
 
-         cUneto := "N"
-
-         ? cTprLine
-         ? cLDLijevaMargina + "Ukupno:"
-
-         @ PRow(), nC1 + 8  SAY  _USati  PICT gpics
-         ?? Space( 1 ) + "sati"
-         nPom := _calc_tpr( _UNeto, .T. )
-         @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nPom PICT gpici
-         ?? "", gValuta
-         ? cTprLine
+            @ PRow(), nC1 + 8  SAY  _USati  PICT gpics
+            ?? Space( 1 ) + "sati"
+            nPom := _calc_tpr( _UNeto, .T. )
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nPom PICT gpici
+            ?? "", gValuta
+            ? cTprLine
+         ELSE
+            ? cTprLine
+         ENDIF
 
       ENDIF
 
