@@ -57,6 +57,7 @@ def convert_content_hb_zh(file_name):
         content_new = re.sub('#include "rt_main.ch"', '// #include "rt_main.zhh"', content_new, flags = re.M)
         #include "hbthread.ch"
         content_new = re.sub('"hbthread.ch"', '"thread.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"box.ch"', '"box.zhh"', content_new, flags = re.M)
         #include "f18_color.ch"
         content_new = re.sub('"f18_color.ch"', '"f18_color.zhh"', content_new, flags = re.M)
         #include "hbclass.ch"
@@ -77,6 +78,7 @@ def convert_content_hb_zh(file_name):
         content_new = re.sub('#include "hbapigt.h"', '#include "zh_gt_api.h"', content_new, flags = re.M)
         #include "hbapiitm.h"
         content_new = re.sub('#include "hbapiitm.h"', '#include "zh_item_api.h"', content_new, flags = re.M)
+        
         # HBEditor
         content_new = re.sub('HBEditor', 'ZHEditor', content_new, flags = re.M)
         output_file.write(content_new)
