@@ -11,6 +11,7 @@ cc_binary(
     srcs = [ ":F18_" + F18_LIB + "_zh" ],
     deps = [
         "//zh_zero:headers",
+        "//zh_rtl:headers",
         #"//F18:Z18_klijent_zh_c",
         #"//zh_zero:zh_zero", 
         #"//zh_vm:zh_vm",
@@ -43,8 +44,14 @@ cc_binary(
         #"//zh_debug:zh_debug"
     ] + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
-    copts = C_OPTS,
-    linkstatic = True,
+    #copts = C_OPTS,
+    copts = [
+        "-Izh_zero",
+        "-Izh_rtl",
+        #"-DZH_DYNIMP",
+        #"-DZH_TR_LEVEL=5",
+    ],
+    #linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
