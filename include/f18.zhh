@@ -32,7 +32,7 @@
 
 
 #include "set.zhh"
-#include "hbgtinfo.ch"
+#include "gt_info.zhh"
 #include "common.zhh"
 #include "db_struct.zhh"
 #include "set_curs.zhh"
