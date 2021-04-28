@@ -1,8 +1,9 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
+load("//bazel:windows_dll_library.bzl", "windows_dll_library")
 load("//bazel:zh_comp.bzl", "zh_comp_all")
 load("//bazel:variables.bzl", "C_OPTS", "ZH_COMP_OPTS", 
     "ZH_Z18_COMP_OPTS", "ZH_Z18_HEADERS", "L_OPTS", "L_OPTS_2",
-    "POSTGRESQL_LIB" )
+     "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB" )
 
 F18_LIB = "klijent"
 
@@ -10,6 +11,7 @@ cc_binary(
     name = "F18-klijent",
     srcs = [ ":F18_" + F18_LIB + "_zh" ],
     deps = [
+        ":ziher",
         "//zh_zero:headers",
         "//zh_rtl:headers",
         #"//F18:Z18_klijent_zh_c",
@@ -26,10 +28,6 @@ cc_binary(
         #"//zh_tools:zh_tools",
         #"//zh_tools:zh_tools_zh_c",
         #"//third_party/xlsxwriter:xlsxwriter",
-        #"//zh_xlsxwriter:zh_xlsxwriter",
-        #"//zh_xlsxwriter:zh_xlsxwriter_zh_c",
-        #"//zh_harupdf:zh_harupdf",
-        #"//zh_harupdf:zh_harupdf_zh_c",
         #"//zh_minizip:zh_minizip",
         #"//zh_minizip:zh_minizip_zh_c",
         #"//third_party/minizip:minizip",
@@ -73,6 +71,64 @@ cc_binary(
 #    visibility = ["//visibility:public"],
 #)
 
+windows_dll_library(
+    name = "ziher",
+    srcs = [ 
+       "//zh_zero:c_sources",
+       "//zh_vm:c_sources", 
+       "//zh_vm:zh_vm_zh",
+       "//zh_macro:c_sources",
+       "//zh_rtl:c_sources",
+       "//zh_rtl:zh_rtl_zh",
+       "//zh_rtl/gt:c_sources",
+       "//zh_rtl/gt:zh_rtl_gt_zh",
+       "//zh_rtl/rdd:c_sources",
+       "//zh_rtl/rdd:zh_rtl_rdd_zh",
+       "//third_party/zlib:c_sources",
+       "//third_party/pcre2:c_sources",
+        "//zh_xlsxwriter:c_sources",
+        "//zh_xlsxwriter:zh_xlsxwriter_zh",
+        "//zh_harupdf:c_sources",
+        "//zh_harupdf:zh_harupdf_zh",
+    ],
+    hdrs = glob([
+        "*.h",
+        "*.zhh"
+    ]) + POSTGRESQL_HEADERS,
+    deps = [ 
+        "//zh_zero:headers",
+        "//zh_vm:headers",
+        "//zh_macro:headers",
+        "//zh_comp:headers",
+        "//zh_rtl:headers",
+        "//zh_rtl/gt:headers",
+        "//zh_rtl/rdd:headers",
+        "//zh_xlsxwriter:headers",
+        "//zh_harupdf:headers",
+        "//third_party/zlib:headers",
+        "//third_party/pcre2:headers",
+        "//third_party/harupdf:headers",
+    ] + POSTGRESQL_LIB,
+    linkopts = L_OPTS + L_OPTS_2,
+    copts = [
+        "-DSUPPORT_UNICODE",
+        "-DHAVE_CONFIG_H",
+        "-DPCRE2_CODE_UNIT_WIDTH=8",
+        "-Izh_zero",
+        "-Izh_vm",
+        "-Izh_rtl",
+        "-Izh_harupdf",
+        "-Izh_rtl/rdd/rdd_sql",
+        "-Ithird_party/zlib",
+        "-Ithird_party/pcre2",
+        "-DZH_DYNLIB",
+        #"-DZH_TR_LEVEL=4", #INFO
+        #"-DZH_TR_LEVEL=5", DEBUG
+    ]  + POSTGRESQL_COPT,
+    #linkstatic = False,
+    #linkshared = True,
+    visibility = ["//visibility:public"],
+)
 
 
 ZH_F18_COMP_OPTS=[
@@ -82,7 +138,9 @@ ZH_F18_COMP_OPTS=[
     "-izh_rtl/gt",
     "-iF18/include",
     "-izh_harupdf",
+    "-Ithird_party/harupdf",
     "-DGT_DEFAULT_CONSOLE",
+    "-DF18_POS",
     "-DF18_DEBUG",
     "-b"
 ]
@@ -99,6 +157,7 @@ zh_comp_all(
     srcs = glob([ 
         "*.zh",
         "common/*.zh",
+        "common_legacy/*.zh",
         "core/*.zh",
         "core_dbf/*.zh",
         "core_pdf/*.zh",

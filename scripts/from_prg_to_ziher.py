@@ -32,6 +32,9 @@ def convert_content_hb_zh(file_name):
         #HB_GTI_DESKTOPWIDTH
         content_new = re.sub('HB_([_a-zA-Z]+)', r'ZH_\1', content_new, flags = re.M)
 
+        # promjena imena funkcija hb -> ziher
+        content_new = re.sub('zh_cdpSelect', 'codepageSelect', content_new, flags = re.M)
+
         #include "setcurs.ch"
         content_new = re.sub('"setcurs.ch"', '"set_curs.zhh"', content_new, flags = re.M)
         #include "rddsys.ch"
