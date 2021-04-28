@@ -1,5 +1,0 @@
-if i==F_KONIZ; O_KONIZ; endif
-if i==F_IZVJE; O_IZVJE; endif
-if i==F_ZAGLI; O_ZAGLI; endif
-if i==F_KOLIZ; O_KOLIZ; endif
-
