@@ -58,6 +58,23 @@ def convert_content_hb_zh(file_name):
         #include "hbthread.ch"
         content_new = re.sub('"hbthread.ch"', '"thread.zhh"', content_new, flags = re.M)
         content_new = re.sub('"box.ch"', '"box.zhh"', content_new, flags = re.M)
+     
+        content_new = re.sub('"dbedit.ch"', '"dbedit.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"achoice.ch"', '"achoice.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"rddsql.ch"', '"rdd_sql.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"dbinfo.ch"', '"db_info.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"pdf_cls.ch"', '"pdf_class.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"memoedit.ch"', '"memo_edit.zhh"', content_new, flags = re.M)
+
+
+        content_new = re.sub('"o_f18.ch"', '"o_f18.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"f_f18.ch"', '"f_f18.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"f18_separator.ch"', '"f18_separator.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"f18_rabat.ch"', '"f18_rabat.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"f18_request.ch"', '"f18_request.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"f18_cre_all.ch"', '"f18_cre_all.zhh"', content_new, flags = re.M)
+        content_new = re.sub('#require "sddpg.ch"', '// #require "sddpg.zhh"', content_new, flags = re.M)
+
         #include "f18_color.ch"
         content_new = re.sub('"f18_color.ch"', '"f18_color.zhh"', content_new, flags = re.M)
         #include "hbclass.ch"
