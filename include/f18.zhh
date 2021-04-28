@@ -15,41 +15,41 @@
 
 #include "inkey.zhh"
 #include "get_exit.zhh"
-#include "box.ch"
-#include "dbedit.ch"
-#include "achoice.ch"
+#include "box.zhh"
+#include "dbedit.zhh"
+#include "achoice.zhh"
 
 #include "class.zhh"
 #include "file_io.zhh"
 
-#require "rddsql.ch"
-#require "sddpg.ch"
+#require "rdd_sql.zhh"
+// #require "sddpg.zhh"
 
-#include "dbinfo.ch"
+#include "db_info.zhh"
 #include "error.zhh"
 #include "file_io.zhh"
 #include "class.zhh"
 
 
-#include "set.ch"
+#include "set.zhh"
 #include "hbgtinfo.ch"
 #include "common.zhh"
 #include "db_struct.zhh"
 #include "set_curs.zhh"
-#include "dbedit.ch"
+#include "dbedit.zhh"
 
 #include "thread.zhh"
 
-#include "o_f18.ch"
-#include "f_f18.ch"
-#include "f18_separator.ch"
-#include "f18_rabat.ch"
-#include "f18_request.ch"
-#include "f18_cre_all.ch"
+#include "o_f18.zhh"
+#include "f_f18.zhh"
+#include "f18_separator.zhh"
+#include "f18_rabat.zhh"
+#include "f18_request.zhh"
+#include "f18_cre_all.zhh"
 
-#include "pdf_cls.ch"
+#include "pdf_class.zhh"
 
-#include "memoedit.ch"
+#include "memo_edit.zhh"
 
 
 #define F18_DEFAULT_LOG_LEVEL_DEBUG 9

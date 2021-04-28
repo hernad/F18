@@ -57,6 +57,7 @@ def convert_content_hb_zh(file_name):
         content_new = re.sub('#include "rt_main.ch"', '// #include "rt_main.zhh"', content_new, flags = re.M)
         #include "hbthread.ch"
         content_new = re.sub('"hbthread.ch"', '"thread.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"set.ch"', '"set.zhh"', content_new, flags = re.M)
         content_new = re.sub('"box.ch"', '"box.zhh"', content_new, flags = re.M)
      
         content_new = re.sub('"dbedit.ch"', '"dbedit.zhh"', content_new, flags = re.M)
