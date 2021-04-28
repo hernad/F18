@@ -72,6 +72,7 @@ def convert_content_hb_zh(file_name):
         content_new = re.sub('"o_f18.ch"', '"o_f18.zhh"', content_new, flags = re.M)
         content_new = re.sub('"f_f18.ch"', '"f_f18.zhh"', content_new, flags = re.M)
         content_new = re.sub('"f18_separator.ch"', '"f18_separator.zhh"', content_new, flags = re.M)
+        content_new = re.sub('"f18_release.ch"', '"f18_release.zhh"', content_new, flags = re.M)
         content_new = re.sub('"f18_rabat.ch"', '"f18_rabat.zhh"', content_new, flags = re.M)
         content_new = re.sub('"f18_request.ch"', '"f18_request.zhh"', content_new, flags = re.M)
         content_new = re.sub('"f18_cre_all.ch"', '"f18_cre_all.zhh"', content_new, flags = re.M)

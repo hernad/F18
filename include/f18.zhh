@@ -117,7 +117,7 @@
 
 #ifndef TEST
   #ifndef F18_RELEASE_DEFINED
-      #include "f18_release.ch"
+      #include "f18_release.zhh"
   #endif
 #else
   #ifndef F18_TEST_DEFINED
