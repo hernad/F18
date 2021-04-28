@@ -1,0 +1,13 @@
+
+
+procedure main()
+
+LOCAL cIdPartner
+
+? "hello"
+
+cIdPartner := space(6)
+? "not 1", !cIdpartner$'120008#120009'
+
+cIdPartner := "120008"
+? "not 1", !cIdpartner$'120008#120009'

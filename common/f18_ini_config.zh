@@ -1,0 +1,83 @@
+#include "f18.zhh"
+
+//#ifdef __PLATFORM__UNIX
+#define INI_FNAME "f18_config.ini"
+//#else
+//#define INI_FNAME ".f18_config.ini"
+//#endif
+
+FUNCTION f18_ini_config_read( cSection, hIniParams, lGlobalno )
+
+   LOCAL cTmpIniSection
+   LOCAL cTmpKey
+   LOCAL cIniFile
+   LOCAL cIniRead
+
+   IF ( lGlobalno == NIL ) .OR. ( lGlobalno == .F. )
+      cIniFile := my_home() + INI_FNAME
+   ELSE
+      cIniFile := my_home_root() + INI_FNAME
+   ENDIF
+
+   IF !File( cIniFile )
+      error_bar( "ini", "ini ne postoji: " + cIniFile )
+      RETURN .F.
+   ELSE
+      cIniRead := zh_iniRead( cIniFile )
+   ENDIF
+
+
+   IF Empty( cIniRead )
+      log_write( "Fajl je prazan: " + cIniFile )
+
+   ELSE
+      IF zh_HHasKey( cIniRead, cSection )
+
+         cTmpIniSection := cIniRead[ cSection ]
+         FOR EACH cTmpKey in hIniParams:Keys
+            // napuni ini sa onim sto si procitao
+            IF zh_HHasKey( cTmpIniSection, cTmpKey )
+               hIniParams[ cTmpKey ] := cTmpIniSection[ cTmpKey ]
+            ENDIF
+         NEXT
+
+      ENDIF
+   ENDIF
+
+   RETURN .T.
+
+
+FUNCTION f18_ini_config_write( cSection, hIniParams, lGlobalno )
+
+   LOCAL cTmpKey
+   LOCAL cIniFile
+   LOCAL cIniRead
+
+   IF ( lGlobalno == NIL ) .OR. ( lGlobalno == .F. )
+      cIniFile := my_home() + INI_FNAME
+   ELSE
+      cIniFile := my_home_root() + INI_FNAME
+   ENDIF
+
+   cIniRead := zh_iniRead( cIniFile )
+
+   IF Empty( cIniRead )
+      cIniRead := zh_Hash()
+   ENDIF
+
+   IF !zh_HHasKey( cIniRead, cSection )
+      cIniRead[ cSection ] := zh_Hash()
+   ENDIF
+
+   // napuni cIniRead sa vrijednostima iz ini matrice
+   FOR EACH cTmpKey in hIniParams:Keys
+      cIniRead[ cSection ][ cTmpKey ] := hIniParams[ cTmpKey ]
+   NEXT
+
+
+   IF !zh_iniWrite( cIniFile, cIniRead, "#F18 config", "#end of config" )
+      log_write( "Ne mogu snimiti ini fajl "  + cIniFile )
+      RETURN .F.
+   ENDIF
+
+   RETURN .T.
