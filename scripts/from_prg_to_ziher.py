@@ -34,7 +34,9 @@ def convert_content_hb_zh(file_name):
 
         # promjena imena funkcija hb -> ziher
         content_new = re.sub('zh_cdpSelect', 'codepageSelect', content_new, flags = re.M)
-
+        content_new = re.sub('zh_ps', 'PathSeparator', content_new, flags = re.M)
+        # subst( => substr(
+        content_new = re.sub('subst\(', 'substr(', content_new, flags = re.M)
         #include "setcurs.ch"
         content_new = re.sub('"setcurs.ch"', '"set_curs.zhh"', content_new, flags = re.M)
         #include "rddsys.ch"

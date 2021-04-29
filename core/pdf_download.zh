@@ -20,20 +20,6 @@ STATIC s_cSHA256sum := "7c983e88a4f3ee60035db62957aaf2380714b2be264a8fae852fda08
 #endif
 
 
-FUNCTION PDF_open_dokument( cFile )
-
-   LOCAL cCmd, nRet
-
-   IF is_windows()
-      cCmd := PDF_cmd()
-      nRet := windows_run_invisible( cCmd, cFile )
-   ELSE
-      nRet := f18_open_mime_document( cFile )
-   ENDIF
-
-   RETURN nRet
-
-
 FUNCTION PDF_cmd()
 
    check_PDF_download()
