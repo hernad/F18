@@ -59,13 +59,13 @@ FUNCTION fin_nalog_stampa_fill_psuban( cInd, lStampa, dDatNal, oNalog, aNaloziOb
    M := iif( cInd == "3", "------ -------------- --- ", "" )
    IF hParams[ "fin_tip_dokumenta" ]
 
-      M +=  + "---- ------- " + REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------"
+      M +=  + "---- ------- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------"
       M +=  " -- ------------- ----------- -------- -------- --------------- ---------------"
 
    ELSE
 
       M +=  "---- ------- "
-      M += REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------"
+      M += Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------"
       M += " ----------- -------- -------- --------------- ---------------"
 
    ENDIF
@@ -421,7 +421,7 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
       ??U cTmp
       P_NRED
 
-      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR *       *" + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "*"
+      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR *       *" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*"
       cTmp += "    NAZIV KONTA             "  + "* BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
       cTmp += iif( fin_jednovalutno(), "", " DUG. " + ValPomocna() + "* POT." + ValPomocna() + "*" )
       ??U cTmp
@@ -442,7 +442,7 @@ FUNCTION fin_nalog_zaglavlje( dDatNal, cIdFirma, cIdVN, cBrNal )
       P_NRED
 
 
-      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR   *       *" + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "*"
+      cTmp := iif( lDnevnik, "VNIKU *          *   *", "" ) + "*BR   *       *" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*"
       cTmp += "    NAZIV KONTA             " + "*  TIP I NAZIV   * BROJ VEZE * DATUM  * VALUTA *  DUGUJE " + valuta_domaca_skraceni_naziv() + "  * POTRAŽUJE " + valuta_domaca_skraceni_naziv() + "*"
       cTmp +=  iif( fin_jednovalutno(), "", " DUG. " + ValPomocna() + "* POT." + ValPomocna() + "*" )
       ??U cTmp

@@ -74,7 +74,7 @@ FUNCTION ld_pregled_primanja_za_period()
    EOF CRET
 
    nStrana := 0
-   m := "----- ------ ---------------------------------- " + "-" + REPL( "-", Len( gPicS ) ) + " ----------- -----------"
+   m := "----- ------ ---------------------------------- " + "-" + Replicate( "-", Len( gPicS ) ) + " ----------- -----------"
    IF cdod == "D"
       IF Type( ckolona ) $ "UUIUE"
          Msg( "Nepostojeca kolona" )

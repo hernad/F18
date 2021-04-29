@@ -84,7 +84,7 @@ FUNCTION PrenosFin()
    IF ck2 == "9"
       ck2 := ""
    ENDIF
-   IF ck3 == REPL( "9", Len( ck3 ) )
+   IF ck3 == Replicate( "9", Len( ck3 ) )
       ck3 := ""
    ELSE
       ck3 := k3u256( ck3 )

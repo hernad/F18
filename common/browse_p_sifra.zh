@@ -1507,7 +1507,7 @@ FUNCTION k_f8_nadji_novu_sifru()
             SKIP 1
          ENDDO
          // na osnovu cLast formiram slijedeu çifru
-         cPom := Left( cPom, nDuzUn ) + IF( cLast == "¬¦æÑ", REPL( "0", nDuzSif - nDuzUn - nKor ), cLast )
+         cPom := Left( cPom, nDuzUn ) + IF( cLast == "¬¦æÑ", Replicate( "0", nDuzSif - nDuzUn - nKor ), cLast )
          &( cImeVar ) := PadR( NovaSifra( IF( Empty( cPom ), cPom, RTrim( cPom ) ) ), nDuzSif, " " )
       ELSE
 

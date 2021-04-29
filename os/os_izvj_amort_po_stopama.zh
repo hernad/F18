@@ -129,7 +129,7 @@ FUNCTION os_amortizacija_po_stopama()
 
    P_COND2
 
-   PRIVATE m := "----- ---------- ---- -------- ------------------------------ --- ------" + REPL( " " + REPL( "-", Len( gPicI ) ), 5 )
+   PRIVATE m := "----- ---------- ---- -------- ------------------------------ --- ------" + Replicate( " " + Replicate( "-", Len( gPicI ) ), 5 )
 
    PRIVATE nrbr := 0
 

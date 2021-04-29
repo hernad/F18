@@ -69,7 +69,7 @@ Sifra    Naziv              JMJ Kolicina
       select_o_roba( POS->IdRoba )
       ?? PadR ( _field->Naz, nRobaSir ), _field->Jmj, ""
       SELECT POS
-      ?? TRANS ( POS->Kolicina, cPicKol )
+      ?? TRANSFORM( POS->Kolicina, cPicKol )
       ? cLM + Space ( Len ( POS->IdRoba ) )
       ?? " " + POS->IdOdj, " " + POS->IdDio
       nFin += POS->( Kolicina * Cijena )
@@ -78,7 +78,7 @@ Sifra    Naziv              JMJ Kolicina
 
    ? m
    ? cLM
-   ?? PadL ( "IZNOS DOKUMENTA (" + Trim ( gDomValuta ) + ")",  10  + nRobaSir ), TRANS ( nFin, "9,999,999.99" )
+   ?? PadL ( "IZNOS DOKUMENTA (" + Trim ( gDomValuta ) + ")",  10  + nRobaSir ), TRANSFORM( nFin, "9,999,999.99" )
    ? m
 
    PaperFeed()

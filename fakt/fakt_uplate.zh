@@ -71,7 +71,7 @@ FUNCTION fakt_uplate()
       SELECT ( F_UPL )
       GO TOP
 
-      @ box_x_koord() + X_POS_STANJE - 2, box_y_koord() + 1        SAY REPL( "=", 70 )
+      @ box_x_koord() + X_POS_STANJE - 2, box_y_koord() + 1        SAY Replicate( "=", 70 )
       @ box_x_koord() + X_POS_STANJE - 1, box_y_koord() + Y_POS_STANJE SAY8 " (+)     ZADUŽENJE:"
       @ box_x_koord() + X_POS_STANJE - 0, box_y_koord() + Y_POS_STANJE SAY " (-)       UPLATIO:"
       @ box_x_koord() + X_POS_STANJE + 1, box_y_koord() + Y_POS_STANJE SAY " ------------------"
@@ -79,7 +79,7 @@ FUNCTION fakt_uplate()
 
       DajStanjeKupca()
 
-      @ box_x_koord() + 4, box_y_koord() + 1 SAY REPL( "=", 70 )
+      @ box_x_koord() + 4, box_y_koord() + 1 SAY Replicate( "=", 70 )
 
       SEEK cIdPartner // uplate
       my_browse( "EvUpl", f18_max_rows() -5, f18_max_cols() -10, {|| fakt_ed_uplata() }, "", "<c-N> nova uplata  <F2> ispravka  <c-T> brisanje  <c-P> stampanje", ;
@@ -288,9 +288,9 @@ STATIC FUNCTION StKartKup()
    ? "ZA PERIOD: OD " + DToC( dDatOd ) + " DO " + DToC( dDatDo )
    ? "KUPAC:", cIdPartner, "-", PARTN->naz
    ?
-   ? "-------- " + REPL( "-", Len( opis ) ) + " " + REPL( "-", 10 )
+   ? "-------- " + Replicate( "-", Len( opis ) ) + " " + Replicate( "-", 10 )
    ? "DAT.UPL.³" + PadC( "OPIS", Len( opis ) ) + "³" + PadC( "IZNOS", 10 )
-   ? "-------- " + REPL( "-", Len( opis ) ) + " " + REPL( "-", 10 )
+   ? "-------- " + Replicate( "-", Len( opis ) ) + " " + Replicate( "-", 10 )
 
    SEEK cIdPartner // uplate
    DO WHILE !Eof() .AND. idpartner == cIdPartner
@@ -300,7 +300,7 @@ STATIC FUNCTION StKartKup()
       SKIP 1
    ENDDO
 
-   ? "-------- " + REPL( "-", Len( opis ) ) + " " + REPL( "-", 10 )
+   ? "-------- " + Replicate( "-", Len( opis ) ) + " " + Replicate( "-", 10 )
    ?
    ?U " UKUPNO ZADUŽENJE", TRANSFORM( nUkZaduz, "9999999.99" )
    ? "  - UKUPNO UPLATE", TRANSFORM( nUkUplata, "9999999.99" )
@@ -399,7 +399,7 @@ FUNCTION SaldaKupaca( lPocStanje )
    ? "Tipovi dokumenata zaduzenja kupaca:", Trim( qqTipDok )
 
    m1 := PadC( "SIFRA I NAZIV KUPCA", Len( field->id + field->naz ) + 1 ) + " " + PadC( "ZADUZENJA", 12 ) + " " + PadC( "UPLATE", 12 ) + " " + PadC( "SALDO", 12 )
-   m2 := REPL( "-", Len( field->id ) ) + " " + REPL( "-", Len( field->naz ) ) + " " + REPL( "-", 12 ) + " " + REPL( "-", 12 ) + " " + REPL( "-", 12 )
+   m2 := Replicate( "-", Len( field->id ) ) + " " + Replicate( "-", Len( field->naz ) ) + " " + Replicate( "-", 12 ) + " " + Replicate( "-", 12 ) + " " + Replicate( "-", 12 )
 
    ? m2
    ? m1

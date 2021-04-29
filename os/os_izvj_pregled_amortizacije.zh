@@ -113,7 +113,7 @@ FUNCTION os_pregled_amortizacije()
 
    P_COND2
 
-   PRIVATE m := "----- ---------- ---- -------- ------------------------------ --- ------" + REPL( " " + REPL( "-", Len( gPicI ) ), 5 )
+   PRIVATE m := "----- ---------- ---- -------- ------------------------------ --- ------" + Replicate( " " + Replicate( "-", Len( gPicI ) ), 5 )
 
    cFilter := ".t."
 

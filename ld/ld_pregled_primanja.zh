@@ -161,7 +161,7 @@ FUNCTION ld_pregled_odredjenog_primanja()
    ENDIF
 
    m := "----- " + Replicate( "-", LEN_IDRADNIK ) + " ---------------------------------- " + ;
-         IIF( lKredit .AND. !Empty( cSifKred ), REPL( "-", FIELD_LENGTH_LD_RADKR_NA_OSNOVU + 1 ), "-" + REPL( "-", Len( gPicS ) ) ) + " ----------- -----------"
+         IIF( lKredit .AND. !Empty( cSifKred ), Replicate( "-", FIELD_LENGTH_LD_RADKR_NA_OSNOVU + 1 ), "-" + Replicate( "-", Len( gPicS ) ) ) + " ----------- -----------"
 
    bZagl := {|| ld_zagl_pregled_primanja() }
 

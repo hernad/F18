@@ -110,7 +110,7 @@ FUNCTION pos_stampa_zaduzenja( cIdVd, cBrDok )
 
       ? "-------- ----------------- --- --------"
       ?U PadL ( "UKUPNO ZADUŽENJE (" + Trim ( gDomValuta ) + ")", 29 ), ;
-         TRANS ( nFinZad, "999,999.99" )
+         TRANSFORM( nFinZad, "999,999.99" )
       ? "-------- ----------------- --- --------"
 
       pos_rekapitulacija_tarifa( aTarife )
@@ -217,7 +217,7 @@ FUNCTION PrepisZad( cNazDok )
       ?? PadR ( _field->Naz, nRobaSir ), _field->Jmj, ""
       SELECT POS
 
-      ?? TRANS ( POS->Kolicina, cPicKol )
+      ?? TRANSFORM( POS->Kolicina, cPicKol )
       nFinZad += POS->( Kolicina * Cijena )
 
       pos_setuj_tarife( pos->IdRoba, POS->( Kolicina * Cijena ), @aTarife )
@@ -228,7 +228,7 @@ FUNCTION PrepisZad( cNazDok )
    ? cLM
 
 
-   ?? PadL( "IZNOS DOKUMENTA ", 11  + nRobaSir ), TRANS ( nFinZad, "9,999,999.99" )
+   ?? PadL( "IZNOS DOKUMENTA ", 11  + nRobaSir ), TRANSFORM( nFinZad, "9,999,999.99" )
    ? cLine2
    ?
 

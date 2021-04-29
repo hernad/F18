@@ -221,22 +221,22 @@ FUNCTION kalk_lager_lista_prodavnica()
 
    m := "----- ---------- -------------------- ---"
    nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
+   m += " " + Replicate( "-", nPom )
+   m += " " + Replicate( "-", nPom )
+   m += " " + Replicate( "-", nPom )
    nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
-   m += " " + REPL( "-", nPom )
+   m += " " + Replicate( "-", nPom )
+   m += " " + Replicate( "-", nPom )
+   m += " " + Replicate( "-", nPom )
+   m += " " + Replicate( "-", nPom )
 
    IF cPredhstanje == "D"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() ) - 2
-      m += " " + REPL( "-", nPom )
+      m += " " + Replicate( "-", nPom )
    ENDIF
    IF cSredCij == "D"
       nPom := Len( kalk_pic_cijena_bilo_gpiccdem() )
-      m += " " + REPL( "-", nLen )
+      m += " " + Replicate( "-", nLen )
    ENDIF
 
    s_cM := m
@@ -747,13 +747,13 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
       cTmp := " br. *          *                    *   *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
       cTmp += PadC( "Kol/MPV", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + " " + Replicate( " ", nPom ) + "*"
       nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
       cTmp += cSC2
 
       ?U cTmp
@@ -762,14 +762,14 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
          cTmp := "     *          *                    *   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
-         cTmp += REPL( " ", nPom ) + "*"
-         cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
+         cTmp += Replicate( " ", nPom ) + "*"
+         cTmp += Replicate( " ", nPom ) + " " + Replicate( " ", nPom ) + "*"
          nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
          cTmp += PadC( "SR.NAB.C", nPom ) + "*"
          cTmp += PadC( "NV.Dug.", nPom ) + "*"
          cTmp += PadC( "NV.Pot", nPom ) + "*"
          cTmp += PadC( "NV", nPom ) + "*"
-         cTmp += REPL( " ", nPom ) + "*"
+         cTmp += Replicate( " ", nPom ) + "*"
          cTmp += cSC2
 
          ?U cTmp
@@ -789,13 +789,13 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
       cTmp := " br. *          *                    *   *"
       nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
-      cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + " " + Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
       nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
-      cTmp += REPL( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
+      cTmp += Replicate( " ", nPom ) + "*"
       cTmp += cSC2
 
       ?U cTmp
@@ -804,13 +804,13 @@ FUNCTION kalk_zagl_lager_lista_prodavnica( lSint )
 
          cTmp := "     *          *                    *   *"
          nPom := Len( kalk_pic_kolicina_bilo_gpickol() )
-         cTmp += REPL( " ", nPom ) + " " + REPL( " ", nPom ) + "*"
+         cTmp += Replicate( " ", nPom ) + " " + Replicate( " ", nPom ) + "*"
          nPom := Len( kalk_pic_iznos_bilo_gpicdem() )
          cTmp += PadC( "SR.NAB.C", nPom ) + "*"
          cTmp += PadC( "NV.Dug.", nPom ) + "*"
          cTmp += PadC( "NV.Pot", nPom ) + "*"
          cTmp += PadC( "NV", nPom ) + "*"
-         cTmp += REPL( " ", nPom ) + "*"
+         cTmp += Replicate( " ", nPom ) + "*"
          cTmp += cSC2
 
          ?U cTmp

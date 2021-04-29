@@ -1181,7 +1181,7 @@ FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
 
          // 4 red
          cTmp := "+"
-         cTmp += REPL( "+", FIELD_PARTNER_ID_LENGTH )
+         cTmp += Replicate( "+", FIELD_PARTNER_ID_LENGTH )
          cTmp += "+"
          cTmp += Replicate( "+", 25 )
 

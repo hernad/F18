@@ -181,10 +181,10 @@ FUNCTION my_browse( cImeBoxa, xw, yw, bMyKeyHandler, cMessTop, cMessBot, lInvert
    // Kol := azKol
    // ENDIF
 
-   @ box_x_koord(), box_y_koord() + 2     SAY hParams[ "msg_top" ]   // +  REPL( zh_UTF8ToStrBox( BROWSE_PODVUCI_2 ),  42 )
+   @ box_x_koord(), box_y_koord() + 2     SAY hParams[ "msg_top" ]   // +  Replicate( zh_UTF8ToStrBox( BROWSE_PODVUCI_2 ),  42 )
    @ box_x_koord() + hParams[ "xw" ] + 1,  box_y_koord() + 2   SAY hParams[ "msg_bott" ] COLOR F18_COLOR_MSG_BOTTOM
 
-   // @ box_x_koord() + hParams[ "xw" ] + 1,  Col() + 1 SAY REPL( zh_UTF8ToStrBox( BROWSE_PODVUCI_2 ), 42 )
+   // @ box_x_koord() + hParams[ "xw" ] + 1,  Col() + 1 SAY Replicate( zh_UTF8ToStrBox( BROWSE_PODVUCI_2 ), 42 )
    @ box_x_koord() + 1, box_y_koord() + hParams[ "yw" ] - 6    SAY Str( RecCount(), 5 )
 
    oBrowse := TBrowseDB( box_x_koord() + 2 + hParams[ "prazno" ], box_y_koord() + 1, box_x_koord() + nHeight - nBrojRedovaZaPoruke, box_y_koord() + nWidth )

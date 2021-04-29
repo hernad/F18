@@ -143,7 +143,7 @@ FUNCTION pos_kartica_artikla()
    IF cSiroki == "D"
       m := m + Replicate( "-", 8 ) + " "  // datum
    ENDIF
-   m := m + "---" + REPL( "-", nMDBrDok ) + " ---------- ---------- ----------"
+   m := m + "---" + Replicate( "-", nMDBrDok ) + " ---------- ---------- ----------"
 
    IF cPPar == "D"
       m += " --------"

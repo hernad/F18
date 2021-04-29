@@ -68,9 +68,9 @@ FUNCTION pos_stampa_dokumenta()
 
    ? cLM + "VD", PadR( "Broj", 9 )
    ?? " " + PadR( "Radnik", nRW ), "BrS", " Iznos"
-   ? cLM + "--", REPL( "-", 9 )
+   ? cLM + "--", Replicate( "-", 9 )
 
-   ?? " " + REPL( "-", nRW ), "---", REPL( "-", 10 )
+   ?? " " + Replicate( "-", nRW ), "---", Replicate( "-", 10 )
 
    IF !Empty( cIdVd )
       nSuma := 0
@@ -111,8 +111,8 @@ FUNCTION pos_stampa_dokumenta()
    ENDDO
 
    IF !Empty( cIdVd )
-      ? cLM + "--", REPL ( "-", 9 )
-      ?? " " + REPL( "-", nRW ), "---", REPL( "-", 8 )
+      ? cLM + "--", Replicate( "-", 9 )
+      ?? " " + Replicate( "-", nRW ), "---", Replicate( "-", 8 )
       ? cLM + PadL( "U K U P N O  (" + gDomValuta + ")", 3 + 9 + 0 + 1 + nRW ), Str( nSuma, 12, 2 )
    ENDIF
 

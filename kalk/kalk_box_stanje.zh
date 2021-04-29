@@ -190,10 +190,10 @@ FUNCTION roba_box_stanje( cIdRoba, aStanje )
       ENDIF
 
    NEXT
-   @ nR, box_y_koord() + 2 SAY cDiv + REPL( "-", nLenKonto ) + cDiv + ;
-      REPL ( "-", nPd ) + cDiv
-      //REPL ( "-", nPd ) + cDiv + ;
-      //REPL ( "-", nPd ) + cDiv + ;
+   @ nR, box_y_koord() + 2 SAY cDiv + Replicate( "-", nLenKonto ) + cDiv + ;
+      Replicate( "-", nPd ) + cDiv
+      //Replicate( "-", nPd ) + cDiv + ;
+      //Replicate( "-", nPd ) + cDiv + ;
 
    nR++
    @ nR, box_y_koord() + 2 SAY cDiv + PadC( "UKUPNO:", nLenKonto ) + cDiv

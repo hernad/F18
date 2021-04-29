@@ -546,7 +546,7 @@ FUNCTION ld_lista_kredita()
    nRbr := 0
 
    IF cRateDN == "R"
-      m += REPL( "-", 16 )
+      m += Replicate( "-", 16 )
    ENDIF
 
    IF cIdkred = '.'

@@ -157,7 +157,7 @@ FUNCTION fin_preknjizenje_konta()
    IF cK2 == "9"
       cK2 := ""
    ENDIF
-   IF cK3 == REPL( "9", Len( ck3 ) )
+   IF cK3 == Replicate( "9", Len( ck3 ) )
       cK3 := ""
    ELSE
       cK3 := K3U256( cK3 )

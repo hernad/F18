@@ -318,7 +318,7 @@ FUNCTION pos_stanje_artikala
 STATIC FUNCTION Podvuci()
 
    ?
-   ?? REPL( "-", 5 ), REPL ( "-", 9 ), REPL ( "-", 9 ), REPL ( "-", 9 ), REPL ( "-", 10 ), REPL( "-", 10 ), REPL( "-", 10 )
+   ?? Replicate( "-", 5 ), Replicate( "-", 9 ), Replicate( "-", 9 ), Replicate( "-", 9 ), Replicate( "-", 10 ), Replicate( "-", 10 ), Replicate( "-", 10 )
 
    RETURN .T.
 

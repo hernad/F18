@@ -100,7 +100,7 @@ FUNCTION os_pregled_po_rj()
 
    START PRINT CRET
 
-   m := "----- ---------- ----------------------------" + IIF( cOpis == "D", " " + REPL( "-", Len( field->opis ) ), "" ) + "  ---- ------- -------------"
+   m := "----- ---------- ----------------------------" + IIF( cOpis == "D", " " + Replicate( "-", Len( field->opis ) ), "" ) + "  ---- ------- -------------"
 
    IF lPoAmortStopama
 
@@ -115,7 +115,7 @@ FUNCTION os_pregled_po_rj()
 
    ELSEIF lBrojSobe .AND. Empty( cBrojSobe )
 
-      m := "----- ------ ---------- ----------------------------" + IF( cOpis == "D", " " + REPL( "-", Len( field->opis ) ), "" ) + "  ---- ------- -------------"
+      m := "----- ------ ---------- ----------------------------" + IF( cOpis == "D", " " + Replicate( "-", Len( field->opis ) ), "" ) + "  ---- ------- -------------"
 
       select_o_os_or_sii()
       SET ORDER TO TAG "2"
@@ -216,7 +216,7 @@ FUNCTION os_pregled_po_rj()
 
          ?
          ? "KONTO:", idkonto
-         ? REPL( "-", 14 )
+         ? Replicate( "-", 14 )
          nRbr := 0
 
       ENDIF

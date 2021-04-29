@@ -291,7 +291,7 @@ FUNCTION ZaglDPK()
    IF cF == "1"
       ? "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------------------ ----- ----------------- ----------------------------------------------------------------------- -----------------------------------------------------------------------"
       ? "*RED.*" + PadC( "�IFRA", FIELD_PARTNER_ID_LENGTH ) + "*     NAZIV POSLOVNOG PARTNERA      * PTT *      MJESTO     *       K  U  M  U  L  A  T  I  V  N  I       P  R  O  M  E  T           *                 S      A      L      D       O                       *"
-      ? "      " + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "                                                              ----------------------------------------------------------------------- -----------------------------------------------------------------------"
+      ? "      " + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "                                                              ----------------------------------------------------------------------- -----------------------------------------------------------------------"
       ? "*BROJ*" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*                                   * BROJ*                 *   DUGUJE   " + valuta_domaca_skraceni_naziv() + "  *  POTRA�UJE " + valuta_domaca_skraceni_naziv() + " *   DUGUJE  " + ValPomocna() + "  *   POTRA�. " + ValPomocna() + "  *    DUGUJE " + valuta_domaca_skraceni_naziv() + "  *  POTRA�UJE " + valuta_domaca_skraceni_naziv() + " *   DUGUJE  " + ValPomocna() + "  *   POTRA�." + ValPomocna() + "  *"
       ? m
    ELSEIF cPG == "D"
@@ -303,7 +303,7 @@ FUNCTION ZaglDPK()
    ELSE
       ? "----- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ------------------------ ----------------------------------- -----------------------------------"
       ? "*RED.*" + PadC( "SIFRA", FIELD_PARTNER_ID_LENGTH ) + "*      NAZIV POSLOVNOG    *         KUMULATIVNI  PROMET       *               SALDO              *"
-      ? "      " + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "                        ----------------------------------- -----------------------------------"
+      ? "      " + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "                        ----------------------------------- -----------------------------------"
       ? "*BROJ*" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "*      PARTNERA           *    DUGUJE       *   POTRA�UJE     *    DUGUJE       *   POTRA�UJE    *"
       ? m
    ENDIF

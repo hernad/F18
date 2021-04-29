@@ -222,7 +222,7 @@ FUNCTION fakt_specif_prodaje_real_kolicina()
    IF cPrikaz == "1"
       cLinija := "---- ------ -------------------------- ------------"
    ELSE
-      cLinija := "---- ----------- " + REPL( "-", 40 ) + " ------------" + ;
+      cLinija := "---- ----------- " + Replicate( "-", 40 ) + " ------------" + ;
          " ------------ -------------"
    ENDIF
 

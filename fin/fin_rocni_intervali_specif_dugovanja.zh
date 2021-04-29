@@ -385,7 +385,7 @@ FUNCTION specif_dugovanja_po_rocnim_intervalima()
 
    ENDDO
 
-   ? "+" + REPL( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ĵ"
+   ? "+" + Replicate( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ĵ"
 
    qqout_sa_x_x( PadR( "UKUPNO", Len( POM->IDPARTNER + PadR( PARTN->naz, 25 ) ) + 1 ) )
 
@@ -405,7 +405,7 @@ FUNCTION specif_dugovanja_po_rocnim_intervalima()
       qqout_sa_x( Transform( nTUDug2 - nTUPot2, PICPIC ) )
    ENDIF
 
-   ? "+" + REPL( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+   ? "+" + Replicate( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
    FF
    end_print()
@@ -449,11 +449,11 @@ FUNCTION ZaglDuznici( fStrana, lSvi )
    select_o_konto( cIdKonto )
 
    ? "KONTO  :", cIdKonto, naz
-   ? "+" + REPL( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ŀ"
-   ? "+" + REPL( " ", FIELD_PARTNER_ID_LENGTH ) + "+                         +                     V  A  N      V  A  L  U  T  E                                 +             +"
+   ? "+" + Replicate( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ŀ"
+   ? "+" + Replicate( " ", FIELD_PARTNER_ID_LENGTH ) + "+                         +                     V  A  N      V  A  L  U  T  E                                 +             +"
    ? "+" + PadR( "SIFRA", FIELD_PARTNER_ID_LENGTH ) + "+     NAZIV  PARTNERA     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ĵ  UKUPNO     +"
    ? "+" + PadR( "PARTN.", FIELD_PARTNER_ID_LENGTH ) + "+                         +DO" + Str( nDoDana1, 3 ) + " D.     +DO" + Str( nDoDana2, 3 ) + " D.     +DO" + Str( nDoDana3, 3 ) + " D.     +DO" + Str( nDoDana4, 3 ) + " D.     +PR." + Str( nDoDana4, 2 ) + " D.     + UKUPNO      +             +"
-   ? "+" + REPL( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ĵ"
+   ? "+" + Replicate( "+", FIELD_PARTNER_ID_LENGTH ) + "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++Ĵ"
 
    SELECT ( nArr )
 

@@ -124,7 +124,7 @@ FUNCTION kalk_mag_promet_grupe_partnera()
    EOF CRET
 
    nLen := 1
-   m := "----- ---------- -------------------- --- " + REPL( "-", nlPK ) + " " + REPL( "-", nlPI ) + " " + REPL( "-", nlPK ) + " " + REPL( "-", nlPI )
+   m := "----- ---------- -------------------- --- " + Replicate( "-", nlPK ) + " " + Replicate( "-", nlPI ) + " " + Replicate( "-", nlPK ) + " " + Replicate( "-", nlPI )
 
    gaZagFix := { 7, 5 }
 

@@ -274,7 +274,7 @@ FUNCTION ld_specifikacija_po_mjesecima()
 
    NEXT
 
-   AAdd( aKol, { "", {|| REPL( "=", 25 ) }, .F., "C", 25, 0, 2 * ( i - nKorekcija ) - 1, 1 } )
+   AAdd( aKol, { "", {|| Replicate( "=", 25 ) }, .F., "C", 25, 0, 2 * ( i - nKorekcija ) - 1, 1 } )
    AAdd( aKol, { "", {|| "U K U P N O"    }, .F., "C", 25, 0, 2 * ( i - nKorekcija ), 1 } )
    FOR j := 1 TO NUK
       cPomMI := "nSum[" + AllTrim( Str( i - nKorekcija ) ) + "," + AllTrim( Str( j ) ) + ",1]"
@@ -420,7 +420,7 @@ STATIC FUNCTION FormNum1( nIznos, nDuz, pici )
    cVrati := StrTran( cVrati, ",", "." )
    cVrati := StrTran( cVrati, ":", "," )
    cVrati := AllTrim( cVrati )
-   cVrati := IF( Len( cVrati ) > nDuz, REPL( "*", nDuz ), PadL( cVrati, nDuz ) )
+   cVrati := IF( Len( cVrati ) > nDuz, Replicate( "*", nDuz ), PadL( cVrati, nDuz ) )
 
    RETURN cVrati
 

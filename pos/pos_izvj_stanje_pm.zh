@@ -388,7 +388,7 @@ FUNCTION pos_stanje_artikala_po_odjeljenjima( cD, cS )
 STATIC FUNCTION Podvuci()
 
    ?
-   ?? REPL( "-", 6 ), REPL ( "-", 9 ), REPL ( "-", 9 ), REPL ( "-", 9 ), REPL ( "-", 10 ), REPL( "-", 10 ), REPL( "-", 10 )
+   ?? Replicate( "-", 6 ), Replicate( "-", 9 ), Replicate( "-", 9 ), Replicate( "-", 9 ), Replicate( "-", 10 ), Replicate( "-", 10 ), Replicate( "-", 10 )
 
    RETURN .T.
 

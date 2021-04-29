@@ -92,7 +92,7 @@ FUNCTION pos_top_narudzbe()
       ? PadC ( "POREDAK PO IZNOSU", 40 )
       ?
       ? PadR( "ID ROBA", 10 ), PadR ( "Naziv robe", 20 ), PadC ( "Vrijednost", 19 )
-      ? REPL( "-", 10 ), REPL ( "-", 20 ), REPL ( "-", 19 )
+      ? Replicate( "-", 10 ), Replicate( "-", 20 ), Replicate( "-", 19 )
       nCnt := 1
       SET ORDER TO TAG "2"
       GO BOTTOM
@@ -112,7 +112,7 @@ FUNCTION pos_top_narudzbe()
       ? PadC ( "POREDAK PO KOLICINI", 40 )
       ?
       ? PadR( "ID ROBA", 10 ), PadR ( "Naziv robe", 20 ), PadC ( "Kolicina", 15 )
-      ? REPL( "-", 10 ), REPL ( "-", 20 ), REPL ( "-", 15 )
+      ? Replicate( "-", 10 ), Replicate( "-", 20 ), Replicate( "-", 15 )
 
       nCnt := 1
 

@@ -186,7 +186,7 @@ FUNCTION pos_realizacija_radnik
             SELECT POM
          ELSE
             ? Space ( 5 ) + PadR ( "Vrsta placanja", 24 ), PadC( "Iznos", 10 )
-            ? Space ( 5 ) + REPL ( "-", 24 ), REPL ( "-", 10 )
+            ? Space ( 5 ) + Replicate( "-", 24 ), Replicate( "-", 10 )
          ENDIF
 
          nKolicO := 0    // kolicina za ostale
@@ -272,7 +272,7 @@ FUNCTION pos_realizacija_radnik
       ?
       ? PadR ( "Sifra", 10 ), PadR ( "Naziv robe", 21 )
       ? PadL ( "Set c.", 11 ), PadC ( "Kolicina", 12 ), PadC ( "Iznos", 15 )
-      ? REPL ( "-", 11 ), REPL ( "-", 12 ), REPL ( "-", 15 )
+      ? Replicate( "-", 11 ), Replicate( "-", 12 ), Replicate( "-", 15 )
       SELECT POM
       SET ORDER TO TAG "2"
       GO TOP
@@ -312,7 +312,7 @@ FUNCTION pos_realizacija_radnik
             nTotal3 += nIzn3
          ENDDO
       ENDDO
-      ? REPL ( "=", 40 )
+      ? Replicate( "=", 40 )
       ? PadL ( "U K U P N O", 24 ), Str ( nTotal, 15, 2 )
       IF nTotal2 <> 0
          ? PadL ( "PARTICIPACIJA:", 24 ), Str ( nTotal2, 15, 2 )
@@ -321,7 +321,7 @@ FUNCTION pos_realizacija_radnik
          ? PadL ( NenapPop(), 24 ), Str ( nTotal3, 15, 2 )
          ? PadL ( "UKUPNO NAPLATA:", 24 ), Str ( nTotal - nTotal3 + nTotal2, 15, 2 )
       ENDIF
-      ? REPL ( "=", 40 )
+      ? Replicate( "=", 40 )
    ENDIF
    IF lTekuci
       PaperFeed()

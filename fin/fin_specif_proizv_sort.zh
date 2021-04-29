@@ -101,7 +101,7 @@ FUNCTION fin_specif_suban_proizv_sort()
    IF cK2 == "9"
       cK2 := ""
    ENDIF
-   IF cK3 == REPL( "9", Len( cK3 ) )
+   IF cK3 == Replicate( "9", Len( cK3 ) )
       cK3 := ""
    ELSE
       cK3 := k3u256( cK3 )

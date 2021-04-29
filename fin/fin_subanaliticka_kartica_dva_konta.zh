@@ -215,7 +215,7 @@ FUNCTION fin_suban_kartica2( lOtvSt )
       cK2 := ""
    ENDIF
 
-   IF cK3 == REPL( "9", Len( cK3 ) )
+   IF cK3 == Replicate( "9", Len( cK3 ) )
       cK3 := ""
    ELSE
       cK3 := K3U256( cK3 )

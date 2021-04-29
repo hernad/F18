@@ -634,9 +634,9 @@ FUNCTION fakt_box_stanje( aStanje, cIdroba )
       nTOst += nPom
       nR++
    NEXT
-   @ nR, box_y_koord() + 2 SAY cDiv + "--" + cDiv + REPL ( "-", npd ) + cDiv + ;
-      REPL ( "-", npd ) + cDiv + ;
-      REPL ( "-", npd ) + cDiv + REPL ( "-", npd ) + cDiv
+   @ nR, box_y_koord() + 2 SAY cDiv + "--" + cDiv + Replicate( "-", npd ) + cDiv + ;
+      Replicate( "-", npd ) + cDiv + ;
+      Replicate( "-", npd ) + cDiv + Replicate( "-", npd ) + cDiv
    nR++
    @ nR, box_y_koord() + 2 SAY " | UK.| "
    @ nR, Col() SAY nTSta PICT fakt_pic_iznos()
@@ -653,7 +653,7 @@ FUNCTION fakt_box_stanje( aStanje, cIdroba )
 
    IF nLenDP > 0
       ++nR
-      @ nR, box_y_koord() + 2 SAY REPL( "-", 74 )
+      @ nR, box_y_koord() + 2 SAY Replicate( "-", 74 )
       FOR i := 1 TO nLenDP - 1
 
          cPom777 := aDodPar[ i, 2 ]

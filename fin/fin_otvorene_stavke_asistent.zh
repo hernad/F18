@@ -513,7 +513,7 @@ FUNCTION fin_asistent_otv_st()
    SET CURSOR ON
 
    @ box_x_koord() + ( _max_rows - 5 ), box_y_koord() + 1 SAY "****************  REZULTATI ASISTENTA ************"
-   @ box_x_koord() + ( _max_rows - 4 ), box_y_koord() + 1 SAY REPL( "=", f18_max_cols() - 2 )
+   @ box_x_koord() + ( _max_rows - 4 ), box_y_koord() + 1 SAY Replicate( "=", f18_max_cols() - 2 )
    @ box_x_koord() + ( _max_rows - 3 ), box_y_koord() + 1 SAY " <F2> Ispravka broja dok.       <c-P> Print      <a-P> Print Br.Dok           "
    @ box_x_koord() + ( _max_rows - 2 ), box_y_koord() + 1 SAY8 " <K> Uključi/isključi račun za kamate "
    @ box_x_koord() + ( _max_rows - 1 ), box_y_koord() + 1 SAY8 ' < F6 > Štampanje izvršenih promjena  '
@@ -780,7 +780,7 @@ FUNCTION fin_otvorene_stavke_opcije_browse_pregleda( cIdKonto )
    @ nX + 1, nY SAY8 " <K>    Uključi/isključi račun za kamate         <F5> uzmi broj dok.        "
    @ nX + 2, nY SAY '<ENTER> Postavi/ukini zatvaranje                 <F6> "nalijepi" broj dok.  '
 
-   @ nX + 3, nY SAY REPL( zh_UTF8ToStrBox( BROWSE_PODVUCI), f18_max_cols() - 12 )
+   @ nX + 3, nY SAY Replicate( zh_UTF8ToStrBox( BROWSE_PODVUCI), f18_max_cols() - 12 )
 
    @ nX + 4, nY SAY ""
 

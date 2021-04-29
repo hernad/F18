@@ -179,7 +179,7 @@ FUNCTION os_pregled_po_kontima()
       ENDIF
    ENDIF
 
-   PRIVATE m := "----- ---------- ----" + IF( cAmoGr == "D", " " + REPL( "-", Len( field->idam ) ), "" ) + " -------- ------------------------------ --- ------" + REPL( " " + REPL( "-", Len( gPicI ) ), 3 )
+   PRIVATE m := "----- ---------- ----" + IF( cAmoGr == "D", " " + Replicate( "-", Len( field->idam ) ), "" ) + " -------- ------------------------------ --- ------" + Replicate( " " + Replicate( "-", Len( gPicI ) ), 3 )
 
    IF Empty( cIdRj )
       select_o_os_or_sii()

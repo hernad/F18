@@ -269,9 +269,9 @@ FUNCTION roba_pregled_prodaje_po_grupama()
    ENDIF
    ? "Rekapitulacija po grupama:"
    IF cSaPSiPM == "D"
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
       ? PadC( "GRUPA", 40 ) + " " + PadC( "KOLICINA", 13 ) + " " + PadC( "KOLIC.PR.7d", 13 ) + " " + PadC( "OMJER SADA/7d", 13 ) + " " + PadC( "KOLIC.PR.28d", 13 ) + " " + PadC( "OMJ. SADA/28d", 13 ) + " " + PadC( "BJMJ", 10 ) + " " + PadC( "VRIJEDNOST", 13 )
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
       nIznos := nKol := nKolP1S := nKolP4S := 0
       FOR i := 1 TO Len( aGr )
          ? PadR( aGr[ i, 1 ], 40 ) + " "
@@ -287,13 +287,13 @@ FUNCTION roba_pregled_prodaje_po_grupama()
          nKolP4S += aGr[ i, 4 ]
          nIznos += aGr[ i, 6 ]
       NEXT
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
       ? PadR( "UKUPNO", 40 ) + " " + Str( nKol, 13, 3 ) + " " + Str( nKolP1S, 13, 3 ) + " " + Str( SDiv( nKolP1S, nKol ), 13, 3 ) + " " + Str( nKolP4S, 13, 3 ) + " " + Str( SDiv( nKolP4S, nKol ), 13, 3 ) + " " + Space( 10 ) + " " + Str( nIznos, 13, 3 )
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
    ELSE
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
       ? PadC( "GRUPA", 40 ) + " " + PadC( "KOLICINA", 13 ) + " " + PadC( "BJMJ", 10 ) + " " + PadC( "VRIJEDNOST", 13 )
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
       nIznos := nKol := 0
       FOR i := 1 TO Len( aGr )
          ? PadR( aGr[ i, 1 ], 40 ), ;
@@ -303,9 +303,9 @@ FUNCTION roba_pregled_prodaje_po_grupama()
          nKol += aGr[ i, 2 ]
          nIznos += aGr[ i, 4 ]
       NEXT
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
       ? PadR( "UKUPNO", 40 ) + " " + Str( nKol, 13, 3 ) + " " + Space( 10 ) + " " + Str( nIznos, 13, 3 )
-      ? REPL( "-", 40 ) + " " + REPL( "-", 13 ) + " " + REPL( "-", 10 ) + " " + REPL( "-", 13 )
+      ? Replicate( "-", 40 ) + " " + Replicate( "-", 13 ) + " " + Replicate( "-", 10 ) + " " + Replicate( "-", 13 )
    ENDIF
 
    FF

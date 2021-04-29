@@ -455,18 +455,18 @@ METHOD FinBrutoBilans:set_txt_lines()
 
    // pocetno stanje
    _tmp := ( Len( ::pict_iznos ) * 2 ) + 1
-   AAdd( _arr, { _tmp, PadC( "POČETNO STANJE", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+   AAdd( _arr, { _tmp, PadC( "POČETNO STANJE", _tmp ), PadC( Replicate( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
 
    IF ::hParams[ "kolona_tek_prom" ]
       // tekuci promet
-      AAdd( _arr, { _tmp, PadC( "TEKUĆI PROMET", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+      AAdd( _arr, { _tmp, PadC( "TEKUĆI PROMET", _tmp ), PadC( Replicate( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
    ENDIF
 
    // kumulativni promet
-   AAdd( _arr, { _tmp, PadC( "KUMULATIVNI PROMET", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+   AAdd( _arr, { _tmp, PadC( "KUMULATIVNI PROMET", _tmp ), PadC( Replicate( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
 
    // saldo
-   AAdd( _arr, { _tmp, PadC( "SALDO", _tmp ), PadC( REPL( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
+   AAdd( _arr, { _tmp, PadC( "SALDO", _tmp ), PadC( Replicate( "-", _tmp ), _tmp ), PadC( "DUGUJE     POTRAŽUJE", _tmp ) } )
 
    oRPT:zagl_arr := _arr
 

@@ -686,16 +686,16 @@ FUNCTION naprometniji_artikli_prodavnica()
    IF cSta $ "IO"
       m := AllTrim( Str( Min( nTop, Len( aTopI ) ) ) ) + " NAJPROMETNIJIH ARTIKALA POSMATRANO PO IZNOSIMA:"
       ?
-      ? REPL( "-", Len( m ) )
+      ? Replicate( "-", Len( m ) )
       ?
       ?U PadC( "ŠIFRA", Len( roba->id ) ) + " " + PadC( "NAZIV", 50 ) + " " + PadC( "IZNOS", 20 )
-      ? REPL( "-", Len( roba->id ) ) + " " + REPL( "-", 50 ) + " " + REPL( "-", 20 )
+      ? Replicate( "-", Len( roba->id ) ) + " " + Replicate( "-", 50 ) + " " + Replicate( "-", 20 )
       FOR i := 1 TO Len( aTopI )
          cIdRoba := aTopI[ i, 1 ]
          select_o_roba( cIdRoba )
          ? cIdRoba, Left( ROBA->naz, 50 ), PadC( Transform( aTopI[ i, 2 ], picdem ), 20 )
       NEXT
-      ? REPL( "-", Len( id ) ) + " " + REPL( "-", 50 ) + " " + REPL( "-", 20 )
+      ? Replicate( "-", Len( id ) ) + " " + Replicate( "-", 50 ) + " " + Replicate( "-", 20 )
 
    ENDIF
 
@@ -708,17 +708,17 @@ FUNCTION naprometniji_artikli_prodavnica()
       ENDIF
       m := AllTrim( Str( Min( nTop, Len( aTopK ) ) ) ) + " NAJPROMETNIJIH ARTIKALA POSMATRANO PO KOLICINAMA:"
       ?
-      ? REPL( "-", Len( m ) )
+      ? Replicate( "-", Len( m ) )
       ?
       ?U PadC( "ŠIFRA", Len( roba->id ) ) + " " + PadC( "NAZIV", 50 ) + " " + PadC( "KOLIČINA", 20 )
-      ? REPL( "-", Len( roba->id ) ) + " " + REPL( "-", 50 ) + " " + REPL( "-", 20 )
+      ? Replicate( "-", Len( roba->id ) ) + " " + Replicate( "-", 50 ) + " " + Replicate( "-", 20 )
 
       FOR i := 1 TO Len( aTopK )
          cIdRoba := aTopK[ i, 1 ]
          select_o_roba( cIdRoba )
          ? cIdRoba, Left( ROBA->naz, 50 ), PadC( Transform( aTopK[ i, 2 ], pickol ), 20 )
       NEXT
-      ? REPL( "-", Len( id ) ) + " " + REPL( "-", 50 ) + " " + REPL( "-", 20 )
+      ? Replicate( "-", Len( id ) ) + " " + Replicate( "-", 50 ) + " " + Replicate( "-", 20 )
 
    ENDIF
 

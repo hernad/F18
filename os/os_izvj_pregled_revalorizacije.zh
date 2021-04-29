@@ -75,7 +75,7 @@ FUNCTION os_pregled_revalorizacije()
    ?? "", PrikazVal(), "    Datum:", os_datum_obracuna()
    P_COND2
 
-   PRIVATE m := "----- ---------- ---- -------- ------------------------------ --- ------" + REPL( " " + REPL( "-", Len( gPicI ) ), 5 )
+   PRIVATE m := "----- ---------- ---- -------- ------------------------------ --- ------" + Replicate( " " + Replicate( "-", Len( gPicI ) ), 5 )
 
    select_o_os_or_sii()
 

@@ -437,9 +437,9 @@ FUNCTION pos_realizacija_po_vrstama_placanja()
 
    IF Empty( cIdPos )
 
-      ? REPL ( "=", LEN_TRAKA )
+      ? Replicate( "=", LEN_TRAKA )
       ? PadC ( "SVE KASE", 20 ) + Str ( nTotal, 20, 2 )
-      ? REPL ( "=", LEN_TRAKA )
+      ? Replicate( "=", LEN_TRAKA )
 
    ENDIF
 
@@ -551,9 +551,9 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
          _IdPos := POM->IdPos
          IF Empty( cIdPos )
             select_o_pos_kase( _IdPos )
-            ? REPL ( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             ? Space( 1 ) + _idpos + ":", + KASE->Naz
-            ? REPL ( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
          ENDIF
          SELECT POM
 
@@ -640,9 +640,9 @@ STATIC FUNCTION pos_realizacija_po_radnicima()
          nTotal3 += nTotPos3
       ENDDO
       IF Empty( cIdPos )
-         ? REPL( "-", LEN_TRAKA )
+         ? Replicate( "-", LEN_TRAKA )
          ? PadC( "SVE KASE UKUPNO:", 25 ), Transform( nTotal, "999,999,999.99" )
-         ? REPL( "-", LEN_TRAKA )
+         ? Replicate( "-", LEN_TRAKA )
       ENDIF
    ENDIF
 
@@ -715,9 +715,9 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
          _IdPos := pom->IdPos
          IF Empty( cIdPos )
             select_o_pos_kase( _IdPos )
-            ? REPL( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             ? Space( 1 ) + _idpos + ":", KASE->Naz
-            ? REPL( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             SELECT POM
          ENDIF
          nTotPos := 0
@@ -748,9 +748,9 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
          nTotal3 += nTotPos3
       ENDDO
       IF Empty( cIdPos )
-         ? REPL( "=", LEN_TRAKA )
+         ? Replicate( "=", LEN_TRAKA )
          ? PadC( "SVE KASE UKUPNO", 25 ) + Transform( nTotal, "999,999,999.99" )
-         ? REPL( "=", LEN_TRAKA )
+         ? Replicate( "=", LEN_TRAKA )
       ENDIF
    ENDIF
 
@@ -768,9 +768,9 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
          _IdPos := POM->IdPos
          IF Empty( cIdPos )
             select_o_pos_kase( _IdPos )
-            ? REPL( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             ? Space( 1 ) + _idpos + ":", KASE->Naz
-            ? REPL( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             SELECT POM
          ENDIF
          nTotPos := 0
@@ -845,7 +845,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
                   nTotOdjk += nRobaKol
                ENDIF
             ENDDO
-            ? REPL( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             IF cK1 == "D"
                ? PadC( "UKUPNO " + _idodj, 16 )
                ?? Str( nTotOdjk, 10, 2 )
@@ -853,7 +853,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
                ? PadC( "UKUPNO ODJELJENJE", 26 )
             ENDIF
             ?? Transform( nTotOdj, "999,999,999.99" )
-            ? REPL( "-", LEN_TRAKA )
+            ? Replicate( "-", LEN_TRAKA )
             ?
             nTotPos += nTotOdj
             nTotPosK += nTotOdjk
@@ -865,9 +865,9 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
          nTotal3 += nTotPos3
       ENDDO
       IF Empty( cIdPos )
-         ? REPL( "*", LEN_TRAKA )
+         ? Replicate( "*", LEN_TRAKA )
          ? PadC( "SVE KASE UKUPNO", 25 ), Transform( nTotal, "999,999,999.99" )
-         ? REPL( "*", LEN_TRAKA )
+         ? Replicate( "*", LEN_TRAKA )
       ENDIF
    ENDIF
 
@@ -877,7 +877,7 @@ STATIC FUNCTION pos_realizacija_po_odjeljenjima( fPrik, nTotal2, nTotal3 )
 
 STATIC FUNCTION TotalKasa( cIdPos, nTotPos, nTotPos2, nTotPos3, nTotPosk, cK1, cPodvuci )
 
-   ? REPL( cPodvuci, LEN_TRAKA )
+   ? Replicate( cPodvuci, LEN_TRAKA )
    IF cK1 == "D"
       ? PadC( "UKUPNO KASA " + _idpos, 16 ), Str( nTotPosK, 10, 2 )
       ?? Transform( nTotPos, "999,999,999.99" )
@@ -891,7 +891,7 @@ STATIC FUNCTION TotalKasa( cIdPos, nTotPos, nTotPos2, nTotPos3, nTotPosk, cK1, c
       ? PadL( NenapPop(), 25 ) + Str( nTotPos3, 15, 2 )
       ? PadL( "UKUPNO NAPLATA:", 25 ) + Str( nTotPos - nTotPos3 + nTotPos2, 15, 2 )
    ENDIF
-   ? REPL( cPodvuci, LEN_TRAKA )
+   ? Replicate( cPodvuci, LEN_TRAKA )
    ?
 
    RETURN

@@ -578,7 +578,7 @@ FUNCTION fakt_lager_lista()
       ?
       z0 := "Rekapitulacija stanja po tarifama:"
       ? z0
-      m := "------" + REPL( " " + REPL( "-", Len( gPicProc ) ), 3 ) + REPL( " " + REPL( "-", Len( fakt_pic_iznos() ) ), 5 )
+      m := "------" + Replicate( " " + Replicate( "-", Len( gPicProc ) ), 3 ) + Replicate( " " + Replicate( "-", Len( fakt_pic_iznos() ) ), 5 )
       ? m
       z1 := "Tarifa" + PadC( "PPP%", Len( gPicProc ) + 1 ) + PadC( "PPU%", Len( gPicProc ) + 1 ) + PadC( "PP%", Len( gPicProc ) + 1 ) + PadC( "MPV", Len( fakt_pic_iznos() ) + 1 ) + PadC( "PPP", Len( fakt_pic_iznos() ) + 1 ) + PadC( "PPU", Len( fakt_pic_iznos() ) + 1 ) + PadC( "PP", Len( fakt_pic_iznos() ) + 1 ) + PadC( "MPV+por", Len( fakt_pic_iznos() ) + 1 )
       ? z1

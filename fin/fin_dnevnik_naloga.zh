@@ -102,9 +102,9 @@ FUNCTION fin_dnevnik_naloga()
    lJerry := .F.
 
    IF gNW == "N"
-      M := "------ -------------- --- " + "---- ------- " + REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + REPL( "-", 20 ), "" ) + " -- ------------- ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
+      M := "------ -------------- --- " + "---- ------- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + Replicate( "-", 20 ), "" ) + " -- ------------- ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
    ELSE
-      M := "------ -------------- --- " + "---- ------- " + REPL( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + REPL( "-", 20 ), "" ) + " ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
+      M := "------ -------------- --- " + "---- ------- " + Replicate( "-", FIELD_PARTNER_ID_LENGTH ) + " ----------------------------" + iif( fin_jednovalutno() .AND. lJerry, "-- " + Replicate( "-", 20 ), "" ) + " ----------- -------- -------- --------------- ---------------" + IF( fin_jednovalutno(), "-", " ---------- ----------" )
    ENDIF
 
    cMjGod := Str( Month( dDatNal ), 2 ) + Str( Year( dDatNal ), 4 )

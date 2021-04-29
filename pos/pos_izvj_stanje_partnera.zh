@@ -69,7 +69,7 @@ FUNCTION pos_rpt_stanje_partnera()
    // ? Space( 4 )
    // ENDIF
 
-   ?? REPL( "-", 12 ), REPL( "-", 12 ), REPL( "-", 14 )
+   ?? Replicate( "-", 12 ), Replicate( "-", 12 ), Replicate( "-", 14 )
 
    nSumaSt := 0
    nSumaNije := 0
@@ -174,7 +174,7 @@ FUNCTION pos_rpt_stanje_partnera()
       IF Round( nStanje, 4 ) <> 0 .OR. cNula == "D"
 
          select_o_partner( cIdGost )
-         ? REPL( "-", 80 )
+         ? Replicate( "-", 80 )
          ? AllTrim( Str( nBrojacPartnera ) ) + ") " + PadR( AllTrim( cIdGost ) + " " + partn->Naz, 35 ) + " "
          // IF gVrstaRS == "K"
          // ? Space( 4 )
@@ -183,7 +183,7 @@ FUNCTION pos_rpt_stanje_partnera()
          ?? Str( nStanje, 12, 2 )
          nSumaSt += nStanje
          fPisi := .T.
-         ? REPL( "-", 80 )
+         ? Replicate( "-", 80 )
          ++nBrojacPartnera
       ENDIF
       nSumaNije += nPlacNije
@@ -251,11 +251,11 @@ FUNCTION pos_rpt_stanje_partnera()
       // ELSE
       nDuz := 35 + 1 + 10 + 1 + 10
       // ENDIF
-      ? REPL( "=", nDuz ), REPL( "=", 14 )
+      ? Replicate( "=", nDuz ), Replicate( "=", 14 )
       ? PadL( "Ukupno placeno:", nDuz ), Str( nSumaJest, 14, 2 )
       ? PadL( "UKUPNO NEPLACENO:", nDuz ), Str( nSumaNije, 14, 2 )
       ? PadL( "STANJE UKUPNO:", nDuz ), Str( nSumaSt, 14, 2 )
-      ? REPL( "=", nDuz ), REPL( "=", 14 )
+      ? Replicate( "=", nDuz ), Replicate( "=", 14 )
    ENDIF
 
    // IF gVrstaRS <> "S"
