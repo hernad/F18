@@ -563,7 +563,7 @@ FUNCTION PPrint()
    @ box_x_koord() + 21, box_y_koord() + 2 SAY "Dodatnih redova +/- u odnosu na A4 format " GET nPStranica PICT "999"
    @ box_x_koord() + 23, box_y_koord() + 2 SAY "LPT 1/2/3    " GET gPPort   VALID gPPort $ "12356789"
    gPPTK := PadR( gPPTK, 2 )
-   @ box_x_koord() + 23, Col() + 2 SAY "Konverzija" GET gPPTK PICT "@!" VALID subst( gPPTK, 2, 1 ) $ " 1"
+   @ box_x_koord() + 23, Col() + 2 SAY "Konverzija" GET gPPTK PICT "@!" VALID substr( gPPTK, 2, 1 ) $ " 1"
    IF csekvence == "D"
       READ
    ENDIF

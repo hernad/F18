@@ -411,7 +411,7 @@
                             ;   return  .F.              ;
                             ;endif
 
-#define SLASH  zh_ps()
+#define SLASH  PathSeparator()
 
 
 

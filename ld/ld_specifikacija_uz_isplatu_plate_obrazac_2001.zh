@@ -887,7 +887,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 */
 
    my_close_all_dbf()
-   zh_cdpSelect( "SL852" )
+   codepageSelect( "SL852" )
    FOR EACH cKey in hRec:keys()
       IF ValType( hRec[ cKey ] ) == "C"
          hRec[ cKey ] := to_xml_encoding (  hRec[ cKey ] ) // hRec[ cKey ] je cp852 string

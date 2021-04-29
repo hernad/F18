@@ -80,7 +80,7 @@ FUNCTION f18_start_print( cFileName, xPrintOpt, cDocumentName )
    IF cOpt != "PDF"
       GpIni( cDocumentName )
    ELSE
-      zh_cdpSelect( "SLWIN" )
+      codepageSelect( "SLWIN" )
       oPDF := xPrintOpt[ "opdf" ]
       oPDF:cFileName := txt_print_file_name()
       oPDF:cHeader := cDocumentName
@@ -212,7 +212,7 @@ FUNCTION f18_end_print( cFileName, xPrintOpt )
       oPDF:End()
 
       oPDF:View()
-      zh_cdpSelect( "SL852" )
+      codepageSelect( "SL852" )
       zh_SetTermCP( "SLISO" )
 
 

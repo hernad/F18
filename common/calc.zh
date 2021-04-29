@@ -68,7 +68,7 @@ FUNCTION f18_kalkulator()
 
    //cTermCP := Upper( "UTF8" )
    //cHostCP := Upper( "UTF8" )
-   //zh_cdpSelect( cHostCP )
+   //codepageSelect( cHostCP )
    //zh_SetTermCP( cTermCP, cHostCP, .F.  )
 
    DO WHILE .T.

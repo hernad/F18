@@ -27,7 +27,7 @@ FUNCTION harbour_init()
 
 // ? SET( _SET_OSCODEPAGE )
 
-   zh_cdpSelect( "SL852" )
+   codepageSelect( "SL852" )
    // zh_SetTermCP( "SLISO" )
 
 
