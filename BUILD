@@ -166,7 +166,7 @@ ZH_F18_COMP_OPTS=[
     "-DGT_DEFAULT_CONSOLE",
     "-DF18_POS",
     "-DF18_DEBUG",
-    "-b"
+    #"-b" no debug
 ]
 
 ZH_F18_HEADERS=[

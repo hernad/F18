@@ -37,10 +37,11 @@ def convert_content_hb_zh(file_name):
         content_new = re.sub('zh_cdpSelect', 'codepageSelect', content_new, flags = re.M | re.IGNORECASE)
         content_new = re.sub('zh_cdpOS\(', 'codepageOS(', content_new, flags = re.M | re.IGNORECASE)
         
-        content_new = re.sub('zh_ps', 'PathSeparator', content_new, flags = re.M | re.IGNORECASE)
+        content_new = re.sub('zh_ps\(', 'PathSeparator(', content_new, flags = re.M | re.IGNORECASE)
         # subst( => substr(
         content_new = re.sub('subst\(', 'substr(', content_new, flags = re.M | re.IGNORECASE)
-        content_new = re.sub('TRANS\(', 'TRANSFORM(', content_new, flags = re.M | re.IGNORECASE)
+        content_new = re.sub('TRANS\s*\(', 'TRANSFORM(', content_new, flags = re.M | re.IGNORECASE)
+        content_new = re.sub('REPL\s*\(', 'Replicate(', content_new, flags = re.M | re.IGNORECASE)
 
         # don't use SetKXLat
         content_new = re.sub('SetKXLat\(', '// SetKXLat(', content_new, flags = re.M | re.IGNORECASE)
