@@ -344,7 +344,7 @@ FUNCTION kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok, cViseDokumenata)
       cViseDokumenata := "P"
    ENDIF
    
-   cFileName := "KALK_" + DTOS(Date())
+   cFileName := "KALK_" + hb_TToC( hb_DateTime(), "yyyymmdd", "hhmmss" )
    
    IF cViseDokumenata == "P"
       cFileName += "_" + AllTrim(cIdFirma) + "-" + AllTrim(cIdVD) + "-" + AllTrim(cBrDok)
@@ -353,6 +353,7 @@ FUNCTION kalk_print_file_name_txt(cIdFirma, cIdVd, cBrDok, cViseDokumenata)
       cFileName := StrTran(cFileName, "#", "_")
       cFileName := StrTran(cFileName, ".", "_")
       cFileName := StrTran(cFileName, ":", "_")
+      cFileName := StrTran(cFileName, " ", "")
       // KALK_20200623_10_10_0001_TS.txt
    ENDIF
 

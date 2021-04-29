@@ -51,6 +51,8 @@ FUNCTION Main(...)
    // hb_tracestate(1)
    // hb_traceLevel(5)
    //OutStd('start-m-1' + hb_eol())
+   
+   inkey(0)
 
    IF s_hF18Params == NIL
      s_hF18Params := init_f18_params(...)

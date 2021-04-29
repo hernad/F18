@@ -47,3 +47,6 @@ hbhpdf.hbc
 hbxlsxwriter.hbc
 #hbssl.hbc
 #hbhttpd.hbc
+
+#{linux}-lcurl
+
