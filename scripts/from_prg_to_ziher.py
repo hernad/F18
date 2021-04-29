@@ -33,10 +33,14 @@ def convert_content_hb_zh(file_name):
         content_new = re.sub('HB_([_a-zA-Z]+)', r'ZH_\1', content_new, flags = re.M)
 
         # promjena imena funkcija hb -> ziher
-        content_new = re.sub('zh_cdpSelect', 'codepageSelect', content_new, flags = re.M)
-        content_new = re.sub('zh_ps', 'PathSeparator', content_new, flags = re.M)
+        # https://docs.python.org/3/library/re.html
+        content_new = re.sub('zh_cdpSelect', 'codepageSelect', content_new, flags = re.M | r.IGNORECASE)
+        content_new = re.sub('zh_ps', 'PathSeparator', content_new, flags = re.M | r.IGNORECASE)
         # subst( => substr(
-        content_new = re.sub('subst\(', 'substr(', content_new, flags = re.M)
+        content_new = re.sub('subst\(', 'substr(', content_new, flags = re.M | r.IGNORECASE)
+        # zh_ValToStr => ValToStr(
+        content_new = re.sub('zh_ValToStr\(', 'ValToStr(', content_new, flags = re.M | r.IGNORECASE)
+
         #include "setcurs.ch"
         content_new = re.sub('"setcurs.ch"', '"set_curs.zhh"', content_new, flags = re.M)
         #include "rddsys.ch"
