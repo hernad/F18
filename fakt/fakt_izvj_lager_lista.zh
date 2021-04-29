@@ -600,7 +600,7 @@ FUNCTION fakt_lager_lista()
          nPor1 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) ) * _OPP, fakt_zaokruzenje() )
          nPor2 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) * ( 1 + _OPP ) ) * _PPP, fakt_zaokruzenje() )
          nPor3 := Round( nMPV / ( _ZPP + ( 1 + _OPP ) * ( 1 + _PPP ) ) * _ZPP, fakt_zaokruzenje() )
-         ? aPorezi[ i, 1 ], TRANS( 100 * _OPP, gPicProc ), TRANS( 100 * _PPP, gPicProc ), TRANS( 100 * _ZPP, gPicProc ), TRANS( nMPV0, fakt_pic_iznos() ), TRANS( nPor1, fakt_pic_iznos() ), TRANS( nPor2, fakt_pic_iznos() ), TRANS( nPor3, fakt_pic_iznos() ), TRANS( nMPV, fakt_pic_iznos() )
+         ? aPorezi[ i, 1 ], TRANSFORM( 100 * _OPP, gPicProc ), TRANSFORM( 100 * _PPP, gPicProc ), TRANSFORM( 100 * _ZPP, gPicProc ), TRANSFORM( nMPV0, fakt_pic_iznos() ), TRANSFORM( nPor1, fakt_pic_iznos() ), TRANSFORM( nPor2, fakt_pic_iznos() ), TRANSFORM( nPor3, fakt_pic_iznos() ), TRANSFORM( nMPV, fakt_pic_iznos() )
          nUMPV += nMPV
          nUMPV0 += nMPV0
          nUPor1 += nPor1
@@ -608,7 +608,7 @@ FUNCTION fakt_lager_lista()
          nUPor3 += nPor3
       NEXT
       ? m
-      ? PadR( "UKUPNO:", 3 * ( Len( gPicProc ) + 1 ) + 6 ), TRANS( nUMPV0, fakt_pic_iznos() ), TRANS( nUPor1, fakt_pic_iznos() ), TRANS( nUPor2, fakt_pic_iznos() ), TRANS( nUPor3, fakt_pic_iznos() ), TRANS( nUMPV, fakt_pic_iznos() )
+      ? PadR( "UKUPNO:", 3 * ( Len( gPicProc ) + 1 ) + 6 ), TRANSFORM( nUMPV0, fakt_pic_iznos() ), TRANSFORM( nUPor1, fakt_pic_iznos() ), TRANSFORM( nUPor2, fakt_pic_iznos() ), TRANSFORM( nUPor3, fakt_pic_iznos() ), TRANSFORM( nUMPV, fakt_pic_iznos() )
       ?
    ENDIF
 

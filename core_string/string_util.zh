@@ -232,7 +232,7 @@ FUNCTION ASC256( cTxt )
 
 FUNCTION KPAD( n, l )
 
-   RETURN PadL( LTrim( TRANS( Round( n, gZaokr ), PicDEM ) ), l, "." )
+   RETURN PadL( LTrim( TRANSFORM( Round( n, gZaokr ), PicDEM ) ), l, "." )
 
 
 

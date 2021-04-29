@@ -17,7 +17,7 @@ FUNCTION pos_unos_ispravka_racuna()
    LOCAL lRet
    LOCAL lNoviRacun := .T.
 
-   SetKXLat( "'", "-" )
+   // SetKXLat( "'", "-" )
 
    o_pos_tables()
 

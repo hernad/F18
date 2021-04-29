@@ -461,16 +461,16 @@ FUNCTION os_unos_show_sadasnja_vrijednost( cIdSredstvo, aVr, aSred )
    ENDIF
 
    @ box_x_koord() + 6, box_y_koord() + 1 SAY " UKUPNO:   Nab.vr.="         COLOR "W+/B"
-   @ Row(), Col()  SAY TRANS( aVr[ 1 ], "9999999.99" )        COLOR "GR+/B"
+   @ Row(), Col()  SAY TRANSFORM( aVr[ 1 ], "9999999.99" )        COLOR "GR+/B"
 
    @ Row(), Col()  SAY ",    Otp.vr.="         COLOR "W+/B"
-   @ Row(), Col()  SAY TRANS( aVr[ 2 ], "9999999.99" )        COLOR "GR+/B"
+   @ Row(), Col()  SAY TRANSFORM( aVr[ 2 ], "9999999.99" )        COLOR "GR+/B"
 
    @ Row(), Col()  SAY ",    Sad.vr.="         COLOR "W+/B"
-   @ Row(), Col()  SAY TRANS( aVr[ 1 ] - aVr[ 2 ], "9999999.99" ) COLOR IIF( aVr[ 1 ] - aVr[ 2 ] < 0, "GR+/R", "GR+/B" )
+   @ Row(), Col()  SAY TRANSFORM( aVr[ 1 ] - aVr[ 2 ], "9999999.99" ) COLOR IIF( aVr[ 1 ] - aVr[ 2 ] < 0, "GR+/R", "GR+/B" )
 
 //   @ box_x_koord() + 7, box_y_koord() + 1 SAY8 "           Sadašnja vrijednost sa uračunatom amortizacijom=" COLOR "W+/B"
-//   @ Row(), Col()  SAY TRANS( aVr[ 3 ], "9999999.99" )        COLOR IIF( aVr[ 3 ] < 0, "GR+/R", "GR+/B" )
+//   @ Row(), Col()  SAY TRANSFORM( aVr[ 3 ], "9999999.99" )        COLOR IIF( aVr[ 3 ] < 0, "GR+/R", "GR+/B" )
 
    //GO ( nTrec )
    //SELECT ( _arr )

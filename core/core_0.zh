@@ -23,7 +23,7 @@ FUNCTION harbour_init()
 
    f18_init_threads()
 
-   Set( _SET_OSCODEPAGE, zh_cdpOS() )
+   Set( _SET_OSCODEPAGE, codepageOS() )
 
 // ? SET( _SET_OSCODEPAGE )
 

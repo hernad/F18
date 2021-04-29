@@ -954,7 +954,7 @@ STATIC FUNCTION ispisi_zalihe( cG1, cIdTarifa, cIdRoba, cDUslov )
       SELECT rekap1
       HSEEK cG1 + cIdTarifa + cIdRoba + pobjekti->idobj
       IF k4pp <> 0
-         @ PRow(), PCol() + 1 SAY StrTran( TRANS( k2, cPicKol ), " ", "*" )
+         @ PRow(), PCol() + 1 SAY StrTran( TRANSFORM( k2, cPicKol ), " ", "*" )
       ELSE
          @ PRow(), PCol() + 1 SAY k2 PICT cPicKol
       ENDIF
@@ -1012,7 +1012,7 @@ STATIC FUNCTION ispisi_prodaju( cG1, cIdTarifa, cIdRoba, cDUslov )
       SELECT rekap1
       HSEEK cG1 + cIdTarifa + cIdRoba + pobjekti->idobj
       IF k4pp <> 0
-         @ PRow(), PCol() + 1 SAY StrTran( TRANS( k1, cPicKol ), " ", "*" )
+         @ PRow(), PCol() + 1 SAY StrTran( TRANSFORM( k1, cPicKol ), " ", "*" )
       ELSE
          @ PRow(), PCol() + 1 SAY k1 PICT cPicKol
       ENDIF

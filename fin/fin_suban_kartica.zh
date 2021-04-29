@@ -946,9 +946,9 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       --      nLimit  := Abs( ocitaj_izbaci( F_ULIMIT, k3iz256( ck3 ) + cIdPartner, "f_limit" ) )
             nSLimit := Abs( nDugBHD - nPotBHD )
             ? "------------------------------"
-            ? "LIMIT PO K3  :", TRANS( nLimit, "999999999999.99" )
-            ? "SALDO PO K3  :", TRANS( nSLimit, "999999999999.99" )
-            ? "R A Z L I K A:", TRANS( nLimit - nSLimit, "999999999999.99" )
+            ? "LIMIT PO K3  :", TRANSFORM( nLimit, "999999999999.99" )
+            ? "SALDO PO K3  :", TRANSFORM( nSLimit, "999999999999.99" )
+            ? "R A Z L I K A:", TRANSFORM( nLimit - nSLimit, "999999999999.99" )
             ? "------------------------------"
          ENDIF
 */

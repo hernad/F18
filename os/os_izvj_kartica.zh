@@ -189,12 +189,12 @@ FUNCTION PrikazVal()
             ?? TRANSMN( aPom[ i, 2 ], cT ); ?? cK
             ?? TRANSMN( aPom[ i, 3 ], cT ); ?? cK
             ?? TRANSMN( aPom[ i, 4 ], cT ); ?? cK
-            ?? TRANS( nNV, cTU )     ; ?? cK
+            ?? TRANSFORM( nNV, cTU )     ; ?? cK
             ?? TRANSMN( aPom[ i, 5 ], cT ); ?? cK
             ?? TRANSMN( aPom[ i, 6 ], cT ); ?? cK
             ?? TRANSMN( aPom[ i, 7 ], cT ); ?? cK
-            ?? TRANS( nOV, cTU )     ; ?? cK
-            ?? TRANS( nNV - nOV, cTU ) ; ?? cK
+            ?? TRANSFORM( nOV, cTU )     ; ?? cK
+            ?? TRANSFORM( nNV - nOV, cTU ) ; ?? cK
             IF lErr; ?? " ERR?!"; ENDIF
          NEXT
          ? "����������������������������������������������������������������������������������������������������������������������������������"
@@ -243,5 +243,5 @@ FUNCTION TranSMN( x, cT )
 
    // {
 
-   RETURN IF( x == 0, Space( Len( TRANS( x, cT ) ) ), TRANS( x, cT ) )
+   RETURN IF( x == 0, Space( Len( TRANSFORM( x, cT ) ) ), TRANSFORM( x, cT ) )
 // }

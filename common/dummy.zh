@@ -96,7 +96,7 @@ FUNCTION DiffMFV( cZN, cDiff )
             IF field->&cImeP <> &cVar
                lVrati := .T.
                cDiff += zh_eol() + "     "
-               cDiff += cImeP + ": bilo=" + TRANS( field->&cImeP, "" ) + ", sada=" + TRANS( &cVar, "" )
+               cDiff += cImeP + ": bilo=" + TRANSFORM( field->&cImeP, "" ) + ", sada=" + TRANSFORM( &cVar, "" )
             ENDIF
          ENDIF
       ENDIF

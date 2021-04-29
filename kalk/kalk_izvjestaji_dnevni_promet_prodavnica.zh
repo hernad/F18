@@ -66,8 +66,8 @@ FUNCTION kalk_dnevni_promet_prodavnice()
       ?? "", PadR( aR[ i, 1 ], 10 )
       ?? "", PadR( aR[ i, 2 ], 40 )
       ?? "", PadR( aR[ i, 3 ], 3 )
-      ?? "", TRANS( aR[ i, 4 ], "999999999" )
-      ?? "", TRANS( aR[ i, 5 ], "9999999999.99" )
+      ?? "", TRANSFORM( aR[ i, 4 ], "999999999" )
+      ?? "", TRANSFORM( aR[ i, 5 ], "9999999999.99" )
       IF ( cPodvuci == "D" )
          ?  cLinija
       ENDIF
@@ -143,8 +143,8 @@ FUNCTION PromPeriod()
       ?? "", PadR( aR[ i, 1 ], 10 )
       ?? "", PadR( aR[ i, 2 ], 40 )
       ?? "", PadR( aR[ i, 3 ], 3 )
-      ?? "", TRANS( aR[ i, 4 ], "999999999" )
-      ?? "", TRANS( aR[ i, 5 ], "9999999999.99" )
+      ?? "", TRANSFORM( aR[ i, 4 ], "999999999" )
+      ?? "", TRANSFORM( aR[ i, 5 ], "9999999999.99" )
       IF ( cPodvuci == "D" )
          ?  cLinija
       ENDIF
@@ -396,7 +396,7 @@ STATIC FUNCTION Header( dDan, nStr )
 STATIC FUNCTION Footer( cPodvuci, nUk, nUkKol )
 
    ? cLinija
-   ? PadR( "UKUPNO:", 60 ), TRANS( nUkKol, "9999999999" ), Space( 1 ), TRANS( nUk, "999999999.99" )
+   ? PadR( "UKUPNO:", 60 ), TRANSFORM( nUkKol, "9999999999" ), Space( 1 ), TRANSFORM( nUk, "999999999.99" )
    ? cLinija
 
    RETURN

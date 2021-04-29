@@ -939,7 +939,7 @@ FUNCTION UGenNar()
       ENDDO
       IF _kolicina + nIsporuceno > nNaruceno
          lVrati := .F.
-         MsgBeep( "Količina: " + AllTrim( TRANS( _kolicina, fakt_pic_kolicina() ) ) + ". Naručeno: " + AllTrim( TRANS( nNaruceno, fakt_pic_kolicina() ) ) + ". Dosad isporuceno: " + AllTrim( TRANS( nIsporuceno, fakt_pic_kolicina() ) ) + ". #" + ;
+         MsgBeep( "Količina: " + AllTrim( TRANSFORM( _kolicina, fakt_pic_kolicina() ) ) + ". Naručeno: " + AllTrim( TRANSFORM( nNaruceno, fakt_pic_kolicina() ) ) + ". Dosad isporuceno: " + AllTrim( TRANSFORM( nIsporuceno, fakt_pic_kolicina() ) ) + ". #" + ;
             "Za ovoliku isporuku artikla morate imati novu generalnu narudžbenicu!" )
       ENDIF
    ENDIF

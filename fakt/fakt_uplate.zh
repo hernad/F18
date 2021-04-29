@@ -296,16 +296,16 @@ STATIC FUNCTION StKartKup()
    DO WHILE !Eof() .AND. idpartner == cIdPartner
       ? datupl
       ?? "|" + opis + "|"
-      ?? TRANS( iznos, "9999999.99" )
+      ?? TRANSFORM( iznos, "9999999.99" )
       SKIP 1
    ENDDO
 
    ? "-------- " + REPL( "-", Len( opis ) ) + " " + REPL( "-", 10 )
    ?
-   ?U " UKUPNO ZADUŽENJE", TRANS( nUkZaduz, "9999999.99" )
-   ? "  - UKUPNO UPLATE", TRANS( nUkUplata, "9999999.99" )
+   ?U " UKUPNO ZADUŽENJE", TRANSFORM( nUkZaduz, "9999999.99" )
+   ? "  - UKUPNO UPLATE", TRANSFORM( nUkUplata, "9999999.99" )
    ? "-----------------", "----------"
-   ? "  = PREOSTALI DUG", TRANS( nUkZaduz - nUkUplata, "9999999.99" )
+   ? "  = PREOSTALI DUG", TRANSFORM( nUkZaduz - nUkUplata, "9999999.99" )
    ?
 
    GO ( nRec )
