@@ -125,7 +125,7 @@ FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
 
             cImeCdx := StrTran( cImeCdx, "." + INDEXEXT, "" )
 
-            log_write( "index on " + cKljucIz + " / " + cTag + " / " + cImeCdx + " FILTER: " + iif( cFilter != NIL, cFilter, "-" ) + " / alias=" + cAlias + " / used() = " + zh_ValToStr( Used() ), 5 )
+            log_write( "index on " + cKljucIz + " / " + cTag + " / " + cImeCdx + " FILTER: " + iif( cFilter != NIL, cFilter, "-" ) + " / alias=" + cAlias + " / used() = " + ValToStr( Used() ), 5 )
             IF _tag == "DEL"
                INDEX ON Deleted() TAG "DEL" TO ( cImeCdx ) FOR Deleted()
             ELSE

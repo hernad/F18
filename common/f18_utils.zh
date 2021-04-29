@@ -156,7 +156,7 @@ FUNCTION pp( x )
    ENDIF
 
    IF _type $ "CLDNM"
-      RETURN zh_ValToStr( x )
+      RETURN ValToStr( x )
    ENDIF
 
    RETURN "?" + _type + "?"

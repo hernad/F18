@@ -29,7 +29,7 @@ FUNCTION f18_ime_dbf( xTableRec )
       hRecDbf := get_a_dbf_rec( FILEBASE( xTableRec, .T. ), .T. )
       EXIT
    OTHERWISE
-      ?E  "f18_ime_dbf arg ?! " + zh_ValToStr( xTableRec )
+      ?E  "f18_ime_dbf arg ?! " + ValToStr( xTableRec )
    ENDSWITCH
 
    IF hRecDbf[ "table" ] == "x"

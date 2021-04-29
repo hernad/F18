@@ -29,7 +29,7 @@ FUNCTION _filter_quote( value )
    CASE _var_type == "C"
       RETURN "'" + value + "'"
    OTHERWISE
-      RETURN zh_ValToStr( value )
+      RETURN ValToStr( value )
    ENDCASE
 
    RETURN NIL

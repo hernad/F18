@@ -311,7 +311,7 @@ FUNCTION set_screen_dimensions()
    // ?E " set font_size: ", zh_gtInfo( ZH_GTI_FONTSIZE, font_size() )
 
 
-   // Alert( zh_ValToStr( zh_gtInfo( ZH_GTI_DESKTOPROWS ) ) + " / " + zh_ValToStr( zh_gtInfo( ZH_GTI_DESKTOPCOLS ) ) )
+   // Alert( ValToStr( zh_gtInfo( ZH_GTI_DESKTOPROWS ) ) + " / " + ValToStr( zh_gtInfo( ZH_GTI_DESKTOPCOLS ) ) )
    // zh_gtInfo( ZH_GTI_ISFULLSCREEN, .T. )
 
    IF is_windows() // windowsi traze ovo ponavljanje setovanja da bi se settings "primili"

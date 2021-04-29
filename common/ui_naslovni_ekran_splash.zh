@@ -46,7 +46,7 @@ FUNCTION naslovni_ekran_splash_screen( cNaslov, cVer )
   WClose( nWin )
 
 #ifdef F18_DEBUG
-   ?E  "maxrow: " + zh_valToStr(MaxRow()) + " maxcol: " + zh_valToStr(MaxCol())
+   ?E  "maxrow: " + ValToStr(MaxRow()) + " maxcol: " + ValToStr(MaxCol())
 #endif
    //BoxC()
 

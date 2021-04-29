@@ -123,7 +123,7 @@ FUNCTION set_metric( cSection, cUser, xValue )
    ENDIF
 
    SET CENTURY ON
-   _val := zh_ValToStr( xValue )
+   _val := ValToStr( xValue )
    SET CENTURY OFF
 
    cQuery := "SELECT " + F18_PSQL_SCHEMA + ".setmetric(" + sql_quote( cSection ) + "," + sql_quote( _val ) +  ")"

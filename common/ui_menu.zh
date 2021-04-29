@@ -57,7 +57,7 @@ FUNCTION f18_menu( cIzp, lOsnovniMeni, nIzbor, aOpc, aOpcExe )
             IF ValType( nMenuExeOpcija ) == "B"
                Eval( nMenuExeOpcija )
             ELSE
-               MsgBeep( "meni cudan ?" + zh_ValToStr( nIzbor ) )
+               MsgBeep( "meni cudan ?" + ValToStr( nIzbor ) )
             ENDIF
 
          ENDIF

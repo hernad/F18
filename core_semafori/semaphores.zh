@@ -444,7 +444,7 @@ FUNCTION fill_dbf_from_server( dbf_table, sql_query, sql_fetch_time, dbf_write_t
 
       LOG_CALL_STACK cCallMsg
       cCallMsg := "fill_dbf ERROR: " + aDbfRec[ "table" ] + " / " + ;
-         oError:description + " " + oError:operation + " dbf field: " + cField + "  xSqlValue: " +  zh_ValToStr( xSqlField ) + cCallMsg + ;
+         oError:description + " " + oError:operation + " dbf field: " + cField + "  xSqlValue: " +  ValToStr( xSqlField ) + cCallMsg + ;
          " / alias: " + Alias() + " reccount: " + AllTrim( Str( RecCount() ) )
       ?E cCallMsg
       error_bar( "fill_dbf", cCallMsg )

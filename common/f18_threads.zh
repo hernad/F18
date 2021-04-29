@@ -352,7 +352,7 @@ PROCEDURE idle_eval()
       idle_add_for_eval( "1+1", { || 1 + 1 } )
       ?E "IDLE GET EVAL 1+1:", idle_get_eval( "1+1" )
       idle_add_for_eval( "count konto", {|| table_count( "konto") } )
-      info_bar("idle", "IDLE GET EVAL count konto:" +  zh_ValToStr( idle_get_eval( "count konto" ) ) )
+      info_bar("idle", "IDLE GET EVAL count konto:" +  ValToStr( idle_get_eval( "count konto" ) ) )
 */
 
 FUNCTION idle_get_eval( cId )
