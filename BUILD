@@ -9,67 +9,49 @@ F18_LIB = "klijent"
 
 cc_binary(
     name = "F18-klijent",
-    srcs = [ ":F18_" + F18_LIB + "_zh" ],
+    srcs = [ "F18-klijent.c" ],
     deps = [
-        ":ziher",
+        ":F18",
         "//zh_zero:headers",
-        "//zh_rtl:headers",
-        #"//F18:Z18_klijent_zh_c",
-        #"//zh_zero:zh_zero", 
-        #"//zh_vm:zh_vm",
-        #"//zh_vm:zh_vm_zh_c",
-        #"//zh_macro:zh_macro",
-        #"//zh_rtl:zh_rtl",
-        #"//zh_rtl:zh_rtl_zh_c",
-        #"//zh_rtl/gt:zh_rtl_gt",
-        #"//zh_rtl/gt:zh_rtl_gt_zh_c",
-        #"//zh_rtl/rdd:zh_rtl_rdd",
-        #"//zh_rtl/rdd:zh_rtl_rdd_zh_c",
-        #"//zh_tools:zh_tools",
-        #"//zh_tools:zh_tools_zh_c",
-        #"//third_party/xlsxwriter:xlsxwriter",
-        #"//zh_minizip:zh_minizip",
-        #"//zh_minizip:zh_minizip_zh_c",
-        #"//third_party/minizip:minizip",
-        #"//zh_pgsql:zh_pgsql",
-        #"//zh_pgsql:zh_pgsql_zh_c",
-        #"//third_party/png:png",
-        #"//zh_tcp_ip:zh_tcp_ip",
-        #"//zh_tcp_ip:zh_tcp_ip_zh_c",
-        #"//zh_ssl:zh_ssl",
-        #"//zh_ssl:zh_ssl_zh_c",
-        #"//zh_debug:zh_debug_zh_c",
-        #"//zh_debug:zh_debug"
     ] + POSTGRESQL_LIB,
-    linkopts = L_OPTS + L_OPTS_2,
+    linkopts = L_OPTS + L_OPTS_2,  
+    # [ "/NODEFAULTLIB:msvcrt.lib" ], # https://stackoverflow.com/questions/45810938/error-lnk2019-unresolved-external-symbol-main-referenced-in-function-int-cdec
     #copts = C_OPTS,
     copts = [
         "-Izh_zero",
-        "-Izh_rtl",
-        #"-DZH_DYNIMP",
-        #"-DZH_TR_LEVEL=5",
+        "-DZH_DYNIMP",
+        "-DZH_TR_LEVEL=4",
     ],
     #linkstatic = True,
     visibility = ["//visibility:public"],
 )
 
 
-
-#cc_library(
-#    name = "F18_" + Z18_LIB + "_zh_c",
-#    srcs = [ ":F18_" + Z18_LIB + "_zh" ],
-#    hdrs = glob([
-#        "*.h",
-#    ]),
-#    copts = C_OPTS,
-#    deps = [ 
-#       "//zh_zero:zh_zero", 
-#       "//zh_rtl:zh_rtl",
-#       "//zh_vm:zh_vm"
-#    ],
-#    alwayslink=1,
-#    visibility = ["//visibility:public"],
-#)
+windows_dll_library(
+    name = "F18",
+    srcs = [ ":F18_" + F18_LIB + "_zh" ],
+    hdrs = glob([
+        "*.h",
+        "*.zhh",
+    ]) + POSTGRESQL_HEADERS,
+    deps = [ 
+        ":ziher",
+        "//zh_zero:headers",
+        "//zh_rtl:headers",
+    ] + POSTGRESQL_LIB,
+    linkopts = L_OPTS + L_OPTS_2,
+    copts = [
+        "-Izh_zero",
+        "-Izh_vm",
+        "-Izh_rtl",
+        "-DZH_DYNLIB",
+        #"-DZH_TR_LEVEL=4", #INFO
+        #"-DZH_TR_LEVEL=5", DEBUG
+    ]  + POSTGRESQL_COPT,
+    #linkstatic = False,
+    #linkshared = True,
+    visibility = ["//visibility:public"],
+)
 
 windows_dll_library(
     name = "ziher",
@@ -94,6 +76,8 @@ windows_dll_library(
        "//zh_minizip:c_sources",
        "//zh_pgsql:zh_pgsql_zh",
        "//zh_pgsql:c_sources",
+       "//zh_tcp_ip:c_sources",
+       "//zh_tcp_ip:zh_tcp_ip_zh",
        "//third_party/zlib:c_sources",
        "//third_party/pcre2:c_sources",
        "//third_party/xlsxwriter:c_sources",
@@ -127,9 +111,6 @@ windows_dll_library(
     ] + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
-        "-DSUPPORT_UNICODE",
-        "-DHAVE_CONFIG_H",
-        "-DPCRE2_CODE_UNIT_WIDTH=8",
         "-Izh_zero",
         "-Izh_vm",
         "-Izh_rtl",
@@ -140,6 +121,9 @@ windows_dll_library(
         "-Ithird_party/minizip",
         "-DCREATE_LIB", # minizip no main
         "-Ithird_party/pcre2",
+        "-DSUPPORT_UNICODE", #pcre2
+        "-DHAVE_CONFIG_H", #pcre2
+        "-DPCRE2_CODE_UNIT_WIDTH=8", #pcre2
         "-Ithird_party/harupdf",
         "-Ithird_party/xlsxwriter",
         "-DUSE_STANDARD_TMPFILE", # xlsxwriter don't use tmpfileplus
