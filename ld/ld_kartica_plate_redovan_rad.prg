@@ -28,6 +28,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
    LOCAL aBeneficirani := {}
    LOCAL lFoundTippr
    LOCAL nI
+   LOCAL nOsnNeto, nOsnNetoSati
    PRIVATE cPom
 
    PRIVATE cLDLijevaMargina := ""
@@ -50,6 +51,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
    cUneto := "D"
    nRRsati := 0
    nOsnNeto := 0
+   nOsnNetoSati := 0
    nOsnOstalo := 0
    nOstalaPrimanjaPlus := 0
    nOstalaPrimanjaNegativno := 0
@@ -88,6 +90,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
       select_o_tippr( cPom )
       lFoundTippr := Found()
 
+      // dosli smo do zadnje stavke Neto
       IF tippr->uneto == "N" .AND. cUneto == "D"
          IF Empty(cKarticaSifreTO) 
             cUneto := "N"
@@ -102,6 +105,15 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
             ?? "", gValuta
             ? cTprLine
          ELSE
+            cUneto := "N"
+            ? cTprLine
+            // prikaz ukupno neto
+            ? cLDLijevaMargina + "Ukupno:"
+
+            @ PRow(), nC1 + 8  SAY  nOsnNetoSati  PICT gPics
+            ?? Space( 1 ) + "sati"
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOsnNeto PICT gpici
+            ?? "", gValuta
             ? cTprLine
          ENDIF
 
@@ -174,6 +186,10 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
                // uzmi osnovice
                IF tippr->tpr_tip == "N"
                   nOsnNeto += _I&cPom
+                  // ufs - u fond sati
+                  IF tippr->ufs == "D"
+                     nOsnNetoSati += _S&cPom
+                  ENDIF
                ELSEIF tippr->tpr_tip == "2"
                   nOsnOstalo += _I&cPom
                   IF _I&cPom > 0
