@@ -23,12 +23,23 @@ FUNCTION harbour_init()
 
    f18_init_threads()
 
-   Set( _SET_OSCODEPAGE, codepageOS() )
 
 // ? SET( _SET_OSCODEPAGE )
 
+   
+   Set( _SET_OSCODEPAGE, codepageOS() )
+   Set( _SET_DBCODEPAGE, "SL852" )
+
    codepageSelect( "SL852" )
-   // zh_SetTermCP( "SLISO" )
+   //zh_SetTermCP( "SLISO" )
+   //zh_SetTermCP( "SLWIN" )
+
+      //cTermCP := Upper( "UTF8" )
+   //cHostCP := Upper( "UTF8" )
+   //codepageSelect( cHostCP )
+   //zh_SetTermCP( "SL852", "SL852", .F.  )
+   
+   //zh_SetDispCP("SLWIN")
 
 
    SET DELETED ON

@@ -5,6 +5,32 @@ load("//bazel:variables.bzl", "C_OPTS", "ZH_COMP_OPTS",
     "ZH_Z18_COMP_OPTS", "ZH_Z18_HEADERS", "L_OPTS", "L_OPTS_2",
      "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB" )
 
+
+ZH_F18_COMP_OPTS=[
+    "-n",
+    "-izh_zero", 
+    "-izh_rtl",
+    "-izh_rtl/gt",
+    "-iF18/include",
+    "-izh_harupdf",
+    "-Ithird_party/harupdf",
+    "-Ithird_party/xlsxwriter",
+    "-DGT_DEFAULT_CONSOLE",
+    #"-DELECTRON_HOST",
+    #"-DGT_DEFAULT_GUI",
+    "-DGT_DEFAULT_GUI",
+    "-DF18_POS",
+    #"-DF18_DEBUG",
+    #"-b" no debug
+]
+
+ZH_F18_HEADERS=[
+    "//zh_zero:headers", 
+    "//zh_rtl:headers",
+    "//F18/include:headers",
+    "//zh_harupdf:headers"
+]
+
 F18_LIB = "klijent"
 
 cc_binary(
@@ -137,28 +163,6 @@ windows_dll_library(
     visibility = ["//visibility:public"],
 )
 
-
-ZH_F18_COMP_OPTS=[
-    "-n",
-    "-izh_zero", 
-    "-izh_rtl",
-    "-izh_rtl/gt",
-    "-iF18/include",
-    "-izh_harupdf",
-    "-Ithird_party/harupdf",
-    "-Ithird_party/xlsxwriter",
-    "-DGT_DEFAULT_CONSOLE",
-    "-DF18_POS",
-    "-DF18_DEBUG",
-    #"-b" no debug
-]
-
-ZH_F18_HEADERS=[
-    "//zh_zero:headers", 
-    "//zh_rtl:headers",
-    "//F18/include:headers",
-    "//zh_harupdf:headers"
-]
 
 zh_comp_all(
     name = "F18_" + F18_LIB + "_zh", 
