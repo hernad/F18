@@ -957,7 +957,7 @@ FUNCTION set_novi_broj_jci()
            @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eNabavke generacija uvoz PARAMETRI *****"
  
            nX++
-           @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Prelevmani/Akcize/Carine konts zaključati  " GET cKontaLock VALID cKontaLock $ "DN" PICTURE "@!"
+           @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Prelevmani/Akcize/Carine konta zaključati  " GET cKontaLock VALID cKontaLock $ "DN" PICTURE "@!"
 
            @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Koristiti zavisne troškove  " GET cZavUse VALID  cZavUse $ "DN" PICTURE "@!"
            
