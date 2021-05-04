@@ -207,7 +207,6 @@ FUNCTION fin_nalog_zakljucan( cIdFirma, cIdVn, cBrNal )
        QUIT_1
     ENDIF
 
-    altd()
     nRet := oQuery:FieldGet( 1 )
 
     IF nRet > 0 // nalog se nalazi unutar zakljucanog poreznog perioda

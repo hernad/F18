@@ -28,7 +28,7 @@ if [[ ! -d "${F18_0_DIR}" ]] ; then
    
 fi
 
-
+chmod +w ${F18_0_DIR}/F18-klijent
 cp -av F18-klijent ${F18_0_DIR}/F18-klijent
 
 
