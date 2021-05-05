@@ -2,7 +2,9 @@
 
 MEMVAR gBrojacKalkulacija
 
-FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavIznos, nSpedIznos, nPrevoznikIznos, nZavTrIznos)
+FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, ;
+      nDobavIznos, nSpedIznos, nPrevoznikIznos, nZavTrIznos, ;
+      nCarinaIznos, nAkcizeIznos, nPrelevmaniIznos, lPDVNulirati)
 
     LOCAL nX := 1
     LOCAL GetList := {}
@@ -16,6 +18,9 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     LOCAL cJCIBR
     LOCAL nDadzbine
     LOCAL nSpedOsnPDV0
+    LOCAL cParam
+    LOCAL cKontaLock := fetch_metric("fin_uvoz_kta_lock", my_user(), "N" )
+    LOCAL cZavUse := fetch_metric("fin_uvoz_zav_use", my_user(), "D" )
 
     IF cBrKalk <> NIL
         set_metric("fin_uvoz_kalk_brdok", my_user(), cBrKalk )
@@ -155,24 +160,43 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     ENDIF
     hParams["fin_uvoz_zav_datval"]:= fetch_metric( "fin_uvoz_zav_datval", my_user(), CTOD("") )
     hParams["fin_uvoz_zav_osn_pdv0"]:= fetch_metric( "fin_uvoz_zav_osn_pdv0", my_user(), 0.00 )
+    cParam := "fin_uvoz_zav_iznos"
     IF nZavTrIznos <> NIL
-        hParams["fin_uvoz_zav_iznos"] := nZavTrIznos
-        set_metric( "fin_uvoz_zav_iznos", my_user(), nZavTrIznos )
+        hParams[cParam] := nZavTrIznos
+        set_metric( cParam, my_user(), nZavTrIznos )
     ELSE
-       hParams["fin_uvoz_zav_iznos"]:= fetch_metric( "fin_uvoz_zav_iznos", my_user(), 0.00 )
+       hParams[ cParam ]:= fetch_metric( cParam, my_user(), 0.00 )
     ENDIF
     hParams["fin_uvoz_zav_pdv_iznos"]:= fetch_metric( "fin_uvoz_zav_pdv_iznos", my_user(), 0 )
     hParams["fin_uvoz_zav_pdv_np_iznos"]:= fetch_metric( "fin_uvoz_zav_pdv_np_iznos", my_user(), 0 )
 
 
     hParams["fin_uvoz_kto_prevalm_potraz"]:= PADR(fetch_metric( "fin_uvoz_kto_prevalm_potraz", my_user(), "4823" ), 7)
-    hParams["fin_uvoz_prevalm_iznos"]:= fetch_metric( "fin_uvoz_prevalm_iznos", my_user(), 0.0 )
-
+    cParam := "fin_uvoz_prevalm_iznos"
+    IF nPrelevmaniIznos <> NIL
+        hParams[ cParam ] := nPrelevmaniIznos
+        set_metric( cParam, my_user(), nPrelevmaniIznos )
+    ELSE
+       hParams[ cParam ]:= fetch_metric( cParam, my_user(), 0.0 )
+    ENDIF
+ 
     hParams["fin_uvoz_kto_car_potraz"]:= PADR(fetch_metric( "fin_uvoz_kto_car_potraz", my_user(), "4820" ), 7)
-    hParams["fin_uvoz_car_iznos"]:= fetch_metric( "fin_uvoz_car_iznos", my_user(), 0.0 )
+    cParam := "fin_uvoz_car_iznos"
+    IF nCarinaIznos <> NIL
+        hParams[ cParam ] := nCarinaIznos
+        set_metric( cParam, my_user(), nCarinaIznos )
+    ELSE
+       hParams[ cParam ]:= fetch_metric( cParam, my_user(), 0.0 )
+    ENDIF
 
     hParams["fin_uvoz_kto_akcize_potraz"]:= PADR(fetch_metric( "fin_uvoz_kto_akcize_potraz", my_user(), "4802" ), 7)
-    hParams["fin_uvoz_akcize_iznos"]:= fetch_metric( "fin_uvoz_akcize_iznos", my_user(), 0.0 )
+    cParam := "fin_uvoz_akcize_iznos"
+    IF nAkcizeIznos <> NIL
+        hParams[ cParam ] := nAkcizeIznos
+        set_metric( cParam, my_user(), nAkcizeIznos )
+    ELSE
+       hParams[ cParam ]:= fetch_metric( cParam, my_user(), 0.0 )
+    ENDIF
 
     hParams["fin_uvoz_van_jci_pdv"]:= PADR(fetch_metric( "fin_uvoz_van_jci_pdv", my_user(), "2700" ), 7)
     hParams["fin_uvoz_van_jci_pdv_np"]:= PADR(fetch_metric( "fin_uvoz_van_jci_pdv_np", my_user(), "27690" ), 7)
@@ -189,6 +213,13 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
     PUBLIC gBrojacKalkulacija := fetch_metric( "kalk_brojac_kalkulacija", nil, "D" )
     kalk_duzina_brojaca_dokumenta()
 
+    IF lPDVNulirati != NIL .AND. lPDVNulirati
+        hParams["fin_uvoz_jci_pdv_np_iznos"] := 0
+        hParams["fin_uvoz_jci_pdv_iznos"] := 0
+        hParams["fin_uvoz_sped_pdv_iznos"] := 0
+        hParams["fin_uvoz_sped_pdv_np_iznos"] := 0
+    ENDIF
+    
     Box(, 27, 102)
 
        @ box_x_koord() + nX, box_y_koord() + 2 SAY "KALK 10 -" GET hParams["fin_uvoz_kalk_brdok"]  VALID {|| hParams["fin_uvoz_kalk_brdok"] := kalk_fix_brdok( hParams["fin_uvoz_kalk_brdok"] ), .T. }
@@ -203,9 +234,9 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
 
        @ box_x_koord() + nX++, col() + 2 SAY8 "Kto potraž:" GET hParams["fin_uvoz_jci_kto_potraz"] VALID P_Konto(@hParams["fin_uvoz_jci_kto_potraz"])
        
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV JCI kto:" GET hParams["fin_uvoz_jci_pdv_kto"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY "PDV JCI kto:" GET hParams["fin_uvoz_jci_pdv_kto"] WHEN cKontaLock=="N"
        @ box_x_koord() + nX, col() + 2 SAY "iznos:" GET hParams["fin_uvoz_jci_pdv_iznos"] PICT cPictIznos
-       @ box_x_koord() + nX, col() + 2 SAY "PDV JCI vanspolovno (NP) kto:" GET hParams["fin_uvoz_jci_pdv_np_kto"]  
+       @ box_x_koord() + nX, col() + 2 SAY "PDV JCI vanspolovno (NP) kto:" GET hParams["fin_uvoz_jci_pdv_np_kto"] WHEN cKontaLock=="N"
        @ box_x_koord() + nX, col() + 2 SAY "iznos:" GET hParams["fin_uvoz_jci_pdv_np_iznos"] PICT cPictIznos ;
             VALID hParams["fin_uvoz_jci_pdv_iznos"] + hParams["fin_uvoz_jci_pdv_np_iznos"] > 0
 
@@ -220,8 +251,8 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
        @ box_x_koord() + nX, col() + 2 SAY8 "faktura dobavljac iznos:" GET hParams["fin_uvoz_dob_iznos"] PICT cPictIznos
  
        nX += 2
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto PDV (van JCI) spediter/prevoznik poslovni:" GET hParams["fin_uvoz_van_jci_pdv"]
-       @ box_x_koord() + nX, col() + 2 SAY8 "vanposlovni:" GET hParams["fin_uvoz_van_jci_pdv_np"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Konto PDV (van JCI) spediter/prevoznik poslovni:" GET hParams["fin_uvoz_van_jci_pdv"] WHEN cKontaLock=="N"
+       @ box_x_koord() + nX, col() + 2 SAY8 "vanposlovni:" GET hParams["fin_uvoz_van_jci_pdv_np"] WHEN cKontaLock=="N"
 
        nX += 2
        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Špediter kto :" GET hParams["fin_uvoz_sped_kto"]
@@ -251,28 +282,36 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavI
        @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI iznos:" GET hParams["fin_uvoz_prev_pdv_iznos"]  PICT cPictIznos
        @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI NP izn:" GET hParams["fin_uvoz_prev_pdv_np_iznos"] PICT cPictIznos
 
-       nX += 2
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "ZAV.TR kto :" GET hParams["fin_uvoz_zav_kto"]
-       @ box_x_koord() + nX++, col() + 2 SAY8 "partn:" GET hParams["fin_uvoz_zav_partn"] VALID Empty(hParams["fin_uvoz_zav_partn"]) .OR. P_Partner(@hParams["fin_uvoz_zav_partn"]) 
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  br.fakt:" GET hParams["fin_uvoz_zav_brdok"] ;
-           VALID !Empty(hParams["fin_uvoz_zav_brdok"]) .OR. Empty(hParams["fin_uvoz_zav_partn"])
-       @ box_x_koord() + nX, col() + 2 SAY8 "dat.fakt:" GET hParams["fin_uvoz_zav_datdok"] ;
-           WHEN {|| hParams["fin_uvoz_zav_datdok"] := IIF(Empty(hParams["fin_uvoz_zav_datdok"]), hParams["fin_uvoz_jci_datprij"], hParams["fin_uvoz_zav_datdok"]), .T.} ;
-           VALID !Empty(hParams["fin_uvoz_zav_datdok"]) .OR. Empty(hParams["fin_uvoz_zav_partn"])
-       @ box_x_koord() + nX, col() + 2 SAY8 "dat.val:" GET hParams["fin_uvoz_zav_datval"]    
-       @ box_x_koord() + nX++, col() + 2 SAY8 "faktura ZAV.TR iznos:" GET hParams["fin_uvoz_zav_iznos"] PICT cPictIznos
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY "osn PDV 0% (van JCI) :" GET hParams["fin_uvoz_zav_osn_pdv0"] 
-       @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI iznos:" GET hParams["fin_uvoz_zav_pdv_iznos"]  PICT cPictIznos
-       @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI NP izn:" GET hParams["fin_uvoz_zav_pdv_np_iznos"] PICT cPictIznos
+       IF cZavUse=="D" 
+        nX += 2
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "ZAV.TR kto :" GET hParams["fin_uvoz_zav_kto"]
+        @ box_x_koord() + nX++, col() + 2 SAY8 "partn:" GET hParams["fin_uvoz_zav_partn"] VALID Empty(hParams["fin_uvoz_zav_partn"]) .OR. P_Partner(@hParams["fin_uvoz_zav_partn"]) 
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "  br.fakt:" GET hParams["fin_uvoz_zav_brdok"] ;
+            VALID !Empty(hParams["fin_uvoz_zav_brdok"]) .OR. Empty(hParams["fin_uvoz_zav_partn"])
+        @ box_x_koord() + nX, col() + 2 SAY8 "dat.fakt:" GET hParams["fin_uvoz_zav_datdok"] ;
+            WHEN {|| hParams["fin_uvoz_zav_datdok"] := IIF(Empty(hParams["fin_uvoz_zav_datdok"]), hParams["fin_uvoz_jci_datprij"], hParams["fin_uvoz_zav_datdok"]), .T.} ;
+            VALID !Empty(hParams["fin_uvoz_zav_datdok"]) .OR. Empty(hParams["fin_uvoz_zav_partn"])
+        @ box_x_koord() + nX, col() + 2 SAY8 "dat.val:" GET hParams["fin_uvoz_zav_datval"]    
+        @ box_x_koord() + nX++, col() + 2 SAY8 "faktura ZAV.TR iznos:" GET hParams["fin_uvoz_zav_iznos"] PICT cPictIznos
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY "osn PDV 0% (van JCI) :" GET hParams["fin_uvoz_zav_osn_pdv0"] 
+        @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI iznos:" GET hParams["fin_uvoz_zav_pdv_iznos"]  PICT cPictIznos
+        @ box_x_koord() + nX, col() + 2 SAY "PDV van JCI NP izn:" GET hParams["fin_uvoz_zav_pdv_np_iznos"] PICT cPictIznos
+       ELSE
+        hParams["fin_uvoz_zav_partn"] := ""
+        hParams["fin_uvoz_zav_iznos"] := 0
+        hParams["fin_uvoz_zav_osn_pdv0"] := 0
+        hParams["fin_uvoz_zav_pdv_iznos"] := 0
+        hParams["fin_uvoz_zav_pdv_np_iznos"] := 0
+       ENDIF
 
        nX += 2
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prelevmani kto potraž :" GET hParams["fin_uvoz_kto_prevalm_potraz"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prelevmani kto potraž :" GET hParams["fin_uvoz_kto_prevalm_potraz"] WHEN cKontaLock=="N"
        @ box_x_koord() + nX++, col() + 2 SAY8 "iznos" GET hParams["fin_uvoz_prevalm_iznos"] PICT cPictIznos
 
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "    Carina kto potraž :" GET hParams["fin_uvoz_kto_car_potraz"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "    Carina kto potraž :" GET hParams["fin_uvoz_kto_car_potraz"] WHEN cKontaLock=="N"
        @ box_x_koord() + nX++, col() + 2 SAY8 "iznos" GET hParams["fin_uvoz_car_iznos"] PICT cPictIznos
 
-       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "    Akcize kto potraž :" GET hParams["fin_uvoz_kto_akcize_potraz"]
+       @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "    Akcize kto potraž :" GET hParams["fin_uvoz_kto_akcize_potraz"] WHEN cKontaLock=="N"
        @ box_x_koord() + nX++, col() + 2 SAY8 "iznos" GET hParams["fin_uvoz_akcize_iznos"] PICT cPictIznos
 
        @ box_x_koord() + nX-3, box_y_koord() + 55 SAY8 "ŠPEDITER plaća UIO-u dadžbine (D/N/P):" GET hParams["fin_uvoz_sped_placa_uio"] PICT "@!" ;
@@ -778,7 +817,7 @@ FUNCTION kalk_10_gen_uvoz( cBrKalk )
     LOCAL cQuery := "select brfaktp, datdok, idpartner, mkonto from kalk_kalk where idvd='10'"
     LOCAL cQuery2
     LOCAL cBrFakt, dDatDok, cIdDobavljac, cIdKonto
-    LOCAL nDobavIznos, nSpedIznos, nPrevoznikIznos
+    LOCAL nDobavIznos, nSpedIznos, nPrevoznikIznos, nCarinaIznos, nPrelevmaniIznos, nAkcizeIznos, nZavTrIznos
 
 
     cQuery += " and brdok=" + sql_quote(cBrKalk) + " limit 1"
@@ -797,9 +836,22 @@ FUNCTION kalk_10_gen_uvoz( cBrKalk )
 
     USE
 
+    /*
+    SELECT sum(fcj*kolicina) as fv,
+     sum(case when tspedtr='%' then fcj*spedtr/100*kolicina else (case when tspedtr='U' then spedtr else spedtr*kolicina end) end) spedtr,
+     sum(case when tzavtr='%' then fcj*zavtr/100*kolicina else (case when tzavtr='U' then zavtr else zavtr*kolicina end) end) prevoz,
+     sum(case when tcardaz='%' then fcj*cardaz/100*kolicina else (case when tcardaz='U' then cardaz else cardaz*kolicina end) end) carina,
+     sum(case when tprevoz='%' then fcj*prevoz/100*kolicina else (case when tprevoz='U' then prevoz else prevoz*kolicina end) end) prelevm,
+     sum(case when tbanktr='%' then fcj*banktr/100*kolicina else (case when tbanktr='U' then banktr else banktr*kolicina end) end) akcize
+     FROM kalk_kalk where idvd='10' and brdok='00000136'
+    */ 
+
     cQuery2 := "SELECT sum(fcj*kolicina) as fv,"
-    cQuery2 += " sum(case when tspedtr='U' then spedtr else  fcj*spedtr*kolicina end) spedtr,"
-    cQuery2 += " sum(case when tzavtr='U' then zavtr else  fcj*zavtr*kolicina end) prevoz"
+    cQuery2 += " sum(case when tspedtr='%' then fcj*spedtr/100*kolicina else (case when tspedtr='U' then spedtr else spedtr*kolicina end) end) spedtr,"
+    cQuery2 += " sum(case when tzavtr='%' then fcj*zavtr/100*kolicina else (case when tzavtr='U' then zavtr else zavtr*kolicina end) end) prevoz,"
+    cQuery2 += " sum(case when tcardaz='%' then fcj*cardaz/100*kolicina else (case when tcardaz='U' then cardaz else cardaz*kolicina end) end) carina,"
+    cQuery2 += " sum(case when tprevoz='%' then fcj*prevoz/100*kolicina else (case when tprevoz='U' then prevoz else prevoz*kolicina end) end) prelevm,"
+    cQuery2 += " sum(case when tbanktr='%' then fcj*banktr/100*kolicina else (case when tbanktr='U' then banktr else banktr*kolicina end) end) akcize"
     cQuery2 += " FROM kalk_kalk where idvd='10' and brdok=" + sql_quote(cBrKalk)
 
     IF !use_sql( "KLK", cQuery2)
@@ -810,6 +862,11 @@ FUNCTION kalk_10_gen_uvoz( cBrKalk )
     nDobavIznos := klk->fv
     nSpedIznos := klk->spedtr
     nPrevoznikIznos := klk->prevoz
+    nCarinaIznos := klk->carina
+    nPrelevmaniIznos := klk->prelevm
+    nAkcizeIznos := klk->akcize
+    nZavTrIznos := NIL
+
 
     USE
 
@@ -818,8 +875,10 @@ FUNCTION kalk_10_gen_uvoz( cBrKalk )
         RETURN .F.
     ENDIF
 
-    //fin_gen_uvoz(cBrKalk, dDatDok, cIdDobavljac, cBrFaktP, nDobavIznos, nSpedIznos, nPrevoznikIznos)
-    fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, nDobavIznos, nSpedIznos, nPrevoznikIznos)
+
+    fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, ;
+        nDobavIznos, nSpedIznos, nPrevoznikIznos, nZavTrIznos,;
+        nCarinaIznos, nAkcizeIznos, nPrelevmaniIznos, .T. /* lPDVNulirati */)
 
    
     RETURN .T.
@@ -893,3 +952,32 @@ FUNCTION set_novi_broj_jci()
 
 
 
+    FUNCTION parametri_eNabavke_uvoz()
+
+        LOCAL nX := 1
+        LOCAL GetList := {}
+
+        LOCAL cKontaLock := fetch_metric("fin_uvoz_kta_lock", my_user(), "N" )
+        LOCAL cZavUse := fetch_metric("fin_uvoz_zav_use", my_user(), "D" )
+      
+        Box(, 5, 60 )
+    
+           @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eNabavke generacija uvoz PARAMETRI *****"
+ 
+           nX++
+           @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Prelevmani/Akcize/Carine konta zaključati  " GET cKontaLock VALID cKontaLock $ "DN" PICTURE "@!"
+
+           @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Koristiti zavisne troškove  " GET cZavUse VALID  cZavUse $ "DN" PICTURE "@!"
+           
+           READ
+        BoxC()
+    
+        IF Lastkey() == K_ESC
+           RETURN .F.
+        ENDIF
+    
+
+        set_metric( "fin_uvoz_kta_lock", my_user(), cKontaLock)
+        set_metric( "fin_uvoz_zav_use", my_user(), cZavUse)
+    
+        RETURN .T.

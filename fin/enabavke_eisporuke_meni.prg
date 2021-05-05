@@ -35,6 +35,8 @@ FUNCTION fin_eIsporukeNabavkeMenu()
     AAdd( aOpc, "X. admin - init tabele enab/eisp " )
     AAdd( aOpcexe, {|| db_create_enabavke_eisporuke() } )
     
+    AAdd( aOpc, "Y. fin generacija uvoz parametri " )
+    AAdd( aOpcexe, {|| parametri_eNabavke_uvoz() } )
 
     f18_menu( "f_eni", .F., nIzbor, aOpc, aOpcexe )
  
