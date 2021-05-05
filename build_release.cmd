@@ -59,15 +59,15 @@ del tmpFile
 
 echo !F18_VERSION!, !F18_DATE!, !HARBOUR_VERSION!, !HARBOUR_DATE!
 
-(c:\cygwin64\bin\which.exe cl.exe 2>&1 | c:\cygwin64\bin\grep.exe -c "no cl.exe") > tmpFile
-set /p CL_NOT= < tmpFile
-del tmpFile
+REM (c:\cygwin64\bin\which.exe cl.exe 2>&1 | c:\cygwin64\bin\grep.exe -c "no cl.exe") > tmpFile
+REM set /p CL_NOT= < tmpFile
+REM del tmpFile
 
-IF [!CL_NOT!]==[1] (
-    echo cl.exe NOT IN PATH
-    echo run: Native cmd tools for MSVC [c:\dev\x64_VS_2019.lnk] or [c:\dev\x86_VS_2019.lnk]
-    goto end
-)
+REM IF [!CL_NOT!]==[1] (
+REM    echo cl.exe NOT IN PATH
+REM    echo run: Native cmd tools for MSVC [c:\dev\x64_VS_2019.lnk] or [c:\dev\x86_VS_2019.lnk]
+REM    goto end
+REM)
 
 IF [!BUILD_ARCH!]==[64] (
 
