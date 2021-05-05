@@ -26,13 +26,13 @@ FUNCTION harbour_init()
 
 // ? SET( _SET_OSCODEPAGE )
 
-   
    Set( _SET_OSCODEPAGE, codepageOS() )
-   Set( _SET_DBCODEPAGE, "SL852" )
+   //Set( _SET_DBCODEPAGE, "SL852" )
+
 
    codepageSelect( "SL852" )
-   //zh_SetTermCP( "SLISO" )
-   //zh_SetTermCP( "SLWIN" )
+  // zh_SetTermCP( "SLISO" )
+   //zh_SetTermCP( "SL852", "SLISO", .F. )
 
       //cTermCP := Upper( "UTF8" )
    //cHostCP := Upper( "UTF8" )

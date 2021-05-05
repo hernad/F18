@@ -2,7 +2,7 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
 load("//bazel:windows_dll_library.bzl", "windows_dll_library")
 load("//bazel:zh_comp.bzl", "zh_comp_all")
 load("//bazel:variables.bzl", "C_OPTS", "ZH_COMP_OPTS", 
-    "ZH_Z18_COMP_OPTS", "ZH_Z18_HEADERS", "L_OPTS", "L_OPTS_2",
+    "ZH_Z18_COMP_OPTS", "L_OPTS", "L_OPTS_2",
      "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB" )
 
 
@@ -15,9 +15,9 @@ ZH_F18_COMP_OPTS=[
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    "-DGT_DEFAULT_CONSOLE",
+    #"-DGT_DEFAULT_CONSOLE",
     #"-DELECTRON_HOST",
-    #"-DGT_DEFAULT_GUI",
+    "-DGT_DEFAULT_GUI",
     "-DGT_DEFAULT_GUI",
     "-DF18_POS",
     #"-DF18_DEBUG",
@@ -137,6 +137,7 @@ windows_dll_library(
     ] + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
+        "-DUNICODE", # gt_wvt
         "-Izh_zero",
         "-Izh_vm",
         "-Izh_rtl",
