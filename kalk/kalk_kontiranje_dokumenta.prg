@@ -68,8 +68,6 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    PRIVATE p_cPartnerKontiranje1, p_cPartnerKontiranje2, p_cPartnerKontiranje3, p_cPartnerKontiranje4
 
 
-   // LOCAL cIdVrsteP
-
    cRj1 := ""
    cRj2 := ""
    IF ( lAGen == NIL )

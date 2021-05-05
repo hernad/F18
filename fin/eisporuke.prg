@@ -996,7 +996,6 @@ STATIC FUNCTION set_datumi_eisporuke(hRec)
     // za izvoz faktura moze biti proslog mjeseca
     hRec["dat_fakt_pravi"] := eisp->datdok
     IF eisp->from_opis_dat_fakt <> "UNDEF"
-        altd()
         hRec["dat_fakt_pravi"] := CTOD(eisp->from_opis_dat_fakt)
     ENDIF
 

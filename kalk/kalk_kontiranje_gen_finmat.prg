@@ -53,9 +53,9 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
       lAuto := .F.
    ENDIF
 
-
+altd()
    lPrviProlaz := .T.
-   // DO WHILE .T.
+
    lKalk80Predispozicija := .F.
 
    kalk_open_tabele_za_kontiranje()

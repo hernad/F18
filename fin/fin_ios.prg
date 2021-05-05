@@ -191,8 +191,7 @@ STATIC FUNCTION fin_ios_print()
       CREATE_INDEX( "1", "IdFirma+IdKonto+IdPartner", _alias )
       INDEX ON IdFirma+IdKonto+STR(ABS(ROUND(IZNOSBHD,0)),12,0)+IdPartner TAG "IZNOSD" DESCENDING
    */
-
-   altd()
+   
    IF cSortIznosDN == "D"
       SET ORDER TO TAG "IZNDES"
    ENDIF

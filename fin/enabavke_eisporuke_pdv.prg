@@ -119,7 +119,6 @@ FUNCTION eNab_eIsp_PDV()
     use_sql("ENAB", cQuery)
 
     // ulazni pdv (odbitni - samo poslovna potrosnja) - uvoz - poljop pausal naknada
-    altd()
     hPDV["41"] := enab->iznos_pdv - hPDV["42"] - hPDV["43"]
     hPdv["41"] := Round(hPDV["41"], 0)
     hPdv["42"] := Round(hPDV["42"], 0)

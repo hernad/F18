@@ -37,7 +37,6 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       lPozivFromPOS := .F.
    ENDIF
 
-   altd()
    hParams[ "idpos" ] := pos_pm()
    create_pos_tmp( hParams )
    cleanup_pos_tmp( hParams )

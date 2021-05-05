@@ -475,11 +475,9 @@ STATIC FUNCTION db_insert_enab( hRec )
     LOCAL oError
     
     IF Empty(hRec["dat_fakt"]) 
-        altd()
         Alert("dat_fakt NULL " + hRec["fin_idfirma"] + "-" + hRec["fin_idvn"] + "-" + hRec["fin_brnal"] + "-" + AllTrim(Str(hRec["fin_rbr"])) )
     ENDIF
     IF Empty(hRec["dat_fakt_prijem"])
-        altd()
         Alert("dat_fakt_prijem NULL " + hRec["fin_idfirma"] + "-" + hRec["fin_idvn"] + "-" + hRec["fin_brnal"] + "-" + AllTrim(Str(hRec["fin_rbr"])) )
     ENDIF
 

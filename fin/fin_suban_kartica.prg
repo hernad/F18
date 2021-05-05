@@ -333,8 +333,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    //lVrsteP := .F.
 
-   altd()
-
    cOrderBy := "IdFirma,IdKonto,IdPartner,datdok,otvst,idvn,d_p,brdok"
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    IF cBrza == "D"

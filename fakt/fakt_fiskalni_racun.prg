@@ -380,7 +380,6 @@ STATIC FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
    LOCAL cIdTarifa, cIdRoba, nPos
    LOCAL nKolicina, nRabat, nCijena, nIznos
 
-   altd()
    seek_fakt( cIdFirma, cIdTipDok, cBrDok )
    DO WHILE !Eof() .AND. field->idfirma == cIdFirma .AND. field->idtipdok == cIdTipDok .AND. field->brdok == cBrDok
 
@@ -546,7 +545,6 @@ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTip
       cIdTarifa := AllTrim( roba->idtarifa )
 
       
-      altd()
       IF field->dindem != Left( ValBazna(), 3 )
            /////////// FIX BUG zaokr na 2 DEC /////////////////
            nCijena :=  field->cijena
