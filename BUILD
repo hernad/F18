@@ -1,48 +1,48 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_binary")
-load("//bazel:windows_dll_library.bzl", "windows_dll_library")
+load("//bazel:shared_library.bzl", "shared_library")
 load("//bazel:zh_comp.bzl", "zh_comp_all")
 load("//bazel:variables.bzl", "C_OPTS", "ZH_COMP_OPTS", 
     "ZH_Z18_COMP_OPTS", "L_OPTS", "L_OPTS_2",
      "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB" )
 
 
-ZH_F18_COMP_OPTS=[
+ZH_COMP_OPTS_F18=[
     "-n",
     "-izh_zero", 
     "-izh_rtl",
     "-izh_rtl/gt",
     "-iF18/include",
+    #"-iF18/fin", #enabavke_eisporuke.zhh
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    #"-DGT_DEFAULT_CONSOLE",
+    "-DGT_DEFAULT_CONSOLE",
     #"-DELECTRON_HOST",
-    "-DGT_DEFAULT_GUI",
-    "-DGT_DEFAULT_GUI",
+    #-DGT_DEFAULT_GUI",
     "-DF18_POS",
     #"-DF18_DEBUG",
     #"-b" no debug
 ]
 
-ZH_F18_HEADERS=[
-    "//zh_zero:headers", 
-    "//zh_rtl:headers",
-    "//F18/include:headers",
-    "//zh_harupdf:headers"
+ZH_DEPS_F18=[ 
+    "//zh_zero:headers_filegroup", 
+    "//zh_rtl:headers_filegroup",
+    "//F18/include:headers_filegroup",
+    #"//F18/fin:headers_filegroup",
+    "//zh_harupdf:headers_filegroup"
 ]
+
 
 F18_LIB = "klijent"
 
 cc_binary(
     name = "F18-klijent",
     srcs = [ "F18-klijent.c" ],
-    deps = [
-        ":F18",
-        "//zh_zero:headers",
-    ] + POSTGRESQL_LIB,
-    linkopts = L_OPTS + L_OPTS_2,  
-    # [ "/NODEFAULTLIB:msvcrt.lib" ], # https://stackoverflow.com/questions/45810938/error-lnk2019-unresolved-external-symbol-main-referenced-in-function-int-cdec
-    #copts = C_OPTS,
+    deps = select({
+            "//bazel:windows": [ ":F18_dll_import", ":ziher_dll_import", "//zh_zero:headers"],
+            "//conditions:default": [ ":F18_import", ":ziher_import", "//zh_zero:headers"],
+        }),  #+ POSTGRESQL_LIB
+    linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
         "-DZH_DYNIMP",
@@ -53,18 +53,18 @@ cc_binary(
 )
 
 
-windows_dll_library(
+shared_library(
     name = "F18",
-    srcs = [ ":F18_" + F18_LIB + "_zh" ],
+    os = "linux",
+    srcs = [ ":F18_zh" ],
     hdrs = glob([
         "*.h",
         "*.zhh",
     ]) + POSTGRESQL_HEADERS,
-    deps = [ 
-        ":ziher",
-        "//zh_zero:headers",
-        "//zh_rtl:headers",
-    ] + POSTGRESQL_LIB,
+    deps = select({
+            "//bazel:windows": [ ":ziher.dll", "//zh_zero:headers", "//zh_rtl:headers"],
+            "//conditions:default": [ ":ziher.so", "//zh_zero:headers", "//zh_rtl:headers"],
+        }) + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
@@ -74,13 +74,12 @@ windows_dll_library(
         #"-DZH_TR_LEVEL=4", #INFO
         #"-DZH_TR_LEVEL=5", DEBUG
     ]  + POSTGRESQL_COPT,
-    #linkstatic = False,
-    #linkshared = True,
     visibility = ["//visibility:public"],
 )
 
-windows_dll_library(
+shared_library(
     name = "ziher",
+    os = "linux",
     srcs = [ 
        "//zh_zero:c_sources",
        "//zh_vm:c_sources", 
@@ -135,7 +134,7 @@ windows_dll_library(
         "//third_party/png:headers",
         "//third_party/minizip:headers",
     ] + POSTGRESQL_LIB,
-    linkopts = L_OPTS + L_OPTS_2,
+    linkopts = L_OPTS + L_OPTS_2 + ["-lX11"],
     copts = [
         "-DUNICODE", # gt_wvt
         "-Izh_zero",
@@ -159,14 +158,12 @@ windows_dll_library(
         #"-DZH_TR_LEVEL=4", #INFO
         #"-DZH_TR_LEVEL=5", DEBUG
     ]  + POSTGRESQL_COPT,
-    #linkstatic = False,
-    #linkshared = True,
     visibility = ["//visibility:public"],
 )
 
 
 zh_comp_all(
-    name = "F18_" + F18_LIB + "_zh", 
+    name = "F18_zh", 
     srcs = glob([ 
         "*.zh",
         "common/*.zh",
@@ -190,7 +187,7 @@ zh_comp_all(
         "virm/*.zh",
         "epdv/*.zh",
     ]),
-    args = ZH_F18_COMP_OPTS,
-    deps = ZH_F18_HEADERS,
+    args = ZH_COMP_OPTS_F18,
+    deps = ZH_DEPS_F18,
     visibility = ["//visibility:public"],
 )

@@ -190,7 +190,7 @@ STATIC FUNCTION get_log_level_from_params()
 
 FUNCTION set_screen_dimensions()
 
-   LOCAL cMsg
+   LOCAL cMsg, nCols, nRows
 
    LOCAL nPixWidth  := zh_gtInfo( ZH_GTI_DESKTOPWIDTH )
    LOCAL nPixHeight := zh_gtInfo( ZH_GTI_DESKTOPHEIGHT )
@@ -222,20 +222,24 @@ FUNCTION set_screen_dimensions()
       // font_name( "Consolas" )
       // font_weight_bold() ruzno
    ELSE
-      font_name( "terminus" )
-      font_weight_bold()
+      //font_name( "lucidatypewriter" )
+      //font_name( "courier" )
+      //font_weight_bold()
    ENDIF
 
    DO CASE
 
-   CASE nPixWidth >= 3000 .AND. nPixHeight >= 1800
+   CASE nPixWidth >= 3000 .AND. nPixHeight >= 1400
 
        IF is_linux()
-         font_name("Liberation Mono")
-         font_weight_bold()
-         font_size(40)
-         font_width(24)  
+         //font_name("lucidatypewriter")
+         font_name("terminus")
+         //font_weight_bold()
+         font_size(30)
+         font_width(15)  
          // linux zavrsi 45x24, 37 rows x 132 cols
+         //f18_max_rows( 40 )
+         //f18_max_cols( 130 )
          ?E cMsg + "HiDPI"
        ENDIF
               
@@ -325,14 +329,21 @@ FUNCTION set_screen_dimensions()
    ?E " get0 font_weight: ", zh_gtInfo( ZH_GTI_FONTWEIGHT )
 
 
-   IF SetMode( f18_max_rows( desktop_rows() - 1 ) + INFO_BAR_ROWS,  ;
-         f18_max_cols( desktop_cols() - 3 ) )
+   //nCols := f18_max_cols( desktop_cols() - 3 ) 
+   //IF nCols > 145
+   // nCols := 145
+   //ENDIF
+   nRows := 35
+   nCols := 140
+
+   IF SetMode( nRows,  ;
+         nCols )
       ?E "GUI1 setovanje ekrana: setovan ekran po rezoluciji", f18_max_rows(), f18_max_cols()
    ELSE
       // linux nece od prve!?
-      SetMode( f18_max_rows( desktop_rows() - 1 ) + INFO_BAR_ROWS,  ;
-         f18_max_cols( desktop_cols() - 3 ) )
-      ?E "GUI2 set font_width: ", zh_gtInfo( ZH_GTI_FONTWIDTH, font_width() )
+      SetMode( nRows,  nCols) 
+      ?E " GUI2 set font_width: ", zh_gtInfo( ZH_GTI_FONTWIDTH, font_width() )
+      ?E " ROWS:", f18_max_rows( desktop_rows() - 1 ) + INFO_BAR_ROWS, "COLS:", nCols
    ENDIF
 
    ?E " get font_name: ", zh_gtInfo( ZH_GTI_FONTNAME )
