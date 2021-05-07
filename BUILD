@@ -55,7 +55,10 @@ cc_binary(
 
 shared_library(
     name = "F18",
-    os = "linux",
+    os = select({
+            "//bazel:windows": "windows",
+            "//conditions:default": "linux",
+        }),
     srcs = [ ":F18_zh" ],
     hdrs = glob([
         "*.h",
@@ -79,7 +82,10 @@ shared_library(
 
 shared_library(
     name = "ziher",
-    os = "linux",
+    os = select({
+            "//bazel:windows": "windows",
+            "//conditions:default": "linux",
+        }),
     srcs = [ 
        "//zh_zero:c_sources",
        "//zh_vm:c_sources", 
