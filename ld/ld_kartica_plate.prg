@@ -286,7 +286,7 @@ STATIC FUNCTION ld_zagl_kartica()
    ?U "OBRAČUN PLATE ZA" + Space( 1 ) + Str( mjesec, 2 ) + "/" + Str( godina, 4 ) + " (obr. " + IspisObr() + ")", " ZA " + Upper( Trim( tip_organizacije() ) ), self_organizacija_naziv()
    ? "RJ:", idrj, ld_rj->naz
    ? idradn, "-", RADNIK_PREZ_IME, "  Mat.br:", radn->matbr
-   ShowHiredFromTo( radn->hiredfrom, radn->hiredto, "" )
+   ld_angazovan_od_do( radn->hiredfrom, radn->hiredto, "" )
    ? _l( "Radno mjesto:" ), radn->rmjesto, "  STR.SPR:", IDSTRSPR
    ? _l( "Vrsta posla:" ), idvposla, vposla->naz, "         Radi od:", radn->datod
    ? IF( gBodK == "1", _l( "Broj bodova :" ), _l( "Koeficijent :" ) ), Transform( brbod, "99999.99" ), Space( 24 )

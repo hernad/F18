@@ -56,7 +56,7 @@ FUNCTION ShowPPFakultet()
  *   param: dHiredFrom - angazovan od datum
  *   param: dHiredTo - angazovan do datum
  */
-FUNCTION ShowHiredFromTo( dHiredFrom, dHiredTo, cLM )
+FUNCTION ld_angazovan_od_do( dHiredFrom, dHiredTo, cLM )
 
    // {
    cHiredFrom := DToC( dHiredFrom )

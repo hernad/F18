@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-THREAD STATIC __var_obr
+//THREAD STATIC __var_obr
 
 FUNCTION rekap_ld( cId, nGodina, nMjesec, nIzn1, nIzn2, cIdPartner, cOpis, cOpis2, lObavDodaj, cIzdanje )
 
@@ -83,6 +83,7 @@ FUNCTION o_ld_rekap()
 
 FUNCTION ld_rekap_get_svi()
 
+   LOCAL GetList := {}
    PushWa()
 
    Box(, 11 + iif( IsRamaGlas(), 1, 0 ), 75 )
@@ -120,6 +121,8 @@ FUNCTION ld_rekap_get_svi()
 
 
 FUNCTION ld_rekap_get_rj()
+
+   LOCAL GetList := {}
 
    PushWa()
 

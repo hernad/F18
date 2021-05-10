@@ -15,7 +15,7 @@
 THREAD STATIC DUZ_STRANA := 70
 THREAD STATIC s_cRadniSatiDN := "N"
 
-MEMVAR cLDLijevaMargina
+MEMVAR cLDLijevaMargina, gPics, gPici
 
 FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta, cKarticaSifreTO, lKarticaTO )
 
@@ -106,6 +106,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
             ? cTprLine
          ELSE
             cUneto := "N"
+            altd()
             ? cTprLine
             // prikaz ukupno neto
             ? cLDLijevaMargina + "Ukupno:"
@@ -182,6 +183,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
                ? cLPom
             ENDIF
 
+            altd()
             IF tippr->( FieldPos( "TPR_TIP" ) ) <> 0
                // uzmi osnovice
                IF tippr->tpr_tip == "N"
@@ -201,6 +203,9 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
                   // standardni tekuci sistem
                   IF tippr->uneto == "D"
                      nOsnNeto += _I&cPom
+                     IF tippr->ufs == "D"
+                        nOsnNetoSati += _S&cPom
+                     ENDIF
                   ELSE
                      nOsnOstalo += _I&cPom
                      IF _I&cPom > 0
@@ -217,6 +222,9 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
                // standardni tekuci sistem
                IF tippr->uneto == "D"
                   nOsnNeto += _I&cPom
+                  IF tippr->ufs == "D"
+                     nOsnNetoSati += _S&cPom
+                  ENDIF
                ELSE
                   nOsnOstalo += _I&cPom
                   IF _I&cPom > 0

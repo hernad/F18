@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-STATIC __var_obr
+//STATIC __var_obr
 
 FUNCTION ld_rekapitulacija_sql( lSvi )
 
@@ -81,7 +81,6 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    //USE
 
    cObracun := Trim( cObracun )
-
 
    hParams := hb_Hash()
    hParams[ "svi" ] := lSvi
@@ -254,10 +253,8 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
 
    // bruto osnova minimalca
    IF nURadn_bo < nUMRadn_bo
-
       ?? " min.bruto satnica * sati"
       @ PRow(), 60 SAY nUMRadn_bo PICT gPici
-
    ENDIF
 
    ? cMainLine
@@ -275,7 +272,6 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    ? cMainLine
    ?U "4. LIČNI ODBICI UKUPNO"
    @ PRow(), 60 SAY nULOdbitak PICT gPici
-
 
    nPorOsn := nURadn_bo - nUDoprIz - nULOdbitak
 
@@ -424,7 +420,6 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    my_close_all_dbf()
 
    ENDPRINT
-
 
    IF f18_use_module( "virm" ) .AND. Pitanje(, "Generisati virmane za ovaj obračun plate ? (D/N)", "D" ) == "D"
       virm_set_global_vars()
