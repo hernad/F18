@@ -48,7 +48,7 @@ FUNCTION rekap_ld( cId, nGodina, nMjesec, nIzn1, nIzn2, cIdPartner, cOpis, cOpis
    ENDIF
 
    RREPLACE godina WITH Str( nGodina, 4, 0 ), mjesec WITH Str( nMjesec, 2, 0 ), ;
-      id    WITH  cId, ;
+      id WITH  cId, ;
       iznos1 WITH nIzn1, iznos2 WITH nIzn2, ;
       idpartner WITH cIdPartner, ;
       opis WITH cOpis, ;
@@ -896,7 +896,6 @@ FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut )
 
       IF !Empty(cRekapTipoviOut) .AND. cPom $ cRekapTipoviOut
          // tip primanja npr. TO neoporezivi izbaciti
-         altd()
          loop
       ENDIF
 
