@@ -611,7 +611,7 @@ FUNCTION ld_gen_virm()
    MsgBeep( "Opcija podrazumjeva da ste prozvali rekapitulaciju plate" )
 
    virm_set_global_vars()
-   virm_prenos_ld( .T. )
+   ld_virm_prenos( .T. )
    unos_virmana()
 
    my_close_all_dbf()

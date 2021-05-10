@@ -877,13 +877,14 @@ FUNCTION zagl_rekapitulacija_plata_rj()
 
 
 
-FUNCTION ld_ispis_po_tipovima_primanja( lSvi )
+FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut )
 
    LOCAL i
 
    LOCAL cTipPrElem := ld_tip_primanja_el_nepogode()
 
    cUNeto := "D"
+
 
    FOR i := 1 TO cLDPolja
 
@@ -892,6 +893,13 @@ FUNCTION ld_ispis_po_tipovima_primanja( lSvi )
       ENDIF
 
       cPom := PadL( AllTrim( Str( i ) ), 2, "0" )
+
+      IF !Empty(cRekapTipoviOut) .AND. cPom $ cRekapTipoviOut
+         // tip primanja npr. TO neoporezivi izbaciti
+         altd()
+         loop
+      ENDIF
+
       _S&cPom := aRekap[ i, 1 ]   // nafiluj ove varijable radi proracuna dodatnih stavki
       _I&cPom := aRekap[ i, 2 ]
 

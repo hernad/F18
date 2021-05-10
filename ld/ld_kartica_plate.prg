@@ -49,17 +49,11 @@ FUNCTION ld_kartica_plate( cIdRj, nMjesec, nGodina, cIdRadn, cObrac )
       o_ld_rj()
       o_ld_radn()
       o_ld_vrste_posla()
-      // O_RADKR
       o_kred()
-      // select_o_ld()
 
    ELSE
       cObracun := cObrac
    ENDIF
-
-//   IF s_cRadnisatiDN == "D"
-  //    O_RADSAT
-  // ENDIF
 
    PRIVATE nC1 := 20 + Len( cLDLijevaMargina )
 

@@ -13,11 +13,12 @@
 
 //STATIC __var_obr
 
-FUNCTION ld_rekapitulacija_sql( lSvi )
+FUNCTION ld_rekapitulacija_sql( lSveRj )
 
    LOCAL _a_benef := {}
    LOCAL i
    LOCAL hParams
+   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
 
    PRIVATE nC1 := 20
    PRIVATE cTPNaz
@@ -30,7 +31,6 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    PRIVATE aNetoMj
    PRIVATE cDoprSpace := ""
    PRIVATE cLDLijevaMargina := ""
-
 
    cTpLine := _gtprline()
    cDoprLine := _gdoprline( cDoprSpace )
@@ -51,8 +51,8 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    PRIVATE nStepenInvaliditeta := 0
    PRIVATE nVrstaInvaliditeta := 0
 
-   IF lSvi == NIL
-      lSvi := .F.
+   IF lSveRj == NIL
+      lSveRj := .F.
    ENDIF
 
    o_ld_rekap()
@@ -63,7 +63,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    cOpsRad := Space( 4 )
    cK4 := "S"
 
-   IF lSvi
+   IF lSveRj
       qqRJ := Space( 60 )
       ld_rekap_get_svi()
       IF ( LastKey() == K_ESC )
@@ -83,7 +83,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    cObracun := Trim( cObracun )
 
    hParams := hb_Hash()
-   hParams[ "svi" ] := lSvi
+   hParams[ "svi" ] := lSveRj
    hParams[ "str_sprema" ] := cStrSpr
    hParams[ "q_rj" ] := qqRj
 
@@ -96,14 +96,14 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
 
    use_sql_ld_ld( nGodina, nMjesec, nMjesecDo, nVrstaInvaliditeta, nStepenInvaliditeta, hParams )
 
-   IF lSvi
+   IF lSveRj
       SET ORDER TO TAG ( ld_index_tag_vise_obracuna( "2" ) )
    ELSE
       SET ORDER TO TAG ( ld_index_tag_vise_obracuna( "1" ) )
    ENDIF
 
 
-   IF !lSvi
+   IF !lSveRj
       SEEK Str( nGodina, 4, 0 ) + cIdRj + Str( nMjesec, 2, 0 ) + cObracun // after ld_sql open
       EOF CRET
    ELSE
@@ -125,7 +125,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    ?
    P_12CPI
 
-   ld_pozicija_parobr( nMjesec, nGodina, cObracun, iif( !lSvi, cIdRj, ) )  // pozicionira bazu PAROBR na odgovarajuci zapis
+   ld_pozicija_parobr( nMjesec, nGodina, cObracun, iif( !lSveRj, cIdRj, ) )  // pozicionira bazu PAROBR na odgovarajuci zapis
 
    PRIVATE aRekap[ cLDPolja, 2 ]
 
@@ -167,21 +167,21 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    SELECT ld
 
    IF nMjesec != nMjesecDo
-      IF lSvi
+      IF lSveRj
          GO TOP
          PRIVATE bUslov := {|| field->godina == nGodina .AND. field->mjesec >= nMjesec .AND. field->mjesec <= nMjesecDo .AND. field->obr = cObracun }
       ELSE
          PRIVATE bUslov := {|| field->godina == nGodina .AND. field->idrj == cIdRj .AND. field->mjesec >= nMjesec .AND. field->mjesec <= nMjesecDo .AND. field->obr = cObracun }
       ENDIF
    ELSE
-      IF lSvi
+      IF lSveRj
          PRIVATE bUslov := {|| nGodina == field->godina .AND. nMjesec == field->mjesec .AND. field->obr == cObracun }
       ELSE
          PRIVATE bUslov := {|| nGodina == field->godina .AND. cIdrj == field->idrj .AND. nMjesec == field->mjesec .AND. field->obr == cObracun }
       ENDIF
    ENDIF
 
-   _ld_calc_totals( lSvi, @_a_benef )
+   ld_rekap_calc_totals( lSveRj, @_a_benef, cRekapTipoviOut )
 
    IF nLjudi == 0
       nLjudi := 9999999
@@ -203,7 +203,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
       ?U "Općina rada:", cOpsRad
    ENDIF
 
-   IF lSvi
+   IF lSveRj
       zagl_rekapitulacija_plata_svi()
    ELSE
       zagl_rekapitulacija_plata_rj()
@@ -213,7 +213,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
 
    cLinija := cTpLine
 
-   ld_ispis_po_tipovima_primanja( lSvi )
+   ld_ispis_po_tipovima_primanja( lSveRj, cRekapTipoviOut )
 
    ? cTpLine
 
@@ -226,18 +226,15 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
 
    ? cTpLine
 
-
    ?
    ProizvTP()
 
    IF cRTipRada $ "A#U"
-
       ? cMainLine
       ?U "a) UKUPNI BRUTO SA TROŠKOVIMA "
       @ PRow(), 60 SAY nUBBTrosk PICT gPicI
       ?U "b) UKUPNI TROŠKOVI "
       @ PRow(), 60 SAY nURTrosk PICT gPici
-
    ENDIF
 
 
@@ -296,7 +293,6 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
    nTOsnova := 0
    nPorB := 0
    nPorR := 0
-
 
    nTOsnova := obr_porez( nGodina, nMjesec, @nPor, @nPor2, @nPorOps, @nPorOps2, @nUPorOl, "B" )    // obracunaj porez na bruto
 
@@ -425,7 +421,7 @@ FUNCTION ld_rekapitulacija_sql( lSvi )
       virm_set_global_vars()
       set_metric( "virm_godina", my_user(), nGodina )
       set_metric( "virm_mjesec", my_user(), nMjesec )
-      virm_prenos_ld( .T. )
+      ld_virm_prenos( .T. )
       unos_virmana()
       my_close_all_dbf()
    ENDIF
@@ -442,11 +438,12 @@ STATIC FUNCTION nStr()
    RETURN .T.
 
 
-STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
+STATIC FUNCTION ld_rekap_calc_totals( lSveRj, a_benef, cRekapTipoviOut )
 
    LOCAL i
    LOCAL cTpr
    LOCAL cOpis2
+   LOCAL nIzbitiIzUkupnihPrimanja
 
    nPorol := 0
    nRadn_bo := 0
@@ -454,6 +451,7 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
    nMRadn_bo := 0
    nPor := 0
    aNetoMj := {}
+   
 
    DO WHILE !Eof() .AND. Eval( bUSlov )
 
@@ -481,15 +479,12 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       ENDIF
 
       IF ( ( !Empty( cOpsSt ) .AND. cOpsSt <> radn->idopsst ) ) .OR. ( ( !Empty( cOpsRad ) .AND. cOpsRad <> radn->idopsrad ) )
-
          SELECT ld
          SKIP 1
          LOOP
-
       ENDIF
 
       IF ( IsRamaGlas() .AND. cK4 <> "S" )
-
          IF ( cK4 = "P" .AND. !radn->k4 = "P" .OR. cK4 = "N" .AND. radn->k4 = "P" )
             SELECT ld
             SKIP 1
@@ -500,19 +495,23 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       _ouneto := Max( _uneto, PAROBR->prosld * gPDLimit / 100 )
       _oosnneto := 0
       _oosnostalo := 0
-
       nRadn_lod := _ulicodb
-
       nKoefLO := nRadn_lod
 
       cTrosk := radn->trosk
 
       lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cTipRada $ "A#U"
 
+      nIzbitiIzUkupnihPrimanja := 0
       FOR i := 1 TO cLDPolja
 
          cTprField := PadL( AllTrim( Str( i ) ), 2, "0" )
          cTpr := "_I" + cTprField
+         IF !Empty(cRekapTipoviOut) .AND. cTprField $ cRekapTipoviOut
+            // tip primanja npr. TO neoporezivi izbaciti
+            nIzbitiIzUkupnihPrimanja += &cTpr
+            loop
+         ENDIF
 
          IF &cTpr == 0
             LOOP
@@ -523,24 +522,19 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
          IF tippr->( FieldPos( "TPR_TIP" ) ) <> 0
             IF tippr->tpr_tip == "N"
-
                // osnovica neto
                _oosnneto += &cTpr
 
             ELSEIF tippr->tpr_tip == "2"
-
                // osnovica ostalo
                _oosnostalo += &cTpr
 
             ELSEIF tippr->tpr_tip == " "
-
                IF tippr->uneto == "D"
-
                   // osnovica ostalo
                   _oosnneto += &cTpr
 
                ELSEIF tippr->uneto == "N"
-
                   // osnovica ostalo
                   _oosnostalo += &cTpr
 
@@ -591,14 +585,11 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       nRadn_bo := nRadn_bo - nRTrosk
 
       IF cTipRada $ " #I#N"
-
          nMRadn_bo := nRadn_bo
-
          IF ld_calc_min_bruto_yes_no()
             // minimalna bruto osnova
             nMRadn_bo := ld_min_bruto_osnova( nRadn_bo, _usati )
          ENDIF
-
          // ukupno minimalna bruto osnova
          nUMRadn_bo += nMRadn_bo
 
@@ -611,14 +602,11 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       nURadn_bo += nRadn_bo
 
       IF is_radn_k4_bf_ide_u_benef_osnovu()
-
          // beneficirani staz za radnika
          nRadn_bbo := ld_get_bruto_osnova( _oosnneto - if( !Empty( gBFForm ), &gBFForm, 0 ), cTipRada, nKoefLO, nRSpr_koef )
          nURadn_bbo += nRadn_bbo
-
          // upisi osnovicu...
          add_to_a_benef( @a_benef, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nRadn_bbo )
-
       ENDIF
 
       // da bi dobio osnovicu za poreze
@@ -631,7 +619,6 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
       // ukupni doprinosi iz
       nURadn_diz += nRadn_diz
-
       // osnovica za poreze
       nRadn_posn := ROUND2( ( nRadn_bo - nRadn_diz ) - nRadn_lod, gZaok2 )
 
@@ -641,7 +628,6 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
       // ovo je total poreske osnove za radnika
       nPorOsnova := nRadn_posn
-
       IF nPorOsnova < 0 .OR. !radn_oporeziv( ld->idradn, ld->idrj )
          nPorOsnova := 0
       ENDIF
@@ -649,18 +635,14 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       // ovo je total poreske osnove
       nUPorOsnova += nPorOsnova
 
-
-
       select_o_por()   // obradi poreze
       GO TOP
 
       nPor := 0
       nPorOl := 0
-
       DO WHILE !Eof()
 
          cAlgoritam := get_algoritam()
-
          ld_opstina_stanovanja_rada( POR->poopst )
 
          IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
@@ -691,7 +673,6 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
          ENDIF
 
          select_o_por()
-
          SKIP
 
       ENDDO
@@ -699,7 +680,6 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       // neto na ruke osnova
       // BRUTO - DOPR_IZ - POREZ
       nPorNROsnova := ROUND2 ( ( nRadn_bo - nRadn_diz ) - nPor, gZaok2 )
-
       // minimalna neto osnova
       nPorNrOsnova := min_neto( nPorNROsnova, _usati )
 
@@ -713,10 +693,7 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       ENDIF
 
       nUPorNROsnova += nPorNROsnova
-
-
       nPom := AScan( aNeta, {| x | x[ 1 ] == vposla->idkbenef } )
-
       IF nPom == 0
          AAdd( aNeta, { vposla->idkbenef, _oUNeto } )
       ELSE
@@ -726,14 +703,17 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       FOR i := 1 TO cLDPolja
 
          cPom := PadL( AllTrim( Str( i ) ), 2, "0" )
-         select_o_tippr( cPom )
+         IF !Empty(cRekapTipoviOut) .AND. cPom $ cRekapTipoviOut
+            // tip primanja npr. TO neoporezivi izbaciti
+            loop
+         ENDIF
 
+         select_o_tippr( cPom )
          SELECT ld
          aRekap[ i, 1 ] += _S&cPom  // sati
          nIznos := _I&cPom
 
          aRekap[ i, 2 ] += nIznos  // iznos
-
          IF tippr->uneto == "N" .AND. nIznos <> 0
 
             IF nIznos > 0
@@ -769,16 +749,14 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
       nUOdbici += _UOdbici  // ukupno odbici
 
       IF nMjesec <> nMjesecDo
-
          nPom := AScan( aNetoMj, {| x | x[ 1 ] == mjesec } )
-
          IF nPom > 0
             aNetoMj[ nPom, 2 ] += _uneto
             aNetoMj[ nPom, 3 ] += _usati
          ELSE
             nTObl := Select()
             nTRec := PAROBR->( RecNo() )
-            ld_pozicija_parobr( mjesec, godina, IF( ld_vise_obracuna(), cObracun, ), IF( !lSvi, cIdRj, ) )
+            ld_pozicija_parobr( mjesec, godina, IF( ld_vise_obracuna(), cObracun, ), IF( !lSveRj, cIdRj, ) )
             // samo pozicionira bazu PAROBR na odgovarajui zapis
             AAdd( aNetoMj, { mjesec, _uneto, _usati, PAROBR->k3, PAROBR->k1 } )
             SELECT PAROBR
@@ -792,7 +770,7 @@ STATIC FUNCTION _ld_calc_totals( lSvi, a_benef )
 
       IF RADN->isplata == "TR"  // radnik isplata na tekuci racun
          cOpis2 := RADNIK_PREZ_IME
-         rekap_ld( "IS_" + RADN->idbanka, nGodina, nMjesecDo, _UIznos, 0, RADN->idbanka, RADN->brtekr, cOpis2, .T. )
+         rekap_ld( "IS_" + RADN->idbanka, nGodina, nMjesecDo, _UIznos - nIzbitiIzUkupnihPrimanja, 0, RADN->idbanka, RADN->brtekr, cOpis2, .T. )
       ENDIF
 
       SELECT ld

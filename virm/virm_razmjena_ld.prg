@@ -14,7 +14,7 @@
 MEMVAR _mjesec, _godina, nBrojRadnikaPrivateVar, gVirmFirma
 
 
-FUNCTION virm_prenos_ld( lPrenosLDVirm )
+FUNCTION ld_virm_prenos( lPrenosLDVirm )
 
    LOCAL _poziv_na_broj
    LOCAL _dat_virm := Date()
@@ -96,7 +96,7 @@ FUNCTION virm_prenos_ld( lPrenosLDVirm )
    _dod_opis := ", za " + Str( _mjesec, 2 ) + "." + Str( _godina, 4 )
    nRBr := 0
 
-   virm_ld_obrada( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis, _per_od, _per_do )
+   ld_virm_obrada( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis, _per_od, _per_do )
 
    ld_virm_generacija_krediti( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis )
    virm_ld_isplata_radniku_na_tekuci_racun( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis )
@@ -138,22 +138,18 @@ STATIC FUNCTION virm_ld_isplata_radniku_na_tekuci_racun( nGodina, nMjesec, dDatV
       _kome_txt := field->naz
       _kome_sjed := field->mjesto
       _nacin_pl := "1"
-
       _KOME_ZR := Space( 16 )
       virm_odredi_ziro_racun( _u_korist, @_KOME_ZR, .F. )
 
       SELECT virm_pripr
       GO TOP
 
-
       _ko_txt := field->ko_txt   // uzmi podatke iz prve stavke
       _ko_zr := field->ko_zr
-
       select_o_partner( gVirmFirma )
 
       _total := 0
       _kredit := 0
-
       SELECT rekld
       cIdPartnerRekLd := field->idpartner // SK=sifra kreditora/banke ( ovo je dupla informacija - sadrzi isti podataka kao i cIdBanka )
 
@@ -224,7 +220,7 @@ FUNCTION iznos_virman( nIznos )
 // ----------------------------------------------------------------------------------------------------
 // obrada virmana za regularnu isplatu plata, doprinosi, porezi itd...
 // ----------------------------------------------------------------------------------------------------
-STATIC FUNCTION virm_ld_obrada( nGodina, nMjesec, dDatVirm, r_br, dod_opis, dDatumOd, dDatumDo )
+STATIC FUNCTION ld_virm_obrada( nGodina, nMjesec, dDatVirm, r_br, dod_opis, dDatumOd, dDatumDo )
 
    LOCAL _broj_radnika
    LOCAL _formula, _izr_formula
@@ -249,24 +245,21 @@ STATIC FUNCTION virm_ld_obrada( nGodina, nMjesec, dDatVirm, r_br, dod_opis, dDat
 
    DO WHILE !Eof()
 
-      _formula := field->formula
+      _formula := ldvirm->formula
       IF Empty( _formula )
          SKIP
          LOOP
       ENDIF
 
       _svrha_placanja := AllTrim( field->id )
-
       o_vrprim( ldvirm->id )
       cVrPrimIdPartner := vrprim->idpartner
 
       select_o_partner( gVirmFirma )
 
-
       SELECT virm_pripr
 
       _izr_formula := &_formula // npr. RLD("DOPR1XZE01")
-
       SELECT virm_pripr
 
       IF _bez_nula == "N" .OR. _izr_formula > 0
@@ -287,7 +280,6 @@ STATIC FUNCTION virm_ld_obrada( nGodina, nMjesec, dDatVirm, r_br, dod_opis, dDat
             REPLACE field->pnabr WITH _poziv_na_broj
          ENDIF
 
-
          _tmp_opis := Trim( vrprim->pom_txt ) +  iif( !Empty( dod_opis ), " " + AllTrim( dod_opis ), "" ) +  iif( !Empty( nBrojRadnikaPrivateVar ), " " + nBrojRadnikaPrivateVar, "" )
 
          _KOME_ZR := ""  // resetuj public varijable
@@ -295,9 +287,7 @@ STATIC FUNCTION virm_ld_obrada( nGodina, nMjesec, dDatVirm, r_br, dod_opis, dDat
          _budzorg := ""
          _idops := ""
 
-
          IF PadR( cVrPrimIdPartner, 2 ) == "JP"
-
             set_jprih_globalne_varijable_kome_zr_budzorg_idjprih_idops()
             // _cKomeZiroRacun := _KOME_ZR
             // __kome_txt := _kome_txt
@@ -436,8 +426,6 @@ FUNCTION set_jprih_globalne_varijable_kome_zr_budzorg_idjprih_idops()
 
 
 
-
-
 FUNCTION set_pozicija_jprih_record( cIdJPrih, cIdOps, cIdKan, cIdEnt )
 
    LOCAL lOk := .F.
@@ -522,8 +510,6 @@ FUNCTION set_pozicija_jprih_record( cIdJPrih, cIdOps, cIdKan, cIdEnt )
    RETURN aRez
 
 
-
-
 FUNCTION virm_opcina_rada()
 
    LOCAL cVrati := "   "
@@ -553,7 +539,6 @@ FUNCTION virm_opcina_rada()
    RETURN cVrati
 
 
-
 STATIC FUNCTION pozicioniraj_rec_vrprim_sifra_kr()
 
    LOCAL hRec
@@ -575,7 +560,6 @@ STATIC FUNCTION pozicioniraj_rec_vrprim_sifra_kr()
    ENDIF
 
    RETURN .T.
-
 
 
 STATIC FUNCTION pozicioniraj_rec_vrprim_sifra_is()

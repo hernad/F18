@@ -358,6 +358,7 @@ FUNCTION ld_set_prikaz()
    LOCAL cPrikazKarticeNaUnosuDN := fetch_metric( "ld_obracun_prikaz_kartice_na_unosu", NIL, "N" )
    LOCAL GetList := {}
    LOCAL cKarticaSifreTO := fetch_metric("ld_kartica_sifre_to", NIL, SPACE(10))
+   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
 
    gPotp1 := PadR( gPotp1, 150 )
    gPotp2 := PadR( gPotp2, 150 )
@@ -381,6 +382,7 @@ FUNCTION ld_set_prikaz()
 
    @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Kartica plate - svi doprinosi (D/N)" GET gKarSDop VALID gKarSDop $ "DN" PICT "@!"
    @ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Kartica plate - TO posebna kartica (navesti šifre)" GET cKarticaSifreTO
+   @ box_x_koord() + 13, box_y_koord() + 2 SAY8 "Primanja koja treba izbaciti iz rekapitulacije" GET cRekapTipoviOut
 
    READ
 
@@ -401,6 +403,7 @@ FUNCTION ld_set_prikaz()
       set_metric( "ld_potpis_red_2", NIL, gPotp2 )
       set_metric( "ld_kartica_svi_doprinosi", NIL, gKarSDop )
       set_metric( "ld_kartica_sifre_to", NIL, cKarticaSifreTO )
+      set_metric("ld_rekap_out", NIL, cRekapTipoviOut)
 
    ENDIF
 

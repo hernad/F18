@@ -21,7 +21,7 @@ FUNCTION virm_razmjena_podataka()
    LOCAL _Izbor := 1
 
    AAdd( _opc, "1. ld   ->   virman             " )
-   AAdd( _opcexe, {|| virm_prenos_ld() } )
+   AAdd( _opcexe, {|| ld_virm_prenos() } )
    //AAdd( _opc, "2. fin  ->   virman   " )
   // AAdd( _opcexe, {|| virm_prenos_fin() } )
 
