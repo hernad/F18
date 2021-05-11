@@ -3,7 +3,7 @@ load("//bazel:shared_library.bzl", "shared_library")
 load("//bazel:zh_comp.bzl", "zh_comp_all")
 load("//bazel:variables.bzl", "C_OPTS", "ZH_COMP_OPTS", 
     "ZH_Z18_COMP_OPTS", "L_OPTS", "L_OPTS_2",
-     "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB" )
+     "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB", "WINDOWS_LINUX" )
 
 
 ZH_COMP_OPTS_F18=[
@@ -16,9 +16,9 @@ ZH_COMP_OPTS_F18=[
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    "-DGT_DEFAULT_CONSOLE",
+    #"-DGT_DEFAULT_CONSOLE",
     #"-DELECTRON_HOST",
-    #-DGT_DEFAULT_GUI",
+    "-DGT_DEFAULT_GUI",
     "-DF18_POS",
     #"-DF18_DEBUG",
     #"-b" no debug
@@ -35,12 +35,13 @@ ZH_DEPS_F18=[
 
 F18_LIB = "klijent"
 
+
 cc_binary(
     name = "F18-klijent",
     srcs = [ "F18-klijent.c" ],
     deps = select({
-            "//bazel:windows": [ ":F18_dll_import", ":ziher_dll_import", "//zh_zero:headers"],
-            "//conditions:default": [ ":F18_import", ":ziher_import", "//zh_zero:headers"],
+            "//bazel:windows": [ "//zh_zero:headers", ":F18_dll_import", ":ziher_dll_import"], 
+            "//conditions:default": [ "//zh_zero:headers", ":F18_import", ":ziher_import"],
         }),  #+ POSTGRESQL_LIB
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
@@ -55,19 +56,13 @@ cc_binary(
 
 shared_library(
     name = "F18",
-    os = select({
-            "//bazel:windows": "windows",
-            "//conditions:default": "linux",
-        }),
+    os = "windows",
     srcs = [ ":F18_zh" ],
     hdrs = glob([
         "*.h",
         "*.zhh",
     ]) + POSTGRESQL_HEADERS,
-    deps = select({
-            "//bazel:windows": [ ":ziher.dll", "//zh_zero:headers", "//zh_rtl:headers"],
-            "//conditions:default": [ ":ziher.so", "//zh_zero:headers", "//zh_rtl:headers"],
-        }) + POSTGRESQL_LIB,
+    deps = ["//zh_zero:headers", "//zh_rtl:headers", ":ziher_dll_import"] + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
@@ -78,15 +73,38 @@ shared_library(
         #"-DZH_TR_LEVEL=5", DEBUG
     ]  + POSTGRESQL_COPT,
     visibility = ["//visibility:public"],
+    target_compatible_with = [
+        #"@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
 )
 
 shared_library(
-    name = "ziher",
-    os = select({
-            "//bazel:windows": "windows",
-            "//conditions:default": "linux",
-        }),
-    srcs = [ 
+    name = "F18",
+    os = "linux",
+    srcs = [ ":F18_zh" ],
+    hdrs = glob([
+        "*.h",
+        "*.zhh",
+    ]) + POSTGRESQL_HEADERS,
+    deps = [ "//zh_zero:headers", "//zh_rtl:headers", ":ziher_import"] + POSTGRESQL_LIB,
+    linkopts = L_OPTS + L_OPTS_2,
+    copts = [
+        "-Izh_zero",
+        "-Izh_vm",
+        "-Izh_rtl",
+        "-DZH_DYNLIB",
+        #"-DZH_TR_LEVEL=4", #INFO
+        #"-DZH_TR_LEVEL=5", DEBUG
+    ]  + POSTGRESQL_COPT,
+    visibility = ["//visibility:public"],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
+
+_ZIHER_SRCS = [ 
        "//zh_zero:c_sources",
        "//zh_vm:c_sources", 
        "//zh_vm:zh_vm_zh",
@@ -115,12 +133,9 @@ shared_library(
        "//third_party/harupdf:c_sources",
        "//third_party/png:c_sources",
        "//third_party/minizip:c_sources",
-    ],
-    hdrs = glob([
-        "*.h",
-        "*.zhh"
-    ]) + POSTGRESQL_HEADERS,
-    deps = [ 
+    ]
+
+_ZIHER_DEPS = [ 
         "//zh_zero:headers",
         "//zh_vm:headers",
         "//zh_macro:headers",
@@ -139,9 +154,9 @@ shared_library(
         "//third_party/xlsxwriter:headers",
         "//third_party/png:headers",
         "//third_party/minizip:headers",
-    ] + POSTGRESQL_LIB,
-    linkopts = L_OPTS + L_OPTS_2 + ["-lX11"],
-    copts = [
+    ] + POSTGRESQL_LIB
+
+_ZIHER_COPTS = [
         "-DUNICODE", # gt_wvt
         "-Izh_zero",
         "-Izh_vm",
@@ -163,10 +178,43 @@ shared_library(
         "-DZH_DYNLIB",
         #"-DZH_TR_LEVEL=4", #INFO
         #"-DZH_TR_LEVEL=5", DEBUG
-    ]  + POSTGRESQL_COPT,
+    ]  + POSTGRESQL_COPT
+
+shared_library(
+    name = "ziher",
+    os = "windows",
+    srcs = _ZIHER_SRCS,
+    hdrs = glob([
+        "*.h",
+        "*.zhh"
+    ]) + POSTGRESQL_HEADERS,
+    deps = _ZIHER_DEPS,
+    linkopts = L_OPTS + L_OPTS_2,
+    copts = _ZIHER_COPTS,
     visibility = ["//visibility:public"],
+    target_compatible_with = [
+        #"@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
 )
 
+shared_library(
+    name = "ziher",
+    os = "linux",
+    srcs = _ZIHER_SRCS,
+    hdrs = glob([
+        "*.h",
+        "*.zhh"
+    ]) + POSTGRESQL_HEADERS,
+    deps = _ZIHER_DEPS,
+    linkopts = L_OPTS + L_OPTS_2 + ["-lX11"],
+    copts = _ZIHER_COPTS,
+    visibility = ["//visibility:public"],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
 
 zh_comp_all(
     name = "F18_zh", 
