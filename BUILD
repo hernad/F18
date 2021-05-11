@@ -16,18 +16,27 @@ ZH_COMP_OPTS_F18=[
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    "-DGT_DEFAULT_CONSOLE",
-    "-DELECTRON_HOST",
-    #"-DGT_DEFAULT_GUI",
+    #"-DGT_DEFAULT_CONSOLE",
+    #"-DELECTRON_HOST",
+    "-DGT_DEFAULT_GUI",
     "-DF18_POS",
     #"-DF18_DEBUG",
     #"-b" no debug
 ]
 
+filegroup(
+    name = "fin_headers_filegroup",
+    srcs = glob([
+        "fin/*.zhh",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
 ZH_DEPS_F18=[ 
     "//zh_zero:headers_filegroup", 
     "//zh_rtl:headers_filegroup",
     "//F18/include:headers_filegroup",
+    ":fin_headers_filegroup",
     #"//F18/fin:headers_filegroup",
     "//zh_harupdf:headers_filegroup"
 ]
@@ -231,6 +240,7 @@ zh_comp_all(
         "core_string/*.zh",
         "core_ui2/*.zh",
         "fin/*.zh",
+        "fin/*.zhh",
         "kalk/*.zh",
         "kalk_legacy/*.zh",
         "fakt/*.zh",
