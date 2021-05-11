@@ -16,9 +16,9 @@ ZH_COMP_OPTS_F18=[
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    #"-DGT_DEFAULT_CONSOLE",
-    #"-DELECTRON_HOST",
-    "-DGT_DEFAULT_GUI",
+    "-DGT_DEFAULT_CONSOLE",
+    "-DELECTRON_HOST",
+    #"-DGT_DEFAULT_GUI",
     "-DF18_POS",
     #"-DF18_DEBUG",
     #"-b" no debug
@@ -73,7 +73,7 @@ shared_library(
         #"-DZH_TR_LEVEL=5", DEBUG
     ]  + POSTGRESQL_COPT,
     visibility = ["//visibility:public"],
-    target_compatible_with = [
+    exec_compatible_with = [
         #"@platforms//cpu:x86_64",
         "@platforms//os:windows",
     ],
@@ -98,7 +98,7 @@ shared_library(
         #"-DZH_TR_LEVEL=5", DEBUG
     ]  + POSTGRESQL_COPT,
     visibility = ["//visibility:public"],
-    target_compatible_with = [
+    exec_compatible_with = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
@@ -192,7 +192,7 @@ shared_library(
     linkopts = L_OPTS + L_OPTS_2,
     copts = _ZIHER_COPTS,
     visibility = ["//visibility:public"],
-    target_compatible_with = [
+    exec_compatible_with = [
         #"@platforms//cpu:x86_64",
         "@platforms//os:windows",
     ],
@@ -210,7 +210,7 @@ shared_library(
     linkopts = L_OPTS + L_OPTS_2 + ["-lX11"],
     copts = _ZIHER_COPTS,
     visibility = ["//visibility:public"],
-    target_compatible_with = [
+    exec_compatible_with = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
