@@ -134,7 +134,7 @@ def walk_1():
 
 
 
-#walk_1()
+walk_1()
 
 
 def walk_2():

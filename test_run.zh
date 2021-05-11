@@ -1,0 +1,66 @@
+
+#pragma BEGINDUMP
+
+#include "zh_api.h"
+#include "zh_error_api.h"
+#include "zh_gt_api.h"
+#include "zh_item_api.h"
+#include "zh_fs_api.h"
+
+/* TOFIX: The screen buffer handling is not right for all platforms (Windows)
+          The output of the launched (MS-DOS?) app is not visible. */
+
+ZH_FUNC( __RUN_SYSTEM )
+{
+   const char * pszCommand = zh_parc( 1 );
+
+   int iResult;
+
+   if( pszCommand && zh_gtSuspend() == ZH_SUCCESS )
+   {
+      char * pszFree = NULL;
+
+      iResult = system( zh_osEncodeCP( pszCommand, &pszFree, NULL ) );
+
+      zh_retni(iResult);
+
+      if( pszFree )
+         zh_xfree( pszFree );
+
+      if( zh_gtResume() != ZH_SUCCESS )
+      {
+         /* an error should be generated here !! Something like */
+         /* zh_errRT_BASE_Ext1( EG_GTRESUME, 6002, NULL, ZH_ERR_FUNCNAME, 0, EF_CANDEFAULT ); */
+      }
+   }
+}
+
+
+#pragma ENDDUMP
+
+_cmd := "c:\windows\system32\notepad.exe"
+
+_cmd := "start f18_editor.cmd c:\Documents and Settings\hbakir\.f18\bringout_2012\outf.txt"
+
+_cmd := "copy test_run.xprg test_copy.txt"
+_cmd := 'echo f18_test2 > "%HOME%\test copy.txt"'
+
+? "run"
+
+
+_stderr := ""
+_stdout := ""
+
+
+//_ret := zh_processrun(_cmd, @_stderr, @_stdout)
+
+//_ret := (_cmd, NIL, NIL, NIL)
+_ret := __run_system(_cmd)
+
+
+
+? "stderr", _stderr
+? "stdout", _stdout
+? _ret
+
+inkey(0)

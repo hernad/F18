@@ -1,0 +1,147 @@
+/*
+ * Clipper Tool III like window system test program
+ * Donated to the public domain on 2006-02-11 by Przemyslaw Czerpak
+ */
+
+#ifdef __HARBOUR__
+#require "hbct"
+#endif
+
+#include "inkey.zhh"
+#include "set_curs.zhh"
+
+static n1:=1, n2:=2, n3:=3
+
+PROCEDURE Main()
+
+   LOCAL aWin := Array( 3 ), y, x, i, lFlag := .F., lBoard := .T.
+   LOCAL nKeyStd
+   LOCAL cProg, nI
+
+   SetBlink( .F. )
+   WBoard( 5, 5, 20, 75 )
+   WMode( .T., .T., .T., .T. )
+   WSetShadow( 7 )
+   SetClearA( 10 * 16 + 14 )
+   SetClearB( 35 )
+   DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( ".", 9 ), NToColor( 10 * 16 + 14 ) )
+   SetPos( 0, 0 )
+   ? "GT driver:", zh_gtVersion()
+   ? zh_gtVersion( 1 )
+   ?
+   ? "ESC - quit "
+   ? "0 - select window 0 (base screen) "
+   ? "1-9 select window 1-9 "
+   ? "C - close window "
+   ? "Q - clear screen "
+   ? "P - print text at window 0 "
+   ? "B - board switch "
+   ? "INS - cursor shape "
+   ? "DEL - hide cursor "
+   ? "arrows - window move "
+
+   SetClearB( 61 )
+   FOR i := 1 TO Len( aWin )
+      y := i + 2
+      x := i * 4 + 10
+      SetColor( NToColor( i * 16 + 15 ) + ",W+/B*" )
+      WSetShadow( i % 8 )
+      aWin[ i ] := WOpen( y, x, y + 25, x + 70 )
+      WBox()
+
+      @ -1, 0 SAY "TITLE " + zh_ntos( aWin[ i ] )
+      ? zh_ntos( Row()        ) + ":" + zh_ntos( Col()        ), "/", zh_ntos( MaxRow()         ) + ":" + zh_ntos( MaxCol()         ), ""
+      ? zh_ntos( WRow()       ) + ":" + zh_ntos( WCol()       ), "/", zh_ntos( MaxRow( .T. )    ) + ":" + zh_ntos( MaxCol( .T. )    ), ""
+      ? zh_ntos( WFRow()      ) + ":" + zh_ntos( WFCol()      ), "/", zh_ntos( WFLastRow()      ) + ":" + zh_ntos( WFLastCol()      ), ""
+      ? zh_ntos( WFRow( .T. ) ) + ":" + zh_ntos( WFCol( .T. ) ), "/", zh_ntos( WFLastRow( .T. ) ) + ":" + zh_ntos( WFLastCol( .T. ) ), ""
+      ? "window:", zh_ntos( aWin[ i ] ), ""
+      SetCursor( Int( i % 5 ) )
+
+   NEXT
+
+   dspcord()
+   DO WHILE .T.
+      nKeyStd := Inkey( 0, INKEY_ALL )
+      DO CASE
+      CASE nKeyStd == K_ESC
+         EXIT
+      CASE nKeyStd >= zh_keyCode( "1" ) .AND. nKeyStd <= zh_keyCode( "9" )
+         WSelect( aWin[ nKeyStd - zh_keyCode( "0" ) ] )
+         nI := nKeyStd - zh_keyCode( "0" )
+         cProg := "prog" + alltrim( str( nI ) ) + "()"
+         &cProg
+      CASE nKeyStd == zh_keyCode( "0" )
+         WSelect( 0 )
+      CASE nKeyStd == zh_keyCode( "C" ) .OR. nKeyStd == zh_keyCode( "c" )
+         WClose()
+      CASE nKeyStd == zh_keyCode( "Q" ) .OR. nKeyStd == zh_keyCode( "q" )
+         CLS
+      CASE nKeyStd == zh_keyCode( "B" ) .OR. nKeyStd == zh_keyCode( "b" )
+         IF lBoard
+            WBoard( 0, 0, MaxRow( .T. ) - 1, MaxCol( .T. ) )
+         ELSE
+            WBoard( 5, 5, 20, 75 )
+         ENDIF
+         lBoard := ! lBoard
+      CASE nKeyStd == zh_keyCode( "P" ) .OR. nKeyStd == zh_keyCode( "P" )
+         y := WFRow()
+         x := WFCol()
+         i := WSelect()
+         WSelect( 0 )
+         @ y, x SAY "THIS IS WINDOW 0 OUTPUT"
+         WSelect( i )
+      CASE nKeyStd == K_INS
+         lFlag := ! lFlag
+         SetCursor( iif( lFlag, 3, 1 ) )
+      CASE nKeyStd == K_DEL
+         SetCursor( SC_NONE )
+      CASE nKeyStd == K_LEFT
+         WMove( WRow(), WCol() - 1 )
+      CASE nKeyStd == K_RIGHT
+         WMove( WRow(), WCol() + 1 )
+      CASE nKeyStd == K_UP
+         WMove( WRow() - 1, WCol() )
+      CASE nKeyStd == K_DOWN
+         WMove( WRow() + 1, WCol() )
+      ENDCASE
+      dspcord()
+   ENDDO
+
+   RETURN
+
+procedure prog1()
+
+CLEAR
+@ 2, 2 SAY "prog1:" GET n1
+READ
+return
+
+procedure prog2()
+
+
+CLEAR
+@ 4, 4 SAY "prog2:" GET n2
+READ
+return
+
+procedure prog3()
+
+
+CLEAR
+@ 4, 1 SAY "prog3:" GET n1
+@ 6, 6 SAY "prog3:" GET n3
+READ
+return
+
+
+
+STATIC PROCEDURE dspcord()
+
+   LOCAL mr := MRow(), mc := MCol(), r := WRow(), c := WCol(), w := WSelect()
+
+   WSelect( 0 )
+   @ MaxRow(), 0 SAY PadR( "WPOS(" + zh_ntos( r ) + "," + zh_ntos( c ) + ")" + ;
+      iif( MPresent(), "MPOS(" + zh_ntos( mr ) + "," + zh_ntos( mc ) + ")", "" ), MaxCol() + 1 )
+   WSelect( w )
+
+   RETURN
