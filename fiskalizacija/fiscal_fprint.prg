@@ -501,7 +501,7 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
       cOperaterPassword := hFiskalniParams[ "op_pwd" ]
    ENDIF
 
-   cVrstaPlacanja := AllTrim( aRacunData[ 1, 13 ] )
+   cVrstaPlacanja := AllTrim( aRacunData[ 1, FISK_INDEX_VRSTA_PLACANJA ] )
    nTotal := aRacunData[ 1, FISK_INDEX_TOTAL ] // ukupno racun
 
    IF nTotal == NIL
@@ -728,6 +728,7 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
 
    AAdd( aArr, { cTmp } )
 
+   // https://redmine.bring.out.ba/issues/38042#change-291730
    // 7. zatvaranje racuna
    cTmp := "56"
    cTmp += cZarez

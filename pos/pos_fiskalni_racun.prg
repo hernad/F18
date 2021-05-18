@@ -662,30 +662,28 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
    LOCAL cVrstaPlacanjaNaziv := ""
 
    IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
-      RETURN cRet
+      // gotovina FPRINT, TREMOL
+      RETURN "0"
    ENDIF
 
    IF cIdVrstePlacanja == "CK"
+      IF s_cFiskalniDrajverNaziv == "FPRINT"
+         // https://redmine.bring.out.ba/issues/38042#change-291730
+         RETURN "2"
+      ENDIF
+      // TREMOL
       RETURN "1"  // cek
    ENDIF
 
    IF cIdVrstePlacanja == "KT"
+      IF s_cFiskalniDrajverNaziv == "FPRINT"
+         // https://redmine.bring.out.ba/issues/38042#change-291730
+         RETURN "1"
+      ENDIF
+      // TREMOL
       RETURN "2"  // kartica   fiskalni_vrsta_placanja( id_plac, cDriver )
    ENDIF
-   // select_o_vrstep( cIdVrstePlacanja )
-   // cVrstaPlacanjaNaziv := Upper( AllTrim( vrstep->naz ) )
-   // DO CASE
-   // CASE "KARTICA" $ cVrstaPlacanjaNaziv
-   // cRet := "1"
-   // CASE "CEK" $ cVrstaPlacanjaNaziv
-   // cRet := "2"
-   // CASE "VIRMAN" $ cVrstaPlacanjaNaziv
-   // cRet := "3"
-   // OTHERWISE
-   // cRet := "0"
-   // ENDCASE
-
-   // SELECT ( nDbfArea )
+   
 
    RETURN "0"
 

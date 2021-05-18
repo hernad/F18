@@ -372,7 +372,7 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
       IF cDriver == "TRING"
          cRet := "Gotovina"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := cIdVrsteP
+         cRet := "0"
       ELSEIF cDriver == "TREMOL"
          cRet := "Gotovina"
       ENDIF
@@ -384,7 +384,7 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
       ELSEIF cDriver == "FLINK"
          cRet := "2"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := cIdVrsteP
+         cRet := "1"
       ELSEIF cDriver == "TREMOL"
          cRet := "Cek"
       ENDIF
@@ -396,7 +396,7 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
       ELSEIF cDriver == "FLINK"
          cRet := "1"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := cIdVrsteP
+         cRet := "2"
       ELSEIF cDriver == "TREMOL"
          cRet := "Kartica"
       ENDIF
@@ -408,7 +408,7 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
       ELSEIF cDriver == "FLINK"
          cRet := "3"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := cIdVrsteP
+         cRet := "3"
       ELSEIF cDriver == "TREMOL"
          cRet := "Virman"
       ENDIF
