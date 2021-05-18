@@ -681,7 +681,8 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
          RETURN "1"
       ENDIF
       // TREMOL
-      RETURN "2"  // kartica   fiskalni_vrsta_placanja( id_plac, cDriver )
+      RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
+
    ENDIF
    
 

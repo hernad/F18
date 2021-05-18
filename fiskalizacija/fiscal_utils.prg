@@ -365,6 +365,10 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
 
    LOCAL cRet := ""
 
+   // prema https://redmine.bring.out.ba/issues/38042 za FPRINT 
+   // funkcija ne daje dobre rezultate
+   // za karticu treba vratiti "1" a vraca 2
+   
    DO CASE
 
    CASE cIdVrsteP == "0"  // gotovina
