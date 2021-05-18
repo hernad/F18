@@ -513,7 +513,7 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
    // rek_rn, plu, plu_cijena, popust, barkod, vrsta plac, total racuna }
    fprint_dodaj_artikle_za_racun( @aArr, aRacunData, lStorno, hFiskalniParams )
 
-   cRnBroj := AllTrim( aRacunData[ 1, 1 ] ) // broj racuna
+   cRnBroj := AllTrim( aRacunData[ 1, FISK_INDEX_BRDOK ] ) // broj racuna
    cLogic := "1"
 
    // 1) otvaranje fiskalnog racuna
@@ -535,7 +535,7 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
    cTmp += cTackaZarez
 
    IF lStorno == .T.
-      cRek_rn := AllTrim( aRacunData[ 1, 8 ] )
+      cRek_rn := AllTrim( aRacunData[ 1, FISK_INDEX_FISK_RACUN_STORNIRATI ] )
       cTmp += cTackaZarez
       cTmp += cRek_rn
       cTmp += cTackaZarez
@@ -558,17 +558,17 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
       cTmp += cTackaZarez
 
       // kod PLU
-      cTmp += AllTrim( Str( aRacunData[ i, 9 ] ) )
+      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_PLU ] ) )
       cTmp += cTackaZarez
       // kolicina 0-99999.999
-      cTmp += AllTrim( Str( aRacunData[ i, 6 ], 12, 3 ) )
+      cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_KOLICINA ], 12, 3 ) )
       cTmp += cTackaZarez
       // popust 0-99.99%
-      IF aRacunData[ i, 10 ] > 0
+      IF aRacunData[ i, FISK_INDEX_PLU_CIJENA ] > 0
          // cijena kolicina 5.880, cijena 5.95, popust 10.92%
          // 52,1,______,_,__;PLU=25;kolicina=5.880;popust=-10.92;
          // 52,1,009120,4,0;25;5.880;-10.92;
-         cTmp += "-" + AllTrim( Str( aRacunData[ i, 11 ], 10, 2 ) )
+         cTmp += "-" + AllTrim( Str( aRacunData[ i, FISK_INDEX_POPUST ], 10, 2 ) )
       ENDIF
       cTmp += cTackaZarez
 
@@ -644,8 +644,15 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
    //   cTmp += cTackaZarez
    // ENDIF
    
+
    cTmp += cVrstaPlacanja
    cTmp += cTackaZarez
+      
+   IF cVrstaPlacanja <> "0"
+      // https://redmine.bring.out.ba/issues/38042#note-11
+      // ne mora se iznos slati za plaćanje gotovina, plaćanje karticom se mora
+      cTmp += AllTrim( Str( nTotal, 12, 2 ) )
+   ENDIF
    cTmp += cTackaZarez
 
    AAdd( aArr, { cTmp } )
