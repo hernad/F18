@@ -92,7 +92,7 @@ FUNCTION pos_azuriraj_racun( hParams )
       IF !fiscal_opt_active()
          lBezFiskalnih := .T.
          IF Pitanje(, "Fiskalni štampač nije aktivan. Svejedno ažurirati?", " " ) == "D"
-            altd()
+            Altd()
          ELSE
             lOk := .F.
          ENDIF

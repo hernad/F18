@@ -44,7 +44,7 @@ FUNCTION kalk_import_txt_partner()
 
    import_txt_set_a_rules_partn( @aRules ) // setuj pravila upisa podataka u temp tabelu
 
-   kalk_imp_txt_to_temp( aDbf, aRules, cImpFile ) // prebaci iz txt => temp tbl
+   kalk_imp_txt_to_temp_dbf( aDbf, aRules, cImpFile ) // prebaci iz txt => temp tbl
 
    IF kalk_impt_txt_check_partnere() > 0
       IF Pitanje(, "Izvršiti import partnera (D/N)?", "D" ) == "N"
@@ -102,7 +102,7 @@ FUNCTION kalk_import_txt_roba()
    import_txt_set_a_rules_roba( @aRules )
 
 
-   kalk_imp_txt_to_temp( aDbf, aRules, cImpFile )  // prebaci iz txt => temp tbl
+   kalk_imp_txt_to_temp_dbf( aDbf, aRules, cImpFile )  // prebaci iz txt => temp tbl
 
    IF kalk_imp_txt_check_roba() > 0
       IF Pitanje(, "Importovati nove cijene u šifarnika robe (D/N)?", "D" ) == "N"

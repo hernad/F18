@@ -30,6 +30,8 @@ FUNCTION meni_import_vindija()
       s_lStampatiDokumente := .T.
    ENDIF
 
+   check_finmat_dbf_ima_opis()
+
    AAdd( opc, "1. import vindija računi                 " )
    AAdd( opcexe, {|| kalk_auto_import_racuni() } )
    AAdd( opc, "2. import vindija partner" )
@@ -60,6 +62,9 @@ FUNCTION meni_import_vindija()
 
 FUNCTION kalk_auto_import_racuni()
 
+   LOCAL aRules := {}
+   LOCAL aDbf := {}
+
    // LOCAL cCtrl_art := "N"
    PRIVATE cExpPath
    PRIVATE cImpFile
@@ -79,15 +84,14 @@ FUNCTION kalk_auto_import_racuni()
       RETURN .F.
    ENDIF
 
-   PRIVATE aDbf := {}
-   PRIVATE aRules := {}
+   
+   
    PRIVATE aFaktEx
    PRIVATE lFtSkip := .F.
    PRIVATE lNegative := .F.
 
-   kalk_imp_txt_set_a_dbf_temp( @aDbf ) // setuj polja temp tabele u matricu aDbf
-   kalk_imp_set_rule_dok( @aRules ) // setuj pravila upisa podataka u temp tabelu
-   kalk_imp_txt_to_temp( aDbf, aRules, cImpFile ) // prebaci iz txt => temp tbl
+   kalk_imp_set_array_rules_adbf( @aRules, @aDbf ) // setuj pravila upisa podataka u temp tabelu, setuj polja temp tabele u matricu aDbf
+   kalk_imp_txt_to_temp_dbf( aDbf, aRules, cImpFile ) // prebaci iz txt => temp tbl
 
 
    IF !kalk_imp_check_partn_roba_exist()
@@ -169,13 +173,13 @@ STATIC FUNCTION kalk_get_vp_ili_mp()
  *   param: cTxtFile - txt fajl za import
  */
 
-FUNCTION kalk_imp_txt_to_temp( aDbf, aRules, cTxtFile )
+FUNCTION kalk_imp_txt_to_temp_dbf( aDbf, aRules, cTxtFile )
 
    LOCAL oFile, nCnt
 
    my_close_all_dbf()
 
-   cre_kalk_imp_temp( aDbf )
+   cre_kalk_imp_temp_dbf( aDbf )
    o_kalk_imp_temp()
 
    IF !File( f18_ime_dbf( "kalk_imp_temp" ) )
@@ -255,7 +259,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
    my_close_all_dbf()
 
    o_kalk_pripr()
-
    o_kalk_pript()
    select_o_kalk_imp_temp()
 
@@ -287,7 +290,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
       cIdProdajnoMjesto := kalk_imp_temp->idpm
       cIdPJ := kalk_imp_temp->idpj
 
-
       IF lFSkip // ako je ukljucena opcija preskakanja postojecih faktura
          IF Len( aFExist ) > 0
             nFExist := AScan( aFExist, {| aVal | AllTrim( aVal[ 1 ] ) == cFakt } )
@@ -299,7 +301,6 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          ENDIF
       ENDIF
 
-
       IF ( cFakt <> cPredhodniFaktDokument ) // .OR. (cIdVd == "11" .AND. (cIdProdajnoMjesto <> cPredhodnoProdMjesto) )
          ++nUvecaj
          cBrojKalk := kalk_imp_get_next_temp_broj( nUvecaj )
@@ -307,13 +308,11 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
          AAdd( aPom, { cIdVd, cBrojKalk, cFakt } )
       ENDIF
 
-
       cIdRobaSifraDob := PadL( AllTrim( kalk_imp_temp->idroba ), 5, "0" )
       find_roba_by_sifradob( cIdRobaSifraDob )
 
       cIdKontoZaduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "Z", cIdPJ )
       cIdKontoRazduzuje := kalk_imp_get_konto_by_tip_pm_poslovnica( cIdVd, kalk_imp_temp->idpm, "R", cIdPJ )
-
 
       select_o_koncij( cIdKontoZaduzuje )
       select_o_kalk_pript()
@@ -335,6 +334,7 @@ STATIC FUNCTION kalk_imp_from_temp_to_pript( aFExist, lFSkip, lNegative )// , cC
 
       IF cIdVd $ "14#KO"
          REPLACE mkonto WITH cIdKontoRazduzuje
+         REPLACE opis WITH kalk_imp_opis_by_tip2(kalk_imp_temp->tip2)
       ENDIF
 
       IF cIdVd $ "95#96"
@@ -1160,78 +1160,103 @@ STATIC FUNCTION FillDobSifra()
     *   param: aRule - matrica pravila
 */
 
-STATIC FUNCTION kalk_imp_set_rule_dok( aRule )
+STATIC FUNCTION kalk_imp_set_array_rules_adbf( aRule, aDbf )
 
+    //10 10 77091741 19.05.2021 102125 088 KM  2 001 1     +000000015.63000 +000000004.55000 +0000007.11000 +0000010.88000 +0000010.00000 18.07.2021 +000000015.63000 942 760 
+   // 1  2    3         4        5     6   7  8  9  10           11              12                13             14           15          16             17         18  19
+   
    // 1- idfirma
+   AAdd( aDbf, { "idfirma", "C", 2, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 1, 2)" } )
    // 2-idtipdok
+   AAdd( aDbf, { "idtipdok", "C", 2, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 4, 2)" } )
    // 3-brdok
+   AAdd( aDbf, { "brdok", "C", 8, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 7, 8)" } )
    // 4-datdok
+   AAdd( aDbf, { "datdok", "D", 8, 0 } )
    AAdd( aRule, { "CTOD(SUBSTR(cVar, 16, 10))" } )
    // 5-idpartner
+   AAdd( aDbf, { "idpartner", "C", 6, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 27, 6)" } )
    // 6-id pm
+   AAdd( aDbf, { "idpm", "C", 3, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 34, 3)" } )
    // 7-dindem
+   AAdd( aDbf, { "dindem", "C", 3, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 38, 3)" } )
    // 8-zaokr
+   AAdd( aDbf, { "zaokr", "N", 1, 0 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 42, 1))" } )
    // 9-rbr
+   AAdd( aDbf, { "rbr", "C", 3, 0 } )
    AAdd( aRule, { "STR(VAL(SUBSTR(cVar, 44, 3)),3)" } )
    // 10-idroba
+   AAdd( aDbf, { "idroba", "C", 10, 0 } )
    AAdd( aRule, { "ALLTRIM(SUBSTR(cVar, 48, 5))" } )
    // 11-kolicina
+   AAdd( aDbf, { "kolicina", "N", 14, 5 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 54, 16))" } )
    // 12-cijena
+   AAdd( aDbf, { "cijena", "N", 14, 5 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 71, 16))" } )
    // 13-rabat
+   AAdd( aDbf, { "rabat", "N", 14, 5 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 88, 14))" } )
    // 14-porez
+   AAdd( aDbf, { "porez", "N", 14, 5 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 103, 14))" } )
    // 15-procenat rabata
+   AAdd( aDbf, { "rabatp", "N", 14, 5 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 118, 14))" } )
    // 16-datum valute
+   AAdd( aDbf, { "datval", "D", 8, 0 } )
    AAdd( aRule, { "CTOD(SUBSTR(cVar, 133, 10))" } )
    // 17-obracunska kolicina
+   AAdd( aDbf, { "obrkol", "N", 14, 5 } )
    AAdd( aRule, { "VAL(SUBSTR(cVar, 144, 16))" } )
    // 18-poslovna jedinica "kod"
+   AAdd( aDbf, { "idpj", "C", 3, 0 } )
    AAdd( aRule, { "SUBSTR(cVar, 161, 3)" } )
 
-   RETURN .T.
+   // 19-priroda fakture - vrsta dokumenta
+   AAdd( aRule, { "SUBSTR(cVar, 165, 3)" } )
+   // https://redmine.bring.out.ba/issues/38044
+   // 700 - Zapisnik o sniženju cijene
+   // 701 - Storno zapisnika o sniženju cijene
+   // 760 - Faktura/otpremnica
+   // 761 - Storno fakture/otpremnice
+   // 780 - Povrat od kupca
+   // 781 - Storno povrata od kupca
+   AAdd( aDbf, { "tip2", "C", 3, 0 } )
 
-
-/*
- *   Setuj matricu sa poljima tabele dokumenata RACUN
- *   param: aDbf - matrica
-*/
-STATIC FUNCTION kalk_imp_txt_set_a_dbf_temp( aDbf )
-
-   AAdd( aDbf, { "idfirma", "C", 2, 0 } )
-   AAdd( aDbf, { "idtipdok", "C", 2, 0 } )
-   AAdd( aDbf, { "brdok", "C", 8, 0 } )
-   AAdd( aDbf, { "datdok", "D", 8, 0 } )
-   AAdd( aDbf, { "idpartner", "C", 6, 0 } )
-   AAdd( aDbf, { "idpm", "C", 3, 0 } )
-   AAdd( aDbf, { "dindem", "C", 3, 0 } )
-   AAdd( aDbf, { "zaokr", "N", 1, 0 } )
-   AAdd( aDbf, { "rbr", "C", 3, 0 } )
-   AAdd( aDbf, { "idroba", "C", 10, 0 } )
-   AAdd( aDbf, { "kolicina", "N", 14, 5 } )
-   AAdd( aDbf, { "cijena", "N", 14, 5 } )
-   AAdd( aDbf, { "rabat", "N", 14, 5 } )
-   AAdd( aDbf, { "porez", "N", 14, 5 } )
-   AAdd( aDbf, { "rabatp", "N", 14, 5 } )
-   AAdd( aDbf, { "datval", "D", 8, 0 } )
-   AAdd( aDbf, { "obrkol", "N", 14, 5 } )
-   AAdd( aDbf, { "idpj", "C", 3, 0 } )
+   // ovo je pmocno polje i ono se ne puni iz txt-a
    AAdd( aDbf, { "dtype", "C", 3, 0 } )
 
    RETURN .T.
 
 
-STATIC FUNCTION cre_kalk_imp_temp( aDbf )
+STATIC FUNCTION kalk_imp_opis_by_tip2( cTip2 )
+
+   switch cTip2
+		case "700"
+			return "700-Zap_sn_cjena"
+      case "701"
+			return "701-Storno_zap_sn_cjena"
+      case "760"
+			return "760-Fakt_otpr"
+      case "780"
+			return "780-Povrat_kupac"
+      case "781"
+			return "780-Storno_povrat_kupac"
+	endswitch
+
+   RETURN "999-nepoznat_tip2"
+
+
+
+STATIC FUNCTION cre_kalk_imp_temp_dbf( aDbf )
 
    LOCAL cTmpTbl := "kalk_imp_temp"
 

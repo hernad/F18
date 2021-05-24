@@ -63,6 +63,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
    LOCAL nStranaValutaIznos
    LOCAL nKursPomocna
    LOCAL cEnabUvozSwitchKALK := fetch_metric( "fin_enab_uvoz_switch_kalk", NIL, "N" )
+   LOCAL cFinmatOpis
 
    PRIVATE p_cKontoKontiranje1, p_cKontoKontiranje2, p_cKontoKontiranje3
    PRIVATE p_cPartnerKontiranje1, p_cPartnerKontiranje2, p_cPartnerKontiranje3, p_cPartnerKontiranje4
@@ -256,11 +257,7 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
 
          lDatFakt := .F.
          cGlavniKonto := finmat_glavni_konto( finmat->idvd )
-         // IF finmat->idvd $ "14#95#96"
-         // select_o_koncij( finmat->idkonto2 )
-         // ELSE
          select_o_koncij( cGlavniKonto )
-         // ENDIF
          select_o_roba( finmat->idroba )
 
          SELECT trfp
@@ -498,6 +495,8 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                REPLACE IdPartner  WITH cIdPartner
                REPLACE D_P      WITH hRecTrfp[ "d_p" ]
 
+               cFinmatOpis := finmat->opis // originalni opis iza kalk_pripr->opis
+
                REPLACE fin_pripr->idFirma  WITH finmat->idfirma, ;
                   fin_pripr->IdVN     WITH cIdVnTrFP, ;
                   fin_pripr->BrNal    WITH cBrNalogFin, ;
@@ -510,22 +509,24 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
                   REPLACE opis WITH Left( hRecTrfp[ "naz" ], Len( hRecTrfp[ "naz" ] ) - 2 )
                ENDIF
 
-               IF "#V#" $  hRecTrfp[ "naz" ]  // stavi datum valutiranja
+               IF "#V#" $ hRecTrfp[ "naz" ]  // stavi datum valutiranja
                   REPLACE datval WITH dDatVal
-                  REPLACE opis WITH StrTran( hRecTrfp[ "naz" ], "#V#", "" )
-                  // IF lVrsteP
-                  // REPLACE k4 WITH cIdVrsteP
-                  // ENDIF
+                  REPLACE opis WITH StrTran( fin_pripr->opis, "#V#", "" )
                ENDIF
 
-               // kontiraj radnu jedinicu
-               IF "#RJ1#" $  hRecTrfp[ "naz" ]  // stavi datum valutiranja
-                  REPLACE IdRJ WITH cRj1, fin_pripr->opis WITH StrTran( hRecTrfp[ "naz" ], "#RJ1#", "" )
+               // https://redmine.bring.out.ba/issues/38044
+               IF "#OP#" $ hRecTrfp[ "naz" ]  // stavi originalni opis
+                  REPLACE opis WITH StrTran( fin_pripr->opis, "#OP#", TRIM( cFinmatOpis ) )
                ENDIF
 
-               IF "#RJ2#" $  hRecTrfp[ "naz" ]  // stavi datum valutiranja
-                  REPLACE IdRJ WITH cRj2, fin_pripr->opis WITH StrTran( hRecTrfp[ "naz" ], "#RJ2#", "" )
-               ENDIF
+               //// kontiraj radnu jedinicu
+               //IF "#RJ1#" $  hRecTrfp[ "naz" ]  // stavi datum valutiranja
+               //   REPLACE IdRJ WITH cRj1, fin_pripr->opis WITH StrTran( hRecTrfp[ "naz" ], "#RJ1#", "" )
+               //ENDIF
+//
+               //IF "#RJ2#" $  hRecTrfp[ "naz" ]  // stavi datum valutiranja
+               //   REPLACE IdRJ WITH cRj2, fin_pripr->opis WITH StrTran( hRecTrfp[ "naz" ], "#RJ2#", "" )
+               //ENDIF
 
                // IF lPoRj
                // REPLACE IdRJ WITH cIdRj

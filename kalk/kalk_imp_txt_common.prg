@@ -71,6 +71,7 @@ FUNCTION kalk_imp_obradi_sve_dokumente_iz_pript( nPocniOd, lStampaj, lOstaviBrdo
    LOCAL nTekucaWA, nStCnt, cBBTipDok
    LOCAL nPTRec, nPCRec, cBRdok, cFirma, cIdVd
    LOCAL hRec
+   LOCAL GetList := {}
 
    o_kalk_pripr()
    o_kalk_pript()

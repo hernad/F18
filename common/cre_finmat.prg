@@ -79,9 +79,23 @@ Harbour extended Field Types
    AAdd( aDBf, { "GKol2", "B",  8,  8 } )
    AAdd( aDBf, { "K1", "C",   1,  0 } )
    AAdd( aDBf, { "K2", "C",   1,  0 } )
+   AAdd( aDBf, { "OPIS", "C", 100,  0 } )
    _alias := "FINMAT"
    _table_name := "finmat"
    IF_NOT_FILE_DBF_CREATE
    CREATE_INDEX( "1", "idFirma+IdVD+BRDok", _alias )
 
+   RETURN .T.
+
+
+FUNCTION check_finmat_dbf_ima_opis()
+
+      o_finmat()
+      IF FIELDPOS("opis") == 0
+            my_close_all_dbf()
+            f18_delete_dbf("finmat")
+            Alert("FINMAT promjenjena struktura. Ponovo pokrenite F18")
+            QUIT_1
+      ENDIF
+   
    RETURN .T.

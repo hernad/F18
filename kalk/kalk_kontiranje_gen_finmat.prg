@@ -53,10 +53,10 @@ FUNCTION kalk_kontiranje_gen_finmat( lAzuriraniDokument, cIdFirma, cIdVd, cBrDok
       lAuto := .F.
    ENDIF
 
-altd()
    lPrviProlaz := .T.
-
    lKalk80Predispozicija := .F.
+
+   check_finmat_dbf_ima_opis()
 
    kalk_open_tabele_za_kontiranje()
    IF lAzuriraniDokument
@@ -220,7 +220,8 @@ altd()
             ZavTr     WITH Round( kalk_PRIPR->( nKalkZavTr * nKolicina ), nZaokruzenje ), ;
             NV        WITH Round( kalk_PRIPR->NC * kalk_PRIPR->Kolicina, nZaokruzenje ), ;
             Marza     WITH Round( nKalkMarzaVP * kalk_pripr->Kolicina, nZaokruzenje ), ;           // marza se ostvaruje nad stvarnom kolicinom
-            VPV       WITH Round( kalk_PRIPR->VPC * kalk_pripr->Kolicina, nZaokruzenje )        // vpv se formira nad stvarnom kolicinom
+            VPV       WITH Round( kalk_PRIPR->VPC * kalk_pripr->Kolicina, nZaokruzenje ),;        // vpv se formira nad stvarnom kolicinom
+            opis      WITH kalk_pripr->opis
 
          IF kalk_pripr->idvd $ '41#42'
             REPLACE RABATV WITH kalk_pripr->RABATV * kalk_pripr->kolicina
