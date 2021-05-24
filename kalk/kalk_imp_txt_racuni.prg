@@ -1246,10 +1246,12 @@ STATIC FUNCTION kalk_imp_opis_by_tip2( cTip2 )
 			return "701-Storno_zap_sn_cjena"
       case "760"
 			return "760-Fakt_otpr"
+      case "761"
+			return "761-Storno_Fakt_otpr"
       case "780"
 			return "780-Povrat_kupac"
       case "781"
-			return "780-Storno_povrat_kupac"
+			return "781-Storno_povrat_kupac"
 	endswitch
 
    RETURN "999-nepoznat_tip2"
