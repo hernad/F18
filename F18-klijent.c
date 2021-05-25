@@ -1,14 +1,6 @@
-#include <stdio.h>
-
-#include "zh_vm_pub.h"
-#include "zh_trace.h"
-//#include "zh_pcode.h"
-#include "zh_init.h"
-//#include "zh_xvm.h"
-
-#if defined( _MSC_VER )
-#include <windows.h>
-#endif
+#include "F18-klijent.h"
+#include "zh_api.h"
+#include <Python.h>
 
 ZH_FUNC_EXTERN( MAIN );
 
@@ -24,7 +16,7 @@ ZH_FUNC_EXTERN( MAIN );
 
 ZH_INIT_SYMBOLS_BEGIN( zh_vm_SymbolInit_F18_ZH )
 { "MAIN", { ZH_FS_PUBLIC | ZH_FS_FIRST | ZH_FS_LOCAL }, { ZH_FUNCNAME( MAIN ) }, NULL }
-ZH_INIT_SYMBOLS_EX_END( zh_vm_SymbolInit_F18_ZH, "", 0x0, 0x0003 )
+ZH_INIT_SYMBOLS_EX_END( zh_vm_SymbolInit_F18_ZH, "F18KLIJENT", 0x0, 0x0003 )
 
 //{ "(_INITSTATICS00001)", { ZH_FS_INITEXIT | ZH_FS_LOCAL }, { zh_INITSTATICS }, NULL }
 
@@ -44,7 +36,11 @@ ZH_INIT_SYMBOLS_EX_END( zh_vm_SymbolInit_F18_ZH, "", 0x0, 0x0003 )
 //int      zh_vmQuit( void ); /* Immediately quits the virtual machine, return ERRORLEVEL code */
 //void     zh_cmdargInit( int argc, char * argv[] ); /* initialize command-line argument API's */
 
+#if defined( SHARED_LIB )
+int run_main( int argc, char * argv[] )
+#else
 int main( int argc, char * argv[] )
+#endif
 {
 
    //dll_say_hello("Hello dll", "22");
@@ -72,9 +68,316 @@ File Type: EXECUTABLE IMAGE
 
    zh_cmdargInit( argc, argv );
    puts("-- 2 --");
-   zh_vmInit( 1 );
+   zh_vmInit( 1, 1 );
    //puts("");
    puts("************************ end F18-klijent ****************************");
 
-   return zh_vmQuit();
+   return zh_vmQuit( ZH_TRUE );
+}
+
+
+void simple_printf(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+ 
+    while (*fmt != '\0') {
+        if (*fmt == 'd') {
+            int i = va_arg(args, int);
+            printf("%d\n", i);
+        } else if (*fmt == 'c') {
+            // A 'char' variable will be promoted to 'int'
+            // A character literal in C is already 'int' by itself
+            int c = va_arg(args, int);
+            printf("%c\n", c);
+        } else if (*fmt == 'f') {
+            double d = va_arg(args, double);
+            printf("%f\n", d);
+        }
+        ++fmt;
+    }
+ 
+    va_end(args);
+}
+
+
+static PyObject *
+f18lib_system(PyObject *self, PyObject *args)
+{
+    const char *command;
+    int sts;
+
+    if (!PyArg_ParseTuple(args, "s", &command))
+        return NULL;
+    sts = system(command);
+    return PyLong_FromLong(sts);
+}
+
+static PyObject *
+f18lib_f18(PyObject *self, PyObject *args)
+{
+   const char *command;
+   //char *argv[1];
+   char* f18_args[] = { "--help", NULL };
+    //int sts;
+
+   if (!PyArg_ParseTuple(args, "s", &command))
+        return NULL;
+   //sts = system(command);
+   //argv[0] = command;
+   
+   ZH_TRACE( ZH_TR_INFO, ( "main(%d, %p)", 1, ( void * ) f18_args ) );
+
+   printf("dynsymcount: %d\n", zh_dynsymCount());
+
+   zh_cmdargInit( 1, f18_args );
+
+   zh_vmInit( ZH_TRUE, ZH_TRUE );
+   zh_vmQuit( ZH_FALSE );
+   return PyLong_FromLong(0);
+}
+
+static PyObject *
+f18lib_f18_1(PyObject *self, PyObject *args)
+{
+   const char *command;
+   //char *argv[1];
+   char* f18_args[] = { "--help", NULL };
+    //int sts;
+
+   if (!PyArg_ParseTuple(args, "s", &command))
+        return NULL;
+   //sts = system(command);
+   //argv[0] = command;
+   
+   ZH_TRACE( ZH_TR_INFO, ( "main(%d, %p)", 1, ( void * ) f18_args ) );
+
+   printf("dynsymcount: %d\n", zh_dynsymCount());
+
+   //zh_cmdargInit( 1, f18_args );
+   zh_memvarsClear(ZH_TRUE);
+
+   zh_vmInit( ZH_TRUE, ZH_FALSE );
+   zh_vmQuit( ZH_FALSE );
+
+   return PyLong_FromLong(0);
+}
+
+static PyObject *
+f18lib_vminit(PyObject *self, PyObject *args)
+{
+
+   zh_vmInit( ZH_FALSE, ZH_TRUE );
+
+   zh_conRelease();
+
+   return PyLong_FromLong(0);
+}
+
+
+static PyObject *
+ziher_conInit(PyObject *self, PyObject *args)
+{
+
+   zh_conInit();
+
+   return PyLong_FromLong(0);
+}
+
+static PyObject *
+ziher_conRelease(PyObject *self, PyObject *args)
+{
+
+   zh_conRelease();
+
+   return PyLong_FromLong(0);
+}
+
+
+static PyObject *
+f18lib_run(PyObject *self, PyObject *args)
+{
+
+   char *sFunc;
+   int initConsole = 0;
+   int releaseConsole = 0;
+
+   if (!PyArg_ParseTuple(args, "s|ii", &sFunc, &initConsole, &releaseConsole))
+        return NULL;
+
+   PZH_SYMBOL pDynSym =  zh_dynsymFind( sFunc );
+
+   if (initConsole)
+      zh_conInit();
+      
+
+   if( pDynSym )
+   {
+      zh_vmPushDynSym( pDynSym );
+      zh_vmPushNil();
+      zh_vmProc( 0 );
+   } else {
+       printf("nema ziher func %s\n", sFunc);
+   }
+
+   if (releaseConsole)
+      zh_conRelease();
+
+   return PyLong_FromLong(0);
+}
+
+
+static PyObject *
+f18lib_run_get(PyObject *self, PyObject *args)
+{
+
+   char *sFunc;
+   int initConsole = 0;
+   int releaseConsole = 0;
+   const char *ret;
+   PyObject *pyValue;
+
+   if (!PyArg_ParseTuple(args, "s|ii", &sFunc, &initConsole, &releaseConsole))
+        return NULL;
+
+   PZH_SYMBOL pDynSym =  zh_dynsymFind( sFunc );
+
+   if (initConsole)
+      zh_conInit();
+      
+   if( pDynSym )
+   {
+      zh_vmPushDynSym( pDynSym );
+      zh_vmPushNil();
+      // vmdo je funkcija
+      zh_vmDo( 0 );
+
+      //PZH_ITEM pResult = zh_itemNew( zh_stackReturnItem() );
+      //PZH_ITEM pResult = zh_stackReturnItem();
+      const char * ret = zh_parc( -1 );
+      printf("return: %s\n", ret);
+      pyValue = Py_BuildValue("s", ret);
+      
+   
+   } else {
+       printf("nema ziher func %s\n", sFunc);
+   }
+
+   //#define zh_retc( szText )                    zh_itemPutC( zh_stackReturnItem(), szText )
+
+   
+
+/*
+   if( pRetVal && ZH_IS_STRING( pRetVal ) ) {
+       ret = zh_itemGetCPtr(pRetVal);
+       pyValue = PyUnicode_FromString(ret);
+   } else {
+       pyValue = PyUnicode_FromString("");
+   }
+
+*/
+
+   if (releaseConsole)
+      zh_conRelease();
+
+   //return PyUnicode_FromString(ret);
+   return pyValue;
+}
+
+
+static PyObject *
+f18lib_put_get(PyObject *self, PyObject *args)
+{
+
+   char *sFunc, *sParam;
+   int initConsole = 0;
+   int releaseConsole = 0;
+   const char *ret;
+   PyObject *pyValue;
+
+   if (!PyArg_ParseTuple(args, "ss|ii", &sFunc, &sParam, &initConsole, &releaseConsole))
+        return NULL;
+
+   PZH_SYMBOL pDynSym =  zh_dynsymFind( sFunc );
+
+   if (initConsole)
+      zh_conInit();
+      
+   if( pDynSym )
+   {
+      zh_vmPushDynSym( pDynSym );
+      zh_vmPushString( sParam, strlen( sParam ) );
+      // vmdo je funkcija
+      zh_vmDo( 1 ); // 1 param
+
+      const char * ret = zh_parc( -1 );
+      printf("return: %s\n", ret);
+      pyValue = Py_BuildValue("s", ret);
+      
+   
+   } else {
+       printf("nema ziher func %s\n", sFunc);
+   }
+
+
+   if (releaseConsole)
+      zh_conRelease();
+
+   //return PyUnicode_FromString(ret);
+   return pyValue;
+}
+
+static PyObject *
+f18lib_razrijedi(PyObject *self, PyObject *args)
+{
+
+   char *sParam1;
+
+   if (!PyArg_ParseTuple(args, "s", &sParam1))
+        return NULL;
+
+   //puts("step 3");
+   //zh_memvarsClear(ZH_TRUE);
+
+   PZH_ITEM func = zh_itemPutCPtr(NULL, "RAZRIJEDI");
+   PZH_ITEM p1 = zh_itemPutC(NULL, sParam1);
+   PZH_ITEM pResult = zh_itemDo( func, 1, p1, 0);
+   if (!ZH_IS_STRING(pResult))
+      printf("\nrezultat nije string ?!\n");
+   
+   const char *ret = zh_itemGetCPtr(pResult);
+   printf("evo rezultat razrijedi: %s", ret);
+   
+   return PyLong_FromLong(0);
+}
+
+static PyMethodDef F18LibMethods[] = {
+    {"system",  f18lib_system, METH_VARARGS, "Execute a shell command."},
+    {"f18",  f18lib_f18, METH_VARARGS, "Execute f18 command."},
+    {"vminit",  f18lib_vminit, METH_VARARGS, "Execute f18 command /1."},
+    {"con_init",  ziher_conInit, METH_VARARGS, "ziher initialize console"},
+    {"con_release",  ziher_conRelease, METH_VARARGS, "ziher release console"},
+    {"run",  f18lib_run, METH_VARARGS, "run ziher func"},
+    {"run_get",  f18lib_run_get, METH_VARARGS, "run ziher func"},
+    {"put_get",  f18lib_put_get, METH_VARARGS, "run ziher func"},
+    {"razrijedi",  f18lib_razrijedi, METH_VARARGS, "Execute f18 command /2."},
+    {NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef F18klijentLibModule = {
+    PyModuleDef_HEAD_INIT,
+    "f18klijentlib",   /* name of module */
+    NULL, /* module documentation, may be NULL */
+    -1,       /* size of per-interpreter state of the module,
+                 or -1 if the module keeps state in global variables. */
+    F18LibMethods
+};
+
+
+PyMODINIT_FUNC
+PyInit_f18klijentlib(void)
+{
+    
+    // zh_itemDoC( "init_ziher_py", 0, 0);
+    return PyModule_Create(&F18klijentLibModule);
 }

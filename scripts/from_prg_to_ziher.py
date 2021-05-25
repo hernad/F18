@@ -30,7 +30,7 @@ def convert_content_hb_zh(file_name):
         #hb_default()
         content_new = re.sub('hb_([a-zA-Z]+)', r'zh_\1', content_new, flags = re.M)
         #HB_GTI_DESKTOPWIDTH
-        content_new = re.sub('HB_([_a-zA-Z]+)', r'ZH_\1', content_new, flags = re.M)
+        content_new = re.sub('ZH_([_a-zA-Z]+)', r'ZH_\1', content_new, flags = re.M)
 
         # promjena imena funkcija hb -> ziher
         # https://docs.python.org/3/library/re.html

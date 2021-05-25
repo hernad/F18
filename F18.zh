@@ -23,6 +23,7 @@ FUNCTION Main( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
 
    LOCAL _arg_v := zh_Hash()
 
+
    cre_arg_v_hash( @_arg_v, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    harbour_init()
@@ -339,3 +340,11 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
 FUNCTION zh_SendMail( ... )
    RETURN tip_MailSend( ... )
 */
+
+
+function init_ziher_py()
+
+   //REQUEST ZH_GT_STD
+   //REQUEST ZH_GT_STD_DEFAULT
+   
+   return .T.

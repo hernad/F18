@@ -5,6 +5,9 @@ load("//bazel:variables.bzl", "C_OPTS", "ZH_COMP_OPTS",
     "ZH_Z18_COMP_OPTS", "L_OPTS", "L_OPTS_2",
      "POSTGRESQL_HEADERS", "POSTGRESQL_COPT", "POSTGRESQL_LIB", "WINDOWS_LINUX" )
 
+ZIHER_TRACE_LEVEL=["-DZH_TR_LEVEL_DEBUG"] #debug
+#"-DZH_TR_LEVEL=4" #INFO
+
 
 ZH_COMP_OPTS_F18=[
     "-n",
@@ -16,9 +19,9 @@ ZH_COMP_OPTS_F18=[
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    #"-DGT_DEFAULT_CONSOLE",
-    #"-DELECTRON_HOST",
-    "-DGT_DEFAULT_GUI",
+    "-DGT_DEFAULT_CONSOLE",
+    "-DELECTRON_HOST",
+    #"-DGT_DEFAULT_GUI",
     "-DF18_POS",
     #"-DF18_DEBUG",
     #"-b" no debug
@@ -42,8 +45,31 @@ ZH_DEPS_F18=[
 ]
 
 
-F18_LIB = "klijent"
 
+shared_library(
+    name = "F18-klijent-lib",
+    os = "linux",
+    srcs = [ "F18-klijent.c" ],
+    hdrs = glob([
+        "*.h",
+        "*.zhh",
+    ]) + POSTGRESQL_HEADERS,
+    deps = [ "//zh_zero:headers", ":F18_import", ":ziher_import"],
+    linkopts = L_OPTS + L_OPTS_2,
+    copts = [
+        "-Izh_zero",
+        "-I/usr/include/python3.9",
+        "-Izh_vm",
+        "-Izh_rtl",
+        "-DZH_DYNLIB",
+        "-DSHARED_LIB",
+    ]  + POSTGRESQL_COPT + ZIHER_TRACE_LEVEL,
+    visibility = ["//visibility:public"],
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+)
 
 cc_binary(
     name = "F18-klijent",
@@ -56,8 +82,7 @@ cc_binary(
     copts = [
         "-Izh_zero",
         "-DZH_DYNIMP",
-        "-DZH_TR_LEVEL=4",
-    ],
+    ] + ZIHER_TRACE_LEVEL,
     #linkstatic = True,
     visibility = ["//visibility:public"],
 )
@@ -78,9 +103,7 @@ shared_library(
         "-Izh_vm",
         "-Izh_rtl",
         "-DZH_DYNLIB",
-        #"-DZH_TR_LEVEL=4", #INFO
-        #"-DZH_TR_LEVEL=5", DEBUG
-    ]  + POSTGRESQL_COPT,
+    ]  + POSTGRESQL_COPT + ZIHER_TRACE_LEVEL,
     visibility = ["//visibility:public"],
     exec_compatible_with = [
         #"@platforms//cpu:x86_64",
@@ -103,9 +126,7 @@ shared_library(
         "-Izh_vm",
         "-Izh_rtl",
         "-DZH_DYNLIB",
-        #"-DZH_TR_LEVEL=4", #INFO
-        #"-DZH_TR_LEVEL=5", DEBUG
-    ]  + POSTGRESQL_COPT,
+    ]  + POSTGRESQL_COPT + ZIHER_TRACE_LEVEL,
     visibility = ["//visibility:public"],
     exec_compatible_with = [
         "@platforms//cpu:x86_64",
@@ -185,9 +206,7 @@ _ZIHER_COPTS = [
         "-DUSE_STANDARD_TMPFILE", # xlsxwriter don't use tmpfileplus
         "-Ithird_party/png",
         "-DZH_DYNLIB",
-        #"-DZH_TR_LEVEL=4", #INFO
-        #"-DZH_TR_LEVEL=5", DEBUG
-    ]  + POSTGRESQL_COPT
+    ]  + POSTGRESQL_COPT + ZIHER_TRACE_LEVEL
 
 shared_library(
     name = "ziher",
