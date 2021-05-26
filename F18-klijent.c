@@ -306,9 +306,28 @@ f18lib_put_get(PyObject *self, PyObject *args)
    if( pDynSym )
    {
       zh_vmPushDynSym( pDynSym );
-      zh_vmPushString( sParam, strlen( sParam ) );
+      zh_vmPushNil(); //pSelf = zh_stackSelfItem();   /* NIL, OBJECT or BLOCK */
+
+      //zh_vmPushString(  );
+      printf("sParam='%s'\n", sParam);
+      //PZH_ITEM pItem1 = zh_itemPutC(NULL, sParam);
+      puts("step 3x");
+      //PZH_ITEM pItem1 = zh_itemPutCConst( zh_stackAllocItem(), "CONTEXT" );
+      //zh_vmPushInteger( 100 );
+
+     
+      //PZH_ITEM pItem1 = zh_itemPutCL( NULL, sParam, strlen( sParam ) );
+      //puts("step 3bx");
+      //zh_retclen(sParam, strlen( sParam ));
       // vmdo je funkcija
+      //zh_vmPush( va_arg( va, PZH_ITEM ) );
+      //zh_vmPush( pItem1);
+      zh_vmPushString(sParam, strlen( sParam ));
+
+      puts("step 4x");
       zh_vmDo( 1 ); // 1 param
+      //zh_vmProc(1);
+      puts("step 5x");
 
       const char * ret = zh_parc( -1 );
       printf("return: %s\n", ret);

@@ -11,6 +11,7 @@ ZIHER_TRACE_LEVEL=["-DZH_TR_LEVEL_DEBUG"] #debug
 
 ZH_COMP_OPTS_F18=[
     "-n",
+    "-gc3", # generate real C code 0=compact (default) 1=normal 2=verbose 3=generate real C code
     "-izh_zero", 
     "-izh_rtl",
     "-izh_rtl/gt",
@@ -96,7 +97,11 @@ shared_library(
         "*.h",
         "*.zhh",
     ]) + POSTGRESQL_HEADERS,
-    deps = ["//zh_zero:headers", "//zh_rtl:headers", ":ziher_dll_import"] + POSTGRESQL_LIB,
+    deps = [
+        "//zh_zero:headers", 
+        "//zh_vm:headers", 
+        "//zh_rtl:headers", 
+        ":ziher_dll_import"] + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
@@ -119,7 +124,11 @@ shared_library(
         "*.h",
         "*.zhh",
     ]) + POSTGRESQL_HEADERS,
-    deps = [ "//zh_zero:headers", "//zh_rtl:headers", ":ziher_import"] + POSTGRESQL_LIB,
+    deps = [ 
+        "//zh_zero:headers", 
+        "//zh_rtl:headers",
+        "//zh_vm:headers",
+        ":ziher_import"] + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
