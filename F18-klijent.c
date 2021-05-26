@@ -1,19 +1,9 @@
 #include "F18-klijent.h"
 #include "zh_api.h"
+#include "zh_item_api.h"
 #include <Python.h>
 
 ZH_FUNC_EXTERN( MAIN );
-
-//ZH_FUNC_EXTERN( ZH_CODEPAGE_SL852 );
-//ZH_FUNC_EXTERN( ZH_CODEPAGE_SLISO );
-//ZH_FUNC_EXTERN( ZH_CODEPAGE_SLWIN );
-//ZH_FUNC_EXTERN( DBFCDX );
-//ZH_FUNC_EXTERN( DBFFPT );
-//ZH_FUNC_EXTERN( ZH_GT_WIN );
-//ZH_FUNC_EXTERN( ZH_GT_WIN_DEFAULT );
-//ZH_FUNC_EXTERN( ARRAYRDD );
-//ZH_FUNC_INITSTATICS();
-
 ZH_INIT_SYMBOLS_BEGIN( zh_vm_SymbolInit_F18_ZH )
 { "MAIN", { ZH_FS_PUBLIC | ZH_FS_FIRST | ZH_FS_LOCAL }, { ZH_FUNCNAME( MAIN ) }, NULL }
 ZH_INIT_SYMBOLS_EX_END( zh_vm_SymbolInit_F18_ZH, "F18KLIJENT", 0x0, 0x0003 )
@@ -237,6 +227,9 @@ f18lib_run_get(PyObject *self, PyObject *args)
    const char *ret;
    PyObject *pyValue;
 
+   // https://stackoverflow.com/questions/10625865/how-does-pyarg-parsetupleandkeywords-work
+
+
    if (!PyArg_ParseTuple(args, "s|ii", &sFunc, &initConsole, &releaseConsole))
         return NULL;
 
@@ -298,7 +291,7 @@ f18lib_put_get(PyObject *self, PyObject *args)
    if (!PyArg_ParseTuple(args, "ss|ii", &sFunc, &sParam, &initConsole, &releaseConsole))
         return NULL;
 
-   PZH_SYMBOL pDynSym =  zh_dynsymFind( sFunc );
+   PZH_SYMBOL pDynSym = zh_dynsymFind( sFunc );
 
    if (initConsole)
       zh_conInit();
@@ -308,21 +301,12 @@ f18lib_put_get(PyObject *self, PyObject *args)
       zh_vmPushDynSym( pDynSym );
       zh_vmPushNil(); //pSelf = zh_stackSelfItem();   /* NIL, OBJECT or BLOCK */
 
-      //zh_vmPushString(  );
-      printf("sParam='%s'\n", sParam);
-      //PZH_ITEM pItem1 = zh_itemPutC(NULL, sParam);
-      puts("step 3x");
-      //PZH_ITEM pItem1 = zh_itemPutCConst( zh_stackAllocItem(), "CONTEXT" );
-      //zh_vmPushInteger( 100 );
-
+      //printf("sParam='%s'\n", sParam);
      
-      //PZH_ITEM pItem1 = zh_itemPutCL( NULL, sParam, strlen( sParam ) );
-      //puts("step 3bx");
-      //zh_retclen(sParam, strlen( sParam ));
-      // vmdo je funkcija
-      //zh_vmPush( va_arg( va, PZH_ITEM ) );
-      //zh_vmPush( pItem1);
       zh_vmPushString(sParam, strlen( sParam ));
+      //zh_vmPushLogical();
+      //zh_vmPushInteger();
+      //zh_vmPushItemRef();
 
       puts("step 4x");
       zh_vmDo( 1 ); // 1 param
@@ -344,6 +328,80 @@ f18lib_put_get(PyObject *self, PyObject *args)
 
    //return PyUnicode_FromString(ret);
    return pyValue;
+}
+
+static PyObject *
+f18lib_hash(PyObject *self, PyObject *args) {
+
+   char *sFunc, *sParam;
+   int initConsole = 0;
+   int releaseConsole = 0;
+   PyObject *pyValue = NULL;
+   char *cKey1 = "key1";
+   char *cValue1 = "value 1";
+
+   if (!PyArg_ParseTuple(args, "s|ii", &sFunc, &sParam, &initConsole, &releaseConsole))
+        return NULL;
+
+   PZH_SYMBOL pDynSym = zh_dynsymFind( sFunc );
+
+   if (initConsole)
+      zh_conInit();
+      
+   if( pDynSym )
+   {
+      zh_vmPushDynSym( pDynSym );
+      zh_vmPushNil(); //pSelf = zh_stackSelfItem();   /* NIL, OBJECT or BLOCK */
+
+puts("step 1");     
+     PZH_ITEM pHash = zh_hashNew( NULL );
+
+     //for( iParam = 1; iParam <= iPCount; iParam += 2 )
+     PZH_ITEM pKey = zh_itemNew( NULL );
+     PZH_ITEM pValue = zh_itemNew( NULL );
+     //zh_vmPushString( cKey1, strlen( cKey1 ));
+     //PZH_ITEM pValue = zh_vmPushString( cValue1, strlen( cValue1 ));
+     zh_itemPutC( pKey, "key1" );
+     zh_itemPutC( pValue, "value1");
+     zh_hashAdd( pHash, pKey, pValue );
+puts("step 2");  
+     //zh_itemRelease( pKey );
+     //zh_itemRelease( pValue );
+
+puts("step 3");  
+     zh_vmPush(pHash);
+
+puts("step 4");  
+     zh_vmDo( 1 );
+
+puts("step 5");
+     PZH_ITEM pHashRet = zh_param( -1, ZH_IT_HASH);
+     int len = zh_hashLen( pHashRet );
+     // https://stackoverflow.com/questions/51632300/python-c-api-problems-trying-to-build-a-dictionary
+     
+     pyValue = PyDict_New();
+     for( int i = 1; i <= len; i++) {
+        PZH_ITEM pKey = zh_hashGetKeyAt( pHashRet, i );
+        PZH_ITEM pValue = zh_hashGetValueAt( pHashRet, i );
+        char *cKey = "00", *cValue = "?";
+        if( ( zh_itemType( pKey ) & ZH_IT_STRING ) && ( zh_itemType( pValue ) & ZH_IT_STRING ) ) {
+           //const char * szText = zh_itemGetCPtr( pText );
+           //int iWidth, iDec, iLen = ( int ) zh_itemGetCLen( pText );
+           cKey = zh_itemGetCPtr( pKey );
+           cValue = zh_itemGetCPtr( pValue);
+           printf("key=%s value=%s\n", cKey, cValue);
+        }
+        //Py_BuildValue("{s:i,s:O}",
+        //   cKey, cValue);
+        PyDict_SetItemString(pyValue, cKey, Py_BuildValue("s", cValue));
+     }
+
+    }
+
+    if (releaseConsole)
+      zh_conRelease();
+
+    return pyValue;
 }
 
 static PyObject *
@@ -380,6 +438,7 @@ static PyMethodDef F18LibMethods[] = {
     {"run_get",  f18lib_run_get, METH_VARARGS, "run ziher func"},
     {"put_get",  f18lib_put_get, METH_VARARGS, "run ziher func"},
     {"razrijedi",  f18lib_razrijedi, METH_VARARGS, "Execute f18 command /2."},
+    {"hash",  f18lib_hash, METH_VARARGS, "in/out hash"},
     {NULL, NULL, 0, NULL}
 };
 

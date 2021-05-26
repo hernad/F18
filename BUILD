@@ -11,7 +11,7 @@ ZIHER_TRACE_LEVEL=["-DZH_TR_LEVEL_DEBUG"] #debug
 
 ZH_COMP_OPTS_F18=[
     "-n",
-    "-gc3", # generate real C code 0=compact (default) 1=normal 2=verbose 3=generate real C code
+    #"-gc3", # generate real C code 0=compact (default) 1=normal 2=verbose 3=generate real C code
     "-izh_zero", 
     "-izh_rtl",
     "-izh_rtl/gt",

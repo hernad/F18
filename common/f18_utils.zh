@@ -162,6 +162,26 @@ FUNCTION pp( x )
    RETURN "?" + _type + "?"
 
 
+FUNCTION pp_2( x )
+
+   LOCAL _key, nI
+   LOCAL _tmp
+   LOCAL _type
+   LOCAL hRet := zh_Hash()
+
+   _tmp := ""
+
+      _tmp += "(hash): "
+      FOR EACH _key in x:Keys
+         _tmp +=  pp( _key ) + " / " + pp( x[ _key ] ) + " ; "
+      NEXT
+
+      hRet["1"] := "OK"
+      hRet["2"] := "OK2"
+
+      ? _tmp
+   RETURN hRet
+
 
 // --------------------------------------
 // aktiviranje vpn podrske
