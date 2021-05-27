@@ -17,12 +17,14 @@ MEMVAR _idradnik
 MEMVAR gIdRadnik, lTekuci, cPrikazPazarRoba, cIdRadnik, cVrsteP, cFilterVrstePlacanja, cIdPos, dDatOd, dDatDo
 
 FUNCTION pos_realizacija_radnik
+   // moraju biti privatne varijable jer se dole tako koristi
    PARAMETERS lTekuci, cPrikazPazarRoba
 
    LOCAL xPrintOpt, bZagl
    LOCAL aDbf
    LOCAL cNaslov
    LOCAL aNiz
+   LOCAL nTotal, nTotalRadnik, nTotalRadnikZaVP, nPopust, nPopustRadnik, nPopustRadnikZaVP
 
    PRIVATE cIdRadnik := Space( 4 )
    PRIVATE cVrsteP := Space( 60 )
@@ -69,7 +71,6 @@ FUNCTION pos_realizacija_radnik
    AAdd ( aDbf, { "IdRoba", "C", 10, 0 } )
    AAdd ( aDbf, { "Kolicina", "N", 15, 3 } )
    AAdd ( aDbf, { "Iznos",    "N", 20, 5 } )
-
    AAdd ( aDbf, { "popust",   "N", 20, 5 } )
 
    pos_cre_pom_dbf( aDbf )
@@ -96,7 +97,7 @@ FUNCTION pos_realizacija_radnik
    cNaslov += AllTrim(Str(pos_prodavnica())) + "/" + pos_pm() + " : "
    IF lTekuci
       IF cPrikazPazarRoba $ "PO"
-         cNaslov += "PAZAR RADNIKA"
+         cNaslov += "REALIZACIJA RADNIKA"
       ELSE
          cNaslov += "REALIZACIJA RADNIKA PO ROBAMA"
       ENDIF
@@ -126,7 +127,7 @@ FUNCTION pos_realizacija_radnik
       ?U "-----", Replicate ( "-", 30 )
    ENDIF
 
-   pos_real_radnik_generacija_pom ( POS_IDVD_RACUN )
+   pos_real_radnik_generacija_pom_dbf( POS_IDVD_RACUN )
 
    SELECT pos_doks
    SET ORDER TO TAG "2"       // "DOKSi2", "IdVd+DTOS (Datum)"
@@ -136,65 +137,63 @@ FUNCTION pos_realizacija_radnik
 
    IF cPrikazPazarRoba $ "PO"
       nTotal := 0
-      nTotal3 := 0
+      nPopust := 0
       SELECT POM
       SET ORDER TO TAG "1"
       GO TOP
-      bZagl := {|| zagl_radnik() }
+      bZagl := {|| zagl_radnik_vrstaplacanja() }
       Eval( bZagl )
       DO WHILE !Eof()
          check_nova_strana( bZagl, s_oPDF )
          _IdRadnik := POM->IdRadnik
-         nTotRadn := 0
-         nTotRadn3 := 0
+         nTotalRadnik := 0
+         nPopustRadnik := 0
          IF ! lTekuci
             ? _IdRadnik + "  " + PadR ( find_pos_osob_naziv( _IdRadnik ), 30 )
             ? Replicate ( "-", 40 )
             SELECT POM
-
          ENDIF
 
          nKolicO := 0    // kolicina za ostale
          nKolicPr := 0  // kolicina za premirane
          DO WHILE !Eof() .AND. POM->IdRadnik == _IdRadnik
             _IdVrsteP := POM->IdVrsteP
-            nTotVP := 0
-            nTotVP3 := 0
+            nTotalRadnikZaVP := 0
+            nPopustRadnikZaVP := 0
             DO WHILE !Eof() .AND. POM->( IdRadnik + IdVrsteP ) == ( _IdRadnik + _IdVrsteP )
-               nTotVP += POM->Iznos
-               nTotVP3 += pom->popust
+               nTotalRadnikZaVP += POM->Iznos
+               nPopustRadnikZaVP += pom->popust
                SKIP
             ENDDO
-
             select_o_vrstep( _IdVrsteP )
-            ? Space ( 5 ) + PadR ( VRSTEP->Naz, 24 ), Str ( nTotVP, 10, 2 )
-            nTotRadn += nTotVP
-            nTotRadn3 += nTotVP3
+            // iznos za vrstu placanja (neto - sa uracunatim popustom)
+            ? Space ( 5 ) + PadR ( VRSTEP->Naz, 24 ), Str( nTotalRadnikZaVP - nPopustRadnikZaVP, 10, 2 )
+            nTotalRadnik += nTotalRadnikZaVP
+            nPopustRadnik += nPopustRadnikZaVP
 
             SELECT POM
          ENDDO
 
          ? Replicate ( "-", 40 )
-         ? PadL ( "UKUPNO RADNIK (" + _idradnik + "):", 29 ), Str ( nTotRadn, 10, 2 )
-
-         IF nTotRadn3 <> 0
-            ? PadL ( pos_popust_prikaz(), 29 ), Str ( nTotRadn3, 10, 2 )
-            ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotRadn - nTotRadn3, 10, 2 )
-         ENDIF
+         ? PadL ( "BRUTO RADNIK (" + _idradnik + "):", 29 ), Str( nTotalRadnik, 10, 2 )
+         //IF nPopustRadnik <> 0
+         ? PadL ( pos_popust_prikaz(), 29 ), Str( -nPopustRadnik, 10, 2 )
+         ? PadL ( "NETO RADNIK:", 29 ), Str( nTotalRadnik - nPopustRadnik, 10, 2 )
+         //ENDIF
          ? Replicate ( "-", 40 )
 
-         nTotal += nTotRadn
-         nTotal3 += nTotRadn3
+         nTotal += nTotalRadnik
+         nPopust += nPopustRadnik
       ENDDO
 
       IF Empty ( cIdRadnik )
          ?
          ? Replicate ( "=", 40 )
-         ? PadC ( "SVI RADNICI UKUPNO:", 25 ), Str ( nTotal, 14, 2 )
-         IF nTotal3 <> 0
-            ? PadL ( pos_popust_prikaz(), 29 ), Str ( nTotal3, 10, 2 )
-            ? PadL ( "UKUPNO NAPLATA:", 29 ), Str ( nTotal - nTotal3, 10, 2 )
-         ENDIF
+         ? PadC ( "SVI RADNICI BRUTO:", 29 ), Str( nTotal, 10, 2 )
+         //IF nPopust <> 0
+         ? PadL ( pos_popust_prikaz(), 29 ), Str( -nPopust, 10, 2 )
+         ? PadL ( "SVI RADNICI NETO:", 29 ), Str( nTotal - nPopust, 10, 2 )
+         //ENDIF
          ? Replicate ( "=", 40 )
       ENDIF
    ENDIF
@@ -213,7 +212,7 @@ FUNCTION pos_realizacija_radnik
       SET ORDER TO TAG "2"
       GO TOP
       nTotal := 0
-      nTotal3 := 0
+      nPopust := 0
       DO WHILE !Eof()
 
          check_nova_strana( bZagl, s_oPDF )
@@ -236,17 +235,17 @@ FUNCTION pos_realizacija_radnik
                SELECT POM
                SKIP
             ENDDO
-            ? Str ( nKol, 12, 3 ), Str ( nIzn, 15, 2 )
+            ? Str( nKol, 12, 3 ), Str( nIzn, 15, 2 )
             nTotal += nIzn
-            nTotal3 += nIzn3
+            nPopust += nIzn3
          ENDDO
       ENDDO
       ? REPL ( "=", 40 )
-      ? PadL ( "U K U P N O", 24 ), Str ( nTotal, 15, 2 )
-      IF nTotal3 <> 0
-         ? PadL ( pos_popust_prikaz(), 24 ), Str ( nTotal3, 15, 2 )
-         ? PadL ( "UKUPNO NAPLATA:", 24 ), Str ( nTotal - nTotal3, 15, 2 )
-      ENDIF
+      ? PadL ( "UKUPNO BRUTO", 24 ), Str( nTotal, 15, 2 )
+      //IF nPopust <> 0
+      ? PadL ( pos_popust_prikaz(), 24 ), Str( -nPopust, 15, 2 )
+      ? PadL ( "UKUPNO NETO:", 24 ), Str( nTotal - nPopust, 15, 2 )
+      //ENDIF
       ? REPL ( "=", 40 )
    ENDIF
 
@@ -256,7 +255,7 @@ FUNCTION pos_realizacija_radnik
    RETURN .T.
 
 
-STATIC FUNCTION zagl_radnik()
+STATIC FUNCTION zagl_radnik_vrstaplacanja()
 
    LOCAL cLinija :=  REPL ( "-", 24 ) + " " + REPL ( "-", 10 )
 
@@ -293,7 +292,7 @@ FUNCTION pos_close_dbfs_real_radnici()
    RETURN .T.
 
 
-FUNCTION pos_real_radnik_generacija_pom( cIdVd )
+FUNCTION pos_real_radnik_generacija_pom_dbf( cIdVd )
 
    LOCAL nPopust
 
@@ -315,7 +314,6 @@ FUNCTION pos_real_radnik_generacija_pom( cIdVd )
          SELECT POM
          GO TOP
          HSEEK _IdRadnik + _IdVrsteP + POS->IdRoba
-
          nPopust := pos_popust( pos->cijena, pos->ncijena )
          IF !Found()
             APPEND BLANK

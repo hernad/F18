@@ -289,13 +289,13 @@ FUNCTION pos_racun_prikazi_ukupno()
    RETURN .T.
 
 
-FUNCTION pos_popust( nCijena, nNCijena )
+FUNCTION pos_popust( nCijena, nNovaCijena )
 
-   IF Round( nNcijena, 4 ) == 0
+   IF Round( nNovaCijena, 4 ) == 0
       RETURN 0
    ENDIF
 
-   RETURN nCijena - nNCijena
+   RETURN nCijena - nNovaCijena
 
 
 FUNCTION pos_popust_procenat( nCijena, nNCijena )
