@@ -171,15 +171,17 @@ FUNCTION pp_2( x )
 
    _tmp := ""
 
-      _tmp += "(hash): "
-      FOR EACH _key in x:Keys
-         _tmp +=  pp( _key ) + " / " + pp( x[ _key ] ) + " ; "
-      NEXT
+   _tmp += "(hash): "
+   FOR EACH _key in x:Keys
+      _tmp +=  pp( _key ) + " / " + pp( x[ _key ] ) + " ; "
+   NEXT
 
-      hRet["1"] := "OK"
-      hRet["2"] := "OK2"
+   hRet["1"] := "OK"
+   hRet["2"] := "OK2"
 
-      ? _tmp
+   ? "py_callback(10,10):", py_callback(10,10)
+
+   ? _tmp
    RETURN hRet
 
 

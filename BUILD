@@ -47,6 +47,21 @@ ZH_DEPS_F18=[
 
 
 
+# bazel build //F18:F18-klijent-lib.so ; rm -rf *.so; cp -av bazel-bin/F18/F18-klijent-lib.so f18klijentlib.so; cp -av bazel-bin/F18/{ziher,F18}.so .
+# export LD_LIBRARY_PATH=.
+#>>> import f18klijentlib
+#>>> f18klijentlib.vminit()
+#init step 1
+#...
+#
+#init step 20
+#ZH_START_PROCEDURE = "MAIN"
+#init step 20
+#init step 27
+#0
+#>>> f18klijentlib.run("MAIN",1,1)
+
+
 shared_library(
     name = "F18-klijent-lib",
     os = "linux",
