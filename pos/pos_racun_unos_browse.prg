@@ -114,7 +114,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       set_cursor_on()
 
       @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
-         WHEN pos_when_racun_artikal( @_idroba, pos_tekuca_stavka_iznos(_cijena, _ncijena, _kolicina) ) ;
+         WHEN pos_when_racun_artikal( @_idroba, pos_tekuca_stavka_iznos(_cijena, _ncijena, _kolicina), pos_racun_tekuci_saldo_neto() ) ;
          VALID pos_valid_racun_artikal( @_idroba, GetList, 2, 27 )
       @ box_x_koord() + 3, box_y_koord() + 5 SAY "  Cijena:" GET _Cijena PICT "99999.999"  ;
          WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena  )

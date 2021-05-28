@@ -17,7 +17,7 @@ STATIC s_nMaxKolicinaPosRacun := NIL
 MEMVAR gOcitBarKod, gPosPratiStanjePriProdaji
 MEMVAR _cijena, _ncijena
 
-FUNCTION pos_when_racun_artikal( cIdRoba, nUnosIznos )
+FUNCTION pos_when_racun_artikal( cIdRoba, nUnosIznos, nRacunNetoIznos )
 
    LOCAL nColor
    pos_set_key_handler_ispravka_racuna()
@@ -27,11 +27,14 @@ FUNCTION pos_when_racun_artikal( cIdRoba, nUnosIznos )
    IF nUnosIznos <> NIL 
       IF nUnosIznos <> 0
          //nColor := SetColor( F18_COLOR_NAGLASENO )
-         @ box_x_koord() + 4, box_y_koord() + 34 SAY "UNOS NETO IZNOS:"
+         @ box_x_koord() + 4, box_y_koord() + 31 SAY8 "       TEKUĆI UNOS:"
          @ row(), col() + 1 SAY  Str( nUnosIznos, 10, 2 ) COLOR f18_color_invert()
+         @ box_x_koord() + 5, box_y_koord() + 31 SAY8 "NETO + TEKUĆI UNOS:"
+         @ row(), col() + 1 SAY  Str( nRacunNetoIznos + nUnosIznos, 10, 2 ) COLOR f18_color_invert()
          //SetColor( nColor )
       ELSE   
-         @ box_x_koord() + 4, box_y_koord() + 34 SAY SPACE(30)
+         @ box_x_koord() + 4, box_y_koord() + 31 SAY SPACE(30)
+         @ box_x_koord() + 5, box_y_koord() + 31 SAY SPACE(30)
       ENDIF
 
    ENDIF
@@ -278,9 +281,11 @@ STATIC FUNCTION pos_cijena_nije_nula( nCijena )
 
 FUNCTION pos_racun_prikazi_ukupno_header(nMaxCols)
 
+   LOCAL nColor := SetColor( F18_COLOR_NAGLASENO )
    @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY " BRUTO:"
    @ box_x_koord() + 4, box_y_koord() + ( nMaxCols - 30 ) SAY "POPUST:"
    @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY "  NETO:"
+   SetColor( nColor )
    RETURN .T.
 
 FUNCTION pos_racun_prikazi_ukupno()
@@ -299,7 +304,7 @@ FUNCTION pos_racun_prikazi_ukupno()
    // ENDIF
 
    // @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
-   pos_racun_prikaz_ukupno( box_x_koord() + 2, nIznos, nPopust )
+   pos_racun_prikaz_ukupno_cifre( box_x_koord() + 2, nIznos, nPopust )
    // ispis_veliki_brojevi_iznos( pos_racun_iznos_neto(), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
    ispis_veliki_brojevi_iznos( nIznos - nPopust, box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
 
@@ -357,6 +362,11 @@ FUNCTION pos_racun_tekuci_saldo()
 
    RETURN { nIznos, nPopust }
 
+FUNCTION pos_racun_tekuci_saldo_neto()
+
+   LOCAL aRet := pos_racun_tekuci_saldo()
+
+RETURN aRet[1] - aRet[2]
 
 FUNCTION pos_provjera_priprema()
 
