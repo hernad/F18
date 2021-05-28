@@ -110,7 +110,7 @@ FUNCTION pos_brisi_stavku_racuna()
    Beep ( 2 )
    //pos_racun_iznos( pos_racun_iznos() - _pos_pripr->cijena * _pos_pripr->kolicina )
    //pos_racun_popust( pos_racun_popust() - _pos_pripr->ncijena * _pos_pripr->kolicina )
-   pos_racun_sumarno_stavka( _pos_pripr->idroba, _pos_pripr->cijena, _pos_pripr->ncijena, 0 )
+   pos_priprema_suma_idroba_cij_ncij( _pos_pripr->idroba, _pos_pripr->cijena, _pos_pripr->ncijena, 0 )
    my_delete()
    pos_racun_prikazi_ukupno()
 

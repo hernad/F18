@@ -77,7 +77,6 @@ FUNCTION pos_zakljuci_racun()
       RETURN .F.
    ENDIF
 
-
    GO TOP
    hParam[ "idpos" ] := _pos_pripr->idpos
    hParam[ "idvd" ] := _pos_pripr->idvd
@@ -89,7 +88,6 @@ FUNCTION pos_zakljuci_racun()
    hParam[ "idpartner" ] := _pos_pripr->idpartner
 
    IF pos_form_zakljucenje_racuna( @hParam )
-
       o_pos_tables()
       hParam[ "idvd" ] := POS_IDVD_RACUN
       hParam[ "brdok" ] := pos_novi_broj_dokumenta( hParam[ "idpos" ], POS_IDVD_RACUN, hParam[ "datum" ] )

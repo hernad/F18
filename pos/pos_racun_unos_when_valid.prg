@@ -10,17 +10,31 @@
  */
 
 #include "f18.ch"
+#include "f18_color.ch"
 
 STATIC s_nMaxKolicinaPosRacun := NIL
 
 MEMVAR gOcitBarKod, gPosPratiStanjePriProdaji
 MEMVAR _cijena, _ncijena
 
-FUNCTION pos_when_racun_artikal( cIdRoba )
+FUNCTION pos_when_racun_artikal( cIdRoba, nUnosIznos )
 
+   LOCAL nColor
    pos_set_key_handler_ispravka_racuna()
    cIdroba := PadR( cIdroba, POS_ROBA_DUZINA_SIFRE )
    pos_racun_artikal_info( 0, "XCLEARX" )
+
+   IF nUnosIznos <> NIL 
+      IF nUnosIznos <> 0
+         //nColor := SetColor( F18_COLOR_NAGLASENO )
+         @ box_x_koord() + 4, box_y_koord() + 34 SAY "UNOS NETO IZNOS:"
+         @ row(), col() + 1 SAY  Str( nUnosIznos, 10, 2 ) COLOR f18_color_invert()
+         //SetColor( nColor )
+      ELSE   
+         @ box_x_koord() + 4, box_y_koord() + 34 SAY SPACE(30)
+      ENDIF
+
+   ENDIF
 
    RETURN .T.
 
@@ -126,7 +140,7 @@ STATIC FUNCTION pos_racun_provjera_dupli_artikal( cIdroba )
          nKolicinaT += _pos_pripr->kolicina
          SKIP
       ENDDO
-      pos_racun_sumarno_stavka( cIdRoba, nCijenaT, nNCijenaT, nKolicinaT )
+      pos_priprema_suma_idroba_cij_ncij( cIdRoba, nCijenaT, nNCijenaT, nKolicinaT )
    ENDDO
 
    IF nCount > 0
@@ -146,7 +160,7 @@ FUNCTION pos_when_racun_cijena_ncijena( cIdRoba, nCijena, nNCijena )
    ENDIF
 
    pos_racun_artikal_info( 1, cIdRoba, "Stanje: " + AllTrim( Str( pos_dostupno_artikal_za_cijenu( cIdRoba, nCijena, nNCijena ), 12, 3 ) ) )
-   nPotrebnaKolicinaStavka := pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena )
+   nPotrebnaKolicinaStavka := pos_priprema_suma_idroba_cij_ncij( cIdRoba, nCijena, nNCijena )
    pos_racun_artikal_info( 3, cIdRoba, "Potrebna količina do sada: " + AllTrim( Str( nPotrebnaKolicinaStavka, 12, 3 ) ) + "" )
 
    RETURN .F.
@@ -189,7 +203,7 @@ STATIC FUNCTION pos_provjera_stanje( cIdRoba, nKolicina, nCijena, nNCijena )
       RETURN .T.
    ENDIF
    nStanjeRobe := pos_dostupno_artikal_za_cijenu( cIdroba, nCijena, nNCijena )
-   nPotrebnaKolicinaVecUnesenoUPripremu := pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena )
+   nPotrebnaKolicinaVecUnesenoUPripremu := pos_priprema_suma_idroba_cij_ncij( cIdRoba, nCijena, nNCijena )
 
    IF ( nKolicina + nPotrebnaKolicinaVecUnesenoUPripremu ) > nStanjeRobe
       cMsg := AllTrim( cIdroba ) + " na stanju: " + AllTrim( Str( nStanjeRobe, 12, 3 ) )
@@ -262,6 +276,12 @@ STATIC FUNCTION pos_cijena_nije_nula( nCijena )
 
    RETURN .T.
 
+FUNCTION pos_racun_prikazi_ukupno_header(nMaxCols)
+
+   @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY " BRUTO:"
+   @ box_x_koord() + 4, box_y_koord() + ( nMaxCols - 30 ) SAY "POPUST:"
+   @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY "  NETO:"
+   RETURN .T.
 
 FUNCTION pos_racun_prikazi_ukupno()
 

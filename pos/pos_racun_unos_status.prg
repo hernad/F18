@@ -32,9 +32,20 @@ STATIC s_hRacunSumarno
 FUNCTION pos_racun_sumarno_init()
 
    s_hRacunSumarno := hb_hash()
+   RETURN .T.
 
+/*
+     ako se jedan artikal unosi vise puta pri cemu moze biti sa raznim cijenama, u ova hash matrica
+     sadrzi parove, npr
 
-FUNCTION pos_racun_sumarno_stavka( cIdRoba, nCijena, nNCijena, nKolicina )
+     "R01   10.00  0.00" =>    5 
+     "R01   10.00  9.00" =>    2
+     "R01   10.00  8.00  =>    1
+
+     R01 po cijeni 10 KM - 5 kom, po cijeni 9 - 2 kom, po cijeni 8 - 1 kom
+    
+*/
+FUNCTION pos_priprema_suma_idroba_cij_ncij( cIdRoba, nCijena, nNCijena, nKolicina )
 
    LOCAL cKey
 
@@ -84,26 +95,26 @@ FUNCTION pos_racun_popust( nIznos )
 FUNCTION pos_racun_prikaz_ukupno( nRow, nIznosRacuna, nPopust )
 
    @ box_x_koord() + nRow + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY nIznosRacuna PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY nPopust PICT "99999.99" COLOR f18_color_invert()
+   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY -nPopust PICT "99999.99" COLOR f18_color_invert()
    @ box_x_koord() + nRow + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY nIznosRacuna - nPopust PICT "99999.99" COLOR f18_color_invert()
 
    RETURN .T.
-*/
+
 
 FUNCTION pos_racun_artikal_info( nLinija, cIdRoba, cMessage )
 
-   LOCAL nI, nColor
-
+   LOCAL nI, nColor, nKoordY := box_y_koord() + 2
+   
    IF cIdRoba == "XCLEARX" // pobrisi statusne linije
       FOR nI := 1 TO 3
-         @ box_x_koord() + ( f18_max_rows() - 11 ) + nI, box_y_koord() + 2 SAY Space( f18_max_cols() / 2 )
+         @ box_x_koord() + ( f18_max_rows() - 11 ) + nI, nKoordY SAY Space( Round(f18_max_cols() / 2, 0) )
       NEXT
       RETURN .T.
    ENDIF
 
    nColor := SetColor( F18_COLOR_NAGLASENO )
-   @ box_x_koord() + ( f18_max_rows() - 11 ) + nLinija, box_y_koord() + 2 SAY Space( f18_max_cols() / 2 )
-   @ box_x_koord() + ( f18_max_rows() - 11 ) + nLinija, box_y_koord() + 2 SAY _u( cIdRoba + " : " + cMessage )
+   @ box_x_koord() + ( f18_max_rows() - 11 ) + nLinija, nKoordY SAY Space( Round(f18_max_cols() / 2, 0) )
+   @ box_x_koord() + ( f18_max_rows() - 11 ) + nLinija, nKoordY SAY _u( cIdRoba + " : " + cMessage )
    SetColor( nColor )
 
    RETURN .T.

@@ -40,14 +40,13 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       cBrDok := ""
    ENDIF
 
-   AAdd( ImeKol, { PadR( "Artikal", 10 ), {|| _pos_pripr->idroba } } )
-   AAdd( ImeKol, { PadC( "Naziv", 50 ), {|| PadR( _pos_pripr->robanaz, 50 ) } } )
-   AAdd( ImeKol, { "JMJ", {|| _pos_pripr->jmj } } )
+   AAdd( ImeKol, { PadR( "Artikal", 60 ), {|| pos_tekuci_artikal(_pos_pripr->idroba, _pos_pripr->robanaz, _pos_pripr->jmj) } } )
    AAdd( ImeKol, { _u( "Količina" ), {|| Str( _pos_pripr->kolicina, 8, 3 ) } } )
-   AAdd( ImeKol, { "Cijena", {|| Str( _pos_pripr->cijena, 8, 2 ) } } )
-   AAdd( ImeKol, { "Ukupno", {|| Str( _pos_pripr->kolicina * _pos_pripr->cijena, 10, 2 ) } } )
-   AAdd( ImeKol, { "Popust", {|| Str( pos_popust( _pos_pripr->cijena, _pos_pripr->ncijena ), 8, 2 ) } } )
-   AAdd( ImeKol, { "Ukupno NETO", {|| Str( _pos_pripr->kolicina * pos_pripr_neto_cijena(), 10, 2 ) } } )
+   AAdd( ImeKol, { "Neto Cij", {|| Str( pos_pripr_neto_cijena(), 8, 2 ) } } )
+   AAdd( ImeKol, { "NETO", {|| Str( _pos_pripr->kolicina * pos_pripr_neto_cijena(), 10, 2 ) } } )
+   //AAdd( ImeKol, { "Bruto", {|| Str( _pos_pripr->kolicina * _pos_pripr->cijena, 10, 2 ) } } )
+   //AAdd( ImeKol, { "Popust", {|| Str( pos_popust( _pos_pripr->cijena, _pos_pripr->ncijena ), 8, 2 ) } } )
+   
    AAdd( ImeKol, { "Tarifa", {|| _pos_pripr->idtarifa } } )
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )
@@ -78,9 +77,7 @@ FUNCTION pos_racun_unos_browse( cBrDok )
    SetKey( K_F8, {|| pos_storno_racuna_f8( s_oBrowse ) } )
    SetKey( K_F9, {|| fiskalni_izvjestaji_komande( .T., .T.  ) } )
 
-   @ box_x_koord() + 3, box_y_koord() + ( nMaxCols - 30 ) SAY "UKUPNO:"
-   @ box_x_koord() + 4, box_y_koord() + ( nMaxCols - 30 ) SAY "POPUST:"
-   @ box_x_koord() + 5, box_y_koord() + ( nMaxCols - 30 ) SAY "  NETO:"
+   pos_racun_prikazi_ukupno_header(nMaxCols)
    pos_racun_prikazi_ukupno()
 
    SELECT _pos_pripr
@@ -117,18 +114,18 @@ FUNCTION pos_racun_unos_browse( cBrDok )
       set_cursor_on()
 
       @ box_x_koord() + 2, box_y_koord() + 5 SAY " Artikal:" GET _idroba PICT PICT_POS_ARTIKAL ;
-         WHEN pos_when_racun_artikal( @_idroba ) ;
+         WHEN pos_when_racun_artikal( @_idroba, pos_tekuca_stavka_iznos(_cijena, _ncijena, _kolicina) ) ;
          VALID pos_valid_racun_artikal( @_idroba, GetList, 2, 27 )
       @ box_x_koord() + 3, box_y_koord() + 5 SAY "  Cijena:" GET _Cijena PICT "99999.999"  ;
-         WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena )
+         WHEN pos_when_racun_cijena_ncijena( _idroba, _cijena, _ncijena  )
 
-      @ box_x_koord() + 3, Col() + 2 SAY "Popust" GET nPopust PICT "999999.99" ;
+      @ box_x_koord() + 3, Col() + 2 SAY "Pop:" GET nPopust PICT "999999.99" ;
          WHEN {|| nPopust := pos_popust( _cijena, _ncijena ), .F. }
-      @ box_x_koord() + 3, Col() + 2 SAY "Sa popustom:" GET nCijenaSaPopustom PICT "999999.99" ;
+      @ box_x_koord() + 3, Col() + 2 SAY "Neto Cij:" GET nCijenaSaPopustom PICT "999999.99" ;
          WHEN {|| nCijenaSaPopustom := _cijena - nPopust, .F. }
 
       @ box_x_koord() + 4, box_y_koord() + 5 SAY8 "Količina:" GET _kolicina PICT "999999.999" ;
-         WHEN pos_when_racun_kolicina( @_kolicina ) ;
+         WHEN pos_when_racun_kolicina( @_kolicina) ;
          VALID pos_valid_racun_kolicina( _idroba, @_kolicina, _cijena, _ncijena )
 
       READ
@@ -180,6 +177,23 @@ FUNCTION pos_racun_unos_browse( cBrDok )
 
    RETURN .T.
 
+STATIC FUNCTION pos_tekuca_stavka_iznos(nCijena, nNovaCijena, nKolicina)
+
+  IF nNovaCijena <> 0
+     // cijena sa popustom
+     RETURN Round(nNovaCijena * nKolicina, 2)
+  ENDIF
+  // nema popusta
+  RETURN Round(nCijena * nKolicina, 2)
+
+
+STATIC FUNCTION pos_tekuci_artikal(cIdRoba, cNaziv, cJmj)
+  LOCAL cPom
+  IF  Empty(cIdRoba) .AND. Empty(cNaziv)
+     cPom := "-"
+  ENDIF
+  cPom := cIdRoba + " : " + AllTrim(cNaziv) + " (" + AllTrim(cJmj) + ")"
+  RETURN PADR(cPom, 60) 
 
 FUNCTION pos_storno_racuna_f8( oBrowse )
 
