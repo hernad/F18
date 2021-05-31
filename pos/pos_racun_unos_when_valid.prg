@@ -29,7 +29,7 @@ FUNCTION pos_when_racun_artikal( cIdRoba, nUnosIznos, nRacunNetoIznos )
          //nColor := SetColor( F18_COLOR_NAGLASENO )
          @ box_x_koord() + 4, box_y_koord() + 31 SAY8 "       TEKUĆI UNOS:"
          @ row(), col() + 1 SAY  Str( nUnosIznos, 10, 2 ) COLOR f18_color_invert()
-         @ box_x_koord() + 5, box_y_koord() + 31 SAY8 "NETO + TEKUĆI UNOS:"
+         //@ box_x_koord() + 5, box_y_koord() + 31 SAY8 "NETO + TEKUĆI UNOS:"
          @ row(), col() + 1 SAY  Str( nRacunNetoIznos + nUnosIznos, 10, 2 ) COLOR f18_color_invert()
          //SetColor( nColor )
       ELSE   
