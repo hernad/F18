@@ -357,7 +357,7 @@ STATIC FUNCTION db_insert_eisp( hRec )
     BEGIN SEQUENCE WITH {| err| Break( err ) }
         oRet := run_sql_query(cQuery)
     RECOVER USING oError
-        error_bar( "eisp_ins:" + oError:description )  
+        error_bar( "eisp_ins:" + oError:description )
     END SEQUENCE
 
     IF sql_error_in_query( oRet, "INSERT" )
@@ -871,7 +871,6 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         
         // faktura sadrzi PDV, postoji dio obracunat po stopi PDV 0%
         IF (Abs(hRec["fakt_iznos_pdv"]) + Abs(hRec["fakt_iznos_pdv_np"])) > 0 .AND.  Abs(hRec["fakt_iznos_sa_pdv0_ostalo"]) > 0
-            altd()
             IF !( cClan $ "24#25")
                 // ako nije jedan od dva clana to se stavlja u obicni promet
                 IF lRegistrovaniPDVObveznik
