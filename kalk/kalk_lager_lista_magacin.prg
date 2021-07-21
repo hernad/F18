@@ -24,7 +24,7 @@ FUNCTION kalk_lager_lista_magacin()
    PARAMETERS fPocStanje
 
    LOCAL fimagresaka := .F.
-   LOCAL _curr_user := "<>"
+   LOCAL cUser := "<>"
    LOCAL cExpXlsx := "N"
    LOCAL lExpXlsx := .F.
    LOCAL cPodaciOFakturiPartneraDN := "N"
@@ -53,7 +53,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL nVPC
    LOCAL cIdKonto
    LOCAL aHeader
-   LOCAL cXlsxName
+   LOCAL cXlsxName, aXlsxFields
 
    // pPicDem := kalk_prosiri_pic_iznos_za_2()
    // pPicCDem := kalk_prosiri_pic_cjena_za_2()
@@ -120,15 +120,15 @@ FUNCTION kalk_lager_lista_magacin()
    ENDIF
 
    IF !fPocStanje
-      cIdKonto := fetch_metric( "kalk_lager_lista_id_konto", _curr_user, cIdKonto )
-      cPNab := fetch_metric( "kalk_lager_lista_po_nabavnoj", _curr_user, cPNab )
-      cNulaDN := fetch_metric( "kalk_lager_lista_prikaz_nula", _curr_user, cNulaDN )
-      dDatOd := fetch_metric( "kalk_lager_lista_datum_od", _curr_user, dDatOd )
-      dDatDo := fetch_metric( "kalk_lager_lista_datum_do", _curr_user, dDatDo )
-      p_cPrikazSamoNabavne := fetch_metric( "kalk_lager_Lista_prikaz_do_nabavne", _curr_user, p_cPrikazSamoNabavne )
-      cVpcIzSifarnikaDN := fetch_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
-      cTxtOdt := fetch_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
-      cExpXlsx := fetch_metric( "kalk_lager_mag_export", _curr_user, "N")
+      cIdKonto := fetch_metric( "kalk_lager_lista_id_konto", cUser, cIdKonto )
+      cPNab := fetch_metric( "kalk_lager_lista_po_nabavnoj", cUser, cPNab )
+      cNulaDN := fetch_metric( "kalk_lager_lista_prikaz_nula", cUser, cNulaDN )
+      dDatOd := fetch_metric( "kalk_lager_lista_datum_od", cUser, dDatOd )
+      dDatDo := fetch_metric( "kalk_lager_lista_datum_do", cUser, dDatDo )
+      p_cPrikazSamoNabavne := fetch_metric( "kalk_lager_Lista_prikaz_do_nabavne", cUser, p_cPrikazSamoNabavne )
+      cVpcIzSifarnikaDN := fetch_metric( "kalk_lager_Lista_vpc_iz_sif", cUser, cVpcIzSifarnikaDN )
+      cTxtOdt := fetch_metric( "kalk_lager_print_varijanta", cUser, cTxtOdt )
+      cExpXlsx := fetch_metric( "kalk_lager_mag_export", cUser, "N")
    ENDIF
 
    cArtikalNaz := Space( 30 )
@@ -219,9 +219,9 @@ FUNCTION kalk_lager_lista_magacin()
       set_metric( "kalk_lager_lista_datum_od", f18_user(), dDatOd )
       set_metric( "kalk_lager_lista_datum_do", f18_user(), dDatDo )
       set_metric( "kalk_lager_lista_prikaz_do_nabavne", f18_user(), p_cPrikazSamoNabavne )
-      set_metric( "kalk_lager_Lista_vpc_iz_sif", _curr_user, cVpcIzSifarnikaDN )
-      set_metric( "kalk_lager_print_varijanta", _curr_user, cTxtOdt )
-      set_metric( "kalk_lager_mag_export", _curr_user, cExpXlsx)
+      set_metric( "kalk_lager_Lista_vpc_iz_sif", cUser, cVpcIzSifarnikaDN )
+      set_metric( "kalk_lager_print_varijanta", cUser, cTxtOdt )
+      set_metric( "kalk_lager_mag_export", cUser, cExpXlsx)
    ENDIF
 
 
@@ -246,7 +246,7 @@ FUNCTION kalk_lager_lista_magacin()
 
    IF cExpXlsx $ "DF"
       lExpXlsx := .T.
-      aExpFields := get_export_fields()
+      aXlsxFields := kalk_llm_xls_fields()
       aHeader := {}
       IF cExpXlsx == "D"
         AADD( aHeader, { "Period", DTOC(dDatOd) + " -" + DTOC(dDatDo) } )
@@ -256,7 +256,7 @@ FUNCTION kalk_lager_lista_magacin()
          cXlsxName := "kalk_llm.xlsx" 
       ENDIF
 
-      xlsx_export_init( aExpFields, aHeader, cXlsxName )
+      xlsx_export_init( aXlsxFields, aHeader, cXlsxName )
    ENDIF
 
    kalk_llm_open_tables()
@@ -339,7 +339,7 @@ FUNCTION kalk_lager_lista_magacin()
 
    nLen := 1
 
-   _set_zagl( @cLine, @cTxt1, @cTxt2, @cTxt3, cSredCij )
+   kalk_llm_zaglavlje( @cLine, @cTxt1, @cTxt2, @cTxt3, cSredCij )
 
    s_cLinija := cLine
    s_cTxt1 := cTxt1
@@ -389,13 +389,10 @@ FUNCTION kalk_lager_lista_magacin()
 
       nUlaz := 0
       nIzlaz := 0
-
       nVPVU := 0
       nVPVI := 0
-
       nVPVRU := 0
       nVPVRI := 0
-
       nNVU := 0
       nNVI := 0
 
@@ -748,7 +745,6 @@ FUNCTION kalk_lager_lista_magacin()
             ? Space( 6 ) + podaci_o_fakturi_partnera( cMIPart, CTOD(""), cMINumber, cMI_type )
          ENDIF
 
-
       ENDIF
 
       IF roba_barkod_pri_unosu()
@@ -861,13 +857,11 @@ STATIC FUNCTION podaci_o_fakturi_partnera( cPartner, dDatum, cFaktura, cMU_I )
       IF !Empty( cPartner )
 
          cMIPart := AllTrim( get_partner_naziv( cPartner ) )
-
          IF cMU_I == "1"
             cTip := "dob.:"
          ELSE
             cTip := "kup.:"
          ENDIF
-
          cRet := DToC( dDatum )
          cRet += ", "
          cRet += "br.dok: "
@@ -884,7 +878,7 @@ STATIC FUNCTION podaci_o_fakturi_partnera( cPartner, dDatum, cFaktura, cMU_I )
 
       RETURN cRet
 
-STATIC FUNCTION get_export_fields()
+STATIC FUNCTION kalk_llm_xls_fields()
 
    LOCAL aDbf := {}
 
@@ -922,7 +916,6 @@ STATIC FUNCTION kalk_llm_xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba,
 
    LOCAL hRow := hb_hash()
 
-  
    IF nVar == nil
       nVar := 0
    ENDIF
@@ -962,7 +955,7 @@ STATIC FUNCTION kalk_llm_xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba,
 
 
 
-STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
+STATIC FUNCTION kalk_llm_zaglavlje( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
 
    LOCAL aLLM := {}
    LOCAL nPom
@@ -992,7 +985,6 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
    AAdd( aLLM, { nPom, PadC( "STANJE", nPom ), PadC( "", nPom ), PadC( "4 - 5", nPom ) } )
 
 
-
    // NV podaci
    // -------------------------------
    nPom := Len( kalk_prosiri_pic_cjena_za_2() )
@@ -1004,7 +996,6 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
    AAdd( aLLM, { nPom, PadC( "NV", nPom ), PadC( "NC", nPom ), PadC( "6 - 7", nPom ) } )
 
    IF p_cPrikazSamoNabavne == "N"
-
       nPom := Len( kalk_prosiri_pic_cjena_za_2() )
       // pv.dug
       AAdd( aLLM, { nPom, PadC( "PV.Dug.", nPom ), PadC( "", nPom ), PadC( "8", nPom ) } )
@@ -1014,8 +1005,6 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
       AAdd( aLLM, { nPom, PadC( "PV.Pot.", nPom ), PadC( "", nPom ), PadC( "10", nPom ) } )
       // PV
       AAdd( aLLM, { nPom, PadC( "PV", nPom ), PadC( "PC", nPom ), PadC( "8 - 10", nPom ) } )
-
-
    ENDIF
 
 
@@ -1023,7 +1012,6 @@ STATIC FUNCTION _set_zagl( cLine, cTxt1, cTxt2, cTxt3, cSredCij )
       nPom := Len( kalk_prosiri_pic_cjena_za_2() )
       // sredi cijene
       AAdd( aLLM, { nPom, PadC( "Sred.cij", nPom ), PadC( "", nPom ), PadC( "", nPom ) } )
-
    ENDIF
 
    cLine := SetRptLineAndText( aLLM, 0 )
@@ -1115,7 +1103,6 @@ FUNCTION IsInGroup( cGr, cPodGr, cIdRoba )
 
 
 STATIC FUNCTION kalk_llm_open_tables()
-
 
    IF select_o_koncij()
       ?E "open koncij ok"
