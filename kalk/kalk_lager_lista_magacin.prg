@@ -224,7 +224,6 @@ FUNCTION kalk_lager_lista_magacin()
       set_metric( "kalk_lager_mag_export", cUser, cExpXlsx)
    ENDIF
 
-
    lSvodi := .F.
 
    // IF my_get_from_ini( "KALK_LLM", "SvodiNaJMJ", "N", KUMPATH ) == "D"
@@ -421,7 +420,6 @@ FUNCTION kalk_lager_lista_magacin()
             LOOP
          ENDIF
       ENDIF
-
 
       IF ( FieldPos( "MINK" ) ) <> 0
          nMink := roba->mink
@@ -693,7 +691,6 @@ FUNCTION kalk_lager_lista_magacin()
             @ PRow(), PCol() + 1 SAY say_kolicina( nKJMJ * nMink  )
          ENDIF
 
-
          // ulaz - prazno
          @ PRow(), nCol0 SAY Space( Len( kalk_prosiri_pic_kolicina_za_2() ) )
          // izlaz - prazno
@@ -842,7 +839,6 @@ FUNCTION kalk_lager_lista_magacin()
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 
