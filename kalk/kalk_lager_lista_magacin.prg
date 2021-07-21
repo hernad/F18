@@ -769,8 +769,7 @@ FUNCTION kalk_lager_lista_magacin()
                   nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
                   nNVU, nNVI, ( nNVU - nNVI ), 0, ;
                   nVPVU, nVPVI, ( nVPVU - nVPVI ), 0, ;
-                  nVPVRU, nVPVRI, ;
-                  dDatZadnjiUlaz, dL_izlaz )
+                  nVPVRU, nVPVRI, dDatZadnjiUlaz, dL_izlaz )
 
             ELSE
                kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, ;
@@ -779,8 +778,7 @@ FUNCTION kalk_lager_lista_magacin()
                   nNVU, nNVI, ( nNVU - nNVI ), ;
                   0, ;
                   nVPVU, nVPVI, ( nVPVU - nVPVI ), ;
-                  nVPCIzSif, nVPVRU, nVPVRI, ;
-                  dDatZadnjiUlaz, dL_izlaz )
+                  nVPCIzSif, nVPVRU, nVPVRI, dDatZadnjiUlaz, dL_izlaz )
             ENDIF
          ENDIF
       ENDIF
