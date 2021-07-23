@@ -50,7 +50,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL dDatZadnjiUlaz := CToD( "" )
    LOCAL dL_izlaz := CToD( "" )
    LOCAL hParams
-   LOCAL nVPC
+   LOCAL nVPC, nNC
    LOCAL cIdKonto
    LOCAL aHeader
    LOCAL cXlsxName, aXlsxFields
@@ -759,24 +759,17 @@ FUNCTION kalk_lager_lista_magacin()
 
             cTmp := ""
             cTmp := roba->sifradob
+            
 
             IF cNulaDN == "D" .AND. Round( nUlaz - nIzlaz, 4 ) == 0
-               kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, ;
-                  roba->naz, roba->idtarifa, cJmj, ;
-                  nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
-                  nNVU, nNVI, ( nNVU - nNVI ), 0, ;
-                  nVPVU, nVPVI, ( nVPVU - nVPVI ), 0, ;
-                  nVPVRU, nVPVRI, dDatZadnjiUlaz, dL_izlaz )
-
+               nNc := 0
             ELSE
-               kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, ;
-                  roba->naz, roba->idtarifa, cJmj, ;
-                  nUlaz, nIzlaz, ( nUlaz - nIzlaz ), ;
-                  nNVU, nNVI, ( nNVU - nNVI ), ;
-                  0, ;
-                  nVPVU, nVPVI, ( nVPVU - nVPVI ), ;
-                  nVPCIzSif, nVPVRU, nVPVRI, dDatZadnjiUlaz, dL_izlaz )
+               nNc := ( nNVU - nNVI ) / ( nUlaz - nIzlaz )   
             ENDIF
+
+            kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, roba->naz, roba->idtarifa, cJmj, ;
+                  nUlaz, nIzlaz, ( nUlaz - nIzlaz ), nNVU, nNVI, ( nNVU - nNVI ), nNC, ;
+                  nVPVU, nVPVI, ( nVPVU - nVPVI ), nVPCIzSif, nVPVRU, nVPVRI, dDatZadnjiUlaz, dL_izlaz )
          ENDIF
       ENDIF
 
@@ -904,8 +897,8 @@ STATIC FUNCTION kalk_llm_xls_fields()
 
 
 
-STATIC FUNCTION kalk_llm_xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, ;
-      cJmj, nUlaz, nIzlaz, nSaldo, nNVDug, nNVPot, nNV, nNC, ;
+STATIC FUNCTION kalk_llm_xlsx_export_fill_row( nVar, cIdRoba, cSifDob, cNazRoba, cTarifa, cJmj, ;
+      nUlaz, nIzlaz, nSaldo, nNVDug, nNVPot, nNV, nNC, ;
       nPVDug, nPVPot, nPV, nPC, nPVrdug, nPVrpot, dDatZadnjiUlaz, dL_izlaz )
 
    LOCAL hRow := hb_hash()
