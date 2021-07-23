@@ -755,22 +755,26 @@ FUNCTION kalk_lager_lista_magacin()
 
 
       IF lExpXlsx
-         IF cNulaDN == "D" .OR. Round( nNVU - nNVI, 4 ) <> 0
 
             cTmp := ""
             cTmp := roba->sifradob
             
-
-            IF cNulaDN == "D" .AND. Round( nUlaz - nIzlaz, 4 ) == 0
-               nNc := 0
-            ELSE
+            nNc := NIL
+            IF Round( nUlaz - nIzlaz, 4 ) != 0.0 
                nNc := ( nNVU - nNVI ) / ( nUlaz - nIzlaz )   
+            ELSE
+               IF cNulaDN == "D" .OR. Round( nNVU - nNVI, 4 ) <> 0
+                  // prikazati nule ili postoji neka nabavna vrijednost a kolicina 0
+                  nNc := 0
+               ENDIF
             ENDIF
 
-            kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, roba->naz, roba->idtarifa, cJmj, ;
+            IF nNc != NIL
+              kalk_llm_xlsx_export_fill_row( 0, roba->id, cTmp, roba->naz, roba->idtarifa, cJmj, ;
                   nUlaz, nIzlaz, ( nUlaz - nIzlaz ), nNVU, nNVI, ( nNVU - nNVI ), nNC, ;
                   nVPVU, nVPVI, ( nVPVU - nVPVI ), nVPCIzSif, nVPVRU, nVPVRI, dDatZadnjiUlaz, dL_izlaz )
-         ENDIF
+            ENDIF
+
       ENDIF
 
    ENDDO
