@@ -56,31 +56,24 @@ FUNCTION fakt_kalk_prenos_10_14()
    LOCAL _params := fakt_params()
    LOCAL GetList := {}
    LOCAL hRec
+   LOCAL nRbr, aMemo, cIdPartner, cMKonto
 
    // PRIVATE lVrsteP := _params[ "fakt_vrste_placanja" ]
 
-   // o_koncij()
    o_kalk_pripr()
-   // o_kalk()
-   // o_kalk_doks()
-   // o_kalk_doks2()
-   // o_roba()
-   // o_konto()
-   // o_partner()
-   // o_tarifa()
-   // o_fakt_dbf()
+
 
    dDatKalk := fetch_metric( "kalk_fakt_prenos_10_14_datum", my_user(), Date() )
-   cIdKonto := fetch_metric( "kalk_fakt_prenos_10_14_konto_1", my_user(), PadR( "1200", 7 ) )
-   cIdKonto2 := fetch_metric( "kalk_fakt_prenos_10_14_konto_2", my_user(), PadR( "1310", 7 ) )
+   //cIdKonto := fetch_metric( "kalk_fakt_prenos_10_14_konto_1", my_user(), PadR( "1200", 7 ) )
+   cMKonto := fetch_metric( "kalk_fakt_prenos_10_14_konto_2", my_user(), PadR( "1310", 7 ) )
 
    //IF glKalkBrojacPoKontima
       Box( "#FAKT->KALK", 3, 70 )
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Konto razdužuje" GET cIdKonto2 PICT "@!" VALID P_Konto( @cIdKonto2 )
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Konto razdužuje" GET cMKonto PICT "@!" VALID P_Konto( @cMKonto )
       READ
       BoxC()
    //ENDIF
-   cBrKalk :=  kalk_get_next_broj_v5( cIdFirma, "14", cIdKonto2 )
+   cBrKalk :=  kalk_get_next_broj_v5( cIdFirma, "14", cMKonto )
 
    Box(, 15, 60 )
 
@@ -91,7 +84,7 @@ FUNCTION fakt_kalk_prenos_10_14()
       //@ box_x_koord() + 4, box_y_koord() + 2   SAY8 "Konto razdužuje:" GET cIdKonto2 PICT "@!" WHEN !glKalkBrojacPoKontima VALID P_Konto( @cIdKonto2 )
 
 
-      cFaktFirma := iif( cIdKonto2 == gKomKonto, gKomFakt, cIdFirma )
+      cFaktFirma := iif( cMKonto == gKomKonto, gKomFakt, cIdFirma )
       @ box_x_koord() + 6, box_y_koord() + 2 SAY "Broj fakture: " GET cFaktFirma
       @ box_x_koord() + 6, Col() + 2 SAY "- " + cIdtipdok
       @ box_x_koord() + 6, Col() + 2 SAY "-" GET cBrDok
@@ -146,8 +139,7 @@ FUNCTION fakt_kalk_prenos_10_14()
          ESC_BCR
 
          SELECT kalk_pripr
-         LOCATE FOR BrFaktP == cBrDok
-
+         LOCATE FOR kalk_pripr->BrFaktP == cBrDok
 
          IF Found() // faktura je vec prenesena
             Beep( 4 )
@@ -160,6 +152,8 @@ FUNCTION fakt_kalk_prenos_10_14()
          GO BOTTOM
          IF kalk_pripr->brdok == cBrKalk
             nRbr := kalk_pripr->Rbr
+         ELSE
+            nRbr := 0
          ENDIF
 
          IF !find_kalk_doks_by_broj_dokumenta( cIdFirma, "14", cBrKalk )
@@ -172,8 +166,8 @@ FUNCTION fakt_kalk_prenos_10_14()
             hRec := dbf_get_rec()
          ENDIF
 
-         hRec[ "datval" ] := dDatPl
-         update_rec_server_and_dbf( "kalk_doks", hRec, 1, "FULL" )
+         //hRec[ "datval" ] := dDatPl
+         //update_rec_server_and_dbf( "kalk_doks", hRec, 1, "FULL" )
 
          SELECT fakt
          DO WHILE !Eof() .AND. cFaktFirma + cIdTipDok + PADR( cBrDok, FIELD_LEN_FAKT_BRDOK ) == fakt->IdFirma + fakt->IdTipDok + PADR( fakt->BrDok, FIELD_LEN_FAKT_BRDOK )
@@ -205,15 +199,15 @@ FUNCTION fakt_kalk_prenos_10_14()
                idpartner WITH cIdPartner, ;
                idtarifa WITH ROBA->idtarifa, ;
                brfaktp WITH fakt->brdok, ;
-               datfaktp WITH fakt->datdok, ;
-               idkonto   WITH cIdkonto, ;
-               idkonto2  WITH cIdkonto2, ;
+               datfaktp WITH fakt->datdok, ;   //idkonto   WITH cIdkonto, ;
+               mkonto  WITH cMKonto, ;
                kolicina WITH fakt->kolicina, ;
                idroba WITH fakt->idroba, ;
                nc  WITH ROBA->nc, ;
                vpc WITH fakt->cijena, ;
                rabatv WITH nRabat, ;
-               mpc WITH fakt->porez
+               mpc WITH fakt->porez,;
+               datval WITH dDatPl
 
             SELECT fakt
             SKIP
@@ -222,8 +216,8 @@ FUNCTION fakt_kalk_prenos_10_14()
          @ box_x_koord() + 8, box_y_koord() + 2 SAY "Dokument je prenesen !"
 
          set_metric( "kalk_fakt_prenos_10_14_datum", my_user(), dDatKalk )
-         set_metric( "kalk_fakt_prenos_10_14_konto_1", my_user(), cIdKonto )
-         set_metric( "kalk_fakt_prenos_10_14_konto_2", my_user(), cIdKonto2 )
+         //set_metric( "kalk_fakt_prenos_10_14_konto_1", my_user(), cIdKonto )
+         set_metric( "kalk_fakt_prenos_10_14_konto_2", my_user(), cMkonto )
 
          kalk_fix_brdok_add_1( @cBrKalk )
 
