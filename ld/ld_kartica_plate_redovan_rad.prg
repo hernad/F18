@@ -183,7 +183,6 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
                ? cLPom
             ENDIF
 
-            altd()
             IF tippr->( FieldPos( "TPR_TIP" ) ) <> 0
                // uzmi osnovice
                IF tippr->tpr_tip == "N"
@@ -346,7 +345,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
 
       nBrutoOsnova := ld_get_bruto_osnova( nOsnZaBr, cRTipRada, nLicniOdbitak )
       IF is_radn_k4_bf_ide_u_benef_osnovu()
-         nTmp2 := nOsnZaBr - IF( !Empty( gBFForm ),  &( gBFForm ), 0 )
+         nTmp2 := nOsnZaBr - IIF( !Empty( gBFForm ),  &( gBFForm ), 0 )
          nBFo := ld_get_bruto_osnova( nTmp2, cRTipRada, nLicniOdbitak )
          add_to_a_benef( @aBeneficirani, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nBFO )
       ENDIF
@@ -479,16 +478,20 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
       ? cLDLijevaMargina + "3. BRUTO - DOPRINOSI IZ PLATE (1-2)"
       @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOporDoh PICT gpici
 
-      ? cMainLine
-      IF nLicniOdbitak > 0
-         ?U cLDLijevaMargina + "4. LIČNI ODBITAK", Space( 14 )
-         ?? AllTrim( Str( gOsnLOdb ) ) + " * koef. " + ;
-            AllTrim( Str( nKoefOdbitka ) ) + " = "
-         @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nLicniOdbitak PICT gpici
+      IF lKarticaTO
+         nLicniOdbitak := 0
       ELSE
-         ?U cLDLijevaMargina + "4. LIČNI ODBITAK"
-         @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nLicniOdbitak PICT gpici
+         ? cMainLine
+         IF nLicniOdbitak > 0
+            ?U cLDLijevaMargina + "4. LIČNI ODBITAK", Space( 14 )
+            ?? AllTrim( Str( gOsnLOdb ) ) + " * koef. " + ;
+               AllTrim( Str( nKoefOdbitka ) ) + " = "
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nLicniOdbitak PICT gpici
+         ELSE
+            ?U cLDLijevaMargina + "4. LIČNI ODBITAK"
+            @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nLicniOdbitak PICT gpici
 
+         ENDIF
       ENDIF
 
       ? cMainLine

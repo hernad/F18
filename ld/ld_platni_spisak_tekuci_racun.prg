@@ -1,11 +1,14 @@
 #include "f18.ch"
 
+MEMVAR cTpr, cLDPolja
 
 FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
 
    LOCAL nC1 := 20
    LOCAL cVarSort
    LOCAL GetList := {}
+
+   LOCAL  nIznosPrikazati, nIzbitiIzNeto, nIzbitiIzOstalo
 
    cIdRadn := Space( LEN_IDRADNIK )
    cIdRj := gLDRadnaJedinica
@@ -151,7 +154,7 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
 
    nPocRec := RecNo()
 
-   FOR nDio := 1 TO IF( cDrugiDio == "D", 2, 1 )
+   FOR nDio := 1 TO IIF( cDrugiDio == "D", 2, 1 )
 
       IF nDio == 2
          GO ( nPocRec )
@@ -176,8 +179,7 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
          select_o_radn( _idradn )
          SELECT ld
 
-         IF radn->isplata <> cIsplata .OR. ;
-               radn->idbanka <> cIdBanka
+         IF radn->isplata <> cIsplata .OR. radn->idbanka <> cIdBanka
             // samo za tekuce racune
             SKIP
             LOOP
@@ -192,17 +194,21 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
 
          nC1 := PCol() + 1
 
+
+         ld_izbiti_iz_ukupno( @nIzbitiIzNeto, @nIzbitiIzOstalo )
+         nIznosPrikazati := _uIznos - nIzbitiIzNeto - nIzbitiIzOstalo
+
          IF cPrikIzn == "D"
             IF nProcenat <> 100
                IF nDio == 1
-                  @ PRow(), PCol() + 1 SAY Round( _uiznos * nprocenat / 100, nzkk ) PICT gpici
+                  @ PRow(), PCol() + 1 SAY Round( nIznosPrikazati * nProcenat / 100, nzkk ) PICT gpici
                ELSE
-                  @ PRow(), PCol() + 1 SAY Round( _uiznos, nzkk ) - Round( _uiznos * nprocenat / 100, nzkk ) PICT gpici
+                  @ PRow(), PCol() + 1 SAY Round( nIznosPrikazati, nZkk ) - Round( nIznosPrikazati * nProcenat / 100, nzkk ) PICT gpici
                ENDIF
             ELSE
-               @ PRow(), PCol() + 1 SAY _uiznos PICT gpici
+               @ PRow(), PCol() + 1 SAY nIznosPrikazati PICT gpici
                IF cZaBanku == "D"
-                  cZaBnkIznos := FormatSTR( AllTrim( Str( _uiznos ), 8, 2 ), 8, .T. )
+                  cZaBnkIznos := FormatSTR( AllTrim( Str( nIznosPrikazati ), 8, 2 ), 8, .T. )
                ENDIF
             ENDIF
          ELSE
@@ -231,12 +237,12 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
 
          IF nProcenat <> 100
             IF nDio == 1
-               nT4 += Round( _uiznos * nProcenat / 100, nZkk )
+               nT4 += Round( nIznosPrikazati * nProcenat / 100, nZkk )
             ELSE
-               nT4 += ( Round( _uiznos, nZkk ) - Round( _uiznos * nProcenat / 100, nZKK ) )
+               nT4 += ( Round( nIznosPrikazati, nZkk ) - Round( nIznosPrikazati * nProcenat / 100, nZKK ) )
             ENDIF
          ELSE
-            nT4 += _uiznos
+            nT4 += nIznosPrikazati
          ENDIF
 
          SKIP
@@ -341,3 +347,35 @@ FUNCTION ld_zagl_spisak_tekuci_racun()
    ? m
 
    RETURN .T.
+
+
+FUNCTION ld_izbiti_iz_ukupno( nIzbitiIzNeto, nIzbitiIzOstalo )
+
+   LOCAL i, cTprField
+   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
+   PRIVATE cTpr
+
+   nIzbitiIzNeto := 0
+   nIzbitiIzOstalo := 0
+
+   FOR i := 1 TO cLDPolja // cLDPolja public var
+
+      cTprField := PadL( AllTrim( Str( i ) ), 2, "0" )
+      select_o_tippr( cTprField )
+      SELECT ld
+
+      cTpr := "_I" + cTprField
+      IF !Empty(cRekapTipoviOut) .AND. cTprField $ cRekapTipoviOut
+         // tip primanja npr. TO neoporezivi izbaciti
+         IF tippr->uneto == "D"
+            nIzbitiIzNeto += &cTpr
+         ELSE
+            nIzbitiIzOstalo += &cTpr
+         ENDIF
+         loop
+      ENDIF
+
+   NEXT
+
+
+RETURN .T.

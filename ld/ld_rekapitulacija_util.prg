@@ -877,14 +877,13 @@ FUNCTION zagl_rekapitulacija_plata_rj()
 
 
 
-FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut )
+FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut, nUNeto, nUSati, nIzbitiIzNeto, nIzbitiIzOstala )
 
    LOCAL i
 
    LOCAL cTipPrElem := ld_tip_primanja_el_nepogode()
 
    cUNeto := "D"
-
 
    FOR i := 1 TO cLDPolja
 
@@ -905,14 +904,15 @@ FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut )
       cPom := PadL( AllTrim( Str( i ) ), 2, "0" )
       select_o_tippr( cPom )
 
-      IF tippr->uneto == "N" .AND. cUneto == "D"
+      IF tippr->uneto == "N" .AND. cUneto == "D" // prelazimo sa oporezivih na neoporeziva
          cUneto := "N"
          ? cLinija
 
-         ?  "Ukupno:"
+         ?  "Ukupno:" // radi se o neto dijelu
          @ PRow(), nC1 + 8  SAY Str( nUSati, 12, 2 )
          ?? Space( 1 ) + _l( "sati" )
-         @ PRow(), 60 SAY nUNeto PICT gpici
+
+         @ PRow(), 60 SAY nUNeto - nIzbitiIzNeto PICT gPici
          ?? "", gValuta
 
          _UNeto := nUNeto
@@ -928,15 +928,15 @@ FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut )
          IF tippr->fiksan $ "DN"
             @ PRow(), PCol() + 8 SAY Str( aRekap[ i, 1 ], 12, 2 )
             ?? " s"
-            @ PRow(), 60 SAY aRekap[ i, 2 ]      PICT gpici
+            @ PRow(), 60 SAY aRekap[ i, 2 ]  PICT gpici
          ELSEIF tippr->fiksan == "P"
             @ PRow(), PCol() + 8 SAY aRekap[ i, 1 ] / nLjudi PICT "999.99%"
-            @ PRow(), 60 SAY aRekap[ i, 2 ]        PICT gpici
+            @ PRow(), 60 SAY aRekap[ i, 2 ]  PICT gpici
          ELSEIF tippr->fiksan == "C"
-            @ PRow(), 60 SAY aRekap[ i, 2 ]        PICT gpici
+            @ PRow(), 60 SAY aRekap[ i, 2 ]  PICT gpici
          ELSEIF tippr->fiksan == "B"
             @ PRow(), PCol() + 8 SAY aRekap[ i, 1 ] PICT "999999"; ?? " b"
-            @ PRow(), 60 SAY aRekap[ i, 2 ]      PICT gpici
+            @ PRow(), 60 SAY aRekap[ i, 2 ]  PICT gpici
          ENDIF
 
 
@@ -966,7 +966,6 @@ STATIC FUNCTION IspisKred( lSvi )
    LOCAL nTrec
    LOCAL cIdKred, cNaOsnovu, nUkKred, nUkKrRad, cOpis2
    LOCAL cFilter
-
 
    IF "SUMKREDITA" $ tippr->formula
 
@@ -1241,7 +1240,6 @@ FUNCTION ProizvTP()
    ENDDO
 
    RETURN .T.
-
 
 
 STATIC FUNCTION PrikKBO()
