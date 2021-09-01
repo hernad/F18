@@ -308,11 +308,11 @@ FUNCTION ld_pregled_plata()
          nBrOsn := nBO - nTrosk
       ENDIF
 
-      nDoprIz := u_dopr_iz( nMBO, cRTipRada )
+      nDoprIz := ld_uk_doprinosi_iz( nMBO, cRTipRada )
 
       nPorez := 0
       IF radn_oporeziv( _idradn, ld->idrj ) .AND. cRTipRada <> "S"
-         nPorez := izr_porez( nBrOsn - nDoprIz - nLicOdb, "B" )
+         nPorez := ld_izr_porez( nBrOsn - nDoprIz - nLicOdb, "B" )
       ENDIF
 
       nNeto := ( nBrOsn - nDoprIz )

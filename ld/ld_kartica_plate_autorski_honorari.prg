@@ -251,7 +251,7 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
       ENDIF
 
       // obracunaj porez
-      aPor := obr_por( por->id, nPorOsnovica, 0 )
+      aPor := ld_obr_por( por->id, nPorOsnovica, 0 )
 
       // ispisi porez
       nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )

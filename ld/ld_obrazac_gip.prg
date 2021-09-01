@@ -405,7 +405,7 @@ FUNCTION ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjese
          nIDopr1X := Round( nIDopr10 + nIDopr11 + nIDopr12, 4 )
 
          // ukupno dopr iz 31%
-         // nDoprIz := u_dopr_iz( nMBruto, cTipRada )
+         // nDoprIz := ld_uk_doprinosi_iz( nMBruto, cTipRada )
 
          // osnovica za porez
          IF cRptTip $ "3#4"
@@ -420,7 +420,7 @@ FUNCTION ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjese
          ENDIF
 
          // porez je ?
-         nPorez := izr_porez( nPorOsn, "B" )
+         nPorez := ld_izr_porez( nPorOsn, "B" )
 
          SELECT ld
 

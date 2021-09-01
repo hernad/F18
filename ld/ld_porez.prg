@@ -57,7 +57,7 @@ FUNCTION get_pr_obracuna()
 // nOsnNeto - osnovica neto
 // nOsnOstalo - osnovica ostala primanja
 // -------------------------------------------
-FUNCTION obr_por( cId, nOsnNeto, nOsnOstalo )
+FUNCTION ld_obr_por( cId, nOsnNeto, nOsnOstalo )
 
    LOCAL aPor := {}
    LOCAL aPorTek := {}

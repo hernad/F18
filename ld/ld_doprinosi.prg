@@ -16,7 +16,7 @@
 // ------------------------------------------------
 // vraca ukupno doprinosa IZ plate, 1X
 // ------------------------------------------------
-FUNCTION u_dopr_iz( nDopOsn, cRTipRada )
+FUNCTION ld_uk_doprinosi_iz( nDopOsn, cRTipRada )
 
    LOCAL nU_dop_iz
 

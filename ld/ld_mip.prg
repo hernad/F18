@@ -557,7 +557,7 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
             nPorOsn := 0
          ENDIF
 
-         nPorez := izr_porez( nPorOsn, "B" )  // porez je ?
+         nPorez := ld_izr_porez( nPorOsn, "B" )  // porez je ?
 
          SELECT ld
          nNaRuke := Round( nBruto - nU_d_iz - nPorez + nTrosk, 2 ) // na ruke je

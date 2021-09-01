@@ -7,8 +7,8 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
    LOCAL nC1 := 20
    LOCAL cVarSort
    LOCAL GetList := {}
-
-   LOCAL  nIznosPrikazati, nIzbitiIzNeto, nIzbitiIzOstalo
+   
+   LOCAL  nIznosZaIsplatu, nIzbitiIzNeto, nIzbitiIzOstalo, nUneto2
 
    cIdRadn := Space( LEN_IDRADNIK )
    cIdRj := gLDRadnaJedinica
@@ -97,7 +97,7 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
          Box(, 2, 30 )
          nSlog := 0
          cSort1 := "SortPrez(IDRADN)"
-         cFilt := iif( Empty( nMjesec ), ".t.", "MJESEC==" + _filter_quote( nMjesec ) ) + ".and." + IF( Empty( nGodina ), ".t.", "GODINA==" + _filter_quote( nGodina ) )
+         cFilt := iif( Empty( nMjesec ), ".t.", "MJESEC==" + _filter_quote( nMjesec ) ) + ".and." + IIF( Empty( nGodina ), ".t.", "GODINA==" + _filter_quote( nGodina ) )
          IF ld_vise_obracuna()
             cFilt += ".and. obr=" + _filter_quote( cObracun )
          ENDIF
@@ -117,7 +117,7 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
          Box(, 2, 30 )
          nSlog := 0
          cSort1 := "SortPrez(IDRADN)"
-         cFilt := "IDRJ==" + _filter_quote( cIdRj ) + ".and." + IF( Empty( nMjesec ), ".t.", "MJESEC==" + _filter_quote( nMjesec ) ) + ".and." + IF( Empty( nGodina ), ".t.", "GODINA==" + _filter_quote( nGodina ) )
+         cFilt := "IDRJ==" + _filter_quote( cIdRj ) + ".and." + IIF( Empty( nMjesec ), ".t.", "MJESEC==" + _filter_quote( nMjesec ) ) + ".and." + IIF( Empty( nGodina ), ".t.", "GODINA==" + _filter_quote( nGodina ) )
          IF ld_vise_obracuna()
             cFilt += ".and. obr=" + _filter_quote( cObracun )
          ENDIF
@@ -196,19 +196,28 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
 
 
          ld_izbiti_iz_ukupno( @nIzbitiIzNeto, @nIzbitiIzOstalo )
-         nIznosPrikazati := _uIznos - nIzbitiIzNeto - nIzbitiIzOstalo
+         // _uneto2 :=  _ubruto - _udopr  _uporez
+         // _uiznos = _uneto2 + _uodbici
+
+         IF nIzbitiIzNeto <> 0
+altd()
+            nUNeto2 := ld_obracun_radnik_neto2(_IdRadn, _IdRj, _I01, _UNeto - nIzbitiIzNeto, _USati, _UlicOdb)
+            nIznosZaIsplatu := nUneto2 + _uodbici - nIzbitiIzOstalo
+         ELSE
+            nIznosZaIsplatu := _uIznos
+         ENDIF
 
          IF cPrikIzn == "D"
             IF nProcenat <> 100
                IF nDio == 1
-                  @ PRow(), PCol() + 1 SAY Round( nIznosPrikazati * nProcenat / 100, nzkk ) PICT gpici
+                  @ PRow(), PCol() + 1 SAY Round( nIznosZaIsplatu * nProcenat / 100, nzkk ) PICT gpici
                ELSE
-                  @ PRow(), PCol() + 1 SAY Round( nIznosPrikazati, nZkk ) - Round( nIznosPrikazati * nProcenat / 100, nzkk ) PICT gpici
+                  @ PRow(), PCol() + 1 SAY Round( nIznosZaIsplatu, nZkk ) - Round( nIznosZaIsplatu * nProcenat / 100, nzkk ) PICT gpici
                ENDIF
             ELSE
-               @ PRow(), PCol() + 1 SAY nIznosPrikazati PICT gpici
+               @ PRow(), PCol() + 1 SAY nIznosZaIsplatu PICT gpici
                IF cZaBanku == "D"
-                  cZaBnkIznos := FormatSTR( AllTrim( Str( nIznosPrikazati ), 8, 2 ), 8, .T. )
+                  cZaBnkIznos := FormatSTR( AllTrim( Str( nIznosZaIsplatu ), 8, 2 ), 8, .T. )
                ENDIF
             ENDIF
          ELSE
@@ -237,12 +246,12 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
 
          IF nProcenat <> 100
             IF nDio == 1
-               nT4 += Round( nIznosPrikazati * nProcenat / 100, nZkk )
+               nT4 += Round( nIznosZaIsplatu * nProcenat / 100, nZkk )
             ELSE
-               nT4 += ( Round( nIznosPrikazati, nZkk ) - Round( nIznosPrikazati * nProcenat / 100, nZKK ) )
+               nT4 += ( Round( nIznosZaIsplatu, nZkk ) - Round( nIznosZaIsplatu * nProcenat / 100, nZKK ) )
             ENDIF
          ELSE
-            nT4 += nIznosPrikazati
+            nT4 += nIznosZaIsplatu
          ENDIF
 
          SKIP
@@ -324,7 +333,6 @@ FUNCTION ld_zagl_spisak_tekuci_racun()
    DevPos( PRow(), 74 )
 
    ?? _l( "Str." ), Str( ++nStrana, 3 )
-
    ?
 
    IF nProcenat <> 100
@@ -332,11 +340,10 @@ FUNCTION ld_zagl_spisak_tekuci_racun()
       ?
       ? _l( "Procenat za isplatu:" )
       IF nDio == 1
-         @ PRow(), PCol() + 1 SAY nprocenat PICT "999.99%"
+         @ PRow(), PCol() + 1 SAY nProcenat PICT "999.99%"
       ELSE
-         @ PRow(), PCol() + 1 SAY 100 - nprocenat PICT "999.99%"
+         @ PRow(), PCol() + 1 SAY 100 - nProcenat PICT "999.99%"
       ENDIF
-
       ?
 
    ENDIF

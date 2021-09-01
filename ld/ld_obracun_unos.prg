@@ -157,7 +157,6 @@ FUNCTION ld_rekalkulacija_primanja()
          cIdPrimanje := PadL( AllTrim( Str( nI ) ), 2, "0" )
          select_o_tippr( cIdPrimanje )
 
-
          IF tippr->aktivan == "D" .AND. "PAROBR" $ Upper( tippr->formula )
 
             _UIznos := _UIznos - _i&cIdPrimanje
@@ -488,7 +487,6 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
       ENDIF
 
       SELECT ( nTArea )
-
    NEXT
 
    IF radn->( FieldPos( "opor" ) ) <> 0
@@ -537,16 +535,16 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
       ENDIF
    ENDIF
 
-   nDop := u_dopr_iz( nMinBO, cTipRada )
+   nDop := ld_uk_doprinosi_iz( nMinBO, cTipRada )
    _udopr := nDop
    _udop_st := 31.0
-   nPorOsnovica := ( ( _ubruto - _udopr ) - _ulicodb )
+   nPorOsnovica := (  _ubruto - _udopr - _ulicodb )
 
    IF nPorOsnovica < 0 .OR. !radn_oporeziv( _idradn, _idrj )
       nPorOsnovica := 0
    ENDIF
 
-   _uporez := izr_porez( nPorOsnovica, "B" )
+   _uporez := ld_izr_porez( nPorOsnovica, "B" )
    _upor_st := 10.0
 
    IF !radn_oporeziv( _idradn, _idrj )
@@ -554,7 +552,7 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
       _upor_st := 0
    ENDIF
 
-   _uneto2 := Round( ( ( _ubruto - _udopr ) - _uporez ), gZaok2 )
+   _uneto2 := Round( ( _ubruto - _udopr - _uporez ), gZaok2 )
 
    IF cTipRada $ " #nI#N#"
       nMinNeto := min_neto( _uneto2, _usati )

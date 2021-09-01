@@ -226,14 +226,14 @@ STATIC FUNCTION fill_data( nGodina, nMjesec, cDopr1X, cDopr2X, cVRada, cObr, cRa
          nDohodak := nPrihod - nRashod
 
          // ukupno dopr iz
-         nDoprIz := u_dopr_iz( nDohodak, cT_tiprada )
+         nDoprIz := ld_uk_doprinosi_iz( nDohodak, cT_tiprada )
 
 
          // osnovica za porez
          nPorOsn := ( nDohodak - nDoprIz ) - nL_odb
 
          // porez je ?
-         nPorez := izr_porez( nPorOsn, "B" )
+         nPorez := ld_izr_porez( nPorOsn, "B" )
 
          IF lInRS == .T.
             nDoprIz := 0

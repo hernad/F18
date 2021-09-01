@@ -5,8 +5,8 @@ set HB_COMPILER=msvc
 
 set F18_POS=1
 set F18_DEBUG=1
-set DATE=25.09.2020
-set VERSION=3.2.0
+set DATE=01.09.2021
+set VERSION=3.3.76
 
 IF [%VERSION%]==[] (
    echo ENVAR VERSION nije definisana. STOP!
@@ -20,8 +20,7 @@ echo #define F18_VER_DATE  "%DATE%" >> include\f18_ver.ch
 
 type include\f18_ver.ch
 
-
-hbmk2 F18 -workdir=.bdebug -ldflag+=/NODEFAULTLIB:LIBCMT
+hbmk2 F18 -workdir=.bd -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
 
 
 :end

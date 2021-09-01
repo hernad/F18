@@ -11,7 +11,6 @@
 
 #include "f18.ch"
 
-
 THREAD STATIC DUZ_STRANA := 70
 THREAD STATIC s_cRadniSatiDN := "N"
 
@@ -530,7 +529,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
             LOOP
          ENDIF
 
-         aPor := obr_por( por->id, nPorOsnovica, 0 )
+         aPor := ld_obr_por( por->id, nPorOsnovica, 0 )
          nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
 
          SKIP 1

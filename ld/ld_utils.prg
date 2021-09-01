@@ -181,6 +181,18 @@ FUNCTION radn_oporeziv( cIdRadn, cRj )
 // nSKoef - koeficijent kod samostalnih poslodavaca
 // cTrosk - ugovori o djelu i ahon, korsiti troskove ?
 // ---------------------------------------------------------
+
+// cTipRada:  cTipRada := get_ld_rj_tip_rada( _idradn, _idrj )
+//  ld_rj->tiprada ili ako je empty ld_rj.tiprada onda radn->tiprada
+//   " " nesamostalni gleda se parobr.k5
+//   "N" gleda se parobr.k6
+//   "I" ugovoreni iznos manji od odbitka
+//   "S" samostalni poslodavci
+//   "P" predsjednicki clanovi
+//   "R" republika srpska
+//   "U" ugovor o djelu
+//   "A" autorski honorara
+
 FUNCTION ld_get_bruto_osnova( nIzn, cTipRada, nLOdb, nSKoef, cTrosk )
 
    LOCAL nBrt := 0
@@ -206,7 +218,7 @@ FUNCTION ld_get_bruto_osnova( nIzn, cTipRada, nLOdb, nSKoef, cTrosk )
    DO CASE
       // nesamostalni rad
    CASE Empty( cTipRada )
-      nBrt := ROUND2( nIzn * parobr->k5, gZaok2 )
+      nBrt := ROUND2( nIzn * parobr->k5, gZaok2 ) // stanardni obracun, parobr.k5 = 1.52550, za 1000 KM je bruto osnova = 1525.50
 
       // neto placa (neto + porez )
    CASE cTipRada == "N"
@@ -248,7 +260,6 @@ FUNCTION ld_get_bruto_osnova( nIzn, cTipRada, nLOdb, nSKoef, cTrosk )
       ENDIF
 
       nBrt := ROUND2( nIzn / ( ( ( 100 - nTr ) * 0.96 * 0.90 + nTr ) / 100 ), gZaok2 )
-
 
       IF radnik_iz_rs( radn->idopsst, radn->idopsrad ) // ako je u RS-u, nema troskova, i drugi koeficijent
          nBrt := ROUND2( nIzn * 1.111112, gZaok2 )
@@ -779,3 +790,94 @@ FUNCTION IspisObr()
 
 FUNCTION Obr2_9()
    RETURN ld_vise_obracuna() .AND. !Empty( cObracun ) .AND. cObracun <> "1"
+
+
+// koriste se varijable:
+
+// gUgTrosk, gAhTrosk, gLDRadnaJedinica
+// gZaok2
+
+
+
+FUNCTION ld_obracun_radnik_neto2(cIdRadn, cIdRj, nI01, nUNeto, nUSati, nUlicOdb)
+
+   LOCAL cTipRada, nSPR_koef, cTrosk, nKlo, lInRs, nTrosk, nMinBO, nDoprIz, nPorOsnovica, nPorez, nUneto2  //, cOpor
+   LOCAL nUBruto
+
+   PushWa()
+
+   ld_pozicija_parobr( ld_tekuci_mjesec(), ld_tekuca_godina(), iif( ld_vise_obracuna(), gObracun, ), gLDRadnaJedinica )
+   cTipRada := get_ld_rj_tip_rada( cIdradn, cIdrj )
+   nSPr_koef := 0
+   cTrosk := " "
+   IF cTipRada == "S"
+      IF radn->( FieldPos( "SP_KOEF" ) ) <> 0
+         nSPr_koef := radn->sp_koef
+      ENDIF
+   ENDIF
+   //IF radn->( FieldPos( "opor" ) ) <> 0
+   //   cOpor := radn->opor
+   //ENDIF
+
+   IF cTipRada $ "A#U#P#S"
+      nULicOdb := 0
+   ENDIF
+   IF radn->( FieldPos( "trosk" ) ) <> 0
+      cTrosk := radn->trosk
+   ENDIF
+   nUBruto := ld_get_bruto_osnova( nUNeto, cTipRada, nULicOdb, nSPr_koef, cTrosk )
+
+   nKLO := radn->klo
+   lInRs := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+   
+      IF cTipRada == "U" .AND. cTrosk <> "N"
+         nTrosk := ROUND2( nUbruto * ( gUgTrosk / 100 ), gZaok2 )
+         IF lInRS == .T.
+            nTrosk := 0
+         ENDIF
+         nUBruto := nUbruto - nTrosk
+      ENDIF
+   
+      IF cTipRada == "A" .AND. cTrosk <> "N"
+         nTrosk := ROUND2( nUBruto * ( gAhTrosk / 100 ), gZaok2 )
+         IF lInRS
+            nTrosk := 0
+         ENDIF
+         nUBruto := nUBruto - nTrosk
+      ENDIF
+   
+      nMinBO := nUBruto
+      IF cTipRada $ " #nI#N"
+         IF nI01 == 0
+            // ne racunaj min.bruto osnovu
+         ELSE
+            nMinBO := ld_min_bruto_osnova( nUBruto, nUSati )
+         ENDIF
+      ENDIF
+   
+      nDoprIz := ld_uk_doprinosi_iz( nMinBO, cTipRada )
+
+      //_udop_st := 31.0
+      nPorOsnovica :=  nUbruto - nDoprIz - nUlicOdb
+   
+      IF nPorOsnovica < 0 .OR. !radn_oporeziv( cIdradn, cIdrj )
+         nPorOsnovica := 0
+      ENDIF
+   
+      nPorez := ld_izr_porez( nPorOsnovica, "B" )
+      //_upor_st := 10.0
+   
+      IF !radn_oporeziv( cIdradn, cIdrj )
+         nPorez := 0
+         //_upor_st := 0
+      ENDIF
+   
+      nUneto2 := Round( nUbruto - nDoprIz - nPorez, gZaok2 )
+   
+      IF cTipRada $ " #nI#N#"
+         nUNeto2 := min_neto( nUneto2, nUsati )
+      ENDIF
+   
+      PopWa()
+   
+      RETURN nUneto2

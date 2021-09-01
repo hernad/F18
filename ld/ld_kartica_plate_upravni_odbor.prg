@@ -295,7 +295,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
       ENDIF
 
       // obracunaj porez
-      aPor := obr_por( por->id, nPorOsnovica, 0 )
+      aPor := ld_obr_por( por->id, nPorOsnovica, 0 )
 
       // ispisi porez
       nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )

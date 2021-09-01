@@ -219,7 +219,7 @@ FUNCTION cre_ops_ld_temp()
    RETURN .T.
 
 
-FUNCTION PopuniOpsLD( cTip, cPorId, aPorezi )
+FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOsnIPorez, nOsnOstaloZaBrutoOsnIPorezs )
 
    LOCAL nT_st_1 := 0
    LOCAL nT_st_2 := 0
@@ -256,11 +256,11 @@ FUNCTION PopuniOpsLD( cTip, cPorId, aPorezi )
       cPrObr := get_pr_obracuna()
 
       IF cPrObr == "N" .OR. cPrObr == " " .OR. cPrObr == "B"
-         nOsnovica := _oosnneto
+         nOsnovica := nOsnNetoZaBrutoOsnIPorez
       ELSEIF cPrObr == "2"
-         nOsnovica := _oosnostalo
+         nOsnovica := nOsnOstaloZaBrutoOsnIPorezs
       ELSEIF cPrObr == "P"
-         nOsnovica := ( _oosnneto + _oosnostalo )
+         nOsnovica := ( nOsnNetoZaBrutoOsnIPorez + nOsnOstaloZaBrutoOsnIPorezs )
       ENDIF
 
       FOR i := 1 TO Len( aPorezi )
@@ -290,9 +290,9 @@ FUNCTION PopuniOpsLD( cTip, cPorId, aPorezi )
 
    ELSE
       cPorId := "  "
-      nOsnovica := _ouneto
+      nOsnovica := nOsnovaNeto
       nOsnov3 := nPorOsnova
-      nOsnov4 := _oosnneto
+      nOsnov4 := nOsnNetoZaBrutoOsnIPorez
       nOsnov5 := nPorNROsnova
       nOstalo := _uodbici
       nBrOsnova := nMRadn_bo

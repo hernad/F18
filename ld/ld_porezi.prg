@@ -117,7 +117,6 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
             cOpst := opsld->idops
 
             select_o_ops( cOpst )
-
             SELECT opsld
 
             IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
@@ -129,7 +128,6 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
             IF cAlgoritam == "S"
 
                ?U idops, ops->naz
-
                nPom := 0
 
                DO WHILE !Eof() .AND. porid == cSeek .AND. id == por->poopst .AND. idops == cOpst
@@ -224,9 +222,7 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
             ENDIF
 
             nOOP += nTmpPor
-
             nOsnova += nTmpPor
-
             nPOLjudi += ljudi
             nPorOps += nPom
 
@@ -278,7 +274,6 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
          ENDIF
 
          nOsnova := nTmpOsnova
-
          @ PRow(), nC1 SAY nTmpOsnova PICT gpici
          @ PRow(), PCol() + 1 SAY nPom := round2( Max( dlimit, iznos / 100 * nTmpOsnova ), gZaok2 ) PICT gpici
          IF cUmPD == "D"
@@ -287,7 +282,7 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
             rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom - nPom2, 0 )
             nPor2 += nPom2
          ELSE
-            rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom, nTmpOsnova,, "(" + AllTrim( Str( nLjudi ) ) + ")" )
+            rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom, nTmpOsnova, NIL, "(" + AllTrim( Str( nLjudi ) ) + ")" )
          ENDIF
 
          nPor += nPom
@@ -315,7 +310,7 @@ FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, c
 // ----------------------------------------------------
 // izracunaj porez na osnovu tipa
 // ----------------------------------------------------
-FUNCTION izr_porez( nOsnovica, cTipPor )
+FUNCTION ld_izr_porez( nOsnovica, cTipPor )
 
    LOCAL nPor
    LOCAL nPom
@@ -355,7 +350,7 @@ FUNCTION izr_porez( nOsnovica, cTipPor )
       ENDIF
 
       // obracunaj porez
-      aPor := obr_por( por->id, nOsnovica, 0 )
+      aPor := ld_obr_por( por->id, nOsnovica, 0 )
 
       nTmp := isp_por( aPor, cAlgoritam, "", .F., .T. )
 

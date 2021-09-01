@@ -334,12 +334,12 @@ STATIC FUNCTION napuni_podatke( cRj, nGodina, nMjesec, cMjesecDo, ;
             nBruto += nBrPoj // ukupni bruto
 
 
-            nDoprIz := u_dopr_iz( nMBrutoST, cTipRada ) // ukupno dopr iz 31%
+            nDoprIz := ld_uk_doprinosi_iz( nMBrutoST, cTipRada ) // ukupno dopr iz 31%
             nUDopIz += nDoprIz
 
 
-            nDop_rad := u_dopr_iz( nBr_rad, cTipRada ) // doprinos za bol i rad
-            nDop_bol := u_dopr_iz( nBr_bol, cTipRada )
+            nDop_rad := ld_uk_doprinosi_iz( nBr_rad, cTipRada ) // doprinos za bol i rad
+            nDop_bol := ld_uk_doprinosi_iz( nBr_bol, cTipRada )
 
             nURad_izn += ( nBr_rad - nDop_rad )
             nUBol_izn += ( nBr_bol - nDop_bol )
@@ -352,7 +352,7 @@ STATIC FUNCTION napuni_podatke( cRj, nGodina, nMjesec, cMjesecDo, ;
             ENDIF
 
 
-            nPorPoj := izr_porez( nPorOsnP, "B" ) // porez je
+            nPorPoj := ld_izr_porez( nPorOsnP, "B" ) // porez je
             nPorez += nPorPoj
 
 
