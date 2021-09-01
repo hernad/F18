@@ -348,7 +348,6 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
          nBFo := ld_get_bruto_osnova( nTmp2, cRTipRada, nLicniOdbitak )
          add_to_a_benef( @aBeneficirani, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nBFO )
       ENDIF
-
       nBoMin := nBrutoOsnova
       IF cRTipRada $ " #nI#N"
          IF ld_calc_min_bruto_yes_no()

@@ -7,7 +7,7 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
    LOCAL nC1 := 20
    LOCAL cVarSort
    LOCAL GetList := {}
-   
+
    LOCAL  nIznosZaIsplatu, nIzbitiIzNeto, nIzbitiIzOstalo, nUneto2
 
    cIdRadn := Space( LEN_IDRADNIK )
