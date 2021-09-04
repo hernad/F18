@@ -86,7 +86,7 @@ FUNCTION u_dopr_na( nDopOsn, cRTipRada )
 
 
 
-FUNCTION obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
+FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
    LOCAL nIznos := 0
 

@@ -15,7 +15,7 @@
 // -------------------------------------
 // obracun i prikaz poreza
 // -------------------------------------
-FUNCTION obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, cTipPor )
+FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, cTipPor )
 
    LOCAL cAlgoritam := ""
    LOCAL nOsnova := 0

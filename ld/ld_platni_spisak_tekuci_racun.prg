@@ -8,7 +8,9 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
    LOCAL cVarSort
    LOCAL GetList := {}
 
-   LOCAL  nIznosZaIsplatu, nIzbitiIzNeto, nIzbitiIzOstalo, nUneto2
+   LOCAL nIznosZaIsplatu, nIzbitiIzNeto, nIzbitiIzOstalo, nUneto2
+   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
+   LOCAL cPrikazTODN := "N", lPrikazTO
 
    cIdRadn := Space( LEN_IDRADNIK )
    cIdRj := gLDRadnaJedinica
@@ -43,7 +45,7 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
    cDrugiDio := "D"
    cVarSort := fetch_metric( "ld_platni_spisak_sortiranje", my_user(), cVarSort )
 
-   Box(, 11, 50 )
+   Box(, 12, 50 )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY "Radna jedinica (prazno-sve): "  GET cIdRJ
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Mjesec: "  GET  nMjesec  PICT "99"
@@ -55,6 +57,10 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
    @ box_x_koord() + 7, box_y_koord() + 2 SAY "Banka        :" GET cIdBanka VALID P_Kred( @cIdBanka )
    @ box_x_koord() + 8, box_y_koord() + 2 SAY "Sortirati po(1-sifri,2-prezime+ime)"  GET cVarSort VALID cVarSort $ "12"  PICT "9"
    @ box_x_koord() + 11, box_y_koord() + 2 SAY "Spremiti izvjestaj za banku (D/N)" GET cZaBanku PICT "@!"
+
+   IF !Empty(cRekapTipoviOut)
+     @ box_x_koord() + 12, box_y_koord() + 2 SAY "Prikaz TO (D/N)" GET cPrikazTODN PICT "@!"
+   ENDIF
 
    READ
 
@@ -195,12 +201,11 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
          nC1 := PCol() + 1
 
 
-         ld_izbiti_iz_ukupno( @nIzbitiIzNeto, @nIzbitiIzOstalo )
+         ld_izbiti_iz_ukupno( cRekapTipoviOut, cPrikazTODN == "D", @nIzbitiIzNeto, @nIzbitiIzOstalo )
          // _uneto2 :=  _ubruto - _udopr  _uporez
          // _uiznos = _uneto2 + _uodbici
 
          IF nIzbitiIzNeto <> 0
-altd()
             nUNeto2 := ld_obracun_radnik_neto2(_IdRadn, _IdRj, _I01, _UNeto - nIzbitiIzNeto, _USati, _UlicOdb)
             nIznosZaIsplatu := nUneto2 + _uodbici - nIzbitiIzOstalo
          ELSE
@@ -356,10 +361,16 @@ FUNCTION ld_zagl_spisak_tekuci_racun()
    RETURN .T.
 
 
-FUNCTION ld_izbiti_iz_ukupno( nIzbitiIzNeto, nIzbitiIzOstalo )
+FUNCTION ld_izbiti_iz_ukupno( cRekapTipoviOut, lPrikazTO, nIzbitiIzNeto, nIzbitiIzOstalo )
 
    LOCAL i, cTprField
-   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
+   
+   LOCAL bIskljuciPrimanja := { | cTip | !Empty(cRekapTipoviOut) .AND. cTip $ cRekapTipoviOut }
+
+   IF lPrikazTO // rekapitulacija TO - samo primanja navedena u cRekaptTipoviOut, npr. "08,32"
+      bIskljuciPrimanja := { | cTip | !Empty(cRekapTipoviOut) .AND. !(cTip $ cRekapTipoviOut) }
+   ENDIF
+
    PRIVATE cTpr
 
    nIzbitiIzNeto := 0
@@ -372,7 +383,7 @@ FUNCTION ld_izbiti_iz_ukupno( nIzbitiIzNeto, nIzbitiIzOstalo )
       SELECT ld
 
       cTpr := "_I" + cTprField
-      IF !Empty(cRekapTipoviOut) .AND. cTprField $ cRekapTipoviOut
+      IF Eval(bIskljuciPrimanja, cTprField)
          // tip primanja npr. TO neoporezivi izbaciti
          IF tippr->uneto == "D"
             nIzbitiIzNeto += &cTpr

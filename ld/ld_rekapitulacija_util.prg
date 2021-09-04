@@ -81,12 +81,12 @@ FUNCTION o_ld_rekap()
    RETURN .T.
 
 
-FUNCTION ld_rekap_get_svi()
+FUNCTION ld_rekap_get_vars_svi(cRekapTipoviOut, cRekapSamoTODN)
 
    LOCAL GetList := {}
    PushWa()
 
-   Box(, 11 + iif( IsRamaGlas(), 1, 0 ), 75 )
+   Box(, 12 + iif( IsRamaGlas(), 1, 0 ), 75 )
    DO WHILE .T.
 
       @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Vrsta djelatnosti: "  GET cRTipRada VALID val_tiprada( cRTipRada ) PICT "@!"
@@ -102,6 +102,10 @@ FUNCTION ld_rekap_get_svi()
 
       @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Vrsta invaliditeta (0 sve)  : "  GET  nVrstaInvaliditeta  PICT "9" VALID nVrstaInvaliditeta == 0 .OR. valid_vrsta_invaliditeta( @nVrstaInvaliditeta )
       @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Stepen invaliditeta (>=)    : "  GET  nStepenInvaliditeta  PICT "999" VALID valid_stepen_invaliditeta( @nStepenInvaliditeta )
+
+      IF !Empty(cRekapTipoviOut)
+         @ box_x_koord() + 12, box_y_koord() + 2 SAY8 "Rekapitulacija samo TO? (D/N)"  GET cRekapSamoTODN VALID cRekapSamoTODN $ "DN"  PICT "@!"
+      ENDIF
 
       READ
       ClvBox()
@@ -120,13 +124,13 @@ FUNCTION ld_rekap_get_svi()
    RETURN .T.
 
 
-FUNCTION ld_rekap_get_rj()
+FUNCTION ld_rekap_get_vars_rj( cRekapTipoviOut, cRekapSamoTODN )
 
    LOCAL GetList := {}
 
    PushWa()
 
-   Box(, 10 + iif( IsRamaGlas(), 1, 0 ), 75 )
+   Box(, 11 + iif( IsRamaGlas(), 1, 0 ), 75 )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Vrsta djelatnosti: "  GET cRTipRada VALID val_tiprada( cRTipRada ) PICT "@!"
    @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "Radna jedinica: "  GET cIdRJ
@@ -140,6 +144,10 @@ FUNCTION ld_rekap_get_rj()
 
    @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Vrsta invaliditeta (0 sve)  : "  GET  nVrstaInvaliditeta  PICT "9" VALID nVrstaInvaliditeta == 0 .OR. valid_vrsta_invaliditeta( @nVrstaInvaliditeta )
    @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Stepen invaliditeta (>=)    : "  GET  nStepenInvaliditeta  PICT "999" VALID valid_stepen_invaliditeta( @nStepenInvaliditeta )
+
+   IF !Empty(cRekapTipoviOut)
+      @ box_x_koord() + 11, box_y_koord() + 2 SAY8 "Rekapitulacija samo TO? (D/N)"  GET cRekapSamoTODN VALID cRekapSamoTODN $ "DN"  PICT "@!"
+   ENDIF
 
    READ
 
@@ -877,11 +885,16 @@ FUNCTION zagl_rekapitulacija_plata_rj()
 
 
 
-FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut, nUNeto, nUSati, nIzbitiIzNeto, nIzbitiIzOstala )
+FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut, lRekapTO, nUNeto, nUSati, nIzbitiIzNeto, nIzbitiIzOstala )
 
    LOCAL i
 
    LOCAL cTipPrElem := ld_tip_primanja_el_nepogode()
+   LOCAL bIskljuciPrimanja := { | cTip | !Empty(cRekapTipoviOut) .AND. cTip $ cRekapTipoviOut }
+
+   IF lRekapTO // rekapitulacija TO - samo primanja navedena u cRekaptTipoviOut, npr. "08,32"
+      bIskljuciPrimanja := { | cTip | !Empty(cRekapTipoviOut) .AND. !(cTip $ cRekapTipoviOut) }
+   ENDIF
 
    cUNeto := "D"
 
@@ -893,7 +906,7 @@ FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut, nUNeto, nUSati, n
 
       cPom := PadL( AllTrim( Str( i ) ), 2, "0" )
 
-      IF !Empty(cRekapTipoviOut) .AND. cPom $ cRekapTipoviOut
+      IF Eval(bIskljuciPrimanja, cPom)
          // tip primanja npr. TO neoporezivi izbaciti
          loop
       ENDIF

@@ -15,12 +15,14 @@
 
 FUNCTION ld_rekapitulacija_sql( lSveRj )
 
-   LOCAL _a_benef := {}
+   LOCAL aBeneficirani := {}
    LOCAL i
    LOCAL hParams
-   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
+   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10)), lRekapTO := .F.
    LOCAL nIzbitiIzNeto, nIzbitiIzOstalo
    LOCAL nURadniciBrutoOsnova
+   LOCAL cRekapSamoTODN := "N"
+   LOCAL nULOdbitak
 
    PRIVATE nC1 := 20
    PRIVATE cTPNaz
@@ -67,16 +69,21 @@ FUNCTION ld_rekapitulacija_sql( lSveRj )
 
    IF lSveRj
       qqRJ := Space( 60 )
-      ld_rekap_get_svi()
+      ld_rekap_get_vars_svi( cRekapTipoviOut, @cRekapSamoTODN )
       IF ( LastKey() == K_ESC )
          RETURN .F.
       ENDIF
    ELSE
       qqRJ := Space( 2 )
-      ld_rekap_get_rj()
+      ld_rekap_get_vars_rj( cRekapTipoviOut, @cRekapSamoTODN )
       IF ( LastKey() == K_ESC )
          RETURN .F.
       ENDIF
+   ENDIF
+
+   lRekapTO := .F. // rekapitulacija samo TO
+   IF cRekapSamoTODN == "D"
+      lRekapTO := .T.
    ENDIF
 
    //SELECT ld
@@ -183,8 +190,8 @@ FUNCTION ld_rekapitulacija_sql( lSveRj )
       ENDIF
    ENDIF
 
-   ld_rekap_calc_totals( bUslov, lSveRj, @_a_benef, cRekapTipoviOut, ;
-           @nUSati, @nUNeto, @nUIznos, @nUOdbici, @nIzbitiIzNeto, @nIzbitiIzOstalo, @nURadniciBrutoOsnova)
+   ld_rekap_calc_totals( bUslov, lSveRj, @aBeneficirani, cRekapTipoviOut, lRekapTO, ;
+           @nUSati, @nUNeto, @nULOdbitak, @nUIznos, @nUOdbici, @nIzbitiIzNeto, @nIzbitiIzOstalo, @nURadniciBrutoOsnova)
 
    IF nLjudi == 0
       nLjudi := 9999999
@@ -216,13 +223,12 @@ FUNCTION ld_rekapitulacija_sql( lSveRj )
 
    cLinija := cTpLine
 
-   ld_ispis_po_tipovima_primanja( lSveRj, cRekapTipoviOut, nUNeto, nUSati, nIzbitiIzNeto, nIzbitiIzOstalo )
+   ld_ispis_po_tipovima_primanja( lSveRj, cRekapTipoviOut, lRekapTO, nUNeto, nUSati, nIzbitiIzNeto, nIzbitiIzOstalo )
 
    ? cTpLine
 
    nPosY := 60
 
-altd()
    ? "Ukupno (primanja sa obustavama):"
    @ PRow(), nPosY SAY nUNeto - nIzbitiIzNeto + nUOstalaPrimanja + nUOstalaPrimanjaMinus PICT gpici
    ?? "", gValuta
@@ -261,7 +267,7 @@ altd()
 
    cLinija := cDoprLine
 
-   obr_doprinos( nGodina, nMjesec, @nDopr, @nDopr2, cRTipRada, _a_benef )
+   ld_obr_doprinos( nGodina, nMjesec, @nDopr, @nDopr2, cRTipRada, aBeneficirani )
 
    nTOporDoh := nURadniciBrutoOsnova - nUDoprIz
 
@@ -271,6 +277,9 @@ altd()
 
    ? cMainLine
    ?U "4. LIČNI ODBICI UKUPNO"
+   IF lRekapTO
+      nULOdbitak := 0
+   ENDIF
    @ PRow(), 60 SAY nULOdbitak PICT gPici
 
    nPorOsn := nURadniciBrutoOsnova - nUDoprIz - nULOdbitak
@@ -297,7 +306,7 @@ altd()
    nPorB := 0
    nPorR := 0
 
-   nTOsnova := obr_porez( nGodina, nMjesec, @nPor, @nPor2, @nPorOps, @nPorOps2, @nUPorOl, "B" )    // obracunaj porez na bruto
+   nTOsnova := ld_obr_porez( nGodina, nMjesec, @nPor, @nPor2, @nPorOps, @nPorOps2, @nUPorOl, "B" )    // obracunaj porez na bruto
 
    nPorB := nPor
 
@@ -313,7 +322,6 @@ altd()
    nPorOp1 += nPorOps
    nPorOp2 += nPorOps2
    nPorOl1 += nUPorOl
-
    nNetoIspl := nUPorNROsnova
    nUZaIspl := nNetoIspl + nUOstalaPrimanjaMinus + nUOstalaPrimanja
 
@@ -326,7 +334,7 @@ altd()
    @ PRow(), 60 SAY nNetoIspl PICT gPici
    ? cMainLine
 
-   obr_porez( nGodina, nMjesec, @nPor, @nPor2, @nPorOps, @nPorOps2, @nUPorOl, "R" )
+   ld_obr_porez( nGodina, nMjesec, @nPor, @nPor2, @nPorOps, @nPorOps2, @nUPorOl, "R" )
 
    nPorR := nPor
    nPorez1 += nPor
@@ -439,8 +447,8 @@ STATIC FUNCTION nStr()
    RETURN .T.
 
 
-STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef, cRekapTipoviOut, ;
-             nUSati, nUNeto, nUIznos, nUOdbici, nIzbitiIzNeto, nIzbitiIzOstalo, nURadniciBrutoOsnova ) // po referenci
+STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, aBeneficirani, cRekapTipoviOut, lRekapTO, ;
+             nUSati, nUNeto, nULOdbitak, nUIznos, nUOdbici, nIzbitiIzNeto, nIzbitiIzOstalo, nURadniciBrutoOsnova ) // po referenci
    LOCAL i
    LOCAL cTpr
    LOCAL cOpis2
@@ -448,9 +456,12 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
    LOCAL nOsnovaNeto
    LOCAL nOsnNetoZaBrutoOsnIPorez, nOsnOstaloZaBrutoOsnIPorez
    LOCAL nRadnikBrutoOsnova
+   LOCAL bIskljuciPrimanja := { | cTip | !Empty(cRekapTipoviOut) .AND. cTip $ cRekapTipoviOut }
 
-   //LOCAL 
-   
+   IF lRekapTO // rekapitulacija TO - samo primanja navedena u cRekaptTipoviOut, npr. "08,32"
+      bIskljuciPrimanja := { | cTip | !Empty(cRekapTipoviOut) .AND. !(cTip $ cRekapTipoviOut) }
+   ENDIF
+
    nIzbitiIzNeto := 0
    nIzbitiIzOstalo := 0
 
@@ -504,8 +515,11 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
 
       nOsnNetoZaBrutoOsnIPorez := 0
       nOsnOstaloZaBrutoOsnIPorez := 0
-      nRadn_lod := _ulicodb
-      nKoefLO := nRadn_lod
+      nRadnikLicniOdbitak := _ulicodb
+      IF lRekapTO
+         nRadnikLicniOdbitak := 0
+      ENDIF
+      nKoefLO := nRadnikLicniOdbitak
 
       cTrosk := radn->trosk
       lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cTipRada $ "A#U"
@@ -518,7 +532,7 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
          SELECT ld
 
          cTpr := "_I" + cTprField
-         IF !Empty(cRekapTipoviOut) .AND. cTprField $ cRekapTipoviOut
+         IF Eval(bIskljuciPrimanja, cTprField)
             // tip primanja npr. TO neoporezivi izbaciti
             IF tippr->uneto == "D"
               nIzbitiIzNeto += &cTpr
@@ -616,7 +630,7 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
          nRadn_bbo := ld_get_bruto_osnova( nOsnNetoZaBrutoOsnIPorez - if( !Empty( gBFForm ), &gBFForm, 0 ), cTipRada, nKoefLO, nRSpr_koef )
          nURadn_bbo += nRadn_bbo
          // upisi osnovicu...
-         add_to_a_benef( @a_benef, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nRadn_bbo )
+         add_to_a_benef( @aBeneficirani, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nRadn_bbo )
       ENDIF
 
       // da bi dobio osnovicu za poreze
@@ -630,7 +644,7 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
       // ukupni doprinosi iz
       nURadn_diz += nRadn_diz
       // osnovica za poreze
-      nRadn_posn := ROUND2( ( nRadnikBrutoOsnova - nRadn_diz ) - nRadn_lod, gZaok2 )
+      nRadn_posn := ROUND2( ( nRadnikBrutoOsnova - nRadn_diz ) - nRadnikLicniOdbitak, gZaok2 )
 
       IF lInRS == .T.
          nRadn_posn := 0
@@ -659,7 +673,6 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
             SKIP 1
             LOOP
          ENDIF
-
          IF por->por_tip == "B"
             aPor := ld_obr_por( por->id, nPorOsnova, 0 )
          ELSE
@@ -669,7 +682,6 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
          // samo izracunaj total, ne ispisuj porez
 
          nTmpP := isp_por( aPor, cAlgoritam, "", .F. )
-
          IF nTmpP < 0
             nTmpP := 0
          ENDIF
@@ -712,7 +724,7 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
 
       FOR i := 1 TO cLDPolja // prolazak po tipovima primanja - drugi put
          cPom := PadL( AllTrim( Str( i ) ), 2, "0" )
-         IF !Empty(cRekapTipoviOut) .AND. cPom $ cRekapTipoviOut
+         IF Eval(bIskljuciPrimanja, cPom)
             // tip primanja npr. TO neoporezivi izbaciti
             loop
          ENDIF
@@ -735,8 +747,7 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, a_benef
 
       nUSati += _USati  // ukupno sati
       nUNeto += _UNeto  // ukupno neto iznos
-
-      nULOdbitak += nRadn_lod
+      nULOdbitak += nRadnikLicniOdbitak
       nUNetoOsnova += nOsnovaNeto // ukupno neto osnova
 
       IF is_radn_k4_bf_ide_u_benef_osnovu()
