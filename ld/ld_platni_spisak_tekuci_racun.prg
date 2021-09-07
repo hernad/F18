@@ -206,6 +206,10 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
          // _uiznos = _uneto2 + _uodbici
 
          IF nIzbitiIzNeto <> 0
+            IF cPrikazTODN == "D"
+               // kada je obracun samo TO nema licnog odbitka
+               _UlicOdb := 0
+            ENDIF
             nUNeto2 := ld_obracun_radnik_neto2(_IdRadn, _IdRj, _I01, _UNeto - nIzbitiIzNeto, _USati, _UlicOdb)
             nIznosZaIsplatu := nUneto2 + _uodbici - nIzbitiIzOstalo
          ELSE

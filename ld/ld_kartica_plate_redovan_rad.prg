@@ -105,12 +105,15 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
             ? cTprLine
          ELSE
             cUneto := "N"
-            altd()
             ? cTprLine
             // prikaz ukupno neto
             ? cLDLijevaMargina + "Ukupno:"
 
-            @ PRow(), nC1 + 8  SAY  nOsnNetoSati  PICT gPics
+            IF lKarticaTO
+               @ PRow(), nC1 + 8  SAY  _USati  PICT gPics // prikazati sate sa "full" kartice
+            ELSE   
+               @ PRow(), nC1 + 8  SAY  nOsnNetoSati  PICT gPics
+            ENDIF
             ?? Space( 1 ) + "sati"
             @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nOsnNeto PICT gpici
             ?? "", gValuta
@@ -324,7 +327,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
    IF gSihtarica == "D"
       nTmp := get_siht( .T., nGodina, nMjesec, ld->idradn, "" )
       IF ld->usati < nTmp
-         ?U "Greška: sati po šihtarici većnI od uk.sati plaće !"
+         ?U "Greška: sati po šihtarici veći od uk.sati plaće !"
       ENDIF
    ENDIF
 

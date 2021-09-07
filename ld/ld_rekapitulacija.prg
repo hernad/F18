@@ -86,9 +86,6 @@ FUNCTION ld_rekapitulacija_sql( lSveRj )
       lRekapTO := .T.
    ENDIF
 
-   //SELECT ld
-   //USE
-
    cObracun := Trim( cObracun )
 
    hParams := hb_Hash()
@@ -794,7 +791,6 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, aBenefi
       SKIP
    ENDDO // end petlja radnik
 
-   altd()
 
    RETURN .T.
 
