@@ -90,7 +90,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    LOCAL cDodDoprZ
    LOCAL t
    LOCAL nKoefLicniOdbici
-   LOCAL nULicOdbitak
+   //LOCAL nULicOdbitak
    LOCAL nP77
    // LOCAL nP78
    LOCAL nP79
@@ -117,6 +117,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 
    LOCAL nUkupnoBrutoOsnovicaSaMinLimit := 0
    LOCAL nUkupnoBrutoOsnovicaStvariUsluge := 0
+   LOCAL nRadnikBrutoOsnovicaSaMinLimit
 
    //LOCAL lPDNE := .F.
    LOCAL aOps := {}
@@ -128,6 +129,9 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    LOCAL nUNeto
    LOCAL cTekuciRadnikTipRada
    LOCAL nDodDoprZ, nDodDoprP
+   LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
+   LOCAL cPrikazTODN := "N", lPrikazTO
+   LOCAL nIzbitiIzNeto, nIzbitiIzOstalo, nRadnikUNeto
 
 
    IF ValType( cDoprIz3 ) != "C"
@@ -167,21 +171,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 
    ld_specifikacije_otvori_tabele()
 
-   /*
-   SELECT ops
-
-   IF ( FieldPos( "DNE" ) <> 0 )
-      GO TOP
-      DO WHILE !Eof()
-         AAdd( aOps, { id, dne, 0 } ) // sifra opstine, dopr.koje nema, neto
-         SKIP 1
-      ENDDO
-      lPDNE := .T.
-   ELSE
-      lPDNE := .F.
-   ENDIF
-*/
-
    cUslovIdRj := fetch_metric( "ld_specifikacija_rj", NIL, cUslovIdRj )
    cUslovOpstStan := fetch_metric( "ld_specifikacija_opcine", NIL, cUslovOpstStan )
    cUslovIdRj := PadR( cUslovIdRj, 100 )
@@ -190,7 +179,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    dDatIspl := Date()
 
    DO WHILE .T.
-      Box(, 23 + iif( cLdSpec2001GrupePoslovaAutoRucno == "1", 0, 1 ), 75 )
+      Box(, 24 + iif( cLdSpec2001GrupePoslovaAutoRucno == "1", 0, 1 ), 75 )
 
       @ box_x_koord() + 1, box_y_koord() + 2 SAY "Radna jedinica (prazno-sve): " GET cUslovIdRj PICT "@!S15"
       @ box_x_koord() + 1, Col() + 1 SAY "Djelatnost" GET cDjelatnost VALID val_tiprada( cDjelatnost ) PICT "@!"
@@ -243,6 +232,10 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       @ box_x_koord() + 21, box_y_koord() + 2 SAY "Isplata: 'A' doprinosi+porez, 'B' samo doprinosi, 'C' samo porez" GET cVrstaIsplate VALID cVrstaIsplate $ "ABC" PICT "@!"
       @ box_x_koord() + 22, box_y_koord() + 2 SAY "Polje 11/12/13/14 ?" GET cCheck11_14 VALID cCheck11_14 $ "  #11#12#13#14" PICT "@!"
 
+      IF !Empty(cRekapTipoviOut)
+         @ box_x_koord() + 23, box_y_koord() + 2 SAY "Prikaz TO (D/N)" GET cPrikazTODN PICT "@!"
+      ENDIF
+
       READ
 
       clvbox()
@@ -255,6 +248,11 @@ FUNCTION ld_specifikacija_plate_obr_2001()
          EXIT
       ENDIF
    ENDDO
+
+   lPrikazTO := .F.
+   IF cPrikazTODN == "D"
+      lPrikazTO := .T.
+   ENDIF
 
    set_metric( "org_naziv", NIL, cFirmNaz )
    set_metric( "ld_firma_adresa", NIL, cFirmAdresa )
@@ -294,7 +292,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 
    ld_porezi_i_doprinosi_iz_sezone( nGodina, nMjesec )
 
-
    hRec := hb_Hash()
    oReport := YargReport():New( iif( cRepSr == "D", "ld_obr_2001-A", "ld_obr_2001" ), "xlsx" )
 
@@ -322,7 +319,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    CASE cCheck11_14 == "14"
       hRec[ "check_14" ] := "X"
    ENDCASE
-
 
    hRec[ "d_od_1" ] := SubStr( PadL( AllTrim( Str( nDanOd, 2 ) ), 2, "0" ), 1, 1 )
    hRec[ "d_od_2" ] := SubStr( PadL( AllTrim( Str( nDanOd, 2 ) ), 2, "0" ), 2, 1 )
@@ -361,7 +357,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    hRec[ "j12" ] := SubStr( cMatBR, 12, 1 )
    hRec[ "j13" ] := SubStr( cMatBR, 13, 1 )
 
-
    hRec[ "d_up_1" ] := SubStr( PadL( AllTrim( Str( Day( dDatIspl ), 2 ) ), 2, "0" ), 1, 1 )
    hRec[ "d_up_2" ] := SubStr( PadL( AllTrim( Str( Day( dDatIspl ), 2 ) ), 2, "0" ), 2, 1 )
 
@@ -377,14 +372,10 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 
    ld_pozicija_parobr( nMjesec, nGodina, cObracun, Left( cUslovIdRj, 2 ) )
 
-   // SELECT LD
-   // SET ORDER TO TAG ( ld_index_tag_vise_obracuna( "2" ) )
-
    seek_ld_2( NIL, nGodina, nMjesec )
-   // GO TOP
-   // HSEEK Str( nGodina, 4, 0 ) + Str( nMjesec, 2, 0 )
 
 
+   // --- SET FILTER START --------------------------------------------------------------------------
    IF !Empty( cUslovIdRj )
       cFilt += ( ".and." + cFilterRj )
    ENDIF
@@ -395,7 +386,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 
    SET FILTER TO &cFilt
    GO TOP
-
 
    cObracun := Trim( cObracun )
    cDoprOO1 := ld_izrezi_string( "D->", 2, @cNOO1 )
@@ -407,7 +397,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    cDodDoprZ := ld_izrezi_string( "D->", 2, @cDodatniDoprZdravstvo )
 
    ld_pozicija_parobr( nMjesec, nGodina, cObracun, Left( cUslovIdRj, 2 ) )
-
    seek_ld_2( NIL, nGodina, nMjesec )
 
    IF !Empty( cUslovIdRj )
@@ -420,20 +409,20 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 
    SET FILTER TO &cFilt
    GO TOP
-
-
+  
    IF Eof()
       MsgBeep( "Obračun za ovaj mjesec ne postoji !" )
       // my_close_all_dbf()
       RETURN .T.
    ENDIF
+   // ----- SET FILTER END ----------------------------------------------------------------
 
    nUNeto := 0
    nUNetoOsnova := 0
    nPorNaPlatu := 0
    nKoefLicniOdbici := 0
    nBrojZaposlenih := 0
-   nULicOdbitak := 0
+   //nULicOdbitak := 0
    nDodDoprZ := 0
    nDodDoprP := 0
 
@@ -446,9 +435,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
          nRSpr_koef := radn->sp_koef
       ENDIF
 
-      //IF cTekuciRadnikTipRada $ "I#N" .AND.
-         //
-      //ELSE
+      // ---- WHILE LOOP LD FILTER START --------------------
       IF !Empty( cDjelatnost ) .AND. cDjelatnost <> cTekuciRadnikTipRada
          info_bar( "ld_spec", ld->idradn + " djelatnost:" + cDjelatnost + " <>  radn: " + cTekuciRadnikTipRada + " SKIP!" )
          SELECT ld
@@ -475,53 +462,48 @@ FUNCTION ld_specifikacija_plate_obr_2001()
          SKIP 1
          LOOP
       ENDIF
+      // ---- WHILE LOOP LD FILTER --- END  --------------------
 
       nKoefLicniOdbici := ld->ulicodb
-      nULicOdbitak += nKoefLicniOdbici
+      IF lPrikazTO
+         nKoefLicniOdbici := 0
+      ENDIF
+
+      //nULicOdbitak += nKoefLicniOdbici
       nP77 := iif( !Empty( cMRad ), LD->&( "I" + cMRad ), 0 )
-      // nP78 := iif( !Empty( cPorOl ), LD->&( "I" + cPorOl ), 0 )
       nP79 := 0
 
-/*
-      IF !Empty( cBolPr ) .OR. !Empty( cBolPr )
-         FOR t := 1 TO 99
-            cPom := IF( t > 9, Str( t, 2 ), "0" + Str( t, 1 ) )
-            IF LD->( FieldPos( "I" + cPom ) ) <= 0
-               EXIT
-            ENDIF
-            nP79 += IF( cPom $ cBolPr, LD->&( "I" + cPom ), 0 )
-         NEXT
-      ENDIF
-*/
+      ld_izbiti_iz_ukupno( cRekapTipoviOut, cPrikazTODN == "D", @nIzbitiIzNeto, @nIzbitiIzOstalo )
 
       nP80 := nP81 := nP82 := nP83 := nP84 := nP85 := 0
+      nRadnikUNeto := ld->uneto - nIzbitiIzNeto
 
-      IF LD->uneto > 0  // zbog bol.preko 42 dana koje ne ide u neto
+      IF nRadnikUNeto > 0  // zbog bol.preko 42 dana koje ne ide u neto
          IF Len( aPom ) < 1 .OR. ( nPom := AScan( aPom, {| x | x[ 1 ] == LD->brbod } ) ) == 0
-            AAdd( aPom, { LD->brbod, 1, nP77, LD->uneto } )
+            AAdd( aPom, { LD->brbod, 1, nP77, nRadnikUNeto } )
          ELSE
             IF !( ld_vise_obracuna() .AND. Empty( cObracun ) .AND. LD->obr $ "23456789" )
                aPom[ nPom, 2 ] += 1  // broj radnika
             ENDIF
             aPom[ nPom, 3 ] += nP77  // minuli rad
-            aPom[ nPom, 4 ] += LD->uneto // neto
+            aPom[ nPom, 4 ] += nRadnikUNeto // neto
          ENDIF
       ENDIF
 
-
       nPrimanjaStvariUsluge := 0
+      // "Prim.u usl.ili dobrima (npr: 12;14;)" - cPrimanjaStvariUsluge
       IF !Empty( cPrimanjaStvariUsluge )
          FOR t := 1 TO 99
-            cPom := IF( t > 9, Str( t, 2 ), "0" + Str( t, 1 ) )
+            cPom := IIF( t > 9, Str( t, 2 ), "0" + Str( t, 1 ) )
             IF LD->( FieldPos( "I" + cPom ) ) <= 0
                EXIT
             ENDIF
-            nPrimanjaStvariUsluge += IF( cPom $ cPrimanjaStvariUsluge, LD->&( "I" + cPom ), 0 )
+            nPrimanjaStvariUsluge += IIF( cPom $ cPrimanjaStvariUsluge, LD->&( "I" + cPom ), 0 )
          NEXT
       ENDIF
 
-      nUNeto += ld->uneto
-      nNetoOsn := Max( ld->uneto, PAROBR->prosld * gPDLimit / 100 )
+      nUNeto += nRadnikUNeto
+      nNetoOsn := Max( nRadnikUNeto, PAROBR->prosld * gPDLimit / 100 )
       nUNetoOsnova += nNetoOsn
 
       // prvo doprinosi i bruto osnova
@@ -532,31 +514,25 @@ FUNCTION ld_specifikacija_plate_obr_2001()
          nRadnikBrutoStvariUsluge := ld_get_bruto_osnova( nPrimanjaStvariUsluge, cTekuciRadnikTipRada, nKoefLicniOdbici, nRSpr_koef )
       ENDIF
 
-      nMPojBrOsn := nRadnikBrutoOsnovica
-
+      nRadnikBrutoOsnovicaSaMinLimit := nRadnikBrutoOsnovica
       IF ld_calc_min_bruto_yes_no()
-         nMPojBrOsn := ld_min_bruto_osnova( nRadnikBrutoOsnovica, field->usati ) // minimalni bruto
+         nRadnikBrutoOsnovicaSaMinLimit := ld_min_bruto_osnova( nRadnikBrutoOsnovica, field->usati ) // minimalni bruto
       ENDIF
 
       nBrutoOsnova += nRadnikBrutoOsnovica
       nUkupnoBrutoOsnovicaStvariUsluge += nRadnikBrutoStvariUsluge
-      nUkupnoBrutoOsnovicaSaMinLimit += nMPojBrOsn
+      nUkupnoBrutoOsnovicaSaMinLimit += nRadnikBrutoOsnovicaSaMinLimit
 
 
       aBeneficirani := {}
-
-      IF is_radn_k4_bf_ide_u_benef_osnovu()     // beneficirani radnici
-
+      IF is_radn_k4_bf_ide_u_benef_osnovu()  // beneficirani radnici
          cFFTmp := gBFForm
          gBFForm := StrTran( gBFForm, "_", "" )
 
          nPojBrBenef := ld_get_bruto_osnova( nNetoOsn - IF( !Empty( gBFForm ), &gBFForm, 0 ), cTekuciRadnikTipRada, nKoefLicniOdbici, nRSpr_koef )
-
          nBrutoOsBenef += nPojBrBenef 
          add_to_a_benef( @aBeneficirani, AllTrim( radn->k3 ), ld_beneficirani_stepen(), nPojBrBenef )
-
          gBFForm := cFFtmp
-
       ENDIF
 
       nPom := nUkupnoBrutoOsnovicaSaMinLimit
@@ -564,46 +540,33 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       nKoefDodatniDoprinosZdravstvo := 0
       nKoefDodatniDoprinosPio := 0
 
+      // --- DOPRINOSI START ---------------------------------------------------------------------------------
       o_dopr()
       GO TOP
       DO WHILE !Eof()
 
-/*
-         IF DOPR->poopst == "1" .AND. lPDNE
-            nBOO := 0
-            FOR i := 1 TO Len( aOps )
-               IF !( DOPR->id $ aOps[ i, 2 ] )
-                  nBOO += aOps[ i, 3 ]
-               ENDIF
-            NEXT
-            nBOO := ld_get_bruto_osnova( nBOO, cTekuciRadnikTipRada, nKoefLicniOdbici )
-         ELSE
-         */
-         nBOO := nUkupnoBrutoOsnovicaSaMinLimit
-         // ENDIF
-
-         IF ID $ cDodDoprP
-            nKoefDodatniDoprinosPio += iznos
+         IF dopr->ID $ cDodDoprP
+            nKoefDodatniDoprinosPio += dopr->iznos
             IF !Empty( field->idkbenef )
-               nDodDoprP += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * iznos / 100 ), gZaok2 )
+               nDodDoprP += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * dopr->iznos / 100 ), gZaok2 )
             ELSE
-               nDodDoprP += ROUND2( Max( DLIMIT, nBOO * iznos / 100 ), gZaok2 )
+               nDodDoprP += ROUND2( Max( DLIMIT, nUkupnoBrutoOsnovicaSaMinLimit * dopr->iznos / 100 ), gZaok2 )
             ENDIF
          ENDIF
 
-         IF ID $ cDodDoprZ
-            nKoefDodatniDoprinosZdravstvo += iznos
+         IF dopr->ID $ cDodDoprZ
+            nKoefDodatniDoprinosZdravstvo += dopr->iznos
             IF !Empty( field->idkbenef )
                // beneficirani
-               nDodDoprZ += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * iznos / 100 ), gZaok2 )
+               nDodDoprZ += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * dopr->iznos / 100 ), gZaok2 )
             ELSE
-               nDodDoprZ += ROUND2( Max( DLIMIT, nBOO * iznos / 100 ), gZaok2 )
+               nDodDoprZ += ROUND2( Max( DLIMIT, nUkupnoBrutoOsnovicaSaMinLimit * dopr->iznos / 100 ), gZaok2 )
             ENDIF
          ENDIF
 
-         SKIP 1
-
+         SKIP
       ENDDO
+      // --- DOPRINOSI END ---------------------------------------------------------------------------------
 
       nKoefDopr1X := find_field_by_id( "dopr", cDoprIz1, "iznos" )
       nKoefDopr2X := find_field_by_id( "dopr", cDoprIz2, "iznos" )
@@ -614,7 +577,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       nKoefDopr7X := find_field_by_id( "dopr", cDoprNa3, "iznos" )
 
       //nPom := nKoefDopr1X + nKoefDopr2X //+ nKoefDopr3X
-
 
       hRec[ "stopa_16" ] := FormNum2( nKoefDopr1X, 16, cPictureIznos ) + "%"  // PIO iz
       hRec[ "stopa_17" ] := FormNum2( nKoefDopr2X, 16, cPictureIznos ) + "%"  // zdravstvo iz
@@ -628,13 +590,11 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       hRec[ "stopa_23" ] := FormNum2( nKoefDodatniDoprinosPio, 16, cPictureIznos ) + "%"  // dodatni PIO i invalid
       hRec[ "stopa_24" ] := FormNum2( nKoefDodatniDoprinosZdravstvo, 16, cPictureIznos ) + "%"  // dodatni zdravstvo
 
+      nPojDoprIZ := round2( ( nRadnikBrutoOsnovicaSaMinLimit * nKoefDopr1X / 100 ), gZaok2 ) + ;
+         round2( ( nRadnikBrutoOsnovicaSaMinLimit * nKoefDopr2X / 100 ), gZaok2 ) + ;
+         round2( ( nRadnikBrutoOsnovicaSaMinLimit * nKoefDopr3X / 100 ), gZaok2 )
 
-
-      nPojDoprIZ := round2( ( nMPojBrOsn * nKoefDopr1X / 100 ), gZaok2 ) + ;
-         round2( ( nMPojBrOsn * nKoefDopr2X / 100 ), gZaok2 ) + ;
-         round2( ( nMPojBrOsn * nKoefDopr3X / 100 ), gZaok2 )
-
-      nRadnikPoreznaOsnovica := ( nRadnikBrutoOsnovica - nPojDoprIz ) - nKoefLicniOdbici
+      nRadnikPoreznaOsnovica := nRadnikBrutoOsnovica - nPojDoprIz - nKoefLicniOdbici
 
       IF nRadnikPoreznaOsnovica >= 0 .AND. radn_oporeziv( radn->id, ld->idrj )
          // osnovica za porez na platu
@@ -651,6 +611,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       nPorNaPlatu := 0
       nPorezOstali := 0
 
+      // -------------------- POREZI START --------------------------------------------------------
       o_por()   // porez na platu i ostali porez
       GO TOP
       DO WHILE !Eof()
@@ -667,6 +628,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       ENDDO
 
       SELECT LD
+      // -------------------- POREZI END --------------------------------------------------------
 
       nBrojZaposlenih++
       // nPorOlaksice += nP78
@@ -678,16 +640,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       nOstOb3 += nP84
       nOstOb4 += nP85
 
-/*
-      IF lPDNE
-         nOps := AScan( aOps, {| x | x[ 1 ] == RADN->idopsst } )
-         IF nOps > 0
-            aOps[ nOps, 3 ] += Max( ld->uneto, PAROBR->prosld * gPDLimit / 100 )
-         ELSE
-            AAdd( aOps, { RADN->idopsst, "", Max( ld->uneto, PAROBR->prosld * gPDLimit / 100 ) } )
-         ENDIF
-      ENDIF
-*/
       ++nObrCount
 
       SKIP 1
@@ -741,63 +693,12 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    // Ostale obaveze = OstaleObaveze.1
 
 
-/*
-   ASort( aPom, , , {| x, y | x[ 1 ] > y[ 1 ] } )
-   FOR i := 1 TO Len( aPom )
-      IF cLdSpec2001GrupePoslovaAutoRucno == "1"
-         IF i <= nGrupaPoslova
-            aSpec[ i, 1 ] := aPom[ i, 1 ]
-            aSpec[ i, 2 ] := aPom[ i, 2 ]
-            aSpec[ i, 3 ] := aPom[ i, 3 ]
-            aSpec[ i, 4 ] := aPom[ i, 4 ]
-         ELSE
-            aSpec[ nGrupaPoslova, 2 ] += aPom[ i, 2 ]
-            aSpec[ nGrupaPoslova, 3 ] += aPom[ i, 3 ]
-            aSpec[ nGrupaPoslova, 4 ] += aPom[ i, 4 ]
-         ENDIF
-      ELSE     // gcLdSpec2001GrupePoslovaAutoRucno=="2"
-         DO CASE
-         CASE aPom[ i, 1 ] <= nLimG5
-            aSpec[ 5, 1 ] := aPom[ i, 1 ]
-            aSpec[ 5, 2 ] += aPom[ i, 2 ]
-            aSpec[ 5, 3 ] += aPom[ i, 3 ]
-            aSpec[ 5, 4 ] += aPom[ i, 4 ]
-         CASE aPom[ i, 1 ] <= nLimG4
-            aSpec[ 4, 1 ] := aPom[ i, 1 ]
-            aSpec[ 4, 2 ] += aPom[ i, 2 ]
-            aSpec[ 4, 3 ] += aPom[ i, 3 ]
-            aSpec[ 4, 4 ] += aPom[ i, 4 ]
-         CASE aPom[ i, 1 ] <= nLimG3
-            aSpec[ 3, 1 ] := aPom[ i, 1 ]
-            aSpec[ 3, 2 ] += aPom[ i, 2 ]
-            aSpec[ 3, 3 ] += aPom[ i, 3 ]
-            aSpec[ 3, 4 ] += aPom[ i, 4 ]
-         CASE aPom[ i, 1 ] <= nLimG2
-            aSpec[ 2, 1 ] := aPom[ i, 1 ]
-            aSpec[ 2, 2 ] += aPom[ i, 2 ]
-            aSpec[ 2, 3 ] += aPom[ i, 3 ]
-            aSpec[ 2, 4 ] += aPom[ i, 4 ]
-         CASE aPom[ i, 1 ] <= nLimG1
-            aSpec[ 1, 1 ] := aPom[ i, 1 ]
-            aSpec[ 1, 2 ] += aPom[ i, 2 ]
-            aSpec[ 1, 3 ] += aPom[ i, 3 ]
-            aSpec[ 1, 4 ] += aPom[ i, 4 ]
-         ENDCASE
-      ENDIF
-      aSpec[ nGrupaPoslova + 1, 2 ] += aPom[ i, 2 ]; aSpec[ nGrupaPoslova + 1, 3 ] += aPom[ i, 3 ]
-      aSpec[ nGrupaPoslova + 1, 4 ] += aPom[ i, 4 ]
-   NEXT
-
-*/
-
-
    o_por()
    GO TOP
    SEEK "01"
 
    nPom := nPorNaPlatu - nPorOlaksice // efektivno porez na dohodak
    hRec[ "iznos_29" ] :=   FormNum2( isplata_poreza_kontrola_iznosa( nPom, cVrstaIsplate ), 16, cPictureIznos )
-
 
    nPorOlaksice   := Abs( nPorOlaksice   )
    nBolPreko      := Abs( nBolPreko      )
@@ -871,20 +772,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
 //   nPom := nPorNaPlatu - nPorOlaksice
 //   nPom := nPorezOstali
 //   nPom := nOstaleObaveze + nPorezOstali
-
-/*
-   // ukupno za RS obaveze
-
-   IF cVrstaIsplate == "A"
-      nPom := nDopr1x + nDopr5x + nD21a + nD22a + nPorNaPlatu
-
-   ELSEIF cVrstaIsplate == "B"
-      nPom := nDopr1x + nDopr5x + nD21a + nD22a
-
-   ELSEIF cVrstaIsplate == "C"
-      nPom := nPorNaPlatu
-   ENDIF
-*/
 
    my_close_all_dbf()
    hb_cdpSelect( "SL852" )

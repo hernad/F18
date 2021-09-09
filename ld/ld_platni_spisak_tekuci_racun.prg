@@ -23,10 +23,8 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
    nProcenat := 100
    nZkk := gZaok
 
-   // o_kred()
    o_ld_rj()
    o_ld_radn()
-   // select_o_ld()
 
    PRIVATE cIsplata := ""
    PRIVATE cLokacija
@@ -167,7 +165,6 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
       ENDIF
 
       Eval( bZagl )
-
       nT1 := 0
       nT2 := 0
       nT3 := 0
@@ -191,7 +188,6 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
             LOOP
          ENDIF
 
-
          ? Str( ++nRbr, 4 ) + ".", idradn, radn->matbr, RADNIK_PREZ_IME
 
          IF cZaBanku == "D"
@@ -199,7 +195,6 @@ FUNCTION ld_platni_spisak_tekuci_racun( cVarijanta )
          ENDIF
 
          nC1 := PCol() + 1
-
 
          ld_izbiti_iz_ukupno( cRekapTipoviOut, cPrikazTODN == "D", @nIzbitiIzNeto, @nIzbitiIzOstalo )
          // _uneto2 :=  _ubruto - _udopr  _uporez
@@ -386,7 +381,7 @@ FUNCTION ld_izbiti_iz_ukupno( cRekapTipoviOut, lPrikazTO, nIzbitiIzNeto, nIzbiti
       select_o_tippr( cTprField )
       SELECT ld
 
-      cTpr := "_I" + cTprField
+      cTpr := "LD->I" + cTprField  // npr. ld->i01
       IF Eval(bIskljuciPrimanja, cTprField)
          // tip primanja npr. TO neoporezivi izbaciti
          IF tippr->uneto == "D"
