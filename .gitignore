@@ -1,3 +1,5 @@
+.x*
+F18-klijent.exe
 *.log
 cloc
 .git/
