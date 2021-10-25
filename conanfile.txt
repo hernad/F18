@@ -33,3 +33,5 @@ libpq:with_openssl=False
 libxml2:shared=False
 libxslt:shared=False
 minizip:bzip2=True
+minizip:shared=False
+minizip:tools=True
