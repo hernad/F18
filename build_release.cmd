@@ -114,7 +114,7 @@ echo ======================================================
 
 hbmk2 F18 -clean
 REM hbmk2 F18 -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
-hbmk2 F18  -workdir=.b!BUILD_ARCH! -trace-
+hbmk2 F18  -workdir=.%ARCH%r -trace-
 
 REM copy F18.exe F18_Windows_%VERSION%
 REM echo pravim F18_Windows_%VERSION%.gz ...

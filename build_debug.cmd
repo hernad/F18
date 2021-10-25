@@ -54,36 +54,36 @@ REM    echo run: Native cmd tools for MSVC [c:\dev\x64_VS_2019.lnk] or [c:\dev\x
 REM    goto end
 REM )
 
-IF [%BUILD_ARCH%]==[64] (
-
-    (cl 2>&1 | %CYGWIN%grep.exe -c "for x64")  > tmpFile
-    set /p CL_X64= < tmpFile
-    del tmpFile
-
-    IF [%CL_X64%]==[1] (
-        echo ===== MSVC cl x64 ok =============
-    ) ELSE (
-        echo ERROR cl x64 nije u PATH-u!
-        echo run c:\dev\x64_VS_2019.lnk
-        goto end
-    )
-
-) ELSE (
-
-    (cl 2>&1 | %CYGWIN%grep.exe -c "for x86")  > tmpFile
-    set /p CL_X86= < tmpFile
-    del tmpFile 
-
-    IF [%CL_X86%]==[1] (
-        echo ====== MSVC cl x86 ok =========
-    ) ELSE (
-        echo ERROR cl x86 nije u PATH-u!
-        echo run c:\dev\x86_VS_2019.lnk
-        goto end
-    )
-
-
-)
+REM IF [%BUILD_ARCH%]==[64] (
+REM 
+REM     (cl 2>&1 | %CYGWIN%grep.exe -c "for x64")  > tmpFile
+REM     set /p CL_X64= < tmpFile
+REM     del tmpFile
+REM 
+REM     IF [%CL_X64%]==[1] (
+REM         echo ===== MSVC cl x64 ok =============
+REM     ) ELSE (
+REM         echo ERROR cl x64 nije u PATH-u!
+REM         echo run c:\dev\x64_VS_2019.lnk
+REM         goto end
+REM     )
+REM 
+REM ) ELSE (
+REM 
+REM     (cl 2>&1 | %CYGWIN%grep.exe -c "for x86")  > tmpFile
+REM     set /p CL_X86= < tmpFile
+REM     del tmpFile 
+REM 
+REM     IF [%CL_X86%]==[1] (
+REM         echo ====== MSVC cl x86 ok =========
+REM     ) ELSE (
+REM         echo ERROR cl x86 nije u PATH-u!
+REM         echo run c:\dev\x86_VS_2019.lnk
+REM         goto end
+REM     )
+REM 
+REM 
+REM )
 
 
 set LINE=#define F18_VER_DEFINED
@@ -126,7 +126,7 @@ echo ======================================================
 
 REM hbmk2 F18 -clean
 REM hbmk2 F18 -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
-hbmk2 F18 -workdir=.hbdbg -trace-
+hbmk2 F18 -workdir=.%ARCH%d -trace-
 
 REM copy F18.exe F18_Windows_%VERSION%
 REM echo pravim F18_Windows_%VERSION%.gz ...
