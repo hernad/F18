@@ -1,5 +1,6 @@
 [requires]
 zlib/1.2.11
+minizip/1.2.11
 libpng/1.6.37
 boost/1.72.0
 libcurl/7.69.1
@@ -31,3 +32,6 @@ libpq:with_zlib=True
 libpq:with_openssl=False
 libxml2:shared=False
 libxslt:shared=False
+minizip:bzip2=True
+minizip:shared=False
+minizip:tools=True
