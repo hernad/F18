@@ -1,7 +1,16 @@
 @echo off
 
-set HB_ARCHITECTURE=win
-set HB_COMPILER=msvc
+REM set CYGWIN=c:\cygwin64\bin\
+set CYGWIN=
+
+REM set HB_ARCHITECTURE=win
+REM IF [%ARCH%]==[x64] (
+REM   set HB_COMPILER=msvc64
+REM ) ELSE (
+REM    set HB_COMPILER=msvc
+REM )
+set F18_GT_CONSOLE=
+set F18_GT_GUI=1
 
 set F18_DEBUG=
 set F18_POS=1
@@ -22,10 +31,10 @@ type include\f18_ver.ch
 
 
 REM hbmk2 F18 -clean -workdir=.b32
-hbmk2 F18 -trace- -ldflag+=/NODEFAULTLIB:LIBCMT -workdir=.b32
+hbmk2 F18 -trace- -ldflag+=/NODEFAULTLIB:LIBCMT -workdir=.%ARCH%r
 
 copy /y F18.exe F18_2.exe
-c:\cygwin64\bin\gzip --force F18.exe
+%CYGWIN%gzip --force F18.exe
 
 echo pravim F18_Windows_%VERSION%.gz ...
 copy /y F18.exe.gz F18_Windows_%VERSION%.gz

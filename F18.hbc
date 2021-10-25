@@ -1,10 +1,10 @@
 #10.8 macosc/darvin ne treba ovo
 #{mingw|mingwce|(gcc&(linux))}libs=supc++
 
-libs=hbct
-{!unix}libs=hbmzip minizip charset iconv icudt icuin icuio icutu icuuc
-
 libs=hbtip
+{win}libs=charset iconv icudt icuin icuio icutu icuuc
+libs=hbmzip minizip
+{msvc64}libs=bz2
 
 {F18_GT_CONSOLE&unix}gt=gtnul
 
@@ -14,19 +14,27 @@ libs=hbtip
 {F18_GT_CONSOLE&allwin}gt=gtwin
 {!F18_GT_CONSOLE&allwin}gt=gtwvt
 
-#libs=hbpgsql
-#{unix}libs=pq
-#{win}libs=libpq
-#libs=sddpg
-
-#{mingw}libpaths=c:/msys32/mingw32/lib
 #{darwin}libpaths=/Library/PostgreSQL/9.1/lib
 
-{msvc64}libpaths=c:\dev\conan\deploy\x64\zlib\lib
+{msvc64}libpaths=conan\deploy\x86_64\zlib\lib
+{msvc64}libpaths=conan\deploy\x86_64\libiconv\lib
+{msvc64}libpaths=conan\deploy\x86_64\icu\lib
+{msvc64}libs=secur32
+
+{msvc64}libpaths=c:\dev\F18_conan_deploy\x86_64\zlib\lib
+{msvc64}libpaths=c:\dev\F18_conan_deploy\x86_64\bzip2\lib
+{msvc64}libpaths=c:\dev\F18_conan_deploy\x86_64\minizip\lib
+{msvc64}libpaths=c:\dev\F18_conan_deploy\x86_64\libiconv\lib
+{msvc64}libpaths=c:\dev\F18_conan_deploy\x86_64\icu\lib
 
 {msvc}libpaths=conan\deploy\x86\zlib\lib
 {msvc}libpaths=conan\deploy\x86\libiconv\lib
 {msvc}libpaths=conan\deploy\x86\icu\lib
 {msvc}libs=secur32
+
+{msvc}libpaths=c:\dev\F18_conan_deploy\x86\zlib\lib
+{msvc}libpaths=c:\dev\F18_conan_deploy\x86\libiconv\lib
+{msvc}libpaths=c:\dev\F18_conan_deploy\x86\icu\lib
+
 
 mt=yes

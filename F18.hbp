@@ -42,13 +42,14 @@ reports/*.prg
 {linux}-lm
 
 
-{linux}-static
-{linux}hbct.hbc
-{linux}hbmzip.hbc
-{linux}hbtip.hbc
+-static
+
+hbct.hbc
+hbmzip.hbc
+hbtip.hbc
 #sddpg contains hbpgsql.hbc, so no need to double on that
-{linux}sddpg.hbc
-{linux}rddmisc.hbc
-{linux}hbhpdf.hbc
+sddpg.hbc
+rddmisc.hbc
+hbhpdf.hbc
 
 hbxlsxwriter.hbc

@@ -1,7 +1,12 @@
 @echo off
 
-set HB_ARCHITECTURE=win
-set HB_COMPILER=msvc
+REM set HB_ARCHITECTURE=win
+REM 
+REM IF [%ARCH%]==[x64] (
+REM   set HB_COMPILER=msvc64
+REM ) ELSE (
+REM    set HB_COMPILER=msvc
+REM )
 
 set F18_POS=1
 set F18_DEBUG=1
@@ -20,7 +25,7 @@ echo #define F18_VER_DATE  "%DATE%" >> include\f18_ver.ch
 
 type include\f18_ver.ch
 
-hbmk2 F18 -workdir=.bd -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
+hbmk2 F18 -workdir=.%ARCH%d -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
 
 
 :end
