@@ -3,6 +3,9 @@
 REM https://stackoverflow.com/questions/22278456/enable-and-disable-delayed-expansion-what-does-it-do/22278518#22278518
 setlocal enableDelayedExpansion
 
+set CYGWIN=
+REM set CYGWIN=c:\cygwin64\bin\
+
 del /F /Q F18-klijent.exe
 
 IF EXIST F18-klijent.exe (
@@ -14,7 +17,8 @@ set F18_DEBUG=
 set F18_POS=1
 SET F18_GT_CONSOLE=1
 
-set HB_DBG=c:\dev\F18
+
+set HB_DBG=%cd%
 set HB_DBG_PATH=%HB_DBG%\common;%HB_DBG%\pos;%HB_DBG%\kalk;%HB_DBG%\fin;%HB_DBG%\fakt;%HB_DBG%\os;%HB_DBG%\ld;%HB_DBG%\epdv;%HB_DBG%\virm;%HB_DBG%\core;%HB_DBG%\core_sql;%HB_DBG%\core_pdf
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\core_reporting
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\fiskalizacija
@@ -69,47 +73,6 @@ REM    echo run: Native cmd tools for MSVC [c:\dev\x64_VS_2019.lnk] or [c:\dev\x
 REM    goto end
 REM)
 
-IF [!BUILD_ARCH!]==[64] (
-
-    if EXIST tmpFile (
-        del tmpFile
-    )
-    (cl.exe 2>&1 | c:\cygwin64\bin\grep.exe -c "for x64") > tmpFile
-    if NOT EXIST tmpFile (
-        echo error cl-x64-1
-        goto end
-    ) else (
-       echo == tmpFile =============
-       type tmpFile
-       echo === tmpfile =============
-    )
-    set /p CL_X64= < tmpFile
-    del tmpFile
-
-    IF [!CL_X64!]==[1] (
-        echo ===== MSVC cl x64 ok =============
-    ) ELSE (
-        echo ERROR [CL_X64=!CL_X64!] cl x64 nije u PATH-u!
-        echo run c:\dev\x64_VS_2019.lnk
-        goto end
-    )
-
-) ELSE (
-
-    (cl.exe 2>&1 | c:\cygwin64\bin\grep.exe -c "for x86")  > tmpFile
-    set /p CL_X86= < tmpFile
-    del tmpFile 
-
-    IF [!CL_X86!]==[1] (
-        echo ====== MSVC cl x86 ok =========
-    ) ELSE (
-        echo ERROR [CL_X64=!CL_X86!] cl x86 nije u PATH-u!
-        echo run c:\dev\x86_VS_2019.lnk
-        goto end
-    )
-
-
-)
 
 set LINE=#define F18_VER_DEFINED
 echo %LINE% > include\f18_ver.ch

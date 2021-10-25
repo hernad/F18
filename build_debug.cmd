@@ -3,8 +3,10 @@
 set F18_DEBUG=1
 set F18_POS=1
 SET F18_GT_CONSOLE=1
+set CYGWIN=
+REM set CYGWIN=c:\cygwin64\bin\
 
-set HB_DBG=c:\dev\F18
+set HB_DBG=%cd%
 set HB_DBG_PATH=%HB_DBG%\common;%HB_DBG%\pos;%HB_DBG%\kalk;%HB_DBG%\fin;%HB_DBG%\fakt;%HB_DBG%\os;%HB_DBG%\ld;%HB_DBG%\epdv;%HB_DBG%\virm;%HB_DBG%\core;%HB_DBG%\core_sql;%HB_DBG%\core_pdf
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\core_reporting
 set HB_DBG_PATH=%HB_DBG_PATH%;%HB_DBG%\fiskalizacija
@@ -42,19 +44,19 @@ del tmpFile
 
 echo %F18_VERSION%, %F18_DATE%, %HARBOUR_VERSION%, %HARBOUR_DATE%
 
-(c:\cygwin64\bin\which.exe cl.exe 2>&1 | c:\cygwin64\bin\grep -c "no cl.exe") > tmpFile
-set /p CL_NOT= < tmpFile
-del tmpFile
+REM (%CYGWIN%which.exe cl.exe 2>&1 | %CYGWIN%grep -c "no cl.exe") > tmpFile
+REM set /p CL_NOT= < tmpFile
+REM del tmpFile
 
-IF [%CL_NOT%]==[1] (
-    echo cl.exe NOT IN PATH
-    echo run: Native cmd tools for MSVC [c:\dev\x64_VS_2019.lnk] or [c:\dev\x86_VS_2019.lnk]
-    goto end
-)
+REM IF [%CL_NOT%]==[1] (
+REM    echo cl.exe NOT IN PATH
+REM    echo run: Native cmd tools for MSVC [c:\dev\x64_VS_2019.lnk] or [c:\dev\x86_VS_2019.lnk]
+REM    goto end
+REM )
 
 IF [%BUILD_ARCH%]==[64] (
 
-    (cl 2>&1 | c:\cygwin64\bin\grep.exe -c "for x64")  > tmpFile
+    (cl 2>&1 | %CYGWIN%grep.exe -c "for x64")  > tmpFile
     set /p CL_X64= < tmpFile
     del tmpFile
 
@@ -68,7 +70,7 @@ IF [%BUILD_ARCH%]==[64] (
 
 ) ELSE (
 
-    (cl 2>&1 | c:\cygwin64\bin\grep.exe -c "for x86")  > tmpFile
+    (cl 2>&1 | %CYGWIN%grep.exe -c "for x86")  > tmpFile
     set /p CL_X86= < tmpFile
     del tmpFile 
 
@@ -124,11 +126,11 @@ echo ======================================================
 
 REM hbmk2 F18 -clean
 REM hbmk2 F18 -trace- -ldflag+=/NODEFAULTLIB:LIBCMT
-hbmk2 F18 -trace-
+hbmk2 F18 -workdir=.hbdbg -trace-
 
 REM copy F18.exe F18_Windows_%VERSION%
 REM echo pravim F18_Windows_%VERSION%.gz ...
-REM c:\cygwin64\bin\gzip --force F18_Windows_%VERSION%
+REM %CYGWIN%gzip --force F18_Windows_%VERSION%
 
 REM dir F18_Windows_%VERSION%.gz
 
