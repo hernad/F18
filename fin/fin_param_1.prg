@@ -19,20 +19,21 @@ STATIC __fin_params := NIL
 // -----------------------------------
 FUNCTION mnu_fin_params()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
    LOCAL _izbor := 1
 
    fin_read_params()
 
-   AAdd( _opc, "1. osnovni parametri                        " )
-   AAdd( _opcexe, {|| parametri_organizacije() } )
-   AAdd( _opc, "2. parametri rada " )
-   AAdd( _opcexe, {|| fin_parametri_obrade_naloga() } )
-   AAdd( _opc, "3. parametri izgleda " )
-   AAdd( _opcexe, {|| fin_parametri_izgleda() } )
-
-   f18_menu( "fin_param", .F., _izbor, _opc, _opcexe )
+   AAdd( aOpc, "1. osnovni parametri                        " )
+   AAdd( aOpcExe, {|| parametri_organizacije() } )
+   AAdd( aOpc, "2. parametri rada " )
+   AAdd( aOpcExe, {|| fin_parametri_obrade_naloga() } )
+   AAdd( aOpc, "3. parametri izgleda " )
+   AAdd( aOpcExe, {|| fin_parametri_izgleda() } )
+   AAdd( aOpc, "4. parametri import spil" )
+   AAdd( aOpcExe, {|| fin_parametri_import_spil() } )
+   f18_menu( "fin_param", .F., _izbor, aOpc, aOpcExe )
 
    RETURN .T.
 
