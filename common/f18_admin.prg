@@ -675,6 +675,7 @@ METHOD F18Admin:wget_download( cUrl, cFileName, cLocalFileName, lEraseFile, sile
    LOCAL lOk := .F.
    LOCAL cCmd
    LOCAL nFileHandle, nLength
+   LOCAL lCurl := .F.
 
    // IF lEraseFile == NIL
    // lEraseFile := .F.
@@ -692,16 +693,29 @@ METHOD F18Admin:wget_download( cUrl, cFileName, cLocalFileName, lEraseFile, sile
    // FErase( cLocalFileName )
    // Sleep( 1 )
    // ENDIF
-
+altd()
    cCmd := "wget "
 
 // #ifdef __PLATFORM__WINDOWS
    cCmd += " -q  --tries=2 --timeout=3  --no-cache --no-check-certificate "
 // #endif
 
+#ifdef __PLATFORM__WINDOWS
+     altd()
+     IF FILE("c:\Windows\system32\curl.exe")
+        // windows 11
+        cCmd := "curl -L "
+        lCurl := .T.
+     ENDIF
+#endif
+
    cCmd += cUrl + cFileName // http://test.com/FILE
 
-   cCmd += " -O "
+   IF lCurl
+      cCmd += " -o "
+   ELSE
+      cCmd += " -O "
+   ENDIF
 
    IF f18_run( cCmd + " " + file_path_quote( cLocalFileName ) ) != 0
       MsgBeep( "Error: " + cCmd  + "?!" )

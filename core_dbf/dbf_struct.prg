@@ -15,19 +15,19 @@
 */
 FUNCTION SkratiAZaD( struct )
 
-   LOCAL nI, _len
+   LOCAL nI, nLen
 
-   _len := Len( struct )
+   nLen := Len( struct )
 
-   FOR nI := 1 TO _len
+   FOR nI := 1 TO nLen
       // sistemska polja
       IF ( "#" + STRUCT[ nI, 1 ] + "#" $ "#BRISANO#_SITE_#_OID_#_USER_#_COMMIT_#_DATAZ_#_TIMEAZ_#" )
          ADel ( struct, nI )
-         _len--
+         nLen--
          nI := nI - 1
       ENDIF
    NEXT
 
-   ASize( struct, _len )
+   ASize( struct, nLen )
 
    RETURN NIL

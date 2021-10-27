@@ -37,23 +37,23 @@ FUNCTION server_db_version( lInit )
 
 FUNCTION check_server_db_version()
 
-   LOCAL _server_db_num, _server_db_str, _f18_required_server_str, _f18_required_server_num
+   LOCAL nServerDbNum, _server_db_str, _f18_required_server_str, _f18_required_server_num
    LOCAL _msg
 
    info_bar( "init", "check_server_db_version" )
    _f18_required_server_num := get_version_num( server_db_ver_major(), server_db_ver_minor(), server_db_ver_patch() )
 
-   _server_db_num := server_db_version()
+   nServerDbNum := server_db_version()
 
-   IF _server_db_num < 0
+   IF nServerDbNum < 0
       error_bar( "server_db", "server_db_version < 0")
       RETURN .F.
    ENDIF
 
-   IF ( _f18_required_server_num > _server_db_num )
+   IF ( _f18_required_server_num > nServerDbNum )
 
       _f18_required_server_str := get_version_str( _f18_required_server_num )
-      _server_db_str := get_version_str( _server_db_num )
+      _server_db_str := get_version_str( nServerDbNum )
 
       _msg := "F18 klijent trazi verziju " + _f18_required_server_str + " server db je verzije: " + _server_db_str
 

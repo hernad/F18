@@ -10,8 +10,8 @@ REM )
 
 set F18_POS=1
 set F18_DEBUG=1
-set DATE=01.09.2021
-set VERSION=3.3.76
+set DATE=26.10.2021
+set VERSION=3.3.79
 
 IF [%VERSION%]==[] (
    echo ENVAR VERSION nije definisana. STOP!
