@@ -16,6 +16,7 @@ STATIC s_nFinPriprRedniBroj
 
 MEMVAR Ch, KursLis, gnLOst, gPotpis, lBlagAsis, cBlagIDVN
 MEMVAR Kol, ImeKol
+MEMVAR aOpc, h
 
 MEMVAR _idkonto, _idpartner, _funk, _fond, _idfirma, _brnal, _datval, _datdok, _otvst, _idrj, _idvn, _brdok, _k1, _k2, _k3, _k4, _rbr
 
@@ -1044,24 +1045,32 @@ FUNCTION fin_tek_rec_2()
 
 FUNCTION fin_knjizenje_ostale_opcije()
 
-   PRIVATE opc[ 2 ]
+   LOCAL nIzbor
+   PRIVATE aOpc[ 2 ]
 
-   opc[ 1 ] := "1. novi datum->datum, stari datum->dat.valute "
-   opc[ 2 ] := "2. FIN uvoz promjena broja JCI"
-
+   aOpc[ 1 ] := "1. novi datum->datum, stari datum->dat.valute "
+   aOpc[ 2 ] := "2. FIN uvoz promjena broja JCI"
    h[ 1 ] := h[ 2 ] := ""
-   PRIVATE Izbor := 1
+
+   IF fin_spil_active()
+      AADD(aOpc, "3. spil import")
+      AADD(h, "")
+   ENDIF
+
+   nIzbor := 1
    PRIVATE am_x := box_x_koord(), am_y := box_y_koord()
    my_close_all_dbf()
    DO WHILE .T.
-      Izbor := meni_0( "prip", opc, Izbor, .F. )
+      nIzbor := meni_0( "prip", aOpc, nIzbor, .F. )
       DO CASE
-      CASE Izbor == 0
+      CASE nIzbor == 0
          EXIT
-      CASE izbor == 1
+      CASE nizbor == 1
          SetDatUPripr()
-      CASE izbor == 2
+      CASE nIzbor == 2
          set_novi_broj_jci()
+      CASE nIzbor == 3
+         fin_spil_import()
       ENDCASE
    ENDDO
    box_x_koord( am_x )

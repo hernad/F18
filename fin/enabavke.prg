@@ -736,8 +736,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
         IF (cAlias)->enab_rbr <> -99999
             // vec postoji stavka 43% u tabeli enabavke
-            IF (cAlias)->enab_porezni_period != cPorezniPeriod
-                altd()       
+            IF (cAlias)->enab_porezni_period != cPorezniPeriod      
                 Alert(_u("Greška koristi se nalog " +;
                 (cAlias)->idfirma + "-" + (cAlias)->idvn + "-" + (cAlias)->brnal + "/" + AllTrim(Str((cAlias)->rbr)) +;
                 " iz poreznog perioda: " + (cAlias)->enab_porezni_period))

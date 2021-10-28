@@ -140,7 +140,6 @@ FUNCTION open_exported_xlsx()
 
 FUNCTION check_mogu_izbrisati_fajl(cFileName)
 
-   altd()
    Ferase(cFileName)
    IF File(cFileName)
       Alert("Fajl već otvoren " + cFileName)

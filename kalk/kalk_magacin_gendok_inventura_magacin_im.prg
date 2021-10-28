@@ -109,7 +109,6 @@ FUNCTION kalk_generacija_inventura_magacin_im()
             LOOP
          ENDIF
 
-altd()
          IF cCijenaTIP == "2"
             RowNC( @nNVU, @nNVI )
             // vpc = nc, magacin po nabavnim

@@ -693,7 +693,6 @@ METHOD F18Admin:wget_download( cUrl, cFileName, cLocalFileName, lEraseFile, sile
    // FErase( cLocalFileName )
    // Sleep( 1 )
    // ENDIF
-altd()
    cCmd := "wget "
 
 // #ifdef __PLATFORM__WINDOWS
@@ -701,7 +700,6 @@ altd()
 // #endif
 
 #ifdef __PLATFORM__WINDOWS
-     altd()
      IF FILE("c:\Windows\system32\curl.exe")
         // windows 11
         cCmd := "curl -L "
