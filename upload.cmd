@@ -13,7 +13,7 @@ echo BUILD_ARCH=%BUILD_ARCH%
 
 IF EXIST tmp (
   echo delete tmp ...
-  c:\cygwin64\bin\rm -rf tmp
+  %USERPROFILE%\dev\cygwin64\bin\rm -rf tmp
 )
 
 REM if NOT EXIST %USERPROFILE%\.bintray_owner (
@@ -30,7 +30,7 @@ REM set /p BINTRAY_OWNER= < %USERPROFILE%\.bintray_owner
 REM set /p BINTRAY_API_KEY= < %USERPROFILE%\.bintray_api_key
 
 
-set HARBOUR_ROOT=c:\dev\harbour\%BUILD_ARCH%\harbour
+set HARBOUR_ROOT=%USERPROFILE%\dev\harbour\%BUILD_ARCH%\harbour
 
 echo %HARBOUR_ROOT%
 call build_zip.cmd
