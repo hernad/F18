@@ -57,7 +57,7 @@ ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
 
 if EXIST %CURRENT_DIR%tmp\nul (
   echo rm -rf %CURRENT_DIR%tmp
-  c:\cygwin64\bin\rm.exe -rf %CURRENT_DIR%tmp
+  %USERPROFILE%\dev\cygwin64\bin\rm.exe -rf %CURRENT_DIR%tmp
 ) else (
    echo  dir %CURRENT_DIR%tmp not exists
 )
