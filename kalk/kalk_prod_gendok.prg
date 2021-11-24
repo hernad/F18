@@ -62,11 +62,7 @@ STATIC FUNCTION kalk_prod_gen_ip()
 
 FUNCTION kalk_generisi_niv_prodavnica_na_osnovu_druge_niv()
 
-   // o_konto()
-   // o_tarifa()
-// o_sifk()
-// o_sifv()
-   // o_roba()
+   LOCAL GetList
 
    Box(, 4, 70 )
 

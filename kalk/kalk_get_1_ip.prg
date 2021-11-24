@@ -47,7 +47,7 @@ FUNCTION kalk_get_1_ip()
    // ENDIF
    select_o_tarifa( _idtarifa )
    select_o_roba( _idroba )
-   _mpcsapp := kalk_get_mpc_by_koncij_pravilo( _pkonto )
+   //_mpcsapp := kalk_get_mpc_by_koncij_pravilo( _pkonto )
 
    SELECT kalk_pripr
 
@@ -60,7 +60,8 @@ FUNCTION kalk_get_1_ip()
    nX += 2
    @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( "NABAVNA CIJENA:", nLeft ) GET _nc PICT picdem
    nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( cTmp, nLeft ) GET _mpcsapp PICT picdem
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY PadL( cTmp, nLeft ) GET _mpcsapp PICT picdem ;
+      WHEN( kalk_valid_mpc_u_pos(_idroba, @_mpcsapp) )
 
    READ
 
@@ -242,6 +243,25 @@ FUNCTION kalk_generisi_ip_stavka( cIdFirma, cBrDok, cPKonto, cIdRoba, dDatDok, c
    ENDIF
 
    RETURN .T.
+
+
+STATIC FUNCTION kalk_valid_mpc_u_pos(cIdRoba, nMpcSAPP)
+
+      LOCAL nOsnovnaCijena
+      LOCAL nProdavnica
+      
+      PushWa()
+      nProdavnica:= set_prodavnica_by_pkonto( kalk_pripr->pkonto )
+      nOsnovnaCijena := pos_dostupna_osnovna_cijena_za_artikal( cIdroba )
+      PopWa()
+   
+      IF round(nOsnovnaCijena, 3) <>  round(nMpcSAPP, 3)
+         Alert(_u("Postavljam cijenu iz POS " + Alltrim(STR(nOsnovnaCijena, 10, 2))))
+         nMpcSAPP := nOsnovnaCijena
+      ENDIF
+      RETURN .T.
+   
+
 
 /* --------------------------------------------------------------------------
 // generacija inventure - razlike postojece inventure

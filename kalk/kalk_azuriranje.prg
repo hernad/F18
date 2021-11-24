@@ -63,7 +63,7 @@ FUNCTION kalk_azuriranje_dokumenta( lAuto, lStampaj )
       RETURN .F.
    ENDIF
 
-   IF !kalk_provjera_cijena()
+   IF !kalk_provjera_cijena_pos()
       RETURN .F.
    ENDIF
 
@@ -291,7 +291,7 @@ STATIC FUNCTION kalk_check_generisati_zavisne_dokumente( lAuto )
 
 
 
-STATIC FUNCTION kalk_provjera_cijena()
+STATIC FUNCTION kalk_provjera_cijena_pos()
 
    LOCAL cIdFirma
    LOCAL cIdVd
@@ -316,7 +316,6 @@ STATIC FUNCTION kalk_provjera_cijena()
       DO WHILE !Eof() .AND. cIdfirma == field->idfirma .AND. cIdvd == field->idvd .AND. cBrdok == field->brdok
 
          cRbr := "Rbr " + AllTrim( Transform( kalk_pripr->rbr, '9999' ) )
-
          IF field->idvd == "11" .AND. Round( field->vpc, 4 ) == 0
             Beep( 1 )
             Msg( cRbr + ') VPC = 0, pozovite "savjetnika" sa <Alt-H>!' )
