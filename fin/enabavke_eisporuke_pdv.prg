@@ -197,54 +197,63 @@ FUNCTION eNab_eIsp_PDV()
     hPDV["34"] := ROUND(hPDV["34"], 0)
     use
 
-    nX := 0
-    nCol := 42
-    nWidth := 25
-    
+    DO WHILE .T.
+        nX := 0
+        nCol := 42
+        nWidth := 25
+        
+        Box(, 28, 85)
 
-    Box(, 28, 85)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Obračun PDV za: " + cPDV + " porezni period: " + cPorezniPeriod
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Obračun PDV za: " + cPDV + " porezni period: " + cPorezniPeriod
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "I. Isporuke i nabavke svi iznosi iskazani bez PDV"
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "I. Isporuke i nabavke svi iznosi iskazani bez PDV"
 
-    nX++
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(11) sve isporuke : ", nWidth) + Transform(hPDV[ "11" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(21) sve nabavke : ", nWidth) + Transform(hPDV[ "21" ], cPict)
+        nX++
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(11) sve isporuke : ", nWidth) + Transform(hPDV[ "11" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(21) sve nabavke : ", nWidth) + Transform(hPDV[ "21" ], cPict)
 
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(12) izvoz: ", nWidth) + Transform(hPDV[ "12" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(22) uvoz : ", nWidth) + Transform(hPDV[ "22" ], cPict)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(12) izvoz: ", nWidth) + Transform(hPDV[ "12" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(22) uvoz : ", nWidth) + Transform(hPDV[ "22" ], cPict)
 
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PADR("(13) oslobodjene placanja PDV: ", nWidth) + Transform(hPDV[ "13" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 PADR("(23) nabavke od poljopriv: ", nWidth) + Transform(hPDV[ "23" ], cPict)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PADR("(13) oslobodjene placanja PDV: ", nWidth) + Transform(hPDV[ "13" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 PADR("(23) nabavke od poljopriv: ", nWidth) + Transform(hPDV[ "23" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "II. izlazni PDV"
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(41) PDV na ulaz od reg.obv. PDV: ", nWidth) + Transform(hPDV[ "41" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) PDV na uvoz:                 ", nWidth) + Transform(hPDV[ "42" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) paus nakn za poljopriv:", nWidth) + Transform(hPDV[ "43" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "II. izlazni PDV"
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(41) PDV na ulaz od reg.obv. PDV: ", nWidth) + Transform(hPDV[ "41" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) PDV na uvoz:                 ", nWidth) + Transform(hPDV[ "42" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(43) paus nakn za poljopriv:", nWidth) + Transform(hPDV[ "43" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(51) PDV izlazni:   ", nWidth) + Transform(hPDV[ "51" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(61) PDV ulazni:               ", nWidth) + Transform(hPDV[ "61" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(51) PDV izlazni:   ", nWidth) + Transform(hPDV[ "51" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(61) PDV ulazni:               ", nWidth) + Transform(hPDV[ "61" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(71) PDV za uplatu/povrat:  ", nWidth) + Transform(hPDV[ "71" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(71) PDV za uplatu/povrat:  ", nWidth) + Transform(hPDV[ "71" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "III. Podaci o krajnjoj potrošnji"
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(32) FBiH: ", nWidth) + Transform(hPDV[ "32" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(33) RS: ", nWidth) + Transform(hPDV[ "33" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(34) BD: ", nWidth) + Transform(hPDV[ "34" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "III. Podaci o krajnjoj potrošnji"
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(32) FBiH: ", nWidth) + Transform(hPDV[ "32" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(33) RS: ", nWidth) + Transform(hPDV[ "33" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(34) BD: ", nWidth) + Transform(hPDV[ "34" ], cPict)
 
-    inkey(0)
-    BoxC()
+        @ box_x_koord() + 29, box_y_koord() + 20 SAY "<ESC> - kraj" COLOR f18_color_invert()
+
+        inkey(0)
+        BoxC()
+
+        IF LastKey() == K_ESC
+            EXIT
+        ENDIF
+
+    ENDDO
 
     RETURN .T.
