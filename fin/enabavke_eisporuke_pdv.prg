@@ -39,6 +39,9 @@ FUNCTION eNab_eIsp_PDV()
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
 
+    hPDV["id_br"] := cPDV
+    hPDV["dat_od"] := dDatOd
+    hPDV["dat_do"] := dDatDo
     hPdv["11"] := 0
     hPdv["12"] := 0
     hPdv["13"] := 0
@@ -54,6 +57,7 @@ FUNCTION eNab_eIsp_PDV()
     hPdv["32"] := 0
     hPdv["33"] := 0
     hPdv["34"] := 0
+    
 
 
     SELECT F_TMP
@@ -245,7 +249,7 @@ FUNCTION eNab_eIsp_PDV()
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(33) RS: ", nWidth) + Transform(hPDV[ "33" ], cPict)
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(34) BD: ", nWidth) + Transform(hPDV[ "34" ], cPict)
 
-        @ box_x_koord() + 29, box_y_koord() + 20 SAY "<ESC> - kraj" COLOR f18_color_invert()
+        @ box_x_koord() + 29, box_y_koord() + 20 SAY "<ESC> - kraj, <P> - print" COLOR f18_color_invert()
 
         inkey(0)
         BoxC()
@@ -254,6 +258,11 @@ FUNCTION eNab_eIsp_PDV()
             EXIT
         ENDIF
 
+        IF Upper(Chr(Lastkey())) == "P"
+            print_pdv(hPDV)
+        ENDIF
+
     ENDDO
 
     RETURN .T.
+
