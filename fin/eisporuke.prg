@@ -1492,7 +1492,7 @@ STATIC FUNCTION xlsx_export_fill_row()
 
 FUNCTION export_eIsporuke()
 
-
+    LOCAL nCnt
     LOCAL dDatOd := fetch_metric( "fin_enab_dat_od", my_user(), DATE()-1 )
     LOCAL dDatDo := fetch_metric( "fin_enab_dat_do", my_user(), DATE() )
     LOCAL nX
@@ -1523,10 +1523,14 @@ FUNCTION export_eIsporuke()
         RETURN .F.
     ENDIF
 
+    Box(, 1, 50)
+    nCnt := 0
     DO WHILE !EOF()
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY STR( ++nCnt,4, 0)
       xlsx_export_fill_row()
       SKIP
     ENDDO
+    BoxC()
     USE
 
     my_close_all_dbf()

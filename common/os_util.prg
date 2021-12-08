@@ -383,6 +383,7 @@ FUNCTION f18_run( cCommand, hOutput, lAsync )
          ENDIF
           ?E "win32_run:", cCommand
           nRet := __WIN32_SYSTEM( cCommand )
+          //windows11: nRet := hb_Run( cCommand )
           ?E "win32_run exit:", nRet
       ENDIF
 
@@ -633,7 +634,6 @@ FUNCTION f18_open_mime_document( cDocument )
 */
 
    // cDocument := file_path_quote( cDocument )
-
    IF is_windows()
       nError := f18_run( cCmd + " " + file_path_quote( cDocument ), NIL, .T. )
    ELSE
