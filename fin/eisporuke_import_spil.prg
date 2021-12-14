@@ -198,10 +198,13 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
 
          hPartner := fin_spil_find_partner( spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni, spilrn->c_tax_number )
          IF hPartner["id_partner"] == "GOTOVINA"
-            cIdPartner := ""
-            cIdKonto := "20500" // blagajna ?
-            cIdKontoPDV := Padr("4730", 7)
-            cIdKontoPrihod := Padr("61101", 7)
+            //cIdPartner := ""
+            //cIdKonto := "20500" // blagajna ?
+            //cIdKontoPDV := Padr("4730", 7)
+            //cIdKontoPrihod := Padr("61101", 7)
+            SKIP
+            LOOP
+            // preskacemo KP i KPM, to se posebno unosi u 66 FIN naloge
          ELSE
             cIdPartner := hPartner["id_partner"]
             cIdKonto := Padr("2110", 7)
