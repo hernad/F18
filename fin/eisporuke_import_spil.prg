@@ -91,29 +91,75 @@ FUNCTION fin_spil_rn_count( dDateOd, dDateDo )
    RETURN oRow:FieldGet( oRow:FieldPos( "count" ) )
 
 
-FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo, cGoni)
+FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo, cGoni, cTaxNumber)
+
+   LOCAL hRet := hb_hash()
    //spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni
 
    // get_partn_pdvb( cPartnerId )
    // AllTrim( get_partn_sifk_sifv( "PDVB", cPartnerId, .F. ) )
+   hRet["pdv"] := .F.
+   hRet["ino"] := .F.
 
    IF cRegNo == "999999999999"
-      RETURN "GOTOVINA"
+      hRet["id_partner"] := "GOTOVINA"
+      RETURN hRet
+   ENDIF
+
+   IF !Empty(cRegNo)
+      PushWa()
+      SELECT (F_SIFV)
+      use_sql_sifv( "PARTN", "PDVB", NIL, cRegNo )
+      PopWa()
+      IF !Empty(sifv->idsif)
+            // PDV obveznik
+            hRet["id_partner"] := LEFT(sifv->idsif, 6)
+            hRet["pdv"] := .T.
+            RETURN hRet 
+      ENDIF
+      IF TRIM(cClientName) == "KP" .OR. TRIM(cClientName) == "KPM"
+         hRet["id_partner"] := "GOTOVINA"
+         RETURN hRet
+      ENDIF
+   ENDIF
+
+   IF !Empty(cRegNo)
+      PushWa()
+      SELECT (F_SIFV)
+      use_sql_sifv( "PARTN", "IDBR", NIL, cRegNo )
+      PopWa()
+      IF !Empty(sifv->idsif)
+         // Kupac ima ID broj - NE-PDV obveznik
+         hRet["id_partner"] := LEFT(sifv->idsif, 6)
+         hRet["pdv"] := .F.
+        
+         RETURN hRet
+      ENDIF
+   ENDIF
+
+   IF cTaxNumber == "G2"
+      hRet["ino"] := .T.
    ENDIF
 
    PushWa()
-   altd()
-   use_sql_sifv( "PARTN", "PDVB", NIL, cRegNo )
+   SELECT (F_PARTN)
+   find_partner_by_naz_or_id( upper(cClientName) )
    PopWa()
-   IF !Empty(sifv->idsif)
-         // PDV obveznik
-         RETURN LEFT(sifv->idsif, 6)
-   ENDIF
-   IF TRIM(cClientName) == "KP" .OR. TRIM(cClientName) == "KPM"
-      RETURN "GOTOVINA"
+
+   IF partn->(reccount()) == 1
+      // partner pronadjen po nazivu
+      hRet["id_partner"] := partn->id
+      IF partner_is_ino( hRet["id_partner"] )
+          hRet["ino"] := .T.
+      ELSE
+          hRet["ino"] := .F.
+      ENDIF
+      RETURN hRet
    ENDIF
 
-   RETURN REPLICATE("?", 6)
+   hRet["id_partner"] := REPLICATE("?", 6)
+   RETURN hRet
+ 
 
 
 
@@ -125,6 +171,8 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
    LOCAL lError := .F.
    LOCAL nRbr, hFinItem, hFinItemPDV, hFinItemPrihod, cIdPartner
    LOCAL aFinItems := {}
+   LOCAL cIdKonto, cIdKontoPDV, cIdKontoPrihod
+   LOCAL hPartner
 
    IF !fin_cre_spil_table( dDatOd, dDatDo )
       RETURN -1
@@ -144,45 +192,75 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
   
    nRbr := 1
    Box(, 3, 80)
+      @ box_x_koord(), box_y_koord() + 10 SAY STR(spilrn->(reccount()), 5, 0)
+
       DO WHILE !EOF()
 
-         cIdPartner := fin_spil_find_partner( spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni )
-         IF cIdPartner != "GOTOVINA"
-            hFinItem := hb_hash()
-            hFinItem[ "idfirma" ] := self_organizacija_id()
-            hFinItem[ "idvn" ] := "14"
-            hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
-            hFinItem[ "brdok" ] := spilrn->ordernum
-            hFinItem[ "opis" ] := "fisk_rn: " + Alltrim(spilrn->fiscal_number)
-            hFinItem[ "datdok" ] := spilrn->inv_date
-            hFinItem[ "konto" ] := Padr("2110", 7)
-            hFinItem[ "partner" ] := cIdPartner
-            hFinItem[ "d_p" ] := "1"
-            hFinItem[ "iznos" ] := spilrn->inv_tot_excl + spilrn->inv_tot_tax
-            hFinItem[ "rbr" ] := nRbr
-            ++nRbr
-            AADD( aFinItems, hFinItem)
+         hPartner := fin_spil_find_partner( spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni, spilrn->c_tax_number )
+         IF hPartner["id_partner"] == "GOTOVINA"
+            cIdPartner := ""
+            cIdKonto := "20500" // blagajna ?
+            cIdKontoPDV := Padr("4730", 7)
+            cIdKontoPrihod := Padr("61101", 7)
+         ELSE
+            cIdPartner := hPartner["id_partner"]
+            cIdKonto := Padr("2110", 7)
+            IF hPartner["pdv"]
+               cIdKontoPDV := Padr("4700", 7)
+               cIdKontoPrihod := Padr("6110", 7)
+            ELSE
+               // Partner ne-PDV obveznik
+               cIdKontoPDV := Padr("4730", 7)
+               cIdKontoPrihod := Padr("61101", 7)
+            ENDIF
+         ENDIF
 
+         IF hPartner["ino"]
+            cIdKonto := Padr("2120", 7)
+            cIdKontoPrihod := Padr("6120", 7)
+         ENDIF
+
+         hFinItem := hb_hash()
+         hFinItem[ "idfirma" ] := self_organizacija_id()
+         hFinItem[ "idvn" ] := "14"
+         hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
+         hFinItem[ "brdok" ] := spilrn->ordernum
+         hFinItem[ "opis" ] := "fisk_rn: " + Alltrim(spilrn->fiscal_number)
+         hFinItem[ "datdok" ] := spilrn->inv_date
+         hFinItem[ "konto" ] := cIdKonto
+         hFinItem[ "partner" ] := cIdPartner
+         hFinItem[ "d_p" ] := "1"
+         hFinItem[ "iznos" ] := spilrn->inv_tot_excl + spilrn->inv_tot_tax
+         hFinItem[ "rbr" ] := nRbr
+         ++nRbr
+         AADD( aFinItems, hFinItem)
+
+         IF cIdPartner == REPLICATE("?", 6)
+            hFinItem[ "opis" ] += " ; " + trim(spilrn->client_name) + " " + trim(spilrn->client_country)
+         ENDIF
+
+         IF Round(spilrn->inv_tot_tax, 2) <> 0 
             hFinItemPDV := hb_HClone(hFinItem)
-            hFinItemPDV[ "konto" ] := Padr("4700", 7)
+            hFinItemPDV[ "konto" ] := cIdKontoPDV
             hFinItemPDV[ "iznos" ] := spilrn->inv_tot_tax
             hFinItemPDV[ "d_p" ] := "2"
             hFinItemPDV[ "rbr" ] := nRbr
             hFinItemPDV[ "partner" ] := SPACE(6)
             AADD( aFinItems, hFinItemPDV)
             ++nRbr
-
-            hFinItemPrihod := hb_HClone(hFinItem)
-            hFinItemPrihod[ "konto" ] := Padr("6110", 7)
-            hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
-            hFinItemPrihod[ "d_p" ] := "2"
-            hFinItemPrihod[ "rbr" ] := nRbr
-            hFinItemPrihod[ "partner" ] := SPACE(6)
-            AADD( aFinItems, hFinItemPrihod)
-            ++nRbr
          ENDIF
+
+         hFinItemPrihod := hb_HClone(hFinItem)
+         hFinItemPrihod[ "konto" ] := cIdKontoPrihod
+         hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
+         hFinItemPrihod[ "d_p" ] := "2"
+         hFinItemPrihod[ "rbr" ] := nRbr
+         hFinItemPrihod[ "partner" ] := SPACE(6)
+         AADD( aFinItems, hFinItemPrihod)
+         ++nRbr
          
-         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Rbr: " + Alltrim(Str(nRbr, 5))
+
+         @ box_x_koord() + 2, box_y_koord() + 3 SAY "Rbr: " + Alltrim(Str(nRbr, 6, 0))
          SKIP
 
       ENDDO
@@ -223,9 +301,11 @@ FUNCTION fin_spil_import()
 
 STATIC FUNCTION fin_spil_pripr_fill( hFinItem )
 
+   Box(, 2, 50)
    select_o_fin_pripr()
    APPEND BLANK
 
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY STR(hFinItem[ "rbr" ], 5, 0)
    RREPLACE idfirma WITH hFinItem[ "idfirma" ], ;
             idvn WITH hFinItem[ "idvn" ], ;
             brnal WITH hFinItem[ "brnal" ], ;
@@ -239,7 +319,10 @@ STATIC FUNCTION fin_spil_pripr_fill( hFinItem )
             iznosbhd WITH hFinItem[ "iznos" ], ;
             iznosdem WITH fin_km_to_eur(hFinItem["iznos"], hFinItem["datdok"])
    
+   BoxC()
+
    RETURN .T.
+
 
 
 FUNCTION fin_spil_active()
