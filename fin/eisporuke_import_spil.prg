@@ -46,22 +46,23 @@ FUNCTION fin_cre_spil_table( dDateOd, dDateDo )
   cSql += "client_email varchar(200),"
   cSql += "c_tax_number varchar(15),"
   cSql += "tax_rate decimal(18,2),"
+  cSql += "order_total decimal(18,2),"
   cSql += "inv_tot_excl decimal(18,2),"
   cSql += "inv_tot_tax decimal(18,2),"
   cSql += "inv_tot_incl decimal(18,2))"
 
   cMSSQLQuery := "select spil_EU_FiscalNumber.FiscalNumber as fiscal_number,"
   cMSSQLQuery += "client.RegistrationNo as reg_no, client.GONI as goni, client.TaxCode as tax_code,"
-  cMSSQLQuery += "convert(date, invdate) as inv_date, ordernum, doctype, docstate, accountid, cAccountName as c_account_name,"
+  cMSSQLQuery += "convert(date, spilinvnum.invdate) as inv_date, spilinvnum.ordernum, spilinvnum.doctype, spilinvnum.docstate, spilinvnum.accountid, spilinvnum.cAccountName as c_account_name,"
   cMSSQLQuery += "client.name as client_name, client.Physical5 as client_country, client.email as client_email,"
-  cMSSQLQuery += "cTaxNumber as c_tax_number, taxrate as tax_rate, invTotExcl as inv_tot_excl, invTotTax as inv_tot_tax,"
-  cMSSQLQuery += "InvTotIncl as inv_tot_incl" 
+  cMSSQLQuery += "spilinvnum.cTaxNumber as c_tax_number, spilinvnum.taxrate as tax_rate, spilinvnum.invTotExcl as inv_tot_excl, spilinvnum.invTotTax as inv_tot_tax,"
+  cMSSQLQuery += "spilinvnum.InvTotIncl as inv_tot_incl, spilinvnum.ordertotal as order_total" 
   cMSSQLQuery += " from spilInvNum" 
-  cMSSQLQuery += " left join client on client.dclink=accountid"
+  cMSSQLQuery += " left join client on client.dclink=spilinvnum.accountid"
   cMSSQLQuery += " left join spil_EU_FiscalNumber on spil_EU_fiscalnumber.OrderIndex = spilinvnum.OrderIndex"
-  cMSSQLQuery += " where invdate>='" + sql_quote( dDateOd ) + "' and invdate<='" + sql_quote( dDateDo) + "'"
-  cMSSQLQuery += " and (doctype=4 or doctype=8)"
-  cMSSQLQuery += " order by invdate"
+  cMSSQLQuery += " where spilinvnum.invdate>='" + sql_quote( dDateOd ) + "' and spilinvnum.invdate<='" + sql_quote( dDateDo) + "'"
+  cMSSQLQuery += " and (spilinvnum.doctype=4 or spilinvnum.doctype=8 or spilinvnum.doctype=9)"
+  cMSSQLQuery += " order by spilinvnum.invdate"
 
   cSql += " SERVER spil OPTIONS( query '" + cMSSQLQuery + "', row_estimate_method 'execute');"
   oQuery := run_sql_query( cSql )
@@ -71,6 +72,24 @@ FUNCTION fin_cre_spil_table( dDateOd, dDateDo )
   ENDIF
  
   RETURN .T. 
+
+FUNCTION fin_drop_spil_table( dDateOd, dDateDo )
+
+   LOCAL cSql, oQuery 
+   LOCAL cMSSQLQuery
+   LOCAL cTableName := fin_spil_table_name( dDateOd, dDateDo)
+ 
+   IF Empty( cTableName)
+      RETURN .F.
+   ENDIF
+ 
+   cSql := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
+   oQuery := run_sql_query( cSql )
+   IF sql_error_in_query( oQuery, "CREATE" )
+     RETURN .F.
+   ENDIF
+  
+   RETURN .T.
 
 
 FUNCTION fin_spil_rn_count( dDateOd, dDateDo )
@@ -88,18 +107,27 @@ FUNCTION fin_spil_rn_count( dDateOd, dDateDo )
    MsgC()
    oRow := oQuery:GetRow( 1 )
 
+   cQry := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
+   oQuery := run_sql_query( cQry )
+   IF sql_error_in_query( oQuery, "CREATE" )
+     RETURN -2
+   ENDIF
+
    RETURN oRow:FieldGet( oRow:FieldPos( "count" ) )
 
 
 FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo, cGoni, cTaxNumber)
 
    LOCAL hRet := hb_hash()
+   LOCAL aPovezane
    //spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni
 
    // get_partn_pdvb( cPartnerId )
    // AllTrim( get_partn_sifk_sifv( "PDVB", cPartnerId, .F. ) )
    hRet["pdv"] := .F.
    hRet["ino"] := .F.
+   hRet["povezano_lice"] := .F.
+   aPovezane := { PADR("0589", 6), PADR("3171", 6), PADR("3458",6), PADR("7437", 6), PADR("586268",6) }
 
    IF cRegNo == "999999999999"
       hRet["id_partner"] := "GOTOVINA"
@@ -114,6 +142,9 @@ FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo,
       IF !Empty(sifv->idsif)
             // PDV obveznik
             hRet["id_partner"] := LEFT(sifv->idsif, 6)
+            IF Ascan( aPovezane, hRet["id_partner"] ) <> 0
+               hRet["povezano_lice"] := .T.
+            ENDIF 
             hRet["pdv"] := .T.
             RETURN hRet 
       ENDIF
@@ -132,12 +163,11 @@ FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo,
          // Kupac ima ID broj - NE-PDV obveznik
          hRet["id_partner"] := LEFT(sifv->idsif, 6)
          hRet["pdv"] := .F.
-        
          RETURN hRet
       ENDIF
    ENDIF
 
-   IF cTaxNumber == "G2"
+   IF cTaxNumber == "G2" // G1 domaci
       hRet["ino"] := .T.
    ENDIF
 
@@ -163,7 +193,7 @@ FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo,
 
 
 
-FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
+FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
 
    LOCAL cTableName := fin_spil_table_name( dDatOd, dDatDo )
    LOCAL cAlias := "SPILRN"
@@ -175,7 +205,8 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
    LOCAL hPartner
 
    IF !fin_cre_spil_table( dDatOd, dDatDo )
-      RETURN -1
+      Alert("FIN cre spil table error?!")
+      RETURN aFinItems
    ENDIF
 
    SELECT( F_POM )
@@ -195,6 +226,19 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
       @ box_x_koord(), box_y_koord() + 10 SAY STR(spilrn->(reccount()), 5, 0)
 
       DO WHILE !EOF()
+
+         IF cFaktAvAvStor == "1" .AND. spilrn->doctype == 9 
+            // Zelimo Fakture, Avansne fakture preskociti
+            // doctype = "9" => RC - avansi
+            SKIP
+            LOOP
+         ENDIF
+
+         IF cFaktAvAvStor == "2" .AND. spilrn->doctype <> 9
+            // Zelimo Avansne Fakture, obicne fakture preskociti
+            SKIP
+            LOOP
+         ENDIF
 
          hPartner := fin_spil_find_partner( spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni, spilrn->c_tax_number )
          IF hPartner["id_partner"] == "GOTOVINA"
@@ -216,11 +260,27 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
                cIdKontoPDV := Padr("4730", 7)
                cIdKontoPrihod := Padr("61101", 7)
             ENDIF
+
          ENDIF
 
-         IF hPartner["ino"]
+         IF hPartner["ino"] // ino partner
             cIdKonto := Padr("2120", 7)
             cIdKontoPrihod := Padr("6120", 7)
+         ENDIF
+         
+         IF hPartner["povezano_lice"] // povezana pravna lica
+            cIdKonto := "2100"
+            cIdKontoPrihod := "6100"
+         ENDIF
+
+         IF trim(spilrn->client_name) == "FL-BANKINO"
+            // uplata banka ino partner
+            cIdKonto := "2123"
+         ENDIF
+         
+         IF trim(spilrn->client_name) == "FL-BANK"
+            // uplata banka domaci klijent
+            cIdKonto := "2118"
          ENDIF
 
          hFinItem := hb_hash()
@@ -233,7 +293,14 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
          hFinItem[ "d_p" ] := "1"
-         hFinItem[ "iznos" ] := spilrn->inv_tot_excl + spilrn->inv_tot_tax
+         IF spilrn->doctype == 9
+            // RC dokumenti
+            altd()
+            hFinItem[ "iznos" ] := spilrn->order_total
+         ELSE
+            hFinItem[ "iznos" ] := spilrn->inv_tot_excl + spilrn->inv_tot_tax
+         ENDIF   
+         
          hFinItem[ "rbr" ] := nRbr
          ++nRbr
          AADD( aFinItems, hFinItem)
@@ -242,20 +309,28 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
             hFinItem[ "opis" ] += " ; " + trim(spilrn->client_name) + " " + trim(spilrn->client_country)
          ENDIF
 
-         IF Round(spilrn->inv_tot_tax, 2) <> 0 
-            hFinItemPDV := hb_HClone(hFinItem)
-            hFinItemPDV[ "konto" ] := cIdKontoPDV
+         hFinItemPDV := hb_HClone(hFinItem)
+         hFinItemPDV[ "konto" ] := cIdKontoPDV
+         IF spilrn->doctype == 9
+            hFinItemPDV[ "iznos" ] := round(spilrn->order_total / 1.17 * 0.17, 2)
+         ELSE
             hFinItemPDV[ "iznos" ] := spilrn->inv_tot_tax
-            hFinItemPDV[ "d_p" ] := "2"
-            hFinItemPDV[ "rbr" ] := nRbr
-            hFinItemPDV[ "partner" ] := SPACE(6)
+         ENDIF
+         hFinItemPDV[ "d_p" ] := "2"
+         hFinItemPDV[ "rbr" ] := nRbr
+         hFinItemPDV[ "partner" ] := SPACE(6)
+         IF Round(hFinItemPDV[ "iznos" ], 2) <> 0 
             AADD( aFinItems, hFinItemPDV)
             ++nRbr
          ENDIF
-
+         
          hFinItemPrihod := hb_HClone(hFinItem)
          hFinItemPrihod[ "konto" ] := cIdKontoPrihod
-         hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
+         IF spilrn->doctype == 9
+            hFinItemPrihod[ "iznos" ] := round(spilrn->order_total / 1.17, 2)
+         ELSE
+            hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
+         ENDIF
          hFinItemPrihod[ "d_p" ] := "2"
          hFinItemPrihod[ "rbr" ] := nRbr
          hFinItemPrihod[ "partner" ] := SPACE(6)
@@ -269,6 +344,10 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo)
       ENDDO
    BoxC()
 
+   IF !fin_drop_spil_table( dDatOd, dDatDo )
+     Alert("FIN drop spil table error?")
+   ENDIF
+
    RETURN aFinItems
 
 
@@ -277,10 +356,12 @@ FUNCTION fin_spil_import()
    LOCAL dDatOd := fetch_metric("fin_spil_od", my_user(), Date()), dDatDo := fetch_metric("fin_spil_do", my_user(), Date())
    LOCAL GetList := {}
    LOCAL nRbr, aFinItems
+   LOCAL cFaktAvAvStor := "1"
 
    Box(, 3, 60)
      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Datum od" GET dDatOd
      @ box_x_koord() + 1, col() + 2 SAY "do"  GET dDatDo
+     @ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)/Avans (2)/Avans-Storno (3)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "123"
      READ
    BoxC()
 
@@ -290,7 +371,7 @@ FUNCTION fin_spil_import()
 
    // Alert(Str(fin_spil_rn_count(dDatOd, dDatDo)))
 
-   aFinItems := fin_spil_get_fin_stavke(dDatod, dDatDo)
+   aFinItems := fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
 
    FOR nRbr := 1 TO LEN( aFinItems )
       fin_spil_pripr_fill( aFinItems[ nRbr ] )
