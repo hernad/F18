@@ -1,8 +1,8 @@
 #include "f18.ch"
 
-FUNCTION fin_spil_table_name( dDateOd, dDateDo )
+FUNCTION fin_spil_table_name( cSufix, dDateOd, dDateDo )
 
-   LOCAL cTableName := "fmk.spil_racuni_"
+   LOCAL cTableName := "fmk.spil_racuni_" + cSufix + "_"
    IF year( dDateOd ) <> year( dDateDo )
       Alert( "godina za datume od-do moraju biti iste")
       RETURN ""
@@ -18,11 +18,25 @@ FUNCTION fin_spil_table_name( dDateOd, dDateDo )
 
    RETURN cTableName
 
-FUNCTION fin_cre_spil_table( dDateOd, dDateDo )
+
+FUNCTION fin_cre_spil_table( cSufix, dDateOd, dDateDo )
+
+   IF cSufix == "IN"
+      return fin_cre_spil_table_in( dDateOd, dDateDo )
+   ELSE
+      return fin_cre_spil_table_rc( dDateOd, dDateDo )
+   ENDIF
+   
+   Alert("cre mora biti IN ili RC ?")
+   RETURN .F.
+
+
+// IN dokumenti - racuni
+FUNCTION fin_cre_spil_table_in( dDateOd, dDateDo )
 
   LOCAL cSql, oQuery 
   LOCAL cMSSQLQuery
-  LOCAL cTableName := fin_spil_table_name( dDateOd, dDateDo)
+  LOCAL cTableName := fin_spil_table_name( "IN", dDateOd, dDateDo)
 
   IF Empty( cTableName)
      RETURN .F.
@@ -36,7 +50,7 @@ FUNCTION fin_cre_spil_table( dDateOd, dDateDo )
   cSql += "goni varchar(20),"
   cSql += "tax_code varchar(4),"
   cSql += "inv_date date,"
-  cSql += "ordernum varchar(20),"
+  cSql += "order_number varchar(20),"
   cSql += "doctype int,"
   cSql += "docstate int,"
   cSql += "accountid int,"
@@ -46,22 +60,21 @@ FUNCTION fin_cre_spil_table( dDateOd, dDateDo )
   cSql += "client_email varchar(200),"
   cSql += "c_tax_number varchar(15),"
   cSql += "tax_rate decimal(18,2),"
-  cSql += "order_total decimal(18,2),"
   cSql += "inv_tot_excl decimal(18,2),"
   cSql += "inv_tot_tax decimal(18,2),"
   cSql += "inv_tot_incl decimal(18,2))"
 
   cMSSQLQuery := "select spil_EU_FiscalNumber.FiscalNumber as fiscal_number,"
   cMSSQLQuery += "client.RegistrationNo as reg_no, client.GONI as goni, client.TaxCode as tax_code,"
-  cMSSQLQuery += "convert(date, spilinvnum.invdate) as inv_date, spilinvnum.ordernum, spilinvnum.doctype, spilinvnum.docstate, spilinvnum.accountid, spilinvnum.cAccountName as c_account_name,"
+  cMSSQLQuery += "convert(date, spilinvnum.invdate) as inv_date, spilinvnum.ordernum as order_number, spilinvnum.doctype, spilinvnum.docstate, spilinvnum.accountid, spilinvnum.cAccountName as c_account_name,"
   cMSSQLQuery += "client.name as client_name, client.Physical5 as client_country, client.email as client_email,"
   cMSSQLQuery += "spilinvnum.cTaxNumber as c_tax_number, spilinvnum.taxrate as tax_rate, spilinvnum.invTotExcl as inv_tot_excl, spilinvnum.invTotTax as inv_tot_tax,"
-  cMSSQLQuery += "spilinvnum.InvTotIncl as inv_tot_incl, spilinvnum.ordertotal as order_total" 
+  cMSSQLQuery += "spilinvnum.InvTotIncl as inv_tot_incl" 
   cMSSQLQuery += " from spilInvNum" 
   cMSSQLQuery += " left join client on client.dclink=spilinvnum.accountid"
   cMSSQLQuery += " left join spil_EU_FiscalNumber on spil_EU_fiscalnumber.OrderIndex = spilinvnum.OrderIndex"
   cMSSQLQuery += " where spilinvnum.invdate>='" + sql_quote( dDateOd ) + "' and spilinvnum.invdate<='" + sql_quote( dDateDo) + "'"
-  cMSSQLQuery += " and (spilinvnum.doctype=4 or spilinvnum.doctype=8 or spilinvnum.doctype=9)"
+  cMSSQLQuery += " and (spilinvnum.doctype=4 or spilinvnum.doctype=8)"
   cMSSQLQuery += " order by spilinvnum.invdate"
 
   cSql += " SERVER spil OPTIONS( query '" + cMSSQLQuery + "', row_estimate_method 'execute');"
@@ -73,11 +86,70 @@ FUNCTION fin_cre_spil_table( dDateOd, dDateDo )
  
   RETURN .T. 
 
-FUNCTION fin_drop_spil_table( dDateOd, dDateDo )
+
+// RC dokumenti - avansne fakture
+FUNCTION fin_cre_spil_table_rc( dDateOd, dDateDo )
 
    LOCAL cSql, oQuery 
    LOCAL cMSSQLQuery
-   LOCAL cTableName := fin_spil_table_name( dDateOd, dDateDo)
+   LOCAL cTableName := fin_spil_table_name( "RC", dDateOd, dDateDo)
+ 
+   IF Empty( cTableName)
+      RETURN .F.
+   ENDIF
+ 
+   altd()
+   cSql := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
+   cSql += "CREATE FOREIGN TABLE " + cTableName  
+   cSql += "("
+   cSql += "reg_no varchar(20),"
+   cSql += "goni varchar(20),"
+   cSql += "tax_code varchar(4),"
+   cSql += "inv_date date,"
+   cSql += "order_number varchar(20),"
+   cSql += "doctype int,"
+   cSql += "type_id int," // avansna faktura je> 1 storno minus, 0 - plus 
+   cSql += "docstate int,"
+   cSql += "accountid int,"
+   cSql += "c_account_name varchar(50),"
+   cSql += "client_name varchar(100),"
+   cSql += "client_country varchar(40),"
+   cSql += "client_email varchar(200),"
+   cSql += "c_tax_number varchar(15),"
+   cSql += "tax_rate decimal(18,2),"
+   cSql += "inv_tot_excl decimal(18,2),"
+   cSql += "inv_tot_tax decimal(18,2),"
+   cSql += "inv_tot_incl decimal(18,2)"
+   cSql += ")"
+ 
+   cMSSQLQuery := "select convert(date, view_spil_EU_FiscalInvoicesSalesBook.InvDate) as inv_date,"
+   cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.OrderNum as order_number," 
+   cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.InvTotExcl as inv_tot_excl,"
+   cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.InvTotTax  as inv_tot_tax, view_spil_EU_FiscalInvoicesSalesBook.InvTotIncl as inv_tot_incl,"
+   cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.doctype, view_spil_EU_FiscalInvoicesSalesBook.TypeID as type_id, spilinvnum.accountid, spilinvnum.cAccountName as c_account_name,"
+   cMSSQLQuery += "spilinvnum.accountid, spilinvnum.cTaxNumber as c_tax_number, spilinvnum.taxrate as tax_rate,"
+   cMSSQLQuery += "client.RegistrationNo as reg_no, client.GONI as goni, client.name as client_name, client.Physical5 as client_country, client.email as client_email, client.TaxCode as tax_code"
+   cMSSQLQuery += " from view_spil_EU_FiscalInvoicesSalesBook"
+   cMSSQLQuery += " left join spilInvNum on view_spil_EU_FiscalInvoicesSalesBook.OrderIndex=spilinvnum.OrderIndex"         
+   cMSSQLQuery += " left join client on client.dclink=spilinvnum.accountid"
+   cMSSQLQuery += " where view_spil_EU_FiscalInvoicesSalesBook.doctype=9 and"
+   cMSSQLQuery += " view_spil_EU_FiscalInvoicesSalesBook.invdate>='" + sql_quote( dDateOd ) + "' and view_spil_EU_FiscalInvoicesSalesBook.invdate <= '" + sql_quote( dDateDo) + "'"
+   cMSSQLQuery += " order by view_spil_EU_FiscalInvoicesSalesBook.invdate"
+ 
+   cSql += " SERVER spil OPTIONS( query '" + cMSSQLQuery + "', row_estimate_method 'execute');"
+   oQuery := run_sql_query( cSql )
+ 
+   IF sql_error_in_query( oQuery, "CREATE" )
+     RETURN .F.
+   ENDIF
+  
+   RETURN .T. 
+
+FUNCTION fin_drop_spil_table( cSufix, dDateOd, dDateDo )
+
+   LOCAL cSql, oQuery 
+   LOCAL cMSSQLQuery
+   LOCAL cTableName := fin_spil_table_name( cSufix, dDateOd, dDateDo)
  
    IF Empty( cTableName)
       RETURN .F.
@@ -92,13 +164,13 @@ FUNCTION fin_drop_spil_table( dDateOd, dDateDo )
    RETURN .T.
 
 
-FUNCTION fin_spil_rn_count( dDateOd, dDateDo )
+FUNCTION fin_spil_rn_count_in( dDateOd, dDateDo )
 
-   LOCAL cTableName := fin_spil_table_name( dDateOd, dDateDo )
+   LOCAL cTableName := fin_spil_table_name( "IN", dDateOd, dDateDo )
    LOCAL cQry := "select count(*) from " + cTableName
    LOCAL oQuery, oRow
 
-   IF !fin_cre_spil_table( dDateOd, dDateDo )
+   IF !fin_cre_spil_table( "IN", dDateOd, dDateDo )
       RETURN -1
    ENDIF
 
@@ -193,18 +265,26 @@ FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo,
 
 
 
-FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
+FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
 
-   LOCAL cTableName := fin_spil_table_name( dDatOd, dDatDo )
+   LOCAL cTableName
    LOCAL cAlias := "SPILRN"
-   LOCAL cQry := "select * from " + cTableName
+   LOCAL cQry 
    LOCAL lError := .F.
    LOCAL nRbr, hFinItem, hFinItemPDV, hFinItemPrihod, cIdPartner
    LOCAL aFinItems := {}
    LOCAL cIdKonto, cIdKontoPDV, cIdKontoPrihod
-   LOCAL hPartner
+   LOCAL hPartner, cSufix
 
-   IF !fin_cre_spil_table( dDatOd, dDatDo )
+   IF cFaktAvAvStor == "1"
+      cSufix := "IN"
+   ELSE
+      cSufix := "RC"
+   ENDIF
+   cTableName := fin_spil_table_name( cSufix, dDatOd, dDatDo )
+   cQry := "select * from " + cTableName
+
+   IF !fin_cre_spil_table( cSufix, dDatOd, dDatDo )
       Alert("FIN cre spil table error?!")
       RETURN aFinItems
    ENDIF
@@ -220,22 +300,22 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
       Alert(_u("Greška pri preuzimanju " + cTableName + " ?!" ))
       RETURN .F.
    ENDIF
-  
+
+   altd()
    nRbr := 1
    Box(, 3, 80)
       @ box_x_koord(), box_y_koord() + 10 SAY STR(spilrn->(reccount()), 5, 0)
 
       DO WHILE !EOF()
 
-         IF cFaktAvAvStor == "1" .AND. spilrn->doctype == 9 
-            // Zelimo Fakture, Avansne fakture preskociti
-            // doctype = "9" => RC - avansi
+         IF cFaktAvAvStor == "2" .AND. spilrn->type_id <> 0
+            // typeid = 0 su regularne avansne fakture
             SKIP
             LOOP
          ENDIF
 
-         IF cFaktAvAvStor == "2" .AND. spilrn->doctype <> 9
-            // Zelimo Avansne Fakture, obicne fakture preskociti
+         IF cFaktAvAvStor == "3" .AND. spilrn->type_id <> 1
+            // typeid = 1 su storno avansne fakture
             SKIP
             LOOP
          ENDIF
@@ -287,19 +367,20 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
          hFinItem[ "idfirma" ] := self_organizacija_id()
          hFinItem[ "idvn" ] := "14"
          hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
-         hFinItem[ "brdok" ] := spilrn->ordernum
-         hFinItem[ "opis" ] := "fisk_rn: " + Alltrim(spilrn->fiscal_number)
+         hFinItem[ "brdok" ] := spilrn->order_number
+         IF cFaktAvAvStor == "1"
+            hFinItem[ "opis" ] := "fisk_rn: " + Alltrim(spilrn->fiscal_number)
+         ELSE
+            hFinItem[ "opis" ] := ""
+         ENDIF
          hFinItem[ "datdok" ] := spilrn->inv_date
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
          hFinItem[ "d_p" ] := "1"
-         IF spilrn->doctype == 9
-            // RC dokumenti
-            altd()
-            hFinItem[ "iznos" ] := spilrn->order_total
-         ELSE
-            hFinItem[ "iznos" ] := spilrn->inv_tot_excl + spilrn->inv_tot_tax
-         ENDIF   
+         hFinItem[ "iznos" ] := spilrn->inv_tot_excl + spilrn->inv_tot_tax
+         IF cFaktAvAvStor == "3" // storno avansne fakture RC
+            hFinItem[ "iznos" ] := hFinItem[ "iznos" ] * -1
+         ENDIF 
          
          hFinItem[ "rbr" ] := nRbr
          ++nRbr
@@ -311,10 +392,9 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
 
          hFinItemPDV := hb_HClone(hFinItem)
          hFinItemPDV[ "konto" ] := cIdKontoPDV
-         IF spilrn->doctype == 9
-            hFinItemPDV[ "iznos" ] := round(spilrn->order_total / 1.17 * 0.17, 2)
-         ELSE
-            hFinItemPDV[ "iznos" ] := spilrn->inv_tot_tax
+         hFinItemPDV[ "iznos" ] := spilrn->inv_tot_tax
+         IF cFaktAvAvStor == "3" // storno RC
+            hFinItemPDV[ "iznos" ] := hFinItemPDV[ "iznos" ] * -1
          ENDIF
          hFinItemPDV[ "d_p" ] := "2"
          hFinItemPDV[ "rbr" ] := nRbr
@@ -326,10 +406,9 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
          
          hFinItemPrihod := hb_HClone(hFinItem)
          hFinItemPrihod[ "konto" ] := cIdKontoPrihod
-         IF spilrn->doctype == 9
-            hFinItemPrihod[ "iznos" ] := round(spilrn->order_total / 1.17, 2)
-         ELSE
-            hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
+         hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
+         IF cFaktAvAvStor == "3" // storno RC
+            hFinItemPrihod[ "iznos" ] := hFinItemPrihod[ "iznos" ] * -1
          ENDIF
          hFinItemPrihod[ "d_p" ] := "2"
          hFinItemPrihod[ "rbr" ] := nRbr
@@ -344,7 +423,7 @@ FUNCTION fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
       ENDDO
    BoxC()
 
-   IF !fin_drop_spil_table( dDatOd, dDatDo )
+   IF !fin_drop_spil_table( cSufix, dDatOd, dDatDo )
      Alert("FIN drop spil table error?")
    ENDIF
 
@@ -371,7 +450,7 @@ FUNCTION fin_spil_import()
 
    // Alert(Str(fin_spil_rn_count(dDatOd, dDatDo)))
 
-   aFinItems := fin_spil_get_fin_stavke(dDatod, dDatDo, cFaktAvAvStor)
+   aFinItems := fin_spil_get_fin_stavke(cFaktAvAvStor, dDatod, dDatDo)
 
    FOR nRbr := 1 TO LEN( aFinItems )
       fin_spil_pripr_fill( aFinItems[ nRbr ] )
