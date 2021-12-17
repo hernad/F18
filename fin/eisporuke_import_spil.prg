@@ -363,6 +363,17 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             cIdKonto := "2118"
          ENDIF
 
+         IF cFaktAvAvStor <> "1"
+            // avansne fakture
+            cIdKonto := "2110"
+            IF hPartner["pdv"]
+               cIdKontoPDV := "4710"
+            ELSE
+               cIdKontoPDV := "47101" // ne-PDV obveznik
+            ENDIF
+            cIdKontoPrihod := "4302" // partner koji je uplatio
+         ENDIF
+
          hFinItem := hb_hash()
          hFinItem[ "idfirma" ] := self_organizacija_id()
          hFinItem[ "idvn" ] := "14"
@@ -410,9 +421,17 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          IF cFaktAvAvStor == "3" // storno RC
             hFinItemPrihod[ "iznos" ] := hFinItemPrihod[ "iznos" ] * -1
          ENDIF
+
          hFinItemPrihod[ "d_p" ] := "2"
          hFinItemPrihod[ "rbr" ] := nRbr
          hFinItemPrihod[ "partner" ] := SPACE(6)
+         
+         IF cFaktAvAvStor <> "1" 
+            // avansne fakture
+            hFinItemPrihod[ "opis" ] += "ENAB: PRESKOCI"
+            hFinItemPrihod[ "partner" ] := cIdPartner
+         ENDIF
+         
          AADD( aFinItems, hFinItemPrihod)
          ++nRbr
          
