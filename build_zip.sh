@@ -30,6 +30,12 @@ if [[ -z "$HB_ROOT" ]] ; then
     export HB_ROOT=$(pwd)/harbour
 fi
 
+if ! [[ -f $HB_ROOT/lib/libpq.so ]] ; then
+    echo $HB_ROOT/lib mora sadrzati .so fajlove
+    echo HB_ROOT = $HB_ROOT env varijabla nije dobro definisana
+    exit
+fi
+
 cp -av $HB_ROOT/lib/libssl.so .
 cp -av $HB_ROOT/lib/libcrypto.so .
 cp -av $HB_ROOT/lib/libpq.so .
