@@ -229,7 +229,7 @@ FUNCTION fin_spil_find_partner( cAccountId, cClientName, cClientCountry, cRegNo,
    IF !Empty(cRegNo)
       PushWa()
       SELECT (F_SIFV)
-      use_sql_sifv( "PARTN", "IDBR", NIL, cRegNo )
+      use_sql_sifv( "PARTN", "IDBR", NIL, cGoni )
       PopWa()
       IF !Empty(sifv->idsif)
          // Kupac ima ID broj - NE-PDV obveznik
