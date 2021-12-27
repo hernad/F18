@@ -33,9 +33,16 @@ FUNCTION P_K1( cId, dx, dy )
 
 FUNCTION P_VrsteP( cId, dx, dy )
 
+   LOCAL i
    PRIVATE ImeKol, Kol := {}
 
    o_vrstep()
+   IF reccount() == 0
+      select(F_VRSTEP)
+      use
+      pos_fill_vrste_placanja()
+      o_vrstep()
+   ENDIF
 
    ImeKol := { { "ID ",             {|| id },  "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) }      }, ;
       { PadC( "Naziv", 20 ), {|| PadR( ToStrU( naz ), 20 ) },  "naz" };
@@ -46,3 +53,24 @@ FUNCTION P_VrsteP( cId, dx, dy )
    NEXT
 
    RETURN p_sifra( F_VRSTEP, 1, 10, 55, "Šifarnik vrsta plaćanja", @cid, dx, dy )
+
+
+FUNCTION pos_fill_vrste_placanja()
+
+   LOCAL cShema := pos_prodavnica_sql_schema()
+   LOCAL cQuery, oQry
+   
+   
+   cQuery := "INSERT INTO " + cShema + ".vrstep (id,naz) VALUES"
+   cQuery += "    ('01','GOTOVINA            ')"
+   cQuery += "     ,('KT','KARTICA             ')"
+   cQuery += "     ,('VR','VIRMAN              ')"
+   cQuery += "     ,('CK','CEK                 ')"
+   cQuery += "; select count(*) from " + cShema + ".vrstep"
+
+   oQry := run_sql_query( cQuery )
+
+   IF sql_error_in_query( oQry, "SELECT" )
+      RETURN .F.
+   ENDIF
+   RETURN .T.

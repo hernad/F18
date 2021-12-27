@@ -671,7 +671,7 @@ STATIC FUNCTION my_browse_p_sifra_key_handler( Ch, nWa, cNaslov, bBlok, aZabrane
          RETURN DE_CONT
       ENDIF
 
-      print_lista( "Pregled: " + AllTrim( cNaslov ) + " na dan " + DToC( Date() ) + " g.", "sifarnik" )
+      print_lista( "Pregled: " + AllTrim( _u(cNaslov) ) + " na dan " + DToC( Date() ) + " g.", "sifarnik" )
       PopWa()
 
       RETURN DE_CONT

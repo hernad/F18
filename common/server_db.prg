@@ -45,6 +45,10 @@ FUNCTION check_server_db_version()
    nKlijentRequestDbVer := server_db_ver_klijent()
 
    nServerDbVersion := server_db_version()
+   IF ValType(nServerDbVersion) <> "N"
+      Alert("server_db_version ?! " + hb_ValToStr(nServerDbVersion))
+      RETURN .F.
+   ENDIF
    IF nServerDbVersion < 0
       error_bar( "server_db", "server_db_version < 0")
       RETURN .F.

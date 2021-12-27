@@ -1,5 +1,6 @@
 #include "f18.ch"
 
+
 FUNCTION eNab_eIsp_PDV()
 
     LOCAL cPDV  := fetch_metric( "fin_enab_my_pdv", NIL, PadR( "<POPUNI>", 12 ) )
@@ -247,4 +248,9 @@ FUNCTION eNab_eIsp_PDV()
     inkey(0)
     BoxC()
 
+
+
     RETURN .T.
+
+
+

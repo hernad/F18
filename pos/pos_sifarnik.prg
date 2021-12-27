@@ -16,7 +16,7 @@ MEMVAR ImeKol, Kol
 
 FUNCTION p_pos_strad( cId, dx, dy )
 
-   LOCAL lRet
+   LOCAL lRet, i
 
    PRIVATE ImeKol
    PRIVATE Kol := {}
