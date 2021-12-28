@@ -19,10 +19,10 @@ FUNCTION fin_pocetno_stanje_sql()
    LOCAL cPrenosCopySifarnikeDN
    LOCAL hParams := hb_Hash()
    LOCAL nSintetikaDuzina
-   LOCAL _data, _partn_data, _konto_data
+   LOCAL oFinData, _partn_data, _konto_data
    LOCAL cKontaUslov := PadR( "", 100 )
    LOCAL GetList := {}
-
+   LOCAL cDatabase, cYear
 
    _k_1 := fetch_metric( "fin_prenos_pocetno_stanje_k1", NIL, "9" )
    _k_2 := fetch_metric( "fin_prenos_pocetno_stanje_k2", NIL, "9" )
@@ -39,9 +39,13 @@ FUNCTION fin_pocetno_stanje_sql()
    //cPrenosCopySifarnikeDN := fetch_metric( "fin_prenos_pocetno_stanje_sif", NIL, "N" )
    cPrenosCopySifarnikeDN := "N"
 
-   dDatumOdStaraGodina := CToD( "01.01." + AllTrim( Str( Year( Date() ) - 1 ) ) )
-   dDatumDoStaraGodina := CToD( "31.12." + AllTrim( Str( Year( Date() ) - 1 ) ) )
-   dDatumPocetnoStanje := CToD( "01.01." + AllTrim( Str( Year( Date() ) ) ) )
+   cDatabase := my_server_params()[ "database" ]
+   cYear := Right(cDatabase, 4)
+   altd()
+
+   dDatumOdStaraGodina := CToD( "01.01." + AllTrim( Str( Val(cYear) - 1 ) ) )
+   dDatumDoStaraGodina := CToD( "31.12." + AllTrim( Str( Val(cYear) - 1 ) ) )
+   dDatumPocetnoStanje := CToD( "01.01." + AllTrim( Str( Val(cYear) ) ) )
 
    Box(, 9, 60 )
 
@@ -98,15 +102,15 @@ FUNCTION fin_pocetno_stanje_sql()
    hParams[ "konto_uslov" ] := cKontaUslov
 
    dbf_refresh_stop()
-   fin_pocetno_stanje_get_data( hParams, @_data, @_konto_data, @_partn_data )
+   fin_pocetno_stanje_get_data( hParams, @oFinData, @_konto_data, @_partn_data )
 
-   IF _data == NIL
+   IF oFinData == NIL
       MsgBeep( "Ne postoje traženi podaci... prekidam operaciju !" )
       dbf_refresh_start()
       RETURN .F.
    ENDIF
 
-   IF !fin_poc_stanje_insert_into_fin_pripr( _data, _konto_data, _partn_data, hParams )
+   IF !fin_poc_stanje_insert_into_fin_pripr( oFinData, _konto_data, _partn_data, hParams )
       dbf_refresh_start()
       RETURN .F.
    ENDIF
@@ -372,6 +376,8 @@ STATIC FUNCTION fin_poc_stanje_insert_into_fin_pripr( oDataset, oKontoDataset, o
    BoxC()
    // MsgC()
 
+   MsgBeep("Dokument: " + hRecord["idfirma"] + "-" + hRecord["idvn"] + "-" + hRecord["brnal"] + "# u procesu ažuriranja ...")
+
 
 /* ovo dole je necitljivo - treba dodaje konta i partnere koji nedostaju, ali ovdje se zlostavlja varijabla lOk
    tako da se ne moze racumjeti sta se desava
@@ -607,6 +613,7 @@ STATIC FUNCTION fin_pocetno_stanje_get_data( hParam, oFinQuery, oKontoDataset, o
    cQuery += " GROUP BY idkonto,idpartner,brdok,datdok,datval,otvst,opis,d_p,iznosbhd,iznosdem "
    cQuery += " ORDER BY idkonto,idpartner,brdok,datdok,datval,otvst "
 
+   altd()
    switch_to_database( hServerParams, cDatabase, nYearSezona )
 
    MsgO( "početno stanje - sql query u toku..." )
@@ -649,11 +656,11 @@ FUNCTION switch_to_database( hDbParams, cDatabase, nYear )
 
    my_server_logout()
 
-   IF nYear <> Year( Date() )
+   //IF nYear <> Year( Date() )
       hDbParams[ "database" ] := Left( cDatabase, Len( cDatabase ) - 4 ) + AllTrim( Str( nYear ) )
-   ELSE
-      hDbParams[ "database" ] := cDatabase
-   ENDIF
+   //ELSE
+   //   hDbParams[ "database" ] := cDatabase
+   //ENDIF
    my_server_params( hDbParams )
    my_server_login( hDbParams )
    set_sql_search_path()
