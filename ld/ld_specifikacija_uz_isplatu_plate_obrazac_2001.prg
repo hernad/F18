@@ -132,6 +132,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    LOCAL cRekapTipoviOut := fetch_metric("ld_rekap_out", NIL, SPACE(10))
    LOCAL cPrikazTODN := "N", lPrikazTO
    LOCAL nIzbitiIzNeto, nIzbitiIzOstalo, nRadnikUNeto
+   LOCAL cPom, nRSpr_koef, nRadnikBrutoStvariUsluge
 
 
    IF ValType( cDoprIz3 ) != "C"
@@ -676,9 +677,10 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    hRec[ "iznos_25" ] := FormNum2( isplata_dopr_kontrola_iznosa( nDopr5X + nDopr6X + nDopr7X + nDodDoprP + nDodDoprZ, cVrstaIsplate ), 16, cPictureIznos )
 
    hRec[ "broj_zaposlenih" ] := AllTrim( Str( nBrojZaposlenih, 6, 0 ) )
-   hRec[ "place_u_novcu" ] := FormNum2( nUkupnoBrutoOsnovicaSaMinLimit, 16, cPictureIznos )
+   hRec[ "place_u_novcu" ] := FormNum2( nUkupnoBrutoOsnovicaSaMinLimit - nUkupnoBrutoOsnovicaStvariUsluge, 16, cPictureIznos )
    hRec[ "place_u_stvarima" ] := FormNum2( nUkupnoBrutoOsnovicaStvariUsluge, 16, cPictureIznos )
-   hRec[ "ukupne_place" ] := FormNum2( nUkupnoBrutoOsnovicaSaMinLimit + nUkupnoBrutoOsnovicaStvariUsluge, 16, cPictureIznos )
+
+   hRec[ "ukupne_place" ] := FormNum2( nUkupnoBrutoOsnovicaSaMinLimit, 16, cPictureIznos )
 
    IF nObrCount == 0
       MsgBeep( "Štampa specifikacije nije moguća, nema obračuna !" )
