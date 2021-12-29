@@ -1,7 +1,9 @@
+#include "f18.ch"
+
 FUNCTION fin_kontni_plan_2022()
 
     LOCAL cStarted := fetch_metric( "f18_kontni_2022", NIL, "0" )
-    LOCAL cDatabase
+    LOCAL cDatabase, cQuery, oQuery
     LOCAL aKontaPromjenaNaziva := {;
           { "01", "Nematerijalna sredstva", "Nematerijalna imovina" }, ;
           { "03", "Investicijske nekretnine", "Ulaganja u investicijske nekretnine" }, ;
@@ -109,14 +111,14 @@ FUNCTION fin_kontni_plan_2022()
           { "68", "...", "Prihodi-dobici po osnovu usklađivanja vrijednosti imovine" }, ;
           { "680", "...", "Dobici od otpuštanja ranije priznatih gubitaka od umanjenja vrijednosti nematerijalne imovine" }, ;
           { "681", "...", "Dobici od nekretnina, postrojenja i opreme" }, ;
-          { "682", "...", "Dobici od otpuštanja ranije priznatih gubitaka od umanjenja vrijednosti investicijskih nekretnina koje se vode po trošku" }, ;
-          { "683", "...", "Dobici od otpuštanja ranije priznatih gubitaka od umanjenja vrijednosti biološke imovine koja se vodi po trošku" }, ;
+          { "682", "...", "Dobici od otpuštanja ranije prizn gubitaka od umanjenja vrij investic nekretn koje se vode po trošku" }, ;
+          { "683", "...", "Dobici od otpuštanja ranije prizn gubitaka od umanjenja vrij biološke imovine koja se vodi po trošku" }, ;
           { "684", "...", "Dobici od usklađivanja vrijednosti dugoročne finansijske imovine" }, ;
           { "685", "...", "Dobici od usklađivanja vrijednosti zaliha" }, ;
           { "686", "...", "Dobici od usklađivanja vrijednosti kratkoročne finansijske imovine" }, ;
           { "687", "...", "Dobici od prestanka priznavanja imovine s pravom korištenja" }, ;
-          { "688", "...", "Dobici od usklađivanja vrijednosti dugoročne imovine namijenjene prodaji imovine poslovanja koje se obustavlja" }, ;
-          { "689", "...", "Dobici od usklađivanja vrijednosti ostale finansijske i nefinansijske imovine" }, ;
+          { "688", "...", "Dobici od usklađiv vrijednosti dugoročne imovine namijenjene prodaji imovine posl koje se obustavlja" }, ;
+          { "689", "...", "Dobici od usklađiv vrijednosti ostale finansijske i nefinansijske imovine" }, ;
           { "69", "...", "Efekti promjena računovodstvenih politika i ispravki grešaka iz ranijih perioda i prenos prihoda" }, ;
           { "690", "...", "Prihodi po osnovu promjene računovodstvenih politika" }, ;
           { "691", "...", "Prihodi po osnovu ispravki grešaka iz ranijih perioda" } ;
@@ -222,7 +224,7 @@ FUNCTION fin_kontni_plan_2022()
         { "6744", "Dobici od otuđenja u pridružena društva" }, ;
         { "6745", "Dobici od otuđenja u zajedničke poduhvate" }, ;
         { "6810", "Dobici od otpuštanja ranije priznatih gubitaka od umanjenja vrijednosti nekretnina, postrojenja i opreme koji se vode po trošku" }, ;
-        { "6811", "Dobici od otpuštanja ranije priznatih gubitaka od promjene revalorizovane vrijednosti nekretnina, postrojenja i opreme za koje nema postojećih revalorizacionih rezervi" }, ;
+        { "6811", "Dobici od otpuštanja ranije priznatih gubitaka od promjene revalor vrij nekretnina, postrojenja i opreme za koje nema postojećih revalor rezervi" }, ;
         { "6841", "Dobici od otpuštanja ranije priznatih kreditnih gubitaka od finsnsijske imovine po amortizovanom trošku" }, ;
         { "6842", "Dobici od otpuštanja ranije priznatih kreditnih gubitaka od finsnsijske imovine po fer vrijednosti kroz ukupni rezultat" }, ;
         { "6843", "Dobici od prestanka priznavanja finansijske imovine po amortizovanom trošku (usljed modifikacije)" }, ;
@@ -233,7 +235,7 @@ FUNCTION fin_kontni_plan_2022()
         { "6880", "Dobici od usklađivanja vrijednosti dugoročne imovine namijenjene prodaji" }, ;
         { "6881", "Dobici od usklađivanja vrijednosti imovine poslovanja koje se obustavlja" } ;
     }
-
+ 
     LOCAL aKontaBrisati := {;
         { "22"  },;
         { "222" },;
@@ -253,135 +255,135 @@ FUNCTION fin_kontni_plan_2022()
     }
 
     LOCAL aKontaPreknj := { ;
-            {"013", "Ulaganja na tuđim sredstvima",;
+            {"013.*", "Ulaganja na tuđim sredstvima",;
               {;
                 { "0201", "Ulaganja u tuđe zemljište" },;
                 { "0211", "Ulaganja u tuđe građevinske objekte" } ;
               };    
             },;
-            { "026", "Stambene zgrade i stanovi", ;
+            { "026.*", "Stambene zgrade i stanovi", ;
                {;
                   { "0212", "Stambene zgrade i stanovi" } ;
                };
             },;
-            { "01?8", "Vrijednosna usklađivanja nematerijalne imovine po osnovu umanjenja vrijednosti", ;
+            { "01.{1}8.*", "Vrijednosna usklađivanja nematerijalne imovine po osnovu umanjenja vrijednosti", ;
                {;
                   { "018", "Vrijednosna usklađivanja nematerijalne imovine po osnovu umanjenja vrijednosti" }, ;
                   { "019", "Ispravka vrijednosti nematerijalne imovine" } ;
                };
             },;
-            { "01?9", "Ispravka vrijednosti nematerijalne imovine", ;
+            { "01.{1}9.*", "Ispravka vrijednosti nematerijalne imovine", ;
                 {;
                    { "018", "Vrijednosna usklađivanja nematerijalne imovine po osnovu umanjenja vrijednosti" }, ;
                    { "019", "Ispravka vrijednosti nematerijalne imovine" } ;
                 };
             },;
-            { "03?8", "-pogledaj-stari-kontni-plan", ;
+            { "03.{1}8.*", "-pogledaj-stari-kontni-plan", ;
                 {;
                     { "036", "Vrijednosna usklađivanja ulaganja u investicijske nekretnine po osnovu promjene fer vrijednosti" }, ;
                     { "038", "Vrijednosna usklađivanja ulaganja u investicijske nekretnine po osnovu umanjenja vrijednosti" }, ;
-                    { "039", "Ispravka vrijednosti ulaganja u investicijske nekretnine" }, ;
+                    { "039", "Ispravka vrijednosti ulaganja u investicijske nekretnine" } ;
                 };
             },;
-            { "03?9", "-pogledaj-stari-kontni-plan", ;
+            { "03.{1}9.*", "-pogledaj-stari-kontni-plan", ;
                 {;
                     { "036", "Vrijednosna usklađivanja ulaganja u investicijske nekretnine po osnovu promjene fer vrijednosti" }, ;
                     { "038", "Vrijednosna usklađivanja ulaganja u investicijske nekretnine po osnovu umanjenja vrijednosti" }, ;
-                    { "039", "Ispravka vrijednosti ulaganja u investicijske nekretnine" }, ;
+                    { "039", "Ispravka vrijednosti ulaganja u investicijske nekretnine" } ;
                 };
             },; 
-            { "04?8", "-pogledaj-stari-kontni-plan", ;
+            { "04.{1}8.*", "-pogledaj-stari-kontni-plan", ;
                 {;
                     { "046", "Vrijednosna usklađivanja ulaganja biološke imovine po osnovu promjene fer vrijednosti" }, ;
                     { "048", "Vrijednosna usklađivanja ulaganja biološke imovine po osnovu umanjenja vrijednosti" }, ;
-                    { "049", "Ispravka vrijednosti biološke imovine" }, ;
+                    { "049", "Ispravka vrijednosti biološke imovine" } ;
                 };
             },;
-            { "04?9", "-pogledaj-stari-kontni-plan", ;
+            { "04.{1}9.*", "-pogledaj-stari-kontni-plan", ;
                 {;
                     { "046", "Vrijednosna usklađivanja ulaganja biološke imovine po osnovu promjene fer vrijednosti" }, ;
                     { "048", "Vrijednosna usklađivanja ulaganja biološke imovine po osnovu umanjenja vrijednosti" }, ;
-                    { "049", "Ispravka vrijednosti biološke imovine" }, ;
+                    { "049", "Ispravka vrijednosti biološke imovine" } ;
                 };
             },;
-            { "05?", "Ostala stalna materijalna sredstva", ;
+            { "05.{1}.*", "Ostala stalna materijalna sredstva", ;
                 {;
                     { "026", "Ostala dugoročna materijalna sredstva" }, ;
                     { "078", "Ostala dugoročna potraživanja i imovina" } ;
                 };
             },;
-            { "061", "Učešća u kapitalu drugih pravnih lica", ;
+            { "061.*", "Učešća u kapitalu drugih pravnih lica", ;
                 {;
                     { "060", "Ulaganja u zavisna i pridružena društva i zajedničke poduhvate" } ;
                 };
             },;
-            { "062", "Dugoročni krediti dati povezanim pravnim licima", ;
+            { "062.*", "Dugoročni krediti dati povezanim pravnim licima", ;
                 {;
                     { "0662", "Dati krediti" } ;
                 };
             },;
-            { "063", "Dugoročni krediti dati u zemlji", ;
+            { "063.*", "Dugoročni krediti dati u zemlji", ;
                 {;
                     { "0662", "Dati krediti" } ;
                 };
             },;
-            { "064", "Dugoročni krediti dati u inostranstvo", ;
+            { "064.*", "Dugoročni krediti dati u inostranstvo", ;
                 {;
                     { "0662", "Dati krediti" } ;
                 };
             },;
-            { "070", "Potraživanja od povezanih pravnih lica", ;
+            { "070.*", "Potraživanja od povezanih pravnih lica", ;
                 {;
                     { "067", "Potraživanja po finansijskim najmovima" }, ;
                     { "0671", "Dugoročna potraživanja po finansijskim najmovima" }, ;
-                    { "0679", "Ispravka vrijednosti dugoročnih potraživanja po finansijskim najmovima" }, ;
+                    { "0679", "Ispravka vrijednosti dugoročnih potraživanja po finansijskim najmovima" } ;
                 };
             },; 
-            { "071", "Potraživanja po osnovu prodaje na kredit", ;
+            { "071.*", "Potraživanja po osnovu prodaje na kredit", ;
                 {;
                     { "067", "Potraživanja po finansijskim najmovima" }, ;
                     { "0671", "Dugoročna potraživanja po finansijskim najmovima" }, ;
-                    { "0679", "Ispravka vrijednosti dugoročnih potraživanja po finansijskim najmovima" }, ;
+                    { "0679", "Ispravka vrijednosti dugoročnih potraživanja po finansijskim najmovima" } ;
                 };
             },;            
-            { "072", "Potraživanja po ugovorima o finansijskom najmu (lizingu)", ;
+            { "072.*", "Potraživanja po ugovorima o finansijskom najmu (lizingu)", ;
                 {;
                     { "067", "Potraživanja po finansijskim najmovima" }, ;
                     { "0671", "Dugoročna potraživanja po finansijskim najmovima" }, ;
-                    { "0679", "Ispravka vrijednosti dugoročnih potraživanja po finansijskim najmovima" }, ;
+                    { "0679", "Ispravka vrijednosti dugoročnih potraživanja po finansijskim najmovima" } ;
                 };
             },;
-            { "220", "Potraživanja od izvoznika", ;
+            { "220.*", "Potraživanja od izvoznika", ;
                 {;
                     { "X220", "X? Potraživanja od izvoznika" } ;
                 };
             },;
-            { "221", "Potraživanja po osnovu uvoza za tuđi račun", ;
+            { "221.*", "Potraživanja po osnovu uvoza za tuđi račun", ;
                 {;
                     { "X221", "X? Potraživanja po osnovu uvoza za tuđi račun" } ;
                 };
             },;
-            { "222", "Potraživanja po osnovu konsignacione i komisione prodaje", ;
+            { "222.*", "Potraživanja po osnovu konsignacione i komisione prodaje", ;
                 {;
                     { "X222", "X? Potraživanja po konsignacione i komisione prodaje" } ;
                 };
             },;
-            { "223", "Potraživanja iz zajedničkih poslova", ;
+            { "223.*", "Potraživanja iz zajedničkih poslova", ;
                 {;
                     { "X223", "X? Potraživanja iz zajedničkih poslova" } ;
                 };
             },;
-            { "228", "Ostala potraživanja iz specifičnih poslova", ;
+            { "228.*", "Ostala potraživanja iz specifičnih poslova", ;
                 {;
                     { "X228", "X? Ostala potraživanja iz specifičnih poslova" } ;
                 };
             },;
-            { "229", "Ispravka vrijednosti potraživanja iz specifičnih poslova", ;
+            { "229.*", "Ispravka vrijednosti potraživanja iz specifičnih poslova", ;
                 {;
-                    { "X228", "X? Ispravka vrijednosti potraživanja iz specifičnih poslova" } ;
+                    { "X220", "X? Ispravka vrijednosti potraživanja iz specifičnih poslova" } ;
                 };
             },;
-            { "230", "Potraživanja za kamatu i dividendu od povezanih pravnih lica", ;
+            { "230.*", "Potraživanja za kamatu i dividendu od povezanih pravnih lica", ;
                 {;
                     { "231", "Potraživanja za kamatu od finansijske imovine i zateznu kamatu" }, ;
                     { "2310", "Potraživanja za kamatu po depozitima po amortizovanom trošku" }, ;
@@ -391,41 +393,41 @@ FUNCTION fin_kontni_plan_2022()
                     { "2314", "Potraživanja za zateznu kamatu" } ;
                 };
             },;
-            { "231", "Potraživanja za kamatu i dividendu od drugih subjekata", ;
+            { "231.*", "Potraživanja za kamatu i dividendu od drugih subjekata", ;
                 {;
                     { "230", "Potraživanja za dividende" } ;
                 };
             },;
-            { "240", "Kratkoročni krediti povezanim pravnim licima", ;
+            { "240.*", "Kratkoročni krediti povezanim pravnim licima", ;
                 {;
                     { "2402", "Dati krediti" } ;
                 };
             },;
-            { "29", "Gubitak iznad visine kapitala", ;
+            { "29.*", "Gubitak iznad visine kapitala", ;
                 {;
                     { "35", "Gubitak" }, ;
                     { "350", "Gubitak ranijih perioda" }, ;
                     { "351", "Gubitak izvještajnog perioda" } ;
                 };
             },;
-            { "290", "Gubitak iznad visine kapitala", ;
+            { "290.*", "Gubitak iznad visine kapitala", ;
                 {;
                     { "35", "Gubitak" }, ;
                     { "350", "Gubitak ranijih perioda" }, ;
                     { "351", "Gubitak izvještajnog perioda" } ;
                 };
             },;
-            { "303", "Zadružni udjeli", ;
+            { "303.*", "Zadružni udjeli", ;
                 {;
                     { "X303", "X? Zadružni udjeli" } ;
                 };
             },;
-            { "304", "Ulozi", ;
+            { "304.*", "Ulozi", ;
                 {;
                     { "X304", "X? Ulozi" } ;
                 };
             },;
-            { "31", "Upisani neuplaćeni kapital", ;
+            { "31.*", "Upisani neuplaćeni kapital", ;
                 {;
                     { "23", "Ostala kratkoročna potraživanja"},;
                     { "231", "Potraživanja za kamatu od finansijske imovine i zateznu kamatu" }, ;
@@ -436,7 +438,7 @@ FUNCTION fin_kontni_plan_2022()
                     { "2314", "Potraživanja za zateznu kamatu" } ;
                 };
             },;
-            { "310", "Upisane neuplaćene dionice", ;
+            { "310.*", "Upisane neuplaćene dionice", ;
                 {;
                     { "23", "Ostala kratkoročna potraživanja"},;
                     { "231", "Potraživanja za kamatu od finansijske imovine i zateznu kamatu" }, ;
@@ -447,7 +449,7 @@ FUNCTION fin_kontni_plan_2022()
                     { "2314", "Potraživanja za zateznu kamatu" } ;
                 };
             },;
-            { "312", "Upisani neuplaćeni udjeli", ;
+            { "312.*", "Upisani neuplaćeni udjeli", ;
                 {;
                     { "23", "Ostala kratkoročna potraživanja"},;
                     { "231", "Potraživanja za kamatu od finansijske imovine i zateznu kamatu" }, ;
@@ -458,7 +460,7 @@ FUNCTION fin_kontni_plan_2022()
                     { "2314", "Potraživanja za zateznu kamatu" } ;
                 };
             },;
-            { "319", "Ostali upisani neuplaćeni kapital", ;
+            { "319.*", "Ostali upisani neuplaćeni kapital", ;
                 {;
                     { "23", "Ostala kratkoročna potraživanja"},;
                     { "231", "Potraživanja za kamatu od finansijske imovine i zateznu kamatu" }, ;
@@ -469,22 +471,22 @@ FUNCTION fin_kontni_plan_2022()
                     { "2314", "Potraživanja za zateznu kamatu" } ;
                 };
             },;
-            { "333", "Nerealizovani gubici iz osnova finansijskih sredstava raspoloživih za prodaju", ;
+            { "333.*", "Nerealizovani gubici iz osnova finansijskih sredstava raspoloživih za prodaju", ;
                 {;
                     { "X333", "X? Nerealizovani gubici iz osnova finansijskih sredstava raspoloživih za prodaju" } ;
                 };
             },;
-            { "342", "neraspoređeni višak prihoda ranijih godina", ;
+            { "342.*", "neraspoređeni višak prihoda ranijih godina", ;
                 {;
                     { "340", "Neraspoređena dobiti ranijih perioda" } ;
                 };
             },;
-            { "343", "neraspoređeni višak prihoda ranijih godina", ;
+            { "343.*", "neraspoređeni višak prihoda ranijih godina", ;
                 {;
                     { "341", "Neraspoređena dobit izvještajnog perioda" } ;
                 };
             },;
-            { "411", "Dugoročne obaveze prema povezanim pravnim licima", ;
+            { "411.*", "Dugoročne obaveze prema povezanim pravnim licima", ;
                 {;
                     { "410", "Obaveze koje se mogu konvertovati u kapital" }, ;
                     { "412", "Obaveze po izdatim dužničkim instrumentima" }, ;
@@ -496,19 +498,19 @@ FUNCTION fin_kontni_plan_2022()
                     { "419", "Ostale dugoročne obaveze" } ;
                 };
             },;
-            { "415", "lizing u zemlji", ;
+            { "415.*", "lizing u zemlji", ;
                 {;
                     { "415", "Dugoročne obaveze po najmovima (finansijski najam)" }, ;
                     { "416", "Dugoročne obaveze po najmovima (operativni najam)" } ;
                 };
             },;
-            { "416", "lizing u inostranstvu", ;
+            { "416.*", "lizing u inostranstvu", ;
                 {;
                     { "415", "Dugoročne obaveze po najmovima (finansijski najam)" }, ;
                     { "416", "Dugoročne obaveze po najmovima (operativni najam)" } ;
                 };
             },;
-            { "420", "obaveze prema povezaznim pravnim licima", ;
+            { "420.*", "obaveze prema povezaznim pravnim licima", ;
                 {;
                     { "421", "Obaveze po izdatim dužničkim instrumentima" }, ;
                     { "422", "Kratkoročni krediti uzeti u zemlji" }, ;
@@ -519,13 +521,13 @@ FUNCTION fin_kontni_plan_2022()
                     { "428", "Ostale kratkoročne finansijske obaveze po amortizovanom trošku" } ;
                 };
             },;
-            { "424", "Kratkoročni dio dugoročnih kredita", ;
+            { "424.*", "Kratkoročni dio dugoročnih kredita", ;
                 {;
                     { "422", "Kratkoročni krediti uzeti u zemlji" }, ;
                     { "423", "Kratkoročni krediti uzeti u inostranstvu" } ;
                 };
             },;
-            { "430", "Primljeni avansi, depoziti i kaucije", ;
+            { "430.*", "Primljeni avansi, depoziti i kaucije", ;
                 {;
                     { "430", "Primljeni depoziti i kaucije i zadržana plaćanja" }, ;
                     { "434", "Primljeni avansi" }, ;
@@ -533,36 +535,36 @@ FUNCTION fin_kontni_plan_2022()
                     { "437", "Obaveze po osnovu faktoring poslova" } ;
                 };
             },;
-            { "44", "Obaveze iz specifičnih poslova", ;
+            { "44.*", "Obaveze iz specifičnih poslova", ;
                 {;
                     { "X44", "X? Obaveze iz specifičnih poslova" } ;
                 };
             },;
-            { "62", "Prihodi od aktiviranja ili potrošnje robe i učinaka", ;
+            { "62.*", "Prihodi od aktiviranja ili potrošnje robe i učinaka", ;
                 {;
                     { "X62", "X? Prihodi od aktiviranja ili potrošnje robe i učinaka" } ;
                 };
             },;
-            { "642", "Povećanje vrijednosti ostalih specifičnih sredstava koja se ne amortizuju", ;
+            { "642.*", "Povećanje vrijednosti ostalih specifičnih sredstava koja se ne amortizuju", ;
                 {;
                     { "640", "Povećanje fer vrijednosti investicijskih nekretnina koja se ne amortizuju" } ;
                 };
             },;
-            { "645", "Smanjenje vrijednosti ostalih specifičnih sredstava koja se ne amortizuju", ;
+            { "645.*", "Smanjenje vrijednosti ostalih specifičnih sredstava koja se ne amortizuju", ;
                 {;
                     { "643", "Smanjenje fer vrijednosti investicijskih nekretnina koja se ne amortizuju" } ;
                 };
             },;
-            { "660", "Finansijski prihodi od povezanih pravnih lica", ;
+            { "660.*", "Finansijski prihodi od povezanih pravnih lica", ;
                 {;
                     { "656", "Prihodi od dividendi" } ;
                 };
             },;
-            { "664", "Prihodi od učešća u dobiti zajedničkih ulaganja", ;
+            { "664.*", "Prihodi od učešća u dobiti zajedničkih ulaganja", ;
                 {;
                     { "X664", "X? Prihodi od učešća u dobiti zajedničkih ulaganja" } ;
                 };
-            },;
+            };
         }
 
 
@@ -570,13 +572,135 @@ FUNCTION fin_kontni_plan_2022()
         cDatabase := my_server_params()[ "database" ]
     ENDIF
 
-
-    if Right(cDatabase, 4) == "2021"
+    if Right(cDatabase, 4) != "2022"
         //
-        Alert("nalazimo se u bazi 2021")
+        Alert("Ovo je primjenjljivo samo u 2022 godini")
+        RETURN .F.
     ENDIF
 
+    cQuery := "CREATE TABLE IF NOT EXISTS public.konto_2021 as table fmk.konto;"
+    oQuery := run_sql_query(cQuery)
+    IF sql_error_in_query( oQuery, "CREATE" )
+        RETURN .F.
+    ENDIF
+    MsgBeep("tabela pbl.konto_2021 formirana")
+
+    change_konto_naz_200()
+
+    sif_2022_preknjizenja(aKontaPreknj)
+    sif_2022_nova(aKontaNova)
+    //cQuery := "select distinct idkonto as id_u from fmk.fin_suban" 
+    //cQuery += " order by idkonto"
+    //oQuery := run_sql_query(cQuery)
+    //SELECT(F_KONTO)
+    //IF !use_sql( "konto", cQuery, "KONTO" )
+    //    RETURN .F.
+    //ENDIF
+    //
+    //IF reccount() == 0
+    //    Alert("U bazi nema nijednog fin naloga?! Trebalo bi da bude početno stanje!")
+    //    
+    //    RETURN .F.
+    //ENDIF
+
+    DO WHILE !EOF()
+    ENDDO
 
     return .T.
 
 
+STATIC FUNCTION change_konto_naz_200()
+
+    LOCAL hDbServerParams := my_server_params()
+    LOCAL cQuery
+    LOCAL oQuery
+
+    IF !F18Admin():relogin_as_admin( hDbServerParams[ "database" ] )
+        Alert("Ne mogu se relogirati kao admin?!")
+        RETURN .F.
+    ENDIF
+
+    cQuery := "ALTER TABLE fmk.konto ALTER COLUMN naz TYPE varchar(150)"
+    oQuery := run_sql_query(cQuery)
+    IF sql_error_in_query( oQuery, "ALTER" )
+        RETURN .F.
+    ENDIF
+    MsgBeep("tabela fmk.konto alter naz(57)->naz(150)")
+
+    F18Admin():relogin_as( hDbServerParams[ "user" ],  hDbServerParams[ "password" ], hDbServerParams[ "database" ] )
+
+    RETURN .T.
+
+STATIC FUNCTION sif_2022_preknjizenja( aKontaPreknj )
+
+    LOCAL nI, cStariKto, aNovaKonta, cQuery, oQuery, nJ, cId
+    /*
+    
+            { "03.{1}8", "Revalorizacija ulaganja", ;
+                {;
+                    { "036", "Vrijednosna usklađivanja ulaganja u investicijske nekretnine po osnovu promjene fer vrijednosti" }, ;
+                    { "038", "Vrijednosna usklađivanja ulaganja u investicijske nekretnine po osnovu umanjenja vrijednosti" }, ;
+                    { "039", "Ispravka vrijednosti ulaganja u investicijske nekretnine" }, ;
+                };
+            },;
+    */
+
+    FOR nI := 1 to LEN(aKontaPreknj)
+        cStariKto := aKontaPreknj[nI][1]
+        aNovaKonta := aKontaPreknj[nI][3]
+
+        // delete from fmk.konto where id ~ '03.{1}8.*'
+        cQuery := "delete from fmk.konto where trim(id) ~ '" + cStariKto + "'"
+        run_sql_query( cQuery )
+        
+        FOR nJ := 1 to LEN( aNovaKonta )
+            IF Valtype(aNovaKonta[nJ][1]) <> "C"
+                altd()
+                LOOP
+            ENDIF
+            cId := PADR(aNovaKonta[nJ][1], 7)
+            cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
+            cQuery += "insert into fmk.konto(id, naz) values ("+ sql_quote(cId) + "," + sql_quote(_u(aNovaKonta[nJ][2])) +")"
+            run_sql_query(cQuery)
+        NEXT
+        
+    NEXT
+
+
+    RETURN .T.
+
+STATIC FUNCTION sif_2022_nova( aNovaKonta )
+
+    LOCAL nI, cQuery, cId
+    /*
+           { "603", "Odobreni popusti i rabati" }, ;
+    */
+
+    FOR nI := 1 to LEN( aNovaKonta )
+        IF Valtype(aNovaKonta[nI][1]) <> "C"
+            altd()
+            LOOP
+        ENDIF
+        cId := PADR(aNovaKonta[nI][1], 7)
+        cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
+        cQuery += "insert into fmk.konto(id, naz) values ("+ sql_quote(cId) + "," + sql_quote(_u(aNovaKonta[nI][2])) +")"
+        altd()
+        run_sql_query(cQuery)
+    NEXT
+    
+    RETURN .T.
+
+
+FUNCTION konto_2022()
+    
+    LOCAL cDatabase := "XXXX"
+
+    IF hb_HHasKey( my_server_params(), "database" )
+        cDatabase := my_server_params()[ "database" ]
+    ENDIF
+
+    if Right(cDatabase, 4) != "2022"
+      RETURN .F.
+    ENDIF
+
+    RETURN .T.

@@ -1055,6 +1055,14 @@ FUNCTION fin_knjizenje_ostale_opcije()
    IF fin_spil_active()
       AADD(aOpc, "3. spil import")
       AADD(h, "")
+   ELSE
+      AADD(aOpc, "------------------")
+      AADD(h, "")
+   ENDIF
+
+   IF konto_2022()
+      AADD(aOpc, "4. kontni plan 2022")
+      AADD(h, "")
    ENDIF
 
    nIzbor := 1
@@ -1069,8 +1077,10 @@ FUNCTION fin_knjizenje_ostale_opcije()
          SetDatUPripr()
       CASE nIzbor == 2
          set_novi_broj_jci()
-      CASE nIzbor == 3
+      CASE fin_spil_active() .and. nIzbor == 3
          fin_spil_import()
+      CASE konto_2022() .and. nIzbor == 4
+         fin_kontni_plan_2022()
       ENDCASE
    ENDDO
    box_x_koord( am_x )

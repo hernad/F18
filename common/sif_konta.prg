@@ -36,7 +36,7 @@ FUNCTION P_Konto( cId, dx, dy )
 
 
    AAdd( ImeKol, { PadC( "ID", 7 ), {|| id }, "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) } } )
-   AAdd( ImeKol, { "Naziv", {|| naz }, "naz" } )
+   AAdd( ImeKol, { PADR("Naziv", 90), {|| PADR(naz, 90) }, "naz" } )
 
    FOR i := 1 TO Len( ImeKol )
       AAdd( Kol, i )
