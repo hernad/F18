@@ -22,11 +22,14 @@ FUNCTION kalk_maloprodaja_pos_izvjestaji()
    LOCAL aOpcExe := {}
    LOCAL nIzbor := 1
 
-   AAdd( aOpc,   "1. kartica          " )
+   AAdd( aOpc,   "1. kartica                            " )
    AAdd( aOpcExe, {|| pos_kartica_artikla() } )
 
    AAdd( aOpc,   "2. lager lista" )
    AAdd( aOpcExe, {|| pos_stanje_artikala() } )
+
+   AAdd( aOpc,   "3. neobrađeni dokumenti u prodavnicama" )
+   AAdd( aOpcExe, {|| pos_neobradjeni_lista_rpt() } )
 
    f18_menu( "m2", .F.,  nIzbor, aOpc, aOpcExe )
 

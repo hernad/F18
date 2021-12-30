@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+STATIC s_oPDF
 MEMVAR gIdRadnik
 
 /*
@@ -211,6 +211,96 @@ FUNCTION pos_21_get_lista()
    ENDDO()
 
    RETURN aLista
+
+
+FUNCTION pos_neobradjeni_lista()
+
+   LOCAL cQuery, oData, oRow, oError, hRec, aLista := {}
+   LOCAL nI, cProdavnica, aProdavnice := {;
+      "p2",;     
+      "p4",;      
+      "p5",;      
+      "p6",;      
+      "p7",;      
+      "p8",;      
+      "p10",;     
+      "p11",;     
+      "p12",;     
+      "p13",;     
+      "p15",;     
+      "p16",;     
+      "p17",;     
+      "p18",;     
+      "p20",;     
+      "p21",;     
+      "p22",;     
+      "p23";
+   }
+
+   FOR nI := 1 TO LEN( aProdavnice)
+      cProdavnica := aProdavnice[nI]
+      cQuery := "SELECT * FROM  " + cProdavnica + ".pos_21_neobradjeni_dokumenti()"
+      oData := run_sql_query( cQuery )
+
+      DO WHILE !oData:Eof()
+         oRow := oData:GetRow()
+         hRec := hb_Hash()
+         hRec[ "prodavnica" ] := cProdavnica
+         hRec[ "brdok" ] := oRow:FieldGet( oRow:FieldPos( "brdok" ) )
+         hRec[ "datum" ] := oRow:FieldGet( oRow:FieldPos( "datum" ) )
+         hRec[ "brfaktp" ] := oRow:FieldGet( oRow:FieldPos( "brfaktp" ) )
+         hRec[ "storno" ] := oRow:FieldGet( oRow:FieldPos( "storno" ) )
+
+         AAdd( aLista, hRec )
+         oData:skip()
+      ENDDO()
+   NEXT
+
+   RETURN aLista
+
+
+FUNCTION pos_neobradjeni_lista_rpt()
+
+   LOCAL nI, aLista, xPrintOpt
+   LOCAL cLine, cHeader, aHeader
+
+   s_oPDF := PDFClass():New()
+   xPrintOpt := hb_Hash()
+   xPrintOpt[ "tip" ] := "PDF"
+   xPrintOpt[ "layout" ] := "portrait"
+   xPrintOpt[ "opdf" ] := s_oPDF
+   xPrintOpt[ "font_size" ] := 10
+
+   aLista := pos_neobradjeni_lista()
+   IF LEN(aLista) == 0
+      MsgBeep("Nema neobrađenih dokumenata")
+      RETURN .T.
+   ENDIF
+
+   IF f18_start_print( NIL, xPrintOpt,  "POS NEOBRAĐENI dokumenti NA DAN: " + DToC( Date() ) ) == "X"
+      RETURN .F.
+   ENDIF
+
+   cLine := ""
+   cHeader := ""
+   aHeader := { "  Prodavnica ", "  Broj dokumenta  ", "    Datum   ", " Otpreminca ", "Storno" }
+   FOR nI := 1 TO LEN(aHeader)
+      cLine += REPLICATE("-", LEN(aHeader[nI])) + " "
+      cHeader += aHeader[nI] + " "
+   NEXT
+
+   ? cLine
+   ? cHeader
+   ? cLine
+   FOR nI := 1 TO LEN(aLista)
+      ? PADR(aLista[nI]["prodavnica"], LEN(aHeader[1])), PADR("21-" + aLista[nI]["brdok"], LEN(aHeader[2])),;
+        PADR(aLista[nI]["datum"], LEN(aHeader[3])), PADR(aLista[nI]["brfaktp"], LEN(aHeader[4])),;
+        PADR(IIF(aLista[nI]["storno"], "S", " "), LEN(aHeader[5]))
+   NEXT
+   ? cLine
+   f18_end_print( NIL, xPrintOpt )
+
+   RETURN .T.
 
 
 FUNCTION pos_21_neobradjeni_lista_stariji()
