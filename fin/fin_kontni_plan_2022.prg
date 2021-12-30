@@ -4,6 +4,7 @@ FUNCTION fin_kontni_plan_2022()
 
     LOCAL cStarted := fetch_metric( "f18_kontni_2022", NIL, "0" )
     LOCAL cDatabase, cQuery, oQuery
+    LOCAL cStatus
     LOCAL aKontaPromjenaNaziva := {;
           { "01", "Nematerijalna sredstva", "Nematerijalna imovina" }, ;
           { "03", "Investicijske nekretnine", "Ulaganja u investicijske nekretnine" }, ;
@@ -577,6 +578,14 @@ FUNCTION fin_kontni_plan_2022()
         Alert("Ovo je primjenjljivo samo u 2022 godini")
         RETURN .F.
     ENDIF
+    
+    cStatus := fetch_metric( "kontni_plan_2022", NIL, "0" )
+
+    IF cStatus <> "0"
+        IF Pitanje(,"Aktiviranje kontnog plana 2022 je već urađeno. Nastaviti", "N") == "N"
+           RETURN .F.
+        ENDIF
+    ENDIF
 
     cQuery := "CREATE TABLE IF NOT EXISTS public.konto_2021 as table fmk.konto;"
     oQuery := run_sql_query(cQuery)
@@ -606,8 +615,7 @@ FUNCTION fin_kontni_plan_2022()
     //    RETURN .F.
     //ENDIF
 
-    DO WHILE !EOF()
-    ENDDO
+    set_metric( "kontni_plan_2022", NIL, "1" )
 
     return .T.
 

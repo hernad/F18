@@ -13,31 +13,31 @@
 
 FUNCTION MnuSifrarnik()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
    LOCAL _izbor := 1
 
-   AAdd( _opc, "1. opći matični podaci (šifarnici)                " )
-   AAdd( _opcexe, {|| opci_sifarnici() } )
+   AAdd( aOpc, "1. opći matični podaci (šifarnici)                " )
+   AAdd( aOpcExe, {|| opci_sifarnici() } )
 
-   AAdd( _opc, "2. matični podaci finansijsko poslovanje " )
-   AAdd( _opcexe, {|| _menu_specif() } )
+   AAdd( aOpc, "2. matični podaci finansijsko poslovanje " )
+   AAdd( aOpcExe, {|| _menu_specif() } )
 
 
    IF ( gFinRj == "D" .OR. gFinFunkFond == "D" )
-      AAdd( _opc, "3. budžet" )
-      AAdd( _opcexe, {|| _menu_budzet() } )
+      AAdd( aOpc, "3. budžet" )
+      AAdd( aOpcExe, {|| _menu_budzet() } )
    ENDIF
 
-   f18_menu( "sif", .F., _izbor, _opc, _opcexe )
+   f18_menu( "sif", .F., _izbor, aOpc, aOpcExe )
 
    RETURN .T.
 
 
 STATIC FUNCTION _menu_specif()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
    LOCAL _izbor := 1
 
    o_konto()
@@ -47,22 +47,28 @@ STATIC FUNCTION _menu_specif()
    O_PKONTO
    //O_ULIMIT
 
-   AAdd( _opc, "1. kontni plan                             " )
-   AAdd( _opcexe, {|| p_konto() } )
-   AAdd( _opc, "2. sheme kontiranja fakt->fin (trfp2)  " )
-   AAdd( _opcexe, {|| P_Trfp2() } )
-   AAdd( _opc, "3. prenos konta u ng" )
-   AAdd( _opcexe, {|| P_PKonto() } )
+   AAdd( aOpc, "1. kontni plan                             " )
+   AAdd( aOpcExe, {|| p_konto() } )
+   AAdd( aOpc, "2. sheme kontiranja fakt->fin (trfp2)  " )
+   AAdd( aOpcExe, {|| P_Trfp2() } )
+   AAdd( aOpc, "3. prenos konta u ng" )
+   AAdd( aOpcExe, {|| P_PKonto() } )
 
-  // AAdd( _opc, "4. limiti po ugovorima" )
-  // AAdd( _opcexe, {|| P_ULimit() } )
+   
+   IF konto_2022()
+      AADD(aOpc, "4. kontni plan 2022")
+      AAdd( aOpcExe, {|| fin_kontni_plan_2022() } )
+   ENDIF
 
-  // AAdd( _opc, "5. sheme kontiranja obracuna LD" )
-  // AAdd( _opcexe, {|| P_TRFP3() } )
-   AAdd( _opc, "6. kamatne stope" )
-   AAdd( _opcexe, {|| P_KS() } )
+  // AAdd( aOpc, "4. limiti po ugovorima" )
+  // AAdd( aOpcExe, {|| P_ULimit() } )
 
-   f18_menu( "sopc", .F., _izbor, _opc, _opcexe )
+  // AAdd( aOpc, "5. sheme kontiranja obracuna LD" )
+  // AAdd( aOpcExe, {|| P_TRFP3() } )
+   AAdd( aOpc, "6. kamatne stope" )
+   AAdd( aOpcExe, {|| P_KS() } )
+
+   f18_menu( "sopc", .F., _izbor, aOpc, aOpcExe )
 
    RETURN .T.
 
@@ -70,29 +76,29 @@ STATIC FUNCTION _menu_specif()
 
 STATIC FUNCTION _menu_budzet()
 
-   LOCAL _opc := {}
-   LOCAL _opcexe := {}
+   LOCAL aOpc := {}
+   LOCAL aOpcExe := {}
    LOCAL _Izbor := 1
 
    OSifBudzet()
 
-   AAdd( _opc, "1. radne jedinice              " )
-   AAdd( _opcexe, {|| P_Rj() } )
+   AAdd( aOpc, "1. radne jedinice              " )
+   AAdd( aOpcExe, {|| P_Rj() } )
 
-   AAdd( _opc, "2. funkc.kval       " )
-   AAdd( _opcexe, {|| P_FunK() } )
+   AAdd( aOpc, "2. funkc.kval       " )
+   AAdd( aOpcExe, {|| P_FunK() } )
 
-   //AAdd( _opc, "3. plan budzeta" )
-   //AAdd( _opcexe, {|| P_Budzet() } )
-   //AAdd( _opc, "4. partije->konta " )
-   //AAdd( _opcexe, {|| P_ParEK() } )
-   AAdd( _opc, "5. fond   " )
-   AAdd( _opcexe, {|| P_Fond() } )
+   //AAdd( aOpc, "3. plan budzeta" )
+   //AAdd( aOpcExe, {|| P_Budzet() } )
+   //AAdd( aOpc, "4. partije->konta " )
+   //AAdd( aOpcExe, {|| P_ParEK() } )
+   AAdd( aOpc, "5. fond   " )
+   AAdd( aOpcExe, {|| P_Fond() } )
 
-  // AAdd( _opc, "6. konta-izuzeci" )
-  // AAdd( _opcexe, {|| P_BuIZ() } )
+  // AAdd( aOpc, "6. konta-izuzeci" )
+  // AAdd( aOpcExe, {|| P_BuIZ() } )
 
-   f18_menu( "sbdz", .F., _izbor, _opc, _opcexe )
+   f18_menu( "sbdz", .F., _izbor, aOpc, aOpcExe )
 
    RETURN .T.
 
