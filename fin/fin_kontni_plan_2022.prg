@@ -588,7 +588,10 @@ FUNCTION fin_kontni_plan_2022()
     change_konto_naz_200()
 
     sif_2022_preknjizenja(aKontaPreknj)
+    sif_2022_delete(aKontaBrisati)
     sif_2022_nova(aKontaNova)
+    sif_2022_rename(aKontaPromjenaNaziva)
+
     //cQuery := "select distinct idkonto as id_u from fmk.fin_suban" 
     //cQuery += " order by idkonto"
     //oQuery := run_sql_query(cQuery)
@@ -659,9 +662,11 @@ STATIC FUNCTION sif_2022_preknjizenja( aKontaPreknj )
                 LOOP
             ENDIF
             cId := PADR(aNovaKonta[nJ][1], 7)
-            cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
-            cQuery += "insert into fmk.konto(id, naz) values ("+ sql_quote(cId) + "," + sql_quote(_u(aNovaKonta[nJ][2])) +")"
-            run_sql_query(cQuery)
+            IF left(cId, 1) <> "X"
+                cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
+                cQuery += "insert into fmk.konto(id, naz) values ("+ sql_quote(cId) + "," + sql_quote(_u(aNovaKonta[nJ][2])) +")"
+                run_sql_query(cQuery)
+            ENDIF
         NEXT
         
     NEXT
@@ -685,6 +690,46 @@ STATIC FUNCTION sif_2022_nova( aNovaKonta )
         cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
         cQuery += "insert into fmk.konto(id, naz) values ("+ sql_quote(cId) + "," + sql_quote(_u(aNovaKonta[nI][2])) +")"
         altd()
+        run_sql_query(cQuery)
+    NEXT
+    
+    RETURN .T.
+
+
+STATIC FUNCTION sif_2022_rename( aKontaPromjenaNaziva )
+
+        LOCAL nI, cQuery, cId
+        /*
+              { "01", "Nematerijalna sredstva", "Nematerijalna imovina" }, ;
+        */
+    
+        FOR nI := 1 to LEN( aKontaPromjenaNaziva )
+            IF Valtype(aKontaPromjenaNaziva[nI][1]) <> "C"
+                altd()
+                LOOP
+            ENDIF
+            cId := PADR(aKontaPromjenaNaziva[nI][1], 7)
+            cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
+            cQuery += "insert into fmk.konto(id, naz) values ("+ sql_quote(cId) + "," + sql_quote(_u(aKontaPromjenaNaziva[nI][3])) +")"
+            run_sql_query(cQuery)
+        NEXT
+        
+        RETURN .T.
+
+STATIC FUNCTION sif_2022_delete( aKontaBrisati )
+
+    LOCAL nI, cQuery, cId
+    /*
+            { "01", "Nematerijalna sredstva", "Nematerijalna imovina" }, ;
+    */
+
+    FOR nI := 1 to LEN( aKontaBrisati )
+        IF Valtype(aKontaBrisati[nI][1]) <> "C"
+            altd()
+            LOOP
+        ENDIF
+        cId := PADR(aKontaBrisati[nI][1], 7)
+        cQuery := "delete from fmk.konto where rpad(id,7,' ')="+ sql_quote(cId) + ";"
         run_sql_query(cQuery)
     NEXT
     

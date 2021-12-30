@@ -10,6 +10,7 @@
  */
 
 #include "f18.ch"
+#define MAX_SIRINA_MINUS 55
 
 MEMVAR ImeKol
 
@@ -24,6 +25,7 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
    LOCAL tmpRec
    LOCAL aFieldLen, nFieldWidth
    LOCAL nXP, nYP
+   LOCAL nMaxSirina := f18_max_cols() - MAX_SIRINA_MINUS
 
    // uzmi when, valid kodne blokove
    IF ( Ch == K_F2 .AND. lZabIsp .AND. AScan( aZabIsp, Upper( ImeKol[ nI, 3 ] ) ) > 0 )
@@ -53,11 +55,12 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
       nFieldWidth := aFieldLen[ 2 ] // char polje sirina
    ENDIF
 
-   IF cGetPictureCode ==  "@S50" .OR. Len( ToStr( Eval( bVariableEval ) ) ) > 50
-      cGetPictureCode :=  "@S50"
-      @ box_x_koord() + nTekRed + 1, box_y_koord() + 67 SAY Chr( 16 )
+   IF cGetPictureCode ==  "@S" + AllTrim(Str(nMaxSirina)) .OR. Len( ToStr( Eval( bVariableEval ) ) ) > nMaxSirina
+      cGetPictureCode :=  "@S" + AllTrim(Str(nMaxSirina))
+      @ box_x_koord() + nTekRed + 1, box_y_koord() + nMaxSirina + 17 SAY Chr( 16 ) //">"
    ENDIF
 
+   altd()
    IF Len( ImeKol[ nI ] ) >= 7 .AND. ImeKol[ nI, 7 ] <> NIL // picture kod zadan u ImeKol
       cGetPictureCode := ImeKol[ nI, 7 ]
    ENDIF
@@ -142,6 +145,7 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
 FUNCTION get_field_get_picture_code( cAlias, cField )
 
    LOCAL aFieldLen := get_field_len( cAlias, Lower( cField ) )
+   LOCAL nMaxSirina := f18_max_cols() - MAX_SIRINA_MINUS
 
    //IF Upper( cField ) == "DUZINA" .AND. cAlias == "SIFK"
    //    AltD()
@@ -152,8 +156,8 @@ FUNCTION get_field_get_picture_code( cAlias, cField )
    ENDIF
 
    IF aFieldLen[ 1 ] == "C"
-      IF aFieldLen[ 2 ] > 50
-         RETURN "@S50"
+      IF aFieldLen[ 2 ] > nMaxSirina
+         RETURN "@S" + AllTrim(Str(nMaxSirina))
       ENDIF
       RETURN Replicate( "X", aFieldLen[ 2 ] )
    ENDIF
