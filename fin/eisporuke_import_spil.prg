@@ -50,6 +50,7 @@ FUNCTION fin_cre_spil_table_in( dDateOd, dDateDo )
   cSql += "goni varchar(20),"
   cSql += "tax_code varchar(4),"
   cSql += "inv_date date,"
+  cSql += "pay_date date,"
   cSql += "order_number varchar(20),"
   cSql += "doctype int,"
   cSql += "docstate int,"
@@ -66,7 +67,7 @@ FUNCTION fin_cre_spil_table_in( dDateOd, dDateDo )
 
   cMSSQLQuery := "select spil_EU_FiscalNumber.FiscalNumber as fiscal_number,"
   cMSSQLQuery += "client.RegistrationNo as reg_no, client.GONI as goni, client.TaxCode as tax_code,"
-  cMSSQLQuery += "convert(date, spilinvnum.invdate) as inv_date, spilinvnum.ordernum as order_number, spilinvnum.doctype, spilinvnum.docstate, spilinvnum.accountid, spilinvnum.cAccountName as c_account_name,"
+  cMSSQLQuery += "convert(date, spilinvnum.invdate) as inv_date, convert(date, spilinvnum.PaymentDueDate) as pay_date, spilinvnum.ordernum as order_number, spilinvnum.doctype, spilinvnum.docstate, spilinvnum.accountid, spilinvnum.cAccountName as c_account_name,"
   cMSSQLQuery += "client.name as client_name, client.Physical5 as client_country, client.email as client_email,"
   cMSSQLQuery += "spilinvnum.cTaxNumber as c_tax_number, spilinvnum.taxrate as tax_rate, spilinvnum.invTotExcl as inv_tot_excl, spilinvnum.invTotTax as inv_tot_tax,"
   cMSSQLQuery += "spilinvnum.InvTotIncl as inv_tot_incl" 
@@ -106,6 +107,7 @@ FUNCTION fin_cre_spil_table_rc( dDateOd, dDateDo )
    cSql += "goni varchar(20),"
    cSql += "tax_code varchar(4),"
    cSql += "inv_date date,"
+   cSql += "pay_date date,"
    cSql += "order_number varchar(20),"
    cSql += "doctype int,"
    cSql += "type_id int," // avansna faktura je> 1 storno minus, 0 - plus 
@@ -123,6 +125,7 @@ FUNCTION fin_cre_spil_table_rc( dDateOd, dDateDo )
    cSql += ")"
  
    cMSSQLQuery := "select convert(date, view_spil_EU_FiscalInvoicesSalesBook.InvDate) as inv_date,"
+   cMSSQLQuery += "convert(date, view_spil_EU_FiscalInvoicesSalesBook.InvDate) as pay_date,"
    cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.OrderNum as order_number," 
    cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.InvTotExcl as inv_tot_excl,"
    cMSSQLQuery += "view_spil_EU_FiscalInvoicesSalesBook.InvTotTax  as inv_tot_tax, view_spil_EU_FiscalInvoicesSalesBook.InvTotIncl as inv_tot_incl,"
@@ -385,6 +388,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             hFinItem[ "opis" ] := ""
          ENDIF
          hFinItem[ "datdok" ] := spilrn->inv_date
+         hFinItem[ "datval" ] := spilrn->pay_date
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
          hFinItem[ "d_p" ] := "1"
@@ -402,6 +406,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          ENDIF
 
          hFinItemPDV := hb_HClone(hFinItem)
+         hFinItemPDV[ "datval" ] := CTOD("")
          hFinItemPDV[ "konto" ] := cIdKontoPDV
          hFinItemPDV[ "iznos" ] := spilrn->inv_tot_tax
          IF cFaktAvAvStor == "3" // storno RC
@@ -416,6 +421,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          ENDIF
          
          hFinItemPrihod := hb_HClone(hFinItem)
+         hFinItemPrihod[ "datval" ] := CTOD("")
          hFinItemPrihod[ "konto" ] := cIdKontoPrihod
          hFinItemPrihod[ "iznos" ] := spilrn->inv_tot_excl
          IF cFaktAvAvStor == "3" // storno RC
@@ -483,11 +489,18 @@ FUNCTION fin_spil_import()
 
 STATIC FUNCTION fin_spil_pripr_fill( hFinItem )
 
+   LOCAL dDatVal
    Box(, 2, 50)
    select_o_fin_pripr()
    APPEND BLANK
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY STR(hFinItem[ "rbr" ], 5, 0)
+   IF LEFT(hFinItem[ "brdok" ], 2) == "IN"
+      dDatVal := hFinItem[ "datval" ]
+   ELSE
+      dDatVal := CTOD("")
+   ENDIF
+
    RREPLACE idfirma WITH hFinItem[ "idfirma" ], ;
             idvn WITH hFinItem[ "idvn" ], ;
             brnal WITH hFinItem[ "brnal" ], ;
@@ -495,6 +508,7 @@ STATIC FUNCTION fin_spil_pripr_fill( hFinItem )
             opis WITH hFinItem[ "opis" ], ;
             rbr WITH hFinItem[ "rbr" ], ;
             datdok WITH hFinItem[ "datdok" ], ;
+            datval WITH dDatVal, ;
             idkonto WITH hFinItem[ "konto" ], ;
             idpartner WITH hFinItem[ "partner" ], ;
             d_p WITH hFinItem[ "d_p" ], ;
