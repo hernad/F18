@@ -28,6 +28,7 @@ FUNCTION PrintParovno( nKolUlaz, nKolIzlaz )
 
    RETURN .T.
 
+/*   
 // -------------------------------------------
 // vraca naziv prodavnice iz tabele OBJEKTI
 // -------------------------------------------
@@ -49,3 +50,4 @@ FUNCTION get_prod_naz( cIdKonto )
    SELECT ( nTArea )
 
    RETURN cNaz
+*/

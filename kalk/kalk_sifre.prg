@@ -27,8 +27,9 @@ FUNCTION kalk_sifrarnik()
    AAdd( aOpcExe, {|| opci_sifarnici() } )
    AAdd( aOpc, "2. robno-materijalno poslovanje" )
    AAdd( aOpcExe, {|| sif_roba_tarife_koncij_sast() } )
-   AAdd( aOpc, "3. magacinski i prodajni objekti" )
-   AAdd( aOpcExe, {|| P_Objekti() } )
+
+   //AAdd( aOpc, "3. magacinski i prodajni objekti" )
+   //AAdd( aOpcExe, {|| P_Objekti() } )
 
    f18_menu( "msif", .F., nIzbor, aOpc, aOpcExe )
 
@@ -92,6 +93,7 @@ FUNCTION kalk_roba_key_handler( Ch )
 
 */
 
+/*
 FUNCTION P_Objekti()
 
    LOCAL nTArea
@@ -117,7 +119,7 @@ FUNCTION P_Objekti()
    p_sifra( F_OBJEKTI, 1, f18_max_rows() - 15, f18_max_cols() - 20, "Objekti" )
 
    RETURN .T.
-
+*/
 
 
 

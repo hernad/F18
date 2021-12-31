@@ -31,7 +31,7 @@ STATIC cLinija
 #define ROBAN_LEN 40
 #define KOLICINA_LEN 10
 
-
+/*
 
 FUNCTION kalk_izvj_stanje_po_objektima()
 
@@ -1109,3 +1109,5 @@ FUNCTION resetuj_vrijednosti_tabele_pobjekti()
    ENDDO
 
    RETURN
+
+*/   

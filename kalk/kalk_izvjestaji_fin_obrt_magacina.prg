@@ -11,7 +11,7 @@
 
 #include "f18.ch"
 
-
+/*
 
 // Pregled finansijskog obrta magacin/prodavnica
 FUNCTION kalk_finansijski_obrt()
@@ -590,10 +590,6 @@ STATIC FUNCTION Legenda()
 // }
 
 
-/* ZagOPoMF()
- *     Zaglavlje obrta
- */
-
 FUNCTION ZagOPoMF()
 
    // {
@@ -627,17 +623,10 @@ FUNCTION ZagOPoMF()
    ? cZText1
    ? cZText2
 
-/*
-if (cCijena=="P")
- ? "    GRUPACIJA               POCETNA      NABAVKA        ZADUZ.          MALOPROD.          KUMULAT.       OSTVARENI          ZALIHA           ZALIHA         +POVECANJE       PROSJECNA      GOD. KOEF."
- ? "                            ZALIHA       MAGACIN      PRODAVNICE           RUC             PRODAJA          RUC              REKL.R           NA DAN         -SNIZENJE          ZALIHA         OBRTA  "
-else
- ? "    GRUPACIJA               POCETNA      NABAVKA        ZADUZ.          KUMULAT.          ZALIHA          ZALIHA          PROSJECNA      GOD. KOEF."
- ? "                            ZALIHA       MAGACIN      PRODAVNICA        PRODAJA           REKL.R          NA DAN            ZALIHA         OBRTA  "
-endif
-*/
+
 
    ? m
 
    RETURN
-// }
+
+*/
