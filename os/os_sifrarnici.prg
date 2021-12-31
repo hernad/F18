@@ -38,8 +38,8 @@ FUNCTION os_sifarnici()
    AAdd( aOpcExe, {|| NIL } )
    AAdd( aOpc, "6. konta" )
    AAdd( aOpcExe, {|| p_konto() } )
-   AAdd( aOpc, "7. grupacije K1" )
-   AAdd( aOpcExe, {|| p_k1() } )
+   //AAdd( aOpc, "7. grupacije K1" )
+   //AAdd( aOpcExe, {|| p_k1() } )
 
    AAdd( aOpc, "8. partneri" )
    AAdd( aOpcExe, {|| p_partner() } )
@@ -88,6 +88,7 @@ FUNCTION P_OS( cId, dx, dy )
       { PadR( "OtpVr", 15 ), {|| otpvr },  "otpvr", {|| .T. },  {|| os_validate_vrijednost( wnabvr, wotpvr ) }  };
       }
 
+   /*
    IF os_sii_da_li_postoji_polje( "K1" )
       AAdd ( ImeKol, { PadC( "K1", 4 ), {|| k1 }, "k1", {|| .T. }, {|| P_K1( @wK1 ) } } )
     //  AAdd ( ImeKol, { PadC( "K1", 4 ), {|| k1 }, "k1", {|| .T. }, {|| .T. } } )
@@ -95,6 +96,7 @@ FUNCTION P_OS( cId, dx, dy )
       AAdd ( ImeKol, { PadC( "K3", 2 ), {|| k3 }, "k3"   } )
       AAdd ( ImeKol, { PadC( "Opis", 2 ), {|| opis }, "opis"   } )
    ENDIF
+   */
 
    IF os_fld_partn_exist()
       AAdd ( ImeKol, { "Dobavljac", {|| idPartner }, "idPartner", {|| .T. }, {|| p_partner( @wIdPartner ) }   } )

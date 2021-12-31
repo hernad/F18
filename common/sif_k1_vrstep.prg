@@ -4,7 +4,7 @@ MEMVAR ImeKol, Kol
 
 // k1 - karakteristike
 
-
+/*
 FUNCTION P_K1( cId, dx, dy )
 
    LOCAL _area, nI
@@ -26,7 +26,7 @@ FUNCTION P_K1( cId, dx, dy )
    SELECT ( _area )
 
    RETURN p_sifra( F_K1, I_ID, 10, 60, "Lista - K1", @cId, dx, dy )
-
+*/
 
 /* fn P_VrsteP(cId,dx,dy)
  */
