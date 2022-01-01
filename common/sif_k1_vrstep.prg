@@ -36,11 +36,16 @@ FUNCTION P_VrsteP( cId, dx, dy )
    LOCAL i
    PRIVATE ImeKol, Kol := {}
 
+   // koristi ga POS 
+   // takodje postoje tragovi koristenja u FAKT, ali vidim da je u knjig vrstep reccount=0 
+
    o_vrstep()
    IF reccount() == 0
       select(F_VRSTEP)
       use
-      pos_fill_vrste_placanja()
+      IF programski_modul() == "POS"
+          pos_fill_vrste_placanja()
+      ENDIF
       o_vrstep()
    ENDIF
 
