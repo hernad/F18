@@ -71,7 +71,7 @@ FUNCTION kalk_stampa_dok_im()
    ENDIF
    cCijenaTip := Pitanje(, "Na obrascu prikazati VPC (D) ili NC (N)?", "N" )
 
-   cNaslov := "INVENTURA MAGACIN " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " + AllTrim( konto->naz ) + " , Datum: " + DToC( kalk_pripr->DatDok )
+   cNaslov := "INVENTURA MAGACIN " + cIdFirma + "-" + cIdVD + "-" + cBrDok + " / " +_to_utf8(AllTrim( konto->naz )) + " , Datum: " + DToC( kalk_pripr->DatDok )
    s_oPDF := PDFClass():New()
    xPrintOpt := hb_Hash()
    xPrintOpt[ "tip" ] := "PDF"
@@ -116,7 +116,7 @@ FUNCTION kalk_stampa_dok_im()
 
       check_nova_strana( bZagl, s_oPDF )
 
-      @ PRow() + 1, 0 SAY  kalk_pripr->Rbr PICTURE "XXX"
+      @ PRow() + 1, 2 SAY  kalk_pripr->Rbr PICTURE "9999"
       @ PRow(), nColIdRoba := PCol() + 1 SAY  kalk_pripr->idroba
       @ PRow(), PCol() + 1  SAY PadR( Trim( ROBA->naz ), s_nRobaNazivDuzina )
       @ PRow(), PCol() + 1  SAY ROBA->jmj
@@ -186,8 +186,8 @@ FUNCTION kalk_stampa_dok_im()
 
    check_nova_strana( bZagl, s_oPDF, .F., 3 )
    ? s_cLinija
-   @ PRow() + 1, 0 SAY "Ukupno:"
-   @ PRow(), ( PCol() * 6 ) + 2 SAY nTotKol PICT kalk_pic_kolicina_bilo_gpickol()
+   @ PRow() + 1, 2 SAY "Ukupno:"
+   @ PRow(), nColKolicina SAY nTotKol PICT kalk_pic_kolicina_bilo_gpickol()
    @ PRow(), PCol() + 1 SAY nTotGKol PICT kalk_pic_kolicina_bilo_gpickol()
    @ PRow(), PCol() + 1 SAY nTotb PICT kalk_pic_iznos_bilo_gpicdem()
    @ PRow(), PCol() + 1 SAY nTotc PICT kalk_pic_iznos_bilo_gpicdem()
@@ -225,10 +225,10 @@ STATIC FUNCTION zagl()
 
    LOCAL nI, cHeader1, cHeader2
 
-   s_cLinija := "---"
-   s_cLinija += Space( 1 )
-   cHeader1 := "*R *"
-   cHeader2 := "*br*"
+   s_cLinija := SPACE(2) + "----"
+   s_cLinija += Space(1)
+   cHeader1 := SPACE(2) + "*R  *"
+   cHeader2 := SPACE(2) + "*br *"
 
    s_cLinija += Replicate( "-", 10 ) // cIdroba
    s_cLinija += Space( 1 )
@@ -284,3 +284,6 @@ STATIC FUNCTION zagl()
    ? cHeader1
    ? cHeader2
    ?U s_cLinija
+
+   RETURN .T.
+
