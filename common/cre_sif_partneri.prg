@@ -537,11 +537,12 @@ FUNCTION is_postoji_partner( cSifra )
    RETURN .F.
 
 /*
-    0 - Mali
-    1 - Srednji
-    2 - Veliki
-    3 - Nacionalni
-    4 - Horeka - hoteli/restorani
+    M - Mali
+    S - Srednji
+    V - Veliki
+    N - Nacionalni
+    U - Ustanove
+    H - Horeka - hoteli/restorani
 */
 FUNCTION partn_velicina_naz( cSifVelicina )
 
@@ -556,6 +557,8 @@ FUNCTION partn_velicina_naz( cSifVelicina )
         return PADR("Veliki", nWidth)
       case "N"
         return PADR("Nacionalni", nWidth)
+      case "U"
+        return PADR("Ustanove", nWidth)  
       case "H"
         return PADR("HoReKa", nWidth)
 	endswitch
@@ -583,6 +586,8 @@ FUNCTION partn_velicina_get( cSifVelicina )
    AAdd( aRet, "V" )
    AAdd( aOpc, "N. nacionalni" )
    AAdd( aRet, "N" )
+   AAdd( aOpc, "U. ustanove" )
+   AAdd( aRet, "U" )
    AAdd( aOpc, "H. horeka" )
    AAdd( aRet, "H" )
    // inicijalna pozicija
