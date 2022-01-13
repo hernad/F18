@@ -44,7 +44,7 @@ METHOD programski_modul_osnovni_meni()
    LOCAL nIzbor := 1
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
-     LOCAL cSeparator := Replicate( "-", 50)
+   LOCAL cSeparator := Replicate( "-", 50)
 
 
    AAdd( aOpc, "1. unos/ispravka dokumenta                         " )

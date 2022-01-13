@@ -95,6 +95,11 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
    LOCAL lRet
    LOCAL aImeKolKupac := ARRAY(10)
    LOCAL aImeKolDobavljac := ARRAY(10)
+   LOCAL aImeKolFax := ARRAY(10)
+   LOCAL aImeKolMob := ARRAY(10)
+   LOCAL aImeKolVelicina := ARRAY(10)
+   LOCAL aImeKolRegija := ARRAY(10)
+   LOCAL aImeKolVrObezbj := ARRAY(10)
    LOCAL bPodvuciNeaktivne
 
    PRIVATE ImeKol
@@ -131,9 +136,56 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
 
    //AAdd ( ImeKol, { PadR( "Dev ZR", 22 ), {|| DZIROR }, "Dziror" } )
    AAdd( Imekol, { PadR( "Telefon", 12 ),  {|| TELEFON }, "telefon"  } )
-   AAdd ( ImeKol, { PadR( "Fax", 12 ), {|| fax }, "fax" } )
-   AAdd ( ImeKol, { PadR( "MobTel", 20 ), {|| mobtel }, "mobtel" } )
+  
+   //AAdd ( ImeKol, { PadR( "Fax", 12 ), {|| fax }, "fax" } )
+   aImeKolFax[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := PadR( "Fax", 12 )
+   aImeKolFax[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| fax }
+   aImeKolFax[ BROWSE_IMEKOL_IME_VARIJABLE ] := "fax"
+   aImeKolFax[ BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] := 27
+   AAdd( ImeKol, aImeKolFax )
+
+
+   //AAdd ( ImeKol, { PadR( "MobTel", 20 ), {|| mobtel }, "mobtel" } )
+   aImeKolMob[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := PadR( "MobTel", 20 )
+   aImeKolMob[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| mobtel }
+   aImeKolMob[ BROWSE_IMEKOL_IME_VARIJABLE ] := "mobtel"
+   aImeKolMob[ BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] := 44
+   AAdd( ImeKol, aImeKolMob )
+
+
    AAdd ( ImeKol, { PadR( ToStrU( "Općina" ), 6 ), {|| idOps }, "idops", {|| .T. }, {|| p_ops( @wIdops ) } } )
+
+   IF fieldpos("S_VELICINA") <> 0
+      aImeKolVelicina[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := _u("Veličina")
+      aImeKolVelicina[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| s_velicina }
+      aImeKolVelicina[ BROWSE_IMEKOL_IME_VARIJABLE ] := "s_velicina"
+      aImeKolVelicina[ BROWSE_IMEKOL_WHEN ] := {|| .T. }
+      aImeKolVelicina[ BROWSE_IMEKOL_VALID ] := {|| partn_velicina_get( @ws_velicina ) }
+      aImeKolVelicina[ BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ] := "@!"
+      aImeKolVelicina[ BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] := 20
+      AAdd( ImeKol, aImeKolVelicina )
+   ENDIF
+   IF fieldpos("S_REGIJA") <> 0
+      aImeKolRegija[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := _u("Regija")
+      aImeKolRegija[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| s_regija }
+      aImeKolRegija[ BROWSE_IMEKOL_IME_VARIJABLE ] := "s_regija"
+      aImeKolRegija[ BROWSE_IMEKOL_WHEN ] := {|| .T. }
+      aImeKolRegija[ BROWSE_IMEKOL_VALID ] := {|| partn_regija_get( @ws_regija ) }
+      aImeKolRegija[ BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ] := "@!"
+      aImeKolRegija[ BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] := 32
+      AAdd( ImeKol, aImeKolRegija )
+   ENDIF
+   IF fieldpos("S_VR_OBEZBJ") <> 0
+      aImeKolVrObezbj[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := _u("Vr.Obezbj")
+      aImeKolVrObezbj[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| s_vr_obezbj }
+      aImeKolVrObezbj[ BROWSE_IMEKOL_IME_VARIJABLE ] := "s_vr_obezbj"
+      aImeKolVrObezbj[ BROWSE_IMEKOL_WHEN ] := {|| .T. }
+      aImeKolVrObezbj[ BROWSE_IMEKOL_VALID ] := {|| partn_vrsta_obezbj_get( @ws_vr_obezbj ) }
+      aImeKolVrObezbj[ BROWSE_IMEKOL_KOLONA_U_PICTURE_CODE ] := "@!"
+      aImeKolVrObezbj[ BROWSE_IMEKOL_KOLONA_U_POSTOJECEM_REDU ] := 42
+      AAdd( ImeKol, aImeKolVrObezbj )
+   ENDIF
+
    AAdd ( ImeKol, { PadR( "Referent", 10 ), {|| field->idrefer }, "idrefer", {|| .T. }, {|| EMPTY(wIdrefer) .OR. p_refer( @wIdrefer ) } } )
 
    aImeKolKupac[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := "kupac?"
@@ -235,7 +287,7 @@ FUNCTION p_sifk_partn_group()
    RETURN lRet
 
 
-
+/*
 FUNCTION p_set_group( set_field )
 
    LOCAL aOpc := {}
@@ -261,7 +313,7 @@ FUNCTION p_set_group( set_field )
    box_y_koord( _m_y )
 
    RETURN .T.
-
+*/
 
 FUNCTION gr_opis( cGroup )
 
@@ -427,7 +479,6 @@ FUNCTION set_sifk_partn_bank()
    IF !Found()
 
       APPEND BLANK
-
       hRec := dbf_get_rec()
       hRec[ "id" ] := cId
       hRec[ "naz" ] := cNaz
@@ -471,12 +522,12 @@ FUNCTION ispisi_partn( cPartn, nX, nY )
 
 
 
-FUNCTION is_postoji_partner( sifra )
+FUNCTION is_postoji_partner( cSifra )
 
    LOCAL nCount
    LOCAL cWhere
 
-   cWhere := "id = " + sql_quote( sifra )
+   cWhere := "id = " + sql_quote( cSifra )
    nCount := table_count( F18_PSQL_SCHEMA_DOT + "partn", cWhere )
 
    IF nCount > 0
@@ -484,3 +535,191 @@ FUNCTION is_postoji_partner( sifra )
    ENDIF
 
    RETURN .F.
+
+/*
+    0 - Mali
+    1 - Srednji
+    2 - Veliki
+    3 - Nacionalni
+    4 - Horeka - hoteli/restorani
+*/
+FUNCTION partn_velicina_naz( cSifVelicina )
+
+   LOCAL nWidth := 12
+
+   switch valtype( cSifVelicina )
+      case "M"
+			return PADR("Mali", nWidth)
+		case "S"
+        return PADR("Srednji", nWidth)
+		case "V"
+        return PADR("Veliki", nWidth)
+      case "N"
+        return PADR("Nacionalni", nWidth)
+      case "H"
+        return PADR("HoReKa", nWidth)
+	endswitch
+
+   RETURN PADR("Mali", 12)
+
+
+FUNCTION partn_velicina_get( cSifVelicina )
+
+   LOCAL nWidth := 12
+
+   LOCAL aOpc := {}, aRet := {}
+   LOCAL nIzbor := 1
+   LOCAL lFound
+
+   IF EMPTY(cSifVelicina)
+      RETURN .T.
+   ENDIF
+
+   AAdd( aOpc, "M. mali          " )
+   AAdd( aRet, "M" )
+   AAdd( aOpc, "S. srednji" )
+   AAdd( aRet, "S" )
+   AAdd( aOpc, "V. veliki" )
+   AAdd( aRet, "V" )
+   AAdd( aOpc, "N. nacionalni" )
+   AAdd( aRet, "N" )
+   AAdd( aOpc, "H. horeka" )
+   AAdd( aRet, "H" )
+   // inicijalna pozicija
+
+   lFound := .T.
+   nIzbor := AScan(aRet, { |cItem| cItem == cSifVelicina })
+
+   IF nIzbor == 0
+      lFound := .F.
+      nIzbor := 1
+   ENDIF
+   // odredi kroz meni
+   nIzbor := meni_0( "psv", aOpc, NIL, nIzbor, .F., .T. )
+
+   IF nIzbor > 0
+      cSifVelicina := aRet[ nIzbor]
+      lFound := .T.
+   ENDIF
+
+   RETURN lFound
+
+
+FUNCTION partn_regija_naz( cSifRegija )
+
+   LOCAL nWidth := 10
+
+   switch valtype( cSifRegija )
+      case "S"
+         return PADR("Sarajevo", nWidth)
+      case "T"
+         return PADR("Tuzla", nWidth)
+      case "L"
+         return PADR("Banja Luka", nWidth)
+      case "B"
+         return PADR("Bihać", nWidth)
+      case "Z"
+         return PADR("Tranzit", nWidth)
+   endswitch
+   
+   RETURN PADR("Sarajevo", nWidth)
+
+
+FUNCTION partn_regija_get( cSifRegija )
+
+   LOCAL nWidth := 10
+
+   LOCAL aOpc := {}, aRet := {}
+   LOCAL nIzbor := 1
+   LOCAL cRet := "S"
+   LOCAL lFound
+
+   IF EMPTY(cSifRegija)
+      RETURN .T.
+   ENDIF
+
+   AAdd( aOpc, "S. sarajevo          " )
+   AAdd( aRet, "S" )
+   AAdd( aOpc, "T. tuzla" )
+   AAdd( aRet, "T" )
+   AAdd( aOpc, "L. banja luka" )
+   AAdd( aRet, "L" )
+   AAdd( aOpc, "B. bihać" )
+   AAdd( aRet, "B" )
+   AAdd( aOpc, "T. tranzit" )
+   AAdd( aRet, "T" )
+  
+   lFound := .T.
+   nIzbor := AScan(aRet, { |cItem| cItem == cSifRegija })
+
+   IF nIzbor == 0
+      lFound := .F.
+      nIzbor := 1
+   ENDIF
+   // odredi kroz meni
+   nIzbor := meni_0( "psr", aOpc, NIL, nIzbor, .F., .T. )
+
+   IF nIzbor > 0
+      cSifRegija := aRet[ nIzbor]
+      lFound := .T.
+   ENDIF
+
+   RETURN lFound
+
+
+FUNCTION partn_vrsta_obezbj_naz( cSifVrstaObezbjedjenja )
+
+   LOCAL nWidth := 9
+   
+   switch valtype( cSifVrstaObezbjedjenja )
+      case "0"
+         return PADR("Nema", nWidth)
+      case "M"
+         return PADR("Mjenica", nWidth)
+      case "G"
+         return PADR("Garancija", nWidth)
+      case "A"
+         return PADR("Avanas", nWidth)         
+   endswitch
+      
+   RETURN PADR("Nema", nWidth)
+
+
+FUNCTION partn_vrsta_obezbj_get( cSifVrstaObezbjedjenja )
+
+   LOCAL nWidth := 10
+
+   LOCAL aOpc := {}, aRet := {}
+   LOCAL nIzbor := 1
+   LOCAL cRet := "0"
+   LOCAL lFound
+
+   IF EMPTY(cSifVrstaObezbjedjenja)
+      RETURN .T.
+   ENDIF
+
+   AAdd( aOpc, "0. nema          " )
+   AAdd( aRet, "0" )
+   AAdd( aOpc, "M. mjenica" )
+   AAdd( aRet, "M" )
+   AAdd( aOpc, "G. garancija" )
+   AAdd( aRet, "G" )
+   AAdd( aOpc, "A. avans" )
+   AAdd( aRet, "A" )
+   
+   lFound := .T.
+   nIzbor := AScan(aRet, { |cItem| cItem == cSifVrstaObezbjedjenja })
+
+   IF nIzbor == 0
+      lFound := .F.
+      nIzbor := 1
+   ENDIF
+   // odredi kroz meni
+   nIzbor := meni_0( "psr", aOpc, NIL, nIzbor, .F., .T. )
+
+   IF nIzbor > 0
+      cSifVrstaObezbjedjenja := aRet[ nIzbor]
+      lFound := .T.
+   ENDIF
+
+   RETURN lFound
