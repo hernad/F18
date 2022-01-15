@@ -21,9 +21,9 @@ FUNCTION fin_rocni_intervali_meni()
    AAdd( aOpcexe, {|| specif_dugovanja_po_rocnim_intervalima() } )
 
    AAdd( aOpc, "2. kartica dugovanja kupaca valuta/van valute                  " )
-   AAdd( aOpcexe, {|| fin_spec_otv_stavke_rocni_intervali( .T. ) } )
+   AAdd( aOpcexe, {|| fin_spec_otv_stavke_rocni_intervali_zagl_main( .T. ) } )
    AAdd( aOpc, "3. specifikacija dugovanja kupaca valuta/van valute" )
-   AAdd( aOpcexe, {|| fin_spec_otv_stavke_rocni_intervali( .F. ) } )
+   AAdd( aOpcexe, {|| fin_spec_otv_stavke_rocni_intervali_zagl_main( .F. ) } )
 
    f18_menu( "spri", .F., nIzbor, aOpc, aOpcexe )
 

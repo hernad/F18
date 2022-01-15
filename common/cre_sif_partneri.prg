@@ -537,18 +537,14 @@ FUNCTION is_postoji_partner( cSifra )
    RETURN .F.
 
 /*
-    M - Mali
-    S - Srednji
-    V - Veliki
-    N - Nacionalni
-    U - Ustanove
-    H - Horeka - hoteli/restorani
+   https://redmine.bring.out.ba/issues/38227
+
 */
 FUNCTION partn_velicina_naz( cSifVelicina )
 
    LOCAL nWidth := 12
 
-   switch valtype( cSifVelicina )
+   switch cSifVelicina
       case "M"
 			return PADR("Mali", nWidth)
 		case "S"
@@ -560,7 +556,7 @@ FUNCTION partn_velicina_naz( cSifVelicina )
       case "U"
         return PADR("Ustanove", nWidth)  
       case "H"
-        return PADR("HoReKa", nWidth)
+        return PADR("HoReCa", nWidth)
 	endswitch
 
    RETURN PADR("Mali", 12)
@@ -614,7 +610,7 @@ FUNCTION partn_regija_naz( cSifRegija )
 
    LOCAL nWidth := 10
 
-   switch valtype( cSifRegija )
+   switch cSifRegija
       case "S"
          return PADR("Sarajevo", nWidth)
       case "T"
@@ -672,11 +668,11 @@ FUNCTION partn_regija_get( cSifRegija )
    RETURN lFound
 
 
-FUNCTION partn_vrsta_obezbj_naz( cSifVrstaObezbjedjenja )
+FUNCTION partn_vr_obezbj_naz( cSifVrstaObezbjedjenja )
 
    LOCAL nWidth := 9
    
-   switch valtype( cSifVrstaObezbjedjenja )
+   switch cSifVrstaObezbjedjenja
       case "0"
          return PADR("Nema", nWidth)
       case "M"

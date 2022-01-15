@@ -37,15 +37,27 @@ FUNCTION fin_kupci_pregled_dugovanja()
       RETURN .F.
    ENDIF
 
-   //[ernad.husremovic@sa.out.ba@zvijer F18_template]$ sha256sum kupci_pregled_dugovanja.xlsx 
-   download_template( "kupci_pregled_dugovanja.xlsx", "5c36b55c2965951c9430fca176fb9b19943478a0741b4e3830a01f6ed37324bf" )
 
-   oReport := YargReport():New( "kupci_pregled_dugovanja", "xlsx", "Header#BandSql1" )
-   cSql := "select * from sp_dugovanja("
+   //[ernad.husremovic@sa.out.ba@zvijer F18_template]$ sha256sum kupci_pregled_dugovanja.xlsx 
+   download_template( "kupci_pregled_dugovanja_2.xlsx", "2123d67178796b5747070bfd81c3ea4b5b2630fcf8434e40a471a35eaa6d5ed1", .T. /* from master branch */ )
+
+   oReport := YargReport():New( "kupci_pregled_dugovanja_2", "xlsx", "Header#BandSql1" )
+   
+   // 1) select * from sp_dugovanja('2022-01-01','2022-01-31', '211%', '%')
+   // 2) select sp_dugovanja.*, partn.s_velicina, partn.s_vr_obezbj, partn.s_regija from sp_dugovanja('2022-01-01','2022-01-31', '211%', '%')
+   //    left join partn on sp_dugovanja.partner_id = partn.id 
+   // 3) select sp_dugovanja.*, partn_velicina_naz(partn.s_velicina), partn_vr_obezbj_naz(partn.s_vr_obezbj), partn_regija_naz(partn.s_regija) 
+   //    from sp_dugovanja('2022-01-01','2022-01-31', '211%', '%')
+   //    left join partn on sp_dugovanja.partner_id = partn.id
+
+   cSql := "select sp_dugovanja.*,"
+   cSql += " partn_velicina_naz(partn.s_velicina), partn_vr_obezbj_naz(partn.s_vr_obezbj), partn_regija_naz(partn.s_regija)"
+   cSql += " from sp_dugovanja("
    cSql += sql_quote( dDatOd ) + ","
    cSql += sql_quote( dDatDo ) + ","
    cSql += sql_quote( Trim( cIdKonto ) + "%" ) + ","
    cSql += sql_quote( Trim( cIdPartner ) + "%" ) + ")"
+   cSql += " left join partn on sp_dugovanja.partner_id = partn.id" 
 
    IF cAvans == "N"
       cSql += " WHERE i_ukupno>0"

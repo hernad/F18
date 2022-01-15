@@ -11,11 +11,11 @@
 
 #include "f18.ch"
 
-/* fin_spec_otv_stavke_rocni_intervali(lKartica)
+/* 
  *  Otvorene stavke grupisano po brojevima veze
  */
 
-FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
+FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
    LOCAL nCol1 := 72
    LOCAL cSvi := "N"
@@ -24,10 +24,10 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
    LOCAL cExpRpt := "N"
    LOCAL aExpFld
    LOCAL cStart
-   LOCAL cP_naz := ""
+   LOCAL cP_naz := "", cP_regija := "", cP_velicina := "", cP_vr_obezbj := ""
    LOCAL GetList := {}
    LOCAL i, j
-   PRIVATE cIdPartner
+   LOCAL cIdPartner
 
    IF lKartica == NIL
       lKartica := .F.
@@ -272,7 +272,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
       IF PRow() > 58 + dodatni_redovi_po_stranici()
          FF
-         Zfin_spec_otv_stavke_rocni_intervali( nil, nil, PICPIC )
+         fin_spec_otv_stavke_rocni_intervali_zagl( nil, nil, PICPIC )
       ENDIF
 
       IF ( !fveci .AND. idpartner = cSvi ) .OR. fVeci
@@ -358,18 +358,18 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
       IF PRow() > 52 + dodatni_redovi_po_stranici()
          FF
-         Zfin_spec_otv_stavke_rocni_intervali( .T., nil, PICPIC )
+         fin_spec_otv_stavke_rocni_intervali_zagl( .T., nil, PICPIC )
          fPrviProlaz := .F.
       ENDIF
 
       IF fPrviProlaz
-         Zfin_spec_otv_stavke_rocni_intervali( nil, nil, PICPIC )
+         fin_spec_otv_stavke_rocni_intervali_zagl( nil, nil, PICPIC )
          fPrviProlaz := .F.
       ENDIF
 
       SELECT pom
 
-      DO WHILE !Eof() .AND. cIdPartner == IdPartner
+      DO WHILE !Eof() .AND. cIdPartner == pom->IdPartner
 
          IF cPoRn == "D"
             ? datdok, datval, PadR( brdok, 10 )
@@ -383,6 +383,10 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
             qqout_sa_x_x( cIdPartner )
             select_o_partner( cIdPartner )
             cP_naz := PadR( partn->naz, 25 )
+            cP_regija := partn_regija_naz( partn->s_regija)
+            cP_vr_obezbj := partn_vr_obezbj_naz( partn->s_vr_obezbj)
+            cP_velicina := partn_velicina_naz( partn->s_velicina)
+
             select pom
             qqout_sa_x( cP_naz )
             cLastIdPartner := cIdPartner
@@ -563,7 +567,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
       IF PRow() > 58 + dodatni_redovi_po_stranici()
          FF
-         Zfin_spec_otv_stavke_rocni_intervali( .T., nil, PICPIC )
+         fin_spec_otv_stavke_rocni_intervali_zagl( .T., nil, PICPIC )
       ENDIF
 
       SELECT POM
@@ -613,9 +617,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
                IF lExportXlsx
                   IF cValuta == "1"
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot, anInterUV[ 1, 1, 1 ] - anInterUV[ 1, 2, 1 ], anInterUV[ 2, 1, 1 ] - anInterUV[ 2, 2, 1 ], anInterUV[ 3, 1, 1 ] - anInterUV[ 3, 2, 1 ], anInterUV[ 4, 1, 1 ] - anInterUV[ 4, 2, 1 ], anInterUV[ 5, 1, 1 ] - anInterUV[ 5, 2, 1 ], anInterVV[ 1, 1, 1 ] - anInterVV[ 1, 2, 1 ], anInterVV[ 2, 1, 1 ] - anInterVV[ 2, 2, 1 ], anInterVV[ 3, 1, 1 ] - anInterVV[ 3, 2, 1 ], anInterVV[ 4, 1, 1 ] - anInterVV[ 4, 2, 1 ], anInterVV[ 5, 1, 1 ] - anInterVV[ 5, 2, 1 ] )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot, anInterUV[ 1, 1, 1 ] - anInterUV[ 1, 2, 1 ], anInterUV[ 2, 1, 1 ] - anInterUV[ 2, 2, 1 ], anInterUV[ 3, 1, 1 ] - anInterUV[ 3, 2, 1 ], anInterUV[ 4, 1, 1 ] - anInterUV[ 4, 2, 1 ], anInterUV[ 5, 1, 1 ] - anInterUV[ 5, 2, 1 ], anInterVV[ 1, 1, 1 ] - anInterVV[ 1, 2, 1 ], anInterVV[ 2, 1, 1 ] - anInterVV[ 2, 2, 1 ], anInterVV[ 3, 1, 1 ] - anInterVV[ 3, 2, 1 ], anInterVV[ 4, 1, 1 ] - anInterVV[ 4, 2, 1 ], anInterVV[ 5, 1, 1 ] - anInterVV[ 5, 2, 1 ] )
                   ELSE
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2, anInterUV[ 1, 3, 1 ] - anInterUV[ 1, 4, 1 ], anInterUV[ 2, 3, 1 ] - anInterUV[ 2, 4, 1 ], anInterUV[ 3, 3, 1 ] - anInterUV[ 3, 4, 1 ], anInterUV[ 4, 3, 1 ] - anInterUV[ 4, 4, 1 ], anInterUV[ 5, 3, 1 ] - anInterUV[ 5, 4, 1 ], anInterVV[ 1, 3, 1 ] - anInterVV[ 1, 4, 1 ], anInterVV[ 2, 3, 1 ] - anInterVV[ 2, 4, 1 ], anInterVV[ 3, 3, 1 ] - anInterVV[ 3, 4, 1 ], anInterVV[ 4, 3, 1 ] - anInterVV[ 4, 4, 1 ], anInterVV[ 5, 3, 1 ] - anInterVV[ 5, 4, 1 ] )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2, anInterUV[ 1, 3, 1 ] - anInterUV[ 1, 4, 1 ], anInterUV[ 2, 3, 1 ] - anInterUV[ 2, 4, 1 ], anInterUV[ 3, 3, 1 ] - anInterUV[ 3, 4, 1 ], anInterUV[ 4, 3, 1 ] - anInterUV[ 4, 4, 1 ], anInterUV[ 5, 3, 1 ] - anInterUV[ 5, 4, 1 ], anInterVV[ 1, 3, 1 ] - anInterVV[ 1, 4, 1 ], anInterVV[ 2, 3, 1 ] - anInterVV[ 2, 4, 1 ], anInterVV[ 3, 3, 1 ] - anInterVV[ 3, 4, 1 ], anInterVV[ 4, 3, 1 ] - anInterVV[ 4, 4, 1 ], anInterVV[ 5, 3, 1 ] - anInterVV[ 5, 4, 1 ] )
                   ENDIF
                ENDIF
             ELSE
@@ -631,10 +635,10 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
                IF lExportXlsx
                   IF cValuta == "1"
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot )
 
                   ELSE
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2 )
+                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2 )
 
                   ENDIF
                ENDIF
@@ -663,7 +667,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali( lKartica )
 
       // prikazimo total
       FF
-      Zfin_spec_otv_stavke_rocni_intervali( .T., .T., PICPIC )
+      fin_spec_otv_stavke_rocni_intervali_zagl( .T., .T., PICPIC )
       ? m2 := StrTran( M, "-", "=" )
       IF cSaRokom == "D"
          FOR i := 1 TO Len( anInterUV )
@@ -912,13 +916,13 @@ FUNCTION saldo_nula( cIdPartn )
    RETURN .F.
 
 
-   /* Zfin_spec_otv_stavke_rocni_intervali(fStrana,lSvi)
+   /* fin_spec_otv_stavke_rocni_intervali_zagl(fStrana,lSvi)
     *     Zaglavlje izvjestaja specifikacije po dospjecu
     *   param: fStrana
     *   param: lSvi
     */
 
-FUNCTION Zfin_spec_otv_stavke_rocni_intervali( fStrana, lSvi, PICPIC )
+FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl( fStrana, lSvi, PICPIC )
 
    LOCAL nII
    LOCAL cTmp
@@ -1225,13 +1229,17 @@ FUNCTION qqout_sa_x( xVal )
 
 
 
-STATIC FUNCTION fill_xlsx( cIntervals, cIdPart, cP_naz, nTUVal, nTVVal, nTotal, nUVal1, nUVal2, nUVal3, nUVal4, nUValP, nVVal1, nVVal2, nVVal3, nVVal4, nVValP )
+STATIC FUNCTION fill_xlsx( cIntervals, cIdPart, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nTUVal, nTVVal, nTotal, nUVal1, nUVal2, nUVal3, nUVal4, nUValP, nVVal1, nVVal2, nVVal3, nVVal4, nVValP )
 
  
    LOCAL hRec := hb_hash()
 
    hRec["idpart"] := cIdPart
    hRec["p_naz"] := cP_naz
+   hRec["p_velicina"] := cP_velicina
+   hRec["p_regija"] := cP_regija
+   hRec["p_vr_obezbj"] := cP_vr_obezbj
+
    hRec["t_vval"] := nTVVal
    hRec["t_uval"] := nTUVal
    hRec["total"] := nTotal
@@ -1272,6 +1280,9 @@ STATIC FUNCTION get_xlsx_fields( cIntervals, nPartLen )
 
    AAdd( aFields, { "idpart", "C", nPartLen, 0 } )
    AAdd( aFields, { "p_naz", "C", 40, 0 } )
+   AAdd( aFields, { "p_velicina", "C", 15, 0 } )
+   AAdd( aFields, { "p_regija", "C", 15, 0 } )
+   AAdd( aFields, { "p_vr_obezbj", "C", 15, 0 } )
 
    IF cIntervals == "D"
       AAdd( aFields, { "UVal_1", "N", 15, 2 } )
