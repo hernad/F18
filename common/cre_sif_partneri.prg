@@ -156,7 +156,7 @@ FUNCTION p_partner( cId, dx, dy, lEmptyIdOk )
    AAdd ( ImeKol, { PadR( ToStrU( "Općina" ), 6 ), {|| idOps }, "idops", {|| .T. }, {|| p_ops( @wIdops ) } } )
 
    IF fieldpos("S_VELICINA") <> 0
-      aImeKolVelicina[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := _u("Veličina")
+      aImeKolVelicina[ BROWSE_IMEKOL_NASLOV_VARIJABLE ] := _u("Kup.Tip")
       aImeKolVelicina[ BROWSE_IMEKOL_VARIJABLA_KODNI_BLOK ] := {|| s_velicina }
       aImeKolVelicina[ BROWSE_IMEKOL_IME_VARIJABLE ] := "s_velicina"
       aImeKolVelicina[ BROWSE_IMEKOL_WHEN ] := {|| .T. }
@@ -584,7 +584,7 @@ FUNCTION partn_velicina_get( cSifVelicina )
    AAdd( aRet, "N" )
    AAdd( aOpc, "U. ustanove" )
    AAdd( aRet, "U" )
-   AAdd( aOpc, "H. horeka" )
+   AAdd( aOpc, "H. horeca" )
    AAdd( aRet, "H" )
    // inicijalna pozicija
 

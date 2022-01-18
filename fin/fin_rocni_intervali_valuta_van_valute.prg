@@ -1236,7 +1236,7 @@ STATIC FUNCTION fill_xlsx( cIntervals, cIdPart, cP_naz, cP_velicina, cP_regija, 
 
    hRec["idpart"] := cIdPart
    hRec["p_naz"] := cP_naz
-   hRec["p_velicina"] := cP_velicina
+   hRec["p_tip_kupca"] := cP_velicina
    hRec["p_regija"] := cP_regija
    hRec["p_vr_obezbj"] := cP_vr_obezbj
 
@@ -1280,9 +1280,7 @@ STATIC FUNCTION get_xlsx_fields( cIntervals, nPartLen )
 
    AAdd( aFields, { "idpart", "C", nPartLen, 0 } )
    AAdd( aFields, { "p_naz", "C", 40, 0 } )
-   AAdd( aFields, { "p_velicina", "C", 15, 0 } )
-   AAdd( aFields, { "p_regija", "C", 15, 0 } )
-   AAdd( aFields, { "p_vr_obezbj", "C", 15, 0 } )
+   
 
    IF cIntervals == "D"
       AAdd( aFields, { "UVal_1", "N", 15, 2 } )
@@ -1304,5 +1302,9 @@ STATIC FUNCTION get_xlsx_fields( cIntervals, nPartLen )
 
    AAdd( aFields, { "T_VVal", "N", 15, 2 } )
    AAdd( aFields, { "Total", "N", 15, 2 } )
+
+   AAdd( aFields, { "p_tip_kupca", "C", 15, 0 } )
+   AAdd( aFields, { "p_regija", "C", 15, 0 } )
+   AAdd( aFields, { "p_vr_obezbj", "C", 15, 0 } )
 
    RETURN aFields

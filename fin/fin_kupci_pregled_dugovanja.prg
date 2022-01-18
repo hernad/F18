@@ -39,7 +39,7 @@ FUNCTION fin_kupci_pregled_dugovanja()
 
 
    //[ernad.husremovic@sa.out.ba@zvijer F18_template]$ sha256sum kupci_pregled_dugovanja.xlsx 
-   download_template( "kupci_pregled_dugovanja_2.xlsx", "2123d67178796b5747070bfd81c3ea4b5b2630fcf8434e40a471a35eaa6d5ed1", .T. /* from master branch */ )
+   download_template( "kupci_pregled_dugovanja_2.xlsx", "f25e2f106abfd71a898798983ae14e728397954daed1021a5842eed5dde37606", .T. /* from master branch */ )
 
    oReport := YargReport():New( "kupci_pregled_dugovanja_2", "xlsx", "Header#BandSql1" )
    
