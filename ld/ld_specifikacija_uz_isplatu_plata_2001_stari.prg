@@ -949,6 +949,7 @@ FUNCTION ld_iz_koje_opcine_je_radnik( cIdRadn )
 
 FUNCTION isplata_dopr_kontrola_iznosa( nIzn, cIspl )
 
+   // "Isplata: 'A' doprinosi+porez, 'B' samo doprinosi, 'C' samo porez"
    IF cIspl $ "AB"
       RETURN nIzn
    ENDIF

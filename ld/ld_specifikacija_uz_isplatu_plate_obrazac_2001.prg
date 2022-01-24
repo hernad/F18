@@ -395,7 +395,6 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    cDoprOO4 := ld_izrezi_string( "D->", 2, @cNOO4 )
 
    cDodDoprP := ld_izrezi_string( "D->", 2, @cDodatniDoprPio )
-   altd()
    cDodDoprZ := ld_izrezi_string( "D->", 2, @cDodatniDoprZdravstvo )
 
    ld_pozicija_parobr( nMjesec, nGodina, cObracun, Left( cUslovIdRj, 2 ) )
@@ -587,7 +586,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       hRec[ "stopa_21" ] := FormNum2( nKoefDopr6X, 16, cPictureIznos ) + "%"  // zdrav na
       hRec[ "stopa_22" ] := FormNum2( nKoefDopr7X, 16, cPictureIznos ) + "%"  // nezap na
 
-      nPom := nKoefDopr5X + nKoefDopr6X + nKoefDodatniDoprinosZdravstvo + nKoefDodatniDoprinosPio
+      //nPom := nKoefDopr5X + nKoefDopr6X + nKoefDodatniDoprinosZdravstvo + nKoefDodatniDoprinosPio
 
       hRec[ "stopa_23" ] := FormNum2( nKoefDodatniDoprinosPio, 16, cPictureIznos ) + "%"  // dodatni PIO i invalid
       hRec[ "stopa_24" ] := FormNum2( nKoefDodatniDoprinosZdravstvo, 16, cPictureIznos ) + "%"  // dodatni zdravstvo
