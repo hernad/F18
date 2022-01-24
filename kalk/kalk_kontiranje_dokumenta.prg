@@ -283,6 +283,11 @@ FUNCTION kalk_kontiranje_fin_naloga( lAutomatskiSetBrojNaloga, lAGen, lViseKalk,
       ENDIF
 
       PRIVATE dDatVal := CToD( "" )  // inicijalizuj datum valute
+      // u shemi kontiranja mora biti
+      // trfp->naz  "KUPAC #V#"
+      // trfp->id   mora u formuli biti funkcija koja sadrzi datval(), npr:
+      // trfp->id   VPV-RABATV+MPV+DATVAL()
+
       PRIVATE cIdVrsteP := "  " // i vrstu placanja
 
       DO WHILE cIdVD == finmat->IdVD .AND. cBrDok == finmat->BrDok .AND. !Eof()
@@ -754,7 +759,7 @@ FUNCTION SetKonto( nBroj, lValue, cTrue, cFalse )
 
 FUNCTION RJ( nBroj, cDef, cTekst )
 
-   PRIVATE GetList := {}
+   LOCAL GetList := {}
 
    IF ( nBroj == 1 .AND. Len( cRJ1 ) <> 0 ) .OR. ( nBroj == 2 .AND. Len( cRj2 ) <> 0 )
       RETURN 0
