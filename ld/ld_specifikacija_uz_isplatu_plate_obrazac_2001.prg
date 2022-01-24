@@ -62,8 +62,8 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    LOCAL cDoprNa2 := PadR( fetch_metric( "ld_specifikacija_doprinos_6", NIL, "21" ), 2 )
    LOCAL cDoprNa3 := fetch_metric( "ld_specifikacija_doprinos_7", NIL, "22" )
 
-   LOCAL cDodatniDoprPio := PadR( fetch_metric( "ld_specifikacija_doprinos_pio", NIL, "  " ), 2 )
-   LOCAL cDodatniDoprZdravstvo := PadR( fetch_metric( "ld_specifikacija_doprinos_zdr", NIL, "  " ), 2 )
+   LOCAL cDodatniDoprPio := PadR( fetch_metric( "ld_specifikacija_doprinos_pio", NIL, "  " ), 100 )
+   LOCAL cDodatniDoprZdravstvo := PadR( fetch_metric( "ld_specifikacija_doprinos_zdr", NIL, "  " ), 100 )
    LOCAL nUkDoprIZ := 0
    LOCAL cCOO1 := fetch_metric( "ld_specifikacija_c1", NIL, Space( 20 ) )
    LOCAL cCOO2 := fetch_metric( "ld_specifikacija_c2", NIL, Space( 20 ) )
@@ -217,8 +217,8 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       @ box_x_koord() + 12, Col() + 2 SAY "Dopr.nez (na)" GET cDoprNa3
       //@ box_x_koord() + 12, Col() + 1 SAY "Omjer dopr.nez (%):" GET nOmjerNezaposlenost PICT "999.99999"
 
-      @ box_x_koord() + 13, box_y_koord() + 2 SAY "Dod.dopr. pio" GET cDodatniDoprPio PICT "@S35"
-      @ box_x_koord() + 14, box_y_koord() + 2 SAY "Dod.dopr. zdr" GET cDodatniDoprZdravstvo PICT "@S35"
+      @ box_x_koord() + 13, box_y_koord() + 2 SAY "Dodatni dopr.pio" GET cDodatniDoprPio PICT "@S35"
+      @ box_x_koord() + 14, box_y_koord() + 2 SAY "Dodatni dopr.zdr" GET cDodatniDoprZdravstvo PICT "@S35"
 
       @ box_x_koord() + 15, box_y_koord() + 2 SAY "Ost.obaveze: NAZIV                  USLOV"
       @ box_x_koord() + 16, box_y_koord() + 2 SAY " 1." GET cCOO1
@@ -395,6 +395,7 @@ FUNCTION ld_specifikacija_plate_obr_2001()
    cDoprOO4 := ld_izrezi_string( "D->", 2, @cNOO4 )
 
    cDodDoprP := ld_izrezi_string( "D->", 2, @cDodatniDoprPio )
+   altd()
    cDodDoprZ := ld_izrezi_string( "D->", 2, @cDodatniDoprZdravstvo )
 
    ld_pozicija_parobr( nMjesec, nGodina, cObracun, Left( cUslovIdRj, 2 ) )
