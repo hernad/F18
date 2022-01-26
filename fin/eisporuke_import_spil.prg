@@ -304,7 +304,6 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
       RETURN .F.
    ENDIF
 
-   altd()
    nRbr := 1
    Box(, 3, 80)
       @ box_x_koord(), box_y_koord() + 10 SAY STR(spilrn->(reccount()), 5, 0)
@@ -324,6 +323,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          ENDIF
 
          hPartner := fin_spil_find_partner( spilrn->accountid, spilrn->client_name, spilrn->client_country, spilrn->reg_no, spilrn->goni, spilrn->c_tax_number )
+
          IF hPartner["id_partner"] == "GOTOVINA"
             //cIdPartner := ""
             //cIdKonto := "20500" // blagajna ?
@@ -332,18 +332,17 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             SKIP
             LOOP
             // preskacemo KP i KPM, to se posebno unosi u 66 FIN naloge
-         ELSE
-            cIdPartner := hPartner["id_partner"]
-            cIdKonto := Padr("2110", 7)
-            IF hPartner["pdv"]
-               cIdKontoPDV := Padr("4700", 7)
-               cIdKontoPrihod := Padr("6110", 7)
-            ELSE
-               // Partner ne-PDV obveznik
-               cIdKontoPDV := Padr("4730", 7)
-               cIdKontoPrihod := Padr("61101", 7)
-            ENDIF
+         ENDIF
 
+         cIdPartner := hPartner["id_partner"]
+         cIdKonto := Padr("2110", 7)
+         IF hPartner["pdv"]
+            cIdKontoPDV := Padr("4700", 7)
+            cIdKontoPrihod := Padr("6110", 7)
+         ELSE
+            // Partner ne-PDV obveznik
+            cIdKontoPDV := Padr("4730", 7)
+            cIdKontoPrihod := Padr("61101", 7)
          ENDIF
 
          IF hPartner["ino"] // ino partner
@@ -368,7 +367,6 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
 
          IF cFaktAvAvStor <> "1"
             // avansne fakture
-            cIdKonto := "2110"
             IF hPartner["pdv"]
                cIdKontoPDV := "4710"
             ELSE
@@ -383,9 +381,16 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
          hFinItem[ "brdok" ] := spilrn->order_number
          IF cFaktAvAvStor == "1"
-            hFinItem[ "opis" ] := "fisk_rn: " + Alltrim(spilrn->fiscal_number)
+            hFinItem[ "opis" ] := "RN. (" + AllTrim(spilrn->order_number)  + "), FISK_RN (" + Alltrim(spilrn->fiscal_number) + ")"
          ELSE
-            hFinItem[ "opis" ] := ""
+            IF cFaktAvAvStor == "2"
+               // AV.RN. (RC036046)
+               hFinItem[ "opis" ] := "AV.RN."
+            ELSEIF cFaktAvAvStor == "3"
+               // ST.AV. (RC036046/S)
+               hFinItem[ "opis" ] := "ST.AV."
+            ENDIF   
+            hFinItem[ "opis" ] += " (" + AllTrim(spilrn->order_number) + ") "
          ENDIF
          hFinItem[ "datdok" ] := spilrn->inv_date
          hFinItem[ "datval" ] := spilrn->pay_date

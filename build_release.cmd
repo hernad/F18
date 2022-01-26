@@ -14,8 +14,8 @@ set F18_GT_GUI=1
 
 set F18_DEBUG=
 set F18_POS=1
-set DATE=24.01.2022
-set VERSION=3.3.91
+set DATE=26.01.2022
+set VERSION=3.3.92
 
 IF [%VERSION%]==[] (
    echo ENVAR VERSION nije definisana. STOP!
