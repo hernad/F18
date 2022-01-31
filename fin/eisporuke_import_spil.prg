@@ -381,7 +381,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
          hFinItem[ "brdok" ] := spilrn->order_number
          IF cFaktAvAvStor == "1"
-            hFinItem[ "opis" ] := "RN. (" + AllTrim(spilrn->order_number)  + "), FISK_RN (" + Alltrim(spilrn->fiscal_number) + ")"
+            hFinItem[ "opis" ] := "RN. " + AllTrim(spilrn->order_number)  + ", FISK_RN " + Alltrim(spilrn->fiscal_number) + ""
          ELSE
             IF cFaktAvAvStor == "2"
                // AV.RN. (RC036046)
@@ -390,7 +390,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
                // ST.AV. (RC036046/S)
                hFinItem[ "opis" ] := "ST.AV."
             ENDIF   
-            hFinItem[ "opis" ] += " (" + AllTrim(spilrn->order_number) + ") "
+            hFinItem[ "opis" ] += " " + AllTrim(spilrn->order_number) + " "
          ENDIF
          hFinItem[ "datdok" ] := spilrn->inv_date
          hFinItem[ "datval" ] := spilrn->pay_date
