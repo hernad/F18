@@ -17,7 +17,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
 
    LOCAL oDataSet
    LOCAL _qry, _where
-   LOCAL _dat_od, _dat_do, _dat_ps, _p_konto
+   LOCAL _dat_od, _dat_do, dDatumPocStanja, _p_konto
    LOCAL _art_filter, _dok_filter, _tar_filter, _part_filter
    LOCAL _db_params := my_server_params()
    LOCAL _tek_database := my_server_params()[ "database" ]
@@ -32,10 +32,10 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
 
    _dat_od := hParams[ "datum_od" ]
    _dat_do := hParams[ "datum_do" ]
-   _dat_ps := hParams[ "datum_ps" ]
+   dDatumPocStanja := hParams[ "datum_ps" ]
    _p_konto := hParams[ "p_konto" ]
    _year_sez := Year( _dat_do )
-   _year_tek := Year( _dat_ps )
+   _year_tek := Year( dDatumPocStanja )
 
 
    _where := " WHERE "
@@ -111,7 +111,7 @@ FUNCTION kalk_prod_lager_lista_sql( hParams, lPocetnoStanje )
 FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
 
    LOCAL _ret := .T.
-   LOCAL _p_konto, _dat_od, _dat_do, _nule, _pr_nab, cRobaTipUslugeDN, _dat_ps
+   LOCAL _p_konto, _dat_od, _dat_do, _nule, _pr_nab, cRobaTipUslugeDN, dDatumPocStanja
    LOCAL nX := 1
    LOCAL _art_filter := Space( 300 )
    LOCAL _tar_filter := Space( 300 )
@@ -130,13 +130,13 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
    _nule := fetch_metric( "kalk_lager_lista_prod_prikaz_nula", _curr_user, "N" )
    _dat_od := fetch_metric( "kalk_lager_lista_prod_datum_od", _curr_user, Date() -30 )
    _dat_do := fetch_metric( "kalk_lager_lista_prod_datum_do", _curr_user, Date() )
-   _dat_ps := NIL
+   dDatumPocStanja := NIL
    cRobaTipUslugeDN := "N"
 
    IF lPocetnoStanje
       _dat_od := CToD( "01.01." + AllTrim( Str( Year( Date() ) -1 ) ) )
       _dat_do := CToD( "31.12." + AllTrim( Str( Year( Date() ) -1 ) ) )
-      _dat_ps := CToD( "01.01." + AllTrim( Str( Year( Date() ) ) ) )
+      dDatumPocStanja := CToD( "01.01." + AllTrim( Str( Year( Date() ) ) ) )
    ENDIF
 
    Box( "# LAGER LISTA PRODAVNICE" + if( lPocetnoStanje, " / POČETNO STANJE", "" ), 15, f18_max_cols() -5 )
@@ -154,7 +154,7 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
    @ box_x_koord() + nX, Col() + 1 SAY "do:" GET _dat_do
 
    IF lPocetnoStanje
-      @ box_x_koord() + nX, Col() + 1 SAY8 "Datum poč.stanja:" GET _dat_ps
+      @ box_x_koord() + nX, Col() + 1 SAY8 "Datum poč.stanja:" GET dDatumPocStanja
    ENDIF
 
    ++nX
@@ -195,7 +195,7 @@ FUNCTION kalk_prod_lager_lista_vars( hParams, lPocetnoStanje )
 
    hParams[ "datum_od" ] := _dat_od
    hParams[ "datum_do" ] := _dat_do
-   hParams[ "datum_ps" ] := _dat_ps
+   hParams[ "datum_ps" ] := dDatumPocStanja
    hParams[ "p_konto" ] := _p_konto
    hParams[ "nule" ] := _nule
    hParams[ "roba_tip_tu" ] := cRobaTipUslugeDN

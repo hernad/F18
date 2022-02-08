@@ -28,6 +28,9 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
    LOCAL lFoundTippr
    LOCAL nI
    LOCAL nOsnNeto, nOsnNetoSati
+   LOCAL lRsObracun
+   LOCAL nPorOsnovica
+
    PRIVATE cPom
 
    PRIVATE cLDLijevaMargina := ""
@@ -56,6 +59,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
    nOstalaPrimanjaNegativno := 0
    // nLicniOdbitak := g_licni_odb( radn->id )
    nLicniOdbitak := ld->ulicodb
+   lRsObracun := (radn->tiprada == "R")
    nKoefOdbitka := get_koeficijent_licnog_odbitka( nLicniOdbitak )
    cRTipRada := get_ld_rj_tip_rada( ld->idradn, ld->idrj )
 
@@ -497,16 +501,27 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
 
       ? cMainLine
 
-      nPorOsnovica := ( nBrutoOsnova - nUkDoprIz - nLicniOdbitak )
+      // u republikasrpska je osnovica Bruto - licni odbitak
+      IF lRsObracun
+         nPorOsnovica := ( nBrutoOsnova - nLicniOdbitak )
+      ELSE
+         nPorOsnovica := ( nBrutoOsnova - nUkDoprIz - nLicniOdbitak )
+      ENDIF
+
       IF nPorOsnovica < 0 .OR. !radn_oporeziv( radn->id, ld->idrj )
          nPorOsnovica := 0
       ENDIF
 
-      ?  cLDLijevaMargina + "5. OSNOVICA ZA POREZ NA PLATU (1-2-4)"
+      altd()
+      if lRsObracun
+         ?  cLDLijevaMargina + "5. OSNOVICA ZA POREZ NA PLATU (1-4)"
+      ELSE
+         ?  cLDLijevaMargina + "5. OSNOVICA ZA POREZ NA PLATU (1-2-4)"
+      ENDIF
       @ PRow(), 60 + Len( cLDLijevaMargina ) SAY nPorOsnovica PICT gpici
 
       ? cMainLine
-      ? cLDLijevaMargina + "6. POREZ NA PLATU"
+      ? cLDLijevaMargina + "6. POREZ NA PLATU:"
 
       select_o_por()
       GO TOP

@@ -241,8 +241,9 @@ FUNCTION ld_get_bruto_osnova( nIzn, cTipRada, nLOdb, nSKoef, cTrosk )
    CASE cTipRada == "P"
       nBrt := ROUND2( ( nIzn * 1.11111 ) / 0.96, gZaok2 )
 
-      // republika srpska
+      
    CASE cTipRada == "R"
+      // republika srpska
       nTmp := Round( ( nLOdb * parobr->k5 ), 2 )
       nBrt := ROUND2( ( nIzn - nTmp ) / parobr->k6, gZaok2 )
 
