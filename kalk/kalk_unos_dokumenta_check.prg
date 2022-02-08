@@ -390,6 +390,7 @@ FUNCTION kalk_pripr_brisi_od_do()
    LOCAL _ret := .F.
    LOCAL _od := Space( 4 )
    LOCAL _do := Space( 4 )
+   LOCAL GetList := {}
 
    SELECT kalk_pripr
    GO TOP
@@ -428,7 +429,7 @@ FUNCTION kalk_pripr_brisi_od_do()
 // -------------------------------------------------------------
 FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
 
-   LOCAL _rbr
+   LOCAL nRbr
 
    IF silent == NIL
       silent := .T.
@@ -436,7 +437,7 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
 
    IF !silent
       IF Pitanje(, "Renumerisati pripremu ?", "N" ) == "N"
-         RETURN
+         RETURN .F.
       ENDIF
    ENDIF
 
@@ -449,11 +450,11 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
    SET ORDER TO
    GO TOP
 
-   _rbr := 0
+   nRbr := 0
 
    my_flock()
    DO WHILE !Eof()
-      REPLACE field->rbr WITH RedniBroj( ++_rbr )
+      REPLACE field->rbr WITH RedniBroj( ++nRbr )
       SKIP
    ENDDO
    my_unlock()
@@ -462,7 +463,7 @@ FUNCTION renumeracija_kalk_pripr( cDok, cIdvd, silent )
    SET ORDER TO TAG "1"
    GO TOP
 
-   RETURN
+   RETURN .T.
 
 
 

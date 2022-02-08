@@ -19,7 +19,7 @@ FUNCTION GenMag()
    LOCAL _opcexe := {}
    LOCAL _izbor := 1
 
-   AAdd( _opc, "1. magacin prenos početnog stanj              " )
+   AAdd( _opc, "1. magacin prenos početnog stanja              " )
    AAdd( _opcexe, {|| kalk_pocetno_stanje_magacin() } )
 
 /*

@@ -22,7 +22,7 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
    LOCAL hServerParams := my_server_params()
    LOCAL cDatabaseTekuca := my_server_params()[ "database" ]
    LOCAL nYearSezona, nYearTekuca
-   LOCAL cZaokruzenje := AllTrim( Str( gZaokr ) )
+   LOCAL cZaokruzenje //:= AllTrim( Str( gZaokr ) )
 
    IF hParams == NIL
       hParams := hb_Hash()
@@ -43,6 +43,7 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
    cWhere += _sql_date_parse( "k.datdok", dDatOd, dDatDo )
    cWhere += " AND " + _sql_cond_parse( "k.idfirma", self_organizacija_id() )
    cWhere += " AND " + _sql_cond_parse( "k.mkonto", cIdKontoMagacin )
+   cZaokruzenje := "4" // zaokruzenje iznosa
 
    cQuery := " SELECT " + ;
       " k.idroba, " + ;
@@ -68,7 +69,7 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
       "WHEN k.mu_i = '5' THEN r.vpc * k.kolicina ELSE 0 " + ;
       "END ), " + cZaokruzenje + " ) AS vpvi " + ;
       " FROM " + F18_PSQL_SCHEMA_DOT + "kalk_kalk k " + ;
-      " RIGHT JOIN " + F18_PSQL_SCHEMA_DOT + " roba r ON r.id = k.idroba "
+      " LEFT JOIN " + F18_PSQL_SCHEMA_DOT + " roba r ON r.id = k.idroba "
 
    cQuery += cWhere
 
@@ -110,7 +111,7 @@ FUNCTION kalk_mag_lager_lista_sql( hParams, lPocetnoStanje )
 FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
 
    LOCAL _ret := .T.
-   LOCAL cIdKontoMagacin, dDatOd, dDatDo, _nule, _pr_nab, _roba_tip_tu, dDatPocStanje, _do_nab
+   LOCAL cIdKontoMagacin, dDatOd, dDatDo, cPrikazNuleDN, _pr_nab, _roba_tip_tu, dDatPocStanje, _do_nab
    LOCAL nX := 1
    LOCAL _art_filter := Space( 300 )
    LOCAL _tar_filter := Space( 300 )
@@ -119,6 +120,7 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    LOCAL _brfakt_filter := Space( 300 )
    LOCAL _curr_user := my_user()
    LOCAL cMinimalneKolicineDN
+   LOCAL GetList := {}
 
    IF lPocetnoStanje == NIL
       lPocetnoStanje := .F.
@@ -128,7 +130,7 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    _do_nab := fetch_metric( "kalk_lager_Lista_mag_prikaz_do_nabavne", _curr_user, "N" )
    cIdKontoMagacin := fetch_metric( "kalk_lager_lista_mag_id_konto", _curr_user, PadR( "1320", 7 ) )
    _pr_nab := fetch_metric( "kalk_lager_lista_mag_po_nabavnoj", _curr_user, "D" )
-   _nule := fetch_metric( "kalk_lager_lista_mag_prikaz_nula", _curr_user, "N" )
+   cPrikazNuleDN := fetch_metric( "kalk_lager_lista_mag_prikaz_nula", _curr_user, "N" )
    dDatOd := fetch_metric( "kalk_lager_lista_mag_datum_od", _curr_user, Date() -30 )
    dDatDo := fetch_metric( "kalk_lager_lista_mag_datum_do", _curr_user, Date() )
    dDatPocStanje := NIL
@@ -173,7 +175,7 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    ++nX
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "Prikaz nabavne vrijednosti (D/N)" GET _pr_nab VALID _pr_nab $ "DN" PICT "@!"
-   @ box_x_koord() + nX, Col() + 1 SAY "Prikaz stavki kojima je NV = 0 (D/N)" GET _nule VALID _nule $ "DN" PICT "@!"
+   @ box_x_koord() + nX, Col() + 1 SAY "Prikaz stavki kojima je NV = 0 (D/N)" GET cPrikazNuleDN VALID cPrikazNuleDN $ "DN" PICT "@!"
 
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Prikaz samo kritičnih zaliha (D/N)" GET cMinimalneKolicineDN VALID cMinimalneKolicineDN $ "DN" PICT "@!"
@@ -192,7 +194,7 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    set_metric( "kalk_lager_Lista_mag_prikaz_do_nabavne", _curr_user, _do_nab )
    set_metric( "kalk_lager_lista_mag_id_konto", _curr_user, cIdKontoMagacin )
    set_metric( "kalk_lager_lista_mag_po_nabavnoj", _curr_user, _pr_nab )
-   set_metric( "kalk_lager_lista_mag_prikaz_nula", _curr_user, _nule )
+   set_metric( "kalk_lager_lista_mag_prikaz_nula", _curr_user, cPrikazNuleDN )
    set_metric( "kalk_lager_lista_mag_datum_od", _curr_user, dDatOd )
    set_metric( "kalk_lager_lista_mag_datum_do", _curr_user, dDatDo )
    set_metric( "kalk_lager_lista_mag_minimalne_kolicine", _curr_user, cMinimalneKolicineDN )
@@ -201,7 +203,7 @@ FUNCTION kalk_mag_lager_lista_vars( hParams, lPocetnoStanje )
    hParams[ "datum_do" ] := dDatDo
    hParams[ "datum_ps" ] := dDatPocStanje
    hParams[ "m_konto" ] := cIdKontoMagacin
-   hParams[ "nule" ] := _nule
+   hParams[ "nule" ] := cPrikazNuleDN
    hParams[ "roba_tip_tu" ] := _roba_tip_tu
    hParams[ "pr_nab" ] := _pr_nab
    hParams[ "do_nab" ] := _do_nab

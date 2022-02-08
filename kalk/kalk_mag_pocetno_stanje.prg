@@ -27,7 +27,9 @@ FUNCTION kalk_pocetno_stanje_magacin()
       RETURN .F.
    ENDIF
 
+   altd()
    nCount := kalk_mag_insert_ps_into_pripr( oDataSet, hParams )
+   
 
    IF nCount > 0
       renumeracija_kalk_pripr( nil, nil, .T. )
@@ -77,7 +79,6 @@ STATIC FUNCTION kalk_mag_insert_ps_into_pripr( oDataSet, hParams )
    DO WHILE !oDataSet:Eof()
 
       oRow := oDataSet:GetRow()
-
       cIdRoba := hb_UTF8ToStr( oRow:FieldGet( oRow:FieldPos( "idroba" ) ) )
       nUlaz := oRow:FieldGet( oRow:FieldPos( "ulaz" ) )
       nIzlaz := oRow:FieldGet( oRow:FieldPos( "izlaz" ) )
@@ -89,11 +90,15 @@ STATIC FUNCTION kalk_mag_insert_ps_into_pripr( oDataSet, hParams )
       select_o_roba( cIdRoba )
 
       IF cRobaTipTU == "N" .AND. roba->tip $ "TU"
+         altd()
          oDataSet:Skip()
          LOOP
       ENDIF
 
-      IF Round( nUlaz - nIzlaz, 2 ) == 0
+      IF Round(nUlaz - nIzlaz, 4) == 0
+         IF Round(nNvI - nNvU, 4) <> 0
+            Alert( cIdRoba + " kolicina=0, NV<> 0. SKIP!")
+         ENDIF
          oDataSet:Skip()
          LOOP
       ENDIF
@@ -123,7 +128,6 @@ STATIC FUNCTION kalk_mag_insert_ps_into_pripr( oDataSet, hParams )
       IF lMagacinPoNabavnoj
          hRec[ "vpc" ] := hRec[ "nc" ]
       ENDIF
-
       dbf_update_rec( hRec )
 
       oDataSet:Skip()
