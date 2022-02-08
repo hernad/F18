@@ -15,7 +15,9 @@
 FUNCTION specifikacija_po_analitickim_kontima()
 
    LOCAL cSK := "N"
+   LOCAL GetList := {}
    PRIVATE nC := 66
+
 
    cIdFirma := self_organizacija_id()
    picBHD := FormPicL( "9 " + gPicBHD, 20 )
@@ -33,7 +35,7 @@ FUNCTION specifikacija_po_analitickim_kontima()
    cNula := "N"
 
    DO WHILE .T.
-      @ box_x_koord() + 1, box_y_koord() + 6 SAY "SPECIFIKACIJA ANALITICKIH KONTA"
+      @ box_x_koord() + 1, box_y_koord() + 6 SAY8 "SPECIFIKACIJA ANALITIČKIH KONTA"
       IF gNW == "D"
          @ box_x_koord() + 3, box_y_koord() + 2 SAY "Firma "; ?? self_organizacija_id(), "-", self_organizacija_naziv()
       ELSE
@@ -43,7 +45,7 @@ FUNCTION specifikacija_po_analitickim_kontima()
       @ box_x_koord() + 5, box_y_koord() + 2 SAY "Datum od" GET dDatOd
       @ box_x_koord() + 5, Col() + 2 SAY "do" GET dDatDo
       IF fin_dvovalutno()
-         @ box_x_koord() + 6, box_y_koord() + 2 SAY "Obracun za " + AllTrim( valuta_domaca_skraceni_naziv() ) + "/" + AllTrim( ValPomocna() ) + " (1/2):" GET cTip VALID ctip $ "12"
+         @ box_x_koord() + 6, box_y_koord() + 2 SAY8 "Obračun za " + AllTrim( valuta_domaca_skraceni_naziv() ) + "/" + AllTrim( ValPomocna() ) + " (1/2):" GET cTip VALID ctip $ "12"
       ENDIF
       @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikaz sintetickih konta (D/N):" GET cSK PICT "@!" VALID cSK $ "DN"
       @ box_x_koord() + 9, box_y_koord() + 2 SAY "Prikaz stavki sa saldom 0 D/N" GET cNula PICT "@!" VALID cNula  $ "DN"
@@ -132,7 +134,7 @@ FUNCTION specifikacija_po_analitickim_kontima()
          SELECT ANAL
 
          IF cNula == "D" .OR. Round( nd - np, 3 ) <> 0
-            ? cIdkonto, KONTO->naz
+            ? cIdkonto, LEFT(KONTO->naz, 58)
             nC := PCol() + 1
             @ PRow(), PCol() + 1 SAY nd PICT pic
             @ PRow(), PCol() + 1 SAY np PICT pic
@@ -166,7 +168,6 @@ FUNCTION specifikacija_po_analitickim_kontima()
    closeret
 
    RETURN .T.
-
 
 
 
