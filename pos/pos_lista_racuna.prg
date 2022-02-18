@@ -244,7 +244,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       ENDIF
       nFiskalniRn := pos_get_broj_fiskalnog_racuna( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok )
       Box(, 1, 40 )
-      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFiskalniRn PICT "99999"
+      @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj fiskalnog računa: " GET nFiskalniRn PICT "999999"
       READ
       BoxC()
 
