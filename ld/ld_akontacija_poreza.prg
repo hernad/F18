@@ -134,7 +134,7 @@ STATIC FUNCTION fill_data( nGodina, nMjesec, cDopr1X, cDopr2X, cVRada, cObr, cRa
 
       select_o_radn( cIdRadnikTekuci )
 
-      lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cT_tipRada $ "A#U"
+      lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cT_tipRada $ "A#U"
 
       IF ( cVRada $ "1#3" .AND. !( cT_tiprada $ "A#U" ) )  // uzmi samo odgovarajuce tipove rada
          SELECT ld
@@ -175,7 +175,7 @@ STATIC FUNCTION fill_data( nGodina, nMjesec, cDopr1X, cDopr2X, cVRada, cObr, cRa
          // uvijek provjeri tip rada
          cT_tiprada := get_ld_rj_tip_rada( field->idradn, field->idrj )
 
-         lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cT_tipRada $ "A#U"
+         lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cT_tipRada $ "A#U"
 
          // samo pozicionira bazu PAROBR na odgovarajuci zapis
          ld_pozicija_parobr( nMjesec, nGodina, IF( ld_vise_obracuna(), ld->obr, ), ld->idrj )

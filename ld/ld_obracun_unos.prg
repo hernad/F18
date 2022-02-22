@@ -467,7 +467,7 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
    cOpor := " "
    cTrosk := " "
    lInRS := .F.
-   lInRs := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+   lInRs := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
    FOR nI := 1 TO cLDPolja // 40
 

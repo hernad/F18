@@ -204,7 +204,7 @@ STATIC FUNCTION napuni_podatke( cRj, nGodina, nMjesec, cMjesecDo, ;
 
       cIdRadnikTekuci := field->idradn
 
-      lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+      lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
       IF !Empty( cRadnik )
          IF cIdRadnikTekuci <> cRadnik

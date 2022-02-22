@@ -219,7 +219,7 @@ FUNCTION ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjese
       ENDIF
 
       cTipRada := get_ld_rj_tip_rada( ld->idradn, ld->idrj )
-      lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+      lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
       ld_pozicija_parobr( ld->mjesec, ld->godina, iif( ld_vise_obracuna(), ld->obr, ), ld->idrj )
 
@@ -274,7 +274,7 @@ FUNCTION ol_fill_data( cRadneJedinice, cIdRjTekuca, nGodinaOd, nGodinaDo, nMjese
 
          cTipRada := get_ld_rj_tip_rada( ld->idradn, ld->idrj )    // uvijek provjeri tip rada, ako ima vise obracuna
          cTrosk := radn->trosk
-         lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+         lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
          IF cRptTip $ "3#4"
             IF ( cTipRada $ " #I#N" )

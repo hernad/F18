@@ -246,7 +246,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
                //
                //ELSE
 
-                  ld_rekap_ld( "DOPR" + dopr->id + opsld->idops, nGodina, nMjesec, npom, nBOOps, idops, ld_opsld_ljudi() )
+                  ld_rekap_ld( "DOPR" + dopr->id + opsld->idops, nGodina, nMjesec, nPom, nBOOps, idops, ld_opsld_ljudi() )
                   nDoprOps += nPom
                //ENDIF
 
@@ -273,7 +273,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
             //   nPom2 := nDoprOps2
             //ELSE
                IF nDoprOps > 0
-                  ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nDoprOps, nOOD,, "(" + AllTrim( Str( nPOLjudi ) ) + ")" )
+                  ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nDoprOps, nOOD, NIL, "(" + AllTrim( Str( nPOLjudi ) ) + ")" )
                ENDIF
             //ENDIF
 
@@ -336,7 +336,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
             //   @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
             //   ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom - nPom2, 0 )
             //ELSE
-               ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom, nBO,, "(" + AllTrim( Str( nLjudi ) ) + ")" )
+               ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom, nBO, NIL, "(" + AllTrim( Str( nLjudi ) ) + ")" )
             //ENDIF
          ENDIF
 

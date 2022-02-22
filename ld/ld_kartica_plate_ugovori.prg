@@ -102,7 +102,7 @@ FUNCTION ld_kartica_plate_ugovori( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNe
    nOsnZaBr := nOsnNeto
 
    // radi li se o RS-u ?
-   lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+   lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
    // bruto sa troskovima
    nBSaTr := ld_get_bruto_osnova( nOsnZaBr, cRTipRada, nLicOdbitak, nil, cTrosk )

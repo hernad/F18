@@ -317,7 +317,7 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
 
       select_o_radn( cIdRadnikTekuci )
       cTipRada := get_ld_rj_tip_rada( cIdRadnikTekuci, ld->idrj )
-      lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+      lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
       ld_pozicija_parobr( ld->mjesec, ld->godina, ld->obr, ld->idrj ) // samo pozicionira bazu PAROBR na odgovarajuci zapis
 

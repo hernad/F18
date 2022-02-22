@@ -254,7 +254,7 @@ FUNCTION ld_specifikacija_plate_ostali()
       nRSpr_koef := 0
       nTrosk := 0
 
-      lInRS := radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cRTR $ "A#U"
+      lInRS := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad ) .AND. cRTR $ "A#U"
 
       // da li koristi troskove
       cKTrosk := radn->trosk

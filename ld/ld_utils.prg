@@ -262,7 +262,7 @@ FUNCTION ld_get_bruto_osnova( nIzn, cTipRada, nLOdb, nSKoef, cTrosk )
 
       nBrt := ROUND2( nIzn / ( ( ( 100 - nTr ) * 0.96 * 0.90 + nTr ) / 100 ), gZaok2 )
 
-      IF radnik_iz_rs( radn->idopsst, radn->idopsrad ) // ako je u RS-u, nema troskova, i drugi koeficijent
+      IF ld_radnik_iz_rs( radn->idopsst, radn->idopsrad ) // ako je u RS-u, nema troskova, i drugi koeficijent
          nBrt := ROUND2( nIzn * 1.111112, gZaok2 )
       ENDIF
 
@@ -346,7 +346,7 @@ FUNCTION ld_bruto_isplata_ispis( nNeto, cTipRada, nLOdb, nSKoef, cTrosk )
 
       cPrn := AllTrim( Str( nNeto ) ) + " / " + AllTrim( Str( nProc, 12, 6 ) ) + " ="
       // ako je u RS-u, nema troskova, i drugi koeficijent
-      IF radnik_iz_rs( radn->idopsst, radn->idopsrad )
+      IF ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
 
          cPrn := AllTrim( Str( nNeto ) ) + " * 1.111112 ="
       ENDIF
@@ -829,7 +829,7 @@ FUNCTION ld_obracun_radnik_neto2(cIdRadn, cIdRj, nI01, nUNeto, nUSati, nUlicOdb)
    nUBruto := ld_get_bruto_osnova( nUNeto, cTipRada, nULicOdb, nSPr_koef, cTrosk )
 
    nKLO := radn->klo
-   lInRs := radnik_iz_rs( radn->idopsst, radn->idopsrad )
+   lInRs := ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
    
       IF cTipRada == "U" .AND. cTrosk <> "N"
          nTrosk := ROUND2( nUbruto * ( gUgTrosk / 100 ), gZaok2 )

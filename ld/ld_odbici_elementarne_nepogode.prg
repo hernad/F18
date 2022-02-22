@@ -79,7 +79,7 @@ STATIC FUNCTION obracunaj_odbitak()
 
    cOpcSt := ld_iz_koje_opcine_je_radnik( _idradn )
 
-   lRadnikJeIzRs := radnik_iz_rs( cOpcSt )
+   lRadnikJeIzRs := ld_radnik_iz_rs( cOpcSt )
 
    IF lRadnikJeIzRs
       nProcIznos := 1.5

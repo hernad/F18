@@ -445,13 +445,13 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       ENDIF
 
       IF cRepSr == "N" // preskoci RS
-         IF radnik_iz_rs( radn->idopsst, radn->idopsrad )
+         IF ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
             SELECT ld
             SKIP
             LOOP
          ENDIF
       ELSE  // preskoci FBiH
-         IF !radnik_iz_rs( radn->idopsst, radn->idopsrad )
+         IF !ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
             SELECT ld
             SKIP
             LOOP

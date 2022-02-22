@@ -229,7 +229,7 @@ FUNCTION cre_ops_ld_temp()
 
 // cTip - stepenasti
 
-FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOsnIPorez, nOsnOstaloZaBrutoOsnIPorezs, nMRadn_bo )
+FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nPorOsnovaBruto, nPorNaRukeOsnova, nOsnNetoZaBrutoOsnIPorez, nOsnOstaloZaBrutoOsnIPorezs, nRadnikMinBrutoOsn, nPorol )
 
    LOCAL nT_st_1 := 0
    LOCAL nT_st_2 := 0
@@ -298,14 +298,14 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
          ENDIF
       NEXT
 
-   ELSE
+   ELSE // standardni - nestepenasti obracun
       cPorId := "  "
       nOsnovica := nOsnovaNeto
-      nOsnov3 := nPorOsnova
+      nOsnov3 := nPorOsnovaBruto
       nOsnov4 := nOsnNetoZaBrutoOsnIPorez
-      nOsnov5 := nPorNROsnova
+      nOsnov5 := nPorNaRukeOsnova
       nOstalo := _uodbici
-      nBrOsnova := nMRadn_bo
+      nBrOsnova := nRadnikMinBrutoOsn
    ENDIF
 
    select_o_ops( radn->idopsst )
@@ -316,8 +316,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
    IF Found()
 
       REPLACE iznos WITH iznos + nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE izn_ost WITH izn_ost + nOstalo
@@ -357,8 +357,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       REPLACE porid WITH cPorId
       REPLACE idops WITH radn->idopsst
       REPLACE iznos WITH nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -398,8 +398,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
    SEEK cPorId + "3" + ops->idkan
    IF Found()
       REPLACE iznos WITH iznos + nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -438,8 +438,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       REPLACE porid WITH cPorId
       REPLACE idops WITH ops->idkan
       REPLACE iznos WITH nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -480,8 +480,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
    IF Found()
 
       REPLACE iznos WITH iznos + nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -521,8 +521,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       REPLACE porid WITH cPorId
       REPLACE idops WITH ops->idn0
       REPLACE iznos WITH nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -567,8 +567,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
    IF Found()
 
       REPLACE iznos WITH iznos + nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -609,8 +609,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       REPLACE porid WITH cPorId
       REPLACE idops WITH radn->idopsrad
       REPLACE iznos WITH nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -651,8 +651,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
    IF Found()
 
       REPLACE iznos WITH iznos + nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -692,8 +692,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       REPLACE porid WITH cPorId
       REPLACE idops WITH ops->idkan
       REPLACE iznos WITH nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -734,8 +734,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
    IF Found()
 
       REPLACE iznos WITH iznos + nOsnovica
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -776,8 +776,8 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       REPLACE idops WITH ops->idn0
       REPLACE iznos WITH nOsnovica
       REPLACE izn_ost WITH nOstalo
-      REPLACE iznos2 WITH iznos2 + nPorOl
-      REPLACE iznos3 WITH iznos3 + nOsnov3
+      REPLACE iznos2 WITH opsld->iznos2 + nPorOl
+      REPLACE iznos3 WITH opsld->iznos3 + nOsnov3
       REPLACE iznos4 WITH iznos4 + nOsnov4
       REPLACE iznos5 WITH iznos5 + nOsnov5
       REPLACE br_osn WITH br_osn + nBrOsnova
@@ -1238,9 +1238,9 @@ FUNCTION ProizvTP()
 
       @ PRow(), 60 SAY round2( &cPom, gZaok2 ) PICT gpici
       IF nMjesec == nMjesecDo
-         ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesec, round2( &cpom, gZaok2 ), 0 )
+         ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesec, round2( &cPom, gZaok2 ), 0 )
       ELSE
-         ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesecDo, round2( &cpom, gZaok2 ), 0 )
+         ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesecDo, round2( &cPom, gZaok2 ), 0 )
       ENDIF
 
       SKIP

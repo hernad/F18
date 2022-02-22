@@ -370,13 +370,13 @@ FUNCTION ld_specifikacija_plate_2001_stari()
       ENDIF
 
       IF cRepSr == "N"
-         IF radnik_iz_rs( radn->idopsst, radn->idopsrad )
+         IF ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
             SELECT ld
             SKIP
             LOOP
          ENDIF
       ELSE
-         IF !radnik_iz_rs( radn->idopsst, radn->idopsrad )
+         IF !ld_radnik_iz_rs( radn->idopsst, radn->idopsrad )
             SELECT ld
             SKIP
             LOOP
@@ -910,7 +910,7 @@ FUNCTION prvi_dan_mjeseca( nMonth )
 // " " ili "1" = federacija
 // "2" = rs
 // ----------------------------------------------
-FUNCTION radnik_iz_rs( cOpsst, cOpsrad )
+FUNCTION ld_radnik_iz_rs( cOpsst, cOpsrad )
 
    LOCAL lRet := .F.
    LOCAL cSql, oQry
