@@ -13,7 +13,7 @@
 
 //THREAD STATIC __var_obr
 
-FUNCTION rekap_ld( cId, nGodina, nMjesec, nIzn1, nIzn2, cIdPartner, cOpis, cOpis2, lObavDodaj, cIzdanje )
+FUNCTION ld_rekap_ld( cId, nGodina, nMjesec, nIzn1, nIzn2, cIdPartner, cOpis, cOpis2, lObavDodaj, cIzdanje )
 
    IF lObavDodaj == nil
       lObavDodaj := .F.
@@ -49,7 +49,8 @@ FUNCTION rekap_ld( cId, nGodina, nMjesec, nIzn1, nIzn2, cIdPartner, cOpis, cOpis
 
    RREPLACE godina WITH Str( nGodina, 4, 0 ), mjesec WITH Str( nMjesec, 2, 0 ), ;
       id WITH  cId, ;
-      iznos1 WITH nIzn1, iznos2 WITH nIzn2, ;
+      iznos1 WITH nIzn1, ;
+      iznos2 WITH nIzn2, ;
       idpartner WITH cIdPartner, ;
       opis WITH cOpis, ;
       opis2 WITH cOpis2
@@ -81,7 +82,7 @@ FUNCTION o_ld_rekap()
    RETURN .T.
 
 
-FUNCTION ld_rekap_get_vars_svi(cRekapTipoviOut, cRekapSamoTODN)
+FUNCTION ld_rekap_get_vars_svi(cRekapTipoviOut, cRekapSamoTODN, cRTipRada)
 
    LOCAL GetList := {}
    PushWa()
@@ -124,7 +125,7 @@ FUNCTION ld_rekap_get_vars_svi(cRekapTipoviOut, cRekapSamoTODN)
    RETURN .T.
 
 
-FUNCTION ld_rekap_get_vars_rj( cRekapTipoviOut, cRekapSamoTODN )
+FUNCTION ld_rekap_get_vars_rj( cRekapTipoviOut, cRekapSamoTODN, cRTipRada )
 
    LOCAL GetList := {}
 
@@ -226,8 +227,9 @@ FUNCTION cre_ops_ld_temp()
 
    RETURN .T.
 
+// cTip - stepenasti
 
-FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOsnIPorez, nOsnOstaloZaBrutoOsnIPorezs )
+FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOsnIPorez, nOsnOstaloZaBrutoOsnIPorezs, nMRadn_bo )
 
    LOCAL nT_st_1 := 0
    LOCAL nT_st_2 := 0
@@ -259,7 +261,7 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
       aPorezi := {}
    ENDIF
 
-   IF cTip == "S"
+   IF cTip == "S" // stepenasti obracun
 
       cPrObr := get_pr_obracuna()
 
@@ -815,10 +817,6 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nOsnNetoZaBrutoOs
 
 
 
-
-
-
-
 FUNCTION zagl_rekapitulacija_plata_svi()
 
    select_o_por()
@@ -958,9 +956,9 @@ FUNCTION ld_ispis_po_tipovima_primanja( lSvi, cRekapTipoviOut, lRekapTO, nUNeto,
          ENDIF
 
          IF nMjesec == nMjesecDo
-            rekap_ld( "PRIM" + tippr->id, nGodina, nMjesec, aRekap[ i, 2 ], aRekap[ i, 1 ] )
+            ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesec, aRekap[ i, 2 ], aRekap[ i, 1 ] )
          ELSE
-            rekap_ld( "PRIM" + tippr->id, nGodina, nMjesecDo, aRekap[ i, 2 ], aRekap[ i, 1 ] )
+            ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesecDo, aRekap[ i, 2 ], aRekap[ i, 1 ] )
          ENDIF
 
          IspisKred( lSvi )
@@ -1064,7 +1062,7 @@ STATIC FUNCTION IspisKred( lSvi )
 
                IF nUkKrRad <> 0
                   _kr_partija := AllTrim( kred->zirod )
-                  rekap_ld( "KRED" + cIdKred + cNaOsnovu, nGodina, nMjesecDo, nUkKrRad, 0, cIdkred, cNaosnovu, AllTrim( cOpis2 ) + ", " + _kr_partija, .T. )
+                  ld_rekap_ld( "KRED" + cIdKred + cNaOsnovu, nGodina, nMjesecDo, nUkKrRad, 0, cIdkred, cNaosnovu, AllTrim( cOpis2 ) + ", " + _kr_partija, .T. )
 
                ENDIF
 
@@ -1180,10 +1178,10 @@ STATIC FUNCTION IspisKred( lSvi )
                _kr_partija := AllTrim( kred->zirod )
 
                IF nMjesec == nMjesecDo
-                  rekap_ld( "KRED" + cIdkred + cNaOsnovu, nGodina, nMjesec, nUkKred, 0, ;
+                  ld_rekap_ld( "KRED" + cIdkred + cNaOsnovu, nGodina, nMjesec, nUkKred, 0, ;
                      cIdKred, cNaosnovu, AllTrim( cOpis2 ) + ", " + _kr_partija )
                ELSE
-                  rekap_ld( "KRED" + cIdKred + cNaosnovu, nGodina, nMjesecDo, nUkkred, 0, ;
+                  ld_rekap_ld( "KRED" + cIdKred + cNaosnovu, nGodina, nMjesecDo, nUkkred, 0, ;
                      cIdKred, cNaosnovu, AllTrim( cOpis2 ) + ", " + _kr_partija )
                ENDIF
 
@@ -1240,9 +1238,9 @@ FUNCTION ProizvTP()
 
       @ PRow(), 60 SAY round2( &cPom, gZaok2 ) PICT gpici
       IF nMjesec == nMjesecDo
-         rekap_ld( "PRIM" + tippr->id, nGodina, nMjesec, round2( &cpom, gZaok2 ), 0 )
+         ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesec, round2( &cpom, gZaok2 ), 0 )
       ELSE
-         rekap_ld( "PRIM" + tippr->id, nGodina, nMjesecDo, round2( &cpom, gZaok2 ), 0 )
+         ld_rekap_ld( "PRIM" + tippr->id, nGodina, nMjesecDo, round2( &cpom, gZaok2 ), 0 )
       ENDIF
 
       SKIP

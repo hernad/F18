@@ -315,6 +315,7 @@ FUNCTION ld_kartica_redova()
    LOCAL cFIznos := "_I"
    LOCAL cFSati := "_S"
    LOCAL nStRedova := 23
+   LOCAL i
 
    IF gPrBruto == "X"
       nStRedova := 32
@@ -446,7 +447,7 @@ STATIC FUNCTION prikazi_primanja()
 
             IF tippr->uneto == "N"; nKumPrim := Abs( nKumPrim ); ENDIF
             ? m2 := cLDLijevaMargina + "   ----------------------------- ----------------------------"
-            ? cLDLijevaMargina + "    SUMA IZ PRETHODNIH OBRA¬UNA   UKUPNO (SA OVIM OBRA¬UNOM)"
+            ? cLDLijevaMargina + "    SUMA IZ PRETHODNIH OBRACUNA   UKUPNO (SA OVIM OBRACUNOM)"
             ? m2
             ? cLDLijevaMargina + "   " + PadC( Str( nKumPrim - nIznos ), 29 ) + " " + PadC( Str( nKumPrim ), 28 )
             ? m2

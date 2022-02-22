@@ -28,7 +28,7 @@ FUNCTION ld_uk_doprinosi_iz( nDopOsn, cRTipRada )
    DO WHILE !Eof()
 
       // provjeri tip rada
-      IF Empty( dopr->tiprada ) .AND. cRTipRada $ tr_list()
+      IF Empty( dopr->tiprada ) .AND. cRTipRada $ ld_tiprada_list()
          // ovo je u redu...
       ELSEIF ( cRTipRada <> dopr->tiprada )
          SKIP
@@ -62,7 +62,7 @@ FUNCTION u_dopr_na( nDopOsn, cRTipRada )
    DO WHILE !Eof()
 
       // provjeri tip rada
-      IF Empty( dopr->tiprada ) .AND. cRTipRada $ tr_list()
+      IF Empty( dopr->tiprada ) .AND. cRTipRada $ ld_tiprada_list()
          // ovo je u redu...
       ELSEIF ( cRTipRada <> dopr->tiprada )
          SKIP
@@ -86,13 +86,20 @@ FUNCTION u_dopr_na( nDopOsn, cRTipRada )
 
 
 
-FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
+FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkRadnMinBrutoOsn )
 
    LOCAL nIznos := 0
+   LOCAL lRSObracun := .F.
 
+   
    IF cTRada == nil
       cTRada := " "
    ENDIF
+
+   IF cTRada == "R"
+      lObracunRS := .T.
+   ENDIF
+
 
    IF a_benef == NIL
       a_benef := {}
@@ -100,7 +107,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
    m := "----------------------- -------- ----------- -----------"
 
-   IF cUmPD == "D"
+   IF cUmPDNeKontamStajeOvoVazdajeN == "D"
       m += " ----------- -----------"
    ENDIF
 
@@ -114,7 +121,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
    nC1 := 20
    nDoprIz := 0
 
-   IF cUmPD == "D"
+   IF cUmPDNeKontamStajeOvoVazdajeN == "D"
 
       ? "----------------------- -------- ----------- ----------- ----------- -----------"
       ? _l( "                                 Obracunska   Doprinos   Preplaceni   Doprinos  " )
@@ -127,7 +134,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
    DO WHILE !Eof()
 
       IF gVarObracun == "2"
-         IF Empty( dopr->tiprada ) .AND. cRTipRada $ tr_list()
+         IF Empty( dopr->tiprada ) .AND. cRTipRada $ ld_tiprada_list()
             // ovo je ok
          ELSEIF dopr->tiprada <> cRTipRada
             SKIP
@@ -144,21 +151,21 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
       nC1 := PCol() + 1
 
-      IF Empty( field->idkbenef )
+      IF Empty( dopr->idkbenef ) // standardni doprinosi 
 
-         IF !Empty( field->poopst )
+         IF !Empty( dopr->poopst )
 
-            IF poopst == "1"
+            IF dopr->poopst == "1"
                ?? _l( " (po opst.stan)" )
-            ELSEIF poopst == "2"
+            ELSEIF dopr->poopst == "2"
                ?? _l( " (po opst.rada)" )
-            ELSEIF poopst == "3"
+            ELSEIF dopr->poopst == "3"
                ?? _l( " (po kant.stan)" )
-            ELSEIF poopst == "4"
+            ELSEIF dopr->poopst == "4"
                ?? _l( " (po kant.rada)" )
-            ELSEIF poopst == "5"
+            ELSEIF dopr->poopst == "5"
                ?? _l( " (po ent. stan)" )
-            ELSEIF poopst == "6"
+            ELSEIF dopr->poopst == "6"
                ?? _l( " (po ent. rada)" )
             ENDIF
 
@@ -212,7 +219,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
                nPom := round2( Max( dopr->dlimit, dopr->iznos / 100 * nBOOps ), gZaok2 )
 
-               IF cUmPD == "D"
+               IF cUmPDNeKontamStajeOvoVazdajeN == "D"
                   nBOOps2 := round2( piznos * nPK3 / 100, gZaok2 )
                   nPom2 := round2( Max( dopr->dlimit, dopr->iznos / 100 * nBOOps2 ), gZaok2 )
                ENDIF
@@ -221,27 +228,27 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
                   nPom := dopr->dlimit * opsld->ljudi
 
-                  IF cUmPD == "D"
+                  IF cUmPDNeKontamStajeOvoVazdajeN == "D"
                      nPom2 := dopr->dlimit * opsld->pljudi
                   ENDIF
                ENDIF
 
                @ PRow(), PCol() + 1 SAY nPom PICTURE gPici
 
-               IF cUmPD == "D"
+               //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+               //
+               //   @ PRow(), PCol() + 1 SAY  nPom2 PICTURE gPici
+               //   @ PRow(), PCol() + 1 SAY  nPom - nPom2 PICTURE gPici
+               //
+               //   ld_rekap_ld( "DOPR" + dopr->id + idops, nGodina, nMjesec, nPom - nPom2, 0, idops, ld_opsld_ljudi() )
+               //   nDoprOps2 += nPom2
+               //   nDoprOps += nPom
+               //
+               //ELSE
 
-                  @ PRow(), PCol() + 1 SAY  nPom2 PICTURE gPici
-                  @ PRow(), PCol() + 1 SAY  nPom - nPom2 PICTURE gPici
-
-                  rekap_ld( "DOPR" + dopr->id + idops, nGodina, nMjesec, nPom - nPom2, 0, idops, NLjudi() )
-                  nDoprOps2 += nPom2
+                  ld_rekap_ld( "DOPR" + dopr->id + opsld->idops, nGodina, nMjesec, npom, nBOOps, idops, ld_opsld_ljudi() )
                   nDoprOps += nPom
-
-               ELSE
-
-                  rekap_ld( "DOPR" + dopr->id + opsld->idops, nGodina, nMjesec, npom, nBOOps, idops, NLjudi() )
-                  nDoprOps += nPom
-               ENDIF
+               //ENDIF
 
                nOOD += nBOOps
                nPOLjudi += ljudi
@@ -258,17 +265,17 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
             @ PRow(), nC1 SAY nOOD PICT gpici
             @ PRow(), PCol() + 1 SAY nDoprOps PICT gpici
 
-            IF cUmPD == "D"
-
-               @ PRow(), PCol() + 1 SAY nDoprOps2 PICT gpici
-               @ PRow(), PCol() + 1 SAY nDoprOps - nDoprOps2 PICT gpici
-               rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nDoprOps - nDoprOps2, 0,, NLjudi() )
-               nPom2 := nDoprOps2
-            ELSE
+            //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+            //
+            //   @ PRow(), PCol() + 1 SAY nDoprOps2 PICT gpici
+            //   @ PRow(), PCol() + 1 SAY nDoprOps - nDoprOps2 PICT gpici
+            //   ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nDoprOps - nDoprOps2, 0,, ld_opsld_ljudi() )
+            //   nPom2 := nDoprOps2
+            //ELSE
                IF nDoprOps > 0
-                  rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nDoprOps, nOOD,, "(" + AllTrim( Str( nPOLjudi ) ) + ")" )
+                  ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nDoprOps, nOOD,, "(" + AllTrim( Str( nPOLjudi ) ) + ")" )
                ENDIF
-            ENDIF
+            //ENDIF
 
             IF dopr->id == "1X"
                IF ops->reg == "2" .AND. cTRada $ "A#U"
@@ -297,7 +304,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
 
             IF gVarObracun == "2"
 
-               nBo := nUMRadn_bo
+               nBo := nUkRadnMinBrutoOsn
 
             ELSE
                nBO := ld_get_bruto_osnova( nTmpOsn, cRTipRada, nKoefLO )
@@ -311,26 +318,26 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
                nUDoprIz += nPom
             ENDIF
 
-            IF cUmPD == "D"
+            IF cUmPDNeKontamStajeOvoVazdajeN == "D"
                nPom2 := round2( Max( dlimit, iznos / 100 * nBO2 ), gZaok2 )
             ENDIF
 
-            IF Round( iznos, 4 ) = 0 .AND. dlimit > 0
+            IF Round( iznos, 4 ) == 0 .AND. dlimit > 0
                nPom := dlimit * nljudi
                // nije po opstinama
-               IF cUmPD == "D"
+               IF cUmPDNeKontamStajeOvoVazdajeN == "D"
                   nPom2 := dlimit * nljudi
                   // nije po opstinama ?!?nLjudi
                ENDIF
             ENDIF
             @ PRow(), PCol() + 1 SAY nPom PICT gpici
-            IF cUmPD == "D"
-               @ PRow(), PCol() + 1 SAY nPom2 PICT gpici
-               @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
-               rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom - nPom2, 0 )
-            ELSE
-               rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom, nBO,, "(" + AllTrim( Str( nLjudi ) ) + ")" )
-            ENDIF
+            //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+            //   @ PRow(), PCol() + 1 SAY nPom2 PICT gpici
+            //   @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
+            //   ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom - nPom2, 0 )
+            //ELSE
+               ld_rekap_ld( "DOPR" + dopr->id, nGodina, nMjesec, nPom, nBO,, "(" + AllTrim( Str( nLjudi ) ) + ")" )
+            //ENDIF
          ENDIF
 
       ELSE
@@ -349,7 +356,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
          ? cLinija
          ?
          nDopr += nPom
-         IF cUmPD == "D"
+         IF cUmPDNeKontamStajeOvoVazdajeN == "D"
             nDopr2 += nPom2
          ENDIF
       ENDIF
@@ -364,7 +371,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef )
    @ PRow(), nc1 SAY Space( Len( gpici ) )
    @ PRow(), PCol() + 1 SAY nDopr  PICT gpici
 
-   IF cUmPD == "D"
+   IF cUmPDNeKontamStajeOvoVazdajeN == "D"
       @ PRow(), PCol() + 1 SAY nDopr2  PICT gpici
       @ PRow(), PCol() + 1 SAY nDopr - nDopr2  PICT gpici
    ENDIF

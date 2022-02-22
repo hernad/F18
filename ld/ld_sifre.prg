@@ -845,16 +845,17 @@ FUNCTION ImaUObrac( cKljuc, cTag )
 FUNCTION p_ld_por( cId, nDeltaX, nDeltaY )
 
    LOCAL nI, lRet
-   LOCAL _st_stopa := fetch_metric( "ld_porezi_stepenasta_stopa", NIL, "N" )
+   LOCAL cStepenastaStopa := fetch_metric( "ld_porezi_stepenasta_stopa", NIL, "N" )
    LOCAL nI2
    PRIVATE Imekol := {}
    PRIVATE Kol := {}
 
    AAdd( ImeKol, { PadR( "Id", 2 ), {|| id }, "id", {|| .T. }, {|| validacija_postoji_sifra( wid ) } } )
-
-//   IF POR->( FieldPos( "ALGORITAM" ) ) <> 0 .AND. _st_stopa == "D"
-//      AAdd( ImeKol, { "Algor.", {|| algoritam }, "algoritam" } )
-//   ENDIF
+   
+   //IF POR->( FieldPos( "ALGORITAM" ) ) <> 0 .AND. 
+   IF cStepenastaStopa == "D"
+      AAdd( ImeKol, { "Algor.", {|| algoritam }, "algoritam" } )
+   ENDIF
 
    AAdd( ImeKol, { PadR( "Naziv", 20 ), {|| naz }, "naz" } )
    AAdd( ImeKol, { PadR( "Iznos", 20 ), {||  Transform( iznos, "99.99" ) }, "iznos", {|| iif( POR->( FieldPos( "ALGORITAM" ) ) <> 0, wh_oldpor( walgoritam ), .T. ) } } )
@@ -863,8 +864,9 @@ FUNCTION p_ld_por( cId, nDeltaX, nDeltaY )
 
    AAdd( ImeKol, { "p.tip", {|| por_tip }, "por_tip" } )
 
-/*
-   IF POR->( FieldPos( "ALGORITAM" ) ) <> 0 .AND. _st_stopa == "D"
+
+   //IF POR->( FieldPos( "ALGORITAM" ) ) <> 0 
+   IF cStepenastaStopa == "D"
 
       AAdd( ImeKol, { "St.1", {|| s_sto_1 }, "s_sto_1", {|| ld_when_porez( walgoritam ) } } )
       AAdd( ImeKol, { "Izn.1", {|| s_izn_1 }, "s_izn_1", {|| ld_when_porez( walgoritam ) } } )
@@ -876,9 +878,8 @@ FUNCTION p_ld_por( cId, nDeltaX, nDeltaY )
       AAdd( ImeKol, { "Izn.4", {|| s_izn_4 }, "s_izn_4", {|| ld_when_porez( walgoritam ) } } )
       AAdd( ImeKol, { "St.5", {|| s_sto_5 }, "s_sto_5", {|| ld_when_porez( walgoritam ) } } )
       AAdd( ImeKol, { "Izn.5", {|| s_izn_5 }, "s_izn_5", {|| ld_when_porez( walgoritam ) } } )
-
    ENDIF
-*/
+
 
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )

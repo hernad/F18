@@ -12,23 +12,25 @@
 
 #include "f18.ch"
 
-// -------------------------------------
-// obracun i prikaz poreza
-// -------------------------------------
-FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl, cTipPor )
+MEMVAR cLinija
 
+FUNCTION ld_obr_porez( lRsObracun, nGodina, nMjesec, nUkPorez, nPor2, nPorOps, nPorOps2, nUPorOl, cTipPor )
+
+   LOCAL cSeek, nC1, nPorOsnovica, nPorez
    LOCAL cAlgoritam := ""
    LOCAL nOsnova := 0
+   LOCAL nOsnObrPorPoOpstinama, nUkLjudiPoOpst
 
    IF cTipPor == nil
       cTipPor := ""
    ENDIF
 
+   // cTipPor = "B" - porez na bruto
+
    select_o_por()
    GO TOP
 
-   nPom := 0
-   nPor := 0
+   nUkPorez := 0
    nPor2 := 0
    nPorOps := 0
    nPorOps2 := 0
@@ -36,11 +38,11 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
 
    cLinija := "----------------------- -------- ----------- -----------"
 
-   IF cUmPD == "D"
+   IF cUmPDNeKontamStajeOvoVazdajeN == "D"
       m += " ----------- -----------"
    ENDIF
 
-   IF cUmPD == "D"
+   IF cUmPDNeKontamStajeOvoVazdajeN == "D"
       P_12CPI
       ? "----------------------- -------- ----------- ----------- ----------- -----------"
       ? _l( "                                 Obracunska     Porez    Preplaceni     Porez   " )
@@ -49,13 +51,13 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
       ? "----------------------- -------- ----------- ----------- ----------- -----------"
    ENDIF
 
-   DO WHILE !Eof()
+   DO WHILE !Eof() // vrti kroz poreze
 
-      cAlgoritam := get_algoritam()
+      cAlgoritam := ld_get_por_algoritam()
 
       // ako to nije taj tip poreza preskoci
       IF !Empty( cTipPor )
-         IF por_tip <> cTipPor
+         IF por->por_tip <> cTipPor
             SKIP
             LOOP
          ENDIF
@@ -65,43 +67,44 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
          // FF
       ENDIF
 
-      ? id, "-", naz
+      ? por->id, "-", por->naz
 
-      IF cAlgoritam == "S"
+      IF cAlgoritam == "S" // stepenasti obracun
          @ PRow(), PCol() + 1 SAY "st.por"
       ELSE
-         @ PRow(), PCol() + 1 SAY iznos PICT "99.99%"
+         @ PRow(), PCol() + 1 SAY por->iznos PICT "99.99%"
       ENDIF
 
       nC1 := PCol() + 1
 
-      IF !Empty( poopst )
+      IF !Empty( por->poopst )
 
-         IF poopst == "1"
+         IF por->poopst == "1"
             ?? _l( " (po opst.stan)" )
-         ELSEIF poopst == "2"
+         ELSEIF por->poopst == "2"
             ?? _l( " (po opst.stan)" )
-         ELSEIF poopst == "3"
+         ELSEIF por->poopst == "3"
             ?? _l( " (po kant.stan)" )
-         ELSEIF poopst == "4"
+         ELSEIF por->poopst == "4"
             ?? _l( " (po kant.rada)" )
-         ELSEIF poopst == "5"
+         ELSEIF por->poopst == "5"
             ?? _l( " (po ent. stan)" )
-         ELSEIF poopst == "6"
+         ELSEIF por->poopst == "6"
             ?? _l( " (po ent. rada)" )
             ?? _l( " (po opst.rada)" )
          ENDIF
 
-         nOOP := 0
          // ukupna Osnovica za Obracun Poreza za po opstinama
-
-         nPOLjudi := 0
+         nOsnObrPorPoOpstinama := 0
          // ukup.ljudi za po opstinama
+         nUkLjudiPoOpst := 0
+         
 
          nPorOps := 0
+         // ovaj je vazda 0 nPorOps2
          nPorOps2 := 0
 
-         IF cAlgoritam == "S"
+         IF cAlgoritam == "S" // stepenasti obracun
             cSeek := por->id
          ELSE
             cSeek := Space( 2 )
@@ -112,7 +115,7 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
 
          ? StrTran( cLinija, "-", "=" )
 
-         DO WHILE !Eof() .AND. porid == cSeek .AND. id == por->poopst
+         DO WHILE !Eof() .AND. opsld->porid == cSeek .AND. opsld->id == por->poopst
 
             cOpst := opsld->idops
 
@@ -122,56 +125,55 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
             IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
                SKIP 1
                LOOP
-
             ENDIF
 
-            IF cAlgoritam == "S"
+            IF cAlgoritam == "S" // stepenasti obracun
 
-               ?U idops, ops->naz
+               ?U opdld->idops, ops->naz
                nPom := 0
 
-               DO WHILE !Eof() .AND. porid == cSeek .AND. id == por->poopst .AND. idops == cOpst
+               DO WHILE !Eof() .AND. opsld->porid == cSeek .AND. id == por->poopst .AND. opsld->idops == cOpst
 
-                  IF t_iz_1 <> 0
+                  IF opsld->t_iz_1 <> 0
                      ? " -obracun za stopu "
-                     @ PRow(), PCol() + 1 SAY t_st_1 PICT "99.99%"
+                     @ PRow(), PCol() + 1 SAY opsld->t_st_1 PICT "99.99%"
                      @ PRow(), PCol() + 1 SAY "="
-                     @ PRow(), PCol() + 1 SAY t_iz_1 PICT gpici
+                     @ PRow(), PCol() + 1 SAY opsld->t_iz_1 PICT gpici
                   ENDIF
 
-                  IF t_iz_2 <> 0
+                  IF opsld->t_iz_2 <> 0
                      ? " -obracun za stopu "
-                     @ PRow(), PCol() + 1 SAY t_st_2 PICT "99.99%"
+                     @ PRow(), PCol() + 1 SAY opsld->t_st_2 PICT "99.99%"
                      @ PRow(), PCol() + 1 SAY "="
-                     @ PRow(), PCol() + 1 SAY t_iz_2 PICT gpici
+                     @ PRow(), PCol() + 1 SAY opsld->t_iz_2 PICT gpici
                   ENDIF
 
-                  IF t_iz_3 <> 0
+                  IF opsld->t_iz_3 <> 0
                      ? " -obracun za stopu "
-                     @ PRow(), PCol() + 1 SAY t_st_3 PICT "99.99%"
+                     @ PRow(), PCol() + 1 SAY opsld->t_st_3 PICT "99.99%"
                      @ PRow(), PCol() + 1 SAY "="
-                     @ PRow(), PCol() + 1 SAY t_iz_3 PICT gpici
+                     @ PRow(), PCol() + 1 SAY opsld->t_iz_3 PICT gpici
                   ENDIF
 
-                  IF t_iz_4 <> 0
+                  IF opsld->t_iz_4 <> 0
                      ? " -obracun za stopu "
-                     @ PRow(), PCol() + 1 SAY t_st_4 PICT "99.99%"
+                     @ PRow(), PCol() + 1 SAY opsld->t_st_4 PICT "99.99%"
                      @ PRow(), PCol() + 1 SAY "="
-                     @ PRow(), PCol() + 1 SAY t_iz_4 PICT gpici
+                     @ PRow(), PCol() + 1 SAY opsld->t_iz_4 PICT gpici
                   ENDIF
 
-                  IF t_iz_5 <> 0
+                  IF opsld->t_iz_5 <> 0
                      ? " -obracun za stopu "
-                     @ PRow(), PCol() + 1 SAY t_st_5 PICT "99.99%"
+                     @ PRow(), PCol() + 1 SAY opsld->t_st_5 PICT "99.99%"
                      @ PRow(), PCol() + 1 SAY "="
-                     @ PRow(), PCol() + 1 SAY t_iz_5 PICT gpici
+                     @ PRow(), PCol() + 1 SAY opsld->t_iz_5 PICT gpici
                   ENDIF
 
-                  nPom += t_iz_1
-                  nPom += t_iz_2
-                  nPom += t_iz_3
-                  nPom += t_iz_4
-                  nPom += t_iz_5
+                  nPom += opsld->t_iz_1
+                  nPom += opsld->t_iz_2
+                  nPom += opsld->t_iz_3
+                  nPom += opsld->t_iz_4
+                  nPom += opsld->t_iz_5
 
                   SKIP
 
@@ -180,51 +182,46 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
                @ PRow(), PCol() + 1 SAY "UK="
                @ PRow(), PCol() + 1 SAY nPom PICT gPici
 
-               rekap_ld( "POR" + por->id + idops, nGodina, nMjesec, nPom, iznos, idops, NLjudi() )
+               ld_rekap_ld( "POR" + por->id + opsld->idops, nGodina, nMjesec, nPom, iznos, opsld->idops, ld_opsld_ljudi() )
 
-            ELSE
+            ELSE // cAlgoritam nije "S"
 
-               ?U idops, ops->naz
+               ?U opsld->idops, ops->naz
 
-               // ovo je osnovica za porez
-               nTmpPor := iznos
 
-               IF por->por_tip == "B"
-                  // ako je na bruto onda je ovo osnovica
-                  nTmpPor := iznos3
-               ELSEIF por->por_tip == "R"
-                  // ako je na ruke onda je osnovica
-                  nTmpPor := iznos5
+               IF por->por_tip == "B" // ako je na bruto onda je ovo osnovica
+                  nPorOsnovica := opsld->iznos3
+               ELSEIF por->por_tip == "R" // ako je na ruke onda je osnovica
+                  nPorOsnovica := opsld->iznos5
                ENDIF
 
-               @ PRow(), nC1 SAY nTmpPor PICTURE gpici
+               @ PRow(), nC1 SAY nPorOsnovica PICTURE gpici
 
                // osnovica ne moze biti negativna
-               IF nTmpPor < 0
-                  nTmpPor := 0
+               IF nPorOsnovica < 0
+                  nPorOsnovica := 0
                ENDIF
 
-               nPom := round2( Max( por->dlimit, por->iznos / 100 * nTmpPor ), gZaok2 )
+               nPorez := round2( Max( por->dlimit, por->iznos / 100 * nPorOsnovica ), gZaok2 )
+               @ PRow(), PCol() + 1 SAY nPorez PICT gpici
 
-               @ PRow(), PCol() + 1 SAY nPom PICT gpici
+               //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+               //   @ PRow(), PCol() + 1 SAY nPom2 := round2( Max( por->dlimit, por->iznos / 100 * piznos ), gZaok2 ) PICT gpici
+               //   @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
+               //
+               //   ld_rekap_ld( "POR" + por->id + idops, nGodina, nMjesec, nPom - nPom2, 0, idops, ld_opsld_ljudi() )
+               //   nPorOps2 += nPom2
+               //ELSE
 
-               IF cUmPD == "D"
-                  @ PRow(), PCol() + 1 SAY nPom2 := round2( Max( por->dlimit, por->iznos / 100 * piznos ), gZaok2 ) PICT gpici
-                  @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
-
-                  rekap_ld( "POR" + por->id + idops, nGodina, nMjesec, nPom - nPom2, 0, idops, NLjudi() )
-                  nPorOps2 += nPom2
-               ELSE
-
-                  rekap_ld( "POR" + por->id + idops, nGodina, nMjesec, nPom, nTmpPor, idops, NLjudi() )
-               ENDIF
+                  ld_rekap_ld( "POR" + por->id + opsld->idops, nGodina, nMjesec, nPorez, nPorOsnovica, opsld->idops, ld_opsld_ljudi() )
+               //ENDIF
 
             ENDIF
 
-            nOOP += nTmpPor
-            nOsnova += nTmpPor
-            nPOLjudi += ljudi
-            nPorOps += nPom
+            nOsnObrPorPoOpstinama += nPorOsnovica
+            nOsnova += nPorOsnovica
+            nUkLjudiPoOpst += opsld->ljudi
+            nPorOps += nPorez
 
             IF cAlgoritam <> "S"
                SKIP
@@ -239,28 +236,24 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
 
          ? cLinija
 
-         nPor += nPorOps
+         nUkPorez += nPorOps
          nPor2 += nPorOps2
 
-      ENDIF
-
-      IF !Empty( poopst )
-
          ? _l( "Ukupno po ops.:" )
-
-         @ PRow(), nC1 SAY nOOP PICT gpici
+         @ PRow(), nC1 SAY nOsnObrPorPoOpstinama PICT gpici
          @ PRow(), PCol() + 1 SAY nPorOps   PICT gpici
 
-         IF cUmPD == "D"
-            @ PRow(), PCol() + 1 SAY nPorOps2   PICT gpici
-            @ PRow(), PCol() + 1 SAY nPorOps - nPorOps2   PICT gpici
-            rekap_ld( "POR" + por->id, nGodina, nMjesec, nPorOps - nPorOps2, 0,, NLjudi() )
-         ELSE
-            rekap_ld( "POR" + por->id, nGodina, nMjesec, nPorOps, nOOP,, "(" + AllTrim( Str( nPOLjudi ) ) + ")" )
-         ENDIF
+         //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+         //   @ PRow(), PCol() + 1 SAY nPorOps2   PICT gpici
+         //   @ PRow(), PCol() + 1 SAY nPorOps - nPorOps2   PICT gpici
+         //   ld_rekap_ld( "POR" + por->id, nGodina, nMjesec, nPorOps - nPorOps2, 0,, ld_opsld_ljudi() )
+         //ELSE
+            ld_rekap_ld( "POR" + por->id, nGodina, nMjesec, nPorOps, nOsnObrPorPoOpstinama,, "(" + AllTrim( Str( nUkLjudiPoOpst ) ) + ")" )
+         //ENDIF
 
          ? cLinija
-      ELSE
+
+      ELSE // Empty( por->poopst )
 
          nTmpOsnova := nUNeto
          IF por->por_tip == "B"
@@ -275,31 +268,35 @@ FUNCTION ld_obr_porez( nGodina, nMjesec, nPor, nPor2, nPorOps, nPorOps2, nUPorOl
 
          nOsnova := nTmpOsnova
          @ PRow(), nC1 SAY nTmpOsnova PICT gpici
-         @ PRow(), PCol() + 1 SAY nPom := round2( Max( dlimit, iznos / 100 * nTmpOsnova ), gZaok2 ) PICT gpici
-         IF cUmPD == "D"
-            @ PRow(), PCol() + 1 SAY nPom2 := round2( Max( dlimit, iznos / 100 * nUNeto2 ), gZaok2 ) PICT gpici
-            @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
-            rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom - nPom2, 0 )
-            nPor2 += nPom2
-         ELSE
-            rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom, nTmpOsnova, NIL, "(" + AllTrim( Str( nLjudi ) ) + ")" )
-         ENDIF
+         @ PRow(), PCol() + 1 SAY nPom := round2( Max( dlimit, por->iznos / 100 * nTmpOsnova ), gZaok2 ) PICT gpici
+         //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+         //   @ PRow(), PCol() + 1 SAY nPom2 := round2( Max( dlimit, iznos / 100 * nUNeto2 ), gZaok2 ) PICT gpici
+         //   @ PRow(), PCol() + 1 SAY nPom - nPom2 PICT gpici
+         //   ld_rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom - nPom2, 0 )
+         //   nPor2 += nPom2
+         //ELSE
+            ld_rekap_ld( "POR" + por->id, nGodina, nMjesec, nPom, nTmpOsnova, NIL, "(" + AllTrim( Str( nLjudi ) ) + ")" )
+         //ENDIF
 
-         nPor += nPom
+         nUkPorez += nPom
       ENDIF
 
       SKIP
    ENDDO
 
    ? cLinija
-   ? _l( "Ukupno Porez" )
-   @ PRow(), nC1 SAY Space( Len( gpici ) )
-   @ PRow(), PCol() + 1 SAY nPor - nUPorOl PICT gpici
-
-   IF cUmPD == "D"
-      @ PRow(), PCol() + 1 SAY nPor2              PICT gpici
-      @ PRow(), PCol() + 1 SAY nPor - nUPorOl - nPor2 PICT gpici
+   IF cTipPor == "B"
+      ?  "Ukupno Porez"
+   ELSE
+      ?  "Ukupno Porez[N]"
    ENDIF
+   @ PRow(), nC1 SAY Space( Len( gpici ) )
+   @ PRow(), PCol() + 1 SAY nUkPorez - nUPorOl PICT gpici
+
+   //IF cUmPDNeKontamStajeOvoVazdajeN == "D"
+   //   @ PRow(), PCol() + 1 SAY nPor2              PICT gpici
+   //   @ PRow(), PCol() + 1 SAY nUkPorez - nUPorOl - nPor2 PICT gpici
+   //ENDIF
 
    ? cLinija
 
@@ -334,7 +331,7 @@ FUNCTION ld_izr_porez( nOsnovica, cTipPor )
    DO WHILE !Eof()
 
       // vrati algoritam poreza
-      cAlgoritam := get_algoritam()
+      cAlgoritam := ld_get_por_algoritam()
 
       ld_opstina_stanovanja_rada( POR->poopst )
 
@@ -352,7 +349,7 @@ FUNCTION ld_izr_porez( nOsnovica, cTipPor )
       // obracunaj porez
       aPor := ld_obr_por( por->id, nOsnovica, 0 )
 
-      nTmp := isp_por( aPor, cAlgoritam, "", .F., .T. )
+      nTmp := ld_ispis_poreza( aPor, cAlgoritam, "", .F., .T. )
 
       IF nTmp < 0
          nTmp := 0

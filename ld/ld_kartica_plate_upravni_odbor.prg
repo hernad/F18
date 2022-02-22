@@ -279,7 +279,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
    DO WHILE !Eof()
 
       // vrati algoritam poreza
-      cAlgoritam := get_algoritam()
+      cAlgoritam := ld_get_por_algoritam()
 
       ld_opstina_stanovanja_rada( POR->poopst )
 
@@ -298,7 +298,7 @@ FUNCTION ld_kartica_plate_upravni_odbor( cIdRj, nMjesec, nGodina, cIdRadn, cObra
       aPor := ld_obr_por( por->id, nPorOsnovica, 0 )
 
       // ispisi porez
-      nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
+      nPor += ld_ispis_poreza( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
 
       SKIP 1
    ENDDO

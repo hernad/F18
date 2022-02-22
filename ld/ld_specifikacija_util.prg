@@ -407,7 +407,6 @@ FUNCTION ld_izrezi_string( cPoc, nIza, cOstObav )
 
    LOCAL cVrati := "", nPoz := 0
 
-   altd()
    DO WHILE ( nPoz := At( cPoc, cOstObav ) ) > 0
       cVrati := cVrati + SubStr( cOstObav, nPoz + Len( cPoc ), nIza ) + ";"
       cOstObav := Stuff( cOstObav, nPoz, Len( cPoc ) + nIza, "" )

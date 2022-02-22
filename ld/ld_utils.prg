@@ -41,7 +41,7 @@ FUNCTION _calc_tpr( nIzn, lCalculate )
    RETURN nRet
 
 
-FUNCTION tr_list()
+FUNCTION ld_tiprada_list()
    RETURN "I#N"
 
 
@@ -136,7 +136,7 @@ FUNCTION get_dopr( cDopr, cTipRada )
    DO WHILE !Eof() .AND. dopr->id == cDopr
 
       // provjeri tip rada
-      IF Empty( dopr->tiprada ) .AND. cTipRada $ tr_list()
+      IF Empty( dopr->tiprada ) .AND. cTipRada $ ld_tiprada_list()
          // ovo je u redu...
       ELSEIF ( cTipRada <> dopr->tiprada )
          SKIP
@@ -692,7 +692,7 @@ FUNCTION SortIme( cId )
 */
 
 
-FUNCTION NLjudi()
+FUNCTION ld_opsld_ljudi()
    RETURN "(" + AllTrim( Str( opsld->ljudi ) ) + ")"
 
 

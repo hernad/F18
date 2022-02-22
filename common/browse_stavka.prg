@@ -60,7 +60,6 @@ FUNCTION browse_stavka_formiraj_getlist( cVariableName, GetList, lZabIsp, aZabIs
       @ box_x_koord() + nTekRed + 1, box_y_koord() + nMaxSirina + 17 SAY Chr( 16 ) //">"
    ENDIF
 
-   altd()
    IF Len( ImeKol[ nI ] ) >= 7 .AND. ImeKol[ nI, 7 ] <> NIL // picture kod zadan u ImeKol
       cGetPictureCode := ImeKol[ nI, 7 ]
    ENDIF

@@ -19,6 +19,7 @@ MEMVAR cLDLijevaMargina, gPics, gPici
 FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta, cKarticaSifreTO, lKarticaTO )
 
    LOCAL nKRedova
+   LOCAL cAlgoritam
    LOCAL cDoprSpace := Space( 3 )
    LOCAL cTprLine
    LOCAL cDoprLine
@@ -401,7 +402,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
 
       DO WHILE !Eof()
 
-         IF cRTipRada $ tr_list() .AND. Empty( dopr->tiprada )
+         IF cRTipRada $ ld_tiprada_list() .AND. Empty( dopr->tiprada )
          ELSEIF dopr->tiprada <> cRTipRada
             SKIP
             LOOP
@@ -512,7 +513,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
          nPorOsnovica := 0
       ENDIF
 
-      altd()
+
       if lRsObracun
          ?  cLDLijevaMargina + "5. OSNOVICA ZA POREZ NA PLATU (1-4)"
       ELSE
@@ -533,7 +534,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
 
       DO WHILE !Eof()
 
-         cAlgoritam := get_algoritam()
+         cAlgoritam := ld_get_por_algoritam()
 
          ld_opstina_stanovanja_rada( POR->poopst )
          IF !ld_ima_u_ops_porez_ili_doprinos( "POR", POR->id )
@@ -547,7 +548,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
          ENDIF
 
          aPor := ld_obr_por( por->id, nPorOsnovica, 0 )
-         nPor += isp_por( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
+         nPor += ld_ispis_poreza( aPor, cAlgoritam, cLDLijevaMargina, .T., .T. )
 
          SKIP 1
       ENDDO

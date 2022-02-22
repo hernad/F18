@@ -12,20 +12,19 @@
 #include "f18.ch"
 
 
-
 // -----------------------------------------------
 // vraca tip algoritma iz sifrarnika poreza
 // -----------------------------------------------
-FUNCTION get_algoritam()
+FUNCTION ld_get_por_algoritam()
 
    LOCAL xRet := ""
    LOCAL nTArea := Select()
 
    select_o_por()
 
-   IF por->( FieldPos( "ALGORITAM" ) ) <> 0
+   //IF por->( FieldPos( "ALGORITAM" ) ) <> 0
       xRet := field->algoritam
-   ENDIF
+   //ENDIF
 
    SELECT ( nTArea )
 
@@ -68,7 +67,7 @@ FUNCTION ld_obr_por( cId, nOsnNeto, nOsnOstalo )
    LOCAL i
 
    // uzmi koji je algoritam
-   cAlg := get_algoritam()
+   cAlg := ld_get_por_algoritam()
    cPrObr := get_pr_obracuna()
 
    IF cPrObr == "N" .OR. cPrObr == " " .OR. cPrObr == "B"
@@ -92,13 +91,13 @@ FUNCTION ld_obr_por( cId, nOsnNeto, nOsnOstalo )
 
    IF cAlg == "S"
       // stepenasti obracun
-      aPortek := _get_portek( 2 )
-      aPor := obr_por_st( aPorTek, nIznos )
+      aPortek := ld_get_array_porezi( 2 )
+      aPor := ld_obr_por_stepenasti( aPorTek, nIznos )
 
    ELSE
       // standardni obracun
-      aPorTek := _get_portek( 1 )
-      aPor := obr_por_os( aPorTek, nIznos )
+      aPorTek := ld_get_array_porezi( 1 )
+      aPor := ld_obr_por_standardni( aPorTek, nIznos )
 
    ENDIF
 
@@ -108,7 +107,7 @@ FUNCTION ld_obr_por( cId, nOsnNeto, nOsnOstalo )
 // ispis poreza
 // lWOpis - bez opisa id, naz
 // ---------------------------------------------
-FUNCTION isp_por( aPor, cPorType, cMargina, lIspis, lWOpis )
+FUNCTION ld_ispis_poreza( aPor, cPorType, cMargina, lIspis, lWOpis )
 
    LOCAL nRet := 0
 
@@ -121,9 +120,9 @@ FUNCTION isp_por( aPor, cPorType, cMargina, lIspis, lWOpis )
    ENDIF
 
    IF cPorType == "S"
-      nRet := isp_por_st( aPor, cMargina, lIspis )
+      nRet := ld_ispis_poreza_standardni_obracun( aPor, cMargina, lIspis )
    ELSE
-      nRet := isp_por_os( aPor, cMargina, lIspis, lWOpis )
+      nRet := ld_ispis_poreza_osnovni_obracun( aPor, cMargina, lIspis, lWOpis )
    ENDIF
 
    RETURN nRet
@@ -131,7 +130,7 @@ FUNCTION isp_por( aPor, cPorType, cMargina, lIspis, lWOpis )
 // -----------------------------------------
 // ispis poreza, osnovni obracun
 // -----------------------------------------
-STATIC FUNCTION isp_por_os( aPor, cMargina, lIspis, lWOpis )
+STATIC FUNCTION ld_ispis_poreza_osnovni_obracun( aPor, cMargina, lIspis, lWOpis )
 
    LOCAL nTotal := 0
    LOCAL i := 1
@@ -166,7 +165,7 @@ STATIC FUNCTION isp_por_os( aPor, cMargina, lIspis, lWOpis )
 // ------------------------------------
 // ispis poreza, stepenasti obracun
 // ------------------------------------
-STATIC FUNCTION isp_por_st( aPor, cMargina, lIspis )
+STATIC FUNCTION ld_ispis_poreza_standardni_obracun( aPor, cMargina, lIspis )
 
    LOCAL i
    LOCAL nTotal := 0
@@ -226,7 +225,7 @@ STATIC FUNCTION isp_por_st( aPor, cMargina, lIspis )
 // ---------------------------------------------------
 // obracun standardni poreza
 // ---------------------------------------------------
-STATIC FUNCTION obr_por_os( aPorTek, nIznos )
+STATIC FUNCTION ld_obr_por_standardni( aPorTek, nIznos )
 
    LOCAL aPor := {}
    LOCAL nPorIznos
@@ -255,7 +254,7 @@ STATIC FUNCTION obr_por_os( aPorTek, nIznos )
 // aPorTek - matrica sa poreznim stopama i limitima
 // nIznos - obracunska osnovica
 // ------------------------------------------------
-STATIC FUNCTION obr_por_st( aPorTek, nIznos )
+STATIC FUNCTION ld_obr_por_stepenasti( aPorTek, nIznos )
 
    LOCAL aPor := {}
    LOCAL i
@@ -312,7 +311,7 @@ STATIC FUNCTION obr_por_st( aPorTek, nIznos )
 // nvar - varijanta 1 - standardna
 // varijanta 2 - stepenasti
 // -------------------------------------------
-STATIC FUNCTION _get_portek( nVar )
+STATIC FUNCTION ld_get_array_porezi( nVar )
 
    LOCAL aPor := {}
    LOCAL i
