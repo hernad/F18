@@ -246,7 +246,7 @@ FUNCTION ld_rekapitulacija_sql( lSveRj )
    ? cTpLine
 
    ?
-   ProizvTP()
+   ld_proizv_tippr()
 
    IF cRTipRada $ "A#U"
       ? cMainLine
@@ -831,6 +831,7 @@ STATIC FUNCTION ld_rekap_calc_totals( bUslovMjesecGodinaObracun, lSveRj, aBenefi
 
       IF RADN->isplata == "TR"  // radnik isplata na tekuci racun
          cOpis2 := RADNIK_PREZ_IME
+         // stavke za generaciju virmana
          ld_rekap_ld( "IS_" + RADN->idbanka, nGodina, nMjesecDo, _UIznos - nIzbitiIzNeto - nIzbitiIzOstalo, 0, RADN->idbanka, RADN->brtekr, cOpis2, .T. )
       ENDIF
 

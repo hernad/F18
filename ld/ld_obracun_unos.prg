@@ -434,7 +434,7 @@ STATIC FUNCTION kalkulisi_uneto_usati_uiznos_za_radnika()
 
 
 
-STATIC FUNCTION izracunaj_ukupno_za_isplatu_za_radnika( cTipRada, cTrosk, nTrosk, lInRs )
+STATIC FUNCTION ld_izracunaj_ukupno_za_isplatu_za_radnika( cTipRada, cTrosk, nTrosk, lInRs )
 
    _uiznos := ROUND2( _uneto2 + _uodbici, gZaok2 )
 
@@ -537,8 +537,14 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
 
    nDop := ld_uk_doprinosi_iz( nMinBO, cTipRada )
    _udopr := nDop
-   _udop_st := 31.0
-   nPorOsnovica := (  _ubruto - _udopr - _ulicodb )
+   //_udop_st := 31.0
+   
+   altd()
+   IF lInRs 
+      nPorOsnovica := _ubruto - _ulicodb
+   ELSE
+      nPorOsnovica := _ubruto - _udopr - _ulicodb
+   ENDIF
 
    IF nPorOsnovica < 0 .OR. !radn_oporeziv( _idradn, _idrj )
       nPorOsnovica := 0
@@ -559,14 +565,14 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
       _uneto2 := nMinNeto
    ENDIF
 
-   izracunaj_ukupno_za_isplatu_za_radnika( cTipRada, cTrosk, nTrosk, lInRs )
+   ld_izracunaj_ukupno_za_isplatu_za_radnika( cTipRada, cTrosk, nTrosk, lInRs )
 
    IF Round( _uneto2, 2 ) <> 0 .AND. LastKey() <> K_ESC .AND. ld_obracunaj_odbitak_za_elementarne_nepogode( lNovi )
 
       // zato što naknadno radimo definisanje tip primanja, moramo napraviti rekalkulaciju
       hData := izracunaj_uneto_usati_za_radnika()
       _uodbici := hData[ "uodbici" ]
-      izracunaj_ukupno_za_isplatu_za_radnika( cTipRada, cTrosk, nTrosk, lInRs )
+      ld_izracunaj_ukupno_za_isplatu_za_radnika( cTipRada, cTrosk, nTrosk, lInRs )
 
       IF lNovi
          MsgBeep( "Za radnika je obračnuat odbitak radi elementarnih nepogoda." )
@@ -581,6 +587,7 @@ STATIC FUNCTION ld_unos_obracuna_footer( lSaveObracun )
 
    // direktno se unose globalne vars iz tabele ld: ld->usati, ld->lucodb, ... ld->uiznos
 
+   altd()
    @ box_x_koord() + 19, box_y_koord() + 2 SAY "Ukupno sati:"
    @ Row(), Col() + 1 SAY _usati PICT gPics
    @ box_x_koord() + 19, Col() + 2 SAY "Uk.lic.odb.:"

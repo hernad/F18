@@ -19,12 +19,13 @@ FUNCTION ld_virm_prenos( lPrenosLDVirm )
    LOCAL _poziv_na_broj
    LOCAL _dat_virm := Date()
    LOCAL _bez_nula := fetch_metric( "virm_generisanje_nule", my_user(), "D" )
-   LOCAL _ispl_posebno := fetch_metric( "virm_isplate_za_radnike_posebno", my_user(), "N" )
+   LOCAL cIsplataPojedinacno := fetch_metric( "virm_isplate_za_radnike_posebno", my_user(), "N" )
    LOCAL _dod_opis1 := "D"
    LOCAL _racun_upl
    LOCAL _per_od, _per_do
    LOCAL _id_banka, _dod_opis
    LOCAL nRBr, _firma
+   LOCAL GetList := {}
 
 
    PRIVATE _mjesec, _godina, nBrojRadnikaPrivateVar
@@ -77,7 +78,7 @@ FUNCTION ld_virm_prenos( lPrenosLDVirm )
    @ box_x_koord() + 7, box_y_koord() + 2 SAY "Datum" GET _dat_virm
    @ box_x_koord() + 8, box_y_koord() + 2 SAY "Porezni period od" GET _per_od
    @ box_x_koord() + 8, Col() + 2 SAY "do" GET _per_do
-   @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Isplate prebaciti pojedinačno za svakog radnika (D/N)?" GET _ispl_posebno VALID _ispl_posebno $ "DN" PICT "@!"
+   @ box_x_koord() + 9, box_y_koord() + 2 SAY8 "Isplate prebaciti pojedinačno za svakog radnika (D/N)?" GET cIsplataPojedinacno VALID cIsplataPojedinacno $ "DN" PICT "@!"
    @ box_x_koord() + 10, box_y_koord() + 2 SAY8 "Formirati samo stavke sa iznosima većim od 0 (D/N)?" GET _bez_nula VALID _bez_nula $ "DN" PICT "@!"
 
    READ
@@ -91,7 +92,7 @@ FUNCTION ld_virm_prenos( lPrenosLDVirm )
    set_metric( "virm_mjesec", my_user(), _mjesec )
    set_metric( "virm_poziv_na_broj", my_user(), _poziv_na_broj )
    set_metric( "virm_generisanje_nule", my_user(), _bez_nula )
-   set_metric( "virm_isplate_za_radnike_posebno", my_user(), _ispl_posebno )
+   set_metric( "virm_isplate_za_radnike_posebno", my_user(), cIsplataPojedinacno )
 
    _dod_opis := ", za " + Str( _mjesec, 2 ) + "." + Str( _godina, 4 )
    nRBr := 0
@@ -99,6 +100,7 @@ FUNCTION ld_virm_prenos( lPrenosLDVirm )
    ld_virm_obrada( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis, _per_od, _per_do )
 
    ld_virm_generacija_krediti( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis )
+   altd()
    virm_ld_isplata_radniku_na_tekuci_racun( _godina, _mjesec, _dat_virm, @nRBr, _dod_opis )
    // virm_popuna_javnih_prihoda()
 
@@ -115,7 +117,7 @@ STATIC FUNCTION virm_ld_isplata_radniku_na_tekuci_racun( nGodina, nMjesec, dDatV
    LOCAL _svrha_placanja
    LOCAL _racun_upl := fetch_metric( "virm_zr_uplatioca", my_user(), Space( 16 ) )
    LOCAL _bez_nula := fetch_metric( "virm_generisanje_nule", my_user(), "N" )
-   LOCAL _ispl_posebno := fetch_metric( "virm_isplate_za_radnike_posebno", my_user(), "N" )
+   LOCAL cIsplataPojedinacno := fetch_metric( "virm_isplate_za_radnike_posebno", my_user(), "N" )
    LOCAL _isplata_opis := ""
    LOCAL cIdPartnerRekLd
 
@@ -151,11 +153,11 @@ STATIC FUNCTION virm_ld_isplata_radniku_na_tekuci_racun( nGodina, nMjesec, dDatV
       _total := 0
       _kredit := 0
       SELECT rekld
-      cIdPartnerRekLd := field->idpartner // SK=sifra kreditora/banke ( ovo je dupla informacija - sadrzi isti podataka kao i cIdBanka )
+      cIdPartnerRekLd := rekld->idpartner // SK=sifra kreditora/banke ( ovo je dupla informacija - sadrzi isti podataka kao i cIdBanka )
 
-      IF _ispl_posebno == "N"     // isplate za jednu banku - sumirati
+      IF cIsplataPojedinacno == "N"     // isplate za jednu banku - sumirati
 
-         DO WHILE !Eof() .AND. Left( field->id,  Len( cOznakaIsplatePrefix ) ) == cOznakaIsplatePrefix .AND. rekld->idpartner == cIdPartnerRekLd
+         DO WHILE !Eof() .AND. Left( rekld->id,  Len( cOznakaIsplatePrefix ) ) == cOznakaIsplatePrefix .AND. rekld->idpartner == cIdPartnerRekLd
             ++_kredit
             _total += rekld->iznos1
             _isplata_opis := "obuhvaceno " + AllTrim( Str( _kredit ) ) + " radnika"
@@ -167,7 +169,7 @@ STATIC FUNCTION virm_ld_isplata_radniku_na_tekuci_racun( nGodina, nMjesec, dDatV
 
          _kredit := 1
          _total := rekld->iznos1
-         _isplata_opis := AllTrim( field->opis2 )
+         _isplata_opis := AllTrim( rekld->opis2 )
 
       ENDIF
 
@@ -192,7 +194,7 @@ STATIC FUNCTION virm_ld_isplata_radniku_na_tekuci_racun( nGodina, nMjesec, dDatV
             field->svrha_doz WITH AllTrim( vrprim->pom_txt ) + " " + AllTrim( dod_opis ) + " " + _isplata_opis, ;
             field->u_korist WITH cIdBanka
 
-         IF _ispl_posebno == "D"  // jedan radnik
+         IF cIsplataPojedinacno == "D"  // jedan radnik
             REPLACE field->svrha_doz WITH Trim( svrha_doz ) + ", tekuci rn:" + Trim( rekld->opis )
          ENDIF
 
