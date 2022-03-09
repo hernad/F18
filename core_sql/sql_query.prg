@@ -361,7 +361,7 @@ FUNCTION sql_query_bez_zapisa( ret )
 
 FUNCTION qry_show_interesantne_greske( cError )
 
-   LOCAL pRegex := hb_regexComp( 'ERROR:  duplicate key value violates unique constraint "eisporuke_fin_nalog".*\((\d{2}), (\d{2}), (\d{8}), (\d+), (\d{4}).*' )
+   LOCAL pRegex := hb_regexComp( '.*ERROR:  duplicate key value violates unique constraint eisporuke_fin_nalog.*\((\d{2}), (\d{2}), (\d{8}), (\d+), (\d{4}).*' )
    LOCAL aMatch
 
    //ERROR:  duplicate key value violates unique constraint "eisporuke_fin_nalog"
@@ -369,7 +369,10 @@ FUNCTION qry_show_interesantne_greske( cError )
    //   1 RUN_SQL_QUERY / 202 //   2 DB_INSERT_EISP / 358 //   3 GEN_EISPORUKE_STAVKE / 975 //   4 GEN_EISPORUKE / 1322 //   5 (b)FIN_EISPORUKE / 115 //   6 F18_MENU / 58 //   7 FIN_EISPORUKE / 121 //   8 (b)FIN_EISPORUKENABAVKEMENU / 24 //   9 F18_MENU / 58 //  10 FIN_EISPORUKENABAVKEMENU / 41 //  11 (b)TFINMOD_PROGRAMSKI_MODUL_OSNOVNI_MENI / 85 //  12 F18_MENU / 58 //  13 TFINMOD:PROGRAMSKI_MODUL_OSNOVNI_MENI / 91 //  14 TFINMOD:MMENU / 37 //  15 TFINMOD:RUN / 126 //  16 MAINFIN / 24 //  17 (b)SET_PROGRAM_MODULE_MENU / 250 //  18 F18_PROGRAMSKI_MODULI_MENI / 214 //  19 F18_LOGIN_LOOP / 94 //  20 (b)F18LOGIN_ADMINISTRATORSKE_OPCIJE / 743 //  21 F18LOGIN:ADMINISTRATORSKE_OPCIJE / 772 //  22 F18LOGIN:BROWSE_ODABIR_ORGANIZACIJE / 923 //  23 F18LOGIN:ODABIR_ORGANIZACIJE / 537 //  24 F18_LOGIN_LOOP / 75 //  25 MAIN / 46
    //SQL ERROR QUERY:  INSERT INTO public.eisporuke(eisporuke_id, tip, porezni_period, br_fakt, jci, dat_fakt, dat_fakt_pravi,kup_naz,kup_sjediste, kup_pdv, kup_jib, kup_pdv0_clan,idpartner, idkonto_pdv, idkonto_kup,fakt_iznos_sa_pdv,fakt_iznos_sa_pdv_interna,fakt_iznos_sa_pdv0_izvoz,fakt_iznos_sa_pdv0_ostalo,fakt_iznos_bez_pdv,fakt_iznos_pdv,fakt_iznos_bez_pdv_np,fakt_iznos_pdv_np,fakt_iznos_pdv_np_32,fakt_iznos_pdv_np_33,fakt_iznos_pdv_np_34,opis, fin_idfirma, fin_idvn,fin_brnal,fin_rbr) VALUES(3147,'01','2105','IN55377/21          ','','2021-05-31','2021-05-31','FONDACIJA "IZVOR NADE"','71000 SARAJEVO OBALA KULINA BANA 24','','4201535470006','','507865','4730   ','2110   ',4716.05,0.00,0.00,0.00,0.00,0.00,4030.81,685.24,685.24,0.00,0.00,'RN. IN55377/21','10','14','00000218',92)
 
+   cError := STRTRAN(cError, chr(10), "")
+   cError := STRTRAN(cError, chr(13), "")
    cError := STRTRAN(cError, hb_eol(), "")
+   cError := STRTRAN(cError, '"', '')
    aMatch := hb_regex( pRegex, cError )
    IF Len( aMatch ) >= 6 // aMatch[1]="10" aMatch[2]="14", aMatch[3]="000000218", aMatch[4]="92", aMatch[5]="2021"
          MsgBeep( "Dupliranje - već postoji " + aMatch[2] + "-" + aMatch[3] + "-" + aMatch[4] + " / rbr " + aMatch[5] )      
