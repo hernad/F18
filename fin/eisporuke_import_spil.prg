@@ -99,7 +99,6 @@ FUNCTION fin_cre_spil_table_rc( dDateOd, dDateDo )
       RETURN .F.
    ENDIF
  
-   altd()
    cSql := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
    cSql += "CREATE FOREIGN TABLE " + cTableName  
    cSql += "("
