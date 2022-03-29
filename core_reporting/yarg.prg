@@ -116,7 +116,7 @@ METHOD YargReport:create_report_properties()
 
 
    ? "cuba.reporting.sql.driver=org.postgresql.Driver"
-   ? "cuba.reporting.sql.dbUrl=jdbc:postgresql://" + hServerParams[ "host" ] + "/" + hServerParams[ "database" ]
+   ? "cuba.reporting.sql.dbUrl=jdbc:postgresql://" + hServerParams[ "host" ] + ":" + AllTrim(Str(hServerParams[ "port" ])) + "/" + hServerParams[ "database" ]
    ? "cuba.reporting.sql.user=" + hServerParams[ "user" ]
    ? "cuba.reporting.sql.password=" + + hServerParams[ "password" ]
 
