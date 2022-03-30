@@ -14,11 +14,12 @@ FUNCTION fin_ht_get_fin_stavke(dDatod, dDatDo)
    LOCAL nPDVStopa, lPdvObveznik
 
    cQry := "select brdok, datdok, idpartner, dindem, idroba, txt, kolicina, cijena,"
-   cQry += "COALESCE(substring( UPPER(txt),'(?:VOZ.*REG.*TAB.*|VOZ.*REG.*OZN.*|REG.*OZN.*VOZ.*)\s*([A-Z0-9a-z]{3,4}\-[A-Z0-9a-z]{1,2}\-[A-Z0-9a-z]{3,4})'),'') as regbr,"
+   cQry += "COALESCE(substring( UPPER(txt),'(?:VOZ.*REG.*TAB.*|VOZ.*REG.*OZN.*|REG.*OZN.*VOZ.*)[ :]+([A-Z0-9a-z]{3,4}\-[A-Z0-9a-z]{1,2}\-[A-Z0-9a-z]{3,4})'),'') as regbr,"
    cQry += "COALESCE(substring(UPPER(txt),'(?:OSLOB.*PLA.*PDV.*PO.*LAN.*|NIJE.*OBR.*PDV.*PO.*LAN.*)(\d{2})\s*\..*PDV'), '') as clan"
    cQry += " FROM fmk.fakt_fakt"
    cQry += " WHERE idtipdok='10' and datdok BETWEEN " + sql_quote( dDatOd ) + " AND " + sql_quote( dDatDo )
    cQry += " AND rbr::INTEGER = 1"
+   cQry += " ORDER BY fmk.fakt_fakt.brdok"
 
    SELECT( F_POM )
    MsgO("Preuzimanje podataka sa servera")
@@ -232,7 +233,7 @@ FUNCTION is_ht()
 STATIC FUNCTION ht_povezana_lica(cIdPartner)
 
    LOCAL lPovezano := .F.
-   LOCAL aPovezane := { PADR("1805", 6), PADR("0589", 6), PADR("3171", 6), PADR("3458",6), PADR("7437", 6), PADR("586268",6) }
+   LOCAL aPovezane := { PADR("0001", 6), PADR("1000", 6), PADR("1805", 6), PADR("7874", 6) }
 
    IF Ascan( aPovezane, cIdPartner ) <> 0
         lPovezano := .T.
