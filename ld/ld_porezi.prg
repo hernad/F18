@@ -14,6 +14,13 @@
 
 MEMVAR cLinija
 
+/*
+
+   ld_obr_porez( "R", nGodina, nMjesec, nNetoIspl, @nUkPorNeto) //, @nUPorOl )
+   ld_obr_porez( "B", nGodina, nMjesec, @nPorOsnovaBruto, @nUkPorBruto) //, @nUPorOl )
+
+*/
+
 FUNCTION ld_obr_porez(cTipPor, nGodina, nMjesec, nUkPorOsnovica, nUkPorez) //, nUPorOl )
 
    LOCAL cSeek, nC1, nPorez
@@ -261,6 +268,8 @@ FUNCTION ld_obr_porez(cTipPor, nGodina, nMjesec, nUkPorOsnovica, nUkPorez) //, n
          //ELSEIF por->por_tip == "R"
          //   nTmpOsnova := nUkPorNaRukeOsnova
          //ENDIF
+         altd()
+         // port_tip == "R" vodne naknade
          IF nUkPorOsnovica < 0
             nUkPorOsnovica := 0
          ENDIF

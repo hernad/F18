@@ -233,7 +233,7 @@ FUNCTION is_ht()
 STATIC FUNCTION ht_povezana_lica(cIdPartner)
 
    LOCAL lPovezano := .F.
-   LOCAL aPovezane := { PADR("0001", 6), PADR("1000", 6), PADR("1805", 6), PADR("7874", 6) }
+   LOCAL aPovezane := { PADR("20", 6), PADR("0001", 6), PADR("1000", 6), PADR("1805", 6), PADR("7874", 6) }
 
    IF Ascan( aPovezane, cIdPartner ) <> 0
         lPovezano := .T.
