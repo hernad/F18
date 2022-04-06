@@ -208,12 +208,11 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
       fin_get_k1_k4_funk_fond( @GetList, 14 )
       
-      /*
+
       @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za broj veze: " GET cUslovUpperBrDok PICT "@!S30"
       @ Row() + 1, box_y_koord() + 2 SAY8 "(prazno-svi; 61_SP_2-spoji uplate za naloge tipa 61;"
       @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_2 - kupci spojiti uplate za sve vrste naloga; "
       @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_1 - dobavljači spojiti plaćanja za sve vrste naloga)"
-      */
 
       IF cBrza <> "D"
          @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za naziv konta (prazno-svi) " GET cUslovNazivKonta PICT "@!S20"

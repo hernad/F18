@@ -15,7 +15,6 @@ MEMVAR __print_opt, gZaokr
 
 STATIC s_nOpisDuzina := 70
 
-
 FUNCTION kalk_tkv()
 
    LOCAL hParams
@@ -25,16 +24,88 @@ FUNCTION kalk_tkv()
       RETURN .F.
    ENDIF
    nCount := kalk_gen_fin_stanje_magacina_za_tkv( hParams )
-   IF nCount > 0
-      stampaj_tkv( hParams )
-   ENDIF
+   //IF nCount > 0
+   //   stampaj_tkv( hParams )
+   //ENDIF
 
    RETURN .T.
 
 
+STATIC FUNCTION get_params_tkv( hParams )
+
+   LOCAL lRet := .F.
+   LOCAL nX := 1
+   //LOCAL cUslovKonta := fetch_metric( "kalk_tkv_konto", my_user(), Space( 200 ) )
+   LOCAL cIdKonto := PADR(fetch_metric("kalk_tkv_konto", my_user(), SPACE(7)), 7)
+   LOCAL _d_od := fetch_metric( "kalk_tkv_datum_od", my_user(), Date() - 30 )
+   LOCAL _d_do := fetch_metric( "kalk_tkv_datum_do", my_user(), Date() )
+   LOCAL cIdVd := fetch_metric( "kalk_tkv_vrste_dok", my_user(), Space( 200 ) )
+   LOCAL _usluge := fetch_metric( "kalk_tkv_gledati_usluge", my_user(), "N" )
+   LOCAL cNabavneiliProdajneCijene := fetch_metric( "kalk_tkv_tip_obrasca", my_user(), "P" )
+   //LOCAL cViseKontaDN := "D"
+   LOCAL cXlsxDN := "D"
+   LOCAL GetList := {}
+
+   Box(, 15, 70 )
+
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "*** magacin - izvještaj TKV"
+
+   ++nX
+   ++nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Datum od" GET _d_od
+   @ box_x_koord() + nX, Col() + 1 SAY "do" GET _d_do
+   ++nX
+   ++nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "                  Konto:" GET cIdKonto VALID P_Konto( @cIdKonto )
+   ++nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Vrste dok. (prazno-svi):" GET cIdVd PICT "@S35"
+   ++nX
+   ++nX
+   //@ box_x_koord() + nX, box_y_koord() + 2 SAY "Gledati [N] nabavne cijene [P] prodajne cijene ?" GET cNabavneiliProdajneCijene PICT "@!" VALID cNabavneiliProdajneCijene $ "PN"
+   //++nX
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Gledati usluge (D/N) ?" GET _usluge PICT "@!" VALID _usluge $ "DN"
+   //nX += 2
+   //@ box_x_koord() + nX, box_y_koord() + 2 SAY "Export XLSX (D/N) ?" GET cXlsxDN PICT "@!" VALID cXlsXDN $ "DN"
+
+   READ
+
+   BoxC()
+
+   IF LastKey() == K_ESC
+      RETURN lRet
+   ENDIF
+
+   lRet := .T.
+
+   hParams := hb_Hash()
+   hParams[ "datum_od" ] := _d_od
+   hParams[ "datum_do" ] := _d_do
+   hParams[ "idkonto" ] := cIdKonto
+   hParams[ "vrste_dok" ] := cIdVd
+   hParams[ "gledati_usluge" ] := _usluge
+   hParams[ "nab_ili_prod" ] := cNabavneiliProdajneCijene
+
+   // ako postoji tacka u kontu onda gledaj
+   //IF Right( AllTrim( cUslovKonta ), 1 ) == "."
+   //   cViseKontaDN := "N"
+   //ENDIF
+   //hParams[ "vise_konta" ] := cViseKontaDN
+   hParams[ "xlsx" ] := iif( cXlsXDN == "D", .T., .F. )
+
+   // snimi sql/db parametre
+   set_metric( "kalk_tkv_konto", my_user(), cIdKonto )
+   set_metric( "kalk_tkv_datum_od", my_user(), _d_od )
+   set_metric( "kalk_tkv_datum_do", my_user(), _d_do )
+   set_metric( "kalk_tkv_vrste_dok", my_user(), cIdVd )
+   set_metric( "kalk_tkv_gledati_usluge", my_user(), _usluge )
+   set_metric( "kalk_tkv_tip_obrasca", my_user(), cNabavneiliProdajneCijene )
+
+   RETURN lRet
+
+
 FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
-   LOCAL cUslovKonto := ""
+   //LOCAL cUslovKonto := ""
    LOCAL dDatumOd := Date()
    LOCAL dDatumDo := Date()
    LOCAL cUslovTarife := ""
@@ -53,7 +124,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    LOCAL cFilterVrsteDok := ""
    LOCAL cFilterTarife := ""
    LOCAL cGledatiUslugeDN := "N"
-   LOCAL cViseKontaDN := "N"
+   //LOCAL cViseKontaDN := "N"
    LOCAL nCount := 0
    LOCAL hKalkParams
    LOCAL cIdKonto
@@ -61,15 +132,17 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    LOCAL cBrDok
    LOCAL nRealizacija, nRealizacijaNv
    LOCAL hRec
+   LOCAL aHeader, aXlsxFields, cXlsxName
+   LOCAL cOpisKnjizenja, nRedBr
 
    // uslovi generisanja se uzimaju iz hash matrice
    // moguce vrijednosti su:
-   IF hb_HHasKey( hParams, "vise_konta" )
-      cViseKontaDN := hParams[ "vise_konta" ]
-   ENDIF
+   // IF hb_HHasKey( hParams, "vise_konta" )
+   //   cViseKontaDN := hParams[ "vise_konta" ]
+   //ENDIF
 
-   IF hb_HHasKey( hParams, "konto" )
-      cUslovKonto := hParams[ "konto" ]
+   IF hb_HHasKey( hParams, "idkonto" )
+      cIdKonto := hParams[ "idkonto" ]
    ENDIF
    IF hb_HHasKey( hParams, "datum_od" )
       dDatumOd := hParams[ "datum_od" ]
@@ -87,15 +160,32 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       cGledatiUslugeDN := hParams[ "gledati_usluge" ]
    ENDIF
 
-   kalk_hernad_tkv_cre_r_export()  // napravi pomocnu tabelu
 
-   IF cViseKontaDN == "D"
-      lViseKonta := .T.
-   ENDIF
+   //kalk_hernad_tkv_cre_r_export()  // napravi pomocnu tabelu
+   //xlsx_export_init( aDbf )
+   // IF hParams["xlsx"]
+   aXlsxFields := kalk_tkv_xls_fields()
+   aHeader := {}
+   //IF cExpXlsx == "D"
+   AADD( aHeader, { "Period", DTOC(dDatumOd) + " -" + DTOC(dDatumDo) } )
+   select_o_konto( cIdKonto )
 
-   IF lViseKonta .AND. !Empty( cUslovKonto )
-      cFilterKonto := Parsiraj( cUslovKonto, "mkonto" )
-   ENDIF
+   AADD( aHeader, { "Magacin:", cIdKonto + " " + Trim(konto->naz) } )
+
+   cXlsxName := "kalk_tkv_" + Alltrim(cIdKonto) + ".xlsx"
+   // ELSE
+   //   cXlsxName := "kalk_tkv.xlsx" 
+   //ENDIF
+   xlsx_export_init( aXlsxFields, aHeader, cXlsxName )
+   //ENDIF
+
+   //IF cViseKontaDN == "D"
+   //   lViseKonta := .T.
+   //ENDIF
+
+   //IF lViseKonta .AND. !Empty( cUslovKonto )
+   //   cFilterKonto := Parsiraj( cUslovKonto, "mkonto" )
+   //ENDIF
 
    IF !Empty( cUslovTarife )
       cFilterTarife := Parsiraj( cUslovTarife, "idtarifa" )
@@ -105,26 +195,27 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       cFilterVrsteDok := Parsiraj( cUslovIdVD, "idvd" )
    ENDIF
 
-
-   IF !lViseKonta  // sinteticki konto
+   /*
+   //IF !lViseKonta  // sinteticki konto
       IF Len( Trim( cUslovKonto ) ) <= 3 .OR. "." $ cUslovKonto
          IF "." $ cUslovKonto
             cUslovKonto := StrTran( cUslovKonto, ".", "" )
          ENDIF
          cUslovKonto := Trim( cUslovKonto )
       ENDIF
-   ENDIF
-
+   //ENDIF
+   */
 
    hKalkParams := hb_Hash()
    hKalkParams[ "idfirma" ] := cIdFirma
 
-   IF Len( Trim( cUslovKonto ) ) == 3  // sinteticki konto
-      cIdkonto := Trim( cUslovKonto )
-      hKalkParams[ "mkonto_sint" ] := cIdKonto
-   ELSE
-      hKalkParams[ "mkonto" ] := cUslovKonto
-   ENDIF
+   //IF Len( Trim( cUslovKonto ) ) == 3  // sinteticki konto
+   //   cIdkonto := Trim( cUslovKonto )
+   //   hKalkParams[ "mkonto_sint" ] := cIdKonto
+   //ELSE
+   //   hKalkParams[ "mkonto" ] := cUslovKonto
+   //ENDIF
+   //cIdKonto :=  hKalkParams[ "idkonto" ]
 
    IF !Empty( dDatumOd )
       hKalkParams[ "dat_od" ] := dDatumOd
@@ -139,19 +230,23 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    find_kalk_za_period( hKalkParams )
    MsgC()
 
-   select_o_koncij( cUslovKonto )
+   select_o_koncij( cIdKonto )
    SELECT kalk
 
    Box(, 2, 60 )
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 PadR( "Generisanje pomoćne tabele u toku...", 58 ) COLOR f18_color_i()
 
+   nRedBr := 0
+   altd()
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. ispitaj_prekid()
 
-      IF !lViseKonta .AND. field->mkonto <> cUslovKonto
+      //IF !lViseKonta .AND. field->mkonto <> cUslovKonto
+      IF cIdKonto <> kalk->mkonto
          SKIP
          LOOP
       ENDIF
+
       IF ( field->datdok < dDatumOd .OR. field->datdok > dDatumDo )
          SKIP
          LOOP
@@ -211,20 +306,23 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       cPartnerMjesto := field->mjesto
       cPartnerAdresa := field->adresa
 
-      SELECT ( nDbfArea )
-      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + cIdVdBrDok == field->idfirma + DToS( field->datdok ) + field->idvd + "-" + field->brdok .AND. ispitaj_prekid()
+      //SELECT ( nDbfArea )
+      SELECT KALK
+      DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + cIdVdBrDok == kalk->idfirma + DToS( kalk->datdok ) + kalk->idvd + "-" + kalk->brdok .AND. ispitaj_prekid()
 
          // ispitivanje konta u varijanti jednog konta i datuma
-         IF !lViseKonta .AND. ( field->datdok < dDatumOd .OR. field->datdok > dDatumDo .OR. field->mkonto <> cUslovKonto )
+         //IF !lViseKonta .AND. 
+         IF  kalk->datdok < dDatumOd .OR. kalk->datdok > dDatumDo .OR. kalk->mkonto <> cIdKonto
             SKIP
             LOOP
          ENDIF
-         IF lViseKonta .AND. !Empty( cFilterKonto )
-            IF !Tacno( cFilterKonto )
-               SKIP
-               LOOP
-            ENDIF
-         ENDIF
+
+         //IF lViseKonta .AND. !Empty( cFilterKonto )
+         //   IF !Tacno( cFilterKonto )
+         //      SKIP
+         //      LOOP
+         //   ENDIF
+         //ENDIF
          IF !Empty( cFilterVrsteDok )
             IF !Tacno( cFilterVrsteDok )
                SKIP
@@ -265,7 +363,6 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
             nRealizacija += Round( nVpc * field->kolicina, gZaokr )
             nVPVRabat += Round( ( field->rabatv / 100 ) * nVPC * field->kolicina, gZaokr )
             nRealizacijaNv += 0
-
          ENDIF
 
          nMarzaVP += kalk_marza_veleprodaja()
@@ -284,7 +381,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       @ box_x_koord() + 2, box_y_koord() + 2 SAY "Dokument: " + cIdFirma + "-" + cIdVd + "-" + cBrDok
 
       hRec := hb_Hash()
-      hRec[ "idfirma" ] := cIdFirma
+      //hRec[ "idfirma" ] := cIdFirma
       hRec[ "idvd" ] := cIdVd
       hRec[ "brdok" ] := cBrDok
       hRec[ "datum" ] := dDatDok
@@ -299,7 +396,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       hRec[ "nv_izlaz" ] := nNvIzlaz
       hRec[ "nv_real" ] := nRealizacijaNv
       hRec[ "nv_pot" ] := nNvIzlaz + nRealizacijaNv
-      hRec[ "vp_marza" ] := nRealizacija - nVPVRabat - nRealizacijaNv
+      hRec[ "vp_marza" ] := ROUND(nRealizacija - nVPVRabat - nRealizacijaNv, 2)
 
       //hRec[ "vp_dug" ] := nVPVUlaz
       //hRec[ "vp_pot" ] := nVpvIzlaz
@@ -309,9 +406,29 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       hRec[ "vp_real_nt" ] := nRealizacija - nVPVRabat
 
 
-      o_r_export_legacy()
-      APPEND BLANK
-      dbf_update_rec( hRec )
+      //o_r_export_legacy()
+      //APPEND BLANK
+      //dbf_update_rec( hRec )
+
+      hRec["rbr"] := ++nRedBr
+      //? PadL( AllTrim( Str( ++nRedBr ) ), 6 ) + "."
+      //@ PRow(), PCol() + 1 SAY field->datum
+      cOpisKnjizenja := AllTrim( hRec["vr_dok"] )
+      cOpisKnjizenja += " "
+      cOpisKnjizenja += "broj: "
+      cOpisKnjizenja += AllTrim( hRec["idvd"] ) + "-" + AllTrim( hRec["brdok"] )
+      cOpisKnjizenja += ", "
+      cOpisKnjizenja += "veza: " + AllTrim( hRec["br_fakt"] )
+      cOpisKnjizenja += ", "
+      cOpisKnjizenja += AllTrim( hRec["part_naz"] )
+      cOpisKnjizenja += ", "
+      cOpisKnjizenja += AllTrim( hRec["part_adr"] )
+      cOpisKnjizenja += ", "
+      cOpisKnjizenja += AllTrim( hRec["part_mj"] )
+      //aOpisKnjizenja := SjeciStr( cOpisKnjizenja, s_nOpisDuzina )
+      hRec["opis_knj"] := cOpisKnjizenja 
+
+      kalk_tkv_xlsx_export_fill_row( hRec )
 
       ++nCount
       SELECT kalk
@@ -320,80 +437,15 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
    BoxC()
 
+   IF hParams[ "xlsx" ]
+      open_exported_xlsx()
+   ENDIF
+
    RETURN nCount
 
 
-STATIC FUNCTION get_params_tkv( hParams )
 
-   LOCAL lRet := .F.
-   LOCAL nX := 1
-   LOCAL cUslovKonta := fetch_metric( "kalk_tkv_konto", my_user(), Space( 200 ) )
-   LOCAL _d_od := fetch_metric( "kalk_tkv_datum_od", my_user(), Date() - 30 )
-   LOCAL _d_do := fetch_metric( "kalk_tkv_datum_do", my_user(), Date() )
-   LOCAL cIdVd := fetch_metric( "kalk_tkv_vrste_dok", my_user(), Space( 200 ) )
-   LOCAL _usluge := fetch_metric( "kalk_tkv_gledati_usluge", my_user(), "N" )
-   LOCAL cNabavneiliProdajneCijene := fetch_metric( "kalk_tkv_tip_obrasca", my_user(), "P" )
-   LOCAL cViseKontaDN := "D"
-   LOCAL cXlsxDN := "D"
-   LOCAL GetList := {}
-
-   Box(, 15, 70 )
-
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "*** magacin - izvještaj TKV"
-
-   ++nX
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Datum od" GET _d_od
-   @ box_x_koord() + nX, Col() + 1 SAY "do" GET _d_do
-   ++nX
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "     Konto (prazno-svi):" GET cUslovKonta PICT "@S35"
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Vrste dok. (prazno-svi):" GET cIdVd PICT "@S35"
-   ++nX
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Gledati [N] nabavne cijene [P] prodajne cijene ?" GET cNabavneiliProdajneCijene PICT "@!" VALID cNabavneiliProdajneCijene $ "PN"
-   ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Gledati usluge (D/N) ?" GET _usluge PICT "@!" VALID _usluge $ "DN"
-   nX += 2
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Export XLSX (D/N) ?" GET cXlsxDN PICT "@!" VALID cXlsXDN $ "DN"
-
-   READ
-
-   BoxC()
-
-   IF LastKey() == K_ESC
-      RETURN lRet
-   ENDIF
-
-   lRet := .T.
-
-   hParams := hb_Hash()
-   hParams[ "datum_od" ] := _d_od
-   hParams[ "datum_do" ] := _d_do
-   hParams[ "konto" ] := cUslovKonta
-   hParams[ "vrste_dok" ] := cIdVd
-   hParams[ "gledati_usluge" ] := _usluge
-   hParams[ "nab_ili_prod" ] := cNabavneiliProdajneCijene
-
-   // ako postoji tacka u kontu onda gledaj
-   IF Right( AllTrim( cUslovKonta ), 1 ) == "."
-      cViseKontaDN := "N"
-   ENDIF
-   hParams[ "vise_konta" ] := cViseKontaDN
-   hParams[ "xlsx" ] := iif( cXlsXDN == "D", .T., .F. )
-
-   // snimi sql/db parametre
-   set_metric( "kalk_tkv_konto", my_user(), cUslovKonta )
-   set_metric( "kalk_tkv_datum_od", my_user(), _d_od )
-   set_metric( "kalk_tkv_datum_do", my_user(), _d_do )
-   set_metric( "kalk_tkv_vrste_dok", my_user(), cIdVd )
-   set_metric( "kalk_tkv_gledati_usluge", my_user(), _usluge )
-   set_metric( "kalk_tkv_tip_obrasca", my_user(), cNabavneiliProdajneCijene )
-
-   RETURN lRet
-
-
+/*
 STATIC FUNCTION stampaj_tkv( hParams )
 
    LOCAL nRedBr := 0
@@ -420,8 +472,8 @@ STATIC FUNCTION stampaj_tkv( hParams )
    nTotalPotrazuje := 0
    nTotalRabat := 0
 
-   SELECT r_export
-   GO TOP
+   //SELECT r_export
+   //GO TOP
 
    DO WHILE !Eof()
 
@@ -512,10 +564,9 @@ STATIC FUNCTION stampaj_tkv( hParams )
       open_exported_xlsx()
    ENDIF
 
+
    RETURN .T.
-
-
-
+*/
 
 STATIC FUNCTION get_linija()
 
@@ -537,7 +588,7 @@ STATIC FUNCTION get_linija()
    RETURN cLinija
 
 
-
+/*
 STATIC FUNCTION tkv_zaglavlje( hParams )
 
    ? self_organizacija_id(), "-", AllTrim( self_organizacija_naziv() )
@@ -553,12 +604,10 @@ STATIC FUNCTION tkv_zaglavlje( hParams )
    ENDIF
 
    ? "na dan", Date()
-
    ?
 
    RETURN .T.
-
-
+*/
 
 STATIC FUNCTION tkv_header()
 
@@ -606,34 +655,43 @@ STATIC FUNCTION tkv_header()
    RETURN .T.
 
 
-   STATIC FUNCTION kalk_hernad_tkv_cre_r_export()
+STATIC FUNCTION kalk_tkv_xls_fields()
 
-      LOCAL aDbf := {}
+   LOCAL aDbf := {}
 
-      AAdd( aDbf, { "idfirma", "C",  2, 0 } )
-      AAdd( aDbf, { "idvd", "C",  2, 0 } )
-      AAdd( aDbf, { "brdok", "C",  8, 0 } )
-      AAdd( aDbf, { "datum", "D",  8, 0 } )
-      AAdd( aDbf, { "vr_dok", "C", 30, 0 } )
-      AAdd( aDbf, { "idpartner", "C",  6, 0 } )
-      AAdd( aDbf, { "part_naz", "C", 100, 0 } )
-      AAdd( aDbf, { "part_mj", "C", 50, 0 } )
-      AAdd( aDbf, { "part_ptt", "C", 10, 0 } )
-      AAdd( aDbf, { "part_adr", "C", 50, 0 } )
-      AAdd( aDbf, { "br_fakt", "C", 20, 0 } )
-      AAdd( aDbf, { "nv_dug", "N", 15, 2 } )
-      AAdd( aDbf, { "nv_izlaz", "N", 15, 2 } )
-      AAdd( aDbf, { "nv_real", "N", 15, 2 } )
-      AAdd( aDbf, { "nv_pot", "N", 15, 2 } )
+   AAdd( aDbf, { "rbr", "N",  8, 0, "R.br" } )
+   AAdd( aDbf, { "datum", "D",  8, 0 } )
+   AAdd( aDbf, { "opis_knj", "C", 150, 0, "Opis knjizenja"})
 
-      //AAdd( aDbf, { "vp_dug", "N", 15, 2 } )
-      //AAdd( aDbf, { "vp_pot", "N", 15, 2 } )
-      AAdd( aDbf, { "vp_marza", "N", 15, 2 } )
+  // AAdd( aDbf, { "idfirma", "C",  2, 0 } )
+   AAdd( aDbf, { "idvd", "C",  2, 0 } )
+   AAdd( aDbf, { "brdok", "C",  8, 0 } )
+   
+   AAdd( aDbf, { "vr_dok", "C", 30, 0 } )
+   AAdd( aDbf, { "idpartner", "C",  6, 0 } )
+   AAdd( aDbf, { "part_naz", "C", 100, 0 } )
+   AAdd( aDbf, { "part_mj", "C", 50, 0 } )
+   AAdd( aDbf, { "part_ptt", "C", 10, 0 } )
+   AAdd( aDbf, { "part_adr", "C", 50, 0 } )
+   AAdd( aDbf, { "br_fakt", "C", 20, 0 } )
+   AAdd( aDbf, { "nv_dug", "N", 15, 2, "NV DUG" } )
+   AAdd( aDbf, { "nv_izlaz", "N", 15, 2 } )
+   AAdd( aDbf, { "nv_real", "N", 15, 2, "NV real" } )
+   AAdd( aDbf, { "nv_pot", "N", 15, 2, "NV POT" } )
 
-      AAdd( aDbf, { "vp_rabat", "N", 15, 2 } )
-      AAdd( aDbf, { "vp_real", "N", 15, 2 } )
-      AAdd( aDbf, { "vp_real_nt", "N", 15, 2 } )
+   //AAdd( aDbf, { "vp_dug", "N", 15, 2 } )
+   //AAdd( aDbf, { "vp_pot", "N", 15, 2 } )
+   AAdd( aDbf, { "vp_marza", "N", 15, 2 } )
 
-      xlsx_export_init( aDbf )
+   AAdd( aDbf, { "vp_rabat", "N", 15, 2, "VP rabat" } )
+   AAdd( aDbf, { "vp_real", "N", 15, 2, "VP real" } )
+   AAdd( aDbf, { "vp_real_nt", "N", 15, 2, "VP real neto" } )
 
-      RETURN aDbf
+   RETURN aDbf
+
+
+STATIC FUNCTION kalk_tkv_xlsx_export_fill_row( hRow )
+
+   xlsx_export_do_fill_row( hRow )
+
+   RETURN .T.
