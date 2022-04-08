@@ -97,37 +97,41 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpcExe, {|| NIL } )
 
       AAdd( aOpc, "5. unos depozita u uredjaj       " )
-      AAdd( aOpcExe, {|| fprint_unos_pologa( s_hFiskalniDeviceParams ) } )
+      AAdd( aOpcExe, {|| fprint_unos_pologa(s_hFiskalniDeviceParams) } )
 
-      AAdd( aOpc, "6. štampanje duplikata       " )
-      AAdd( aOpcExe, {|| fprint_dupliciraj_racun( s_hFiskalniDeviceParams ) } )
+      AAdd( aOpc, "6. štampanje duplikata - prema vremenu " )
+      AAdd( aOpcExe, {|| fprint_dupliciraj_racun_vrijeme(s_hFiskalniDeviceParams) } )
 
       AAdd( aOpc, "7. zatvori račun (cmd 56)       " )
-      AAdd( aOpcExe, {|| fiscal_fprint_zatvori_racun( s_hFiskalniDeviceParams ) } )
+      AAdd( aOpcExe, {|| fiscal_fprint_zatvori_racun(s_hFiskalniDeviceParams) } )
 
       AAdd( aOpc, "8. zatvori nasilno račun (cmd 301) " )
-      AAdd( aOpcExe, {|| fprint_komanda_301_zatvori_racun( s_hFiskalniDeviceParams ) } )
+      AAdd( aOpcExe, {|| fprint_komanda_301_zatvori_racun(s_hFiskalniDeviceParams) } )
+
+      AAdd( aOpc, "9. deblokada fiskalnog uređaja" )
+      AAdd( aOpcExe, {||  fprint_komanda_deblokada(s_hFiskalniDeviceParams) } )
 
       IF !lLowLevel
 
-         AAdd( aOpc, "9. proizvoljna komanda " )
+         AAdd( aOpc, "P. proizvoljna komanda " )
          AAdd( aOpcExe, {|| fprint_manual_cmd( s_hFiskalniDeviceParams ) } )
 
          IF s_hFiskalniDeviceParams[ "type" ] == "P"
-            AAdd( aOpc, "10. brisanje artikala iz uređaja (cmd 107)" )
+            AAdd( aOpc, "A. brisanje artikala iz uređaja (cmd 107)" )
             AAdd( aOpcExe, {|| fprint_delete_plu( s_hFiskalniDeviceParams, .F. ) } )
          ENDIF
 
-         AAdd( aOpc, "11. reset PLU " )
+         AAdd( aOpc, "B. reset PLU " )
          AAdd( aOpcExe, {|| auto_plu( .T., NIL, s_hFiskalniDeviceParams ) } )
 
-         AAdd( aOpc, "12. non-fiscal racun - test" )
+         AAdd( aOpc, "C. non-fiscal racun - test" )
          AAdd( aOpcExe, {|| fprint_non_fiscal_text( s_hFiskalniDeviceParams, "ČčĆćŽžĐđŠš" ) } )
 
-         AAdd( aOpc, "13. test email" )
+         AAdd( aOpc, "T. test email" )
          AAdd( aOpcExe, {|| f18_email_test() } )
 
       ENDIF
+
 
    CASE cFiskalniDrajver == "HCP"
 

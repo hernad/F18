@@ -200,6 +200,7 @@ FUNCTION fiskalni_array_to_fajl( cFilePath, cFileName, aStruct, aData, cSeparato
    LOCAL nCount := 0
    LOCAL cNumFill := "0"
    LOCAL cPrintFile
+   LOCAL xVal, cType, nLen, nDec
 
    IF cSeparator == nil
       cSeparator := ""

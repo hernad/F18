@@ -112,10 +112,10 @@ FUNCTION fprint_unos_pologa( hFiskalniParams, nPolog, lShowBox )
    RETURN .T.
 
 
-FUNCTION fprint_dupliciraj_racun( hFiskalniParams, hRacunParams )
+FUNCTION fprint_dupliciraj_racun_vrijeme( hFiskalniParams, hRacunParams )
 
    LOCAL cTackaZarez := ";"
-   LOCAL aDouble := {}
+   LOCAL aData := {}
    LOCAL aStruct := {}
    LOCAL dDatumFrom := Date()
    LOCAL dDatumTo := dDatumFrom
@@ -191,13 +191,9 @@ FUNCTION fprint_dupliciraj_racun( hFiskalniParams, hRacunParams )
 
    ENDIF
 
-   // uzmi strukturu tabele za pos racun
    aStruct := fiskalni_get_struct_za_gen_fajlova( F_POS_RN )
-
-   // iscitaj pos matricu
-   aDouble := fprint_duplikat_dokumenta( cType, dDatumFrom, dDatumTo, cTimeFrom, cTimeTo )
-
-   fiskalni_array_to_fajl( hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aDouble )
+   aData := fprint_duplikat_dokumenta( cType, dDatumFrom, dDatumTo, cTimeFrom, cTimeTo )
+   fiskalni_array_to_fajl( hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aData )
 
    RETURN .T.
 
@@ -220,17 +216,97 @@ STATIC FUNCTION fprint_fix_time( cTimeIn, nFix )
 
 FUNCTION fprint_komanda_301_zatvori_racun( hFiskalniParams )
 
-   LOCAL cTackaZarez := ";"
-   LOCAL aVoid := {}
+   LOCAL aData := {}
    LOCAL aStruct := {}
 
    aStruct := fiskalni_get_struct_za_gen_fajlova( F_POS_RN ) // uzmi strukturu tabele za pos racun
    // iscitaj pos matricu
-   aVoid := fprint_nasilno_zatvori_racun_iznos_0()
-   fiskalni_array_to_fajl( hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aVoid )
+   aData := fprint_nasilno_zatvori_racun_iznos_0()
+   fiskalni_array_to_fajl( hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aData )
 
    RETURN .T.
 
+FUNCTION fprint_komanda_deblokada( hFiskalniParams )
+
+      LOCAL aData := {}
+      LOCAL aStruct := {}
+   
+      aStruct := fiskalni_get_struct_za_gen_fajlova( F_POS_RN ) // uzmi strukturu tabele za pos racun
+      // iscitaj pos matricu
+      aData := fprint_sekvenca_deblokada()
+      fiskalni_array_to_fajl( hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aData )
+   
+      RETURN .T.
+
+/*
+  https://redmine.bring.out.ba/issues/38412#note-5
+  53,1,______,_,__;53                                                                                 
+  56,1,______,_,__;                                                                                  
+  301,1,______,_,__;
+
+*/   
+STATIC FUNCTION fprint_sekvenca_deblokada()
+
+   LOCAL aArr := {}
+
+   AAdd( aArr, { "53,1,______,_,__;53" } )
+   AAdd( aArr, { "56,1,______,_,__;" } )
+   AAdd( aArr, { "301,1,______,_,__;" } )
+
+   RETURN aArr
+
+/*
+FUNCTION fprint_print_kopija_rn(hFiskalniParams, nFiskNum)
+
+   LOCAL cCommand
+   LOCAL _broj_rn := Space( 10 )
+   LOCAL _refund := "N"
+   LOCAL nError := 0
+   LOCAL GetList := {}
+
+   // box - daj broj racuna
+   Box(, 2, 50 )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj računa:" GET _broj_rn ;
+      VALID !Empty( _broj_rn )
+   @ box_x_koord() + 2, box_y_koord() + 2 SAY "racun je storno (D/N)?" GET _refund ;
+      VALID _refund $ "DN" PICT "@!"
+   READ
+   BoxC()
+
+   IF LastKey() == K_ESC
+      RETURN .F.
+   ENDIF
+
+   RETURN .T.
+*/
+
+FUNCTION fprint_komanda_kopija_rn(hFiskalniParams, nFiskNum)
+
+      LOCAL aData := {}
+      LOCAL aStruct := {}
+   
+      aStruct := fiskalni_get_struct_za_gen_fajlova(F_POS_RN) // uzmi strukturu tabele za pos racun
+      aData := fprint_sekvenca_kopija_rn(nFiskNum)
+      fiskalni_array_to_fajl(hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aData)
+   
+      RETURN .T.
+
+/*
+   https://redmine.bring.out.ba/issues/38412#note-6
+
+   kopija RN 99
+   od: 99, do: 99
+   109,1,______,_,__;F;99;99;1;
+*/
+STATIC FUNCTION fprint_sekvenca_kopija_rn(nFiskNum)
+
+   LOCAL aArr := {}
+   LOCAL cFiskNum 
+
+   cFiskNum := AllTrim(Str(nFiskNum))
+   AAdd( aArr, { "109,1,______,_,__;F;" + cFiskNum + ";" + cFiskNum + ";1;" } )
+
+   RETURN aArr
 
 FUNCTION fprint_non_fiscal_text( hFiskalniParams, cTxt )
 
@@ -1161,6 +1237,7 @@ STATIC FUNCTION fprint_nasilno_zatvori_racun_iznos_0()
    AAdd( aArr, { cTmp } )
 
    RETURN aArr
+
 
 
 
