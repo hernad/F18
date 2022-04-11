@@ -16,7 +16,7 @@ STATIC s_nFiskalniDeviceId
 STATIC s_hFiskalniDeviceParams
 
 
-FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
+FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
    LOCAL _dev_id := 0
    LOCAL cFiskalniDrajver
@@ -29,8 +29,8 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
    LOCAL aOpc := {}
    LOCAL aOpcExe := {}
 
-   IF lLowLevel == NIL
-      lLowLevel := .F.
+   IF lObicniUser == NIL
+      lObicniUser := .F.
    ENDIF
 
    IF lPozivFromPOS == NIL
@@ -77,7 +77,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "FPRINT"
 
-      IF !lLowLevel
+      IF !lObicniUser
 
          AAdd( aOpc, "------ izvještaji ---------------------------------" )
          AAdd( aOpcExe, {|| NIL } )
@@ -99,8 +99,8 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpc, "5. unos depozita u uredjaj       " )
       AAdd( aOpcExe, {|| fprint_unos_pologa(s_hFiskalniDeviceParams) } )
 
-      AAdd( aOpc, "6. štampanje duplikata - prema vremenu " )
-      AAdd( aOpcExe, {|| fprint_dupliciraj_racun_vrijeme(s_hFiskalniDeviceParams) } )
+      AAdd( aOpc, "6. duplikat računa - po broju" )
+      AAdd( aOpcExe, {|| fprint_print_kopija_rn(s_hFiskalniDeviceParams, 0) } )
 
       AAdd( aOpc, "7. zatvori račun (cmd 56)       " )
       AAdd( aOpcExe, {|| fiscal_fprint_zatvori_racun(s_hFiskalniDeviceParams) } )
@@ -111,8 +111,11 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpc, "9. deblokada fiskalnog uređaja" )
       AAdd( aOpcExe, {||  fprint_komanda_deblokada(s_hFiskalniDeviceParams) } )
 
-      IF !lLowLevel
+      IF !lObicniUser
 
+         AAdd( aOpc, "V. duplikat - prema vremenu " )
+         AAdd( aOpcExe, {|| fprint_dupliciraj_racun_vrijeme(s_hFiskalniDeviceParams) } )
+   
          AAdd( aOpc, "P. proizvoljna komanda " )
          AAdd( aOpcExe, {|| fprint_manual_cmd( s_hFiskalniDeviceParams ) } )
 
@@ -135,7 +138,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "HCP"
 
-      IF !lLowLevel
+      IF !lObicniUser
          AAdd( aOpc, "------ izvještaji -----------------------" )
          AAdd( aOpcExe, {|| .F. } )
          AAdd( aOpc, "1. dnevni fiskalni izvještaj (Z rep.)    " )
@@ -157,7 +160,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpc, "7. pošalji cmd.ok    " )
       AAdd( aOpcExe, {|| hcp_create_cmd_ok( s_hFiskalniDeviceParams ) } )
 
-      IF !lLowLevel
+      IF !lObicniUser
 
          AAdd( aOpc, "8. izbaci stanje računa    " )
          AAdd( aOpcExe, {|| fiskalni_hcp_get_broj_racuna( s_hFiskalniDeviceParams ) } )
@@ -168,7 +171,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "TREMOL"
 
-      IF !lLowLevel
+      IF !lObicniUser
 
          AAdd( aOpc, "------ izvještaji -----------------------" )
          AAdd( aOpcExe, {|| .F. } )
@@ -196,7 +199,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpc, "K. kopija računa    " )
       AAdd( aOpcExe, {|| tremol_stampa_kopije_racuna( s_hFiskalniDeviceParams ) } )
 
-      IF !lLowLevel
+      IF !lObicniUser
 
          AAdd( aOpc, "R. reset artikala    " )
          AAdd( aOpcExe, {|| tremol_reset_plu_artikla( s_hFiskalniDeviceParams ) } )
@@ -206,7 +209,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpc, "P. unos depozita u uređaj    " )
       AAdd( aOpcExe, {|| tremol_polog( s_hFiskalniDeviceParams ) } )
 
-      IF !lLowLevel
+      IF !lObicniUser
          AAdd( aOpc, "R. reset PLU " )
          AAdd( aOpcExe, {|| auto_plu( .T., NIL, s_hFiskalniDeviceParams ) } )
       ENDIF
@@ -214,7 +217,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "TRING"
 
-      IF !lLowLevel
+      IF !lObicniUser
 
          AAdd( aOpc, "------ izvještaji ---------------------------------" )
          AAdd( aOpcExe, {|| NIL } )
@@ -236,7 +239,7 @@ FUNCTION fiskalni_izvjestaji_komande( lLowLevel, lPozivFromPOS )
       AAdd( aOpc, "7. zatvori (poništi) racun " )
       AAdd( aOpcExe, {|| tring_close_rn( s_hFiskalniDeviceParams ) } )
 
-      IF !lLowLevel
+      IF !lObicniUser
 
          AAdd( aOpc, "8. inicijalizacija " )
          AAdd( aOpcExe, {|| tring_init( s_hFiskalniDeviceParams, "1", "" ) } )

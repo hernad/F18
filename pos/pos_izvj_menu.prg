@@ -37,7 +37,7 @@ FUNCTION pos_izvjestaji()
 
    IF fiscal_opt_active()
       AAdd( aOpc, "F. fiskalni izvještaji i komande" )
-      AAdd( aOpcexe, {|| fiskalni_izvjestaji_komande( NIL, .T. ) } )
+      AAdd( aOpcexe, {|| fiskalni_izvjestaji_komande( .F., .T. ) } )
    ENDIF
 
    f18_menu( "izvt", .F., nIzbor, aOpc, aOpcExe )

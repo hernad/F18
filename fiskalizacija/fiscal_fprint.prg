@@ -255,21 +255,18 @@ STATIC FUNCTION fprint_sekvenca_deblokada()
 
    RETURN aArr
 
-/*
+
 FUNCTION fprint_print_kopija_rn(hFiskalniParams, nFiskNum)
 
    LOCAL cCommand
-   LOCAL _broj_rn := Space( 10 )
-   LOCAL _refund := "N"
    LOCAL nError := 0
    LOCAL GetList := {}
 
    // box - daj broj racuna
    Box(, 2, 50 )
-   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj računa:" GET _broj_rn ;
-      VALID !Empty( _broj_rn )
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "racun je storno (D/N)?" GET _refund ;
-      VALID _refund $ "DN" PICT "@!"
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY8 "Broj računa:" GET nFiskNum PICT "999999" valid nFiskNum > 0
+   //@ box_x_koord() + 2, box_y_koord() + 2 SAY "racun je storno (D/N)?" GET _refund ;
+   //   VALID _refund $ "DN" PICT "@!"
    READ
    BoxC()
 
@@ -277,19 +274,21 @@ FUNCTION fprint_print_kopija_rn(hFiskalniParams, nFiskNum)
       RETURN .F.
    ENDIF
 
+   fprint_komanda_kopija_rn(hFiskalniParams, nFiskNum)
+
    RETURN .T.
-*/
+
 
 FUNCTION fprint_komanda_kopija_rn(hFiskalniParams, nFiskNum)
 
-      LOCAL aData := {}
-      LOCAL aStruct := {}
-   
-      aStruct := fiskalni_get_struct_za_gen_fajlova(F_POS_RN) // uzmi strukturu tabele za pos racun
-      aData := fprint_sekvenca_kopija_rn(nFiskNum)
-      fiskalni_array_to_fajl(hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aData)
-   
-      RETURN .T.
+   LOCAL aData := {}
+   LOCAL aStruct := {}
+
+   aStruct := fiskalni_get_struct_za_gen_fajlova(F_POS_RN) // uzmi strukturu tabele za pos racun
+   aData := fprint_sekvenca_kopija_rn(nFiskNum)
+   fiskalni_array_to_fajl(hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aStruct, aData)
+
+   RETURN .T.
 
 /*
    https://redmine.bring.out.ba/issues/38412#note-6
@@ -308,6 +307,7 @@ STATIC FUNCTION fprint_sekvenca_kopija_rn(nFiskNum)
 
    RETURN aArr
 
+   
 FUNCTION fprint_non_fiscal_text( hFiskalniParams, cTxt )
 
    LOCAL cTackaZarez := ";"
