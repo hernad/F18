@@ -13,13 +13,16 @@ FUNCTION fin_ht_get_fin_stavke(dDatod, dDatDo)
    LOCAL lIno, lPDV, cSufix, hTxt
    LOCAL nPDVStopa, lPdvObveznik
 
-   cQry := "select brdok, datdok, idpartner, dindem, idroba, txt, kolicina, cijena,"
+   cQry := "select fakt_fakt.brdok, fakt_fakt.datdok, fakt_fakt.idpartner, fakt_fakt.dindem, fakt_fakt.idroba, fakt_fakt.txt, fakt_fakt.kolicina, fakt_fakt.cijena,"
+   cQry += "fakt_doks.iznos - fakt_doks.rabat as neto, fakt_fakt.rbr::INTEGER,"
    cQry += "COALESCE(substring( UPPER(txt),'(?:VOZ.*REG.*TAB.*|VOZ.*REG.*OZN.*|REG.*OZN.*VOZ.*)[:]\s*([A-Z0-9a-z]{3,4}\-[A-Z0-9a-z]{1,2}\-[A-Z0-9a-z]{3,4})'),'') as regbr,"
    cQry += "COALESCE(substring(UPPER(txt),'(?:OSLOB.*PLA.*PDV.*PO.*LAN.*|NIJE.*OBR.*PDV.*PO.*LAN.*)(\d{2})\s*\..*PDV'), '') as clan"
    cQry += " FROM fmk.fakt_fakt"
-   cQry += " WHERE idtipdok='10' and datdok BETWEEN " + sql_quote( dDatOd ) + " AND " + sql_quote( dDatDo )
-   cQry += " AND rbr::INTEGER = 1"
-   cQry += " ORDER BY fmk.fakt_fakt.brdok"
+   cQry += " LEFT join fmk.fakt_doks on fmk.fakt_doks.brdok=fmk.fakt_fakt.brdok"
+
+   cQry += " WHERE fakt_fakt.idtipdok='10' and fakt_fakt.datdok BETWEEN " + sql_quote( dDatOd ) + " AND " + sql_quote( dDatDo )
+   //cQry += " AND rbr::INTEGER = 1"
+   cQry += " ORDER BY fmk.fakt_fakt.brdok, fmk.fakt_fakt.rbr::INTEGER"
 
    SELECT( F_POM )
    MsgO("Preuzimanje podataka sa servera")
@@ -39,97 +42,104 @@ FUNCTION fin_ht_get_fin_stavke(dDatod, dDatDo)
 
       DO WHILE !EOF()
 
-        nPDVStopa := 0
-        cIdPartner := htfakt->idpartner
-        lPdvObveznik := partner_is_pdv_obveznik( cIdPartner )
+        IF htfakt->rbr == 1 // kupac i PDV samo iz prve stavke 
+         nPDVStopa := 0
+         cIdPartner := htfakt->idpartner
+         lPdvObveznik := partner_is_pdv_obveznik( cIdPartner )
 
-        IF partner_is_ino( cIdPartner )
-            lIno := .T.
+         IF partner_is_ino( cIdPartner )
+               lIno := .T.
+               lPDV := .F.
+         ELSE
+               lIno := .F.
+               lPDV := .T.
+         ENDIF
+
+         // UP1 - PDV17
+         IF TRIM(htfakt->idroba) == 'UP1'
+               lPDV := .T.
+               nPDVStopa := 17.00
+         ENDIF
+
+         IF !Empty(htfakt->clan)
             lPDV := .F.
-        ELSE
-            lIno := .F.
-            lPDV := .T.
-        ENDIF
-
-        // UP1 - PDV17
-        IF TRIM(htfakt->idroba) == 'UP1'
-            lPDV := .T.
-            nPDVStopa := 17.00
-        ENDIF
-
-        IF !Empty(htfakt->clan)
-           lPDV := .F.
-           nPDVStopa := 0.00
-        ENDIF
-    
-        cIdKonto := Padr("2112", 7)
-        IF lPDV 
-           IF lPdvObveznik
-              cIdKontoPDV := Padr("4700", 7)
-              cIdKontoPrihod := Padr("6116", 7)
-           ELSE
-              // Partner ne-PDV obveznik
-              cIdKontoPDV := Padr("4730", 7)
-              cIdKontoPrihod := Padr("61160", 7)
-           ENDIF
-        ENDIF
-
-        IF lIno
-            cIdKonto := Padr("2122", 7)
-            cIdKontoPrihod := Padr("6122", 7)
-        ENDIF
-
-        IF lPdvObveznik .AND. !lPDV // PDV obveznik nepovezano pravno lice, oslobodjen po nekom clanu PDVa-
-           cIdKonto := Padr("2112", 7)
-           cIdKontoPrihod := Padr("6122", 7)
-        ENDIF
-
-        IF ht_povezana_lica(cIdPartner)
-            cIdKonto := "2100"
-            cIdKontoPrihod := "6102"
-            IF !Empty(htfakt->clan) // oslobodjenje po clanovima 26, 27, 30
-               cIdKontoPrihod := Padr("61020", 7)
+            nPDVStopa := 0.00
+         ENDIF
+      
+         cIdKonto := Padr("2112", 7)
+         IF lPDV 
+            IF lPdvObveznik
+               cIdKontoPDV := Padr("4700", 7)
+               cIdKontoPrihod := Padr("6116", 7)
+            ELSE
+               // Partner ne-PDV obveznik
+               cIdKontoPDV := Padr("4730", 7)
+               cIdKontoPrihod := Padr("61160", 7)
             ENDIF
-        ENDIF
-         
-        hTxt := fakt_ftxt_decode_string( htfakt->txt )
+         ENDIF
 
-        hFinItem := hb_hash()
-        hFinItem[ "idfirma" ] := self_organizacija_id()
-        hFinItem[ "idvn" ] := "14"
-        hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
-        hFinItem[ "brdok" ] := htfakt->brdok
-         
-        hFinItem[ "opis" ] := "RN. " + AllTrim(htfakt->brdok)
+         IF lIno
+               cIdKonto := Padr("2122", 7)
+               cIdKontoPrihod := Padr("6122", 7)
+         ENDIF
 
-        IF !Empty(htfakt->clan)
-           hFinItem[ "opis"] += ", PDV0: CLAN" + htfakt->clan
-        ENDIF
-         
-        hFinItem[ "datdok" ] := htfakt->datdok
-        hFinItem[ "datval" ] := hTxt["datpl"]
+         IF lPdvObveznik .AND. !lPDV // PDV obveznik nepovezano pravno lice, oslobodjen po nekom clanu PDVa-
+            cIdKonto := Padr("2112", 7)
+            cIdKontoPrihod := Padr("6122", 7)
+         ENDIF
 
-        hFinItem[ "konto" ] := cIdKonto
-        hFinItem[ "partner" ] := cIdPartner
-        hFinItem[ "d_p" ] := "1"
-        hFinItem[ "iznos" ] := ROUND(htfakt->cijena * htfakt->kolicina * (1 + nPDVStopa/100.00), 2)
-        hFinItem[ "rbr" ] := nRbr
-        ++nRbr
-        AADD( aFinItems, hFinItem)
+         IF ht_povezana_lica(cIdPartner)
+               cIdKonto := "2100"
+               cIdKontoPrihod := "6102"
+               IF !Empty(htfakt->clan) // oslobodjenje po clanovima 26, 27, 30
+                  cIdKontoPrihod := Padr("61020", 7)
+               ENDIF
+         ENDIF
+            
+         hTxt := fakt_ftxt_decode_string( htfakt->txt )
 
+         hFinItem := hb_hash()
+         hFinItem[ "idfirma" ] := self_organizacija_id()
+         hFinItem[ "idvn" ] := "14"
+         hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
+         hFinItem[ "brdok" ] := htfakt->brdok
+            
+         hFinItem[ "opis" ] := "RN. " + AllTrim(htfakt->brdok)
 
-        hFinItemPDV := hb_HClone(hFinItem)
-        hFinItemPDV[ "datval" ] := CTOD("")
-        hFinItemPDV[ "konto" ] := cIdKontoPDV
-        hFinItemPDV[ "iznos" ] := Round(htfakt->cijena * htfakt->kolicina * nPDVStopa/100.00, 2)
-        hFinItemPDV[ "d_p" ] := "2"
-        hFinItemPDV[ "rbr" ] := nRbr
-        hFinItemPDV[ "partner" ] := SPACE(6)
-        IF Round(hFinItemPDV[ "iznos" ], 2) <> 0 
-           AADD( aFinItems, hFinItemPDV)
-           ++nRbr
-        ENDIF
+         IF !Empty(htfakt->clan)
+            hFinItem[ "opis"] += ", PDV0: CLAN" + htfakt->clan
+         ENDIF
+            
+         hFinItem[ "datdok" ] := htfakt->datdok
+         hFinItem[ "datval" ] := hTxt["datpl"]
 
+         hFinItem[ "konto" ] := cIdKonto
+         hFinItem[ "partner" ] := cIdPartner
+         hFinItem[ "d_p" ] := "1"
+         //hFinItem[ "iznos" ] := ROUND(htfakt->cijena * htfakt->kolicina * (1 + nPDVStopa/100.00), 2)
+         hFinItem[ "iznos" ] := ROUND(htfakt->neto * (1 + nPDVStopa/100.00), 2)
+         hFinItem[ "rbr" ] := nRbr
+
+         ++nRbr
+         AADD( aFinItems, hFinItem)
+
+         hFinItemPDV := hb_HClone(hFinItem)
+         hFinItemPDV[ "datval" ] := CTOD("")
+         hFinItemPDV[ "konto" ] := cIdKontoPDV
+         //hFinItemPDV[ "iznos" ] := Round(htfakt->cijena * htfakt->kolicina * nPDVStopa/100.00, 2)
+         hFinItemPDV[ "iznos" ] := Round(htfakt->neto * nPDVStopa/100.00, 2)
+         hFinItemPDV[ "d_p" ] := "2"
+         hFinItemPDV[ "rbr" ] := nRbr
+         hFinItemPDV[ "partner" ] := SPACE(6)
+         IF htfakt->rbr == 1 // kupac i PDV samo iz prve stavke
+            IF Round(hFinItemPDV[ "iznos" ], 2) <> 0 
+               AADD( aFinItems, hFinItemPDV)
+               ++nRbr
+            ENDIF
+         ENDIF
+
+        ENDIF // stavka broj 1 
+       
         hFinItemPrihod := hb_HClone(hFinItem)
         hFinItemPrihod[ "datval" ] := CTOD("")
         hFinItemPrihod[ "konto" ] := cIdKontoPrihod
@@ -139,17 +149,10 @@ FUNCTION fin_ht_get_fin_stavke(dDatod, dDatDo)
         hFinItemPrihod[ "rbr" ] := nRbr
         hFinItemPrihod[ "brdok"] := htfakt->regbr
         hFinItemPrihod[ "partner" ] := SPACE(6)
-         
-        //IF cFaktAvAvStor <> "1" 
-           // avansne fakture
-        //   hFinItemPrihod[ "opis" ] += "ENAB: PRESKOCI"
-        //   hFinItemPrihod[ "partner" ] := cIdPartner
-        //ENDIF
-         
+
         AADD( aFinItems, hFinItemPrihod)
         ++nRbr
          
-
         @ box_x_koord() + 2, box_y_koord() + 3 SAY "Rbr: " + Alltrim(Str(nRbr, 6, 0))
         SKIP
 
