@@ -76,7 +76,7 @@ FUNCTION fin_cre_spil_table_in( dDateOd, dDateDo )
   cMSSQLQuery += " left join spil_EU_FiscalNumber on spil_EU_fiscalnumber.OrderIndex = spilinvnum.OrderIndex"
   cMSSQLQuery += " where spilinvnum.invdate>='" + sql_quote( dDateOd ) + "' and spilinvnum.invdate<='" + sql_quote( dDateDo) + "'"
   cMSSQLQuery += " and (spilinvnum.doctype=4 or spilinvnum.doctype=8)"
-  cMSSQLQuery += " order by spilinvnum.invdate"
+  cMSSQLQuery += " order by spil_EU_FiscalNumber.FiscalNumber, spilinvnum.invdate"
 
   cSql += " SERVER spil OPTIONS( query '" + cMSSQLQuery + "', row_estimate_method 'execute');"
   oQuery := run_sql_query( cSql )
