@@ -12,6 +12,7 @@
 #include "f18.ch"
 
 STATIC s_oPDF, s_nKol2
+STATIC s_lZadnjaNegativnaNivelacija := .F.
 
 MEMVAR m
 MEMVAR dDatum0, dDatum1, cIdRoba, cIdPos, cPredhodnoStanje
@@ -127,6 +128,7 @@ FUNCTION pos_kartica_artikla()
       nPredhodnaRealizacija := 0
       nPredhodniPopust := 0
       nStanjeKolicina := 0
+      s_lZadnjaNegativnaNivelacija := .F.
 
       check_nova_strana( bZagl, s_oPDF, .F., 8 )
       ?
@@ -271,6 +273,12 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
    ELSEIF POS->idvd $ POS_IDVD_ULAZI
       nUlaz += POS->Kolicina
       nVrijednost += POS->Kolicina * POS->Cijena
+
+      //IF ROUND(nStanjeKolicina, 3) == 0 .AND. s_lZadnjaNegativnaNivelacija
+      //   Alert("bug #38433: " + DToC( pos->datum ) + " " + POS->IdVd + "-" + AllTrim( POS->BrDok ) + " " + pos->idroba)
+      //ENDIF
+
+
       nStanjeKolicina += POS->Kolicina
       IF lPrint
          ?
@@ -328,6 +336,11 @@ FUNCTION pos_stanje_proracun_kartica( nUlaz, nIzlaz, nKalo, nStanjeKolicina, nVr
       ENDIF
 
       IF POS->IdVd $ POS_IDVD_NIVELACIJE
+         IF pos->kolicina < 0 .AND.  ROUND(POS->ncijena - POS->cijena, 2) <> 0
+            s_lZadnjaNegativnaNivelacija := .T.
+         ELSE
+            s_lZadnjaNegativnaNivelacija := .F.
+         ENDIF
          nVrijednost += POS->Kolicina * ( POS->ncijena - POS->cijena )
       ENDIF
 

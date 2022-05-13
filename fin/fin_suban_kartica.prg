@@ -86,8 +86,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL nKonD, nKonP, nKonP2, nKonD2
    LOCAL cFilterNazivKonta, cFilterIdKonto, cFilterIdPartner, cFilterIdVn
    LOCAL nSviD, nSviP, nSviD2, nSviP2
-
-
+   LOCAL cUplate
 
    PRIVATE fK1 := hFinParams[ "fin_k1" ]
    PRIVATE fK2 := hFinParams[ "fin_k2" ]
@@ -332,7 +331,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
    //lVrsteP := .F.
 
-   cOrderBy := "IdFirma,IdKonto,IdPartner,datdok,otvst,idvn,d_p,brdok"
+   cOrderBy := "IdFirma,IdKonto,IdPartner,datdok,idvn,brnal,otvst,d_p,brdok"
    MsgO( "Preuzimanje podataka sa SQL servera ..." )
    IF cBrza == "D"
       IF RTrim( cUslovIdPartner ) == ";" // ne kontam kada se ovo desava
@@ -653,14 +652,20 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
             hRec := dbf_get_rec()
             nSpojeno := 0
-            DO WHILE lSpojiUplate .AND. hRec[ "datdok" ] == suban->datdok .AND. hRec[ "otvst" ] == field->otvst .AND. ;
-                  field->idvn == hRec[ "idvn" ] .AND. suban->d_p == hRec[ "d_p" ] .AND. ;
-                  ( field->idvn == cIdVnIzvod .OR. cIdVnIzvod == "**" ) .AND. field->d_p == cSpojiDP .AND. Eval( bEvalSubanKartPartner )
+
+            DO WHILE lSpojiUplate .AND. hRec[ "datdok" ] == suban->datdok .AND. ;
+                  suban->idvn == hRec[ "idvn" ] .AND. suban->d_p == hRec[ "d_p" ] .AND. ;
+                  ( suban->idvn == cIdVnIzvod .OR. cIdVnIzvod == "**" ) .AND. suban->d_p == cSpojiDP .AND. Eval( bEvalSubanKartPartner )
 
                IF nSpojeno > 0
                   hRec[ "iznosbhd" ] += field->iznosbhd
                   hRec[ "iznosdem" ] += field->iznosdem
-                  hRec[ "opis" ] := iif( cSpojiDP == "2", "uplate", "placanja" ) + " na dan " + DToC( field->datdok )
+                  IF hRec[ "idvn" ] == "03" // kompenzacije
+                     cUplate := "kompenzacije"
+                  ELSE // "61"
+                     cUplate := "uplate"
+                  ENDIF
+                  hRec[ "opis" ] := iif( cSpojiDP == "2", cUplate, "placanja" ) + " na dan " + DToC( field->datdok )
                   hRec[ "brdok" ] := iif( hRec[ "otvst" ] == "9", "Z", "O" ) + "-" + DToC( field->datdok )
                ENDIF
                nSpojeno++
