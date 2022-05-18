@@ -192,18 +192,19 @@ FUNCTION Parsiraj( cFilterUpit, cImeSifre, cTip, lRekurzivno ) // , nSifWA )
          cProlaz += "$"
       ENDIF
 
-      IF cOperator $ "*?" .AND. Empty( cProlaz ) .AND. npoz1 > 0
-         nPoz1 := 1
-         nPoz1end := NextToken( @cFilterUpit, @cToken )
-         cLijevo := Left( cFilterUpit, nPoz1End - 1 )
-         IF cTip == "C"
-            cIzraz += "LIKE('" + cLijevo + "'," + cImeSifre + ")"
-         ELSE
-            cProlaz := "DE"  // Data error
-         ENDIF
-         cFilterUpit := SubStr( cFilterUpit, nPoz1End + 1 )
-         cProlaz += "?"
-      ENDIF
+      // debug - fix error "Undefined function/LIKE"
+      //IF cOperator $ "*?" .AND. Empty( cProlaz ) .AND. npoz1 > 0
+      //   nPoz1 := 1
+      //   nPoz1end := NextToken( @cFilterUpit, @cToken )
+      //   cLijevo := Left( cFilterUpit, nPoz1End - 1 )
+      //   IF cTip == "C"
+      //      cIzraz += "LIKE('" + cLijevo + "'," + cImeSifre + ")"
+      //   ELSE
+      //      cProlaz := "DE"  // Data error
+      //   ENDIF
+      //   cFilterUpit := SubStr( cFilterUpit, nPoz1End + 1 )
+      //   cProlaz += "?"
+      //ENDIF
 
       IF cOperator == "" .AND. cProlaz == "" // nista od gornjih operatora
          nPoz1 := NextToken( @cFilterUpit, @cToken )
