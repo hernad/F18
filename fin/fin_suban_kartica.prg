@@ -211,7 +211,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za broj veze: " GET cUslovUpperBrDok PICT "@!S30"
       @ Row() + 1, box_y_koord() + 2 SAY8 "(prazno-svi; 61_SP_2-spoji uplate za naloge tipa 61;"
       @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_2 - kupci spojiti uplate za sve vrste naloga; "
-      @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_1 - dobavljači spojiti plaćanja za sve vrste naloga)"
+      //@ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_1 - dobavljači spojiti plaćanja za sve vrste naloga)"
 
       IF cBrza <> "D"
          @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za naziv konta (prazno-svi) " GET cUslovNazivKonta PICT "@!S20"
@@ -235,7 +235,11 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       IF Len( aMatch ) > 0 // aMatch[1]="61_SP_2", aMatch[2]=61, aMatch[3]=2
          cIdVnIzvod :=  aMatch[ 2 ]
          cSpojiDP := aMatch[ 3 ]
+   
          lSpojiUplate := .T.
+         IF LEFT( cUslovIdKonto, 2 ) == "43" .AND. cSpojiDP == "2" // kartica dobavljaca, ignorisi spajanje potrazne strane
+            lSpojiUplate := .F.
+         ENDIF
       ENDIF
 
       IF !( cPrikazK1234 $ "123" )
