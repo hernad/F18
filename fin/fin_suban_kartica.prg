@@ -72,7 +72,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    LOCAL nZDugBHD, nZPotBHD, nZDugDEM, nZPotDEM // zatvorene stavke
    LOCAL cPredhodniPromet // 1 - bez, 2 - sa
    LOCAL hRec
-   LOCAL cFilterBrDok
+   LOCAL cFilterBrDok := ""
    LOCAL GetList := {}
    LOCAL cNaslov
    LOCAL cRasclaniti := "N"
@@ -229,7 +229,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          s_cXlsxName := my_home_root() + "fin_suban_kartica.xlsx"
       ENDIF
 
-      
       pRegex := hb_regexComp( "(..)_SP_(\d)" )
       aMatch := hb_regex( pRegex, cUslovUpperBrDok )
       IF Len( aMatch ) > 0 // aMatch[1]="61_SP_2", aMatch[2]=61, aMatch[3]=2
@@ -240,6 +239,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          IF LEFT( cUslovIdKonto, 2 ) == "43" .AND. cSpojiDP == "2" // kartica dobavljaca, ignorisi spajanje potrazne strane
             lSpojiUplate := .F.
          ENDIF
+         cUslovUpperBrDok := ""
       ENDIF
 
       IF !( cPrikazK1234 $ "123" )
@@ -291,7 +291,11 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    set_metric( "fin_kart_suban_xlsx", my_user(), cExpXlsx)
 
    IF !lSpojiUplate
-      cFilterBrDok := Parsiraj( cUslovUpperBrDok, "UPPER(BRDOK)", "C" )
+      IF ("_SP_" $ cUslovUpperBrDok) // ignorisi _SP_2;
+         cUslovUpperBrDok := ""
+      ELSE
+         cFilterBrDok := Parsiraj( cUslovUpperBrDok, "UPPER(BRDOK)", "C" )
+      ENDIF
    ELSE
       cUslovUpperBrDok := ""
    ENDIF
