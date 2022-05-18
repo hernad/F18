@@ -121,7 +121,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    cIdFirma := fetch_metric( "fin_kart_org_id", my_user(), cIdFirma )
    cUslovIdKonto := fetch_metric( "fin_kart_konto", my_user(), cUslovIdKonto )
    cUslovIdPartner := fetch_metric( "fin_kart_partner", my_user(), cUslovIdPartner )
-   cUslovUpperBrDok := fetch_metric( "fin_kart_broj_dokumenta", my_user(), cUslovUpperBrDok )
+   cUslovUpperBrDok := Padr(fetch_metric( "fin_kart_broj_dokumenta", my_user(), cUslovUpperBrDok ), 40)
    dDatOd := fetch_metric( "fin_kart_datum_od", my_user(), dDatOd )
    dDatDo := fetch_metric( "fin_kart_datum_do", my_user(), dDatDo )
    p_cValutaDom1Eur2Obje3 := fetch_metric( "fin_kart_valuta", my_user(), p_cValutaDom1Eur2Obje3 )
@@ -146,33 +146,34 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       s_lSifkPRMJ := .F.
    ENDIF
    
-
-   cBoxName := "SUBANALITIČKA KARTICA"
-   IF lOtvoreneStavke
-      cBoxName += " - OTVORENE STAVKE"
-   ENDIF
-
-   Box( "#" + cBoxName, 25, 65 )
-
-   set_cursor_on()
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "LibreOffice kartica (D/N) ?" GET cLibreOffice PICT "@!"
-   READ
-
-   IF cLibreOffice == "D"
-      BoxC()
-      RETURN fin_suban_kartica_sql( lOtvSt )
-   ENDIF
-
-   kartica_otvori_tabele()
-
-   ++nX
-   @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "BEZ/SA kumulativnim prometom  (1/2):" GET cKumulativniPrometBez1Sa2
-   @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "BEZ/SA prethodnim prometom (1/2):" GET cPredhodniPromet
-   @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "Brza kartica (D/N)" GET cBrza PICT "@!" VALID cBrza $ "DN"
-   READ
-
    DO WHILE .T.
+      GetList := {}
+      nX := 2
+      cBoxName := "SUBANALITIČKA KARTICA"
+      IF lOtvoreneStavke
+         cBoxName += " - OTVORENE STAVKE"
+      ENDIF
 
+      Box( "#" + cBoxName, 25, 65 )
+
+      set_cursor_on()
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY "LibreOffice kartica (D/N) ?" GET cLibreOffice PICT "@!"
+      READ
+
+      IF cLibreOffice == "D"
+         BoxC()
+         RETURN fin_suban_kartica_sql( lOtvSt )
+      ENDIF
+
+      kartica_otvori_tabele()
+
+      ++nX
+      @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "BEZ/SA kumulativnim prometom  (1/2):" GET cKumulativniPrometBez1Sa2
+      @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "BEZ/SA prethodnim prometom (1/2):" GET cPredhodniPromet
+      @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "Brza kartica (D/N)" GET cBrza PICT "@!" VALID cBrza $ "DN"
+      READ
+
+         
       @ box_x_koord() + ( ++nX ), box_y_koord() + 2 SAY "Firma "
       ?? self_organizacija_id(), "-", self_organizacija_naziv()
 
@@ -210,7 +211,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
 
       @ Row() + 1, box_y_koord() + 2 SAY8 "Uslov za broj veze: " GET cUslovUpperBrDok PICT "@!S30"
       @ Row() + 1, box_y_koord() + 2 SAY8 "(prazno-svi; 61_SP_2-spoji uplate za naloge tipa 61;"
-      @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_2 - kupci spojiti uplate za sve vrste naloga; "
+      @ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_2 - kupci spojiti uplate za sve vrste naloga) "
       //@ Row() + 1, box_y_koord() + 2 SAY8 " **_SP_1 - dobavljači spojiti plaćanja za sve vrste naloga)"
 
       IF cBrza <> "D"
@@ -239,7 +240,6 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
          IF LEFT( cUslovIdKonto, 2 ) == "43" .AND. cSpojiDP == "2" // kartica dobavljaca, ignorisi spajanje potrazne strane
             lSpojiUplate := .F.
          ENDIF
-         cUslovUpperBrDok := ""
       ENDIF
 
       IF !( cPrikazK1234 $ "123" )
@@ -259,6 +259,8 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       cFilterIdVn := parsiraj( cUslovIdVn, "IDVN", "C" )
       cFilterNazivKonta := Parsiraj( cUslovNazivKonta, "UPPER(naz)", "C" )
 
+      BoxC()
+
       IF cBrza == "D"
          IF cFilterIdVn <> NIL
             EXIT
@@ -274,7 +276,7 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
       ENDIF
 
    ENDDO
-   BoxC()
+   
 
    set_metric( "fin_kart_kumul", my_user(), cKumulativniPrometBez1Sa2 )
    set_metric( "fin_kart_predhodno_stanje", my_user(), cPredhodniPromet )
@@ -293,9 +295,8 @@ FUNCTION fin_suban_kartica( lOtvst ) // param lOtvst  - .t. otvorene stavke
    IF !lSpojiUplate
       IF ("_SP_" $ cUslovUpperBrDok) // ignorisi _SP_2;
          cUslovUpperBrDok := ""
-      ELSE
-         cFilterBrDok := Parsiraj( cUslovUpperBrDok, "UPPER(BRDOK)", "C" )
       ENDIF
+      cFilterBrDok := Parsiraj( cUslovUpperBrDok, "UPPER(BRDOK)", "C" )
    ELSE
       cUslovUpperBrDok := ""
    ENDIF
