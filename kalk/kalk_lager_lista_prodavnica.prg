@@ -284,7 +284,7 @@ FUNCTION kalk_lager_lista_prodavnica()
 /*
       //IF IsVindija()
          IF !Empty( cGr )
-            IF AllTrim( cGr ) <> AllTrim( IzSifKRoba( "GR1", cIdRoba, .F. ) )
+            IF AllTrim( cGr ) <> AllTrim( get_roba_sifk_sifv( "GR1", cIdRoba, .F. ) )
                SELECT kalk
                SKIP
                LOOP

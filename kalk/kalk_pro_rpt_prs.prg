@@ -178,7 +178,7 @@ STATIC FUNCTION _gen_rpt( cBrFakt, cValuta, dDatOd, dDatDo, cRekap )
 
       // carinski tarifni broj
       // uzmi iz sifk ("ROBA", "TARB")
-      REPLACE field->ctarbr WITH IzSifkRoba( "TARB", cSastId, .F. )
+      REPLACE field->ctarbr WITH get_roba_sifk_sifv( "TARB", cSastId, .F. )
 
       // primarna jedinica mjere sastavnice
       REPLACE field->jmjprim WITH cJmjPrim

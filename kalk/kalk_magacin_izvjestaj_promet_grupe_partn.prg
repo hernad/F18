@@ -172,7 +172,7 @@ FUNCTION kalk_mag_promet_grupe_partnera()
             IF !( cLastPar == idpartner )
                cLastPar := idpartner
                // uzmi iz sifk karakteristiku GRUP
-               cSKGrup := IzSifKRoba( "GRUP", idpartner, .F. )
+               cSKGrup := get_roba_sifk_sifv( "GRUP", idpartner, .F. )
             ENDIF
             IF cSKGrup != cGP
                SKIP 1; LOOP

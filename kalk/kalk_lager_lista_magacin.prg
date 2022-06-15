@@ -430,12 +430,12 @@ FUNCTION kalk_lager_lista_magacin()
       // po vindija GRUPA
       // IF IsVindija()
       IF !Empty( cGr )
-         IF AllTrim( cGr ) <> IzSifKRoba( "GR1", cIdRoba, .F. )
+         IF AllTrim( cGr ) <> get_roba_sifk_sifv( "GR1", cIdRoba, .F. )
             SELECT kalk
             SKIP
             LOOP
          ELSE
-            IF Empty( IzSifKRoba( "GR2", cIdRoba, .F. ) )
+            IF Empty( get_roba_sifk_sifv( "GR2", cIdRoba, .F. ) )
                SELECT kalk
                SKIP
                LOOP
@@ -814,8 +814,8 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
 
       IF lSignZal
-         ?? Space( 6 ) + "p.kol: " + Str( IzSifKRoba( "PKOL", roba->id, .F. ) )
-         ?? ", p.cij: " + Str( IzSifKRoba( "PCIJ", roba->id, .F. ) )
+         ?? Space( 6 ) + "p.kol: " + Str( get_roba_sifk_sifv( "PKOL", roba->id, .F. ) )
+         ?? ", p.cij: " + Str( get_roba_sifk_sifv( "PCIJ", roba->id, .F. ) )
       ENDIF
 
    ENDDO
@@ -1099,7 +1099,7 @@ FUNCTION IsInGroup( cGr, cPodGr, cIdRoba )
       RETURN .T.
    ENDIF
 
-   IF AllTrim( IzSifKRoba( "GR1", cIdRoba, .F. ) ) $ AllTrim( cGr )
+   IF AllTrim( get_roba_sifk_sifv( "GR1", cIdRoba, .F. ) ) $ AllTrim( cGr )
       bRet := .T.
    ELSE
       bRet := .F.
@@ -1107,7 +1107,7 @@ FUNCTION IsInGroup( cGr, cPodGr, cIdRoba )
 
    IF bRet
       IF !Empty( cPodGr )
-         IF AllTrim( IzSifKRoba( "GR2", cIdRoba, .F. ) ) $ AllTrim( cPodGr )
+         IF AllTrim( get_roba_sifk_sifv( "GR2", cIdRoba, .F. ) ) $ AllTrim( cPodGr )
             bRet := .T.
          ELSE
             bRet := .F.

@@ -320,7 +320,7 @@ FUNCTION fakt_kartica()
 
       IF PRow() - dodatni_redovi_po_stranici() > 50; FF; ++nStrana; ENDIF
 
-      ZaglKart( lPrviProlaz )
+      fakt_zagl_kart( lPrviProlaz, nStrana, cIdRoba )
       lPrviProlaz := .F.
 
       IF cPredh == "2"     // dakle sa prethodnim stanjem
@@ -382,9 +382,18 @@ FUNCTION fakt_kartica()
       DO WHILE !Eof() .AND. IF( cSintetika == "D" .AND. ROBA->tip == "S",  Left( cIdRoba, gnDS ) == Left( IdRoba, gnDS ), cIdRoba == IdRoba )
          cKolona := "N"
 
-         IF !Empty( cIdFirma ); IF idfirma <> cIdFirma; skip; loop; end; END
-         IF !Empty( cK1 ); IF cK1 <> K1 ; skip; loop; end; END // uslov ck1
-         IF !Empty( cK2 ); IF cK2 <> K2; skip; loop; end; END // uslov ck2
+         IF !Empty( cIdFirma )
+            IF idfirma <> cIdFirma
+               skip
+               loop
+            end
+         END
+         IF !Empty( cK1 )
+            IF cK1 <> K1 ; skip; loop; end
+         END // uslov ck1
+         IF !Empty( cK2 )
+            IF cK2 <> K2; skip; loop; end
+         END // uslov ck2
 
          IF !Empty( qqPartn )
             seek_fakt_doks( fakt->idfirma, fakt->idtipdok, fakt->brdok )
@@ -416,7 +425,7 @@ FUNCTION fakt_kartica()
 
             IF cKolona != "N"
 
-               IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; ZaglKart(); ENDIF
+               IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; fakt_zagl_kart(NIL, nStrana, cIdRoba); ENDIF
 
                ? Space( gnLMarg ); ?? Str( ++nRbr, 3 ) + ".   " + idfirma + "-" + idtipdok + "-" + brdok + Left( serbr, 1 ) + "  " + DToC( datdok )
 
@@ -427,8 +436,8 @@ FUNCTION fakt_kartica()
                   @ PRow(), PCol() + 1 SAY PadR( fakt_doks->Partner, 20 )
                ENDIF
 
-               @ PRow(), PCol() + 1 SAY IF( cKolona == "U", kolicina, 0 ) PICT cPicKol
-               @ PRow(), PCol() + 1 SAY IF( cKolona != "U", kolicina, 0 ) PICT cPicKol
+               @ PRow(), PCol() + 1 SAY IIF( cKolona == "U", kolicina, 0 ) PICT cPicKol
+               @ PRow(), PCol() + 1 SAY IIF( cKolona != "U", kolicina, 0 ) PICT cPicKol
                @ PRow(), PCol() + 1 SAY nUl - ( nIzl + nRevers + nRezerv ) PICT cPicKol
                IF cPPC == "D"
                   @ PRow(), PCol() + 1 SAY Cijena PICT fakt_pic_iznos()
@@ -459,7 +468,7 @@ FUNCTION fakt_kartica()
       ENDDO
       // GLAVNA DO-WHILE
 
-      IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; ZaglKart(); ENDIF
+      IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; fakt_zagl_kart(NIL, nStrana, cIdRoba); ENDIF
 
       ? Space( gnLMarg ); ?? m
       ? Space( gnLMarg ) + "CIJENA:            " + Str( _cijena, 12, 3 )
@@ -492,12 +501,18 @@ FUNCTION fakt_kartica()
    RETURN .T.
 
 
-STATIC FUNCTION ZaglKart( lIniStrana )
+STATIC FUNCTION fakt_zagl_kart( lIniStrana, nStrana, cIdRoba )
+
+   LOCAL cGr1, cNazGr1, cGr2, cNazGr2
 
    STATIC nZStrana := 0
 
-   IF lIniStrana = NIL; lIniStrana := .F. ; ENDIF
-   IF lIniStrana; nZStrana := 0; ENDIF
+   IF lIniStrana = NIL
+      lIniStrana := .F.
+   ENDIF
+   IF lIniStrana
+      nZStrana := 0
+   ENDIF
    B_ON
    IF nStrana > nZStrana
       ?? Space( 66 ) + "Strana: " + AllTrim( Str( nStrana ) )
@@ -507,11 +522,25 @@ STATIC FUNCTION ZaglKart( lIniStrana )
    ?? m
    ? Space( gnLMarg )
    ??U "ŠIFRA:"
+
    // IF fID_J
    // ?? IF( cSintetika == "D" .AND. ROBA->tip == "S", ROBA->ID_J, Left( cidroba, 10 ) ), PadR( ROBA->naz, 40 ), " (" + ROBA->jmj + ")"
    // ELSE
-   ?? iif( cSintetika == "D" .AND. ROBA->tip == "S", ROBA->id, cidroba ), PadR( ROBA->naz, 40 ), " (" + ROBA->jmj + ")"
+   ?? iif( cSintetika == "D" .AND. ROBA->tip == "S", ROBA->id, cIdroba ), PadR( ROBA->naz, 40 ), " (" + ROBA->jmj + ")"
    // ENDIF
+   
+   IF !Empty(cNazGr1 := get_sifk_naz( "ROBA", "GR1" ))
+      cGr1 := get_roba_sifk_sifv( "GR1", cIdRoba, .F. )
+      ? Space( gnLMarg )
+      ?? TRIM(cNazGr1) + ":", cGr1
+   ENDIF
+
+   IF !Empty(cNazGr2 := get_sifk_naz( "ROBA", "GR2" ))
+      cGr2 := get_roba_sifk_sifv( "GR2", cIdRoba, .F. )
+      ? Space( gnLMarg )
+      ?? TRIM(cNazGr2) + ":", cGr2
+   ENDIF
+
    ? Space( gnLMarg ); ?? m
    B_OFF
    ? Space( gnLMarg )

@@ -373,7 +373,7 @@ STATIC FUNCTION _fill_rpt_data( param )
          _roba_gr := PadR( cIdRoba, 2 )
       ELSE
          // ovdje cemo smjestiti grupaciju...
-         _roba_gr := IzSifKRoba( "GR1", cIdRoba, .F. )
+         _roba_gr := get_roba_sifk_sifv( "GR1", cIdRoba, .F. )
       ENDIF
 
       SELECT mat_suban

@@ -212,7 +212,7 @@ FUNCTION IzSifkKonto( cDbfName, cOznaka, cIdSif, return_nil )
    RETURN  get_sifk_sifv( "KONTO", cDbfName, cOznaka, xSif, return_nil )
 
 
-FUNCTION IzSifkRoba( cDbfName, cOznaka, cIdSif, return_nil )
+FUNCTION get_roba_sifk_sifv( cDbfName, cOznaka, cIdSif, return_nil )
 
    LOCAL xSif
 

@@ -702,7 +702,7 @@ STATIC FUNCTION _val_gr( cId, cSifK )
 
    LOCAL cRet := ""
 
-   cRet := IzSifKRoba( cSifK, cId, .F. )
+   cRet := get_roba_sifk_sifv( cSifK, cId, .F. )
    IF cRet == nil
       cRet := ""
    ENDIF

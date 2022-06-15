@@ -72,7 +72,7 @@ FUNCTION roba_pregled_prodaje_po_grupama()
       select_o_roba( cIdRoba )
       info_bar( "gen", "prodaja po grupama:" + cIdRoba )
 
-      cG := IzSifKRoba( "GR1", cIdRoba, .F. )
+      cG := get_roba_sifk_sifv( "GR1", cIdRoba, .F. )
 
       // SELECT SIFV
       // HSEEK "ROBA    " + "GR1 " + PadR( cIdRoba, 15 )
@@ -85,7 +85,7 @@ FUNCTION roba_pregled_prodaje_po_grupama()
       // cPodgrupa := Trim( naz )
       // ENDIF
 
-      cPodgrupa := IzSifKRoba( "GR2", cIdRoba, .F. )
+      cPodgrupa := get_roba_sifk_sifv( "GR2", cIdRoba, .F. )
 
       cJMJ := ROBA->jmj
       nKJMJ := svedi_na_jedinicu_mjere( 1, cIdRoba, @cJMJ )

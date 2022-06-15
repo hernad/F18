@@ -75,7 +75,7 @@ FUNCTION PlFill_Sezona()
       GO TOP
       Box(, 3, 60 )
       DO WHILE !Eof()
-         cSez := IzSifKRoba( "SEZ", roba->id, .F. )
+         cSez := get_roba_sifk_sifv( "SEZ", roba->id, .F. )
          @ box_x_koord() + 1, box_y_koord() + 2 SAY roba->id + " " + cSez
 
          cSezonaPf = cSez
