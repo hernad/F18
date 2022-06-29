@@ -426,7 +426,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL hNeimenovani := NIL
     LOCAL nIzvozPoFakturama
     LOCAL dDatFaktPravi
-    LOCAL cClan, lRegistrovaniPDVObveznik
+    LOCAL cClan, lRegistrovaniPDVObveznik, lPovratSL2
     //LOCAL cOpisIznosFaktureIzvoz := ""
 
     LOCAL cIdKontoKupac := trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
@@ -565,6 +565,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         hRec["fin_rbr"] := eisp->rbr
 
         cClan := ""
+        lPovratSL2 := .F. // povrat PDV-a kupcu po obrascu SL-2
         IF eisp->from_opis_pdv0_clan <> "UNDEF"
             cClan := eisp->from_opis_pdv0_clan
         ENDIF    
@@ -623,6 +624,13 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             cJib := REPLICATE("9", 13)
             hRec["kup_pdv"] := cPDVBroj
             hRec["kup_jib"] := cJib
+
+            if hRec["kup_pdv0_clan"] == "54" .AND. eisp->pdv < 0 // SL-2
+                altd()
+                lPovratSL2 := .T.
+            ELSE
+                lPovratSL2 := .F.
+            ENDIF
 
 
         ELSE
@@ -774,10 +782,15 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                   // 4720
                   nPDVInterna := eisp->pdv
                   nOsnovicaInterna := ROUND(nPDVInterna / 0.17, 2)
-               ELSE 
+               ELSE
+                  // kranja potrosnja 
                   // 4730, 4731, 4732 bez partnera osnovica se utvrdjuje na osnovu PDV
                   nPDVNePDVObveznik := eisp->pdv
-                  nOsnovicaNePdvObveznik := ROUND(nPDVNePDVObveznik / 0.17, 2)
+                  IF lPovratSL2
+                      nOsnovicaNePdvObveznik := 0
+                  ELSE
+                      nOsnovicaNePdvObveznik := ROUND(nPDVNePDVObveznik / 0.17, 2)
+                  ENDIF
                   nNePDVObveznikSaPDV := nOsnovicaNePdvObveznik + nPDVNePDVObveznik 
                ENDIF
             ELSE
@@ -974,8 +987,8 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                     db_insert_eisp(hRec)
                     csv_insert(cPorezniPeriod, cCSV, hRec, @hUkupno, @nRbr )
                 ELSE
-                    IF (hNeimenovani != NIL .AND. hNeimenovani["fin_idfirma"] == hRec["fin_idfirma"] .AND. hNeimenovani["fin_idvn"] == hRec["fin_idvn"] .AND. hNeimenovani["fin_brnal"] == hRec["fin_brnal"] ;
-                            .AND. hNeimenovani["dat_fakt"] == hRec["dat_fakt"] .AND. hNeimenovani["idkonto_pdv"] == hRec["idkonto_pdv"])
+                    IF (hNeimenovani != NIL .AND. !hNeimenovani["sl2"] .AND. !lPovratSL2 .AND. (hNeimenovani["fin_idfirma"] == hRec["fin_idfirma"] .AND. hNeimenovani["fin_idvn"] == hRec["fin_idvn"] .AND. hNeimenovani["fin_brnal"] == hRec["fin_brnal"] ;
+                            .AND. hNeimenovani["dat_fakt"] == hRec["dat_fakt"] .AND. hNeimenovani["idkonto_pdv"] == hRec["idkonto_pdv"]))
                         hNeimenovani["cnt"] += 1
                         hNeimenovani["fakt_iznos_bez_pdv"]    += hRec["fakt_iznos_bez_pdv"]
                         hNeimenovani["fakt_iznos_pdv"]        += hRec["fakt_iznos_pdv"] 
@@ -1000,6 +1013,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
                         ENDIF
                         hNeimenovani := hb_hash()
                         hNeimenovani["cnt"] := 1
+                        hNeimenovani["sl2"] := lPovratSL2
                         hNeimenovani["tip"] := cTipDokumenta2
                         hNeimenovani["porezni_period"] := hRec["porezni_period"]
                         hNeimenovani["idkonto_pdv"] := hRec["idkonto_pdv"] 
@@ -1318,15 +1332,18 @@ FUNCTION gen_eIsporuke()
 
     // 01 standardne isporuke 4730 - ne PDV obveznici krajnja potrosnja; ; lPDVNule .F., lOsnovaNula .F., 
     // cMjestoKrajnjePotrosnje="1" FBiH
-    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVNeFBiH, cNabExcludeIdvn, .F., .F., "1", .T., @hUkupno)
+    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01" /* cTipDokumenta */, cIdKontoPDVNeFBiH /* cIdKonto */, cNabExcludeIdvn, .F. /* lPDVNule */, .F. /* lOsnovaNula*/, "1" /* cMjestoKrajnjePotrosnjeIn */, ;
+         .T. /*lMozeNeimenovaniKupac*/, @hUkupno)
 
     // 01 standardne isporuke 4731 - ne PDV obveznici krajnja potrosnja; ; lPDVNule .F., lOsnovaNula .F., 
     // cMjestoKrajnjePotrosnje="2" RS
-    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVNeRS, cNabExcludeIdvn, .F., .F., "2", .T., @hUkupno)
+    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVNeRS, cNabExcludeIdvn, .F., .F., "2", ;
+        .T. /*lMozeNeimenovaniKupac*/, @hUkupno)
 
     // 01 standardne isporuke 4732 - ne PDV obveznici krajnja potrosnja; ; lPDVNule .F., lOsnovaNula .F.,
     // cMjestoKrajnjePotrosnje="3" BD
-    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVNeBD, cNabExcludeIdvn, .F., .F., "3", .T., @hUkupno)
+    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVNeBD, cNabExcludeIdvn, .F., .F., "3", ;
+        .T. /*lMozeNeimenovaniKupac*/, @hUkupno)
     
     // 02 interne fakture - sopstvena krajnja potrosnja; ; lPDVNule .F., lOsnovaNula .F., 
     // cMjestoKrajnjePotrosnje="1" sopstvena krajnja potrosnja je uvijek FBiH
