@@ -1,6 +1,5 @@
 #include "f18.ch"
 
-
 FUNCTION eNab_eIsp_PDV()
 
     LOCAL cPDV  := fetch_metric( "fin_enab_my_pdv", NIL, PadR( "<POPUNI>", 12 ) )
@@ -40,21 +39,25 @@ FUNCTION eNab_eIsp_PDV()
     set_metric( "fin_enab_dat_od", my_user(), dDatOd )
     set_metric( "fin_enab_dat_do", my_user(), dDatDo )
 
-    hPdv["11"] := 0
-    hPdv["12"] := 0
-    hPdv["13"] := 0
-    hPdv["21"] := 0
-    hPdv["22"] := 0
-    hPdv["23"] := 0
-    hPdv["41"] := 0
-    hPdv["42"] := 0
-    hPdv["43"] := 0
-    hPdv["51"] := 0
-    hPdv["61"] := 0
-    hPdv["71"] := 0
-    hPdv["32"] := 0
-    hPdv["33"] := 0
-    hPdv["34"] := 0
+    hPDV["id_br"] := cPDV
+    hPDV["dat_od"] := dDatOd
+    hPDV["dat_do"] := dDatDo
+    hPdv["11"] := 0.00
+    hPdv["12"] := 0.00
+    hPdv["13"] := 0.00
+    hPdv["21"] := 0.00
+    hPdv["22"] := 0.00
+    hPdv["23"] := 0.00
+    hPdv["41"] := 0.00
+    hPdv["42"] := 0.00
+    hPdv["43"] := 0.00
+    hPdv["51"] := 0.00
+    hPdv["61"] := 0.00
+    hPdv["71"] := 0.00
+    hPdv["32"] := 0.00
+    hPdv["33"] := 0.00
+    hPdv["34"] := 0.00
+    
 
 
     SELECT F_TMP
@@ -101,17 +104,17 @@ FUNCTION eNab_eIsp_PDV()
     cQuery += " FROM public.enabavke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     use_sql("ENAB", cQuery)
     hPDV["21"] += enab->fakt_iznos_bez_pdv - hPDV["23"] - hPDV["22"]
-    hPDV["21"] := ROUND(hPDV["21"], 0)
-    hPDV["22"] := ROUND(hPDV["22"], 0)
+    hPDV["21"] := pdv_prijava_zaok_decimal(hPDV["21"])
+    hPDV["22"] := pdv_prijava_zaok_decimal(hPDV["22"])
 
     //  poljop naknada 
     cQuery := "select sum(fakt_iznos_bez_pdv) as fakt_iznos_bez_pdv, sum(fakt_iznos_poljo_pausal) as iznos_pausal" 
     cQuery += " FROM public.enabavke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     cQuery += " AND fakt_iznos_poljo_pausal<>0"
     use_sql("ENAB", cQuery)
-    hPDV["23"] := ROUND(enab->fakt_iznos_bez_pdv, 0)
+    hPDV["23"] := pdv_prijava_zaok_decimal(enab->fakt_iznos_bez_pdv)
     // pausalna naknada za poljop
-    hPDV["43"] := ROUND(enab->iznos_pausal, 0)
+    hPDV["43"] := pdv_prijava_zaok_decimal(enab->iznos_pausal)
     use
 
     //  sve nabavke iznos pdv
@@ -121,19 +124,19 @@ FUNCTION eNab_eIsp_PDV()
 
     // ulazni pdv (odbitni - samo poslovna potrosnja) - uvoz - poljop pausal naknada
     hPDV["41"] := enab->iznos_pdv - hPDV["42"] - hPDV["43"]
-    hPdv["41"] := Round(hPDV["41"], 0)
-    hPdv["42"] := Round(hPDV["42"], 0)
-    hPdv["43"] := Round(hPDV["43"], 0)
+    hPdv["41"] := pdv_prijava_zaok_decimal(hPDV["41"])
+    hPdv["42"] := pdv_prijava_zaok_decimal(hPDV["42"])
+    hPdv["43"] := pdv_prijava_zaok_decimal(hPDV["43"])
 
     use
-    hPDV["61"] := ROUND(hPDV["41"] + hPDV["42"] + hPDV["43"], 0)
+    hPDV["61"] := pdv_prijava_zaok_decimal(hPDV["41"] + hPDV["42"] + hPDV["43"])
 
     // isporuke izvoz tip=04 ali i stavke prevoza po CLAN27
     cQuery := "select sum(fakt_iznos_sa_pdv0_izvoz) as fakt_iznos" 
     cQuery += " FROM public.eisporuke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     //cQuery += " AND tip='04'"
     use_sql("EISP", cQuery)
-    hPDV["12"] += ROUND(eisp->fakt_iznos, 0)
+    hPDV["12"] += pdv_prijava_zaok_decimal(eisp->fakt_iznos)
     use
 
    
@@ -143,7 +146,7 @@ FUNCTION eNab_eIsp_PDV()
     cQuery += " WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     cQuery += " and (substr(get_sifk('PARTN', 'PDVO', COALESCE(fin_suban.idpartner,'')),1,2) IN ('24','25') OR trim(eisporuke.kup_pdv0_clan) IN ('24','25'))"
     use_sql("EISP", cQuery)
-    hPDV["13"] := ROUND(eisp->fakt_iznos, 0)
+    hPDV["13"] := pdv_prijava_zaok_decimal(eisp->fakt_iznos)
     use
 
     // ovo se ne moze desiti - od verzije 3.3.70 u polje fakt_iznos_sa_pdv0_ostalo idu samo oslobodjenja po clanu 24,25
@@ -175,15 +178,15 @@ FUNCTION eNab_eIsp_PDV()
     cQuery += " AND tip<>'04'"
     use_sql("EISP", cQuery)
     hPDV["11"] += eisp->fakt_iznos_bez_pdv
-    hPDV["11"] := ROUND(hPDV["11"], 0)
+    hPDV["11"] := pdv_prijava_zaok_decimal(hPDV["11"])
 
     // izlazni PDV
-    hPDV["51"] := ROUND(eisp->iznos_pdv, 0)
+    hPDV["51"] := pdv_prijava_zaok_decimal(eisp->iznos_pdv)
     use
 
     // pdv za uplatu
     hPDV["71"] := hPDV["51"] - hPDV["61"]
-    hPDV["71"] := ROUND(hPDV["71"], 0)
+    hPDV["71"] := pdv_prijava_zaok_decimal(hPDV["71"])
 
     SELECT F_TMP
     cQuery := "select sum(fakt_iznos_pdv_np_32) as fakt_iznos_pdv_np_32, sum(fakt_iznos_pdv_np_33) as fakt_iznos_pdv_np_33, sum(fakt_iznos_pdv_np_34) as fakt_iznos_pdv_np_34" 
@@ -193,64 +196,79 @@ FUNCTION eNab_eIsp_PDV()
     hPDV["33"] += eisp->fakt_iznos_pdv_np_33
     hPDV["34"] += eisp->fakt_iznos_pdv_np_34
 
-    hPDV["32"] := ROUND(hPDV["32"], 0)
-    hPDV["33"] := ROUND(hPDV["33"], 0)
-    hPDV["34"] := ROUND(hPDV["34"], 0)
+    hPDV["32"] := pdv_prijava_zaok_decimal(hPDV["32"])
+    hPDV["33"] := pdv_prijava_zaok_decimal(hPDV["33"])
+    hPDV["34"] := pdv_prijava_zaok_decimal(hPDV["34"])
     use
 
-    nX := 0
-    nCol := 42
-    nWidth := 25
-    
+    DO WHILE .T.
+        nX := 0
+        nCol := 42
+        nWidth := 25
+        
+        Box(, 28, 85)
 
-    Box(, 28, 85)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Obračun PDV za: " + cPDV + " porezni period: " + cPorezniPeriod
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Obračun PDV za: " + cPDV + " porezni period: " + cPorezniPeriod
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "I. Isporuke i nabavke svi iznosi iskazani bez PDV"
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "I. Isporuke i nabavke svi iznosi iskazani bez PDV"
 
-    nX++
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(11) sve isporuke : ", nWidth) + Transform(hPDV[ "11" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(21) sve nabavke : ", nWidth) + Transform(hPDV[ "21" ], cPict)
+        nX++
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(11) sve isporuke : ", nWidth) + Transform(hPDV[ "11" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(21) sve nabavke : ", nWidth) + Transform(hPDV[ "21" ], cPict)
 
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(12) izvoz: ", nWidth) + Transform(hPDV[ "12" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(22) uvoz : ", nWidth) + Transform(hPDV[ "22" ], cPict)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(12) izvoz: ", nWidth) + Transform(hPDV[ "12" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(22) uvoz : ", nWidth) + Transform(hPDV[ "22" ], cPict)
 
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PADR("(13) oslobodjene placanja PDV: ", nWidth) + Transform(hPDV[ "13" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 PADR("(23) nabavke od poljopriv: ", nWidth) + Transform(hPDV[ "23" ], cPict)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 PADR("(13) oslobodjene placanja PDV: ", nWidth) + Transform(hPDV[ "13" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 PADR("(23) nabavke od poljopriv: ", nWidth) + Transform(hPDV[ "23" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "II. izlazni PDV"
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(41) PDV na ulaz od reg.obv. PDV: ", nWidth) + Transform(hPDV[ "41" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) PDV na uvoz:                 ", nWidth) + Transform(hPDV[ "42" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) paus nakn za poljopriv:", nWidth) + Transform(hPDV[ "43" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "II. izlazni PDV"
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(41) PDV na ulaz od reg.obv. PDV: ", nWidth) + Transform(hPDV[ "41" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(42) PDV na uvoz:                 ", nWidth) + Transform(hPDV[ "42" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(43) paus nakn za poljopriv:", nWidth) + Transform(hPDV[ "43" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(51) PDV izlazni:   ", nWidth) + Transform(hPDV[ "51" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(61) PDV ulazni:               ", nWidth) + Transform(hPDV[ "61" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(51) PDV izlazni:   ", nWidth) + Transform(hPDV[ "51" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + nCol SAY8 Padr("(61) PDV ulazni:               ", nWidth) + Transform(hPDV[ "61" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(71) PDV za uplatu/povrat:  ", nWidth) + Transform(hPDV[ "71" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX, box_y_koord() + 2 SAY8 Padr("(71) PDV za uplatu/povrat:  ", nWidth) + Transform(hPDV[ "71" ], cPict)
 
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "III. Podaci o krajnjoj potrošnji"
-    nX++
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(32) FBiH: ", nWidth) + Transform(hPDV[ "32" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(33) RS: ", nWidth) + Transform(hPDV[ "33" ], cPict)
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(34) BD: ", nWidth) + Transform(hPDV[ "34" ], cPict)
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 REPLICATE("-", 78)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "III. Podaci o krajnjoj potrošnji"
+        nX++
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(32) FBiH: ", nWidth) + Transform(hPDV[ "32" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(33) RS: ", nWidth) + Transform(hPDV[ "33" ], cPict)
+        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 Padr("(34) BD: ", nWidth) + Transform(hPDV[ "34" ], cPict)
 
-    inkey(0)
-    BoxC()
+        @ box_x_koord() + 29, box_y_koord() + 20 SAY "<ESC> - kraj, <P> - print" COLOR f18_color_invert()
 
+        inkey(0)
+        BoxC()
 
+        IF LastKey() == K_ESC
+            EXIT
+        ENDIF
+
+        IF Upper(Chr(Lastkey())) == "P"
+            print_pdv(hPDV)
+        ENDIF
+
+    ENDDO
 
     RETURN .T.
 
+//
+// zaokruzenje na 2 decimalna mjesta naPDV prijavi
+//
+FUNCTION pdv_prijava_zaok_decimal(nInput)
 
-
+   RETURN ROUND(nInput, 2)

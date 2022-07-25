@@ -799,7 +799,7 @@ FUNCTION fin_gen_uvoz(cBrKalk, cIdKonto, dDatDok, cIdDobavljac, cBrFakt, ;
     RETURN .T.
 
 
- STATIC FUNCTION fin_km_to_eur( nKM, dDatDok )
+FUNCTION fin_km_to_eur( nKM, dDatDok )
 
     LOCAL dKurs
    

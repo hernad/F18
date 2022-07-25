@@ -526,11 +526,12 @@ STATIC FUNCTION db_insert_enab( hRec )
     BEGIN SEQUENCE WITH {| err| Break( err ) }
         oRet := run_sql_query(cQuery)
     RECOVER USING oError
-        error_bar( "enab_ins:" + oError:description )  
-     END SEQUENCE
+        error_bar( "enab_ins:" + oError:description )    
+    END SEQUENCE
   
 
     IF sql_error_in_query( oRet, "INSERT" )
+      Alert("FIN stavka tip:" + hRec["tip"] + " brfakt: " + Trim(hRec["br_fakt"]) + " " + hRec["fin_idfirma"] + "-" + hRec["fin_idvn"] + "-" + hRec["fin_brnal"] + "/" + Alltrim(Str(hRec["fin_rbr"])) )  
       RETURN .F.
     ENDIF
 
@@ -671,7 +672,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
     // povezati se sa postojecim enabavkama preko broja fin naloga
     cQuery += " left join public.enabavke on fin_suban.idfirma=enabavke.fin_idfirma and fin_suban.idvn=enabavke.fin_idvn"
-    cQuery += " and fin_suban.brnal=enabavke.fin_brnal and fin_suban.rbr=enabavke.fin_rbr and extract(year from  fin_suban.datdok)=extract(year from  enabavke.dat_fakt)"
+    cQuery += " and fin_suban.brnal=enabavke.fin_brnal and fin_suban.rbr=enabavke.fin_rbr and extract(year from  fin_suban.datdok)=extract(year from  enabavke.dat_fakt_prijem)"
  
     IF lSchema
         // ako je kooperant moze biti kupac potrazuje, ako je glavni izvodjac onda je dobavljac potrazuje 0
@@ -736,7 +737,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
         IF (cAlias)->enab_rbr <> -99999
             // vec postoji stavka 43% u tabeli enabavke
-            IF (cAlias)->enab_porezni_period != cPorezniPeriod     
+            IF (cAlias)->enab_porezni_period != cPorezniPeriod      
                 Alert(_u("Greška koristi se nalog " +;
                 (cAlias)->idfirma + "-" + (cAlias)->idvn + "-" + (cAlias)->brnal + "/" + AllTrim(Str((cAlias)->rbr)) +;
                 " iz poreznog perioda: " + (cAlias)->enab_porezni_period))
@@ -1355,6 +1356,7 @@ FUNCTION gen_eNabavke()
         ENDIF
     ENDIF
 
+    altd()
     DirChange( cLokacijaExport )
     info_bar( "csv", "lokacija csv: " + cLokacijaExport )
     
