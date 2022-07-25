@@ -145,7 +145,8 @@ FUNCTION read_epdv_gl_params()
    gZAO_CIJ := fetch_metric( "epdv_zaokruzenje_cijene", nil, gZAO_CIJ )
    gZAO_PDV := fetch_metric( "epdv_zaokruzenje_pdv", nil, gZAO_PDV )
 
-   gPIC_IZN := fetch_metric( "epdv_picture_iznos", nil, gPIC_IZN )
+   //gPIC_IZN := fetch_metric( "epdv_picture_iznos", nil, gPIC_IZN )
+   
    gPIC_CIJ := fetch_metric( "epdv_picture_cijena", nil, gPIC_CIJ )
 
    gUlPDVKp := fetch_metric( "epdv_ulazni_pdv_krajnja_potrosnja", nil, gUlPdvKp )

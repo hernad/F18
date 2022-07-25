@@ -346,30 +346,30 @@ STATIC FUNCTION epdv_prijava_fill_kuf_kif()
 
 STATIC FUNCTION epdv_zaokruzenje_pdv_prijava()
 
-   _u_nab_21 := Round( _u_nab_21, ZAO_PDV() )
-   _u_uvoz := Round( _u_uvoz, ZAO_PDV() )
-   _u_nab_23 := Round( _u_nab_23, ZAO_PDV() )
+   _u_nab_21 := pdv_prijava_zaok_decimal( _u_nab_21 )
+   _u_uvoz := pdv_prijava_zaok_decimal( _u_uvoz)
+   _u_nab_23 := pdv_prijava_zaok_decimal( _u_nab_23 )
 
 
-   _u_pdv_41 := Round( _u_pdv_41, ZAO_PDV() )
-   _u_pdv_uv := Round( _u_pdv_uv, ZAO_PDV() )
-   _u_pdv_43 := Round( _u_pdv_43, ZAO_PDV() )
+   _u_pdv_41 := pdv_prijava_zaok_decimal( _u_pdv_41 )
+   _u_pdv_uv := pdv_prijava_zaok_decimal( _u_pdv_uv )
+   _u_pdv_43 := pdv_prijava_zaok_decimal( _u_pdv_43 )
 
 
-   _i_opor := Round( _i_opor, ZAO_PDV() )
-   _i_izvoz := Round( _i_izvoz, ZAO_PDV() )
-   _i_neop := Round( _i_neop, ZAO_PDV() )
+   _i_opor := pdv_prijava_zaok_decimal( _i_opor )
+   _i_izvoz := pdv_prijava_zaok_decimal( _i_izvoz )
+   _i_neop := pdv_prijava_zaok_decimal( _i_neop )
 
 
-   _i_pdv_r := Round( _i_pdv_r, ZAO_PDV() )
+   _i_pdv_r := pdv_prijava_zaok_decimal( _i_pdv_r )
 
-   _i_pdv_nr1 := Round( _i_pdv_nr1, ZAO_PDV() )
-   _i_pdv_nr2 := Round( _i_pdv_nr2, ZAO_PDV() )
-   _i_pdv_nr3 := Round( _i_pdv_nr3, ZAO_PDV() )
-   _i_pdv_nr4 := Round( _i_pdv_nr4, ZAO_PDV() )
+   _i_pdv_nr1 := pdv_prijava_zaok_decimal( _i_pdv_nr1 )
+   _i_pdv_nr2 := pdv_prijava_zaok_decimal( _i_pdv_nr2 )
+   _i_pdv_nr3 := pdv_prijava_zaok_decimal( _i_pdv_nr3 )
+   _i_pdv_nr4 := pdv_prijava_zaok_decimal( _i_pdv_nr4 )
 
-   _u_pdv_uk := Round( _u_pdv_uk, ZAO_PDV() )
-   _i_pdv_uk := Round( _i_pdv_uk, ZAO_PDV() )
+   _u_pdv_uk := pdv_prijava_zaok_decimal( _u_pdv_uk )
+   _i_pdv_uk := pdv_prijava_zaok_decimal( _i_pdv_uk )
 
    RETURN .T.
 
@@ -408,8 +408,9 @@ STATIC FUNCTION epdv_prijava_fill_iz_pdv_tabele()
 
    RETURN .T.
 
-
-
+//
+// NE KORISTI SE VISE !
+//
 STATIC FUNCTION show_rpt()
 
    LOCAL nLenUk
@@ -434,7 +435,7 @@ STATIC FUNCTION show_rpt()
    P_COND
    ?
    ?? rpt_lm()
-   ?? PadL( "Obrazac P PDV, ver 01.12", RPT_COL * 2 + RPT_GAP )
+   ?? PadL( "Obrazac P PDV, ver 02.00", RPT_COL * 2 + RPT_GAP )
 
    ?
    ?? rpt_lm()

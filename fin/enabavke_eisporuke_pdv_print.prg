@@ -105,18 +105,18 @@ FUNCTION print_pdv( hPDV )
     ?? rpt_lm()
     ?? Space( RPT_RI )
  
-    cPom := PadR( "11. Oporezive isporuke, osim onih u 12 i 13 ", RPT_W2 ) + Transform( hPDV["11"], PIC_IZN() )
+    cPom := PadR( "11. Oporezive isporuke, osim onih u 12 i 13 ", RPT_W2 ) + Transform( hPDV["11"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     ?? Space( RPT_GAP )
  
     ?? Space( RPT_RI )
-    cPom := PadR( "21. SVE nabavke osim 22 i 23 ", RPT_W2 ) + Transform( hPDV["21"], PIC_IZN() )
+    cPom := PadR( "21. SVE nabavke osim 22 i 23 ", RPT_W2 ) + Transform( hPDV["21"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
     ?? rpt_lm()
-    cPom := PadR( "12. Vrijednost izvoza ", RPT_W2 ) + Transform( hPDV["12"], PIC_IZN() )
+    cPom := PadR( "12. Vrijednost izvoza ", RPT_W2 ) + Transform( hPDV["12"], pdv_prij_pict() )
     // sirina kolone - indent
     ?? Space( RPT_RI )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
@@ -124,20 +124,20 @@ FUNCTION print_pdv( hPDV )
     ?? Space( RPT_GAP )
  
     ?? Space( RPT_RI )
-    cPom := PadR( "22. Vrijednost uvoza ", RPT_W2 ) + Transform( hPDV["22"], PIC_IZN() )
+    cPom := PadR( "22. Vrijednost uvoza ", RPT_W2 ) + Transform( hPDV["22"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
     ?? rpt_lm()
     ?? Space( RPT_RI )
  
-    cPom := PadR( _u("13. Isp. oslobođene PDV-a "), RPT_W2 ) + Transform( hPDV["13"], PIC_IZN() )
+    cPom := PadR( _u("13. Isp. oslobođene PDV-a "), RPT_W2 ) + Transform( hPDV["13"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     ?? Space( RPT_GAP )
  
     ?? Space( RPT_RI )
-    cPom := PadR( _u("23. Vrijednost nab. od poljoprivrednika "), RPT_W2 ) + Transform( hPDV["23"], PIC_IZN() )
+    cPom := PadR( _u("23. Vrijednost nab. od poljoprivrednika "), RPT_W2 ) + Transform( hPDV["23"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
@@ -185,7 +185,7 @@ FUNCTION print_pdv( hPDV )
     ?? Space( RPT_GAP )
  
     ?? Space( RPT_RI )
-    cPom := PadR( "41. Od reg. PDV obveznika osim 42 i 43", RPT_W2 ) + Transform( hPDV["41"], PIC_IZN() )
+    cPom := PadR( "41. Od reg. PDV obveznika osim 42 i 43", RPT_W2 ) + Transform( hPDV["41"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
@@ -199,7 +199,7 @@ FUNCTION print_pdv( hPDV )
     ?? Space( RPT_GAP )
  
     ?? Space( RPT_RI )
-    cPom := PadR( "42. PDV na uvoz ", RPT_W2 ) + Transform( hPDV["42"], PIC_IZN() )
+    cPom := PadR( "42. PDV na uvoz ", RPT_W2 ) + Transform( hPDV["42"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
@@ -211,7 +211,7 @@ FUNCTION print_pdv( hPDV )
     ?? Space( RPT_GAP )
  
     ?? Space( RPT_RI )
-    cPom := PadR( _u("43. Paušalna naknada za poljoprivrednike "), RPT_W2 ) + Transform( hPDV["43"], PIC_IZN() )
+    cPom := PadR( _u("43. Paušalna naknada za poljoprivrednike "), RPT_W2 ) + Transform( hPDV["43"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
@@ -219,7 +219,7 @@ FUNCTION print_pdv( hPDV )
  
     ?? rpt_lm()
     ?? Space( RPT_RI )
-    cPom :=  PadR( _u("51. PDV obračunat na izlaz(dobra i usluge) "),  RPT_W2 - RPT_BOLD_DELTA ) + Transform( hPDV["51"], PIC_IZN() )
+    cPom :=  PadR( _u("51. PDV obračunat na izlaz(dobra i usluge) "),  RPT_W2 - RPT_BOLD_DELTA ) + Transform( hPDV["51"], pdv_prij_pict() )
     B_ON
     ?? PadL( cPom, RPT_COL - RPT_RI - RPT_BOLD_DELTA + 1 )
     B_OFF
@@ -228,7 +228,7 @@ FUNCTION print_pdv( hPDV )
  
     ?? Space( RPT_RI )
     B_ON
-    cPom := PadR( "61. Ulazni PDV (ukupno) ", RPT_W2 - RPT_BOLD_DELTA ) + Transform( hPDV["61"], PIC_IZN() )
+    cPom := PadR( "61. Ulazni PDV (ukupno) ", RPT_W2 - RPT_BOLD_DELTA ) + Transform( hPDV["61"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI - RPT_BOLD_DELTA + 1 )
     B_OFF
  
@@ -237,7 +237,7 @@ FUNCTION print_pdv( hPDV )
  
     ?? rpt_lm()
     ?? Space( RPT_RI )
-    cPom := PadR( "71. Obaveza PDV-a za uplatu/povrat ", RPT_W2 - RPT_BOLD_DELTA ) + Transform( hPDV["71"], PIC_IZN() )
+    cPom := PadR( "71. Obaveza PDV-a za uplatu/povrat ", RPT_W2 - RPT_BOLD_DELTA ) + Transform( hPDV["71"], pdv_prij_pict() )
     B_ON
     ?? PadL( cPom, RPT_COL - RPT_RI - RPT_BOLD_DELTA + 1 )
     B_OFF
@@ -271,20 +271,20 @@ FUNCTION print_pdv( hPDV )
  
     ?? rpt_lm()
     ?? Space( RPT_RI )
-    cPom := PadR( "32. Federacije BiH ", RPT_W2 ) + Transform( hPDV["32"], PIC_IZN() )
+    cPom := PadR( "32. Federacije BiH ", RPT_W2 ) + Transform( hPDV["32"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
  
     ?? rpt_lm()
     ?? Space( RPT_RI )
-    cPom := PadR( "33. Republike Srpske ", RPT_W2 ) + Transform( hPDV["33"], PIC_IZN() )
+    cPom := PadR( "33. Republike Srpske ", RPT_W2 ) + Transform( hPDV["33"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
     ?? rpt_lm()
     ?? Space( RPT_RI )
-    cPom := PadR( _u("34. Brčko Distrikta "), RPT_W2 ) + Transform( hPDV["34"], PIC_IZN() )
+    cPom := PadR( _u("34. Brčko Distrikta "), RPT_W2 ) + Transform( hPDV["34"], pdv_prij_pict() )
     ?? PadL( cPom, RPT_COL - RPT_RI + 1 )
  
     show_raz_1()
@@ -345,3 +345,8 @@ RETURN .T.
 STATIC FUNCTION rpt_lm()
 
         RETURN Space( RPT_LM )
+
+STATIC FUNCTION pdv_prij_pict( xVal )
+
+   RETURN "9999999.99"
+      
