@@ -42,21 +42,21 @@ FUNCTION eNab_eIsp_PDV()
     hPDV["id_br"] := cPDV
     hPDV["dat_od"] := dDatOd
     hPDV["dat_do"] := dDatDo
-    hPdv["11"] := 0
-    hPdv["12"] := 0
-    hPdv["13"] := 0
-    hPdv["21"] := 0
-    hPdv["22"] := 0
-    hPdv["23"] := 0
-    hPdv["41"] := 0
-    hPdv["42"] := 0
-    hPdv["43"] := 0
-    hPdv["51"] := 0
-    hPdv["61"] := 0
-    hPdv["71"] := 0
-    hPdv["32"] := 0
-    hPdv["33"] := 0
-    hPdv["34"] := 0
+    hPdv["11"] := 0.00
+    hPdv["12"] := 0.00
+    hPdv["13"] := 0.00
+    hPdv["21"] := 0.00
+    hPdv["22"] := 0.00
+    hPdv["23"] := 0.00
+    hPdv["41"] := 0.00
+    hPdv["42"] := 0.00
+    hPdv["43"] := 0.00
+    hPdv["51"] := 0.00
+    hPdv["61"] := 0.00
+    hPdv["71"] := 0.00
+    hPdv["32"] := 0.00
+    hPdv["33"] := 0.00
+    hPdv["34"] := 0.00
     
 
 
@@ -104,17 +104,17 @@ FUNCTION eNab_eIsp_PDV()
     cQuery += " FROM public.enabavke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     use_sql("ENAB", cQuery)
     hPDV["21"] += enab->fakt_iznos_bez_pdv - hPDV["23"] - hPDV["22"]
-    hPDV["21"] := ROUND(hPDV["21"], 0)
-    hPDV["22"] := ROUND(hPDV["22"], 0)
+    hPDV["21"] := pdv_prijava_zaok_decimal(hPDV["21"])
+    hPDV["22"] := pdv_prijava_zaok_decimal(hPDV["22"])
 
     //  poljop naknada 
     cQuery := "select sum(fakt_iznos_bez_pdv) as fakt_iznos_bez_pdv, sum(fakt_iznos_poljo_pausal) as iznos_pausal" 
     cQuery += " FROM public.enabavke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     cQuery += " AND fakt_iznos_poljo_pausal<>0"
     use_sql("ENAB", cQuery)
-    hPDV["23"] := ROUND(enab->fakt_iznos_bez_pdv, 0)
+    hPDV["23"] := pdv_prijava_zaok_decimal(enab->fakt_iznos_bez_pdv)
     // pausalna naknada za poljop
-    hPDV["43"] := ROUND(enab->iznos_pausal, 0)
+    hPDV["43"] := pdv_prijava_zaok_decimal(enab->iznos_pausal)
     use
 
     //  sve nabavke iznos pdv
@@ -124,19 +124,19 @@ FUNCTION eNab_eIsp_PDV()
 
     // ulazni pdv (odbitni - samo poslovna potrosnja) - uvoz - poljop pausal naknada
     hPDV["41"] := enab->iznos_pdv - hPDV["42"] - hPDV["43"]
-    hPdv["41"] := Round(hPDV["41"], 0)
-    hPdv["42"] := Round(hPDV["42"], 0)
-    hPdv["43"] := Round(hPDV["43"], 0)
+    hPdv["41"] := pdv_prijava_zaok_decimal(hPDV["41"])
+    hPdv["42"] := pdv_prijava_zaok_decimal(hPDV["42"])
+    hPdv["43"] := pdv_prijava_zaok_decimal(hPDV["43"])
 
     use
-    hPDV["61"] := ROUND(hPDV["41"] + hPDV["42"] + hPDV["43"], 0)
+    hPDV["61"] := pdv_prijava_zaok_decimal(hPDV["41"] + hPDV["42"] + hPDV["43"])
 
     // isporuke izvoz tip=04 ali i stavke prevoza po CLAN27
     cQuery := "select sum(fakt_iznos_sa_pdv0_izvoz) as fakt_iznos" 
     cQuery += " FROM public.eisporuke WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     //cQuery += " AND tip='04'"
     use_sql("EISP", cQuery)
-    hPDV["12"] += ROUND(eisp->fakt_iznos, 0)
+    hPDV["12"] += pdv_prijava_zaok_decimal(eisp->fakt_iznos)
     use
 
    
@@ -146,7 +146,7 @@ FUNCTION eNab_eIsp_PDV()
     cQuery += " WHERE porezni_period=" + sql_quote(cPorezniPeriod)
     cQuery += " and (substr(get_sifk('PARTN', 'PDVO', COALESCE(fin_suban.idpartner,'')),1,2) IN ('24','25') OR trim(eisporuke.kup_pdv0_clan) IN ('24','25'))"
     use_sql("EISP", cQuery)
-    hPDV["13"] := ROUND(eisp->fakt_iznos, 0)
+    hPDV["13"] := pdv_prijava_zaok_decimal(eisp->fakt_iznos)
     use
 
     // ovo se ne moze desiti - od verzije 3.3.70 u polje fakt_iznos_sa_pdv0_ostalo idu samo oslobodjenja po clanu 24,25
@@ -178,15 +178,15 @@ FUNCTION eNab_eIsp_PDV()
     cQuery += " AND tip<>'04'"
     use_sql("EISP", cQuery)
     hPDV["11"] += eisp->fakt_iznos_bez_pdv
-    hPDV["11"] := ROUND(hPDV["11"], 0)
+    hPDV["11"] := pdv_prijava_zaok_decimal(hPDV["11"])
 
     // izlazni PDV
-    hPDV["51"] := ROUND(eisp->iznos_pdv, 0)
+    hPDV["51"] := pdv_prijava_zaok_decimal(eisp->iznos_pdv)
     use
 
     // pdv za uplatu
     hPDV["71"] := hPDV["51"] - hPDV["61"]
-    hPDV["71"] := ROUND(hPDV["71"], 0)
+    hPDV["71"] := pdv_prijava_zaok_decimal(hPDV["71"])
 
     SELECT F_TMP
     cQuery := "select sum(fakt_iznos_pdv_np_32) as fakt_iznos_pdv_np_32, sum(fakt_iznos_pdv_np_33) as fakt_iznos_pdv_np_33, sum(fakt_iznos_pdv_np_34) as fakt_iznos_pdv_np_34" 
@@ -196,9 +196,9 @@ FUNCTION eNab_eIsp_PDV()
     hPDV["33"] += eisp->fakt_iznos_pdv_np_33
     hPDV["34"] += eisp->fakt_iznos_pdv_np_34
 
-    hPDV["32"] := ROUND(hPDV["32"], 0)
-    hPDV["33"] := ROUND(hPDV["33"], 0)
-    hPDV["34"] := ROUND(hPDV["34"], 0)
+    hPDV["32"] := pdv_prijava_zaok_decimal(hPDV["32"])
+    hPDV["33"] := pdv_prijava_zaok_decimal(hPDV["33"])
+    hPDV["34"] := pdv_prijava_zaok_decimal(hPDV["34"])
     use
 
     DO WHILE .T.
@@ -266,3 +266,9 @@ FUNCTION eNab_eIsp_PDV()
 
     RETURN .T.
 
+//
+// zaokruzenje na 2 decimalna mjesta naPDV prijavi
+//
+FUNCTION pdv_prijava_zaok_decimal(nInput)
+
+   RETURN ROUND(nInput, 2)
