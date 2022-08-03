@@ -336,15 +336,14 @@ FUNCTION print_pdv( hPDV )
 
 
 STATIC FUNCTION show_raz_1()
-
+        
         ?
-        ?
-     
-RETURN .T.
+        ? 
+    RETURN .T.
 
 STATIC FUNCTION rpt_lm()
 
-        RETURN Space( RPT_LM )
+   RETURN Space( RPT_LM )
 
 STATIC FUNCTION pdv_prij_pict( xVal )
 
