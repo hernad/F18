@@ -1197,10 +1197,9 @@ FUNCTION gen_eIsporuke()
     LOCAL dDatDo := fetch_metric( "fin_enab_dat_do", my_user(), DATE() )
     LOCAL cExportFile, nFileNo
     LOCAL cCSV := ";"
-    LOCAL cPorezniPeriod
+    LOCAL cPorezniPeriod, cPorGodina
     LOCAL hUkupno := hb_hash()
     LOCAL nRbr := 0
-    LOCAL nRbr2 := 0
     LOCAL cBrisatiDN := "N"
     LOCAL nCnt
     LOCAL oError
@@ -1216,7 +1215,8 @@ FUNCTION gen_eIsporuke()
         nX++
 
         // godina: 2020 -> 20   mjesec: 01, 02, 03 ...
-       cPorezniPeriod := RIGHT(AllTrim(STR(Year(dDatOd))), 2) + PADL(AllTrim(STR(Month(dDatOd))), 2, "0")
+       cPorGodina := RIGHT(AllTrim(STR(Year(dDatOd))), 2)
+       cPorezniPeriod := cPorGodina + PADL(AllTrim(STR(Month(dDatOd))), 2, "0")
 
        IF !enab_eisp_check_porezni_period(cPorezniPeriod)
           BoxC()
@@ -1224,22 +1224,13 @@ FUNCTION gen_eIsporuke()
        ENDIF
 
         SELECT F_TMP
-        IF !use_sql( "EISP", "select max(eisporuke_id) as max from public.eisporuke where porezni_period<>" + sql_quote(cPorezniPeriod))
+        IF !use_sql( "EISP", "select max(eisporuke_id) as max from public.eisporuke where LEFT(porezni_period, 2)=" + sql_quote(cPorGodina) + " AND porezni_period<>" + sql_quote(cPorezniPeriod))
             MsgBeep("eisporuke sql tabela nedostupna?!")
             BoxC()
             RETURN .F.
         ENDIF
         nRbr := eisp->max + 1
         USE
-        SELECT F_TMP
-        BEGIN SEQUENCE WITH {| err| Break( err ) }
-            use_sql( "EISP", "select max(g_r_br) as max from fmk.epdv_kif")
-            nRbr2 := enab->max + 1
-            USE
-        RECOVER USING oError
-        END SEQUENCE
-
-        nRbr := Round(Max(nRbr, nRbr2), 0)
         
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY " brisati period " + cPorezniPeriod +" pa ponovo generisati?:" GET cBrisatiDN PICT "@!" VALID cBrisatiDN $ "DN"
         @ box_x_koord() + nX++, box_y_koord() + 2 SAY "Redni broj naredne eIsporuke:" GET nRbr PICT 99999
