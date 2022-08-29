@@ -67,7 +67,6 @@ FUNCTION xlsx_export_do_fill_row( hRow )
    
     LOCAL nI, cKey
 
-   
     IF s_pWorkSheet == NIL
        
        s_pWorkBook := workbook_new( s_cXlsxName )

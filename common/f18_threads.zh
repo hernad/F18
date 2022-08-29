@@ -10,7 +10,7 @@
  */
 
 #include "f18.zhh"
-
+x
 STATIC s_nThreadCount := 0
 STATIC s_mtxMutex
 STATIC s_mainThreadID

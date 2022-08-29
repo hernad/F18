@@ -179,7 +179,7 @@ FUNCTION pp_2( x )
    hRet["1"] := "OK"
    hRet["2"] := "OK2"
 
-   ? "py_callback(10,10):", py_callback(10,10)
+   //? "py_callback(10,10):", py_callback(10,10)
 
    ? _tmp
    RETURN hRet

@@ -261,7 +261,6 @@ METHOD LDExportTxt:copy_existing_formula( id_formula )
 // -----------------------------------------------------------
 // generisanje podataka u pomocnu tabelu iz sql-a
 // -----------------------------------------------------------
-
 METHOD LDExportTxt:fill_data_from_ld()
 
    LOCAL _ok := .F.
@@ -427,7 +426,6 @@ METHOD LDExportTxt:fill_data_from_ld()
 // vraca liniju koja ce sluziti kao makro za odsjecanje i prikaz
 // teksta
 // -----------------------------------------------------------
-
 METHOD LDExportTxt:get_export_line_macro()
 
    LOCAL _struct
@@ -441,7 +439,6 @@ METHOD LDExportTxt:get_export_line_macro()
 // -----------------------------------------------------------
 // pravi txt fajl na osnovu dbf tabele i makro linije
 // -----------------------------------------------------------
-
 METHOD LDExportTxt:create_txt_from_dbf()
 
    LOCAL _ok := .F.
@@ -533,7 +530,6 @@ METHOD LDExportTxt:create_txt_from_dbf()
 // -----------------------------------------------------------
 // glavna metoda exporta
 // -----------------------------------------------------------
-
 METHOD LDExportTxt:export()
 
    LOCAL _ok := .F.
@@ -604,7 +600,6 @@ METHOD LDExportTxt:export_setup_duplicate()
 // -----------------------------------------------------------
 // podesenje varijanti exporta
 // -----------------------------------------------------------
-
 METHOD LDExportTxt:export_setup()
 
    LOCAL _ok := .F.
@@ -717,8 +712,6 @@ METHOD LDExportTxt:export_setup()
 // -----------------------------------------------------------
 // citanje podesenja varijanti
 // -----------------------------------------------------------
-
-
 METHOD LDExportTxt:export_setup_read_params( id )
 
    LOCAL _param_name := "ld_export_" + PadL( AllTrim( Str( id ) ), 2, "0" ) + "_"
@@ -738,12 +731,9 @@ METHOD LDExportTxt:export_setup_read_params( id )
 
 
 
-
-
 // -----------------------------------------------------------
 // snimanje podesenja varijanti
 // -----------------------------------------------------------
-
 METHOD LDExportTxt:export_setup_write_params( id )
 
    LOCAL _param_name := "ld_export_" + PadL( AllTrim( Str( id ) ), 2, "0" ) + "_"

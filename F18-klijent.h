@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <Python.h>
+
 #define SHARED_LIB
 
 #include "zh_vm_pub.h"
@@ -18,3 +20,5 @@ int main( int argc, char * argv[] );
 #endif
 
 void simple_printf(const char* fmt, ...);
+
+PyObject *f18lib_set_callback(PyObject *self, PyObject *args);

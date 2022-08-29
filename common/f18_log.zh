@@ -11,7 +11,6 @@
 
 #include "f18.zhh"
 
-
 FUNCTION f18_view_log( _params )
 
    LOCAL _data
@@ -30,7 +29,6 @@ FUNCTION f18_view_log( _params )
    cLogFile := print_log_data( _data, _params, _print_to_file )
 
    RETURN cLogFile
-
 
 
 
