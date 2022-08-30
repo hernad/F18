@@ -120,7 +120,7 @@ FUNCTION kalk_unos_dok_81( hParams )
    // ENDIF
 
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _kolicina PICT PicKol VALID _kolicina <> 0
+   @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "Količina " GET _kolicina PICT PicKol //VALID _kolicina <> 0
 
    IF kalk_is_novi_dokument()
       select_o_koncij( _pkonto )
