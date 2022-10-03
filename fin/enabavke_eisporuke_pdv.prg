@@ -271,4 +271,4 @@ FUNCTION eNab_eIsp_PDV()
 //
 FUNCTION pdv_prijava_zaok_decimal(nInput)
 
-   RETURN ROUND(nInput, 0)
+   RETURN ROUND(nInput, 2)
