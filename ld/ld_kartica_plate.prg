@@ -282,6 +282,16 @@ STATIC FUNCTION ld_zagl_kartica()
    ? idradn, "-", RADNIK_PREZ_IME, "  Mat.br:", radn->matbr
    ld_angazovan_od_do( radn->hiredfrom, radn->hiredto, "" )
    ? _l( "Radno mjesto:" ), radn->rmjesto, "  STR.SPR:", IDSTRSPR
+
+   altd()
+   // RG Osnovna plata
+   IF parobr->k8 != 0
+      // i17 - minuli
+      ?U "Osnovna plata:", Transform( parobr->K8, "99999.99" ), "     Učinak:", Transform((_uneto - _i17 - parobr->k8) / _usati, "9999.9999")
+      ?
+   ENDIF
+
+
    ? _l( "Vrsta posla:" ), idvposla, vposla->naz, "         Radi od:", radn->datod
    ? IF( gBodK == "1", _l( "Broj bodova :" ), _l( "Koeficijent :" ) ), Transform( brbod, "99999.99" ), Space( 24 )
    IF gMinR == "B"
@@ -289,7 +299,7 @@ STATIC FUNCTION ld_zagl_kartica()
    ELSE
       ?? _l( "K.Min.rada:" ), Transform( kminrad, "99.99%" )
    ENDIF
-   ? IF( gBodK == "1", _l( "Vrijednost boda:" ), _l( "Vr.koeficijenta:" ) ), Transform( parobr->vrbod, "99999.99999" )
+   ? IIF( gBodK == "1", _l( "Vrijednost boda:" ), _l( "Vr.koeficijenta:" ) ), Transform( parobr->vrbod, "99999.99999" )
 
    IF radn->n1 <> 0 .OR. radn->n2 <> 0
       ? _l( "N1:" ), Transform( radn->n1, "99999999.9999" )
