@@ -283,7 +283,6 @@ STATIC FUNCTION ld_zagl_kartica()
    ld_angazovan_od_do( radn->hiredfrom, radn->hiredto, "" )
    ? _l( "Radno mjesto:" ), radn->rmjesto, "  STR.SPR:", IDSTRSPR
 
-   altd()
    // RG Osnovna plata
    IF parobr->k8 != 0
       // i17 - minuli

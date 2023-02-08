@@ -539,7 +539,6 @@ STATIC FUNCTION kalkulacija_obracuna_plate_za_radnika( lNovi )
    _udopr := nDop
    //_udop_st := 31.0
    
-   altd()
    IF lInRs 
       nPorOsnovica := _ubruto - _ulicodb
    ELSE
@@ -587,7 +586,6 @@ STATIC FUNCTION ld_unos_obracuna_footer( lSaveObracun )
 
    // direktno se unose globalne vars iz tabele ld: ld->usati, ld->lucodb, ... ld->uiznos
 
-   altd()
    @ box_x_koord() + 19, box_y_koord() + 2 SAY "Ukupno sati:"
    @ Row(), Col() + 1 SAY _usati PICT gPics
    @ box_x_koord() + 19, Col() + 2 SAY "Uk.lic.odb.:"

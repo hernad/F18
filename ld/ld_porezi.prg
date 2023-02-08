@@ -268,7 +268,6 @@ FUNCTION ld_obr_porez(cTipPor, nGodina, nMjesec, nUkPorOsnovica, nUkPorez) //, n
          //ELSEIF por->por_tip == "R"
          //   nTmpOsnova := nUkPorNaRukeOsnova
          //ENDIF
-         altd()
          // port_tip == "R" vodne naknade
          IF nUkPorOsnovica < 0
             nUkPorOsnovica := 0

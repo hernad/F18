@@ -261,6 +261,7 @@ FUNCTION ld_popuni_ops_ld( cTip, cPorId, aPorezi, nOsnovaNeto, nPorOsnovaBruto, 
       aPorezi := {}
    ENDIF
 
+   altd()
    IF cTip == "S" // stepenasti obracun
 
       cPrObr := get_pr_obracuna()
