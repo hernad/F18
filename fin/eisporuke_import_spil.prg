@@ -371,7 +371,7 @@ FUNCTION fin_spil_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             ELSE
                cIdKontoPDV := "47101" // ne-PDV obveznik
             ENDIF
-            cIdKontoPrihod := "4302" // partner koji je uplatio
+            cIdKontoPrihod := "4340" // partner koji je uplatio
          ENDIF
 
          hFinItem := hb_hash()
