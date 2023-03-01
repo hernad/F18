@@ -21,7 +21,7 @@ ZH_COMP_OPTS_F18=[
     "-izh_harupdf",
     "-Ithird_party/harupdf",
     "-Ithird_party/xlsxwriter",
-    #"-DGT_DEFAULT_CONSOLE",
+    "-DGT_DEFAULT_CONSOLE",
     "-DELECTRON_HOST",
     #"-DGT_DEFAULT_GUI",
     "-DF18_POS",
