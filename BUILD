@@ -129,32 +129,32 @@ cc_binary(
 #    visibility = ["//visibility:public"],
 #)
 
-shared_library(
-    name = "F18-py",
-    os = "windows",
-    srcs = [ ":F18_zh", "F18-klijent.c" ],
-    hdrs = glob([
-        "*.h",
-        "*.zhh",
-    ]) + PYTHON_HEADERS + POSTGRESQL_HEADERS,
-    deps = [
-        "//zh_zero:headers", 
-        "//zh_vm:headers", 
-        "//zh_rtl:headers", 
-        ":ziher_dll_import"] + POSTGRESQL_LIB,
-    linkopts = L_OPTS + L_OPTS_2,
-    copts = [
-        "-Izh_zero",
-        "-Izh_vm",
-        "-Izh_rtl",
-        "-DZH_DYNLIB",
-    ]  + POSTGRESQL_COPT + PYTHON_COPT + ZIHER_TRACE_LEVEL,
-    visibility = ["//visibility:public"],
-    exec_compatible_with = [
-        #"@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-)
+#shared_library(
+#    name = "F18-py",
+#    os = "windows",
+#    srcs = [ ":F18_zh", "F18-klijent.c" ],
+#    hdrs = glob([
+#        "*.h",
+#        "*.zhh",
+#    ]) + PYTHON_HEADERS + POSTGRESQL_HEADERS,
+#    deps = [
+#        "//zh_zero:headers", 
+#        "//zh_vm:headers", 
+#        "//zh_rtl:headers", 
+#        ":ziher_dll_import"] + POSTGRESQL_LIB,
+#    linkopts = L_OPTS + L_OPTS_2,
+#    copts = [
+#        "-Izh_zero",
+#        "-Izh_vm",
+#        "-Izh_rtl",
+#        "-DZH_DYNLIB",
+#    ]  + POSTGRESQL_COPT + PYTHON_COPT + ZIHER_TRACE_LEVEL,
+#    visibility = ["//visibility:public"],
+#    exec_compatible_with = [
+#        #"@platforms//cpu:x86_64",
+#        "@platforms//os:windows",
+#    ],
+#)
 
 windows_dll_library(
     name = "F18",
@@ -323,6 +323,10 @@ windows_dll_library(
     #linkstatic = False,
     #linkshared = True,
     visibility = ["//visibility:public"],
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+    ],
 )
 
 #shared_library(
