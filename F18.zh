@@ -261,12 +261,6 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
       AAdd( aMeniExec, {|| MainFakt( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
    ENDIF
 
-   IF f18_use_module( "epdv" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". ePDV  # elektronska evidencija PDV-a" )
-      AAdd( aMeniExec, {|| MainEpdv( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-
    IF f18_use_module( "ld" )
       cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
       AAdd( aMeniOpcije, cMenuBrojac + ". LD    # obračun plata" )
