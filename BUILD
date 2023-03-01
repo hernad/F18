@@ -25,8 +25,8 @@ ZH_COMP_OPTS_F18=[
     "-DELECTRON_HOST",
     #"-DGT_DEFAULT_GUI",
     "-DF18_POS",
-    #"-DF18_DEBUG",
-    #"-b" no debug
+    "-DF18_DEBUG",
+    "-b" #debug
 ]
 
 filegroup(
@@ -238,6 +238,8 @@ _ZIHER_SRCS = [
        "//zh_zero:c_sources",
        "//zh_vm:c_sources", 
        "//zh_vm:zh_vm_zh",
+       "//zh_debug:zh_debug_zh", # debugger
+       "//zh_debug:c_sources", # debugger
        "//zh_macro:c_sources",
        "//zh_rtl:c_sources",
        "//zh_rtl:zh_rtl_zh",
@@ -270,6 +272,7 @@ _ZIHER_DEPS = [
         "//zh_vm:headers",
         "//zh_macro:headers",
         "//zh_comp:headers",
+        "//zh_debug:headers", #debugger
         "//zh_rtl:headers",
         "//zh_rtl/gt:headers",
         "//zh_rtl/rdd:headers",

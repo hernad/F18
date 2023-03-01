@@ -101,15 +101,27 @@ METHOD F18Login:New()
    hDbParamsIni[ "port" ] := nil
    hDbParamsIni[ "session" ] := nil
 
-   IF !f18_ini_config_read( F18_SERVER_INI_SECTION + iif( test_mode(), "_test", "" ), @hDbParamsIni, .T. )
-      error_bar( "ini", "problem f18 ini read" )
-   ENDIF
+   altd()
+   if GetEnv( "F18_ODOO" ) == "1"
+      hDbParamsIni[ "host" ] := GetEnv("F18_DB_HOST")
+      hDbParamsIni[ "database" ] := GetEnv("F18_DB_DATABASE")
+      hDbParamsIni[ "user" ] := GetEnv("F18_DB_USER")
+      hDbParamsIni[ "schema" ] := GetEnv("F18_DB_SCHEMA")
+      hDbParamsIni[ "port" ] := Val(GetEnv("F18_DB_PORT"))
+      hDbParamsIni[ "session" ] := GetEnv("F18_DB_SESSION")
+      hDbParamsIni[ "password" ] := GetEnv("F18_DB_PASSWORD")
+   else
 
-   IF ValType( hDbParamsIni[ "port" ] ) == "C" // port je numeric
-      hDbParamsIni[ "port" ] := Val( hDbParamsIni[ "port" ] )
-   ENDIF
-   hDbParamsIni[ "password" ] := hDbParamsIni[ "user" ]
+      IF !f18_ini_config_read( F18_SERVER_INI_SECTION + iif( test_mode(), "_test", "" ), @hDbParamsIni, .T. )
+         error_bar( "ini", "problem f18 ini read" )
+      ENDIF
 
+      IF ValType( hDbParamsIni[ "port" ] ) == "C" // port je numeric
+         hDbParamsIni[ "port" ] := Val( hDbParamsIni[ "port" ] )
+      ENDIF
+      hDbParamsIni[ "password" ] := hDbParamsIni[ "user" ]
+   
+   endif
    my_server_params( hDbParamsIni )
 
    ::set_data_connection_params( hDbParamsIni )
