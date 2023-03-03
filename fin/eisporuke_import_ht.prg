@@ -70,29 +70,29 @@ FUNCTION fin_ht_get_fin_stavke(dDatod, dDatDo)
          IF lPDV 
             IF lPdvObveznik
                cIdKontoPDV := Padr("4700", 7)
-               cIdKontoPrihod := Padr("6116", 7)
+               cIdKontoPrihod := Padr("6210", 7)
             ELSE
                // Partner ne-PDV obveznik
                cIdKontoPDV := Padr("4730", 7)
-               cIdKontoPrihod := Padr("61160", 7)
+               cIdKontoPrihod := Padr("62101", 7)
             ENDIF
          ENDIF
 
          IF lIno
                cIdKonto := Padr("2122", 7)
-               cIdKontoPrihod := Padr("6122", 7)
+               cIdKontoPrihod := Padr("6220", 7)
          ENDIF
 
          IF lPdvObveznik .AND. !lPDV // PDV obveznik nepovezano pravno lice, oslobodjen po nekom clanu PDVa-
             cIdKonto := Padr("2112", 7)
-            cIdKontoPrihod := Padr("6122", 7)
+            cIdKontoPrihod := Padr("6220", 7)
          ENDIF
 
          IF ht_povezana_lica(cIdPartner)
                cIdKonto := "2100"
-               cIdKontoPrihod := "6102"
+               cIdKontoPrihod := "6200"
                IF !Empty(htfakt->clan) // oslobodjenje po clanovima 26, 27, 30
-                  cIdKontoPrihod := Padr("61020", 7)
+                  cIdKontoPrihod := Padr("62001", 7)
                ENDIF
          ENDIF
             
