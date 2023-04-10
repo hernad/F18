@@ -367,6 +367,12 @@ FUNCTION fakt_v_kolicina( cTipVpc )
             LOOP
          ENDIF
 
+         // gledaj stanje do datuma dokumenta u pripremi
+         IF fakt->datdok > _datdok
+            SKIP
+            LOOP
+         ENDIF
+
          IF idtipdok = "0"
             nUl  += kolicina
          ELSEIF idtipdok = "1"
