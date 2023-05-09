@@ -219,7 +219,7 @@ shared_library(
         "//zh_zero:headers", 
         "//zh_rtl:headers",
         "//zh_vm:headers",
-        ":ziher_import"] + POSTGRESQL_LIB,
+        ":ziher_import"] + PYTHON_LIB + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
