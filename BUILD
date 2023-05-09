@@ -71,11 +71,10 @@ shared_library(
         "*.h",
         "*.zhh",
     ]) + POSTGRESQL_HEADERS,
-    deps = [ "//zh_zero:headers", ":F18_import", ":ziher_import"],
+    deps = [ "//zh_zero:headers", ":F18_import", ":ziher_import"] + PYTHON_LIB + POSTGRESQL_LIB,
     linkopts = L_OPTS + L_OPTS_2,
     copts = [
         "-Izh_zero",
-        "-I/usr/include/python3.9",
         "-Izh_vm",
         "-Izh_rtl",
         "-DZH_DYNLIB",
