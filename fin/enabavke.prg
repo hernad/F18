@@ -47,7 +47,7 @@ FUNCTION parametri_eNabavke()
 
     LOCAL cEnabUvozSwitchKALK := PadR( fetch_metric( "fin_enab_uvoz_switch_kalk", NIL, "N" ), 1 )
 
-    Box(, 17, 80 )
+    Box(, 23, 80 )
 
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY "***** eNabavke PARAMETRI *****"
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Konto klasa dobavljaci        " GET cIdKontoDobav VALID !Empty(cIdKontoDobav)
@@ -79,13 +79,13 @@ FUNCTION parametri_eNabavke()
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(blagajna, izvodi, obračun PDV)" GET cNabExcludeIdvn PICTURE "@S35" 
 
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(05 - ino usluge)" GET cNabIdvn05 PICTURE "@S35"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(06 - KO)" GET cNabIdvn06 PICTURE "@S35"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(07 - ispravak odbitka)" GET cNabIdvn07 PICTURE "@S35"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(08 - shema građ primljeni izvj. izvođač)" GET cNabIdvn08 PICTURE "@S35"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(09 - ostalo)" GET cNabIdvn09 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(05 - ino usluge)                  " GET cNabIdvn05 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(06 - KO)                          " GET cNabIdvn06 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(07 - ispravak odbitka)            " GET cNabIdvn07 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(08 - građ primljeni izvj. izvođač)" GET cNabIdvn08 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(09 - ostalo)                      " GET cNabIdvn09 PICTURE "@S35"
 
-    @ box_x_koord() + nX, COL() + 2 SAY8 "Posebna schema patch[1]  " GET cShemaPatch1 PICTURE "@!" VALID cShemaPatch1 $ "DN"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Posebna schema patch[1]  " GET cShemaPatch1 PICTURE "@!" VALID cShemaPatch1 $ "DN"
        
     nX++
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "Kontiranje KALK 10/uvoz zamijeniti sa FIN-gen enabavke (D/N):" GET cEnabUvozSwitchKALK ;
@@ -805,13 +805,13 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
         // ako se radi o vrsti naloga koji zelimo oznaciti u CSV kao tip '05'
         IF (cAlias)->idvn $ hNabIdvn["05"]
             cTipDokumenta2 := "05"
-        ELSE IF (cAlias)->idvn $ hNabIdvn["06"]
+        ELSEIF (cAlias)->idvn $ hNabIdvn["06"]
             cTipDokumenta2 := "06"
-        ELSE IF (cAlias)->idvn $ hNabIdvn["07"]    
+        ELSEIF (cAlias)->idvn $ hNabIdvn["07"]    
             cTipDokumenta2 := "07"
-        ELSE IF (cAlias)->idvn $ hNabIdvn["08"]
+        ELSEIF (cAlias)->idvn $ hNabIdvn["08"]
             cTipDokumenta2 := "08"
-        ELSE IF (cAlias)->idvn $ hNabIdvn["09"]    
+        ELSEIF (cAlias)->idvn $ hNabIdvn["09"]    
             cTipDokumenta2 := "09"            
         ENDIF
 
@@ -1286,13 +1286,7 @@ FUNCTION gen_eNabavke()
     LOCAL cIdKontoPDVOstaloNP := PadR( fetch_metric( "fin_enab_idkonto_pdv_ostalo_np", NIL, "27698" ), 7 )
 
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
-    LOCAL hNabIdvn = hb_hash()
-    hNabIdvn["05"] := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05" ), 100 )
-    hNabIdvn["06"] := PadR( fetch_metric( "fin_enab_idvn_06", NIL, "06" ), 100 )
-    hNabIdvn["07"] := PadR( fetch_metric( "fin_enab_idvn_07", NIL, "07" ), 100 )
-    hNabIdvn["08"] := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "08" ), 100 )
-    hNabIdvn["09"] := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "09" ), 100 )
-
+    LOCAL hNabIdvn := hb_hash()
     LOCAL cPDV  := fetch_metric( "fin_enab_my_pdv", NIL, PadR( "<POPUNI>", 12 ) )
     LOCAL dDatOd := fetch_metric( "fin_enab_dat_od", my_user(), DATE()-1 )
     LOCAL dDatDo := fetch_metric( "fin_enab_dat_do", my_user(), DATE() )
@@ -1308,8 +1302,13 @@ FUNCTION gen_eNabavke()
     LOCAL GetList := {}
     LOCAL cLokacijaExport := my_home() + "export" + SLASH, nCreate
 
+    hNabIdvn["05"] := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05" ), 100 )
+    hNabIdvn["06"] := PadR( fetch_metric( "fin_enab_idvn_06", NIL, "06" ), 100 )
+    hNabIdvn["07"] := PadR( fetch_metric( "fin_enab_idvn_07", NIL, "07" ), 100 )
+    hNabIdvn["08"] := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "08" ), 100 )
+    hNabIdvn["09"] := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "09" ), 100 )
 
-    Box(, 6, 70 )
+    Box(, 6, 7 )
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 " Vaš PDV broj:" GET cPDV
     @ box_x_koord() + nX, box_y_koord() + 2 SAY "Za period od:" GET dDatOd
     @ box_x_koord() + nX++, col() + 2 SAY "Za period od:" GET dDatDo
