@@ -37,7 +37,12 @@ FUNCTION parametri_eNabavke()
     LOCAL cIdKontoPDVOstaloNP := PadR( fetch_metric( "fin_enab_idkonto_pdv_ostalo_np", NIL, "27698" ), 7 )
 
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
-    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
+    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05" ), 100 )
+    LOCAL cNabIdvn06 := PadR( fetch_metric( "fin_enab_idvn_06", NIL, "06" ), 100 )
+    LOCAL cNabIdvn07 := PadR( fetch_metric( "fin_enab_idvn_07", NIL, "07" ), 100 )
+    LOCAL cNabIdvn08 := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "08" ), 100 )
+    LOCAL cNabIdvn09 := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "09" ), 100 )
+
     LOCAL cShemaPatch1 := PadR( fetch_metric( "fin_enab_schema_patch_1", NIL, "N" ), 1 )
 
     LOCAL cEnabUvozSwitchKALK := PadR( fetch_metric( "fin_enab_uvoz_switch_kalk", NIL, "N" ), 1 )
@@ -73,9 +78,12 @@ FUNCTION parametri_eNabavke()
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji su isključuju iz generacije eNabavki/eIsporuka"
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(blagajna, izvodi, obračun PDV)" GET cNabExcludeIdvn PICTURE "@S35" 
 
-
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke/eIsporuke"
-    @ box_x_koord() + nX, box_y_koord() + 2 SAY8 "(tip 05)" GET cNabIdvn05 PICTURE "@S35" 
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(05 - ino usluge)" GET cNabIdvn05 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(06 - KO)" GET cNabIdvn06 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(07 - ispravak odbitka)" GET cNabIdvn07 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(08 - shema građ primljeni izvj. izvođač)" GET cNabIdvn08 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(09 - ostalo)" GET cNabIdvn09 PICTURE "@S35"
 
     @ box_x_koord() + nX, COL() + 2 SAY8 "Posebna schema patch[1]  " GET cShemaPatch1 PICTURE "@!" VALID cShemaPatch1 $ "DN"
        
@@ -116,7 +124,12 @@ FUNCTION parametri_eNabavke()
     set_metric( "fin_enab_idkonto_pdv_ostalo_np", NIL, cIdKontoPDVOstaloNP)
     
     set_metric( "fin_enab_idvn_exclude", NIL, Trim(cNabExcludeIdvn) )
+
     set_metric( "fin_enab_idvn_05", NIL, Trim(cNabIdvn05) )
+    set_metric( "fin_enab_idvn_06", NIL, Trim(cNabIdvn06) )
+    set_metric( "fin_enab_idvn_07", NIL, Trim(cNabIdvn07) )
+    set_metric( "fin_enab_idvn_08", NIL, Trim(cNabIdvn08) )
+    set_metric( "fin_enab_idvn_09", NIL, Trim(cNabIdvn09) )
 
     set_metric( "fin_enab_uvoz_switch_kalk", NIL, cEnabUvozSwitchKALK )
     set_metric( "fin_enab_schema_patch_1", NIL, cShemaPatch1)
@@ -601,7 +614,7 @@ select get_sifk('PARTN', 'PDVB', fin_suban.idpartner) as pdv_broj, get_sifk('PAR
 
 */
 
-STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDokumenta, cIdKonto, cIdKontoNP, cNabExcludeIdvn, cNabIdvn05, ;
+STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDokumenta, cIdKonto, cIdKontoNP, cNabExcludeIdvn, hNabIdvn, ;
         lUslugeStranogLica, lSamoPDV0, lSchema, hNalog, hUkupno )
 
     LOCAL cSelectFields, cBrDokFinFin2, cFinNalogNalog2, cLeftJoinFin2, cBrDokFinFin3, cFinNalogNalog3, cLeftJoinFin3 
@@ -790,8 +803,16 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
         ENDIF
 
         // ako se radi o vrsti naloga koji zelimo oznaciti u CSV kao tip '05'
-        IF (cAlias)->idvn $ cNabIdvn05
+        IF (cAlias)->idvn $ hNabIdvn["05"]
             cTipDokumenta2 := "05"
+        ELSE IF (cAlias)->idvn $ hNabIdvn["06"]
+            cTipDokumenta2 := "06"
+        ELSE IF (cAlias)->idvn $ hNabIdvn["07"]    
+            cTipDokumenta2 := "07"
+        ELSE IF (cAlias)->idvn $ hNabIdvn["08"]
+            cTipDokumenta2 := "08"
+        ELSE IF (cAlias)->idvn $ hNabIdvn["09"]    
+            cTipDokumenta2 := "09"            
         ENDIF
 
         hRec["enabavke_id"] := nRbr
@@ -1265,7 +1286,12 @@ FUNCTION gen_eNabavke()
     LOCAL cIdKontoPDVOstaloNP := PadR( fetch_metric( "fin_enab_idkonto_pdv_ostalo_np", NIL, "27698" ), 7 )
 
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
-    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
+    LOCAL hNabIdvn = hb_hash()
+    hNabIdvn["05"] := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05" ), 100 )
+    hNabIdvn["06"] := PadR( fetch_metric( "fin_enab_idvn_06", NIL, "06" ), 100 )
+    hNabIdvn["07"] := PadR( fetch_metric( "fin_enab_idvn_07", NIL, "07" ), 100 )
+    hNabIdvn["08"] := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "08" ), 100 )
+    hNabIdvn["09"] := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "09" ), 100 )
 
     LOCAL cPDV  := fetch_metric( "fin_enab_my_pdv", NIL, PadR( "<POPUNI>", 12 ) )
     LOCAL dDatOd := fetch_metric( "fin_enab_dat_od", my_user(), DATE()-1 )
@@ -1388,32 +1414,32 @@ FUNCTION gen_eNabavke()
 
 
     // 05 tip ostalo u CSV - usluge strana lica internet fakture
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVUslugeStranaLica, cIdKontoPDVUslugeStranaLicaNP, cNabExcludeIdvn, cNabIdvn05, .T., .F., .F.,;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVUslugeStranaLica, cIdKontoPDVUslugeStranaLicaNP, cNabExcludeIdvn, hNabIdvn, .T., .F., .F.,;
         NIL, @hUkupno)
 
     // 03 dati avansi
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "03", cIdKontoPDVAvansi, cIdKontoPDVAvansiNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .F.,;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "03", cIdKontoPDVAvansi, cIdKontoPDVAvansiNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F.,;
         NIL, @hUkupno)
 
     // posebna schema u gradjevinarstvu
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cIdKontoPDVSchemaNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .T. /* lSchema */, ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cIdKontoPDVSchemaNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .T. /* lSchema */, ;
         NIL, @hUkupno)
 
     // poljoprivreda
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVPolj, cIdKontoPDVPoljNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .F., ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVPolj, cIdKontoPDVPoljNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
         NIL, @hUkupno)
 
     // 04 uvoz
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04", cIdKontoPDVUvoz, cIdKontoPDVUvozNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .F., ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04", cIdKontoPDVUvoz, cIdKontoPDVUvozNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
         NIL, @hUkupno)
 
     // 05 - knjizenja ostalo 278
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVOstalo, cIdKontoPDVOstaloNP, cNabExcludeIdvn, cNabIdvn05, .F., .F., .F., ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVOstalo, cIdKontoPDVOstaloNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
         NIL, @hUkupno)
 
 
     // 01 standardne nabavke moraju biti na kraju
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDV, cIdKontoPDVNP, cNabExcludeIdvn, cNabIdvn05, .F., .T., .F., ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDV, cIdKontoPDVNP, cNabExcludeIdvn, hNabIdvn, .F., .T., .F., ;
         NIL, @hUkupno)
 
     

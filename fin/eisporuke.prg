@@ -23,7 +23,11 @@ FUNCTION parametri_eIsporuke()
     LOCAL cIdKontoPDVSchema := PadR( fetch_metric( "fin_eisp_idkonto_pdv_schema", NIL, "475" ), 7 )
     LOCAL cIdKontoPDVOstalo := PadR( fetch_metric( "fin_eisp_idkonto_pdv_ostalo", NIL, "478" ), 7 )
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
-    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
+    LOCAL cIspIdvn05 := PadR( fetch_metric( "fin_eisp_idvn_05", NIL, "55" ), 100 )
+    LOCAL cIspIdvn06 := PadR( fetch_metric( "fin_eisp_idvn_06", NIL, "56" ), 100 )
+    LOCAL cIspIdvn07 := PadR( fetch_metric( "fin_eisp_idvn_07", NIL, "57" ), 100 )
+    LOCAL cIspIdvn08 := PadR( fetch_metric( "fin_eisp_idvn_08", NIL, "58" ), 100 )
+    LOCAL cIspIdvn09 := PadR( fetch_metric( "fin_eisp_idvn_09", NIL, "59" ), 100 )
 
     Box(, 18, 80 )
 
@@ -50,8 +54,12 @@ FUNCTION parametri_eIsporuke()
        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji su isključuju iz generacije eNabavki/eIsporuke"
        @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(blagajna, izvodi, obračun PDV)" GET cNabExcludeIdvn PICTURE "@S35"
 
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke/eIsporuke"
-       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(tip 05)" GET cNabIdvn05 PICTURE "@S35" 
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eIsporuke"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(05 - ino usluge)" GET cIspIdvn05 PICTURE "@S35"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(06 - umanjenje po PDV-SL-2)" GET cIspIdvn06 PICTURE "@S35"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(07 - manjak po čl.11 Pravil)" GET cIspIdvn07 PICTURE "@S35"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(08 - izvršene donacije)" GET cIspIdvn08 PICTURE "@S35"
+       @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(09 - ostalo)" GET cIspIdvn09 PICTURE "@S35"
 
        READ
     BoxC()
@@ -73,8 +81,11 @@ FUNCTION parametri_eIsporuke()
     set_metric( "fin_eisp_idkonto_pdv_schema", NIL, cIdKontoPDVSchema)
     set_metric( "fin_eisp_idkonto_pdv_ostalo", NIL, cIdKontoPDVOstalo)
     set_metric( "fin_enab_idvn_exclude", NIL, Trim(cNabExcludeIdvn))
-    set_metric( "fin_enab_idvn_05", NIL, Trim(cNabIdvn05) )
-
+    set_metric( "fin_eisp_idvn_05", NIL, Trim(cIspIdvn05) )
+    set_metric( "fin_eisp_idvn_06", NIL, Trim(cIspIdvn06) )
+    set_metric( "fin_eisp_idvn_07", NIL, Trim(cIspIdvn07) )
+    set_metric( "fin_eisp_idvn_08", NIL, Trim(cIspIdvn08) )
+    set_metric( "fin_eisp_idvn_09", NIL, Trim(cIspIdvn09) )
 
     RETURN .T.
 
@@ -431,7 +442,12 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
 
     LOCAL cIdKontoKupac := trim(fetch_metric( "fin_eisp_idkonto_kup", NIL, '21'))
     LOCAL cIdKontoDobavljac := trim(fetch_metric( "fin_enab_idkonto_dob", NIL, '43'))
-    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05,06,07" ), 100 )
+    LOCAL hIspIdvn := hb_hash()
+    hIspIdvn["05"] := PadR( fetch_metric( "fin_eisp_idvn_05", NIL, "55" ), 100 )
+    hIspIdvn["06"] := PadR( fetch_metric( "fin_eisp_idvn_06", NIL, "56" ), 100 )
+    hIspIdvn["07"] := PadR( fetch_metric( "fin_eisp_idvn_07", NIL, "57" ), 100 )
+    hIspIdvn["08"] := PadR( fetch_metric( "fin_eisp_idvn_08", NIL, "58" ), 100 )
+    hIspIdvn["09"] := PadR( fetch_metric( "fin_eisp_idvn_09", NIL, "59" ), 100 )
     
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
     
@@ -862,8 +878,16 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         ENDIF
 
         // ako se radi o vrsti naloga koji zelimo oznaciti u CSV kao tip '05'
-        IF eisp->idvn $ cNabIdvn05
+        IF eisp->idvn $ hIspIdvn["05"]
             cTipDokumenta2 := "05"
+        ELSE IF eisp->idvn $ hIspIdvn["06"]
+            cTipDokumenta2 := "06"
+        ELSE IF eisp->idvn $ hIspIdvn["07"]
+            cTipDokumenta2 := "07"
+        ELSE IF eisp->idvn $ hIspIdvn["08"]
+            cTipDokumenta2 := "08"
+        ELSE IF eisp->idvn $ hIspIdvn["09"]
+            cTipDokumenta2 := "09"
         ENDIF
 
         hRec["tip"] := cTipDokumenta2

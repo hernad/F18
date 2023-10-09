@@ -332,10 +332,10 @@ STATIC FUNCTION get_exp_fields()
    AAdd( aDBF, { "IDKONTO", "C", 7, 0 } )
    AAdd( aDBF, { "KOLICINA", "N", 10, 2 } )
    AAdd( aDBF, { "JMJ", "C", 3, 0 } )
-   AAdd( aDBF, { "STAM", "N", 12, 5 } )
-   AAdd( aDBF, { "NABVR", "N", 12, 5 } )
-   AAdd( aDBF, { "OTPVR", "N", 12, 5 } )
-   AAdd( aDBF, { "SADVR", "N", 12, 5 } )
+   AAdd( aDBF, { "STAM", "N", 18, 5 } )
+   AAdd( aDBF, { "NABVR", "N", 18, 5 } )
+   AAdd( aDBF, { "OTPVR", "N", 18, 5 } )
+   AAdd( aDBF, { "SADVR", "N", 18, 5 } )
 
    RETURN aDBF
 
