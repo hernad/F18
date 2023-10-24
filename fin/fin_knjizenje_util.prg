@@ -48,6 +48,33 @@ FUNCTION SetDatUPripr()
 
    RETURN .T.
 
+
+FUNCTION fin_pripr_delete_recno()
+
+   LOCAL nRet := 1
+   LOCAL GetList := {}
+   LOCAL nRecno := 1682, nRecNext
+   
+
+   Box(, 1, 36 )
+   @ box_x_koord() + 1, box_y_koord() + 2 SAY "Brisi stavke od RECNO:" GET nRecno
+   READ
+   BoxC()
+
+  o_fin_pripr() 
+  set order to 0
+  go nRecno
+  do while !eof()
+     skip
+     nRecNext := recno()
+     skip -1
+     my_delete()
+     go nRecNext
+  enddo
+
+  RETURN .T.
+
+
 /* K3Iz256(cK3)
  *
  *   param: cK3

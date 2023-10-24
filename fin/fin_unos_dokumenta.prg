@@ -1066,6 +1066,11 @@ FUNCTION fin_knjizenje_ostale_opcije()
       AADD(h, "")
    ENDIF
 
+   //AADD(aOpc, "4. delete by recNO")
+   //AADD(h, "")
+
+
+
    nIzbor := 1
    PRIVATE am_x := box_x_koord(), am_y := box_y_koord()
    my_close_all_dbf()
@@ -1084,6 +1089,8 @@ FUNCTION fin_knjizenje_ostale_opcije()
             fin_ht_import()
       CASE konto_2022() .and. nIzbor == 4
          fin_kontni_plan_2022()
+      //CASE nIzbor == 4
+      //      fin_pripr_delete_recno()
       ENDCASE
    ENDDO
    box_x_koord( am_x )

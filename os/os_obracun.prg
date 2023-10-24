@@ -193,7 +193,6 @@ FUNCTION os_obracun_amortizacije()
          nOstalo := hAmortizacija[ "ostalo" ]
 
 
-
          IF cAGrupe == "N" // napuni _amp
 
             ? _id, _datum, naz
@@ -827,9 +826,12 @@ FUNCTION os_proracun_amortizacija_od_do( nNabVr, nOtpVr, nOstalo, d1, d2, nGAmor
 
 FUNCTION os_obracun_revalorizacije()
 
-   LOCAL  cAGrupe := "D", nRec, dDatObr, nMjesOd, nMjesDo
+   LOCAL nRevStopa, cAGrupe := "D", nRec, dDatObr, nMjesOd, nMjesDo
    LOCAL nKoef
    LOCAL cIdSredstvo
+   LOCAL nRevAm // revalorizacija amortizacije
+   LOCAL hRec
+
 
    //o_reval()
    o_os_sii()
@@ -872,7 +874,7 @@ FUNCTION os_obracun_revalorizacije()
    ? " INV.BR     DatNab  S.Rev     Sredstvo                  Nab.vr      Otp.vr+Am   Reval.DUG    Rev.POT    Rev.Am    Stopa"
    ? m
 
-   _datotp := fix_dat_var(_datotp)
+   //_datotp := fix_dat_var(_datotp)
 
    nURevDug := 0
    nURevPot := 0
@@ -888,39 +890,59 @@ FUNCTION os_obracun_revalorizacije()
       select_o_reval( _idrev )
       select_o_os_or_sii()
 
-      nRevAm := 0
-      nKoef := izracunaj_os_reval( _datum, iif( !Empty( _datotp ), Min( dDatOBr, _datotp ), dDatObr ), @nRevAm )     // napuni _revp,_revd
+      nRevStopa := reval->I1
+      nKoef := izracunaj_os_reval( _datum, iif( !Empty( _datotp ), Min( dDatOBr, _datotp ), dDatObr ),;
+         nRevStopa, @nRevAm)     // napuni _revp,_revd
       ? _id, _datum, _idrev, _naz
-      @ PRow(), PCol() + 1 SAY _nabvr * nBBK     PICT gpici
-      @ PRow(), PCol() + 1 SAY _otpvr * nBBK + _amp * nBBK     PICT gpici
-      @ PRow(), PCol() + 1 SAY _revd * nBBK       PICT gpici
-      @ PRow(), PCol() + 1 SAY _revp * nBBK - nRevAm * nBBK  PICT gpici
-      @ PRow(), PCol() + 1 SAY nRevAm * nBBK       PICT gpici
-      @ PRow(), PCol() + 1 SAY nkoef       PICT "9999.999"
+      // nBBK - konstanta = 1
+      @ PRow(), PCol() + 1 SAY _nabvr * nBBK                 PICT gpici
+      @ PRow(), PCol() + 1 SAY _otpvr * nBBK + _amp * nBBK   PICT gPici
+
+      @ PRow(), PCol() + 1 SAY _revd * nBBK                  PICT gpici
+      @ PRow(), PCol() + 1 SAY _revp * nBBK - nRevAm * nBBK  PICT gPici
+      @ PRow(), PCol() + 1 SAY nRevAm * nBBK                 PICT gpici
+      @ PRow(), PCol() + 1 SAY nKoef * 100                   PICT "9999.999"
+
+      select_o_os_or_sii()
+
       nURevDug += _revd
       nURevPot += _revp
       nURevAm += nRevAm
-      Gather()
 
+      hRec := get_hash_record_from_global_vars()
+      SET DEVICE TO SCREEN
+      select_o_os_or_sii()
+      update_rec_server_and_dbf( Alias(), hRec, 1, "FULL" )
+      SET DEVICE TO PRINTER
+
+      Scatter()
       cIdSredstvo := _id
 
       os_select_promj( cIdSredstvo )
       // HSEEK cIdSredstvo
       DO WHILE !Eof() .AND. id == cIdSredstvo .AND. datum <= dDatObr
          Scatter()
-         nRevAm := 0
-         nKoef := izracunaj_os_reval( _datum, iif( !Empty( _datotp ), Min( dDatOBr, _datotp ), dDatObr ), @nRevAm )
+      
+         nKoef := izracunaj_os_reval( _datum, iif( !Empty( _datotp ), Min( dDatOBr, _datotp ), dDatObr ),;
+            nRevStopa, @nRevAm )
          ? Space( 10 ), _datum, _idrev, _opis
-         @ PRow(), PCol() + 1 SAY _nabvr * nBBK      PICT gpici
-         @ PRow(), PCol() + 1 SAY _otpvr * nBBK + _amp * nBBK PICT gpici
-         @ PRow(), PCol() + 1 SAY _revd * nBBK       PICT gpici
-         @ PRow(), PCol() + 1 SAY _revp * nBBK - nRevAm * nBBK  PICT gpici
-         @ PRow(), PCol() + 1 SAY nRevAm * nBBK       PICT gpici
-         @ PRow(), PCol() + 1 SAY nkoef       PICT "9999.999"
+         @ PRow(), PCol() + 1 SAY _nabvr * nBBK                PICT gpici
+         @ PRow(), PCol() + 1 SAY _otpvr * nBBK + _amp * nBBK  PICT gpici
+         @ PRow(), PCol() + 1 SAY _revd * nBBK                 PICT gpici
+         @ PRow(), PCol() + 1 SAY _revp * nBBK - nRevAm * nBBK PICT gpici
+         @ PRow(), PCol() + 1 SAY nRevAm * nBBK                PICT gpici
+         @ PRow(), PCol() + 1 SAY nKoef * 100                  PICT "9999.999"
          nURevDug += _revd
          nURevPot += _revp
          nURevAm += nRevAm
          Gather()
+
+         hRec := get_hash_record_from_global_vars()
+         SET DEVICE TO SCREEN
+         os_select_promj_area()
+         update_rec_server_and_dbf( Alias(), hRec, 1, "FULL" )
+         SET DEVICE TO PRINTER
+
          SKIP
       ENDDO
 
@@ -947,17 +969,41 @@ FUNCTION os_obracun_revalorizacije()
    RETURN
 
 
+// jednostavna revalorizacija
+FUNCTION izracunaj_os_reval( d1, d2, nStopa, nRevAm )
+
+   // AMD - amortizacija duguje
+   // AMP - amortizacija potrazuje
+
+   LOCAL nKoef := nStopa/100
+   LOCAL nRevDug, nRevPot 
+
+   IF d2 < d1 // mjesdo < mjesod
+      _revd := 0
+      _revp := 0
+      nKoef := 0
+   ENDIF
+
+   nRevDug := Round( _nabvr * nKoef, 2 )
+   nRevPot := Round( ( _otpvr + _amp ) * nKoef, 2 )
+   nRevAm := Round( _amp * nKoef, 2 )
+
+   _RevD := nRevDug
+   _RevP := nRevPot
+   
+   RETURN nKoef
 
 
 // ************************
 // d1 - od mjeseca, d2 do
 // ************************
-FUNCTION izracunaj_os_reval( d1, d2, nRevAm )
+FUNCTION izracunaj_os_reval_stari( d1, d2, nRevAm )
 
    // nRevAm - iznos revalorizacije amortizacije
    LOCAL nTrecRev
-   LOCAL nMjesOD, nMjesDo, nIzn, nIzn2, nk1, nk2, nkoef
+   LOCAL nMjesOD, nMjesDo, nIzn, nIzn2, nK1, nK2, nKoef
 
+   altd()
    IF Year( d1 ) < Year( d2 )
       //PushWA()
       //SELECT reval
