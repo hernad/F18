@@ -81,7 +81,7 @@ FUNCTION parametri_eNabavke()
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "FIN nalozi koji odredjuju ostale eNabavke"
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(05 - ino usluge)                  " GET cNabIdvn05 PICTURE "@S35"
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(06 - KO)                          " GET cNabIdvn06 PICTURE "@S35"
-    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(07 - ispravak odbitka)            " GET cNabIdvn07 PICTURE "@S35"
+    @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(07 - ispravak odbitka ul PDV)     " GET cNabIdvn07 PICTURE "@S35"
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(08 - građ primljeni izvj. izvođač)" GET cNabIdvn08 PICTURE "@S35"
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 "(09 - ostalo)                      " GET cNabIdvn09 PICTURE "@S35"
 
@@ -655,6 +655,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI-P:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci_prij,"
     cSelectFields += "COALESCE(substring(fin_suban.opis from 'MJ-KP:\s*(\d)'), 'X') as from_opis_mj_kp,"
+    cSelectFields += "COALESCE(substring(fin_suban.opis from 'TIP:\s*(\d+)'), 'UNDEF') as from_opis_tip,"
 
     //cSelectFields += "((case when sub2.d_p='1' then 1 else -1 end) * sub2.iznosbhd - (case when fin_suban.d_p='2' then 1 else -1 end) * fin_suban.iznosbhd) * -1 as bez_pdv,"
     //cSelectFields += "(case when fin_suban.d_p='2' then 1 else -1 end) * fin_suban.iznosbhd * -1 as pdv,"
@@ -805,14 +806,18 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
         // ako se radi o vrsti naloga koji zelimo oznaciti u CSV kao tip '05'
         IF (cAlias)->idvn $ hNabIdvn["05"]
             cTipDokumenta2 := "05"
-        ELSEIF (cAlias)->idvn $ hNabIdvn["06"]
-            cTipDokumenta2 := "06"
+        ELSEIF ((cAlias)->idvn $ hNabIdvn["06"] .OR. (cAlias)->iznos_pdv < 0)
+            cTipDokumenta2 := "06" // Knjizna obavjest
         ELSEIF (cAlias)->idvn $ hNabIdvn["07"]    
             cTipDokumenta2 := "07"
         ELSEIF (cAlias)->idvn $ hNabIdvn["08"]
             cTipDokumenta2 := "08"
         ELSEIF (cAlias)->idvn $ hNabIdvn["09"]    
             cTipDokumenta2 := "09"            
+        ENDIF
+
+        IF (cAlias)->from_opis_tip <> "UNDEF"
+            cTipDokumenta2 := (cAlias)->from_opis_tip
         ENDIF
 
         hRec["enabavke_id"] := nRbr
@@ -911,8 +916,8 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
         lZadanaOsnovica := .F.
 
         IF lSchema
-            // uplata na po posebnoj shemi je tip ostalo
-            cTipDokumenta2 := "05"
+            // uplata na po posebnoj shemi u gradjevinarstvu je tip 08
+            cTipDokumenta2 := "08"
             hRec[ "osn_pdv17"] := 0
             hRec[ "osn_pdv17np"] := 0
         ELSE
@@ -1308,7 +1313,7 @@ FUNCTION gen_eNabavke()
     hNabIdvn["08"] := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "08" ), 100 )
     hNabIdvn["09"] := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "09" ), 100 )
 
-    Box(, 6, 7 )
+    Box(, 6, 70 )
     @ box_x_koord() + nX++, box_y_koord() + 2 SAY8 " Vaš PDV broj:" GET cPDV
     @ box_x_koord() + nX, box_y_koord() + 2 SAY "Za period od:" GET dDatOd
     @ box_x_koord() + nX++, col() + 2 SAY "Za period od:" GET dDatDo
@@ -1421,19 +1426,19 @@ FUNCTION gen_eNabavke()
         NIL, @hUkupno)
 
     // posebna schema u gradjevinarstvu
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cIdKontoPDVSchemaNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .T. /* lSchema */, ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "08", cIdKontoPDVSchema, cIdKontoPDVSchemaNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .T. /* lSchema */, ;
         NIL, @hUkupno)
 
     // poljoprivreda
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVPolj, cIdKontoPDVPoljNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "09", cIdKontoPDVPolj, cIdKontoPDVPoljNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
         NIL, @hUkupno)
 
     // 04 uvoz
     gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04", cIdKontoPDVUvoz, cIdKontoPDVUvozNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
         NIL, @hUkupno)
 
-    // 05 - knjizenja ostalo 278
-    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVOstalo, cIdKontoPDVOstaloNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
+    // 09 - knjizenja ostalo 278
+    gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "09", cIdKontoPDVOstalo, cIdKontoPDVOstaloNP, cNabExcludeIdvn, hNabIdvn, .F., .F., .F., ;
         NIL, @hUkupno)
 
 

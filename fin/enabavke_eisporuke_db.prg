@@ -135,8 +135,8 @@ FUNCTION db_create_enabavke_eisporuke(lSilent)
     cQuery += "ALTER TABLE public.enabavke drop constraint allowed_enabavke_vrste;"
     cQuery += "ALTER TABLE public.eisporuke drop constraint allowed_eisporuke_vrste;"
      
-    cQuery += "ALTER TABLE public.enabavke ADD constraint allowed_enabavke_vrste check (tip in ('01','02','03','04','05','06','07','08'));"
-    cQuery += "ALTER TABLE public.eisporuke ADD constraint allowed_eisporuke_vrste check (tip in ('01','02','03','04','05','06','07','08'));"
+    cQuery += "ALTER TABLE public.enabavke ADD constraint allowed_enabavke_vrste check (tip in ('01','02','03','04','05','06','07','08','09'));"
+    cQuery += "ALTER TABLE public.eisporuke ADD constraint allowed_eisporuke_vrste check (tip in ('01','02','03','04','05','06','07','08','09'));"
 
 
     /*
