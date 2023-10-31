@@ -482,6 +482,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'PDV0:\s*CLAN(\d+)'), 'UNDEF') as from_opis_pdv0_clan,"
         cSelectFields += "'UNDEF' as from_opis_dat_jci,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
+        cSelectFields += "COALESCE(substring(fin_suban.opis from 'TIP:\s*(\d+)'), 'UNDEF') as from_opis_tip,"
         cSelectFields += "0 as JCI_IZN,"
         cSelectFields += "COALESCE(substring(sub2.opis from 'OSN-PDV17:\s*([-+\d.\-]+)')::DECIMAL, -9999999.99) as from_opis_osn_pdv17,"
         cSelectFields += "fin_suban.idkonto as idkonto_pdv, sub2.idkonto as idkonto_kup, sub2.idpartner as idpartner, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
@@ -891,8 +892,8 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             cTipDokumenta2 := "09"
         ENDIF
         
-        IF (cAlias)->from_opis_tip <> "UNDEF"
-            cTipDokumenta2 := (cAlias)->from_opis_tip
+        IF eisp->from_opis_tip <> "UNDEF"
+            cTipDokumenta2 := eisp->from_opis_tip
         ENDIF
 
         hRec["tip"] := cTipDokumenta2
