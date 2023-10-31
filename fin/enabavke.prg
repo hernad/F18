@@ -1104,7 +1104,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
             // rekurzija - obrada ostalih stavki naloga uvoza
             PushWa()
-            gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04Z", cIdKontoPDV, cIdKontoPDVNP, cNabExcludeIdvn, cNabIdvn05, .F., .T., .F., ;
+            gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04Z", cIdKontoPDV, cIdKontoPDVNP, cNabExcludeIdvn, hNabIdvn, .F., .T., .F., ;
                 @hNal, @hUkupno)
             PopWa()
     
