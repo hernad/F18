@@ -37,11 +37,11 @@ FUNCTION parametri_eNabavke()
     LOCAL cIdKontoPDVOstaloNP := PadR( fetch_metric( "fin_enab_idkonto_pdv_ostalo_np", NIL, "27698" ), 7 )
 
     LOCAL cNabExcludeIdvn := PadR( fetch_metric( "fin_enab_idvn_exclude", NIL, "I1,I2,IB,B1,B2,B3,PD" ), 100 )
-    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "05" ), 100 )
-    LOCAL cNabIdvn06 := PadR( fetch_metric( "fin_enab_idvn_06", NIL, "06" ), 100 )
-    LOCAL cNabIdvn07 := PadR( fetch_metric( "fin_enab_idvn_07", NIL, "07" ), 100 )
-    LOCAL cNabIdvn08 := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "08" ), 100 )
-    LOCAL cNabIdvn09 := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "09" ), 100 )
+    LOCAL cNabIdvn05 := PadR( fetch_metric( "fin_enab_idvn_05", NIL, "X5" ), 100 )
+    LOCAL cNabIdvn06 := PadR( fetch_metric( "fin_enab_idvn_06", NIL, "X6" ), 100 )
+    LOCAL cNabIdvn07 := PadR( fetch_metric( "fin_enab_idvn_07", NIL, "X7" ), 100 )
+    LOCAL cNabIdvn08 := PadR( fetch_metric( "fin_enab_idvn_08", NIL, "X8" ), 100 )
+    LOCAL cNabIdvn09 := PadR( fetch_metric( "fin_enab_idvn_09", NIL, "X9" ), 100 )
 
     LOCAL cShemaPatch1 := PadR( fetch_metric( "fin_enab_schema_patch_1", NIL, "N" ), 1 )
 

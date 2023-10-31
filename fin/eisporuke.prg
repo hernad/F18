@@ -444,11 +444,11 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
     LOCAL cIdKontoDobavljac := trim(fetch_metric( "fin_enab_idkonto_dob", NIL, '43'))
     LOCAL hIspIdvn := hb_hash()
     
-    hIspIdvn["05"] := PadR( fetch_metric( "fin_eisp_idvn_05", NIL, "55" ), 100 )
-    hIspIdvn["06"] := PadR( fetch_metric( "fin_eisp_idvn_06", NIL, "56" ), 100 )
-    hIspIdvn["07"] := PadR( fetch_metric( "fin_eisp_idvn_07", NIL, "57" ), 100 )
-    hIspIdvn["08"] := PadR( fetch_metric( "fin_eisp_idvn_08", NIL, "58" ), 100 )
-    hIspIdvn["09"] := PadR( fetch_metric( "fin_eisp_idvn_09", NIL, "59" ), 100 )
+    hIspIdvn["05"] := PadR( fetch_metric( "fin_eisp_idvn_05", NIL, "Y5" ), 100 )
+    hIspIdvn["06"] := PadR( fetch_metric( "fin_eisp_idvn_06", NIL, "Y6" ), 100 )
+    hIspIdvn["07"] := PadR( fetch_metric( "fin_eisp_idvn_07", NIL, "Y7" ), 100 )
+    hIspIdvn["08"] := PadR( fetch_metric( "fin_eisp_idvn_08", NIL, "Y8" ), 100 )
+    hIspIdvn["09"] := PadR( fetch_metric( "fin_eisp_idvn_09", NIL, "Y9" ), 100 )
     
     cTmps := get_sql_expression_exclude_idvns(cNabExcludeIdvn)
     
@@ -469,6 +469,7 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'PDV0:\s*CLAN(\d+)'), 'UNDEF') as from_opis_pdv0_clan,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-JCI:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_jci,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'DAT-FAKT:\s*([\d.]+)'), 'UNDEF') as from_opis_dat_fakt,"
+        cSelectFields += "COALESCE(substring(fin_suban.opis from 'TIP:\s*(\d+)'), 'UNDEF') as from_opis_tip,"
         cSelectFields += "COALESCE(substring(fin_suban.opis from 'JCI-IZN:\s*([\d.\-]+)')::DECIMAL, 0.0) as JCI_IZN,"
         cSelectFields += "fin_suban.idkonto as idkonto_kup, fin_suban.idpartner as idpartner, '' as idkonto_pdv, fin_suban.idfirma, fin_suban.idvn, fin_suban.brnal, fin_suban.rbr,"
         
@@ -643,7 +644,6 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
             hRec["kup_jib"] := cJib
 
             if hRec["kup_pdv0_clan"] == "54" .AND. eisp->pdv < 0 // SL-2
-                altd()
                 lPovratSL2 := .T.
             ELSE
                 lPovratSL2 := .F.
@@ -881,14 +881,18 @@ STATIC FUNCTION gen_eisporuke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipD
         // ako se radi o vrsti naloga koji zelimo oznaciti u CSV kao tip '05'
         IF eisp->idvn $ hIspIdvn["05"]
             cTipDokumenta2 := "05"
-        ELSEIF eisp->idvn $ hIspIdvn["06"]
-            cTipDokumenta2 := "06"
+        ELSEIF (eisp->idvn $ hIspIdvn["06"] .OR. lPovratSL2)
+            cTipDokumenta2 := "06" // umanjenje PDV po PDV-SL-2 obrascima
         ELSEIF eisp->idvn $ hIspIdvn["07"]
             cTipDokumenta2 := "07"
         ELSEIF eisp->idvn $ hIspIdvn["08"]
             cTipDokumenta2 := "08"
         ELSEIF eisp->idvn $ hIspIdvn["09"]
             cTipDokumenta2 := "09"
+        ENDIF
+        
+        IF (cAlias)->from_opis_tip <> "UNDEF"
+            cTipDokumenta2 := (cAlias)->from_opis_tip
         ENDIF
 
         hRec["tip"] := cTipDokumenta2
@@ -1365,8 +1369,8 @@ FUNCTION gen_eIsporuke()
     // cMjestoKrajnjePotrosnje="1" sopstvena krajnja potrosnja je uvijek FBiH
     gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "02", cIdKontoPDVInterne, cNabExcludeIdvn, .F., .F., "1", .T., @hUkupno)
 
-    // 05 ostale isporuke - usluge stranih lica 4740, lPDVNule = .T., lOsnovaNula = .T.
-    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "05", cIdKontoPDVUslugeStranaLica, cNabExcludeIdvn, .T., .T., NIL, .F., @hUkupno)
+    // 09 ostale isporuke - usluge stranih lica 4740, lPDVNule = .T., lOsnovaNula = .T.
+    gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "09", cIdKontoPDVUslugeStranaLica, cNabExcludeIdvn, .T., .T., NIL, .F., @hUkupno)
   
     // 01 standardne isporuke, 4750 - po posebnoj shemi
     gen_eisporuke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "01", cIdKontoPDVSchema, cNabExcludeIdvn, .F., .F., NIL, .F., @hUkupno)
