@@ -24,7 +24,9 @@ REM http://download.bring.out.ba/F18/F18-windows-x64_4.23.30.zip
 
 set ZIP_FILE=%F18_PACKAGE%_%F18_VERSION%.zip
 
-set HARBOUR_ROOT=c:\dev\harbour\%BUILD_ARCH%\harbour
+REM set HARBOUR_ROOT=c:\dev\harbour\%BUILD_ARCH%\harbour
+echo USERPROFILE=%USERPROFILE%
+set HARBOUR_ROOT=%USERPROFILE%\harbour\%BUILD_ARCH%\harbour
 
 if [%HARBOUR_ROOT%] EQU [] (
   REM x64

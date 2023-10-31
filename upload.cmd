@@ -29,8 +29,8 @@ REM
 REM set /p BINTRAY_OWNER= < %USERPROFILE%\.bintray_owner
 REM set /p BINTRAY_API_KEY= < %USERPROFILE%\.bintray_api_key
 
-
-set HARBOUR_ROOT=%USERPROFILE%\dev\harbour\%BUILD_ARCH%\harbour
+echo USERPROFILE=%USERPROFILE%
+set HARBOUR_ROOT=%USERPROFILE%\harbour\%BUILD_ARCH%\harbour
 
 echo %HARBOUR_ROOT%
 call build_zip.cmd
@@ -56,8 +56,8 @@ ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
 
 
 if EXIST %CURRENT_DIR%tmp\nul (
-  echo rm -rf %CURRENT_DIR%tmp
-  %USERPROFILE%\dev\cygwin64\bin\rm.exe -rf %CURRENT_DIR%tmp
+  REM echo rm -rf %CURRENT_DIR%tmp
+  del /s tmp
 ) else (
    echo  dir %CURRENT_DIR%tmp not exists
 )
