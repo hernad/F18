@@ -729,6 +729,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             hRec["jci"] := (cAlias)->jci
         ELSE
             IF cTipDokumenta == "04Z"
+                // uvoz zavisni dokumenti
                 hRec["jci"] := hNalog["jci"]
             ELSE
                 hRec["jci"] := ""
