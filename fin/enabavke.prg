@@ -729,6 +729,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
             hRec["jci"] := (cAlias)->jci
         ELSE
             IF cTipDokumenta == "04Z"
+                // uvoz zavisni dokumenti
                 hRec["jci"] := hNalog["jci"]
             ELSE
                 hRec["jci"] := ""
@@ -1104,7 +1105,7 @@ STATIC FUNCTION gen_enabavke_stavke(nRbr, dDatOd, dDatDo, cPorezniPeriod, cTipDo
 
             // rekurzija - obrada ostalih stavki naloga uvoza
             PushWa()
-            gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04Z", cIdKontoPDV, cIdKontoPDVNP, cNabExcludeIdvn, cNabIdvn05, .F., .T., .F., ;
+            gen_enabavke_stavke(@nRbr, dDatOd, dDatDo, cPorezniPeriod, "04Z", cIdKontoPDV, cIdKontoPDVNP, cNabExcludeIdvn, hNabIdvn, .F., .T., .F., ;
                 @hNal, @hUkupno)
             PopWa()
     
