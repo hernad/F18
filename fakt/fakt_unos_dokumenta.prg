@@ -357,7 +357,7 @@ STATIC FUNCTION edit_fakt_priprema( lFaktNoviRec, hFaktItemsAttributi )
             @ box_x_koord() + nX, box_y_koord() + 2 SAY "Dest:" GET hFaktTxt[ "destinacija" ] PICT "@S20"
          ENDIF
 
-         IF ( hFaktParams[ "fakt_objekti" ] .AND. _idtipdok $ "10#11#12#13" )
+         IF ( hFaktParams[ "fakt_objekti" ] .AND. _idtipdok $ "01#10#11#12#13" )
             @ box_x_koord() + nX, Col() + 1 SAY "Objekat:" GET hFaktTxt[ "objekti" ] ;
                VALID p_fakt_objekti( @hFaktTxt[ "objekti" ] ) PICT "@!"
          ENDIF
