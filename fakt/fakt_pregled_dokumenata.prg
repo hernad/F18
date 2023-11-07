@@ -198,7 +198,7 @@ FUNCTION fakt_pregled_liste_dokumenata()
    ENDIF
 
    IF lFaktObjekti .AND. !Empty( cObjekatId )
-      cFilter += ".and. faktcObjekatId()==" + _filter_quote( cObjekatId )
+      cFilter += ".and. fakt_objekat_id()==" + _filter_quote( cObjekatId )
    ENDIF
 
    IF !Empty( cUslovFaktBrDok )

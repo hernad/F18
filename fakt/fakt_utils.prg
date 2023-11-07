@@ -94,15 +94,20 @@ FUNCTION fakt_objekat_naz( id_obj )
 // ako se zadaje bez parametara pretpostavlja se da je
 // napravljena tabela relacije fakt_doks->fakt
 // --------------------------------------------------
-FUNCTION fakt_objekat_id( cIdFirma, id_tipdok, cBrDok )
+FUNCTION fakt_objekat_id( cIdFirma, cIdTipdok, cBrDok )
 
    LOCAL _ret := ""
    LOCAL aMemo
 
    PushWA()
-   IF cIdFirma == NIL
+
+   if alias() == "FAKT_DOKS_PREGLED"
+       cIdFirma = fakt_doks_pregled->idfirma
+       cIdTipdok = fakt_doks_pregled->idtipdok
+       cBrDok = fakt_doks_pregled->brdok
+   elseif  cIdFirma == NIL
       cIdFirma = fakt->idfirma
-      id_tipdok = fakt->idtipdok
+      cIdTipdok = fakt->idtipdok
       cBrDok = fakt->brdok
    ENDIF
 
@@ -112,7 +117,7 @@ FUNCTION fakt_objekat_id( cIdFirma, id_tipdok, cBrDok )
     //  o_fakt_dbf()
    //ENDIF
 
-   IF !seek_fakt( cIdFirma, id_tipdok, cBrDok ) // + "  1"
+   IF !seek_fakt( cIdFirma, cIdTipdok, cBrDok ) // + "  1"
    //IF Eof()
       _ret := Space( 10 )
    ELSE
