@@ -190,6 +190,9 @@ FUNCTION fakt_kartica()
       m += " ----------- ----- -----------"
    ENDIF
 
+   IF hParams["fakt_objekti"]
+      m += " ---------------"
+   ENDIF
 
    WPar( "c1", cIdFirma )
    WPar( "d1", dDatOd )
@@ -210,11 +213,6 @@ FUNCTION fakt_kartica()
    //PRIVATE cFilter := ""
    cFilter := iif( cBrza == "N", cFilterRoba, ".t." )
 
-   // hendliranje objekata
-   IF hParams[ "fakt_objekti" ] .AND. !Empty( cObjekatId )
-      cFilter += ".and. fakt_objekat_id() == " + _filter_quote( cObjekatId )
-   ENDIF
-
    cFilter := StrTran( cFilter, ".t..and.", "" )
 
 
@@ -225,7 +223,6 @@ FUNCTION fakt_kartica()
       cFilter += IIF( Empty( dDatDo ), "", ".and. DATDOK <= " + _filter_quote( dDatDo ) )
       seek_fakt_3( cIdFirma, qqRoba )
    ENDIF
-
 
    IF cFilter == ".t."
       SET FILTER TO
@@ -248,7 +245,7 @@ FUNCTION fakt_kartica()
       ENDIF
    ENDIF
 
-   IF hParams[ "fakt_objekti" ] .AND. !Empty( cObjekatId )
+   IF hParams["fakt_objekti"] .AND. !Empty( cObjekatId )
       ? Space( gnLMarg )
       ?? "Uslov za objekat: ", AllTrim( cObjekatId ), fakt_objekat_naz( cObjekatId )
    ENDIF
@@ -287,7 +284,7 @@ FUNCTION fakt_kartica()
    DO WHILE !Eof()
       IF cBrza == "D"
          IF qqRoba <> IdRoba .AND. ;
-               IF( cSintetika == "D", Left( qqRoba, gnDS ) != Left( IdRoba, gnDS ), .T. )
+               IIF( cSintetika == "D", Left( qqRoba, gnDS ) != Left( IdRoba, gnDS ), .T. )
             // tekuci slog nije zeljena kartica
             EXIT
          ENDIF
@@ -312,7 +309,7 @@ FUNCTION fakt_kartica()
       IF cTipVPC == "2" .AND.  roba->( FieldPos( "vpc2" ) <> 0 )
          _cijena := roba->vpc2
       ELSE
-         _cijena := IF ( !Empty( cIdFirma ), fakt_mpc_iz_sifrarnika(), roba->vpc )
+         _cijena := IIF ( !Empty( cIdFirma ), fakt_mpc_iz_sifrarnika(), roba->vpc )
       ENDIF
       IF gVarC == "4" // uporedo vidi i mpc
          _cijena2 := roba->mpc
@@ -320,7 +317,7 @@ FUNCTION fakt_kartica()
 
       IF PRow() - dodatni_redovi_po_stranici() > 50; FF; ++nStrana; ENDIF
 
-      fakt_zagl_kart( lPrviProlaz, nStrana, cIdRoba )
+      fakt_zagl_kart( lPrviProlaz, nStrana, cIdRoba, hParams["fakt_objekti"] )
       lPrviProlaz := .F.
 
       IF cPredh == "2"     // dakle sa prethodnim stanjem
@@ -331,7 +328,7 @@ FUNCTION fakt_kartica()
          SEEK cIdFirma + IIF( cSintetika == "D" .AND. ROBA->tip == "S", RTrim( ROBA->id ), cIdRoba ) // fakt - ranije otvoreno
 
          // DO-WHILE za cPredh=2
-         DO WHILE !Eof() .AND. IF( cSintetika == "D" .AND. ROBA->tip == "S", Left( cIdRoba, gnDS ) == Left( IdROba, gnDS ), ;
+         DO WHILE !Eof() .AND. IIF( cSintetika == "D" .AND. ROBA->tip == "S", Left( cIdRoba, gnDS ) == Left( IdROba, gnDS ), ;
                cIdRoba == IdRoba ) .AND. dDatOd > datdok
 
             IF !Empty( cK1 )
@@ -340,6 +337,12 @@ FUNCTION fakt_kartica()
             IF !Empty( cK2 )
                IF cK2 <> K2; skip; loop; ENDIF
             ENDIF
+
+            // filter za objekat
+            IF hParams["fakt_objekti"] .AND. !Empty( cObjekatId )
+               IF fakt_objekat_id() <> cObjekatId; skip; loop; ENDIF
+            ENDIF
+
             IF !Empty( cIdFirma ); IF idfirma <> cIdFirma; skip; loop; end; END
 
 
@@ -394,6 +397,11 @@ FUNCTION fakt_kartica()
          IF !Empty( cK2 )
             IF cK2 <> K2; skip; loop; end
          END // uslov ck2
+         // filter za objekat
+         IF hParams["fakt_objekti"] .AND. !Empty( cObjekatId )
+            altd()
+            IF fakt_objekat_id() <> cObjekatId; skip; loop; ENDIF
+         ENDIF
 
          IF !Empty( qqPartn )
             seek_fakt_doks( fakt->idfirma, fakt->idtipdok, fakt->brdok )
@@ -425,7 +433,7 @@ FUNCTION fakt_kartica()
 
             IF cKolona != "N"
 
-               IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; fakt_zagl_kart(NIL, nStrana, cIdRoba); ENDIF
+               IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; fakt_zagl_kart(NIL, nStrana, cIdRoba, hParams["fakt_objekti"]); ENDIF
 
                ? Space( gnLMarg ); ?? Str( ++nRbr, 3 ) + ".   " + idfirma + "-" + idtipdok + "-" + brdok + Left( serbr, 1 ) + "  " + DToC( datdok )
 
@@ -443,6 +451,9 @@ FUNCTION fakt_kartica()
                   @ PRow(), PCol() + 1 SAY Cijena PICT fakt_pic_iznos()
                   @ PRow(), PCol() + 1 SAY Rabat  PICT "99.99"
                   @ PRow(), PCol() + 1 SAY Cijena * ( 1 - Rabat / 100 ) PICT fakt_pic_iznos()
+               ENDIF
+               IF hParams["fakt_objekti"] 
+                  @ PRow(), PCol() + 1 SAY fakt_objekat_id()
                ENDIF
             ENDIF
 
@@ -468,7 +479,7 @@ FUNCTION fakt_kartica()
       ENDDO
       // GLAVNA DO-WHILE
 
-      IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; fakt_zagl_kart(NIL, nStrana, cIdRoba); ENDIF
+      IF PRow() - dodatni_redovi_po_stranici() > 55; FF; ++nStrana; fakt_zagl_kart(NIL, nStrana, cIdRoba, hParams[ "fakt_objekti "]); ENDIF
 
       ? Space( gnLMarg ); ?? m
       ? Space( gnLMarg ) + "CIJENA:            " + Str( _cijena, 12, 3 )
@@ -501,7 +512,7 @@ FUNCTION fakt_kartica()
    RETURN .T.
 
 
-STATIC FUNCTION fakt_zagl_kart( lIniStrana, nStrana, cIdRoba )
+STATIC FUNCTION fakt_zagl_kart( lIniStrana, nStrana, cIdRoba, lFaktObjekti /*hParams[ "fakt_objekti "]*/ )
 
    LOCAL cGr1, cNazGr1, cGr2, cNazGr2
 
@@ -549,8 +560,13 @@ STATIC FUNCTION fakt_zagl_kart( lIniStrana, nStrana, cIdRoba )
       ?? PadC( "Partner", 21 )
    ENDIF
    ??U "     Ulaz       Izlaz      Stanje  "
+
    IF cPPC == "D"
       ?? "     Cijena   Rab%   C-Rab"
+   ENDIF
+
+   IF lFaktObjekti
+      ??U "   Objekat"
    ENDIF
 
    ?U Space( gnLMarg )

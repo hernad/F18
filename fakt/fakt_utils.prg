@@ -94,10 +94,11 @@ FUNCTION fakt_objekat_naz( id_obj )
 // ako se zadaje bez parametara pretpostavlja se da je
 // napravljena tabela relacije fakt_doks->fakt
 // --------------------------------------------------
-FUNCTION fakt_objekat_id( cIdFirma, cIdTipdok, cBrDok )
+FUNCTION fakt_objekat_id()
 
    LOCAL _ret := ""
    LOCAL aMemo
+   LOCAL cIdFirma, cIdTipDok, cBrDok
 
    PushWA()
 
@@ -105,11 +106,17 @@ FUNCTION fakt_objekat_id( cIdFirma, cIdTipdok, cBrDok )
        cIdFirma = fakt_doks_pregled->idfirma
        cIdTipdok = fakt_doks_pregled->idtipdok
        cBrDok = fakt_doks_pregled->brdok
-   elseif  cIdFirma == NIL
+       
+   elseif alias() == "FAKT"
       cIdFirma = fakt->idfirma
-      cIdTipdok = fakt->idtipdok
-      cBrDok = fakt->brdok
+       cIdTipdok = fakt->idtipdok
+       cBrDok = fakt->brdok
+   ELSE
+      Alert("fakt_objekat_id alias ?")
+      QUIT_1
    ENDIF
+
+   seek_fakt_1st( cIdFirma, cIdTipdok, cBrDok )
 
    //SELECT ( F_FAKT )
 
@@ -117,15 +124,18 @@ FUNCTION fakt_objekat_id( cIdFirma, cIdTipdok, cBrDok )
     //  o_fakt_dbf()
    //ENDIF
 
-   IF !seek_fakt( cIdFirma, cIdTipdok, cBrDok ) // + "  1"
+   //IF !seek_fakt( cIdFirma, cIdTipdok, cBrDok ) // + "  1"
    //IF Eof()
-      _ret := Space( 10 )
-   ELSE
-      aMemo := fakt_ftxt_decode( fakt->txt )
-      IF Len( aMemo ) >= 20
-         _ret := PadR( aMemo[ 20 ], 10 )
-      ENDIF
+   //   _ret := Space( 10 )
+   //ELSE
+   _ret = Space(10)
+   aMemo := fakt_ftxt_decode( fakt_1st->txt )
+   IF Len( aMemo ) >= 20
+      _ret := PadR( aMemo[ 20 ], 10 )
    ENDIF
+   SELECT fakt_1st
+   USE
+   //ENDIF
 
    PopWa()
 

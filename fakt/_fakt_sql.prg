@@ -386,6 +386,44 @@ FUNCTION seek_fakt( cIdFirma, cIdTipDok, cBrDok, cIdPartner, cIdRoba, dDatDokOd,
    RETURN !Eof()
 
 
+// fakt prva stavka
+FUNCTION seek_fakt_1st( cIdFirma, cIdTipDok, cBrDok )
+
+      LOCAL cSql
+      LOCAL cTable := "fakt_fakt"
+      LOCAL hIndexes, cKey
+      LOCAL lWhere := .F.
+      LOCAL cAlias := "FAKT_1ST"
+      
+      cSql := "SELECT * from " + F18_PSQL_SCHEMA_DOT + cTable
+
+      cSql += " WHERE rbr='  1'"
+      
+      cSql += " AND idfirma=" + sql_quote( cIdFirma )
+      
+      cSql += " AND idtipdok=" + sql_quote( cIdTipDok )
+        
+      cSql += " AND rpad(brdok," + ALLTRIM( Str( FIELD_LEN_FAKT_BRDOK ) ) + ")=" + sql_quote( cBrDok )
+ 
+      //altd()
+
+      SELECT 512
+      use_sql( cTable, cSql, cAlias )
+   
+      //hIndexes := h_fakt_fakt_indexes()
+   
+      //FOR EACH cKey IN hIndexes:Keys
+      //   INDEX ON  &( hIndexes[ cKey ] )  TAG ( cKey ) TO ( cAlias )
+      //NEXT
+      //IF cTag == NIL
+      //   cTag := "1"
+      //ENDIF
+      //SET ORDER TO TAG ( cTag )
+      GO TOP
+   
+      RETURN !Eof()
+
+
 FUNCTION h_fakt_fakt_indexes()
 
    LOCAL hIndexes := hb_Hash()
