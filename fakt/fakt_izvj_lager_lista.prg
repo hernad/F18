@@ -273,12 +273,12 @@ FUNCTION fakt_lager_lista()
    IF lFaktObjekti .and. !empty(cObjekatId)
       cHeaderPlus += " " + "(" + trim(cObjekatId) + ") "
       cXlsxH := trim(cObjekatId) + "_"
-      IF cRR == "M"
-         cXlsxH += "mink_"
-      endif
    ENDIF
 
    if lXlsx
+      IF cRR == "M"
+         cXlsxH += "mink_"
+      endif 
      s_cXlsxName := my_home_root() + "fakt_lager_" + cXlsxH + dtos(dDatOd) + "_" + dtos(dDatDo) + ".xlsx"
    endif
 
