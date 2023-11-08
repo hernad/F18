@@ -244,7 +244,7 @@ FUNCTION kalk_lager_lista_magacin()
       lSaberiStanjeZaSvaKonta := ( Pitanje(, "Računati stanje robe kao zbir stanja na svim obuhvacenim kontima? (D/N)", "N" ) == "D" )
    ENDIF
 
-   IF lExpDbf == .T.
+   IF lExpDbf
       aExpFields := g_exp_fields()
       create_dbf_r_export( aExpFields )
    ENDIF
@@ -778,7 +778,7 @@ FUNCTION kalk_lager_lista_magacin()
             ? Space( 6 ) + show_more_info( cMIPart, dMIDate, cMINumber, cMI_type )
          ENDIF
 
-         IF lExpDbf == .T.
+         IF lExpDbf
             IF ( cNulaDN == "N" .AND. Round( nUlaz - nIzlaz, 4 ) <> 0 ) ;
                   .OR. ( cNulaDN == "D" )
 
@@ -870,7 +870,7 @@ FUNCTION kalk_lager_lista_magacin()
       ENDIF
    ENDIF
 
-   IF lExpDbf == .T.
+   IF lExpDbf
       open_r_export_table() // lansiraj report
    ENDIF
 
