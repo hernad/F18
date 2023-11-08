@@ -11,6 +11,9 @@
 
 #include "f18.ch"
 
+STATIC s_cXlsxName := NIL
+STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
+STATIC s_pMoneyFormat, s_pDateFormat
 
 MEMVAR dDatOd, dDatDo
 
@@ -26,7 +29,9 @@ FUNCTION fakt_lager_lista()
    LOCAL oPdf, xPrintOpt, bZagl
    LOCAL cObjekatId := Space(10)
    LOCAL cLokacija := SPACE(10)
-   LOCAL cHeaderPlus := "", nRobaMink := 0
+   LOCAL cHeaderPlus := "", cXlsxH := "", nRobaMink := 0
+   LOCAL hRow := hb_Hash()
+   LOCAL lXlsx := .F., cXlsxDN := "N"
 
    IF !is_legacy_ptxt()
       oPDF := PDFClass():New()
@@ -71,7 +76,6 @@ FUNCTION fakt_lager_lista()
       // ENDIF
    ENDIF
 
-
    lSaberikol := .F.
    nKU := nKI := 0
 
@@ -100,7 +104,6 @@ FUNCTION fakt_lager_lista()
    RPar( "c8", @qqTipDok )
    RPar( "d1", @dDatOd )
    RPar( "d2", @dDatDo )
-
 
    qqRoba := PadR( qqRoba, 60 )
    qqPartn := PadR( qqPartn, 20 )
@@ -131,8 +134,8 @@ FUNCTION fakt_lager_lista()
       IF lBezUlaza
          cRR := "N"
       ELSE
-         @ box_x_koord() + 6, box_y_koord() + 2 SAY "Prikaz rezervacija, reversa (D), MINKOL (M)"
-         @ box_x_koord() + 7, box_y_koord() + 2 SAY "Fakturisano na osnovu otpremnica (F)"
+         @ box_x_koord() + 6, box_y_koord() + 2 SAY "Prikaz rezervacija, reversa (D)"
+         @ box_x_koord() + 7, box_y_koord() + 2 SAY "Fakturisano na osnovu otpremnica (F), MINKOL (M)"
          @ box_x_koord() + 8, box_y_koord() + 2 SAY "Standardni prikaz (N) "  GET cRR   PICT "@!" VALID cRR $ "DNFM"
       ENDIF
 
@@ -178,6 +181,8 @@ FUNCTION fakt_lager_lista()
          @ box_x_koord() + 22, box_y_koord() + 2 SAY "Objekat (prazno svi):" GET cObjekatId
          @ box_x_koord() + 22, col() + 2 SAY "Lokacija:" GET cLokacija
       endif
+
+      @ box_x_koord() + 23, box_y_koord() + 2 SAY "xlsx generacija D/N" GET cXlsxDN pict "@!" valid cXlsxDN $ "DN"
       READ
 
       ESC_BCR
@@ -192,6 +197,12 @@ FUNCTION fakt_lager_lista()
       ENDIF
 
    ENDDO
+
+   if cXlsxDN == "D"
+      lXlsx := .T.
+   else
+      lXlsx := .F.
+   endif
 
    IF lBezUlaza
       m := "---- ---------- ----------------------------------------" + " ----------- ---"
@@ -257,9 +268,19 @@ FUNCTION fakt_lager_lista()
    GO TOP
    EOF CRET
 
+   
+
    IF lFaktObjekti .and. !empty(cObjekatId)
       cHeaderPlus += " " + "(" + trim(cObjekatId) + ") "
+      cXlsxH := trim(cObjekatId) + "_"
+      IF cRR == "M"
+         cXlsxH += "mink_"
+      endif
    ENDIF
+
+   if lXlsx
+     s_cXlsxName := my_home_root() + "fakt_lager_" + cXlsxH + dtos(dDatOd) + "_" + dtos(dDatDo) + ".xlsx"
+   endif
 
    IF HB_ISHASH( xPrintOpt )
       xPrintOpt[ "header" ] := "FAKT Lager lista " + cHeaderPlus + my_database() + " na dan " + DToC( Date() ) + " period od " + DToC( dDatOd ) + " - " + DToC( dDatDo )
@@ -409,9 +430,6 @@ FUNCTION fakt_lager_lista()
          select_o_roba( cIdRoba )
          nRobaMink := roba->mink
          SELECT FAKT
-         IF trim(cIdroba) == "288020"
-            altd()
-         endif
          IF (cRR == "M" .AND. nRobaMink <> 0.0 .AND. (nRobaMink - nUl + nIzl > 0)) ; // minimalne kolicina
             .OR. ;
             (cRR != "M" .AND. !(cSaldo0 == "N" .AND. ((nUl - nIzl) == 0) ))
@@ -445,15 +463,18 @@ FUNCTION fakt_lager_lista()
                ? Space( gnLMarg ); ?? m
             ENDIF
             ? Space( gnLMarg )
+            hRow["rbr"] := nRbr
+            hRow["sifra"] := cIdRoba
+            hRow["naziv"] := trim(roba->naz)
             ?? Str( ++nRbr, 4 ), ;
                IIF( cSintetika == "D" .AND. ROBA->tip == "S", ROBA->id, Left( cIdroba, 10 ) ), PadR( ROBA->naz, 40 )
 
             IF cRR $ "MNF" .AND. !lBezUlaza
                IF cPrikazKolicina $ "US"
-                  @ PRow(), PCol() + 1 SAY nUl  PICT iif( cPopis == "N", fakt_pic_kolicina(), Replicate( "_", Len( fakt_pic_kolicina() ) ) )
+                  @ PRow(), PCol() + 1 SAY (hRow["ulaz"] := nUl)  PICT iif( cPopis == "N", fakt_pic_kolicina(), Replicate( "_", Len( fakt_pic_kolicina() ) ) )
                ENDIF
                IF cPrikazKolicina $ "IS"
-                  @ PRow(), PCol() + 1 SAY nIzl PICT iif( cPopis == "N", fakt_pic_kolicina(), Replicate( "_", Len( fakt_pic_kolicina() ) ) )
+                  @ PRow(), PCol() + 1 SAY (hRow["izlaz"] := nIzl) PICT iif( cPopis == "N", fakt_pic_kolicina(), Replicate( "_", Len( fakt_pic_kolicina() ) ) )
                ENDIF
             ENDIF
 
@@ -469,7 +490,7 @@ FUNCTION fakt_lager_lista()
                @ PRow(), PCol() + 1 SAY nRezerv PICT iif( cPopis == "N", fakt_pic_kolicina(), Replicate( "_", Len( fakt_pic_kolicina() ) ) )
                @ PRow(), PCol() + 1 SAY nUl - nIzl - nRevers - nRezerv PICT iif( cPopis == "N", fakt_pic_kolicina(), Replicate( "_", Len( fakt_pic_kolicina() ) ) )
             ENDIF
-            @ PRow(), PCol() + 1 SAY roba->jmj
+            @ PRow(), PCol() + 1 SAY (hRow["jmj"] := roba->jmj)
             IF cTipVPC == "2" .AND.  roba->( FieldPos( "vpc2" ) <> 0 )
                _cijena := roba->vpc2
             ELSE
@@ -520,32 +541,33 @@ FUNCTION fakt_lager_lista()
 
             IF cRealizacija == "D"
                IF nIzl > 0
-                  @ PRow(), PCol() + 1 SAY ( nReal1 - nReal2 ) / nIzl  PICT "99999.999"
+                  @ PRow(), PCol() + 1 SAY (hRow["cijena"] := nReal1 - nReal2 ) / nIzl  PICT "99999.999"
                ELSE
-                  @ PRow(), PCol() + 1 SAY 0  PICT "99999.999"
+                  @ PRow(), PCol() + 1 SAY (hRow["cijena"] := 0)  PICT "99999.999"
                ENDIF
                nCol1 := PCol() + 1
-               @ PRow(), nCol1 SAY nReal1  PICT fakt_pic_iznos()
+               @ PRow(), nCol1 SAY (hRow["iznos"] := nReal1)  PICT fakt_pic_iznos()
                @ PRow(), PCol() + 1 SAY nReal2  PICT fakt_pic_iznos()
                @ PRow(), PCol() + 1 SAY nReal1 - nReal2  PICT fakt_pic_iznos()
                nIzn += nReal1
                nIznR += nReal2
             ELSE
                nPomSt := IIF( cPrikazKolicina == "S", nUl - nIzl, IIF( cPrikazKolicina == "I", nIzl, nUl ) )
+               hRow["stanje"] := nPomst
                IF cRR == "M" // minimalne kolicine
-                  @ PRow(), PCol() + 1 SAY nRobaMink  PICT "99999.999" // minimalna kolicina
-                  @ PRow(), PCol() + 1 SAY nRobaMink - nPomSt  PICT fakt_pic_iznos() // naruciti
+                  @ PRow(), PCol() + 1 SAY (hRow["mink"] := nRobaMink)  PICT "99999.999" // minimalna kolicina
+                  @ PRow(), PCol() + 1 SAY (hRow["naruciti"] := nRobaMink - nPomSt)  PICT fakt_pic_iznos() // naruciti
                ELSE
                   IF !lBezUlaza
-                     @ PRow(), PCol() + 1 SAY _cijena  PICT "99999.999" // cijena
+                     @ PRow(), PCol() + 1 SAY (hRow["cijena"] := _cijena)  PICT "99999.999" // cijena
                      nCol1 := PCol() + 1
-                     @ PRow(), nCol1 SAY nPomSt * _cijena   PICT iif( cPopis == "N", fakt_pic_iznos(), Replicate( "_", Len( fakt_pic_iznos() ) ) )  //iznos
+                     @ PRow(), nCol1 SAY (hRow["iznos"] := nPomSt * _cijena)  PICT iif( cPopis == "N", fakt_pic_iznos(), Replicate( "_", Len( fakt_pic_iznos() ) ) )  //iznos
                   ENDIF
                ENDIF
                nIzn += nPomSt * _cijena
                IF gVarC == "4" // uporedo
                   IF !lBezUlaza
-                     @ PRow(), PCol() + 1 SAY _cijena2   PICT fakt_pic_iznos()
+                     @ PRow(), PCol() + 1 SAY (hRow["cijena"] := _cijena2)  PICT fakt_pic_iznos()
                   ENDIF
                   nIzn2 += nPomSt * _cijena2
                ENDIF
@@ -553,9 +575,11 @@ FUNCTION fakt_lager_lista()
 
             if lFaktObjekti
                // hano koristi GR1 za oznaku lokacije
-               @ prow(), pcol() + 1 SAY get_roba_sifk_sifv( "GR1", roba->id, .F. )
+               @ prow(), pcol() + 1 SAY (hRow["lokacija"] := get_roba_sifk_sifv( "GR1", roba->id, .F. ))
+               
             endif
 
+            if lXlsx; xlsx_export_fill_row(hRow, cRR, lFaktObjekti); endif
          ENDIF
       ENDIF
 
@@ -615,7 +639,6 @@ FUNCTION fakt_lager_lista()
    IF cPoTar == "D"
 
       check_nova_strana( bZagl, oPDF )
-
       ?
       z0 := "Rekapitulacija stanja po tarifama:"
       ? z0
@@ -656,6 +679,13 @@ FUNCTION fakt_lager_lista()
    end_print( xPrintOpt )
 
    my_close_all_dbf()
+
+   if lXlsx
+      workbook_close( s_pWorkBook )
+      s_pWorkBook := NIL
+      s_pWorkSheet := NIL
+      f18_open_mime_document( s_cXlsxName )
+   endif
 
    RETURN .T.
 
@@ -937,7 +967,6 @@ STATIC FUNCTION lager_lista_xml( table, hParams )
    RETURN _ret
 
 
-
 FUNCTION fakt_lager_lista_sql( hParams, lPocetnoStanje )
 
    LOCAL _table
@@ -957,7 +986,6 @@ FUNCTION fakt_lager_lista_sql( hParams, lPocetnoStanje )
    _table := fakt_lager_lista_get_data( hParams, lPocetnoStanje )
 
    RETURN _table
-
 
 
 STATIC FUNCTION fakt_lager_lista_get_data( hParams, lPocetnoStanje )
@@ -1057,3 +1085,84 @@ FUNCTION fakt_vt_porezi()
    ENDIF
 
    RETURN .T.
+
+
+ STATIC FUNCTION xlsx_export_fill_row(hRow, cRR, lFaktObjekti)
+
+      LOCAL nI
+      LOCAL aKolona
+  
+      aKolona := {}
+      AADD(aKolona, { "N", "Rbr", 10, hRow["rbr"] })
+   
+      AADD(aKolona, { "C", "Sifra", 10, hRow["sifra"] })
+      AADD(aKolona, { "C", "Naziv", 100, hRow["naziv"] })
+      AADD(aKolona, { "C", "JMJ", 5, hRow["jmj"] })
+      AADD(aKolona, { "M", "Ulaz", 15, hRow["ulaz"] })
+      AADD(aKolona, { "M", "Izlaz", 15, hRow["izlaz"] })
+      AADD(aKolona, { "M", "Stanje", 15, hRow["stanje"] })
+
+      IF cRR == "M"
+         AADD(aKolona, { "M", "Mink", 15, hRow["mink"] })
+         AADD(aKolona, { "M", "Naruciti", 15, hRow["naruciti"] })
+      ELSE
+         AADD(aKolona, { "M", "Cijena", 15, hRow["cijena"] })
+         AADD(aKolona, { "M", "Iznos", 15, hRow["iznos"] })
+      ENDIF
+
+      IF lFaktObjekti
+         AADD(aKolona, { "C", "Lokacija", 20, hRow["lokacija"] })
+      endif
+
+      IF s_pWorkSheet == NIL
+  
+          s_pWorkBook := workbook_new( s_cXlsxName )
+          s_pWorkSheet := workbook_add_worksheet(s_pWorkBook, NIL)
+      
+          s_pMoneyFormat := workbook_add_format(s_pWorkBook)
+          format_set_num_format(s_pMoneyFormat, /*"#,##0"*/ "#0.00" )
+      
+          s_pDateFormat := workbook_add_format(s_pWorkBook)
+          format_set_num_format(s_pDateFormat, "d.mm.yy")
+          
+          
+          /* Set the column width. */
+          for nI := 1 TO LEN(aKolona)
+              // worksheet_set_column(lxw_worksheet *self, lxw_col_t firstcol, lxw_col_t lastcol, double width, lxw_format *format)
+              worksheet_set_column(s_pWorkSheet, nI - 1, nI - 1, aKolona[ nI, 3], NIL)
+          next
+      
+      
+          //nema smisla header kada imamo vise konta ili vise partnera
+          //worksheet_write_string( s_pWorkSheet, 0, 0,  "Konto:", NIL)
+          //worksheet_write_string( s_pWorkSheet, 0, 1,  hb_StrToUtf8(cIdKonto + " - " + Trim( cKontoNaziv)), NIL)
+          //worksheet_write_string( s_pWorkSheet, 1, 0,  "Partner:", NIL)
+          //worksheet_write_string( s_pWorkSheet, 1, 1,  hb_StrToUtf8(cIdPartner + " - " + Trim(cPartnerNaziv)), NIL)
+          
+          /* Set header */
+          s_nWorkSheetRow := 0
+          for nI := 1 TO LEN(aKolona)
+              worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKolona[nI, 2], NIL)
+          next
+          
+      ENDIF
+      
+      
+      s_nWorkSheetRow++
+      
+      FOR nI := 1 TO LEN(aKolona)
+              IF aKolona[ nI, 1 ] == "C"
+                  worksheet_write_string( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  hb_StrToUtf8(aKolona[nI, 4]), NIL)
+              ELSEIF aKolona[ nI, 1 ] == "M"
+                  worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKolona[nI, 4], s_pMoneyFormat)
+              ELSEIF aKolona[ nI, 1 ] == "N"
+                  worksheet_write_number( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKolona[nI, 4], NIL)
+              ELSEIF aKolona[ nI, 1 ] == "D"
+                  worksheet_write_datetime( s_pWorkSheet, s_nWorkSheetRow, nI - 1,  aKolona[nI, 4], s_pDateFormat)
+              ENDIF
+      NEXT
+              
+      RETURN .T.
+       
+  
+        
