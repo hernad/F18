@@ -443,7 +443,7 @@ FUNCTION kalk_lager_lista_magacin()
             LOOP
          ENDIF
 
-         nVPC := vpc_magacin_rs()
+         nVPC := vpc_magacin()
 
          IF kalk->mu_i == "1"
 
@@ -453,26 +453,26 @@ FUNCTION kalk_lager_lista_magacin()
                nUlaz += nKolicina
                kalk_sumiraj_kolicinu( nKolicina, 0, @nTUlazP, @nTIzlazP )
                nCol1 := PCol() + 1
-               IF koncij->naz == "P2"
-                  nVPVU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-                  nVPVRU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-               ELSE
-                  nVPVU += Round( roba->vpc * kolicina, gZaokr )
-                  nVPVRU += Round( nVPC * kolicina, gZaokr )
-               ENDIF
+               //IF koncij->naz == "P2"
+               //   nVPVU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
+               //   nVPVRU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
+               //ELSE
+               nVPVU += Round( roba->vpc * kolicina, gZaokr )
+               nVPVRU += Round( nVPC * kolicina, gZaokr )
+               //ENDIF
 
                nNVU += Round( nc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
             ELSE
                nKolicina := -field->kolicina
                nIzlaz += nKolicina
                kalk_sumiraj_kolicinu( 0, nKolicina, @nTUlazP, @nTIzlazP )
-               IF koncij->naz == "P2"
-                  nVPVI -= Round( roba->plc * kolicina, gZaokr )
-                  nVPVRI -= Round( roba->plc * kolicina, gZaokr )
-               ELSE
+               //IF koncij->naz == "P2"
+               //   nVPVI -= Round( roba->plc * kolicina, gZaokr )
+               //   nVPVRI -= Round( roba->plc * kolicina, gZaokr )
+               //ELSE
                   nVPVI -= Round( roba->vpc * kolicina, gZaokr )
                   nVPVRI -= Round( nVPC * kolicina, gZaokr )
-               ENDIF
+               //ENDIF
                nNVI -= Round( nc * kolicina, gZaokr )
             ENDIF
 

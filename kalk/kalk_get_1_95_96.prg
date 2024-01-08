@@ -169,7 +169,13 @@ STATIC FUNCTION RadNalOK()
 
 FUNCTION set_vpc_mag_16_95_96()
 
-   _vpc := vpc_magacin_rs_priprema()
-   _marza := _vpc - _nc
+   IF trim(_mkonto) == "13202"
+     //_vpc := vpc_magacin_rs_priprema()
+     _vpc := roba->vpc
+     _marza := _vpc - _nc
+   ELSE
+      _vpc := _nc
+      _marza := 0
+   ENDIF
 
    RETURN .F.

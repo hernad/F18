@@ -30,46 +30,62 @@ koristi TKV
 
 */
 
+// FUNCTION vpc_magacin_rs_priprema()
+//   RETURN vpc_magacin_rs( .T. )
 
-FUNCTION vpc_magacin_rs_priprema()
-   RETURN vpc_magacin_rs( .T. )
+// brisati ovo nam ne treba
+//FUNCTION vpc_magacin_rs( lKalkPriprema )
+//
+//   LOCAL nVPC, nAlias
+//
+//   hb_default( @lKalkPriprema, .F. )
+//
+//   IF lKalkPriprema
+//      IF kalk_pripr->IdVd $ "14#10#KO#11" // u dokumentu je vpc
+//         nVPC := kalk_pripr->vpc
+//      ELSE
+//         // HACK: u dokument nije pohranjena vpc, uzeti iz robe
+//         // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
+//         IF kalk_pripr->idpartner == PadR( "118169", 7 ) // HACK-2: majop
+//            nVPC := roba->vpc2
+//         ELSE
+//            nVPC := roba->vpc
+//         ENDIF
+//      ENDIF
+//
+//   ELSE
+//      // azurirani dokument
+//      IF kalk->IdVd $ "14#10#KO#11"
+//         nVPC := kalk->vpc
+//      ELSE
+//         // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
+//         IF kalk->idpartner == PadR( "118169", 7 ) // majop
+//            nVPC := roba->vpc2
+//         ELSE
+//            nVPC := roba->vpc
+//         ENDIF
+//      ENDIF
+//   ENDIF
+//
+//   RETURN nVPC
 
 
-FUNCTION vpc_magacin_rs( lKalkPriprema )
+FUNCTION vpc_magacin(  )
 
    LOCAL nVPC, nAlias
 
-   hb_default( @lKalkPriprema, .F. )
-
-   IF lKalkPriprema
-      IF kalk_pripr->IdVd $ "14#10#KO" // u dokumentu je vpc
-         nVPC := kalk_pripr->vpc
+   IF trim(kalk->mkonto) == "13202"
+      nVPC := kalk->vpc
+   else   
+      // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
+      IF kalk->idpartner == PadR( "118169", 7 ) // majop
+         nVPC := roba->vpc2
       ELSE
-         // HACK: u dokument nije pohranjena vpc, uzeti iz robe
-         // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
-         IF kalk_pripr->idpartner == PadR( "118169", 7 ) // HACK-2: majop
-            nVPC := roba->vpc2
-         ELSE
-            nVPC := roba->vpc
-         ENDIF
-      ENDIF
-
-   ELSE
-      IF kalk->IdVd $ "14#10#KO"
-         nVPC := kalk->vpc
-      ELSE
-         // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
-         IF kalk->idpartner == PadR( "118169", 7 ) // majop
-            nVPC := roba->vpc2
-         ELSE
-            nVPC := roba->vpc
-         ENDIF
+         nVPC := roba->vpc
       ENDIF
    ENDIF
-
+   
    RETURN nVPC
-
-
 
 STATIC FUNCTION kalk_fin_stanje_add_to_r_export_legacy( cIdFirma, cIdVd, cBrDok, dDatDok, cVrstaDokumenta, cIdPartner, ;
       part_naz, part_mjesto, part_ptt, part_adr, broj_fakture, ;

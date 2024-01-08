@@ -30,6 +30,7 @@ FUNCTION kalk_get_1_11()
    LOCAL nKolZN
    LOCAL nNcPosljednjegUlaza
    LOCAL nNcSrednja
+   LOCAL nVPCRoba := 0
 
    IF Empty( _mkonto )
       _MKonto := _Idkonto
@@ -72,6 +73,7 @@ FUNCTION kalk_get_1_11()
    READ
    ESC_RETURN K_ESC
 
+   nVPCRoba := roba->vpc
    select_o_koncij( _pkonto )
    SELECT kalk_pripr
    IF kalk_is_novi_dokument()
@@ -174,6 +176,12 @@ FUNCTION kalk_get_1_11()
    _IdKonto2 := _PKonto  // ulaz u prodavnicu
    _gkolicin2 := 0
    _gkolicina := 0
+
+   if trim(_mkonto) == "13202" .and. round(nVPCRoba, 4) > 0 // magacin u RS
+      _VPC := nVPCRoba
+      _marza := nVPCRoba - _nc
+      _marza2 := _MPC - nVPCRoba
+   endif
 
    IF _idvd == '21'
       _MU_I := "6"

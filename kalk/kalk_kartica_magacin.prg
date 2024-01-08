@@ -548,7 +548,7 @@ FUNCTION kalk_kartica_magacin()
             hParams[ "nc" ] := nNc
             hParams[ "nv" ] := nNV
             hParams[ "rabatv" ] := field->rabatv
-            hParams[ "vpc" ] := vpc_magacin_rs()
+            hParams[ "vpc" ] := vpc_magacin()
             hParams[ "stanje" ] := nUlaz - nIzlaz
             xlsx_export_fill_row( hParams)
             nCount ++

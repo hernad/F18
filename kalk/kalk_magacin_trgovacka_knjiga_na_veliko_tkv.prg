@@ -343,7 +343,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
          select_o_roba( kalk->idroba )
          SELECT kalk
-         nVPC := vpc_magacin_rs()
+         nVPC := vpc_magacin()
 
          IF kalk->mu_i == "1" // .AND. !( field->idvd $ "12#94" )  // ulazne kalkulacije
             nVPVUlaz += Round(  nVpc * field->kolicina, gZaokr )

@@ -122,11 +122,12 @@ FUNCTION kalk_stampa_dok_16_95_96( hViseDokumenata )
             cIdKontoGlavni := field->idkonto2
          ENDIF
          ?? "  ", PadR( cIdKontoGlavni, 7 ), PadR( AllTrim( field->idroba ) + "-" + AllTrim( roba->naz ) + " (" + AllTrim( roba->jmj ) + ")", 60 )
-         @ PRow(), PCol() + 1 SAY field->kolicina PICT pickol()
-         @ PRow(), PCol() + 1 SAY field->nc PICT piccdem()
+         @ PRow(), PCol() + 1 SAY kalk_pripr->kolicina PICT pickol()
+         @ PRow(), PCol() + 1 SAY kalk_pripr->nc PICT piccdem()
          @ PRow(), nC1 := PCol() + 1 SAY nUNv PICT picdem()
          IF lVPC
-            nVPC := vpc_magacin_rs_priprema()
+            //nVPC := vpc_magacin_rs_priprema()
+            nVPC := kalk_pripr->vpc
             SELECT kalk_pripr
             nUVPV := nVPC * field->kolicina
             // nv * (marzavp% + 1) = vpv =>  marzavp% = vpv/nv - 1 x 100%
@@ -189,7 +190,7 @@ FUNCTION is_magacin_evidencija_vpc( cMKonto )
    LOCAL lVPC := .F.
 
    select_o_koncij( cMKonto )
-   IF koncij->region == "RS"
+   IF koncij->region == "RS" .OR. trim(cMKonto) == "13202" // skladiste bl
       lVPC := .T.
    ENDIF
 
