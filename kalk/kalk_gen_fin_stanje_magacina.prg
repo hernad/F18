@@ -70,13 +70,13 @@ koristi TKV
 //   RETURN nVPC
 
 
-FUNCTION vpc_magacin(  )
+FUNCTION vpc_magacin()
 
    LOCAL nVPC, nAlias
 
    IF trim(kalk->mkonto) == "13202"
       nVPC := kalk->vpc
-   else   
+   ELSE   
       // select_o_roba( kalk->idroba ) ne treba ovo je vec uradjeno u nadfunkciji
       IF kalk->idpartner == PadR( "118169", 7 ) // majop
          nVPC := roba->vpc2
@@ -84,6 +84,10 @@ FUNCTION vpc_magacin(  )
          nVPC := roba->vpc
       ENDIF
    ENDIF
+   
+//   if ValType(nVPC) <> "N"
+//      altd()
+//   endif
    
    RETURN nVPC
 

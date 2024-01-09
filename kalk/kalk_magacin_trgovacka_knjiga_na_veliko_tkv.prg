@@ -114,7 +114,7 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    LOCAL lViseKonta := .F.
    LOCAL nDbfArea
    LOCAL nVPVRabat
-   LOCAL nNvUlaz, nNvIzlaz, nVPVUlaz, nVPVIzlaz
+   LOCAL nNvUlaz, nNvIzlaz, nVPVUlaz, nVPVIzlaz, nVPVPot
    LOCAL nMarzaVP, nMarzaMP, nPrevozTr, nPrevoz2Tr
    LOCAL nBankTr, nZavisniTr, nCarinTr, nSpedTr
    LOCAL cBrFaktP, cIdVd, cTipDokumentaNaziv, cIdPartner
@@ -134,6 +134,8 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    LOCAL hRec
    LOCAL aHeader, aXlsxFields, cXlsxName
    LOCAL cOpisKnjizenja, nRedBr
+   LOCAL lVPV := .F.
+   LOCAL nNVSaldo, nVPVSaldo, nNVPot
 
    // uslovi generisanja se uzimaju iz hash matrice
    // moguce vrijednosti su:
@@ -160,11 +162,14 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       cGledatiUslugeDN := hParams[ "gledati_usluge" ]
    ENDIF
 
+   IF trim(cIdKonto) == "13202"
+      lVpv := .T.
+   ENDIF 
 
    //kalk_hernad_tkv_cre_r_export()  // napravi pomocnu tabelu
    //xlsx_export_init( aDbf )
    // IF hParams["xlsx"]
-   aXlsxFields := kalk_tkv_xls_fields()
+   aXlsxFields := kalk_tkv_xls_fields(lVpv)
    aHeader := {}
    //IF cExpXlsx == "D"
    AADD( aHeader, { "Period", DTOC(dDatumOd) + " -" + DTOC(dDatumDo) } )
@@ -238,7 +243,9 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
    @ box_x_koord() + 1, box_y_koord() + 2 SAY8 PadR( "Generisanje pomoćne tabele u toku...", 58 ) COLOR f18_color_i()
 
    nRedBr := 0
-   altd()
+   nVPVSaldo := 0
+   nNVSaldo := 0
+
    DO WHILE !Eof() .AND. cIdFirma == field->idfirma .AND. ispitaj_prekid()
 
       //IF !lViseKonta .AND. field->mkonto <> cUslovKonto
@@ -273,8 +280,11 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
          ENDIF
       ENDIF
 
+
       nVPVUlaz := 0
       nVPVIzlaz := 0
+      nNVPot := 0
+      nVPVPot := 0
       nNvUlaz := 0
       nNvIzlaz := 0
       nVPVRabat := 0
@@ -343,7 +353,11 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
          select_o_roba( kalk->idroba )
          SELECT kalk
-         nVPC := vpc_magacin()
+         nVpc := vpc_magacin()
+
+//         if ValType(nVPC) <> "N"
+//            altd()
+//         endif
 
          IF kalk->mu_i == "1" // .AND. !( field->idvd $ "12#94" )  // ulazne kalkulacije
             nVPVUlaz += Round(  nVpc * field->kolicina, gZaokr )
@@ -351,11 +365,13 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
 
          ELSEIF kalk->mu_i == "5" .AND. kalk->idvd != "KO" .AND. kalk->idvd != "14" // izlazne kalkulacije
             nVPVIzlaz += Round( nVpc * field->kolicina, gZaokr )
+            nVPVPot += Round( nVpc * field->kolicina, gZaokr )
             nVPVRabat += Round( ( field->rabatv / 100 ) * nVPC * field->kolicina, gZaokr )
             nNvIzlaz += Round( field->nc * field->kolicina, gZaokr )
 
          ELSEIF kalk->idvd == "14"
             nRealizacija += Round( nVpc * field->kolicina, gZaokr )
+            nVPVPot += Round( nVpc * field->kolicina, gZaokr )
             nVPVRabat += Round( ( field->rabatv / 100 ) * nVPC * field->kolicina, gZaokr )
             nRealizacijaNv += Round( field->nc * field->kolicina, gZaokr )
 
@@ -392,18 +408,32 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
       hRec[ "part_ptt" ] := cPartnerPTT
       hRec[ "part_adr" ] := cPartnerAdresa
       hRec[ "br_fakt" ] := cBrFaktP
-      hRec[ "nv_dug" ] := nNvUlaz
+      
       hRec[ "nv_izlaz" ] := nNvIzlaz
       hRec[ "nv_real" ] := nRealizacijaNv
-      hRec[ "nv_pot" ] := nNvIzlaz + nRealizacijaNv
-      hRec[ "vp_marza" ] := ROUND(nRealizacija - nVPVRabat - nRealizacijaNv, 2)
+      
+      hRec[ "vp_marza" ] := ROUND(nRealizacija - nVPVRabat - nRealizacijaNv, 2 )
 
-      //hRec[ "vp_dug" ] := nVPVUlaz
-      //hRec[ "vp_pot" ] := nVpvIzlaz
+      nNvUlaz := round( nNvUlaz, 2)
+      nNVPot := round( nNvIzlaz + nRealizacijaNv, 2)
+      hRec[ "nv_dug" ] := nNvUlaz
+      hRec[ "nv_pot" ] := nNVPot
+      nNVSAldo := Round( nNVSaldo + nNvUlaz - nNVPot, 2 )
+      hRec[ "nv" ] := nNVSaldo
+
 
       hRec[ "vp_rabat" ] := nVPVRabat
       hRec[ "vp_real" ] := nRealizacija
       hRec[ "vp_real_nt" ] := nRealizacija - nVPVRabat
+
+      IF lVPV
+         nVPVUlaz := Round( nVPVUlaz, 2 )
+         nVPVPot := Round( nVPVPot, 2 )
+         hRec[ "vpv_dug"] := nVPVUlaz
+         hRec[ "vpv_pot" ] := nVPVPot
+         nVPVSaldo := Round( nVPVSaldo + nVPVUlaz - nVPVPot, 2 )
+         hRec[ "vpv" ] := nVPVSaldo 
+      ENDIF
 
 
       //o_r_export_legacy()
@@ -655,7 +685,7 @@ STATIC FUNCTION tkv_header()
    RETURN .T.
 
 
-STATIC FUNCTION kalk_tkv_xls_fields()
+STATIC FUNCTION kalk_tkv_xls_fields(lVPV)
 
    LOCAL aDbf := {}
 
@@ -674,10 +704,13 @@ STATIC FUNCTION kalk_tkv_xls_fields()
    AAdd( aDbf, { "part_ptt", "C", 10, 0 } )
    AAdd( aDbf, { "part_adr", "C", 50, 0 } )
    AAdd( aDbf, { "br_fakt", "C", 20, 0 } )
-   AAdd( aDbf, { "nv_dug", "N", 15, 2, "NV DUG" } )
+   
    AAdd( aDbf, { "nv_izlaz", "N", 15, 2 } )
    AAdd( aDbf, { "nv_real", "N", 15, 2, "NV real" } )
+   
+   AAdd( aDbf, { "nv_dug", "N", 15, 2, "NV DUG" } )
    AAdd( aDbf, { "nv_pot", "N", 15, 2, "NV POT" } )
+   AAdd( aDbf, { "nv",     "N", 15, 2, "NV SALDO" } )
 
    //AAdd( aDbf, { "vp_dug", "N", 15, 2 } )
    //AAdd( aDbf, { "vp_pot", "N", 15, 2 } )
@@ -686,6 +719,12 @@ STATIC FUNCTION kalk_tkv_xls_fields()
    AAdd( aDbf, { "vp_rabat", "N", 15, 2, "VP rabat" } )
    AAdd( aDbf, { "vp_real", "N", 15, 2, "VP real" } )
    AAdd( aDbf, { "vp_real_nt", "N", 15, 2, "VP real neto" } )
+
+   IF lVPV
+      AAdd( aDbf, { "vpv_dug", "N", 15, 2, "VPV DUG" } )
+      AAdd( aDbf, { "vpv_pot", "N", 15, 2, "VPV POT" } )
+      AAdd( aDbf, { "vpv", "N", 15, 2, "VPV SALDO" } )
+   ENDIF
 
    RETURN aDbf
 
