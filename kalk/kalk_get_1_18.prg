@@ -93,13 +93,9 @@ FUNCTION kalk_get_1_18()
       ENDIF
    ENDIF
 
-   IF roba->tip $ "VK"
-      _VPC := ( nKalkNovaCijena - nKalkStaraCijena )
-      _MPCSAPP := nKalkStaraCijena
-   ELSE
-      _VPC := nKalkNovaCijena - nKalkStaraCijena
-      _MPCSAPP := nKalkStaraCijena
-   ENDIF
+   _VPC := nKalkNovaCijena - nKalkStaraCijena
+   _MPCSAPP := nKalkStaraCijena
+   
 
    _idpartner := ""
    _rabat := prevoz := prevoz2 := _banktr := _spedtr := _zavtr := _nc := _marza := _marza2 := _mpc := 0
