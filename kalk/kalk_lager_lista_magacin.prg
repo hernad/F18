@@ -54,6 +54,7 @@ FUNCTION kalk_lager_lista_magacin()
    LOCAL cIdKonto
    LOCAL aHeader
    LOCAL cXlsxName, aXlsxFields
+   LOCAL lVPC
 
    // pPicDem := kalk_prosiri_pic_iznos_za_2()
    // pPicCDem := kalk_prosiri_pic_cjena_za_2()
@@ -192,6 +193,10 @@ FUNCTION kalk_lager_lista_magacin()
 
       READ
       ESC_BCR
+
+      
+      lVPC := is_magacin_evidencija_vpc( cIdKonto )
+
 
       PRIVATE aUsl1 := Parsiraj( qqRoba, "IdRoba" )
       PRIVATE aUsl2 := Parsiraj( qqTarifa, "IdTarifa" )
@@ -482,19 +487,20 @@ FUNCTION kalk_lager_lista_magacin()
             nKolicina := field->kolicina
             nIzlaz += nKolicina
             kalk_sumiraj_kolicinu( 0, nKolicina, @nTUlazP, @nTIzlazP )
-            IF koncij->naz == "P2"
-               nVPVI += Round( roba->plc * kolicina, gZaokr )
-               nVPVRI += Round( roba->plc * kolicina, gZaokr )
-            ELSE
-               nVPVI += Round( roba->vpc * kolicina, gZaokr )
-               nVPVRI += Round( nVPC * kolicina, gZaokr )
-            ENDIF
+            
+            nVPVI += Round( roba->vpc * kolicina, gZaokr )
+            nVPVRI += Round( nVPC * kolicina, gZaokr )
+            
             nRabat += Round(  rabatv / 100 * vpc * kolicina, gZaokr )
             nNVI += Round( nc * kolicina, gZaokr )
 
             // datum zadnjeg izlaza
             dL_izlaz := field->datdok
 
+         // ELSEIF lVPC .and. field->mu_i == "3"  // nivelacija 18-ka
+         //
+         //   nVPVU += Round( roba->vpc * kolicina, gZaokr )  
+   
          ELSEIF kalk->mu_i == "8"
             nKolicina := -field->kolicina
             nIzlaz += nKolicina

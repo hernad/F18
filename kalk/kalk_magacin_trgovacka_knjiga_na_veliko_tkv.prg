@@ -375,6 +375,9 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
             nVPVRabat += Round( ( field->rabatv / 100 ) * nVPC * field->kolicina, gZaokr )
             nRealizacijaNv += Round( field->nc * field->kolicina, gZaokr )
 
+         ELSEIF lVPV .and. kalk->mu_i == "3" // 18-ka
+            nVPVUlaz += Round(  kalk->vpc * field->kolicina, gZaokr )
+            
          ELSEIF kalk->idvd == "KO"
             nRealizacija += Round( nVpc * field->kolicina, gZaokr )
             nVPVRabat += Round( ( field->rabatv / 100 ) * nVPC * field->kolicina, gZaokr )

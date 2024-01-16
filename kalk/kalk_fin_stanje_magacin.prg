@@ -281,7 +281,7 @@ FUNCTION finansijsko_stanje_magacin()
             nRabat -= Round( kalk->rabatv / 100 * nVPC * kalk->kolicina, gZaokr )
             nNVI -= Round( kalk->nc * kalk->kolicina, gZaokr )
 
-         ELSEIF mu_i == "3"    // nivelacija
+         ELSEIF mu_i == "3"  // nivelacija
             nVPVU += Round( nVPC * kalk->kolicina, gZaokr )
          ENDIF
 
@@ -392,7 +392,6 @@ FUNCTION finansijsko_stanje_magacin()
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 STATIC FUNCTION kalk_zagl_fin_stanje_magacin()

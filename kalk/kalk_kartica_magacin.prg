@@ -36,7 +36,7 @@ FUNCTION kalk_kartica_magacin()
    LOCAL cIdRobaTackaZarez := cIdRoba
    LOCAL GetList := {}
    LOCAL lPrviProlaz
-   LOCAL nCount := 0
+   LOCAL nCount := 0, lVPC
 
    PRIVATE fKNabC := .F.
 
@@ -113,6 +113,8 @@ FUNCTION kalk_kartica_magacin()
          READ
          ESC_BCR
 
+         
+         lVPC := is_magacin_evidencija_vpc( cIdKonto )
 
          // IF !Empty( cRnT1 ) .AND. !Empty( cRNalBroj )
          // PRIVATE aUslRn := Parsiraj( cRNalBroj, "idzaduz2" )
@@ -241,7 +243,7 @@ FUNCTION kalk_kartica_magacin()
       nCol1 := 10
       nUlaz := nIzlaz := 0
       nRabat := nNV := nVPV := 0
-      tnNVd := tnNVp := tnVPVd := tnVPVp := 0
+      nTNVd := nTNVp := tnVPVd := tnVPVp := 0
       lPrviProlaz := .T.
       nColDok := 9
       nColFCJ2 := 68
@@ -294,8 +296,8 @@ FUNCTION kalk_kartica_magacin()
             ENDIF
 
             IF cPVSS == "N"
-               @ PRow(), PCol() + 1 SAY kalk_say_iznos( tnNVd ) // NV dug. NV pot.
-               @ PRow(), PCol() + 1 SAY kalk_say_iznos( tnNVp )
+               @ PRow(), PCol() + 1 SAY kalk_say_iznos( nTNVd ) // NV dug. NV pot.
+               @ PRow(), PCol() + 1 SAY kalk_say_iznos( nTNVp )
             ENDIF
 
             @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNV ) // NV
@@ -333,7 +335,7 @@ FUNCTION kalk_kartica_magacin()
             ENDIF
 
             nNVd := field->nc * kalk->kolicina
-            tnNVd += nNVd
+            nTNVd += nNVd
             nNV += field->nc * kalk->kolicina
 
             nVPVd := kalk->vpc * kalk->kolicina
@@ -391,7 +393,7 @@ FUNCTION kalk_kartica_magacin()
             ENDIF
 
             nNVp := kalk->nc * kalk->kolicina
-            tnNVp += nNVp
+            nTNVp += nNVp
             nNV -= kalk->nc * kalk->kolicina
 
             nVPVp := kalk->vpc * kalk->kolicina
@@ -447,7 +449,7 @@ FUNCTION kalk_kartica_magacin()
 
             ENDIF
             nNVp := -field->nc * kalk->kolicina
-            tnNVp += nNVp
+            nTNVp += nNVp
             nNV += nc * ( kolicina )
 
             nVPVp := -kalk->vpc * kalk->kolicina
@@ -468,7 +470,7 @@ FUNCTION kalk_kartica_magacin()
                ENDIF
             ENDIF
 
-         ELSEIF field->mu_i == "3"   // nivelacija
+         ELSEIF lVPC .and. field->mu_i == "3"   // nivelacija 18-ka
 
             IF field->datdok >= dDatod
                ? field->datdok, field->idvd + "-" + field->brdok, field->idtarifa
@@ -570,8 +572,8 @@ FUNCTION kalk_kartica_magacin()
          @ PRow(), PCol() + 1 SAY say_kolicina( 0 )
       ENDIF
       IF cPVSS == "N"
-         @ PRow(), PCol() + 1 SAY kalk_say_iznos( tnNVd )
-         @ PRow(), PCol() + 1 SAY kalk_say_iznos( tnNVp )
+         @ PRow(), PCol() + 1 SAY kalk_say_iznos( nTNVd )
+         @ PRow(), PCol() + 1 SAY kalk_say_iznos( nTNVp )
       ENDIF
       @ PRow(), PCol() + 1 SAY kalk_say_iznos( nNV )
       @ PRow(), PCol() + 1 SAY say_kolicina( nRabat  )
