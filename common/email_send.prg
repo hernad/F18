@@ -172,14 +172,14 @@ FUNCTION email_podrska_bring_out( cSubject, cBody )
 
    cTo := "F18@bug.out.ba"
    cFrom := "F18@bug.out.ba"
-#ifdef F18_DEBUG
-   cServer := "mail.bring.out.ba"
-   nPort := 25
-   Alert("send email to " + cServer)
-#else
+//ifdef F18_DEBUG
+//   cServer := "mail.bring.out.ba"
+//   nPort := 25
+//   Alert("send email to " + cServer)
+//#else
    cServer := "smtp.bug.out.ba"
    nPort := 999
-#endif
+//#endif
    
    cUser := "xx"
    cPassword := "xx"

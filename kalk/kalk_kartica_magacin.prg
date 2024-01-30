@@ -278,6 +278,7 @@ FUNCTION kalk_kartica_magacin()
             LOOP
          ENDIF
 
+
          IF cPredh == "D" .AND. kalk->datdok >= dDatod .AND. lPrviProlaz
 
             lPrviProlaz := .F. // ispis predhodnog stanja
@@ -484,7 +485,7 @@ FUNCTION kalk_kartica_magacin()
 
                @ PRow(), PCol() + 1 SAY PadR( "NIV   (" + Transform( kalk->kolicina, pickol ) + ")", Len( pickol ) * 2 + 1 )
                @ PRow(), PCol() + 1 SAY PadR( " stara VPC:", Len( pickol ) - 2 )
-               @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp       )  // kod ove kalk to predstavlja staru vpc
+               @ PRow(), PCol() + 1 SAY say_cijena( kalk->mpcsapp     )  // kod ove kalk to predstavlja staru vpc
                @ PRow(), PCol() + 1 SAY PadR( "nova VPC:", Len( piccdem ) + iif( cPVSS == "N", 2 * ( Len( picdem ) + 1 ), 0 ) )
                @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc + kalk->mpcsapp )
                @ PRow(), PCol() + 1 SAY say_cijena( kalk->vpc         )

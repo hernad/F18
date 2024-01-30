@@ -132,7 +132,7 @@ FUNCTION kalk_get_16_1()
 
    @ box_x_koord() + 14, box_y_koord() + 2    SAY "NAB.CJ   "  GET _NC  PICTURE  picnc()  WHEN V_kol10()
    // vodi se po nc
-   _vpc := _nc
+   //_vpc := _nc
    //marza := 0
    cBeze := " "
    @ box_x_koord() + 17, box_y_koord() + 2 GET cBeze VALID kalk_16_svedi_kolicinu_cijenu( cSvedi )
@@ -157,9 +157,14 @@ FUNCTION kalk_get_16_1()
 
 STATIC FUNCTION kalk_16_svedi_kolicinu_cijenu( cSvedi )
 
-   IF koncij->naz == "N1"
+   // 96-0000001 => 16-G000001
+   IF trim(_mkonto) == "13202"
+      _vpc := roba->vpc
+     _marza := _vpc - _nc
+   ELSE  
       _VPC := _NC
    ENDIF
+
    IF cSvedi == "S"
       IF _vpc <> 0
          _kolicina := -Round( nKalkVPV16PredhodnaStavka / _vpc, 4 )
