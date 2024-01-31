@@ -280,6 +280,11 @@ FUNCTION kalk_gen_fin_stanje_magacina_za_tkv( hParams )
          ENDIF
       ENDIF
 
+      IF kalk->idvd $ ("IM", "21", "22") // inventura magacin ne treba
+         SKIP
+         LOOP
+      ENDIF
+
 
       nVPVUlaz := 0
       nVPVIzlaz := 0
