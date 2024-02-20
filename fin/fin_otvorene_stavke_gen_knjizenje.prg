@@ -695,6 +695,6 @@ STATIC FUNCTION fin_cre_open_dbf_ostav()
    USE
 
    my_use_temp( "OSTAV", my_home() + my_dbf_prefix() + cDbfName, .F., .T. )
-   INDEX ON DToS( DatDok ) + DToS( iif( Empty( datval ), datdok, datval ) ) + brdok TAG "1"
+   INDEX ON DToS( iif( Empty( datval ), datdok, datval ) ) + brdok TAG "1"
 
    RETURN .T.
