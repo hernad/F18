@@ -50,7 +50,17 @@ FUNCTION fin_kupci_pregled_dugovanja()
    //    from sp_dugovanja('2022-01-01','2022-01-31', '211%', '%')
    //    left join partn on sp_dugovanja.partner_id = partn.id
 
-   cSql := "select sp_dugovanja.*,"
+   //select konto_id, partner_naz, referent_naz, substring(partner_id,2) as partner_id, i_pocstanje, i_dospjelo, i_nedospjelo, i_ukupno, valuta, rok_pl, partn_velicina_naz, partn_vr_obezbj_naz, partn_regija_naz
+   //from
+   //(select sp_dugovanja.*, partn_velicina_naz(partn.s_velicina), partn_vr_obezbj_naz(partn.s_vr_obezbj), partn_regija_naz(partn.s_regija)
+   // from sp_dugovanja('2024-01-01', '2024-02-29', '2110%', '10%')
+   //  left join partn on sp_dugovanja.partner_id = partn.id) spdug
+
+   // partner_id prema zelenoj app - varazdin
+   // 106165 => 06165
+   cSql := "SELECT konto_id, partner_naz, referent_naz, substring(partner_id,2) as partner_id, i_pocstanje, i_dospjelo, i_nedospjelo, i_ukupno, valuta, rok_pl, partn_velicina_naz, partn_vr_obezbj_naz, partn_regija_naz"
+   cSql += " FROM ("
+   cSql += "select sp_dugovanja.*,"
    cSql += " partn_velicina_naz(partn.s_velicina), partn_vr_obezbj_naz(partn.s_vr_obezbj), partn_regija_naz(partn.s_regija)"
    cSql += " from sp_dugovanja("
    cSql += sql_quote( dDatOd ) + ","
@@ -64,6 +74,7 @@ FUNCTION fin_kupci_pregled_dugovanja()
    ELSE
       cSql += " WHERE i_ukupno<>0 "
    ENDIF
+   cSql += ") spdug"
 
    // cSql += " WHERE i_ukupno"+to_xml_encoding("<>")+"0"
    // cSql += " AND idkonto=" + to_xml_encoding(sql_quote( Padr( "2110", 7) ))
