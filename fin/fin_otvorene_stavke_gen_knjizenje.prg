@@ -174,6 +174,7 @@ FUNCTION fin_unos_asistent_gen_otvorene_stavke()
       ENDIF
       aFaktura := { CToD( "" ), CToD( "" ), CToD( "" ) }
 
+      // zbir za broj dokumenta
       DO WHILE !Eof() .AND. field->idfirma == cIdFirma .AND. cIdKonto == field->idkonto .AND. cIdPartner == field->idpartner .AND. field->brdok == cBrDok
 
          dDatDok := Min( Max( fix_dat_var( field->datval, .T. ), fix_dat_var( field->datdok, .T. ) ), dDatDok )
@@ -199,6 +200,7 @@ FUNCTION fin_unos_asistent_gen_otvorene_stavke()
 
       ENDDO
 
+      // saldo za broj dokumenta
       IF Round( nDug - nPot, 2 ) <> 0
 
          SELECT ostav
@@ -258,7 +260,8 @@ FUNCTION fin_unos_asistent_gen_otvorene_stavke()
    SELECT ostav
    GO TOP
 
-   my_browse( "KOStav", nBoxRow, nBoxCol, {|| oasist_key_handler( nIznos, cDugPot ) }, "", "Otvorene stavke.", , , , {|| field->m2 = '3' }, 3 )
+   // _datdok = datum knjizenja izvoda
+   my_browse( "KOStav", nBoxRow, nBoxCol, {|| oasist_key_handler( nIznos, cDugPot, _datdok ) }, "", "Otvorene stavke.", , , , {|| field->m2 = '3' }, 3 )
 
    BoxC() // rucni asistent
 
@@ -269,7 +272,7 @@ FUNCTION fin_unos_asistent_gen_otvorene_stavke()
 
    GO TOP
    DO WHILE !Eof()
-      IF field->m2 = "3"
+      IF field->m2 == "3"
          lMarker3 := .T.
          EXIT
       ENDIF
@@ -458,8 +461,9 @@ STATIC FUNCTION _del_nal_xx()
 
 
 
+// cDugPot == "2" za kupca
 
-STATIC FUNCTION oasist_key_handler( nIznos, cDugPot )
+STATIC FUNCTION oasist_key_handler( nIznos, cDugPot, dDatKnjizenja )
 
    LOCAL cOldBrDok := ""
    LOCAL cBrdok := ""
@@ -470,6 +474,8 @@ STATIC FUNCTION oasist_key_handler( nIznos, cDugPot )
    LOCAL hRec
    LOCAL nUplaceno
    LOCAL nPredhodniIznos
+   LOCAL dTekDatValute
+   LOCAL nStornirano
 
    DO CASE
 
@@ -558,18 +564,37 @@ STATIC FUNCTION oasist_key_handler( nIznos, cDugPot )
 
       SELECT ostav
       GO TOP
+      altd()
 
       IF Pitanje(, "Asistent zatvara stavke ( " + AllTrim( kalk_say_iznos( nIznos ) ) + " KM) ?", "D" ) == "D"
 
-         nPredhodniIznos := nIznos
-         GO TOP
          my_flock()
+         GO TOP
+         nStornirano := 0
+         // u slucaju kupaca, ako imamo storno fakture do datuma knjizenja - saberi ih
+         DO WHILE IIF( Empty( ostav->datval ), ostav->datdok, ostav->datval ) <= dDatKnjizenja .AND. !Eof()
+            IF cDugPot != ostav->d_p .AND. ostav->iznosbhd<0
+               nStornirano += -ostav->iznosbhd
+            ENDIF
+            SKIP       
+         ENDDO
+         
+         // iznos za zatvaranje, stavke koje su stornirane takodje se uzimaju u obzira 
+         nPredhodniIznos := nIznos + nStornirano
+         GO TOP
          DO WHILE !Eof()
-            IF cDugPot <> field->d_p .AND. nPredhodniIznos > 0
-               nUplaceno := Min( field->iznosbhd, nPredhodniIznos )
+            
+            //dTekDatValute := IIF( Empty( ostav->datval ), ostav->datdok, ostav->datval )
+
+            // cDugPot != ostav->d_p, ako zatvaramo kupce cDugPot = 2, dugovanja su d_p = 1
+            IF cDugPot != ostav->d_p .AND. nPredhodniIznos > 0
+               nUplaceno := Min( ostav->iznosbhd, nPredhodniIznos )
                REPLACE m2 WITH "3"
                REPLACE uplaceno WITH nUplaceno
-               nPredhodniIznos -= nUplaceno
+               IF nUplaceno >= 0
+                 // ne racunati stornirane stavke
+                 nPredhodniIznos -= nUplaceno
+               ENDIF
             ELSE
                REPLACE m2 WITH ""
             ENDIF
@@ -577,8 +602,10 @@ STATIC FUNCTION oasist_key_handler( nIznos, cDugPot )
          ENDDO
          my_unlock()
 
+         altd()
          GO TOP
-         IF nPredhodniIznos > 0
+         // kupac je avansirao
+         IF round(nPredhodniIznos, 2) > 0
 
             // ostao si u avansu
             APPEND BLANK
