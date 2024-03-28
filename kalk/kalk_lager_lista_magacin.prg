@@ -462,7 +462,7 @@ FUNCTION kalk_lager_lista_magacin()
                //   nVPVU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
                //   nVPVRU += Round( roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
                //ELSE
-               nVPVU += Round( roba->vpc * kolicina, gZaokr )
+               nVPVU += Round( nVPC * kolicina, gZaokr )
                nVPVRU += Round( nVPC * kolicina, gZaokr )
                //ENDIF
 
@@ -475,7 +475,7 @@ FUNCTION kalk_lager_lista_magacin()
                //   nVPVI -= Round( roba->plc * kolicina, gZaokr )
                //   nVPVRI -= Round( roba->plc * kolicina, gZaokr )
                //ELSE
-                  nVPVI -= Round( roba->vpc * kolicina, gZaokr )
+                  nVPVI -= Round( nVPC * kolicina, gZaokr )
                   nVPVRI -= Round( nVPC * kolicina, gZaokr )
                //ENDIF
                nNVI -= Round( nc * kolicina, gZaokr )
@@ -488,7 +488,7 @@ FUNCTION kalk_lager_lista_magacin()
             nIzlaz += nKolicina
             kalk_sumiraj_kolicinu( 0, nKolicina, @nTUlazP, @nTIzlazP )
             
-            nVPVI += Round( roba->vpc * kolicina, gZaokr )
+            nVPVI += Round( nVPC * kolicina, gZaokr )
             nVPVRI += Round( nVPC * kolicina, gZaokr )
             
             nRabat += Round(  rabatv / 100 * vpc * kolicina, gZaokr )
@@ -497,35 +497,29 @@ FUNCTION kalk_lager_lista_magacin()
             // datum zadnjeg izlaza
             dL_izlaz := field->datdok
 
-         // ELSEIF lVPC .and. field->mu_i == "3"  // nivelacija 18-ka
-         //
-         //   nVPVU += Round( roba->vpc * kolicina, gZaokr )  
+         ELSEIF lVPC .and. field->mu_i == "3"  // nivelacija 18-ka
+         
+            nVPVU += Round( nVPC * kolicina, gZaokr )
+            nVPVRU += Round( nVPC * kolicina, gZaokr )
+            
    
          ELSEIF kalk->mu_i == "8"
             nKolicina := -field->kolicina
             nIzlaz += nKolicina
             kalk_sumiraj_kolicinu( 0, nKolicina, @nTUlazP, @nTIzlazP )
-            IF koncij->naz == "P2"
-               nVPVI += Round( roba->plc * ( - kolicina ), gZaokr )
-               nVPVRI += Round( roba->plc * ( - kolicina ), gZaokr )
-            ELSE
-               nVPVI += Round( roba->vpc * ( - kolicina ), gZaokr )
-               nVPVRI += Round( nVPC * ( - kolicina ), gZaokr )
-            ENDIF
+          
+            nVPVI += Round( nVPC * ( - kolicina ), gZaokr )
+            nVPVRI += Round( nVPC * ( - kolicina ), gZaokr )
+            
             nRabat += Round(  rabatv / 100 * vpc * ( - kolicina ), gZaokr )
             nNVI += Round( nc * ( - kolicina ), gZaokr )
             nKolicina := -field->kolicina
             nUlaz += nKolicina
             kalk_sumiraj_kolicinu( nKolicina, 0, @nTUlazP, @nTIzlazP )
 
-            IF koncij->naz == "P2"
-               nVPVU += Round( - roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-               nVPVRU += Round( - roba->plc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-            ELSE
-               nVPVU += Round( - roba->vpc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-               nVPVRU += Round( - nVPC * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
-            ENDIF
-
+            nVPVU += Round( - nVPC * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
+            nVPVRU += Round( - nVPC * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
+            
             nNVU += Round( - nc * ( kolicina - gkolicina - gkolicin2 ), gZaokr )
          ENDIF
 
