@@ -73,6 +73,7 @@ FUNCTION RRocnost()
 
    RETURN nVrati
 
+   
 FUNCTION IspisRocnosti()
 
    LOCAL cRocnost := Rocnost(), cVrati

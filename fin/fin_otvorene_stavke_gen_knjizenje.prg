@@ -571,30 +571,40 @@ STATIC FUNCTION oasist_key_handler( nIznos, cDugPot, dDatKnjizenja )
          my_flock()
          GO TOP
          nStornirano := 0
-         // u slucaju kupaca, ako imamo storno fakture do datuma knjizenja - saberi ih
+         // krug 1
+         // u slucaju kupaca, ako imamo storno fakture do datuma knjizenja - saberi ih i smatraj zatvorenim
          DO WHILE IIF( Empty( ostav->datval ), ostav->datdok, ostav->datval ) <= dDatKnjizenja .AND. !Eof()
             IF cDugPot != ostav->d_p .AND. ostav->iznosbhd<0
                nStornirano += -ostav->iznosbhd
+               REPLACE m2 WITH "3"
+               replace uplaceno with ostav->iznosbhd
             ENDIF
             SKIP       
          ENDDO
          
+         // krug 2
          // iznos za zatvaranje, stavke koje su stornirane takodje se uzimaju u obzira 
          nPredhodniIznos := nIznos + nStornirano
          GO TOP
          DO WHILE !Eof()
             
             //dTekDatValute := IIF( Empty( ostav->datval ), ostav->datdok, ostav->datval )
+         
+            // storna su u prvom krugu zatvorena
+            IF cDugPot != ostav->d_p .AND. ostav->iznosbhd<0
+               SKIP
+               loop
+            ENDIF
 
             // cDugPot != ostav->d_p, ako zatvaramo kupce cDugPot = 2, dugovanja su d_p = 1
             IF cDugPot != ostav->d_p .AND. nPredhodniIznos > 0
                nUplaceno := Min( ostav->iznosbhd, nPredhodniIznos )
                REPLACE m2 WITH "3"
                REPLACE uplaceno WITH nUplaceno
-               IF nUplaceno >= 0
-                 // ne racunati stornirane stavke
+               //IF nUplaceno >= 0
+                 //  ne racunati stornirane stavke
                  nPredhodniIznos -= nUplaceno
-               ENDIF
+               //ENDIF
             ELSE
                REPLACE m2 WITH ""
             ENDIF
