@@ -50,7 +50,7 @@ echo $LINE >> include/f18_ver.ch
 LINE="#define F18_VER_DATE  \"$F18_DATE\""
 echo $LINE >> include/f18_ver.ch
 
-LINE="#define F18_DEV_PERIOD  \"1994-2020\""
+LINE="#define F18_DEV_PERIOD  \"1994-2024\""
 echo $LINE >> include/f18_ver.ch
 
 LINE="#define F18_HARBOUR  \"$HARBOUR_VERSION\""

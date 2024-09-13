@@ -43,9 +43,7 @@ Notes:
 
     ./build_release.sh
 
-#### upload release to bintray
 
-    ./upload.sh
 
 
  

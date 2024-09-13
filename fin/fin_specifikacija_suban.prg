@@ -1,7 +1,7 @@
  /*
   * This file is part of the bring.out FMK, a free and open source
   * accounting software suite,
-  * Copyright (c) 1994-2018 by bring.out d.o.o Sarajevo.
+  * Copyright (c) 1994-2024 by bring.out d.o.o Sarajevo.
   * It is licensed to you under the Common Public Attribution License
   * version 1.0, the full text of which (including knowhow ERP specific Exhibits)
   * is available in the file LICENSE_CPAL_bring.out_knowhow.md located at the

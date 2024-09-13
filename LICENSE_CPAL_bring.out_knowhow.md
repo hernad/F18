@@ -201,7 +201,7 @@ The Original Code is knowhow ERP.
 
 The Original Developer is not the Initial Developer and is ____________________. If left blank, the Original Developer is the Initial Developer.
 
-The Initial Developer of the Original Code is bring.out doo Sarajevo. All portions of the code written by bring.out are Copyright (c) 1994-2018 bring.out doo Sarajevo. All Rights Reserved.
+The Initial Developer of the Original Code is bring.out doo Sarajevo. All portions of the code written by bring.out are Copyright (c) 1994-2024 bring.out doo Sarajevo. All Rights Reserved.
 
 Contributor(s) ______________________.
 
@@ -213,7 +213,7 @@ Alternatively, the contents of this file may be used under the terms of the brin
 EXHIBIT B. Attribution Information
 -------------------------------------
 
-Attribution Copyright Notice: Copyright (c) 1994-2018 by bring.out d.o.o. Sarajevo
+Attribution Copyright Notice: Copyright (c) 1994-2024 by bring.out d.o.o. Sarajevo
 
 Attribution Phrase: Powered by knowhow ERP
 

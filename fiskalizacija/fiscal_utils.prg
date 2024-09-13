@@ -1,7 +1,7 @@
 /*
  * This file is part of the bring.out knowhow ERP, a free and open source
  * Enterprise Resource Planning software suite,
- * Copyright (c) 1994-2018 by bring.out doo Sarajevo.
+ * Copyright (c) 1994-2024 by bring.out doo Sarajevo.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including FMK specific Exhibits)
  * is available in the file LICENSE_CPAL_bring.out_knowhow.md located at the
@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+MEMVAR Ch
 
 STATIC __MAX_QT := 99999.999
 STATIC __MIN_QT := 0.001
@@ -18,7 +19,6 @@ STATIC __MAX_PRICE := 999999.99
 STATIC __MIN_PRICE := 0.01
 STATIC __MAX_PERC := 99.99
 STATIC __MIN_PERC := -99.99
-
 
 
 /*
