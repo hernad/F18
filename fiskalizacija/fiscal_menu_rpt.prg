@@ -58,6 +58,12 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
    DO CASE
 
+   CASE cFiskalniDrajver == "OFS"
+
+      AAdd( aOpc, "1. test hello curl" )
+      AAdd( aOpcExe, {|| curl_hello() } )
+
+
    CASE cFiskalniDrajver == "FLINK"
 
       AAdd( aOpc, "------ izvještaji ---------------------------------" )
