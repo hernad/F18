@@ -506,8 +506,10 @@ FUNCTION use_sql_kalk( hParams )
 
    IF !lReportMagacin
       cSql += coalesce_num_num_zarez( "mpc", 18, 8 )
-      cSql += coalesce_num_num_zarez( "mpcsapp", 18, 8 )
    ENDIF
+
+   // kalk-18 pohranjuje vpc_diff u ovo polje
+   cSql += coalesce_num_num_zarez( "mpcsapp", 18, 8 )
 
    cSql += coalesce_char_zarez( "mu_i", 1 )
    cSql += coalesce_char_zarez( "pu_i", 1 )

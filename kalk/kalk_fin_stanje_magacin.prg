@@ -12,6 +12,7 @@
 #include "f18.ch"
 
 MEMVAR picdem, piccdem
+MEMVAR __print_opt
 
 FUNCTION finansijsko_stanje_magacin()
 
@@ -51,7 +52,7 @@ FUNCTION finansijsko_stanje_magacin()
       READ
 
       IF cPapir == "2"
-         qqidvd := PadR( "10;", 60 )
+         qqIdvd := PadR( "10;", 60 )
       ENDIF
 
       PRIVATE cViseKonta := "N"
@@ -231,7 +232,7 @@ FUNCTION finansijsko_stanje_magacin()
 
       DO WHILE !Eof() .AND. cIdFirma + DToS( dDatDok ) + cBroj == idFirma + DToS( datdok ) + idvd + "-" + brdok
 
-         IF cViseKonta == "N" .AND. ( datdok < dDatOd .OR. datdok > dDatDo .OR. mkonto <> cidkonto )
+         IF cViseKonta == "N" .AND. ( datdok < dDatOd .OR. datdok > dDatDo .OR. mkonto <> cIdKonto )
             SKIP
             LOOP
          ENDIF
@@ -241,6 +242,11 @@ FUNCTION finansijsko_stanje_magacin()
                SKIP
                LOOP
             ENDIF
+         ENDIF
+
+         IF kalk->idvd $ "21#22"  // iskljuciti dokumente 21, 21
+            SKIP
+            LOOP
          ENDIF
 
          IF Len( cUslovIdVD ) <> 0
@@ -259,7 +265,7 @@ FUNCTION finansijsko_stanje_magacin()
 
          select_o_roba( kalk->idroba )
          SELECT KALK
-         nVPC := vpc_magacin_rs()
+         nVPC := vpc_magacin()
 
          IF kalk->mu_i == "1" .AND. !( kalk->idvd $ "12#22#94" )
             nVPVU += Round( nVPC * kalk->kolicina, gZaokr )
@@ -275,7 +281,7 @@ FUNCTION finansijsko_stanje_magacin()
             nRabat -= Round( kalk->rabatv / 100 * nVPC * kalk->kolicina, gZaokr )
             nNVI -= Round( kalk->nc * kalk->kolicina, gZaokr )
 
-         ELSEIF mu_i == "3"    // nivelacija
+         ELSEIF mu_i == "3"  // nivelacija
             nVPVU += Round( nVPC * kalk->kolicina, gZaokr )
          ENDIF
 
@@ -333,7 +339,6 @@ FUNCTION finansijsko_stanje_magacin()
       ENDIF
 
       IF lExport
-
          xlsx_export_fill_row( cBroj, dDatDok, cDokNaz, cIdPartner, ;
             cPartnNaz, cPartnMj, cPartnPtt, cPartnAdr, cBrFaktP, ;
             nNVU, nNVI, nTNVU - nTNVI, ;
@@ -387,7 +392,6 @@ FUNCTION finansijsko_stanje_magacin()
    my_close_all_dbf()
 
    RETURN .T.
-
 
 
 STATIC FUNCTION kalk_zagl_fin_stanje_magacin()

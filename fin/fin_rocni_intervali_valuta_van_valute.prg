@@ -11,6 +11,11 @@
 
 #include "f18.ch"
 
+MEMVAR anInterUV, anInterVV, cPrikazKartica, cPrikazRocnihIntervala
+MEMVAR nDoDana1, nDoDana2, nDoDana3, nDoDana4, dNaDan
+MEMVAR picbhd, picdem
+
+
 /* 
  *  Otvorene stavke grupisano po brojevima veze
  */
@@ -27,16 +32,16 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    LOCAL cP_naz := "", cP_regija := "", cP_velicina := "", cP_vr_obezbj := ""
    LOCAL GetList := {}
    LOCAL i, j
-   LOCAL cIdPartner
+   LOCAL cIdPartner, dDatVal
 
    IF lKartica == NIL
       lKartica := .F.
    ENDIF
 
    IF lKartica
-      cPoRN := "D"
+      cPrikazKartica := "D"
    ELSE
-      cPoRN := "N"
+      cPrikazKartica := "N"
    ENDIF
 
    cDokument := Space( 8 )
@@ -62,14 +67,14 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
 
    cIdFirma := self_organizacija_id()
-   cIdkonto := Space( 7 )
+   cIdkonto := PADR("2110", 7)
    cIdPartner := PadR( "", FIELD_LEN_PARTNER_ID )
    dNaDan := Date()
    cOpcine := Space( 20 )
    cValuta := "1"
    cPrikNule := "N"
 
-   cSaRokom := "N"
+   cPrikazRocnihIntervala := "D"
    nDoDana1 :=  8
    nDoDana2 := 15
    nDoDana3 := 30
@@ -84,22 +89,22 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
 
    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto:               " GET cIdkonto   PICT "@!"  VALID p_konto( @cIdkonto )
-   IF cPoRN == "D"
+   IF cPrikazKartica == "D"
       @ box_x_koord() + 3, box_y_koord() + 2 SAY "Partner (prazno svi):" GET cIdpartner PICT "@!"  VALID Empty( cIdpartner )  .OR. ( "." $ cidpartner ) .OR. ( ">" $ cidpartner ) .OR. p_partner( @cIdPartner )
    ENDIF
 
    // @ box_x_koord()+ 5,box_y_koord()+2 SAY "Prikaz prebijenog stanja " GET cPrelomljeno valid cPrelomljeno $ "DN" pict "@!"
    @ box_x_koord() + 6, box_y_koord() + 2 SAY "Izvjestaj se pravi na dan:" GET dNaDan
-   @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikazati rocne intervale (D/N) ?" GET cSaRokom VALID cSaRokom $ "DN" PICT "@!"
-   @ box_x_koord() + 8, box_y_koord() + 2 SAY "Interval 1: do (dana)" GET nDoDana1 WHEN cSaRokom == "D" PICT "999"
-   @ box_x_koord() + 9, box_y_koord() + 2 SAY "Interval 2: do (dana)" GET nDoDana2 WHEN cSaRokom == "D" PICT "999"
-   @ box_x_koord() + 10, box_y_koord() + 2 SAY "Interval 3: do (dana)" GET nDoDana3 WHEN cSaRokom == "D" PICT "999"
-   @ box_x_koord() + 11, box_y_koord() + 2 SAY "Interval 4: do (dana)" GET nDoDana4 WHEN cSaRokom == "D" PICT "999"
+   @ box_x_koord() + 7, box_y_koord() + 2 SAY "Prikazati rocne intervale (D/N) ?" GET cPrikazRocnihIntervala VALID cPrikazRocnihIntervala $ "DN" PICT "@!"
+   @ box_x_koord() + 8, box_y_koord() + 2 SAY "Interval 1: do (dana)" GET nDoDana1 WHEN cPrikazRocnihIntervala == "D" PICT "999"
+   @ box_x_koord() + 9, box_y_koord() + 2 SAY "Interval 2: do (dana)" GET nDoDana2 WHEN cPrikazRocnihIntervala == "D" PICT "999"
+   @ box_x_koord() + 10, box_y_koord() + 2 SAY "Interval 3: do (dana)" GET nDoDana3 WHEN cPrikazRocnihIntervala == "D" PICT "999"
+   @ box_x_koord() + 11, box_y_koord() + 2 SAY "Interval 4: do (dana)" GET nDoDana4 WHEN cPrikazRocnihIntervala == "D" PICT "999"
    @ box_x_koord() + 13, box_y_koord() + 2 SAY "Prikaz iznosa (format)" GET PICPIC PICT "@!"
    @ box_x_koord() + 14, box_y_koord() + 2 SAY "Uslov po opcini (prazno - nista)" GET cOpcine
    @ box_x_koord() + 15, box_y_koord() + 2 SAY "Prikaz stavki kojima je saldo 0 (D/N)?" GET cPrikNule VALID cPrikNule $ "DN" PICT "@!"
 
-   IF cPoRN == "N"
+   IF cPrikazKartica == "N"
       @ box_x_koord() + 16, box_y_koord() + 2 SAY8 "Prikaz izvještaja u (1)KM (2)EURO" GET cValuta VALID cValuta $ "12"
    ENDIF
    @ box_x_koord() + 18, box_y_koord() + 2 SAY "Export u XLSX?" GET cExpRpt VALID cExpRpt $ "DN" PICT "@!"
@@ -132,7 +137,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    cSvi := cIdpartner
 
    IF lExportXlsx
-      aExpFld := get_xlsx_fields( cSaRokom, FIELD_LEN_PARTNER_ID )
+      aExpFld := get_xlsx_fields( cPrikazRocnihIntervala, FIELD_LEN_PARTNER_ID )
       xlsx_export_init( aExpFld,  {}, "fin_rocni_int_" + DTOS(date()) + ".xlsx"  )
    ENDIF
 
@@ -151,7 +156,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    ELSE
       cDugPot := "1"
       Box(, 3, 60 )
-      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " + cIdKonto + " duguje / potrazuje (1/2)" GET cdugpot  VALID cdugpot $ "12" PICT "9"
+      @ box_x_koord() + 2, box_y_koord() + 2 SAY "Konto " + cIdKonto + " duguje / potrazuje (1/2)" GET cDugPot  VALID cDugPot $ "12" PICT "9"
       READ
       Boxc()
    ENDIF
@@ -160,14 +165,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    // kreiraj pomocnu bazu
 
    o_trfp2()
-   //o_suban()
-   //o_partner()
-   //o_konto()
 
-   IF cPoRN == "D"
+
+   IF cPrikazKartica == "D"
       gaZagFix := { 5, 3 }
    ELSE
-      IF cSaRokom == "N"
+      IF cPrikazRocnihIntervala == "N"
          gaZagFix := { 4, 4 }
       ELSE
          gaZagFix := { 4, 5 }
@@ -194,15 +197,25 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
    DO WHILE !Eof() .AND. suban->idfirma == cIdfirma .AND. cIdKonto == suban->IdKonto
 
-      cIdPartner := idpartner
+      cIdPartner := suban->idpartner
       nUDug2 := 0
       nUPot2 := 0
       nUDug := 0
       nUPot := 0
 
+      if suban->datdok > dNaDan
+         SKIP
+         loop
+      endif
+
       fPrviprolaz := .T.
 
       DO WHILE !Eof() .AND. suban->idfirma == cIdfirma .AND. cIdKonto == suban->IdKonto .AND. cIdPartner == suban->IdPartner
+
+         if suban->datdok > dNaDan
+            SKIP
+            loop
+         endif
 
          cBrDok := BrDok
          cOtvSt := otvst
@@ -210,14 +223,20 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
          nDug := nPot := 0
          aFaktura := { CToD( "" ), CToD( "" ), CToD( "" ) }
 
+         // brdok
          DO WHILE !Eof() .AND. suban->idfirma == cIdfirma .AND. cIdKonto == suban->IdKonto .AND. cIdPartner == suban->IdPartner .AND. suban->brdok == cBrDok
 
+            if suban->datdok > dNaDan
+               SKIP
+               loop
+            endif
+
             IF D_P == "1"
-               nDug += IznosBHD
-               nDug2 += IznosDEM
+               nDug += suban->IznosBHD
+               nDug2 += suban->IznosDEM
             ELSE
-               nPot += IznosBHD
-               nPot2 += IznosDEM
+               nPot += suban->IznosBHD
+               nPot2 += suban->IznosDEM
             ENDIF
 
             IF D_P == cDugPot
@@ -232,19 +251,19 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
             SKIP 1
          ENDDO
 
-         IF Round( ndug - npot, 2 ) == 0
+         IF Round( nDug - nPot, 2 ) == 0
             // nista
          ELSE
             fPrviProlaz := .F.
             IF cPrelomljeno == "D"
-               IF ( ndug - npot ) > 0
+               IF ( nDug - nPot ) > 0
                   nDug := nDug - nPot
                   nPot := 0
                ELSE
                   nPot := nPot - nDug
                   nDug := 0
                ENDIF
-               IF ( ndug2 - npot2 ) > 0
+               IF ( nDug2 - nPot2 ) > 0
                   nDug2 := nDug2 - nPot2
                   nPot2 := 0
                ELSE
@@ -264,7 +283,21 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
             _pot       := nPot
             _dug2      := nDug2
             _pot2      := nPot2
-            _otvst     := IF( IF( Empty( _datval ), _datdok > dNaDan, _datval > dNaDan ), " ", "1" )
+             
+            if empty( _datval )
+               dDatVal := _datdok
+            else
+               dDatVal := _datval
+            endif
+
+            if dDatVal > dNaDan
+               // stavka unutar valute
+               _otvst := " "
+            else
+               // ova stavka je van valute - treba platiti
+               _otvst := "1"
+            endif       
+
             Gather()
             SELECT SUBAN
          ENDIF
@@ -283,7 +316,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    ENDDO
 
    SELECT POM
-   IF cSaRokom == "D"
+   IF cPrikazRocnihIntervala == "D"
+      // 1) partner
+      // 2) unutar valute " ", van valute "1"
+      // 3) Rocnost  "  8", " 15", " 30", " 60", "999"
+      // 4) datum dokumenta
+      // 5) datum valute
       INDEX ON IDPARTNER + OTVST + Rocnost() + DToS( DATDOK ) + DToS( iif( Empty( DATVAL ), DATDOK, DATVAL ) ) + BRDOK TAG "2"
    ELSE
       INDEX ON IDPARTNER + OTVST + DToS( DATDOK ) + DToS( iif( Empty( DATVAL ), DATDOK, DATVAL ) ) + BRDOK TAG "2"
@@ -295,7 +333,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    nTUkUVD := nTUkUVP := nTUkUVD2 := nTUkUVP2 := 0
    nTUkVVD := nTUkVVP := nTUkVVD2 := nTUkVVP2 := 0
 
-   IF cSaRokom == "D"
+   IF cPrikazRocnihIntervala == "D"
       // D,TD    P,TP   D2,TD2  P2,TP2
       anInterUV := { { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, ;        // do - interval 1
          { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }, ;        // do - interval 2
@@ -312,13 +350,13 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
    ENDIF
 
    cLastIdPartner := ""
-   IF cPoRN == "N"
+   IF cPrikazKartica == "N"
       fPrviProlaz := .T.
    ENDIF
 
    DO WHILE !Eof()
 
-      IF cPoRN == "D"
+      IF cPrikazKartica == "D"
          fPrviProlaz := .T.
       ENDIF
 
@@ -346,7 +384,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
       cFaza := otvst
 
-      IF cSaRokom == "D"
+      IF cPrikazRocnihIntervala == "D"
          FOR i := 1 TO Len( anInterUV )
             FOR j := 1 TO Len( anInterUV[ i ] )
                anInterUV[ i, j, 1 ] := 0
@@ -369,15 +407,16 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
       SELECT pom
 
+      // za partnera
       DO WHILE !Eof() .AND. cIdPartner == pom->IdPartner
 
-         IF cPoRn == "D"
+         IF cPrikazKartica == "D"
             ? datdok, datval, PadR( brdok, 10 )
             nCol1 := PCol() + 1
             ?? " "
-            ?? Transform( dug, picbhd ), Transform( pot, picbhd ), Transform( dug - pot, picbhd )
+            ?? Transform( pom->dug, picbhd ), Transform( pom->pot, picbhd ), Transform( pom->dug - pom->pot, picbhd )
             IF fin_dvovalutno()
-               ?? " " + Transform( dug2, picdem ), Transform( pot2, picdem ), Transform( dug2 - pot2, picdem )
+               ?? " " + Transform( pom->dug2, picdem ), Transform( pom->pot2, picdem ), Transform( pom->dug2 - pom->pot2, picdem )
             ENDIF
          ELSEIF cLastIdPartner != cIdPartner .OR. Len( cLastIdPartner ) < 1
             qqout_sa_x_x( cIdPartner )
@@ -393,28 +432,28 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
          ENDIF
 
          IF otvst == " "
-            IF cPoRn == "D"
-               ?? "   U VALUTI" + IF( cSaRokom == "D", IspisRocnosti(), "" )
+            IF cPrikazKartica == "D"
+               ?? "   U VALUTI" + IIF( cPrikazRocnihIntervala == "D", IspisRocnosti(), "" )
             ENDIF
             nUkUVD  += Dug
             nUkUVP  += Pot
             nUkUVD2 += Dug2
             nUkUVP2 += Pot2
-            IF cSaRokom == "D"
+            IF cPrikazRocnihIntervala == "D"
                anInterUV[ nFaza, 1, 1 ] += dug
                anInterUV[ nFaza, 2, 1 ] += pot
                anInterUV[ nFaza, 3, 1 ] += dug2
                anInterUV[ nFaza, 4, 1 ] += pot2
             ENDIF
          ELSE
-            IF cPoRn == "D"
-               ?? " VAN VALUTE" + IF( cSaRokom == "D", IspisRocnosti(), "" )
+            IF cPrikazKartica == "D"
+               ?? " VAN VALUTE" + IIF( cPrikazRocnihIntervala == "D", IspisRocnosti(), "" )
             ENDIF
             nUkVVD  += Dug
             nUkVVP  += Pot
             nUkVVD2 += Dug2
             nUkVVP2 += Pot2
-            IF cSaRokom == "D"
+            IF cPrikazRocnihIntervala == "D"
                anInterVV[ nFaza, 1, 1 ] += dug
                anInterVV[ nFaza, 2, 1 ] += pot
                anInterVV[ nFaza, 3, 1 ] += dug2
@@ -429,13 +468,13 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
          SKIP 1
          // znaci da treba
          IF cFaza != otvst .OR. Eof() .OR. cIdPartner != idpartner // <-+ prikazati
-            IF cPoRn == "D"
+            IF cPrikazKartica == "D"
                ? m
             ENDIF                           // + subtotal
             IF cFaza == " "
-               IF cSaRokom == "D"
+               IF cPrikazRocnihIntervala == "D"
                   SKIP -1
-                  IF cPoRn == "D"
+                  IF cPrikazKartica == "D"
                      ? "UK.U VALUTI" + IspisRocnosti() + ":"
                      @ PRow(), nCol1 SAY anInterUV[ nFaza, 1, 1 ] PICTURE picBHD
                      @ PRow(), PCol() + 1 SAY anInterUV[ nFaza, 2, 1 ] PICTURE picBHD
@@ -451,12 +490,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
                   anInterUV[ nFaza, 2, 2 ] += anInterUV[ nFaza, 2, 1 ]
                   anInterUV[ nFaza, 3, 2 ] += anInterUV[ nFaza, 3, 1 ]
                   anInterUV[ nFaza, 4, 2 ] += anInterUV[ nFaza, 4, 1 ]
-                  IF cPoRn == "D"
+                  IF cPrikazKartica == "D"
                      ? m
                   ENDIF
                   SKIP 1
                ENDIF
-               IF cPoRn == "D"
+               IF cPrikazKartica == "D"
                   ? "UKUPNO U VALUTI:"
                   @ PRow(), nCol1 SAY nUkUVD PICTURE picBHD
                   @ PRow(), PCol() + 1 SAY nUkUVP PICTURE picBHD
@@ -472,9 +511,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
                nTUkUVD2 += nUkUVD2
                nTUkUVP2 += nUkUVP2
             ELSE
-               IF cSaRokom == "D"
+               IF cPrikazRocnihIntervala == "D"
                   SKIP -1
-                  IF cPoRn == "D"
+                  IF cPrikazKartica == "D"
                      ? "UK.VAN VALUTE" + IspisRocnosti() + ":"
                      @ PRow(), nCol1 SAY anInterVV[ nFaza, 1, 1 ] PICTURE picBHD
                      @ PRow(), PCol() + 1 SAY anInterVV[ nFaza, 2, 1 ] PICTURE picBHD
@@ -490,12 +529,12 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
                   anInterVV[ nFaza, 2, 2 ] += anInterVV[ nFaza, 2, 1 ]
                   anInterVV[ nFaza, 3, 2 ] += anInterVV[ nFaza, 3, 1 ]
                   anInterVV[ nFaza, 4, 2 ] += anInterVV[ nFaza, 4, 1 ]
-                  IF cPoRn == "D"
+                  IF cPrikazKartica == "D"
                      ? m
                   ENDIF
                   SKIP 1
                ENDIF
-               IF cPoRn == "D"
+               IF cPrikazKartica == "D"
                   ? "UKUPNO VAN VALUTE:"
                   @ PRow(), nCol1 SAY nUkVVD PICTURE picBHD
                   @ PRow(), PCol() + 1 SAY nUkVVP PICTURE picBHD
@@ -511,20 +550,20 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
                nTUkVVD2 += nUkVVD2
                nTUkVVP2 += nUkVVP2
             ENDIF
-            IF cPoRn == "D"
+            IF cPrikazKartica == "D"
                ? m
             ENDIF
             cFaza := otvst
-            IF cSaRokom == "D"
+            IF cPrikazRocnihIntervala == "D"
                nFaza := RRocnost()
             ENDIF
-         ELSEIF cSaRokom == "D" .AND. nFaza != RRocnost()
+         ELSEIF cPrikazRocnihIntervala == "D" .AND. nFaza != RRocnost()
             SKIP -1
-            IF cPoRn == "D"
+            IF cPrikazKartica == "D"
                ? m
             ENDIF
             IF cFaza == " "
-               IF cPoRn == "D"
+               IF cPrikazKartica == "D"
                   ? "UK.U VALUTI" + IspisRocnosti() + ":"
                   @ PRow(), nCol1 SAY anInterUV[ nFaza, 1, 1 ] PICTURE picBHD
                   @ PRow(), PCol() + 1 SAY anInterUV[ nFaza, 2, 1 ] PICTURE picBHD
@@ -540,7 +579,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
                anInterUV[ nFaza, 3, 2 ] += anInterUV[ nFaza, 3, 1 ]
                anInterUV[ nFaza, 4, 2 ] += anInterUV[ nFaza, 4, 1 ]
             ELSE
-               IF cPoRn == "D"
+               IF cPrikazKartica == "D"
                   ? "UK.VAN VALUTE" + IspisRocnosti() + ":"
                   @ PRow(), nCol1 SAY anInterVV[ nFaza, 1, 1 ] PICTURE picBHD
                   @ PRow(), PCol() + 1 SAY anInterVV[ nFaza, 2, 1 ] PICTURE picBHD
@@ -556,7 +595,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
                anInterVV[ nFaza, 3, 2 ] += anInterVV[ nFaza, 3, 1 ]
                anInterVV[ nFaza, 4, 2 ] += anInterVV[ nFaza, 4, 1 ]
             ENDIF
-            IF cPoRn == "D"
+            IF cPrikazKartica == "D"
                ? m
             ENDIF
             SKIP 1
@@ -572,7 +611,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
       SELECT POM
       IF !fPrviProlaz  // bilo je stavki
-         IF cPoRn == "D"
+         IF cPrikazKartica == "D"
             ? M
             ? "UKUPNO:"
             @ PRow(), nCol1 SAY nUDug PICTURE picBHD
@@ -585,7 +624,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
             ENDIF
             ? m
          ELSE
-            IF cSaRokom == "D"
+            IF cPrikazRocnihIntervala == "D"
                FOR i := 1 TO Len( anInterUV )
                   IF ( cValuta == "1" )
                      qqout_sa_x( Transform( anInterUV[ i, 1, 1 ] -anInterUV[ i, 2, 1 ], PICPIC ) )
@@ -617,9 +656,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
                IF lExportXlsx
                   IF cValuta == "1"
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot, anInterUV[ 1, 1, 1 ] - anInterUV[ 1, 2, 1 ], anInterUV[ 2, 1, 1 ] - anInterUV[ 2, 2, 1 ], anInterUV[ 3, 1, 1 ] - anInterUV[ 3, 2, 1 ], anInterUV[ 4, 1, 1 ] - anInterUV[ 4, 2, 1 ], anInterUV[ 5, 1, 1 ] - anInterUV[ 5, 2, 1 ], anInterVV[ 1, 1, 1 ] - anInterVV[ 1, 2, 1 ], anInterVV[ 2, 1, 1 ] - anInterVV[ 2, 2, 1 ], anInterVV[ 3, 1, 1 ] - anInterVV[ 3, 2, 1 ], anInterVV[ 4, 1, 1 ] - anInterVV[ 4, 2, 1 ], anInterVV[ 5, 1, 1 ] - anInterVV[ 5, 2, 1 ] )
+                     fill_xlsx( cPrikazRocnihIntervala, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot, anInterUV[ 1, 1, 1 ] - anInterUV[ 1, 2, 1 ], anInterUV[ 2, 1, 1 ] - anInterUV[ 2, 2, 1 ], anInterUV[ 3, 1, 1 ] - anInterUV[ 3, 2, 1 ], anInterUV[ 4, 1, 1 ] - anInterUV[ 4, 2, 1 ], anInterUV[ 5, 1, 1 ] - anInterUV[ 5, 2, 1 ], anInterVV[ 1, 1, 1 ] - anInterVV[ 1, 2, 1 ], anInterVV[ 2, 1, 1 ] - anInterVV[ 2, 2, 1 ], anInterVV[ 3, 1, 1 ] - anInterVV[ 3, 2, 1 ], anInterVV[ 4, 1, 1 ] - anInterVV[ 4, 2, 1 ], anInterVV[ 5, 1, 1 ] - anInterVV[ 5, 2, 1 ] )
                   ELSE
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2, anInterUV[ 1, 3, 1 ] - anInterUV[ 1, 4, 1 ], anInterUV[ 2, 3, 1 ] - anInterUV[ 2, 4, 1 ], anInterUV[ 3, 3, 1 ] - anInterUV[ 3, 4, 1 ], anInterUV[ 4, 3, 1 ] - anInterUV[ 4, 4, 1 ], anInterUV[ 5, 3, 1 ] - anInterUV[ 5, 4, 1 ], anInterVV[ 1, 3, 1 ] - anInterVV[ 1, 4, 1 ], anInterVV[ 2, 3, 1 ] - anInterVV[ 2, 4, 1 ], anInterVV[ 3, 3, 1 ] - anInterVV[ 3, 4, 1 ], anInterVV[ 4, 3, 1 ] - anInterVV[ 4, 4, 1 ], anInterVV[ 5, 3, 1 ] - anInterVV[ 5, 4, 1 ] )
+                     fill_xlsx( cPrikazRocnihIntervala, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2, anInterUV[ 1, 3, 1 ] - anInterUV[ 1, 4, 1 ], anInterUV[ 2, 3, 1 ] - anInterUV[ 2, 4, 1 ], anInterUV[ 3, 3, 1 ] - anInterUV[ 3, 4, 1 ], anInterUV[ 4, 3, 1 ] - anInterUV[ 4, 4, 1 ], anInterUV[ 5, 3, 1 ] - anInterUV[ 5, 4, 1 ], anInterVV[ 1, 3, 1 ] - anInterVV[ 1, 4, 1 ], anInterVV[ 2, 3, 1 ] - anInterVV[ 2, 4, 1 ], anInterVV[ 3, 3, 1 ] - anInterVV[ 3, 4, 1 ], anInterVV[ 4, 3, 1 ] - anInterVV[ 4, 4, 1 ], anInterVV[ 5, 3, 1 ] - anInterVV[ 5, 4, 1 ] )
                   ENDIF
                ENDIF
             ELSE
@@ -635,10 +674,10 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
                IF lExportXlsx
                   IF cValuta == "1"
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot )
+                     fill_xlsx( cPrikazRocnihIntervala, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD - nUkUVP, nUkVVD - nUkVVP, nUDug - nUPot )
 
                   ELSE
-                     fill_xlsx( cSaRokom, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2 )
+                     fill_xlsx( cPrikazRocnihIntervala, cIdPartner, cP_naz, cP_velicina, cP_regija, cP_vr_obezbj, nUkUVD2 - nUkUVP2, nUkVVD2 - nUkVVP2, nUDug2 - nUPot2 )
 
                   ENDIF
                ENDIF
@@ -648,7 +687,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
          ENDIF
       ENDIF
 
-      IF cPoRn == "D"
+      IF cPrikazKartica == "D"
          ?
          ?
          ?
@@ -660,7 +699,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
       nTUPot2 += nUPot2
    ENDDO
 
-   IF cPoRn == "D" .AND. Len( cSvi ) < Len( idpartner ) .AND. ;
+   IF cPrikazKartica == "D" .AND. Len( cSvi ) < Len( idpartner ) .AND. ;
          ( Round( nTUDug, 2 ) != 0 .OR. Round( nTUPot, 2 ) != 0 .OR. ;
          Round( nTUkUVD, 2 ) != 0 .OR. Round( nTUkUVP, 2 ) != 0 .OR. ;
          Round( nTUkVVD, 2 ) != 0 .OR. Round( nTUkVVP, 2 ) != 0 )
@@ -669,7 +708,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
       FF
       fin_spec_otv_stavke_rocni_intervali_zagl( .T., .T., PICPIC )
       ? m2 := StrTran( M, "-", "=" )
-      IF cSaRokom == "D"
+      IF cPrikazRocnihIntervala == "D"
          FOR i := 1 TO Len( anInterUV )
             ? "PARTN.U VAL." + IspisRoc2( i ) + ":"
             @ PRow(), nCol1 SAY anInterUV[ i, 1, 2 ] PICTURE picBHD
@@ -693,7 +732,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
          @ PRow(), PCol() + 1 SAY nTUkUVD2 - nTUkUVP2 PICTURE picdem
       ENDIF
       ? m2
-      IF cSaRokom == "D"
+      IF cPrikazRocnihIntervala == "D"
          FOR i := 1 TO Len( anInterVV )
             ? "PARTN.VAN VAL." + IspisRoc2( i ) + ":"
             @ PRow(), nCol1 SAY anInterVV[ i, 1, 2 ] PICTURE picBHD
@@ -731,20 +770,20 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
    ENDIF // total
 
-   IF cPoRn == "N"
+   IF cPrikazKartica == "N"
 
       cTmpL := ""
 
       // uzmi liniju
-      _get_line1( @cTmpL, cSaRokom, PICPIC )
+      _get_line1( @cTmpL, cPrikazRocnihIntervala, PICPIC )
 
       ? cTmpL
 
       qqout_sa_x_x( PadR( "UKUPNO", Len( POM->IDPARTNER + PadR( PARTN->naz, 25 ) ) + 1 ) )
 
-      _get_line2( @cTmpL, cSaRokom, PICPIC )
+      _get_line2( @cTmpL, cPrikazRocnihIntervala, PICPIC )
 
-      IF cSaRokom == "D"
+      IF cPrikazRocnihIntervala == "D"
          FOR i := 1 TO Len( anInterUV )
             IF ( cValuta == "1" )
                qqout_sa_x( Transform( anInterUV[ i, 1, 2 ] -anInterUV[ i, 2, 2 ], PICPIC ) )
@@ -776,9 +815,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
          IF lExportXlsx 
             IF cValuta == "1"
-               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot, anInterUV[ 1, 1, 2 ] - anInterUV[ 1, 2, 2 ], anInterUV[ 2, 1, 2 ] - anInterUV[ 2, 2, 2 ], anInterUV[ 3, 1, 2 ] - anInterUV[ 3, 2, 2 ], anInterUV[ 4, 1, 2 ] - anInterUV[ 4, 2, 2 ], anInterUV[ 5, 1, 2 ] - anInterUV[ 5, 2, 2 ], anInterVV[ 1, 1, 2 ] - anInterVV[ 1, 2, 2 ], anInterVV[ 2, 1, 2 ] - anInterVV[ 2, 2, 2 ], anInterVV[ 3, 1, 2 ] - anInterVV[ 3, 2, 2 ], anInterVV[ 4, 1, 2 ] - anInterVV[ 4, 2, 2 ], anInterVV[ 5, 1, 2 ] - anInterVV[ 5, 2, 2 ] )
+               fill_xlsx( cPrikazRocnihIntervala, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot, anInterUV[ 1, 1, 2 ] - anInterUV[ 1, 2, 2 ], anInterUV[ 2, 1, 2 ] - anInterUV[ 2, 2, 2 ], anInterUV[ 3, 1, 2 ] - anInterUV[ 3, 2, 2 ], anInterUV[ 4, 1, 2 ] - anInterUV[ 4, 2, 2 ], anInterUV[ 5, 1, 2 ] - anInterUV[ 5, 2, 2 ], anInterVV[ 1, 1, 2 ] - anInterVV[ 1, 2, 2 ], anInterVV[ 2, 1, 2 ] - anInterVV[ 2, 2, 2 ], anInterVV[ 3, 1, 2 ] - anInterVV[ 3, 2, 2 ], anInterVV[ 4, 1, 2 ] - anInterVV[ 4, 2, 2 ], anInterVV[ 5, 1, 2 ] - anInterVV[ 5, 2, 2 ] )
             ELSE
-               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2, anInterUV[ 1, 3, 2 ] - anInterUV[ 1, 4, 2 ], anInterUV[ 2, 3, 2 ] - anInterUV[ 2, 4, 2 ], anInterUV[ 3, 3, 2 ] - anInterUV[ 3, 4, 2 ], anInterUV[ 4, 3, 2 ] - anInterUV[ 4, 4, 2 ], anInterUV[ 5, 3, 2 ] - anInterUV[ 5, 4, 2 ], anInterVV[ 1, 3, 2 ] - anInterVV[ 1, 4, 2 ], anInterVV[ 2, 3, 2 ] - anInterVV[ 2, 4, 2 ], anInterVV[ 3, 3, 2 ] - anInterVV[ 3, 4, 2 ], anInterVV[ 4, 3, 2 ] - anInterVV[ 4, 4, 2 ], anInterVV[ 5, 3, 2 ] - anInterVV[ 5, 4, 2 ] )
+               fill_xlsx( cPrikazRocnihIntervala, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2, anInterUV[ 1, 3, 2 ] - anInterUV[ 1, 4, 2 ], anInterUV[ 2, 3, 2 ] - anInterUV[ 2, 4, 2 ], anInterUV[ 3, 3, 2 ] - anInterUV[ 3, 4, 2 ], anInterUV[ 4, 3, 2 ] - anInterUV[ 4, 4, 2 ], anInterUV[ 5, 3, 2 ] - anInterUV[ 5, 4, 2 ], anInterVV[ 1, 3, 2 ] - anInterVV[ 1, 4, 2 ], anInterVV[ 2, 3, 2 ] - anInterVV[ 2, 4, 2 ], anInterVV[ 3, 3, 2 ] - anInterVV[ 3, 4, 2 ], anInterVV[ 4, 3, 2 ] - anInterVV[ 4, 4, 2 ], anInterVV[ 5, 3, 2 ] - anInterVV[ 5, 4, 2 ] )
             ENDIF
          ENDIF
 
@@ -795,9 +834,9 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 
          IF lExportXlsx
             IF cValuta == "1"
-               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot )
+               fill_xlsx( cPrikazRocnihIntervala, "UKUPNO", "", nTUkUVD - nTUkUVP, nTUkVVD - nTUkVVP, nTUDug - nTUPot )
             ELSE
-               fill_xlsx( cSaRokom, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2 )
+               fill_xlsx( cPrikazRocnihIntervala, "UKUPNO", "", nTUkUVD2 - nTUkUVP2, nTUkVVD2 - nTUkVVP2, nTUDug2 - nTUPot2 )
             ENDIF
          ENDIF
 
@@ -826,7 +865,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl_main( lKartica )
 // -----------------------------------------------------
 // vraca liniju za report varijanta 1
 // -----------------------------------------------------
-STATIC FUNCTION _get_line1( cTmpL, cSaRokom, cPicForm )
+STATIC FUNCTION _get_line1( cTmpL, cPrikazRocnihIntervala, cPicForm )
 
    LOCAL cStart := "+"
    LOCAL cMidd := "+"
@@ -835,7 +874,7 @@ STATIC FUNCTION _get_line1( cTmpL, cSaRokom, cPicForm )
    LOCAL cFill := "+"
    LOCAL nFor := 3
 
-   IF cSaRokom == "D"
+   IF cPrikazRocnihIntervala == "D"
       nFor := 13
    ENDIF
 
@@ -856,7 +895,7 @@ STATIC FUNCTION _get_line1( cTmpL, cSaRokom, cPicForm )
 // ------------------------------------------------------
 // vraca liniju varijantu 2
 // ------------------------------------------------------
-STATIC FUNCTION _get_line2( cTmpL, cSaRokom, cPicForm )
+STATIC FUNCTION _get_line2( cTmpL, cPrikazRocnihIntervala, cPicForm )
 
    LOCAL cStart := "+"
    LOCAL cLine := "+"
@@ -864,7 +903,7 @@ STATIC FUNCTION _get_line2( cTmpL, cSaRokom, cPicForm )
    LOCAL cFill := "+"
    LOCAL nFor := 3
 
-   IF cSaRokom == "D"
+   IF cPrikazRocnihIntervala == "D"
       nFor := 13
    ENDIF
 
@@ -929,18 +968,18 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl( fStrana, lSvi, PICPIC )
 
    ?
 
-   IF cSaRokom == "D" .AND. ( ( Len( AllTrim( PICPIC ) ) * 13 ) + 46 ) > 170
+   IF cPrikazRocnihIntervala == "D" .AND. ( ( Len( AllTrim( PICPIC ) ) * 13 ) + 46 ) > 170
       ?? "#%LANDS#"
    ENDIF
 
-   IF cPoRn == "D"
+   IF cPrikazKartica == "D"
       IF fin_dvovalutno()
          P_COND2
       ELSE
          P_COND
       ENDIF
    ELSE
-      IF cSaRokom == "D"
+      IF cPrikazRocnihIntervala == "D"
          P_COND2
       ELSE
          P_10CPI
@@ -959,7 +998,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl( fStrana, lSvi, PICPIC )
       fStrana := .T.
    ENDIF
 
-   IF cPoRn == "D"
+   IF cPrikazKartica == "D"
       ??U "FIN.P:  SPECIFIKACIJA OTVORENIH STAVKI PO ROČNIM INTERVALIMA NA DAN "; ?? dNaDan
       IF fStrana
          @ PRow(), 110 SAY "Str:" + Str( ++nStr, 3 )
@@ -1001,7 +1040,7 @@ FUNCTION fin_spec_otv_stavke_rocni_intervali_zagl( fStrana, lSvi, PICPIC )
 
       ? "KONTO  :", cIdKonto, naz
 
-      IF cSaRokom == "D"
+      IF cPrikazRocnihIntervala == "D"
 
          // prvi red
          cTmp := "+"
