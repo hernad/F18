@@ -16,7 +16,6 @@ STATIC s_cPath, s_cFlinkPath2, s_cName
 
 THREAD STATIC F_POS_RN := "POS_RN" // pos komande
 
-xx
 
 FUNCTION is_flink_fiskalni()
 
