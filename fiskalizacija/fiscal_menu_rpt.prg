@@ -62,6 +62,9 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
       AAdd( aOpc, "1. test hello curl" )
       AAdd( aOpcExe, {|| curl_hello() } )
+      
+      AAdd( aOpc, "2. test create invoice" )
+      AAdd( aOpcExe, {|| ofs_create_invoice() } )
 
 
    CASE cFiskalniDrajver == "FLINK"
