@@ -15,6 +15,32 @@ FUNCTION ofs_get_params()
    
    return hParams
 
+FUNCTION ofs_cleanup()
+    LOCAL hParams := hb_hash()
+    LOCAL nDeviceId 
+ 
+    LOCAL cDokumentNaziv
+
+
+    o_pos__pripr()
+    my_dbf_pack()
+    IF _pos_pripr->( RecCount2() ) == 0
+       my_close_all_dbf()
+       RETURN .F.
+    ENDIF
+ 
+    GO TOP
+    hParams[ "idpos" ] := _pos_pripr->idpos
+    my_close_all_dbf()
+  
+    altd()
+ 
+    cleanup_pos_tmp( hParams )
+
+    RETURN .T.
+
+
+
 FUNCTION curl_hello()
 
     LOCAL hCurl, nRet, cData
@@ -363,3 +389,233 @@ FUNCTION ofs_create_invoice()
             "#" ;
             )
     RETURN .T.
+
+
+FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno )
+
+    LOCAL cVrstaPlacanja, cOperater, nTotal, nI
+    LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa
+
+    //LOCAL hParams := ofs_get_params()
+    LOCAL hCurl, nRet, cData, pHeaders, cApiKey, hResponseData, hInvoiceData, hPaymentLine, hItemLine 
+    LOCAL cStatus1
+    LOCAL hRet := hb_hash()
+
+    hRet["error"] := 0
+    hRet["broj"] := ""
+    hRet["datum"] := ""
+    hRet["json"] := ""
+   
+    IF lStorno == NIL
+        lStorno := .F.
+    ENDIF
+    
+    
+
+    cVrstaPlacanja := AllTrim( aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ] )
+        
+    IF !Empty( hParams[ "op_id" ] ) // provjeri operatera i lozinku iz podesenja...
+        cOperater := hParams[ "op_id" ]
+    ENDIF
+ 
+    //   IF !Empty( hParams[ "op_pwd" ] )
+    //       cOperaterPassword := hFiskalniParams[ "op_pwd" ]
+    //   ENDIF
+             
+    nTotal := aRacunStavke[ 1, FISK_INDEX_TOTAL ] // ukupno racun
+     
+    IF nTotal == NIL
+        nTotal := 0
+    ENDIF
+     
+    IF !ofs_attention(hParams)
+        Alert("Fiskalni je mrtav?!")
+       RETURN .F.
+    ENDIF
+
+    cStatus1 := ofs_status(hParams)
+
+    IF cStatus1 == "999"
+        // ovdje pomoci nema - status 1300 ne moze se popraviti unosom pin-a
+        hRet["error"] := FISK_NEMA_ODGOVORA
+        RETURN hRet
+    ENDIF
+
+    IF cStatus1 == "99"
+      Alert("Neuspjesan unos PIN-a. Prekid izdavanja fiskalnog racuna!")
+      hRet["error"] := FISK_NEMA_ODGOVORA
+      RETURN hRet
+
+    ENDIF
+
+    // ako je doslo do unosa pin-a, ova - druga kontrola statusa mora dati otkljucan uredjaj
+    IF cStatus1 == "1" .AND. ofs_status(hParams) != "0" 
+       Alert("Nakon unosa PIN-a uredjaj i dalje nedostupan!? STOP!")
+       hRet["error"] := FISK_NEMA_ODGOVORA
+       RETURN hRet
+    ENDIF
+
+    hCurl := curl_init(hParams, "/api/invoices", "application/json", "POST")
+    
+    hInvoiceData := hb_hash()
+
+    hInvoiceData["invoiceRequest"] := hb_hash()
+    
+    hInvoiceData["invoiceRequest"]["invoiceType"] := "Normal"
+    hInvoiceData["invoiceRequest"]["transactionType"] := "Sale"
+    
+    hInvoiceData["invoiceRequest"]["payment"] := {}
+    hPaymentLine := hb_hash()
+    hPaymentLine["amount"] := nTotal
+    hPaymentLine["paymentType"] := cVrstaPlacanja
+    AAdd(hInvoiceData["invoiceRequest"]["payment"], hPaymentLine)
+
+    // 5. kupac - podaci
+    //IF aKupac <> NIL .AND. Len( aKupac ) > 0
+    
+        //// aKupac = { idbroj, naziv, adresa, ptt, mjesto }
+        //
+        //// 1. id broj
+        //cTmp += AllTrim( aKupac[ 1, 1 ] )
+        //cTmp += cTackaZarez
+    
+        //// 2. naziv
+        //cTmp += AllTrim( PadR( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 2 ] ), lConvertTo852 ), 36 ) )
+        //cTmp += cTackaZarez
+    
+        //// 3. adresa
+        //cTmp += AllTrim( PadR( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 3 ] ), lConvertTo852 ), 36 ) )
+        //cTmp += cTackaZarez
+    
+        //// 4. ptt, mjesto
+        //cTmp += AllTrim( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 4 ] ), lConvertTo852 ) ) + " " + ;
+        //   AllTrim( to_win1250_encoding( hb_StrToUTF8( aKupac[ 1, 5 ] ), lConvertTo852 ) )
+    
+        //cTmp += cTackaZarez
+        //cTmp += cTackaZarez
+        //cTmp += cTackaZarez
+    
+        //AAdd( aArr, { cTmp } )
+    
+    //ENDIF
+
+    //IF lStorno == .T.
+    //   cRek_rn := AllTrim( aRacunData[ 1, FISK_INDEX_FISK_RACUN_STORNIRATI ] )
+    // ENDIF  
+    
+    hInvoiceData["invoiceRequest"]["items"] := {}
+
+    FOR nI := 1 TO Len( aRacunStavke )
+        cArtikalNaz := aRacunStavke[ nI, FISK_INDEX_ROBANAZIV ]
+        cArtikalJmj := aRacunStavke[ nI, FISK_INDEX_JMJ ]
+        cArtikal := hb_StrToUTF8(TRIM(cArtikalNaz) + " (" + cArtikalJmj + ")")
+
+        nCijena := aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
+        nKolicina := aRacunStavke[ nI, FISK_INDEX_KOLICINA ]
+        //nPopust := aRacunStavke[ nI, FISK_INDEX_POPUST ]
+        
+        cArtikalTarifa := fiskalni_tarifa( aRacunStavke[ nI, FISK_INDEX_TARIFA ], hParams[ "pdv" ], "OFS" )
+        
+        hItemLine := hb_hash()
+        hItemLine["name"] := cArtikal
+        hItemLine["labels"] := { cArtikalTarifa }
+        hItemLine["totalAmount"] := ROUND(nCijena * nKolicina, 2)
+        hItemLine["unitPrice"] := nCijena
+        hItemLine["quantity"] := nKolicina
+        AAdd(hInvoiceData["invoiceRequest"]["items"], hItemLine)
+            
+    NEXT
+    
+    hInvoiceData["invoiceRequest"]["cashier"] := cOperater
+    
+    cData := hb_jsonEncode(hInvoiceData)
+    //altd()
+
+    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cData)
+            
+    //Sending the request and getting the response
+    IF ( nRet:= curl_easy_perform( hCurl ) ) == 0
+        cData := curl_easy_dl_buff_get( hCurl )
+    ELSE
+        Alert( "curl_ret: " + hb_ValToStr( nRet ) )
+        curl_end()
+    ENDIF
+      
+    hRet["json"] := cData
+    hResponseData := hb_jsonDecode(cData)
+    
+    MsgBeep("#businessName: " + hResponseData["businessName"] +;
+            "#address: " + hResponseData["address"] +;
+            "#invoiceNumber: " + hResponseData["invoiceNumber"] +;
+            "#sdcDateTime: " + hResponseData["sdcDateTime"] +;
+            "#totalAmount: " + Str(hResponseData["totalAmount"], 10,2) +;
+            "#messages: " + hResponseData["messages"] +;
+            "#taxItems(1).amount:" + Str(hResponseData["taxItems"][1]["amount"], 10,4) +;
+            "#taxItems(1).label:" + hResponseData["taxItems"][1]["label"] +;
+            "#" ;
+            )
+    
+    
+    hRet["broj"] := hResponseData["invoiceNumber"]
+    hRet["datum"] := hResponseData["sdcDateTime"]
+    
+    
+RETURN hRet
+
+
+FUNCTION is_ofs_fiskalni()
+
+    LOCAL nDeviceId, hParams
+ 
+    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+    IF nDeviceId > 0
+        hParams := get_fiscal_device_params( nDeviceId, my_user() )
+    ENDIF
+
+ 
+    IF !hb_HHasKey( hParams, "drv" )
+       RETURN .F.
+    ENDIF
+ 
+    RETURN hParams[ "drv" ] == "OFS"
+
+
+FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
+
+    LOCAL cQuery, oRet, oError, lRet := .F.
+  
+    LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
+ 
+    cIdPos := hParams["idpos"]
+    cIdVd := hParams["idvd"]
+    dDatDok := hParams["datum"]
+    cBrDok := hParams["brdok"]
+    cBrojFiskRacuna := hParams["fiskalni_broj"]
+    cDatumFiskRacuna := hParams["fiskalni_datum"]
+    cJson := hParams["json"]
+    
+    altd()
+    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna_ofs(" + ;
+       sql_quote( cIdPos ) + "," + ;
+       sql_quote( cIdVd ) + "," + ;
+       sql_quote( dDatDok ) + "," + ;
+       sql_quote( cBrDok ) + "," + ;
+       sql_quote( cBrojFiskRacuna ) + "," +;
+       sql_quote( cDatumFiskRacuna ) + "," +;
+       sql_quote( hb_Utf8ToStr(cJson) ) + ")"
+ 
+    BEGIN SEQUENCE WITH {| err | Break( err ) }
+ 
+       oRet := run_sql_query( cQuery )
+       IF is_var_objekat_tpqquery( oRet )
+          IF (!(oRet:FieldGet( 1 ) == "")) .OR. cBrojFiskRacuna == "-"
+             lRet := .T.
+          ENDIF
+       ENDIF
+ 
+    RECOVER USING oError
+       Alert( _u( "Setovanje FISK broja " + AllTrim( cBrojFiskRacuna ) + " neuspješno. Dupli broj?!" ) )
+    END SEQUENCE
+ 
+    RETURN lRet
+ 

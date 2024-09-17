@@ -318,6 +318,8 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
          cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "TREMOL"
          cIdTarifaFiskalni := "2"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "E"
       ENDIF
 
    CASE cTmp == "PDV0" .AND. cPDVDN == "D"
@@ -330,6 +332,9 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
          cIdTarifaFiskalni := "3"
       ELSEIF cDriver == "TREMOL"
          cIdTarifaFiskalni := "1"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "K"
+      
       ENDIF
 
    CASE cTmp == "PDVM"
@@ -337,6 +342,8 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
       IF cDriver == "FPRINT"
          cIdTarifaFiskalni := "5"
       ELSEIF cDriver == "TRING"
+         cIdTarifaFiskalni := "M"
+      ELSEIF cDriver == "OFS"
          cIdTarifaFiskalni := "M"
       ENDIF
 
@@ -350,6 +357,9 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
          cIdTarifaFiskalni := "0"
       ELSEIF cDriver == "TREMOL"
          cIdTarifaFiskalni := "3"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "A"
+      
       ENDIF
 
    OTHERWISE
@@ -379,6 +389,8 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
          cRet := "0"
       ELSEIF cDriver == "TREMOL"
          cRet := "Gotovina"
+      ELSEIF cDriver == "OFS"
+         cRet := "Cash"
       ENDIF
 
    CASE cIdVrsteP == "1"  // cek
@@ -415,6 +427,8 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
          cRet := "3"
       ELSEIF cDriver == "TREMOL"
          cRet := "Virman"
+      ELSEIF cDriver == "OFS"
+         cRet := "WireTransfer"
       ENDIF
 
    ENDCASE

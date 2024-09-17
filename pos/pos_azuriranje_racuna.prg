@@ -99,7 +99,6 @@ FUNCTION pos_azuriraj_racun( hParams )
       ENDIF
          
          IF lOk .AND. !lBezFiskalnih .AND. !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
-
             IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
                cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
                MsgBeep( cMsg )
@@ -112,10 +111,15 @@ FUNCTION pos_azuriraj_racun( hParams )
          // auto-plu set_params (TREBA LI?!) ; zato ovo nije unutar PSQL transakcije
          IF lOk .AND. (lBezFiskalnih .OR. hParams["fiskalni_izdat"] .OR. pos_fiskaliziraj_racun( @hParams ))
 
+            altd()
             run_sql_query( "BEGIN" )
             IF pos_tmp_to_pos( hParams ) != -1
                IF !lBezFiskalnih
-                   lOk := pos_set_broj_fiskalnog_racuna( hParams )
+                  IF is_ofs_fiskalni()
+                     lOk := pos_set_broj_fiskalnog_racuna_ofs( hParams )
+                  ELSE
+                     lOk := pos_set_broj_fiskalnog_racuna( hParams )
+                  ENDIF
                ENDIF
 
                // stornirani racun, set referencu na originalni 

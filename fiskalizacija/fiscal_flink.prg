@@ -34,6 +34,9 @@ FUNCTION is_flink_fiskalni()
 
    RETURN s_hFiskalniUredjajParams[ "drv" ] == "FLINK"
 
+
+
+
 STATIC FUNCTION flink_init()
 
    LOCAL nDeviceId

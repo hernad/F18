@@ -66,6 +66,9 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       AAdd( aOpc, "2. test create invoice" )
       AAdd( aOpcExe, {|| ofs_create_invoice() } )
 
+      AAdd( aOpc, "3. postmp cleanup" )
+      AAdd( aOpcExe, {|| ofs_cleanup() } )
+
 
    CASE cFiskalniDrajver == "FLINK"
 

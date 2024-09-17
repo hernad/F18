@@ -18,6 +18,7 @@ STATIC s_cFiskalniDrajverFPRINT := "FPRINT"
 STATIC s_cFiskalniDrajverFLINK := "FLINK"
 STATIC s_cFiskalniDrajverHCP := "HCP"
 STATIC s_cFiskalniDrajverTRING := "TRING"
+STATIC s_cFiskalniDrajverOFS := "OFS"
 STATIC s_cFiskalniDrajverNaziv
 
 
@@ -59,8 +60,14 @@ FUNCTION pos_fiskaliziraj_racun( hParams )
       RETURN .F.
    ENDIF
 
-   hParams["fiskalni_broj"] := hRet["broj"] 
-
+   altd()
+   hParams["fiskalni_broj"] := hRet["broj"]
+   
+   if hDeviceParams["drv"] == "OFS"
+      hParams["fiskalni_datum"] := hRet["datum"]
+      hParams["json"] := hRet["json"]
+   endif
+ 
    RETURN .T.
 
 
@@ -131,6 +138,9 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverFPRINT
       RETURN pos_to_fprint( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
+   
+   CASE cFiskalniDravjerIme == s_cFiskalniDrajverFPRINT
+      RETURN pos_to_fprint( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverFLINK
       RETURN pos_to_flink( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
@@ -144,6 +154,9 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverTremol
       RETURN pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
+   CASE cFiskalniDravjerIme == s_cFiskalniDrajverOFS
+      RETURN pos_to_ofs( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
+   
    ENDCASE
 
    RETURN hRet
@@ -211,7 +224,7 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
    nPosRacunUkupnoCheck := 0
    DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
 
-      aStavka := Array( 16 )
+      aStavka := Array( FISK_INDEX_LEN )
       IF nStorno > 0
          cBrojFiskRNStorno := AllTrim( Str( nStorno, 10, 0 ) )
       ENDIF
@@ -233,9 +246,11 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
 
       SELECT pos
       nPOSRabatProcenat := 0
+      aStavka[ FISK_INDEX_NETO_CIJENA ] := field->cijena
       IF field->ncijena > 0  // cijena = 100, ncijena = 90 (cijena sa uracunatim popustom), popust = 10%
          nPOSRabatProcenat := ( ( field->cijena - field->ncijena ) / field->cijena ) * 100
          nPOSRabatProcenat := ROUND(nPOSRabatProcenat, 2)
+         aStavka[ FISK_INDEX_NETO_CIJENA ] := field->ncijena
       ENDIF
 
       cRobaNaziv := fiscal_art_naz_fix( roba->naz, s_hFiskalniUredjajParams[ "drv" ] )
@@ -440,6 +455,18 @@ STATIC FUNCTION pos_to_flink( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSto
 
 
    RETURN hRet
+
+STATIC FUNCTION pos_to_ofs( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
+
+      //LOCAL nErrorLevel := 0
+      LOCAL hParams := hb_hash()
+     
+      hParams["idpos"] := cIdPos
+      hParams["idvd"] := cIdVd
+      hParams["datum"] := dDatDok
+      hParams["brdok"] := cBrDok
+   
+      return fiskalni_ofs_racun( s_hFiskalniUredjajParams, aRacunStavke, lStorno )
 
 
 FUNCTION pos_set_broj_fiskalnog_racuna( hParams )
@@ -663,7 +690,11 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
 
    IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
       // gotovina FPRINT, TREMOL
-      RETURN "0"
+      IF s_cFiskalniDrajverNaziv == "OFS"
+         RETURN "Cash"
+      ELSE
+         RETURN "0"
+      ENDIF
    ENDIF
 
    IF cIdVrstePlacanja == "CK"
@@ -678,14 +709,16 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
    IF cIdVrstePlacanja == "KT"
       IF s_cFiskalniDrajverNaziv == "FPRINT"
          // https://redmine.bring.out.ba/issues/38042#change-291730
-         RETURN "1"
+         RETURN "1" 
+      ELSEIF s_cFiskalniDrajverNaziv == "OFS"
+         RETURN "WireTransfer"
       ENDIF
+
       // TREMOL
       RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
 
    ENDIF
    
-
    RETURN "0"
 
 
