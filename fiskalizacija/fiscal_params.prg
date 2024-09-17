@@ -355,9 +355,19 @@ FUNCTION korisnik_postavke_fiskalni_uredjaj()
    cPrintFiskalniDN := fetch_metric( "fiscal_device_" + cDevTmp + "_print_fiscal", cUserName, "D" )
    cOperaterTipovi := PadR( fetch_metric( "fiscal_device_" + cDevTmp + "_op_docs", cUserName, "" ), 100 )
 
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "Direktorij izlaznih fajlova:" GET cOutDir PICT "@S50" VALID fiskalni_out_dir_valid( cOutDir )
+   IF cFiskalDrajver == "OFS"
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY "API URL:" GET cOutDir PICT "@S50" 
+   ELSE
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY "Direktorij izlaznih fajlova:" GET cOutDir PICT "@S50" VALID fiskalni_out_dir_valid( cOutDir )
+   ENDIF
+
    ++nX
-   @ box_x_koord() + nX, box_y_koord() + 2 SAY "       Naziv izlaznog fajla:" GET cOutFile PICT "@S20" VALID !Empty( cOutFile )
+   IF cFiskalDrajver == "OFS"
+      @ box_x_koord() + nX, box_y_koord() + 2 SAY "       API key:" GET cOutFile PICT "@S30" VALID !Empty( cOutFile )
+   ELSE    
+     @ box_x_koord() + nX, box_y_koord() + 2 SAY "       Naziv izlaznog fajla:" GET cOutFile PICT "@S20" VALID !Empty( cOutFile )
+   ENDIF
+
    ++nX
    @ box_x_koord() + nX, box_y_koord() + 2 SAY "       Naziv fajla odgovora:" GET cOutAnswer PICT "@S20"
    nX += 2
@@ -716,8 +726,13 @@ FUNCTION get_fiscal_device_params( nDeviceId, cUserName )
    hParam[ "print_fiscal" ] := "T"
    hParam[ "op_docs" ] := ""
 #else
-   hParam[ "out_dir" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, "" )
-   hParam[ "out_file" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_file", cUserName, "" )
+   if hParam["drv"] == "OFS"
+      hParam[ "url" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, "" )
+      hParam[ "api_key" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_file", cUserName, "" )
+   else   
+      hParam[ "out_dir" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, "" )
+      hParam[ "out_file" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_file", cUserName, "" )
+   endif
    hParam[ "out_answer" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_out_answer", cUserName, "" )
    hParam[ "op_id" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_op_id", cUserName, "" )
    hParam[ "op_pwd" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_op_pwd", cUserName, "" )
@@ -739,6 +754,10 @@ FUNCTION get_fiscal_device_params( nDeviceId, cUserName )
 STATIC FUNCTION post_check( hParams )
 
    LOCAL lRet := .T.
+
+   if hParams["drv"] == "OFS"
+      RETURN .T.
+   ENDIF
 
    lRet := fiskalni_out_dir_valid( hParams[ "out_dir" ], .F. )
 

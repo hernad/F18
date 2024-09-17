@@ -1,8 +1,19 @@
 #include "hbcurl.ch"
 #include "f18.ch"
 
-#DEFINE OFS_URL   "http://ofs.svc.test.out.ba:8000"
-#DEFINE OFS_API_KEY "0123456789abcdef0123456789abcdef"
+//#DEFINE OFS_URL   "http://ofs.svc.test.out.ba:8000"
+//#DEFINE OFS_API_KEY "0123456789abcdef0123456789abcdef"
+
+
+FUNCTION ofs_get_params()
+   LOCAL cUserName := my_user()
+   LOCAL hParams := hb_hash()
+   LOCAL nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+
+   // url, api_key
+   hParams := get_fiscal_device_params( nDeviceId, my_user() )
+   
+   return hParams
 
 FUNCTION curl_hello()
 
@@ -51,7 +62,7 @@ FUNCTION curl_hello()
     RETURN NIL
 
 
-FUNCTION curl_init(cUrl, cContentType, cMethod, cApiKey)
+FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     local hCurl, aHeader
     
     curl_global_init()
@@ -61,7 +72,7 @@ FUNCTION curl_init(cUrl, cContentType, cMethod, cApiKey)
         return NIL
     endif
 
-    curl_easy_setopt( hCurl, HB_CURLOPT_URL, cUrl )  
+    curl_easy_setopt( hCurl, HB_CURLOPT_URL, hParams["url"] + cPath )  
     curl_easy_setopt( hCurl, HB_CURLOPT_CUSTOMREQUEST, cMethod )  
         
     //Disabling the SSL peer verification (you can use it if you have no SSL certificate yet, but still want to test HTTPS)
@@ -85,8 +96,8 @@ FUNCTION curl_init(cUrl, cContentType, cMethod, cApiKey)
      //   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, pHeaders)
 
     aHeader := {}
-    IF  cApiKey != NIL
-        AAdd(aHeader, "Authorization: Bearer " + cApiKey)
+    IF  hParams["api_key"] != NIL
+        AAdd(aHeader, "Authorization: Bearer " + hParams["api_key"])
     ENDIF
     AAdd(aHeader, "Content-Type: " + cContentType)
     curl_easy_setopt( hCurl, HB_CURLOPT_HTTPHEADER, aHeader)
@@ -101,8 +112,13 @@ FUNCTION curl_end()
     RETURN NIL
 
 
-FUNCTION ofs_attention()
-    LOCAL nRet, cData, hCurl := curl_init(OFS_URL + "/api/attention", "application/text", "GET", OFS_API_KEY)
+FUNCTION ofs_attention(hParams)
+
+    LOCAL nRet, cData, hCurl
+    IF hParams == NIL
+        hParams := ofs_get_params()
+    ENDIF
+    hCurl := curl_init(hParams, "/api/attention", "application/text", "GET")
 
     IF hCurl == NIL
        return .F.
@@ -121,15 +137,17 @@ FUNCTION ofs_attention()
     RETURN .T.
 
 
-FUNCTION ofs_putpin()
+FUNCTION ofs_putpin(hParams)
     LOCAL GetList := {}
     LOCAL cPin := SPACE(4)
     LOCAL nRet, cData, hCurl
     LOCAL lOk := .F.
 
-    
+    IF hParams == NIL
+        hParams := ofs_get_params()
+    ENDIF
     DO WHILE .T.
-        hCurl := curl_init(OFS_URL + "/api/pin", "application/text", "POST", OFS_API_KEY)
+        hCurl := curl_init(hParams, "/api/pin", "application/text", "POST")
 
         IF hCurl == NIL
           curl_end()
@@ -189,9 +207,15 @@ FUNCTION ofs_putpin()
 */  
 
 
-FUNCTION ofs_status()
-    LOCAL nRet, cData, hCurl := curl_init(OFS_URL + "/api/status", "application/json", "GET", OFS_API_KEY)
+FUNCTION ofs_status(hParams)
+    
+    LOCAL nRet, cData, hCurl
     LOCAL hResponseData, cGsc := "", cCode, cRet := "0"
+
+    IF hParams == NIL
+        hParams := ofs_get_params()
+    ENDIF
+    hCurl := curl_init(hParams, "/api/status", "application/json", "GET")
 
     IF hCurl == NIL
         return "99"
@@ -210,7 +234,6 @@ FUNCTION ofs_status()
         //I'm using hb_jsonDecode() so I can decode the responde into a JSON object
         hResponseData := hb_jsonDecode(cData)
         
-        altd()
         cGsc = "" 
         for each cCode in hResponseData["gsc"]
             cGsc := cGsc + cCode + "/"
@@ -239,7 +262,7 @@ FUNCTION ofs_status()
         cRet := "999"  
     ELSEIF "1500" $ cGsc
       // Alert("/api/status sadrzi kod: 1500 => Neophodan unos PIN-a. STOP")   
-      IF ofs_putpin()
+      IF ofs_putpin(hParams)
         cRet := "1"
       ELSE
         cRet := "99"
@@ -250,15 +273,16 @@ FUNCTION ofs_status()
 
 FUNCTION ofs_create_invoice()
 
+    LOCAL hParams := ofs_get_params()
     LOCAL hCurl, nRet, cData, pHeaders, cApiKey, hResponseData, hInvoiceData, hPaymentLine, hItemLine 
     LOCAL cStatus1
 
-    IF !ofs_attention()
+    IF !ofs_attention(hParams)
         Alert("Fiskalni je mrtav?!")
        RETURN .F.
     ENDIF
 
-    cStatus1 := ofs_status()
+    cStatus1 := ofs_status(hParams)
 
     IF cStatus1 == "999"
         // ovdje pomoci nema - status 1300 ne moze se popraviti unosom pin-a
@@ -271,13 +295,13 @@ FUNCTION ofs_create_invoice()
     ENDIF
 
     // ako je doslo do unosa pin-a, ova - druga kontrola statusa mora dati otkljucan uredjaj
-    IF cStatus1 == "1" .AND. ofs_status() != "0" 
+    IF cStatus1 == "1" .AND. ofs_status(hParams) != "0" 
        Alert("Nakon unosa PIN-a uredjaj i dalje nedostupan!? STOP!")
       
        RETURN .F.
     ENDIF
 
-    hCurl := curl_init(OFS_URL + "/api/invoices", "application/json", "POST", OFS_API_KEY)
+    hCurl := curl_init(hParams, "/api/invoices", "application/json", "POST")
     
     hInvoiceData := hb_hash()
 
