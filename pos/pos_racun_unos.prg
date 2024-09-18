@@ -94,6 +94,8 @@ FUNCTION pos_zakljuci_racun()
       hParam[ "vrijeme" ] := PadR( Time(), 5 )
       hParam[ "datum" ] := danasnji_datum()
       hParam[ "idpartner" ] := ""
+      // saljemo racun iz pripreme
+      hParam[ "azuriran" ] := .F.
 
       cDokumentNaziv := pos_dokument_sa_vrijeme( hParam )
       IF seek_pos_doks( hParam[ "idpos" ], hParam[ "idvd" ], hParam[ "datum" ], hParam[ "brdok" ] ) ;

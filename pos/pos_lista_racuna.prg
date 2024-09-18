@@ -155,6 +155,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
    LOCAL nFiskalniRn
    LOCAL GetList := {}
    LOCAL hParams := hb_Hash()
+   LOCAL cFiskalniRn
 
    SELECT pos_doks
 
@@ -250,7 +251,31 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
 
    ENDIF
 
-   IF Upper( Chr( nCh ) ) == "R"
+   // OFS fiskalni
+   IF is_ofs_fiskalni() .and. Upper( Chr( nCh ) ) == "R"
+
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+
+      cFiskalniRn := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+
+      IF cFiskalniRn == NIL .OR. cFiskalniRn == "_"
+         hParams[ "fiskalni_izdat" ] := .F.
+         hParams[ "azuriran" ] := .T.
+         hParams[ "uplaceno" ] := -1
+         pos_fiskaliziraj_racun( hParams )
+      ELSE
+         MsgBeep( "Postoji fiskalni račun " + cFiskalniRn + "?!" )
+      ENDIF
+
+      SELECT pos_doks
+      RETURN DE_REFRESH
+
+   ENDIF
+
+   // FBiH fiskalni uredjaji
+   IF !is_ofs_fiskalni() .and. Upper( Chr( nCh ) ) == "R"
 
       hParams[ "idpos" ] := pos_doks->idpos
       hParams[ "datum" ] := pos_doks->datum
@@ -260,6 +285,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
 
       IF nFiskalniRn == NIL .OR. nFiskalniRn == 0
          hParams[ "fiskalni_izdat" ] := .F.
+         hParams[ "azuriran" ] := .T.
          hParams[ "uplaceno" ] := -1
          pos_fiskaliziraj_racun( hParams )
       ELSE

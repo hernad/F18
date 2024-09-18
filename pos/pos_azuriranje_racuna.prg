@@ -12,6 +12,10 @@
 #include "f18.ch"
 
 
+/*
+   hParams["azuriran"] - racun izpripreme .F., azuriran .T.
+*/
+
 FUNCTION pos_azuriraj_racun( hParams )
 
    LOCAL cDokument
@@ -96,67 +100,77 @@ FUNCTION pos_azuriraj_racun( hParams )
             lOk := .F.
          ENDIF
       ENDIF
+
+      // stari fiskalni drajveri FBiH   
+      IF lOk .AND. !lBezFiskalnih .AND. !is_ofs_fiskalni() .and. !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
+         IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
+            cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
+            MsgBeep( cMsg )
+            error_bar( "fisk", cMsg )
+            lOk := .F.
+         ENDIF
+      ENDIF
+
+      // OFS drajver
+      IF lOk .AND. !lBezFiskalnih .AND. is_ofs_fiskalni() .and. !Empty( cUUIDFiskStorniran )
+         IF ( cOldFiskRn := pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran ) ) <> "_"
+            cMsg := "Već postoji storno istog RN, FISK: " + cOldFiskRn
+            MsgBeep( cMsg )
+            error_bar( "fisk", cMsg )
+            lOk := .F.
+         ENDIF
+      ENDIF
+
+      // unutar pos_fiskaliziraj_racun se desava transakcija
+      // auto-plu set_params (TREBA LI?!) ; zato ovo nije unutar PSQL transakcije
+      IF lOk .AND. (lBezFiskalnih .OR. hParams["fiskalni_izdat"] .OR. pos_fiskaliziraj_racun( @hParams ))
+
          
-         IF lOk .AND. !lBezFiskalnih .AND. !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
-            IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
-               cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
-               MsgBeep( cMsg )
-               error_bar( "fisk", cMsg )
-               lOk := .F.
+         run_sql_query( "BEGIN" )
+         IF pos_tmp_to_pos( hParams ) != -1
+            IF !lBezFiskalnih
+               IF is_ofs_fiskalni()
+                  lOk := pos_set_broj_fiskalnog_racuna_ofs( hParams )
+               ELSE
+                  lOk := pos_set_broj_fiskalnog_racuna( hParams )
+               ENDIF
             ENDIF
-         ENDIF
 
-         IF lOk .AND. !lBezFiskalnih .AND. is_ofs_fiskalni() .and. !Empty( cUUIDFiskStorniran )
-            IF ( cOldFiskRn := pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran ) ) <> 0
-               cMsg := "Već postoji storno istog RN, FISK: " + AllTrim( cOldFiskRn )
-               MsgBeep( cMsg )
-               error_bar( "fisk", cMsg )
-               lOk := .F.
-            ENDIF
-         ENDIF
-
-         // unutar pos_fiskaliziraj_racun se desava transakcija
-         // auto-plu set_params (TREBA LI?!) ; zato ovo nije unutar PSQL transakcije
-         IF lOk .AND. (lBezFiskalnih .OR. hParams["fiskalni_izdat"] .OR. pos_fiskaliziraj_racun( @hParams ))
-
-            altd()
-            run_sql_query( "BEGIN" )
-            IF pos_tmp_to_pos( hParams ) != -1
-               IF !lBezFiskalnih
-                  IF is_ofs_fiskalni()
-                     lOk := pos_set_broj_fiskalnog_racuna_ofs( hParams )
-                  ELSE
-                     lOk := pos_set_broj_fiskalnog_racuna( hParams )
-                  ENDIF
+            // stornirani racun, set referencu na originalni 
+            IF lOk .AND. !lBezFiskalnih 
+               // FBIH
+               // u pripremi je stornirani fiskalni racun
+               IF !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni() .and. !is_ofs_fiskalni()
+                  pos_set_ref_storno_fisk_dok( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], cUUIDFiskStorniran )
+                  info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
+                  lOk := .T.
                ENDIF
 
-               // stornirani racun, set referencu na originalni 
-               IF lOk .AND. !lBezFiskalnih 
-                  IF !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
-                     // PSQL p2.set_ref_storno_fisk_dok( cIdPos, cIdVd, dDatDok, cBrDok, uuidFiskStorniran )
-                     pos_set_ref_storno_fisk_dok( hRec[ "idpos" ], hRec[ "idvd" ], hRec[ "datum" ], hRec[ "brdok" ], cUUIDFiskStorniran )
-                     info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
-                     lOk := .T.
-                  ENDIF
+               // OFS
+               // u pripremi je stornirani fiskalni racun
+               IF !Empty( cUUIDFiskStorniran ) .AND. is_ofs_fiskalni()
+                  lOk := pos_set_ref_storno_fisk_dok_ofs( hRec, cUUIDFiskStorniran )
+                  info_bar( "fisk", "storniran dok " + cUUIDFiskStorniran )
                ENDIF
-
-            ELSE
-               lOk := .F.
-            ENDIF
-
-            IF lOk
-               run_sql_query( "COMMIT" )
-               log_write( "PS azur_rn: " + cDokument, 2 )
-
-               pos_brisi_pripremu_racuna()
-            ELSE
-               run_sql_query( "ROLLBACK" ) //, hTranParams )
-               log_write( "POS ERR_azur_rn_ERR: " + cDokument, 2 )
             ENDIF
 
          ELSE
             lOk := .F.
          ENDIF
+
+         IF lOk
+            run_sql_query( "COMMIT" )
+            log_write( "PS azur_rn: " + cDokument, 2 )
+
+            pos_brisi_pripremu_racuna()
+         ELSE
+            run_sql_query( "ROLLBACK" ) //, hTranParams )
+            log_write( "POS ERR_azur_rn_ERR: " + cDokument, 2 )
+         ENDIF
+
+      ELSE
+         lOk := .F.
+      ENDIF
 
    ENDIF
 
