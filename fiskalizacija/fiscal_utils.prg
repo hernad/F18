@@ -334,7 +334,6 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
          cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "OFS"
          cIdTarifaFiskalni := "K"
-      
       ENDIF
 
    CASE cTmp == "PDVM"

@@ -13,13 +13,24 @@
 
 STATIC s_nFiskalniUredjajId := 0
 STATIC s_hFiskalniUredjajParams
+STATIC s_cFiskalniDrajverNaziv
+
 STATIC s_cFiskalniDrajverTremol := "TREMOL"
 STATIC s_cFiskalniDrajverFPRINT := "FPRINT"
 STATIC s_cFiskalniDrajverFLINK := "FLINK"
 STATIC s_cFiskalniDrajverHCP := "HCP"
 STATIC s_cFiskalniDrajverTRING := "TRING"
 STATIC s_cFiskalniDrajverOFS := "OFS"
-STATIC s_cFiskalniDrajverNaziv
+
+STATIC FUNCTION init_fisk_params(hFiskalniParams)
+
+  IF hFiskalniParams != NIL
+      s_nFiskalniUredjajId := hFiskalniParams[ "id" ]
+      s_hFiskalniUredjajParams := hFiskalniParams
+      s_cFiskalniDrajverNaziv :=   s_hFiskalniUredjajParams[ "drv" ]
+  ENDIF
+
+  RETURN .T.
 
 
 /*
@@ -96,10 +107,8 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
    cBrDok := hParams[ "brdok" ]
    nUplaceno := hParams[ "uplaceno" ]
 
-   s_nFiskalniUredjajId := hFiskalniParams[ "id" ]
-   s_hFiskalniUredjajParams := hFiskalniParams
+   init_fisk_params(hFiskalniParams)
    cFiskalniDravjerIme := s_hFiskalniUredjajParams[ "drv" ]
-   s_cFiskalniDrajverNaziv := cFiskalniDravjerIme
 
    // lStorno := pos_is_storno( cIdPos, "42", dDatDok, cBrDok )
    IF nUplaceno == -1 // fiskalizacija azuriranog racuna
@@ -175,8 +184,11 @@ STATIC FUNCTION pos_racun_u_pripremi_broj_storno_rn()
 
    RETURN nStorno
 
-
-STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nStorno, nUplaceniIznos )
+/*
+   nStorno > 0 => lStorno = .T.
+   nUplaceniIznos <  0 => gledamo azurirani racun
+*/
+FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nStorno, nUplaceniIznos, hFiskParams )
 
    LOCAL aStavkeRacuna := {}
    LOCAL nPLU
@@ -191,6 +203,11 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
    LOCAL lStorno
    LOCAL lTmpTabele := .T.
    LOCAL nI
+
+   // kod direktnog poziva kopije ofs fiskalnog racuna moze se desiti da nisu inicijalizovani params
+   IF hFiskParams <> NIL .and. s_hFiskalniUredjajParams == NIL
+      init_fisk_params(hFiskParams)
+   ENDIF
 
    lStorno := ( nStorno > 0 )
    IF nUplaceniIznos == NIL
@@ -231,16 +248,17 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       cIdRoba := field->idroba
 
       select_o_roba( cIdRoba )
+    
       nPLU := roba->fisc_plu
       IF s_hFiskalniUredjajParams[ "plu_type" ] == "D"
          nPLU := auto_plu( .F., .F., s_hFiskalniUredjajParams )
       ENDIF
 
-      IF s_cFiskalniDrajverNaziv == "FPRINT" .AND. nPLU == 0
+      IF s_hFiskalniUredjajParams[ "drv" ] == "FPRINT" .AND. nPLU == 0
          MsgBeep( "PLU artikla = 0, to nije moguće !" )
          RETURN NIL
       ENDIF
-
+   
       cRobaBarkod := roba->barkod
       cJMJ := roba->jmj
 
@@ -262,8 +280,10 @@ STATIC FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nSto
       aStavka[ FISK_INDEX_KOLICINA ] := Abs( pos->kolicina )
       aStavka[ FISK_INDEX_TARIFA ] := pos->idtarifa
       aStavka[ FISK_INDEX_FISK_RACUN_STORNIRATI ] := cBrojFiskRNStorno
+
       aStavka[ FISK_INDEX_PLU ] := nPLU
       aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
+      
       aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
       aStavka[ FISK_INDEX_BARKOD ] := cRobaBarkod
       aStavka[ FISK_INDEX_VRSTA_PLACANJA ] := cVrstaPlacanja
@@ -685,8 +705,15 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
 
    LOCAL cRet := "0"
 
-   // LOCAL nDbfArea := Select()
-   LOCAL cVrstaPlacanjaNaziv := ""
+   IF s_cFiskalniDrajverNaziv == NIL
+      Altd( "pos_get_vrsta_placanja_0123 nije setovana!? QUIT!")
+      QUIT_1
+   ENDIF
+
+   IF s_cFiskalniDrajverNaziv == "OFS"
+      // default placanje
+      cRet := "Cash"
+   ENDIF
 
    IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
       // gotovina FPRINT, TREMOL
@@ -701,6 +728,8 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
       IF s_cFiskalniDrajverNaziv == "FPRINT"
          // https://redmine.bring.out.ba/issues/38042#change-291730
          RETURN "2"
+      ELSEIF s_cFiskalniDrajverNaziv == "OFS"
+          RETURN "Check"
       ENDIF
       // TREMOL
       RETURN "1"  // cek
@@ -711,15 +740,14 @@ STATIC FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
          // https://redmine.bring.out.ba/issues/38042#change-291730
          RETURN "1" 
       ELSEIF s_cFiskalniDrajverNaziv == "OFS"
-         RETURN "WireTransfer"
+         RETURN "Card"
+      ELSE
+         // TREMOL
+         RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
       ENDIF
-
-      // TREMOL
-      RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
-
    ENDIF
    
-   RETURN "0"
+   RETURN cRet
 
 
 STATIC FUNCTION pos_to_tring( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lStorno )
@@ -734,7 +762,6 @@ STATIC FUNCTION pos_to_tring( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSto
 
    hRet["error"] := nErrorLevel
    RETURN hRet
-
 
 
 STATIC FUNCTION pos_pripr_set_opis( cOpis )

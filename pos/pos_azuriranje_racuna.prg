@@ -19,7 +19,7 @@ FUNCTION pos_azuriraj_racun( hParams )
    LOCAL nCount := 0
    LOCAL lOk := .F.
    LOCAL cUUIDFiskStorniran
-   LOCAL nOldFiskRn
+   LOCAL nOldFiskRn, cOldFiskRn
    LOCAL cMsg
    LOCAL nFiskBroj, cBroj
    LOCAL lBezFiskalnih := .F.
@@ -38,7 +38,6 @@ FUNCTION pos_azuriraj_racun( hParams )
    
    SELECT _pos_pripr
    GO TOP
-
 
    cDokument := pos_dokument_sa_vrijeme(hParams)
 
@@ -101,6 +100,15 @@ FUNCTION pos_azuriraj_racun( hParams )
          IF lOk .AND. !lBezFiskalnih .AND. !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
             IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
                cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )
+               MsgBeep( cMsg )
+               error_bar( "fisk", cMsg )
+               lOk := .F.
+            ENDIF
+         ENDIF
+
+         IF lOk .AND. !lBezFiskalnih .AND. is_ofs_fiskalni() .and. !Empty( cUUIDFiskStorniran )
+            IF ( cOldFiskRn := pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran ) ) <> 0
+               cMsg := "Već postoji storno istog RN, FISK: " + AllTrim( cOldFiskRn )
                MsgBeep( cMsg )
                error_bar( "fisk", cMsg )
                lOk := .F.

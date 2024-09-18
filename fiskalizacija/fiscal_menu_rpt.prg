@@ -73,7 +73,7 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       AAdd( aOpcExe, {|| curl_hello() } )
 
 #ifdef F18_DEBUG
-      AAdd( aOpc, "5. test create invoice" )
+      AAdd( aOpc, "T. test create invoice" )
       AAdd( aOpcExe, {|| ofs_create_test_invoice() } )
 #endif
 

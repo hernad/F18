@@ -1,4 +1,3 @@
-/*
  * This file is part of the bring.out knowhow ERP, a free and open source
  * Enterprise Resource Planning software suite,
  * Copyright (c) 1994-2024 by bring.out doo Sarajevo.
@@ -10,7 +9,6 @@
  */
 
 #include "f18.ch"
-
 
 FUNCTION pos_pregled_racuna_tabela()
 

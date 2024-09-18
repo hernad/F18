@@ -180,7 +180,7 @@ FUNCTION ofs_putpin(hParams)
           EXIT
         endif
 
-        Box(,1, 80)
+        Box(,1, 60)
         Beep( 1 )
         @ box_x_koord() + 1, box_y_koord() + 2 SAY "Unesi PIN fiskalnog uredjaja:" GET cPin PICT "@!S40"
         READ
@@ -242,7 +242,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
     
     LOCAL nRet, cData, hCurl
     LOCAL hResponseData, cGsc := "", cCode, cRet := "0"
-    LOCAL cCurrentTaxRates, oTaxRates, oTaxCategory, oTaxRate
+    LOCAL oTaxRates, oTaxCategory, oTaxRate, nX, nRedova
 
     IF hParams == NIL
         hParams := ofs_get_params()
@@ -276,7 +276,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
         next
     ENDIF
 
-    IF cVarijanta == "S"
+    IF cRet == "0" .and. cVarijanta == "S"
         MsgBeep("STATUS #hardwareVersion: " + hResponseData["hardwareVersion"] +;
             "#sdcDateTime - tekuci datum: " + hResponseData["sdcDateTime"] +;
             "#last invoiceNumber: " + hResponseData["lastInvoiceNumber"] +;
@@ -284,7 +284,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
             )
     ENDIF
 
-    IF cVarijanta == "P"
+    IF cRet == "0" .and. cVarijanta == "P"
         altd()
 
         /*
@@ -336,22 +336,49 @@ FUNCTION ofs_status(hParams, cVarijanta)
             ]
         */
         
+        do while .t.
+            //cCurrentTaxRates := ""
+            nRedova := 1
+            for each oTaxRates in hResponseData["currentTaxRates"]
+                nRedova ++
+                
+                for each oTaxCategory in oTaxRates["taxCategories"]
+                    nRedova ++
+                    for each oTaxRate in oTaxCategory["taxRates"]
+                        nRedova ++
+                    next
+                    nRedova ++
+                    
+                next
+                nRedova ++
+            next
+            Box(, nRedova, 70)
+            nX := 1
+            for each oTaxRates in hResponseData["currentTaxRates"]
+                @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "**** Current Tax Rates ******"
+                
+                @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "taxRates: " + oTaxRates["groupId"] + " : " + oTaxRates["validFrom"] + " {"
+                
+                for each oTaxCategory in oTaxRates["taxCategories"]
+                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "tax categ: " + AllTrim(Str(oTaxCategory["categoryType"])) + " - " + oTaxCategory["name"] + " ["
+                    for each oTaxRate in oTaxCategory["taxRates"]
 
-        cCurrentTaxRates := ""
-        for each oTaxRates in hResponseData["currentTaxRates"]
-             cCurrentTaxRates += oTaxRates["groupId"] + "{ "
-             
-             for each oTaxCategory in oTaxRates["taxCategories"]
-                  cCurrentTaxRates += AllTrim(Str(oTaxCategory["categoryType"])) + ":" + oTaxCategory["name"] + "[ "
-                  for each oTaxRate in oTaxCategory["taxRates"]
-                      cCurrentTaxRates +=  "#( " + oTaxRate["label"] + ":" + AllTrim(Str(oTaxRate["rate"])) + " )"
-                  next
-                  cCurrentTaxRates += " ]"
-             next
-             cCurrentTaxRates += " }"
+                        @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(10) + "(label: " + oTaxRate["label"] + " rate: " + AllTrim(Str(oTaxRate["rate"])) + " )"
+                    next
+                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "]"
+                next
+                @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "}"
+            next
+            inkey(0)
+            BoxC()
 
-        next
-        MsgBeep(cCurrentTaxRates)
+            
+            if lastkey() == K_ESC
+                exit
+            endif
+        enddo
+
+
         
     ENDIF
     
@@ -472,27 +499,68 @@ FUNCTION ofs_create_test_invoice()
     RETURN .T.
 
 
-FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno )
+
+FUNCTION fiskalni_ofs_racun_kopija(hParams)
+
+    LOCAL nDeviceId, hFiskParams, aKupac, aRacunStavke, nStorno, lStorno, nUplaceno, hKopija
+ 
+    altd()
+
+    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+    IF nDeviceId > 0
+        hFiskParams := get_fiscal_device_params( nDeviceId, my_user() )
+    ENDIF
+
+    aKupac := NIL
+    
+    IF pos_is_storno_ofs( hParams[ "idpos" ], "42", hParams[ "datum" ], hParams[ "brdok" ] )
+       nStorno := 1
+       lStorno := .T.
+    ELSE
+        nStorno := 0
+        lStorno := .F.
+    ENDIF
+    
+    nUplaceno := -1 // azurirani racin
+    
+    hParams["idvd"] := "42"
+    aRacunStavke := pos_fiskalni_stavke_racuna( hParams[ "idpos" ], hParams["idvd"], hParams[ "datum" ], hParams[ "brdok" ], ;
+                    nStorno, nUplaceno, hFiskParams )
+
+    
+    hKopija := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+
+RETURN fiskalni_ofs_racun(hFiskParams, aRacunStavke, aKupac, lStorno, hKopija)
+
+
+/*
+   return hRet["error"] numeric
+          hRet["broj"] char, hRet["datum"] char, hRet["json"] char 
+ */
+FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno, hKopija )
 
     LOCAL cVrstaPlacanja, cOperater, nTotal, nI
     LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa
 
     //LOCAL hParams := ofs_get_params()
     LOCAL hCurl, nRet, cData, pHeaders, cApiKey, hResponseData, hInvoiceData, hPaymentLine, hItemLine 
-    LOCAL cStatus1
+    LOCAL cStatus1, cInvoiceType
     LOCAL hRet := hb_hash()
 
     hRet["error"] := 0
     hRet["broj"] := ""
     hRet["datum"] := ""
     hRet["json"] := ""
-   
+    
+    cInvoiceType := "Normal"
+    IF hKopija != NIL
+        cInvoiceType := "Copy"
+    ENDIF
+        
     IF lStorno == NIL
         lStorno := .F.
     ENDIF
     
-    
-
     cVrstaPlacanja := AllTrim( aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ] )
         
     IF !Empty( hParams[ "op_id" ] ) // provjeri operatera i lozinku iz podesenja...
@@ -511,7 +579,7 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno )
      
     IF !ofs_attention(hParams)
         Alert("Fiskalni nije ukljucen ?! STOP!")
-       RETURN .F.
+       RETURN hRet
     ENDIF
 
     cStatus1 := ofs_status(hParams)
@@ -542,7 +610,11 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno )
 
     hInvoiceData["invoiceRequest"] := hb_hash()
     
-    hInvoiceData["invoiceRequest"]["invoiceType"] := "Normal"
+    hInvoiceData["invoiceRequest"]["invoiceType"] := cInvoiceType
+    if cInvoiceType == "Copy"
+        hInvoiceData["invoiceRequest"]["referentDocumentNumber"] := hKopija["fiskalni_broj"]
+        hInvoiceData["invoiceRequest"]["referentDocumentDT"] := hKopija["fiskalni_datum"]
+    endif
     hInvoiceData["invoiceRequest"]["transactionType"] := "Sale"
     
     hInvoiceData["invoiceRequest"]["payment"] := {}
@@ -625,22 +697,22 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno )
     hRet["json"] := cData
     hResponseData := hb_jsonDecode(cData)
     
-    MsgBeep("#businessName: " + hResponseData["businessName"] +;
-            "#address: " + hResponseData["address"] +;
-            "#invoiceNumber: " + hResponseData["invoiceNumber"] +;
-            "#sdcDateTime: " + hResponseData["sdcDateTime"] +;
-            "#totalAmount: " + Str(hResponseData["totalAmount"], 10,2) +;
-            "#messages: " + hResponseData["messages"] +;
-            "#taxItems(1).amount:" + Str(hResponseData["taxItems"][1]["amount"], 10,4) +;
-            "#taxItems(1).label:" + hResponseData["taxItems"][1]["label"] +;
-            "#" ;
-            )
+    // MsgBeep("#businessName: " + hResponseData["businessName"] +;
+    //         "#address: " + hResponseData["address"] +;
+    //         "#invoiceNumber: " + hResponseData["invoiceNumber"] +;
+    //         "#sdcDateTime: " + hResponseData["sdcDateTime"] +;
+    //         "#totalAmount: " + Str(hResponseData["totalAmount"], 10,2) +;
+    //         "#messages: " + hResponseData["messages"] +;
+    //         "#taxItems(1).amount:" + Str(hResponseData["taxItems"][1]["amount"], 10,4) +;
+    //         "#taxItems(1).label:" + hResponseData["taxItems"][1]["label"] +;
+    //         "#" ;
+    //         )
     
     
     hRet["broj"] := hResponseData["invoiceNumber"]
     hRet["datum"] := hResponseData["sdcDateTime"]
     
-    
+ 
 RETURN hRet
 
 
@@ -700,3 +772,122 @@ FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
  
     RETURN lRet
  
+
+    FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
+
+        LOCAL cQuery, oRet, oError, hRet, cGet
+      
+        LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
+     
+        cIdPos := hParams["idpos"]
+        cIdVd := hParams["idvd"]
+        dDatDok := hParams["datum"]
+        cBrDok := hParams["brdok"]
+
+        hRet := NIL
+    
+        altd()
+        cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
+           sql_quote( cIdPos ) + "," + ;
+           sql_quote( cIdVd ) + "," + ;
+           sql_quote( dDatDok ) + "," + ;
+           sql_quote( cBrDok ) + ")"
+     
+        BEGIN SEQUENCE WITH {| err | Break( err ) }
+     
+           oRet := run_sql_query( cQuery )
+           IF is_var_objekat_tpqquery( oRet )
+              cGet := oRet:FieldGet( 1 )
+              aTokens := NumToken( cGet, "_" )
+              hRet := hb_hash()
+              hRet["fiskalni_broj"] := Token( cGet, "_", 1)
+              hRet["fiskalni_datum"] := Token( cGet, "_", 2)
+           ENDIF
+     
+        RECOVER USING oError
+           Alert( _u( "get broj fisk racuna ofs za POS: " +  cIdPos + "-" + cIdVd + "-" + cBrdok + dtoc(dDatDok) + " neuspješan?!" ) )
+           QUIT_1
+        END SEQUENCE
+     
+        RETURN hRet
+    
+/*
+   u p2.pos_fisk_doks.ref_storno_fisk_dok postoji ovaj racun
+
+   FUNCTION p15.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+*/
+FUNCTION pos_is_storno_ofs( cIdPos, cIdVd, dDatDok, cBrDok )
+
+    LOCAL cQuery, oRet, lValue
+ 
+    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_is_storno_ofs(" + ;
+       sql_quote( cIdPos ) + "," + ;
+       sql_quote( cIdVd ) + "," + ;
+       sql_quote( dDatDok ) + "," + ;
+       sql_quote( cBrDok ) + ")"
+ 
+    oRet := run_sql_query( cQuery )
+    IF is_var_objekat_tpqquery( oRet )
+       lValue := oRet:FieldGet( 1 )
+       IF lValue <> NIL
+          RETURN lValue
+       ELSE
+          RETURN .F.
+       ENDIF
+    ENDIF
+ 
+    RETURN .F.
+ 
+ // SELECT p15.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  => 101
+ 
+ FUNCTION pos_storno_broj_rn_ofs( cIdPos, cIdVd, dDatDok, cBrDok )
+ 
+    LOCAL cQuery, oRet, nValue
+ 
+    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_storno_broj_rn_ofs(" + ;
+       sql_quote( cIdPos ) + "," + ;
+       sql_quote( cIdVd ) + "," + ;
+       sql_quote( dDatDok ) + "," + ;
+       sql_quote( cBrDok ) + ")"
+ 
+    oRet := run_sql_query( cQuery )
+    IF is_var_objekat_tpqquery( oRet )
+       nValue := oRet:FieldGet( 1 )
+       IF nValue <> NIL
+          RETURN nValue
+       ELSE
+          RETURN 0
+       ENDIF
+    ENDIF
+ 
+    RETURN 0
+
+
+/*
+   broj fiskalnog racuna koji je storno dokumenta ciji je uuid= cUUIDFiskStorniran
+
+  PSQL FUNCTION p15.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
+*/
+FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
+
+    LOCAL cQuery, oRet, cValue
+ 
+    IF is_flink_fiskalni()
+       RETURN 0
+    ENDIF
+ 
+    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref_ofs(" + ;
+       sql_quote( cUUIDFiskStorniran ) +  ")"
+ 
+    oRet := run_sql_query( cQuery )
+    IF is_var_objekat_tpqquery( oRet )
+        // stored procedura vraca string: invoice_number || '_' || sdc_date_time
+       cValue := oRet:FieldGet( 1 )
+       IF cValue <> NIL
+          RETURN cValue
+       ELSE
+          RETURN 0
+       ENDIF
+    ENDIF
+ 
+    RETURN 0    

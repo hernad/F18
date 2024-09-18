@@ -120,6 +120,9 @@ FUNCTION pos_lista_racuna( hParams )
 
    IF hParams[ "browse" ]
       cFnc := "<Enter> ili <P>-Pregled, <S> Storno, <R> Napravi fiskalni"
+      IF is_ofs_fiskalni()
+         cFnc += ", <K> Kopija fisk"
+      ENDIF
    ELSE
       cFnc := "<Enter>-Odabir   <P>-Pregled"
    ENDIF
@@ -213,6 +216,28 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
 
       MsgBeep( "Storno račun se nalazi u pripremi !" )
       SELECT pos_doks
+      RETURN DE_REFRESH
+
+   ENDIF
+
+   IF is_ofs_fiskalni() .and. Upper( Chr( nCh ) ) == "K"
+      // Alert( "TODO pos_storno" )
+
+      hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "datum" ] := pos_doks->datum
+      hParams[ "brdok" ] := pos_doks->brdok
+
+      IF (fiskalni_ofs_racun_kopija( hParams))["error"] == 0
+        MsgBeep( "Poslan zahtjev za stampu!" )
+      ENDIF
+      SELECT pos_doks
+
+      Tb:goBottom()
+      Tb:refreshAll()
+      Tb:dehilite()
+      DO WHILE !Tb:Stabilize() .AND. ( ( Ch := Inkey() ) == 0 )
+      ENDDO
+
       RETURN DE_REFRESH
 
    ENDIF
