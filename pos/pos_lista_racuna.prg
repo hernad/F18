@@ -87,12 +87,12 @@ FUNCTION pos_lista_racuna( hParams )
 
    AAdd( ImeKol, { _u( "Broj računa" ), {|| PadR( Trim( pos_doks->IdPos ) + "-" + AllTrim( pos_doks->BrDok ), 9 ) } } )
    AAdd( ImeKol, { "Datum", {|| field->datum } } )
-   AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna_str( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok ) } } )
    AAdd( ImeKol, { "Iznos", {|| Str ( pos_iznos_racuna( field->idpos, field->idvd, field->datum, field->brdok ), 13, 2 ) } } )
    AAdd( ImeKol, { "Vr.Pl", {|| field->idvrstep } } )
    AAdd( ImeKol, { "Partner", {|| field->idPartner } } )
    AAdd( ImeKol, { "Vrijeme", {|| field->vrijeme } } )
-
+   AAdd( ImeKol, { "Fisk.rn", {|| pos_get_broj_fiskalnog_racuna_str( pos_doks->IdPos, pos_doks->IdVd, pos_doks->datum, pos_doks->brdok ) } } )
+   
    FOR i := 1 TO Len( ImeKol )
       AAdd( kol, i )
    NEXT
@@ -125,6 +125,9 @@ FUNCTION pos_lista_racuna( hParams )
       ENDIF
    ELSE
       cFnc := "<Enter>-Odabir   <P>-Pregled"
+      IF is_ofs_fiskalni()
+         cFnc += ", <K> Kopija fisk"
+      ENDIF
    ENDIF
 
    KEYBOARD '\'
@@ -201,13 +204,18 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
 */
 
    IF Upper( Chr( nCh ) ) == "S"
-      // Alert( "TODO pos_storno" )
 
       hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "idvd" ] := pos_doks->idvd
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "brdok" ] := pos_doks->brdok
 
-      pos_storno_racuna( hParams )
+      if is_ofs_fiskalni()
+         pos_storno_racun_ofs( hParams )
+      else
+         pos_storno_racuna( hParams )
+      endif
+
       Tb:goBottom()
       Tb:refreshAll()
       Tb:dehilite()

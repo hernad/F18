@@ -107,7 +107,6 @@ STATIC FUNCTION izaberi_racun_iz_liste( arr, cBrDok, dDatumRacuna )
 
 
 
-
 FUNCTION pos_storno_racuna( hParams )
 
    LOCAL GetList := {}
@@ -168,12 +167,10 @@ FUNCTION pos_storno_racuna( hParams )
          RETURN .F.
       ENDIF
 
-      IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " broj fiskalng računa [" + AllTrim( Str( hParams[ "fisk_rn" ] ) ) + "] ?", "D" ) == "D"
+      IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " fiskalnog računa [" + AllTrim( Str( hParams[ "fisk_rn" ] ) ) + "] ?", "D" ) == "D"
          pos_napravi_u_pripremi_storno_dokument( hParams )
       ENDIF
    ENDIF
-
-
 
    PopWa()
 
@@ -195,7 +192,7 @@ FUNCTION pos_storno_racuna( hParams )
 //
 // RETURN .T.
 
-STATIC FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
+FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
 
    LOCAL cIdRoba, hRec
 

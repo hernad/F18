@@ -772,44 +772,45 @@ FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
  
     RETURN lRet
  
+/*
+    hRet["fiskalni_broj"] := Token( cGet, "_", 1)
+    hRet["fiskalni_datum"] := Token( cGet, "_", 2)
+*/
+FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
 
-    FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
-
-        LOCAL cQuery, oRet, oError, hRet, cGet
-      
-        LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
-     
-        cIdPos := hParams["idpos"]
-        cIdVd := hParams["idvd"]
-        dDatDok := hParams["datum"]
-        cBrDok := hParams["brdok"]
-
-        hRet := NIL
+    LOCAL cQuery, oRet, oError, hRet, cGet
     
-        altd()
-        cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
-           sql_quote( cIdPos ) + "," + ;
-           sql_quote( cIdVd ) + "," + ;
-           sql_quote( dDatDok ) + "," + ;
-           sql_quote( cBrDok ) + ")"
-     
-        BEGIN SEQUENCE WITH {| err | Break( err ) }
-     
-           oRet := run_sql_query( cQuery )
-           IF is_var_objekat_tpqquery( oRet )
-              cGet := oRet:FieldGet( 1 )
-              aTokens := NumToken( cGet, "_" )
-              hRet := hb_hash()
-              hRet["fiskalni_broj"] := Token( cGet, "_", 1)
-              hRet["fiskalni_datum"] := Token( cGet, "_", 2)
-           ENDIF
-     
-        RECOVER USING oError
-           Alert( _u( "get broj fisk racuna ofs za POS: " +  cIdPos + "-" + cIdVd + "-" + cBrdok + dtoc(dDatDok) + " neuspješan?!" ) )
-           QUIT_1
-        END SEQUENCE
-     
-        RETURN hRet
+    LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
+    
+    cIdPos := hParams["idpos"]
+    cIdVd := hParams["idvd"]
+    dDatDok := hParams["datum"]
+    cBrDok := hParams["brdok"]
+    
+    hRet := NIL
+
+    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
+        sql_quote( cIdPos ) + "," + ;
+        sql_quote( cIdVd ) + "," + ;
+        sql_quote( dDatDok ) + "," + ;
+        sql_quote( cBrDok ) + ")"
+    
+    BEGIN SEQUENCE WITH {| err | Break( err ) }
+    
+        oRet := run_sql_query( cQuery )
+        IF is_var_objekat_tpqquery( oRet )
+            cGet := oRet:FieldGet( 1 )
+            hRet := hb_hash()
+            hRet["fiskalni_broj"] := Token( cGet, "_", 1)
+            hRet["fiskalni_datum"] := Token( cGet, "_", 2)
+        ENDIF
+    
+    RECOVER USING oError
+        Alert( _u( "get broj fisk racuna ofs za POS: " +  cIdPos + "-" + cIdVd + "-" + cBrdok + dtoc(dDatDok) + " neuspješan?!" ) )
+        QUIT_1
+    END SEQUENCE
+    
+    RETURN hRet
     
 /*
    u p2.pos_fisk_doks.ref_storno_fisk_dok postoji ovaj racun
@@ -866,16 +867,13 @@ FUNCTION pos_is_storno_ofs( cIdPos, cIdVd, dDatDok, cBrDok )
 /*
    broj fiskalnog racuna koji je storno dokumenta ciji je uuid= cUUIDFiskStorniran
 
-  PSQL FUNCTION p15.fisk_broj_rn_by_storno_ref( uuidFiskStorniran text ) RETURNS integer
+  PSQL FUNCTION p15.fisk_broj_rn_by_storno_ref_ofs( uuidFiskStorniran text ) RETURNS varchar
 */
 FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
 
     LOCAL cQuery, oRet, cValue
  
-    IF is_flink_fiskalni()
-       RETURN 0
-    ENDIF
- 
+
     cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref_ofs(" + ;
        sql_quote( cUUIDFiskStorniran ) +  ")"
  
@@ -886,8 +884,114 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
        IF cValue <> NIL
           RETURN cValue
        ELSE
-          RETURN 0
+          RETURN "-"
        ENDIF
     ENDIF
  
-    RETURN 0    
+RETURN "-"
+
+
+FUNCTION pos_storno_racun_ofs( hParams )
+
+    LOCAL GetList := {}, hRet
+    LOCAL cOldFiskFullRn, cMsg, cFullBroj
+ 
+    IF !hb_HHasKey( hParams, "datum" )
+       hParams[ "datum" ] := NIL
+    ENDIF
+    IF !hb_HHasKey( hParams, "brdok" )
+       hParams[ "brdok" ] := NIL
+    ENDIF
+    IF !hb_HHasKey( hParams, "idpos" )
+       hParams[ "idpos" ] := pos_pm()
+    ENDIF
+    IF hParams[ "datum" ] == nil
+       hParams[ "datum" ] := danasnji_datum()
+    ENDIF
+    IF hParams[ "brdok" ] == nil
+       hParams[ "brdok" ] := Space( FIELD_LEN_POS_BRDOK )
+    ENDIF
+    hParams[ "browse" ] := .F.
+ 
+    PushWA()
+    Box(, 5, 55 )
+    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
+    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
+    READ
+    BoxC()
+    IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
+       PopWa()
+       RETURN .F.
+    ENDIF
+ 
+    hParams[ "idvd" ] := "42"
+    hRet := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+    hParams[ "fiskalni_broj" ] := hRet["fiskalni_broj"]
+    hParams[ "fiskalni_datum" ] := hRet["fiskalni_datum"]
+    cFullBroj := hParams[ "fiskalni_broj" ] + "_" + hParams["fiskalni_datum"]
+
+    altd()
+    hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id_ofs( hParams )
+
+    IF ( cOldFiskFullRn := pos_fisk_broj_rn_by_storno_ref_ofs( hParams[ "fisk_id" ] ) ) <> "_"
+        cMsg := "Već postoji storno istog RN, broj FISK: " + cOldFiskFullRn
+        MsgBeep( cMsg )
+        error_bar( "fisk", cMsg )
+        PopWa()
+        RETURN .F.
+    ENDIF
+
+    info_bar( "fisk", "Broj fiskalnog računa: " +  cFullBroj)
+    IF LastKey() == K_ESC .OR. Empty(hParams[ "fiskalni_broj" ])
+        MsgBeep( "Broj fiskalnog računa prazan?! Ne može storno!" )
+        PopWa()
+        RETURN .F.
+    ENDIF
+
+    IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
+
+        // hParams["fisk_rn"] i hParams["fisk_id"] se upisuju u _pos_pripr
+        // da li nam je neophodan fisk_rn koji je numeric ? nije 
+        //AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
+        //AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
+        hParams[ "fisk_rn" ] := 999
+
+        pos_napravi_u_pripremi_storno_dokument( hParams )
+    ENDIF
+
+ 
+    PopWa()
+ 
+RETURN .T.
+
+
+FUNCTION pos_get_fiskalni_dok_id_ofs( hParams )
+
+    LOCAL cQuery, oRet, cValue, cIdVd, cIdPos, dDatDok, cBrDok
+ 
+    cIdPos := hParams["idpos"]
+    cIdVd := hParams["idvd"]
+    dDatDok := hParams["datum"]
+    cBrDok := hParams["brdok"]
+    
+    IF Empty( cIdPos )
+       RETURN 0
+    ENDIF
+ 
+    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_dok_id_ofs(" + ;
+       sql_quote( cIdPos ) + "," + ;
+       sql_quote( cIdVd ) + "," + ;
+       sql_quote( dDatDok ) + "," + ;
+       sql_quote( cBrDok ) + ")"
+ 
+    oRet := run_sql_query( cQuery )
+    IF is_var_objekat_tpqquery( oRet )
+       cValue := oRet:FieldGet( 1 )
+       IF cValue <> NIL
+          RETURN cValue
+       ELSE
+          RETURN ""
+       ENDIF
+    ENDIF
+ 
+    RETURN ""

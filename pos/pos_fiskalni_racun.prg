@@ -23,6 +23,7 @@ STATIC s_cFiskalniDrajverTRING := "TRING"
 STATIC s_cFiskalniDrajverOFS := "OFS"
 
 STATIC FUNCTION init_fisk_params(hFiskalniParams)
+  LOCAL nDeviceId
 
   IF hFiskalniParams != NIL
       s_nFiskalniUredjajId := hFiskalniParams[ "id" ]
@@ -30,7 +31,21 @@ STATIC FUNCTION init_fisk_params(hFiskalniParams)
       s_cFiskalniDrajverNaziv :=   s_hFiskalniUredjajParams[ "drv" ]
   ENDIF
 
-  RETURN .T.
+   // ako i dalje nisu parametri inicijalizovani
+   if s_hFiskalniUredjajParams == NIL
+     nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+     IF nDeviceId <> NIL .AND. nDeviceId > 0
+         hFiskalniParams := get_fiscal_device_params( nDeviceId, my_user() )
+         s_hFiskalniUredjajParams := hFiskalniParams
+         s_nFiskalniUredjajId := hFiskalniParams[ "id" ]
+         s_cFiskalniDrajverNaziv :=   s_hFiskalniUredjajParams[ "drv" ]
+         RETURN .T.
+     ELSE
+         RETURN .F.
+     ENDIF
+   endif
+
+RETURN .T.
 
 
 /*
@@ -534,8 +549,23 @@ FUNCTION pos_set_broj_fiskalnog_racuna( hParams )
 
 
 FUNCTION pos_get_broj_fiskalnog_racuna_str( cIdPos, cIdVd, dDatDok, cBrDok )
+   
+   LOCAL hRet, hParams := hb_hash()
 
-   RETURN PadL( AllTrim( Str( pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok ) ) ), 6 )
+   init_fisk_params()
+
+   IF s_cFiskalniDrajverNaziv == "OFS"
+      hParams["idpos"] := cIdPos
+      hParams["idvd"] := cIdVd
+      hParams["datum"] := dDatDok
+      hParams["brdok"] := cBrDok  
+      hRet := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+      RETURN PadL( hRet["fiskalni_broj"] + "_" + hRet["fiskalni_datum"], 35 )
+   ELSE
+      RETURN PadL( AllTrim( Str( pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok ) ) ), 6 )
+   ENDIF
+
+RETURN ""
 
 
 FUNCTION pos_get_broj_fiskalnog_racuna( cIdPos, cIdVd, dDatDok, cBrDok )
