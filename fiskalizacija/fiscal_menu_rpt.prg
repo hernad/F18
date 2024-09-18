@@ -60,15 +60,22 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "OFS"
 
-      AAdd( aOpc, "1. test hello curl" )
-      AAdd( aOpcExe, {|| curl_hello() } )
-      
-      AAdd( aOpc, "2. test create invoice" )
-      AAdd( aOpcExe, {|| ofs_create_invoice() } )
+      AAdd( aOpc, "1. status - osnovne informacije" )
+      AAdd( aOpcExe, {|| ofs_status(NIL, "S") } )
 
-      AAdd( aOpc, "3. postmp cleanup" )
+      AAdd( aOpc, "2. status - porezne stope" )
+      AAdd( aOpcExe, {|| ofs_status(NIL, "P") } )
+
+      AAdd( aOpc, "3. postmp ciscenje" )
       AAdd( aOpcExe, {|| ofs_cleanup() } )
 
+      AAdd( aOpc, "4. test hello curl" )
+      AAdd( aOpcExe, {|| curl_hello() } )
+
+#ifdef F18_DEBUG
+      AAdd( aOpc, "5. test create invoice" )
+      AAdd( aOpcExe, {|| ofs_create_test_invoice() } )
+#endif
 
    CASE cFiskalniDrajver == "FLINK"
 

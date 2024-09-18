@@ -21,7 +21,6 @@ FUNCTION ofs_cleanup()
  
     LOCAL cDokumentNaziv
 
-
     o_pos__pripr()
     my_dbf_pack()
     IF _pos_pripr->( RecCount2() ) == 0
@@ -225,6 +224,12 @@ FUNCTION ofs_putpin(hParams)
     RETURN lOk
 
 /*
+
+   cVarijanta = "0" - check gsc code, aktiviraj unos pin-a ako treba
+   cVarijanta = "P" - porezne stope  
+   cVarijanta = "S" - osnovni statusni podaci
+
+
    cRet = "0"  // sve ok
    cRet = "1"  // uspjesno unijet pin 
    cRet = "99" // error
@@ -233,14 +238,20 @@ FUNCTION ofs_putpin(hParams)
 */  
 
 
-FUNCTION ofs_status(hParams)
+FUNCTION ofs_status(hParams, cVarijanta)
     
     LOCAL nRet, cData, hCurl
     LOCAL hResponseData, cGsc := "", cCode, cRet := "0"
+    LOCAL cCurrentTaxRates, oTaxRates, oTaxCategory, oTaxRate
 
     IF hParams == NIL
         hParams := ofs_get_params()
     ENDIF
+
+    IF cVarijanta == NIL
+        cVarijanta := "0"
+    ENDIF
+
     hCurl := curl_init(hParams, "/api/status", "application/json", "GET")
 
     IF hCurl == NIL
@@ -257,7 +268,6 @@ FUNCTION ofs_status(hParams)
     
       
     IF cRet == "0"
-        //I'm using hb_jsonDecode() so I can decode the responde into a JSON object
         hResponseData := hb_jsonDecode(cData)
         
         cGsc = "" 
@@ -266,14 +276,85 @@ FUNCTION ofs_status(hParams)
         next
     ENDIF
 
-    //altd()
-    /*
-    MsgBeep("STATUS #hardwareVersion: " + hResponseData["hardwareVersion"] +;
+    IF cVarijanta == "S"
+        MsgBeep("STATUS #hardwareVersion: " + hResponseData["hardwareVersion"] +;
             "#sdcDateTime - tekuci datum: " + hResponseData["sdcDateTime"] +;
             "#last invoiceNumber: " + hResponseData["lastInvoiceNumber"] +;
             "#gsc: " + cGsc + "#" ;
             )
-    */
+    ENDIF
+
+    IF cVarijanta == "P"
+        altd()
+
+        /*
+        
+            taxRate0 = TaxRate( rate = 0, label = "G")
+            taxRateA = TaxRate( rate = 0, label = "A")
+            taxRateE = TaxRate( rate = 10, label = "E")
+            taxRateD = TaxRate( rate = 20, label = "D")
+
+            taxCategory1 = TaxCategory(categoryType=0, name="Bez PDV", orderId=4, taxRates=[taxRate0])
+            taxCategory2 = TaxCategory(categoryType=0, name="Nije u PDV", orderId=1, taxRates=[taxRateA])
+            taxCategory3 = TaxCategory(categoryType=6, name="P-PDV", orderId=3, taxRates=[taxRateE])
+            taxCategory4 = TaxCategory(categoryType=6, name="D-PDV", orderId=3, taxRates=[taxRateD])
+
+            class TaxRates(BaseModel):
+                groupId: str
+                taxCategories: list[TaxCategory] = []
+                validFrom: str
+                
+            allTaxRates = [
+                TaxRates(
+                    groupId="1",
+                    taxCategories=[
+                        taxCategory1
+                    ],
+                    validFrom="2021-11-01T02:00:00.000+01:00"
+                ),
+                TaxRates(
+                    groupId="6",
+                    taxCategories=[
+                        taxCategory2,
+                        taxCategory3,
+                        taxCategory4
+                    ],
+                    validFrom=""
+                )
+            ]
+
+            currentTaxRates = [
+                TaxRates(
+                    groupId="6",
+                    taxCategories=[
+                        taxCategory2,
+                        taxCategory3,
+                        taxCategory4
+                    ],
+                    validFrom = "2024-05-01T02:00:00.000+01:00"
+                )
+            ]
+        */
+        
+
+        cCurrentTaxRates := ""
+        for each oTaxRates in hResponseData["currentTaxRates"]
+             cCurrentTaxRates += oTaxRates["groupId"] + "{ "
+             
+             for each oTaxCategory in oTaxRates["taxCategories"]
+                  cCurrentTaxRates += AllTrim(Str(oTaxCategory["categoryType"])) + ":" + oTaxCategory["name"] + "[ "
+                  for each oTaxRate in oTaxCategory["taxRates"]
+                      cCurrentTaxRates +=  "#( " + oTaxRate["label"] + ":" + AllTrim(Str(oTaxRate["rate"])) + " )"
+                  next
+                  cCurrentTaxRates += " ]"
+             next
+             cCurrentTaxRates += " }"
+
+        next
+        MsgBeep(cCurrentTaxRates)
+        
+    ENDIF
+    
     curl_end()
 
     //  Samo ako se koristi LPFR: proveriti da li je bezbednosni element prisutan pozivom /api/status (opisan u "Provera statusa") 
@@ -297,7 +378,7 @@ FUNCTION ofs_status(hParams)
 
     RETURN cRet
 
-FUNCTION ofs_create_invoice()
+FUNCTION ofs_create_test_invoice()
 
     LOCAL hParams := ofs_get_params()
     LOCAL hCurl, nRet, cData, pHeaders, cApiKey, hResponseData, hInvoiceData, hPaymentLine, hItemLine 
@@ -429,7 +510,7 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, lStorno )
     ENDIF
      
     IF !ofs_attention(hParams)
-        Alert("Fiskalni je mrtav?!")
+        Alert("Fiskalni nije ukljucen ?! STOP!")
        RETURN .F.
     ENDIF
 
