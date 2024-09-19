@@ -435,6 +435,24 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
    RETURN cRet
 
 
+FUNCTION is_fiskalizacija_off()
+
+   LOCAL nDeviceId
+
+altd()
+
+   nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+   IF nDeviceId == NIL
+      RETURN .T.
+   ENDIF
+   IF nDeviceId > 0
+      RETURN .F.
+   ENDIF
+
+
+   RETURN .F.
+
+
 
 FUNCTION provjeri_kolicine_i_cijene_fiskalnog_racuna( aRacunStavke, lStorno, nLevel, cDriver )
 

@@ -766,6 +766,10 @@ FUNCTION is_ofs_fiskalni()
     LOCAL nDeviceId, hParams
  
     nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+    IF nDeviceId == NIL
+       RETURN .F.
+    ENDIF
+
     IF nDeviceId > 0
         hParams := get_fiscal_device_params( nDeviceId, my_user() )
     ENDIF
@@ -792,7 +796,10 @@ FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
     cDatumFiskRacuna := hParams["fiskalni_datum"]
     cJson := hParams["json"]
     
-    altd()
+    IF Empty(cBrojFiskRacuna)
+       return .F.
+    ENDIF
+
     cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
@@ -832,8 +839,10 @@ FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
     dDatDok := hParams["datum"]
     cBrDok := hParams["brdok"]
     
-    hRet := NIL
-
+    hRet := hb_hash()
+    hRet["fiskalni_broj"] := ""
+    hRet["fiskalni_datum"] := ""
+   
     cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
         sql_quote( cIdPos ) + "," + ;
         sql_quote( cIdVd ) + "," + ;
@@ -854,7 +863,7 @@ FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
         Alert( _u( "get broj fisk racuna ofs za POS: " +  cIdPos + "-" + cIdVd + "-" + cBrdok + dtoc(dDatDok) + " neuspješan?!" ) )
         QUIT_1
     END SEQUENCE
-    
+  
     RETURN hRet
     
 /*
@@ -945,9 +954,7 @@ RETURN "-"
 
 FUNCTION pos_storno_racun_ofs( hParams )
 
-    LOCAL GetList := {}, hRet
-    LOCAL cOldFiskFullRn, cMsg, cFullBroj
- 
+
     IF !hb_HHasKey( hParams, "datum" )
        hParams[ "datum" ] := NIL
     ENDIF
@@ -964,7 +971,29 @@ FUNCTION pos_storno_racun_ofs( hParams )
        hParams[ "brdok" ] := Space( FIELD_LEN_POS_BRDOK )
     ENDIF
     hParams[ "browse" ] := .F.
+
+
+    pronadji_fiskalni_racun_za_storniranje_ofs(@hParams)
+    
+    IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
+        // hParams["fisk_rn"] i hParams["fisk_id"] se upisuju u _pos_pripr
+        // da li nam je neophodan fisk_rn koji je numeric ? nije 
+        //AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
+        //AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
+        hParams[ "fisk_rn" ] := 999
+        pos_napravi_u_pripremi_storno_dokument( hParams )
+    ENDIF
+
+    PopWa()
  
+RETURN .T.
+
+
+FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
+    LOCAL GetList := {}
+    local hRet, cOldFiskFullRn, cMsg, cFullBroj
+ 
+    
     PushWA()
     Box(, 5, 55 )
     @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
@@ -972,19 +1001,25 @@ FUNCTION pos_storno_racun_ofs( hParams )
     READ
     BoxC()
     IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
-       PopWa()
-       RETURN .F.
+        PopWa()
+        RETURN .F.
     ENDIF
- 
+
+    if is_fiskalizacija_off()
+        // omoguciti izradu storna kad je fiskalizacija off
+        // kad se vrati fiskalizacija morace se unijeti fiskalni racun koji se stornira
+        hParams["fiskalni_broj"] = ""
+        hParams["fiskalni_datum"] = ""
+        RETURN .T.
+    endif
+
     hParams[ "idvd" ] := "42"
     hRet := pos_get_broj_fiskalnog_racuna_ofs( hParams )
     hParams[ "fiskalni_broj" ] := hRet["fiskalni_broj"]
     hParams[ "fiskalni_datum" ] := hRet["fiskalni_datum"]
     cFullBroj := hParams[ "fiskalni_broj" ] + "_" + hParams["fiskalni_datum"]
 
-    altd()
     hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id_ofs( hParams )
-
     // trazimo da li je vec storniranje ovog fiskalnog racuna
     IF ( cOldFiskFullRn := pos_fisk_broj_rn_by_storno_ref_ofs( hParams[ "fisk_id" ] ) ) <> "_"
         cMsg := "Već postoji storno istog RN, broj FISK: " + cOldFiskFullRn
@@ -1000,22 +1035,7 @@ FUNCTION pos_storno_racun_ofs( hParams )
         PopWa()
         RETURN .F.
     ENDIF
-
-    IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
-
-        // hParams["fisk_rn"] i hParams["fisk_id"] se upisuju u _pos_pripr
-        // da li nam je neophodan fisk_rn koji je numeric ? nije 
-        //AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
-        //AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
-        hParams[ "fisk_rn" ] := 999
-
-        pos_napravi_u_pripremi_storno_dokument( hParams )
-    ENDIF
-
- 
-    PopWa()
- 
-RETURN .T.
+return .t.
 
 
 FUNCTION pos_get_fiskalni_dok_id_ofs( hParams )

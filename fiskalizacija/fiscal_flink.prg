@@ -23,6 +23,9 @@ FUNCTION is_flink_fiskalni()
 
    IF s_hFiskalniUredjajParams == NIL
       nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+      IF nDeviceId == NIL
+        RETURN .F.
+      ENDIF
       IF nDeviceId > 0
          s_hFiskalniUredjajParams := get_fiscal_device_params( nDeviceId, my_user() )
       ENDIF

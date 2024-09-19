@@ -130,9 +130,6 @@ FUNCTION pos_lista_racuna( hParams )
       ENDIF
    ENDIF
 
-   KEYBOARD '\'
-   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh, @hParams ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str() + "/" + pos_pm(), "", NIL, cFnc,, bRacunMarkiran )
-
    SET FILTER TO
 
    hParams[ "idpos" ] := pos_doks->idpos
@@ -140,6 +137,10 @@ FUNCTION pos_lista_racuna( hParams )
    hParams[ "brdok" ] := pos_doks->brdok
    hParams[ "datum" ] := pos_doks->datum
    hParams[ "idradnik" ] := pos_doks->idradnik
+   
+   KEYBOARD '\'
+   my_browse( "pos_rn", f18_max_rows() - 12, f18_max_cols() - 25, {| nCh | lista_racuna_key_handler( nCh, @hParams ) }, _u( " POS RAČUNI PROD: " ) + pos_prodavnica_str() + "/" + pos_pm(), "", NIL, cFnc,, bRacunMarkiran )
+
    IF LastKey() == K_ESC
       RETURN .F.
    ENDIF
@@ -155,7 +156,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
    LOCAL nFiskalniRn
    LOCAL GetList := {}
    LOCAL hParams := hb_Hash()
-   LOCAL cFiskalniRn
+   LOCAL cFiskalniRn, hTmp
 
    SELECT pos_doks
 
@@ -233,6 +234,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       // Alert( "TODO pos_storno" )
 
       hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "idvd" ] := pos_doks->idvd
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "brdok" ] := pos_doks->brdok
 
@@ -255,16 +257,20 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
    IF is_ofs_fiskalni() .and. Upper( Chr( nCh ) ) == "R"
 
       hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "idvd" ] := pos_doks->idvd
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "brdok" ] := pos_doks->brdok
 
-      cFiskalniRn := pos_get_broj_fiskalnog_racuna_ofs( hParams )
-
-      IF cFiskalniRn == NIL .OR. cFiskalniRn == "_"
+      hTmp := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+      
+      IF Empty(hTmp["fiskalni_broj"])
+         hParams["storno_fiskalni_broj"] := ""
+         hParams["storno_fiskalni_datum"] := ""
          hParams[ "fiskalni_izdat" ] := .F.
          hParams[ "azuriran" ] := .T.
          hParams[ "uplaceno" ] := -1
-         pos_fiskaliziraj_racun( hParams )
+         hParams[ "drv" ] := "OFS"
+         pos_fiskaliziraj_racun( hParams ) // OFS
       ELSE
          MsgBeep( "Postoji fiskalni račun " + cFiskalniRn + "?!" )
       ENDIF
@@ -278,6 +284,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
    IF !is_ofs_fiskalni() .and. Upper( Chr( nCh ) ) == "R"
 
       hParams[ "idpos" ] := pos_doks->idpos
+      hParams[ "idvd" ] := pos_doks->idvd
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "brdok" ] := pos_doks->brdok
 
@@ -287,7 +294,8 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
          hParams[ "fiskalni_izdat" ] := .F.
          hParams[ "azuriran" ] := .T.
          hParams[ "uplaceno" ] := -1
-         pos_fiskaliziraj_racun( hParams )
+         hParams[ "drv" ] := "FBIH"
+         pos_fiskaliziraj_racun( hParams )  // FBiH
       ELSE
          MsgBeep( "Postoji fiskalni račun " + AllTrim( Str( nFiskalniRn ) ) + "?!" )
       ENDIF

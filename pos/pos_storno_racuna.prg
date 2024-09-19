@@ -131,8 +131,8 @@ FUNCTION pos_storno_racuna( hParams )
 
    PushWA()
    Box(, 5, 55 )
-   @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
-   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
+    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
+    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
    READ
    BoxC()
    IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
@@ -219,7 +219,11 @@ FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
       hRec[ "idvrstep" ] := "01"
       hRec[ "idradnik" ] := hParams[ "idradnik" ]
       hRec[ "fisk_rn" ] := hParams[ "fisk_rn" ]
-      hRec[ "fisk_id" ] := hParams[ "fisk_id" ]
+      if is_fiskalizacija_off()
+        hRec[ "fisk_id" ] := "0"
+      else
+        hRec[ "fisk_id" ] := hParams[ "fisk_id" ]
+      endif 
 
       dbf_update_rec( hRec )
       SELECT pos

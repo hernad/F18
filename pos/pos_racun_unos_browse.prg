@@ -200,8 +200,10 @@ FUNCTION pos_storno_racuna_f8( oBrowse )
    LOCAL hParams := hb_Hash()
    LOCAL nCh
 
-   if  is_ofs_fiskalni()
+   if is_ofs_fiskalni()
       pos_storno_racun_ofs( hParams )
+   elseif is_fiskalizacija_off()
+      pos_storno_racun_ofs( hParams )   
    else   
       pos_storno_racuna( hParams )
    endif
