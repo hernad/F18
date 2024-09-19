@@ -90,6 +90,10 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     
     curl_global_init()
 
+    IF hParams == NIL
+       hParams := ofs_get_params()
+    ENDIF
+
     if empty( hCurl := curl_easy_init() )
         MsgBeep( "curl init neuspjesan ?!")
         return NIL
@@ -126,8 +130,8 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     
     curl_easy_setopt( hCurl, HB_CURLOPT_HTTPHEADER, aHeader)
     
-
     return hCurl
+
 
 FUNCTION curl_end()
     
@@ -139,10 +143,8 @@ FUNCTION curl_end()
 FUNCTION ofs_attention(hParams)
 
     LOCAL nRet, cData, hCurl
-    IF hParams == NIL
-        hParams := ofs_get_params()
-    ENDIF
-    hCurl := curl_init(hParams, "/api/attention", "application/text", "GET")
+
+    hCurl := curl_init(@hParams, "/api/attention", "application/text", "GET")
 
     IF hCurl == NIL
        return .F.
@@ -167,11 +169,8 @@ FUNCTION ofs_putpin(hParams)
     LOCAL nRet, cData, hCurl
     LOCAL lOk := .F.
 
-    IF hParams == NIL
-        hParams := ofs_get_params()
-    ENDIF
     DO WHILE .T.
-        hCurl := curl_init(hParams, "/api/pin", "application/text", "POST")
+        hCurl := curl_init(@hParams, "/api/pin", "application/text", "POST")
 
         IF hCurl == NIL
           curl_end()
@@ -243,15 +242,12 @@ FUNCTION ofs_status(hParams, cVarijanta)
     LOCAL hResponseData, cGsc := "", cCode, cRet := "0"
     LOCAL oTaxRates, oTaxCategory, oTaxRate, nX, nRedova
 
-    IF hParams == NIL
-        hParams := ofs_get_params()
-    ENDIF
 
     IF cVarijanta == NIL
         cVarijanta := "0"
     ENDIF
 
-    hCurl := curl_init(hParams, "/api/status", "application/json", "GET")
+    hCurl := curl_init(@hParams, "/api/status", "application/json", "GET")
 
     IF hCurl == NIL
         return "99"
@@ -409,7 +405,7 @@ FUNCTION ofs_create_test_invoice()
     LOCAL hCurl, nRet, cData, pHeaders, cApiKey, hResponseData, hInvoiceData, hPaymentLine, hItemLine 
     LOCAL cStatus1
 
-    IF !ofs_attention(hParams)
+    IF !ofs_attention(@hParams)
         Alert("Fiskalni je mrtav?!")
        RETURN .F.
     ENDIF
@@ -433,7 +429,7 @@ FUNCTION ofs_create_test_invoice()
        RETURN .F.
     ENDIF
 
-    hCurl := curl_init(hParams, "/api/invoices", "application/json", "POST")
+    hCurl := curl_init(@hParams, "/api/invoices", "application/json", "POST")
     
     hInvoiceData := hb_hash()
 
@@ -466,8 +462,7 @@ FUNCTION ofs_create_test_invoice()
     hInvoiceData["invoiceRequest"]["cashier"] := "Radnik 1"
     
     cData := hb_jsonEncode(hInvoiceData)
-    //altd()
-
+    
     curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cData)
             
     //Sending the request and getting the response
@@ -550,22 +545,17 @@ FUNCTION json_date(dDatum)
     RETURN LEFT(cDat, 4) + "-" + SUBSTR(cDat, 5,2) + "-" + SUBSTR(cDat, 7, 2) 
 
 
-FUNCTION ofs_invoice_search(hParams)
+FUNCTION ofs_invoice_search()
 
     LOCAL GetList := {}
     local hRet, hCurl, hInvoiceSearchData, cDataRequest, nRet, cData
     LOCAL dDatOd := DATE(), dDatDo := DATE(), cLine
     LOCAL nI, nJ, hLine
-    LOCAL nUkupnoRn, nUkupnoStorno, nCount
+    LOCAL nUkupnoRn, nUkupnoStorno, nCount := 0, cSep, nCntSale := 0, nCntRefund := 0
     LOCAL cPict := "99999999.99"
-    
-    IF hParams == NIL
-        hParams := hb_hash()
-    ENDIF
+    LOCAL hParams
 
-    altd()
-
-    hRet := ofs_attention_status(hParams)
+    hRet := ofs_attention_status(@hParams)
     IF hRet["error"] <> 0
         RETURN hRet
     ENDIF
@@ -584,43 +574,34 @@ FUNCTION ofs_invoice_search(hParams)
     hParams["path"] = "/api/invoices/search"
     hParams["content"] := "application/json"
     hParams["method"] := "GET"
-    hCurl := curl_init(hParams, hParams["path"], hParams["content"] , hParams["method"])
+    hCurl := curl_init(@hParams, hParams["path"], hParams["content"] , hParams["method"])
     
     hInvoiceSearchData := hb_hash()
     hInvoiceSearchData["fromDate"] := json_date(dDatOd)
     hInvoiceSearchData["toDate"] := json_date(dDatDo)
-    hInvoiceSearchData["invoiceTypes"] := { "Sale", "Refund" }
-    hInvoiceSearchData["transactionTypes"] := { "Normal" }
+    hInvoiceSearchData["invoiceTypes"] := { "Normal" }
+    hInvoiceSearchData["transactionTypes"] := { "Sale", "Refund"}
     hInvoiceSearchData["paymentTypes"] := { "Cash", "Card", "WireTransfer", "Other" }
     
-    
     cDataRequest := hb_jsonEncode(hInvoiceSearchData)
-    
     nRet := curl_request(hCurl, cDataRequest, @cData)
     curl_end()
 
     IF nRet <> 0
         hRet["error"] := 801
     ENDIF
-
-    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cDataRequest)
-            
-    //Sending the request and getting the response
-    IF ( nRet:= curl_easy_perform( hCurl ) ) == 0
-        cData := curl_easy_dl_buff_get( hCurl )
-    ELSE
-        Alert( "curl_ret: " + hb_ValToStr( nRet ) )
-        curl_end()
-    ENDIF
-      
-    // ako je nova linija Chr(13) + Chr(10) vrati Chr(10)
-    cData := StrTran(cData, Chr(13) + Chr(10), Chr(10))
-
+  
     nUkupnoRn := 0
     nUkupnoStorno := 0
     nCount := 0
-    FOR nI := 1 TO NumToken(cData, Chr(10))
-        cLine := Token(cData, Chr(10), nI)
+    
+    cData := StrTran(cData, "\n", "#")
+    cData := StrTran(cData, '"', '')
+    
+    cSep := '#'
+
+    FOR nI := 1 TO NumToken(cData, cSep)
+        cLine := Token(cData, cSep, nI)
         //FOR nJ := 1 TO NumToken(cLine, ",")
         //RX4F7Y5L-RX4F7Y5L-137,Normal,Refund,2024-03-11T23:19:54.853+01:00,100.0000
         hLine := hb_hash()
@@ -630,10 +611,12 @@ FUNCTION ofs_invoice_search(hParams)
         hLine["datetime"] := Token(cLine, ",", 4)
         hLine["amount"] := Token(cLine, ",", 5)
         
-        IF hLine["Sale"]
+        IF hLine["transaction"] == "Sale"
             nUkupnoRn += VAL(hLine["amount"])
-        ELSE
+            nCntSale ++
+        ELSEIF  hLine["transaction"] == "Refund"
             nUkupnoStorno += VAL(hLine["amount"])
+            nCntRefund ++
         ENDIF
 
         nCount ++
@@ -642,18 +625,19 @@ FUNCTION ofs_invoice_search(hParams)
 
     DO WHILE .T.
         Box(, 10, 60)
-            @ box_x_koord() + 1, box_y_koord() + 2 SAY "========= Pregled prometa od" + DTOC(dDatOd) + " - " + DtoC(dDatDo)
-            @ box_x_koord() + 1, box_y_koord() + 2 SAY "1. Racuni:"
-            @ ROW(), COL() + 2 SAY nUkupnoRn PICTURE cPict
+            @ box_x_koord() + 1, box_y_koord() + 2 SAY "========= Pregled prometa: " + DTOC(dDatOd) + " - " + DtoC(dDatDo) + " ========"
             
-            @ box_x_koord() + 2, box_y_koord() + 2 SAY "2. Storno:"
-            @ ROW(), COL() + 2 SAY nUkupnoStorno PICT cPict
+            @ box_x_koord() + 3, box_y_koord() + 2 SAY "1.  (+)  Racuni:" ; @ ROW(), COL() + 2 SAY nUkupnoRn PICTURE cPict
+            
+            @ box_x_koord() + 4, box_y_koord() + 2 SAY "2.  (-)  Storno:" ; @ ROW(), COL() + 2 SAY nUkupnoStorno PICT cPict
 
-            @ box_x_koord() + 4, box_y_koord() + 2 SAY "    UKUPNO:"
-            @ ROW() , COL() + 2 SAY nUkupnoRn - nUkupnoStorno PICT cPict
+            @ box_x_koord() + 6, box_y_koord() + 2 SAY "A) UKUPNO IZNOS:" ; @ ROW() , COL() + 2 SAY nUkupnoRn - nUkupnoStorno PICT cPict
 
-            @ box_x_koord() + 6, box_y_koord() + 2 SAY "    Broj izdatih racuna:"
-            @ ROW() , COL() + 2 SAY nCount PICT "999"
+            @ box_x_koord() + 8, box_y_koord() + 2 SAY " Broj RN + / - :"
+            @ ROW(), COL() + 2 SAY nCntSale PICT "999"
+            @ ROW(), COL() + 2 SAY nCntRefund PICT "999"
+
+            @ box_x_koord() + 10, box_y_koord() + 2 SAY "B)  UKUPNO BROJ:" ; @ ROW() , COL() + 2 SAY nCount PICT "999"
         
             inkey(0)
         BoxC()
@@ -678,7 +662,7 @@ FUNCTION ofs_attention_status(hParams)
     hRet["datum"] := ""
     hRet["json"] := ""
 
-    IF !ofs_attention(hParams)
+    IF !ofs_attention(@hParams)
         Alert("Fiskalni nije ukljucen ?! STOP!")
         hRet["error"] := FISK_NEMA_ODGOVORA
        RETURN hRet
@@ -804,13 +788,13 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
         nTotal := 0
     ENDIF
      
-    hRet := ofs_attention_status(hParams)
+    hRet := ofs_attention_status(@hParams)
     if hRet["error"] <> 0
         RETURN hRet
     endif
 
     cUrl := hParams["url"]
-    hCurl := curl_init(hParams, cPath := "/api/invoices", cContent := "application/json", cMethod := "POST")
+    hCurl := curl_init(@hParams, cPath := "/api/invoices", cContent := "application/json", cMethod := "POST")
     
     hInvoiceData := hb_hash()
 
@@ -1225,7 +1209,6 @@ FUNCTION pos_get_fiskalni_dok_id_ofs( hParams )
     ENDIF
  
     RETURN ""
-
 
 
 /*

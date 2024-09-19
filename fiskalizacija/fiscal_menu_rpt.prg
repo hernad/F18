@@ -61,7 +61,7 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
    CASE cFiskalniDrajver == "OFS"
 
       AAdd( aOpc, "1. promet fiskalni za period" )
-      AAdd( aOpcExe, {|| ofs_invoice_search(NIL) } )
+      AAdd( aOpcExe, {|| ofs_invoice_search() } )
 
       AAdd( aOpc, "2. status - osnovne informacije" )
       AAdd( aOpcExe, {|| ofs_status(NIL, "S") } )
