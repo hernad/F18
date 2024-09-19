@@ -74,8 +74,6 @@ FUNCTION pos_fiskaliziraj_racun( hParams )
    LOCAL lRet := .F.
    LOCAL hRet
 
-   altd()
-
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
    IF nDeviceId <> NIL .AND. nDeviceId > 0
       hDeviceParams := get_fiscal_device_params( nDeviceId, my_user() )

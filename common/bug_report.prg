@@ -318,7 +318,6 @@ STATIC FUNCTION bug_send_email( oError, lNotify )
    LOCAL cDatabase
    LOCAL aAttach
 
-
    cAnswer := fetch_metric( "bug_report_email", my_user(), "A" )
 
    IF lNotify == NIL
@@ -376,6 +375,61 @@ STATIC FUNCTION bug_send_email( oError, lNotify )
    RETURN .T.
 
 
+FUNCTION bug_send_email_body( cBody, lNotify )
+
+   LOCAL hParamsEmail
+   LOCAL cSubject
+   LOCAL cAttachment
+   LOCAL cAnswer
+   LOCAL cDatabase
+   LOCAL aAttach
+
+   cAnswer := fetch_metric( "bug_report_email", my_user(), "A" )
+
+   IF lNotify == NIL
+      lNotify := .F.
+   ENDIF
+#ifndef F18_DEBUG 
+   DO CASE
+   CASE cAnswer $ "D#N#A"
+      IF cAnswer $ "DN"
+         IF Pitanje(, "Poslati poruku greške email-om podrški bring.out-a (D/N) ?", cAnswer ) == "N"
+            RETURN .F.
+         ENDIF
+      ENDIF
+   OTHERWISE
+      RETURN .F.
+   ENDCASE
+#endif
+   // BUG F18 1.7.21, rg_2013/bjasko, 02.04.04, 15:00:07, variable does not exist
+   IF lNotify
+      cSubject := "NOTIFY F18 "
+   ELSE
+      cSubject := "BUG F18 "
+   ENDIF
+
+   IF hb_HHasKey( my_server_params(), "database" )
+      cDatabase := my_server_params()[ "database" ]
+   ELSE
+      cDatabase := "DBNOTDEFINED"
+   ENDIF
+
+   cSubject += f18_ver()
+   cSubject += ", " + cDatabase + "/" + AllTrim( f18_user() )
+   cSubject += ", " + DToC( Date() ) + " " + PadR( Time(), 8 )
+
+   
+
+   //cBody := "U prilogu zip fajl sa sadrzajem trenutne greske i log fajlom servera"
+   hParamsEmail := email_podrska_bring_out( cSubject, cBody )
+   aAttach := {}
+   info_bar( "err-sync", "Slanje greške podršci bring.out ..." )
+
+   ?E pp(hParamsEmail)
+   f18_send_email( hParamsEmail, aAttach )
+   
+   Alert(_u('Poruka o programskoj greški poslana podršci bring.out'))
+RETURN .T.   
 
 STATIC FUNCTION send_email_attachment()
 

@@ -564,7 +564,6 @@ STATIC FUNCTION oasist_key_handler( nIznos, cDugPot, dDatKnjizenja )
 
       SELECT ostav
       GO TOP
-      altd()
 
       IF Pitanje(, "Asistent zatvara stavke ( " + AllTrim( kalk_say_iznos( nIznos ) ) + " KM) ?", "D" ) == "D"
 

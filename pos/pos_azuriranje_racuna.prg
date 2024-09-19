@@ -102,7 +102,6 @@ FUNCTION pos_azuriraj_racun( hParams )
       ENDIF
 
       // stari fiskalni drajveri FBiH 
-      altd()  
       IF lOk .AND. !lBezFiskalnih .AND. !is_ofs_fiskalni() .and. !Empty( cUUIDFiskStorniran ) .AND. !is_flink_fiskalni()
          IF ( nOldFiskRn := pos_fisk_broj_rn_by_storno_ref( cUUIDFiskStorniran ) ) <> 0
             cMsg := "Već postoji storno istog RN, broj FISK: " + AllTrim( Str( nOldFiskRn ) )

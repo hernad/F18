@@ -1375,7 +1375,6 @@ FUNCTION gen_eNabavke()
         ENDIF
     ENDIF
 
-    altd()
     DirChange( cLokacijaExport )
     info_bar( "csv", "lokacija csv: " + cLokacijaExport )
     

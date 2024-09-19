@@ -31,8 +31,6 @@ FUNCTION ofs_cleanup()
     GO TOP
     hParams[ "idpos" ] := _pos_pripr->idpos
     my_close_all_dbf()
-  
-    altd()
  
     cleanup_pos_tmp( hParams )
 
@@ -124,7 +122,8 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     IF  hParams["api_key"] != NIL
         AAdd(aHeader, "Authorization: Bearer " + hParams["api_key"])
     ENDIF
-    AAdd(aHeader, "Content-Type: " + cContentType)
+    AAdd(aHeader, "Content-Type: " + cContentType + "; charset=UTF-8")
+    
     curl_easy_setopt( hCurl, HB_CURLOPT_HTTPHEADER, aHeader)
     
 
@@ -285,8 +284,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
     ENDIF
 
     IF cRet == "0" .and. cVarijanta == "P"
-        altd()
-
+        
         /*
         
             taxRate0 = TaxRate( rate = 0, label = "G")
@@ -360,7 +358,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
                 @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "taxRates: " + oTaxRates["groupId"] + " : " + oTaxRates["validFrom"] + " {"
                 
                 for each oTaxCategory in oTaxRates["taxCategories"]
-                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "tax categ: " + AllTrim(Str(oTaxCategory["categoryType"])) + " - " + oTaxCategory["name"] + " ["
+                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "tax categ: " + AllTrim(Str(oTaxCategory["categoryType"])) + " - '" + convert_cyr_to_lat(oTaxCategory["name"]) + "' ["
                     for each oTaxRate in oTaxCategory["taxRates"]
 
                         @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(10) + "(label: " + oTaxRate["label"] + " rate: " + AllTrim(Str(oTaxRate["rate"])) + " )"
@@ -504,8 +502,6 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
     LOCAL nDeviceId, hFiskParams, aKupac, aRacunStavke, hKopija, cUUId
  
-    altd()
-
     nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
     IF nDeviceId > 0
         hFiskParams := get_fiscal_device_params( nDeviceId, my_user() )
@@ -550,7 +546,9 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
 
     LOCAL cVrstaPlacanja, cOperater, nTotal, nI
     LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa
-    LOCAL lStorno
+    LOCAL lStorno, oError, cDataRequest
+    LOCAL cNewLine := Chr(13) + Chr(10)
+    LOCAL cUrl, cPath, cContent, cMethod
 
     //LOCAL hParams := ofs_get_params()
     LOCAL hCurl, nRet, cData, pHeaders, cApiKey, hResponseData, hInvoiceData, hPaymentLine, hItemLine 
@@ -608,8 +606,6 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
 
     cVrstaPlacanja := aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ]
     
-    altd()  
-
     IF !Empty( hParams[ "op_id" ] ) // provjeri operatera i lozinku iz podesenja...
         cOperater := hParams[ "op_id" ]
     ENDIF
@@ -651,7 +647,9 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
        RETURN hRet
     ENDIF
 
-    hCurl := curl_init(hParams, "/api/invoices", "application/json", "POST")
+    cUrl := hParams["url"]
+
+    hCurl := curl_init(hParams, cPath := "/api/invoices", cContent := "application/json", cMethod := "POST")
     
     hInvoiceData := hb_hash()
 
@@ -700,7 +698,6 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     //ENDIF
 
   
-    
     hInvoiceData["invoiceRequest"]["items"] := {}
 
     FOR nI := 1 TO Len( aRacunStavke )
@@ -726,10 +723,10 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     
     hInvoiceData["invoiceRequest"]["cashier"] := cOperater
     
-    cData := hb_jsonEncode(hInvoiceData)
+    cDataRequest := hb_jsonEncode(hInvoiceData)
     //altd()
 
-    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cData)
+    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cDataRequest)
             
     //Sending the request and getting the response
     IF ( nRet:= curl_easy_perform( hCurl ) ) == 0
@@ -754,9 +751,23 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     //         )
     
     
-    hRet["broj"] := hResponseData["invoiceNumber"]
-    hRet["datum"] := hResponseData["sdcDateTime"]
+    BEGIN SEQUENCE WITH {| err | Break( err ) }
+ 
+        hRet["broj"] := hResponseData["invoiceNumber"]
+        hRet["datum"] := hResponseData["sdcDateTime"]
     
+     RECOVER USING oError
+        Alert( _u( "Fiskalni odgovor ne sadrzi obavezna polja: invoiceNumber + sdcDateTime!" ) )
+        bug_send_email_body( ;
+            "CALL: " + cUrl + "; path: " + cPath + "; content: " + cContent + "; method: " + cMethod + cNewLine +;
+            REPLICATE("=", 100) + cNewLine + cNewLine +;
+            "REQUEST:" + cDataRequest  + cNewLine + cNewLine +;
+            "RESPONSE: " + cData, .F. )
+        hRet["broj"] := ""
+        hRet["datum"] := ""
+
+     END SEQUENCE
+
  
 RETURN hRet
 
@@ -876,7 +887,6 @@ FUNCTION pos_is_storno_ofs( hParams )
     LOCAL cQuery, oRet, lValue 
     LOCAL cIdPos, cIdVd, dDatDok, cBrDok
     
-    altd()
     cIdPos := hParams["idpos"]
     cIdVd := hParams["idvd"]
     dDatDok := hParams["datum"]
@@ -953,7 +963,6 @@ RETURN "-"
 
 
 FUNCTION pos_storno_racun_ofs( hParams )
-
 
     IF !hb_HHasKey( hParams, "datum" )
        hParams[ "datum" ] := NIL
@@ -1107,7 +1116,6 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     //  init_fisk_params(hFiskParams)
     //ENDIF
  
-    altd()
     lStorno := !Empty( hParams["storno_fiskalni_broj"] )
  
     if !lAzuriraniDokument
@@ -1218,8 +1226,6 @@ FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
 
     // AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
     // AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
-    altd()
-
     cUUID := _pos_pripr->fisk_id
 
     hParams[ "idpos" ] := _pos_pripr->idpos
@@ -1275,7 +1281,6 @@ FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
 
     LOCAL cQuery, oError, oRet, cGet
 
-    altd()
     // select invoice_number || '_' || sdc_date_time from p23.pos_fisk_doks_ofs where dok_id = <cUUID>  
     cQuery := "SELECT invoice_number || '_' || sdc_date_time  from " +;
               pos_prodavnica_sql_schema() + ".pos_fisk_doks_ofs" + ;
@@ -1295,3 +1300,48 @@ FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
  
 RETURN cGet
 
+
+// https://en.wikipedia.org/wiki/Bosnian_language
+
+// https://www.w3schools.com/charsets/ref_utf_cyrillic.asp
+
+FUNCTION convert_cyr_to_lat( cCyrStr )
+    LOCAL nFind, nI, cRet, cSlovo
+
+    LOCAL aMap := {;
+        {  Chr(208) + Chr(145), "B" }, ;
+        {  Chr(208) + Chr(181), "e" }, ;
+        {  Chr(208) + Chr(183), "z" }, ;
+        {  Chr(32),             " " }, ;
+        {  Chr(208) + Chr(159), "P" }, ;    
+        {  Chr(208) + Chr(148), "D"}, ;
+        {  Chr(208) + Chr(146), "V" }, ;
+        {  Chr(208) + Chr(130), "Đ" }, ;
+        {  Chr(208) + Chr(137), "LJ"}, ; 
+        {  Chr(208) + Chr(144), "A"}, ;
+        {  Chr(208) + Chr(147), "G"} ;   
+    }
+
+    // https://www.cogsci.ed.ac.uk/~richard/utf-8.cgi?input=1033&mode=decimal
+    // Character 	Љ
+    // UTF-8 bytes as Latin-1 characters bytes 	Ð <89> => Chr(208) + 0x89 => 137 => Chr(137)
+
+    cRet := ""
+    //FOR nI := 1 TO LEN(cCyrStr)
+    //  cSlovo := SUBSTR(cCyrStr, nI, 2)
+    //  nFind := Ascan(aMap[nI, 1],  cSlovo)
+    //  IF nFind == 0
+    //    cRet += cSlovo
+    //  ELSE
+    //    cRet += aMap[nI, 2]
+    //  ENDIF
+    //NEXT
+
+    cRet := cCyrStr
+    FOR nI := 1 TO Len(aMap)
+        cRet := StrTran(cRet, aMap[nI, 1], aMap[nI, 2] )
+    NEXT
+
+    cRet := hb_Utf8ToStr(cRet)
+    
+RETURN cRet
