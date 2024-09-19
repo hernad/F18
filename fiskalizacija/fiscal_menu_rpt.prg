@@ -60,16 +60,19 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "OFS"
 
-      AAdd( aOpc, "1. status - osnovne informacije" )
+      AAdd( aOpc, "1. promet fiskalni za period" )
+      AAdd( aOpcExe, {|| ofs_invoice_search(NIL) } )
+
+      AAdd( aOpc, "2. status - osnovne informacije" )
       AAdd( aOpcExe, {|| ofs_status(NIL, "S") } )
 
-      AAdd( aOpc, "2. status - porezne stope" )
+      AAdd( aOpc, "3. status - porezne stope" )
       AAdd( aOpcExe, {|| ofs_status(NIL, "P") } )
 
-      AAdd( aOpc, "3. postmp ciscenje" )
+      AAdd( aOpc, "4. postmp ciscenje" )
       AAdd( aOpcExe, {|| ofs_cleanup() } )
 
-      AAdd( aOpc, "4. test hello curl" )
+      AAdd( aOpc, "5. test hello curl" )
       AAdd( aOpcExe, {|| curl_hello() } )
 
 #ifdef F18_DEBUG

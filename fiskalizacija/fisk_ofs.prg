@@ -497,12 +497,17 @@ FUNCTION ofs_create_test_invoice()
     RETURN .T.
 
 
-
 FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
-    LOCAL nDeviceId, hFiskParams, aKupac, aRacunStavke, hKopija, cUUId
+    LOCAL nDeviceId, hFiskParams, aKupac, aRacunStavke, hKopija, cUUId, hRet
  
     nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+    IF nDevice == NIL
+        hRet := hb_hash()
+        hRet["error"] := 500
+        RETURN hRet
+    ENDIF
+
     IF nDeviceId > 0
         hFiskParams := get_fiscal_device_params( nDeviceId, my_user() )
     ENDIF
@@ -538,6 +543,188 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 RETURN fiskalni_ofs_racun(hFiskParams, aRacunStavke, aKupac, hKopija)
 
 
+FUNCTION json_date(dDatum)
+
+    LOCAL cDat := DTOS(dDatum)
+    // 20240530 => 2024-05-30
+    RETURN LEFT(cDat, 4) + "-" + SUBSTR(cDat, 5,2) + "-" + SUBSTR(cDat, 7, 2) 
+
+
+FUNCTION ofs_invoice_search(hParams)
+
+    LOCAL GetList := {}
+    local hRet, hCurl, hInvoiceSearchData, cDataRequest, nRet, cData
+    LOCAL dDatOd := DATE(), dDatDo := DATE(), cLine
+    LOCAL nI, nJ, hLine
+    LOCAL nUkupnoRn, nUkupnoStorno, nCount
+    LOCAL cPict := "99999999.99"
+    
+    IF hParams == NIL
+        hParams := hb_hash()
+    ENDIF
+
+    altd()
+
+    hRet := ofs_attention_status(hParams)
+    IF hRet["error"] <> 0
+        RETURN hRet
+    ENDIF
+
+    Box(, 3, 60)
+      @ box_x_koord() + 1, box_y_koord() + 1 SAY "Datum od" GET dDatOd
+      @ box_x_koord() + 2, box_y_koord() + 1 SAY "      do" GET dDatOd
+      READ
+      
+    BoxC()
+
+    IF LastKey() == K_ESC
+       return hRet
+    ENDIF
+
+    hParams["path"] = "/api/invoices/search"
+    hParams["content"] := "application/json"
+    hParams["method"] := "GET"
+    hCurl := curl_init(hParams, hParams["path"], hParams["content"] , hParams["method"])
+    
+    hInvoiceSearchData := hb_hash()
+    hInvoiceSearchData["fromDate"] := json_date(dDatOd)
+    hInvoiceSearchData["toDate"] := json_date(dDatDo)
+    hInvoiceSearchData["invoiceTypes"] := { "Sale", "Refund" }
+    hInvoiceSearchData["transactionTypes"] := { "Normal" }
+    hInvoiceSearchData["paymentTypes"] := { "Cash", "Card", "WireTransfer", "Other" }
+    
+    
+    cDataRequest := hb_jsonEncode(hInvoiceSearchData)
+    
+    nRet := curl_request(hCurl, cDataRequest, @cData)
+    curl_end()
+
+    IF nRet <> 0
+        hRet["error"] := 801
+    ENDIF
+
+    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cDataRequest)
+            
+    //Sending the request and getting the response
+    IF ( nRet:= curl_easy_perform( hCurl ) ) == 0
+        cData := curl_easy_dl_buff_get( hCurl )
+    ELSE
+        Alert( "curl_ret: " + hb_ValToStr( nRet ) )
+        curl_end()
+    ENDIF
+      
+    // ako je nova linija Chr(13) + Chr(10) vrati Chr(10)
+    cData := StrTran(cData, Chr(13) + Chr(10), Chr(10))
+
+    nUkupnoRn := 0
+    nUkupnoStorno := 0
+    nCount := 0
+    FOR nI := 1 TO NumToken(cData, Chr(10))
+        cLine := Token(cData, Chr(10), nI)
+        //FOR nJ := 1 TO NumToken(cLine, ",")
+        //RX4F7Y5L-RX4F7Y5L-137,Normal,Refund,2024-03-11T23:19:54.853+01:00,100.0000
+        hLine := hb_hash()
+        hLine["broj"] := Token(cLine, ",", 1)
+        hLine["type"] := Token(cLine, ",", 2)
+        hLine["transaction"] := Token(cLine, ",", 3) // Sale, Refund
+        hLine["datetime"] := Token(cLine, ",", 4)
+        hLine["amount"] := Token(cLine, ",", 5)
+        
+        IF hLine["Sale"]
+            nUkupnoRn += VAL(hLine["amount"])
+        ELSE
+            nUkupnoStorno += VAL(hLine["amount"])
+        ENDIF
+
+        nCount ++
+    NEXT
+
+
+    DO WHILE .T.
+        Box(, 10, 60)
+            @ box_x_koord() + 1, box_y_koord() + 2 SAY "========= Pregled prometa od" + DTOC(dDatOd) + " - " + DtoC(dDatDo)
+            @ box_x_koord() + 1, box_y_koord() + 2 SAY "1. Racuni:"
+            @ ROW(), COL() + 2 SAY nUkupnoRn PICTURE cPict
+            
+            @ box_x_koord() + 2, box_y_koord() + 2 SAY "2. Storno:"
+            @ ROW(), COL() + 2 SAY nUkupnoStorno PICT cPict
+
+            @ box_x_koord() + 4, box_y_koord() + 2 SAY "    UKUPNO:"
+            @ ROW() , COL() + 2 SAY nUkupnoRn - nUkupnoStorno PICT cPict
+
+            @ box_x_koord() + 6, box_y_koord() + 2 SAY "    Broj izdatih racuna:"
+            @ ROW() , COL() + 2 SAY nCount PICT "999"
+        
+            inkey(0)
+        BoxC()
+        IF LastKey() == K_ESC
+            exit
+        ENDIF
+    ENDDO
+
+    //hResponseData := hb_jsonDecode(cData)
+    
+
+    RETURN hRet
+
+
+
+FUNCTION ofs_attention_status(hParams)
+
+    LOCAL hRet := hb_hash(), cStatus1 
+
+    hRet["error"] := 0
+    hRet["broj"] := ""
+    hRet["datum"] := ""
+    hRet["json"] := ""
+
+    IF !ofs_attention(hParams)
+        Alert("Fiskalni nije ukljucen ?! STOP!")
+        hRet["error"] := FISK_NEMA_ODGOVORA
+       RETURN hRet
+    ENDIF
+
+    cStatus1 := ofs_status(hParams)
+
+    IF cStatus1 == "999"
+        // ovdje pomoci nema - status 1300 ne moze se popraviti unosom pin-a
+        hRet["error"] := FISK_NEMA_ODGOVORA
+        RETURN hRet
+    ENDIF
+
+    IF cStatus1 == "99"
+      Alert("Neuspjesan unos PIN-a. Prekid izdavanja fiskalnog racuna!")
+      hRet["error"] := FISK_NEMA_ODGOVORA
+      RETURN hRet
+    ENDIF
+
+    // ako je doslo do unosa pin-a, ova - druga kontrola statusa mora dati otkljucan uredjaj
+    IF cStatus1 == "1" .AND. ofs_status(hParams) != "0" 
+       Alert("Nakon unosa PIN-a uredjaj i dalje nedostupan!? STOP!")
+       hRet["error"] := FISK_NEMA_ODGOVORA
+       RETURN hRet
+    ENDIF
+
+RETURN hRet
+
+
+FUNCTION curl_request(hCurl, cDataRequest, cData)
+
+    LOCAL nRet
+
+    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cDataRequest)
+            
+    //Sending the request and getting the response
+    IF ( nRet:= curl_easy_perform( hCurl ) ) == 0
+        cData := curl_easy_dl_buff_get( hCurl )
+    ELSE
+        Alert( "curl_ret: " + hb_ValToStr( nRet ) )
+        return nRet
+    ENDIF
+
+RETURN 0
+
+
 /*
    return hRet["error"] numeric
           hRet["broj"] char, hRet["datum"] char, hRet["json"] char 
@@ -565,7 +752,6 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     cFullStornoRacun := aRacunStavke[ 1, FISK_INDEX_FISK_RACUN_STORNIRATI ]
     cStornoFiskalniBroj := Token( cFullStornoRacun, "_", 1)
     cStornoFiskalniDatum := Token( cFullStornoRacun, "_", 2)
-
 
     IF !Empty(cStornoFiskalniBroj)
         lStorno := .T.
@@ -595,7 +781,6 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
 
         // referentDocumentNumber (string) - broj originalnog računa
         // referentDocumentDT (timestamp) - vreme originalnog računa
-
         cReferentDocumentNumber := hKopija["fiskalni_broj"]
         cReferentDocumentDT := hKopija["fiskalni_datum"]    
     
@@ -615,40 +800,16 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     //   ENDIF
              
     nTotal := aRacunStavke[ 1, FISK_INDEX_TOTAL ] // ukupno racun
-     
     IF nTotal == NIL
         nTotal := 0
     ENDIF
      
-    IF !ofs_attention(hParams)
-        Alert("Fiskalni nije ukljucen ?! STOP!")
-       RETURN hRet
-    ENDIF
-
-    cStatus1 := ofs_status(hParams)
-
-    IF cStatus1 == "999"
-        // ovdje pomoci nema - status 1300 ne moze se popraviti unosom pin-a
-        hRet["error"] := FISK_NEMA_ODGOVORA
+    hRet := ofs_attention_status(hParams)
+    if hRet["error"] <> 0
         RETURN hRet
-    ENDIF
-
-    IF cStatus1 == "99"
-      Alert("Neuspjesan unos PIN-a. Prekid izdavanja fiskalnog racuna!")
-      hRet["error"] := FISK_NEMA_ODGOVORA
-      RETURN hRet
-
-    ENDIF
-
-    // ako je doslo do unosa pin-a, ova - druga kontrola statusa mora dati otkljucan uredjaj
-    IF cStatus1 == "1" .AND. ofs_status(hParams) != "0" 
-       Alert("Nakon unosa PIN-a uredjaj i dalje nedostupan!? STOP!")
-       hRet["error"] := FISK_NEMA_ODGOVORA
-       RETURN hRet
-    ENDIF
+    endif
 
     cUrl := hParams["url"]
-
     hCurl := curl_init(hParams, cPath := "/api/invoices", cContent := "application/json", cMethod := "POST")
     
     hInvoiceData := hb_hash()
@@ -725,31 +886,18 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     
     cDataRequest := hb_jsonEncode(hInvoiceData)
     //altd()
+    
+    nRet := curl_request(hCurl, cDataRequest, @cData)
+    curl_end()
 
-    curl_easy_setopt(hCurl, HB_CURLOPT_POSTFIELDS, cDataRequest)
-            
-    //Sending the request and getting the response
-    IF ( nRet:= curl_easy_perform( hCurl ) ) == 0
-        cData := curl_easy_dl_buff_get( hCurl )
-    ELSE
-        Alert( "curl_ret: " + hb_ValToStr( nRet ) )
-        curl_end()
+    IF nRet <> 0
+       hRet["error"] = 702
+       return hRet
     ENDIF
-      
+    
+    
     hRet["json"] := cData
     hResponseData := hb_jsonDecode(cData)
-    
-    // MsgBeep("#businessName: " + hResponseData["businessName"] +;
-    //         "#address: " + hResponseData["address"] +;
-    //         "#invoiceNumber: " + hResponseData["invoiceNumber"] +;
-    //         "#sdcDateTime: " + hResponseData["sdcDateTime"] +;
-    //         "#totalAmount: " + Str(hResponseData["totalAmount"], 10,2) +;
-    //         "#messages: " + hResponseData["messages"] +;
-    //         "#taxItems(1).amount:" + Str(hResponseData["taxItems"][1]["amount"], 10,4) +;
-    //         "#taxItems(1).label:" + hResponseData["taxItems"][1]["label"] +;
-    //         "#" ;
-    //         )
-    
     
     BEGIN SEQUENCE WITH {| err | Break( err ) }
  
@@ -1301,6 +1449,7 @@ FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
 RETURN cGet
 
 
+
 // https://en.wikipedia.org/wiki/Bosnian_language
 
 // https://www.w3schools.com/charsets/ref_utf_cyrillic.asp
@@ -1345,3 +1494,5 @@ FUNCTION convert_cyr_to_lat( cCyrStr )
     cRet := hb_Utf8ToStr(cRet)
     
 RETURN cRet
+
+
