@@ -63,16 +63,19 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       AAdd( aOpc, "1. promet fiskalni za period" )
       AAdd( aOpcExe, {|| ofs_invoice_search() } )
 
-      AAdd( aOpc, "2. status - osnovne informacije" )
+      AAdd( aOpc, "2. sadrzaj fiskalnog racuna" )
+      AAdd( aOpcExe, {|| ofs_invoice_get() } )
+
+      AAdd( aOpc, "3. status - osnovne informacije" )
       AAdd( aOpcExe, {|| ofs_status(NIL, "S") } )
 
-      AAdd( aOpc, "3. status - porezne stope" )
+      AAdd( aOpc, "4. status - porezne stope" )
       AAdd( aOpcExe, {|| ofs_status(NIL, "P") } )
 
-      AAdd( aOpc, "4. postmp ciscenje" )
+      AAdd( aOpc, "5. postmp ciscenje" )
       AAdd( aOpcExe, {|| ofs_cleanup() } )
 
-      AAdd( aOpc, "5. test hello curl" )
+      AAdd( aOpc, "6. test hello curl" )
       AAdd( aOpcExe, {|| curl_hello() } )
 
 #ifdef F18_DEBUG

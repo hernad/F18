@@ -86,7 +86,7 @@ FUNCTION curl_hello()
 
 
 FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
-    local hCurl, aHeader
+    local hCurl, aHeader, cParams, hRequestParam
     
     curl_global_init()
 
@@ -110,8 +110,15 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     //url-encoded pattern
     //If you are sending a GET method request, you can just delete this clause, because your parameters will be attached 
     //directly into your URL
-    //curl_easy_setopt( hCurl, HB_CURLOPT_POSTFIELDS, "example=param&example2=param2...")          
-    
+    if hb_HHasKey(hParams, "request_params")
+       cParams := "" 
+       // "example=param&example2=param2..."
+       FOR each hRequestParam in hParams["request_params"]
+           cParams := hRequestParam["name"] + "=" + hRequestParam["value"]
+       NEXT
+       curl_easy_setopt( hCurl, HB_CURLOPT_POSTFIELDS, cParams)          
+    endif
+
     //Setting the buffer
     curl_easy_setopt( hCurl, HB_CURLOPT_DL_BUFF_SETUP )
     curl_easy_setopt(hCurl, HB_CURLOPT_FOLLOWLOCATION, 1)
@@ -649,10 +656,85 @@ FUNCTION ofs_invoice_search()
     //hResponseData := hb_jsonDecode(cData)
     
 
-    RETURN hRet
+RETURN hRet
 
 
+FUNCTION ofs_invoice_get( cBrojRacuna )
 
+    LOCAL GetList := {}
+    local hRet, hCurl, nRet, cData
+    LOCAL dDatOd := DATE(), dDatDo := DATE(), cLine
+    LOCAL nI, nJ, hLine
+    LOCAL nUkupnoRn, nUkupnoStorno, nCount := 0, cSep, nCntSale := 0, nCntRefund := 0
+    LOCAL hParams := NIL, aRequestParams := {}, hRequestParam, hRacun
+
+    hRet := ofs_attention_status(@hParams)
+    IF hRet["error"] <> 0
+        RETURN hRet
+    ENDIF
+
+
+    IF cBrojRacuna == NIL
+        cBrojRacuna := SPACE(25)
+        Box(, 3, 60)
+           @ box_x_koord() + 1, box_y_koord() + 1 SAY "Broj racuna:" GET cBrojRacuna
+        READ
+        BoxC()
+
+        IF LastKey() == K_ESC
+            hRet["error"] := 909
+        return hRet
+        ENDIF
+    ENDIF
+
+    hParams["path"] = "/api/invoices"
+    hParams["content"] := "application/json"
+    hParams["method"] := "GET"
+
+    hRequestParam := hb_hash()
+    hRequestParam["name"] := "receiptLayout"
+    hRequestParam["value"] := "Slip"
+    AADD(aRequestParams, hRequestParam)
+    //hRequestParam["name"] := "imageFormat"
+    //hRequestParam["value"] := "Png"
+    //AADD(aRequestParams, hRequestParam)
+    hRequestParam["name"] := "includeHeaderAndFooter"
+    hRequestParam["value"] := "true"
+    AADD(aRequestParams, hRequestParam)
+    hParams["request_params"] := aRequestParams
+    // /api/invoices/RX4F7Y5L-RX4F7Y5L-138?receiptLayout=Slip&imageFormat=Png&includeHeaderAndFooter=true'
+
+    hCurl := curl_init(@hParams, hParams["path"] + "/" + AllTrim(cBrojRacuna), hParams["content"] , hParams["method"])
+    
+
+    nRet := curl_request(hCurl, NIL, @cData)
+    curl_end()
+
+    IF nRet <> 0
+        hRet["error"] := 801
+        RETURN hRet
+    ENDIF
+  
+    nUkupnoRn := 0
+    nUkupnoStorno := 0
+    nCount := 0
+    
+    hRacun := hb_jsonDecode(cData) 
+
+    IF hb_hhaskey(hRacun, "invoiceResponse")
+        Alert("Nepostojeci racun!")
+        hRet["error"] := 979
+        RETURN hRet
+
+    ENDIF
+    altd()
+    Alert("Racun cashier: " + hRacun["invoiceRequest"]["cashier"])
+    Alert("Racun PDV: " + Str(hRacun["invoiceResponse"]["taxItems"][1]["amount"], 8, 2))
+    //hResponseData := hb_jsonDecode(cData)
+    
+RETURN hRet
+
+   
 FUNCTION ofs_attention_status(hParams)
 
     LOCAL hRet := hb_hash(), cStatus1 
@@ -716,7 +798,7 @@ RETURN 0
 FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
 
     LOCAL cVrstaPlacanja, cOperater, nTotal, nI
-    LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa
+    LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa, nPopust, nPopustIznos
     LOCAL lStorno, oError, cDataRequest
     LOCAL cNewLine := Chr(13) + Chr(10)
     LOCAL cUrl, cPath, cContent, cMethod
@@ -850,17 +932,21 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
         cArtikalJmj := aRacunStavke[ nI, FISK_INDEX_JMJ ]
         cArtikal := hb_StrToUTF8(TRIM(cArtikalNaz) + " (" + cArtikalJmj + ")")
 
-        nCijena := aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
+        nCijena := aRacunStavke[ nI, FISK_INDEX_CIJENA ]
+        nPopust := aRacunStavke[ nI, FISK_INDEX_POPUST ]
+        nPopustIznos := aRacunStavke[ nI, FISK_INDEX_CIJENA ] - aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
+        //nCijena := aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
         nKolicina := aRacunStavke[ nI, FISK_INDEX_KOLICINA ]
-        //nPopust := aRacunStavke[ nI, FISK_INDEX_POPUST ]
-        
+
         cArtikalTarifa := fiskalni_tarifa( aRacunStavke[ nI, FISK_INDEX_TARIFA ], hParams[ "pdv" ], "OFS" )
         
         hItemLine := hb_hash()
         hItemLine["name"] := cArtikal
         hItemLine["labels"] := { cArtikalTarifa }
-        hItemLine["totalAmount"] := ROUND(nCijena * nKolicina, 2)
+        hItemLine["totalAmount"] := ROUND((nCijena - nPopustIznos) * nKolicina, 2)
         hItemLine["unitPrice"] := nCijena
+        hItemLine["discount"] := nPopust
+        hItemLine["discountAmount"] := nPopustIznos
         hItemLine["quantity"] := nKolicina
         AAdd(hInvoiceData["invoiceRequest"]["items"], hItemLine)
             
