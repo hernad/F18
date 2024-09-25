@@ -262,8 +262,6 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       hParams[ "brdok" ] := pos_doks->brdok
       hParams[ "azuriran" ] := .T.
 
-      altd()
-
       hTmp := pos_get_broj_fiskalnog_racuna_ofs( hParams )
       
       IF Empty(hTmp["fiskalni_broj"])

@@ -970,7 +970,7 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
     hInvoiceData["invoiceRequest"] := hb_hash()
     
     hInvoiceData["invoiceRequest"]["invoiceType"] := cInvoiceType
-    if cInvoiceType == "Copy"
+    if lStorno .OR. cInvoiceType == "Copy"
         hInvoiceData["invoiceRequest"]["referentDocumentNumber"] := cReferentDocumentNumber
         hInvoiceData["invoiceRequest"]["referentDocumentDT"] := cReferentDocumentDT
     endif
@@ -1458,6 +1458,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
       ENDIF
     ENDIF
  
+    altd()
     nPosRacunUkupnoCheck := 0
     DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
  
