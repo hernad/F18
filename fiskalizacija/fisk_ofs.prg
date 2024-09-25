@@ -238,21 +238,25 @@ FUNCTION ofs_putpin(hParams)
    cRet = "99" // error
    cRet = "999" // error pomoci nema
 
-*/  
+*/
 
 
 FUNCTION ofs_status(hParams, cVarijanta)
     
     LOCAL nRet, cData, hCurl
     LOCAL hResponseData, cGsc := "", cCode, cRet := "0"
-    LOCAL oTaxRates, oTaxCategory, oTaxRate, nX, nRedova
+    LOCAL oTaxRates, oTaxCategory, oTaxRate, nX, nRedova, oError, cPath, cContent, cMethod 
 
 
     IF cVarijanta == NIL
         cVarijanta := "0"
     ENDIF
 
-    hCurl := curl_init(@hParams, "/api/status", "application/json", "GET")
+    hCurl := curl_init(@hParams, cPath := "/api/status", cContent := "application/json", cMethod := "GET")
+    hParams["path"] := cPath
+    hParams["content"] := cContent
+    hParams["method"] := cMethod
+    
 
     IF hCurl == NIL
         return "99"
@@ -284,104 +288,66 @@ FUNCTION ofs_status(hParams, cVarijanta)
             )
     ENDIF
 
-    IF cRet == "0" .and. cVarijanta == "P"
-        
-        /*
-        
-            taxRate0 = TaxRate( rate = 0, label = "G")
-            taxRateA = TaxRate( rate = 0, label = "A")
-            taxRateE = TaxRate( rate = 10, label = "E")
-            taxRateD = TaxRate( rate = 20, label = "D")
-
-            taxCategory1 = TaxCategory(categoryType=0, name="Bez PDV", orderId=4, taxRates=[taxRate0])
-            taxCategory2 = TaxCategory(categoryType=0, name="Nije u PDV", orderId=1, taxRates=[taxRateA])
-            taxCategory3 = TaxCategory(categoryType=6, name="P-PDV", orderId=3, taxRates=[taxRateE])
-            taxCategory4 = TaxCategory(categoryType=6, name="D-PDV", orderId=3, taxRates=[taxRateD])
-
-            class TaxRates(BaseModel):
-                groupId: str
-                taxCategories: list[TaxCategory] = []
-                validFrom: str
-                
-            allTaxRates = [
-                TaxRates(
-                    groupId="1",
-                    taxCategories=[
-                        taxCategory1
-                    ],
-                    validFrom="2021-11-01T02:00:00.000+01:00"
-                ),
-                TaxRates(
-                    groupId="6",
-                    taxCategories=[
-                        taxCategory2,
-                        taxCategory3,
-                        taxCategory4
-                    ],
-                    validFrom=""
-                )
-            ]
-
-            currentTaxRates = [
-                TaxRates(
-                    groupId="6",
-                    taxCategories=[
-                        taxCategory2,
-                        taxCategory3,
-                        taxCategory4
-                    ],
-                    validFrom = "2024-05-01T02:00:00.000+01:00"
-                )
-            ]
-        */
-        
-        do while .t.
-            //cCurrentTaxRates := ""
-            nRedova := 1
-            for each oTaxRates in hResponseData["currentTaxRates"]
-                nRedova ++
-                
-                for each oTaxCategory in oTaxRates["taxCategories"]
-                    nRedova ++
-                    for each oTaxRate in oTaxCategory["taxRates"]
-                        nRedova ++
-                    next
+ 
+    BEGIN SEQUENCE WITH {| err | Break( err ) }
+        IF cRet == "0" .and. cVarijanta == "P"
+    
+            do while .t.
+                //cCurrentTaxRates := ""
+                nRedova := 1
+                for each oTaxRates in hResponseData["currentTaxRates"]
                     nRedova ++
                     
-                next
-                nRedova ++
-            next
-            Box(, nRedova, 70)
-            nX := 1
-            for each oTaxRates in hResponseData["currentTaxRates"]
-                @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "**** Current Tax Rates ******"
-                
-                @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "taxRates: " + oTaxRates["groupId"] + " : " + oTaxRates["validFrom"] + " {"
-                
-                for each oTaxCategory in oTaxRates["taxCategories"]
-                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "tax categ: " + AllTrim(Str(oTaxCategory["categoryType"])) + " - '" + convert_cyr_to_lat(oTaxCategory["name"]) + "' ["
-                    for each oTaxRate in oTaxCategory["taxRates"]
-
-                        @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(10) + "(label: " + oTaxRate["label"] + " rate: " + AllTrim(Str(oTaxRate["rate"])) + " )"
+                    for each oTaxCategory in oTaxRates["taxCategories"]
+                        nRedova ++
+                        for each oTaxRate in oTaxCategory["taxRates"]
+                            nRedova ++
+                        next
+                        nRedova ++
+                        
                     next
-                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "]"
+                    nRedova ++
                 next
-                @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "}"
-            next
-            inkey(0)
-            BoxC()
+                Box(, nRedova, 70)
+                nX := 1
+                for each oTaxRates in hResponseData["currentTaxRates"]
+                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "**** Current Tax Rates ******"
+                    
+                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "taxRates: " + oTaxRates["groupId"] + " : " + oTaxRates["validFrom"] + " {"
+                    
+                    for each oTaxCategory in oTaxRates["taxCategories"]
+                        @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "tax categ: " + AllTrim(Str(oTaxCategory["categoryType"])) + " - '" + convert_cyr_to_lat(oTaxCategory["name"]) + "' ["
+                        for each oTaxRate in oTaxCategory["taxRates"]
 
-            
-            if lastkey() == K_ESC
-                exit
-            endif
-        enddo
+                            @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(10) + "(label: " + oTaxRate["label"] + " rate: " + AllTrim(Str(oTaxRate["rate"])) + " )"
+                        next
+                        @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "]"
+                    next
+                    @ box_x_koord() + (nX++), box_y_koord() + 2 SAY "}"
+                next
+                inkey(0)
+                BoxC()
 
+                
+                if lastkey() == K_ESC
+                    exit
+                endif
+            enddo
 
+        ENDIF
         
-    ENDIF
-    
-    curl_end()
+        curl_end()
+
+    RECOVER USING oError
+       Alert("Status - odgovor nije ocekivan!")
+       bug_send_email_body( ;
+        "CALL: " + hParams["url"] + "; path: " + hParams["path"] + "; content: " + hParams["content"] + "; method: " + hParams["method"] + NEWLINE +;
+        REPLICATE("=", 95) + NEWLINE + NEWLINE +;
+        "REQUEST: " + "<nema dodatnih podataka>" +;
+        "RESPONSE: " + cData, .F. )
+   
+
+    END SEQUENCE
 
     //  Samo ako se koristi LPFR: proveriti da li je bezbednosni element prisutan pozivom /api/status (opisan u "Provera statusa") 
     // i proverom da li se u spisku statusa u polju gsc nalazi kod 1300. Ukoliko se ovaj kod nalazi onda treba 
@@ -844,6 +810,17 @@ FUNCTION curl_request(hCurl, cDataRequest, cData)
 RETURN 0
 
 
+function ofs_money(nMoney)
+   LOCAL cMoney := AllTrim(STR(nMoney, 12, 2))
+   LOCAL nTmp := Val(cMoney)
+
+  return round(nTmp,2)
+
+
+function ofs_quantity(nMoney)
+  return round(nMoney,3)
+
+
 /*
    return hRet["error"] numeric
           hRet["broj"] char, hRet["datum"] char, hRet["json"] char 
@@ -865,6 +842,7 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     hRet["datum"] := ""
     hRet["json"] := ""
     
+    altd()
     cInvoiceType := "Normal"
     
     cFullStornoRacun := aRacunStavke[ 1, FISK_INDEX_FISK_RACUN_STORNIRATI ]
@@ -943,7 +921,7 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
     
     hInvoiceData["invoiceRequest"]["payment"] := {}
     hPaymentLine := hb_hash()
-    hPaymentLine["amount"] := nTotal
+    hPaymentLine["amount"] := ofs_money(nTotal)
     hPaymentLine["paymentType"] := cVrstaPlacanja
     AAdd(hInvoiceData["invoiceRequest"]["payment"], hPaymentLine)
 
@@ -981,8 +959,10 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
 
     FOR nI := 1 TO Len( aRacunStavke )
         cArtikalNaz := aRacunStavke[ nI, FISK_INDEX_ROBANAZIV ]
-        cArtikalJmj := aRacunStavke[ nI, FISK_INDEX_JMJ ]
-        cArtikal := hb_StrToUTF8(TRIM(cArtikalNaz) + " (" + cArtikalJmj + ")")
+        //cArtikalJmj := aRacunStavke[ nI, FISK_INDEX_JMJ ]
+        //cArtikal := hb_StrToUTF8(TRIM(cArtikalNaz) + " (" + cArtikalJmj + ")")
+      
+        cArtikal := izbaci_nasa_slova(hb_StrToUTF8(TRIM(cArtikalNaz)))
 
         nCijena := aRacunStavke[ nI, FISK_INDEX_CIJENA ]
         nPopust := aRacunStavke[ nI, FISK_INDEX_POPUST ]
@@ -995,11 +975,11 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
         hItemLine := hb_hash()
         hItemLine["name"] := cArtikal
         hItemLine["labels"] := { cArtikalTarifa }
-        hItemLine["totalAmount"] := ROUND((nCijena - nPopustIznos) * nKolicina, 2)
-        hItemLine["unitPrice"] := nCijena
-        hItemLine["discount"] := nPopust
-        hItemLine["discountAmount"] := nPopustIznos
-        hItemLine["quantity"] := nKolicina
+        hItemLine["totalAmount"] := ofs_money((nCijena - nPopustIznos) * nKolicina)
+        hItemLine["unitPrice"] := ofs_money(nCijena)
+        hItemLine["discount"] := ofs_money(nPopust)
+        hItemLine["discountAmount"] := ofs_money(nPopustIznos)
+        hItemLine["quantity"] := ofs_quantity(nKolicina)
         AAdd(hInvoiceData["invoiceRequest"]["items"], hItemLine)
             
     NEXT
@@ -1272,7 +1252,6 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
     LOCAL GetList := {}
     local hRet, cOldFiskFullRn, cMsg, cFullBroj
  
-    
     PushWA()
     Box(, 5, 55 )
     @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
@@ -1613,6 +1592,40 @@ FUNCTION convert_cyr_to_lat( cCyrStr )
     NEXT
 
     cRet := hb_Utf8ToStr(cRet)
+    
+RETURN cRet
+
+FUNCTION izbaci_nasa_slova( cNaziv )
+    LOCAL nFind, nI, cRet, cSlovo
+
+    LOCAL aMap := {;
+        { "Ć", "C" }, ;
+        { "Š", "S" }, ;
+        { "Č", "C"}, ;
+        { "Đ", "DJ"} ;
+    }
+
+    // https://www.cogsci.ed.ac.uk/~richard/utf-8.cgi?input=1033&mode=decimal
+    // Character 	Љ
+    // UTF-8 bytes as Latin-1 characters bytes 	Ð <89> => Chr(208) + 0x89 => 137 => Chr(137)
+
+    cRet := ""
+    //FOR nI := 1 TO LEN(cCyrStr)
+    //  cSlovo := SUBSTR(cCyrStr, nI, 2)
+    //  nFind := Ascan(aMap[nI, 1],  cSlovo)
+    //  IF nFind == 0
+    //    cRet += cSlovo
+    //  ELSE
+    //    cRet += aMap[nI, 2]
+    //  ENDIF
+    //NEXT
+
+    cRet := cNaziv
+    FOR nI := 1 TO Len(aMap)
+        cRet := StrTran(cRet, aMap[nI, 1], aMap[nI, 2] )
+    NEXT
+
+    //cRet := hb_Utf8ToStr(cRet)
     
 RETURN cRet
 
