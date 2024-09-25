@@ -319,7 +319,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
                         @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "tax categ: " + AllTrim(Str(oTaxCategory["categoryType"])) + " - '" + convert_cyr_to_lat(oTaxCategory["name"]) + "' ["
                         for each oTaxRate in oTaxCategory["taxRates"]
 
-                            @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(10) + "(label: " + oTaxRate["label"] + " rate: " + AllTrim(Str(oTaxRate["rate"])) + " )"
+                            @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(10) + "(label: " + convert_cyr_to_lat(oTaxRate["label"]) + " rate: " + AllTrim(Str(oTaxRate["rate"])) + " )"
                         next
                         @ box_x_koord() + (nX++), box_y_koord() + 2 SAY SPACE(2) + "]"
                     next
@@ -506,7 +506,7 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
     
     hKopija := pos_get_broj_fiskalnog_racuna_ofs( hParams )
 
-RETURN fiskalni_ofs_racun(hFiskParams, aRacunStavke, aKupac, hKopija)
+RETURN ofs_invoice_create(hFiskParams, aRacunStavke, aKupac, hKopija)
 
 
 FUNCTION json_date(dDatum)
@@ -586,9 +586,9 @@ FUNCTION ofs_invoice_search()
         hLine["amount"] := Token(cLine, ",", 5)
         
         // iako su labele K i A nepotrebne jer su uvijek 0
-        nPDV := hRetInvoice["pdv"]["E"]
-        nPDV += hRetInvoice["pdv"]["K"]
-        nPDV += hRetInvoice["pdv"]["A"]
+        nPDV := hRetInvoice["pdv"][convert_lat_to_cyr("E")]
+        nPDV += hRetInvoice["pdv"][convert_lat_to_cyr("K")]
+        nPDV += hRetInvoice["pdv"][convert_lat_to_cyr("A")]
         
         IF hLine["transaction"] == "Sale"
             nUkupnoRn += VAL(hLine["amount"])
@@ -717,7 +717,8 @@ FUNCTION ofs_invoice_get( cBrojRacuna )
      END SEQUENCE
 
     // label E za PDV17
-    cLabel := hRacun["invoiceResponse"]["taxItems"][1]["label"]
+    // srbi salju response na cirilici
+    cLabel := convert_cyr_to_lat(hRacun["invoiceResponse"]["taxItems"][1]["label"])
     cBrojRacunaResp := hRacun["invoiceResponse"]["invoiceNumber"]
     nPDVIznosResp := hRacun["invoiceResponse"]["taxItems"][1]["amount"]
 
@@ -825,7 +826,7 @@ function ofs_quantity(nMoney)
    return hRet["error"] numeric
           hRet["broj"] char, hRet["datum"] char, hRet["json"] char 
  */
-FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
+FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
 
     LOCAL cVrstaPlacanja, cOperater, nTotal, nI
     LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa, nPopust, nPopustIznos
@@ -962,7 +963,7 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
         //cArtikalJmj := aRacunStavke[ nI, FISK_INDEX_JMJ ]
         //cArtikal := hb_StrToUTF8(TRIM(cArtikalNaz) + " (" + cArtikalJmj + ")")
       
-        cArtikal := izbaci_nasa_slova(hb_StrToUTF8(TRIM(cArtikalNaz)))
+        cArtikal := izbaci_nasa_slova_utf8(hb_StrToUTF8(TRIM(cArtikalNaz)))
 
         nCijena := aRacunStavke[ nI, FISK_INDEX_CIJENA ]
         nPopust := aRacunStavke[ nI, FISK_INDEX_POPUST ]
@@ -974,7 +975,8 @@ FUNCTION fiskalni_ofs_racun( hParams, aRacunStavke, aKupac, hKopija )
         
         hItemLine := hb_hash()
         hItemLine["name"] := cArtikal
-        hItemLine["labels"] := { cArtikalTarifa }
+        // mora im se slati cirilica
+        hItemLine["labels"] := { convert_lat_to_cyr(cArtikalTarifa) }
         hItemLine["totalAmount"] := ofs_money((nCijena - nPopustIznos) * nKolicina)
         hItemLine["unitPrice"] := ofs_money(nCijena)
         hItemLine["discount"] := ofs_money(nPopust)
@@ -1554,7 +1556,11 @@ RETURN cGet
 
 // https://www.w3schools.com/charsets/ref_utf_cyrillic.asp
 
-FUNCTION convert_cyr_to_lat( cCyrStr )
+FUNCTION convert_lat_to_cyr( cLatString )
+   return convert_cyr_to_lat( cLatString, .F., .T. )
+
+
+FUNCTION convert_cyr_to_lat( cCyrStr, lReturnCP, lInvert )
     LOCAL nFind, nI, cRet, cSlovo
 
     LOCAL aMap := {;
@@ -1568,8 +1574,23 @@ FUNCTION convert_cyr_to_lat( cCyrStr )
         {  Chr(208) + Chr(130), "Đ" }, ;
         {  Chr(208) + Chr(137), "LJ"}, ; 
         {  Chr(208) + Chr(144), "A"}, ;
-        {  Chr(208) + Chr(147), "G"} ;   
+        {  Chr(208) + Chr(147), "G"}, ;
+        {  Chr(208) + Chr(149), "E"}, ;
+        {  Chr(208) + Chr(154), "K"} ;      
     }
+
+    IF lReturnCP == NIL
+        lReturnCP := .T.
+    ENDIF
+
+    IF lInvert == NIL
+        lInvert := .F.
+    ENDIF
+
+    IF lInvert
+        // ako si prevrno na cirilicu ne vracaj code page string
+        lReturnCP := .F.
+    ENDIF
 
     // https://www.cogsci.ed.ac.uk/~richard/utf-8.cgi?input=1033&mode=decimal
     // Character 	Љ
@@ -1588,14 +1609,21 @@ FUNCTION convert_cyr_to_lat( cCyrStr )
 
     cRet := cCyrStr
     FOR nI := 1 TO Len(aMap)
-        cRet := StrTran(cRet, aMap[nI, 1], aMap[nI, 2] )
+        IF lInvert 
+           // cirilicu u latinicu
+           cRet := StrTran(cRet, aMap[nI, 2], aMap[nI, 1] )
+        ELSE
+           cRet := StrTran(cRet, aMap[nI, 1], aMap[nI, 2] )
+        ENDIF
     NEXT
 
-    cRet := hb_Utf8ToStr(cRet)
-    
+    if !lInvert
+       cRet := hb_Utf8ToStr(cRet)
+    endif
+
 RETURN cRet
 
-FUNCTION izbaci_nasa_slova( cNaziv )
+FUNCTION izbaci_nasa_slova_utf8( cNaziv )
     LOCAL nFind, nI, cRet, cSlovo
 
     LOCAL aMap := {;
@@ -1625,7 +1653,6 @@ FUNCTION izbaci_nasa_slova( cNaziv )
         cRet := StrTran(cRet, aMap[nI, 1], aMap[nI, 2] )
     NEXT
 
-    //cRet := hb_Utf8ToStr(cRet)
     
 RETURN cRet
 

@@ -243,7 +243,7 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
       RETURN pos_to_tremol( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
 
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverOFS
-      return fiskalni_ofs_racun( hFiskalniParams, aStavkeRacuna, lStorno )
+      return ofs_invoice_create( hFiskalniParams, aStavkeRacuna, lStorno )
 
    ENDCASE
 
