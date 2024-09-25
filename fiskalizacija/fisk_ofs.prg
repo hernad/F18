@@ -110,6 +110,7 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     if hb_HHasKey(hParams, "request_params")
        cParams := "" 
        // "example=param&example2=param2..."
+       altd()
        FOR each hRequestParam in hParams["request_params"]
            cParams := hRequestParam["name"] + "=" + hRequestParam["value"]
        NEXT
@@ -131,7 +132,7 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     IF  hParams["api_key"] != NIL
         AAdd(aHeader, "Authorization: Bearer " + hParams["api_key"])
     ENDIF
-    AAdd(aHeader, "Content-Type: " + cContentType + "; charset=UTF-8")
+    AAdd(aHeader, "Content-Type: " + cContentType) // + "; charset=UTF-8")
     
     curl_easy_setopt( hCurl, HB_CURLOPT_HTTPHEADER, aHeader)
     
@@ -494,6 +495,8 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
     // uuid fiskalnog racuna ciju kopiju zelimo
     //cUUId := pos_get_fiskalni_dok_id_ofs( hParams )
+    altd()
+
     IF pos_is_storno_ofs(hParams)
         hParams["storno_fiskalni_broj"] := "A"
         hParams["storno_fiskalni_datum"] := "B"
@@ -524,16 +527,18 @@ FUNCTION ofs_invoice_search()
     LOCAL nI, nJ, hLine
     LOCAL nUkupnoRn, nUkupnoStorno, nCount := 0, cSep, nCntSale := 0, nCntRefund := 0, nPDV, nUkupnoPDV, hRetInvoice
     LOCAL cPict := "99999999.99"
-    LOCAL hParams
+    LOCAL hParams := NIL, oError, cPDV := "N"
+
 
     hRet := ofs_attention_status(@hParams)
     IF hRet["error"] <> 0
         RETURN hRet
     ENDIF
 
-    Box(, 3, 60)
-      @ box_x_koord() + 1, box_y_koord() + 1 SAY "Datum od" GET dDatOd
-      @ box_x_koord() + 2, box_y_koord() + 1 SAY "      do" GET dDatOd
+    Box(, 4, 60)
+      @ box_x_koord() + 1, box_y_koord() + 1 SAY "  Datum od" GET dDatOd
+      @ box_x_koord() + 2, box_y_koord() + 1 SAY "        do" GET dDatOd
+      @ box_x_koord() + 4, box_y_koord() + 1 SAY " PDV D/N/X:" GET cPDV PICT "@!" valid cPDV $ "DNX"
       READ
       
     BoxC()
@@ -544,14 +549,14 @@ FUNCTION ofs_invoice_search()
 
     hParams["path"] = "/api/invoices/search"
     hParams["content"] := "application/json"
-    hParams["method"] := "GET"
+    hParams["method"] := "POST"
     hCurl := curl_init(@hParams, hParams["path"], hParams["content"] , hParams["method"])
     
     hInvoiceSearchData := hb_hash()
     hInvoiceSearchData["fromDate"] := json_date(dDatOd)
     hInvoiceSearchData["toDate"] := json_date(dDatDo)
     hInvoiceSearchData["invoiceTypes"] := { "Normal" }
-    hInvoiceSearchData["transactionTypes"] := { "Sale", "Refund"}
+    hInvoiceSearchData["transactionTypes"] := { "Sale", "Refund" }
     hInvoiceSearchData["paymentTypes"] := { "Cash", "Card", "WireTransfer", "Other" }
     
     cDataRequest := hb_jsonEncode(hInvoiceSearchData)
@@ -566,43 +571,75 @@ FUNCTION ofs_invoice_search()
     nUkupnoStorno := 0
     nCount := 0
     nUkupnoPDV := 0
+   
     
-    cData := StrTran(cData, "\n", "#")
-    cData := StrTran(cData, '"', '')
-    
-    cSep := '#'
-
-    FOR nI := 1 TO NumToken(cData, cSep)
-        cLine := Token(cData, cSep, nI)
-        //FOR nJ := 1 TO NumToken(cLine, ",")
-        //RX4F7Y5L-RX4F7Y5L-137,Normal,Refund,2024-03-11T23:19:54.853+01:00,100.0000
-        hLine := hb_hash()
-        hLine["broj"] := Token(cLine, ",", 1)
-        hRetInvoice := ofs_invoice_get(hLine["broj"])
+    BEGIN SEQUENCE WITH {| err | Break( err ) }
+         
+        cData := StrTran(cData, "\n", "#")
+        cData := StrTran(cData, Chr(13)+Chr(10), "#")
+        cData := StrTran(cData, Chr(10), "#")
+        cData := StrTran(cData, '"', '')
         
-        hLine["type"] := Token(cLine, ",", 2)
-        hLine["transaction"] := Token(cLine, ",", 3) // Sale, Refund
-        hLine["datetime"] := Token(cLine, ",", 4)
-        hLine["amount"] := Token(cLine, ",", 5)
         
-        // iako su labele K i A nepotrebne jer su uvijek 0
-        nPDV := hRetInvoice["pdv"][convert_lat_to_cyr("E")]
-        nPDV += hRetInvoice["pdv"][convert_lat_to_cyr("K")]
-        nPDV += hRetInvoice["pdv"][convert_lat_to_cyr("A")]
+        cSep := '#'
+
+        FOR nI := 1 TO NumToken(cData, cSep)
+            cLine := Token(cData, cSep, nI)
+            //FOR nJ := 1 TO NumToken(cLine, ",")
+            //RX4F7Y5L-RX4F7Y5L-137,Normal,Refund,2024-03-11T23:19:54.853+01:00,100.0000
+            hLine := hb_hash()
+            hLine["broj"] := Token(cLine, ",", 1)
+
+            IF cPDV == "D"
+               hRetInvoice := ofs_invoice_get(hLine["broj"])
+               // iako su labele K i A nepotrebne jer su uvijek 0
+               nPDV := hRetInvoice["pdv"]["E"]
+               nPDV += hRetInvoice["pdv"]["K"]
+               nPDV += hRetInvoice["pdv"]["A"]
+            ELSE
+                nPDV := 0
+            ENDIF
+            
+            hLine["type"] := Token(cLine, ",", 2)
+            hLine["transaction"] := Token(cLine, ",", 3) // Sale, Refund
+            hLine["datetime"] := Token(cLine, ",", 4)
+            hLine["amount"] := Token(cLine, ",", 5)
+            
+            IF hLine["transaction"] == "Sale"
+                nUkupnoRn += VAL(hLine["amount"])
+                nCntSale ++
+                nUkupnoPDV += nPDV
+            ELSEIF  hLine["transaction"] == "Refund"
+                nUkupnoStorno += VAL(hLine["amount"])
+                nUkupnoPDV -= nPDV
+                nCntRefund ++
+            ENDIF
+            nCount ++
+        NEXT
+
+    RECOVER USING oError
+        hRet["error"] := 881
+        Alert( _u( "Lista fiskalnih racuna sadrzaj cudan?!" ) )
+        bug_send_email_body( ;
+            "CALL: " + hParams["url"] + "; path: " + hParams["path"] + "; content: " + hParams["content"] + "; method: " + hParams["method"] + NEWLINE +;
+            REPLICATE("=", 95) + NEWLINE + NEWLINE +;
+            "REQUEST: " + cDataRequest + NEWLINE + NEWLINE +;
+            "RESPONSE: " + cData, .F. )
+        hRet["broj"] := ""
+        hRet["datum"] := ""
+        RETURN hRet
         
-        IF hLine["transaction"] == "Sale"
-            nUkupnoRn += VAL(hLine["amount"])
-            nCntSale ++
-            nUkupnoPDV += nPDV
-        ELSEIF  hLine["transaction"] == "Refund"
-            nUkupnoStorno += VAL(hLine["amount"])
-            nUkupnoPDV -= nPDV
-            nCntRefund ++
-        ENDIF
+    END SEQUENCE
 
-        nCount ++
-    NEXT
-
+    altd()
+    // debug
+    if cPDV == "X"
+        bug_send_email_body( ;
+            "CALL: " + hParams["url"] + "; path: " + hParams["path"] + "; content: " + hParams["content"] + "; method: " + hParams["method"] + NEWLINE +;
+            REPLICATE("=", 95) + NEWLINE + NEWLINE +;
+            "REQUEST: " + cDataRequest + NEWLINE + NEWLINE +;
+            "RESPONSE: " + cData, .F. )
+    endif    
 
     DO WHILE .T.
         Box(, 12, 60)
@@ -612,9 +649,11 @@ FUNCTION ofs_invoice_search()
             @ box_x_koord() + 4, box_y_koord() + 2 SAY "2.  (-)  Storno:" ; @ ROW(), COL() + 2 SAY nUkupnoStorno PICT cPict
 
             @ box_x_koord() + 6, box_y_koord() + 2 SAY "A) UKUPNO IZNOS:" ; @ ROW() , COL() + 2 SAY nUkupnoRn - nUkupnoStorno PICT cPict
-            @ box_x_koord() + 7, box_y_koord() + 2 SAY "B)      BEZ PDV:" ; @ ROW() , COL() + 2 SAY (nUkupnoRn - nUkupnoStorno) - nUkupnoPDV PICT cPict
-            @ box_x_koord() + 8, box_y_koord() + 2 SAY "A)          PDV:" ; @ ROW() , COL() + 2 SAY nUkupnoPDV PICT cPict
-
+            
+            if cPDV == "D"
+              @ box_x_koord() + 7, box_y_koord() + 2 SAY "B)      BEZ PDV:" ; @ ROW() , COL() + 2 SAY (nUkupnoRn - nUkupnoStorno) - nUkupnoPDV PICT cPict
+              @ box_x_koord() + 8, box_y_koord() + 2 SAY "A)          PDV:" ; @ ROW() , COL() + 2 SAY nUkupnoPDV PICT cPict
+            endif
 
             @ box_x_koord() + 10, box_y_koord() + 2 SAY " Broj RN + / - :"
             @ ROW(), COL() + 2 SAY nCntSale PICT "999"
@@ -636,17 +675,18 @@ RETURN hRet
 FUNCTION ofs_invoice_get( cBrojRacuna )
 
     LOCAL GetList := {}
-    local hRet, hCurl, nRet, cData
+    local hRet := hb_hash(), hCurl, nRet, cData
     LOCAL dDatOd := DATE(), dDatDo := DATE(), cLine
     LOCAL nI, nJ, hLine
     LOCAL nUkupnoRn, nUkupnoStorno, nCount := 0, cSep, nCntSale := 0, nCntRefund := 0
     LOCAL hParams := NIL, aRequestParams := {}, hRequestParam, hRacun, cLabel, cBrojRacunaResp, nPDVIznosResp
     LOCAL lInteractive := .F., oError
+    LOCAL cPath, cContent, cMethod
 
-    hRet := ofs_attention_status(@hParams)
-    IF hRet["error"] <> 0
-        RETURN hRet
-    ENDIF
+    //hRet := ofs_attention_status(@hParams)
+    //IF hRet["error"] <> 0
+    //    RETURN hRet
+    //ENDIF
 
     IF cBrojRacuna == NIL
         lInteractive := .T.
@@ -658,30 +698,41 @@ FUNCTION ofs_invoice_get( cBrojRacuna )
 
         IF LastKey() == K_ESC
             hRet["error"] := 909
-        return hRet
+            return hRet
         ENDIF
     ENDIF
 
-    hParams["path"] = "/api/invoices"
-    hParams["content"] := "application/json"
-    hParams["method"] := "GET"
 
-    hRequestParam := hb_hash()
-    hRequestParam["name"] := "receiptLayout"
-    hRequestParam["value"] := "Slip"
-    AADD(aRequestParams, hRequestParam)
-    //hRequestParam["name"] := "imageFormat"
-    //hRequestParam["value"] := "Png"
-    //AADD(aRequestParams, hRequestParam)
-    hRequestParam["name"] := "includeHeaderAndFooter"
-    hRequestParam["value"] := "true"
-    AADD(aRequestParams, hRequestParam)
-    hParams["request_params"] := aRequestParams
+  //  hRequestParam := hb_hash()
+  //  hRequestParam["name"] := "receiptLayout"
+  //  hRequestParam["value"] := "Slip"
+  //  AADD(aRequestParams, hRequestParam)
+  //  //hRequestParam["name"] := "imageFormat"
+  //  //hRequestParam["value"] := "Png"
+  //  //AADD(aRequestParams, hRequestParam)
+  //  
+  //  hRequestParam["name"] := "includeHeaderAndFooter"
+  //  hRequestParam["value"] := "true"
+  //  AADD(aRequestParams, hRequestParam)
+  //
+  //  hParams["request_params"] := aRequestParams
+
+
     // /api/invoices/RX4F7Y5L-RX4F7Y5L-138?receiptLayout=Slip&imageFormat=Png&includeHeaderAndFooter=true'
+    altd()
 
-    hCurl := curl_init(@hParams, hParams["path"] + "/" + AllTrim(cBrojRacuna), hParams["content"] , hParams["method"])
+    hRet := hb_hash()
+    hRet["error"] := 0
     
-    nRet := curl_request(hCurl, NIL, @cData)
+    cPath := "/api/invoices"
+    cContent := "application/json"
+    cMethod := "GET"
+    hCurl := curl_init(@hParams, cPath+ "/" + AllTrim(cBrojRacuna), cContent , cMethod)
+    hParams["path"] = cPath
+    hParams["content"] := cContent
+    hParams["method"] := cMethod
+    
+    nRet := curl_request(hCurl, "{}", @cData)
     curl_end()
 
     IF nRet <> 0
@@ -692,17 +743,49 @@ FUNCTION ofs_invoice_get( cBrojRacuna )
     nUkupnoRn := 0
     nUkupnoStorno := 0
     nCount := 0
-    
-    hRacun := hb_jsonDecode(cData)
+
+    nPDVIznosResp := 0
+    cLabel := 0
+
+    IF lInteractive
+        Alert("data length:" + Str(len(cData)))
+    ENDIF
 
     BEGIN SEQUENCE WITH {| err | Break( err ) }
- 
+         
+        hRacun := hb_jsonDecode(cData)
+
         IF Valtype(hRacun["invoiceResponse"]) == "H" .and. ValType(hRacun["invoiceResponse"]) == "H"
             hRet["error"] := 0
         ENDIF
 
+        // label E za PDV17
+        // srbi salju response na cirilici
+        cLabel := convert_cyr_to_lat(hRacun["invoiceResponse"]["taxItems"][1]["label"])
+
+        cBrojRacunaResp := hRacun["invoiceResponse"]["invoiceNumber"]
+        nPDVIznosResp := hRacun["invoiceResponse"]["taxItems"][1]["amount"]
+
+        IF lInteractive
+            IF !hb_hhaskey(hRacun, "invoiceResponse")
+                Alert("Nepostojeci racun!")
+                hRet["error"] := 979
+            ENDIF
+            
+            Alert("Racun cashier: " + hRacun["invoiceRequest"]["cashier"])
+
+            IF fiskalni_tarifa("PDV17", "D", "OFS" ) == cLabel
+               Alert( cBrojRacunaResp + ": iznos PDV17 label: " + cLabel + " iznos: " + Str(nPDVIznosResp, 8, 2))
+            ENDIF
+            
+            // label K za PDV0
+            IF fiskalni_tarifa(  "PDV0", "D", "OFS" ) == hRacun["invoiceResponse"]["taxItems"][1]["label"]
+                Alert(cBrojRacunaResp + ": iznos PDV0 label: " + cLabel + " iznos: " + Str(nPDVIznosResp, 8, 2))
+            ENDIF
+        ENDIF
+
     
-     RECOVER USING oError
+    RECOVER USING oError
         hRet["error"] := 752
         Alert( _u( "invoice_get odgovor ne sadrzi obavezna polja: invoiceRequest + invoiceResponse!" ) )
         bug_send_email_body( ;
@@ -713,35 +796,7 @@ FUNCTION ofs_invoice_get( cBrojRacuna )
         hRet["broj"] := ""
         hRet["datum"] := ""
         RETURN hRet
-
      END SEQUENCE
-
-    // label E za PDV17
-    // srbi salju response na cirilici
-    cLabel := convert_cyr_to_lat(hRacun["invoiceResponse"]["taxItems"][1]["label"])
-    cBrojRacunaResp := hRacun["invoiceResponse"]["invoiceNumber"]
-    nPDVIznosResp := hRacun["invoiceResponse"]["taxItems"][1]["amount"]
-
-    IF lInteractive
-        IF !hb_hhaskey(hRacun, "invoiceResponse")
-            Alert("Nepostojeci racun!")
-            hRet["error"] := 979
-            RETURN hRet
-
-        ENDIF
-        
-        Alert("Racun cashier: " + hRacun["invoiceRequest"]["cashier"])
-
-    
-        IF fiskalni_tarifa(  "PDV17", "D", "OFS" ) == cLabel
-        Alert( cBrojRacunaResp + ": iznos PDV17 label: " + cLabel + " iznos: " + Str(nPDVIznosResp, 8, 2))
-        ENDIF
-        
-        // label K za PDV0
-        IF fiskalni_tarifa(  "PDV0", "D", "OFS" ) == hRacun["invoiceResponse"]["taxItems"][1]["label"]
-            Alert(cBrojRacunaResp + ": iznos PDV0 label: " + cLabel + " iznos: " + Str(nPDVIznosResp, 8, 2))
-        ENDIF
-    ENDIF
 
     hRet["pdv"] := hb_hash()
     hRet["pdv"]["E"] := 0.0
@@ -856,6 +911,7 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
         lStorno := .F.
     ENDIF   
 
+    altd()
     cTransactionType := "Sale"
     IF lStorno
         cTransactionType := "Refund"
@@ -1197,9 +1253,14 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
 
     LOCAL cQuery, oRet, cValue
  
+    IF empty(cUUIDFiskStorniran)
+       RETURN ""
+    ENDIF
+
     cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref_ofs(" + ;
        sql_quote( cUUIDFiskStorniran ) +  ")"
- 
+
+    altd()
     oRet := run_sql_query( cQuery )
     IF is_var_objekat_tpqquery( oRet )
         // stored procedura vraca string: invoice_number || '_' || sdc_date_time
@@ -1207,11 +1268,11 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
        IF cValue <> NIL
           RETURN cValue
        ELSE
-          RETURN "-"
+          RETURN "_"
        ENDIF
     ENDIF
  
-RETURN "-"
+RETURN "_"
 
 
 FUNCTION pos_storno_racun_ofs( hParams )
@@ -1274,13 +1335,19 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
     endif
 
     hParams[ "idvd" ] := "42"
+    // racun koji fiskaliziramo
     hRet := pos_get_broj_fiskalnog_racuna_ofs( hParams )
     hParams[ "fiskalni_broj" ] := hRet["fiskalni_broj"]
     hParams[ "fiskalni_datum" ] := hRet["fiskalni_datum"]
     cFullBroj := hParams[ "fiskalni_broj" ] + "_" + hParams["fiskalni_datum"]
-
+    // naci njegov uuid 
     hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id_ofs( hParams )
     // trazimo da li je vec storniranje ovog fiskalnog racuna
+    IF Empty(hParams[ "fisk_id" ])
+        MsgBeep("Racun koji ste odabrali kao originalni uopste nije fiskalniziran?!")
+        RETURN .F.
+    ENDIF
+
     IF ( cOldFiskFullRn := pos_fisk_broj_rn_by_storno_ref_ofs( hParams[ "fisk_id" ] ) ) <> "_"
         cMsg := "Već postoji storno istog RN, broj FISK: " + cOldFiskFullRn
         MsgBeep( cMsg )
@@ -1366,6 +1433,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     //  init_fisk_params(hFiskParams)
     //ENDIF
  
+    altd()
     lStorno := !Empty( hParams["storno_fiskalni_broj"] )
  
     if !lAzuriraniDokument
@@ -1483,9 +1551,14 @@ FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
     hParams[ "brdok" ] := _pos_pripr->brdok
     hParams[ "datum" ] := _pos_pripr->datum
     
-    cInvoiceNumberDate := pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
-    hRet[ "storno_fiskalni_broj" ] := Token( cInvoiceNumberDate, "_", 1)
-    hRet[ "storno_fiskalni_datum" ] := Token( cInvoiceNumberDate, "_", 2)
+    IF Empty(cUUID)
+        hRet[ "storno_fiskalni_broj" ] := ""
+        hRet[ "storno_fiskalni_datum" ] := ""
+    ELSE
+       cInvoiceNumberDate := pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
+       hRet[ "storno_fiskalni_broj" ] := Token( cInvoiceNumberDate, "_", 1)
+       hRet[ "storno_fiskalni_datum" ] := Token( cInvoiceNumberDate, "_", 2)
+    ENDIF
 
    
     PopWa()

@@ -260,6 +260,9 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
       hParams[ "idvd" ] := pos_doks->idvd
       hParams[ "datum" ] := pos_doks->datum
       hParams[ "brdok" ] := pos_doks->brdok
+      hParams[ "azuriran" ] := .T.
+
+      altd()
 
       hTmp := pos_get_broj_fiskalnog_racuna_ofs( hParams )
       

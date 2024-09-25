@@ -147,7 +147,7 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
    cFiskalniDravjerIme := s_hFiskalniUredjajParams[ "drv" ]
 
    // lStorno := pos_is_storno( cIdPos, "42", dDatDok, cBrDok )
-   
+   altd()
    IF hParams["azuriran"]  //  nUplaceno == -1 // fiskalizacija azuriranog racuna
       
       IF pos_iznos_racuna( cIdPos, "42", dDatDok, cBrDok ) < 0
@@ -195,6 +195,9 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
       IF cFiskalniDravjerIme == s_cFiskalniDrajverOFS
          hStornoRacun["storno_fiskalni_broj"] := ""
          hStornoRacun["storno_fiskalni_datum"] := ""
+         altd()
+         hStornoRacun := pos_racun_u_pripremi_broj_storno_rn_ofs()
+
       ELSE  
          // iz pripreme iscitavamo podatke o storno racunu
          nStornoRacunBroj := pos_racun_u_pripremi_broj_storno_rn()
