@@ -273,7 +273,7 @@ STATIC FUNCTION lista_racuna_key_handler( nCh, hParamsInOut )
          hParams[ "drv" ] := "OFS"
          pos_fiskaliziraj_racun( hParams ) // OFS
       ELSE
-         MsgBeep( "Postoji fiskalni račun " + cFiskalniRn + "?!" )
+         MsgBeep( "Postoji fiskalni račun " + hTmp["fiskalni_broj"] + "?!" )
       ENDIF
 
       SELECT pos_doks
