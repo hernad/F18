@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export F18_DEBUG=1
 export F18_POS=1
