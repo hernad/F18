@@ -3,7 +3,8 @@
 
 libs=hbtip
 {win}libs=charset iconv icudt icuin icuio icutu icuuc
-libs=hbmzip minizip
+libs=hbmzip 
+{win}libs=minizip
 {msvc64}libs=bz2
 
 {F18_GT_CONSOLE&unix}gt=gtnul

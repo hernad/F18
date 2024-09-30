@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #if [ "$HB_INC_INSTALL" == "" ]; then
 #    echo "setuj envars"
@@ -10,6 +10,9 @@ if [ "$1" != "--no-rm" ] ; then
 fi
 
 F18_VER=$2
+
+export F18_GT_CONSOLE=1
+export F18_POS=1
 
 unset F18_DEBUG
 unset F18_DEBUG_BROWSE_SIF
