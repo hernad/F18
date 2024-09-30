@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 unset F18_DEBUG
 export F18_POS=1
