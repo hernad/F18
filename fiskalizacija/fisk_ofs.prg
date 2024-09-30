@@ -1295,15 +1295,15 @@ FUNCTION pos_storno_racun_ofs( hParams )
     hParams[ "browse" ] := .F.
 
 
-    pronadji_fiskalni_racun_za_storniranje_ofs(@hParams)
-    
-    IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
-        // hParams["fisk_rn"] i hParams["fisk_id"] se upisuju u _pos_pripr
-        // da li nam je neophodan fisk_rn koji je numeric ? nije 
-        //AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
-        //AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
-        hParams[ "fisk_rn" ] := 999
-        pos_napravi_u_pripremi_storno_dokument( hParams )
+    IF pronadji_fiskalni_racun_za_storniranje_ofs(@hParams)        
+        IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
+            // hParams["fisk_rn"] i hParams["fisk_id"] se upisuju u _pos_pripr
+            // da li nam je neophodan fisk_rn koji je numeric ? nije 
+            //AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
+            //AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
+            hParams[ "fisk_rn" ] := 999
+            pos_napravi_u_pripremi_storno_dokument( hParams )
+        ENDIF
     ENDIF
 
     PopWa()
