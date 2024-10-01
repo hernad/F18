@@ -378,6 +378,10 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
    // funkcija ne daje dobre rezultate
    // za karticu treba vratiti "1" a vraca 2
    
+   IF cDriver == "OFS"
+      cRet := "Cash"
+   ENDIF
+   
    DO CASE
 
    CASE cIdVrsteP == "0"  // gotovina
