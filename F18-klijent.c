@@ -512,7 +512,7 @@ static PyMethodDef F18LibMethods[] = {
     {"run_get",  f18lib_run_get, METH_VARARGS, "run ziher func"},
     {"put_get",  f18lib_put_get, METH_VARARGS, "run ziher func"},
     {"hash",  f18lib_hash, METH_VARARGS, "in/out hash"},
-    {"set_callback",  f18lib_set_callback, METH_VARARGS, "set callback function"},
+//    {"set_callback",  f18lib_set_callback, METH_VARARGS, "set callback function"},
     {NULL, NULL, 0, NULL}
 };
 

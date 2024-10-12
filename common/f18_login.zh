@@ -101,7 +101,7 @@ METHOD F18Login:New()
    hDbParamsIni[ "port" ] := nil
    hDbParamsIni[ "session" ] := nil
 
-   altd()
+   //altd()
    if GetEnv( "F18_ODOO" ) == "1"
       hDbParamsIni[ "host" ] := GetEnv("F18_DB_HOST")
       hDbParamsIni[ "database" ] := GetEnv("F18_DB_DATABASE")

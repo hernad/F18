@@ -26,7 +26,7 @@ FUNCTION Main( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    set_f18_params( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
    harbour_init()
 
-   altd()
+   //altd()
    
    init_parameters_cache()
    set_f18_current_directory()
@@ -43,14 +43,11 @@ FUNCTION Main( p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 )
       RETURN .T.
    ENDIF
 
-
    f18_login_loop( NIL, _arg_v )
 
    RETURN .T.
 
 #endif
-
-
 
 
 FUNCTION f18_login_loop( lAutoConnect, hProgramParametri )
