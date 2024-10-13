@@ -22,10 +22,10 @@ FUNCTION naslovni_ekran_splash_screen( cNaslov, cVer )
    nXStart := MAXROW() / 2 - 10
    nYStart := MAXCOL() / 2 - 30
 
-   nWin := WOpen( nXStart, nYStart, nXStart + 20, nYStart + 70 )
-   WBox()
+   //nWin := WOpen( nXStart, nYStart, nXStart + 20, nYStart + 70 )
+   //WBox()
 
-   WSelect( nWin )
+   //WSelect( nWin )
    //SetColor( f18_color_invert() )
    DispBox( 0, 0, MaxRow(), MaxCol(), Replicate( " ", 9 ) )
    SetPos( 0, 0 )
@@ -43,7 +43,7 @@ FUNCTION naslovni_ekran_splash_screen( cNaslov, cVer )
 
   Inkey( 5 )
 
-  WClose( nWin )
+  //WClose( nWin )
 
 #ifdef F18_DEBUG
    ?E  "maxrow: " + ValToStr(MaxRow()) + " maxcol: " + ValToStr(MaxCol())
