@@ -19,6 +19,11 @@ FUNCTION naslovni_ekran_splash_screen( cNaslov, cVer )
    LOCAL nXStart, nYStart
 
 
+   IF cNaslov == NIL
+      cNaslov := "hello"
+      cVer := "0.0.0"
+   ENDIF
+
    nXStart := MAXROW() / 2 - 10
    nYStart := MAXCOL() / 2 - 30
 
@@ -37,7 +42,7 @@ FUNCTION naslovni_ekran_splash_screen( cNaslov, cVer )
    @  3, 2 SAY PadC( "Verzija: " + cVer, 60 )
    @  5, 2 SAY PadC( "bring.out d.o.o. Sarajevo (" + f18_dev_period() + ")", 60 )
    @  7, 2 SAY PadC( "Juraja Najtharta 3, Sarajevo, BiH", 60 )
-   @  8, 2 SAY PadC( "tel: 033/269-291, fax: 033/269-292", 60 )
+   //@  8, 2 SAY PadC( "tel: 033/269-291, fax: 033/269-292", 60 )
    @  9, 2 SAY PadC( "web: http://bring.out.ba", 60 )
    @ 10, 2 SAY PadC( "email: podrska@bring.out.ba", 60)
 
