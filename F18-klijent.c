@@ -3,10 +3,21 @@
 #include "zh_item_api.h"
 #include <Python.h>
 
+
+
+extern void ext_zh_vm_SymbolInit_F18_UTILS_ZH( void );
+
+/*
 ZH_FUNC_EXTERN( MAIN );
+//ZH_FUNC_EXTERN( FUNC_HELLO_ZIHER );
+//ZH_FUNC_EXTERN( FUNC_HELLO_ZIHER_2 );
+
 ZH_INIT_SYMBOLS_BEGIN( zh_vm_SymbolInit_F18_ZH )
-{ "MAIN", { ZH_FS_PUBLIC | ZH_FS_FIRST | ZH_FS_LOCAL }, { ZH_FUNCNAME( MAIN ) }, NULL }
+ { "MAIN", { ZH_FS_PUBLIC | ZH_FS_FIRST | ZH_FS_LOCAL }, { ZH_FUNCNAME( MAIN ) }, NULL },
+// { "FUNC_HELLO_ZIHER",   { ZH_FS_PUBLIC }, { ZH_FUNCNAME( FUNC_HELLO_ZIHER )  }, NULL },
+// { "FUNC_HELLO_ZIHER_2", { ZH_FS_PUBLIC }, { ZH_FUNCNAME( FUNC_HELLO_ZIHER_2 ) }, NULL }
 ZH_INIT_SYMBOLS_EX_END( zh_vm_SymbolInit_F18_ZH, "F18KLIJENT", 0x0, 0x0003 )
+*/
 
 //{ "(_INITSTATICS00001)", { ZH_FS_INITEXIT | ZH_FS_LOCAL }, { zh_INITSTATICS }, NULL }
 
@@ -110,13 +121,59 @@ static PyObject *
 f18lib_vminit(PyObject *self, PyObject *args)
 {
 
-   zh_vmInit( ZH_FALSE, ZH_TRUE );
+   ZH_BOOL bStartMainProc = 0;
+   ZH_BOOL bInitRT = 0;
+   ZH_BOOL bReleaseConsole = 0;
 
-   zh_conRelease();
+   if (!PyArg_ParseTuple(args, "iii", &bStartMainProc, &bInitRT, &bReleaseConsole))
+        return NULL;
 
+   zh_vmInit( bStartMainProc, bInitRT );
+   if (bReleaseConsole)
+      zh_conRelease();
    return PyLong_FromLong(0);
 }
 
+
+static PyObject *
+f18lib_vmquit(PyObject *self, PyObject *args)
+{
+
+   ZH_BOOL bInitRT = 0;
+
+   if (!PyArg_ParseTuple(args, "i", &bInitRT))
+        return NULL;
+
+   return PyLong_FromLong(zh_vmQuit( bInitRT ));
+}
+
+static PyObject *
+f18lib_fill_dyntable_0(PyObject *self, PyObject *args)
+{
+   //ext_zh_vm_SymbolInit_ZH_INIT_ZH();
+}
+
+static PyObject *
+f18lib_fill_dyntable(PyObject *self, PyObject *args)
+{
+
+  printf("dynsymcount prije: %d\n", zh_dynsymCount());
+  
+  if( zh_rddRegister( "DBF", 1 ) <= 1 )
+  {
+      zh_rddRegister( "DBFFPT", 1 );
+      if( zh_rddRegister( "DBFCDX", 1 ) <= 1 )
+         return;
+  }
+
+
+  printf("dynsymcount poslije: %d\n", zh_dynsymCount());
+
+  //zh_vmProcessSymbols( symbols_table, ZH_SIZEOFARRAY( symbols_table ), "F18KLIJENT", 0, 0 );
+
+  return PyLong_FromLong(0);
+
+}
 
 static PyObject *
 ziher_conInit(PyObject *self, PyObject *args)
@@ -506,6 +563,9 @@ static PyMethodDef F18LibMethods[] = {
     {"system",  f18lib_system, METH_VARARGS, "Execute a shell command."},
     {"f18",  f18lib_f18, METH_VARARGS, "Execute f18 command."},
     {"vminit",  f18lib_vminit, METH_VARARGS, "Execute f18 command /1."},
+    {"vmquit",  f18lib_vmquit, METH_VARARGS, "Quit ziher VM"},
+    {"fill_dyntable",  f18lib_fill_dyntable, METH_VARARGS, "fill dyn table"},
+    {"fill_dyntable_0",  f18lib_fill_dyntable_0, METH_VARARGS, "fill dyn table_0"},
     {"con_init",  ziher_conInit, METH_VARARGS, "ziher initialize console"},
     {"con_release",  ziher_conRelease, METH_VARARGS, "ziher release console"},
     {"run",  f18lib_run, METH_VARARGS, "run ziher func"},

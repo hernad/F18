@@ -13,6 +13,11 @@ ZIHER_TRACE_LEVEL=["-DZH_TR_LEVEL_DEBUG"] #debug
 ZH_COMP_OPTS_F18=[
     "-n",
     #"-gc3", # generate real C code 0=compact (default) 1=normal 2=verbose 3=generate real C code
+
+    # ako je -gc3 ukljuceno
+    # F18.so size = 22M, bez -gc3 F18.so size = 9.2M
+    # ako je iskljuceno -b -DF18_DEBUG F18.so size = 8.2M
+
     "-izh_zero", 
     "-izh_rtl",
     "-izh_rtl/gt",
@@ -25,8 +30,10 @@ ZH_COMP_OPTS_F18=[
     "-DELECTRON_HOST",
     #"-DGT_DEFAULT_GUI",
     "-DF18_POS",
+    
+    # debug
     "-DF18_DEBUG",
-    "-b" #debug
+    "-b"
 ]
 
 filegroup(

@@ -11,6 +11,9 @@
 
 #include "f18.zhh"
 
+THREAD STATIC s_pyPoziva := 0
+
+
 FUNCTION usex( cTable )
    RETURN my_use( cTable )
 
@@ -331,23 +334,30 @@ FUNCTION create_f18_dokumenti_on_desktop( s_cDesktopPath )
 
 PROCEDURE show_postgresql_version( hParams )
 
-LOCAL oServer, pConn
+   LOCAL oServer, pConn
 
-oServer := TPQServer():New( hParams[ "host" ], hParams[ "database" ] , hParams[ "user" ] , hParams[ "password" ] )
+   oServer := TPQServer():New( hParams[ "host" ], hParams[ "database" ] , hParams[ "user" ] , hParams[ "password" ] )
+   pConn := oServer:pDB
 
-pConn := oServer:pDB
-//? "oServer", oServer, "pConn", pConn
+   //? "oServer", oServer, "pConn", pConn
 
-rddSetDefault( "SQLMIX" )
+   rddSetDefault( "SQLMIX" )
 
-// postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
-IF rddInfo( 1001, { "POSTGRESQL", pConn } ) == 0
-      ? "Could not connect to the server"
-      RETURN
-ENDIF
+   // postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+   IF rddInfo( 1001, { "POSTGRESQL", pConn } ) == 0
+         ? "Could not connect to the server"
+         RETURN
+   ENDIF
 
 
-dbUseArea( .T., , "SELECT version() AS ver", "INFO" )
-OutStd( field->ver )
+   dbUseArea( .T., , "SELECT version() AS ver", "INFO" )
+   OutStd( field->ver )
 
 RETURN
+
+
+FUNCTION func_hello_ziher()
+  RETURN "hello world from ziher:" + Str(++s_pyPoziva, 2)
+
+FUNCTION func_hello_ziher_2()
+  RETURN "hello world from HerZi:" + Str(++s_pyPoziva, 2)  
