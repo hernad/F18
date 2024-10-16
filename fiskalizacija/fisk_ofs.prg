@@ -1060,10 +1060,22 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
     hResponseData := hb_jsonDecode(cData)
     
     BEGIN SEQUENCE WITH {| err | Break( err ) }
- 
+
+        if hb_HHasKey(hResponseData, "statusCode")
+            Alert("Postoji greska: " + hResponseData["message"] + " statusCode: " + Alltrim(STR(hResponseData["statusCode"],5,0))  )
+            // i pored greske moguce je da je racun fiskalizovan
+            // tada se odgovor krije unutar invoiceResponse
+            hResponseData := hResponseData["invoiceResponse"]
+        endif
+
         hRet["broj"] := hResponseData["invoiceNumber"]
         hRet["datum"] := hResponseData["sdcDateTime"]
-    
+
+        IF empty(hRet["broj"]) .or. empty(hRet["datum"])
+            // ovo ipak nesto ne valja ? moze li ovo da se desi - ne znam
+            RaiseError( "broj/datum ne mogu biti prazni?!" )
+        ENDIF
+
      RECOVER USING oError
         Alert( _u( "Fiskalni odgovor ne sadrzi obavezna polja: invoiceNumber + sdcDateTime!" ) )
         bug_send_email_body( ;
@@ -1091,9 +1103,10 @@ FUNCTION is_ofs_fiskalni()
 
     IF nDeviceId > 0
         hParams := get_fiscal_device_params( nDeviceId, my_user() )
+    ELSE
+        return .F. 
     ENDIF
 
- 
     IF !hb_HHasKey( hParams, "drv" )
        RETURN .F.
     ENDIF

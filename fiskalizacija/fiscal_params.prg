@@ -711,9 +711,11 @@ FUNCTION get_fiscal_device_params( nDeviceId, cUserName )
    cOutDir := fetch_metric( "fiscal_device_" + cDevTmp + "_out_dir", cUserName, "" )
 // #endif
 
-   IF Empty( cOutDir )
-      Alert( "izlazni direktorij " + cOutDir + " prazan !" )
-      RETURN NIL
+   IF hParam[ "drv" ] != "OFS"
+      IF Empty( cOutDir )
+         Alert( "izlazni direktorij " + cOutDir + " prazan !" )
+         RETURN NIL
+      ENDIF
    ENDIF
 
 #ifdef TEST
@@ -847,14 +849,17 @@ STATIC FUNCTION _print_param( hParams )
    ? Space( 3 ), "Drajver:", hParams[ "drv" ], "IOSA:", hParams[ "iosa" ], "Serijski broj:", hParams[ "serial" ], "Tip uredjaja:", hParams[ "type" ]
    ? Space( 3 ), "U sistemu PDV-a:", hParams[ "pdv" ]
    ?
-   ? Space( 3 ), "Izlazni direktorij:", AllTrim( hParams[ "out_dir" ] )
-   ? Space( 3 ), "       naziv fajla:", AllTrim( hParams[ "out_file" ] ), "naziv fajla odgovora:", AllTrim( hParams[ "out_answer" ] )
-   ? Space( 3 ), "Operater ID:", hParams[ "op_id" ], "PWD:", hParams[ "op_pwd" ]
-   ?
-   ? Space( 3 ), "Tip PLU kodova:", hParams[ "plu_type" ], "Inicijalni PLU:", AllTrim( Str( hParams[ "plu_init" ] ) )
-   ? Space( 3 ), "Auto polog:", AllTrim( Str( hParams[ "auto_avans" ], 12, 2 ) ), ;
-      "Timeout fiskalnih operacija:", AllTrim( Str( hParams[ "timeout" ] ) )
-   ?
+   IF hParams[ "drv" ] != "OFS"
+      ? Space( 3 ), "Izlazni direktorij:", AllTrim( hParams[ "out_dir" ] )
+      ? Space( 3 ), "       naziv fajla:", AllTrim( hParams[ "out_file" ] ), "naziv fajla odgovora:", AllTrim( hParams[ "out_answer" ] )
+      ? Space( 3 ), "Operater ID:", hParams[ "op_id" ], "PWD:", hParams[ "op_pwd" ]
+      ?
+      ? Space( 3 ), "Tip PLU kodova:", hParams[ "plu_type" ], "Inicijalni PLU:", AllTrim( Str( hParams[ "plu_init" ] ) )
+      ? Space( 3 ), "Auto polog:", AllTrim( Str( hParams[ "auto_avans" ], 12, 2 ) ), ;
+         "Timeout fiskalnih operacija:", AllTrim( Str( hParams[ "timeout" ] ) )
+      ?
+   ENDIF
+
    ?U Space( 3 ), "A4 print:", hParams[ "print_a4" ], " dokumenti za štampu:", hParams[ "op_docs" ]
    ?U Space( 3 ), "Zbirni bezgotovinski račun:", AllTrim( Str( hParams[ "vp_sum" ] ) )
    ?U Space( 3 ), "Bezgotovinski račun moguć bez partnera:", hParams[ "vp_no_customer" ]
