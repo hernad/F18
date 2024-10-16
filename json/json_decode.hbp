@@ -1,0 +1,25 @@
+-ojson-decode
+
+json_decode.prg
+common/t_file_read.prg
+-static
+-inc
+-Iinclude
+-n
+
+{linux}-lm
+
+hbct.hbc
+hbmzip.hbc
+hbtip.hbc
+#sddpg contains hbpgsql.hbc, so no need to double on that
+sddpg.hbc
+rddmisc.hbc
+hbhpdf.hbc
+
+hbxlsxwriter.hbc
+#hbssl.hbc
+#hbhttpd.hbc
+
+#{linux}-lcurl
+

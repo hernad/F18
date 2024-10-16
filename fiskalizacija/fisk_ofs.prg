@@ -537,7 +537,7 @@ FUNCTION ofs_invoice_search()
 
     Box(, 4, 60)
       @ box_x_koord() + 1, box_y_koord() + 1 SAY "  Datum od" GET dDatOd
-      @ box_x_koord() + 2, box_y_koord() + 1 SAY "        do" GET dDatOd
+      @ box_x_koord() + 2, box_y_koord() + 1 SAY "        do" GET dDatDo
       @ box_x_koord() + 4, box_y_koord() + 1 SAY " PDV D/N/X:" GET cPDV PICT "@!" valid cPDV $ "DNX"
       READ
       
@@ -631,7 +631,7 @@ FUNCTION ofs_invoice_search()
         
     END SEQUENCE
 
-    altd()
+
     // debug
     if cPDV == "X"
         bug_send_email_body( ;
@@ -719,7 +719,7 @@ FUNCTION ofs_invoice_get( cBrojRacuna )
 
 
     // /api/invoices/RX4F7Y5L-RX4F7Y5L-138?receiptLayout=Slip&imageFormat=Png&includeHeaderAndFooter=true'
-    altd()
+
 
     hRet := hb_hash()
     hRet["error"] := 0
@@ -911,7 +911,6 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
         lStorno := .F.
     ENDIF   
 
-    altd()
     cTransactionType := "Sale"
     IF lStorno
         cTransactionType := "Refund"
