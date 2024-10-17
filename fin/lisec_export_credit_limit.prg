@@ -9,12 +9,10 @@ FUNCTION lisec_export_credit_limit()
 
    LOCAL cIdKonto1 := fetch_metric("fin_lisec_kupci_1", my_user(), PADR('2110',7))
    LOCAL cIdKonto2 := fetch_metric("fin_lisec_kupci_2", my_user(), PADR('2100',7))
-   
    LOCAL cIdKonto3 := fetch_metric("fin_lisec_kupci_3", my_user(), PADR('2120',7))
    LOCAL cIdKonto4 := fetch_metric("fin_lisec_kupci_4", my_user(), PADR('2119',7))
    LOCAL cIdKonto5 := fetch_metric("fin_lisec_kupci_5", my_user(), PADR('2129',7))
    LOCAL cIdKonto6 := fetch_metric("fin_lisec_kupci_6", my_user(), PADR('',7))
-   
    
 
    Box(, 9, 60)
@@ -139,11 +137,10 @@ STATIC FUNCTION lisec_export_kupci_stanje( cIdKonto1, cIdKonto2, cIdKonto3, cIdK
         @ box_x_koord() + 1, col() + 2 SAY nSaldo     
 
         FWrite( nH, cIdPartner + " 51 " +  AllTrim(STR(nSaldo, 15, 2)) + hb_eol() )
-   
         oDataSet:Skip()
         
-     ENDDO
-     BoxC()
+    ENDDO
+    BoxC()
 
     FClose( nH )
      
