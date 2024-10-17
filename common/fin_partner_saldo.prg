@@ -15,19 +15,23 @@
 // ----------------------------------------
 // vraca saldo partnera
 // ----------------------------------------
-FUNCTION get_fin_partner_saldo( id_partner, id_konto, id_firma )
+FUNCTION get_fin_partner_saldo( id_partner, id_konto, id_firma, dDatDo )
 
-   LOCAL _qry, _qry_ret, _table
+   LOCAL cQuery, _table
    LOCAL _data := {}
    LOCAL nI, oRow
    LOCAL _saldo := 0
 
-   _qry := "SELECT SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
+   cQuery := "SELECT SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo FROM " + F18_PSQL_SCHEMA + ".fin_suban " + ;
       " WHERE idpartner = " + sql_quote( id_partner ) + ;
       " AND idkonto = " + sql_quote( id_konto ) + ;
       " AND idfirma = " + sql_quote( id_firma )
 
-   _table := run_sql_query( _qry )
+   IF dDatDo <> NIL
+      cQuery += " AND datdok <= " + sql_quote( dDatDo )
+   ENDIF
+
+   _table := run_sql_query( cQuery )
    oRow := _table:GetRow( 1 )
 
    _saldo := oRow:FieldGet( oRow:FieldPos( "saldo" ) )

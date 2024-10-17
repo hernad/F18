@@ -1054,6 +1054,7 @@ FUNCTION fin_knjizenje_ostale_opcije()
 
    IF fin_spil_active()
       AADD(aOpc, "3. spil import")
+      AADD(aOpc, "4. lisec credit limit export")
    ELSEIF is_ht()
       AADD(aOpc, "3. ht import")
    ELSE
@@ -1061,10 +1062,12 @@ FUNCTION fin_knjizenje_ostale_opcije()
    ENDIF
    AADD(h, "")
 
+   /*
    IF konto_2022()
       AADD(aOpc, "4. kontni plan 2022")
       AADD(h, "")
    ENDIF
+   */
 
    //AADD(aOpc, "4. delete by recNO")
    //AADD(h, "")
@@ -1085,10 +1088,13 @@ FUNCTION fin_knjizenje_ostale_opcije()
          set_novi_broj_jci()
       CASE fin_spil_active() .and. nIzbor == 3
          fin_spil_import()
+      CASE fin_spil_active() .and. nIzbor == 4
+         lisec_export_credit_limit()
       CASE is_ht() .and. nIzbor == 3
             fin_ht_import()
-      CASE konto_2022() .and. nIzbor == 4
-         fin_kontni_plan_2022()
+
+      //CASE konto_2022() .and. nIzbor == 4
+      //   fin_kontni_plan_2022()
       //CASE nIzbor == 4
       //      fin_pripr_delete_recno()
       ENDCASE
