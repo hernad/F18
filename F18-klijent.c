@@ -234,13 +234,14 @@ f18lib_run_get(PyObject *self, PyObject *args)
    char *sFunc;
    int initConsole = 0;
    int releaseConsole = 0;
+   int returnType = 0;
+
    const char *ret;
    PyObject *pyValue;
 
    // https://stackoverflow.com/questions/10625865/how-does-pyarg-parsetupleandkeywords-work
 
-
-   if (!PyArg_ParseTuple(args, "s|ii", &sFunc, &initConsole, &releaseConsole))
+   if (!PyArg_ParseTuple(args, "s|iii", &sFunc, &initConsole, &releaseConsole, &returnType))
         return NULL;
 
    PZH_SYMBOL pDynSym =  zh_dynsymFind( sFunc );
@@ -257,10 +258,16 @@ f18lib_run_get(PyObject *self, PyObject *args)
 
       //PZH_ITEM pResult = zh_itemNew( zh_stackReturnItem() );
       //PZH_ITEM pResult = zh_stackReturnItem();
-      const char * ret = zh_parc( -1 );
-      printf("return: %s\n", ret);
-      pyValue = Py_BuildValue("s", ret);
-      
+
+      if (returnType == 0) {
+         const char * ret = zh_parc( -1 );
+         //printf("return: %s\n", ret);
+         pyValue = Py_BuildValue("s", ret);
+      } else {
+         int ret = zh_parni( -1 );
+         //printf("return: %s\n", ret);
+         pyValue = Py_BuildValue("i", ret);
+      }
    
    } else {
        printf("nema ziher func %s\n", sFunc);
