@@ -109,9 +109,24 @@ STATIC FUNCTION lisec_export_kupci_stanje( cIdKonto1, cIdKonto2, cIdKonto3, cIdK
 
     nH := FCreate( cLokacijaExport + cFileName )
 
- 
-    cQuery := "SELECT idpartner, SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo" +;
-       " FROM " + F18_PSQL_SCHEMA + ".fin_suban" +;
+    // idlisec=60 => kust_kto='999472   '
+    // select kust_kto_buch from fmk.lisec_kust 
+    //  where vk_ek=0 and kunr=60 
+
+    /*
+    select * FROM (SELECT fmk.lisec_kust.kunr as id_lisec, idpartner, 
+             SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo
+       FROM fmk.fin_suban
+       LEFT JOIN fmk.lisec_kust on trim(fmk.lisec_kust.kust_kto_buch)=fmk.fin_suban.idpartner
+       WHERE idkonto in ( '2110   ' )
+       GROUP BY idpartner, kunr) lisec_saldo
+        where id_lisec is not null
+        ORDER BY id_lisec
+    */
+
+    cQuery := "select * FROM (SELECT fmk.lisec_kust.kunr as id_lisec, idpartner, SUM( CASE WHEN d_p = '1' THEN iznosbhd ELSE -iznosbhd END ) AS saldo" +;
+       " FROM fmk.fin_suban" +;
+       " LEFT JOIN fmk.lisec_kust on trim(fmk.lisec_kust.kust_kto_buch)=trim(fmk.fin_suban.idpartner)" + ;
        " WHERE idkonto in (" + cKonta + ")"
 
     IF dDatDo <> NIL
@@ -119,8 +134,9 @@ STATIC FUNCTION lisec_export_kupci_stanje( cIdKonto1, cIdKonto2, cIdKonto3, cIdK
     ENDIF
 
     cQuery += " AND idfirma = " + sql_quote( cIdFirma ) +;
-       " GROUP BY idpartner" +;
-       " ORDER BY idpartner"
+       " GROUP BY idpartner, kunr) lisec_saldo" +;
+       " WHERE id_lisec is not NULL" +; 
+       " ORDER BY id_lisec"
  
 
     oDataSet := run_sql_query( cQuery )
@@ -131,12 +147,12 @@ STATIC FUNCTION lisec_export_kupci_stanje( cIdKonto1, cIdKonto2, cIdKonto3, cIdK
         nCnt++
 
         oRow := oDataSet:GetRow()
-        cIdPartner := oRow:FieldGet( oRow:FieldPos( "idpartner" ) )
+        cIdPartner := oRow:FieldGet( oRow:FieldPos( "id_lisec" ) )
         nSaldo := oRow:FieldGet( oRow:FieldPos( "saldo" ) )
         @ box_x_koord() + 1, box_y_koord() + 1 SAY cIdPartner        
         @ box_x_koord() + 1, col() + 2 SAY nSaldo     
 
-        FWrite( nH, cIdPartner + " 51 " +  AllTrim(STR(nSaldo, 15, 2)) + hb_eol() )
+        FWrite( nH, AllTrim(Str(cIdPartner, 10, 2)) + " 51 " +  AllTrim(STR(nSaldo, 15, 2)) + hb_eol() )
         oDataSet:Skip()
         
     ENDDO
