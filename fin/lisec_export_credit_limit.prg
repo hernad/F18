@@ -48,7 +48,7 @@ STATIC FUNCTION lisec_export_kupci_stanje( cIdKonto1, cIdKonto2, cIdKonto3, cIdK
 
     LOCAL cQuery, oDataSet, oRow, cKonta
     LOCAL cIdFirma := self_organizacija_id()
-    LOCAL cIdPartner, nSaldo, nCnt
+    LOCAL nIdPartner, nSaldo, nCnt
     LOCAL nH
     LOCAL cFileName := "TFLIORDER.TXT", lCreate
 
@@ -147,12 +147,12 @@ STATIC FUNCTION lisec_export_kupci_stanje( cIdKonto1, cIdKonto2, cIdKonto3, cIdK
         nCnt++
 
         oRow := oDataSet:GetRow()
-        cIdPartner := oRow:FieldGet( oRow:FieldPos( "id_lisec" ) )
+        nIdPartner := oRow:FieldGet( oRow:FieldPos( "id_lisec" ) )
         nSaldo := oRow:FieldGet( oRow:FieldPos( "saldo" ) )
-        @ box_x_koord() + 1, box_y_koord() + 1 SAY cIdPartner        
+        @ box_x_koord() + 1, box_y_koord() + 1 SAY nIdPartner        
         @ box_x_koord() + 1, col() + 2 SAY nSaldo     
 
-        FWrite( nH, AllTrim(Str(cIdPartner, 10, 2)) + " 51 " +  AllTrim(STR(nSaldo, 15, 2)) + hb_eol() )
+        FWrite( nH, AllTrim(Str(nIdPartner, 10)) + " 51 " +  AllTrim(STR(nSaldo, 15, 2)) + hb_eol() )
         oDataSet:Skip()
         
     ENDDO
