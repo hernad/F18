@@ -428,6 +428,7 @@ METHOD F18Login:server_login_form()
    LOCAL _srv_config := "N"
    LOCAL cSezona
    LOCAL nKey, hDbParamsIni := zh_Hash()
+   LOCAL GetList := {}
 
    cUser := ::hDbPostgresConnectionParams[ "user" ]
    cPassword := ""
