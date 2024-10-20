@@ -377,3 +377,15 @@ FUNCTION idle_get_eval( cId )
    ENDDO
 
    RETURN xRet
+
+
+init procedure f18_threads_init()
+   s_nThreadCount := 0
+   s_mtxMutex := NIL
+   s_mainThreadID := NIL 
+   s_aThreads := NIL
+   s_aEval := {}
+   s_aQueueDbfRefresh := {}
+   s_nProcessQueueSeconds := 0
+RETURN
+     

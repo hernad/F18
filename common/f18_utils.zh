@@ -364,8 +364,8 @@ FUNCTION func_hello_ziher_2()
 
 
 INIT PROCEDURE nuliram()
-   altd()
-   ? "============= NULIRAM ======================"
-   inkey(0)
+   //altd()
+   //? "============= NULIRAM ======================"
+   //inkey(0)
    s_pyPoziva := 0
    RETURN
