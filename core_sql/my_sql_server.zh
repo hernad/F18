@@ -169,7 +169,6 @@ FUNCTION my_server_params( hSqlParams )
       RETURN s_psqlServer_params_thread // svaki thread treba zapamtiti svoje parametre
    ENDIF
 
-   altd()
    IF hSqlParams <> NIL
       FOR EACH cKey in hSqlParams:Keys
          s_psqlServer_params[ cKey ] := hSqlParams[ cKey ]

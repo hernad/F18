@@ -58,10 +58,12 @@ FUNCTION f18_login_loop( lAutoConnect, hProgramParametri )
       lAutoConnect := .T.
    ENDIF
 
+   ? "debug login_loop"
    oLogin := my_login()
 
    DO WHILE .T.
 
+      ? "login_loop debug step 2"
       oLogin:postgres_db_login( lAutoConnect )
 
       IF !oLogin:lPostgresDbSpojena

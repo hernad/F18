@@ -667,6 +667,8 @@ FUNCTION no_sql_mode( val )
       __no_sql_mode := val
    ENDIF
 
+   ? "debug no_sql_mode", __no_sql_mode
+
    RETURN __no_sql_mode
 
 

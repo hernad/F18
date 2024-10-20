@@ -1020,3 +1020,14 @@ STATIC FUNCTION _skip_it( aOrganizacije, curr, skiped )
    ENDIF
 
    RETURN( skiped )
+
+
+init procedure f18_login_init()
+
+   ? "F18_login_init"
+   s_oLogin := NIL
+   s_cTekucaSezona := NIL
+   s_cPredhodnaSezona := NIL
+   s_lPrvoPokretanje  := NIL
+   
+   

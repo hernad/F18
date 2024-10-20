@@ -360,4 +360,12 @@ FUNCTION func_hello_ziher()
   RETURN "hello world from ziher:" + Str(++s_pyPoziva, 2)
 
 FUNCTION func_hello_ziher_2()
-  RETURN "hello world from HerZi:" + Str(++s_pyPoziva, 2)  
+  RETURN "hello world from HerZi:" + Str(++s_pyPoziva, 2) 
+
+
+INIT PROCEDURE nuliram()
+   altd()
+   ? "============= NULIRAM ======================"
+   inkey(0)
+   s_pyPoziva := 0
+   RETURN

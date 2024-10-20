@@ -303,7 +303,7 @@ FUNCTION sql_error_in_query( oQry, cTip, oServer )
    IF is_var_objekat_tpqquery( oQry ) .AND. !Empty( oQry:ErrorMsg() )
       LOG_CALL_STACK cLogMsg
 #ifdef F18_DEBUG
-      AltD()  // sql_error_in_query
+      //AltD()  // sql_error_in_query
 #endif
       ?E oQry:ErrorMsg(), cLogMsg
       error_bar( "sql", oQry:ErrorMsg() )
@@ -318,7 +318,7 @@ FUNCTION sql_error_in_query( oQry, cTip, oServer )
       IF is_var_objekat_tpqserver( oServer ) .AND. !Empty( oServer:ErrorMsg() )
          LOG_CALL_STACK cLogMsg
 #ifdef F18_DEBUG
-         AltD()  // sql_error_in_query
+         //AltD()  // sql_error_in_query
 #endif
          ?E oServer:ErrorMsg(), cLogMsg
          RETURN .T.
