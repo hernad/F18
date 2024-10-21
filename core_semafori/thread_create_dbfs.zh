@@ -11,6 +11,14 @@
 
 #include "f18.zhh"
 
+procedure thread_dummy()
+
+   LOCAL i
+   FOR i := 0 to 1000
+      ? "thread_dummy", i
+   NEXT
+   RETURN
+   
 PROCEDURE thread_create_dbfs()
 
    LOCAL _ver

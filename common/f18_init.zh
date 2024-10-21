@@ -101,9 +101,11 @@ FUNCTION post_login()
 
    IF is_in_main_thread()
 
-      //thread_dbfs( zh_threadStart( @thread_create_dbfs() ) )
+      thread_dbfs( zh_threadStart( @thread_create_dbfs() ) )
       
-      //thread_dbfs( zh_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
+      thread_dbfs( zh_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
+
+      //thread_dbfs( zh_threadStart( @thread_dummy()) )
    ENDIF
 
    IF !check_server_db_version()
@@ -894,3 +896,6 @@ init procedure f18_init_init()
 #endif
 
    RETURN
+
+
+
