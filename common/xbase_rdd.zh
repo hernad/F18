@@ -18,12 +18,6 @@ STATIC __dbf_pack_v1 := 700
 // algoritam 2 - vise od 10% deleted zapisa
 STATIC __dbf_pack_v2 := 10
 
-
-/*
-   Funkcije koje koriste xBASE RDD-ovi (replacable database driver)
-   DBCDX, SQLMIX
-*/
-
 THREAD STATIC aWaStack := {}
 
 FUNCTION PushWA()
@@ -276,3 +270,12 @@ STATIC FUNCTION dbf_pack_v1()
 
 STATIC FUNCTION dbf_pack_v2()
    RETURN __dbf_pack_v2
+
+
+init procedure xbase_rdd_init()
+
+   __dbf_pack_algoritam := "1"
+   __dbf_pack_v1 := 700
+   __dbf_pack_v2 := 10
+   aWaStack := {}
+RETURN

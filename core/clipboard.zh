@@ -104,3 +104,7 @@ PROCEDURE set_clipboard()
    info_bar( "clip", "set register " + cReg )
 
    RETURN
+
+init procedure clipboard_init()
+   s_hClipBoard := NIL
+RETURN

@@ -1217,3 +1217,12 @@ FUNCTION ShowBrowse( oBrowse, aConds, aProcs )
 // -----------------------------------
 FUNCTION dummy_func()
    RETURN
+
+
+init procedure ui_main_init()
+   
+   aBoxStack := {}
+   aPrStek := {}
+   aMsgStack := {}
+   RETURN 
+

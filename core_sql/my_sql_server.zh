@@ -320,7 +320,21 @@ FUNCTION my_user()
 
 INIT PROCEDURE init_my_sql_server()
 
+
+   s_psqlServer := NIL  // glavni thread
+   s_pgsqlServerPostgresDb := NIL
+   s_psqlServer_params := NIL  // parametri trebaju biti dostupni novim threadovima
+
+   s_psqlServerDbfThread := NIL // svaka thread konekcija zasebna
+   s_psqlServer_params_thread := NIL  // svaka thread konekcija ce zapamtiti svoje parametre
+
+   s_nSQLConnections := 0
+   s_aSQLConnections := {}
+   s_mtxMutex := NIL
+
    s_mtxMutex := zh_mutexCreate()
    s_psqlServer_params := zh_Hash()
 
    RETURN
+
+

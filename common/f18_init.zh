@@ -101,9 +101,9 @@ FUNCTION post_login()
 
    IF is_in_main_thread()
 
-      thread_dbfs( zh_threadStart( @thread_create_dbfs() ) )
+      //thread_dbfs( zh_threadStart( @thread_create_dbfs() ) )
       
-      thread_dbfs( zh_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
+      //thread_dbfs( zh_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
    ENDIF
 
    IF !check_server_db_version()
@@ -855,3 +855,42 @@ FUNCTION run_on_start()
    info_bar( "init", "run_on_start_end" )
 
    RETURN .T.
+
+
+
+init procedure f18_init_init()
+   
+   s_lAlreadyRunStartup := .F. // startup funkcija vec pokrenuta
+   s_psqlServer_log := .F. // logiranje na server
+
+   s_cF18HomeRoot := NIL // za sve threadove identican cHomeRootDir
+   s_cF18HomeBackup := NIL // svi threadovi ista backup lokacija
+
+   s_cF18CurrentDirectory := NIL
+
+   s_cF18Home := NIL 
+   
+   s_cRunOnStartParam := NIL
+
+   s_nF18FileHandle := NIL
+
+   __test_mode := .F.
+   __no_sql_mode := .F.
+
+   s_nMaxRows := 0
+   s_nMaxCols := 0
+
+    s_cFontName := NIL
+    s_nFontSize := 20
+    s_nFontWidth := 10
+
+    s_nDesktopRows := NIL
+    s_nDesktopCols := NIL
+
+#ifdef F18_DEBUG
+     __log_level := F18_DEFAULT_LOG_LEVEL_DEBUG
+#else
+     __log_level := F18_DEFAULT_LOG_LEVEL
+#endif
+
+   RETURN

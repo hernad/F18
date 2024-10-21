@@ -82,3 +82,10 @@ FUNCTION download_template( cTemplateName,  cSHA256sum, cTemplateVer )
    s_hTemplates[ cTemplateName ] := .T.
 
    RETURN .T.
+
+
+init procedure download_template_init()
+   
+   s_cDirF18Template := NIL
+   s_cUrl := NIL
+   s_hTemplates := NIL

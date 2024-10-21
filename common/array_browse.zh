@@ -554,3 +554,9 @@ FUNCTION StackTop( aStack )
    // Return the value of the last element in the stack array
 
    RETURN ATail( aStack )
+
+
+
+init procedure array_backup_init()
+   nRow := NIL
+RETURN

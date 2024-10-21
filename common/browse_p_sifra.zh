@@ -1813,3 +1813,9 @@ FUNCTION sifarnik_f9_nova_sifra()
    AEval( GetList, {| o | o:display() } )
 
    RETURN NIL
+
+
+init procedure browse_p_sifra_init()
+  __PSIF_NIVO__ := 0
+  __A_SIFV__ := { { NIL, NIL, NIL }, { NIL, NIL, NIL }, { NIL, NIL, NIL }, { NIL, NIL, NIL } }
+return

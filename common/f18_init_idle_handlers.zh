@@ -177,6 +177,11 @@ FUNCTION remove_global_idle_handlers()
 
 
 INIT PROCEDURE idle_init()
-
+   
+   aIdleHandlers := {}
+   s_nIdleRefresh := 0 // start idle refresh in seconds()
+   s_nIdleDisplayCounter := 0 // counter
+   s_lNoRefreshOperation := .F.
+   s_nFinNalogCount := 0
 
    RETURN

@@ -407,3 +407,7 @@ STATIC FUNCTION meni_0_okvir( nX1, nY1, nX2, nY2, lFiksneKoordinate )
    ENDIF
 
    RETURN .T.
+
+init procedure ui_menu()
+   aMenuStack := {}
+RETURN

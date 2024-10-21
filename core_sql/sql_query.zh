@@ -361,6 +361,12 @@ FUNCTION sql_query_bez_zapisa( ret )
 
 INIT PROCEDURE init_sql_qry()
 
+   s_mtxMutex := NIL
+   s_aTransactions := {}
+   s_lSqlTransactionError := .F.
+
+
    s_mtxMutex := zh_mutexCreate()
+
 
    RETURN

@@ -164,3 +164,10 @@ STATIC FUNCTION a_struct()
       { "DOC", "C", 18, 0 }, ;
       { "MESSAGE", "C", f18_max_cols() - 4 - 9 - 19, 0 } ;
       }
+
+
+init procedure ui_msgs_init()
+   aErrors := {}
+   aInfos := {}
+
+RETURN

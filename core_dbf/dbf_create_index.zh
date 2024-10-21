@@ -152,3 +152,9 @@ FUNCTION create_index( cImeInd, xKljuc, cAlias, lSilent )
    CLOSE ALL
 
    RETURN .T.
+
+
+init procedure dbf_create_index_init()
+
+   nSlogova := 0
+RETURN
