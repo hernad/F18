@@ -10,7 +10,7 @@ REM )
 
 set F18_POS=1
 set F18_DEBUG=1
-set DATE=31.10.2023
+set DATE=26.11.2024
 set VERSION=3.3.121
 
 IF [%VERSION%]==[] (
