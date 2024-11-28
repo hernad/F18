@@ -17,7 +17,7 @@ STATIC s_cXlsxName := NIL
 STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
 STATIC s_pMoneyFormat, s_pDateFormat
 
-FUNCTION pos_pregled_racuna()
+FUNCTION pos_pregled_racuna_xlsx()
 
    LOCAL cSql, oQuery, oRow
    LOCAL dDatOd := date()
