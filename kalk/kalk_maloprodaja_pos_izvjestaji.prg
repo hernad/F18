@@ -31,6 +31,9 @@ FUNCTION kalk_maloprodaja_pos_izvjestaji()
    AAdd( aOpc,   "3. neobrađeni dokumenti u prodavnicama" )
    AAdd( aOpcExe, {|| pos_neobradjeni_lista_rpt() } )
 
+   AAdd( aOpc,   "4. pregleda računa za period" )
+   AAdd( aOpcExe, {|| pos_pregled_racuna() } )
+
    f18_menu( "m2", .F.,  nIzbor, aOpc, aOpcExe )
 
    RETURN .T.
