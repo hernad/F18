@@ -16,6 +16,7 @@ MEMVAR gIdRadnik
 STATIC s_cXlsxName := NIL
 STATIC s_pWorkBook, s_pWorkSheet, s_nWorkSheetRow
 STATIC s_pMoneyFormat, s_pDateFormat
+STATIC s_nPredhodniBroj
 
 FUNCTION pos_pregled_racuna_xlsx()
 
@@ -37,7 +38,7 @@ FUNCTION pos_pregled_racuna_xlsx()
       RETURN .F.
    ENDIF
 
-   cSql := "select  pos_items.idvd, " + pos_prodavnica_sql_schema() + ".pos_items.datum, pos.vrijeme, pos_items.brdok, pos_fisk_doks.broj_rn::varchar,"
+   cSql := "select  pos_items.idvd, " + pos_prodavnica_sql_schema() + ".pos_items.datum, pos.vrijeme, pos_items.brdok, pos_fisk_doks.broj_rn,"
    cSql += "sum(round((case when pos_items.ncijena=0 then pos_items.cijena else pos_items.ncijena end) * pos_items.kolicina, 2)) as iznos," 
    cSql += "count(pos_items.*) as brstavki"
    cSql += " FROM " +  pos_prodavnica_sql_schema() + ".pos_items" 
@@ -58,11 +59,11 @@ FUNCTION pos_pregled_racuna_xlsx()
 
 
    oQuery:GoTo( 1 )
+   s_nPredhodniBroj := -999
 
    DO WHILE !oQuery:Eof()
 
       oRow := oQuery:GetRow()
-      
       xlsx_export_fill_row(oRow)
    
       oQuery:Skip()
@@ -82,14 +83,26 @@ STATIC FUNCTION xlsx_export_fill_row(oRow)
 
    LOCAL nI
    LOCAL aKolona
+   LOCAL nBrojFiskRacuna := oRow:FieldGet( oRow:FieldPos( "broj_rn" ) )
+   LOCAL cKontrola := "OK"
+
    
+   IF s_nPredhodniBroj == -999
+      cKontrola := "OK"
+   ELSE
+      IF nBrojFiskRacuna - s_nPredhodniBroj <> 1
+         cKontrola := "ERR"
+      ENDIF
+   ENDIF   
+      
+   s_nPredhodniBroj := nBrojFiskRacuna
    aKolona := {}
    AADD(aKolona, { "D", "Datum", 10, oRow:FieldGet( oRow:FieldPos( "datum" ) ) })
    AADD(aKolona, { "C", "Vrijeme", 12, oRow:FieldGet( oRow:FieldPos( "vrijeme" ) ) })
 
    AADD(aKolona, { "C", "Brdok", 12, oRow:FieldGet( oRow:FieldPos( "brdok" ) ) })
-   AADD(aKolona, { "C", "Fisk.RN", 12, oRow:FieldGet( oRow:FieldPos( "broj_rn" ) ) })
-
+   AADD(aKolona, { "N", "Fisk.RN", 12, nBrojFiskRacuna })
+   AADD(aKolona, { "C", "kontrola", 12, cKontrola })
 
    AADD(aKolona, { "M", "Iznos", 20, oRow:FieldGet( oRow:FieldPos( "iznos" ) ) })
 
