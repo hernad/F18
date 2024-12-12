@@ -432,7 +432,7 @@
  STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, lStorno, aPartner )
  
     LOCAL aRacunData := {}
-    LOCAL _n_rn_broj, _rn_iznos, nRabat, _rn_datum, cFiskalniReklamiraniRnBroj
+    LOCAL _n_rn_broj, _rn_iznos, nRabatProc, nRabatRacun, nRabatStavka, _rn_datum, cFiskalniReklamiraniRnBroj
     LOCAL _vrsta_pl, cIdPartner, nTotalRacuna, nRacunFaktTotal
     LOCAL _art_id, nRobaFiscPLU, cNazivArtikla, cRobaJmj, cVrstaPlacanja
     LOCAL cArtikalBarkod, _rn_rbr, aMemo
@@ -472,8 +472,7 @@
     cFiskalniReklamiraniRnBroj := field->fisc_rn
  
     _rn_iznos := field->iznos
-    nRabat := field->rabat
-    altd()
+    nRabatRacun := field->rabat
     _rn_datum := field->datdok
     cIdPartner := field->idpartner
  
@@ -565,7 +564,7 @@
        ENDIF    
        //? bug? nCijena := field->cijena
 
-       nNetoCijena := nCijena - nRabat 
+       
  
        IF cIdTipDok == "10"
           _vr_plac := "3"
@@ -573,12 +572,15 @@
  
        nKolicina := Abs( field->kolicina )
  
+       altd()
        IF !lInoPartner .AND. !_partn_pdv .AND. RobaZastCijena( roba->idtarifa )
           lPopustNaTeretProdavca := .T.
-          nRabat := 0
+          nRabatProc := 0
        ELSE
-          nRabat := Abs ( field->rabat )
+          nRabatProc := Abs ( field->rabat )
        ENDIF
+
+       nNetoCijena := ROUND(nCijena * (1 - nRabatProc/100.00), 2) 
  
        IF lInoPartner == .T.
           cIdTarifa := "PDV0"
@@ -591,9 +593,9 @@
        ENDIF
  
        IF field->dindem == Left( ValBazna(), 3 )
-          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - nRabat / 100 ), fakt_zaokruzenje() )
+          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - nRabatProc / 100 ), fakt_zaokruzenje() )
        ELSE
-          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - nRabat / 100 ), fakt_zaokruzenje() )
+          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - nRabatProc / 100 ), fakt_zaokruzenje() )
        ENDIF
  
        // 1 - broj racuna
@@ -625,7 +627,7 @@
           cStornoRacunOpis, ;      // 8
           nRobaFiscPLU, ;          // 9
           nCijena, ;               // 10
-          nRabat, ;                // 11 FISK_INDEX_POPUST
+          nRabatProc, ;            // 11 FISK_INDEX_POPUST
           cArtikalBarkod, ;        // 12
           cVrstaPlacanja, ;        // 13
           nTotalRacuna, ;          // 14
