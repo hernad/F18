@@ -322,7 +322,6 @@ FUNCTION ofs_status(hParams, cVarijanta)
     hParams["content"] := cContent
     hParams["method"] := cMethod
     
-
     IF hCurl == NIL
         return "99"
     endif
@@ -338,6 +337,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
       
     IF cRet == "0"
         hResponseData := hb_jsonDecode(cData)
+        altd()
         
         cGsc = "" 
         for each cCode in hResponseData["gsc"]
