@@ -14,7 +14,7 @@ FUNCTION f18_sql_schema( cTable )
   RETURN cTable
 
 
-FUNCTION sql_schema()
+STATIC FUNCTION sql_schema()
    RETURN "public"
 
 
@@ -572,7 +572,7 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
     aRacunStavke := pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams)
     
-    hKopija := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+    hKopija := fakt_get_broj_fiskalnog_racuna_ofs( hParams )
 
 RETURN ofs_invoice_create(hFiskParams, aRacunStavke, aKupac, hKopija)
 
@@ -1179,7 +1179,7 @@ FUNCTION is_ofs_fiskalni()
     RETURN hParams[ "drv" ] == "OFS"
 
 
-FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
+FUNCTION fakt_set_broj_fiskalnog_racuna_ofs( hParams )
 
     LOCAL cQuery, oRet, oError, lRet := .F.
   
@@ -1197,7 +1197,7 @@ FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
        return .F.
     ENDIF
 
-    cQuery := "SELECT " + "public.broj_fiskalnog_racuna_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".broj_fiskalnog_racuna_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
@@ -1225,7 +1225,7 @@ FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
     hRet["fiskalni_broj"] := Token( cGet, "_", 1)
     hRet["fiskalni_datum"] := Token( cGet, "_", 2)
 */
-FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
+FUNCTION fakt_get_broj_fiskalnog_racuna_ofs( hParams )
 
     LOCAL cQuery, oRet, oError, hRet, cGet
     
@@ -1240,7 +1240,7 @@ FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
     hRet["fiskalni_broj"] := ""
     hRet["fiskalni_datum"] := ""
    
-    cQuery := "SELECT public.get_broj_dat_fiskalnog_racuna_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
         sql_quote( cIdPos ) + "," + ;
         sql_quote( cIdVd ) + "," + ;
         sql_quote( dDatDok ) + "," + ;
@@ -1411,12 +1411,12 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
 
     hParams[ "idvd" ] := "42"
     // racun koji fiskaliziramo
-    hRet := pos_get_broj_fiskalnog_racuna_ofs( hParams )
+    hRet := fakt_get_broj_fiskalnog_racuna_ofs( hParams )
     hParams[ "fiskalni_broj" ] := hRet["fiskalni_broj"]
     hParams[ "fiskalni_datum" ] := hRet["fiskalni_datum"]
     cFullBroj := hParams[ "fiskalni_broj" ] + "_" + hParams["fiskalni_datum"]
     // naci njegov uuid 
-    hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id_ofs( hParams )
+    hParams[ "fisk_id" ] := fakt_get_fiskalni_dok_id_ofs( hParams )
     // trazimo da li je vec storniranje ovog fiskalnog racuna
     IF Empty(hParams[ "fisk_id" ])
         MsgBeep("Racun koji ste odabrali kao originalni uopste nije fiskalniziran?!")
@@ -1440,7 +1440,7 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
 return .t.
 
 
-FUNCTION pos_get_fiskalni_dok_id_ofs( hParams )
+FUNCTION fakt_get_fiskalni_dok_id_ofs( hParams )
 
     LOCAL cQuery, oRet, cValue, cIdVd, cIdPos, dDatDok, cBrDok
  
@@ -1559,7 +1559,6 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
           aStavka[ FISK_INDEX_NETO_CIJENA ] := field->ncijena
        ENDIF
  
-
        cRobaNaziv := trim(roba->naz)
        aStavka[ FISK_INDEX_BRDOK ] := AllTrim(cIdPos) + "-" + AllTrim(cBrDok)
        aStavka[ FISK_INDEX_RBR ] := AllTrim( Str( ++nRbr ) )
@@ -1609,7 +1608,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
  
     RETURN aStavkeRacuna
  
-
+/*
 FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
 
     LOCAL nStorno, hParams := hb_hash(), cInvoiceNumberDate, cUUID, hRet := hb_hash()
@@ -1631,7 +1630,7 @@ FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
         hRet[ "storno_fiskalni_broj" ] := ""
         hRet[ "storno_fiskalni_datum" ] := ""
     ELSE
-       cInvoiceNumberDate := pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
+       cInvoiceNumberDate := fakt_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
        hRet[ "storno_fiskalni_broj" ] := Token( cInvoiceNumberDate, "_", 1)
        hRet[ "storno_fiskalni_datum" ] := Token( cInvoiceNumberDate, "_", 2)
     ENDIF
@@ -1640,10 +1639,11 @@ FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
     PopWa()
 
 RETURN hRet
-
+*/
 
 // CREATE OR REPLACE FUNCTION p15.set_ref_storno_fisk_dok( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
 
+/*
 FUNCTION pos_set_ref_storno_fisk_dok_ofs( hParams, cUUIDFiskStorniran )
 
     LOCAL cQuery, oError
@@ -1674,9 +1674,10 @@ FUNCTION pos_set_ref_storno_fisk_dok_ofs( hParams, cUUIDFiskStorniran )
     END SEQUENCE
  
 RETURN .T.
+*/
 
-
-FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
+/*
+FUNCTION fakt_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
 
     LOCAL cQuery, oError, oRet, cGet
 
@@ -1698,7 +1699,7 @@ FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
     END SEQUENCE
  
 RETURN cGet
-
+*/
 
 
 // https://en.wikipedia.org/wiki/Bosnian_language
