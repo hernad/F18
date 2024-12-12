@@ -23,6 +23,8 @@
  STATIC s_lFiskalniPrikaziPartnera
  STATIC s_cFiskalniDrajverTremol := "TREMOL"
  STATIC s_cFiskalniDrajverFPRINT := "FPRINT"
+ STATIC s_cFiskalniDrajverOFS := "OFS"
+ 
  STATIC s_cFiskalniUredjaj
  
  
@@ -44,6 +46,7 @@
     LOCAL aRacunStavkeData, aPartnerData
     LOCAL _cont := "1"
     LOCAL lRacunBezgBezPartnera
+    LOCAL hRet
  
     IF !fiscal_opt_active()
        RETURN nErrorLevel
@@ -108,6 +111,11 @@
  
        nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, aPartnerData, ( nStorno == 1 ) )
  
+   CASE cFiskalniDrajver == s_cFiskalniDrajverOFS
+      // aPartnerData
+       hRet := ofs_invoice_create( s_hFiskalniParams, aRacunStavkeData, (nStorno == 1) )
+       nErrorLevel := hRet["error"]
+
  
     ENDCASE
  
@@ -145,11 +153,13 @@
  
  STATIC FUNCTION idpartner_sa_fakt_dokumenta( cIdFirma, cIdTipDok, cBrDok )
  
-    seek_fakt_doks( cIdFirma, cIdTipDok, cBrDok )
+   LOCAL cIdPartner
+
+   seek_fakt_doks( cIdFirma, cIdTipDok, cBrDok )
  
-    cIdPartner := fakt_doks->idpartner
+   cIdPartner := fakt_doks->idpartner
  
-    RETURN cIdPartner
+   RETURN cIdPartner
  
  
  
@@ -248,7 +258,7 @@
     cWhere += " AND idtipdok = " + sql_quote( cIdTipDok )
     cWhere += " AND brdok = " + sql_quote( cBrDok )
  
-    IF AllTrim( cFiskalniModel ) $ "FPRINT#HCP"
+    IF AllTrim( cFiskalniModel ) $ "FPRINT#"
        cWhere += " AND ( ( iznos > 0 AND fisc_rn > 0 ) "
        cWhere += "  OR ( iznos < 0 AND fisc_st > 0 ) ) "
     ELSE
@@ -318,6 +328,7 @@
     LOCAL hTotal := hb_Hash()
     LOCAL cIdTarifa, nI, nIznos
     LOCAL nDbfArea := Select()
+    LOCAL nTarifaPDV, oError
  
     hTotal[ "ukupno" ] := 0
     hTotal[ "pdv" ] := 0
@@ -329,21 +340,29 @@
        nIznos := aTarifaIznos[ nI, 2 ]
  
        select_o_tarifa( cIdTarifa )
+
+       BEGIN SEQUENCE WITH {| err| Break( err ) }
+         nTarifaPDV := tarifa->pdv
+      RECOVER USING  oError
+         // birvaktile baza
+         nTarifaPDV := tarifa->opp
+      END SEQUENCE
+
  
        IF cIdTipDok $ "11#13#23"
-          IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. tarifa->pdv > 0
+          IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. nTarifaPDV > 0
              hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + nIznos
-             hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + ( nIznos / ( 1 + tarifa->pdv / 100 ) )
-             hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( ( nIznos / ( 1 + tarifa->pdv / 100 ) ) * ( tarifa->pdv / 100 ) )
+             hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + ( nIznos / ( 1 + nTarifaPDV / 100 ) )
+             hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( ( nIznos / ( 1 + nTarifaPDV / 100 ) ) * ( nTarifaPDV / 100 ) )
           ELSE
              hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + nIznos
              hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + nIznos
           ENDIF
        ELSE
-          IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. tarifa->pdv > 0
-             hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + ( nIznos * ( 1 + tarifa->pdv / 100 ) )
+          IF !partner_is_ino( cIdPartner ) .AND. !is_part_pdv_oslob_po_clanu( cIdPartner ) .AND. nTarifaPDV > 0
+             hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + ( nIznos * ( 1 + nTarifaPDV / 100 ) )
              hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + nIznos
-             hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( nIznos * ( tarifa->pdv / 100 ) )
+             hTotal[ "pdv" ] := hTotal[ "pdv" ] + ( nIznos * ( nTarifaPDV / 100 ) )
           ELSE
              hTotal[ "ukupno" ] := hTotal[ "ukupno" ] + nIznos
              hTotal[ "osnovica" ] := hTotal[ "osnovica" ] + nIznos
@@ -413,7 +432,7 @@
  STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, lStorno, aPartner )
  
     LOCAL aRacunData := {}
-    LOCAL _n_rn_broj, _rn_iznos, _rn_rabat, _rn_datum, cFiskalniReklamiraniRnBroj
+    LOCAL _n_rn_broj, _rn_iznos, nRabat, _rn_datum, cFiskalniReklamiraniRnBroj
     LOCAL _vrsta_pl, cIdPartner, nTotalRacuna, nRacunFaktTotal
     LOCAL _art_id, nRobaFiscPLU, cNazivArtikla, cRobaJmj, cVrstaPlacanja
     LOCAL cArtikalBarkod, _rn_rbr, aMemo
@@ -424,6 +443,7 @@
     LOCAL hDataItem, _data_total, aArray, nStornoIdentifikator, cRacunBroj
     LOCAL cMemoOpis, nCijena, cIdTarifa, cStornoRacunOpis,  _vr_plac, nKolicina
     LOCAL nI, nItemLevelCheck
+    LOCAL nNetoCijena
  
     // 0 - gotovina
     // 3 - ziralno / virman
@@ -452,7 +472,8 @@
     cFiskalniReklamiraniRnBroj := field->fisc_rn
  
     _rn_iznos := field->iznos
-    _rn_rabat := field->rabat
+    nRabat := field->rabat
+    altd()
     _rn_datum := field->datdok
     cIdPartner := field->idpartner
  
@@ -533,7 +554,6 @@
        //nCijena := roba->mpc
        cIdTarifa := AllTrim( roba->idtarifa )
  
-       
        IF field->dindem != Left( ValBazna(), 3 )
             /////////// FIX BUG zaokr na 2 DEC /////////////////
             nCijena :=  field->cijena
@@ -543,7 +563,9 @@
            hDataItem := fakt_izracunaj_total( aArray, cIdPartner, cIdTipDok )
            nCijena := hDataItem[ "ukupno" ]
        ENDIF    
-       nCijena := field->cijena
+       //? bug? nCijena := field->cijena
+
+       nNetoCijena := nCijena - nRabat 
  
        IF cIdTipDok == "10"
           _vr_plac := "3"
@@ -553,9 +575,9 @@
  
        IF !lInoPartner .AND. !_partn_pdv .AND. RobaZastCijena( roba->idtarifa )
           lPopustNaTeretProdavca := .T.
-          _rn_rabat := 0
+          nRabat := 0
        ELSE
-          _rn_rabat := Abs ( field->rabat )
+          nRabat := Abs ( field->rabat )
        ENDIF
  
        IF lInoPartner == .T.
@@ -569,9 +591,9 @@
        ENDIF
  
        IF field->dindem == Left( ValBazna(), 3 )
-          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - _rn_rabat / 100 ), fakt_zaokruzenje() )
+          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - nRabat / 100 ), fakt_zaokruzenje() )
        ELSE
-          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - _rn_rabat / 100 ), fakt_zaokruzenje() )
+          nRacunFaktTotal += Round( nKolicina * nCijena * fakt_preracun_cijene() * ( 1 - nRabat / 100 ), fakt_zaokruzenje() )
        ENDIF
  
        // 1 - broj racuna
@@ -590,23 +612,27 @@
        // 14 - total racuna
        // 15 - datum racuna
        // 16 - roba jmj
+       // #define FISK_INDEX_NETO_CIJENA 17
  
-       AAdd( aRacunData, { cRacunBroj, ;
-          _rn_rbr, ;
-          _art_id, ;
-          cNazivArtikla, ;
-          nCijena, ;
-          nKolicina, ;
-          cIdTarifa, ;
-          cStornoRacunOpis, ;
-          nRobaFiscPLU, ;
-          nCijena, ;
-          _rn_rabat, ;
-          cArtikalBarkod, ;
-          cVrstaPlacanja, ;
-          nTotalRacuna, ;
-          _rn_datum, ;
-          cRobaJmj } )
+       AAdd( aRacunData, {; 
+          cRacunBroj, ;            // 1
+          _rn_rbr, ;               // 2
+          _art_id, ;               // 3
+          cNazivArtikla, ;         // 4
+          nCijena, ;               // 5
+          nKolicina, ;             // 6
+          cIdTarifa, ;             // 7
+          cStornoRacunOpis, ;      // 8
+          nRobaFiscPLU, ;          // 9
+          nCijena, ;               // 10
+          nRabat, ;                // 11 FISK_INDEX_POPUST
+          cArtikalBarkod, ;        // 12
+          cVrstaPlacanja, ;        // 13
+          nTotalRacuna, ;          // 14
+          _rn_datum, ;             // 15
+          cRobaJmj,;               // 16
+          nNetoCijena;             // 17
+       } )
  
        SKIP
  

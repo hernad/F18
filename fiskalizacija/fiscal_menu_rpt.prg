@@ -60,7 +60,7 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
    CASE cFiskalniDrajver == "OFS"
 
-      AAdd( aOpc, "1. promet fiskalni za period" )
+      AAdd( aOpc, "1. promet fiskalni za period     " )
       AAdd( aOpcExe, {|| ofs_invoice_search() } )
 
       AAdd( aOpc, "2. sadrzaj fiskalnog racuna" )
@@ -71,9 +71,6 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
       AAdd( aOpc, "4. status - porezne stope" )
       AAdd( aOpcExe, {|| ofs_status(NIL, "P") } )
-
-      AAdd( aOpc, "5. postmp ciscenje" )
-      AAdd( aOpcExe, {|| ofs_cleanup() } )
 
       AAdd( aOpc, "6. test hello curl" )
       AAdd( aOpcExe, {|| curl_hello() } )
@@ -204,7 +201,7 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
    f18_menu( "izvf", .F., nIzbor, aOpc, aOpcExe )
 
    altd()
-   
+
    box_x_koord( _m_x )
    box_y_koord( _m_y )
 

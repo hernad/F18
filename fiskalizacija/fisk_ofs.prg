@@ -78,6 +78,7 @@ FUNCTION ofs_get_params()
    
    return hParams
 
+/*
 FUNCTION ofs_cleanup()
     LOCAL hParams := hb_hash()
     LOCAL nDeviceId 
@@ -98,7 +99,7 @@ FUNCTION ofs_cleanup()
     //pos_hernad cleanup_pos_tmp( hParams )
 
     RETURN .T.
-
+*/
 
 
 FUNCTION curl_hello()
@@ -334,7 +335,6 @@ FUNCTION ofs_status(hParams, cVarijanta)
         cRet := "99"
     ENDIF
     
-      
     IF cRet == "0"
         hResponseData := hb_jsonDecode(cData)
         altd()
@@ -434,6 +434,7 @@ FUNCTION ofs_status(hParams, cVarijanta)
     ENDIF
 
     RETURN cRet
+
 
 FUNCTION ofs_create_test_invoice()
 
