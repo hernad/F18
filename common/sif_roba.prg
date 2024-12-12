@@ -142,8 +142,8 @@ FUNCTION P_Roba( cId, dx, dy, cTagTraziPoSifraDob )
    CASE gModul == "FAKT"
        bRoba := {| Ch| fakt_roba_key_handler( Ch ) }
 
-   OTHERWISE
-       bRoba := {| Ch | pos_roba_block( Ch ) }
+   //OTHERWISE
+   //    bRoba := {| Ch | pos_roba_block( Ch ) }
    ENDCASE
 
 

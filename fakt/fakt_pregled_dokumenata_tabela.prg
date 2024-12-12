@@ -283,7 +283,8 @@ FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUred
       hFiskRacunParams[ "datum" ] := field->fisc_date
       hFiskRacunParams[ "vrijeme" ] := field->fisc_time
 
-      fprint_dupliciraj_racun( hFiskalniParams, hFiskRacunParams )
+      fprint_dupliciraj_racun_vrijeme( hFiskalniParams, hRacunParams )
+
 
       MsgBeep( "Duplikat računa za datum: " + DToC( field->fisc_date ) + ", vrijeme: " + AllTrim( field->fisc_time ) )
       lRefresh := .T.

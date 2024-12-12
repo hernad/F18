@@ -233,13 +233,7 @@ FUNCTION p_sifra_da_li_vec_postoji_sifra( cId, cIdBK, cUslovSrch, cNazSrch ) // 
 
    IF Alias() == "ROBA" .AND. Len( cId ) > 10
 
-#ifdef F18_POS
-      IF !tezinski_barkod( @cId, @_tezina, .F. )
-         barkod_or_roba_id( @cId )
-      ENDIF
-#else
       barkod_or_roba_id( @cId )
-#endif
       // ordSetFocus( _order )
       // RETURN "barkod"
 
@@ -249,13 +243,8 @@ FUNCTION p_sifra_da_li_vec_postoji_sifra( cId, cIdBK, cUslovSrch, cNazSrch ) // 
 
    ENDIF
 
-   IF Alias() == "OS" .OR. Alias() == "SII"
-       find_os_sii_by_naz_or_id( cId )
-   ELSEIF Alias() == "REVAL"
-      find_reval_by_id( cId )
-   ELSEIF Alias() == "AMORT"
-      find_amort_by_id( cId )
-   ELSEIF Alias() == "PARTN"
+ 
+   IF Alias() == "PARTN"
       find_partner_by_naz_or_id( cId )
    ELSEIF Alias() == "ROBA"
       find_roba_by_naz_or_id( cId )
@@ -263,8 +252,6 @@ FUNCTION p_sifra_da_li_vec_postoji_sifra( cId, cIdBK, cUslovSrch, cNazSrch ) // 
       find_roba_p_by_naz_or_id( cId )
    ELSEIF Alias() == "KONTO"
       find_konto_by_naz_or_id( cId )
-   ELSEIF Alias() == "RADN"
-      find_radn_by_naz_or_id( cId )
    ELSEIF Alias() == "TARIFA"
       find_tarifa_by_id( cId )
    ELSEIF Alias() == "KONCIJ"

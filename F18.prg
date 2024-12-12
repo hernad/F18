@@ -261,55 +261,7 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
       AAdd( aMeniExec, {|| MainFakt( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
    ENDIF
 
-   IF f18_use_module( "epdv" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". ePDV  # elektronska evidencija PDV-a" )
-      AAdd( aMeniExec, {|| MainEpdv( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-
-   IF f18_use_module( "ld" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". LD    # obračun plata" )
-      AAdd( aMeniExec, {|| MainLd( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-
-
-   IF f18_use_module( "os" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". OS/SII# osnovna sredstva i sitan inventar" )
-      AAdd( aMeniExec, {|| MainOs( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-
-   IF f18_use_module( "virm" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". VIRM  # virmani" )
-      AAdd( aMeniExec, {|| MainVirm( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-
-#ifdef F18_RNAL
-   IF f18_use_module( "rnal" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". RNAL  # radni nalozi" )
-      AAdd( aMeniExec, {|| MainRnal( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-#endif
-
-#ifdef F18_POS
-   IF f18_use_module( "pos" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". POS   # maloprodajna kasa" )
-      AAdd( aMeniExec, {|| MainPos( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-#endif
-
-#ifdef F18_MAT
-   IF f18_use_module( "mat" )
-      cMenuBrojac := PadL( AllTrim( Str( ++_count ) ), 2 )
-      AAdd( aMeniOpcije, cMenuBrojac + ". MAT   # materijalno" )
-      AAdd( aMeniExec, {|| MainMat( my_user(), "dummy", p3, p4, p5, p6, p7 ) } )
-   ENDIF
-#endif
-
+   
    AAdd( aMeniOpcije, "---------------------------------------------" )
    AAdd( aMeniExec, {|| NIL } )
 

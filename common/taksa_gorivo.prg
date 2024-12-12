@@ -140,52 +140,11 @@ FUNCTION dodaj_taksu_za_gorivo( nKolicina )
       dodaj_sifru_takse_u_sifarnik_robe()
    ENDIF
 
-   IF is_modul_pos()
-      dodaj_taksu_za_gorivo_na_pos_racun( nKolicina )
-   ELSE
-      dodaj_taksu_za_gorivo_na_fakt_racun( nKolicina )
-   ENDIF
+   dodaj_taksu_za_gorivo_na_fakt_racun( nKolicina )
 
    SELECT ( nSelect )
 
    RETURN lRet
-
-
-
-STATIC FUNCTION dodaj_taksu_za_gorivo_na_pos_racun( nKolicina )
-
-   LOCAL hRec, hPrviRec
-
-   SELECT _pos_pripr
-
-   GO TOP
-   hPrviRec := dbf_get_rec()
-
-   APPEND BLANK
-   hRec := dbf_get_rec()
-
-   hRec["idpos"] := hPrviRec["idpos"]
-   hRec["idvd"] := hPrviRec["idvd"]
-   hRec["brdok"] := hPrviRec["brdok"]
-   hRec["datum"] := hPrviRec["datum"]
-   hRec["sto"] := hPrviRec["sto"]
-   hRec["smjena"] := hPrviRec["smjena"]
-   hRec["idodj"] := hPrviRec["idodj"]
-   hRec["idradnik"] := hPrviRec["idradnik"]
-   hRec["idcijena"] := hPrviRec["idcijena"]
-   hRec["prebacen"] := hPrviRec["prebacen"]
-   hRec["mu_i"] := hPrviRec["mu_i"]
-
-   hRec["idroba"] := s_cId_taksa
-   hRec["kolicina"] := nKolicina
-   hRec["cijena"] := roba->mpc
-   hRec["idtarifa"] := roba->idtarifa
-   hRec["robanaz"] := roba->naz
-   hRec["jmj"] := roba->jmj
-
-   dbf_update_rec( hRec )
-
-   RETURN .T.
 
 
 

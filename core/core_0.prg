@@ -179,3 +179,16 @@ FUNCTION my_rddName()
    ENDIF
 
    RETURN "unused"
+
+FUNCTION set_cursor_on()
+
+   LOCAL nCursor := SetCursor()
+
+   IF nCursor == 0
+         SetCursor( 1 )
+   ENDIF
+
+   Set( _SET_EVENTMASK, HB_INKEY_ALL )
+   MSetCursor(.T.)
+
+   RETURN .T.   

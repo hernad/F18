@@ -71,53 +71,13 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
 
    IF lMakeIndex
 
-      IF cTable == "os_os" .OR. cTable == "sii_sii"
-
-         index_os_sii( cAlias )
-
-         SET ORDER TO TAG "1"
-
-      ELSEIF cTable == "os_promj" .OR. cTable == "sii_promj"
-
-         INDEX ON id + tip + DToS( datum ) + opis  TAG "1" TO ( cAlias )
-         SET ORDER TO TAG "1"
-
-      ELSEIF cTable == "ld_radn" // RADN je izuzetak sa imenima tagova "1", "2"
-         INDEX ON ID TAG "1" TO ( cAlias )
-         IF FieldPos( "NAZ" ) > 0
-            INDEX ON NAZ TAG "2" TO ( cAlias )
-         ENDIF
-         SET ORDER TO TAG "1"
-
-      ELSEIF cTable == "ld_obracuni"
-
-         INDEX ON rj + Str( godina, 4, 0 ) + Str( mjesec, 2, 0 ) + STATUS + obr TAG RJ  TO ( cAlias )
-         SET ORDER TO TAG "RJ"
-
-      ELSEIF cTable == "ld_parobr"
-
-         INDEX ON id + godina + obr TAG ID TO ( cAlias ) // id sadrzi informaciju o mjesecu
-         SET ORDER TO TAG "ID"
-
-      ELSEIF cTable == "ops"
-
-         INDEX ON ID TAG "ID" TO ( cAlias )
-         INDEX ON NAZ TAG "NAZ" TO ( cAlias )
-         INDEX ON IDJ TAG "IDJ" TO ( cAlias )
-         INDEX ON IDKAN TAG "IDKAN" TO ( cAlias )
-         INDEX ON IDN0 TAG "IDN0" TO ( cAlias )
-         SET ORDER TO TAG "ID"
-
-      ELSEIF cTable == "dest"
+   
+      IF cTable == "dest"
 
          INDEX ON field->IDPARTNER + field->ID TAG "ID" TO ( cAlias )
          INDEX ON ID TAG "IDDEST" TO ( cAlias )
          SET ORDER TO TAG "ID"
 
-      ELSEIF cTable == "jprih"
-         INDEX ON  id + IdOps + IdKan + IdN0 + Racun TAG "ID" TO  ( cAlias )
-         INDEX ON  Naz + IdOps TAG "NAZ" TO  ( cAlias )
-         SET ORDER TO TAG "ID"
 
 
       ELSEIF cTable == "roba"
@@ -134,10 +94,6 @@ FUNCTION use_sql_sif( cTable, lMakeIndex, cAlias, cId )
          INDEX ON field->ID + Str( field->R_BR, 4, 0 ) + field->ID2 TAG "IDRBR" TO ( cAlias )
          INDEX ON field->ID2 + field->ID TAG "NAZ" TO ( cAlias )
          SET ORDER TO TAG "ID"
-
-      ELSEIF cTable == "pos_osob"
-         INDEX ON KorSif TAG "ID" TO ( cAlias )
-         INDEX ON NAZ TAG "NAZ" TO ( cAlias )
 
       ELSE
          INDEX ON ID TAG "ID" TO ( cAlias )

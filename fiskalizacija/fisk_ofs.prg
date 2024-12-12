@@ -6,9 +6,64 @@
 //#DEFINE OFS_URL   "http://ofs.svc.test.out.ba:8000"
 //#DEFINE OFS_API_KEY "0123456789abcdef0123456789abcdef"
 
+/////////// PORT iz F18 v4 //////////////////////////////
+
+FUNCTION f18_sql_schema( cTable )
+  RETURN "fmk"
 
 FUNCTION sql_schema()
    RETURN "public"
+
+
+FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
+
+LOCAL cRet := "0"
+
+IF s_cFiskalniDrajverNaziv == NIL
+    Altd( "pos_get_vrsta_placanja_0123 nije setovana!? QUIT!")
+    QUIT_1
+ENDIF
+
+IF s_cFiskalniDrajverNaziv == "OFS"
+    // default placanje
+    cRet := "Cash"
+ENDIF
+
+IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
+    // gotovina FPRINT, TREMOL
+    IF s_cFiskalniDrajverNaziv == "OFS"
+        RETURN "Cash"
+    ELSE
+        RETURN "0"
+    ENDIF
+ENDIF
+
+IF cIdVrstePlacanja == "CK"
+    IF s_cFiskalniDrajverNaziv == "FPRINT"
+        // https://redmine.bring.out.ba/issues/38042#change-291730
+        RETURN "2"
+    ELSEIF s_cFiskalniDrajverNaziv == "OFS"
+        RETURN "Check"
+    ENDIF
+    // TREMOL
+    RETURN "1"  // cek
+ENDIF
+
+IF cIdVrstePlacanja == "KT"
+    IF s_cFiskalniDrajverNaziv == "FPRINT"
+        // https://redmine.bring.out.ba/issues/38042#change-291730
+        RETURN "1" 
+    ELSEIF s_cFiskalniDrajverNaziv == "OFS"
+        RETURN "Card"
+    ELSE
+        // TREMOL
+        RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
+    ENDIF
+ENDIF
+
+RETURN cRet
+
+/////////////////////////////////////////////   
    
 FUNCTION ofs_get_params()
    LOCAL cUserName := my_user()
@@ -26,7 +81,7 @@ FUNCTION ofs_cleanup()
  
     LOCAL cDokumentNaziv
 
-    o_pos__pripr()
+    //o_pos__pripr()
     my_dbf_pack()
     IF _pos_pripr->( RecCount2() ) == 0
        my_close_all_dbf()
@@ -34,10 +89,10 @@ FUNCTION ofs_cleanup()
     ENDIF
  
     GO TOP
-    hParams[ "idpos" ] := _pos_pripr->idpos
+    //hParams[ "idpos" ] := _pos_pripr->idpos
     my_close_all_dbf()
  
-    cleanup_pos_tmp( hParams )
+    //pos_hernad cleanup_pos_tmp( hParams )
 
     RETURN .T.
 
@@ -1299,9 +1354,9 @@ FUNCTION pos_storno_racun_ofs( hParams )
     IF !hb_HHasKey( hParams, "brdok" )
        hParams[ "brdok" ] := NIL
     ENDIF
-    IF !hb_HHasKey( hParams, "idpos" )
-       hParams[ "idpos" ] := pos_pm()
-    ENDIF
+    //IF !hb_HHasKey( hParams, "idpos" )
+    //   hParams[ "idpos" ] := pos_pm()
+    //ENDIF
     IF hParams[ "datum" ] == nil
        hParams[ "datum" ] := danasnji_datum()
     ENDIF
@@ -1312,14 +1367,11 @@ FUNCTION pos_storno_racun_ofs( hParams )
 
 
     IF pronadji_fiskalni_racun_za_storniranje_ofs(@hParams)        
-        IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
-            // hParams["fisk_rn"] i hParams["fisk_id"] se upisuju u _pos_pripr
-            // da li nam je neophodan fisk_rn koji je numeric ? nije 
-            //AAdd( aDBf, { 'fisk_rn', 'I',  4,  0 } )
-            //AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
-            hParams[ "fisk_rn" ] := 999
-            pos_napravi_u_pripremi_storno_dokument( hParams )
-        ENDIF
+        //pos_hernad IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
+            
+            //pos_hernad hParams[ "fisk_rn" ] := 999
+            //pos_hernad pos_napravi_u_pripremi_storno_dokument( hParams )
+        //pos_hernad ENDIF
     ENDIF
 
     PopWa()
@@ -1334,7 +1386,7 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
     PushWA()
     Box(, 5, 55 )
     @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
-    @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
+    //pos_hernad @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
     READ
     BoxC()
     IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
@@ -1452,27 +1504,27 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     altd()
     lStorno := !Empty( hParams["storno_fiskalni_broj"] )
  
-    if !lAzuriraniDokument
-       IF !seek_pos_doks_tmp( cIdPos, cIdVd, dDatDok, cBrdok)
-         lTmpTabele := .F.
-         IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
-            RETURN NIL
-         ENDIF
-       ENDIF
-    ENDIF
+    //pos_hernad if !lAzuriraniDokument
+    //pos_hernad    IF !seek_pos_doks_tmp( cIdPos, cIdVd, dDatDok, cBrdok)
+    //pos_hernad      lTmpTabele := .F.
+    //pos_hernad      IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
+    //pos_hernad         RETURN NIL
+    //pos_hernad      ENDIF
+    //pos_hernad    ENDIF
+    //pos_hernad ENDIF
 
     cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep)
-    nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele)
+    //pos_hernad nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele)
  
     IF nUplaceniIznos > 0
        nPosRacunUkupno := nUplaceniIznos
     ENDIF
  
-    IF !seek_pos_pos_tmp( cIdPos, cIdVd, dDatDok, cBrDok )
-      IF !seek_pos_pos( cIdPos, cIdVd, dDatDok, cBrDok )
-          RETURN NIL
-      ENDIF
-    ENDIF
+    //pos_hernad IF !seek_pos_pos_tmp( cIdPos, cIdVd, dDatDok, cBrDok )
+    //pos_hernad  IF !seek_pos_pos( cIdPos, cIdVd, dDatDok, cBrDok )
+    //pos_hernad      RETURN NIL
+    //pos_hernad  ENDIF
+    //pos_hernad ENDIF
  
     altd()
     nPosRacunUkupnoCheck := 0

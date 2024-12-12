@@ -49,40 +49,6 @@ FUNCTION set_a_dbfs()
       set_a_dbf_fakt()
    ENDIF
 
-   IF f18_use_module( "ld" )
-      set_a_dbf_ld()
-      set_a_dbf_ld_sif()
-   ENDIF
-
-   IF f18_use_module( "epdv" )
-      set_a_dbf_epdv()
-   ENDIF
-
-   IF f18_use_module( "os" )
-      set_a_dbf_os()
-   ENDIF
-
-   IF f18_use_module( "virm" )
-      set_a_dbf_virm()
-   ENDIF
-
-#ifdef F18_POS
-   IF f18_use_module( "pos" )
-      set_a_dbf_pos()
-   ENDIF
-#endif
-
-#ifdef F18_RNAL
-   IF f18_use_module( "rnal" )
-      set_a_dbf_rnal()
-   ENDIF
-#endif
-
-#ifdef F18_MAT
-   IF f18_use_module( "mat" )
-      set_a_dbf_mat()
-   ENDIF
-#endif
 
 //#ifdef F18_KADEV
 //   IF f18_use_module( "kadev" )

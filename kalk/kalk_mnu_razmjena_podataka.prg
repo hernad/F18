@@ -22,11 +22,6 @@ FUNCTION kalk_razmjena_podataka()
    AAdd( _opcexe, {|| kalk_kontiranje_gen_finmat( .T. ) } )
    AAdd( _opc, "2. fakt -> kalk" )
    AAdd( _opcexe, {|| fakt_kalk() } )
-   AAdd( _opc, "3. pos -> kalk razduženje prodavnice" )
-   AAdd( _opcexe, {|| kalk_prenos_iz_pos_u_kalk() } )
-
-   AAdd( _opc, "4. kalk -> tops" )
-   AAdd( _opcexe, {|| kalk_tops_meni() } )
 
    AAdd( _opc, "5. import vindija varaždin" )
    AAdd( _opcexe, {|| meni_import_vindija() } )

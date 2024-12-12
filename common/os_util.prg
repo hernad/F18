@@ -648,3 +648,24 @@ FUNCTION f18_open_mime_document( cDocument )
    ENDIF
 
    RETURN nError
+
+
+FUNCTION file_to_str( cFileName )
+
+   LOCAL oFile, cSadrzaj
+
+   cFileName := AllTrim( cFileName )
+   oFile := TFileRead():New( cFileName )
+   oFile:Open()
+   IF oFile:Error()
+      RETURN "READ_ERROR ?!"
+   ENDIF
+
+   cSadrzaj := ""
+   DO WHILE oFile:MoreToRead()
+      cSadrzaj += oFile:ReadLine()
+   ENDDO
+
+   oFile:Close()
+
+   RETURN cSadrzaj

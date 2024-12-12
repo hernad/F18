@@ -50,10 +50,8 @@ FUNCTION opci_sifarnici()
    AAdd( aOpc, "7. općine" )
    AAdd( aOpcExe, {|| P_Ops() } )
 
-
-   AAdd( aOpc, "8. banke" )
-   AAdd( aOpcExe, {|| P_Banke() } )
-
+   //AAdd( aOpc, "8. banke" )
+   //AAdd( aOpcExe, {|| P_Banke() } )
 
    AAdd( aOpc, "9. sifk - karakteristike" )
    AAdd( aOpcExe, {|| P_SifK() } )

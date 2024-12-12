@@ -6,14 +6,7 @@ fin/*.prg
 fakt/*.prg
 kalk/*.prg
 kalk_legacy/*.prg
-{F18_RNAL}rnal/*.prg
-epdv/*.prg
-ld/*.prg
-os/*.prg
-{F18_POS}pos/*.prg
-{F18_MAT}mat/*.prg
 virm/*.prg
-{F18_KADEV}kadev/*.prg
 common/*.prg
 core/*.prg
 core_ui2/*.prg

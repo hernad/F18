@@ -97,15 +97,15 @@ STATIC FUNCTION valid_roba( cIdRoba, cIdTarifa, lNoviDokument, aPorezi )
       cIdTarifa := cTarifa
    ENDIF
 
-   IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
+   //IF tezinski_barkod_get_tezina( _ocitani_barkod, @_tezina ) .AND. _tezina <> 0 // momenat kada mozemo ocitati tezinu iz barkod-a ako se koristi
 
-      _kolicina := _tezina // ako je ocitan tezinski barkod
+   //   _kolicina := _tezina // ako je ocitan tezinski barkod
 
-      IF _idvd == "80" .AND. ( !Empty( _idkonto2 ) .AND. _idkonto2 <> "XXX" ) // kod predispozicije kolicina treba biti negativna kod prvog ocitanja
-         _kolicina := -_kolicina
-      ENDIF
+   //   IF _idvd == "80" .AND. ( !Empty( _idkonto2 ) .AND. _idkonto2 <> "XXX" ) // kod predispozicije kolicina treba biti negativna kod prvog ocitanja
+   //      _kolicina := -_kolicina
+   //   ENDIF
 
-   ENDIF
+   //ENDIF
 
    RETURN .T.
 

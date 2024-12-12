@@ -37,5 +37,8 @@ libs=hbmzip
 {msvc}libpaths=c:\dev\F18_conan_deploy\x86\libiconv\lib
 {msvc}libpaths=c:\dev\F18_conan_deploy\x86\icu\lib
 
+{linux}libs=curl
+{win}libs=libcurl
+libs=${_HB_DYNPREF}hbcurl${_HB_DYNSUFF}
 
 mt=yes

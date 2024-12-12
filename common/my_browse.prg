@@ -667,20 +667,6 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
    CASE Upper( Chr( nKey ) ) == "F"
 
 
-      IF Alias() == "OS" .OR. Alias() == "SII"
-         Box( "#Unijeti dio šifre ili naziva ili mjesta", 1, 70 )
-         SET CURSOR ON
-         @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
-         READ
-         BoxC()
-         IF LastKey() != K_ESC
-            find_os_sii_by_naz_or_id( cIdOrNaz )
-            oBrowse:RefreshAll()
-            RETURN DE_REFRESH
-         ENDIF
-         lKeyHendliran := .T.
-      ENDIF
-
       IF Alias() == "PARTN"
          Box( "#Unijeti dio šifre ili naziva ili mjesta", 1, 70 )
          SET CURSOR ON
@@ -727,19 +713,6 @@ FUNCTION my_browse_f18_komande_with_my_key_handler( oBrowse, nKey, nKeyHandlerRe
          lKeyHendliran := .T.
       ENDIF
 
-      IF Alias() == "RADN"
-         Box( "#Unijeti dio šifre, prezimena ili imena radnika", 1, 70 )
-         SET CURSOR ON
-         @ box_x_koord() + 1, box_y_koord() + 1 SAY "" GET cIdOrNaz PICT "@!S50"
-         READ
-         BoxC()
-         IF LastKey() != K_ESC
-            find_radn_by_naz_or_id( cIdOrNaz )
-            oBrowse:RefreshAll()
-            RETURN DE_REFRESH
-         ENDIF
-         lKeyHendliran := .T.
-      ENDIF
 
       IF Alias() == "FAKT_FTXT"
          Box( "#Unijeti dio šifre ili sadržaja uzorka", 1, 70 )

@@ -162,22 +162,43 @@ FUNCTION select_o_konto( cId )
    RETURN o_konto( cId )
 
 
-
-
-FUNCTION o_vrste_placanja()
-
-   LOCAL cTabela := "vrstep"
+FUNCTION o_vrstep( cId )
 
    SELECT ( F_VRSTEP )
-   IF !use_sql_sif  ( cTabela )
-      error_bar( "o_sql", "open sql " + cTabela )
+   use_sql_vrstep( cId )
+   SET ORDER TO TAG "ID"
+
+   RETURN !Eof()   
+
+FUNCTION use_sql_vrstep( cId )
+
+   LOCAL cSql
+   LOCAL cTable := f18_sql_schema( "vrstep" )
+
+   SELECT ( F_VRSTEP )
+   IF !use_sql_sif( cTable, .T., "VRSTEP", cId )
       RETURN .F.
    ENDIF
 
-   SET ORDER TO TAG "ID"
+   IF cId != NIL
+      SEEK cId
+   ENDIF
 
    RETURN !Eof()
+   
 
+FUNCTION select_o_vrstep( cId )
+
+   SELECT ( F_VRSTEP )
+   IF Used()
+      IF RecCount() > 1 .AND. cId == NIL
+         RETURN .T.
+      ELSE
+         USE // samo zatvoriti postojecu tabelu, pa ponovo otvoriti sa cId
+      ENDIF
+   ENDIF
+
+   RETURN o_vrstep( cId )
 
 /*
 

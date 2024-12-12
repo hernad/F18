@@ -52,27 +52,3 @@ FUNCTION P_Ops( cId, dx, dy )
    RETURN xRet
 
 
-
-FUNCTION P_Banke( cId, dx, dy )
-
-   LOCAL _arr, nI
-   PRIVATE ImeKol
-   PRIVATE Kol
-
-   _arr := Select()
-   o_banke()
-
-   ImeKol := {}
-   AAdd( ImeKol, { PadR( "Id", 2 ), {|| id }, "id", {|| .T. }, {|| valid_sifarnik_id_postoji( wId ) } } )
-   AAdd( ImeKol, { PadR( "Naziv", 35 ), {|| PadR( ToStrU( naz ), 35 ) }, "naz" } )
-   AAdd( ImeKol, { "Mjesto", {|| mjesto }, "mjesto" } )
-   AAdd( ImeKol, { "Adresa", {|| adresa }, "adresa" } )
-
-   Kol := {}
-   FOR nI := 1 TO Len( ImeKol )
-      AAdd( Kol, nI )
-   NEXT
-
-   SELECT ( _arr )
-
-   RETURN p_sifra( F_BANKE, 1, f18_max_rows() -15, f18_max_cols() -10, "MatPod: Lista banaka", @cId, dx, dy )

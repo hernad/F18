@@ -37,9 +37,9 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       lPozivFromPOS := .F.
    ENDIF
 
-   hParams[ "idpos" ] := pos_pm()
-   create_pos_tmp( hParams )
-   cleanup_pos_tmp( hParams )
+   //hParams[ "idpos" ] := pos_pm()
+   //create_pos_tmp( hParams )
+   //cleanup_pos_tmp( hParams )
 
    s_nFiskalniDeviceId := odaberi_fiskalni_uredjaj( NIL, lPozivFromPOS, .F. )
 
@@ -83,22 +83,7 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       AAdd( aOpcExe, {|| ofs_create_test_invoice() } )
 #endif
 
-   CASE cFiskalniDrajver == "FLINK"
-
-      AAdd( aOpc, "------ izvještaji ---------------------------------" )
-      AAdd( aOpcExe, {|| NIL } )
-
-      AAdd( aOpc, "1. dnevni izvještaj  (Z-rep / X-rep)          " )
-      AAdd( aOpcExe, {|| flink_dnevni_izvjestaj() } )
-
-      AAdd( aOpc, "------ ostale komande --------------------" )
-      AAdd( aOpcExe, {|| NIL } )
-
-      AAdd( aOpc, "5. unos depozita u uređaj       " )
-      AAdd( aOpcExe, {|| flink_polog() } )
-
-      AAdd( aOpc, "6. poništi otvoren racun      " )
-      AAdd( aOpcExe, {|| flink_reset_racuna() } )
+   
 
    CASE cFiskalniDrajver == "FPRINT"
 

@@ -73,49 +73,7 @@ FUNCTION cre_all_dbfs( ver )
       cre_all_fakt( ver )
    ENDIF
 
-   IF f18_use_module( "ld" )
-      cre_all_ld_sif( ver )
-      cre_all_ld( ver )
-   ENDIF
 
-
-   IF f18_use_module( "os" )
-      cre_all_os( ver )
-   ENDIF
-
-   IF f18_use_module( "virm" )
-      cre_all_virm_sif( ver )
-      cre_all_virm( ver )
-   ENDIF
-
-
-   IF f18_use_module( "epdv" )
-      cre_all_epdv( ver )
-   ENDIF
-
-#ifdef F18_POS
-   IF f18_use_module( "pos" )
-      cre_all_pos( ver )
-   ENDIF
-#endif
-
-#ifdef F18_RNAL
-   IF f18_use_module( "rnal" )
-      cre_all_rnal( ver )
-   ENDIF
-#endif
-
-#ifdef F18_MAT
-   IF f18_use_module( "mat" )
-      cre_all_mat( ver )
-   ENDIF
-#endif
-
-#ifdef F18_KADEV
-   IF f18_use_module( "kadev" )
-      cre_all_kadev( ver )
-   ENDIF
-#endif
 
 /*
    IF _first_start == 0

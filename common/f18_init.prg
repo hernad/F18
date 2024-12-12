@@ -522,15 +522,6 @@ FUNCTION desktop_cols()
    RETURN s_nDesktopCols
 
 
-FUNCTION log_level( x )
-
-   IF ValType( x ) == "N"
-      __log_level := x
-   ENDIF
-
-   RETURN __log_level
-
-
 
 
 FUNCTION my_home( cHome )
@@ -669,63 +660,6 @@ FUNCTION no_sql_mode( val )
    ENDIF
 
    RETURN __no_sql_mode
-
-
-
-
-
-FUNCTION log_write( cMsg, nLevel, lSilent )
-
-   LOCAL _msg_time
-
-   IF nLevel == NIL
-      // uzmi defaultni
-      nLevel := log_level()
-   ENDIF
-
-   IF lSilent == NIL
-      lSilent := .F.
-   ENDIF
-
-   // treba li logirati ?
-   IF nLevel > log_level()
-      RETURN .T.
-   ENDIF
-
-   _msg_time := DToC( Date() )
-   _msg_time += ", "
-   _msg_time += PadR( Time(), 8 )
-   _msg_time += ": "
-
-   // time ide samo u fajl, ne na server
-   // ovdje ima neki problem #30139 iskljucujem dok ne skontamo
-   // baca mi ove poruke u outf.txt
-   // FWRITE( s_nF18FileHandle, _msg_time + cMsg + hb_eol() )
-
-   IF server_log()
-      server_log_write( cMsg, lSilent )
-   ENDIF
-
-   ?E _msg_time, cMsg
-
-   RETURN .T.
-
-
-FUNCTION server_log()
-   RETURN s_psqlServer_log
-
-
-FUNCTION server_log_disable()
-
-   s_psqlServer_log := .F.
-
-   RETURN .T.
-
-FUNCTION server_log_enable()
-
-   s_psqlServer_log := .T.
-
-   RETURN .T.
 
 
 

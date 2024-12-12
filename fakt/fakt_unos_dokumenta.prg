@@ -95,10 +95,6 @@ FUNCTION fakt_unos_dokumenta()
    LOCAL _sep := hb_UTF8ToStrBox( BROWSE_COL_SEP )
    PRIVATE ImeKol, Kol
 
-#ifdef F18_POS
-
-   pos_unset_key_handler_ispravka_racuna()
-#endif
    zadnji_fiscal_z_report_info()
 
    close_open_fakt_tabele()
@@ -1360,70 +1356,6 @@ FUNCTION StUgRabKup()
    lUgRab := .F.
 
    RETURN .T.
-
-
-
-
-/*
-FUNCTION IspisBankeNar( cBanke )
-
-   LOCAL aaOpc
-
-   o_banke()
-   aaOpc := TokToNiz( cBanke, "," )
-   cVrati := ""
-
-   SELECT banke
-   SET ORDER TO TAG "ID"
-   FOR i := 1 TO Len( aaOpc )
-  --    HSEEK SubStr( aaOpc[ i ], 1, 3 )
-      IF Found()
-         cVrati += AllTrim( banke->naz ) + ", " + AllTrim( banke->adresa ) + ", " + AllTrim( banke->mjesto ) + ", " + AllTrim( aaOpc[ i ] ) + "; "
-      ELSE
-         cVrati += ""
-      ENDIF
-   NEXT
-   SELECT partn
-
-   RETURN cVrati
-*/
-
-
-
-/* JeStorno10()
- *     True je distribucija i TipDokumenta=10  i krajnji desni dio broja dokumenta="S"
-
-FUNCTION JeStorno10()
---   RETURN glDistrib .AND. _idtipdok == "10" .AND. Upper( Right( Trim( _BrDok ), 1 ) ) == "S"
-
-*/
-
-/* RabPor10()
-
-
-FUNCTION RabPor10()
-
-   LOCAL nArr := Select()
-
-  -- seek_fakt( _idfirma, "10", Left( _brdok, gNumDio ) )
-
-   DO WHILE !Eof() .AND.  _idfirma + "10" + Left( _brdok, gNumDio ) == idfirma + idtipdok + Left( brdok, gNumDio ) .AND. _idroba <> idroba
-      SKIP 1
-   ENDDO
-
-   IF _idfirma + "10" + Left( _brdok, gNumDio ) == idfirma + idtipdok + Left( brdok, gNumDio )
-      _rabat    := rabat
-      _porez    := porez
-      // i cijenu, sto da ne?
-      _cijena   := cijena
-   ELSE
-      MsgBeep( "Izabrana roba ne postoji u fakturi za storniranje!" )
-   ENDIF
-   SELECT ( nArr )
-
-   RETURN .T.
-
-*/
 
 
 STATIC FUNCTION popup_fakt_unos_dokumenta()
