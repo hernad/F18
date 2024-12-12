@@ -335,5 +335,5 @@ STATIC FUNCTION set_program_module_menu( aMeniOpcije, aMeniExec, p3, p4, p5, p6,
    RETURN .T.
 
 
-FUNCTION hb_SendMail( ... )
-   RETURN tip_MailSend( ... )
+//FUNCTION hb_SendMail( ... )
+//   RETURN tip_MailSend( ... )

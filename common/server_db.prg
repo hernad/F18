@@ -62,7 +62,7 @@ FUNCTION check_server_db_version()
 
       MsgBeep( _msg )
 
-      OutMsg( 1, _msg + hb_osNewLine() )
+      OutMsg( 1, _msg + hb_eol() )
       RETURN .T.
    ENDIF
 
