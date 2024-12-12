@@ -7,6 +7,9 @@
 //#DEFINE OFS_API_KEY "0123456789abcdef0123456789abcdef"
 
 
+FUNCTION sql_schema()
+   RETURN "public"
+   
 FUNCTION ofs_get_params()
    LOCAL cUserName := my_user()
    LOCAL hParams := hb_hash()
@@ -1132,7 +1135,7 @@ FUNCTION pos_set_broj_fiskalnog_racuna_ofs( hParams )
        return .F.
     ENDIF
 
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".broj_fiskalnog_racuna_ofs(" + ;
+    cQuery := "SELECT " + "public.broj_fiskalnog_racuna_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
@@ -1175,7 +1178,7 @@ FUNCTION pos_get_broj_fiskalnog_racuna_ofs( hParams )
     hRet["fiskalni_broj"] := ""
     hRet["fiskalni_datum"] := ""
    
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
+    cQuery := "SELECT public.get_broj_dat_fiskalnog_racuna_ofs(" + ;
         sql_quote( cIdPos ) + "," + ;
         sql_quote( cIdVd ) + "," + ;
         sql_quote( dDatDok ) + "," + ;
@@ -1213,7 +1216,7 @@ FUNCTION pos_is_storno_ofs( hParams )
     dDatDok := hParams["datum"]
     cBrDok := hParams["brdok"]
 
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_is_storno_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".pos_is_storno_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
@@ -1238,7 +1241,7 @@ FUNCTION pos_storno_broj_rn_ofs( cIdPos, cIdVd, dDatDok, cBrDok )
  
     LOCAL cQuery, oRet, cValue
  
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".pos_storno_broj_rn_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".pos_storno_broj_rn_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
@@ -1270,7 +1273,7 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
        RETURN ""
     ENDIF
 
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".fisk_broj_rn_by_storno_ref_ofs(" + ;
        sql_quote( cUUIDFiskStorniran ) +  ")"
 
     altd()
@@ -1391,7 +1394,7 @@ FUNCTION pos_get_fiskalni_dok_id_ofs( hParams )
        RETURN 0
     ENDIF
  
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_dok_id_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".fisk_dok_id_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
@@ -1596,7 +1599,7 @@ FUNCTION pos_set_ref_storno_fisk_dok_ofs( hParams, cUUIDFiskStorniran )
        RETURN .F.
     ENDIF
  
-    cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".set_ref_storno_fisk_dok_ofs(" + ;
+    cQuery := "SELECT " + sql_schema() + ".set_ref_storno_fisk_dok_ofs(" + ;
        sql_quote( cIdPos ) + "," + ;
        sql_quote( cIdVd ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
@@ -1620,7 +1623,7 @@ FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
 
     // select invoice_number || '_' || sdc_date_time from p23.pos_fisk_doks_ofs where dok_id = <cUUID>  
     cQuery := "SELECT invoice_number || '_' || sdc_date_time  from " +;
-              pos_prodavnica_sql_schema() + ".pos_fisk_doks_ofs" + ;
+              sql_schema() + ".pos_fisk_doks_ofs" + ;
                 " WHERE dok_id = " + sql_quote( cUUID ) + "::uuid"
 
     

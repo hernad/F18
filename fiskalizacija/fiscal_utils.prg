@@ -310,9 +310,7 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
    CASE ( cTmp == "PDV1" .OR. cTmp == "PDV7" ) .AND. cPDVDN == "D"  // pdv17
 
-      IF cDriver == "TRING" // PDV je tarifna skupina "E"
-         cIdTarifaFiskalni := "E"
-      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+      IF cDriver == "FPRINT" .OR. cDriver == "FLINK"
          cIdTarifaFiskalni := "2"
       ELSEIF cDriver == "HCP"
          cIdTarifaFiskalni := "1"
@@ -324,12 +322,8 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
    CASE cTmp == "PDV0" .AND. cPDVDN == "D"
 
-      IF cDriver == "TRING" // bez PDV-a je tarifna skupina "K"
-         cIdTarifaFiskalni := "K"
-      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+      IF cDriver == "FPRINT" .OR. cDriver == "FLINK"
          cIdTarifaFiskalni := "4"
-      ELSEIF cDriver == "HCP"
-         cIdTarifaFiskalni := "3"
       ELSEIF cDriver == "TREMOL"
          cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "OFS"
@@ -340,17 +334,13 @@ FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
       IF cDriver == "FPRINT"
          cIdTarifaFiskalni := "5"
-      ELSEIF cDriver == "TRING"
-         cIdTarifaFiskalni := "M"
       ELSEIF cDriver == "OFS"
          cIdTarifaFiskalni := "M"
       ENDIF
 
    CASE cPDVDN == "N"
 
-      IF cDriver == "TRING" // ne-pdv obveznik, skupina "A"
-         cIdTarifaFiskalni := "A"
-      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+      IF cDriver == "FPRINT"
          cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "HCP"
          cIdTarifaFiskalni := "0"
@@ -386,9 +376,7 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
 
    CASE cIdVrsteP == "0"  // gotovina
 
-      IF cDriver == "TRING"
-         cRet := "Gotovina"
-      ELSEIF cDriver $ "#HCP#FPRINT#"
+      IF cDriver == "FPRINT"
          cRet := "0"
       ELSEIF cDriver == "TREMOL"
          cRet := "Gotovina"
@@ -398,11 +386,7 @@ FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
 
    CASE cIdVrsteP == "1"  // cek
 
-      IF cDriver == "TRING"
-         cRet := "Cek"
-      ELSEIF cDriver == "FLINK"
-         cRet := "2"
-      ELSEIF cDriver $ "#HCP#FPRINT#"
+      IF cDriver == "FPRINT"
          cRet := "1"
       ELSEIF cDriver == "TREMOL"
          cRet := "Cek"
@@ -443,7 +427,6 @@ FUNCTION is_fiskalizacija_off()
 
    LOCAL nDeviceId
 
-altd()
 
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
    IF nDeviceId == NIL

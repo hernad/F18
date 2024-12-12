@@ -161,38 +161,6 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       ENDIF
 
 
-   CASE cFiskalniDrajver == "HCP"
-
-      IF !lObicniUser
-         AAdd( aOpc, "------ izvještaji -----------------------" )
-         AAdd( aOpcExe, {|| .F. } )
-         AAdd( aOpc, "1. dnevni fiskalni izvještaj (Z rep.)    " )
-         AAdd( aOpcExe, {|| hcp_z_rpt( s_hFiskalniDeviceParams ) } )
-         AAdd( aOpc, "2. presjek stanja (X rep.)    " )
-         AAdd( aOpcExe, {|| hcp_x_rpt( s_hFiskalniDeviceParams ) } )
-
-         AAdd( aOpc, "3. periodični izvjestaj (Z rep.)    " )
-         AAdd( aOpcExe, {|| hcp_s_rpt( s_hFiskalniDeviceParams ) } )
-      ENDIF
-
-      AAdd( aOpc, "------ ostale komande --------------------" )
-      AAdd( aOpcExe, {|| .F. } )
-
-      AAdd( aOpc, "5. kopija računa    " )
-      AAdd( aOpcExe, {|| hcp_rn_copy( s_hFiskalniDeviceParams ) } )
-      AAdd( aOpc, "6. unos depozita u uređaj    " )
-      AAdd( aOpcExe, {|| hcp_polog( s_hFiskalniDeviceParams ) } )
-      AAdd( aOpc, "7. pošalji cmd.ok    " )
-      AAdd( aOpcExe, {|| hcp_create_cmd_ok( s_hFiskalniDeviceParams ) } )
-
-      IF !lObicniUser
-
-         AAdd( aOpc, "8. izbaci stanje računa    " )
-         AAdd( aOpcExe, {|| fiskalni_hcp_get_broj_racuna( s_hFiskalniDeviceParams ) } )
-         AAdd( aOpc, "P. reset PLU " )
-         AAdd( aOpcExe, {|| auto_plu( .T., NIL, s_hFiskalniDeviceParams ) } )
-
-      ENDIF
 
    CASE cFiskalniDrajver == "TREMOL"
 
@@ -239,42 +207,6 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
          AAdd( aOpcExe, {|| auto_plu( .T., NIL, s_hFiskalniDeviceParams ) } )
       ENDIF
 
-
-   CASE cFiskalniDrajver == "TRING"
-
-      IF !lObicniUser
-
-         AAdd( aOpc, "------ izvještaji ---------------------------------" )
-         AAdd( aOpcExe, {|| NIL } )
-         AAdd( aOpc, "1. dnevni izvještaj                               " )
-         AAdd( aOpcExe, {|| tring_daily_rpt( s_hFiskalniDeviceParams ) } )
-         AAdd( aOpc, "2. periodični izvjestaj" )
-         AAdd( aOpcExe, {|| tring_per_rpt( s_hFiskalniDeviceParams ) } )
-         AAdd( aOpc, "3. presjek stanja" )
-         AAdd( aOpcExe, {|| tring_x_rpt( s_hFiskalniDeviceParams ) } )
-
-      ENDIF
-
-      AAdd( aOpc, "------ ostale komande --------------------" )
-      AAdd( aOpcExe, {|| .F. } )
-      AAdd( aOpc, "5. unos depozita u uređaj       " )
-      AAdd( aOpcExe, {|| tring_polog( s_hFiskalniDeviceParams ) } )
-      AAdd( aOpc, "6. štampanje duplikata       " )
-      AAdd( aOpcExe, {|| tring_double( s_hFiskalniDeviceParams ) } )
-      AAdd( aOpc, "7. zatvori (poništi) racun " )
-      AAdd( aOpcExe, {|| tring_close_rn( s_hFiskalniDeviceParams ) } )
-
-      IF !lObicniUser
-
-         AAdd( aOpc, "8. inicijalizacija " )
-         AAdd( aOpcExe, {|| tring_init( s_hFiskalniDeviceParams, "1", "" ) } )
-         AAdd( aOpc, "S. reset zahtjeva na PU serveru " )
-         AAdd( aOpcExe, {|| tring_reset( s_hFiskalniDeviceParams ) } )
-
-         AAdd( aOpc, "R. reset PLU " )
-         AAdd( aOpcExe, {|| auto_plu( .T., NIL, s_hFiskalniDeviceParams ) } )
-
-      ENDIF
 
    OTHERWISE
       MsgBeep( "Fiskalni drajver:" + cFiskalniDrajver + " ne postoji?!" )

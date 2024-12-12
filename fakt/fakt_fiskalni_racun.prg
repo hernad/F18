@@ -26,7 +26,6 @@ STATIC __DRV_TREMOL := "TREMOL"
 STATIC __DRV_FPRINT := "FPRINT"
 STATIC __DRV_FLINK := "FLINK"
 STATIC __DRV_HCP := "HCP"
-STATIC __DRV_TRING := "TRING"
 STATIC __DRV_CURRENT
 
 
@@ -125,14 +124,6 @@ FUNCTION fakt_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, lAutoPrint, hDevicePa
       _cont := "1"
       nErrorLevel := fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ), _cont )
 
-   CASE _dev_drv == __DRV_HCP
-      nErrorLevel := fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
-
-   CASE _dev_drv == __DRV_FLINK
-      nErrorLevel := fakt_to_flink( s_hFiskalniParams, cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
-
-   CASE _dev_drv == __DRV_TRING
-      nErrorLevel := fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunStavkeData, _partn_data, ( nStorno == 1 ) )
 
    ENDCASE
 
@@ -242,7 +233,6 @@ STATIC FUNCTION fakt_reklamirani_racun_preduslovi( cIdFirma, cIdTipDok, cBrDok, 
 
    fprint_delete_answer( hFiskalniDevParams )
 
-   fprint_polog( hFiskalniDevParams, nDepozit, .T. )
 
    nErr := fprint_read_error( hFiskalniDevParams, 0 )
 
@@ -1057,27 +1047,6 @@ STATIC FUNCTION fakt_to_tremol( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, l
 
 
 
-STATIC FUNCTION fakt_fisk_fiskalni_isjecak_hcp( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno )
-
-   LOCAL nErrorLevel := 0
-   LOCAL nFiskalniBroj := 0
-
-   nErrorLevel := hcp_rn( s_hFiskalniParams, aRacunData, head, lStorno, aRacunData[ 1, 14 ] )
-
-   IF nErrorLevel = 0
-
-      nFiskalniBroj := hcp_fisc_no( s_hFiskalniParams, lStorno )
-
-      IF nFiskalniBroj > 0
-         fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj, lStorno )
-
-      ENDIF
-
-   ENDIF
-
-   RETURN nErrorLevel
-
-
 
 /*
    napravi zbirni racun ako je potrebno
@@ -1103,7 +1072,7 @@ STATIC FUNCTION set_fiscal_rn_zbirni( aRacunData )
 
    cNazivArtikla := "Stav.RN:"
 
-   IF __DRV_CURRENT  $ "#FPRINT#HCP#TRING#"
+   IF __DRV_CURRENT  $ "#FPRINT"
       cNazivArtikla += " " + AllTrim( aRacunData[ 1, 1 ] )
    ENDIF
 
@@ -1172,51 +1141,6 @@ STATIC FUNCTION fakt_fisk_stavi_u_fakturu( cFirma, cTD, cBroj, nFiscal, lStorno 
    SELECT ( nTArea )
 
    RETURN .T.
-
-
-
-// -------------------------------------------------------------
-// izdavanje fiskalnog isjecka na TFP uredjaj - tring
-// -------------------------------------------------------------
-STATIC FUNCTION fakt_to_tring( cIdFirma, cIdTipDok, cBrDok, aRacunData, head, lStorno )
-
-   LOCAL nErrorLevel := 0
-   LOCAL _trig := 1
-   LOCAL nFiskalniBroj := 0
-
-   IF lStorno
-      _trig := 2
-   ENDIF
-
-   // brisi ulazne fajlove, ako postoje
-   tring_delete_out( s_hFiskalniParams, _trig )
-
-   // ispisi racun
-   tring_rn( s_hFiskalniParams, aRacunData, head, lStorno )
-
-   // procitaj gresku
-   nErrorLevel := tring_read_error( s_hFiskalniParams, @nFiskalniBroj, _trig )
-
-   IF nFiskalniBroj <= 0
-      nErrorLevel := 1
-   ENDIF
-
-   // pobrisi izlazni fajl
-   tring_delete_out( s_hFiskalniParams, _trig )
-
-   IF nErrorLevel <> 0
-      // ostavit cu answer fajl za svaki slucaj!
-      // pobrisi izlazni fajl ako je ostao !
-      MsgBeep( "Postoji greška sa stampanjem !" )
-   ELSE
-      tring_delete_answer( s_hFiskalniParams, _trig )
-      // ubaci broj fiskalnog racuna u fakturu
-      fakt_fisk_stavi_u_fakturu( cIdFirma, cIdTipDok, cBrDok, nFiskalniBroj )
-      MsgBeep( "Kreiran fiskalni racun broj: " + AllTrim( Str( nFiskalniBroj ) ) )
-   ENDIF
-
-   RETURN nErrorLevel
-
 
 
 
