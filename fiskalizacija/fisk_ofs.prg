@@ -9,7 +9,10 @@
 /////////// PORT iz F18 v4 //////////////////////////////
 
 FUNCTION f18_sql_schema( cTable )
-  RETURN "fmk"
+  //RETURN "fmk." + cTable
+  //u v3 mora ovako
+  RETURN cTable
+
 
 FUNCTION sql_schema()
    RETURN "public"

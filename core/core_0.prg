@@ -191,4 +191,7 @@ FUNCTION set_cursor_on()
    Set( _SET_EVENTMASK, HB_INKEY_ALL )
    MSetCursor(.T.)
 
-   RETURN .T.   
+   RETURN .T. 
+
+FUNCTION f18_util_path()
+   RETURN ".." + SLASH + "F18_util" + SLASH   
