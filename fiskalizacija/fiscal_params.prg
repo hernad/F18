@@ -517,6 +517,7 @@ FUNCTION odaberi_fiskalni_uredjaj( cIdTipDok, lFromPos, lSilent )
    LOCAL _pos_default
    LOCAL  cUser := my_user()
 
+   altd()
    IF !s_lUseFiskalneFunkcije
       RETURN NIL
    ENDIF
@@ -548,6 +549,7 @@ FUNCTION odaberi_fiskalni_uredjaj( cIdTipDok, lFromPos, lSilent )
    ENDIF
 
    IF Len( aFiskUredjaji ) > 1
+      altd()
       nDeviceId := fiskalni_uredjaji_meni( aFiskUredjaji )
    ELSE
       nDeviceId := aFiskUredjaji[ 1, 1 ]

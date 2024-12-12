@@ -105,6 +105,8 @@ FUNCTION curl_hello()
 
     LOCAL hCurl, nRet, cData
 
+    altd()
+    
     curl_global_init()
 
     if empty( hCurl := curl_easy_init() )
