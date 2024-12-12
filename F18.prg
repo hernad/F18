@@ -103,67 +103,6 @@ FUNCTION f18_login_loop( lAutoConnect, hProgramParametri )
    RETURN .T.
 
 
-PROCEDURE f18_http_server()
-
-   LOCAL oLogAccess, oLogError, nPort, oServer
-
-   DO WHILE !open_thread( "f18_http_server" )
-      ?E "ERRO open_thread f18_http_server"
-   ENDDO
-
-   oLogAccess := UHttpdLog():New( "f18_access.log" )
-
-   IF ! oLogAccess:Add( "" )
-      oLogAccess:Close()
-      ? "Access log file open error", hb_ntos( FError() )
-      RETURN
-   ENDIF
-
-   oLogError := UHttpdLog():New( "f18_error.log" )
-
-   IF ! oLogError:Add( "" )
-      oLogError:Close()
-      oLogAccess:Close()
-      ? "Error log file open error", hb_ntos( FError() )
-      RETURN
-   ENDIF
-
-   ? "Listening on port:", nPort := 8080
-
-   oServer := UHttpdNew()
-
-   // "PrivateKeyFilename"  => _FN_PKEY, ;
-   // "CertificateFilename" => _FN_CERT, ;
-   // "SSL"                 => .T., ;
-
-   IF ! oServer:Run( { ;
-         "FirewallFilter"      => "", ;
-         "LogAccess"           => {| m | oLogAccess:Add( m + hb_eol() ) }, ;
-         "LogError"            => {| m | oLogError:Add( m + hb_eol() ) }, ;
-         "Trace"               => {| ... | QOut( ... ) }, ;
-         "Port"                => nPort, ;
-         "Idle"                => {| o | iif( hb_vfExists( ".uhttpd.stop" ), ( hb_vfErase( ".uhttpd.stop" ), o:Stop() ), NIL ) }, ;
-         "Mount"             => { ;
-         "/hello"            => {|| UWrite( "Hello!" ) }, ;
-         "/info"             => {|| UProcInfo() }, ;
-         "/files/*"          => {| x | QOut( hb_DirBase() + "files/" + X ), UProcFiles( hb_DirBase() + "files/" + X, .F. ) }, ;
-         "/"                 => {|| URedirect( "/hello" ) } ;
-         } ;
-         } )
-      oLogError:Close()
-      oLogAccess:Close()
-      ? "Server error:", oServer:cError
-      ErrorLevel( 1 )
-      RETURN
-   ENDIF
-
-   oLogError:Close()
-   oLogAccess:Close()
-
-   close_thread( "f18_http_server" )
-
-   RETURN
-
 /*
     vraca hash matricu sa parametrima
 */

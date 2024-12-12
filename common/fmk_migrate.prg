@@ -43,7 +43,7 @@ FUNCTION fmk_migrate( cur_dir )
 
    log_write( ProcName( 1 ) + ": " + cur_dir )
 
-   _files := Directory( cur_dir + HB_OSPATHSEPARATOR() + "*", "D" )
+   _files := Directory( cur_dir + SLASH + "*", "D" )
 
    FOR EACH _file in _files
       IF _file[ 5 ] != "D"
@@ -55,7 +55,7 @@ FUNCTION fmk_migrate( cur_dir )
 
    FOR EACH _file in _files
       IF _file[ 5 ] == "D"
-         fmk_migrate( cur_dir + HB_OSPATHSEPARATOR() +  _file[ 1 ] )
+         fmk_migrate( cur_dir + SLASH +  _file[ 1 ] )
       ENDIF
    NEXT
 

@@ -1,0 +1,5 @@
+-inc
+-hblib
+-oF18_string
+-Iinclude
+string/*.prg

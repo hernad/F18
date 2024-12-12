@@ -407,7 +407,7 @@
                             ;   return  .F.              ;
                             ;endif
 
-#define SLASH  HB_OSPATHSEPARATOR()
+#define SLASH  '\'
 
 
 
