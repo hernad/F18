@@ -83,7 +83,6 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       AAdd( aOpcExe, {|| ofs_create_test_invoice() } )
 #endif
 
-   
 
    CASE cFiskalniDrajver == "FPRINT"
 
@@ -146,7 +145,6 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
       ENDIF
 
 
-
    CASE cFiskalniDrajver == "TREMOL"
 
       IF !lObicniUser
@@ -205,6 +203,8 @@ FUNCTION fiskalni_izvjestaji_komande( lObicniUser, lPozivFromPOS )
 
    f18_menu( "izvf", .F., nIzbor, aOpc, aOpcExe )
 
+   altd()
+   
    box_x_koord( _m_x )
    box_y_koord( _m_y )
 

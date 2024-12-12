@@ -16,9 +16,9 @@ PROCEDURE thread_create_dbfs()
    LOCAL _ver
 
 #ifdef F18_DEBUG_SYNC
-
    ?E "SSSSTART thread create dbfs"
 #endif
+
    DO WHILE !open_thread( "create_dbfs" )
       ?E "ERRO open_thread create_dbfs"
    ENDDO

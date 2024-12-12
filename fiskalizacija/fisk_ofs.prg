@@ -105,8 +105,7 @@ FUNCTION curl_hello()
 
     LOCAL hCurl, nRet, cData
 
-    altd()
-    
+
     curl_global_init()
 
     if empty( hCurl := curl_easy_init() )
@@ -116,7 +115,7 @@ FUNCTION curl_hello()
     //If there's an authorization token, you attach it to the header like this:
     //curl_easy_setopt( hCurl, HB_CURLOPT_HTTPHEADER, {"Authorization: " + cHeader} )
 
-    //Set the URL:
+    //Set the URL
     curl_easy_setopt( hCurl, HB_CURLOPT_URL, "https://download.cloud.out.ba/hello.txt" )  
     
     //Disabling the SSL peer verification (you can use it if you have no SSL certificate yet, but still want to test HTTPS)
@@ -142,6 +141,8 @@ FUNCTION curl_hello()
     curl_global_cleanup()   
 
     MsgBeep("Response:" + Strtran(Strtran(cData, Chr(13), ""), Chr(10), ""))
+
+    altd()
     RETURN NIL
 
 

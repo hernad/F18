@@ -101,17 +101,18 @@ FUNCTION post_login()
 
    IF is_in_main_thread()
 
+#ifndef F18_DEBUG      
       thread_dbfs( hb_threadStart( @thread_create_dbfs() ) )
-      // thread_dbfs( hb_threadStart( @f18_http_server() ) )
 
       thread_dbfs( hb_threadStart( @thread_f18_backup(), 1 ) ) // auto backup jedne organizacije
+#endif
    ENDIF
 
-   IF !check_server_db_version()
-      RETURN .F.
-   ENDIF
+   //IF !check_server_db_version()
+   //   RETURN .F.
+   //ENDIF
 
-   F18Admin():sql_cleanup()
+   //F18Admin():sql_cleanup()
 
    set_sql_search_path()
    server_log_enable()
