@@ -1,7 +1,7 @@
 /*
  * This file is part of the bring.out knowhow ERP, a free and open source
  * Enterprise Resource Planning software suite,
- * Copyright (c) 1994-2018 by bring.out doo Sarajevo.
+ * Copyright (c) 1994-2024 by bring.out doo Sarajevo.
  * It is licensed to you under the Common Public Attribution License
  * version 1.0, the full text of which (including FMK specific Exhibits)
  * is available in the file LICENSE_CPAL_bring.out_knowhow.md located at the
@@ -11,6 +11,7 @@
 
 #include "f18.ch"
 
+MEMVAR Ch
 
 STATIC __MAX_QT := 99999.999
 STATIC __MIN_QT := 0.001
@@ -18,7 +19,6 @@ STATIC __MAX_PRICE := 999999.99
 STATIC __MIN_PRICE := 0.01
 STATIC __MAX_PERC := 99.99
 STATIC __MIN_PERC := -99.99
-
 
 
 /*
@@ -182,8 +182,8 @@ FUNCTION gen_all_plu( lSilent )
          ENDIF
       ENDIF
 
-      ++ nCnt
-      ++ nP_PLU
+      ++nCnt
+      ++nP_PLU
 
       _rec := dbf_get_rec()
       _rec[ "fisc_plu" ] := nP_PLU
@@ -224,9 +224,9 @@ FUNCTION gen_all_plu( lSilent )
 FUNCTION fiskalni_get_last_plu( nFiskDeviceId )
 
    LOCAL nFiskPLU := 0
-   LOCAL _param_name := _get_auto_plu_param_name( nFiskDeviceId )
+   LOCAL cParamName := _get_auto_plu_param_name( nFiskDeviceId )
 
-   nFiskPLU := fetch_metric( _param_name, nil, nFiskPLU )
+   nFiskPLU := fetch_metric( cParamName, NIL, nFiskPLU )
 
    RETURN nFiskPLU
 
@@ -239,46 +239,47 @@ FUNCTION fiskalni_get_last_plu( nFiskDeviceId )
 FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
 
    LOCAL nFiskPLU := 0
-   LOCAL nDbfArea := Select()
-   LOCAL _param_name := _get_auto_plu_param_name( hFiskalniParams[ "id" ] )
+   //LOCAL nDbfArea := Select()
+   LOCAL cParamName := _get_auto_plu_param_name( hFiskalniParams[ "id" ] )
 
-   IF lResetPLU == nil
+   IF lResetPLU == NIL
       lResetPLU := .F.
    ENDIF
 
-   IF lSilentMode == nil
+   IF lSilentMode == NIL
       lSilentMode := .F.
    ENDIF
 
-   IF lResetPLU = .T.
+   IF lResetPLU
       // uzmi inicijalni plu iz parametara
       nFiskPLU := hFiskalniParams[ "plu_init" ]
    ELSE
-      nFiskPLU := fetch_metric( _param_name, nil, nFiskPLU )
+      // auto_plu_dev_1
+      nFiskPLU := fetch_metric( cParamName, NIL, nFiskPLU )
       // prvi put pokrecemo opciju, uzmi init vrijednost !
       IF nFiskPLU == 0
          nFiskPLU := hFiskalniParams[ "plu_init" ]
       ENDIF
       // uvecaj za 1
-      ++ nFiskPLU
+      ++nFiskPLU
    ENDIF
 
    IF lResetPLU .AND. !lSilentMode
       IF !spec_funkcije_sifra( "RESET" )
          MsgBeep( "Unesena pogrešna šifra !" )
-         SELECT ( nDbfArea )
+         //SELECT ( nDbfArea )
          RETURN nFiskPLU
       ENDIF
    ENDIF
 
    // upisi u sql/db
-   set_metric( _param_name, nil, nFiskPLU )
+   set_metric( cParamName, NIL, nFiskPLU )
 
-   IF lResetPLU = .T. .AND. !lSilentMode
+   IF lResetPLU .AND. !lSilentMode
       MsgBeep( "Setovan početni PLU na: " + AllTrim( Str( nFiskPLU ) ) )
    ENDIF
 
-   SELECT ( nDbfArea )
+   //SELECT ( nDbfArea )
 
    RETURN nFiskPLU
 
@@ -289,67 +290,75 @@ FUNCTION auto_plu( lResetPLU, lSilentMode, hFiskalniParams )
 // -----------------------------------------------------------------
 STATIC FUNCTION _get_auto_plu_param_name( nFiskDeviceId )
 
-   LOCAL _tmp := "auto_plu"
+   LOCAL cTmp := "auto_plu"
    LOCAL cRet
 
-   cRet := _tmp + "_dev_" + AllTrim( Str( nFiskDeviceId ) )
+   cRet := cTmp + "_dev_" + AllTrim( Str( nFiskDeviceId ) )
 
    RETURN cRet
 
 
 
-FUNCTION fiscal_txt_get_tarifa( cIdTarifa, cPDVDN, cDriver )
+FUNCTION fiskalni_tarifa( cIdTarifa, cPDVDN, cDriver )
 
-   LOCAL _tar := "2"
-   LOCAL _tmp
+   LOCAL cIdTarifaFiskalni := "2"
+   LOCAL cTmp
 
-
-   _tmp := Left( Upper( AllTrim( cIdTarifa ) ), 4 ) // PDV17 -> PDV1 ili PDV7NP -> PDV7 ili PDV0IZ -> PDV0 ili PDVM
+   cTmp := Left( Upper( AllTrim( cIdTarifa ) ), 4 ) // PDV17 -> PDV1 ili PDV7NP -> PDV7 ili PDV0IZ -> PDV0 ili PDVM
 
    DO CASE
 
-   CASE ( _tmp == "PDV1" .OR. _tmp == "PDV7" ) .AND. cPDVDN == "D"
+   CASE ( cTmp == "PDV1" .OR. cTmp == "PDV7" ) .AND. cPDVDN == "D"  // pdv17
 
       IF cDriver == "TRING" // PDV je tarifna skupina "E"
-         _tar := "E"
-      ELSEIF cDriver == "FPRINT"
-         _tar := "2"
+         cIdTarifaFiskalni := "E"
+      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+         cIdTarifaFiskalni := "2"
       ELSEIF cDriver == "HCP"
-         _tar := "1"
+         cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "TREMOL"
-         _tar := "2"
+         cIdTarifaFiskalni := "2"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "E"
       ENDIF
 
-   CASE _tmp == "PDV0" .AND. cPDVDN == "D"
+   CASE cTmp == "PDV0" .AND. cPDVDN == "D"
 
       IF cDriver == "TRING" // bez PDV-a je tarifna skupina "K"
-         _tar := "K"
-      ELSEIF cDriver == "FPRINT"
-         _tar := "4"
+         cIdTarifaFiskalni := "K"
+      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+         cIdTarifaFiskalni := "4"
       ELSEIF cDriver == "HCP"
-         _tar := "3"
+         cIdTarifaFiskalni := "3"
       ELSEIF cDriver == "TREMOL"
-         _tar := "1"
+         cIdTarifaFiskalni := "1"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "K"
       ENDIF
 
-   CASE _tmp == "PDVM"
+   CASE cTmp == "PDVM"
 
       IF cDriver == "FPRINT"
-         _tar := "5"
+         cIdTarifaFiskalni := "5"
       ELSEIF cDriver == "TRING"
-         _tar := "M"
+         cIdTarifaFiskalni := "M"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "M"
       ENDIF
 
    CASE cPDVDN == "N"
 
       IF cDriver == "TRING" // ne-pdv obveznik, skupina "A"
-         _tar := "A"
-      ELSEIF cDriver == "FPRINT"
-         _tar := "1"
+         cIdTarifaFiskalni := "A"
+      ELSEIF cDriver == "FPRINT" .OR. cDriver == "FLINK"
+         cIdTarifaFiskalni := "1"
       ELSEIF cDriver == "HCP"
-         _tar := "0"
+         cIdTarifaFiskalni := "0"
       ELSEIF cDriver == "TREMOL"
-         _tar := "3"
+         cIdTarifaFiskalni := "3"
+      ELSEIF cDriver == "OFS"
+         cIdTarifaFiskalni := "A"
+      
       ENDIF
 
    OTHERWISE
@@ -358,58 +367,94 @@ FUNCTION fiscal_txt_get_tarifa( cIdTarifa, cPDVDN, cDriver )
 
    ENDCASE
 
-   RETURN _tar
+   RETURN cIdTarifaFiskalni
 
 
-FUNCTION fiscal_txt_get_vr_plac( id_plac, cDriver )
+FUNCTION fiskalni_vrsta_placanja( cIdVrsteP, cDriver )
 
    LOCAL cRet := ""
 
+   // prema https://redmine.bring.out.ba/issues/38042 za FPRINT 
+   // funkcija ne daje dobre rezultate
+   // za karticu treba vratiti "1" a vraca 2
+   
+   IF cDriver == "OFS"
+      cRet := "Cash"
+   ENDIF
+   
    DO CASE
 
-   CASE id_plac == "0"
+   CASE cIdVrsteP == "0"  // gotovina
 
       IF cDriver == "TRING"
          cRet := "Gotovina"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := "0"
       ELSEIF cDriver == "TREMOL"
          cRet := "Gotovina"
+      ELSEIF cDriver == "OFS"
+         cRet := "Cash"
       ENDIF
 
-   CASE id_plac == "1"
+   CASE cIdVrsteP == "1"  // cek
 
       IF cDriver == "TRING"
          cRet := "Cek"
+      ELSEIF cDriver == "FLINK"
+         cRet := "2"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := "1"
       ELSEIF cDriver == "TREMOL"
          cRet := "Cek"
       ENDIF
 
-   CASE id_plac == "2"
+   CASE cIdVrsteP == "2" // kartica
 
       IF cDriver == "TRING"
          cRet := "Virman"
+      ELSEIF cDriver == "FLINK"
+         cRet := "1"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := "2"
       ELSEIF cDriver == "TREMOL"
          cRet := "Kartica"
       ENDIF
 
-   CASE id_plac == "3"
+   CASE cIdVrsteP == "3"  // virman
 
       IF cDriver == "TRING"
          cRet := "Kartica"
+      ELSEIF cDriver == "FLINK"
+         cRet := "3"
       ELSEIF cDriver $ "#HCP#FPRINT#"
-         cRet := id_plac
+         cRet := "3"
       ELSEIF cDriver == "TREMOL"
          cRet := "Virman"
+      ELSEIF cDriver == "OFS"
+         cRet := "WireTransfer"
       ENDIF
 
    ENDCASE
 
    RETURN cRet
+
+
+FUNCTION is_fiskalizacija_off()
+
+   LOCAL nDeviceId
+
+altd()
+
+   nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
+   IF nDeviceId == NIL
+      RETURN .T.
+   ENDIF
+   IF nDeviceId > 0
+      RETURN .F.
+   ENDIF
+
+
+   RETURN .F.
 
 
 
@@ -457,7 +502,7 @@ FUNCTION provjeri_kolicine_i_cijene_fiskalnog_racuna( aRacunStavke, lStorno, nLe
             aRacunStavke[ nI, 4 ] := _naziv
 
             lImaGreska := .F.
-            ++ _fix
+            ++_fix
 
          ENDIF
 
