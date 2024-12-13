@@ -124,6 +124,7 @@ FUNCTION sql_table_update( cTable, cSqlOperator, hRecord, cWhereStr, lSilent )
             LOOP
          ENDIF
 
+         // dok_id uuid fakt_doks
          IF cTmp != "match_code" .AND. !hb_HHasKey( hRecord, cTmp ) // match_code su nebitna polja
             cMsg := "record " + cSqlOperator + " ne sadrzi " + cTmp + " field !?## pogledaj log !"
             log_write( cMsg + " " + pp( hRecord ), 2 )

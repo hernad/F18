@@ -30,14 +30,16 @@
  STATIC s_cFiskalniUredjaj
  
  
- FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
+ FUNCTION fakt_get_vrsta_placanja_0123( cIdVrstePlacanja )
 
    LOCAL cRet := "0"
    
    IF s_cFiskalniDrajverNaziv == NIL
-       Altd( "pos_get_vrsta_placanja_0123 nije setovana!? QUIT!")
+       Altd( "fakt_get_vrsta_placanja_0123 nije setovana!? QUIT!")
        QUIT_1
    ENDIF
+   
+   altd()
    
    IF s_cFiskalniDrajverNaziv == "OFS"
        // default placanje

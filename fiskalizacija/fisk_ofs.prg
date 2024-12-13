@@ -275,8 +275,28 @@ FUNCTION ofs_putpin(hParams)
     LOCAL nRet, cData, hCurl
     LOCAL lOk := .F.
 
+    /*
+        CURL *curl;
+        CURLcode res;
+        curl = curl_easy_init();
+        if(curl) {
+          curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "POST");
+          curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:3566/api/pin");
+          curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+          curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer 0123456789abcdef0123456789abcdef");
+          headers = curl_slist_append(headers, "Content-Type: text/plain");
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+          const char *data = "1234";
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+          res = curl_easy_perform(curl);
+        }
+        curl_easy_cleanup(curl);
+    */
+
     DO WHILE .T.
-        hCurl := curl_init(@hParams, "/api/pin", "application/text", "POST")
+        hCurl := curl_init(@hParams, "/api/pin", "text/plain", "POST")
 
         IF hCurl == NIL
           curl_end()
@@ -1042,7 +1062,9 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
         // iz koraka STEP Sale.Refund.Referent 
     ENDIF
 
-    cVrstaPlacanja := aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ]
+    altd()
+    cVrstaPlacanja := fakt_get_vrsta_placanja_0123( aRacunStavke[ 1, FISK_INDEX_VRSTA_PLACANJA ] )
+
     
     IF !Empty( hParams[ "op_id" ] ) // provjeri operatera i lozinku iz podesenja...
         cOperater := hParams[ "op_id" ]
@@ -1553,7 +1575,9 @@ FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     //pos_hernad    ENDIF
     //pos_hernad ENDIF
 
-    cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep)
+    //cVrstaPlacanja := fakt_get_vrsta_placanja_0123
+    cVrstaPlacanja := ( pos_doks->idvrstep)
+
     //pos_hernad nPosRacunUkupno := pos_iznos_racuna( cIdFirma, cIdTipdok, dDatDok, cBrDok, lTmpTabele)
  
     IF nUplaceniIznos > 0

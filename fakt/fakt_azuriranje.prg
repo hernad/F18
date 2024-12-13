@@ -417,10 +417,12 @@ FUNCTION get_fakt_doks_data( cIdFirma, cIdTipDok, cBrDok )
    hFaktData[ "dat_isp" ]  := iif( Len( aMemo ) >= 7, CToD( aMemo[ 7 ] ), CToD( "" ) )
    hFaktData[ "dat_otpr" ] := iif( Len( aMemo ) >= 7, CToD( aMemo[ 7 ] ), CToD( "" ) )
    hFaktData[ "dat_val" ]  := iif( Len( aMemo ) >= 9, CToD( aMemo[ 9 ] ), CToD( "" ) )
-   //hFaktData[ "fisc_rn" ] := field->fisc_rn
-   //hFaktData[ "fisc_st" ] := 0
-   //hFaktData[ "fisc_date" ] := CToD( "" )
-   //hFaktData[ "fisc_time" ] := PadR( "", 10 )
+
+
+   hFaktData[ "fisc_rn" ] := field->fisc_rn
+   hFaktData[ "fisc_st" ] := 0
+   hFaktData[ "fisc_date" ] := CToD( "" )
+   hFaktData[ "fisc_time" ] := PadR( "", 10 )
 
    _fakt_totals := izracunaj_ukupni_iznos_dokumenta_iz_pripreme( cIdFirma, cIdTipDok, cBrDok )
 
