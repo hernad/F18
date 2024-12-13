@@ -745,11 +745,13 @@ FUNCTION get_fiscal_device_params( nDeviceId, cUserName )
    hParam[ "op_docs" ] := fetch_metric( "fiscal_device_" + cDevTmp + "_op_docs", cUserName, "" )
 #endif
 
+if hParam["drv"] <> "OFS"
    IF !post_check( hParam )
       RETURN NIL
    ENDIF
+ENDIF
 
-   RETURN hParam
+RETURN hParam
 
 
 // ---------------------------------------------------------------

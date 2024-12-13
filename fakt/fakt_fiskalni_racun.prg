@@ -99,6 +99,8 @@
     LOCAL _cont := "1"
     LOCAL lRacunBezgBezPartnera
     LOCAL hRet, hParams
+    LOCAL cFiskalniReklamiratiUUID
+
  
     IF !fiscal_opt_active()
        RETURN nErrorLevel
@@ -129,8 +131,24 @@
        RETURN nErrorLevel
     ENDIF
  
+    //1. sabere fakt stavke moraju bit negativne
     nStorno := fakt_is_storno_dok( cIdFirma, cIdTipDok, cBrDok )
-    IF  nStorno == -1 // error
+
+    //2. takodje mora postojati parametar faktu uuid 
+    IF nStorno == 1
+      hParams := hb_hash()
+      hParams["idfirma"] := cIdFirma
+      hParams["idtipdok"] := cIdTipDok
+      hParams["brdok"] := cBrDok
+
+      IF Empty(fetch_metric("fakt_fisk_uuid_" + trim(hParams["idfirma"]) + "-" + trim(hParams["idtipdok"]) + "-" + trim(hParams["brdok"]), my_user(), ""))
+        // nema parametra za ovaj dokument
+        nStorno := -1
+      ENDIF
+    ENDIF
+
+    // ne ispunjava uslove storno dokumenta
+    IF nStorno == -1
        RETURN nErrorLevel
     ENDIF
  
@@ -147,7 +165,7 @@
        RETURN 1
     ENDIF
  
-    aRacunStavkeData := fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), aPartnerData )
+    aRacunStavkeData := fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, ( nStorno == 1 ), aPartnerData, cFiskalniDrajver )
  
     IF ValType( aRacunStavkeData ) == "L"  .OR. aRacunStavkeData == NIL
        RETURN 1
@@ -171,7 +189,6 @@
       nErrorLevel := hRet["error"]
 
       if nErrorLevel == 0
-
          hParams := hb_hash()
          hParams["idfirma"] := cIdFirma
          hParams["idtipdok"] := cIdTipDok
@@ -183,6 +200,13 @@
           //IF !Empty(hParams["fiskalni_broj"])
           fakt_set_broj_fiskalnog_racuna_ofs( hParams )
           //endif
+
+          if (nStorno == 1)
+            cFiskalniReklamiratiUUID := fetch_metric( "fakt_fisk_uuid_" + trim(hParams["idfirma"]) + "-" + trim(hParams["idtipdok"]) + "-" + trim(hParams["brdok"]), my_user(), ;
+               "")
+            fakt_set_ref_storno_fisk_dok_ofs( hParams, cFiskalniReklamiratiUUID )
+          endif
+                  
       ENDIF
 
  
@@ -232,10 +256,10 @@
  
  
  
- STATIC FUNCTION fakt_izracunaj_ukupnu_vrijednost_racuna( cIdFirma, cIdTipDok, cBrDok )
+FUNCTION fakt_izracunaj_ukupnu_vrijednost_racuna( cIdFirma, cIdTipDok, cBrDok )
  
     LOCAL nUkupno := 0
-    LOCAL aIznosi, _data_total
+    LOCAL aIznosi, hDataTotal
     LOCAL cIdPartner := ""
  
     select_o_roba()
@@ -247,9 +271,9 @@
  
     cIdPartner := idpartner_sa_fakt_dokumenta( cIdFirma, cIdTipDok, cBrDok )
     aIznosi := fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
-    _data_total := fakt_izracunaj_total( aIznosi, cIdPartner, cIdTipDok )
+    hDataTotal := fakt_izracunaj_total( aIznosi, cIdPartner, cIdTipDok )
  
-    nUkupno := _data_total[ "ukupno" ]
+    nUkupno := hDataTotal[ "ukupno" ]
  
     RETURN nUkupno
  
@@ -462,8 +486,7 @@
  
  
  
- 
- STATIC FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
+FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
  
     LOCAL aFakturaIznos := {}
     LOCAL cIdTarifa, cIdRoba, nPos
@@ -510,7 +533,7 @@
  
  
  
- STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, lStorno, aPartner )
+ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTipDok, cBrDok, lStorno, aPartner, cFiskalniDrajver )
  
     LOCAL aRacunData := {}
     LOCAL _n_rn_broj, _rn_iznos, nRabatProc, nRabatRacun, nRabatStavka, _rn_datum, cFiskalniReklamiraniRnBroj
@@ -521,10 +544,13 @@
     LOCAL lInoPartner := .F.
     LOCAL _partn_pdv := .T.
     LOCAL _a_iznosi := {}
-    LOCAL hDataItem, _data_total, aArray, nStornoIdentifikator, cRacunBroj
+    LOCAL hDataItem, hTotal, aArray, nStornoIdentifikator, cRacunBroj
     LOCAL cMemoOpis, nCijena, cIdTarifa, cStornoRacunOpis,  _vr_plac, nKolicina
     LOCAL nI, nItemLevelCheck
     LOCAL nNetoCijena
+    LOCAL hParams
+    LOCAL cFiskalniReklamiratiUUID, hRet
+
  
     // 0 - gotovina
     // 3 - ziralno / virman
@@ -558,7 +584,7 @@
     cIdPartner := field->idpartner
  
     _a_iznosi := fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
-    _data_total := fakt_izracunaj_total( _a_iznosi, cIdPartner, cIdTipDok )
+    hTotal := fakt_izracunaj_total( _a_iznosi, cIdPartner, cIdTipDok )
  
     IF !seek_fakt( cIdFirma, cIdTipDok, cBrDok )
        MsgBeep( "Račun ne posjeduje niti jednu stavku#Štampanje onemogućeno !" )
@@ -566,7 +592,17 @@
     ENDIF
  
     IF lStorno
-       cFiskalniReklamiraniRnBroj := fakt_reklamirani_racun_box( cFiskalniReklamiraniRnBroj )
+       IF cFiskalniDrajver == "OFS"
+         hParams := hb_hash()
+         hParams["idfirma"] := cIdFirma
+         hParams["idtipdok"] := cIdTipDok
+         hParams["brdok"] := cBrDok
+         cFiskalniReklamiratiUUID := fetch_metric( "fakt_fisk_uuid_" + trim(hParams["idfirma"]) + "-" + trim(hParams["idtipdok"]) + "-" + trim(hParams["brdok"]), my_user(), ;
+            "")
+       ELSE
+         cFiskalniReklamiraniRnBroj := fakt_reklamirani_racun_box( cFiskalniReklamiraniRnBroj )
+       ENDIF
+       
     ENDIF
  
     IF cFiskalniReklamiraniRnBroj == -1
@@ -580,7 +616,7 @@
     // pdv, ne pdv obveznici itd...
     // nTotalRacuna := _uk_sa_pdv( cIdTipDok, cIdPartner, _rn_iznos )
  
-    nTotalRacuna := _data_total[ "ukupno" ]
+    nTotalRacuna := hTotal[ "ukupno" ]
     nRacunFaktTotal := 0
  
     DO WHILE !Eof() .AND. field->idfirma == cIdFirma .AND. field->idtipdok == cIdTipDok .AND. field->brdok == cBrDok
@@ -645,7 +681,6 @@
        ENDIF    
        //? bug? nCijena := field->cijena
 
-       
  
        IF cIdTipDok == "10"
           _vr_plac := "3"
@@ -653,7 +688,6 @@
  
        nKolicina := Abs( field->kolicina )
  
-       altd()
        IF !lInoPartner .AND. !_partn_pdv .AND. RobaZastCijena( roba->idtarifa )
           lPopustNaTeretProdavca := .T.
           nRabatProc := 0
@@ -692,10 +726,17 @@
        // 11 - popust
        // 12 - barkod
        // 13 - vrsta placanja
-       // 14 - total racuna
+       // 14 - total racuna  FISK_INDEX_TOTAL
        // 15 - datum racuna
        // 16 - roba jmj
        // #define FISK_INDEX_NETO_CIJENA 17
+
+   
+       if lStorno .AND. cFiskalniDrajver == "OFS"
+         hRet := fakt_get_broj_fiskalnog_racuna_ofs_by_uuid( cFiskalniReklamiratiUUID )
+         cStornoRacunOpis := hRet["fiskalni_broj"] + "_" + hRet["fiskalni_datum"]
+       ENDIF
+
  
        AAdd( aRacunData, {; 
           cRacunBroj, ;            // 1
@@ -705,13 +746,13 @@
           nCijena, ;               // 5
           nKolicina, ;             // 6
           cIdTarifa, ;             // 7
-          cStornoRacunOpis, ;      // 8
+          cStornoRacunOpis, ;      // 8  FISK_INDEX_FISK_RACUN_STORNIRATI
           nRobaFiscPLU, ;          // 9
           nCijena, ;               // 10
           nRabatProc, ;            // 11 FISK_INDEX_POPUST
           cArtikalBarkod, ;        // 12
           cVrstaPlacanja, ;        // 13
-          nTotalRacuna, ;          // 14
+          ABS(nTotalRacuna), ;          // 14
           _rn_datum, ;             // 15
           cRobaJmj,;               // 16
           nNetoCijena;             // 17
