@@ -3,6 +3,8 @@
 
 #define NEWLINE Chr(13) + Chr(10)
 
+
+
 //#DEFINE OFS_URL   "http://ofs.svc.test.out.ba:8000"
 //#DEFINE OFS_API_KEY "0123456789abcdef0123456789abcdef"
 
@@ -18,53 +20,86 @@ STATIC FUNCTION sql_schema()
    RETURN "public"
 
 
-FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
+FUNCTION fakt_dokument( hParams )
+  RETURN AllTrim( hParams[ "idfirma" ] ) + "-" + AllTrim( hParams[ "idtipdok" ] ) + "-" + AllTrim( hParams[ "brdok" ] )
 
-LOCAL cRet := "0"
 
-IF s_cFiskalniDrajverNaziv == NIL
-    Altd( "pos_get_vrsta_placanja_0123 nije setovana!? QUIT!")
-    QUIT_1
+FUNCTION fakt_napravi_u_pripremi_storno_dokument( hParams )
+
+LOCAL cFaktNoviBrDok
+LOCAL hRec
+LOCAL nCount
+LOCAL cFiskalniBr
+LOCAL lFiskalni := fiscal_opt_active()
+LOCAL cIdFirma, cIdTipdok, cBrDok
+
+cIdFirma := hParams["idfirma"]
+cIdTipdok := hParams["idtipdok"]
+cBrDok := hParams["brdok"]
+
+IF Pitanje( "FORM_STORNO", "Formirati storno dokument (D/N) ?", "D" ) == "N"
+    RETURN .F.
 ENDIF
 
-IF s_cFiskalniDrajverNaziv == "OFS"
-    // default placanje
-    cRet := "Cash"
+o_fakt_pripr()
+SELECT fakt_pripr
+
+IF fakt_pripr->( RECCOUNT2() ) <> 0
+    MsgBeep( "Priprema nije prazna !" )
+    RETURN .F.
 ENDIF
 
-IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
-    // gotovina FPRINT, TREMOL
-    IF s_cFiskalniDrajverNaziv == "OFS"
-        RETURN "Cash"
-    ELSE
-        RETURN "0"
+
+cFaktNoviBrDok := AllTrim( cBrDok ) + "/S"
+
+IF Len( AllTrim( cFaktNoviBrDok ) ) > 8
+    cFaktNoviBrDok := Right( AllTrim( cBrDok ), 6 ) + "/S"
+ENDIF
+
+nCount := 0
+
+seek_fakt_doks( cIdFirma, cIdTipDok, cBrDok )
+
+nFiskalniRn := 0
+
+IF lFiskalni
+    /// nFiskalniRn := field->fisc_rn
+    cFiskalniBr := fakt_get_fiskalni_dok_id_ofs(hParams)
+ENDIF
+
+seek_fakt( cIdFirma, cIdTipDok, cBrDok )
+DO WHILE !Eof() .AND. field->idfirma == cIdFirma  .AND. field->idtipdok == cIdTipDok .AND. field->brdok == cBrDok
+
+    hRec := dbf_get_rec()
+
+    SELECT fakt_pripr
+    APPEND BLANK
+
+    hRec[ "kolicina" ] := ( hRec[ "kolicina" ] * -1 )
+    hRec[ "brdok" ] := cFaktNoviBrDok
+    hRec[ "datdok" ] := Date()
+    hRec[ "idvrstep" ] := ""
+
+    IF lFiskalni
+        // hernad ???? TODO 
+        //hRec[ "fisc_rn" ] := nFiskalniRn
     ENDIF
+
+    dbf_update_rec( hRec )
+    SELECT fakt
+    SKIP
+
+    ++nCount
+
+ENDDO
+
+IF nCount > 0
+    MsgBeep( "Formiran je dokument " + cIdFirma + "-" + ;
+        cIdTipDok + "-" + AllTrim( cFaktNoviBrDok ) + ;
+        " u pripremi !" )
 ENDIF
 
-IF cIdVrstePlacanja == "CK"
-    IF s_cFiskalniDrajverNaziv == "FPRINT"
-        // https://redmine.bring.out.ba/issues/38042#change-291730
-        RETURN "2"
-    ELSEIF s_cFiskalniDrajverNaziv == "OFS"
-        RETURN "Check"
-    ENDIF
-    // TREMOL
-    RETURN "1"  // cek
-ENDIF
-
-IF cIdVrstePlacanja == "KT"
-    IF s_cFiskalniDrajverNaziv == "FPRINT"
-        // https://redmine.bring.out.ba/issues/38042#change-291730
-        RETURN "1" 
-    ELSEIF s_cFiskalniDrajverNaziv == "OFS"
-        RETURN "Card"
-    ELSE
-        // TREMOL
-        RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
-    ENDIF
-ENDIF
-
-RETURN cRet
+RETURN .T.
 
 /////////////////////////////////////////////   
    
@@ -93,7 +128,7 @@ FUNCTION ofs_cleanup()
     ENDIF
  
     GO TOP
-    //hParams[ "idpos" ] := _pos_pripr->idpos
+    //hParams[ "idfirma" ] := _pos_pripr->idpos
     my_close_all_dbf()
  
     //pos_hernad cleanup_pos_tmp( hParams )
@@ -546,8 +581,8 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
     aKupac := NIL
     
-    hParams["idvd"] := "42"
-    //IF pos_is_storno_ofs( hParams[ "idpos" ], hParams["idvd"], hParams[ "datum" ], hParams[ "brdok" ] )
+    hParams["idtipdok"] := "42"
+    //IF pos_is_storno_ofs( hParams[ "idfirma" ], hParams["idtipdok"], hParams[ "datum" ], hParams[ "brdok" ] )
     //   nStorno := 1
     //   lStorno := .T.
     //ELSE
@@ -562,7 +597,7 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
     //cUUId := pos_get_fiskalni_dok_id_ofs( hParams )
     altd()
 
-    IF pos_is_storno_ofs(hParams)
+    IF fakt_is_storno_ofs(hParams)
         hParams["storno_fiskalni_broj"] := "A"
         hParams["storno_fiskalni_datum"] := "B"
     ELSE
@@ -570,7 +605,7 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
         hParams["storno_fiskalni_datum"] := ""
     ENDIF
 
-    aRacunStavke := pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams)
+    aRacunStavke := fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams)
     
     hKopija := fakt_get_broj_fiskalnog_racuna_ofs( hParams )
 
@@ -1183,24 +1218,25 @@ FUNCTION fakt_set_broj_fiskalnog_racuna_ofs( hParams )
 
     LOCAL cQuery, oRet, oError, lRet := .F.
   
-    LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
+    LOCAL cIdFirma, cIdTipdok, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
  
-    cIdPos := hParams["idpos"]
-    cIdVd := hParams["idvd"]
-    dDatDok := hParams["datum"]
+    cIdFirma := hParams["idfirma"]
+    cIdTipdok := hParams["idtipdok"]
     cBrDok := hParams["brdok"]
+
     cBrojFiskRacuna := hParams["fiskalni_broj"]
     cDatumFiskRacuna := hParams["fiskalni_datum"]
     cJson := hParams["json"]
+
+    altd()
     
     IF Empty(cBrojFiskRacuna)
        return .F.
     ENDIF
 
     cQuery := "SELECT " + sql_schema() + ".broj_fiskalnog_racuna_ofs(" + ;
-       sql_quote( cIdPos ) + "," + ;
-       sql_quote( cIdVd ) + "," + ;
-       sql_quote( dDatDok ) + "," + ;
+       sql_quote( cIdFirma ) + "," + ;
+       sql_quote( cIdTipdok ) + "," + ;
        sql_quote( cBrDok ) + "," + ;
        sql_quote( cBrojFiskRacuna ) + "," +;
        sql_quote( cDatumFiskRacuna ) + "," +;
@@ -1229,10 +1265,10 @@ FUNCTION fakt_get_broj_fiskalnog_racuna_ofs( hParams )
 
     LOCAL cQuery, oRet, oError, hRet, cGet
     
-    LOCAL cIdPos, cIdVd, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
+    LOCAL cIdFirma, cIdTipdok, dDatDok, cBrDok, nBrojFiskRacuna, cBrojFiskRacuna, cDatumFiskRacuna, cJson
     
-    cIdPos := hParams["idpos"]
-    cIdVd := hParams["idvd"]
+    cIdFirma := hParams["idfirma"]
+    cIdTipdok := hParams["idtipdok"]
     dDatDok := hParams["datum"]
     cBrDok := hParams["brdok"]
     
@@ -1241,8 +1277,8 @@ FUNCTION fakt_get_broj_fiskalnog_racuna_ofs( hParams )
     hRet["fiskalni_datum"] := ""
    
     cQuery := "SELECT " + sql_schema() + ".get_broj_dat_fiskalnog_racuna_ofs(" + ;
-        sql_quote( cIdPos ) + "," + ;
-        sql_quote( cIdVd ) + "," + ;
+        sql_quote( cIdFirma ) + "," + ;
+        sql_quote( cIdTipdok ) + "," + ;
         sql_quote( dDatDok ) + "," + ;
         sql_quote( cBrDok ) + ")"
     
@@ -1257,7 +1293,7 @@ FUNCTION fakt_get_broj_fiskalnog_racuna_ofs( hParams )
         ENDIF
     
     RECOVER USING oError
-        Alert( _u( "get broj fisk racuna ofs za POS: " +  cIdPos + "-" + cIdVd + "-" + cBrdok + dtoc(dDatDok) + " neuspješan?!" ) )
+        Alert( _u( "get broj fisk racuna ofs za FAKT: " +  cIdFirma + "-" + cIdTipdok + "-" + cBrdok + dtoc(dDatDok) + " neuspješan?!" ) )
         QUIT_1
     END SEQUENCE
   
@@ -1266,21 +1302,21 @@ FUNCTION fakt_get_broj_fiskalnog_racuna_ofs( hParams )
 /*
    u p2.pos_fisk_doks.ref_storno_fisk_dok postoji ovaj racun
 
-   FUNCTION p15.pos_is_storno( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+   FUNCTION p15.pos_is_storno( cIdFirma varchar, cIdTipdok varchar, dDatDok date, cBrDok varchar) RETURNS boolean
 */
-FUNCTION pos_is_storno_ofs( hParams )
+FUNCTION fakt_is_storno_ofs( hParams )
 
     LOCAL cQuery, oRet, lValue 
-    LOCAL cIdPos, cIdVd, dDatDok, cBrDok
+    LOCAL cIdFirma, cIdTipdok, dDatDok, cBrDok
     
-    cIdPos := hParams["idpos"]
-    cIdVd := hParams["idvd"]
+    cIdFirma := hParams["idfirma"]
+    cIdTipdok := hParams["idtipdok"]
     dDatDok := hParams["datum"]
     cBrDok := hParams["brdok"]
 
-    cQuery := "SELECT " + sql_schema() + ".pos_is_storno_ofs(" + ;
-       sql_quote( cIdPos ) + "," + ;
-       sql_quote( cIdVd ) + "," + ;
+    cQuery := "SELECT " + sql_schema() + ".fakt_is_storno_ofs(" + ;
+       sql_quote( cIdFirma ) + "," + ;
+       sql_quote( cIdTipdok ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
        sql_quote( cBrDok ) + ")"
  
@@ -1299,13 +1335,13 @@ FUNCTION pos_is_storno_ofs( hParams )
 // vraca u formatu: invoice_number || '_' || sdc_date_time
 // SELECT p15.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  =>  ABC-DE-FG_2024010203
  
-FUNCTION pos_storno_broj_rn_ofs( cIdPos, cIdVd, dDatDok, cBrDok )
+FUNCTION pos_storno_broj_rn_ofs( cIdFirma, cIdTipdok, dDatDok, cBrDok )
  
     LOCAL cQuery, oRet, cValue
  
     cQuery := "SELECT " + sql_schema() + ".pos_storno_broj_rn_ofs(" + ;
-       sql_quote( cIdPos ) + "," + ;
-       sql_quote( cIdVd ) + "," + ;
+       sql_quote( cIdFirma ) + "," + ;
+       sql_quote( cIdTipdok ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
        sql_quote( cBrDok ) + ")"
  
@@ -1327,7 +1363,7 @@ RETURN "_"
 
   PSQL FUNCTION p15.fisk_broj_rn_by_storno_ref_ofs( uuidFiskStorniran text ) RETURNS varchar
 */
-FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
+FUNCTION fakt_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
 
     LOCAL cQuery, oRet, cValue
  
@@ -1361,8 +1397,8 @@ FUNCTION pos_storno_racun_ofs( hParams )
     IF !hb_HHasKey( hParams, "brdok" )
        hParams[ "brdok" ] := NIL
     ENDIF
-    //IF !hb_HHasKey( hParams, "idpos" )
-    //   hParams[ "idpos" ] := pos_pm()
+    //IF !hb_HHasKey( hParams, "idfirma" )
+    //   hParams[ "idfirma" ] := pos_pm()
     //ENDIF
     IF hParams[ "datum" ] == nil
        hParams[ "datum" ] := danasnji_datum()
@@ -1374,11 +1410,11 @@ FUNCTION pos_storno_racun_ofs( hParams )
 
 
     IF pronadji_fiskalni_racun_za_storniranje_ofs(@hParams)        
-        //pos_hernad IF Pitanje(, "Stornirati POS " + pos_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
+        IF Pitanje(, "Stornirati FAKT " + fakt_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
             
-            //pos_hernad hParams[ "fisk_rn" ] := 999
-            //pos_hernad pos_napravi_u_pripremi_storno_dokument( hParams )
-        //pos_hernad ENDIF
+            hParams[ "fisk_rn" ] := 999
+            fakt_napravi_u_pripremi_storno_dokument( hParams )
+        ENDIF
     ENDIF
 
     PopWa()
@@ -1409,7 +1445,6 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
         RETURN .T.
     endif
 
-    hParams[ "idvd" ] := "42"
     // racun koji fiskaliziramo
     hRet := fakt_get_broj_fiskalnog_racuna_ofs( hParams )
     hParams[ "fiskalni_broj" ] := hRet["fiskalni_broj"]
@@ -1423,7 +1458,7 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
         RETURN .F.
     ENDIF
 
-    IF ( cOldFiskFullRn := pos_fisk_broj_rn_by_storno_ref_ofs( hParams[ "fisk_id" ] ) ) <> "_"
+    IF ( cOldFiskFullRn := fakt_fisk_broj_rn_by_storno_ref_ofs( hParams[ "fisk_id" ] ) ) <> "_"
         cMsg := "Već postoji storno istog RN, broj FISK: " + cOldFiskFullRn
         MsgBeep( cMsg )
         error_bar( "fisk", cMsg )
@@ -1442,21 +1477,19 @@ return .t.
 
 FUNCTION fakt_get_fiskalni_dok_id_ofs( hParams )
 
-    LOCAL cQuery, oRet, cValue, cIdVd, cIdPos, dDatDok, cBrDok
+    LOCAL cQuery, oRet, cValue, cIdTipdok, cIdFirma, cBrDok
  
-    cIdPos := hParams["idpos"]
-    cIdVd := hParams["idvd"]
-    dDatDok := hParams["datum"]
+    cIdFirma := hParams["idfirma"]
+    cIdTipdok := hParams["idtipdok"]
     cBrDok := hParams["brdok"]
     
-    IF Empty( cIdPos )
+    IF Empty( cIdFirma )
        RETURN 0
     ENDIF
- 
-    cQuery := "SELECT " + sql_schema() + ".fisk_dok_id_ofs(" + ;
-       sql_quote( cIdPos ) + "," + ;
-       sql_quote( cIdVd ) + "," + ;
-       sql_quote( dDatDok ) + "," + ;
+
+    cQuery := "SELECT " + sql_schema() + ".fisk_dok_ofs_id(" + ;
+       sql_quote( cIdFirma ) + "," + ;
+       sql_quote( cIdTipdok ) + "," + ;
        sql_quote( cBrDok ) + ")"
  
     oRet := run_sql_query( cQuery )
@@ -1476,9 +1509,9 @@ FUNCTION fakt_get_fiskalni_dok_id_ofs( hParams )
    nStorno > 0 => lStorno = .T.
    nUplaceniIznos <  0 => gledamo azurirani racun
 */
-FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
+FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
 
-    LOCAL cIdPos, cIdVd, dDatDok, cBrDok
+    LOCAL cIdFirma, cIdTipdok, dDatDok, cBrDok
     LOCAL aStavkeRacuna := {}
     LOCAL nPLU
     LOCAL cBrojFiskRNStorno := ""
@@ -1495,8 +1528,8 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     LOCAL nUplaceniIznos, lAzuriraniDokument
  
 
-    cIdPos := hParams["idpos"]
-    cIdVd := hParams["idvd"]
+    cIdFirma := hParams["idfirma"]
+    cIdTipdok := hParams["idtipdok"]
     dDatDok := hParams["datum"]
     cBrDok := hParams["brdok"]
     nUplaceniIznos := hParams["uplaceno"]
@@ -1512,30 +1545,30 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     lStorno := !Empty( hParams["storno_fiskalni_broj"] )
  
     //pos_hernad if !lAzuriraniDokument
-    //pos_hernad    IF !seek_pos_doks_tmp( cIdPos, cIdVd, dDatDok, cBrdok)
+    //pos_hernad    IF !seek_pos_doks_tmp( cIdFirma, cIdTipdok, dDatDok, cBrdok)
     //pos_hernad      lTmpTabele := .F.
-    //pos_hernad      IF !seek_pos_doks( cIdPos, cIdVd, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
+    //pos_hernad      IF !seek_pos_doks( cIdFirma, cIdTipdok, dDatDok, cBrDok ) // mora postojati ažurirani pos račun
     //pos_hernad         RETURN NIL
     //pos_hernad      ENDIF
     //pos_hernad    ENDIF
     //pos_hernad ENDIF
 
     cVrstaPlacanja := pos_get_vrsta_placanja_0123( pos_doks->idvrstep)
-    //pos_hernad nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele)
+    //pos_hernad nPosRacunUkupno := pos_iznos_racuna( cIdFirma, cIdTipdok, dDatDok, cBrDok, lTmpTabele)
  
     IF nUplaceniIznos > 0
        nPosRacunUkupno := nUplaceniIznos
     ENDIF
  
-    //pos_hernad IF !seek_pos_pos_tmp( cIdPos, cIdVd, dDatDok, cBrDok )
-    //pos_hernad  IF !seek_pos_pos( cIdPos, cIdVd, dDatDok, cBrDok )
+    //pos_hernad IF !seek_pos_pos_tmp( cIdFirma, cIdTipdok, dDatDok, cBrDok )
+    //pos_hernad  IF !seek_pos_pos( cIdFirma, cIdTipdok, dDatDok, cBrDok )
     //pos_hernad      RETURN NIL
     //pos_hernad  ENDIF
     //pos_hernad ENDIF
  
     altd()
     nPosRacunUkupnoCheck := 0
-    DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
+    DO WHILE !Eof() .AND. pos->idpos == cIdFirma .AND. pos->idvd == cIdTipdok  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
  
        aStavka := Array( FISK_INDEX_LEN )
        IF lStorno
@@ -1560,7 +1593,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
        ENDIF
  
        cRobaNaziv := trim(roba->naz)
-       aStavka[ FISK_INDEX_BRDOK ] := AllTrim(cIdPos) + "-" + AllTrim(cBrDok)
+       aStavka[ FISK_INDEX_BRDOK ] := AllTrim(cIdFirma) + "-" + AllTrim(cBrDok)
        aStavka[ FISK_INDEX_RBR ] := AllTrim( Str( ++nRbr ) )
        aStavka[ FISK_INDEX_IDROBA ] := cIdRoba
        aStavka[ FISK_INDEX_ROBANAZIV ] := cRobaNaziv
@@ -1590,7 +1623,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     IF ROUND(nPosRacunUkupno, 2) <> ROUND(nPosRacunUkupnoCheck, 2)
        FOR nI := 1 TO LEN(aStavkeRacuna)
           // moze se desiti da je radi gresaka zaokruzenja kada ima popusta ukupan iznos koji izracuna fiskalni i ukupan iznos
-          // pri pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele) ima razliku
+          // pri pos_iznos_racuna( cIdFirma, cIdTipdok, dDatDok, cBrDok, lTmpTabele) ima razliku
           // nPosRacunUkupnoCheck proracunava cijenu onako kako racuna fiskalni
           aStavkeRacuna[nI, FISK_INDEX_TOTAL] := nPosRacunUkupnoCheck
        NEXT
@@ -1608,7 +1641,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
  
     RETURN aStavkeRacuna
  
-/*
+
 FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
 
     LOCAL nStorno, hParams := hb_hash(), cInvoiceNumberDate, cUUID, hRet := hb_hash()
@@ -1621,8 +1654,8 @@ FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
     // AAdd( aDBf, { 'fisk_id', 'C',  36,  0 } )
     cUUID := _pos_pripr->fisk_id
 
-    hParams[ "idpos" ] := _pos_pripr->idpos
-    hParams[ "idvd" ] := _pos_pripr->idvd
+    hParams[ "idfirma" ] := _pos_pripr->idpos
+    hParams[ "idtipdok" ] := _pos_pripr->idvd
     hParams[ "brdok" ] := _pos_pripr->brdok
     hParams[ "datum" ] := _pos_pripr->datum
     
@@ -1639,28 +1672,31 @@ FUNCTION pos_racun_u_pripremi_broj_storno_rn_ofs()
     PopWa()
 
 RETURN hRet
-*/
 
-// CREATE OR REPLACE FUNCTION p15.set_ref_storno_fisk_dok( cIdPos varchar, cIdVd varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
 
-/*
-FUNCTION pos_set_ref_storno_fisk_dok_ofs( hParams, cUUIDFiskStorniran )
+
+
+
+// CREATE OR REPLACE FUNCTION p15.set_ref_storno_fisk_dok( cIdFirma varchar, cIdTipdok varchar, dDatDok date, cBrDok varchar, uuidFiskStorniran text ) RETURNS void
+
+
+FUNCTION fakt_set_ref_storno_fisk_dok_ofs( hParams, cUUIDFiskStorniran )
 
     LOCAL cQuery, oError
 
-    LOCAL cIdPos, cIdVd, dDatDok, cBrDok
+    LOCAL cIdFirma, cIdTipdok, dDatDok, cBrDok
      
-    cIdPos := hParams["idpos"]
-    cIdVd := hParams["idvd"]
-    dDatDok := hParams["datum"]
+    cIdFirma := hParams["idfirma"]
+    cIdTipdok := hParams["idtipdok"]
+    dDatDok := hParams["datdok"]
     cBrDok := hParams["brdok"]
-    IF Empty( cIdPos )
+    IF Empty( cIdFirma )
        RETURN .F.
     ENDIF
  
     cQuery := "SELECT " + sql_schema() + ".set_ref_storno_fisk_dok_ofs(" + ;
-       sql_quote( cIdPos ) + "," + ;
-       sql_quote( cIdVd ) + "," + ;
+       sql_quote( cIdFirma ) + "," + ;
+       sql_quote( cIdTipdok ) + "," + ;
        sql_quote( dDatDok ) + "," + ;
        sql_quote( cBrDok ) + "," + ;
        sql_quote( cUUIDFiskStorniran ) +  ")"
@@ -1674,16 +1710,16 @@ FUNCTION pos_set_ref_storno_fisk_dok_ofs( hParams, cUUIDFiskStorniran )
     END SEQUENCE
  
 RETURN .T.
-*/
 
-/*
+
+
 FUNCTION fakt_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
 
     LOCAL cQuery, oError, oRet, cGet
 
-    // select invoice_number || '_' || sdc_date_time from p23.pos_fisk_doks_ofs where dok_id = <cUUID>  
+    // select invoice_number || '_' || sdc_date_time from public.fakt_fisk_doks_ofs where dok_id = <cUUID>  
     cQuery := "SELECT invoice_number || '_' || sdc_date_time  from " +;
-              sql_schema() + ".pos_fisk_doks_ofs" + ;
+              sql_schema() + ".fakt_fisk_doks_ofs" + ;
                 " WHERE dok_id = " + sql_quote( cUUID ) + "::uuid"
 
     
@@ -1699,7 +1735,7 @@ FUNCTION fakt_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
     END SEQUENCE
  
 RETURN cGet
-*/
+
 
 
 // https://en.wikipedia.org/wiki/Bosnian_language

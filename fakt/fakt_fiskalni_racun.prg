@@ -21,6 +21,8 @@
  STATIC s_lFiskalniPartnerPDV
  STATIC cFiskalniVrstaPlacanja
  STATIC s_lFiskalniPrikaziPartnera
+
+ STATIC s_cFiskalniDrajverNaziv := "OFS"
  STATIC s_cFiskalniDrajverTremol := "TREMOL"
  STATIC s_cFiskalniDrajverFPRINT := "FPRINT"
  STATIC s_cFiskalniDrajverOFS := "OFS"
@@ -28,6 +30,55 @@
  STATIC s_cFiskalniUredjaj
  
  
+ FUNCTION pos_get_vrsta_placanja_0123( cIdVrstePlacanja )
+
+   LOCAL cRet := "0"
+   
+   IF s_cFiskalniDrajverNaziv == NIL
+       Altd( "pos_get_vrsta_placanja_0123 nije setovana!? QUIT!")
+       QUIT_1
+   ENDIF
+   
+   IF s_cFiskalniDrajverNaziv == "OFS"
+       // default placanje
+       cRet := "Cash"
+   ENDIF
+   
+   IF Empty( cIdVrstePlacanja ) .OR. cIdVrstePlacanja == "01"
+       // gotovina FPRINT, TREMOL
+       IF s_cFiskalniDrajverNaziv == "OFS"
+           RETURN "Cash"
+       ELSE
+           RETURN "0"
+       ENDIF
+   ENDIF
+   
+   IF cIdVrstePlacanja == "CK"
+       IF s_cFiskalniDrajverNaziv == "FPRINT"
+           // https://redmine.bring.out.ba/issues/38042#change-291730
+           RETURN "2"
+       ELSEIF s_cFiskalniDrajverNaziv == "OFS"
+           RETURN "Check"
+       ENDIF
+       // TREMOL
+       RETURN "1"  // cek
+   ENDIF
+   
+   IF cIdVrstePlacanja == "KT"
+       IF s_cFiskalniDrajverNaziv == "FPRINT"
+           // https://redmine.bring.out.ba/issues/38042#change-291730
+           RETURN "1" 
+       ELSEIF s_cFiskalniDrajverNaziv == "OFS"
+           RETURN "Card"
+       ELSE
+           // TREMOL
+           RETURN "2"  // prema https://redmine.bring.out.ba/issues/38042 za FPRINT fiskalni_vrsta_placanja( id_plac, cDriver )  funkcija ne daje dobre rezultate
+       ENDIF
+   ENDIF
+   
+   RETURN cRet
+
+   
  FUNCTION param_racun_na_email( cEmailTo )
  
     IF cEmailTo != NIL
@@ -46,7 +97,7 @@
     LOCAL aRacunStavkeData, aPartnerData
     LOCAL _cont := "1"
     LOCAL lRacunBezgBezPartnera
-    LOCAL hRet
+    LOCAL hRet, hParams
  
     IF !fiscal_opt_active()
        RETURN nErrorLevel
@@ -66,6 +117,8 @@
  
     s_hFiskalniParams := hDeviceParams
     cFiskalniDrajver := AllTrim( hDeviceParams[ "drv" ] )
+    s_cFiskalniDrajverNaziv := cFiskalniDrajver
+
     lRacunBezgBezPartnera := ( hDeviceParams[ "vp_no_customer" ] == "D" )
  
     s_cFiskalniUredjaj := cFiskalniDrajver
@@ -113,8 +166,23 @@
  
    CASE cFiskalniDrajver == s_cFiskalniDrajverOFS
       // aPartnerData
-       hRet := ofs_invoice_create( s_hFiskalniParams, aRacunStavkeData, (nStorno == 1) )
-       nErrorLevel := hRet["error"]
+      hRet := ofs_invoice_create( s_hFiskalniParams, aRacunStavkeData, (nStorno == 1) )
+      nErrorLevel := hRet["error"]
+
+      if nErrorLevel == 0
+
+         hParams := hb_hash()
+         hParams["idfirma"] := cIdFirma
+         hParams["idtipdok"] := cIdTipDok
+         hParams["brdok"] := cBrDok
+         hParams["fiskalni_broj"] := hRet["broj"]
+         hParams["fiskalni_datum"] := hRet["datum"]
+         hParams["json"] := hRet["json"]
+   
+          //IF !Empty(hParams["fiskalni_broj"])
+          fakt_set_broj_fiskalnog_racuna_ofs( hParams )
+          //endif
+      ENDIF
 
  
     ENDCASE
@@ -248,11 +316,23 @@
  FUNCTION postoji_fiskalni_racun( cIdFirma, cIdTipDok, cBrDok, cFiskalniModel )
  
     LOCAL lRet := .F.
-    LOCAL cWhere
+    LOCAL cWhere, hParams, cRet
  
     IF cFiskalniModel == NIL
        cFiskalniModel := fiskalni_uredjaj_model()
     ENDIF
+
+    if cFiskalniModel == "OFS"
+      hParams := hb_hash()
+      hParams["idfirma"] := cIdFirma
+      hParams["idtipdok"] := cIdTipDok
+      hParams["brdok"] := cBrDok
+
+      cRet := fakt_get_fiskalni_dok_id_ofs(hParams)
+
+      RETURN !Empty(cRet) 
+    endif
+
  
     cWhere := " idfirma = " + sql_quote( cIdFirma )
     cWhere += " AND idtipdok = " + sql_quote( cIdTipDok )
