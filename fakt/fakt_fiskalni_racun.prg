@@ -38,9 +38,8 @@
        Altd( "fakt_get_vrsta_placanja_0123 nije setovana!? QUIT!")
        QUIT_1
    ENDIF
-   
-   altd()
-   
+
+
    IF s_cFiskalniDrajverNaziv == "OFS"
        // default placanje
        cRet := "Cash"

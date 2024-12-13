@@ -1411,29 +1411,28 @@ FUNCTION fakt_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
 RETURN "_"
 
 
-FUNCTION pos_storno_racun_ofs( hParams )
+FUNCTION fakt_storno_racun_ofs( hParams )
 
-    IF !hb_HHasKey( hParams, "datum" )
-       hParams[ "datum" ] := NIL
-    ENDIF
-    IF !hb_HHasKey( hParams, "brdok" )
-       hParams[ "brdok" ] := NIL
-    ENDIF
+    //IF !hb_HHasKey( hParams, "datum" )
+    //   hParams[ "datum" ] := NIL
+    //ENDIF
+    //IF !hb_HHasKey( hParams, "brdok" )
+    //   hParams[ "brdok" ] := NIL
+    //ENDIF
     //IF !hb_HHasKey( hParams, "idfirma" )
     //   hParams[ "idfirma" ] := pos_pm()
     //ENDIF
-    IF hParams[ "datum" ] == nil
-       hParams[ "datum" ] := danasnji_datum()
-    ENDIF
-    IF hParams[ "brdok" ] == nil
-       hParams[ "brdok" ] := Space( FIELD_LEN_POS_BRDOK )
-    ENDIF
-    hParams[ "browse" ] := .F.
+     // IF hParams[ "datum" ] == nil
+    //   hParams[ "datum" ] := danasnji_datum()
+    //ENDIF
+    //IF hParams[ "brdok" ] == nil
+    //   hParams[ "brdok" ] := Space( FIELD_LEN_POS_BRDOK )
+    //ENDIF
+    //hParams[ "browse" ] := .F.
 
 
     IF pronadji_fiskalni_racun_za_storniranje_ofs(@hParams)        
         IF Pitanje(, "Stornirati FAKT " + fakt_dokument( hParams ) + " [" + hParams[ "fiskalni_broj" ] + "] ?", "D" ) == "D"
-            
             hParams[ "fisk_rn" ] := 999
             fakt_napravi_u_pripremi_storno_dokument( hParams )
         ENDIF
@@ -1448,16 +1447,16 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
     LOCAL GetList := {}
     local hRet, cOldFiskFullRn, cMsg, cFullBroj
  
-    PushWA()
-    Box(, 5, 55 )
-    @ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
-    //pos_hernad @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati POS račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
-    READ
-    BoxC()
-    IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
-        PopWa()
-        RETURN .F.
-    ENDIF
+    //PushWA()
+    //Box(, 5, 55 )
+    //@ box_x_koord() + 2, box_y_koord() + 2 SAY "Datum:" GET hParams[ "datum" ]
+    //   @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "Stornirati FAKT račun broj:" GET hParams[ "brdok" ] VALID {|| pos_lista_racuna( @hParams ), .T. }
+    //READ
+    //BoxC()
+    //IF LastKey() == K_ESC .OR. Empty( hParams[ "brdok" ] )
+    //    PopWa()
+    //    RETURN .F.
+    //ENDIF
 
     if is_fiskalizacija_off()
         // omoguciti izradu storna kad je fiskalizacija off
@@ -1467,11 +1466,12 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
         RETURN .T.
     endif
 
-    // racun koji fiskaliziramo
+    // racun koji zelimi stornirati
     hRet := fakt_get_broj_fiskalnog_racuna_ofs( hParams )
     hParams[ "fiskalni_broj" ] := hRet["fiskalni_broj"]
     hParams[ "fiskalni_datum" ] := hRet["fiskalni_datum"]
     cFullBroj := hParams[ "fiskalni_broj" ] + "_" + hParams["fiskalni_datum"]
+
     // naci njegov uuid 
     hParams[ "fisk_id" ] := fakt_get_fiskalni_dok_id_ofs( hParams )
     // trazimo da li je vec storniranje ovog fiskalnog racuna
@@ -1516,6 +1516,7 @@ FUNCTION fakt_get_fiskalni_dok_id_ofs( hParams )
  
     oRet := run_sql_query( cQuery )
     IF is_var_objekat_tpqquery( oRet )
+       // dok_id u tabeli fiskalnih racuna 
        cValue := oRet:FieldGet( 1 )
        IF cValue <> NIL
           RETURN cValue

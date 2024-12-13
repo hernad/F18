@@ -152,6 +152,7 @@ FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUred
    LOCAL cFiscal_time
    LOCAL lReload
    LOCAL nPovrat
+   LOCAL hParams
    LOCAL GetList := {}
 
    s_lBrowseInitialized := .T.
@@ -342,7 +343,13 @@ FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUred
 
    CASE Upper( Chr( nCh ) ) == "S"
 
-      fakt_generisi_storno_dokument( fakt_doks_pregled->idfirma, fakt_doks_pregled->idtipdok, fakt_doks_pregled->brdok )
+      hParams := hb_hash()
+      hParams["idfirma"] := fakt_doks_pregled->idfirma
+      hParams["idtipdok"] := fakt_doks_pregled->idtipdok
+      hParams["brdok"] := fakt_doks_pregled->brdok
+
+      //fakt_generisi_storno_dokument( fakt_doks_pregled->idfirma, fakt_doks_pregled->idtipdok, fakt_doks_pregled->brdok )
+      fakt_storno_racun_ofs( hParams )
 
       IF Pitanje(, "Preći u tabelu pripreme ?", "D" ) == "D"
          fUPripremu := .T.

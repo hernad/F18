@@ -657,7 +657,7 @@ FUNCTION fakt_brisanje_pripreme()
 
    RETURN .T.
 
-
+/*
 FUNCTION fakt_generisi_storno_dokument( cIdFirma, cIdTipDok, cBrDok )
 
    LOCAL cFaktNoviBrDok
@@ -731,3 +731,4 @@ FUNCTION fakt_generisi_storno_dokument( cIdFirma, cIdTipDok, cBrDok )
    ENDIF
 
    RETURN .T.
+*/
