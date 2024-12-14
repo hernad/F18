@@ -338,8 +338,12 @@ FUNCTION fakt_pregled_dokumenata_browse_key_handler( nCh, lOpcine, cFiskalniUred
 
    CASE Upper( Chr( nCh ) ) == "W"
 
-      fakt_napravi_duplikat( fakt_doks_pregled->idfirma, fakt_doks_pregled->idtipdok, fakt_doks_pregled->brdok )
-
+      //fakt_napravi_duplikat( fakt_doks_pregled->idfirma, fakt_doks_pregled->idtipdok, fakt_doks_pregled->brdok )
+      hParams := hb_hash()
+      hParams["idfirma"] := fakt_doks_pregled->idfirma
+      hParams["idtipdok"] := fakt_doks_pregled->idtipdok
+      hParams["brdok"] := fakt_doks_pregled->brdok
+      fiskalni_ofs_racun_kopija(hParams)
 
    CASE Upper( Chr( nCh ) ) == "S"
 

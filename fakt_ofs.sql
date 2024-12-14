@@ -1,4 +1,4 @@
--- fakt_ofs v0.9.3
+-- fakt_ofs v1.0.0
 
 ALTER TABLE fmk.fakt_doks add column dok_id uuid default gen_random_uuid();
 
@@ -217,7 +217,7 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION public.fakt_is_storno_ofs(cIdFirma varchar, cIdTipDok varchar, dDatDok date, cBrDok varchar) RETURNS boolean
+CREATE OR REPLACE FUNCTION public.fakt_is_storno_ofs(cIdFirma varchar, cIdTipDok varchar, cBrDok varchar) RETURNS boolean
  LANGUAGE plpgsql
  AS $$
 DECLARE
@@ -227,7 +227,7 @@ BEGIN
 SELECT fakt_fisk_doks_ofs.ref_storno_fisk_dok FROM fmk.fakt_doks
    LEFT JOIN public.fakt_fisk_doks_ofs
    ON public.fakt_fisk_doks_ofs.ref_fakt_dok = fmk.fakt_doks.dok_id
-   WHERE fmk.fakt_doks.idfirma=cIdFirma AND fmk.fakt_doks.idtipdok=cIdTipDok AND fmk.fakt_doks.datdok=dDatDok AND fmk.fakt_doks.brdok=cBrDok
+   WHERE fmk.fakt_doks.idfirma=cIdFirma AND fmk.fakt_doks.idtipdok=cIdTipDok AND fmk.fakt_doks.brdok=cBrDok
    INTO uuidStorno;
 
 IF uuidStorno IS NULL THEN

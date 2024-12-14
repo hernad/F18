@@ -428,7 +428,7 @@ FUNCTION fakt_izracunaj_ukupnu_vrijednost_racuna( cIdFirma, cIdTipDok, cBrDok )
  // ]
  
  // ----------------------------------------------------------
- STATIC FUNCTION fakt_izracunaj_total( aTarifaIznos, cIdPartner, cIdTipDok )
+ FUNCTION fakt_izracunaj_total( aTarifaIznos, cIdPartner, cIdTipDok )
  
     LOCAL hTotal := hb_Hash()
     LOCAL cIdTarifa, nI, nIznos
@@ -680,7 +680,6 @@ FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
            nCijena := hDataItem[ "ukupno" ]
        ENDIF    
        //? bug? nCijena := field->cijena
-
  
        IF cIdTipDok == "10"
           _vr_plac := "3"
@@ -719,7 +718,7 @@ FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
        // 4 - roba naziv
        // 5 - cijena
        // 6 - kolicina
-       // 7 - tarifa
+       // 7 - tarifa  FISK_INDEX_TARIFA
        // 8 - broj racuna za storniranje
        // 9 - roba plu
        // 10 - plu cijena
@@ -745,14 +744,14 @@ FUNCTION fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
           cNazivArtikla, ;         // 4
           nCijena, ;               // 5
           nKolicina, ;             // 6
-          cIdTarifa, ;             // 7
+          cIdTarifa, ;             // 7  FISK_INDEX_TARIFA
           cStornoRacunOpis, ;      // 8  FISK_INDEX_FISK_RACUN_STORNIRATI
           nRobaFiscPLU, ;          // 9
           nCijena, ;               // 10
           nRabatProc, ;            // 11 FISK_INDEX_POPUST
           cArtikalBarkod, ;        // 12
           cVrstaPlacanja, ;        // 13
-          ABS(nTotalRacuna), ;          // 14
+          ABS(nTotalRacuna), ;     // 14 FISK_INDEX_TOTAL
           _rn_datum, ;             // 15
           cRobaJmj,;               // 16
           nNetoCijena;             // 17

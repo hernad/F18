@@ -184,7 +184,6 @@ FUNCTION curl_hello()
 
     MsgBeep("Response:" + Strtran(Strtran(cData, Chr(13), ""), Chr(10), ""))
 
-    altd()
     RETURN NIL
 
 
@@ -216,7 +215,6 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     if hb_HHasKey(hParams, "request_params")
        cParams := "" 
        // "example=param&example2=param2..."
-       altd()
        FOR each hRequestParam in hParams["request_params"]
            cParams := hRequestParam["name"] + "=" + hRequestParam["value"]
        NEXT
@@ -398,8 +396,6 @@ FUNCTION ofs_status(hParams, cVarijanta)
     
     IF cRet == "0"
         hResponseData := hb_jsonDecode(cData)
-        altd()
-        
         cGsc = "" 
         for each cCode in hResponseData["gsc"]
             cGsc := cGsc + cCode + "/"
@@ -621,7 +617,7 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
     // uuid fiskalnog racuna ciju kopiju zelimo
     //cUUId := pos_get_fiskalni_dok_id_ofs( hParams )
-    altd()
+
 
     IF fakt_is_storno_ofs(hParams)
         hParams["storno_fiskalni_broj"] := "A"
@@ -1385,17 +1381,15 @@ FUNCTION fakt_get_broj_fiskalnog_racuna_ofs( hParams )
 FUNCTION fakt_is_storno_ofs( hParams )
 
     LOCAL cQuery, oRet, lValue 
-    LOCAL cIdFirma, cIdTipdok, dDatDok, cBrDok
+    LOCAL cIdFirma, cIdTipdok, cBrDok
     
     cIdFirma := hParams["idfirma"]
     cIdTipdok := hParams["idtipdok"]
-    dDatDok := hParams["datum"]
     cBrDok := hParams["brdok"]
 
     cQuery := "SELECT " + sql_schema() + ".fakt_is_storno_ofs(" + ;
        sql_quote( cIdFirma ) + "," + ;
        sql_quote( cIdTipdok ) + "," + ;
-       sql_quote( dDatDok ) + "," + ;
        sql_quote( cBrDok ) + ")"
  
     oRet := run_sql_query( cQuery )
@@ -1410,6 +1404,7 @@ FUNCTION fakt_is_storno_ofs( hParams )
  
     RETURN .F.
  
+/*    
 // vraca u formatu: invoice_number || '_' || sdc_date_time
 // SELECT p15.pos_storno_broj_rn( '1 ','42','2019-03-15','       8' );  =>  ABC-DE-FG_2024010203
  
@@ -1434,7 +1429,7 @@ FUNCTION pos_storno_broj_rn_ofs( cIdFirma, cIdTipdok, dDatDok, cBrDok )
     ENDIF
  
 RETURN "_"
-
+*/
 
 /*
    broj fiskalnog racuna koji je storno dokumenta ciji je uuid= cUUIDFiskStorniran
@@ -1593,7 +1588,7 @@ FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     LOCAL nPOSRabatProcenat
     LOCAL cRobaBarkod, cIdRoba, cRobaNaziv, cJMJ
     LOCAL nRbr := 0
-    LOCAL nFaktRacunUkupno, nFaktRacunUkupnoCheck
+    LOCAL nFaktRacunUkupnoCheck
     LOCAL cVrstaPlacanja
     LOCAL nLevel
     LOCAL aStavka
@@ -1601,6 +1596,8 @@ FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     LOCAL lTmpTabele := .T.
     LOCAL nI
     LOCAL nUplaceniIznos, lAzuriraniDokument
+    LOCAL nCijena, nKolicina, nRabatProc, nNetoCijena, cIdTarifa
+    LOCAL cIdPartner, aIznosi, hTotal
  
 
     cIdFirma := hParams["idfirma"]
@@ -1610,29 +1607,29 @@ FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     nUplaceniIznos := hParams["uplaceno"]
     lAzuriraniDokument := hParams["azuriran"]
 
-
     // kod direktnog poziva kopije ofs fiskalnog racuna moze se desiti da nisu inicijalizovani params
     //IF hFiskParams <> NIL .and. s_hFiskalniUredjajParams == NIL
     //  init_fisk_params(hFiskParams)
     //ENDIF
- 
-    altd()
+
     lStorno := !Empty( hParams["storno_fiskalni_broj"] )
  
-    
-    IF nUplaceniIznos > 0
-       nFaktRacunUkupno := nUplaceniIznos
-    ENDIF
- 
+   
     IF !seek_fakt_doks( cIdFirma, cIdTipdok, cBrDok )
-    RETURN NIL
+       RETURN NIL
     ENDIF
-    cVrstaPlacanja := fakt_doks->idvrstep
+    cVrstaPlacanja := fakt_doks->idvrstep // default empty
 
     IF !seek_fakt( cIdFirma, cIdTipdok, cBrDok )
        RETURN NIL
     ENDIF
 
+    cIdPartner := fakt->idpartner
+    aIznosi := fakt_get_iznos_za_dokument( cIdFirma, cIdTipDok, cBrDok )
+    hTotal := fakt_izracunaj_total( aIznosi, cIdPartner, cIdTipDok )
+
+    
+    seek_fakt( cIdFirma, cIdTipdok, cBrDok )
 
     nFaktRacunUkupnoCheck := 0
     DO WHILE !Eof() .AND. fakt->idfirma == cIdFirma .AND. fakt->idtipdok == cIdTipdok  .AND. fakt->brdok == cBrDok
@@ -1643,40 +1640,43 @@ FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
        ELSE
           cBrojFiskRNStorno := ""   
        ENDIF
-       cIdRoba := field->idroba
+       cIdRoba := fakt->idroba
  
        select_o_roba( cIdRoba )
          
        cRobaBarkod := roba->barkod
        cJMJ := roba->jmj
+       cIdTarifa := AllTrim( roba->idtarifa )
  
-       SELECT pos
-       nPOSRabatProcenat := 0
-       aStavka[ FISK_INDEX_NETO_CIJENA ] := field->cijena
-       IF field->ncijena > 0  // cijena = 100, ncijena = 90 (cijena sa uracunatim popustom), popust = 10%
-          nPOSRabatProcenat := ( ( field->cijena - field->ncijena ) / field->cijena ) * 100
-          nPOSRabatProcenat := ROUND(nPOSRabatProcenat, 2)
-          aStavka[ FISK_INDEX_NETO_CIJENA ] := field->ncijena
-       ENDIF
- 
+       SELECT fakt
+
+       nCijena :=  fakt->cijena
+       nKolicina := Abs( fakt->kolicina )
+       nRabatProc := Abs( fakt->rabat )
+  
+       nNetoCijena := ROUND(nCijena * (1 - nRabatProc/100.00), 2) 
+   
+       aStavka[ FISK_INDEX_NETO_CIJENA ] := nNetoCijena
+
+    
        cRobaNaziv := trim(roba->naz)
        aStavka[ FISK_INDEX_BRDOK ] := AllTrim(cIdFirma) + "-" + AllTrim(cBrDok)
        aStavka[ FISK_INDEX_RBR ] := AllTrim( Str( ++nRbr ) )
        aStavka[ FISK_INDEX_IDROBA ] := cIdRoba
        aStavka[ FISK_INDEX_ROBANAZIV ] := cRobaNaziv
-       aStavka[ FISK_INDEX_CIJENA ] := pos->cijena
-       aStavka[ FISK_INDEX_KOLICINA ] := Abs( pos->kolicina ) // uvijek pozitivna vrijednost
-       aStavka[ FISK_INDEX_TARIFA ] := pos->idtarifa
+       aStavka[ FISK_INDEX_CIJENA ] := nCijena
+       aStavka[ FISK_INDEX_KOLICINA ] := nKolicina // uvijek pozitivna vrijednost
+       aStavka[ FISK_INDEX_TARIFA ] := cIdTarifa
        // broj + _ + datum racuna koji se stornira
        aStavka[ FISK_INDEX_FISK_RACUN_STORNIRATI ] := cBrojFiskRNStorno
  
-       aStavka[ FISK_INDEX_PLU ] := nPLU
-       aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
+       aStavka[ FISK_INDEX_PLU ] := 0
+       aStavka[ FISK_INDEX_PLU_CIJENA ] := nCijena
        
-       aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
+       aStavka[ FISK_INDEX_POPUST ] := nRabatProc
        aStavka[ FISK_INDEX_BARKOD ] := cRobaBarkod
        aStavka[ FISK_INDEX_VRSTA_PLACANJA ] := cVrstaPlacanja
-       aStavka[ FISK_INDEX_TOTAL ] := nFaktRacunUkupno
+       aStavka[ FISK_INDEX_TOTAL ] := ABS(hTotal["ukupno"])
        aStavka[ FISK_INDEX_DATUM ] := dDatDok
        aStavka[ FISK_INDEX_JMJ ] :=  cJMJ
  
@@ -1687,7 +1687,7 @@ FUNCTION fakt_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     ENDDO
  
  
-    IF ROUND(nFaktRacunUkupno, 2) <> ROUND(nFaktRacunUkupnoCheck, 2)
+    IF ROUND(ABS(hTotal["ukupno"]), 2) <> ROUND(nFaktRacunUkupnoCheck, 2)
        FOR nI := 1 TO LEN(aStavkeRacuna)
           // moze se desiti da je radi gresaka zaokruzenja kada ima popusta ukupan iznos koji izracuna fiskalni i ukupan iznos
           // pri pos_iznos_racuna( cIdFirma, cIdTipdok, dDatDok, cBrDok, lTmpTabele) ima razliku
