@@ -132,7 +132,9 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     IF  hParams["api_key"] != NIL
         AAdd(aHeader, "Authorization: Bearer " + hParams["api_key"])
     ENDIF
-    AAdd(aHeader, "Content-Type: " + cContentType) // + "; charset=UTF-8")
+    IF cContentType <> NIL
+       AAdd(aHeader, "Content-Type: " + cContentType) // + "; charset=UTF-8")
+    ENDIF
     
     curl_easy_setopt( hCurl, HB_CURLOPT_HTTPHEADER, aHeader)
     
@@ -150,7 +152,8 @@ FUNCTION ofs_attention(hParams)
 
     LOCAL nRet, cData, hCurl
 
-    hCurl := curl_init(@hParams, "/api/attention", "application/text", "GET")
+    //hCurl := curl_init(@hParams, "/api/attention", "text/plain", "GET")
+    hCurl := curl_init(@hParams, "/api/attention", NIL, "GET")
 
     IF hCurl == NIL
        return .F.
@@ -176,8 +179,7 @@ FUNCTION ofs_putpin(hParams)
     LOCAL lOk := .F.
 
     DO WHILE .T.
-        hCurl := curl_init(@hParams, "/api/pin", "application/text", "POST")
-
+        hCurl := curl_init(@hParams, "/api/pin", "text/plain", "POST")
         IF hCurl == NIL
           curl_end()
           lOk := .F.
