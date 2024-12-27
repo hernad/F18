@@ -337,8 +337,8 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
       nRadnihSatiUvecanoTrajanje := 0
       nStUv := 0
       nBruto := 0
-      nO_prih := 0
-      nU_opor := 0
+      nKoristi := 0
+      nUkupanPrihod := 0
       nU_d_pio := 0
       nU_d_zdr := 0
       nU_dn_dz := 0
@@ -568,8 +568,8 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
             nIsplata := min_neto( nIsplata, field->usati )
          ENDIF
 
-         nO_prih := nBrDobra
-         nU_opor := ( nBruto - nBrDobra )
+         nKoristi := nBrDobra
+         nUkupanPrihod := ( nBruto - nBrDobra )
 
          cVrstaIspl := ""
          dDatIspl := Date()
@@ -611,8 +611,8 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
             nRadnihSatiUvecanoTrajanje, ;
             nStUv, ;
             nBruto, ;
-            nO_prih, ;
-            nU_opor, ;
+            nKoristi, ;
+            nUkupanPrihod, ;
             nU_d_pio, ;
             nU_d_zdr, ;
             nU_d_pms, ;
@@ -645,7 +645,7 @@ FUNCTION mip_fill_data( cIdRjTekuca, nGodina, nMjesec, ;
 
 STATIC FUNCTION mip_insert_record_r_export( cIdRadnik, cIdRj, nGodina, nMjesec, ;
       cTipRada, cVrIspl, cR_ime, cR_jmb, cR_opc, dDatIsplate, ;
-      nBrojRadnihSati, nSatiBolovanje, nRadnihSatiUvecanoTrajanje, nStUv, nBruto, nO_prih, nU_opor, ;
+      nBrojRadnihSati, nSatiBolovanje, nRadnihSatiUvecanoTrajanje, nStUv, nBruto, nKoristi, nUkupanPrihod, ;
       nU_d_pio, nU_d_zdr, nU_d_pms, nU_d_nez, nU_d_iz, ;
       nU_dn_pio, nU_dn_zdr, nU_dn_nez, nU_dn_dz, ;
       nUm_prih, nKLO, nLODB, nOsn_por, nIzn_por, ;
@@ -672,8 +672,8 @@ STATIC FUNCTION mip_insert_record_r_export( cIdRadnik, cIdRj, nGodina, nMjesec, 
    REPLACE r_satit WITH nRadnihSatiUvecanoTrajanje
    REPLACE r_stuv WITH nSTUv
    REPLACE bruto WITH nBruto
-   REPLACE o_prih WITH nO_prih
-   REPLACE u_opor WITH nU_opor
+   REPLACE o_prih WITH nKoristi
+   REPLACE u_opor WITH nUkupanPrihod
    REPLACE u_d_pio WITH nU_d_pio
    REPLACE u_d_zdr WITH nU_d_zdr
    REPLACE u_d_pms WITH nU_d_pms
@@ -790,9 +790,9 @@ STATIC FUNCTION mipmip_glavna_fill_xml( cFile )
       nR_sati := 0
       nR_satib := 0
       nRadnihSatiUvecanoTrajanje := 0
-      nO_prih := 0
+      nKoristi := 0
       nBruto := 0
-      nU_opor := 0
+      nUkupanPrihod := 0
       nU_d_zdr := 0
       nU_d_pio := 0
       nU_d_nez := 0
@@ -824,8 +824,8 @@ STATIC FUNCTION mipmip_glavna_fill_xml( cFile )
          ENDIF
 
          nBruto += field->bruto
-         nO_prih += field->o_prih
-         nU_opor += field->u_opor
+         nKoristi += field->o_prih
+         nUkupanPrihod += field->u_opor
          nU_d_zdr += field->u_d_zdr
          nU_d_pio += field->u_d_pio
          nU_d_nez += field->u_d_nez
@@ -879,8 +879,8 @@ STATIC FUNCTION mipmip_glavna_fill_xml( cFile )
       xml_node( "RadniSati", Str( nR_sati, 12, 2 ) )
       xml_node( "RadniSatiBolovanje", Str( nR_satib, 12, 2 ) )
       xml_node( "BrutoPlaca", Str( nBruto, 12, 2 ) )
-      xml_node( "KoristiIDrugiOporeziviPrihodi", Str( nO_prih, 12, 2 ) )
-      xml_node( "UkupanPrihod", Str( nU_opor, 12, 2 ) )
+      xml_node( "KoristiIDrugiOporeziviPrihodi", Str( nKoristi, 12, 2 ) )
+      xml_node( "UkupanPrihod", Str( nUkupanPrihod, 12, 2 ) )
       xml_node( "IznosPIO", Str( nU_d_pio, 12, 2 ) )
       xml_node( "IznosZO", Str( nU_d_zdr, 12, 2 ) )
       xml_node( "IznosNezaposlenost", Str( nU_d_nez, 12, 2 ) )
@@ -1233,8 +1233,8 @@ STATIC FUNCTION mip_glavna_fill_xml( xml_file )
       nR_StUv := 0
       cSifraRadnogMjestaUvecanoTrajanje := ""
       nBruto := 0
-      nO_prih := 0
-      nU_opor := 0
+      nKoristi := 0
+      nUkupanPrihod := 0
       nU_d_pio := 0
       nU_d_zdr := 0
       nU_d_pms := 0
@@ -1267,9 +1267,10 @@ STATIC FUNCTION mip_glavna_fill_xml( xml_file )
 
          nR_stuv := field->r_stuv
          cSifraRadnogMjestaUvecanoTrajanje := field->r_rmj
-         nBruto += field->bruto
-         nO_prih += field->o_prih
-         nU_opor += field->u_opor
+         nKoristi += field->o_prih
+         nBruto += (field->bruto - field->o_prih)  // ako ima koristi, bruto je umanjen za korist
+         //nUkupanPrihod += field->u_opor
+         nUkupanPrihod += field->bruto 
          nU_d_pio += field->u_d_pio
          nU_d_zdr += field->u_d_zdr
          nU_d_nez += field->u_d_nez
@@ -1307,8 +1308,8 @@ STATIC FUNCTION mip_glavna_fill_xml( xml_file )
       xml_node( "r_satit", Str( nRadnihSatiUvecanoTrajanje, 12, 2 ) ) // 21) Broj radnih sati sa uvećanim trajanjem ${rad.r_satit}
       xml_node( "r_stuv", cStUv )
       xml_node( "bruto", Str( nBruto, 12, 2 ) )
-      xml_node( "o_prih", Str( nO_prih, 12, 2 ) )
-      xml_node( "u_opor", Str( nU_opor, 12, 2 ) )
+      xml_node( "o_prih", Str( nKoristi, 12, 2 ) )
+      xml_node( "u_opor", Str( nUkupanPrihod, 12, 2 ) )
       xml_node( "u_d_pio", Str( nU_d_pio, 12, 2 ) )
       xml_node( "u_d_nez", Str( nU_d_nez, 12, 2 ) )
       xml_node( "u_d_zdr", Str( nU_d_zdr, 12, 2 ) )

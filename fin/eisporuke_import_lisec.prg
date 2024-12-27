@@ -19,186 +19,6 @@ FUNCTION fin_lisec_table_name( cSufix, dDateOd, dDateDo )
    RETURN cTableName
 
 
-FUNCTION fin_cre_lisec_table( cSufix, dDateOd, dDateDo )
-
-   IF cSufix == "IN"
-      return fin_cre_lisec_table_in( dDateOd, dDateDo )
-   ELSE
-      return fin_cre_lisec_table_rc( dDateOd, dDateDo )
-   ENDIF
-   
-   Alert("cre mora biti IN ili RC ?")
-   RETURN .F.
-
-
-// IN dokumenti - racuni
-FUNCTION fin_cre_lisec_table_in( dDateOd, dDateDo )
-
-  LOCAL cSql, oQuery 
-  LOCAL cLisecLQuery
-  LOCAL cTableName := fin_lisec_table_name( "IN", dDateOd, dDateDo)
-
-  IF Empty( cTableName)
-     RETURN .F.
-  ENDIF
-
-  cSql := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
-  cSql += "CREATE FOREIGN TABLE " + cTableName  
-  cSql += "("
-  cSql += "fiscal_number varchar(50),"
-  cSql += "reg_no varchar(20),"
-  cSql += "goni varchar(20),"
-  cSql += "tax_code varchar(4),"
-  cSql += "inv_date date,"
-  cSql += "pay_date date,"
-  cSql += "order_number varchar(20),"
-  cSql += "doctype int,"
-  cSql += "docstate int,"
-  cSql += "accountid int,"
-  cSql += "c_account_name varchar(50),"
-  cSql += "client_name varchar(100),"
-  cSql += "client_country varchar(40),"
-  cSql += "client_email varchar(200),"
-  cSql += "c_tax_number varchar(15),"
-  cSql += "tax_rate decimal(18,2),"
-  cSql += "inv_tot_excl decimal(18,2),"
-  cSql += "inv_tot_tax decimal(18,2),"
-  cSql += "inv_tot_incl decimal(18,2))"
-
-  cLisecLQuery := "select _ as fiscal_number,"
-  cLisecLQuery += "_ as reg_no, _ as goni, _ as tax_code,"
-  cLisecLQuery += "_ as inv_date, _ as pay_date, _ as order_number, "
-  cLisecLQuery += "client.name as client_name, client.Physical5 as client_country, client.email as client_email,"
-  cLisecLQuery += "_ as c_tax_number, _ as tax_rate, _ as inv_tot_excl, lisecinvnum.invTotTax as inv_tot_tax,"
-  cLisecLQuery += "lisecinvnum.InvTotIncl as inv_tot_incl" 
-  cLisecLQuery += " from lisecInvNum" 
-  cLisecLQuery += " left join client on client.dclink=lisecinvnum.accountid"
-  cLisecLQuery += " left join lisec_EU_FiscalNumber on lisec_EU_fiscalnumber.OrderIndex = lisecinvnum.OrderIndex"
-  cLisecLQuery += " where lisecinvnum.invdate>='" + sql_quote( dDateOd ) + "' and lisecinvnum.invdate<='" + sql_quote( dDateDo) + "'"
-  cLisecLQuery += " and (lisecinvnum.doctype=4 or lisecinvnum.doctype=8)"
-  cLisecLQuery += " order by _, _"
-
-  cSql += " SERVER lisec OPTIONS( query '" + cLisecLQuery + "', row_estimate_method 'execute');"
-
-  Alert("not implemented!")
-
-  oQuery := run_sql_query( cSql )
-
-  IF sql_error_in_query( oQuery, "CREATE" )
-    RETURN .F.
-  ENDIF
- 
-  RETURN .T. 
-
-
-// RC dokumenti - avansne fakture
-FUNCTION fin_cre_lisec_table_rc( dDateOd, dDateDo )
-
-   LOCAL cSql, oQuery 
-   LOCAL cLisecLQuery
-   LOCAL cTableName := fin_lisec_table_name( "RC", dDateOd, dDateDo)
- 
-   IF Empty( cTableName)
-      RETURN .F.
-   ENDIF
- 
-   cSql := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
-   cSql += "CREATE FOREIGN TABLE " + cTableName  
-   cSql += "("
-   cSql += "reg_no varchar(20),"
-   cSql += "goni varchar(20),"
-   cSql += "tax_code varchar(4),"
-   cSql += "inv_date date,"
-   cSql += "pay_date date,"
-   cSql += "order_number varchar(20),"
-   cSql += "doctype int,"
-   cSql += "type_id int," // avansna faktura je> 1 storno minus, 0 - plus 
-   cSql += "docstate int,"
-   cSql += "accountid int,"
-   cSql += "c_account_name varchar(50),"
-   cSql += "client_name varchar(100),"
-   cSql += "client_country varchar(40),"
-   cSql += "client_email varchar(200),"
-   cSql += "c_tax_number varchar(15),"
-   cSql += "tax_rate decimal(18,2),"
-   cSql += "inv_tot_excl decimal(18,2),"
-   cSql += "inv_tot_tax decimal(18,2),"
-   cSql += "inv_tot_incl decimal(18,2)"
-   cSql += ")"
- 
-   cLisecLQuery := "_ as inv_date,"
-   cLisecLQuery += "_ as pay_date,"
-   cLisecLQuery += "_ as order_number," 
-   cLisecLQuery += "_ as inv_tot_excl,"
-   cLisecLQuery += "_  as inv_tot_tax, view_lisec_EU_FiscalInvoicesSalesBook.InvTotIncl as inv_tot_incl,"
-   cLisecLQuery += "view_lisec_EU_FiscalInvoicesSalesBook.doctype, view_lisec_EU_FiscalInvoicesSalesBook.TypeID as type_id, lisecinvnum.accountid, lisecinvnum.cAccountName as c_account_name,"
-   cLisecLQuery += "lisecinvnum.accountid, lisecinvnum.cTaxNumber as c_tax_number, lisecinvnum.taxrate as tax_rate,"
-   cLisecLQuery += "client.RegistrationNo as reg_no, client.GONI as goni, client.name as client_name, client.Physical5 as client_country, client.email as client_email, client.TaxCode as tax_code"
-   cLisecLQuery += " from view_lisec_EU_FiscalInvoicesSalesBook"
-   cLisecLQuery += " left join lisecInvNum on view_lisec_EU_FiscalInvoicesSalesBook.OrderIndex=lisecinvnum.OrderIndex"         
-   cLisecLQuery += " left join client on client.dclink=lisecinvnum.accountid"
-   cLisecLQuery += " where view_lisec_EU_FiscalInvoicesSalesBook.doctype=9 and"
-   cLisecLQuery += " view_lisec_EU_FiscalInvoicesSalesBook.invdate>='" + sql_quote( dDateOd ) + "' and view_lisec_EU_FiscalInvoicesSalesBook.invdate <= '" + sql_quote( dDateDo) + "'"
-   cLisecLQuery += " order by view_lisec_EU_FiscalInvoicesSalesBook.invdate"
- 
-   cSql += " SERVER lisec OPTIONS( query '" + cLisecLQuery + "', row_estimate_method 'execute');"
-
-   Alert("not implemented!")
-
-   oQuery := run_sql_query( cSql )
- 
-   IF sql_error_in_query( oQuery, "CREATE" )
-     RETURN .F.
-   ENDIF
-  
-   RETURN .T. 
-
-FUNCTION fin_drop_lisec_table( cSufix, dDateOd, dDateDo )
-
-   LOCAL cSql, oQuery 
-   LOCAL cLisecLQuery
-   LOCAL cTableName := fin_lisec_table_name( cSufix, dDateOd, dDateDo)
- 
-   IF Empty( cTableName)
-      RETURN .F.
-   ENDIF
- 
-   cSql := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
-
-   Alert("not implemented!")
-
-   oQuery := run_sql_query( cSql )
-   IF sql_error_in_query( oQuery, "CREATE" )
-     RETURN .F.
-   ENDIF
-  
-   RETURN .T.
-
-
-FUNCTION fin_lisec_rn_count_in( dDateOd, dDateDo )
-
-   LOCAL cTableName := fin_lisec_table_name( "IN", dDateOd, dDateDo )
-   LOCAL cQry := "select count(*) from " + cTableName
-   LOCAL oQuery, oRow
-  
-   Alert("not implemented!")
-
-   IF !fin_cre_lisec_table( "IN", dDateOd, dDateDo )
-      RETURN -1
-   ENDIF
-
-   MsgO("Preuzimanje " + cTableName + " sa LISEC servera")
-   oQuery := run_sql_query( cQry )
-   MsgC()
-   oRow := oQuery:GetRow( 1 )
-
-   cQry := "DROP FOREIGN TABLE IF EXISTS " + cTableName + ";"
-   oQuery := run_sql_query( cQry )
-   IF sql_error_in_query( oQuery, "CREATE" )
-     RETURN -2
-   ENDIF
-
-   RETURN oRow:FieldGet( oRow:FieldPos( "count" ) )
 
 
 FUNCTION fin_lisec_find_partner( cAccountId, cClientName, cClientCountry, cRegNo, cGoni, cTaxNumber)
@@ -300,10 +120,6 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
    cTableName := fin_lisec_table_name( cSufix, dDatOd, dDatDo )
    cQry := "select * from " + cTableName
 
-   IF !fin_cre_lisec_table( cSufix, dDatOd, dDatDo )
-      Alert("FIN cre lisec table error?!")
-      RETURN aFinItems
-   ENDIF
 
    SELECT( F_POM )
    MsgO("Preuzimanje " + cTableName + " sa LISEC servera")
@@ -465,10 +281,7 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
       ENDDO
    BoxC()
 
-   IF !fin_drop_lisec_table( cSufix, dDatOd, dDatDo )
-     Alert("FIN drop lisec table error?")
-   ENDIF
-
+   
    RETURN aFinItems
 
 
@@ -545,7 +358,7 @@ FUNCTION fin_lisec_active()
 
    RETURN .F.
 
-
+/*
 FUNCTION fin_parametri_import_lisec()
 
     LOCAL nX := 1
@@ -579,4 +392,4 @@ FUNCTION fin_parametri_import_lisec()
     ENDIF
  
     RETURN .T.
- 
+*/ 
