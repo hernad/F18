@@ -1,25 +1,5 @@
 #include "f18.ch"
 
-FUNCTION fin_lisec_table_name( cSufix, dDateOd, dDateDo )
-
-   LOCAL cTableName := "fmk.lisec_racuni_" + cSufix + "_"
-   IF year( dDateOd ) <> year( dDateDo )
-      Alert( "godina za datume od-do moraju biti iste")
-      RETURN ""
-   ENDIF
-  
-   IF month( dDateOd ) <> month( dDateDo )
-      Alert( "mjesec za datume od-do moraju biti iste")
-      RETURN ""
-   ENDIF
-  
-   // npr: 01.01.2021 - 31.01.2021 => fmk.lisec_racuni_202101
-   cTableName += AllTrim(Str(year(dDateOd))) + PadL(Alltrim(Str(month(dDateOd))), 2, "0")
-
-   RETURN cTableName
-
-
-
 
 FUNCTION fin_lisec_find_partner( cAccountId, cClientName, cClientCountry, cRegNo, cGoni, cTaxNumber)
 
@@ -110,14 +90,10 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
    LOCAL cIdKonto, cIdKontoPDV, cIdKontoPrihod
    LOCAL hPartner, cSufix
 
-   Alert("not implemented!")
+   
+   //IF cFaktAvAvStor == "1"
+   //   cSufix := "IN"
 
-   IF cFaktAvAvStor == "1"
-      cSufix := "IN"
-   ELSE
-      cSufix := "RC"
-   ENDIF
-   cTableName := fin_lisec_table_name( cSufix, dDatOd, dDatDo )
    cQry := "select * from " + cTableName
 
 
@@ -295,7 +271,9 @@ FUNCTION fin_lisec_import()
    Box(, 3, 60)
      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Datum od" GET dDatOd
      @ box_x_koord() + 1, col() + 2 SAY "do"  GET dDatDo
-     @ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)/Avans (2)/Avans-Storno (3)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "123"
+     //@ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)/Avans (2)/Avans-Storno (3)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "123"
+     @ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "1"
+     
      READ
    BoxC()
 
@@ -303,8 +281,7 @@ FUNCTION fin_lisec_import()
       RETURN .F.
    ENDIF
 
-   Alert("not implemented!")
-
+  
    aFinItems := fin_lisec_get_fin_stavke(cFaktAvAvStor, dDatod, dDatDo)
 
    FOR nRbr := 1 TO LEN( aFinItems )
