@@ -1055,6 +1055,7 @@ FUNCTION fin_knjizenje_ostale_opcije()
    IF fin_spil_active()
       AADD(aOpc, "3. spil import")
       AADD(aOpc, "4. lisec credit limit export")
+      AADD(aOpc, "5. lisec import")
    ELSEIF is_ht()
       AADD(aOpc, "3. ht import")
    ELSE
@@ -1090,6 +1091,9 @@ FUNCTION fin_knjizenje_ostale_opcije()
          fin_spil_import()
       CASE fin_spil_active() .and. nIzbor == 4
          lisec_export_credit_limit()
+      CASE fin_spil_active() .and. nIzbor == 5
+         fin_lisec_import()
+         
       CASE is_ht() .and. nIzbor == 3
             fin_ht_import()
 

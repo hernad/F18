@@ -1,10 +1,10 @@
 #include "f18.ch"
 
 
-FUNCTION fin_lisec_find_partner( cAccountId, cClientName, cClientCountry, cRegNo, cGoni, cTaxNumber)
+FUNCTION fin_lisec_find_partner( cIdPartner, cClientName, cKupacDrzava )
 
    LOCAL hRet := hb_hash()
-   LOCAL aPovezane
+   LOCAL aPovezane, cPdvBroj, cIdBroj
    //lisecrn->accountid, lisecrn->client_name, lisecrn->client_country, lisecrn->reg_no, lisecrn->goni
 
    // get_partn_pdvb( cPartnerId )
@@ -14,17 +14,21 @@ FUNCTION fin_lisec_find_partner( cAccountId, cClientName, cClientCountry, cRegNo
    hRet["povezano_lice"] := .F.
    aPovezane := { PADR("0589", 6), PADR("3171", 6), PADR("3458",6), PADR("7437", 6), PADR("586268",6) }
 
-   Alert("not implemented!")
 
-   IF cRegNo == "999999999999"
+   cPdvBroj := firma_pdv_broj( cIdPartner )
+   cIdBroj := firma_id_broj( cIdPartner )
+
+
+   IF cPDVBroj == "999999999999"
       hRet["id_partner"] := "GOTOVINA"
       RETURN hRet
    ENDIF
 
-   IF !Empty(cRegNo)
+
+   IF !Empty(cPdvBroj)
       PushWa()
       SELECT (F_SIFV)
-      use_sql_sifv( "PARTN", "PDVB", NIL, cRegNo )
+      use_sql_sifv( "PARTN", "PDVB", NIL, cPdvBroj )
       PopWa()
       IF !Empty(sifv->idsif)
             // PDV obveznik
@@ -41,28 +45,23 @@ FUNCTION fin_lisec_find_partner( cAccountId, cClientName, cClientCountry, cRegNo
       ENDIF
    ENDIF
 
-   IF !Empty(cRegNo)
-      PushWa()
-      SELECT (F_SIFV)
-      use_sql_sifv( "PARTN", "IDBR", NIL, cGoni )
-      PopWa()
-      IF !Empty(sifv->idsif)
-         // Kupac ima ID broj - NE-PDV obveznik
-         hRet["id_partner"] := LEFT(sifv->idsif, 6)
-         hRet["pdv"] := .F.
-         RETURN hRet
-      ENDIF
+   IF Len(cPdvBroj) <> 12 .and. Len(cIdBroj) == 13
+      // Kupac ima ID broj - NE-PDV obveznik
+      hRet["id_partner"] := LEFT(cIdPartner, 6)
+      hRet["pdv"] := .F.
+      RETURN hRet
    ENDIF
 
-   IF cTaxNumber == "G2" // G1 domaci
+   IF cKupacDrzava != "Bosnia-Herzegovina"
       hRet["ino"] := .T.
    ENDIF
 
-   PushWa()
-   SELECT (F_PARTN)
-   find_partner_by_naz_or_id( upper(cClientName) )
-   PopWa()
+   //PushWa()
+   //SELECT (F_PARTN)
+   //find_partner_by_naz_or_id( upper(cClientName) )
+   //PopWa()
 
+   /*
    IF partn->(reccount()) == 1
       // partner pronadjen po nazivu
       hRet["id_partner"] := partn->id
@@ -73,6 +72,7 @@ FUNCTION fin_lisec_find_partner( cAccountId, cClientName, cClientCountry, cRegNo
       ENDIF
       RETURN hRet
    ENDIF
+   */
 
    hRet["id_partner"] := REPLICATE("?", 6)
    RETURN hRet
@@ -94,18 +94,59 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
    //IF cFaktAvAvStor == "1"
    //   cSufix := "IN"
 
-   cQry := "select * from " + cTableName
+/*
+select ih_invoice_no as broj_racuna, 
+   rech.rg_info4 as broj_fiskalnog_racuna,
+   (case when ih_type = 5 then 'STORNO' else 'PLUS' end) as storno_plus, 
+   ih_cust_no as lisec_broj_kupca,
+   kust.ku_land as zemlja,
+   ih_curr_code as valuta, 
+   ih_curr_rate as omjer,
+   kust_adr.ku_name as ime_kupca,
+   it.invoice_tot_net as iznos_bez_pdv, 
+   it.invoice_tot_vat as ukupno_pdv,
+   it.inv_tot_date::date as datum_fakture
+from fmk.lisec_invoice_header ih   
+  left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and kust.kust_manu_site='RAMA-GLAS')
+  left join fmk.lisec_kust_adr kust_adr on (kust_adr.ku_nr  = kust.kunr and kust_adr.ku_vk_ek=0)
+  left join fmk.lisec_invoice_totals it  on  it.invoice_no = ih.ih_invoice_no 
+  left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no
+  where ih_invoice_no = 3000000 
+*/
+
+   cQry := "select ih_invoice_no as broj_racuna," 
+   cQry += "rech.rg_info4 as broj_fiskalnog_racuna,"
+   //(case when ih_type = 5 then 'STORNO' else 'PLUS' end) as storno_plus, 
+   cQry += "(case when ih_type = 5 then 'STORNO' else 'PLUS' end) as storno_plus," 
+   cQry += "ih_cust_no as lisec_broj_kupca,"
+   cQry += "fmk.partn.id idpartner,"
+   cQry += "kust.ku_land as kupac_drzava,"
+   cQry += "ih_curr_code as valuta," 
+   cQry += "ih_curr_rate as omjer,"
+   cQry += "kust_adr.ku_name as ime_kupca,"
+   cQry += "it.invoice_tot_net as iznos_bez_pdv,"
+   cQry += "it.invoice_tot_vat as ukupno_pdv,"
+   cQry += "it.inv_tot_date::date as datum_fakture"
+   cQry += " from fmk.lisec_invoice_header ih"   
+   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and kust.kust_manu_site='RAMA-GLAS')"
+   cQry += " left join fmk.lisec_kust_adr kust_adr on (kust_adr.ku_nr = kust.kunr and kust_adr.ku_vk_ek=0)"
+   cQry += " left join fmk.lisec_invoice_totals it on it.invoice_no = ih.ih_invoice_no" 
+   cQry += " left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no"
+   cQry += " LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id)"
+
+   //where ih_invoice_no = 3000000
+   cQry += " WHERE it.inv_tot_date::date>=" + sql_quote(dDatOd) + " and it.inv_tot_date::date<=" + sql_quote(dDatDo)
 
 
    SELECT( F_POM )
-   MsgO("Preuzimanje " + cTableName + " sa LISEC servera")
+   MsgO("Preuzimanje podataka sa LISEC servera")
       IF !use_sql( "lisecrn", cQry, cAlias )
         lError := .T.
       ENDIF
    MsgC()
 
    IF lError
-      Alert(_u("Greška pri preuzimanju " + cTableName + " ?!" ))
+      Alert(_u("Greška pri preuzimanju LISEC podataka ?!" ))
       RETURN .F.
    ENDIF
 
@@ -115,6 +156,7 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
 
       DO WHILE !EOF()
 
+         /*
          IF cFaktAvAvStor == "2" .AND. lisecrn->type_id <> 0
             // typeid = 0 su regularne avansne fakture
             SKIP
@@ -126,8 +168,11 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             SKIP
             LOOP
          ENDIF
+         */
 
-         hPartner := fin_lisec_find_partner( lisecrn->accountid, lisecrn->client_name, lisecrn->client_country, lisecrn->reg_no, lisecrn->goni, lisecrn->c_tax_number )
+
+
+         hPartner := fin_lisec_find_partner( lisecrn->idpartner, lisecrn->ime_kupca, lisecrn->kupac_drzava )
 
          IF hPartner["id_partner"] == "GOTOVINA"
             //cIdPartner := ""
@@ -160,16 +205,17 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             cIdKontoPrihod := "6100"
          ENDIF
 
-         IF trim(lisecrn->client_name) == "FL-BANKINO"
+         IF trim(lisecrn->ime_kupca) == "FL-BANKINO"
             // uplata banka ino partner
             cIdKonto := "2123"
          ENDIF
          
-         IF trim(lisecrn->client_name) == "FL-BANK"
+         IF trim(lisecrn->ime_kupca) == "FL-BANK"
             // uplata banka domaci klijent
             cIdKonto := "2118"
          ENDIF
 
+         /*
          IF cFaktAvAvStor <> "1"
             // avansne fakture
             IF hPartner["pdv"]
@@ -179,14 +225,15 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
             ENDIF
             cIdKontoPrihod := "4340" // partner koji je uplatio
          ENDIF
+         */
 
          hFinItem := hb_hash()
          hFinItem[ "idfirma" ] := self_organizacija_id()
          hFinItem[ "idvn" ] := "14"
          hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
-         hFinItem[ "brdok" ] := lisecrn->order_number
+         hFinItem[ "brdok" ] := AllTrim(STR(lisecrn->broj_racuna))
          IF cFaktAvAvStor == "1"
-            hFinItem[ "opis" ] := "RN. " + AllTrim(lisecrn->order_number)  + ", FISK_RN " + Alltrim(lisecrn->fiscal_number) + ""
+            hFinItem[ "opis" ] := "RN. " + AllTrim(lisecrn->broj_racuna)  + ", FISK_RN " + Alltrim(lisecrn->broj_fiskalnog_racuna) + ""
          ELSE
             IF cFaktAvAvStor == "2"
                // AV.RN. (RC036046)
@@ -195,14 +242,16 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
                // ST.AV. (RC036046/S)
                hFinItem[ "opis" ] := "ST.AV."
             ENDIF   
-            hFinItem[ "opis" ] += " " + AllTrim(lisecrn->order_number) + " "
+            hFinItem[ "opis" ] += " " + AllTrim(lisecrn->broj_racuna) + " "
          ENDIF
-         hFinItem[ "datdok" ] := lisecrn->inv_date
-         hFinItem[ "datval" ] := lisecrn->pay_date
+         hFinItem[ "datdok" ] := lisecrn->datum_fakture
+         // naci datum valute
+         //hFinItem[ "datval" ] := lisecrn->datum_fakture
+
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
          hFinItem[ "d_p" ] := "1"
-         hFinItem[ "iznos" ] := lisecrn->inv_tot_excl + lisecrn->inv_tot_tax
+         hFinItem[ "iznos" ] := lisecrn->iznos_bez_pdv + lisecrn->ukupno_pdv
          IF cFaktAvAvStor == "3" // storno avansne fakture RC
             hFinItem[ "iznos" ] := hFinItem[ "iznos" ] * -1
          ENDIF 
@@ -212,13 +261,13 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          AADD( aFinItems, hFinItem)
 
          IF cIdPartner == REPLICATE("?", 6)
-            hFinItem[ "opis" ] += " ; " + trim(lisecrn->client_name) + " " + trim(lisecrn->client_country)
+            hFinItem[ "opis" ] += " ; " + trim(lisecrn->ime_kupca) + " " + trim(lisecrn->kupac_drzava)
          ENDIF
 
          hFinItemPDV := hb_HClone(hFinItem)
          hFinItemPDV[ "datval" ] := CTOD("")
          hFinItemPDV[ "konto" ] := cIdKontoPDV
-         hFinItemPDV[ "iznos" ] := lisecrn->inv_tot_tax
+         hFinItemPDV[ "iznos" ] := lisecrn->ukupno_pdv
          IF cFaktAvAvStor == "3" // storno RC
             hFinItemPDV[ "iznos" ] := hFinItemPDV[ "iznos" ] * -1
          ENDIF
@@ -233,7 +282,7 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
          hFinItemPrihod := hb_HClone(hFinItem)
          hFinItemPrihod[ "datval" ] := CTOD("")
          hFinItemPrihod[ "konto" ] := cIdKontoPrihod
-         hFinItemPrihod[ "iznos" ] := lisecrn->inv_tot_excl
+         hFinItemPrihod[ "iznos" ] := lisecrn->iznos_bez_pdv
          IF cFaktAvAvStor == "3" // storno RC
             hFinItemPrihod[ "iznos" ] := hFinItemPrihod[ "iznos" ] * -1
          ENDIF
@@ -281,7 +330,7 @@ FUNCTION fin_lisec_import()
       RETURN .F.
    ENDIF
 
-  
+
    aFinItems := fin_lisec_get_fin_stavke(cFaktAvAvStor, dDatod, dDatDo)
 
    FOR nRbr := 1 TO LEN( aFinItems )
