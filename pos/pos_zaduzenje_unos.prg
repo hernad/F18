@@ -83,7 +83,8 @@ FUNCTION pos_zaduzenje( cIdVd )
       @ box_x_koord() + 2, Col() + 2 SAY "Broj fakture:" GET _BrFaktP VALID !Empty( _brFaktP )
    ENDIF
    @ box_x_koord() + 4, box_y_koord() + 2 SAY "    Opis:" GET _Opis PICTURE "@S50"
-   @ box_x_koord() + 6, box_y_koord() + 2 SAY " Datum dok:" GET _Datum PICT "@D" VALID _Datum <= Date()
+   @ box_x_koord() + 6, box_y_koord() + 2 SAY " Datum dok:" GET _Datum PICT "@D" ;
+        VALID _Datum <= Date() .AND. (tekuca_sezona() == Year(_Datum))
    IF cIdVd == POS_IDVD_ZAHTJEV_SNIZENJE
       @ Row(), Col() + 2 SAY "Datumski interval od:" GET _dat_od WHEN pos_zaduzenje_when_dat_od( cIdVd, @_dat_od, @_dat_do )
       @ Row(), Col() + 2 SAY "do:" GET _dat_do VALID Empty( _dat_do ) .OR. _dat_do >= _dat_od
