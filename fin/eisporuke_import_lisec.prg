@@ -20,10 +20,16 @@ FUNCTION fin_lisec_find_partner( cIdPartner, cClientName, cKupacDrzava )
 
 
    IF cPDVBroj == "999999999999"
+      altd()
       hRet["id_partner"] := "GOTOVINA"
       RETURN hRet
    ENDIF
 
+   IF TRIM(cClientName) == "KP" .OR. TRIM(cClientName) == "KPM"
+      altd()
+      hRet["id_partner"] := "GOTOVINA"
+      RETURN hRet
+   ENDIF
 
    IF !Empty(cPdvBroj)
       PushWa()
@@ -38,10 +44,6 @@ FUNCTION fin_lisec_find_partner( cIdPartner, cClientName, cKupacDrzava )
             ENDIF 
             hRet["pdv"] := .T.
             RETURN hRet 
-      ENDIF
-      IF TRIM(cClientName) == "KP" .OR. TRIM(cClientName) == "KPM"
-         hRet["id_partner"] := "GOTOVINA"
-         RETURN hRet
       ENDIF
    ENDIF
 
@@ -171,7 +173,6 @@ from fmk.lisec_invoice_header ih
          */
 
 
-
          hPartner := fin_lisec_find_partner( lisecrn->idpartner, lisecrn->ime_kupca, lisecrn->kupac_drzava )
 
          IF hPartner["id_partner"] == "GOTOVINA"
@@ -251,7 +252,11 @@ from fmk.lisec_invoice_header ih
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
          hFinItem[ "d_p" ] := "1"
-         hFinItem[ "iznos" ] := lisecrn->iznos_bez_pdv + lisecrn->ukupno_pdv
+         if lisecrn->storno_plus == "STORNO"
+            hFinItem[ "iznos" ] := - (lisecrn->iznos_bez_pdv + lisecrn->ukupno_pdv)
+         else   
+            hFinItem[ "iznos" ] := lisecrn->iznos_bez_pdv + lisecrn->ukupno_pdv
+         endif
          IF cFaktAvAvStor == "3" // storno avansne fakture RC
             hFinItem[ "iznos" ] := hFinItem[ "iznos" ] * -1
          ENDIF 
@@ -267,7 +272,12 @@ from fmk.lisec_invoice_header ih
          hFinItemPDV := hb_HClone(hFinItem)
          hFinItemPDV[ "datval" ] := CTOD("")
          hFinItemPDV[ "konto" ] := cIdKontoPDV
-         hFinItemPDV[ "iznos" ] := lisecrn->ukupno_pdv
+         IF lisecrn->storno_plus == "STORNO"
+            hFinItemPDV[ "iznos" ] := - lisecrn->ukupno_pdv
+         ELSE
+            hFinItemPDV[ "iznos" ] := lisecrn->ukupno_pdv
+         ENDIF
+
          IF cFaktAvAvStor == "3" // storno RC
             hFinItemPDV[ "iznos" ] := hFinItemPDV[ "iznos" ] * -1
          ENDIF
@@ -282,7 +292,11 @@ from fmk.lisec_invoice_header ih
          hFinItemPrihod := hb_HClone(hFinItem)
          hFinItemPrihod[ "datval" ] := CTOD("")
          hFinItemPrihod[ "konto" ] := cIdKontoPrihod
-         hFinItemPrihod[ "iznos" ] := lisecrn->iznos_bez_pdv
+         IF lisecrn->storno_plus == "STORNO"
+            hFinItemPrihod[ "iznos" ] := -lisecrn->iznos_bez_pdv
+         ELSE
+            hFinItemPrihod[ "iznos" ] := lisecrn->iznos_bez_pdv
+         ENDIF
          IF cFaktAvAvStor == "3" // storno RC
             hFinItemPrihod[ "iznos" ] := hFinItemPrihod[ "iznos" ] * -1
          ENDIF
