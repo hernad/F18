@@ -107,13 +107,15 @@ select ih_invoice_no as broj_racuna,
    kust_adr.ku_name as ime_kupca,
    it.invoice_tot_net as iznos_bez_pdv, 
    it.invoice_tot_vat as ukupno_pdv,
-   it.inv_tot_date::date as datum_fakture
+   it.inv_tot_date::date as datum_fakture,
+   datval.ipp_due_date::date as datum_valute
 from fmk.lisec_invoice_header ih   
   left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and kust.kust_manu_site='RAMA-GLAS')
   left join fmk.lisec_kust_adr kust_adr on (kust_adr.ku_nr  = kust.kunr and kust_adr.ku_vk_ek=0)
   left join fmk.lisec_invoice_totals it  on  it.invoice_no = ih.ih_invoice_no 
   left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no
-  where ih_invoice_no = 3000000 
+  left join fmk.lisec_invoice_partial_payments datval on datval.ipp_invoice_no = ih.ih_invoice_no 
+  where ih_invoice_no = 2001396 
 */
 
    cQry := "select ih_invoice_no as broj_racuna," 
@@ -128,12 +130,14 @@ from fmk.lisec_invoice_header ih
    cQry += "kust_adr.ku_name as ime_kupca,"
    cQry += "it.invoice_tot_net as iznos_bez_pdv,"
    cQry += "it.invoice_tot_vat as ukupno_pdv,"
-   cQry += "it.inv_tot_date::date as datum_fakture"
+   cQry += "it.inv_tot_date::date as datum_fakture,"
+   cQry += "datval.ipp_due_date::date as datum_valute"
    cQry += " from fmk.lisec_invoice_header ih"   
    cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and kust.kust_manu_site='RAMA-GLAS')"
    cQry += " left join fmk.lisec_kust_adr kust_adr on (kust_adr.ku_nr = kust.kunr and kust_adr.ku_vk_ek=0)"
    cQry += " left join fmk.lisec_invoice_totals it on it.invoice_no = ih.ih_invoice_no" 
    cQry += " left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no"
+   cQry += " left join fmk.lisec_invoice_partial_payments datval on datval.ipp_invoice_no = ih.ih_invoice_no" 
    cQry += " LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id)"
 
    //where ih_invoice_no = 3000000
