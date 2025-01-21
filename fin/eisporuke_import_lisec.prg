@@ -142,7 +142,7 @@ from fmk.lisec_invoice_header ih
 
    //where ih_invoice_no = 3000000
    cQry += " WHERE it.inv_tot_date::date>=" + sql_quote(dDatOd) + " and it.inv_tot_date::date<=" + sql_quote(dDatDo)
-
+   cQry += " ORDER BY rech.rg_info4"
 
    SELECT( F_POM )
    MsgO("Preuzimanje podataka sa LISEC servera")
@@ -236,9 +236,9 @@ from fmk.lisec_invoice_header ih
          hFinItem[ "idfirma" ] := self_organizacija_id()
          hFinItem[ "idvn" ] := "14"
          hFinItem[ "brnal" ] := PadL( 0, 8, "0" )
-         hFinItem[ "brdok" ] := AllTrim(STR(lisecrn->broj_racuna))
+         hFinItem[ "brdok" ] := AllTrim(STR(lisecrn->broj_racuna, 10,0))
          IF cFaktAvAvStor == "1"
-            hFinItem[ "opis" ] := "RN. " + AllTrim(lisecrn->broj_racuna)  + ", FISK_RN " + Alltrim(lisecrn->broj_fiskalnog_racuna) + ""
+            hFinItem[ "opis" ] := "RN. " + AllTrim(STR(lisecrn->broj_racuna, 10,0))  + ", FISK_RN " + Alltrim(lisecrn->broj_fiskalnog_racuna) + ""
          ELSE
             IF cFaktAvAvStor == "2"
                // AV.RN. (RC036046)
@@ -251,7 +251,7 @@ from fmk.lisec_invoice_header ih
          ENDIF
          hFinItem[ "datdok" ] := lisecrn->datum_fakture
          // naci datum valute
-         //hFinItem[ "datval" ] := lisecrn->datum_fakture
+         hFinItem[ "datval" ] := lisecrn->datum_valute
 
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
