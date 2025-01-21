@@ -247,10 +247,11 @@ from fmk.lisec_invoice_header ih
                // ST.AV. (RC036046/S)
                hFinItem[ "opis" ] := "ST.AV."
             ENDIF   
-            hFinItem[ "opis" ] += " " + AllTrim(lisecrn->broj_racuna) + " "
+            hFinItem[ "opis" ] += " " + AllTrim(STR(lisecrn->broj_racuna, 10,0)) + " "
          ENDIF
+      
+         altd()
          hFinItem[ "datdok" ] := lisecrn->datum_fakture
-         // naci datum valute
          hFinItem[ "datval" ] := lisecrn->datum_valute
 
          hFinItem[ "konto" ] := cIdKonto
@@ -369,11 +370,11 @@ STATIC FUNCTION fin_lisec_pripr_fill( hFinItem )
    APPEND BLANK
 
    @ box_x_koord() + 1, box_y_koord() + 2 SAY STR(hFinItem[ "rbr" ], 5, 0)
-   IF LEFT(hFinItem[ "brdok" ], 2) == "IN"
-      dDatVal := hFinItem[ "datval" ]
-   ELSE
-      dDatVal := CTOD("")
-   ENDIF
+   //IF LEFT(hFinItem[ "brdok" ], 2) == "IN"
+   dDatVal := hFinItem[ "datval" ]
+   //ELSE
+   //   dDatVal := CTOD("")
+   //ENDIF
 
    RREPLACE idfirma WITH hFinItem[ "idfirma" ], ;
             idvn WITH hFinItem[ "idvn" ], ;
