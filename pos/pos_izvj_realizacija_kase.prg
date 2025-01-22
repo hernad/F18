@@ -20,7 +20,7 @@ MEMVAR dDatum0, dDatum1, plPrikazPRO
 MEMVAR cUslovRadnici, cUslovVrsteP
 MEMVAR cPrikazPoVrstamaPlacanja
 
-FUNCTION realizacija_kase
+FUNCTION pos_realizacija_kase
 
    PARAMETERS dDatum0, dDatum1 // funkcije VarEdit zahtjevaju privatne varijable
 
@@ -46,9 +46,11 @@ FUNCTION realizacija_kase
       dDatum1 := danasnji_datum()
    ENDIF
 
+   altd()
    pos_realizacija_tbl_cre_pom()
    o_pos_tables()
    o_pom_table()
+
 
    cPrikazPoVrstamaPlacanja := "N"
    cAPrometa := "N"

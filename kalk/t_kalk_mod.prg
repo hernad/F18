@@ -46,6 +46,11 @@ METHOD TKalkMod:programski_modul_osnovni_meni()
    LOCAL opcexe := {}
    LOCAL Izbor := 1
 
+   
+   IF f18_use_module("kalk")
+      PUBLIC grbStId := "D"
+   ENDIF
+
    AAdd( opc,   "1. unos/ispravka dokumenata                " )
    AAdd( opcexe, {|| kalk_pripr_obrada() } )
 

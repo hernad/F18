@@ -9,7 +9,7 @@ set HB_DBG_PATH=%HB_DBG_PATH%;%ROOT%\virm
 set HB_DBG_PATH=%HB_DBG_PATH%;%ROOT%\core
 set HB_DBG_PATH=%HB_DBG_PATH%;%ROOT%\core_sql
 set HB_DBG_PATH=%HB_DBG_PATH%;%ROOT%\core_pdf
-
+set HB_DBG_PATH=%HB_DBG_PATH%;%ROOT%\core_dbf
 
 echo HB_DBG_PATH=%HB_DBG_PATH%
 

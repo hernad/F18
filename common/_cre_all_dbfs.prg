@@ -93,7 +93,7 @@ FUNCTION cre_all_dbfs( ver )
    ENDIF
 
 #ifdef F18_POS
-   IF f18_use_module( "pos" )
+   IF f18_use_module( "pos" ) .or. f18_use_module("kalk")
       cre_all_pos( ver )
    ENDIF
 #endif

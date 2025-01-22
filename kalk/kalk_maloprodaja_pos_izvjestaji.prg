@@ -34,6 +34,9 @@ FUNCTION kalk_maloprodaja_pos_izvjestaji()
    AAdd( aOpc,   "4. pregleda računa za period xlsx" )
    AAdd( aOpcExe, {|| pos_pregled_racuna_xlsx() } )
 
+   AAdd( aOpc,   "5. pos realizacija kase" )
+   AAdd( aOpcExe, {|| pos_realizacija_kase() } )
+
    f18_menu( "m2", .F.,  nIzbor, aOpc, aOpcExe )
 
    RETURN .T.

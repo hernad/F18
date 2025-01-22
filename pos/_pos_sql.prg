@@ -260,7 +260,6 @@ FUNCTION seek_pos_doks_h( hParams  )
    LOCAL hIndexes, cKey
    LOCAL lWhere := .F.
    LOCAL cFields
-
    LOCAL cIdPos, cIdVd, dDatum, cBrDok, cTag, dDatOd, dDatDo, cAlias
 
    IF hb_HHasKey( hParams, "idpos" )

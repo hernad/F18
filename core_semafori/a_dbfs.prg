@@ -67,16 +67,11 @@ FUNCTION set_a_dbfs()
    ENDIF
 
 #ifdef F18_POS
-   IF f18_use_module( "pos" )
+   IF f18_use_module( "pos" ) .or. f18_use_module("kalk")
       set_a_dbf_pos()
    ENDIF
 #endif
 
-#ifdef F18_RNAL
-   IF f18_use_module( "rnal" )
-      set_a_dbf_rnal()
-   ENDIF
-#endif
 
 #ifdef F18_MAT
    IF f18_use_module( "mat" )

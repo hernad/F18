@@ -159,6 +159,7 @@ FUNCTION f18_sql_schema( cTable )
       RETURN cTable
    ENDIF
 
+
    IF cTable == "vrstep" 
       IF cModul == "POS"
         // identicna tabela vrstep postoji u POS
@@ -170,14 +171,20 @@ FUNCTION f18_sql_schema( cTable )
    ENDIF
 
    
-   IF ("#" + cTable + "#") $ "#pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks#"
+   IF ("#" + cTable + "#") $ "#pos_pos#pos_doks#pos#pos_items#pos_osob#pos_strad#pos_stanje#pos_fisk_doks#"
       IF cModul == "POS" 
          RETURN sql_primarna_schema() + "." + cTable
       ELSE
          // KALK modul maloprodaja koristi pos tabele ovako
          // pos_doks  => p2.pos_doks
-         RETURN pos_prodavnica_sql_schema() + "." + cTable
-      ENDIF
+         IF cTable == "pos_pos"
+            RETURN pos_prodavnica_sql_schema() + ".pos_items"
+         ELSEIF cTable == "pos_doks"
+            RETURN pos_prodavnica_sql_schema() + ".pos"   
+         ELSE   
+            RETURN pos_prodavnica_sql_schema() + "." + cTable
+         ENDIF
+      ENDIF   
    ENDIF
 
    // navedene su f18 tabele, ovim tabelama se pristupa preko public view-ova 
