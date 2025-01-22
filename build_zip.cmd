@@ -48,11 +48,13 @@ REM IF [%BUILD_ARCH%] NEQ  [x64] move .build\win32-ia32\user-setup\eShellSetup.e
 echo "============ package: %F18_PACKAGE% ======= package_ver: %F18_VERSION% ============="
 
 REM set ZIPACMD=\users\%USERNAME%\harbour\tools\win32\7z a -tzip
-set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll
+set FILES=F18-klijent.exe curl.exe psql.exe pg_dump.exe pg_restore.exe libpq.dll zlib1.dll libiconv.dll libxml2.dll libcurl.dll
 
 REM x64
 IF [%BUILD_ARCH%] EQU [x64] set FILES=%FILES% libcrypto-1_1-x64.dll
 IF [%BUILD_ARCH%] EQU [x64] set FILES=%FILES% libssl-1_1-x64.dll
+
+
 
 REM x86
 IF [%BUILD_ARCH%] NEQ [x64] set FILES=%FILES% libcrypto-1_1.dll
