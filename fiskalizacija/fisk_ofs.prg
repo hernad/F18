@@ -497,7 +497,7 @@ FUNCTION fiskalni_ofs_racun_kopija(hParams)
 
     // uuid fiskalnog racuna ciju kopiju zelimo
     //cUUId := pos_get_fiskalni_dok_id_ofs( hParams )
-    altd()
+    //altd()
 
     IF pos_is_storno_ofs(hParams)
         hParams["storno_fiskalni_broj"] := "A"
@@ -886,7 +886,8 @@ function ofs_quantity(nMoney)
 FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
 
     LOCAL cVrstaPlacanja, cOperater, nTotal, nI
-    LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa, nPopust, nPopustIznos
+    LOCAL cArtikalNaz, cArtikalJmj, cArtikal, nCijena, nKolicina, cArtikalTarifa, nPopust
+    //, nPopustIznos
     LOCAL lStorno, oError, cDataRequest
     LOCAL cUrl, cPath, cContent, cMethod
 
@@ -1022,10 +1023,15 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
       
         cArtikal := izbaci_nasa_slova_utf8(hb_StrToUTF8(TRIM(cArtikalNaz)))
 
+        // ne koristimo popust nego saljemo odmah neto cijenu
+        nCijena := aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
+        nPopust := 0
+        /*
         nCijena := aRacunStavke[ nI, FISK_INDEX_CIJENA ]
         nPopust := aRacunStavke[ nI, FISK_INDEX_POPUST ]
         nPopustIznos := aRacunStavke[ nI, FISK_INDEX_CIJENA ] - aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
-        //nCijena := aRacunStavke[ nI, FISK_INDEX_NETO_CIJENA ]
+        */
+        
         nKolicina := aRacunStavke[ nI, FISK_INDEX_KOLICINA ]
 
         cArtikalTarifa := fiskalni_tarifa( aRacunStavke[ nI, FISK_INDEX_TARIFA ], hParams[ "pdv" ], "OFS" )
@@ -1034,10 +1040,11 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
         hItemLine["name"] := cArtikal
         // mora im se slati cirilica
         hItemLine["labels"] := { convert_lat_to_cyr(cArtikalTarifa) }
-        hItemLine["totalAmount"] := ofs_money((nCijena - nPopustIznos) * nKolicina)
+        //hItemLine["totalAmount"] := ofs_money((nCijena - nPopustIznos) * nKolicina)
+        hItemLine["totalAmount"] := ofs_money((nCijena) * nKolicina)
         hItemLine["unitPrice"] := ofs_money(nCijena)
         hItemLine["discount"] := ofs_money(nPopust)
-        hItemLine["discountAmount"] := ofs_money(nPopustIznos)
+        hItemLine["discountAmount"] := ofs_money(0)
         hItemLine["quantity"] := ofs_quantity(nKolicina)
         AAdd(hInvoiceData["invoiceRequest"]["items"], hItemLine)
             
