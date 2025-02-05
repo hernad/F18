@@ -68,6 +68,16 @@ METHOD New( oParent, cModul, cVerzija, cPeriod, cKorisn, cSifra, p3, p4, p5, p6,
    ::cP7 := p7
    ::lTerminate := .F.
 
+   if cModul <> "POS"
+      
+      box_x_koord( 4 )
+      box_y_koord( 8 )
+      if f18_prijava( 4, 8 ) == "X"
+         ::quit()
+      ENDIF
+   endif
+
+
    RETURN .T.
 
 
@@ -194,12 +204,13 @@ METHOD globalni_key_handler( nKey, nKeyHandlerRetEvent )
 
 METHOD quit( lVratiseURP )
 
-   LOCAL cKontrDbf
 
    my_close_all_dbf()
    IF ( lVratiseURP == NIL )
       lVratiseURP := .T.
    ENDIF
+
+   QUIT_1
 
    RETURN .T.
 
@@ -241,12 +252,15 @@ PROCEDURE k_f1()
      @ box_x_koord() + 2, box_y_koord() + 2 SAY8 "  <F12>   - pokretanje predhodne godine"
      @ box_x_koord() + 3, box_y_koord() + 2 SAY8 "<Shift+F6> - prelazak u predhodnu godinu"
      
-     @ box_x_koord() + 5, box_y_koord() + 2 SAY8 " <E>  - log - greške"
-     @ box_x_koord() + 6, box_y_koord() + 2 SAY8 " <I>  - log - informacije"
+     @ box_x_koord() + 5, box_y_koord() + 2 SAY8 " <L>  - setovanje lozinke"
      
      inkey(0)
 
    BoxC()
+
+   IF Upper(Chr(Lastkey())) == "L"
+         f18_set_lozinka()
+   ENDIF
 
    RETURN
 
