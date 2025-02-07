@@ -306,7 +306,7 @@ FUNCTION pos_racun_prikazi_ukupno()
    // @ box_x_koord() + 3, box_y_koord() + 15 SAY Space( 10 )
    pos_racun_prikaz_ukupno_cifre( box_x_koord() + 2, nIznos, nPopust )
    // ispis_veliki_brojevi_iznos( pos_racun_iznos_neto(), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
-   ispis_veliki_brojevi_iznos( nIznos - nPopust, box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
+   ispis_veliki_brojevi_iznos( round(nIznos, 2) - round(nPopust, 2), box_x_koord() + ( f18_max_rows() - 12 ), f18_max_cols() - 2 )
 
    SELECT _pos_pripr
    GO TOP
@@ -360,7 +360,7 @@ FUNCTION pos_racun_tekuci_saldo()
    ENDDO
    PopWa()
 
-   RETURN { nIznos, nPopust }
+   RETURN { round(nIznos, 2), round(nPopust,2) }
 
 FUNCTION pos_racun_tekuci_saldo_neto()
 

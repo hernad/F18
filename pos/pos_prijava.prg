@@ -94,23 +94,38 @@ FUNCTION pos_status_traka()
 
 FUNCTION pos_set_user( cKorSif, nSifLen, cLevel )
 
+
+
    cKorSif := CryptSC( PadR( Upper( Trim( cKorSif ) ), nSifLen ) )
 
-   IF find_pos_osob_by_korsif( cKorSif )
-      gIdRadnik := field->ID
-      gKorIme   := field->Naz
-      gSTRAD  := AllTrim ( field->STATUS )
-      IF select_o_pos_strad( OSOB->STATUS )
-         cLevel := field->prioritet
-      ELSE
-         cLevel := L_PRODAVAC
-         gSTRAD := "K"
-      ENDIF
-      RETURN 1
+
+altd()
+
+
+IF find_pos_osob_by_korsif( cKorSif )
+   gIdRadnik := field->ID
+   gKorIme   := field->Naz
+   gSTRAD  := AllTrim ( field->STATUS )
+   IF select_o_pos_strad( OSOB->STATUS )
+      cLevel := field->prioritet
    ELSE
+      cLevel := L_PRODAVAC
+      gSTRAD := "K"
+   ENDIF
+   RETURN 1     
+ELSE
+   #ifdef F18_DEBUG
+      gIdRadnik := "0001"
+      gKorIme := "test"
+      gSTRAD  := "3"
+      cLevel := L_PRODAVAC
+      gSTRAD := "K"
+      RETURN 1   
+   #else
       MsgBeep ( "Unijeta je nepostojeća lozinka !" )
       RETURN 0
-   ENDIF
+   #endif
+ENDIF
 
    RETURN 0
 

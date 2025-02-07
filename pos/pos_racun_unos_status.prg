@@ -94,9 +94,12 @@ FUNCTION pos_racun_popust( nIznos )
 
 FUNCTION pos_racun_prikaz_ukupno_cifre( nRow, nIznosRacuna, nPopust )
 
-   @ box_x_koord() + nRow + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY nIznosRacuna PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY -nPopust PICT "99999.99" COLOR f18_color_invert()
-   @ box_x_koord() + nRow + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY nIznosRacuna - nPopust PICT "99999.99" COLOR f18_color_invert()
+   // prikaz BRUTO:
+   @ box_x_koord() + nRow + 0, box_y_koord() + ( f18_max_cols() - 12 ) SAY round(nIznosRacuna, 2) PICT "99999.99" COLOR f18_color_invert()
+   // pos prikaz POPUST:
+   @ box_x_koord() + nRow + 1, box_y_koord() + ( f18_max_cols() - 12 ) SAY round(-nPopust, 2) PICT "99999.99" COLOR f18_color_invert()
+   // pos prikaz NETO:
+   @ box_x_koord() + nRow + 2, box_y_koord() + ( f18_max_cols() - 12 ) SAY round(nIznosRacuna, 2) - round(nPopust, 2) PICT "99999.99" COLOR f18_color_invert()
 
    RETURN .T.
 

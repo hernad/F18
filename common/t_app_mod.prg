@@ -68,7 +68,7 @@ METHOD New( oParent, cModul, cVerzija, cPeriod, cKorisn, cSifra, p3, p4, p5, p6,
    ::cP7 := p7
    ::lTerminate := .F.
 
-   if cModul <> "POS"
+   if cModul <> "TOPS"
       
       box_x_koord( 4 )
       box_y_koord( 8 )

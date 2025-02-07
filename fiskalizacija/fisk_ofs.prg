@@ -84,7 +84,7 @@ FUNCTION curl_hello()
 
 FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     local hCurl, aHeader, cParams, hRequestParam
-    
+
     curl_global_init()
 
     IF hParams == NIL
@@ -142,7 +142,8 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
 
 
 FUNCTION curl_end()
-    
+ 
+
     //Cleaning the curl instance
     curl_global_cleanup()
     RETURN NIL
@@ -876,7 +877,7 @@ function ofs_money(nMoney)
    nMoney := ROUND(nMoney, 2)
    cMoney := AllTrim(STR(nMoney, 12, 2))
    nTmp := Val(cMoney)
-   
+
   return round(nTmp,2)
 
 
@@ -964,6 +965,8 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
         nTotal := 0
     ENDIF
      
+
+#ifndef F18_DEBUG    
     hRet := ofs_attention_status(@hParams)
     if hRet["error"] <> 0
         RETURN hRet
@@ -971,7 +974,8 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
 
     cUrl := hParams["url"]
     hCurl := curl_init(@hParams, cPath := "/api/invoices", cContent := "application/json", cMethod := "POST")
-    
+#endif
+
     hInvoiceData := hb_hash()
 
     hInvoiceData["invoiceRequest"] := hb_hash()
@@ -1019,6 +1023,8 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
     //ENDIF
 
   
+    altd()
+
     hInvoiceData["invoiceRequest"]["items"] := {}
 
     FOR nI := 1 TO Len( aRacunStavke )
@@ -1059,7 +1065,8 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
     
     cDataRequest := hb_jsonEncode(hInvoiceData)
     //altd()
-    
+
+#ifndef F18_DEBUG   
     nRet := curl_request(hCurl, cDataRequest, @cData)
     curl_end()
 
@@ -1067,7 +1074,7 @@ FUNCTION ofs_invoice_create( hParams, aRacunStavke, aKupac, hKopija )
        hRet["error"] = 702
        return hRet
     ENDIF
-    
+#endif    
     
     hRet["json"] := cData
     hResponseData := hb_jsonDecode(cData)
@@ -1485,6 +1492,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     ENDIF
  
     altd()
+
     nPosRacunUkupnoCheck := 0
     DO WHILE !Eof() .AND. pos->idpos == cIdPos .AND. pos->idvd == cIdVd  .AND. DToS( pos->Datum ) == DToS( dDatDok ) .AND. pos->brdok == cBrDok
  
@@ -1533,7 +1541,10 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
        aStavka[ FISK_INDEX_JMJ ] :=  cJMJ
  
        // ROUND( kolicina * cijena * (1-POPUST/100), 2)
-       nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_CIJENA ] * (1 - aStavka[ FISK_INDEX_POPUST ]/100.00), 2) 
+       //nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_CIJENA ] * (1 - aStavka[ FISK_INDEX_POPUST ]/100.00), 2) 
+       
+       nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_NETO_CIJENA ], 2) 
+       
        AAdd( aStavkeRacuna, aStavka )
        SKIP
     ENDDO
