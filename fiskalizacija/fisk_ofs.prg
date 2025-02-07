@@ -869,9 +869,14 @@ RETURN 0
 
 
 function ofs_money(nMoney)
-   LOCAL cMoney := AllTrim(STR(nMoney, 12, 2))
-   LOCAL nTmp := Val(cMoney)
+   LOCAL cMoney
+   LOCAL nTmp
 
+   // prvo broj zaokruziti
+   nMoney := ROUND(nMoney, 2)
+   cMoney := AllTrim(STR(nMoney, 12, 2))
+   nTmp := Val(cMoney)
+   
   return round(nTmp,2)
 
 

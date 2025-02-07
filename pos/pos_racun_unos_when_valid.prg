@@ -391,7 +391,8 @@ FUNCTION pos_provjera_priprema()
       nStanjeRobe := pos_dostupno_artikal_za_cijenu( cIdroba, nCij, nNCij )
       nOsnovnaCijena := pos_dostupna_osnovna_cijena_za_artikal( cIdRoba )
 
-      IF nOsnovnaCijena <> nCij .AND. nNCij == 0
+      // provjerava se samo obicni racun, storno ne https://redmine.bring.out.ba/issues/41612
+      IF nSt > 0 .and. nOsnovnaCijena <> nCij .AND. nNCij == 0
          Alert( _u( cIdRoba + ": kol [ " + AllTrim( Str( nSt, 8, 3 ) ) + "] NEDOSTUPNA CIJENA: " + AllTrim( Str( nCij, 8, 2 ) )) )
          my_close_all_dbf()
          RETURN .F.
