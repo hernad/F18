@@ -643,6 +643,7 @@ STATIC FUNCTION fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniPar
       // kolicina 0-99999.999
       cTmp += AllTrim( Str( aRacunData[ i, FISK_INDEX_KOLICINA ], 12, 3 ) )
       cTmp += cTackaZarez
+      
       // popust 0-99.99%
       IF aRacunData[ i, FISK_INDEX_PLU_CIJENA ] > 0
          // cijena kolicina 5.880, cijena 5.95, popust 10.92%
