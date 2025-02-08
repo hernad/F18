@@ -604,11 +604,14 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
    LOCAL cSql, oData
    LOCAL nTotal := 0
    LOCAL cSqlTable := f18_sql_schema( "pos_pos" )
-
+#ifdef F18_DEBUG_FISKALNI
+   LOCAL cSql2
+#endif
    IF lTmp == NIL
       lTmp := .F.
    ENDIF
 
+   altd()
    IF lTmp
       cSqlTable := pos_prodavnica_sql_schema() + ".pos_items_tmp_" + AllTrim(cIdPos)
    ENDIF
@@ -622,13 +625,32 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
    ENDIF
 
    cSql := "SELECT "
-   cSql += " SUM( ( kolicina * cijena ) - ( kolicina * (CASE WHEN (ncijena<>0) THEN cijena-ncijena ELSE 0.00 END) ) ) AS total"
+   // predhodni algoritam nije imao round na nivou stavke
+   cSql += " SUM( round( kolicina * (CASE WHEN (ncijena<>0) THEN ncijena ELSE cijena END), 2) ) AS total"
    cSql += " FROM " + cSqlTable
    cSql += " WHERE "
    cSql += " idpos = " + sql_quote( cIdPos )
    cSql += " AND idvd = " + sql_quote( cIdVd )
    cSql += " AND brdok = " + sql_quote( cBrDok )
    cSql += " AND datum = " + sql_quote( dDatum )
+
+#ifdef F18_DEBUG_FISKALNI
+
+   altd()
+
+   cSql2 := "SELECT "
+   // predhodni algoritam nije imao round na nivou stavke
+   cSql2 += " count(*)"
+   cSql2 += " FROM " + cSqlTable
+   cSql2 += " WHERE "
+   cSql2 += " idpos = " + sql_quote( cIdPos )
+   cSql2 += " AND idvd = " + sql_quote( cIdVd )
+   cSql2 += " AND brdok = " + sql_quote( cBrDok )
+   cSql2 += " AND datum = " + sql_quote( dDatum )
+   oData := run_sql_query( cSql2 )
+   ?  oData:FieldGet( 1 )
+
+#endif
 
    oData := run_sql_query( cSql )
    PopWa()
@@ -637,7 +659,7 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
    ENDIF
    nTotal := oData:FieldGet( 1 )
 
-   RETURN nTotal
+   RETURN ROUND( nTotal, 2)
 
 
 FUNCTION pos_get_mpc( cIdRoba )

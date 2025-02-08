@@ -1438,7 +1438,7 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
 
     LOCAL cIdPos, cIdVd, dDatDok, cBrDok
     LOCAL aStavkeRacuna := {}
-    LOCAL nPLU
+
     LOCAL cBrojFiskRNStorno := ""
     LOCAL nPOSRabatProcenat
     LOCAL cRobaBarkod, cIdRoba, cRobaNaziv, cJMJ
@@ -1482,7 +1482,9 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
     nPosRacunUkupno := pos_iznos_racuna( cIdPos, cIdVd, dDatDok, cBrDok, lTmpTabele)
  
     IF nUplaceniIznos > 0
-       nPosRacunUkupno := nUplaceniIznos
+       // ovo je bug! hernad 08.02.2025: Ako korisnik unese neki pogresan iznos ovo se salje fiskalnom
+       // zato treba ignorisati 
+       //nPosRacunUkupno := nUplaceniIznos
     ENDIF
  
     IF !seek_pos_pos_tmp( cIdPos, cIdVd, dDatDok, cBrDok )
@@ -1530,10 +1532,14 @@ FUNCTION pos_fiskalni_stavke_racuna_ofs( hParams, hFiskParams )
        // broj + _ + datum racuna koji se stornira
        aStavka[ FISK_INDEX_FISK_RACUN_STORNIRATI ] := cBrojFiskRNStorno
  
-       aStavka[ FISK_INDEX_PLU ] := nPLU
-       aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
-       
-       aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
+
+       // 08.02.2025 https://redmine.bring.out.ba/issues/41615
+       //aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
+       //aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
+       // saljemo neto cijenu uvijek !
+       aStavka[ FISK_INDEX_PLU_CIJENA ] := aStavka[ FISK_INDEX_NETO_CIJENA ]
+       aStavka[ FISK_INDEX_POPUST ] := 0
+
        aStavka[ FISK_INDEX_BARKOD ] := cRobaBarkod
        aStavka[ FISK_INDEX_VRSTA_PLACANJA ] := cVrstaPlacanja
        aStavka[ FISK_INDEX_TOTAL ] := nPosRacunUkupno

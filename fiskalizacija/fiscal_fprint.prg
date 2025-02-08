@@ -51,9 +51,13 @@ FUNCTION fiskalni_fprint_racun( hFiskalniParams, aRacunData, aKupac, lStorno )
       lStorno := .F.
    ENDIF
 
+   altd()
+
    aFprintStruct := fiskalni_get_struct_za_gen_fajlova( F_POS_RN ) // uzmi strukturu tabele za pos racun
    aFprintArray := fisk_fprint_get_array( aRacunData, aKupac, lStorno, hFiskalniParams )
+#ifndef F18_DEBUG_FISKALNI
    fiskalni_array_to_fajl( hFiskalniParams[ "out_dir" ], hFiskalniParams[ "out_file" ], aFprintStruct, aFprintArray )
+#endif   
 
    RETURN nErr
 

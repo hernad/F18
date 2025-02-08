@@ -28,6 +28,8 @@ FUNCTION pos_azuriraj_racun( hParams )
    LOCAL nFiskBroj, cBroj
    LOCAL lBezFiskalnih := .F.
 
+   altd()
+
    o_pos_tables()
    IF !racun_se_moze_azurirati( hParams[ "idpos" ], hParams[ "idvd" ], danasnji_datum(), hParams[ "brdok" ] )
       RETURN .F.
@@ -35,10 +37,15 @@ FUNCTION pos_azuriraj_racun( hParams )
 
    create_pos_tmp( hParams )
 
+altd()
+#ifndef F18_DEBUG_FISKALNI
    IF !is_pos_tmp_empty( hParams )
       Alert("POS[tmp] se koristi!")
       RETURN .F.
    ENDIF
+#else   
+   cleanup_pos_tmp( hParams )
+#endif   
    
    SELECT _pos_pripr
    GO TOP

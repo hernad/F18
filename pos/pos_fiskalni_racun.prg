@@ -376,7 +376,9 @@ FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nStornoRacu
       aStavka[ FISK_INDEX_JMJ ] :=  cJMJ
 
       // ROUND( kolicina * cijena * (1-POPUST/100), 2)
-      nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_CIJENA ] * (1 - aStavka[ FISK_INDEX_POPUST ]/100.00), 2) 
+      //nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_CIJENA ] * (1 - aStavka[ FISK_INDEX_POPUST ]/100.00), 2) 
+      nPosRacunUkupnoCheck += ROUND(aStavka[ FISK_INDEX_KOLICINA ] * aStavka[ FISK_INDEX_NETO_CIJENA ], 2) 
+
       AAdd( aStavkeRacuna, aStavka )
       SKIP
    ENDDO
@@ -413,7 +415,10 @@ STATIC FUNCTION pos_to_fprint( cIdPos, cIdVd, dDatDok, cBrDok, aRacunStavke, lSt
    hRet["error"] := 0
    hRet["broj"] := 0
 
+   altd()
+#ifndef F18_DEBUG_FISKALNI 
    fprint_delete_answer( s_hFiskalniUredjajParams )
+#endif   
    fiskalni_fprint_racun( s_hFiskalniUredjajParams, aRacunStavke, NIL, lStorno )
 
    hRet["error"] := fprint_read_error( s_hFiskalniUredjajParams, @nBrojFiskalnogRacuna )
