@@ -366,9 +366,13 @@ FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nStornoRacu
       aStavka[ FISK_INDEX_FISK_RACUN_STORNIRATI ] := cBrojFiskRNStorno
 
       aStavka[ FISK_INDEX_PLU ] := nPLU
+
+
+      // hernad 10.02.2025
+      // ostavio sam ipak da fprint salje popust a ne neto cijenu
       aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
-      
       aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
+
       aStavka[ FISK_INDEX_BARKOD ] := cRobaBarkod
       aStavka[ FISK_INDEX_VRSTA_PLACANJA ] := cVrstaPlacanja
       aStavka[ FISK_INDEX_TOTAL ] := nPosRacunUkupno

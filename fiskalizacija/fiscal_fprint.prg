@@ -1144,8 +1144,6 @@ STATIC FUNCTION fprint_dnevni_fiskalni_izvjestaj( cType )
    RETURN aArr
 
 
-
-
 STATIC FUNCTION fprint_duplikat_dokumenta( cType, dDatumFrom, dDatumTo, cTimeFrom, cTimeTo )
 
    LOCAL cTmp := ""
