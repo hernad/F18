@@ -370,8 +370,12 @@ FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nStornoRacu
 
       // hernad 10.02.2025
       // ostavio sam ipak da fprint salje popust a ne neto cijenu
-      aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
-      aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
+      //aStavka[ FISK_INDEX_PLU_CIJENA ] := pos->cijena
+      //aStavka[ FISK_INDEX_POPUST ] := nPOSRabatProcenat
+      // hernad 12.02.2025 mislim da je matematika fprinta sa popustom neispravna
+      // neka ide neto cijena popust 0
+      aStavka[ FISK_INDEX_PLU_CIJENA ] := aStavka[ FISK_INDEX_NETO_CIJENA ]
+      aStavka[ FISK_INDEX_POPUST ] := 0.0
 
       aStavka[ FISK_INDEX_BARKOD ] := cRobaBarkod
       aStavka[ FISK_INDEX_VRSTA_PLACANJA ] := cVrstaPlacanja
