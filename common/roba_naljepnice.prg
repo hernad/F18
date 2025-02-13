@@ -196,7 +196,7 @@ STATIC FUNCTION roba_naljepnice_napuni_iz_kalk_pripr( cKolicina )
                _barkod := roba->barkod
             ENDIF
 
-            IF ( kalk_pripr->idVd == "19" )
+            IF ( kalk_pripr->idVd $ "19#29" )
                _cijena := kalk_pripr->mpcsapp + kalk_pripr->fcj
                _scijena := kalk_pripr->fcj
             ELSE
