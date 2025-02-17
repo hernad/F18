@@ -18,15 +18,12 @@ FUNCTION fin_lisec_find_partner( cIdPartner, cClientName, cKupacDrzava )
    cPdvBroj := firma_pdv_broj( cIdPartner )
    cIdBroj := firma_id_broj( cIdPartner )
 
-
    IF cPDVBroj == "999999999999"
-      altd()
       hRet["id_partner"] := "GOTOVINA"
       RETURN hRet
    ENDIF
 
    IF TRIM(cClientName) == "KP" .OR. TRIM(cClientName) == "KPM"
-      altd()
       hRet["id_partner"] := "GOTOVINA"
       RETURN hRet
    ENDIF
@@ -92,7 +89,8 @@ FUNCTION fin_lisec_get_fin_stavke( cFaktAvAvStor, dDatod, dDatDo)
    LOCAL cIdKonto, cIdKontoPDV, cIdKontoPrihod
    LOCAL hPartner, cSufix
 
-   
+   LOCAL nUkupnoSaPDV, nOsnovica, nPDV
+
    //IF cFaktAvAvStor == "1"
    //   cSufix := "IN"
 
@@ -115,8 +113,34 @@ from fmk.lisec_invoice_header ih
   left join fmk.lisec_invoice_totals it  on  it.invoice_no = ih.ih_invoice_no 
   left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no
   left join fmk.lisec_invoice_partial_payments datval on datval.ipp_invoice_no = ih.ih_invoice_no 
-  where ih_invoice_no = 2001396 
+  where ih_invoice_no = 2001396
+  
+  
+
+
+   select ih_invoice_no as broj_racuna,rech.rg_info4 as broj_fiskalnog_racuna,
+      (case when ih_type = 5 then 'STORNO' else 'PLUS' end) as storno_plus,
+      ih_cust_no as lisec_broj_kupca,fmk.partn.id idpartner,kust.ku_land as kupac_drzava,
+      kust_adr.ku_name as ime_kupca,
+      ih_curr_code as valuta,ih_curr_rate as omjer,
+      it.invoice_tot_net as iznos_bez_pdv,it.invoice_tot_vat as ukupno_pdv,
+      it.inv_tot_date::date as datum_fakture,datval.ipp_due_date::date as datum_valute,
+      kust_adr.*
+   from fmk.lisec_invoice_header ih 
+   left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))
+   left join lateral (select * from fmk.lisec_kust_adr where fmk.lisec_kust_adr.ku_nr=kust.kunr and fmk.lisec_kust_adr.ku_vk_ek=0 and fmk.lisec_kust_adr.ku_name is not null limit 1) kust_adr on true
+   left join fmk.lisec_invoice_totals it on it.invoice_no = ih.ih_invoice_no 
+   left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no 
+   left join fmk.lisec_invoice_partial_payments datval on datval.ipp_invoice_no = ih.ih_invoice_no 
+   LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id) 
+   WHERE it.inv_tot_date::date>='2025-01-31' and it.inv_tot_date::date<='2025-01-31'
+         and (ih_invoice_no between 2000000 and 2999999)
+         and rech.rg_info4 like '%22839%'
+   ORDER BY rech.rg_info4
+
 */
+
+if cFaktAvAvStor == "1" // fakture
 
    cQry := "select ih_invoice_no as broj_racuna," 
    cQry += "rech.rg_info4 as broj_fiskalnog_racuna,"
@@ -124,17 +148,20 @@ from fmk.lisec_invoice_header ih
    cQry += "(case when ih_type = 5 then 'STORNO' else 'PLUS' end) as storno_plus," 
    cQry += "ih_cust_no as lisec_broj_kupca,"
    cQry += "fmk.partn.id idpartner,"
+   
    cQry += "kust.ku_land as kupac_drzava,"
+   cQry += "kust_adr.ku_name as ime_kupca,"
+
    cQry += "ih_curr_code as valuta," 
    cQry += "ih_curr_rate as omjer,"
-   cQry += "kust_adr.ku_name as ime_kupca,"
+   
    cQry += "it.invoice_tot_net as iznos_bez_pdv,"
    cQry += "it.invoice_tot_vat as ukupno_pdv,"
    cQry += "it.inv_tot_date::date as datum_fakture,"
    cQry += "datval.ipp_due_date::date as datum_valute"
    cQry += " from fmk.lisec_invoice_header ih"   
-   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and kust.kust_manu_site='RAMA-GLAS')"
-   cQry += " left join fmk.lisec_kust_adr kust_adr on (kust_adr.ku_nr = kust.kunr and kust_adr.ku_vk_ek=0)"
+   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
+   cQry += " left join lateral (select * from fmk.lisec_kust_adr where fmk.lisec_kust_adr.ku_nr=kust.kunr and fmk.lisec_kust_adr.ku_vk_ek=0 and fmk.lisec_kust_adr.ku_name is not null limit 1) kust_adr on true"
    cQry += " left join fmk.lisec_invoice_totals it on it.invoice_no = ih.ih_invoice_no" 
    cQry += " left join fmk.lisec_rechnung_daten rech on rech.rg_nr = ih.ih_invoice_no"
    cQry += " left join fmk.lisec_invoice_partial_payments datval on datval.ipp_invoice_no = ih.ih_invoice_no" 
@@ -143,6 +170,95 @@ from fmk.lisec_invoice_header ih
    //where ih_invoice_no = 3000000
    cQry += " WHERE it.inv_tot_date::date>=" + sql_quote(dDatOd) + " and it.inv_tot_date::date<=" + sql_quote(dDatDo)
    cQry += " ORDER BY rech.rg_info4"
+
+elseif cFaktAvAvStor == "2"
+
+   // AV
+
+   cQry := "SELECT order_no as broj_racuna," 
+   cQry += " order_tot_net iznos_bez_pdv, round(order_tot_net*0.17,2) as ukupno_pdv,"
+   cQry += " aufk.bestell_dat::date datum_fakture, aufk.bestell_dat::date datum_valute,"
+   cQry += "'PLUS' as storno_plus,"
+   cQry += "kust.ku_land as kupac_drzava,"
+   cQry += "kust_adr.ku_name as ime_kupca,"
+
+   cQry += " aufk.kunr lisec_broj_kupca, fmk.partn.id idpartner"
+
+   cQry += " FROM fmk.lisec_order_totals ot"
+   cQry += " JOIN fmk.lisec_auf_kopf aufk on ot.order_no=aufk.auf_nr"
+   cQry += " join fmk.lisec_doc_origin doc on doc.doc_no=ot.order_no"
+
+   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
+
+   cQry += " left join lateral (select * from fmk.lisec_kust_adr where fmk.lisec_kust_adr.ku_nr=kust.kunr and fmk.lisec_kust_adr.ku_vk_ek=0 and fmk.lisec_kust_adr.ku_name is not null limit 1) kust_adr on true"
+   cQry += " LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id)"
+
+   cQry += " where doc.origin_type = 3"
+   cQry += " and aufk.bestell_dat::date between "  + sql_quote(dDatOd) + " and  " + sql_quote(dDatDo)
+   cQry += " and (order_no between 60000 and 90000)"  // opseg avansne fakture 
+   cQry += " and aufk.kunr not in (4, 6)" // kupci KP, KPM
+   cQry += " order by ot.order_no"
+/* 
+   // Avansne fakture
+
+   select order_no, 
+        order_tot_net iznos, 
+        aufk.bestell_dat::date datum_rn, 
+        aufk.kunr lisec_kupac_broj 
+    from fmk.lisec_order_totals ot
+     join fmk.lisec_auf_kopf aufk on  ot.order_no=aufk.auf_nr 
+     join fmk.lisec_doc_origin doc on doc.doc_no=ot.order_no 
+  where doc.origin_type = 3 and aufk.bestell_dat::date between '2025-01-29' and '2025-01-30'
+        and (order_no between 8000 and 8999)
+        and aufk.kunr not in (4, 6) 
+  order by order_no
+*/  
+   
+elseif cFaktAvAvStor == "3"
+
+/* 
+   // STORNO Avansne fakture
+
+   select order_no as broj_racuna, 
+     order_tot_net iznos_bez_pdv, 
+     round(order_tot_net*0.17,2) as ukupno_pdv, 
+     aufk.bestell_dat::date datum_fakture, 
+     aufk.bestell_dat::date datum_valute,kust.ku_land as kupac_drzava,
+     kust_adr.ku_name as ime_kupca,'PLUS' as storno_plus, 
+     aufk.kunr lisec_broj_kupca, fmk.partn.id idpartner FROM fmk.lisec_order_totals ot 
+     JOIN fmk.lisec_auf_kopf aufk on ot.order_no=aufk.auf_nr join fmk.lisec_doc_origin doc on doc.doc_no=ot.order_no 
+     LEFT JOIN fmk.lisec_kust kust on (kust.kunr = aufk.kunr and kust.kust_manu_site='RAMA-GLAS') 
+     left join fmk.lisec_kust_adr kust_adr on (kust_adr.ku_nr = kust.kunr and kust_adr.ku_vk_ek=0) 
+     LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id) 
+     where doc.origin_type = 3 and aufk.bestell_dat::date between '2025-02-05' and  '2025-02-05' 
+        and (order_no between 8000 and 8999) and aufk.kunr not in (4, 6)
+*/
+
+   cQry := "select order_no as broj_racuna,"
+   cQry += " order_tot_net iznos_bez_pdv, round(order_tot_net*0.17,2) as ukupno_pdv,"
+   cQry += " aufk.bestell_dat::date datum_fakture, aufk.bestell_dat::date datum_valute," 
+
+   cQry += "kust.ku_land as kupac_drzava,"
+   cQry += "kust_adr.ku_name as ime_kupca,"
+   
+   cQry += "'PLUS' as storno_plus,"
+
+   cQry += " aufk.kunr lisec_broj_kupca, fmk.partn.id idpartner"
+   cQry += " FROM fmk.lisec_order_totals ot"
+   cQry += " JOIN fmk.lisec_auf_kopf aufk on ot.order_no=aufk.auf_nr"
+   cQry += " join fmk.lisec_doc_origin doc on doc.doc_no=ot.order_no"
+   
+   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
+
+   cQry += " left join lateral (select * from fmk.lisec_kust_adr where fmk.lisec_kust_adr.ku_nr=kust.kunr and fmk.lisec_kust_adr.ku_vk_ek=0 and fmk.lisec_kust_adr.ku_name is not null limit 1) kust_adr on true"
+   cQry += " LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id)"
+   cQry += " where doc.origin_type = 3"
+   cQry += " and aufk.bestell_dat::date between "  + sql_quote(dDatOd) + " and  " + sql_quote(dDatDo)
+   cQry += " and (order_no between 8000 and 8999)"  // opseg storno avansne fakture 
+   cQry += " and aufk.kunr not in (4, 6)" // kupci KP, KPM
+   cQry += " order by ot.order_no" 
+
+endif   
 
    SELECT( F_POM )
    MsgO("Preuzimanje podataka sa LISEC servera")
@@ -162,21 +278,6 @@ from fmk.lisec_invoice_header ih
 
       DO WHILE !EOF()
 
-         /*
-         IF cFaktAvAvStor == "2" .AND. lisecrn->type_id <> 0
-            // typeid = 0 su regularne avansne fakture
-            SKIP
-            LOOP
-         ENDIF
-
-         IF cFaktAvAvStor == "3" .AND. lisecrn->type_id <> 1
-            // typeid = 1 su storno avansne fakture
-            SKIP
-            LOOP
-         ENDIF
-         */
-
-
          hPartner := fin_lisec_find_partner( lisecrn->idpartner, lisecrn->ime_kupca, lisecrn->kupac_drzava )
 
          IF hPartner["id_partner"] == "GOTOVINA"
@@ -187,6 +288,19 @@ from fmk.lisec_invoice_header ih
             SKIP
             LOOP
             // preskacemo KP i KPM, to se posebno unosi u 66 FIN naloge
+         ENDIF
+
+
+         nOsnovica := lisecrn->iznos_bez_pdv 
+         nPDV := lisecrn->ukupno_pdv
+         IF cFaktAvAvStor == "1"
+            // https://redmine.bring.out.ba/issues/41618 lisec zaokruzenje
+            //
+            if ABS(nPDV) <> 0
+              nUkupnoSaPDV := nOsnovica + nPDV
+              nOsnovica := round(nUkupnoSaPDV / 1.17, 2)
+              nPDV := round(nOsnovica * 0.17, 2)
+            endif
          ENDIF
 
          cIdPartner := hPartner["id_partner"]
@@ -220,7 +334,6 @@ from fmk.lisec_invoice_header ih
             cIdKonto := "2118"
          ENDIF
 
-         /*
          IF cFaktAvAvStor <> "1"
             // avansne fakture
             IF hPartner["pdv"]
@@ -230,8 +343,7 @@ from fmk.lisec_invoice_header ih
             ENDIF
             cIdKontoPrihod := "4340" // partner koji je uplatio
          ENDIF
-         */
-
+         
          hFinItem := hb_hash()
          hFinItem[ "idfirma" ] := self_organizacija_id()
          hFinItem[ "idvn" ] := "14"
@@ -241,30 +353,29 @@ from fmk.lisec_invoice_header ih
             hFinItem[ "opis" ] := "RN. " + AllTrim(STR(lisecrn->broj_racuna, 10,0))  + ", FISK_RN " + Alltrim(lisecrn->broj_fiskalnog_racuna) + ""
          ELSE
             IF cFaktAvAvStor == "2"
-               // AV.RN. (RC036046)
                hFinItem[ "opis" ] := "AV.RN."
             ELSEIF cFaktAvAvStor == "3"
-               // ST.AV. (RC036046/S)
                hFinItem[ "opis" ] := "ST.AV."
             ENDIF   
             hFinItem[ "opis" ] += " " + AllTrim(STR(lisecrn->broj_racuna, 10,0)) + " "
          ENDIF
-      
-         altd()
+
          hFinItem[ "datdok" ] := lisecrn->datum_fakture
          hFinItem[ "datval" ] := lisecrn->datum_valute
 
          hFinItem[ "konto" ] := cIdKonto
          hFinItem[ "partner" ] := cIdPartner
          hFinItem[ "d_p" ] := "1"
+
          if lisecrn->storno_plus == "STORNO"
-            hFinItem[ "iznos" ] := - (lisecrn->iznos_bez_pdv + lisecrn->ukupno_pdv)
+            hFinItem[ "iznos" ] := - (nOsnovica + nPDV)
          else   
-            hFinItem[ "iznos" ] := lisecrn->iznos_bez_pdv + lisecrn->ukupno_pdv
+            hFinItem[ "iznos" ] := nOsnovica + nPDV
          endif
-         IF cFaktAvAvStor == "3" // storno avansne fakture RC
-            hFinItem[ "iznos" ] := hFinItem[ "iznos" ] * -1
-         ENDIF 
+
+         //IF cFaktAvAvStor == "3" // storno avansne fakture RC
+         //   hFinItem[ "iznos" ] := hFinItem[ "iznos" ] * -1
+         //ENDIF 
          
          hFinItem[ "rbr" ] := nRbr
          ++nRbr
@@ -278,14 +389,11 @@ from fmk.lisec_invoice_header ih
          hFinItemPDV[ "datval" ] := CTOD("")
          hFinItemPDV[ "konto" ] := cIdKontoPDV
          IF lisecrn->storno_plus == "STORNO"
-            hFinItemPDV[ "iznos" ] := - lisecrn->ukupno_pdv
+            hFinItemPDV[ "iznos" ] := - nPDV
          ELSE
-            hFinItemPDV[ "iznos" ] := lisecrn->ukupno_pdv
+            hFinItemPDV[ "iznos" ] := nPDV
          ENDIF
-
-         IF cFaktAvAvStor == "3" // storno RC
-            hFinItemPDV[ "iznos" ] := hFinItemPDV[ "iznos" ] * -1
-         ENDIF
+  
          hFinItemPDV[ "d_p" ] := "2"
          hFinItemPDV[ "rbr" ] := nRbr
          hFinItemPDV[ "partner" ] := SPACE(6)
@@ -298,13 +406,13 @@ from fmk.lisec_invoice_header ih
          hFinItemPrihod[ "datval" ] := CTOD("")
          hFinItemPrihod[ "konto" ] := cIdKontoPrihod
          IF lisecrn->storno_plus == "STORNO"
-            hFinItemPrihod[ "iznos" ] := -lisecrn->iznos_bez_pdv
+            hFinItemPrihod[ "iznos" ] := -nOsnovica
          ELSE
-            hFinItemPrihod[ "iznos" ] := lisecrn->iznos_bez_pdv
+            hFinItemPrihod[ "iznos" ] := nOsnovica
          ENDIF
-         IF cFaktAvAvStor == "3" // storno RC
-            hFinItemPrihod[ "iznos" ] := hFinItemPrihod[ "iznos" ] * -1
-         ENDIF
+         //IF cFaktAvAvStor == "3" // storno RC
+         //   hFinItemPrihod[ "iznos" ] := hFinItemPrihod[ "iznos" ] * -1
+         //ENDIF
 
          hFinItemPrihod[ "d_p" ] := "2"
          hFinItemPrihod[ "rbr" ] := nRbr
@@ -339,8 +447,8 @@ FUNCTION fin_lisec_import()
    Box(, 3, 60)
      @ box_x_koord() + 1, box_y_koord() + 2 SAY "Datum od" GET dDatOd
      @ box_x_koord() + 1, col() + 2 SAY "do"  GET dDatDo
-     //@ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)/Avans (2)/Avans-Storno (3)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "123"
-     @ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "1"
+     @ box_x_koord() + 3, box_y_koord() + 2 SAY "Fakture (1)/Avans (2)/Avans-Storno (3)"  GET cFaktAvAvStor VALID cFaktAvAvStor $ "123"
+ 
      
      READ
    BoxC()
