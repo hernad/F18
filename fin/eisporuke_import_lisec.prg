@@ -188,7 +188,7 @@ elseif cFaktAvAvStor == "2"
    cQry += " JOIN fmk.lisec_auf_kopf aufk on ot.order_no=aufk.auf_nr"
    cQry += " join fmk.lisec_doc_origin doc on doc.doc_no=ot.order_no"
 
-   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
+   cQry += " left join fmk.lisec_kust kust on (kust.kunr = aufk.kunr and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
 
    cQry += " left join lateral (select * from fmk.lisec_kust_adr where fmk.lisec_kust_adr.ku_nr=kust.kunr and fmk.lisec_kust_adr.ku_vk_ek=0 and fmk.lisec_kust_adr.ku_name is not null limit 1) kust_adr on true"
    cQry += " LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id)"
@@ -248,13 +248,13 @@ elseif cFaktAvAvStor == "3"
    cQry += " JOIN fmk.lisec_auf_kopf aufk on ot.order_no=aufk.auf_nr"
    cQry += " join fmk.lisec_doc_origin doc on doc.doc_no=ot.order_no"
    
-   cQry += " left join fmk.lisec_kust kust on (kust.kunr = ih.ih_cust_no and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
+   cQry += " left join fmk.lisec_kust kust on (kust.kunr = aufk.kunr and trim(kust.kust_manu_site) in ('','RAMA-GLAS'))"
 
    cQry += " left join lateral (select * from fmk.lisec_kust_adr where fmk.lisec_kust_adr.ku_nr=kust.kunr and fmk.lisec_kust_adr.ku_vk_ek=0 and fmk.lisec_kust_adr.ku_name is not null limit 1) kust_adr on true"
    cQry += " LEFT JOIN fmk.partn on trim(kust.kust_kto_buch)=trim(fmk.partn.id)"
    cQry += " where doc.origin_type = 3"
    cQry += " and aufk.bestell_dat::date between "  + sql_quote(dDatOd) + " and  " + sql_quote(dDatDo)
-   cQry += " and (order_no between 8000 and 8999)"  // opseg storno avansne fakture 
+   cQry += " and ((order_no between 8000 and 8999) or (order_no between 500000 and 599999))"  // opseg storno avansne fakture 
    cQry += " and aufk.kunr not in (4, 6)" // kupci KP, KPM
    cQry += " order by ot.order_no" 
 
