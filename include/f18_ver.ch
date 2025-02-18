@@ -13,5 +13,5 @@
 #define SERVER_DB_VER_MAJOR  0
 #define SERVER_DB_VER_MINOR  0
 #define SERVER_DB_VER_PATCH  25
-#define F18_VER       "3.3.136" 
-#define F18_VER_DATE  "17.02.2025" 
+#define F18_VER       "3.3.137" 
+#define F18_VER_DATE  "18.02.2025" 

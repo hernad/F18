@@ -291,18 +291,6 @@ endif
          ENDIF
 
 
-         nOsnovica := lisecrn->iznos_bez_pdv 
-         nPDV := lisecrn->ukupno_pdv
-         IF cFaktAvAvStor == "1"
-            // https://redmine.bring.out.ba/issues/41618 lisec zaokruzenje
-            //
-            if ABS(nPDV) <> 0
-              nUkupnoSaPDV := nOsnovica + nPDV
-              nOsnovica := round(nUkupnoSaPDV / 1.17, 2)
-              nPDV := round(nOsnovica * 0.17, 2)
-            endif
-         ENDIF
-
          cIdPartner := hPartner["id_partner"]
          cIdKonto := Padr("2110", 7)
          IF hPartner["pdv"]
@@ -344,6 +332,25 @@ endif
             cIdKontoPrihod := "4340" // partner koji je uplatio
          ENDIF
          
+         nOsnovica := lisecrn->iznos_bez_pdv 
+         nPDV := lisecrn->ukupno_pdv
+         IF cFaktAvAvStor == "1"
+            // https://redmine.bring.out.ba/issues/41618 lisec zaokruzenje
+            //
+            if ABS(nPDV) <> 0
+              nUkupnoSaPDV := nOsnovica + nPDV
+              nOsnovica := round(nUkupnoSaPDV / 1.17, 2)
+              nPDV := round(nOsnovica * 0.17, 2)
+            endif
+
+         ELSE
+            // avansne fakture
+            if hPartner["ino"]
+               cIdKontoPrihod := "4341"
+               nPDV := 0
+            endif   
+         ENDIF
+
          hFinItem := hb_hash()
          hFinItem[ "idfirma" ] := self_organizacija_id()
          hFinItem[ "idvn" ] := "14"
