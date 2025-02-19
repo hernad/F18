@@ -611,7 +611,6 @@ STATIC FUNCTION oasist_key_handler( nIznos, cDugPot, dDatKnjizenja )
          ENDDO
          my_unlock()
 
-         altd()
          GO TOP
          // kupac je avansirao
          IF round(nPredhodniIznos, 2) > 0

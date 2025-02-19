@@ -110,7 +110,6 @@ FUNCTION curl_init(hParams, cPath, cContentType, cMethod)
     if hb_HHasKey(hParams, "request_params")
        cParams := "" 
        // "example=param&example2=param2..."
-       altd()
        FOR each hRequestParam in hParams["request_params"]
            cParams := hRequestParam["name"] + "=" + hRequestParam["value"]
        NEXT
@@ -1290,6 +1289,10 @@ FUNCTION pos_fisk_broj_rn_by_storno_ref_ofs( cUUIDFiskStorniran )
        RETURN ""
     ENDIF
 
+#ifdef F18_DEBUG_FISKALNI
+    return "_"
+#endif
+
     cQuery := "SELECT " + pos_prodavnica_sql_schema() + ".fisk_broj_rn_by_storno_ref_ofs(" + ;
        sql_quote( cUUIDFiskStorniran ) +  ")"
 
@@ -1377,7 +1380,14 @@ FUNCTION pronadji_fiskalni_racun_za_storniranje_ofs(hParams)
     hParams[ "fisk_id" ] := pos_get_fiskalni_dok_id_ofs( hParams )
     // trazimo da li je vec storniranje ovog fiskalnog racuna
     IF Empty(hParams[ "fisk_id" ])
-        MsgBeep("Racun koji ste odabrali kao originalni uopste nije fiskalniziran?!")
+#ifdef  F18_DEBUG_FISKALNI
+        hParams["fisk_id"] := "TEST-5354-4e32-8f29-TEST"
+        hParams["fiskalni_broj"] := "TESTTEST"
+        hParams["fiskalni_datum"] := date()
+        return  .T.
+#else
+        MsgBeep("Racun koji ste odabrali kao originalni uopste nije fiskaliziran?!")
+#endif        
         RETURN .F.
     ENDIF
 
@@ -1648,6 +1658,9 @@ FUNCTION pos_get_invoice_number_date_from_fisk_doks_ofs_by_uuid( cUUID )
 
     LOCAL cQuery, oError, oRet, cGet
 
+#ifdef F18_DEBUG_FISKALNI
+    return "TESTTEST_2025-01-01"
+#endif
     // select invoice_number || '_' || sdc_date_time from p23.pos_fisk_doks_ofs where dok_id = <cUUID>  
     cQuery := "SELECT invoice_number || '_' || sdc_date_time  from " +;
               pos_prodavnica_sql_schema() + ".pos_fisk_doks_ofs" + ;

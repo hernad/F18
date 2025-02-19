@@ -611,7 +611,6 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
       lTmp := .F.
    ENDIF
 
-   altd()
    IF lTmp
       cSqlTable := pos_prodavnica_sql_schema() + ".pos_items_tmp_" + AllTrim(cIdPos)
    ENDIF
@@ -635,8 +634,6 @@ FUNCTION pos_iznos_racuna( cIdPos, cIdVD, dDatum, cBrDok, lTmp )
    cSql += " AND datum = " + sql_quote( dDatum )
 
 #ifdef F18_DEBUG_FISKALNI
-
-   altd()
 
    cSql2 := "SELECT "
    // predhodni algoritam nije imao round na nivou stavke

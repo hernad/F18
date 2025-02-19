@@ -196,7 +196,10 @@ FUNCTION pos_napravi_u_pripremi_storno_dokument( hParams )
 
    LOCAL cIdRoba, hRec
 
-   SELECT _POS_PRIPR
+   //SELECT _POS_PRIPR
+   altD()   
+   select_o_dbf( "_POS_PRIPR", F__PRIPR, "_pos_pripr", "1" )
+
    my_dbf_zap()
 
    seek_pos_pos( hParams[ "idpos" ], hParams[ "idvd" ], hParams[ "datum" ], hParams[ "brdok" ] )

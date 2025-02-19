@@ -203,6 +203,7 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
          nStornoRacunBroj := pos_racun_u_pripremi_broj_storno_rn()
          if nStornoRacunBroj > 0
             lStorno := .T.
+         endif
       ENDIF
    ENDIF
 
@@ -213,7 +214,7 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
       hParams["storno_fiskalni_datum"] := hStornoRacun["storno_fiskalni_datum"]
       aStavkeRacuna := pos_fiskalni_stavke_racuna_ofs( hParams, hFiskalniParams  )
    ELSE
-      lStorno := nStornoRacunBroj > 0
+      lStorno := (nStornoRacunBroj > 0)
       aStavkeRacuna := pos_fiskalni_stavke_racuna( cIdPos, "42", dDatDok, cBrDok, nStornoRacunBroj, nUplaceno )
    ENDIF
 

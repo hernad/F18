@@ -432,7 +432,7 @@ STATIC FUNCTION set_table_values_algoritam_vars( cTabela, hRecord, nAlgoritam, c
       IF ValType( cKey ) == "C"
 
          IF !hb_HHasKey( hRecord, cKey )  // ne gledati numericke kljuceve, koji su array stavke
-            AltD() // nepostojeci kljuc
+            //AltD() // nepostojeci kljuc
             cMsg := RECI_GDJE_SAM + "# tabela:" + cTabela + "#bug - nepostojeći kljuc:" + cKey +  "#hRecord:" + pp( hRecord )
             log_write( cMsg, 1 )
             MsgBeep( cMsg )

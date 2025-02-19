@@ -443,8 +443,6 @@ FUNCTION is_fiskalizacija_off()
 
    LOCAL nDeviceId
 
-altd()
-
    nDeviceId := odaberi_fiskalni_uredjaj( NIL, .T., .F. )
    IF nDeviceId == NIL
       RETURN .T.
