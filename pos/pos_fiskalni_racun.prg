@@ -121,7 +121,7 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
    LOCAL cIdPos, dDatDok, cBrDok
    LOCAL nErrorLevel := 0
    LOCAL cFiskalniDravjerIme
-   LOCAL lStorno
+   LOCAL lStorno := .F.
    LOCAL aStavkeRacuna
    LOCAL nStornoRacunBroj, hStornoRacun := hb_hash()
    LOCAL nUplaceno
@@ -201,17 +201,19 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
       ELSE  
          // iz pripreme iscitavamo podatke o storno racunu
          nStornoRacunBroj := pos_racun_u_pripremi_broj_storno_rn()
+         if nStornoRacunBroj > 0
+            lStorno := .T.
       ENDIF
    ENDIF
 
-   //lStorno := nStornoRacunBroj > 0
-
+   
  
    IF cFiskalniDravjerIme == s_cFiskalniDrajverOFS
       hParams["storno_fiskalni_broj"] := hStornoRacun["storno_fiskalni_broj"]
       hParams["storno_fiskalni_datum"] := hStornoRacun["storno_fiskalni_datum"]
       aStavkeRacuna := pos_fiskalni_stavke_racuna_ofs( hParams, hFiskalniParams  )
    ELSE
+      lStorno := nStornoRacunBroj > 0
       aStavkeRacuna := pos_fiskalni_stavke_racuna( cIdPos, "42", dDatDok, cBrDok, nStornoRacunBroj, nUplaceno )
    ENDIF
 
@@ -227,8 +229,6 @@ STATIC FUNCTION pos_send_to_fiskalni_printer( hParams, hFiskalniParams )
       hRet["broj"] := 0
       RETURN hRet
 
-   CASE cFiskalniDravjerIme == s_cFiskalniDrajverFPRINT
-      RETURN pos_to_fprint( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
    
    CASE cFiskalniDravjerIme == s_cFiskalniDrajverFPRINT
       RETURN pos_to_fprint( cIdPos, "42", dDatDok, cBrDok, aStavkeRacuna, lStorno )
