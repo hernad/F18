@@ -408,9 +408,11 @@ FUNCTION pos_fiskalni_stavke_racuna( cIdPos, cIdVd, dDatDok, cBrDok, nStornoRacu
    ENDIF
 
    nLevel := 1
-   IF provjeri_kolicine_i_cijene_fiskalnog_racuna( @aStavkeRacuna, lStorno, nLevel, s_hFiskalniUredjajParams[ "drv" ] ) < 0
-      RETURN NIL
-   ENDIF
+
+   // #41669
+   //IF provjeri_kolicine_i_cijene_fiskalnog_racuna( @aStavkeRacuna, lStorno, nLevel, s_hFiskalniUredjajParams[ "drv" ] ) < 0
+   //   RETURN NIL
+   //ENDIF
 
    RETURN aStavkeRacuna
 

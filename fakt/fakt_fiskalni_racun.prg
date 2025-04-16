@@ -635,9 +635,10 @@ STATIC FUNCTION fakt_gen_array_racun_stavke_from_fakt_dokument( cIdFirma, cIdTip
 
    nItemLevelCheck := 2
 
-   IF provjeri_kolicine_i_cijene_fiskalnog_racuna( @aRacunData, lStorno, nItemLevelCheck, s_hFiskalniParams[ "drv" ] ) < 0
-      RETURN NIL
-   ENDIF
+   // #41669
+   //IF provjeri_kolicine_i_cijene_fiskalnog_racuna( @aRacunData, lStorno, nItemLevelCheck, s_hFiskalniParams[ "drv" ] ) < 0
+   //   RETURN NIL
+   //ENDIF
 
    RETURN aRacunData
 
