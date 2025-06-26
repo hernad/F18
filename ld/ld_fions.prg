@@ -848,7 +848,7 @@ FUNCTION Bruto( nbruto, ndopr )
    nPorOl := 0
 
    DO WHILE !Eof()
-      nPom := Max( dlimit, Round( iznos / 100 * Max( _UNeto, PAROBR->prosld * gPDLimit / 100 ), gZaok ) )
+      nPom := Max( dlimit, Round( por->iznos / 100 * Max( _UNeto, PAROBR->prosld * gPDLimit / 100 ), gZaok ) )
       nPor += nPom
       SKIP
    ENDDO
@@ -885,14 +885,14 @@ FUNCTION Bruto( nbruto, ndopr )
       ENDIF
       // ? id,"-",naz
       // @ prow(),pcol()+1 SAY iznos pict "99.99%"
-      IF Empty( idkbenef ) // doprinos udara na neto
+      IF Empty( dopr->idkbenef ) // doprinos udara na neto
          // @ prow(),pcol()+1 SAY nBO pict gpici
          // nC1:=pcol()+1
-         nPom := Max( dlimit, Round( iznos / 100 * nBO, gZaok ) )
+         nPom := Max( dlimit, Round( dopr->iznos / 100 * nBO, gZaok ) )
          nBruto += nPom
          nPorDopr += nPom
       ELSE
-         nPom0 := AScan( aNeta, {| x | x[ 1 ] == idkbenef } )
+         nPom0 := AScan( aNeta, {| x | x[ 1 ] == dopr->idkbenef } )
          IF nPom0 <> 0
             nPom2 := parobr->k3 / 100 * aNeta[ nPom0, 2 ]
          ELSE
@@ -901,7 +901,7 @@ FUNCTION Bruto( nbruto, ndopr )
          IF Round( nPom2, gZaok ) <> 0
             // @ prow(),pcol()+1 SAY nPom2 pict gpici
             // nC1:=pcol()+1
-            nPom := Max( dlimit, Round( iznos / 100 * nPom2, gZaok ) )
+            nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nPom2, gZaok ) )
             nBruto += nPom
             nPorDopr += nPom
          ENDIF

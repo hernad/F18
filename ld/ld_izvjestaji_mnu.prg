@@ -86,9 +86,6 @@ STATIC FUNCTION izvjestaji_specifikacije()
    AAdd( aOpc, "1. specifikacija uz isplatu plata 2001                            " )
    AAdd( aOpcExe, {|| ld_specifikacija_plate_obr_2001() } )
 
-   AAdd( aOpc, "X. specifikacija uz isplatu plata 2001 (stari) " )
-   AAdd( aOpcExe, {|| ld_specifikacija_plate_2001_stari() } )
-
    AAdd( aOpc, "2. specifikacija za samostalne poduzetnike obrazac 2002  " )
    AAdd( aOpcExe, {|| ld_specifikacija_plate_samostalni_obr_2002() } )
 

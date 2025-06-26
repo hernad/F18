@@ -50,6 +50,7 @@ FUNCTION ld_beneficirani_stepen()
    select_o_kbenef( cTmp )
 
    IF !Eof()
+      // kbenef
       nRet := field->iznos
    ENDIF
 

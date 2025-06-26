@@ -315,19 +315,19 @@ FUNCTION ld_specifikacija_plate_ostali()
       IF cRTR $ "A#U"
          // prihodi
          nPom := nUBrSaTr
-         UzmiIzIni( cIniName, 'Varijable', 'POVPRIH', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+         UzmiIzIni( cIniName, 'Varijable', 'POVPRIH', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
          // rashodi
          nPom := nUTrosk
-         UzmiIzIni( cIniName, 'Varijable', 'POVRASH', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+         UzmiIzIni( cIniName, 'Varijable', 'POVRASH', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
          // dohodak
          nPom := nBrOsnPov
-         UzmiIzIni( cIniName, 'Varijable', 'POVDOH', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+         UzmiIzIni( cIniName, 'Varijable', 'POVDOH', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
       ELSE
          nPom := nBrOsnDr
-         UzmiIzIni( cIniName, 'Varijable', 'DRDOH', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+         UzmiIzIni( cIniName, 'Varijable', 'DRDOH', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
       ENDIF
 
       select_o_dopr()
@@ -383,22 +383,22 @@ FUNCTION ld_specifikacija_plate_ostali()
 
       // upisi povremeni poslovi doprinosi
       nPom := nPovD1X
-      UzmiIzIni( cIniName, 'Varijable', 'POVDZ', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+      UzmiIzIni( cIniName, 'Varijable', 'POVDZ', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
       nPom := nPovD2X
-      UzmiIzIni( cIniName, 'Varijable', 'POVDP', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+      UzmiIzIni( cIniName, 'Varijable', 'POVDP', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
       // upisi ostali samostalni rad - doprinosi
       nPom := nDrD1X
-      UzmiIzIni( cIniName, 'Varijable', 'DRDZDR', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+      UzmiIzIni( cIniName, 'Varijable', 'DRDZDR', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
       nPom := nDrD2X
-      UzmiIzIni( cIniName, 'Varijable', 'DRDPIO', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+      UzmiIzIni( cIniName, 'Varijable', 'DRDPIO', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
       // ukupno dopr.zdravstvo
       nPom := nPovD1X + nDrD1X
-      UzmiIzIni( cIniName, 'Varijable', 'DZDRU', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+      UzmiIzIni( cIniName, 'Varijable', 'DZDRU', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
       // ukupno dopr.pio
       nPom := nPovD2X + nDrD2X
-      UzmiIzIni( cIniName, 'Varijable', 'DPIOU', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+      UzmiIzIni( cIniName, 'Varijable', 'DPIOU', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
       IF cRTR $ "A#U"
          nOsnPov := ( nBO - nPojD1X )
@@ -448,19 +448,19 @@ FUNCTION ld_specifikacija_plate_ostali()
 
    nUkupno := nPNaPlPov + nPNaPlDr + nPovD1X + nPovD2X + nDrD1X + nDrD2X
 
-   UzmiIzIni( cIniName, 'Varijable', 'POVPOSN', FormNum2( nUOsnPov, 16, gPici2 ), 'WRITE' )
-   UzmiIzIni( cIniName, 'Varijable', 'POVPIZN', FormNum2( nPNaPlPov, 16, gPici2 ), 'WRITE' )
+   UzmiIzIni( cIniName, 'Varijable', 'POVPOSN', ld_form_num( nUOsnPov, 16, gPici2 ), 'WRITE' )
+   UzmiIzIni( cIniName, 'Varijable', 'POVPIZN', ld_form_num( nPNaPlPov, 16, gPici2 ), 'WRITE' )
 
-   UzmiIzIni( cIniName, 'Varijable', 'DRPOSN', FormNum2( nUOsnDr, 16, gPici2 ), 'WRITE' )
-   UzmiIzIni( cIniName, 'Varijable', 'DRPIZN', FormNum2( nPNaPlDr, 16, gPici2 ), 'WRITE' )
+   UzmiIzIni( cIniName, 'Varijable', 'DRPOSN', ld_form_num( nUOsnDr, 16, gPici2 ), 'WRITE' )
+   UzmiIzIni( cIniName, 'Varijable', 'DRPIZN', ld_form_num( nPNaPlDr, 16, gPici2 ), 'WRITE' )
 
-   UzmiIzIni( cIniName, 'Varijable', 'POREZ', FormNum2( nPNaPlDr + nPNaPlPov, 16, gPici2 ), 'WRITE' )
+   UzmiIzIni( cIniName, 'Varijable', 'POREZ', ld_form_num( nPNaPlDr + nPNaPlPov, 16, gPici2 ), 'WRITE' )
 
    // ukupno radnika
    UzmiIzIni( cIniName, 'Varijable', 'U016', Str( nURadnika, 0 ), 'WRITE' )
 
    nPom = nUkupno
-   UzmiIzIni( cIniName, 'Varijable', 'UKOBAV', FormNum2( nPom, 16, gPici2 ), 'WRITE' )
+   UzmiIzIni( cIniName, 'Varijable', 'UKOBAV', ld_form_num( nPom, 16, gPici2 ), 'WRITE' )
 
 
    IniRefresh()

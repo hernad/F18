@@ -968,15 +968,15 @@ FUNCTION p_ld_dopr( cId, nDeltaX, nDeltaY )
    LOCAL lRet, nI
    PRIVATE imekol := {}
    PRIVATE kol := {}
-
-   AAdd( ImeKol, { PadR( "Id", 2 ), {|| id }, "id" } )
-   AAdd( ImeKol, { PadR( "Naziv", 20 ), {||  naz }, "naz" } )
-   AAdd( ImeKol, { PadR( "Iznos", 20 ), {||  iznos }, "iznos" } )
-   AAdd( ImeKol, { PadR( "d.tip", 6 ), {||  dop_tip }, "dop_tip", {|| .T. }, {|| v_dop_tip( wdop_tip ) } }  )
-   AAdd( ImeKol, { PadR( "tip rada", 10 ), {|| tiprada }, "tiprada", {|| .T. }, {|| wtiprada $ " #I#S#N#P#U#A#R" .OR. MsgTipRada() } }  )
-   AAdd( ImeKol, { PadR( "KBenef", 5 ), {|| PadC( idkbenef, 5 ) }, "idkbenef", {|| .T. }, {|| Empty( widkbenef ) .OR. P_KBenef( @widkbenef ) } } )
-   AAdd( ImeKol, { PadR( "Donji limit", 12 ), {||  dlimit }, "dlimit" } )
-   AAdd( ImeKol, { PadR( "PoOpst", 6 ), {||  poopst }, "poopst" }  )
+altd()
+   AAdd( ImeKol, { PadR( "Id", 2 ), {|| dopr->id }, "id" } )
+   AAdd( ImeKol, { PadR( "Naziv", 20 ), {||  dopr->naz }, "naz" } )
+   AAdd( ImeKol, { PadR( "Iznos", 20 ), {||  dopr->iznos }, "iznos" } )
+   AAdd( ImeKol, { PadR( "d.tip", 6 ), {||  dopr->dop_tip }, "dop_tip", {|| .T. }, {|| v_dop_tip( wdop_tip ) } }  )
+   AAdd( ImeKol, { PadR( "tip rada", 10 ), {|| dopr->tiprada }, "tiprada", {|| .T. }, {|| wtiprada $ " #I#S#N#P#U#A#R" .OR. MsgTipRada() } }  )
+   AAdd( ImeKol, { PadR( "KBenef", 5 ), {|| PadC( dopr->idkbenef, 5 ) }, "idkbenef", {|| .T. }, {|| Empty( widkbenef ) .OR. P_KBenef( @widkbenef ) } } )
+   AAdd( ImeKol, { PadR( "Donji limit", 12 ), {||  dopr->dlimit }, "dlimit" } )
+   AAdd( ImeKol, { PadR( "PoOpst", 6 ), {||  dopr->poopst }, "poopst" }  )
 
    FOR nI := 1 TO Len( ImeKol )
       AAdd( Kol, nI )

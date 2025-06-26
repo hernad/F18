@@ -228,7 +228,7 @@ FUNCTION ld_krediti_redefinisanje_rata()
    GO TOP
 
 
-   nTRata := field->iznos
+   nTRata := radkr->iznos
    nNRata := nTRata
 
    @ box_x_koord() + 4, box_y_koord() + 2 SAY8 "tekuća rata kredita = " + ;
@@ -373,10 +373,10 @@ FUNCTION SumKredita()
 
    DO WHILE !Eof() .AND. _godina == godina .AND. _mjesec == mjesec .AND. idradn == _idradn
 
-      nIznos += field->iznos
+      nIznos += radkr->iznos
 
       hRec := dbf_get_rec()
-      hRec[ "placeno" ] := iznos
+      hRec[ "placeno" ] := radkr->iznos
 
       update_rec_server_and_dbf( "ld_radkr", hRec, 1, "CONT" )
 
@@ -428,14 +428,14 @@ FUNCTION ld_iznosi_za_kredit( _idradn, cIdkred, cNaOsnovu, _mjesec, _godina )
    nPlaceno := 0
 
    SELECT radkr_2
-   DO WHILE !Eof() .AND. AllTrim( idradn ) == AllTrim( _idradn ) .AND. AllTrim( idkred ) == AllTrim( cIdKred ) .AND. naosnovu == cNaOsnovu
-      nUkupno += iznos
+   DO WHILE !Eof() .AND. AllTrim( radkr_2->idradn ) == AllTrim( _idradn ) .AND. AllTrim( radkr_2->idkred ) == AllTrim( cIdKred ) .AND. radkr_2->naosnovu == cNaOsnovu
+      nUkupno += radkr_2->iznos
 
-      IF ( mjesec > _mjesec .AND. godina >= _godina )
+      IF ( radkr_2->mjesec > _mjesec .AND. radkr_2->godina >= _godina )
          SKIP
          LOOP
       ELSE
-         nPlaceno += placeno
+         nPlaceno += radkr_2->placeno
       ENDIF
 
       SKIP
@@ -450,7 +450,6 @@ FUNCTION ld_iznosi_za_kredit( _idradn, cIdkred, cNaOsnovu, _mjesec, _godina )
    PopWa()
 
    RETURN { nUkupno, nPlaceno }
-
 
 
 
@@ -638,25 +637,25 @@ FUNCTION ld_lista_kredita()
 
             IF cRateDN <> "J" .OR. ( godina == nGodina .AND. mjesec == nMjesec )
                ++nR
-               nIzn += iznos * nKoef
-               nIznP += placeno
-               IF iznos * nKoef == 0 .AND. cRateDN == "R"
+               nIzn += radkr->iznos * nKoef
+               nIznP += radkr->placeno
+               IF radkr->iznos * nKoef == 0 .AND. cRateDN == "R"
                   --nR
                ENDIF  // mozda i za sve var. ?!
-               IF nMjesec == mjesec .AND. nGodina == godina
-                  nIRR := iznos * nKoef
+               IF nMjesec == radkr->mjesec .AND. nGodina == radkr->godina
+                  nIRR := radkr->iznos * nKoef
                ENDIF
             ENDIF
 
             IF cRateDN == "D"
-               ? Space( 47 ), Str( mjesec ) + "/" + Str( godina )
+               ? Space( 47 ), Str( radkr->mjesec ) + "/" + Str( radkr->godina )
                nCol1 := PCol() + 1
-               @ PRow(), PCol() + 1 SAY iznos * nKoef PICT gpici
+               @ PRow(), PCol() + 1 SAY radkr->iznos * nKoef PICT gpici
             ELSEIF cRateDN == "J"
-               IF godina == nGodina .AND. mjesec == nMjesec
-                  ?? "", Str( mjesec ) + "/" + Str( godina )
+               IF radkr->godina == nGodina .AND. radkr->mjesec == nMjesec
+                  ?? "", Str( radkr->mjesec ) + "/" + Str( radkr->godina )
                   nCol1 := PCol() + 1
-                  @ PRow(), PCol() + 1 SAY iznos * nKoef PICT gpici
+                  @ PRow(), PCol() + 1 SAY radkr->iznos * nKoef PICT gpici
                   @ PRow(), PCol() + 1 SAY "___________"
                ENDIF
             ENDIF
@@ -793,11 +792,11 @@ FUNCTION P_Krediti
 
 
    PRIVATE Imekol := {}
-   AAdd( ImeKol, { "Kreditor",      {|| IdKred   } } )
-   AAdd( ImeKol, { "Osnov",         {|| NaOsnovu } } )
-   AAdd( ImeKol, { "Mjesec",        {|| Str( mjesec, 2, 0 )   } } )
-   AAdd( ImeKol, { "Godina",        {|| Str( godina, 4, 0 )   } } )
-   AAdd( ImeKol, { "Iznos",         {|| Iznos    } } )
+   AAdd( ImeKol, { "Kreditor",      {|| radkr->IdKred   } } )
+   AAdd( ImeKol, { "Osnov",         {|| radkr->NaOsnovu } } )
+   AAdd( ImeKol, { "Mjesec",        {|| Str( radkr->mjesec, 2, 0 )   } } )
+   AAdd( ImeKol, { "Godina",        {|| Str( radkr->godina, 4, 0 )   } } )
+   AAdd( ImeKol, { "Iznos",         {|| radkr->Iznos    } } )
 
    Kol := {}
 

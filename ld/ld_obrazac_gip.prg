@@ -1242,7 +1242,6 @@ FUNCTION ol_o_tbl()
    // o_ld_vrste_posla()
    // o_tippr()
    // o_kred()
-   // o_dopr()
    // o_por()
    // select_o_ld()
 

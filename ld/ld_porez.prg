@@ -342,7 +342,7 @@ STATIC FUNCTION ld_get_array_porezi( nVar )
 
    ELSE
 
-      nStopa := field->iznos
+      nStopa := por->iznos
       AAdd( aPor, { por->id, por->naz, nStopa, por->dlimit } )
 
    ENDIF

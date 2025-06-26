@@ -430,7 +430,7 @@ STATIC FUNCTION FormNum1( nIznos, nDuz, pici )
    RETURN cVrati
 
 
-FUNCTION FormNum2( nIznos, nDuz, pici )
+FUNCTION ld_form_num( nIznos, nDuz, pici )
    RETURN AllTrim( formnum1( nIznos, nDuz, pici ) )
 
 
@@ -438,7 +438,6 @@ FUNCTION FormNum2( nIznos, nDuz, pici )
 
 FUNCTION ld_specifikacije_otvori_tabele()
 
-   // o_dopr()
    // o_por()
    // o_ld_parametri_obracuna()
    // o_koef_beneficiranog_radnog_staza()

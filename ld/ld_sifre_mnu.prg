@@ -72,6 +72,7 @@ FUNCTION ld_specificni_sifarnici()
    LOCAL aOpcExe := {}
    LOCAL _izbor := 1
 
+   altd()
    AAdd( aOpc, "1. parametri obračuna                  " )
    AAdd( aOpcExe, {|| P_ParObr() } )
    AAdd( aOpc, "2. tipovi primanja" )
@@ -116,7 +117,6 @@ STATIC FUNCTION o_ld_sif_tables()
    //o_tippr()
    //o_ld_rj()
    //o_por()
-   //o_dopr()
    //o_str_spr()
    //o_koef_beneficiranog_radnog_staza()
    //o_ld_vrste_posla()

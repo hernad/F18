@@ -307,10 +307,10 @@ FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
 
       nPom := nBrutoOsnova // ukupno bruto
 
-      hRec[ "osnovica_obracun" ] := FormNum2( nPom, 16, gPici2 )
+      hRec[ "osnovica_obracun" ] := ld_form_num( nPom, 16, gPici2 )
 
       nPom := nUSati
-      hRec[ "br_radnih_sati" ] := FormNum2( nPom, 16, gPici2 )
+      hRec[ "br_radnih_sati" ] := ld_form_num( nPom, 16, gPici2 )
 
 
       select_o_dopr()
@@ -341,16 +341,16 @@ FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
 
 
       nPom := nKD1X // stope na bruto
-      hRec[ "stopa_19" ] := FormNum2( nPom, 16, gPici3 ) + "%"
+      hRec[ "stopa_19" ] := ld_form_num( nPom, 16, gPici3 ) + "%"
 
       nPom := nKD2X
-      hRec[ "stopa_20" ] := FormNum2( nPom, 16, gPici3 ) + "%"
+      hRec[ "stopa_20" ] := ld_form_num( nPom, 16, gPici3 ) + "%"
 
       nPom := nKD3X
-      hRec[ "stopa_21" ] := FormNum2( nPom, 16, gPici3 ) + "%"
+      hRec[ "stopa_21" ] := ld_form_num( nPom, 16, gPici3 ) + "%"
 
       nPom := nKD1X + nKD2X + nKD3X
-      hRec[ "stopa_22" ] := FormNum2( nPom, 16, gPici3 ) + "%"
+      hRec[ "stopa_22" ] := ld_form_num( nPom, 16, gPici3 ) + "%"
 
       nDopr1X := round2( nBrutoOsnova * nKD1X / 100, gZaok2 )
       nDopr2X := round2( nBrutoOsnova * nKD2X / 100, gZaok2 )
@@ -362,17 +362,17 @@ FUNCTION ld_specifikacija_plate_samostalni_obr_2002()
 
 
       nPom := nDopr1X // iznos doprinosa
-      hRec[ "iznos_19" ] := FormNum2( nPom, 16, gPici2 )
+      hRec[ "iznos_19" ] := ld_form_num( nPom, 16, gPici2 )
 
       nPom := nDopr2X
-      hRec[ "iznos_20" ] := FormNum2( nPom, 16, gPici2 )
+      hRec[ "iznos_20" ] := ld_form_num( nPom, 16, gPici2 )
 
       nPom := nDopr3X
-      hRec[ "iznos_21" ] := FormNum2( nPom, 16, gPici2 )
+      hRec[ "iznos_21" ] := ld_form_num( nPom, 16, gPici2 )
 
       nPom := nDopr1X + nDopr2X + nDopr3X // ukupni doprinosi iz plate
       nUkDoprIZ := nPom
-      hRec[ "iznos_22" ] := FormNum2( nPom, 16, gPici2 )
+      hRec[ "iznos_22" ] := ld_form_num( nPom, 16, gPici2 )
 
       SELECT LD
 

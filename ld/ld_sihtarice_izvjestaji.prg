@@ -205,7 +205,6 @@ STATIC FUNCTION o_tables()
    // o_ld_radn()
    // o_konto()
    o_radsiht()
-   // o_dopr()
    // o_por()
 
    RETURN .T.

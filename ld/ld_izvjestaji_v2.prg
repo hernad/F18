@@ -222,10 +222,10 @@ FUNCTION ZSRO()
    DevPos( PRow(), 74 )
    ?? "Str.", Str( ++nStrana, 3 )
    IF !Empty( cvposla )
-      ? "Vrsta posla:", cvposla, "-", vposla->naz
+      ? "Vrsta posla:", cVposla, "-", vposla->naz
    ENDIF
    IF !Empty( cKBenef )
-      ? "Stopa beneficiranog r.st:", ckbenef, "-", kbenef->naz, ":", kbenef->iznos
+      ? "Stopa beneficiranog r.st:", cKbenef, "-", kbenef->naz, ":", kbenef->iznos
    ENDIF
    ? m
    ? " Rbr * Sifra*         Naziv radnika            *  Sati *   Neto    *  Odbici   * ZA ISPLATU*"
@@ -322,15 +322,15 @@ FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
 
       IF !Empty( dopr->idkbenef )
          // beneficirani
-         nPom := Max( dlimit, Round( iznos / 100 * get_benef_osnovica( aBeneficirani, dopr->idkbenef ), gZaok2 ) )
+         nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * get_benef_osnovica( aBeneficirani, dopr->idkbenef ), gZaok2 ) )
       ELSE
-         nPom := Max( dlimit, Round( iznos / 100 * nBrutoOsnova, gZaok2 ) )
+         nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nBrutoOsnova, gZaok2 ) )
       ENDIF
 
-      IF Round( iznos, 4 ) = 0 .AND. dlimit > 0
+      IF Round( dopr->iznos, 4 ) = 0 .AND. dopr->dlimit > 0
          // fuell boss
          // kartica plate
-         nPom := 1 * dlimit
+         nPom := 1 * dopr->dlimit
       ENDIF
 
       nDopr += nPom

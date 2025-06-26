@@ -882,3 +882,77 @@ FUNCTION ld_obracun_radnik_neto2(cIdRadn, cIdRj, nI01, nUNeto, nUSati, nUlicOdb)
       PopWa()
    
       RETURN nUneto2
+
+// zavisno od cIznosNaziv, vraća 
+// I => nIznos
+// N => cNaziv
+FUNCTION ld_dopr_by_id( cId, cIznosNaziv )
+
+   LOCAL hDopr := hb_hash(), hDoprNaz := hb_hash(), xRet := NIL, nIndex
+
+   IF cId == NIL
+      cId := dopr->id
+   ENDIF
+   
+   // 1 - stare stope, 2 - nove stope od 01.07.2025
+   hDopr["10"] := { 17.0, 17.0 }
+   hDopr["11"] := { 12.5, 12.5 }
+   hDopr["12"] := { 1.5, 1.5 }
+   hDopr["1X"] := { 31.0, 31.0 }
+   hDopr["20"] := { 6.0, 2.5 }
+   hDopr["21"] := { 4.0, 2.0 }
+   hDopr["22"] := { 0.5, 0.5 }
+   hDopr["2X"] := { 10.5, 5.0 }
+   hDopr["70"] := { 23.0, 19.5 }
+   hDopr["80"] := { 16.5, 14.5 }
+   hDopr["90"] := { 2.0, 2.0 }
+
+   hDoprNaz["10"] := { "DOPR.PIO.17% IZ", "DOPR.PIO.17% IZ" }
+   hDoprNaz["11"] := { "DOPR.ZDR.12.5%", "DOPR.ZDR.12.5%" }
+   hDoprNaz["12"] := { "DOPR.NEZAP 1.5%", "DOPR.NEZAP 1.5%" }
+   hDoprNaz["1X"] := { "DOPR.IZ PLATA 31%", "DOPR.IZ PLATA 31%" }
+   hDoprNaz["20"] := { "DOPR.PIO.6% NA", "DOPR.PIO.2.5% NA" }
+   hDoprNaz["21"] := { "DOPR.ZDR.4% NA", "DOPR.ZDR.2% NA" }
+   hDoprNaz["22"] := { "DOPR.NEZAP 0.5%", "DOPR.NEZAP 0.5%" }
+   hDoprNaz["2X"] := { "DOPR.NA PL.10.5%", "DOPR.NA PL.5%" }
+   hDoprNaz["70"] := { "DOPR PIO IZ+NA", "DOPR PIO IZ+NA" }
+   hDoprNaz["80"] := { "DOPR ZDR IZ+NA", "DOPR ZDR IZ+NA" }
+   hDoprNaz["90"] := { "DOPR NEZAP IZ+NA", "DOPR NEZAP IZ+NA" }
+
+   IF !hb_HHasKey( hDopr, cId ) 
+      Alert("Doprinos ID: " + cId + " NE POSTOJI?!")
+      QUIT_1
+   ELSE
+      nIndex := 1 // stare stope
+      IF ld_tekuca_godina() == 2025 .and. ld_tekuci_mjesec() > 6
+         nIndex := 2
+      ENDIF
+      IF ld_tekuca_godina() > 2025
+         nIndex := 2
+      ENDIF
+
+      IF cIznosNaziv == "I"
+        // vrati iznos
+        xRet := hDopr[cId][nIndex]
+      ELSE
+        // vrati naziv
+        xRet := hDoprNaz[cId][nIndex]
+      ENDIF
+   ENDIF
+
+   RETURN xRet
+
+FUNCTION ld_find_dopr_iznos( cDoprId )
+
+   //RETURN find_field_by_id( "dopr", cDoprId, "iznos" ) 
+   RETURN ld_dopr_by_id( cDoprId, "I" )
+
+FUNCTION ld_find_dopr_naz( cDoprId )   
+
+   RETURN ld_dopr_by_id( cDoprId, "N" )
+  
+FUNCTION ld_dopr_iznos()
+   RETURN ld_find_dopr_iznos( NIL )
+
+FUNCTION ld_dopr_naz()
+   RETURN ld_find_dopr_naz( NIL )   

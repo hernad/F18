@@ -747,11 +747,6 @@ FUNCTION OObracun()
    // o_str_spr()
    // ENDIF
 
-   // SELECT F_DOPR
-   // IF !Used()
-   // o_dopr()
-   // ENDIF
-
    // SELECT F_POR
    // IF !Used()
    // o_por()

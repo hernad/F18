@@ -137,10 +137,10 @@ FUNCTION ld_obr_porez(cTipPor, nGodina, nMjesec, nUkPorOsnovica, nUkPorez) //, n
 
             IF cAlgoritam == "S" // stepenasti obracun
 
-               ?U opdld->idops, ops->naz
+               ?U opsld->idops, ops->naz
                nPom := 0
 
-               DO WHILE !Eof() .AND. opsld->porid == cSeek .AND. id == por->poopst .AND. opsld->idops == cOpst
+               DO WHILE !Eof() .AND. opsld->porid == cSeek .AND. opsld->id == por->poopst .AND. opsld->idops == cOpst
 
                   IF opsld->t_iz_1 <> 0
                      ? " -obracun za stopu "
@@ -190,7 +190,7 @@ FUNCTION ld_obr_porez(cTipPor, nGodina, nMjesec, nUkPorOsnovica, nUkPorez) //, n
                @ PRow(), PCol() + 1 SAY "UK="
                @ PRow(), PCol() + 1 SAY nPom PICT gPici
 
-               ld_rekap_ld( "POR" + por->id + opsld->idops, nGodina, nMjesec, nPom, iznos, opsld->idops, ld_opsld_ljudi() )
+               ld_rekap_ld( "POR" + por->id + opsld->idops, nGodina, nMjesec, nPom, opsld->iznos, opsld->idops, ld_opsld_ljudi() )
 
             ELSE // cAlgoritam nije "S"
 

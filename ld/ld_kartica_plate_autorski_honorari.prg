@@ -162,30 +162,30 @@ FUNCTION ld_kartica_plate_autorski_honorar( cIdRj, nMjesec, nGodina, cIdRadn, cO
          ? cDoprLine
       ENDIF
 
-      ? cLDLijevaMargina + cDoprSpace + id, "-", naz
-      @ PRow(), PCol() + 1 SAY iznos PICT "99.99%"
+      ? cLDLijevaMargina + cDoprSpace + dopr->id, "-", dopr->naz
+      @ PRow(), PCol() + 1 SAY dopr->iznos PICT "99.99%"
 
-      IF Empty( idkbenef )
+      IF Empty( dopr->idkbenef )
          // doprinos udara na neto
          @ PRow(), PCol() + 1 SAY nBo PICT gpici
          nC1 := PCol() + 1
-         @ PRow(), PCol() + 1 SAY nPom := Max( dlimit, Round( iznos / 100 * nBO, gZaok2 ) ) PICT gpici
+         @ PRow(), PCol() + 1 SAY nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nBO, gZaok2 ) ) PICT gpici
 
          IF dopr->id == "1X"
             nUkDoprIz += nPom
          ENDIF
 
       ELSE
-         nPom2 := get_benef_osnovica( _a_benef, idkbenef )
+         nPom2 := get_benef_osnovica( _a_benef, dopr->idkbenef )
          IF Round( nPom2, gZaok2 ) <> 0
             @ PRow(), PCol() + 1 SAY nPom2 PICT gpici
             nC1 := PCol() + 1
-            nPom := Max( dlimit, Round( iznos / 100 * nPom2, gZaok2 ) )
+            nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nPom2, gZaok2 ) )
             @ PRow(), PCol() + 1 SAY nPom PICT gpici
          ENDIF
       ENDIF
 
-      IF Right( id, 1 ) == "X"
+      IF Right( dopr->id, 1 ) == "X"
 
          ? cDoprLine
          ?

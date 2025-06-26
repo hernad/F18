@@ -1157,8 +1157,8 @@ STATIC FUNCTION IspisKred( lSvi )
 
                      SELECT radkr
 
-                     IF ld->( Found() ) .AND. godina == nGodina .AND. mjesec == nMjesecFor
-                        nUkKred += iznos
+                     IF ld->( Found() ) .AND. radkr->godina == nGodina .AND. radkr->mjesec == nMjesecFor
+                        nUkKred += radkr->iznos
                      ENDIF
                   NEXT
                ENDIF

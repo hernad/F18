@@ -253,7 +253,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
                   select_o_kred( radkr->idkred )
                   SELECT radkr
                   ? cLDLijevaMargina + "  ", idkred, Left( kred->naz, 22 ), naosnovu
-                  @ PRow(), 58 + Len( cLDLijevaMargina ) SAY iznos PICT "(" + gpici + ")"
+                  @ PRow(), 58 + Len( cLDLijevaMargina ) SAY radkr->iznos PICT "(" + gpici + ")"
 
                   SELECT radkr
                   SKIP
@@ -437,22 +437,22 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
          ENDIF
 
          IF dopr->id == "1X"
-            ? cLDLijevaMargina + "2. " + id, "-", naz
+            ? cLDLijevaMargina + "2. " + dopr->id, "-", dopr->naz
          ELSE
-            ? cLDLijevaMargina + cDoprSpace + id, "-", naz
+            ? cLDLijevaMargina + cDoprSpace + dopr->id, "-", dopr->naz
          ENDIF
 
-         @ PRow(), PCol() + 1 SAY iznos PICT "99.99%"
+         @ PRow(), PCol() + 1 SAY dopr->iznos PICT "99.99%"
 
          IF Empty( field->idkbenef )
             @ PRow(), PCol() + 1 SAY nBoMin PICT gPici
             nC1 := PCol() + 1
-            @ PRow(), PCol() + 1 SAY nPom := Max( dopr->dlimit, Round( iznos / 100 * nBOMin, gZaok2 ) ) PICT gPici
+            @ PRow(), PCol() + 1 SAY nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nBOMin, gZaok2 ) ) PICT gPici
             IF dopr->id == "1X"
                nUkDoprIz += nPom
             ENDIF
          ELSE
-            nPom0 := AScan( aBeneficirani, {| x | x[ 1 ] == idkbenef } )
+            nPom0 := AScan( aBeneficirani, {| x | x[ 1 ] == dopr->idkbenef } )
             IF nPom0 <> 0
                nPom2 := aBeneficirani[ nPom0, 3 ]
             ELSE
@@ -461,7 +461,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
             IF Round( nPom2, gZaok2 ) <> 0
                @ PRow(), PCol() + 1 SAY nPom2 PICT gpici
                nC1 := PCol() + 1
-               nPom := Max( dlimit, Round( iznos / 100 * nPom2, gZaok2 ) )
+               nPom := Max( dlimit, Round( dopr->iznos / 100 * nPom2, gZaok2 ) )
                @ PRow(), PCol() + 1 SAY nPom PICT gpici
             ENDIF
          ENDIF

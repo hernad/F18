@@ -424,8 +424,8 @@ STATIC FUNCTION prikazi_primanja()
                ? cLDLijevaMargina, idkred, Left( kred->naz, 15 ), PadR( naosnovu, 20 )
                @ PRow(), PCol() + 1 SAY aIznosi[ 1 ] PICT "999999.99" // ukupno
                @ PRow(), PCol() + 1 SAY aIznosi[ 1 ] - aIznosi[ 2 ] PICT "999999.99"// ukupno-placeno
-               @ PRow(), PCol() + 1 SAY iznos PICT "9999.99"
-               ukredita += iznos
+               @ PRow(), PCol() + 1 SAY radkr->iznos PICT "9999.99"
+               ukredita += radkr->iznos
                SKIP
             ENDDO
             IF Round( ukredita - niznos, 2 ) <> 0
