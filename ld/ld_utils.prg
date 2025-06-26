@@ -936,7 +936,7 @@ FUNCTION ld_dopr_by_id( cId, cIznosNaziv )
         xRet := hDopr[cId][nIndex]
       ELSE
         // vrati naziv
-        xRet := hDoprNaz[cId][nIndex]
+        xRet := PADR(hDoprNaz[cId][nIndex], 20)
       ENDIF
    ENDIF
 
