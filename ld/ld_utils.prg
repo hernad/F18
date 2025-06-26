@@ -955,4 +955,109 @@ FUNCTION ld_dopr_iznos()
    RETURN ld_find_dopr_iznos( NIL )
 
 FUNCTION ld_dopr_naz()
-   RETURN ld_find_dopr_naz( NIL )   
+   RETURN ld_find_dopr_naz( NIL )
+
+
+FUNCTION zadnji_dan_mjeseca( nMonth )
+
+   LOCAL nDay := 0
+
+   DO CASE
+   CASE nMonth = 1
+      nDay := 31
+   CASE nMonth = 2
+      nDay := 28
+   CASE nMonth = 3
+      nDay := 31
+   CASE nMonth = 4
+      nDay := 30
+   CASE nMonth = 5
+      nDay := 31
+   CASE nMonth = 6
+      nDay := 30
+   CASE nMonth = 7
+      nDay := 31
+   CASE nMonth = 8
+      nDay := 31
+   CASE nMonth = 9
+      nDay := 30
+   CASE nMonth = 10
+      nDay := 31
+   CASE nMonth = 11
+      nDay := 30
+   CASE nMonth = 12
+      nDay := 31
+   ENDCASE
+
+   RETURN nDay
+
+
+
+FUNCTION prvi_dan_mjeseca( nMonth )
+
+   LOCAL nDay := 1
+
+   RETURN nDay
+
+
+
+// ----------------------------------------------
+// da li je radnik u republ.srpskoj
+// gleda polje region "REG" iz opcina
+// " " ili "1" = federacija
+// "2" = rs
+// ----------------------------------------------
+FUNCTION ld_radnik_iz_rs( cOpsst, cOpsrad )
+
+   LOCAL lRet := .F.
+   LOCAL cSql, oQry
+
+   cSql := "SELECT reg FROM " + F18_PSQL_SCHEMA_DOT + "ops "
+   cSql += "WHERE id = " + sql_quote( cOpsSt )
+
+   oQry := run_sql_query( cSql )
+
+   IF is_var_objekat_tpqquery( oQry )
+      IF oQry:FieldGet( 1 ) == "2"
+         lRet := .T.
+      ENDIF
+   ENDIF
+
+   RETURN lRet
+
+
+
+FUNCTION ld_iz_koje_opcine_je_radnik( cIdRadn )
+
+   LOCAL cOpc := ""
+   LOCAL cSql, oQry
+
+   cSql := "SELECT idopsst FROM " + F18_PSQL_SCHEMA_DOT + "ld_radn WHERE id = " + sql_quote( cIdRadn )
+
+   oQry := run_sql_query( cSql )
+
+   IF is_var_objekat_tpqquery( oQry )
+      cOpc := hb_UTF8ToStr( oQry:FieldGet( 1 ) )
+   ENDIF
+
+   RETURN cOpc
+
+
+
+FUNCTION isplata_dopr_kontrola_iznosa( nIzn, cIspl )
+
+   // "Isplata: 'A' doprinosi+porez, 'B' samo doprinosi, 'C' samo porez"
+   IF cIspl $ "AB"
+      RETURN nIzn
+   ENDIF
+
+   RETURN 0
+
+
+FUNCTION isplata_poreza_kontrola_iznosa( nIzn, cIspl )
+
+   IF cIspl $ "AC"
+      RETURN nIzn
+   ENDIF
+
+   RETURN 0
