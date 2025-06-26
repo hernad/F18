@@ -41,7 +41,7 @@ FUNCTION ld_uk_doprinosi_iz( nDopOsn, cRTipRada )
          LOOP
       ENDIF
 
-      nU_dop_iz += round2( ( dopr->iznos / 100 ) * nDopOsn, gZaok2 )
+      nU_dop_iz += round2( ( ld_dopr_iznos() / 100 ) * nDopOsn, gZaok2 )
 
       SKIP 1
 
@@ -109,8 +109,8 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
          ? cLinija
       ENDIF
 
-      ? "  " + dopr->id, "-", dopr->naz
-      @ PRow(), PCol() + 1 SAY dopr->iznos PICT "99.99%"
+      ? "  " + dopr->id, "-", ld_dopr_naz()
+      @ PRow(), PCol() + 1 SAY ld_dopr_iznos() PICT "99.99%"
 
       nC1 := PCol() + 1
 
@@ -159,14 +159,14 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
 
                IF dopr->( FieldPos( "DOP_TIP" ) ) <> 0
                   IF dopr->dop_tip == "N" .OR.  dopr->dop_tip == " "
-                     nIznos := dopr->iznos
+                     nIznos := ld_dopr_iznos()
                   ELSEIF dopr->dop_tip == "2"
                      nIznos := opsld->izn_ost
                   ELSEIF dopr->dop_tip == "P"
-                     nIznos := dopr->iznos + opsld->izn_ost
+                     nIznos := ld_dopr_iznos() + opsld->izn_ost
                   ENDIF
                ELSE
-                  nIznos := dopr->iznos
+                  nIznos := ld_dopr_iznos()
                ENDIF
 
                IF gVarObracun == "2"
@@ -180,14 +180,14 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
 
                @ PRow(), nC1 SAY nBOOps PICTURE gpici
 
-               nPom := round2( Max( dopr->dlimit, dopr->iznos / 100 * nBOOps ), gZaok2 )
+               nPom := round2( Max( dopr->dlimit, ld_dopr_iznos() / 100 * nBOOps ), gZaok2 )
 
                IF cUmPDNeKontamStajeOvoVazdajeN == "D"
                   nBOOps2 := round2( piznos * nPK3 / 100, gZaok2 )
-                  nPom2 := round2( Max( dopr->dlimit, dopr->iznos / 100 * nBOOps2 ), gZaok2 )
+                  nPom2 := round2( Max( dopr->dlimit, ld_dopr_iznos() / 100 * nBOOps2 ), gZaok2 )
                ENDIF
 
-               IF Round( dopr->iznos, 4 ) == 0 .AND. dopr->dlimit > 0
+               IF Round( ld_dopr_iznos(), 4 ) == 0 .AND. dopr->dlimit > 0
 
                   nPom := dopr->dlimit * opsld->ljudi
 
@@ -275,18 +275,18 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
 
             @ PRow(), nC1 SAY nBO PICT gpici
 
-            nPom := round2( Max( dopr->dlimit, dopr->iznos / 100 * nBO ), gZaok2 )
+            nPom := round2( Max( dopr->dlimit, ld_dopr_iznos() / 100 * nBO ), gZaok2 )
 
             IF dopr->id == "1X"
                nUDoprIz += nPom
             ENDIF
 
             IF cUmPDNeKontamStajeOvoVazdajeN == "D"
-               nPom2 := round2( Max( dopr->dlimit, dopr->iznos / 100 * nBO2 ), gZaok2 )
+               nPom2 := round2( Max( dopr->dlimit, ld_dopr_iznos() / 100 * nBO2 ), gZaok2 )
             ENDIF
 
             // nLjudi globalna varijabla nadfunkcije
-            IF Round( dopr->iznos, 4 ) == 0 .AND. dopr->dlimit > 0
+            IF Round( ld_dopr_iznos(), 4 ) == 0 .AND. dopr->dlimit > 0
                nPom := dopr->dlimit * nLjudi
                // nije po opstinama
                IF cUmPDNeKontamStajeOvoVazdajeN == "D"
@@ -312,7 +312,7 @@ FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkR
          IF Round2( nPom2, gZaok2 ) <> 0
             @ PRow(), PCol() + 1 SAY nPom2 PICT gpici
             nC1 := PCol() + 1
-            @ PRow(), PCol() + 1 SAY nPom := Round2( Max( dopr->dlimit, dopr->iznos / 100 * nPom2 ), gZaok2 ) PICT gpici
+            @ PRow(), PCol() + 1 SAY nPom := Round2( Max( dopr->dlimit, ld_dopr_iznos() / 100 * nPom2 ), gZaok2 ) PICT gpici
          ENDIF
       ENDIF
 

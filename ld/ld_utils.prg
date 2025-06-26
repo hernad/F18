@@ -143,7 +143,7 @@ FUNCTION get_dopr( cDopr, cTipRada )
          LOOP
       ENDIF
 
-      nIzn := dopr->iznos
+      nIzn := ld_dopr_iznos()
 
       EXIT
 

@@ -888,7 +888,7 @@ FUNCTION Bruto( nbruto, ndopr )
       IF Empty( dopr->idkbenef ) // doprinos udara na neto
          // @ prow(),pcol()+1 SAY nBO pict gpici
          // nC1:=pcol()+1
-         nPom := Max( dlimit, Round( dopr->iznos / 100 * nBO, gZaok ) )
+         nPom := Max( dlimit, Round( ld_dopr_iznos() / 100 * nBO, gZaok ) )
          nBruto += nPom
          nPorDopr += nPom
       ELSE
@@ -901,7 +901,7 @@ FUNCTION Bruto( nbruto, ndopr )
          IF Round( nPom2, gZaok ) <> 0
             // @ prow(),pcol()+1 SAY nPom2 pict gpici
             // nC1:=pcol()+1
-            nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nPom2, gZaok ) )
+            nPom := Max( dopr->dlimit, Round( ld_dopr_iznos() / 100 * nPom2, gZaok ) )
             nBruto += nPom
             nPorDopr += nPom
          ENDIF

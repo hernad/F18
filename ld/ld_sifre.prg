@@ -968,10 +968,10 @@ FUNCTION p_ld_dopr( cId, nDeltaX, nDeltaY )
    LOCAL lRet, nI
    PRIVATE imekol := {}
    PRIVATE kol := {}
-altd()
+
    AAdd( ImeKol, { PadR( "Id", 2 ), {|| dopr->id }, "id" } )
-   AAdd( ImeKol, { PadR( "Naziv", 20 ), {||  dopr->naz }, "naz" } )
-   AAdd( ImeKol, { PadR( "Iznos", 20 ), {||  dopr->iznos }, "iznos" } )
+   AAdd( ImeKol, { PadR( "Naziv", 20 ), {||  ld_dopr_naz() }, "naz" } )
+   AAdd( ImeKol, { PadR( "Iznos", 20 ), {||  ld_dopr_iznos() }, "iznos" } )
    AAdd( ImeKol, { PadR( "d.tip", 6 ), {||  dopr->dop_tip }, "dop_tip", {|| .T. }, {|| v_dop_tip( wdop_tip ) } }  )
    AAdd( ImeKol, { PadR( "tip rada", 10 ), {|| dopr->tiprada }, "tiprada", {|| .T. }, {|| wtiprada $ " #I#S#N#P#U#A#R" .OR. MsgTipRada() } }  )
    AAdd( ImeKol, { PadR( "KBenef", 5 ), {|| PadC( dopr->idkbenef, 5 ) }, "idkbenef", {|| .T. }, {|| Empty( widkbenef ) .OR. P_KBenef( @widkbenef ) } } )

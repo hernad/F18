@@ -547,21 +547,21 @@ FUNCTION ld_specifikacija_plate_obr_2001()
       DO WHILE !Eof()
 
          IF dopr->ID $ cDodDoprP
-            nKoefDodatniDoprinosPio += dopr->iznos
+            nKoefDodatniDoprinosPio += ld_dopr_iznos()
             IF !Empty( field->idkbenef )
-               nDodDoprP += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * dopr->iznos / 100 ), gZaok2 )
+               nDodDoprP += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * ld_dopr_iznos() / 100 ), gZaok2 )
             ELSE
-               nDodDoprP += ROUND2( Max( DLIMIT, nUkupnoBrutoOsnovicaSaMinLimit * dopr->iznos / 100 ), gZaok2 )
+               nDodDoprP += ROUND2( Max( DLIMIT, nUkupnoBrutoOsnovicaSaMinLimit * ld_dopr_iznos() / 100 ), gZaok2 )
             ENDIF
          ENDIF
 
          IF dopr->ID $ cDodDoprZ
-            nKoefDodatniDoprinosZdravstvo += dopr->iznos
+            nKoefDodatniDoprinosZdravstvo += ld_dopr_iznos()
             IF !Empty( field->idkbenef )
                // beneficirani
-               nDodDoprZ += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * dopr->iznos / 100 ), gZaok2 )
+               nDodDoprZ += ROUND2( Max( DLIMIT, get_benef_osnovica( aBeneficirani, field->idkbenef ) * ld_dopr_iznos() / 100 ), gZaok2 )
             ELSE
-               nDodDoprZ += ROUND2( Max( DLIMIT, nUkupnoBrutoOsnovicaSaMinLimit * dopr->iznos / 100 ), gZaok2 )
+               nDodDoprZ += ROUND2( Max( DLIMIT, nUkupnoBrutoOsnovicaSaMinLimit * ld_dopr_iznos() / 100 ), gZaok2 )
             ENDIF
          ENDIF
 

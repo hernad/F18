@@ -437,17 +437,17 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
          ENDIF
 
          IF dopr->id == "1X"
-            ? cLDLijevaMargina + "2. " + dopr->id, "-", dopr->naz
+            ? cLDLijevaMargina + "2. " + dopr->id, "-", ld_dopr_naz()
          ELSE
-            ? cLDLijevaMargina + cDoprSpace + dopr->id, "-", dopr->naz
+            ? cLDLijevaMargina + cDoprSpace + dopr->id, "-", ld_dopr_naz()
          ENDIF
 
-         @ PRow(), PCol() + 1 SAY dopr->iznos PICT "99.99%"
+         @ PRow(), PCol() + 1 SAY ld_dopr_iznos() PICT "99.99%"
 
          IF Empty( field->idkbenef )
             @ PRow(), PCol() + 1 SAY nBoMin PICT gPici
             nC1 := PCol() + 1
-            @ PRow(), PCol() + 1 SAY nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nBOMin, gZaok2 ) ) PICT gPici
+            @ PRow(), PCol() + 1 SAY nPom := Max( dopr->dlimit, Round( ld_dopr_iznos() / 100 * nBOMin, gZaok2 ) ) PICT gPici
             IF dopr->id == "1X"
                nUkDoprIz += nPom
             ENDIF
@@ -461,7 +461,7 @@ FUNCTION ld_kartica_redovan_rad( cIdRj, nMjesec, nGodina, cIdRadn, cObrac, aNeta
             IF Round( nPom2, gZaok2 ) <> 0
                @ PRow(), PCol() + 1 SAY nPom2 PICT gpici
                nC1 := PCol() + 1
-               nPom := Max( dlimit, Round( dopr->iznos / 100 * nPom2, gZaok2 ) )
+               nPom := Max( dlimit, Round( ld_dopr_iznos() / 100 * nPom2, gZaok2 ) )
                @ PRow(), PCol() + 1 SAY nPom PICT gpici
             ENDIF
          ENDIF

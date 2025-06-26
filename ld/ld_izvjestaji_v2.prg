@@ -322,12 +322,12 @@ FUNCTION IzracDopr( cDopr, nKLO, cTipRada, nSpr_koef )
 
       IF !Empty( dopr->idkbenef )
          // beneficirani
-         nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * get_benef_osnovica( aBeneficirani, dopr->idkbenef ), gZaok2 ) )
+         nPom := Max( dopr->dlimit, Round( ld_dopr_iznos() / 100 * get_benef_osnovica( aBeneficirani, dopr->idkbenef ), gZaok2 ) )
       ELSE
-         nPom := Max( dopr->dlimit, Round( dopr->iznos / 100 * nBrutoOsnova, gZaok2 ) )
+         nPom := Max( dopr->dlimit, Round( ld_dopr_iznos() / 100 * nBrutoOsnova, gZaok2 ) )
       ENDIF
 
-      IF Round( dopr->iznos, 4 ) = 0 .AND. dopr->dlimit > 0
+      IF Round( ld_dopr_iznos(), 4 ) = 0 .AND. dopr->dlimit > 0
          // fuell boss
          // kartica plate
          nPom := 1 * dopr->dlimit
