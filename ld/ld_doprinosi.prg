@@ -49,43 +49,6 @@ FUNCTION ld_uk_doprinosi_iz( nDopOsn, cRTipRada )
 
    RETURN nU_dop_iz
 
-// ------------------------------------------------
-// vraca ukupno doprinosa NA plate, 2X
-// ------------------------------------------------
-FUNCTION u_dopr_na( nDopOsn, cRTipRada )
-
-   select_o_dopr()
-   GO TOP
-
-   nU_dop_na := 0
-
-   DO WHILE !Eof()
-
-      // provjeri tip rada
-      IF Empty( dopr->tiprada ) .AND. cRTipRada $ ld_tiprada_list()
-         // ovo je u redu...
-      ELSEIF ( cRTipRada <> dopr->tiprada )
-         SKIP
-         LOOP
-      ENDIF
-
-      // preskoci zbirne doprinose
-      IF dopr->id <> "2X"
-         SKIP
-         LOOP
-      ENDIF
-
-      nU_dop_na += round2( ( iznos / 100 ) * nDopOsn, gZaok2 )
-
-      SKIP 1
-
-   ENDDO
-
-   RETURN nU_dop_na
-
-
-
-
 FUNCTION ld_obr_doprinos( nGodina, nMjesec, nDopr, nDopr2, cTRada, a_benef, nUkRadnMinBrutoOsn )
 
    LOCAL nIznos := 0
