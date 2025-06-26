@@ -46,8 +46,8 @@ ubuntu_install() {
   fi
 
   if [ ! -f $F18_GZ ] ; then
-      echo "download $F18_VER sa bintray-a"
-      curl -L https://bintray.com/hernad/F18/download_file?file_path=F18_linux_x86_$F18_VER.zip > $F18_GZ
+      echo "ERROR: Bintray is no longer used; please update this script to fetch F18 from the correct location"
+      exit 1
   fi
 
   if [[ $OS == UBUNTU14 ]] ; then
@@ -100,8 +100,8 @@ centos_install() {
   fi
 
   if [ ! -f $F18_GZ ] ; then
-      echo "download $F18_VER sa bintray-a"
-      curl -L https://bintray.com/hernad/F18/download_file?file_path=F18_linux_x86_$F18_VER.zip > $F18_GZ
+      echo "ERROR: Bintray is no longer used; please update this script to fetch F18 from the correct location"
+      exit 1
   fi
 
   if [[ $OS == UBUNTU14 ]] ; then

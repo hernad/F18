@@ -1,4 +1,7 @@
 $F18_VER="3.1.215"
+"# Bintray is no longer used; this install script must be updated for a new download source"
+Write-Error "Bintray is no longer used; please update this script to download F18 from the correct location"
+exit 1
 $F18_VER_HASH="b9ff1d8e8bb6968a804d86cfbd27679d"
 
 # iex (new-object net.webclient).downloadstring('https://raw.githubusercontent.com/knowhow/F18_knowhow/3/bin/F18_install.ps1')
