@@ -894,6 +894,8 @@ FUNCTION ld_dopr_by_id( cId, cIznosNaziv )
       cId := dopr->id
    ENDIF
    
+   cId := Trim(cId)
+   
    // 1 - stare stope, 2 - nove stope od 01.07.2025
    hDopr["10"] := { 17.0, 17.0 }
    hDopr["11"] := { 12.5, 12.5 }
@@ -919,7 +921,8 @@ FUNCTION ld_dopr_by_id( cId, cIznosNaziv )
    hDoprNaz["80"] := { "DOPR ZDR IZ+NA", "DOPR ZDR IZ+NA" }
    hDoprNaz["90"] := { "DOPR NEZAP IZ+NA", "DOPR NEZAP IZ+NA" }
 
-   IF !hb_HHasKey( hDopr, cId ) 
+   IF !hb_HHasKey( hDopr, cId )
+      altd()
       Alert("Doprinos ID: " + cId + " NE POSTOJI?!")
       QUIT_1
    ELSE
