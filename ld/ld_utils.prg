@@ -895,7 +895,7 @@ FUNCTION ld_dopr_by_id( cId, cIznosNaziv )
    ENDIF
    
    cId := Trim(cId)
-   
+
    // 1 - stare stope, 2 - nove stope od 01.07.2025
    hDopr["10"] := { 17.0, 17.0 }
    hDopr["11"] := { 12.5, 12.5 }
@@ -922,9 +922,19 @@ FUNCTION ld_dopr_by_id( cId, cIznosNaziv )
    hDoprNaz["90"] := { "DOPR NEZAP IZ+NA", "DOPR NEZAP IZ+NA" }
 
    IF !hb_HHasKey( hDopr, cId )
-      altd()
-      Alert("Doprinos ID: " + cId + " NE POSTOJI?!")
-      QUIT_1
+      
+      select_o_dopr()
+      //Alert("Doprinos ID: " + cId + " NE POSTOJI?!")
+      //QUIT_1
+      seeK cId
+      IF cIznosNaziv == "I"
+        // vrati iznos
+        xRet := dopr->iznos
+      ELSE
+        // vrati naziv
+        xRet := PADR(dopr->naz, 20)
+      ENDIF
+
    ELSE
       nIndex := 1 // stare stope
       IF ld_tekuca_godina() == 2025 .and. ld_tekuci_mjesec() > 6
