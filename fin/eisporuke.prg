@@ -1230,7 +1230,7 @@ FUNCTION gen_eIsporuke()
     LOCAL cPorezniPeriod, cPorGodina
     LOCAL hUkupno := hb_hash()
     LOCAL nRbr := 0
-    LOCAL cBrisatiDN := "N"
+    LOCAL cBrisatiDN := "D"
     LOCAL nCnt
     LOCAL oError
 
