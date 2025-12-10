@@ -460,9 +460,6 @@ PROCEDURE run_module()
    ELSEIF cModul == "fakt"
       set_metric( "main_menu_fakt", my_user(), "D" )
       MainFakt( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
-   ELSEIF cModul == "epdv"
-      set_metric( "main_menu_epdv", my_user(), "D" )
-      MainEPdv( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
    ELSEIF cModul == "os"
       set_metric( "main_menu_os", my_user(), "D" )
       MainOs( my_user(), "dummy", get_f18_param( "p3" ),  get_f18_param( "p4" ),  get_f18_param( "p5" ),  get_f18_param( "p6" ),  get_f18_param( "p7" ) )
