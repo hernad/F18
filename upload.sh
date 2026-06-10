@@ -19,6 +19,7 @@ fi
 #fi
 
 
+HOST_DOWNLOAD="builder-2.vm.bring.out.ba"
 
 #export BINTRAY_OWNER=`cat $HOME/.bintray_owner`
 #export BINTRAY_API_KEY=`cat $HOME/.bintray_api_key`
@@ -40,9 +41,8 @@ FILE=${F18_PACKAGE}_${F18_VERSION}.zip
 
 ls -lh $FILE
 
-echo "upload: ${F18_PACKAGE} / ${FILE} root@192.168.168.251:/var/www/html/F18/, root@192.168.168.252:/var/www/html/F18/"
-rsync -avz $FILE root@192.168.168.251:/var/www/html/F18/
-rsync -avz $FILE root@192.168.168.252:/var/www/html/F18/
+echo "upload: ${F18_PACKAGE} / ${FILE} to $HOST_DOWNLOAD" 
+rsync -avz $FILE root@${HOST_DOWNLOAD}:/data/download/F18/
 
 
 echo delete $CURRENT_DIR/tmp ...
