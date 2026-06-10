@@ -278,16 +278,12 @@ FUNCTION ofs_status(hParams, cVarijanta)
         hResponseData := hb_jsonDecode(cData)
 
         cGsc = ""
+        // 'gsc' polje vraca samo LPFR (lokalni PFR). VPFR/E-SDC (taxCore) ga ne vraca,
+        // sto je ocekivano => bez gsc polja samo nastavljamo bez greske.
         IF HB_ISHASH( hResponseData ) .AND. hb_HHasKey( hResponseData, "gsc" ) .AND. HB_ISARRAY( hResponseData["gsc"] )
             for each cCode in hResponseData["gsc"]
                 cGsc := cGsc + cCode + "/"
             next
-        ELSE
-            Alert( _u( "/api/status odgovor ne sadrzi 'gsc' polje!" ) )
-            bug_send_email_body( ;
-                "CALL: " + hParams["url"] + "; path: " + hParams["path"] + "; content: " + hParams["content"] + "; method: " + hParams["method"] + NEWLINE +;
-                REPLICATE("=", 95) + NEWLINE + NEWLINE +;
-                "RESPONSE: " + hb_ValToStr( cData ), .F. )
         ENDIF
     ENDIF
 
