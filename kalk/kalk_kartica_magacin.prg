@@ -174,7 +174,7 @@ FUNCTION kalk_kartica_magacin()
       lPrikaziObradjeno := .T.
       cOrderBy := "idfirma,mkonto,idroba,datdok,obradjeno,mu_i,idvd"
    ELSE
-      cOrderBy := "idfirma,mkonto,idroba,datdok,mu_i,idvd"
+      cOrderBy := "idfirma,mkonto,idroba,datdok,brfaktp,mu_i,idvd"
    ENDIF
 
    lBezG2 := .F.

@@ -1075,7 +1075,7 @@ STATIC FUNCTION set_fiscal_rn_zbirni( aRacunData )
 
    cNazivArtikla := "Stav.RN:"
 
-   IF s_cFiskalniUredjaj  $ "#FPRINT#HCP#TRING#"
+   IF s_cFiskalniUredjaj  $ "#FPRINT#HCP#TRING#TREMOL#"
       cNazivArtikla += " " + AllTrim( aRacunData[ 1, 1 ] )
    ENDIF
 

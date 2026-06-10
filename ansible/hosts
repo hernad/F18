@@ -1,7 +1,0 @@
-centos1 ansible_host=192.168.124.245 ansible_user=root
-centos2 ansible_host=192.168.124.80 ansible_user=root
-
-[klijenti]
-centos1
-centos2
-

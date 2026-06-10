@@ -276,11 +276,15 @@ FUNCTION ofs_status(hParams, cVarijanta)
       
     IF cRet == "0"
         hResponseData := hb_jsonDecode(cData)
-        
-        cGsc = "" 
-        for each cCode in hResponseData["gsc"]
-            cGsc := cGsc + cCode + "/"
-        next
+
+        cGsc = ""
+        // 'gsc' polje vraca samo LPFR (lokalni PFR). VPFR/E-SDC (taxCore) ga ne vraca,
+        // sto je ocekivano => bez gsc polja samo nastavljamo bez greske.
+        IF HB_ISHASH( hResponseData ) .AND. hb_HHasKey( hResponseData, "gsc" ) .AND. HB_ISARRAY( hResponseData["gsc"] )
+            for each cCode in hResponseData["gsc"]
+                cGsc := cGsc + cCode + "/"
+            next
+        ENDIF
     ENDIF
 
     IF cRet == "0" .and. cVarijanta == "S"

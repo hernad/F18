@@ -88,9 +88,6 @@ FUNCTION cre_all_dbfs( ver )
    ENDIF
 
 
-   IF f18_use_module( "epdv" )
-      cre_all_epdv( ver )
-   ENDIF
 
 #ifdef F18_POS
    IF f18_use_module( "pos" ) .or. f18_use_module("kalk")

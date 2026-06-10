@@ -49,10 +49,10 @@ echo scp  %ZIP_FILE% root@%HOST%:%DIR%
 scp -i %USERPROFILE%\.ssh\id_rsa %ZIP_FILE% root@%HOST%:%DIR%
 ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
 
-set HOST=192.168.168.252
-echo scp  %ZIP_FILE% root@%HOST%:%DIR%
-scp -i %USERPROFILE%\.ssh\id_rsa %ZIP_FILE% root@%HOST%:%DIR%
-ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
+REM set HOST=192.168.168.252
+REM echo scp  %ZIP_FILE% root@%HOST%:%DIR%
+REM scp -i %USERPROFILE%\.ssh\id_rsa %ZIP_FILE% root@%HOST%:%DIR%
+REM ssh -i %USERPROFILE%\.ssh\id_rsa root@%HOST% chmod +r %DIR%/%ZIP_FILE%
 
 
 if EXIST %CURRENT_DIR%tmp\nul (

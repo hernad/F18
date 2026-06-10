@@ -54,9 +54,6 @@ FUNCTION set_a_dbfs()
       set_a_dbf_ld_sif()
    ENDIF
 
-   IF f18_use_module( "epdv" )
-      set_a_dbf_epdv()
-   ENDIF
 
    IF f18_use_module( "os" )
       set_a_dbf_os()
