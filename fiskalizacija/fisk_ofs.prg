@@ -276,11 +276,19 @@ FUNCTION ofs_status(hParams, cVarijanta)
       
     IF cRet == "0"
         hResponseData := hb_jsonDecode(cData)
-        
-        cGsc = "" 
-        for each cCode in hResponseData["gsc"]
-            cGsc := cGsc + cCode + "/"
-        next
+
+        cGsc = ""
+        IF HB_ISHASH( hResponseData ) .AND. hb_HHasKey( hResponseData, "gsc" ) .AND. HB_ISARRAY( hResponseData["gsc"] )
+            for each cCode in hResponseData["gsc"]
+                cGsc := cGsc + cCode + "/"
+            next
+        ELSE
+            Alert( _u( "/api/status odgovor ne sadrzi 'gsc' polje!" ) )
+            bug_send_email_body( ;
+                "CALL: " + hParams["url"] + "; path: " + hParams["path"] + "; content: " + hParams["content"] + "; method: " + hParams["method"] + NEWLINE +;
+                REPLICATE("=", 95) + NEWLINE + NEWLINE +;
+                "RESPONSE: " + hb_ValToStr( cData ), .F. )
+        ENDIF
     ENDIF
 
     IF cRet == "0" .and. cVarijanta == "S"
